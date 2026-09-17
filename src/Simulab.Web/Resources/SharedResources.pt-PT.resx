@@ -89,4 +89,17 @@
   <data name="Gallery.Snackbar.Show" xml:space="preserve"><value>Mostrar notificação</value></data>
   <data name="Gallery.Snackbar.Message" xml:space="preserve"><value>Guardado com sucesso.</value></data>
   <data name="Gallery.States.EmptyMessage" xml:space="preserve"><value>Ainda não há provas. Adicione a primeira.</value></data>
+  <data name="Layout.SkipToContent" xml:space="preserve"><value>Saltar para o conteúdo</value></data>
+  <data name="Layout.HomeLink" xml:space="preserve"><value>Simulab, página inicial</value></data>
+  <data name="Layout.Menu.Label" xml:space="preserve"><value>Menu principal</value></data>
+  <data name="Layout.Menu.Open" xml:space="preserve"><value>Abrir menu</value></data>
+  <data name="Layout.Menu.Close" xml:space="preserve"><value>Fechar menu</value></data>
+  <data name="Layout.Menu.Collapse" xml:space="preserve"><value>Recolher menu</value></data>
+  <data name="Layout.Menu.Expand" xml:space="preserve"><value>Expandir menu</value></data>
+  <data name="Nav.Home" xml:space="preserve"><value>Início</value></data>
+  <data name="Nav.Section.Study" xml:space="preserve"><value>Estudo</value></data>
+  <data name="Nav.Section.Content" xml:space="preserve"><value>Conteúdo</value></data>
+  <data name="Nav.Section.Administration" xml:space="preserve"><value>Administração</value></data>
+  <data name="Nav.Section.Development" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Nav.Dev.UiKit" xml:space="preserve"><value>Kit de interface</value></data>
 </root>

@@ -26,4 +26,9 @@ public static class AppIcons
     public const string View = Icons.Material.Outlined.Visibility;
     public const string Copy = Icons.Material.Outlined.ContentCopy;
     public const string Archive = Icons.Material.Outlined.Archive;
+    public const string Menu = Icons.Material.Outlined.Menu;
+    public const string Home = Icons.Material.Outlined.Home;
+    public const string ChevronLeft = Icons.Material.Outlined.ChevronLeft;
+    public const string ChevronRight = Icons.Material.Outlined.ChevronRight;
+    public const string Build = Icons.Material.Outlined.Build;
 }
