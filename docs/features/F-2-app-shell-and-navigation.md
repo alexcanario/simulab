@@ -1,7 +1,7 @@
 ---
 feature: F-2
 epic: Foundation and identity
-status: validating
+status: done
 board: 706
 version: 1
 ---
@@ -140,4 +140,8 @@ Close any running app host first (it locks the build output).
 8. Clear the site cookies `simulab.theme` and `simulab.nav` (or use a private window) and set the OS to dark mode: the app follows it after loading. There is no permission check in this feature (menu items with permissions arrive with F-6).
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-2` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge feature/F-2: app shell and navigation (AB#706)" on `main`, 2026-09-17
+- Validated on screen by the owner: 2026-09-17
+- Tests: full suite 124 passed, 0 failed (SharedKernel 8, Architecture 8, Api 4, Web 104), 4 s; full build 5 s, 0 warnings
+- Manual pages: `getting-around` (new) and `index` in en, pt-BR and pt-PT
