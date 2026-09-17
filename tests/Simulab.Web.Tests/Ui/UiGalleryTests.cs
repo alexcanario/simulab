@@ -1,26 +1,16 @@
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using MudBlazor;
 using Simulab.Web.Components.Pages.Dev;
-using Simulab.Web.Components.Ui;
 
 namespace Simulab.Web.Tests.Ui;
 
 public class UiGalleryTests : KitTestContext
 {
-    private sealed class FakeEnvironment(string name) : IHostEnvironment
-    {
-        public string EnvironmentName { get; set; } = name;
-        public string ApplicationName { get; set; } = "Simulab.Web";
-        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
-    }
-
     private IRenderedComponent<UiGallery> RenderGallery(string environment, Action? beforeRender = null)
     {
-        Services.AddSingleton<IHostEnvironment>(new FakeEnvironment(environment));
+        Services.AddSingleton<IHostEnvironment>(new FakeHostEnvironment(environment));
         beforeRender?.Invoke();
         Render<MudPopoverProvider>();
         return Render<UiGallery>(parameters => parameters.Add(p => p.SourceDelay, TimeSpan.Zero));
@@ -50,14 +40,11 @@ public class UiGalleryTests : KitTestContext
     }
 
     [Fact]
-    public void ThemeSwitch_Clicked_TogglesDarkMode()
+    public void Render_Development_HasNoThemeSwitchOfItsOwn()
     {
         var gallery = RenderGallery(Environments.Development);
-        var theme = Services.GetRequiredService<ThemeState>();
 
-        gallery.Find(".gallery-theme-switch").Click();
-
-        theme.IsDarkMode.Should().BeTrue();
-        gallery.Find(".gallery-theme-switch").GetAttribute("aria-label").Should().Be("Switch to light mode");
+        gallery.FindAll(".gallery-theme-switch, .app-theme-switch").Should().BeEmpty();
+        gallery.Markup.Should().NotContain("Switch to dark mode");
     }
 }

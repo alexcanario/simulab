@@ -14,10 +14,27 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="InteractiveServer" Preferences="_preferences" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+    <script src="@Assets["js/shell.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    private ShellPreferences _preferences = ShellPreferences.Default;
+
+    protected override void OnInitialized()
+    {
+        if (HttpContext is not null)
+        {
+            _preferences = ShellPreferences.From(
+                HttpContext.Request.Cookies[PreferenceCookies.Theme],
+                HttpContext.Request.Cookies[PreferenceCookies.Navigation]);
+        }
+    }
+}

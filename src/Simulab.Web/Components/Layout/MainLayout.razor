@@ -1,23 +1,56 @@
 @inherits LayoutComponentBase
-@implements IDisposable
+@implements IAsyncDisposable
 @inject IStringLocalizer<SharedResources> L
 @inject ThemeState ThemeState
+@inject PreferenceWriter PreferenceWriter
+@inject IBrowserViewportService Viewport
+@inject NavigationManager Navigation
 
-<MudThemeProvider Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
+<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h6" Class="app-name">@L["App.Name"]</MudText>
+<a class="app-skip-link" href="#main-content">@L["Layout.SkipToContent"]</a>
+
+<MudLayout Class="@(_isDesktop is null ? "app-shell app-shell-pending" : "app-shell")">
+    <MudAppBar Elevation="1" Dense="false">
+        <MudTooltip Text="@MenuButtonLabel">
+            <MudIconButton Icon="@AppIcons.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.Start"
+                           aria-label="@MenuButtonLabel"
+                           aria-expanded="@(DrawerShowsLabels ? "true" : "false")"
+                           aria-controls="app-drawer"
+                           OnClick="ToggleMenuAsync"
+                           Class="app-menu-button" />
+        </MudTooltip>
+        <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None" Typo="Typo.h6"
+                 Class="app-name" aria-label="@L["Layout.HomeLink"]">@L["App.Name"]</MudLink>
         <MudSpacer />
+        <ThemeSwitch />
         <LanguageSwitch />
+        <div class="app-user-menu"></div>
     </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen"
+               id="app-drawer"
+               Variant="DrawerVariant.Mini"
+               Breakpoint="Breakpoint.Md"
+               ClipMode="DrawerClipMode.Always"
+               Width="240px"
+               MiniWidth="56px"
+               Elevation="1"
+               Class="app-drawer"
+               role="navigation"
+               aria-label="@L["Layout.Menu.Label"]">
+        <NavMenu Collapsed="@(_isDesktop != false && !_drawerOpen)" />
+    </MudDrawer>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-6">
-            @Body
-        </MudContainer>
+        <main id="main-content" tabindex="-1">
+            <MudContainer MaxWidth="MaxWidth.Large" Class="pa-6">
+                @Body
+            </MudContainer>
+        </main>
     </MudMainContent>
 </MudLayout>
 
@@ -29,10 +62,89 @@
 
 @code {
     private readonly MudTheme _theme = Theme.SimulabTheme.Create();
+    private readonly Guid _viewportSubscription = Guid.NewGuid();
+    private MudThemeProvider? _themeProvider;
+    private bool _drawerOpen;
+    private bool? _isDesktop;
+    private bool _collapsedOnDesktop;
 
-    protected override void OnInitialized() => ThemeState.Changed += OnThemeChanged;
+    [CascadingParameter] public ShellPreferences Preferences { get; set; } = ShellPreferences.Default;
+
+    // Desktop: open = expanded, closed = icons only. Phone: open = shown over the content.
+    private bool DrawerShowsLabels => _drawerOpen;
+
+    private string MenuButtonLabel => _isDesktop == false
+        ? (_drawerOpen ? L["Layout.Menu.Close"] : L["Layout.Menu.Open"])
+        : (_drawerOpen ? L["Layout.Menu.Collapse"] : L["Layout.Menu.Expand"]);
+
+    protected override void OnInitialized()
+    {
+        // Until the viewport is known, render the desktop state; CSS hides the drawer on small screens meanwhile.
+        _collapsedOnDesktop = Preferences.NavigationCollapsed;
+        _drawerOpen = !_collapsedOnDesktop;
+        if (Preferences.DarkMode is { } dark)
+            ThemeState.SetDarkMode(dark);
+        ThemeState.Changed += OnThemeChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        if (Preferences.DarkMode is null && _themeProvider is not null)
+            ThemeState.SetDarkMode(await _themeProvider.GetSystemDarkModeAsync());
+
+        await Viewport.SubscribeAsync(_viewportSubscription, OnViewportChanged, fireImmediately: true);
+    }
+
+    private Task OnViewportChanged(BrowserViewportEventArgs args)
+    {
+        var isDesktop = args.Breakpoint >= Breakpoint.Md;
+        if (isDesktop == _isDesktop)
+            return Task.CompletedTask;
+
+        _isDesktop = isDesktop;
+        _drawerOpen = isDesktop && !_collapsedOnDesktop;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ToggleMenuAsync()
+    {
+        _drawerOpen = !_drawerOpen;
+        if (_isDesktop != false)
+        {
+            _collapsedOnDesktop = !_drawerOpen;
+            await PreferenceWriter.WriteAsync(
+                PreferenceCookies.Navigation,
+                _drawerOpen ? PreferenceCookies.NavigationExpanded : PreferenceCookies.NavigationCollapsed);
+        }
+    }
+
+    // The phone menu closes after an item is chosen.
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (_isDesktop != false || !_drawerOpen)
+            return;
+
+        _drawerOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
 
     private void OnThemeChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
+    public async ValueTask DisposeAsync()
+    {
+        ThemeState.Changed -= OnThemeChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+        try
+        {
+            await Viewport.UnsubscribeAsync(_viewportSubscription);
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit is gone; nothing to unsubscribe from.
+        }
+    }
 }

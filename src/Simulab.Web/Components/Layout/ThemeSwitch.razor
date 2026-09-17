@@ -1,0 +1,30 @@
+@implements IDisposable
+@inject IStringLocalizer<SharedResources> L
+@inject ThemeState ThemeState
+@inject PreferenceWriter Preferences
+
+<MudTooltip Text="@Label">
+    <MudIconButton Icon="@(ThemeState.IsDarkMode ? AppIcons.LightMode : AppIcons.DarkMode)"
+                   Color="Color.Inherit"
+                   aria-label="@Label"
+                   OnClick="ToggleAsync"
+                   Class="app-theme-switch" />
+</MudTooltip>
+
+@code {
+    private string Label => ThemeState.IsDarkMode ? L["Common.ThemeSwitch.ToLight"] : L["Common.ThemeSwitch.ToDark"];
+
+    protected override void OnInitialized() => ThemeState.Changed += OnThemeChanged;
+
+    private async Task ToggleAsync()
+    {
+        ThemeState.SetDarkMode(!ThemeState.IsDarkMode);
+        await Preferences.WriteAsync(
+            PreferenceCookies.Theme,
+            ThemeState.IsDarkMode ? PreferenceCookies.ThemeDark : PreferenceCookies.ThemeLight);
+    }
+
+    private void OnThemeChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
+}

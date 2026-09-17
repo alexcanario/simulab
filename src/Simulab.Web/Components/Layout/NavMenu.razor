@@ -1,0 +1,59 @@
+@implements IDisposable
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+@inject IHostEnvironment Environment
+
+<MudNavMenu Class="app-nav-menu">
+    @foreach (var item in _visible.Where(i => i.Section is null))
+    {
+        @Link(item)
+    }
+    @foreach (var section in NavigationItems.Sections(_visible))
+    {
+        @if (Collapsed)
+        {
+            <MudDivider Class="app-nav-divider" />
+        }
+        else
+        {
+            <MudText Typo="Typo.overline" Class="app-nav-section" data-section="@section.Key">@L[$"Nav.Section.{section.Key}"]</MudText>
+        }
+        @foreach (var item in section)
+        {
+            @Link(item)
+        }
+    }
+</MudNavMenu>
+
+@code {
+    private IReadOnlyList<NavigationItem> _visible = [];
+
+    /// <summary>The registry to show. Tests pass their own; the app uses <see cref="NavigationItems.All"/>.</summary>
+    [Parameter] public IReadOnlyList<NavigationItem> Items { get; set; } = NavigationItems.All;
+
+    /// <summary>Desktop menu collapsed to icons: section headers become dividers, labels become tooltips.</summary>
+    [Parameter] public bool Collapsed { get; set; }
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    protected override void OnParametersSet() =>
+        _visible = NavigationItems.Visible(Items, Environment.IsDevelopment());
+
+    private RenderFragment Link(NavigationItem item) => __builder =>
+    {
+        var label = L[item.ResourceKey].Value;
+        var active = item.IsActive(Navigation.ToBaseRelativePath(Navigation.Uri));
+        <MudTooltip Text="@label" Placement="Placement.Right" Disabled="@(!Collapsed)" RootClass="app-nav-tooltip">
+            <MudNavLink Href="@item.Route"
+                        Match="item.Match"
+                        Icon="@item.Icon"
+                        aria-current="@(active ? "page" : null)"
+                        aria-label="@(Collapsed ? label : null)"
+                        data-route="@item.Route">@label</MudNavLink>
+        </MudTooltip>
+    };
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

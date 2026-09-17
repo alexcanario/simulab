@@ -1,5 +1,6 @@
 using MudBlazor;
 using MudBlazor.Services;
+using Simulab.Web.Components.Layout;
 
 namespace Simulab.Web.Components.Ui;
 
@@ -19,6 +20,7 @@ public static class UiKitServiceCollectionExtensions
         services.AddScoped<IConfirmService, ConfirmService>();
         services.AddScoped<ErrorText>();
         services.AddScoped<ThemeState>();
+        services.AddScoped<PreferenceWriter>();
         return services;
     }
 }
