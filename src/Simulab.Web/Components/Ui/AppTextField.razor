@@ -1,0 +1,96 @@
+@* One text field everywhere: label above, required marker, hint or error below, both announced (rule: ui). *@
+@typeparam TValue
+
+<div class="app-field @(HasError ? "app-field-error" : null)">
+    <label class="app-field-label" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <MudTextField T="TValue"
+                  Value="Value"
+                  ValueChanged="OnValueChanged"
+                  id="@Id"
+                  InputType="InputType"
+                  Placeholder="@Placeholder"
+                  Variant="Variant.Outlined"
+                  Margin="Margin.Dense"
+                  MaxLength="@(MaxLength ?? 524288)"
+                  Immediate="false"
+                  Disabled="Disabled"
+                  ReadOnly="ReadOnly"
+                  Error="HasError"
+                  UserAttributes="@Attributes"
+                  Adornment="@(Adornment)"
+                  AdornmentIcon="@AdornmentIcon"
+                  AdornmentAriaLabel="@AdornmentAriaLabel"
+                  OnAdornmentClick="OnAdornmentClick" />
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public TValue? Value { get; set; }
+
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+    [Parameter] public InputType InputType { get; set; } = InputType.Text;
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public int? MaxLength { get; set; }
+
+    [Parameter] public string? Autocomplete { get; set; }
+
+    [Parameter] public Adornment Adornment { get; set; } = Adornment.None;
+
+    [Parameter] public string? AdornmentIcon { get; set; }
+
+    [Parameter] public string? AdornmentAriaLabel { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> OnAdornmentClick { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string DescriptionId => $"{Id}-description";
+
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["aria-describedby"] = DescriptionId,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-required"] = Required ? "true" : null,
+        ["autocomplete"] = Autocomplete
+    };
+
+    private Task OnValueChanged(TValue? value)
+    {
+        Value = value;
+        return ValueChanged.InvokeAsync(value);
+    }
+}

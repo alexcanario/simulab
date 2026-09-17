@@ -1,0 +1,244 @@
+@page "/sign-up"
+@layout AuthLayout
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject ErrorText Errors
+@inject SignUpFlow Flow
+@inject NavigationManager Navigation
+
+<PageTitle>@I["SignUp.Title"] — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card">
+    <h1 class="app-auth-title">@I["SignUp.Title"]</h1>
+    <p class="app-auth-subtitle">@I["SignUp.Subtitle"]</p>
+
+    @if (_serverError is not null)
+    {
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(_serverError)" />
+    }
+    else if (_documentsFailed)
+    {
+        <AppAlert Severity="Severity.Error"
+                  Text="@I["SignUp.LegalUnavailable"]"
+                  ActionText="@L["Common.TryAgain"]"
+                  OnAction="LoadDocumentsAsync" />
+    }
+    else if (IsDraft)
+    {
+        <AppAlert Severity="Severity.Warning" Text="@I["Legal.DraftNotice"]" />
+    }
+
+    <AppTextField TValue="string"
+                  Id="sign-up-email"
+                  Label="@I["SignUp.Email.Label"]"
+                  Placeholder="@I["SignUp.Email.Placeholder"]"
+                  InputType="InputType.Email"
+                  Autocomplete="username"
+                  MaxLength="254"
+                  Required="true"
+                  Disabled="Busy"
+                  Error="@_emailError"
+                  Value="@_email"
+                  ValueChanged="@(value => { _email = value; _emailError = null; })" />
+
+    <AppPasswordField Id="sign-up-password"
+                      Label="@I["SignUp.Password.Label"]"
+                      Hint="@I["SignUp.Password.Hint"]"
+                      ShowLabel="@I["SignUp.Password.Show"]"
+                      HideLabel="@I["SignUp.Password.Hide"]"
+                      Required="true"
+                      Disabled="Busy"
+                      Error="@_passwordError"
+                      Value="@_password"
+                      ValueChanged="@(value => { _password = value; _passwordError = null; })" />
+
+    <AppPasswordStrength Password="@_password" TextFor="StrengthText" />
+
+    <AppPasswordField Id="sign-up-confirm"
+                      Label="@I["SignUp.ConfirmPassword.Label"]"
+                      ShowLabel="@I["SignUp.Password.Show"]"
+                      HideLabel="@I["SignUp.Password.Hide"]"
+                      Required="true"
+                      Disabled="Busy"
+                      Error="@_confirmError"
+                      Value="@_confirmPassword"
+                      ValueChanged="@(value => { _confirmPassword = value; _confirmError = null; })" />
+
+    <AppTextField TValue="string"
+                  Id="sign-up-full-name"
+                  Label="@I["SignUp.FullName.Label"]"
+                  Autocomplete="name"
+                  MaxLength="120"
+                  Disabled="Busy"
+                  Value="@_fullName"
+                  ValueChanged="@(value => _fullName = value)" />
+
+    <div class="app-sign-up-consents">
+        <AppCheckbox Id="sign-up-adult" Required="true" Disabled="Busy" Error="@_adultError"
+                     Value="@_declaresAdult" ValueChanged="@(value => { _declaresAdult = value; _adultError = null; })">
+            @I["SignUp.Adult.Label"]
+        </AppCheckbox>
+
+        <AppCheckbox Id="sign-up-terms" Required="true" Disabled="Busy" Error="@_consentError"
+                     Value="@_acceptsTerms" ValueChanged="@(value => { _acceptsTerms = value; _consentError = null; })">
+            @LegalLabel("SignUp.Terms.Label", "Auth.Legal.Terms", "/terms")
+        </AppCheckbox>
+
+        <AppCheckbox Id="sign-up-privacy" Required="true" Disabled="Busy"
+                     Value="@_acceptsPrivacy" ValueChanged="@(value => { _acceptsPrivacy = value; _consentError = null; })">
+            @LegalLabel("SignUp.Privacy.Label", "Auth.Legal.Privacy", "/privacy")
+        </AppCheckbox>
+    </div>
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               FullWidth="true"
+               Size="Size.Large"
+               Disabled="@(Busy || _documentsFailed)"
+               OnClick="SubmitAsync"
+               Class="app-sign-up-submit">
+        @if (_loadingDocuments)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@I["SignUp.LegalLoading"]</span>
+        }
+        else if (_submitting)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@I["SignUp.Submitting"]</span>
+        }
+        else
+        {
+            @I["SignUp.Submit"]
+        }
+    </MudButton>
+</div>
+
+@code {
+    private string? _email;
+    private string? _password;
+    private string? _confirmPassword;
+    private string? _fullName;
+    private bool _declaresAdult;
+    private bool _acceptsTerms;
+    private bool _acceptsPrivacy;
+
+    private string? _emailError;
+    private string? _passwordError;
+    private string? _confirmError;
+    private string? _adultError;
+    private string? _consentError;
+    private string? _serverError;
+
+    private LegalDocumentResponse? _terms;
+    private LegalDocumentResponse? _privacy;
+    private bool _loadingDocuments = true;
+    private bool _documentsFailed;
+    private bool _submitting;
+
+    private bool Busy => _loadingDocuments || _submitting;
+
+    private bool IsDraft => _terms?.IsPlaceholder == true || _privacy?.IsPlaceholder == true;
+
+    protected override Task OnInitializedAsync() => LoadDocumentsAsync();
+
+    /// <summary>
+    /// The versions shown are the versions accepted. Without them the form cannot be submitted, so the
+    /// visitor never accepts a text the page could not show (BR5).
+    /// </summary>
+    private async Task LoadDocumentsAsync()
+    {
+        _loadingDocuments = true;
+        _documentsFailed = false;
+        _serverError = null;
+
+        var terms = await Api.GetLegalDocumentAsync(LegalTopic.Terms);
+        var privacy = await Api.GetLegalDocumentAsync(LegalTopic.Privacy);
+
+        _terms = terms.Value;
+        _privacy = privacy.Value;
+        _documentsFailed = _terms is null || _privacy is null;
+        _loadingDocuments = false;
+    }
+
+    private async Task SubmitAsync()
+    {
+        _serverError = null;
+        if (!Validate())
+        {
+            return;
+        }
+
+        _submitting = true;
+        var result = await Api.RegisterAsync(new RegisterRequest(
+            _email!.Trim(),
+            _password!,
+            _declaresAdult,
+            _acceptsTerms,
+            _acceptsPrivacy,
+            _terms!.Version,
+            _privacy!.Version,
+            string.IsNullOrWhiteSpace(_fullName) ? null : _fullName!.Trim()));
+        _submitting = false;
+
+        if (result.IsSuccess)
+        {
+            Flow.PendingEmail = _email!.Trim();
+            Navigation.NavigateTo("/check-email");
+            return;
+        }
+
+        _serverError = result.ErrorCode;
+
+        // The passwords are cleared on a server error; everything else the visitor typed stays.
+        _password = null;
+        _confirmPassword = null;
+
+        // The texts changed while the form was open: load the new ones and ask for the acceptances again.
+        if (result.ErrorCode == IdentityErrorCodes.TermsVersionOutdated)
+        {
+            _acceptsTerms = false;
+            _acceptsPrivacy = false;
+            await LoadDocumentsAsync();
+            _serverError = IdentityErrorCodes.TermsVersionOutdated;
+        }
+    }
+
+    /// <summary>Comfort only: the API is the authority on every one of these rules (rule: ui).</summary>
+    private bool Validate()
+    {
+        _emailError = string.IsNullOrWhiteSpace(_email) ? I["SignUp.Email.Required"].Value : null;
+        _passwordError = string.IsNullOrWhiteSpace(_password)
+            ? I["SignUp.Password.Required"].Value
+            : PasswordStrengthRules.Meets(_password) ? null : L["registration.password_too_weak"].Value;
+        _confirmError = string.IsNullOrWhiteSpace(_confirmPassword)
+            ? I["SignUp.ConfirmPassword.Required"].Value
+            : _confirmPassword == _password ? null : I["SignUp.ConfirmPassword.Mismatch"].Value;
+        _adultError = _declaresAdult ? null : L["registration.age_declaration_required"].Value;
+        _consentError = _acceptsTerms && _acceptsPrivacy ? null : L["registration.consent_required"].Value;
+
+        return _emailError is null && _passwordError is null && _confirmError is null
+            && _adultError is null && _consentError is null;
+    }
+
+    private string StrengthText(PasswordStrength strength) =>
+        I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
+
+    private RenderFragment LegalLabel(string labelKey, string documentKey, string href) => builder =>
+    {
+        var parts = I[labelKey].Value.Split("{0}");
+        builder.AddContent(0, parts[0]);
+        builder.OpenElement(1, "a");
+        builder.AddAttribute(2, "href", href);
+        builder.AddAttribute(3, "target", "_blank");
+        builder.AddAttribute(4, "rel", "noopener");
+        builder.AddAttribute(5, "aria-label", $"{I[documentKey]}, {I["SignUp.LinkOpensNewTab"]}");
+        builder.AddContent(6, I[documentKey].Value);
+        builder.CloseElement();
+        if (parts.Length > 1)
+        {
+            builder.AddContent(7, parts[1]);
+        }
+    };
+}

@@ -1,0 +1,31 @@
+@* Feedback that belongs to the page, not to a snackbar: business and server errors, notices, confirmations (rule: ui). *@
+
+<MudAlert Severity="@Severity"
+          Variant="Variant.Filled"
+          Dense="true"
+          Class="@($"app-alert {Class}")"
+          role="@(Severity == Severity.Error ? "alert" : "status")">
+    <div class="app-alert-content">
+        <span>@Text</span>
+        @if (OnAction.HasDelegate)
+        {
+            <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="() => OnAction.InvokeAsync()" Class="app-alert-action">
+                @ActionText
+            </MudButton>
+        }
+    </div>
+</MudAlert>
+
+@code {
+    /// <summary>The message, already translated. Never a raw code (rule: ui).</summary>
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+
+    [Parameter] public Severity Severity { get; set; } = Severity.Info;
+
+    /// <summary>With a handler, the alert shows one action, for example "Try again".</summary>
+    [Parameter] public EventCallback OnAction { get; set; }
+
+    [Parameter] public string? ActionText { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+}

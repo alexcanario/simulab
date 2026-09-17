@@ -1,0 +1,51 @@
+@* A checkbox whose label may hold a link, with its error below the group (rule: ui). *@
+
+<div class="app-checkbox @(HasError ? "app-checkbox-error" : null)">
+    <MudCheckBox T="bool"
+                 Value="Value"
+                 ValueChanged="@(value => ValueChanged.InvokeAsync(value))"
+                 Color="Color.Primary"
+                 Dense="true"
+                 Disabled="Disabled"
+                 UserAttributes="@Attributes">
+        <ChildContent>
+            <span class="app-checkbox-label">
+                @ChildContent
+                @if (Required)
+                {
+                    <span class="app-field-required" aria-hidden="true">*</span>
+                }
+            </span>
+        </ChildContent>
+    </MudCheckBox>
+    @if (HasError)
+    {
+        <span class="app-field-error-text" id="@($"{Id}-description")">@Error</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter] public bool Value { get; set; }
+
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["id"] = Id,
+        ["aria-required"] = Required ? "true" : null,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-describedby"] = HasError ? $"{Id}-description" : null
+    };
+}

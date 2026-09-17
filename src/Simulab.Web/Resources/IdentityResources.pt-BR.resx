@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Auth.Legal.Terms" xml:space="preserve"><value>Termos de Uso</value></data>
+  <data name="Auth.Legal.Privacy" xml:space="preserve"><value>Política de Privacidade</value></data>
+  <data name="SignUp.Title" xml:space="preserve"><value>Crie sua conta</value></data>
+  <data name="SignUp.Subtitle" xml:space="preserve"><value>Pratique com simulados realistas e descubra o que estudar em seguida.</value></data>
+  <data name="SignUp.Email.Label" xml:space="preserve"><value>E-mail</value></data>
+  <data name="SignUp.Email.Placeholder" xml:space="preserve"><value>voce@exemplo.com</value></data>
+  <data name="SignUp.Email.Required" xml:space="preserve"><value>Informe seu e-mail.</value></data>
+  <data name="SignUp.Password.Label" xml:space="preserve"><value>Senha</value></data>
+  <data name="SignUp.Password.Hint" xml:space="preserve"><value>No mínimo 12 caracteres, com maiúscula, número e símbolo.</value></data>
+  <data name="SignUp.Password.Required" xml:space="preserve"><value>Informe uma senha.</value></data>
+  <data name="SignUp.Password.Show" xml:space="preserve"><value>Mostrar senha</value></data>
+  <data name="SignUp.Password.Hide" xml:space="preserve"><value>Ocultar senha</value></data>
+  <data name="SignUp.Password.Strength" xml:space="preserve"><value>Força da senha: {0}</value></data>
+  <data name="SignUp.Password.Strength.Weak" xml:space="preserve"><value>Fraca</value></data>
+  <data name="SignUp.Password.Strength.Fair" xml:space="preserve"><value>Média</value></data>
+  <data name="SignUp.Password.Strength.Strong" xml:space="preserve"><value>Forte</value></data>
+  <data name="SignUp.ConfirmPassword.Label" xml:space="preserve"><value>Confirmar senha</value></data>
+  <data name="SignUp.ConfirmPassword.Required" xml:space="preserve"><value>Repita a senha.</value></data>
+  <data name="SignUp.ConfirmPassword.Mismatch" xml:space="preserve"><value>As senhas não são iguais.</value></data>
+  <data name="SignUp.FullName.Label" xml:space="preserve"><value>Nome completo (opcional)</value></data>
+  <data name="SignUp.Adult.Label" xml:space="preserve"><value>Declaro ter 18 anos ou mais</value></data>
+  <data name="SignUp.Terms.Label" xml:space="preserve"><value>Li e aceito os {0}</value></data>
+  <data name="SignUp.Privacy.Label" xml:space="preserve"><value>Concordo com a {0}</value></data>
+  <data name="SignUp.LinkOpensNewTab" xml:space="preserve"><value>abre em uma nova aba</value></data>
+  <data name="SignUp.Submit" xml:space="preserve"><value>Criar conta</value></data>
+  <data name="SignUp.Submitting" xml:space="preserve"><value>Criando a conta...</value></data>
+  <data name="SignUp.LegalLoading" xml:space="preserve"><value>Carregando os textos legais...</value></data>
+  <data name="SignUp.LegalUnavailable" xml:space="preserve"><value>Não foi possível carregar os textos legais, então o cadastro está indisponível agora.</value></data>
+  <data name="Legal.DraftNotice" xml:space="preserve"><value>Texto provisório: os documentos legais estão em revisão e ainda podem mudar.</value></data>
+  <data name="Legal.Version" xml:space="preserve"><value>Versão {0}, em vigor desde {1}</value></data>
+  <data name="CheckEmail.Title" xml:space="preserve"><value>Verifique seu e-mail</value></data>
+  <data name="CheckEmail.Message" xml:space="preserve"><value>Enviamos um link de verificação para {0}. Ele vale por 24 horas.</value></data>
+  <data name="CheckEmail.NotArrived" xml:space="preserve"><value>Não chegou? Procure na caixa de spam antes de pedir um novo link.</value></data>
+  <data name="CheckEmail.Resend" xml:space="preserve"><value>Enviar um novo link</value></data>
+  <data name="CheckEmail.Resend.Cooldown" xml:space="preserve"><value>Você pode pedir um novo link em {0} s.</value></data>
+  <data name="CheckEmail.Resend.Sent" xml:space="preserve"><value>Se o endereço estiver cadastrado e ainda pendente, um novo link está a caminho.</value></data>
+  <data name="CheckEmail.Sending" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="VerifyEmail.Verifying" xml:space="preserve"><value>Verificando seu e-mail...</value></data>
+  <data name="VerifyEmail.Verified.Title" xml:space="preserve"><value>E-mail verificado</value></data>
+  <data name="VerifyEmail.Verified.Message" xml:space="preserve"><value>Sua conta está ativa e pronta para uso.</value></data>
+  <data name="VerifyEmail.Expired.Title" xml:space="preserve"><value>Este link expirou</value></data>
+  <data name="VerifyEmail.Expired.Message" xml:space="preserve"><value>Os links de verificação valem 24 horas. Informe seu e-mail e enviamos um novo.</value></data>
+  <data name="VerifyEmail.Invalid.Title" xml:space="preserve"><value>Este link não é válido</value></data>
+  <data name="VerifyEmail.Invalid.Message" xml:space="preserve"><value>Ele pode já ter sido usado, ou ter sido copiado pela metade. Cadastre-se de novo ou peça um novo link.</value></data>
+  <data name="VerifyEmail.BackToSignUp" xml:space="preserve"><value>Ir para o cadastro</value></data>
+</root>

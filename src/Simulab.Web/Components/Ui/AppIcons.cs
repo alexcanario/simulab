@@ -31,4 +31,8 @@ public static class AppIcons
     public const string ChevronLeft = Icons.Material.Outlined.ChevronLeft;
     public const string ChevronRight = Icons.Material.Outlined.ChevronRight;
     public const string Build = Icons.Material.Outlined.Build;
+    public const string Hide = Icons.Material.Outlined.VisibilityOff;
+    public const string Mail = Icons.Material.Outlined.MailOutline;
+    public const string Verified = Icons.Material.Outlined.CheckCircle;
+    public const string Expired = Icons.Material.Outlined.HistoryToggleOff;
 }

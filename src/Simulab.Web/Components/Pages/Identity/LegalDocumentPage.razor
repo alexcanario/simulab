@@ -1,0 +1,65 @@
+@page "/terms"
+@page "/privacy"
+@layout AuthLayout
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+<PageTitle>@Heading — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card app-auth-card-wide">
+    @if (_loading)
+    {
+        <AppLoadingState />
+    }
+    else if (_document is null)
+    {
+        <AppErrorState Message="@Errors.For(_errorCode)" OnRetry="LoadAsync" />
+    }
+    else
+    {
+        <h1 class="app-auth-title">@_document.Title</h1>
+        <p class="app-legal-meta">@VersionLine</p>
+
+        @if (_document.IsPlaceholder)
+        {
+            <AppAlert Severity="Severity.Warning" Text="@I["Legal.DraftNotice"]" />
+        }
+
+        @* Markdown rendered by the API with raw HTML disabled (BR14), so the body carries no script. *@
+        <div class="app-legal-body">@((MarkupString)_document.BodyHtml)</div>
+    }
+</div>
+
+@code {
+    private LegalDocumentResponse? _document;
+    private bool _loading = true;
+    private string? _errorCode;
+
+    private LegalTopic Topic =>
+        new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/').EndsWith("/privacy", StringComparison.OrdinalIgnoreCase)
+            ? LegalTopic.Privacy
+            : LegalTopic.Terms;
+
+    private string Heading => _document?.Title
+        ?? (Topic == LegalTopic.Privacy ? I["Auth.Legal.Privacy"] : I["Auth.Legal.Terms"]);
+
+    private string VersionLine => string.Format(
+        CultureInfo.CurrentCulture,
+        I["Legal.Version"],
+        _document?.Version,
+        _document?.EffectiveDate?.ToString("d", CultureInfo.CurrentCulture) ?? string.Empty);
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        var result = await Api.GetLegalDocumentAsync(Topic);
+        _document = result.Value;
+        _errorCode = result.ErrorCode;
+        _loading = false;
+    }
+}

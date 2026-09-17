@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Localization;
 using Simulab.Web.Components;
 using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
+using Simulab.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddUiKit();
 builder.Services.AddLocalization();
+builder.Services.AddSingleton(TimeProvider.System);
+
+// First typed client (F-4). The base address comes from service discovery: no host or port in the code.
+builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
+builder.Services.AddScoped<SignUpFlow>();
 
 // Culture: cookie (set by the language switch), then the browser, then en.
 // The user profile becomes the first source when Identity arrives.

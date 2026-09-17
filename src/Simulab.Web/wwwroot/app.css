@@ -233,3 +233,168 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
         margin-left: 0 !important;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Auth screens (F-4). Declared exception of the ui rule: no app menu, no
+   breadcrumb; the card is centred on the app background.
+   --------------------------------------------------------------------------- */
+.app-auth {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--mud-palette-background);
+}
+
+.app-auth-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 12px 16px;
+}
+
+.app-auth-name {
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}
+
+.app-auth-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 16px 40px;
+    outline: none;
+}
+
+.app-auth-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 28px 26px;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--mud-default-borderradius);
+    background: var(--mud-palette-surface);
+}
+
+.app-auth-card-wide {
+    max-width: 760px;
+}
+
+.app-auth-footer {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.app-auth-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 6px;
+}
+
+.app-auth-subtitle {
+    font-size: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+    margin: 0 0 22px;
+}
+
+/* Result pages: verified, expired, invalid, check your email. */
+.app-auth-result {
+    text-align: center;
+}
+
+.app-auth-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.app-auth-result p {
+    font-size: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 14px;
+}
+
+/* ---------------------------------------------------------------------------
+   Form fields (F-4 kit additions).
+   --------------------------------------------------------------------------- */
+.app-field {
+    margin-bottom: 16px;
+}
+
+.app-field-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+    margin-bottom: 6px;
+}
+
+.app-field-required {
+    color: var(--mud-palette-error);
+    margin-left: 3px;
+}
+
+.app-field-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-disabled);
+    margin-top: 5px;
+    line-height: 1.45;
+}
+
+.app-field-error-text {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mud-palette-error);
+    margin-top: 5px;
+}
+
+.app-password-strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.app-password-strength-bar {
+    flex: 1;
+    height: 5px;
+}
+
+.app-password-strength-text {
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+    white-space: nowrap;
+}
+
+.app-checkbox {
+    margin-bottom: 4px;
+}
+
+.app-checkbox-label {
+    font-size: 0.8125rem;
+    color: var(--mud-palette-text-secondary);
+    line-height: 1.5;
+}
+
+.app-alert {
+    margin-bottom: 18px;
+}
+
+.app-alert-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
