@@ -5,6 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
   </ItemGroup>
