@@ -7,7 +7,7 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 
 ## Run locally
 - Prerequisites: .NET 10 SDK, a container runtime (Docker Desktop or Podman), Aspire tooling.
-- Start: `dotnet run --project src/Simulab.AppHost` → the Aspire dashboard URL is printed on start. Web: https://localhost:7125. Api: https://localhost:7287 (OpenAPI at `/openapi/v1.json`). Sign in as: no seed user yet (arrives with the Identity feature; password kept in user secrets).
+- Start: `dotnet run --project src/Simulab.AppHost` → the Aspire dashboard URL is printed on start. Web: https://localhost:7125 (UI kit gallery at `/dev/ui`, Development only; close the app host before building, it locks the Web DLLs). Api: https://localhost:7287 (OpenAPI at `/openapi/v1.json`). Sign in as: no seed user yet (arrives with the Identity feature; password kept in user secrets).
 - Local containers started by the app host: none yet. Planned, each added by the first feature that needs it: PostgreSQL, Redis, Azurite (blob storage), Mailpit (SMTP capture).
 - Reset local data: not applicable yet.
 
@@ -45,5 +45,5 @@ Names only. None exists yet; each arrives with the feature that needs it.
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 4 s (2026-09-17, skeleton) |
-| Full test suite | < 5 min | 33 tests, under 2 s of test time (2026-09-17, skeleton) |
+| Full build | | 7 s (2026-09-17, F-1) |
+| Full test suite | < 5 min | 76 tests, 4 s (2026-09-17, F-1) |
