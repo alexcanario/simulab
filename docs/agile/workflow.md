@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.4 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
+> Version 0.0.5 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
 
 Contents
 1. Concepts in two minutes
@@ -546,6 +546,8 @@ Status: validating. Validation script: ...
 ```
 
 ## 15. Quick reference
+
+You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
 
 | Command | Use |
 |---|---|
