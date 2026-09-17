@@ -17,6 +17,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
 | ⏳ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | — |
+| ⏳ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -80,3 +81,14 @@ Approved by the owner the same day.
 | 3 | `plugin` — two defects appeared only on screen (MudBlazor's active nav link style beat the drawer CSS: blue on dark blue; the link above), and the browser pane sends an empty key for Enter | Plugin improvement | This log (see below) |
 
 - ⏳ **Screen check before the coverage table.** In feature-build, open the screen through the app host before the coverage table and check the contrast of library states (active, hover, focus) in both themes; the browser pane cannot send Enter, so keyboard steps always stay in the validation script.
+
+## 2026-09-17 — F-3 Data and messaging foundation
+Approved by the owner the same day.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | A tenant query filter that captures the tenant value leaks rows between requests (Simulae TK #184); the base context captures `this` instead | Project rule | `.claude/rules/agile/project.md` (Data) |
+| 2 | Three shared projects were born in this item (`Simulab.Persistence`, `Simulab.Email`, `tests/Simulab.Testing`) and the profile was updated only at the end | Project rule | `.claude/rules/agile/project.md` (Data) |
+| 3 | `plugin` — `Aspire.Hosting.Testing` was missing from the refinement package list and had to be asked mid-build | Plugin improvement | This log (see below) |
+
+- ⏳ **Test packages in the refinement question.** In feature-refinement, the package question must cover the packages the tests need (host testing, containers, fakes), not only the ones the production code needs; a missing one becomes a stop mid-build.

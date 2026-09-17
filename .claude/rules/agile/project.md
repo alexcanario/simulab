@@ -16,6 +16,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Soft delete only. Erasure of a person anonymizes personal data and keeps unidentified attempts.
 - Published question content is versioned. An attempt stores the question version and answer key version that graded it. An annulment or a changed answer key creates a version; it never rewrites history.
 - One schema and one `DbContext` per module. A module never reads another module's tables.
+- A query filter that depends on the current tenant or user reads it from the context instance, never from a value captured when the model was built: EF caches the compiled model and the first request would freeze its tenant.
+- A new building block or shared test project is listed in `docs/agile/profile.md` in the same item that creates it.
 
 ## Access and entitlements
 - Pages, menus and endpoints check permissions, never role names.
