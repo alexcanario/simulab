@@ -30,6 +30,11 @@ A study coach that runs realistic practice exams (public service exams, certific
 - Full suite (ship only): `dotnet test Simulab.slnx` (budget: < 5 min)
 - Run locally: `dotnet run --project src/Simulab.AppHost`
 
+## Models
+- Independent review (`/agile:review`): strongest available model, passed on the call.
+- Main session (quiz, refinement, build): the session model, chosen by the owner.
+- Code searches and sweeps (Explore): Haiku. Mechanical import and rename from Simulae: Sonnet; the tests verify it.
+
 ## Board
 Board: Azure Boards (`acanariopt/simulab`) via `az boards`
 Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
@@ -46,3 +51,4 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 - Every AI call goes through `IAiGateway`, which checks `IEntitlementService` and records usage and cost.
 - Modules and pages never read plan columns; they ask `IEntitlementService`.
 - Never reference MassTransit, RabbitMQ or FluentAssertions.
+- Screens follow `.claude/rules/agile/ui.md`: UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
