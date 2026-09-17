@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.8 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
+> Version 0.0.10 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
 
 Contents
 1. Concepts in two minutes
@@ -156,6 +156,7 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | When | What happens |
 |---|---|
 | **Session start** | Shows the branch, the item in progress, the backlog head, approved files with open questions, and uncommitted work in **every** worktree. |
+| **Every commit** | A guard refuses a `git commit` on the main branch while an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Builds the changed projects and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
 | **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests. |
@@ -164,6 +165,8 @@ Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
+- **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
+- **Hung tests.** A test that runs for more than 120 seconds (`AGILE_GATE_HANG_TIMEOUT`) counts as hung: the run fails with its name instead of blocking the turn for minutes.
 - **No loops.** After 3 red gates in a row the turn ends and you see the failure; the pending check stays for the next turn.
 - **Known limit.** Only edits made with the editing tools are tracked. Changes made by a shell command (`dotnet format`, a merge) are caught at ship.
 - `AGILE_HOOKS=off` disables the hooks for a session.
@@ -215,6 +218,8 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 - Pause mid-feature: commit on the feature branch with a `wip:` prefix; nothing stays only on disk.
 - End: a short note (where we stopped, what is next, who decides).
 - Before merging from a worktree: close any IDE or app host running from that folder.
+
+**Two items in parallel.** The default is one item at a time. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work; Claude never creates a worktree by itself. It first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. Then it creates the branch in a separate folder outside the repository (`Worktrees:` in `CLAUDE.md`, default `<repository parent>/wt/<repository>/<type>-<n>`, kept short because of Windows path limits) and works only there: one writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
 
 ## 14. Worked examples
 
@@ -567,7 +572,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:idea "<text>"` | Capture an epic, feature or bug, unrefined |
 | `/agile:refine <feature>` | Refinement round → feature file for approval |
 | `/agile:screen <feature>` | Screen details and HTML mockup during refinement |
-| `/agile:build <feature>` | Implement an approved feature (one at a time) |
+| `/agile:build <feature> [--worktree]` | Implement an approved feature (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
 | `/agile:ship <feature>` | Full suite, merge, board, app manual |

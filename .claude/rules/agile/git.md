@@ -5,11 +5,11 @@
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
-- A commit message says what the diff really does. Check `git diff --staged` before committing.
+- A commit message says what the diff really does. Check `git diff --staged` and `git branch --show-current` right before every commit: an IDE can switch the branch behind the session. A guard hook refuses a commit on the main branch while an item branch is open.
 - Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work before anything else.
 - If git and the board or the files disagree, stop and ask.
-- Use a worktree only when the owner asks for parallel work. One worktree per agent; two writers never share one (the index races).
-- Worktrees live in a short sibling folder named `<type>-<n>` (e.g. `D:\wt\<repo>\feature-3`). Never inside the repository.
+- Use a worktree only when the owner asks for parallel work (`/agile:build <id> --worktree`). One worktree per writer, session or agent; two writers never share one (the index races).
+- Worktrees live in a short folder named `<type>-<n>` under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
 - Before merging or removing a worktree, ask the owner to close any IDE or app host running from it.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.

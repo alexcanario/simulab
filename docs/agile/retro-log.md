@@ -62,3 +62,9 @@ Raised by the owner after the bootstrap, approved the same day.
 - How it was implemented differs from the note in one point: the guard does not look for "outside `/agile:ship`" (a hook cannot know which skill is running). It looks at git: current branch is main, no merge in progress, an unmerged item branch that no worktree holds.
 - Not verified inside a real session yet: the `PreToolUse` hook firing on the PowerShell tool, and its message reaching Claude. Tested from the command line (nine scenarios).
 - This project is still at 0.0.8 in `.claude/agile/sync.json`. Run `/agile:sync` between features, after updating the installed plugin.
+
+## 2026-09-17 — Sync from agile@canary 0.0.8 to 0.0.10
+- Copied: `.claude/rules/agile/git.md` (branch check before every commit, guard hook, worktrees), `.claude/rules/agile/workflow.md` (WIP limit per checkout), `docs/agile/templates/project-claude.md` (`Worktrees:` line), `docs/agile/workflow.md` (manual 0.0.10).
+- Merged: `docs/agile/profile.md` (two test lines: hang timeout, bUnit with MudBlazor), no conflicts; the Simulab section is kept.
+- Left alone: `.editorconfig` (only comments differ; the PascalCase rules are the same). No build file changed, so no rebuild.
+- Declined for now: the `Worktrees:` line in `CLAUDE.md` (added when parallel work is first requested).

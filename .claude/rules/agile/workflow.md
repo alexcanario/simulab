@@ -5,7 +5,7 @@
 - No production code before the item is `approved`. Reading code to refine is fine; writing it is not.
 - Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not.
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
-- WIP limit: one item in `building` or `validating`. A new request during a build becomes an `idea`, not work.
+- WIP limit: one item in `building` or `validating` per checkout. A new request during a build becomes an `idea`, not work; a second item in parallel needs the owner's `/agile:build <id> --worktree`.
 - Confirm the item at the start of the session. Other items only get registered, never executed.
 - Three human gates: approved → validated on screen → merge authorized. An approval never carries over to the next gate.
 - Verify premises in the code before asking. Never ask what the code already answers.
