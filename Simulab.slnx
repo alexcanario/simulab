@@ -11,6 +11,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Simulab.Api.Tests/Simulab.Api.Tests.csproj" />
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
+    <Project Path="tests/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
     <Project Path="tests/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
     <Project Path="tests/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />

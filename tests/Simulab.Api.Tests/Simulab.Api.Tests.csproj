@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\Simulab.Testing\Simulab.Testing.csproj" />
   </ItemGroup>
 
 </Project>

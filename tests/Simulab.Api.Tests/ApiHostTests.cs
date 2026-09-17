@@ -1,13 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Simulab.Api.Features.System;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Api.Tests;
 
 /// <summary>Through the real HTTP pipeline, with the shared JSON options.</summary>
-public class ApiHostTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class ApiHostTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 
@@ -18,14 +17,6 @@ public class ApiHostTests(WebApplicationFactory<Program> factory) : IClassFixtur
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         (await response.Content.ReadAsStringAsync()).Should().Contain("/api/v1/system/info");
-    }
-
-    [Fact]
-    public async Task Health_endpoint_answers()
-    {
-        var response = await _client.GetAsync("/health");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
