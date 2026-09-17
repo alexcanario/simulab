@@ -4,6 +4,7 @@
 @inject ThemeState ThemeState
 @inject PreferenceWriter PreferenceWriter
 @inject IBrowserViewportService Viewport
+@inject NavigationManager Navigation
 
 <MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
 <MudPopoverProvider />
@@ -42,7 +43,7 @@
                Class="app-drawer"
                role="navigation"
                aria-label="@L["Layout.Menu.Label"]">
-        <NavMenu Collapsed="@(_isDesktop != false && !_drawerOpen)" OnNavigated="OnNavigated" />
+        <NavMenu Collapsed="@(_isDesktop != false && !_drawerOpen)" />
     </MudDrawer>
     <MudMainContent>
         <main id="main-content" tabindex="-1" @ref="_main">
@@ -85,6 +86,7 @@
         if (Preferences.DarkMode is { } dark)
             ThemeState.SetDarkMode(dark);
         ThemeState.Changed += OnThemeChanged;
+        Navigation.LocationChanged += OnLocationChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -121,10 +123,14 @@
         }
     }
 
-    private void OnNavigated()
+    // The phone menu closes after an item is chosen.
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        if (_isDesktop == false)
-            _drawerOpen = false;
+        if (_isDesktop != false || !_drawerOpen)
+            return;
+
+        _drawerOpen = false;
+        InvokeAsync(StateHasChanged);
     }
 
     private Task SkipToContentAsync() => _main.FocusAsync().AsTask();
@@ -134,6 +140,7 @@
     public async ValueTask DisposeAsync()
     {
         ThemeState.Changed -= OnThemeChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
         try
         {
             await Viewport.UnsubscribeAsync(_viewportSubscription);

@@ -34,9 +34,6 @@
     /// <summary>Desktop menu collapsed to icons: section headers become dividers, labels become tooltips.</summary>
     [Parameter] public bool Collapsed { get; set; }
 
-    /// <summary>Raised after an item is chosen (the phone menu closes).</summary>
-    [Parameter] public EventCallback OnNavigated { get; set; }
-
     protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
 
     protected override void OnParametersSet() =>
@@ -50,7 +47,6 @@
             <MudNavLink Href="@item.Route"
                         Match="item.Match"
                         Icon="@item.Icon"
-                        OnClick="() => OnNavigated.InvokeAsync()"
                         aria-current="@(active ? "page" : null)"
                         aria-label="@(Collapsed ? label : null)"
                         data-route="@item.Route">@label</MudNavLink>
