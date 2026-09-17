@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Email.Verification.Subject" xml:space="preserve"><value>Confirme seu e-mail — Simulab</value></data>
+  <data name="Email.Verification.Heading" xml:space="preserve"><value>Confirme seu e-mail</value></data>
+  <data name="Email.Verification.Body" xml:space="preserve"><value>Alguém criou uma conta no Simulab com este endereço. Confirme para ativar a conta.</value></data>
+  <data name="Email.Verification.Button" xml:space="preserve"><value>Confirmar e-mail</value></data>
+  <data name="Email.Verification.Expiry" xml:space="preserve"><value>Este link vale por 24 horas.</value></data>
+  <data name="Email.Verification.Ignore" xml:space="preserve"><value>Se não foi você, ignore esta mensagem. Nada acontece sem esta confirmação.</value></data>
+  <data name="Email.Verification.LinkFallback" xml:space="preserve"><value>Se o botão não funcionar, copie este endereço no navegador:</value></data>
+</root>

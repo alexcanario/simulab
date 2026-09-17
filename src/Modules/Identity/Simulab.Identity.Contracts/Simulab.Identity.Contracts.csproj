@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>
