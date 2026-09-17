@@ -62,11 +62,12 @@ F-4 (Identity) and every later module start from a tested base: a database with 
 - AC11 Given the Api with a reachable database, then `/health` is healthy; given an unreachable one, then it is unhealthy. (BR11)
 - AC12 Given two test classes in one project, then they share one container and get different databases. (BR12)
 - AC13 Architecture: `Simulab.SharedKernel` does not reference EF Core; `Simulab.Persistence` references only `SharedKernel` among the solution projects; no project references MassTransit or RabbitMQ. (Decision 1)
-- AC14 No new UI text is added (localization unchanged; missing-key test stays green).
-- AC15 On screen: the app host starts, the dashboard shows `postgres` and `mailpit` healthy and the Mailpit UI opens — validation script. (BR10)
+- AC14 Architecture: every module `DbContext` inherits `ModuleDbContext` and declares its own schema, and no two module contexts share a schema. (Decision 1)
+- AC15 No new UI text is added (localization unchanged; missing-key test stays green).
+- AC16 On screen: the app host starts, the dashboard shows `postgres` and `mailpit` healthy and the Mailpit UI opens — validation script. (BR10)
 
 ## Decisions
-- 2026-09-17 — Common persistence lives in a new building block `src/Simulab.Persistence` (base `ModuleDbContext`, interceptors, filters, history table, unique-index helper), referencing `SharedKernel` only; `SharedKernel` stays free of EF Core; `profile.md` lists the new building block — owner, question 1.
+- 2026-09-17 — Common persistence lives in a new building block `src/Simulab.Persistence` (base `ModuleDbContext`, interceptors, filters, history table, unique-index helper), referencing `SharedKernel` only; `SharedKernel` stays free of EF Core; `profile.md` lists the new building block — owner, question 1. Each module keeps its own `DbContext`, schema and migrations: the base carries only the mechanism (audit, soft delete, filters, schema and history convention, unique-index helper), and an architecture test enforces one distinct schema per module context. Simulae writes the filters per configuration class, which caused its tenant leak (TK #184, worked around with `EnableServiceProviderCaching(false)`); a filter built in the base context does not have that problem — owner, follow-up question 1.
 - 2026-09-17 — App host adds PostgreSQL and Mailpit now; Redis arrives with F-5, its first user — owner, question 2.
 - 2026-09-17 — `IEmailSender` with SMTP (MailKit) is part of this item, tested against a Mailpit container; email templates in three languages stay in F-4 — owner, question 3.
 - 2026-09-17 — Integration events are dispatched in process, synchronously and in sequence after the caller's save; failures propagate. A job-table (outbox) implementation can replace it behind the same interface when F-10 needs guaranteed delivery — owner, question 4.
