@@ -22,20 +22,20 @@ public static class PersistenceServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Applies the conventions every module context shares: snake_case names, the module's
-    /// migrations history table inside its own schema, and the audit interceptor.
+    /// Applies the conventions every module context shares: snake_case names and the audit
+    /// interceptor. The history table comes from <see cref="UseModuleHistoryTable"/>.
     /// </summary>
-    public static DbContextOptionsBuilder UseModuleConventions(
-        this DbContextOptionsBuilder options,
-        IServiceProvider services,
-        string schema)
+    public static DbContextOptionsBuilder<TContext> UseModuleConventions<TContext>(
+        this DbContextOptionsBuilder<TContext> options,
+        IServiceProvider services)
+        where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(services);
 
-        return options
-            .UseSnakeCaseNamingConvention()
+        options.UseSnakeCaseNamingConvention()
             .AddInterceptors(services.GetRequiredService<AuditAndSoftDeleteInterceptor>());
+        return options;
     }
 
     /// <summary>The Npgsql options every module context shares: its migrations history table in its own schema.</summary>
