@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-4 Sign-up and email verification - mockup</title>
+<style>
+  :root {
+    --primary: #2478C5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD;
+    --secondary: #1A9E8C; --background: #F2F5FB; --surface: #FFFFFF;
+    --appbar: #0F3266;
+    --text: #19243E; --text-2: #4A5A7A; --text-3: #8A96B0; --divider: #D0D8EA;
+    --error: #BE3737; --error-bg: #FBECEC; --error-text: #7A1818;
+    --warning: #D98B1A; --warning-bg: #FDF4E4; --warning-text: #7A4A00;
+    --success: #1A9E8C; --success-bg: #E7F5F3; --success-text: #0D6056;
+    --field: #FFFFFF;
+  }
+  .dark {
+    --primary-lighten: #162540; --background: #0E1828; --surface: #172035;
+    --text: #E0E8F8; --text-2: #7A8EB0; --text-3: #64789B; --divider: #263352;
+    --error-bg: #3A1D1D; --error-text: #F0B4B4;
+    --warning-bg: #3A2E14; --warning-text: #F0CE8C;
+    --success-bg: #12302C; --success-text: #8FD8CE;
+    --field: #101a2c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #d9dee8; color: #19243E; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #ccd; font-size: 13px; position: sticky; top: 0; z-index: 50; }
+  .controls label { font-weight: 600; margin-right: 4px; }
+  .controls select, .controls button { font: inherit; padding: 4px 8px; }
+  .note { padding: 8px 16px; font-size: 12px; color: #4A5A7A; }
+  .stage { display: flex; justify-content: center; padding: 16px; }
+
+  /* ---- AuthLayout ---- */
+  .frame { background: var(--background); color: var(--text); border: 1px solid #99a; border-radius: 8px; overflow: auto; position: relative; height: 760px; transition: width .2s; }
+  .frame.desktop { width: 1100px; max-width: 100%; }
+  .frame.phone { width: 380px; }
+  .auth { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 32px; }
+  .topbar { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 4px; margin-bottom: 18px; }
+  .brand { color: var(--appbar); font-weight: 700; font-size: 1.25rem; text-decoration: none; }
+  .dark .brand { color: #9cc8f2; }
+  .spacer { flex: 1; }
+  .iconbtn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+  .iconbtn:hover { background: rgba(36,120,197,.12); color: var(--primary); }
+  .iconbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .iconbtn[data-tip]:hover::after { content: attr(data-tip); position: absolute; top: 44px; right: 0; white-space: nowrap; background: #333; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; z-index: 40; }
+  .langmenu { position: absolute; right: 16px; top: 62px; background: var(--surface); color: var(--text); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.25); padding: 4px 0; z-index: 40; display: none; min-width: 180px; }
+  .langmenu.open { display: block; }
+  .langmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; color: inherit; padding: 10px 16px; font: inherit; cursor: pointer; }
+  .langmenu button:hover { background: var(--primary-lighten); }
+  .langmenu button[disabled] { opacity: .5; cursor: default; }
+  .card { background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; padding: 28px 26px; width: 100%; max-width: 440px; box-shadow: 0 2px 10px rgba(15,50,102,.06); }
+  .card.wide { max-width: 760px; }
+  .authfoot { margin-top: 20px; font-size: .8125rem; color: var(--text-2); display: flex; gap: 16px; }
+  .authfoot a { color: var(--primary); }
+  h1 { font-size: 1.375rem; font-weight: 700; margin: 0 0 6px; line-height: 1.25; }
+  .sub { font-size: .875rem; color: var(--text-2); margin: 0 0 22px; line-height: 1.55; }
+
+  /* ---- kit: fields ---- */
+  .fieldset { margin-bottom: 16px; }
+  .lbl { display: block; font-size: .75rem; font-weight: 600; color: var(--text-2); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 6px; }
+  .req { color: var(--error); margin-left: 3px; }
+  .ctl { position: relative; display: flex; }
+  input[type=text], input[type=email], input[type=password] { width: 100%; font: inherit; font-size: .9375rem; padding: 10px 12px; border: 1px solid var(--divider); border-radius: 8px; background: var(--field); color: var(--text); }
+  input::placeholder { color: var(--text-3); }
+  input:hover:not(:disabled) { border-color: var(--text-3); }
+  input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(36,120,197,.18); }
+  input:disabled { opacity: .6; cursor: not-allowed; }
+  .haserr input { border-color: var(--error); }
+  .reveal { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+  .hint { display: block; font-size: .75rem; color: var(--text-3); margin-top: 5px; line-height: 1.45; }
+  .err { display: block; font-size: .75rem; color: var(--error); margin-top: 5px; font-weight: 600; }
+  .dark .err { color: #F0B4B4; }
+  .strength { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+  .bar { flex: 1; height: 5px; border-radius: 3px; background: var(--divider); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--error); transition: width .2s; }
+  .bar.fair i { width: 60%; background: var(--warning); }
+  .bar.weak i { width: 28%; background: var(--error); }
+  .bar.strong i { width: 100%; background: var(--success); }
+  .strength span { font-size: .75rem; color: var(--text-2); white-space: nowrap; }
+  .checks { margin: 20px 0 8px; }
+  .chk { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: .8125rem; color: var(--text-2); line-height: 1.5; }
+  .chk input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--primary); }
+  .chk a { color: var(--primary); }
+  .btn { width: 100%; font: inherit; font-size: .9375rem; font-weight: 700; height: 44px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+  .btn:hover:not(:disabled) { background: var(--primary-darken); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn.ghost { background: transparent; color: var(--primary); border: 1.5px solid var(--divider); }
+  .btn.ghost:hover:not(:disabled) { background: var(--primary-lighten); }
+  .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: sp .8s linear infinite; }
+  .spin.dark2 { border-color: rgba(36,120,197,.3); border-top-color: var(--primary); }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  /* ---- kit: alert ---- */
+  .alert { display: flex; gap: 10px; padding: 12px 14px; border-radius: 8px; font-size: .8125rem; line-height: 1.5; margin-bottom: 18px; border-left: 4px solid; }
+  .alert svg { width: 20px; height: 20px; flex: none; }
+  .alert.error { background: var(--error-bg); color: var(--error-text); border-color: var(--error); }
+  .alert.warning { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning); }
+  .alert.success { background: var(--success-bg); color: var(--success-text); border-color: var(--success); }
+  .alert.info { background: var(--primary-lighten); color: var(--text); border-color: var(--primary); }
+  .alert .act { background: none; border: 0; font: inherit; font-weight: 700; color: inherit; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 4px; display: block; }
+
+  /* ---- result pages ---- */
+  .result { text-align: center; }
+  .result .badge { width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .result .badge svg { width: 30px; height: 30px; }
+  .badge.ok { background: var(--success-bg); color: var(--success); }
+  .badge.warn { background: var(--warning-bg); color: var(--warning); }
+  .badge.bad { background: var(--error-bg); color: var(--error); }
+  .badge.mail { background: var(--primary-lighten); color: var(--primary); }
+  .result p { font-size: .875rem; color: var(--text-2); line-height: 1.6; margin: 0 0 14px; }
+  .result strong { color: var(--text); }
+  .cool { font-size: .75rem; color: var(--text-3); margin-top: 8px; }
+  .linkline { margin-top: 16px; font-size: .8125rem; }
+  .linkline a { color: var(--primary); }
+
+  /* ---- legal page ---- */
+  .doc h2 { font-size: 1.25rem; margin: 0 0 4px; }
+  .docmeta { font-size: .75rem; color: var(--text-3); margin-bottom: 18px; }
+  .docbody { font-size: .9375rem; line-height: 1.7; color: var(--text); }
+  .docbody h3 { font-size: 1rem; margin: 22px 0 6px; }
+  .docbody p, .docbody li { color: var(--text-2); }
+  .skel { background: linear-gradient(90deg, var(--divider) 25%, rgba(0,0,0,.04) 50%, var(--divider) 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 6px; height: 12px; margin-bottom: 10px; }
+  @keyframes sk { to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span><label for="screen">Screen</label>
+    <select id="screen">
+      <option value="signup">/sign-up</option>
+      <option value="check">/check-email</option>
+      <option value="verify">/verify-email?token=...</option>
+      <option value="legal">/terms and /privacy</option>
+    </select></span>
+  <span><label for="state">State</label><select id="state"></select></span>
+  <span><label for="size">Size</label>
+    <select id="size"><option value="desktop">Desktop</option><option value="phone">Phone</option></select></span>
+  <span><label for="lang">Language</label>
+    <select id="lang"><option value="en">en</option><option value="pt-BR">pt-BR</option><option value="pt-PT">pt-PT</option></select></span>
+  <span><label>Theme</label><button id="themeCtl" type="button">light / dark</button></span>
+</div>
+<div class="note">The bar above is not part of the app. Inside the frame the language menu (globe), the theme switch (moon/sun) and the show/hide password buttons work as in the app. Every text comes from the resource keys listed in the feature file.</div>
+
+<div class="stage">
+  <div class="frame desktop" id="frame">
+    <div class="auth">
+      <div class="topbar">
+        <a class="brand" href="#" id="brand">Simulab</a>
+        <span class="spacer"></span>
+        <button class="iconbtn" id="themeBtn" type="button"></button>
+        <button class="iconbtn" id="langBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.08 16zm2.95-8H5.08a7.99 7.99 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
+        </button>
+        <div class="langmenu" id="langMenu" role="menu">
+          <button type="button" data-lang="en" lang="en">English</button>
+          <button type="button" data-lang="pt-BR" lang="pt-BR">Portugu&ecirc;s (Brasil)</button>
+          <button type="button" data-lang="pt-PT" lang="pt-PT">Portugu&ecirc;s (Portugal)</button>
+        </div>
+      </div>
+      <div class="card" id="card"></div>
+      <div class="authfoot" id="authfoot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LANGS = ["en", "pt-BR", "pt-PT"];
+const T = {
+  "Auth.Legal.Terms": ["Terms of use", "Termos de Uso", "Termos de Utilização"],
+  "Auth.Legal.Privacy": ["Privacy policy", "Política de Privacidade", "Política de Privacidade"],
+  "Common.ThemeSwitch.ToDark": ["Switch to dark mode", "Mudar para o modo escuro", "Mudar para o modo escuro"],
+  "Common.ThemeSwitch.ToLight": ["Switch to light mode", "Mudar para o modo claro", "Mudar para o modo claro"],
+  "Layout.LanguageSwitch.Label": ["Language", "Idioma", "Idioma"],
+  "Common.TryAgain": ["Try again", "Tentar de novo", "Tentar novamente"],
+
+  "SignUp.Title": ["Create your account", "Crie sua conta", "Crie a sua conta"],
+  "SignUp.Subtitle": ["Practise with realistic exams and find out what to study next.", "Pratique com simulados realistas e descubra o que estudar em seguida.", "Pratique com simulações realistas e descubra o que estudar a seguir."],
+  "SignUp.Email.Label": ["Email", "E-mail", "E-mail"],
+  "SignUp.Email.Placeholder": ["you@example.com", "voce@exemplo.com", "voce@exemplo.com"],
+  "SignUp.Email.Required": ["Enter your email.", "Informe seu e-mail.", "Indique o seu e-mail."],
+  "SignUp.Password.Label": ["Password", "Senha", "Palavra-passe"],
+  "SignUp.Password.Hint": ["At least 12 characters, with an uppercase letter, a digit and a symbol.", "No mínimo 12 caracteres, com maiúscula, número e símbolo.", "No mínimo 12 caracteres, com maiúscula, número e símbolo."],
+  "SignUp.Password.Required": ["Enter a password.", "Informe uma senha.", "Indique uma palavra-passe."],
+  "SignUp.Password.Show": ["Show password", "Mostrar senha", "Mostrar palavra-passe"],
+  "SignUp.Password.Hide": ["Hide password", "Ocultar senha", "Ocultar palavra-passe"],
+  "SignUp.Password.Strength": ["Password strength: {0}", "Força da senha: {0}", "Segurança da palavra-passe: {0}"],
+  "SignUp.Password.Strength.Weak": ["Weak", "Fraca", "Fraca"],
+  "SignUp.Password.Strength.Fair": ["Fair", "Média", "Média"],
+  "SignUp.Password.Strength.Strong": ["Strong", "Forte", "Forte"],
+  "SignUp.ConfirmPassword.Label": ["Confirm password", "Confirmar senha", "Confirmar palavra-passe"],
+  "SignUp.ConfirmPassword.Required": ["Repeat the password.", "Repita a senha.", "Repita a palavra-passe."],
+  "SignUp.ConfirmPassword.Mismatch": ["The two passwords are not the same.", "As senhas não são iguais.", "As palavras-passe não coincidem."],
+  "SignUp.FullName.Label": ["Full name (optional)", "Nome completo (opcional)", "Nome completo (opcional)"],
+  "SignUp.Adult.Label": ["I declare that I am 18 or older", "Declaro ter 18 anos ou mais", "Declaro ter 18 anos ou mais"],
+  "SignUp.Terms.Label": ["I have read and accept the {0}", "Li e aceito os {0}", "Li e aceito os {0}"],
+  "SignUp.Privacy.Label": ["I agree with the {0}", "Concordo com a {0}", "Concordo com a {0}"],
+  "SignUp.LinkOpensNewTab": ["opens in a new tab", "abre em uma nova aba", "abre num novo separador"],
+  "SignUp.Submit": ["Create account", "Criar conta", "Criar conta"],
+  "SignUp.Submitting": ["Creating the account...", "Criando a conta...", "A criar a conta..."],
+  "SignUp.LegalLoading": ["Loading the legal texts...", "Carregando os textos legais...", "A carregar os textos legais..."],
+  "SignUp.LegalUnavailable": ["The legal texts could not be loaded, so sign-up is unavailable right now.", "Não foi possível carregar os textos legais, então o cadastro está indisponível agora.", "Não foi possível carregar os textos legais, por isso o registo está indisponível neste momento."],
+  "Legal.DraftNotice": ["Draft text: the legal documents are under review and may still change.", "Texto provisório: os documentos legais estão em revisão e ainda podem mudar.", "Texto provisório: os documentos legais estão em revisão e ainda podem mudar."],
+  "Legal.Version": ["Version {0}, effective {1}", "Versão {0}, em vigor desde {1}", "Versão {0}, em vigor desde {1}"],
+
+  "CheckEmail.Title": ["Check your email", "Verifique seu e-mail", "Verifique o seu e-mail"],
+  "CheckEmail.Message": ["We sent a verification link to {0}. It is valid for 24 hours.", "Enviamos um link de verificação para {0}. Ele vale por 24 horas.", "Enviámos uma ligação de verificação para {0}. É válida durante 24 horas."],
+  "CheckEmail.NotArrived": ["Did not arrive? Look in the spam folder before asking for a new link.", "Não chegou? Procure na caixa de spam antes de pedir um novo link.", "Não chegou? Procure na pasta de spam antes de pedir uma nova ligação."],
+  "CheckEmail.Resend": ["Send a new link", "Enviar um novo link", "Enviar uma nova ligação"],
+  "CheckEmail.Resend.Cooldown": ["You can ask for a new link in {0} s.", "Você pode pedir um novo link em {0} s.", "Pode pedir uma nova ligação dentro de {0} s."],
+  "CheckEmail.Resend.Sent": ["If the address is registered and still pending, a new link is on its way.", "Se o endereço estiver cadastrado e ainda pendente, um novo link está a caminho.", "Se o endereço estiver registado e ainda pendente, será enviada uma nova ligação."],
+  "CheckEmail.Sending": ["Sending...", "Enviando...", "A enviar..."],
+
+  "VerifyEmail.Verifying": ["Verifying your email...", "Verificando seu e-mail...", "A verificar o seu e-mail..."],
+  "VerifyEmail.Verified.Title": ["Email verified", "E-mail verificado", "E-mail verificado"],
+  "VerifyEmail.Verified.Message": ["Your account is active and ready to use.", "Sua conta está ativa e pronta para uso.", "A sua conta está ativa e pronta a usar."],
+  "VerifyEmail.Expired.Title": ["This link expired", "Este link expirou", "Esta ligação expirou"],
+  "VerifyEmail.Expired.Message": ["Verification links last 24 hours. Enter your email and we send a new one.", "Os links de verificação valem 24 horas. Informe seu e-mail e enviamos um novo.", "As ligações de verificação duram 24 horas. Indique o seu e-mail e enviamos uma nova."],
+  "VerifyEmail.Invalid.Title": ["This link is not valid", "Este link não é válido", "Esta ligação não é válida"],
+  "VerifyEmail.Invalid.Message": ["It may have been used already, or copied only in part. Sign up again or ask for a new link.", "Ele pode já ter sido usado, ou ter sido copiado pela metade. Cadastre-se de novo ou peça um novo link.", "Pode já ter sido usada, ou ter sido copiada apenas em parte. Registe-se novamente ou peça uma nova ligação."],
+  "VerifyEmail.BackToSignUp": ["Go to sign-up", "Ir para o cadastro", "Ir para o registo"],
+
+  "registration.age_declaration_required": ["You must be 18 or older to create an account.", "É preciso ter 18 anos ou mais para criar uma conta.", "É preciso ter 18 anos ou mais para criar uma conta."],
+  "registration.consent_required": ["Accept the terms of use and the privacy policy.", "Aceite os Termos de Uso e a Política de Privacidade.", "Aceite os Termos de Utilização e a Política de Privacidade."],
+  "registration.terms_version_outdated": ["The legal texts changed while you were filling the form. Read them again and accept.", "Os textos legais mudaram enquanto você preenchia o formulário. Leia de novo e aceite.", "Os textos legais mudaram enquanto preenchia o formulário. Leia novamente e aceite."],
+  "registration.password_too_weak": ["This password does not follow the rules above.", "Esta senha não segue as regras acima.", "Esta palavra-passe não segue as regras acima."],
+  "registration.email_invalid": ["Enter a valid email address.", "Informe um e-mail válido.", "Indique um e-mail válido."],
+  "registration.rate_limited": ["Too many attempts from this device. Try again in an hour.", "Muitas tentativas neste dispositivo. Tente de novo em uma hora.", "Demasiadas tentativas neste dispositivo. Tente novamente dentro de uma hora."],
+  "email_verification.rate_limited": ["You asked for a link a moment ago. Wait a little before asking again.", "Você pediu um link há pouco. Espere um pouco antes de pedir de novo.", "Pediu uma ligação há pouco. Aguarde um pouco antes de pedir novamente."],
+  "legal_document.not_found": ["This document does not exist.", "Este documento não existe.", "Este documento não existe."],
+  "common.unexpected_error": ["Something went wrong on our side. Try again in a moment.", "Algo deu errado do nosso lado. Tente de novo em instantes.", "Algo correu mal do nosso lado. Tente novamente dentro de momentos."],
+
+  "Doc.Terms.Title": ["Terms of use", "Termos de Uso", "Termos de Utilização"],
+  "Doc.Terms.H1": ["1. What Simulab is", "1. O que é o Simulab", "1. O que é o Simulab"],
+  "Doc.Terms.P1": ["Simulab is a study service that runs practice exams and suggests what to study next. Using it means accepting these terms.", "O Simulab é um serviço de estudo que aplica simulados e sugere o que estudar em seguida. Usar o serviço significa aceitar estes termos.", "O Simulab é um serviço de estudo que aplica simulações e sugere o que estudar a seguir. Usar o serviço significa aceitar estes termos."],
+  "Doc.Terms.H2": ["2. Your account", "2. Sua conta", "2. A sua conta"],
+  "Doc.Terms.P2": ["You need to be 18 or older, give a valid email address and keep your password to yourself.", "Você precisa ter 18 anos ou mais, informar um e-mail válido e guardar sua senha em segredo.", "Precisa de ter 18 anos ou mais, indicar um e-mail válido e guardar a sua palavra-passe em segredo."],
+  "Doc.Privacy.Title": ["Privacy policy", "Política de Privacidade", "Política de Privacidade"],
+  "Doc.Privacy.H1": ["1. What we collect", "1. O que coletamos", "1. O que recolhemos"],
+  "Doc.Privacy.P1": ["Your email address, the name you choose to give, and what you answer in practice sessions.", "Seu e-mail, o nome que você escolher informar e o que você responde nos simulados.", "O seu e-mail, o nome que escolher indicar e o que responde nas simulações."],
+  "Doc.Privacy.H2": ["2. Why we keep it", "2. Por que guardamos", "2. Porque guardamos"],
+  "Doc.Privacy.P2": ["To show your progress and to tell you what to study next. We never sell your data.", "Para mostrar seu progresso e dizer o que estudar em seguida. Não vendemos seus dados.", "Para mostrar o seu progresso e dizer o que estudar a seguir. Não vendemos os seus dados."],
+};
+
+const STATES = {
+  signup: [
+    ["loading", "Loading the legal versions"],
+    ["ready", "Ready"],
+    ["validation", "Validation errors"],
+    ["submitting", "Submitting"],
+    ["outdated", "Server error - terms changed"],
+    ["ratelimited", "Server error - rate limited"],
+    ["draft", "Draft legal text"],
+    ["legalfail", "Legal documents unavailable"],
+  ],
+  check: [
+    ["cooldown", "Cooling down (60 s)"],
+    ["ready", "Ready to resend"],
+    ["sending", "Sending"],
+    ["sent", "New link sent"],
+    ["throttled", "Throttled"],
+    ["noaddress", "Opened directly (no address)"],
+  ],
+  verify: [
+    ["verifying", "Verifying"],
+    ["verified", "Verified"],
+    ["expired", "Expired (with resend)"],
+    ["invalid", "Invalid"],
+    ["error", "Server error"],
+  ],
+  legal: [
+    ["loading", "Loading"],
+    ["terms", "Terms of use, ready"],
+    ["privacy", "Privacy policy, ready"],
+    ["draft", "Draft version"],
+    ["notfound", "Not found"],
+  ],
+};
+
+const ICON = {
+  moon: '<path d="M9.37 5.51A7.35 7.35 0 0 0 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27A7.014 7.014 0 0 1 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>',
+  sun: '<path d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>',
+  eye: '<path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 0-5z"/>',
+  eyeoff: '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12.5C2.73 16.89 7 20 12 20c1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2z"/>',
+  mail: '<path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>',
+  check: '<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>',
+  clock: '<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>',
+  warn: '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>',
+  info: '<path d="M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>',
+};
+
+const s = { screen: "signup", state: "ready", size: "desktop", lang: "en", dark: false, showPwd: false, showConfirm: false };
+const $ = id => document.getElementById(id);
+const t = (k, ...a) => { let v = T[k][LANGS.indexOf(s.lang)]; a.forEach((x, i) => v = v.replace("{" + i + "}", x)); return v; };
+const svg = (n, cls) => `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="${cls || ""}">${ICON[n]}</svg>`;
+const SAMPLE_EMAIL = "ana.ribeiro@exemplo.com";
+
+function alertBox(kind, iconName, text, action) {
+  return `<div class="alert ${kind}" role="${kind === "error" ? "alert" : "status"}">${svg(iconName)}<div>${text}${action ? `<button class="act" type="button">${action}</button>` : ""}</div></div>`;
+}
+
+function field(o) {
+  const err = o.error ? `<span class="err">${o.error}</span>` : "";
+  const hint = !o.error && o.hint ? `<span class="hint">${o.hint}</span>` : "";
+  const reveal = o.reveal ? `<button class="iconbtn reveal" type="button" data-toggle="${o.id}" aria-label="${o.revealLabel}" data-tip="${o.revealLabel}">${svg(o.revealed ? "eyeoff" : "eye")}</button>` : "";
+  return `<div class="fieldset ${o.error ? "haserr" : ""}">
+    <label class="lbl" for="${o.id}">${o.label}${o.required ? '<span class="req" aria-hidden="true">*</span>' : ""}</label>
+    <div class="ctl"><input id="${o.id}" type="${o.type}" value="${o.value || ""}" placeholder="${o.placeholder || ""}"
+      ${o.required ? 'aria-required="true"' : ""} ${o.error ? 'aria-invalid="true"' : ""} ${o.disabled ? "disabled" : ""}
+      aria-describedby="${o.id}-d" autocomplete="${o.autocomplete || "off"}" ${o.reveal ? 'style="padding-right:44px"' : ""}>${reveal}</div>
+    <span id="${o.id}-d">${err}${hint}</span>
+    ${o.after || ""}
+  </div>`;
+}
+
+function strength(level) {
+  const word = t("SignUp.Password.Strength." + level);
+  return `<div class="strength" aria-live="polite"><div class="bar ${level.toLowerCase()}"><i></i></div><span>${t("SignUp.Password.Strength", word)}</span></div>`;
+}
+
+function checkbox(id, label, checked, error, disabled) {
+  return `<div class="chk"><input type="checkbox" id="${id}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""} aria-required="true" ${error ? 'aria-invalid="true"' : ""}>
+    <label for="${id}">${label}${error ? `<span class="err">${error}</span>` : ""}</label></div>`;
+}
+
+function legalLink(key) {
+  return `<a href="#" target="_blank" aria-label="${t(key)}, ${t("SignUp.LinkOpensNewTab")}">${t(key)}</a>`;
+}
+
+function signUp(st) {
+  const loading = st === "loading";
+  const submitting = st === "submitting";
+  const invalid = st === "validation";
+  const blocked = st === "legalfail";
+  const dis = loading || submitting || blocked;
+  let top = "";
+  if (st === "outdated") top = alertBox("error", "warn", t("registration.terms_version_outdated"));
+  if (st === "ratelimited") top = alertBox("error", "clock", t("registration.rate_limited"));
+  if (blocked) top = alertBox("error", "warn", t("SignUp.LegalUnavailable"), t("Common.TryAgain"));
+  if (st === "draft") top = alertBox("warning", "warn", t("Legal.DraftNotice"));
+
+  const acceptChecked = st === "outdated" ? false : (st === "ready" || st === "submitting" || st === "draft");
+  return `<h1>${t("SignUp.Title")}</h1><p class="sub">${t("SignUp.Subtitle")}</p>
+  ${top}
+  ${field({ id: "email", type: "email", label: t("SignUp.Email.Label"), required: true, placeholder: t("SignUp.Email.Placeholder"),
+    value: invalid ? "" : (st === "ready" || st === "submitting" || st === "draft" || st === "outdated" ? SAMPLE_EMAIL : ""),
+    error: invalid ? t("SignUp.Email.Required") : null, disabled: dis, autocomplete: "username" })}
+  ${field({ id: "pwd", type: s.showPwd ? "text" : "password", label: t("SignUp.Password.Label"), required: true,
+    value: invalid ? "abc" : (st === "ready" || st === "submitting" || st === "draft" ? "Estudar#2026!" : ""),
+    hint: t("SignUp.Password.Hint"), error: invalid ? t("registration.password_too_weak") : null,
+    reveal: true, revealed: s.showPwd, revealLabel: s.showPwd ? t("SignUp.Password.Hide") : t("SignUp.Password.Show"),
+    disabled: dis, autocomplete: "new-password",
+    after: invalid ? strength("Weak") : ((st === "ready" || st === "submitting" || st === "draft") ? strength("Strong") : "") })}
+  ${field({ id: "pwd2", type: s.showConfirm ? "text" : "password", label: t("SignUp.ConfirmPassword.Label"), required: true,
+    value: invalid ? "abd" : (st === "ready" || st === "submitting" || st === "draft" ? "Estudar#2026!" : ""),
+    error: invalid ? t("SignUp.ConfirmPassword.Mismatch") : null,
+    reveal: true, revealed: s.showConfirm, revealLabel: s.showConfirm ? t("SignUp.Password.Hide") : t("SignUp.Password.Show"),
+    disabled: dis, autocomplete: "new-password" })}
+  ${field({ id: "name", type: "text", label: t("SignUp.FullName.Label"), required: false,
+    value: st === "ready" || st === "submitting" || st === "draft" ? "Ana Ribeiro" : "", disabled: dis, autocomplete: "name" })}
+  <div class="checks">
+    ${checkbox("adult", t("SignUp.Adult.Label"), acceptChecked, invalid ? t("registration.age_declaration_required") : null, dis)}
+    ${checkbox("terms", t("SignUp.Terms.Label", legalLink("Auth.Legal.Terms")), acceptChecked, invalid ? t("registration.consent_required") : null, dis)}
+    ${checkbox("privacy", t("SignUp.Privacy.Label", legalLink("Auth.Legal.Privacy")), acceptChecked, null, dis)}
+  </div>
+  <button class="btn" type="button" ${dis ? "disabled" : ""}>
+    ${loading ? `<span class="spin"></span>${t("SignUp.LegalLoading")}` : submitting ? `<span class="spin"></span>${t("SignUp.Submitting")}` : t("SignUp.Submit")}
+  </button>`;
+}
+
+function checkEmail(st) {
+  const addr = st === "noaddress" ? null : SAMPLE_EMAIL;
+  let top = "";
+  if (st === "sent") top = alertBox("success", "check", t("CheckEmail.Resend.Sent"));
+  if (st === "throttled") top = alertBox("error", "clock", t("email_verification.rate_limited"));
+  const btnDisabled = st === "cooldown" || st === "sending";
+  const emailInput = addr ? "" : field({ id: "resend-email", type: "email", label: t("SignUp.Email.Label"), required: true, placeholder: t("SignUp.Email.Placeholder"), autocomplete: "username" });
+  return `<div class="result">
+    <span class="badge mail">${svg("mail")}</span>
+    <h1>${t("CheckEmail.Title")}</h1>
+    ${top}
+    <p>${addr ? t("CheckEmail.Message", `<strong>${addr}</strong>`) : t("VerifyEmail.Expired.Message")}</p>
+    <p>${t("CheckEmail.NotArrived")}</p>
+    ${emailInput}
+    <button class="btn ghost" type="button" ${btnDisabled ? "disabled" : ""}>
+      ${st === "sending" ? `<span class="spin dark2"></span>${t("CheckEmail.Sending")}` : t("CheckEmail.Resend")}
+    </button>
+    ${st === "cooldown" ? `<p class="cool" aria-live="polite">${t("CheckEmail.Resend.Cooldown", 42)}</p>` : ""}
+  </div>`;
+}
+
+function verify(st) {
+  if (st === "verifying") {
+    return `<div class="result" role="status"><span class="badge mail"><span class="spin dark2" style="width:26px;height:26px;border-width:3px"></span></span>
+      <h1>${t("VerifyEmail.Verifying")}</h1></div>`;
+  }
+  if (st === "verified") {
+    return `<div class="result"><span class="badge ok">${svg("check")}</span>
+      <h1>${t("VerifyEmail.Verified.Title")}</h1><p>${t("VerifyEmail.Verified.Message")}</p></div>`;
+  }
+  if (st === "expired") {
+    return `<div class="result"><span class="badge warn">${svg("clock")}</span>
+      <h1>${t("VerifyEmail.Expired.Title")}</h1><p>${t("VerifyEmail.Expired.Message")}</p></div>
+      ${field({ id: "exp-email", type: "email", label: t("SignUp.Email.Label"), required: true, placeholder: t("SignUp.Email.Placeholder"), autocomplete: "username" })}
+      <button class="btn" type="button">${t("CheckEmail.Resend")}</button>`;
+  }
+  if (st === "invalid") {
+    return `<div class="result"><span class="badge bad">${svg("warn")}</span>
+      <h1>${t("VerifyEmail.Invalid.Title")}</h1><p>${t("VerifyEmail.Invalid.Message")}</p>
+      <div class="linkline"><a href="#">${t("VerifyEmail.BackToSignUp")}</a></div></div>`;
+  }
+  return `<div class="result"><span class="badge bad">${svg("warn")}</span>
+    <h1>${t("VerifyEmail.Invalid.Title")}</h1>${alertBox("error", "warn", t("common.unexpected_error"), t("Common.TryAgain"))}</div>`;
+}
+
+function legal(st) {
+  if (st === "loading") {
+    return `<div class="doc"><div class="skel" style="width:40%;height:20px"></div><div class="skel" style="width:25%"></div>
+      <div class="skel"></div><div class="skel"></div><div class="skel" style="width:80%"></div>
+      <div class="skel" style="width:30%;height:16px;margin-top:20px"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div>`;
+  }
+  if (st === "notfound") {
+    return `<div class="result"><span class="badge bad">${svg("warn")}</span><h1>${t("legal_document.not_found")}</h1></div>`;
+  }
+  const privacy = st === "privacy";
+  const p = privacy ? "Doc.Privacy" : "Doc.Terms";
+  const draft = st === "draft" ? alertBox("warning", "warn", t("Legal.DraftNotice")) : "";
+  return `<div class="doc">
+    <h2>${t(p + ".Title")}</h2>
+    <div class="docmeta">${t("Legal.Version", "2026-v1", s.lang === "en" ? "17 Sep 2026" : "17/09/2026")}</div>
+    ${draft}
+    <div class="docbody">
+      <h3>${t(p + ".H1")}</h3><p>${t(p + ".P1")}</p>
+      <h3>${t(p + ".H2")}</h3><p>${t(p + ".P2")}</p>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const frame = $("frame");
+  frame.className = "frame " + s.size + (s.dark ? " dark" : "");
+  document.documentElement.lang = s.lang;
+
+  const themeLabel = s.dark ? t("Common.ThemeSwitch.ToLight") : t("Common.ThemeSwitch.ToDark");
+  const themeBtn = $("themeBtn");
+  themeBtn.innerHTML = svg(s.dark ? "sun" : "moon");
+  themeBtn.dataset.tip = themeLabel; themeBtn.setAttribute("aria-label", themeLabel);
+  const langBtn = $("langBtn");
+  langBtn.dataset.tip = t("Layout.LanguageSwitch.Label"); langBtn.setAttribute("aria-label", t("Layout.LanguageSwitch.Label"));
+  document.querySelectorAll("#langMenu button").forEach(b => b.disabled = b.dataset.lang === s.lang);
+
+  const card = $("card");
+  card.className = "card" + (s.screen === "legal" ? " wide" : "");
+  card.innerHTML = s.screen === "signup" ? signUp(s.state)
+    : s.screen === "check" ? checkEmail(s.state)
+    : s.screen === "verify" ? verify(s.state)
+    : legal(s.state);
+
+  $("authfoot").innerHTML = `<a href="#">${t("Auth.Legal.Terms")}</a><a href="#">${t("Auth.Legal.Privacy")}</a>`;
+}
+
+function fillStates() {
+  const sel = $("state");
+  sel.innerHTML = STATES[s.screen].map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+  s.state = STATES[s.screen][0][0];
+  sel.value = s.state;
+}
+
+$("screen").onchange = e => { s.screen = e.target.value; s.showPwd = false; s.showConfirm = false; fillStates(); render(); };
+$("state").onchange = e => { s.state = e.target.value; render(); };
+$("size").onchange = e => { s.size = e.target.value; render(); };
+$("lang").onchange = e => { s.lang = e.target.value; render(); };
+$("themeCtl").onclick = () => { s.dark = !s.dark; render(); };
+$("themeBtn").onclick = () => { s.dark = !s.dark; render(); };
+$("langBtn").onclick = () => $("langMenu").classList.toggle("open");
+$("langMenu").onclick = e => {
+  const b = e.target.closest("button[data-lang]"); if (!b || b.disabled) return;
+  s.lang = b.dataset.lang; $("lang").value = s.lang; $("langMenu").classList.remove("open"); render();
+};
+$("card").onclick = e => {
+  const b = e.target.closest("button[data-toggle]"); if (!b) return;
+  if (b.dataset.toggle === "pwd") s.showPwd = !s.showPwd; else s.showConfirm = !s.showConfirm;
+  render();
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("langMenu").classList.remove("open"); });
+
+fillStates();
+$("state").value = s.state = "ready";
+render();
+</script>
+</body>
+</html>

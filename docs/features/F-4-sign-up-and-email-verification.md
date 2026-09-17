@@ -47,19 +47,142 @@ Give Simulab its first module and its first real user: a visitor can create an a
 - BR16 Sign-up, verification, resend and reading a legal document are anonymous. No permission is checked in this feature.
 
 ## Screens and API
-Detailed design and the mockup come from `/agile:screen` before build; the elements below are fixed.
+Designed with `/agile:screen` on 2026-09-17; mockup: `docs/features/mockups/F-4-sign-up-and-email-verification.html`.
 
-**Kit additions (F-1 kit, shown in `/dev/ui`)**
-- `AuthLayout`: centred card, no app menu and no breadcrumb, with the language and theme switches. A declared exception in `ui-project.md`, like the exam session screens.
-- `AppTextField`, `AppPasswordField` (show and hide, with an accessible name), `AppPasswordStrength`, `AppCheckbox`, `AppAlert`: the form patterns this screen needs, reused by F-5 and F-7.
+### Kit additions (F-1 kit, all shown in `/dev/ui`)
+- `AuthLayout` — centred card, maximum 440 px, on the app background. App name at the top, the card, and a footer with the links to `/terms` and `/privacy`. Language and theme switches sit above the card, right-aligned. No app menu, no breadcrumb, no user slot. Declared exception in `ui-project.md`, like the exam session screens.
+- `AppTextField` — label above, required marker, hint below, error text replacing the hint, `aria-describedby` wired to whichever is showing, `aria-invalid` on error.
+- `AppPasswordField` — `AppTextField` plus a show/hide button with an accessible name (never icon only).
+- `AppPasswordStrength` — bar plus the word (Weak / Fair / Strong). Never colour alone; announced with `aria-live="polite"`.
+- `AppCheckbox` — label to the right, may hold a link, required marker, error text below the group.
+- `AppAlert` — info, warning, error and success, an optional action, `role="alert"` for error and `role="status"` for the rest.
 
-**Web routes**
-- `/sign-up` — sign-up form in `AuthLayout`. Fields: email, password, confirm password, full name (optional); checkboxes for 18+, terms and privacy, each linking to its public page. Server errors are an alert at the top of the form; field errors sit next to the field.
-- `/check-email` — "we sent you a link", with the address and a resend button that shows its cooldown.
-- `/verify-email?token=...` — consumes the token and shows verified, expired (with resend) or invalid. No sign-in link: F-5 adds it.
-- `/terms`, `/privacy` — public documents with title, version, effective date and the draft notice when the version is a placeholder.
+### Route `/sign-up`
+Layout: `AuthLayout` → title, subtitle, form alert slot, form, submit button.
+Fields, in tab order:
 
-**API**
+| Field | Component | Required | Limits |
+|---|---|---|---|
+| Email | `AppTextField` (`type=email`, `autocomplete=username`) | yes | 254 characters, email format |
+| Password | `AppPasswordField` (`autocomplete=new-password`) + `AppPasswordStrength` | yes | 12 to 128 characters, one uppercase, one digit, one symbol |
+| Confirm password | `AppPasswordField` (`autocomplete=new-password`) | yes | equal to the password |
+| Full name | `AppTextField` (`autocomplete=name`) | no | 120 characters |
+| 18 or older | `AppCheckbox` | yes | — |
+| Terms of use | `AppCheckbox` with a link to `/terms` (new tab) | yes | — |
+| Privacy policy | `AppCheckbox` with a link to `/privacy` (new tab) | yes | — |
+
+Actions: **Create account** (primary, full width). No sign-in link and no Google button: `/sign-in` does not exist until F-5 and Google is off (ADR-0001 #13).
+Navigation: success goes to `/check-email` carrying the address in the navigation state, not in the query string (the address is personal data and must not reach a URL or a log).
+Permissions: anonymous. A signed-in user cannot reach this page before F-5 exists.
+
+States:
+- **loading** — the legal versions are being fetched; the form is visible and disabled, the submit button shows the loading text.
+- **ready** — normal.
+- **validation error** — per field, shown when the field loses focus and again on submit; focus moves to the first field in error.
+- **server error** — `AppAlert` error at the top of the form, focus moved to it; the fields keep what the visitor typed, except the two password fields, which are cleared.
+- **submitting** — submit disabled with a progress indicator; every field read-only.
+- **draft legal text** — `AppAlert` warning above the checkboxes when either document is a placeholder (BR15).
+- **legal documents unavailable** — `AppAlert` error and the submit button disabled, with **Try again**; nothing can be accepted when the text cannot be shown.
+- **terms changed** — the `registration.terms_version_outdated` alert, the two acceptance checkboxes cleared, and the new versions loaded (BR5).
+
+### Route `/check-email`
+Layout: `AuthLayout` → title, message with the address, "did not arrive" hint, resend button.
+Actions: **Send a new link** — starts disabled for 60 seconds, showing the remaining seconds (BR12).
+Navigation: reached from `/sign-up`. Opened directly, with no address in the navigation state, it asks for the email in an `AppTextField` before resending.
+States: **ready**, **cooling down** (button disabled with the counter), **sending**, **sent** (success alert with the generic text), **throttled** (`email_verification.rate_limited`), **server error**.
+
+### Route `/verify-email?token=...`
+The page reads the token from the query string and posts it (Decisions, 2026-09-17). The token never appears on screen.
+States:
+- **verifying** — spinner and text, announced with `role="status"`.
+- **verified** — success alert, title and message. No sign-in link (F-5 adds it).
+- **expired** — title, explanation, an `AppTextField` for the email and the resend button, with the same 60 s cooldown as `/check-email`.
+- **invalid** — title, explanation, and a link to `/sign-up`.
+- **server error** — error alert with **Try again**.
+
+### Routes `/terms` and `/privacy`
+Layout: `AuthLayout` in its wide variant (maximum 760 px), because a legal document is a page of prose.
+Content: document title, "Version {0}, effective {1}", the draft notice when the version is a placeholder, and the sanitized HTML body.
+States: **loading**, **ready**, **draft** (warning alert above the body), **not found** (`legal_document.not_found`), **server error** with **Try again**.
+
+### Accessibility
+- Every field has a visible `<label>` bound by `for`; the required marker is decorative and the requirement is also on `aria-required`.
+- Hint and error are linked through `aria-describedby`; the error sets `aria-invalid="true"`.
+- The form alert is `role="alert"` and takes focus when it appears; the success and status texts are `role="status"`.
+- The password strength gives the level as a word, not only as a colour, and is announced politely while typing.
+- The show/hide password button is a real button with an accessible name that changes with the state, and it does not move focus out of the field.
+- The resend counter is announced at most once every 10 seconds (`aria-live="polite"` on a text that only changes at those points), never on every tick.
+- Tab order follows the visual order; the checkbox links are reachable and open in a new tab, which the accessible name says.
+- Each page sets its own `<title>` and one `<h1>`. Contrast follows WCAG 2.2 AA, checked in light and dark mode.
+
+### UI texts
+New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus `.pt-BR.resx` and `.pt-PT.resx`. Error codes are keys as they are (i18n rule).
+
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `Auth.Legal.Terms` | Terms of use | Termos de Uso | Termos de Utilização |
+| `Auth.Legal.Privacy` | Privacy policy | Política de Privacidade | Política de Privacidade |
+| `SignUp.Title` | Create your account | Crie sua conta | Crie a sua conta |
+| `SignUp.Subtitle` | Practise with realistic exams and find out what to study next. | Pratique com simulados realistas e descubra o que estudar em seguida. | Pratique com simulações realistas e descubra o que estudar a seguir. |
+| `SignUp.Email.Label` | Email | E-mail | E-mail |
+| `SignUp.Email.Placeholder` | you@example.com | voce@exemplo.com | voce@exemplo.com |
+| `SignUp.Email.Required` | Enter your email. | Informe seu e-mail. | Indique o seu e-mail. |
+| `SignUp.Password.Label` | Password | Senha | Palavra-passe |
+| `SignUp.Password.Hint` | At least 12 characters, with an uppercase letter, a digit and a symbol. | No mínimo 12 caracteres, com maiúscula, número e símbolo. | No mínimo 12 caracteres, com maiúscula, número e símbolo. |
+| `SignUp.Password.Required` | Enter a password. | Informe uma senha. | Indique uma palavra-passe. |
+| `SignUp.Password.Show` | Show password | Mostrar senha | Mostrar palavra-passe |
+| `SignUp.Password.Hide` | Hide password | Ocultar senha | Ocultar palavra-passe |
+| `SignUp.Password.Strength` | Password strength: {0} | Força da senha: {0} | Segurança da palavra-passe: {0} |
+| `SignUp.Password.Strength.Weak` | Weak | Fraca | Fraca |
+| `SignUp.Password.Strength.Fair` | Fair | Média | Média |
+| `SignUp.Password.Strength.Strong` | Strong | Forte | Forte |
+| `SignUp.ConfirmPassword.Label` | Confirm password | Confirmar senha | Confirmar palavra-passe |
+| `SignUp.ConfirmPassword.Required` | Repeat the password. | Repita a senha. | Repita a palavra-passe. |
+| `SignUp.ConfirmPassword.Mismatch` | The two passwords are not the same. | As senhas não são iguais. | As palavras-passe não coincidem. |
+| `SignUp.FullName.Label` | Full name (optional) | Nome completo (opcional) | Nome completo (opcional) |
+| `SignUp.Adult.Label` | I declare that I am 18 or older | Declaro ter 18 anos ou mais | Declaro ter 18 anos ou mais |
+| `SignUp.Terms.Label` | I have read and accept the {0} | Li e aceito os {0} | Li e aceito os {0} |
+| `SignUp.Privacy.Label` | I agree with the {0} | Concordo com a {0} | Concordo com a {0} |
+| `SignUp.LinkOpensNewTab` | opens in a new tab | abre em uma nova aba | abre num novo separador |
+| `SignUp.Submit` | Create account | Criar conta | Criar conta |
+| `SignUp.Submitting` | Creating the account... | Criando a conta... | A criar a conta... |
+| `SignUp.LegalLoading` | Loading the legal texts... | Carregando os textos legais... | A carregar os textos legais... |
+| `SignUp.LegalUnavailable` | The legal texts could not be loaded, so sign-up is unavailable right now. | Não foi possível carregar os textos legais, então o cadastro está indisponível agora. | Não foi possível carregar os textos legais, por isso o registo está indisponível neste momento. |
+| `Legal.DraftNotice` | Draft text: the legal documents are under review and may still change. | Texto provisório: os documentos legais estão em revisão e ainda podem mudar. | Texto provisório: os documentos legais estão em revisão e ainda podem mudar. |
+| `Legal.Version` | Version {0}, effective {1} | Versão {0}, em vigor desde {1} | Versão {0}, em vigor desde {1} |
+| `CheckEmail.Title` | Check your email | Verifique seu e-mail | Verifique o seu e-mail |
+| `CheckEmail.Message` | We sent a verification link to {0}. It is valid for 24 hours. | Enviamos um link de verificação para {0}. Ele vale por 24 horas. | Enviámos uma ligação de verificação para {0}. É válida durante 24 horas. |
+| `CheckEmail.NotArrived` | Did not arrive? Look in the spam folder before asking for a new link. | Não chegou? Procure na caixa de spam antes de pedir um novo link. | Não chegou? Procure na pasta de spam antes de pedir uma nova ligação. |
+| `CheckEmail.Resend` | Send a new link | Enviar um novo link | Enviar uma nova ligação |
+| `CheckEmail.Resend.Cooldown` | You can ask for a new link in {0} s. | Você pode pedir um novo link em {0} s. | Pode pedir uma nova ligação dentro de {0} s. |
+| `CheckEmail.Resend.Sent` | If the address is registered and still pending, a new link is on its way. | Se o endereço estiver cadastrado e ainda pendente, um novo link está a caminho. | Se o endereço estiver registado e ainda pendente, será enviada uma nova ligação. |
+| `VerifyEmail.Verifying` | Verifying your email... | Verificando seu e-mail... | A verificar o seu e-mail... |
+| `VerifyEmail.Verified.Title` | Email verified | E-mail verificado | E-mail verificado |
+| `VerifyEmail.Verified.Message` | Your account is active and ready to use. | Sua conta está ativa e pronta para uso. | A sua conta está ativa e pronta a usar. |
+| `VerifyEmail.Expired.Title` | This link expired | Este link expirou | Esta ligação expirou |
+| `VerifyEmail.Expired.Message` | Verification links last 24 hours. Enter your email and we send a new one. | Os links de verificação valem 24 horas. Informe seu e-mail e enviamos um novo. | As ligações de verificação duram 24 horas. Indique o seu e-mail e enviamos uma nova. |
+| `VerifyEmail.Invalid.Title` | This link is not valid | Este link não é válido | Esta ligação não é válida |
+| `VerifyEmail.Invalid.Message` | It may have been used already, or copied only in part. Sign up again or ask for a new link. | Ele pode já ter sido usado, ou ter sido copiado pela metade. Cadastre-se de novo ou peça um novo link. | Pode já ter sido usada, ou ter sido copiada apenas em parte. Registe-se novamente ou peça uma nova ligação. |
+| `VerifyEmail.BackToSignUp` | Go to sign-up | Ir para o cadastro | Ir para o registo |
+| `registration.age_declaration_required` | You must be 18 or older to create an account. | É preciso ter 18 anos ou mais para criar uma conta. | É preciso ter 18 anos ou mais para criar uma conta. |
+| `registration.consent_required` | Accept the terms of use and the privacy policy. | Aceite os Termos de Uso e a Política de Privacidade. | Aceite os Termos de Utilização e a Política de Privacidade. |
+| `registration.terms_version_outdated` | The legal texts changed while you were filling the form. Read them again and accept. | Os textos legais mudaram enquanto você preenchia o formulário. Leia de novo e aceite. | Os textos legais mudaram enquanto preenchia o formulário. Leia novamente e aceite. |
+| `registration.password_too_weak` | This password does not follow the rules above. | Esta senha não segue as regras acima. | Esta palavra-passe não segue as regras acima. |
+| `registration.email_invalid` | Enter a valid email address. | Informe um e-mail válido. | Indique um e-mail válido. |
+| `registration.rate_limited` | Too many attempts from this device. Try again in an hour. | Muitas tentativas neste dispositivo. Tente de novo em uma hora. | Demasiadas tentativas neste dispositivo. Tente novamente dentro de uma hora. |
+| `email_verification.invalid` | This verification link is not valid. | Este link de verificação não é válido. | Esta ligação de verificação não é válida. |
+| `email_verification.expired` | This verification link expired. | Este link de verificação expirou. | Esta ligação de verificação expirou. |
+| `email_verification.rate_limited` | You asked for a link a moment ago. Wait a little before asking again. | Você pediu um link há pouco. Espere um pouco antes de pedir de novo. | Pediu uma ligação há pouco. Aguarde um pouco antes de pedir novamente. |
+| `legal_document.not_found` | This document does not exist. | Este documento não existe. | Este documento não existe. |
+| `Email.Verification.Subject` | Confirm your email — Simulab | Confirme seu e-mail — Simulab | Confirme o seu e-mail — Simulab |
+| `Email.Verification.Heading` | Confirm your email | Confirme seu e-mail | Confirme o seu e-mail |
+| `Email.Verification.Body` | Someone created a Simulab account with this address. Confirm it to activate the account. | Alguém criou uma conta no Simulab com este endereço. Confirme para ativar a conta. | Alguém criou uma conta no Simulab com este endereço. Confirme para ativar a conta. |
+| `Email.Verification.Button` | Confirm email | Confirmar e-mail | Confirmar e-mail |
+| `Email.Verification.Expiry` | This link is valid for 24 hours. | Este link vale por 24 horas. | Esta ligação é válida durante 24 horas. |
+| `Email.Verification.Ignore` | If it was not you, ignore this message. Nothing happens without this confirmation. | Se não foi você, ignore esta mensagem. Nada acontece sem esta confirmação. | Se não foi você, ignore esta mensagem. Nada acontece sem esta confirmação. |
+| `Email.Verification.LinkFallback` | If the button does not work, copy this address into the browser: | Se o botão não funcionar, copie este endereço no navegador: | Se o botão não funcionar, copie este endereço no navegador: |
+
+### API
 - `POST /api/v1/identity/registrations` — create an account. 202 on success, including an email that already exists; 400 validation; 409 `registration.terms_version_outdated`; 429 rate limited.
 - `POST /api/v1/identity/email-verifications` — consume a token. 200 verified; 400 invalid; 410 expired; 429 rate limited.
 - `POST /api/v1/identity/email-verifications/resend` — 202 always; 429 when throttled.
