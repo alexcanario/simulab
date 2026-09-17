@@ -1,7 +1,7 @@
 ---
 feature: F-2
 epic: Foundation and identity
-status: building
+status: validating
 board: 706
 version: 1
 ---
@@ -111,6 +111,10 @@ Existing keys reused: `Common.ThemeSwitch.ToDark`, `Common.ThemeSwitch.ToLight`,
 - 2026-09-17 — Cookies are read on the server at the first request (theme and drawer state render correctly without a flash) and written from the browser through a small JS interop call — no page reload when switching.
 - 2026-09-17 — The app manual gets a short "Getting around" page (menu, theme, language) in the three languages when this feature ships — first end-user visible behavior.
 - 2026-09-17 — Without a theme cookie, the server renders light and `MudThemeProvider` switches to the system preference after the first render — a short flash on the first visit only is accepted.
+- 2026-09-17 — Build: one `MudDrawer` with `DrawerVariant.Mini`, which MudBlazor already turns into a temporary drawer below `Md`; the layout learns the breakpoint from `IBrowserViewportService`. Until it is known (first render), CSS hides the drawer on small screens so phones do not flash an open menu.
+- 2026-09-17 — Build: `MudNavLink` renders a `div` instead of a link when it has `OnClick`, so the phone menu closes on `LocationChanged` in the layout instead.
+- 2026-09-17 — Build: the skip link is handled by `wwwroot/js/shell.js` (capture-phase click, focus on `main`): with `<base href="/">` a plain `#main-content` link would navigate to `/`, and the script also works before the circuit starts. The same file writes the preference cookies.
+- 2026-09-17 — Build: the drawer overrides MudBlazor's active link colour (primary blue on dark blue was unreadable) with the mockup's light background, white text and left bar.
 
 ## Out of scope
 - User menu content, sign-in and sign-out (F-5).
@@ -125,7 +129,15 @@ Existing keys reused: `Common.ThemeSwitch.ToDark`, `Common.ThemeSwitch.ToLight`,
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Close any running app host first (it locks the build output).
+1. Start `dotnet run --project src/Simulab.AppHost` and open the Web at https://localhost:7125 in a desktop-width window. No sign-in (none exists yet). Check the app bar order: menu button, "Simulab", theme switch, language switch; the menu shows "Home" and a "Development" section with "UI kit"; "Home" is highlighted.
+2. Click "UI kit": the gallery opens, "UI kit" is highlighted, "Home" is not, and the gallery has no theme switch of its own.
+3. Press the menu button: the menu collapses to icons (hover an icon: tooltip with its name; the button tooltip reads "Expand menu"). Reload the page (F5): it stays collapsed. Press it again to expand.
+4. Press the theme switch (moon icon, "Switch to dark mode"): the app turns dark without reloading and the icon becomes a sun. Reload: still dark.
+5. Switch the language to Português (Brasil): the page reloads in Portuguese, still dark, and the menu reads "Início", "Desenvolvimento", "Kit de interface".
+6. Narrow the window below 960 px (or use the browser's phone view): the menu is hidden; open it with the menu button, choose "Início": the menu closes.
+7. Keyboard only, after a reload at desktop width: the first Tab shows "Pular para o conteúdo" at the top left; Enter moves focus to the page content (the next Tab lands inside the page). Tab through the menu button, "Simulab", theme and language switches; Enter/Space work on each.
+8. Clear the site cookies `simulab.theme` and `simulab.nav` (or use a private window) and set the OS to dark mode: the app follows it after loading. There is no permission check in this feature (menu items with permissions arrive with F-6).
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

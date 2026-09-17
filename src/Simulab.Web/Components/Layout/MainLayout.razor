@@ -11,7 +11,7 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<a class="app-skip-link" href="#main-content" @onclick="SkipToContentAsync" @onclick:preventDefault="true">@L["Layout.SkipToContent"]</a>
+<a class="app-skip-link" href="#main-content">@L["Layout.SkipToContent"]</a>
 
 <MudLayout Class="@(_isDesktop is null ? "app-shell app-shell-pending" : "app-shell")">
     <MudAppBar Elevation="1" Dense="false">
@@ -46,7 +46,7 @@
         <NavMenu Collapsed="@(_isDesktop != false && !_drawerOpen)" />
     </MudDrawer>
     <MudMainContent>
-        <main id="main-content" tabindex="-1" @ref="_main">
+        <main id="main-content" tabindex="-1">
             <MudContainer MaxWidth="MaxWidth.Large" Class="pa-6">
                 @Body
             </MudContainer>
@@ -64,7 +64,6 @@
     private readonly MudTheme _theme = Theme.SimulabTheme.Create();
     private readonly Guid _viewportSubscription = Guid.NewGuid();
     private MudThemeProvider? _themeProvider;
-    private ElementReference _main;
     private bool _drawerOpen;
     private bool? _isDesktop;
     private bool _collapsedOnDesktop;
@@ -132,8 +131,6 @@
         _drawerOpen = false;
         InvokeAsync(StateHasChanged);
     }
-
-    private Task SkipToContentAsync() => _main.FocusAsync().AsTask();
 
     private void OnThemeChanged() => InvokeAsync(StateHasChanged);
 

@@ -59,7 +59,7 @@ public class ShellHostTests(WebApplicationFactory<Program> factory) : IClassFixt
         var body = html[html.IndexOf("<body", StringComparison.Ordinal)..];
         body.IndexOf("app-skip-link", StringComparison.Ordinal).Should().BeLessThan(body.IndexOf("<button", StringComparison.Ordinal));
         body.Should().Contain("id=\"main-content\"").And.Contain("href=\"#main-content\"");
-        html.Should().Contain("js/preferences");
+        html.Should().Contain("js/shell");
     }
 
     [Theory]

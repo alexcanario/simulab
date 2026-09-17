@@ -203,16 +203,23 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-drawer .mud-nav-link {
     border-left: 3px solid transparent;
+    color: inherit;
 }
 
-.app-drawer .mud-nav-link[aria-current="page"] {
-    background: rgba(255, 255, 255, 0.14);
+.app-drawer .mud-nav-link .mud-nav-link-icon {
+    color: inherit;
+}
+
+.app-drawer .mud-nav-link:not(.mud-nav-link-disabled):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-drawer .mud-navmenu .mud-nav-link.active:not(.mud-nav-link-disabled),
+.app-drawer .mud-navmenu .mud-nav-link[aria-current="page"] {
+    background-color: rgba(255, 255, 255, 0.14);
     border-left-color: var(--mud-palette-primary);
+    color: inherit;
     font-weight: 600;
-}
-
-.app-drawer .mud-nav-link:hover {
-    background: rgba(255, 255, 255, 0.08);
 }
 
 /* Before the viewport is known (first render), keep the drawer out of the way on small screens. */
