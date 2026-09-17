@@ -52,6 +52,9 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The tests come with the code, renamed, using one PostgreSQL container per test project. Code without its tests is not imported.
 - Do not import migrations. Each module has one fresh initial migration.
 
+## UI tests
+- bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
+
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
 - Assertions: AwesomeAssertions. Never FluentAssertions.
