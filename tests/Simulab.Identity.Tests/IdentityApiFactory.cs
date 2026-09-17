@@ -23,6 +23,9 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
     /// <summary>Starts at a fixed instant so token lifetimes and cooldowns are exact.</summary>
     public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 9, 17, 12, 0, 0, TimeSpan.Zero));
 
+    /// <summary>Extra configuration a test class adds on top of the defaults.</summary>
+    public Action<IWebHostBuilder>? ConfigureHost { get; set; }
+
     /// <summary>Creates this host's own database. Called before the first request.</summary>
     public async Task PrepareAsync(string name) =>
         _connectionString = await PostgresServer.CreateDatabaseAsync(name);
@@ -41,6 +44,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
                 ["Email:FromName"] = "Simulab",
                 ["Identity:VerificationUrl"] = "https://localhost/verify-email",
             }));
+
+        ConfigureHost?.Invoke(builder);
 
         builder.ConfigureServices(services =>
         {

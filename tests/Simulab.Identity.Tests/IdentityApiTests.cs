@@ -17,7 +17,16 @@ public abstract class IdentityApiTests : IAsyncLifetime, IDisposable
 
     protected RecordingEmailSender Emails => Factory.Emails;
 
-    public Task InitializeAsync() => Factory.PrepareAsync(GetType().Name);
+    public Task InitializeAsync()
+    {
+        Factory.ConfigureHost = ConfigureHost;
+        return Factory.PrepareAsync(GetType().Name);
+    }
+
+    /// <summary>A test class overrides it to change the host's configuration.</summary>
+    protected virtual void ConfigureHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
+    {
+    }
 
     public Task DisposeAsync() => Task.CompletedTask;
 
