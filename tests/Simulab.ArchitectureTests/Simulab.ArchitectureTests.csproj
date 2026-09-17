@@ -3,9 +3,16 @@
   <!-- Every production assembly is referenced so the rules see it. Add each new module project here. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\..\src\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\..\src\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
     <ProjectReference Include="..\..\src\Simulab.Web\Simulab.Web.csproj" />
+  </ItemGroup>
+
+  <!-- The sample module context of the persistence tests stands in for a module until F-4. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Persistence.Tests\Simulab.Persistence.Tests.csproj" />
   </ItemGroup>
 
 </Project>

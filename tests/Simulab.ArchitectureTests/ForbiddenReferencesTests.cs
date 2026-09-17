@@ -15,7 +15,7 @@ public class ForbiddenReferencesTests
     public void The_rules_see_every_production_assembly()
     {
         SolutionAssemblies.All.Select(a => a.GetName().Name).Should().BeEquivalentTo(
-            "Simulab.SharedKernel", "Simulab.Api", "Simulab.Web", "Simulab.ServiceDefaults");
+            "Simulab.SharedKernel", "Simulab.Persistence", "Simulab.Email", "Simulab.Api", "Simulab.Web", "Simulab.ServiceDefaults");
     }
 
     [Fact]

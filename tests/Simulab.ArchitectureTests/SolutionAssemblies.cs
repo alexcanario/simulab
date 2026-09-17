@@ -8,6 +8,8 @@ internal static class SolutionAssemblies
     public static readonly IReadOnlyList<Assembly> All =
     [
         typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
+        typeof(Simulab.Persistence.ModuleDbContext).Assembly,
+        typeof(Simulab.Email.IEmailSender).Assembly,
         typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
         typeof(Simulab.Web.Resources.SharedResources).Assembly,
         typeof(Microsoft.Extensions.Hosting.Extensions).Assembly // Simulab.ServiceDefaults
