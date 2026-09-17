@@ -1,0 +1,10 @@
+<MudTooltip Text="@Text" Class="app-truncate-host">
+    <span class="app-truncate" style="max-width: @MaxWidth" tabindex="0">@Text</span>
+</MudTooltip>
+
+@code {
+    [Parameter, EditorRequired] public string Text { get; set; } = "";
+
+    /// <summary>CSS width after which the text is cut with an ellipsis.</summary>
+    [Parameter] public string MaxWidth { get; set; } = "24rem";
+}

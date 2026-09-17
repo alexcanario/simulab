@@ -24,4 +24,69 @@
   <data name="Error.RequestId" xml:space="preserve"><value>ID da solicitação: {0}</value></data>
   <data name="NotFound.Title" xml:space="preserve"><value>Página não encontrada</value></data>
   <data name="NotFound.Message" xml:space="preserve"><value>A página que você procura não existe.</value></data>
+  <data name="Common.Add" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Common.Edit" xml:space="preserve"><value>Editar</value></data>
+  <data name="Common.Delete" xml:space="preserve"><value>Excluir</value></data>
+  <data name="Common.View" xml:space="preserve"><value>Visualizar</value></data>
+  <data name="Common.Duplicate" xml:space="preserve"><value>Duplicar</value></data>
+  <data name="Common.Archive" xml:space="preserve"><value>Arquivar</value></data>
+  <data name="Common.Save" xml:space="preserve"><value>Salvar</value></data>
+  <data name="Common.Saving" xml:space="preserve"><value>Salvando...</value></data>
+  <data name="Common.Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common.Search" xml:space="preserve"><value>Pesquisar</value></data>
+  <data name="Common.TryAgain" xml:space="preserve"><value>Tentar novamente</value></data>
+  <data name="Common.Close" xml:space="preserve"><value>Fechar</value></data>
+  <data name="Common.More" xml:space="preserve"><value>Mais ações</value></data>
+  <data name="Common.Actions" xml:space="preserve"><value>Ações</value></data>
+  <data name="Common.Loading" xml:space="preserve"><value>Carregando...</value></data>
+  <data name="Common.LoadFailed" xml:space="preserve"><value>Não foi possível carregar esta lista.</value></data>
+  <data name="Common.Table.Empty" xml:space="preserve"><value>Nada por aqui ainda.</value></data>
+  <data name="Common.Table.RowsPerPage" xml:space="preserve"><value>Linhas por página:</value></data>
+  <data name="Common.Table.PageInfo" xml:space="preserve"><value>{first_item}-{last_item} de {all_items}</value></data>
+  <data name="Common.ActionOnItem" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="Common.Delete.Title" xml:space="preserve"><value>Excluir item?</value></data>
+  <data name="Common.Delete.Confirm" xml:space="preserve"><value>Excluir {0}</value></data>
+  <data name="Common.Discard.Title" xml:space="preserve"><value>Descartar alterações?</value></data>
+  <data name="Common.Discard.Message" xml:space="preserve"><value>Você tem alterações não salvas. Se sair agora, elas serão perdidas.</value></data>
+  <data name="Common.Discard.Confirm" xml:space="preserve"><value>Descartar alterações</value></data>
+  <data name="Common.ThemeSwitch.ToDark" xml:space="preserve"><value>Mudar para o modo escuro</value></data>
+  <data name="Common.ThemeSwitch.ToLight" xml:space="preserve"><value>Mudar para o modo claro</value></data>
+  <data name="common.unexpected_error" xml:space="preserve"><value>Algo deu errado. Tente novamente.</value></data>
+  <data name="common.not_found" xml:space="preserve"><value>O item não foi encontrado. Ele pode ter sido excluído.</value></data>
+  <data name="common.validation_failed" xml:space="preserve"><value>Alguns campos precisam de atenção.</value></data>
+  <data name="Gallery.Title" xml:space="preserve"><value>Galeria do kit de interface</value></data>
+  <data name="Gallery.Breadcrumb.Dev" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Gallery.Intro" xml:space="preserve"><value>Todos os padrões do kit, com dados de exemplo. Confira no modo claro e no escuro, em cada idioma e usando só o teclado.</value></data>
+  <data name="Gallery.Section.Table" xml:space="preserve"><value>Tabela de dados e ações por linha</value></data>
+  <data name="Gallery.Section.RowActions" xml:space="preserve"><value>Ações por linha com menu extra</value></data>
+  <data name="Gallery.Section.States" xml:space="preserve"><value>Estados de lista</value></data>
+  <data name="Gallery.Section.Confirm" xml:space="preserve"><value>Diálogo de confirmação</value></data>
+  <data name="Gallery.Section.Form" xml:space="preserve"><value>Ações de formulário</value></data>
+  <data name="Gallery.Section.Errors" xml:space="preserve"><value>Mensagens de erro</value></data>
+  <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Notificação rápida (snackbar)</value></data>
+  <data name="Gallery.Section.Icons" xml:space="preserve"><value>Ícones</value></data>
+  <data name="Gallery.Table.Mode" xml:space="preserve"><value>Fonte de dados</value></data>
+  <data name="Gallery.Table.Mode.Normal" xml:space="preserve"><value>60 itens</value></data>
+  <data name="Gallery.Table.Mode.Empty" xml:space="preserve"><value>Vazia</value></data>
+  <data name="Gallery.Table.Mode.Failing" xml:space="preserve"><value>Com falha</value></data>
+  <data name="Gallery.Table.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Gallery.Table.Description" xml:space="preserve"><value>Descrição</value></data>
+  <data name="Gallery.Table.Questions" xml:space="preserve"><value>Questões</value></data>
+  <data name="Gallery.Table.Score" xml:space="preserve"><value>Nota média</value></data>
+  <data name="Gallery.Table.UpdatedAt" xml:space="preserve"><value>Atualizado em</value></data>
+  <data name="Gallery.Table.SampleName" xml:space="preserve"><value>Prova de exemplo {0}</value></data>
+  <data name="Gallery.Table.SampleDescription" xml:space="preserve"><value>Uma descrição longa que mostra como a célula da tabela corta o texto e revela tudo numa dica ao passar o mouse.</value></data>
+  <data name="Gallery.Delete.Consequence" xml:space="preserve"><value>Apenas dados de exemplo: nada é excluído.</value></data>
+  <data name="Gallery.Done" xml:space="preserve"><value>Ação concluída: {0}</value></data>
+  <data name="Gallery.Cancelled" xml:space="preserve"><value>Ação cancelada.</value></data>
+  <data name="Gallery.Confirm.Open" xml:space="preserve"><value>Abrir confirmação destrutiva</value></data>
+  <data name="Gallery.Confirm.SampleObject" xml:space="preserve"><value>banca ABC</value></data>
+  <data name="Gallery.Form.Hint" xml:space="preserve"><value>Digite algo e tente sair desta página pelo link abaixo ou fechando a aba.</value></data>
+  <data name="Gallery.Form.Leave" xml:space="preserve"><value>Ir para a página inicial</value></data>
+  <data name="Gallery.Form.Saved" xml:space="preserve"><value>Alterações salvas.</value></data>
+  <data name="Gallery.Errors.Known" xml:space="preserve"><value>Código conhecido</value></data>
+  <data name="Gallery.Errors.Unknown" xml:space="preserve"><value>Código desconhecido</value></data>
+  <data name="Gallery.Snackbar.Show" xml:space="preserve"><value>Mostrar notificação</value></data>
+  <data name="Gallery.Snackbar.Message" xml:space="preserve"><value>Salvo com sucesso.</value></data>
+  <data name="Gallery.States.EmptyMessage" xml:space="preserve"><value>Nenhuma prova ainda. Adicione a primeira.</value></data>
 </root>

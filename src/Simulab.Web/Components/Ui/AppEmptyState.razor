@@ -1,0 +1,22 @@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-state app-state-empty">
+    <MudIcon Icon="@AppIcons.Empty" Size="Size.Large" Color="Color.Default" aria-hidden="true" />
+    <MudText Typo="Typo.body1">@(Message ?? L["Common.Table.Empty"])</MudText>
+    @if (ActionText is not null && OnAction.HasDelegate)
+    {
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@(ActionIcon ?? AppIcons.Add)"
+                   OnClick="() => OnAction.InvokeAsync()" Class="app-empty-action">@ActionText</MudButton>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Message { get; set; }
+
+    /// <summary>The list's primary action, e.g. "Add". Shown only with <see cref="OnAction"/>.</summary>
+    [Parameter] public string? ActionText { get; set; }
+
+    [Parameter] public string? ActionIcon { get; set; }
+
+    [Parameter] public EventCallback OnAction { get; set; }
+}

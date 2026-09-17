@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Localization;
-using MudBlazor.Services;
 using Simulab.Web.Components;
+using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddMudServices();
+builder.Services.AddUiKit();
 builder.Services.AddLocalization();
 
 // Culture: cookie (set by the language switch), then the browser, then en.
@@ -36,6 +36,21 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
 
+// Dev-only pages (/dev/...) do not exist outside Development: the status code pages render Not found.
+if (!app.Environment.IsDevelopment())
+{
+    app.Use((context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/dev", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return Task.CompletedTask;
+        }
+
+        return next(context);
+    });
+}
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -59,3 +74,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+

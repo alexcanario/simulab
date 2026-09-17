@@ -1,0 +1,14 @@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-state app-state-error" role="alert">
+    <MudIcon Icon="@AppIcons.Error" Size="Size.Large" Color="Color.Error" aria-hidden="true" />
+    <MudText Typo="Typo.body1">@(Message ?? L["Common.LoadFailed"])</MudText>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@AppIcons.Retry"
+               OnClick="() => OnRetry.InvokeAsync()" Class="app-retry">@L["Common.TryAgain"]</MudButton>
+</div>
+
+@code {
+    [Parameter] public string? Message { get; set; }
+
+    [Parameter, EditorRequired] public EventCallback OnRetry { get; set; }
+}
