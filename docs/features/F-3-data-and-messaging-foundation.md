@@ -1,7 +1,7 @@
 ---
 feature: F-3
 epic: Foundation and identity
-status: validating
+status: done
 board: 707
 version: 1
 ---
@@ -114,4 +114,8 @@ A container runtime (Docker Desktop or Podman) must be running. Close any app ho
 8. Nothing in this item shows UI text or needs a permission: no language switch and no permission check to do here.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-3` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge feature/F-3: data and messaging foundation (AB#707)" on `main`, 2026-09-17
+- Validated on screen by the owner: 2026-09-17
+- Tests: full suite 156 passed, 0 failed (SharedKernel 12, Architecture 15, AppHost 4, Web 104, Api 5, Persistence 14, Email 2), 9 s; full build 9 s, 0 warnings
+- Manual pages: none (no end-user visible behavior; the F-2 page still applies)
