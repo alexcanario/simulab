@@ -222,6 +222,7 @@ New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus 
 - 2026-09-17 — `Simulab.Web` gets its first typed API client: base address from Aspire service discovery, `AppJson.Options` on every call, no hardcoded host (api-contracts rule).
 - 2026-09-17 — Password hashing uses ASP.NET Identity's default hasher, not Simulae's Argon2id: Argon2id adds a package and a tuning decision this feature does not need. Revisit when a security review asks for it.
 - 2026-09-17 — Token generation keeps Simulae's pattern: a random value, only the hash stored, the raw value only in the email.
+- 2026-09-17 — Screen approved by the owner from the mockup, as designed: full name after the password fields, the confirm-password field kept, `/check-email` as its own page, and the legal documents opening in a new tab — owner, screen questions 1 to 4.
 
 ## Out of scope
 - Sign-in, sign-out, tokens and sessions (F-5). No OpenIddict and no Redis in this feature.
