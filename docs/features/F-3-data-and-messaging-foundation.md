@@ -1,7 +1,7 @@
 ---
 feature: F-3
 epic: Foundation and identity
-status: building
+status: validating
 board: 707
 version: 1
 ---
@@ -81,6 +81,11 @@ F-4 (Identity) and every later module start from a tested base: a database with 
 - 2026-09-17 — The integration events abstraction (`IIntegrationEvent`, `IIntegrationEventPublisher`, `IIntegrationEventHandler<T>`) and its in-process publisher live in `SharedKernel` (profile), with no package dependency.
 - 2026-09-17 — The shared test fixture lives in `tests/Simulab.Testing` (xUnit assembly fixture: one container per test project, `CREATE DATABASE` per test class) — one place instead of a copy per project.
 - 2026-09-17 — Mailpit tests use a generic Testcontainers container of the Mailpit image, reading messages through its HTTP API with the shared JSON options.
+- 2026-09-17 — Build: `Aspire.Hosting.Testing` (MIT) added so AC10 is a test and not only a screen step — owner, build question 1.
+- 2026-09-17 — Build: the Api reports the database through a small `DatabaseHealthCheck` over the Npgsql data source, not through an EF context: no module context exists yet, and no extra package was needed.
+- 2026-09-17 — Build: `IEmailSender` lives in a `Simulab.Email` building block, like `Simulab.Storage` and `Simulab.Ai` in the profile; the Api maps the app host SMTP connection string onto `EmailOptions`.
+- 2026-09-17 — Build: the shared test helper is `PostgresServer` (one container per test process, `CREATE DATABASE` per test class), used by the persistence tests and by the Api health test.
+- 2026-09-17 — Build: pgAdmin was tried in the app host and removed — it is one more container and the item does not ask for it.
 - 2026-09-17 — The Api registers the Npgsql data source and its health check through the Aspire client integration; a module registers its `DbContext` in its own `AddXxxModule()` (F-4 onward).
 
 ## Out of scope
@@ -98,7 +103,15 @@ F-4 (Identity) and every later module start from a tested base: a database with 
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+A container runtime (Docker Desktop or Podman) must be running. Close any app host you have open first.
+1. Start `dotnet run --project src/Simulab.AppHost` and open the dashboard URL printed on start.
+2. Check the resources: `postgres`, `simulab`, `mailpit`, `api` and `web` all reach Running. There is no Redis and no pgAdmin.
+3. Open the `api` URL and add `/health`: it reads `Healthy` (the database is part of that answer).
+4. Open the `mailpit` URL from the dashboard: the inbox opens and is empty. No feature sends email yet (F-4 does).
+5. Open the `web` URL: the app shell from F-2 still works (menu, theme, language).
+6. Stop the app host (Ctrl+C), start it again and check `postgres` reaches Running once more: the named volume survived.
+7. Optional, to prove the data volume: with the app host running, `docker volume ls` lists `simulab-postgres-data`.
+8. Nothing in this item shows UI text or needs a permission: no language switch and no permission check to do here.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

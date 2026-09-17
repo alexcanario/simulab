@@ -2,8 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // One PostgreSQL server with the app database. The named volume keeps local data across restarts.
 var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume("simulab-postgres-data")
-    .WithPgAdmin();
+    .WithDataVolume("simulab-postgres-data");
 
 var database = postgres.AddDatabase("simulab");
 

@@ -14,7 +14,9 @@ One deployable, several business modules with clear boundaries. Each module is *
 | New modules (import, analytics, recommendations, coach) | one project + `Contracts`, unless refinement shows a rich domain | new |
 
 - Two deployable hosts: `Simulab.Api` (also runs the background job worker) and `Simulab.Web`.
-- Building blocks besides `SharedKernel`: `Simulab.Ai` (`IAiGateway`, usage and cost records), `Simulab.Storage` (`IFileStorage`), and the in-process integration events in `SharedKernel`. Created by the first feature that needs them, not before.
+- Building blocks besides `SharedKernel`: `Simulab.Persistence` (F-3: `ModuleDbContext` base, audit and soft-delete interceptor, tenant and soft-delete filters, unique-index helper, database health check), `Simulab.Email` (F-3: `IEmailSender` over SMTP), `Simulab.Ai` (`IAiGateway`, usage and cost records), `Simulab.Storage` (`IFileStorage`), and the in-process integration events in `SharedKernel`. Created by the first feature that needs them, not before.
+- `Simulab.Persistence` references `SharedKernel` only; `SharedKernel` never references EF Core or ASP.NET. Each module keeps its own `DbContext`, schema and migrations and inherits `ModuleDbContext`; architecture tests check both.
+- Test helpers shared by test projects live in `tests/Simulab.Testing` (one PostgreSQL container per test project, a database per test class).
 - `User` inherits `IdentityUser<Guid>` and repeats the `TenantEntity` fields: a known exception in the architecture tests.
 - Forbidden references, checked by the architecture tests: MassTransit, RabbitMQ, FluentAssertions.
 - Importing from Simulae: per feature, renamed to this layout (`Modules.<Module>.<Layer>` becomes `Simulab.<Module>.<Layer>`, `Simulae.Common` becomes `Simulab.SharedKernel`), UI text extracted to the three languages, tests included and moved to the shared PostgreSQL fixture.
