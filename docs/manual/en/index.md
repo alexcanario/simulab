@@ -1,7 +1,7 @@
 ---
 page: index
 locale: en
-features: []
+features: [F-2]
 updated: 2026-09-17
 ---
 # Simulab
@@ -31,4 +31,4 @@ Pages are added here as each feature is released.
 Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. You choose the language in your profile. Exam questions are always shown in their original language.
 
 ## Related pages
-None yet.
+- [Getting around](getting-around.md): menu, light and dark mode, language and keyboard

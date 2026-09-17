@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-PT
-features: []
+features: [F-2]
 updated: 2026-09-17
 ---
 # Simulab
@@ -31,4 +31,4 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Escolhe o idioma no seu perfil. As questões das provas são sempre apresentadas no idioma original.
 
 ## Páginas relacionadas
-Nenhuma por enquanto.
+- [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
