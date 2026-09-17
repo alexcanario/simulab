@@ -50,7 +50,8 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
 v1.MapIdentityEndpoints();
 
 // Development applies the module migrations on start; a release applies them from the pipeline.
-if (app.Environment.IsDevelopment())
+// A test host that does not need a database turns it off with Database:ApplyMigrationsOnStart.
+if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environment.IsDevelopment()))
 {
     await app.Services.MigrateIdentityModuleAsync();
 }

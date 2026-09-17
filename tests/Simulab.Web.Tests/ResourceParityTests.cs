@@ -9,50 +9,71 @@ namespace Simulab.Web.Tests;
 /// <summary>A key added to one language must be added to all three (rule: i18n).</summary>
 public class ResourceParityTests
 {
-    private static readonly ResourceManager Manager = new(typeof(SharedResources).FullName!, typeof(SharedResources).Assembly);
+    /// <summary>Every resource set of the Web. A new set is added here in the feature that creates it.</summary>
+    private static readonly Type[] Sets = [typeof(SharedResources), typeof(IdentityResources)];
 
-    private static HashSet<string> Keys(CultureInfo culture)
+    private static ResourceManager ManagerFor(string setName)
     {
-        var set = Manager.GetResourceSet(culture, createIfNotExists: true, tryParents: false);
+        var marker = Sets.Single(type => type.Name == setName);
+        return new ResourceManager(marker.FullName!, marker.Assembly);
+    }
+
+    private static HashSet<string> Keys(ResourceManager manager, CultureInfo culture)
+    {
+        var set = manager.GetResourceSet(culture, createIfNotExists: true, tryParents: false);
         set.Should().NotBeNull($"the resource file for '{culture.Name}' must exist");
         return set!.Cast<DictionaryEntry>().Select(entry => (string)entry.Key).ToHashSet();
     }
 
-    public static TheoryData<string> TranslatedCultures() =>
-        new(SupportedCultures.All.Select(c => c.Name).Where(name => name != SupportedCultures.Default));
-
-    [Fact]
-    public void Neutral_resources_are_not_empty()
+    public static TheoryData<string, string> SetsAndTranslatedCultures()
     {
-        Keys(CultureInfo.InvariantCulture).Should().NotBeEmpty();
+        var data = new TheoryData<string, string>();
+        foreach (var set in Sets)
+        {
+            foreach (var culture in SupportedCultures.All.Select(c => c.Name).Where(name => name != SupportedCultures.Default))
+            {
+                data.Add(set.Name, culture);
+            }
+        }
+
+        return data;
+    }
+
+    public static TheoryData<string> SetNames() => new(Sets.Select(type => type.Name));
+
+    [Theory]
+    [MemberData(nameof(SetNames))]
+    public void Neutral_resources_are_not_empty(string setName)
+    {
+        Keys(ManagerFor(setName), CultureInfo.InvariantCulture).Should().NotBeEmpty();
     }
 
     [Fact]
-    public void There_is_a_translated_culture_to_check()
+    public void Every_set_is_checked_in_two_translated_cultures()
     {
-        TranslatedCultures().Should().HaveCount(2);
+        SetsAndTranslatedCultures().Should().HaveCount(Sets.Length * 2);
     }
 
     [Theory]
-    [MemberData(nameof(TranslatedCultures))]
-    public void Every_key_exists_in_every_language(string cultureName)
+    [MemberData(nameof(SetsAndTranslatedCultures))]
+    public void Every_key_exists_in_every_language(string setName, string cultureName)
     {
-        var neutral = Keys(CultureInfo.InvariantCulture);
-        var translated = Keys(new CultureInfo(cultureName));
+        var manager = ManagerFor(setName);
 
-        translated.Should().BeEquivalentTo(neutral);
+        Keys(manager, new CultureInfo(cultureName)).Should().BeEquivalentTo(Keys(manager, CultureInfo.InvariantCulture));
     }
 
     [Theory]
-    [MemberData(nameof(TranslatedCultures))]
-    public void Placeholders_match_the_neutral_text(string cultureName)
+    [MemberData(nameof(SetsAndTranslatedCultures))]
+    public void Placeholders_match_the_neutral_text(string setName, string cultureName)
     {
+        var manager = ManagerFor(setName);
         var culture = new CultureInfo(cultureName);
 
-        foreach (var key in Keys(CultureInfo.InvariantCulture))
+        foreach (var key in Keys(manager, CultureInfo.InvariantCulture))
         {
-            var neutral = Manager.GetString(key, CultureInfo.InvariantCulture)!;
-            var translated = Manager.GetString(key, culture)!;
+            var neutral = manager.GetString(key, CultureInfo.InvariantCulture)!;
+            var translated = manager.GetString(key, culture)!;
 
             translated.Contains("{0}").Should().Be(neutral.Contains("{0}"), $"'{key}' in {cultureName} must keep its placeholder");
         }

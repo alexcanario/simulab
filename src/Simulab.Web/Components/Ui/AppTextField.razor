@@ -12,7 +12,6 @@
     <MudTextField T="TValue"
                   Value="Value"
                   ValueChanged="OnValueChanged"
-                  id="@Id"
                   InputType="InputType"
                   Placeholder="@Placeholder"
                   Variant="Variant.Outlined"
@@ -82,6 +81,7 @@
 
     private Dictionary<string, object?> Attributes => new()
     {
+        ["id"] = Id,
         ["aria-describedby"] = DescriptionId,
         ["aria-invalid"] = HasError ? "true" : null,
         ["aria-required"] = Required ? "true" : null,
