@@ -1,0 +1,50 @@
+@inject IConfirmService Confirm
+@inject IStringLocalizer<SharedResources> L
+
+<NavigationLock ConfirmExternalNavigation="HasChanges" OnBeforeInternalNavigation="OnBeforeInternalNavigationAsync" />
+
+<div class="app-form-actions">
+    <MudButton Variant="Variant.Text" Disabled="Saving" OnClick="() => OnCancel.InvokeAsync()" Class="app-form-cancel">@L["Common.Cancel"]</MudButton>
+    <MudButton ButtonType="@(OnSave.HasDelegate ? ButtonType.Button : ButtonType.Submit)"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               Disabled="@(Saving || Disabled)"
+               OnClick="SaveAsync"
+               Class="app-form-save">
+        @if (Saving)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@L["Common.Saving"]</span>
+        }
+        else
+        {
+            @L["Common.Save"]
+        }
+    </MudButton>
+</div>
+
+@code {
+    /// <summary>While true, Save is disabled and shows progress.</summary>
+    [Parameter] public bool Saving { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>While true, leaving the page (in the app or closing the tab) asks for confirmation.</summary>
+    [Parameter] public bool HasChanges { get; set; }
+
+    /// <summary>Without a handler, Save is a submit button for the enclosing form.</summary>
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Task SaveAsync() => OnSave.HasDelegate ? OnSave.InvokeAsync() : Task.CompletedTask;
+
+    private async Task OnBeforeInternalNavigationAsync(LocationChangingContext context)
+    {
+        if (!HasChanges)
+            return;
+
+        if (!await Confirm.ConfirmDiscardAsync(L))
+            context.PreventNavigation();
+    }
+}

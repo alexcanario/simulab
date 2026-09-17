@@ -1,0 +1,10 @@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-state app-state-loading" role="status" aria-live="polite">
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Medium" />
+    <MudText Typo="Typo.body2">@(Text ?? L["Common.Loading"])</MudText>
+</div>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+}

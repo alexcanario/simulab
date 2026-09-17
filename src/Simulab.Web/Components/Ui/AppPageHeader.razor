@@ -1,0 +1,31 @@
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@Title - @L["App.Name"]</PageTitle>
+
+<header class="app-page-header">
+    @if (Breadcrumbs is { Count: > 0 })
+    {
+        <MudBreadcrumbs Items="Breadcrumbs.ToList()" Class="app-breadcrumbs" />
+    }
+    <div class="app-page-header-row">
+        <MudText Typo="Typo.h1" Class="app-page-title">@Title</MudText>
+        @if (PrimaryActionText is not null && OnPrimaryAction.HasDelegate)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@PrimaryActionIcon"
+                       OnClick="() => OnPrimaryAction.InvokeAsync()" Class="app-primary-action">@PrimaryActionText</MudButton>
+        }
+    </div>
+</header>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+
+    [Parameter] public IReadOnlyList<BreadcrumbItem>? Breadcrumbs { get; set; }
+
+    /// <summary>The page's only filled button, at the top right.</summary>
+    [Parameter] public string? PrimaryActionText { get; set; }
+
+    [Parameter] public string? PrimaryActionIcon { get; set; }
+
+    [Parameter] public EventCallback OnPrimaryAction { get; set; }
+}

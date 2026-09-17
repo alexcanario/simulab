@@ -1,0 +1,123 @@
+@typeparam TItem
+@inject IStringLocalizer<SharedResources> L
+@inject ILogger<AppDataTable<TItem>> Logger
+
+<MudDataGrid @ref="_grid"
+             T="TItem"
+             ServerData="LoadServerDataAsync"
+             RowsPerPage="DefaultPageSize"
+             Hover="true"
+             SortMode="SortMode.Single"
+             Filterable="false"
+             Culture="CultureInfo.CurrentCulture"
+             Class="app-data-table">
+    <ToolBarContent>
+        @if (Searchable)
+        {
+            <MudTextField T="string"
+                          Value="_search"
+                          ValueChanged="OnSearchChangedAsync"
+                          Placeholder="@L["Common.Search"]"
+                          aria-label="@L["Common.Search"]"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@AppIcons.Search"
+                          Immediate="true"
+                          DebounceInterval="300"
+                          Clearable="true"
+                          Class="app-table-search" />
+        }
+        <MudSpacer />
+        @ToolBarContent
+    </ToolBarContent>
+    <Columns>
+        @Columns
+        @if (RowActions is not null)
+        {
+            <TemplateColumn T="TItem" Title="@L["Common.Actions"]" Sortable="false" CellClass="app-cell-actions" HeaderClass="app-cell-actions">
+                <CellTemplate>@RowActions(context.Item)</CellTemplate>
+            </TemplateColumn>
+        }
+    </Columns>
+    <LoadingContent>
+        <AppLoadingState />
+    </LoadingContent>
+    <NoRecordsContent>
+        @if (_failed)
+        {
+            <AppErrorState OnRetry="ReloadAsync" />
+        }
+        else
+        {
+            <AppEmptyState Message="@EmptyMessage" ActionText="@EmptyActionText" ActionIcon="@EmptyActionIcon" OnAction="OnEmptyAction" />
+        }
+    </NoRecordsContent>
+    <PagerContent>
+        <MudDataGridPager T="TItem"
+                          PageSizeOptions="PageSizes"
+                          RowsPerPageString="@L["Common.Table.RowsPerPage"]"
+                          InfoFormat="@L["Common.Table.PageInfo"]" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    public const int DefaultPageSize = 25;
+    public static readonly int[] PageSizes = [10, 25, 50];
+
+    private MudDataGrid<TItem> _grid = default!;
+    private string? _search;
+    private bool _failed;
+
+    /// <summary>Column definitions (PropertyColumn, TemplateColumn, AppNumberColumn, AppDateColumn).</summary>
+    [Parameter, EditorRequired] public RenderFragment Columns { get; set; } = default!;
+
+    /// <summary>Loads one page from the server.</summary>
+    [Parameter, EditorRequired] public Func<AppTableQuery, CancellationToken, Task<AppTablePage<TItem>>> LoadAsync { get; set; } = default!;
+
+    /// <summary>Row actions, always rendered as the last column. Use AppRowActions.</summary>
+    [Parameter] public RenderFragment<TItem>? RowActions { get; set; }
+
+    [Parameter] public bool Searchable { get; set; } = true;
+
+    [Parameter] public RenderFragment? ToolBarContent { get; set; }
+
+    [Parameter] public string? EmptyMessage { get; set; }
+
+    [Parameter] public string? EmptyActionText { get; set; }
+
+    [Parameter] public string? EmptyActionIcon { get; set; }
+
+    [Parameter] public EventCallback OnEmptyAction { get; set; }
+
+    public Task ReloadAsync() => _grid.ReloadServerData();
+
+    private async Task<GridData<TItem>> LoadServerDataAsync(GridState<TItem> state, CancellationToken cancellationToken)
+    {
+        _failed = false;
+        var sort = state.SortDefinitions.FirstOrDefault();
+        var query = new AppTableQuery(state.Page, state.PageSize, _search, sort?.SortBy, sort?.Descending ?? false);
+
+        try
+        {
+            var page = await LoadAsync(query, cancellationToken);
+            return new GridData<TItem> { Items = page.Items, TotalItems = page.TotalItems };
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Table data for {ItemType} failed to load", typeof(TItem).Name);
+            _failed = true;
+            return new GridData<TItem> { Items = [], TotalItems = 0 };
+        }
+    }
+
+    private async Task OnSearchChangedAsync(string? value)
+    {
+        _search = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        if (_grid.CurrentPage != 0)
+            _grid.NavigateTo(Page.First);
+        await _grid.ReloadServerData();
+    }
+}

@@ -1,0 +1,221 @@
+@page "/dev/ui"
+@inject IStringLocalizer<SharedResources> L
+@inject IHostEnvironment Environment
+@inject NavigationManager Navigation
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText ErrorText
+@inject ThemeState ThemeState
+
+@if (!_allowed)
+{
+    return;
+}
+
+<AppPageHeader Title="@L["Gallery.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="@(() => Done(L["Common.Add"]))" />
+
+<div class="d-flex align-center gap-2 mb-6">
+    <MudText Typo="Typo.body1" Class="flex-grow-1">@L["Gallery.Intro"]</MudText>
+    <MudTooltip Text="@ThemeSwitchLabel">
+        <MudIconButton Icon="@(ThemeState.IsDarkMode ? AppIcons.LightMode : AppIcons.DarkMode)"
+                       aria-label="@ThemeSwitchLabel"
+                       OnClick="ToggleTheme"
+                       Class="gallery-theme-switch" />
+    </MudTooltip>
+</div>
+
+<section id="gallery-table" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Table"]</MudText>
+    <MudRadioGroup T="GallerySourceMode" Value="_source.Mode" ValueChanged="ChangeModeAsync" aria-label="@L["Gallery.Table.Mode"]" Class="mb-2">
+        <MudRadio Value="GallerySourceMode.Normal" Color="Color.Primary">@L["Gallery.Table.Mode.Normal"]</MudRadio>
+        <MudRadio Value="GallerySourceMode.Empty" Color="Color.Primary">@L["Gallery.Table.Mode.Empty"]</MudRadio>
+        <MudRadio Value="GallerySourceMode.Failing" Color="Color.Primary">@L["Gallery.Table.Mode.Failing"]</MudRadio>
+    </MudRadioGroup>
+    <AppDataTable @ref="_table"
+                  TItem="GallerySample"
+                  LoadAsync="_source.LoadAsync"
+                  EmptyMessage="@L["Gallery.States.EmptyMessage"]"
+                  EmptyActionText="@L["Common.Add"]"
+                  OnEmptyAction="@(() => Done(L["Common.Add"]))">
+        <Columns>
+            <PropertyColumn T="GallerySample" TProperty="string" Property="x => x.Name" Title="@L["Gallery.Table.Name"]" Sortable="false" />
+            <TemplateColumn T="GallerySample" Title="@L["Gallery.Table.Description"]" Sortable="false">
+                <CellTemplate><AppTruncatedText Text="@context.Item.Description" MaxWidth="18rem" /></CellTemplate>
+            </TemplateColumn>
+            <AppNumberColumn TItem="GallerySample" TProperty="int" Property="x => x.Questions" Title="@L["Gallery.Table.Questions"]" />
+            <AppNumberColumn TItem="GallerySample" TProperty="decimal" Property="x => x.Score" Format="N1" Title="@L["Gallery.Table.Score"]" />
+            <AppDateColumn TItem="GallerySample" TProperty="DateTimeOffset" Property="x => x.UpdatedAt" Title="@L["Gallery.Table.UpdatedAt"]" />
+        </Columns>
+        <RowActions>
+            <AppRowActions ItemName="@context.Name"
+                           OnEdit="@(() => Done(L["Common.Edit"]))"
+                           OnDelete="@(() => DeleteAsync(context))" />
+        </RowActions>
+    </AppDataTable>
+</section>
+
+<section id="gallery-row-actions" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.RowActions"]</MudText>
+    <AppRowActions ItemName="@SampleName(1)"
+                   OnEdit="@(() => Done(L["Common.Edit"]))"
+                   OnDelete="@(() => DeleteAsync(_sample))"
+                   MoreActions="_moreActions" />
+</section>
+
+<section id="gallery-states" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.States"]</MudText>
+    <MudGrid>
+        <MudItem xs="12" md="4"><MudPaper Outlined="true"><AppLoadingState /></MudPaper></MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Outlined="true">
+                <AppEmptyState Message="@L["Gallery.States.EmptyMessage"]" ActionText="@L["Common.Add"]" OnAction="@(() => Done(L["Common.Add"]))" />
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="4"><MudPaper Outlined="true"><AppErrorState OnRetry="@(() => Done(L["Common.TryAgain"]))" /></MudPaper></MudItem>
+    </MudGrid>
+</section>
+
+<section id="gallery-confirm" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Confirm"]</MudText>
+    <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@AppIcons.Delete" OnClick="ConfirmSampleAsync">@L["Gallery.Confirm.Open"]</MudButton>
+</section>
+
+<section id="gallery-form" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Form"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Form.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <MudTextField T="string" Label="@L["Gallery.Table.Name"]" Required="true" Variant="Variant.Outlined"
+                      Value="_formName" ValueChanged="OnFormNameChanged" Immediate="true" />
+        <AppFormActions Saving="_saving" HasChanges="_hasChanges" OnSave="SaveAsync" OnCancel="CancelForm" />
+    </MudPaper>
+    <MudLink Href="/" Class="mt-2 d-inline-block">@L["Gallery.Form.Leave"]</MudLink>
+</section>
+
+<section id="gallery-errors" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Errors"]</MudText>
+    <MudAlert Severity="Severity.Error" Class="mb-2">@L["Gallery.Errors.Known"]: @ErrorText.For("common.not_found")</MudAlert>
+    <MudAlert Severity="Severity.Error">@L["Gallery.Errors.Unknown"]: @ErrorText.For("exam_board.does_not_exist_yet")</MudAlert>
+</section>
+
+<section id="gallery-feedback" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Feedback"]</MudText>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ShowSnackbar">@L["Gallery.Snackbar.Show"]</MudButton>
+</section>
+
+<section id="gallery-icons" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Icons"]</MudText>
+    <div class="gallery-icons">
+        @foreach (var (name, icon) in IconList)
+        {
+            <div class="gallery-icon">
+                <MudIcon Icon="@icon" aria-hidden="true" />
+                <code>@($"AppIcons.{name}")</code>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly DateTimeOffset SampleBaseDate = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
+
+    private static readonly IReadOnlyList<(string Name, string Icon)> IconList =
+        [.. typeof(AppIcons).GetFields().Select(field => (field.Name, (string)field.GetRawConstantValue()!))];
+
+    private bool _allowed;
+    private GallerySource _source = default!;
+    private AppDataTable<GallerySample> _table = default!;
+    private GallerySample _sample = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AppRowAction> _moreActions = [];
+    private string? _formName;
+    private bool _hasChanges;
+    private bool _saving;
+
+    /// <summary>Delay of the sample source, so the loading state is visible. Tests set it to zero.</summary>
+    [Parameter] public TimeSpan SourceDelay { get; set; } = TimeSpan.FromMilliseconds(400);
+
+    private string ThemeSwitchLabel => ThemeState.IsDarkMode ? L["Common.ThemeSwitch.ToLight"] : L["Common.ThemeSwitch.ToDark"];
+
+    protected override void OnInitialized()
+    {
+        _allowed = Environment.IsDevelopment();
+        if (!_allowed)
+        {
+            // Reached by in-app navigation outside Development: the request middleware never saw it.
+            Navigation.NotFound();
+            return;
+        }
+
+        _source = new GallerySource(CreateSample, SourceDelay);
+        _sample = CreateSample(1);
+        _breadcrumbs = [new BreadcrumbItem(L["Gallery.Breadcrumb.Dev"], href: null, disabled: true), new BreadcrumbItem(L["Gallery.Title"], href: null, disabled: true)];
+        _moreActions =
+        [
+            new AppRowAction(L["Common.View"], AppIcons.View, () => Done(L["Common.View"])),
+            new AppRowAction(L["Common.Duplicate"], AppIcons.Copy, () => Done(L["Common.Duplicate"])),
+            new AppRowAction(L["Common.Archive"], AppIcons.Archive, () => Done(L["Common.Archive"])),
+        ];
+    }
+
+    private string SampleName(int number) => L["Gallery.Table.SampleName", number];
+
+    private GallerySample CreateSample(int number) => new(
+        number,
+        SampleName(number),
+        L["Gallery.Table.SampleDescription"],
+        Questions: 20 + number * 3 % 60,
+        Score: 40m + number * 7 % 55 + 0.5m,
+        UpdatedAt: SampleBaseDate.AddDays(-number));
+
+    private Task ChangeModeAsync(GallerySourceMode mode)
+    {
+        _source.Mode = mode;
+        return _table.ReloadAsync();
+    }
+
+    private Task Done(string action)
+    {
+        Snackbar.Add(L["Gallery.Done", action], Severity.Success);
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteAsync(GallerySample item)
+    {
+        if (await Confirm.ConfirmDeleteAsync(L, item.Name, L["Gallery.Delete.Consequence"]))
+            await Done(L["Common.Delete"]);
+        else
+            Snackbar.Add(L["Gallery.Cancelled"], Severity.Normal);
+    }
+
+    private Task ConfirmSampleAsync() =>
+        DeleteAsync(_sample with { Name = L["Gallery.Confirm.SampleObject"] });
+
+    private void OnFormNameChanged(string? value)
+    {
+        _formName = value;
+        _hasChanges = !string.IsNullOrEmpty(value);
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        await Task.Delay(SourceDelay * 3);
+        _saving = false;
+        _hasChanges = false;
+        Snackbar.Add(L["Gallery.Form.Saved"], Severity.Success);
+    }
+
+    private void CancelForm()
+    {
+        _formName = null;
+        _hasChanges = false;
+    }
+
+    private void ShowSnackbar() => Snackbar.Add(L["Gallery.Snackbar.Message"], Severity.Success);
+
+    private void ToggleTheme() => ThemeState.SetDarkMode(!ThemeState.IsDarkMode);
+}

@@ -1,0 +1,67 @@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-row-actions" role="group" aria-label="@L["Common.Actions"]">
+    @foreach (var action in _visible)
+    {
+        <MudTooltip Text="@action.Label">
+            <MudIconButton Icon="@action.Icon"
+                           aria-label="@AccessibleName(action)"
+                           Color="@(action.Destructive ? Color.Error : Color.Default)"
+                           Size="Size.Small"
+                           OnClick="() => action.OnClick()"
+                           Class="app-row-action" />
+        </MudTooltip>
+    }
+    @if (_overflow.Count > 0)
+    {
+        <MudTooltip Text="@L["Common.More"]">
+            <MudMenu Icon="@AppIcons.More"
+                     AriaLabel="@AccessibleName(L["Common.More"])"
+                     Size="Size.Small"
+                     AnchorOrigin="Origin.BottomRight"
+                     TransformOrigin="Origin.TopRight"
+                     Class="app-row-more">
+                @foreach (var action in _overflow)
+                {
+                    <MudMenuItem Icon="@action.Icon" OnClick="() => action.OnClick()" Class="app-row-more-item">@action.Label</MudMenuItem>
+                }
+            </MudMenu>
+        </MudTooltip>
+    }
+</div>
+
+@code {
+    /// <summary>Visible icon buttons before the rest go into the overflow menu.</summary>
+    public const int MaxVisible = 3;
+
+    private List<AppRowAction> _visible = [];
+    private List<AppRowAction> _overflow = [];
+
+    [Parameter] public EventCallback OnEdit { get; set; }
+
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    /// <summary>Actions after edit and delete, in order.</summary>
+    [Parameter] public IReadOnlyList<AppRowAction>? MoreActions { get; set; }
+
+    /// <summary>The row's name, added to each button's accessible name.</summary>
+    [Parameter] public string? ItemName { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var all = new List<AppRowAction>();
+        if (OnEdit.HasDelegate)
+            all.Add(new AppRowAction(L["Common.Edit"], AppIcons.Edit, () => OnEdit.InvokeAsync()));
+        if (OnDelete.HasDelegate)
+            all.Add(new AppRowAction(L["Common.Delete"], AppIcons.Delete, () => OnDelete.InvokeAsync(), Destructive: true));
+        all.AddRange(MoreActions ?? []);
+
+        _visible = [.. all.Take(MaxVisible)];
+        _overflow = [.. all.Skip(MaxVisible)];
+    }
+
+    private string AccessibleName(AppRowAction action) => AccessibleName(action.Label);
+
+    private string AccessibleName(string label) =>
+        ItemName is null ? label : L["Common.ActionOnItem", label, ItemName];
+}

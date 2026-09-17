@@ -36,3 +36,116 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+/* ---- UI kit (F-1). Interaction states live here and in SimulabTheme, never on a page. ---- */
+
+a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-button, .mud-radio, .mud-checkbox, .mud-link, .mud-nav-link, .mud-table-sort-label {
+    cursor: pointer;
+}
+
+:is(a, button, input, select, textarea, [tabindex], .mud-button-root):focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.mud-button-root, .mud-icon-button {
+    min-width: 24px;
+    min-height: 24px;
+}
+
+.app-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.app-breadcrumbs {
+    padding: 0 0 0.25rem 0;
+}
+
+.app-page-header-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.app-page-title {
+    flex: 1 1 auto;
+}
+
+.app-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+
+.app-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.app-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.app-data-table .app-cell-actions {
+    text-align: right;
+    white-space: nowrap;
+    width: 1%;
+}
+
+.app-data-table .app-cell-number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.app-data-table .app-cell-number .column-header {
+    justify-content: flex-end;
+}
+
+.app-data-table .app-cell-date {
+    white-space: nowrap;
+}
+
+.app-table-search {
+    max-width: 22rem;
+}
+
+.app-truncate {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.gallery-section {
+    margin-bottom: 2.5rem;
+}
+
+.gallery-section > .mud-typography-h2 {
+    margin-bottom: 0.75rem;
+}
+
+.gallery-form {
+    max-width: 32rem;
+}
+
+.gallery-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 0.75rem;
+}
+
+.gallery-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

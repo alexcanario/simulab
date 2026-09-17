@@ -1,7 +1,7 @@
 ---
 feature: F-1
 epic: Foundation and identity
-status: approved
+status: done
 board: 705
 version: 1
 ---
@@ -45,7 +45,7 @@ Every future screen is assembled from one set of tested patterns, so behavior, i
 
 ## Screens and API
 - `/dev/ui` — dev-only gallery, one section per kit pattern, with a light/dark switch. Uses the app layout (language switch available).
-- No API endpoints. No error codes of its own; `ErrorText` falls back to `Common.Error.Unexpected`.
+- No API endpoints. No error codes of its own; `ErrorText` falls back to `common.unexpected_error`.
 
 ## Acceptance criteria
 - AC1 Given a table with 60 items from a fake server source, when the gallery table loads, then it shows 25 rows, offers page sizes 10, 25 and 50, and requests the next page from the source when paging. (BR2)
@@ -71,6 +71,12 @@ Every future screen is assembled from one set of tested patterns, so behavior, i
 - 2026-09-17 — Confirmation is shown through a kit service (`IConfirmService`) over `IDialogService` — one call site pattern, testable with bUnit.
 - 2026-09-17 — The architecture test for BR13 scans source text of `src/Simulab.Web` — Razor markup is not visible through reflection.
 - 2026-09-17 — Unsaved-changes guard uses `NavigationLock` (in-app navigation and `beforeunload`) — built into Blazor, no JS of our own.
+- 2026-09-17 — Snackbar defaults and kit services are registered by `AddUiKit()`, called once from `Program.cs` — one place for the settings, reusable by the tests.
+- 2026-09-17 — A scoped `ThemeState` drives `MudThemeProvider.IsDarkMode` in `MainLayout` — the gallery switch uses it now; F-2 adds the app-wide switch on the same state.
+- 2026-09-17 — Generic API error text uses the code-style key `common.unexpected_error` (with `common.not_found`, `common.validation_failed`) — the resource key is the code (rule: api-contracts).
+- 2026-09-17 — Extra row action verbs `Common.View`, `Common.Duplicate`, `Common.Archive` added to the shared vocabulary — one term per action.
+- 2026-09-17 — Kit columns `AppNumberColumn` and `AppDateColumn` extend `PropertyColumn` — right alignment and culture format are set in the kit, never per page.
+- 2026-09-17 — `/dev` is blocked twice outside Development: request middleware (404) and a page guard (`NavigationManager.NotFound()`) for in-circuit navigation.
 - 2026-09-17 — Exam session components are out of scope — they belong to the Exam Simulator epic and have no screen design yet.
 
 ## Out of scope
@@ -86,7 +92,18 @@ Every future screen is assembled from one set of tested patterns, so behavior, i
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+1. Run `dotnet run --project src/Simulab.AppHost` and open `https://localhost:7125/dev/ui` (no sign-in yet) → the gallery shows the header "UI kit gallery" with breadcrumb and one filled "Add" button at the top right.
+2. In the table: hover a row, sort "Questions", go to page 2, change rows per page to 10 and 50, type `1` in the search → rows highlight, 25 rows by default, numbers right-aligned, long description cut with a tooltip.
+3. Switch "Data source" to "Empty" and then "Failing"; on "Failing" click "Try again" after switching back to "60 items" → empty state with "Add", error state with "Try again", table returns.
+4. Click the delete icon of a row → dialog with a red button "Delete Sample exam 1"; press Esc → dialog closes, snackbar "Action cancelled." at the bottom right for about 4 seconds, with a close button.
+5. In "Row actions with overflow menu": three icons (edit, delete, view) plus the "More actions" menu with Duplicate and Archive; every icon shows a tooltip.
+6. In "Form actions": type a name, click "Go to the home page" → "Discard changes?" appears; cancel it. Try to reload the tab → the browser asks too. Click "Save" → progress on the button, then "Changes saved."; now leaving asks nothing.
+7. Switch the language with the globe menu (e.g. English → Português (Portugal)), then click the moon icon → texts, dates (`31/08/2026`) and decimals (`47,5`) follow the language; the page turns dark. The theme resets to light after a language switch until F-2 stores it.
+8. Keyboard only: Tab through the page → every control shows a focus ring and can be activated with Enter or Space; the overflow menu opens with Enter.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-1` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge feature/F-1: UI kit and gallery (AB#705)" on `main`, 2026-09-17
+- Validated on screen by the owner: 2026-09-17
+- Tests: full suite 76 passed, 0 failed (SharedKernel 8, Architecture 8, Api 4, Web 56), 4 s; full build 7 s, 0 warnings
+- Manual pages: none (dev-only gallery, no end-user behavior changed)
