@@ -47,5 +47,5 @@ Names only. None exists yet; each arrives with the feature that needs it.
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 5 s, 0 warnings (2026-09-17, F-2) |
-| Full test suite | < 5 min | 124 tests, 4 s (2026-09-17, F-2) |
+| Full build | | 9 s, 0 warnings (2026-09-17, F-3) |
+| Full test suite | < 5 min | 156 tests, 9 s (2026-09-17, F-3) |
