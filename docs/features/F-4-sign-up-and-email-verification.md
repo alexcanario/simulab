@@ -1,7 +1,7 @@
 ---
 feature: F-4
 epic: Foundation and identity
-status: building
+status: validating
 board: 708
 version: 1
 ---
@@ -222,6 +222,13 @@ New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus 
 - 2026-09-17 — `Simulab.Web` gets its first typed API client: base address from Aspire service discovery, `AppJson.Options` on every call, no hardcoded host (api-contracts rule).
 - 2026-09-17 — Password hashing uses ASP.NET Identity's default hasher, not Simulae's Argon2id: Argon2id adds a package and a tuning decision this feature does not need. Revisit when a security review asks for it.
 - 2026-09-17 — Token generation keeps Simulae's pattern: a random value, only the hash stored, the raw value only in the email.
+- 2026-09-17 — Build: `AddRateLimiter` does not resolve in this SDK (checked in an isolated class library and Web SDK project), so the per-client limits of BR12 are a small fixed-window `ClientRateLimiter` over `TimeProvider` in the module's Api project. It is deterministic in tests and needs no package; a second instance would need a shared counter, which arrives with Redis (F-5).
+- 2026-09-17 — Build: the Identity context inherits `ModuleDbContext`, not ASP.NET Identity's own context (C# has no multiple inheritance), and maps the identity tables itself with `UserOnlyStore`. The `user_claims`, `user_logins` and `user_tokens` tables are required by that store and are filled from F-5 on.
+- 2026-09-17 — Build: `User` cannot inherit `TenantEntity`, so the base context does not reach it; its `tenant` and `soft_delete` filters are declared in `IdentityModuleDbContext` with the same names and the same capture rule.
+- 2026-09-17 — Build: the API error codes live in the shared resources (one helper, `ErrorText`, turns a code into text) and the screen texts in a new `IdentityResources` set; the email texts are the module's own `IdentityEmails` resources, because the email is rendered server side in the user's language.
+- 2026-09-17 — Build: the address goes from `/sign-up` to `/check-email` through a scoped `SignUpFlow`, never through the query string: it is personal data and would end up in logs.
+- 2026-09-17 — Build (found on screen): the MailPit connection string carries the container's internal SMTP port (1025), not the port the Api reaches from the host, so every email was refused. The app host now passes `ConnectionStrings__mailpit` built from the mapped endpoint, and `SmtpEmailSender` names the host and port it could not reach.
+- 2026-09-17 — Build (found on screen): the legal Markdown files no longer repeat the document title, which the page already shows from the manifest, and the password strength bar is hidden while the field is empty.
 - 2026-09-17 — Screen approved by the owner from the mockup, as designed: full name after the password fields, the confirm-password field kept, `/check-email` as its own page, and the legal documents opening in a new tab — owner, screen questions 1 to 4.
 
 ## Out of scope
@@ -242,8 +249,15 @@ New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus 
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+A container runtime (Docker Desktop or Podman) must be running. Close any app host or IDE running from this checkout first.
+1. Start `dotnet run --project src/Simulab.AppHost` and open the dashboard URL printed on start. Wait for `postgres`, `simulab`, `mailpit`, `api` and `web` to reach Running.
+2. Open the `web` URL and go to `/sign-up`. Submit the empty form: each required field shows its own message, the two acceptances show theirs, and nothing is sent. The orange notice above says the legal texts are a draft.
+3. Fill in an address of yours, the password `Estudar#2026!` twice, tick the three boxes and create the account. The page moves to "Check your email" with your address, and the resend button counts down from 60 s.
+4. Open the `mailpit` URL from the dashboard: the message is there, in the language of the app, with a "Confirm email" button. Click the link inside it: the page says "Email verified". There is no sign-in link yet — sign-in is F-5.
+5. Open the same link again: it still says "Email verified" (clicking twice is not an error). Now change one character of the token in the address bar and reload: the page says the link is not valid and offers sign-up.
+6. Go back to `/sign-up` and repeat step 3 with the **same** address: the answer is the same "Check your email" page, and no second message arrives in Mailpit. (An address that is already registered is never revealed.)
+7. Switch the language to Português (Portugal) with the globe, then to English, on `/sign-up`, `/terms` and `/privacy`: every text changes, including the field labels, the draft notice and the document body. Switch the theme (moon/sun) on the same pages.
+8. On `/check-email`, press "Send a new link" as soon as the counter ends, then press it again at once: the second attempt is refused by the server and no extra message arrives in Mailpit.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

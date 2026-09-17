@@ -26,7 +26,8 @@ public sealed class LegalDocumentEndpointTests : IdentityApiTests
         document.Locale.Should().Be(locale);
         document.Version.Should().Be(SignUpForm.CurrentVersion);
         document.EffectiveDate.Should().Be(new DateOnly(2026, 9, 17));
-        document.BodyHtml.Should().Contain("<h1>");
+        // The page shows the title from the manifest, so the body starts at its first section.
+        document.BodyHtml.Should().Contain("<h2>").And.NotContain("<h1>");
         // AC12: the texts that ship are drafts until the owner replaces them.
         document.IsPlaceholder.Should().BeTrue();
     }
