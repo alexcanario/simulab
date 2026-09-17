@@ -1,0 +1,24 @@
+using System.Reflection;
+
+namespace Simulab.ArchitectureTests;
+
+/// <summary>The production assemblies the rules run against, and the repository root.</summary>
+internal static class SolutionAssemblies
+{
+    public static readonly IReadOnlyList<Assembly> All =
+    [
+        typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
+        typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
+        typeof(Simulab.Web.Resources.Shared).Assembly,
+        typeof(Microsoft.Extensions.Hosting.Extensions).Assembly // Simulab.ServiceDefaults
+    ];
+
+    public static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Simulab.slnx")))
+            directory = directory.Parent;
+
+        return directory?.FullName ?? throw new InvalidOperationException("Simulab.slnx was not found above the test output folder.");
+    }
+}

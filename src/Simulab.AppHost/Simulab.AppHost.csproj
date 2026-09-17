@@ -1,0 +1,13 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>8daf77c8-2a30-4e41-9ee8-56b5d8331a44</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\Simulab.Web\Simulab.Web.csproj" />
+  </ItemGroup>
+
+</Project>

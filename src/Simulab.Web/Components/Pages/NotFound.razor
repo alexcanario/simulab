@@ -1,0 +1,8 @@
+@page "/not-found"
+@layout MainLayout
+@inject IStringLocalizer<Shared> L
+
+<PageTitle>@L["NotFound.Title"]</PageTitle>
+
+<MudText Typo="Typo.h1" GutterBottom="true">@L["NotFound.Title"]</MudText>
+<MudText Typo="Typo.body1">@L["NotFound.Message"]</MudText>

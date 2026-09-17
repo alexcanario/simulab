@@ -1,0 +1,23 @@
+# Workflow
+
+- The chat is where ideas mature; the disk is the source of truth. Every decision that matters ends in a file with a `status:` header.
+- Status flow: `idea → refining → approved → building → validating → done`. Never skip a status.
+- No production code before the item is `approved`. Reading code to refine is fine; writing it is not.
+- Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not.
+- An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
+- WIP limit: one item in `building` or `validating`. A new request during a build becomes an `idea`, not work.
+- Confirm the item at the start of the session. Other items only get registered, never executed.
+- Three human gates: approved → validated on screen → merge authorized. An approval never carries over to the next gate.
+- Verify premises in the code before asking. Never ask what the code already answers.
+- Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
+- A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.
+- A change of mind during build is a change note (`/agile:change`); only the affected criteria are re-approved.
+- Stay inside the item's scope. Anything extra you notice becomes an `idea` and is reported, not built.
+- When a solution has several moving parts, also offer the simpler version with its trade-off. The owner decides.
+- Show the first artifact of a repeated pattern before replicating it.
+- The main session does the work. Subagents are for a fresh-context review or for parallel work on different files, each in its own worktree.
+- Verify what a subagent reports against the files and `git log`. A report is not evidence.
+- The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
+- Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
+- End every step with: what changed (files), what is next, who acts next.
+- Quote real command output for builds and tests (counts, duration). Never paraphrase a result.

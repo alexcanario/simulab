@@ -1,0 +1,30 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<Shared> L
+
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h6" Class="app-name">@L["App.Name"]</MudText>
+        <MudSpacer />
+        <LanguageSwitch />
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pa-6">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    @L["Layout.UnhandledError"]
+    <a href="." class="reload">@L["Layout.Reload"]</a>
+    <span class="dismiss" role="button" aria-label="@L["Layout.Dismiss"]">🗙</span>
+</div>
+
+@code {
+    private readonly MudTheme _theme = Theme.SimulabTheme.Create();
+}

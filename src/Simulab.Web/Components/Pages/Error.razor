@@ -1,0 +1,24 @@
+@page "/Error"
+@using System.Diagnostics
+@inject IStringLocalizer<Shared> L
+
+<PageTitle>@L["Error.Title"]</PageTitle>
+
+<MudText Typo="Typo.h1" Color="Color.Error" GutterBottom="true">@L["Error.Title"]</MudText>
+<MudText Typo="Typo.body1">@L["Error.Message"]</MudText>
+
+@if (ShowRequestId)
+{
+    <MudText Typo="Typo.body2" Class="mt-4">@L["Error.RequestId", RequestId!]</MudText>
+}
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

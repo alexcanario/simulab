@@ -1,0 +1,29 @@
+@inject IStringLocalizer<Shared> L
+@inject NavigationManager Navigation
+
+<MudMenu Icon="@Icons.Material.Filled.Language"
+         Color="Color.Inherit"
+         AriaLabel="@L["Layout.LanguageSwitch.Label"]"
+         AnchorOrigin="Origin.BottomRight"
+         TransformOrigin="Origin.TopRight">
+    @foreach (var culture in SupportedCultures.All)
+    {
+        <MudMenuItem OnClick="@(() => Switch(culture))"
+                     Disabled="@(culture.Name == CultureInfo.CurrentUICulture.Name)">
+            <span lang="@culture.Name">@Capitalize(culture.NativeName, culture)</span>
+        </MudMenuItem>
+    }
+</MudMenu>
+
+@code {
+    // A full page load: the culture of a Blazor circuit is fixed when the circuit starts.
+    private void Switch(CultureInfo culture)
+    {
+        var current = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        var target = $"/culture/set?culture={Uri.EscapeDataString(culture.Name)}&redirectUri={Uri.EscapeDataString(current)}";
+        Navigation.NavigateTo(target, forceLoad: true);
+    }
+
+    private static string Capitalize(string name, CultureInfo culture) =>
+        name.Length == 0 ? name : char.ToUpper(name[0], culture) + name[1..];
+}

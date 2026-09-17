@@ -1,0 +1,8 @@
+@page "/"
+@inject IStringLocalizer<Shared> L
+
+<PageTitle>@L["App.Name"]</PageTitle>
+
+<MudText Typo="Typo.h1" GutterBottom="true">@L["Home.Title"]</MudText>
+<MudText Typo="Typo.body1" GutterBottom="true">@L["Home.Tagline"]</MudText>
+<MudAlert Severity="Severity.Info" Class="mt-4">@L["Home.Status"]</MudAlert>

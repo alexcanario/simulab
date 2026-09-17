@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App.Name" xml:space="preserve"><value>Simulab</value></data>
+  <data name="Home.Title" xml:space="preserve"><value>Practice like it is exam day</value></data>
+  <data name="Home.Tagline" xml:space="preserve"><value>Realistic practice exams, and a coach that tells you what to study next.</value></data>
+  <data name="Home.Status" xml:space="preserve"><value>Simulab is being built. Features arrive here one at a time.</value></data>
+  <data name="Layout.LanguageSwitch.Label" xml:space="preserve"><value>Language</value></data>
+  <data name="Layout.UnhandledError" xml:space="preserve"><value>An unexpected error has occurred.</value></data>
+  <data name="Layout.Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="Layout.Dismiss" xml:space="preserve"><value>Dismiss</value></data>
+  <data name="Reconnect.Rejoining" xml:space="preserve"><value>Reconnecting to the server...</value></data>
+  <data name="Reconnect.RetryingIn" xml:space="preserve"><value>Reconnection failed. Trying again in {0} seconds.</value></data>
+  <data name="Reconnect.Failed" xml:space="preserve"><value>Could not reconnect. Try again or reload the page.</value></data>
+  <data name="Reconnect.Retry" xml:space="preserve"><value>Try again</value></data>
+  <data name="Reconnect.Paused" xml:space="preserve"><value>The session was paused by the server.</value></data>
+  <data name="Reconnect.ResumeFailed" xml:space="preserve"><value>Could not resume the session. Try again or reload the page.</value></data>
+  <data name="Reconnect.Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="Error.Title" xml:space="preserve"><value>Something went wrong</value></data>
+  <data name="Error.Message" xml:space="preserve"><value>An error occurred while processing your request.</value></data>
+  <data name="Error.RequestId" xml:space="preserve"><value>Request ID: {0}</value></data>
+  <data name="NotFound.Title" xml:space="preserve"><value>Page not found</value></data>
+  <data name="NotFound.Message" xml:space="preserve"><value>The page you are looking for does not exist.</value></data>
+</root>
