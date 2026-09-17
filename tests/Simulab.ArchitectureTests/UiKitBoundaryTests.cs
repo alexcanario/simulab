@@ -31,6 +31,39 @@ public class UiKitBoundaryTests
         FindViolations(webRoot).Should().BeEmpty("pages use AppDataTable and AppIcons from Components/Ui");
     }
 
+    /// <summary>MudNavLink with OnClick renders a div instead of a link (F-2): no href, not a link for assistive technology.</summary>
+    internal static IReadOnlyList<string> FindNavLinksWithClick(string webRoot) =>
+        [.. Directory.EnumerateFiles(webRoot, "*.razor", SearchOption.AllDirectories)
+            .Where(path => System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(path), @"<MudNavLink\b[^>]*\bOnClick\s*="))
+            .Select(path => Path.GetRelativePath(webRoot, path))];
+
+    [Fact]
+    public void Razor_MudNavLink_HasNoOnClick()
+    {
+        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Simulab.Web");
+
+        Directory.EnumerateFiles(webRoot, "*.razor", SearchOption.AllDirectories)
+            .Should().Contain(path => File.ReadAllText(path).Contains("<MudNavLink", StringComparison.Ordinal), "the rule must match at least one nav link");
+        FindNavLinksWithClick(webRoot).Should().BeEmpty("a nav link must stay a link; react to LocationChanged instead");
+    }
+
+    [Fact]
+    public void FindNavLinksWithClick_LinkWithOnClick_NamesTheFile()
+    {
+        var root = Directory.CreateTempSubdirectory("simulab-nav-link-");
+        try
+        {
+            File.WriteAllText(Path.Combine(root.FullName, "Bad.razor"), "<MudNavLink Href=\"/\"\n  OnClick=\"Close\">Home</MudNavLink>");
+            File.WriteAllText(Path.Combine(root.FullName, "Good.razor"), "<MudNavLink Href=\"/\">Home</MudNavLink> <MudButton OnClick=\"Save\" />");
+
+            FindNavLinksWithClick(root.FullName).Should().Equal("Bad.razor");
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
+    }
+
     [Fact]
     public void FindViolations_FileOutsideKit_NamesTheFile()
     {

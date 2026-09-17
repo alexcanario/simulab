@@ -16,6 +16,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | App host left running: gate names the locked build output; build and ship stop what Claude started | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
+| ⏳ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -68,3 +69,14 @@ Raised by the owner after the bootstrap, approved the same day.
 - Merged: `docs/agile/profile.md` (two test lines: hang timeout, bUnit with MudBlazor), no conflicts; the Simulab section is kept.
 - Left alone: `.editorconfig` (only comments differ; the PascalCase rules are the same). No build file changed, so no rebuild.
 - Declined for now: the `Worktrees:` line in `CLAUDE.md` (added when parallel work is first requested).
+
+## 2026-09-17 — F-2 App shell and navigation
+Approved by the owner the same day.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | `MudNavLink` with `OnClick` renders a `div`, not a link; bUnit tests did not catch it, the screen did | Build check | `tests/Simulab.ArchitectureTests/UiKitBoundaryTests.cs` (`Razor_MudNavLink_HasNoOnClick`) |
+| 2 | With `<base href="/">`, an in-page link (`#main-content`) navigates to `/` | Project rule | `.claude/rules/agile/ui-project.md` |
+| 3 | `plugin` — two defects appeared only on screen (MudBlazor's active nav link style beat the drawer CSS: blue on dark blue; the link above), and the browser pane sends an empty key for Enter | Plugin improvement | This log (see below) |
+
+- ⏳ **Screen check before the coverage table.** In feature-build, open the screen through the app host before the coverage table and check the contrast of library states (active, hover, focus) in both themes; the browser pane cannot send Enter, so keyboard steps always stay in the validation script.
