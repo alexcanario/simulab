@@ -98,7 +98,7 @@ Every future screen is assembled from one set of tested patterns, so behavior, i
 4. Click the delete icon of a row → dialog with a red button "Delete Sample exam 1"; press Esc → dialog closes, snackbar "Action cancelled." at the bottom right for about 4 seconds, with a close button.
 5. In "Row actions with overflow menu": three icons (edit, delete, view) plus the "More actions" menu with Duplicate and Archive; every icon shows a tooltip.
 6. In "Form actions": type a name, click "Go to the home page" → "Discard changes?" appears; cancel it. Try to reload the tab → the browser asks too. Click "Save" → progress on the button, then "Changes saved."; now leaving asks nothing.
-7. Click the moon icon (dark mode), then switch the language to Português (Portugal) with the globe menu → the gallery in dark mode and pt-PT (dates `31/08/2026`, decimals `47,5`).
+7. Switch the language with the globe menu (e.g. English → Português (Portugal)), then click the moon icon → texts, dates (`31/08/2026`) and decimals (`47,5`) follow the language; the page turns dark. The theme resets to light after a language switch until F-2 stores it.
 8. Keyboard only: Tab through the page → every control shows a focus ring and can be activated with Enter or Space; the overflow menu opens with Enter.
 
 ## Delivery
