@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\Simulab.Web\Simulab.Web.csproj" />
   </ItemGroup>

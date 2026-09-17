@@ -3,13 +3,17 @@
     <Project Path="src/Simulab.Api/Simulab.Api.csproj" />
     <Project Path="src/Simulab.AppHost/Simulab.AppHost.csproj" />
     <Project Path="src/Simulab.ServiceDefaults/Simulab.ServiceDefaults.csproj" />
+    <Project Path="src/Simulab.Email/Simulab.Email.csproj" />
+    <Project Path="src/Simulab.Persistence/Simulab.Persistence.csproj" />
     <Project Path="src/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
     <Project Path="src/Simulab.Web/Simulab.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Simulab.Api.Tests/Simulab.Api.Tests.csproj" />
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
+    <Project Path="tests/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
     <Project Path="tests/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
+    <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />
     <Project Path="tests/Simulab.Web.Tests/Simulab.Web.Tests.csproj" />
   </Folder>
 </Solution>

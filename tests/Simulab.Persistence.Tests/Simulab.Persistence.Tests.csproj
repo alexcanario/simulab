@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Simulab.Persistence\Simulab.Persistence.csproj" />
+    <ProjectReference Include="..\Simulab.Testing\Simulab.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
