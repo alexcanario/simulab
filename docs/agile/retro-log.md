@@ -16,8 +16,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | App host left running: gate names the locked build output; build and ship stop what Claude started | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
-| ⏳ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | — |
-| ⏳ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | — |
+| ✅ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | 0.0.11 (`a9babf4`) |
+| ✅ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | 0.0.11 (`a9babf4`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -80,7 +80,7 @@ Approved by the owner the same day.
 | 2 | With `<base href="/">`, an in-page link (`#main-content`) navigates to `/` | Project rule | `.claude/rules/agile/ui-project.md` |
 | 3 | `plugin` — two defects appeared only on screen (MudBlazor's active nav link style beat the drawer CSS: blue on dark blue; the link above), and the browser pane sends an empty key for Enter | Plugin improvement | This log (see below) |
 
-- ⏳ **Screen check before the coverage table.** In feature-build, open the screen through the app host before the coverage table and check the contrast of library states (active, hover, focus) in both themes; the browser pane cannot send Enter, so keyboard steps always stay in the validation script.
+- ✅ **Screen check before the coverage table.** In feature-build, open the screen through the app host before the coverage table and check the contrast of library states (active, hover, focus) in both themes; the browser pane cannot send Enter, so keyboard steps always stay in the validation script.
 
 ## 2026-09-17 — F-3 Data and messaging foundation
 Approved by the owner the same day.
@@ -91,4 +91,10 @@ Approved by the owner the same day.
 | 2 | Three shared projects were born in this item (`Simulab.Persistence`, `Simulab.Email`, `tests/Simulab.Testing`) and the profile was updated only at the end | Project rule | `.claude/rules/agile/project.md` (Data) |
 | 3 | `plugin` — `Aspire.Hosting.Testing` was missing from the refinement package list and had to be asked mid-build | Plugin improvement | This log (see below) |
 
-- ⏳ **Test packages in the refinement question.** In feature-refinement, the package question must cover the packages the tests need (host testing, containers, fakes), not only the ones the production code needs; a missing one becomes a stop mid-build.
+- ✅ **Test packages in the refinement question.** In feature-refinement, the package question must cover the packages the tests need (host testing, containers, fakes), not only the ones the production code needs; a missing one becomes a stop mid-build.
+
+## 2026-09-17 — Plugin notes of F-2 and F-3 delivered in agile@canary 0.0.11
+- Both open notes went into the plugin (commit `a9babf4`), at the owner's request. No ⏳ row is left in the status table.
+- F-2: `feature-build` has a screen check before the coverage table (the component library's own states in light and dark mode, what each element really is, in-page links), and the validation script gains one keyboard-only pass of the main task.
+- F-3: the package question of `feature-refinement` lists what the tests need too (host testing, containers, fakes, UI test libraries), with license and version, so the owner's yes is given once.
+- This project is at 0.0.10 in `.claude/agile/sync.json`. 0.0.11 changes no file this project copies except `docs/agile/workflow.md`; `/agile:sync` brings it, between features.
