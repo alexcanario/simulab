@@ -59,6 +59,15 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Resgate | Resgate (?) | `Redemption` | A user's use of a promo code |
 | Cota / Consumo de IA | Quota / Consumo de IA | `AiQuota` / `AiUsage` | The AI limit of a plan and what a user has consumed in a period |
 | Consentimento | Consentimento | `ConsentRecord` | A recorded acceptance (privacy policy, age declaration) |
+| Cadastro / Criar conta | Registo / Criar conta | `Registration` | A visitor creating an account: sign-up form, endpoint and command |
+| Usuário | Utilizador | `User` | An account that signs in; inherits `IdentityUser<Guid>` (declared exception to `TenantEntity`) |
+| Situação da conta | Estado da conta | `AccountStatus` | `Pending` until the email is verified, then `Active` |
+| Verificação de e-mail | Verificação de e-mail | `EmailVerification` / `EmailVerificationToken` | The single-use hashed token, valid 24 h, that activates an account |
+| Reenvio da verificação | Reenvio da verificação | `ResendVerification` | Asking for a new verification email; throttled |
+| Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) |
+| Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts |
+| Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts |
+| Idioma preferido | Idioma preferido | `PreferredLanguage` | The locale used for this user's emails; editable from F-8 |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
