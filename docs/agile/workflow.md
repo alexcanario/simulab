@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.5 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
+> Version 0.0.7 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
 
 Contents
 1. Concepts in two minutes
@@ -42,6 +42,8 @@ Contents
 
 Subagents are the exception: a fresh-context reviewer for risky changes, or parallel work that does not touch the same files. There is no chain of roles per feature.
 
+**Models.** The model is chosen per activity, on purpose: the independent review runs on the strongest model, code searches on the smallest, bulk mechanical work that the tests verify on a mid model, and the main session on the model you pick. The `reviewer` agent declares its default model; your project overrides it in the "Models" section of `CLAUDE.md` (quiz question 34), never by editing the plugin.
+
 ## 3. Setting up a project
 
 1. Install the plugin:
@@ -60,11 +62,13 @@ Subagents are the exception: a fresh-context reviewer for risky changes, or para
 |---|---|
 | 1. Shape | Type of app (web, mobile, API), architecture profile, deployment target |
 | 2. Data | Database, multi-tenancy, soft delete, auditing |
-| 3. Access | Authentication, RBAC, entitlements/plans, admin back office |
+| 3. Access | Authentication, RBAC, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage |
-| 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility |
+| 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, icon family, how an item is edited, UI kit and gallery |
 | 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments |
-| 7. Quality | Test budget per level, coverage expectations, architecture tests |
+| 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity |
+
+When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 7 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
 Outputs, all in English:
 - `CLAUDE.md` — short (≤ 60 lines), pointing to one profile.
@@ -195,7 +199,11 @@ What every profile shares:
 - **Time budget.** Unit < 30 s, integration < 2 min per test project, full suite < 5 min (smaller for `web-app` and `monolith`, < 10 min for `microservices`). **One PostgreSQL container per test project**, never one per test class.
 - **Architecture tests** guard the boundaries and the English vocabulary in every assembly, and every rule of absence is paired with a rule of presence, so an empty assembly fails.
 
-Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files. One rule per line, at most 30 lines per file.
+Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file.
+
+**Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (a basic one; replace it with yours), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
+
+**One behavior on every screen.** The `ui` rule keeps screens from drifting apart: a pattern is defined once, in a UI kit shown on a dev-only gallery page, and pages use the kit instead of raw library components. One icon family behind semantic names (`AppIcons.Edit`), one way to edit an item (row actions in the last column; dialog for simple entities, own page for complex ones; a name link only opens a read-only detail page), the same hover and focus everywhere, one confirmation dialog for destructive actions, the same feedback, list states, form layout and action vocabulary. Architecture tests forbid raw icons and raw tables outside the kit, and the kit comes before the first screen. The project records its choices (icon family, declared exceptions) in its own rules.
 
 `output-style` sets how Claude talks to you: in pt-BR, answer first, step reports of at most 10 lines, details in the file instead of the chat, one recommendation with its reason, no narration of the work, "not verified" said in those words, and bad news first. Long answers only when a gate failed, a question needs context, or you ask.
 
@@ -253,7 +261,7 @@ Round 2 of 7 — Data.
 ...
 ```
 
-After round 7, Claude shows a summary of every decision and asks for confirmation. Then it creates:
+After round 7, Claude asks the closing question, settles what it raises, shows a summary of every decision and asks for confirmation. Then it creates:
 
 ```
 CLAUDE.md                                  52 lines, points to the profile

@@ -1,13 +1,15 @@
 <Project>
-
+  <!-- Test-only settings on top of the solution-wide file (from agile@canary templates/dotnet). -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
-  <!-- Shared by every test project: xUnit + AwesomeAssertions. -->
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- CA1707: test names are Method_Scenario_Expected. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
   </PropertyGroup>
 
+  <!-- Shared by every test project: xUnit + AwesomeAssertions. -->
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="coverlet.collector" />
@@ -20,5 +22,4 @@
     <Using Include="AwesomeAssertions" />
     <Using Include="Xunit" />
   </ItemGroup>
-
 </Project>

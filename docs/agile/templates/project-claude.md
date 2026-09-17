@@ -32,6 +32,11 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Full suite (ship only): `<test command>` (budget: < 5 min)
 - Run locally: `<app host command>`
 
+## Models
+- Independent review (`/agile:review`): <strongest available model>, passed on the call.
+- Main session (quiz, refinement, build): the session model, chosen by the owner.
+- Code searches and sweeps: <small fast model>. Bulk mechanical work verified by tests: <mid model>.
+
 ## Board
 Board: <GitHub Issues + Projects (`<owner>/<repo>`) via `gh` | Azure Boards (`<org>/<project>`) via `az boards` | none (`docs/agile/backlog.md`)>
 Mapping: epic → feature/bug. No tasks per role.

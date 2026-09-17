@@ -9,7 +9,10 @@ namespace Simulab.SharedKernel.Serialization;
 /// </summary>
 public static class AppJson
 {
+    // RS0030: this is the one place allowed to construct JsonSerializerOptions (rule: build-config).
+#pragma warning disable RS0030
     public static JsonSerializerOptions Options { get; } = Configure(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+#pragma warning restore RS0030
 
     public static JsonSerializerOptions Configure(JsonSerializerOptions options)
     {

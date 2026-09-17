@@ -9,7 +9,7 @@ namespace Simulab.Web.Tests;
 /// <summary>A key added to one language must be added to all three (rule: i18n).</summary>
 public class ResourceParityTests
 {
-    private static readonly ResourceManager Manager = new(typeof(Shared).FullName!, typeof(Shared).Assembly);
+    private static readonly ResourceManager Manager = new(typeof(SharedResources).FullName!, typeof(SharedResources).Assembly);
 
     private static HashSet<string> Keys(CultureInfo culture)
     {

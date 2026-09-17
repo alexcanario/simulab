@@ -1,0 +1,10 @@
+M:System.Text.Json.JsonSerializerOptions.#ctor;Use the shared AppJson.Options instance (rule: api-contracts).
+M:System.Text.Json.JsonSerializerOptions.#ctor(System.Text.Json.JsonSerializerDefaults);Use the shared AppJson.Options instance (rule: api-contracts).
+M:System.Text.Json.JsonSerializerOptions.#ctor(System.Text.Json.JsonSerializerOptions);Use the shared AppJson.Options instance (rule: api-contracts).
+P:System.DateTime.Now;Use TimeProvider.GetUtcNow(); convert to the user's time zone only when displaying (rule: i18n).
+P:System.DateTime.Today;Use TimeProvider.GetUtcNow(); convert to the user's time zone only when displaying (rule: i18n).
+P:System.DateTimeOffset.Now;Use TimeProvider.GetUtcNow() (rule: i18n).
+M:System.Threading.Thread.Sleep(System.Int32);Wait on a condition with a timeout (profile: test strategy).
+M:System.Threading.Thread.Sleep(System.TimeSpan);Wait on a condition with a timeout (profile: test strategy).
+N:FluentAssertions;Commercial license from version 8. Use AwesomeAssertions.
+N:MassTransit;Commercial license from version 9. Use in-process events or a broker client with a free license.

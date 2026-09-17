@@ -28,10 +28,8 @@ public class AppJsonTests
     }
 
     [Fact]
-    public void Configure_does_not_add_the_enum_converter_twice()
+    public void The_shared_options_have_one_enum_converter()
     {
-        var options = AppJson.Configure(AppJson.Configure(new JsonSerializerOptions(JsonSerializerDefaults.Web)));
-
-        options.Converters.OfType<System.Text.Json.Serialization.JsonStringEnumConverter>().Should().ContainSingle();
+        AppJson.Options.Converters.OfType<System.Text.Json.Serialization.JsonStringEnumConverter>().Should().ContainSingle();
     }
 }

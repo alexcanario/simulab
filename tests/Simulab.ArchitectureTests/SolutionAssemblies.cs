@@ -9,7 +9,7 @@ internal static class SolutionAssemblies
     [
         typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
         typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
-        typeof(Simulab.Web.Resources.Shared).Assembly,
+        typeof(Simulab.Web.Resources.SharedResources).Assembly,
         typeof(Microsoft.Extensions.Hosting.Extensions).Assembly // Simulab.ServiceDefaults
     ];
 

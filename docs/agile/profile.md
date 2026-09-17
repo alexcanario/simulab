@@ -41,12 +41,16 @@ tests/
   <App>.Web.Tests/               bUnit
   <App>.ArchitectureTests/
 ```
+Every solution root also has `Directory.Build.props`, `Directory.Packages.props` (central package versions), `.editorconfig`, `BannedSymbols.txt` and `global.json`, copied from the plugin at bootstrap; rules the build can check live there, and the Stop gate fails on new warnings.
 
 ## Where business rules live
 - A rule about one entity lives in that entity (`Domain/`): methods that return `Result`, no public setters on ruled state.
 - A rule that needs data or several entities lives in the feature handler.
 - CRUD without rules is a thin slice: endpoint → `DbContext`. No repository, no mediator, no mapping library, no interface with a single implementation.
 - Add structure on the second use, not the first: a domain service when two features share a rule, an abstraction when a second implementation exists.
+- Modules talk only through `Contracts`: a query interface or an in-process integration event. Never another module's `DbContext`, tables or entities.
+- EF mappings are `IEntityTypeConfiguration<T>` classes in `Data/Configurations/`. Tenant and soft-delete filters are global, never repeated per query.
+- The UI validates for comfort only. The API is the authority.
 - The default is per module, not per solution: a module may use the Clean Architecture variant below while its neighbours stay with one project.
 
 ## Variant: Clean Architecture module (five projects)
@@ -62,9 +66,6 @@ Modules/<Module>/
 - The dependency rule points inward: `Api → Application → Domain`, `Infrastructure → Application`. `Domain` and `Application` never reference EF Core or ASP.NET.
 - A port exists only when `Application` needs something from outside (persistence with rules, clock, external service). Simple reads may use a query interface over the `DbContext`.
 - The architecture tests add these directions for the module, and the Stop gate treats the five projects as one unit through their references.
-- Modules talk only through `Contracts`: a query interface or an in-process integration event. Never another module's `DbContext`, tables or entities.
-- EF mappings are `IEntityTypeConfiguration<T>` classes in `Data/Configurations/`. Tenant and soft-delete filters are global, never repeated per query.
-- The UI validates for comfort only. The API is the authority.
 
 ## Test strategy and time budget
 | Level | What | Budget |
@@ -88,3 +89,4 @@ Modules/<Module>/
 - `Api` contains no entities and no handlers.
 - Vocabulary: identifiers in **every** assembly (modules, Api and Web) are English; forbidden terms come from `docs/glossary.md`.
 - Every rule of absence is paired with a rule of presence (the test asserts it matched at least one type). An empty assembly must fail, not pass.
+- Screens follow the `ui` rule: a UI kit and a dev-only gallery come before the first screen; pages use the kit, icons go through semantic names, and architecture tests forbid raw icons and raw tables outside the kit.

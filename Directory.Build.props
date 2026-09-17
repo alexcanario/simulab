@@ -1,12 +1,27 @@
 <Project>
-
-  <!-- Properties shared by every project (src/ and tests/). A property repeated in three or more projects moves here. -->
+  <!-- Shared by every project of the solution (from agile@canary templates/dotnet). A property repeated in three or more projects moves here. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The app ships in pt-BR, pt-PT and en: cultures must work everywhere, containers included. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
     <NeutralLanguage>en</NeutralLanguage>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Rules become build warnings; the agile gate fails on NEW warnings against the committed baseline. -->
+    <!-- Do not turn on TreatWarningsAsErrors: code imported from Simulae must still build while it is being converted. -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- IDE0005 (unnecessary using) is only reported when documentation output is on. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Link="BannedSymbols.txt" />
+  </ItemGroup>
 </Project>

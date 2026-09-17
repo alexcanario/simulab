@@ -51,4 +51,4 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 - Every AI call goes through `IAiGateway`, which checks `IEntitlementService` and records usage and cost.
 - Modules and pages never read plan columns; they ask `IEntitlementService`.
 - Never reference MassTransit, RabbitMQ or FluentAssertions.
-- Screens follow `.claude/rules/agile/ui.md`: UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
+- Screens follow the rules `ui` (core) and `ui-project` (Simulab choices): UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
