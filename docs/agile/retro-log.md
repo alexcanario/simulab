@@ -2,6 +2,23 @@
 
 One entry per retro: date, item, lessons and where each one went.
 
+## Plugin notes — status
+Every note tagged `plugin` in this log, and what happened to it in agile@canary (`D:\dev\agile-canary`). ✅ = implemented in the plugin · ⏳ = still open. A new `plugin` note gets a row here with ⏳.
+
+| Status | Note | From | Plugin version (commit) |
+|---|---|---|---|
+| ✅ | Model per agent and activity | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | UI standards as a core rule, quiz questions, UI kit before the first screen | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | Bootstrap quiz gaps: trials and promo codes, closing question, reading an existing code base | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | PascalCase for constants and `static readonly` in the template `.editorconfig` | Sync to 0.0.7 | 0.0.10 (`b7128e5`) |
+| ✅ | A command to refresh the project copies (`/agile:sync`) | Sync to 0.0.7 | 0.0.8 (`0361053`) |
+| ✅ | Parallel work on request (`/agile:build <id> --worktree`) | Owner question | 0.0.9 (`8ab237e`) |
+| ✅ | App host left running: gate names the locked build output; build and ship stop what Claude started | F-1 | 0.0.10 (`b7128e5`) |
+| ✅ | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
+| ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
+
+This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
+
 ## 2026-09-17 — Bootstrap session (no item)
 Raised by the owner after the bootstrap, approved the same day.
 
@@ -12,16 +29,16 @@ Raised by the owner after the bootstrap, approved the same day.
 | 3 | `plugin` — agents and skills in agile@canary declare no `model:`; the `reviewer` inherits whatever the session runs | Plugin improvement | This log (see below) |
 
 ### Plugin notes (`plugin`)
-- **Model per agent and activity.** Add `model:` to `agents/reviewer.md` (strongest available) and consider it for skills. Add a "Models" table to `templates/project-claude.md` and a question to the bootstrap quiz (round 7 or a new round): which model for review, for bulk mechanical work, for searches. The project override should live in `CLAUDE.md` so the owner can change it without touching the plugin.
-- **UI standards as a core rule.** Consider a `rules/core/ui.md` with the stack-neutral parts (one behavior everywhere, one icon family behind semantic names, one way to edit an item, destructive-action confirmation, list states, action vocabulary) and a quiz question in round 5 (icon family, edit pattern). Consider a "UI kit and gallery" step in the web profiles before the first screen is built.
-- **Bootstrap quiz gaps found in this session.** Entitlements were reduced to "plans with features" and the owner had to raise time-bound grants and promo codes; taxonomy shape came up only after the summary. Suggestion: in round 3, when the brief mentions plans, ask about trials, time-bound grants and usage limits; add a closing question "which domain concept worries you most?" before the summary.
+- ✅ **Model per agent and activity.** Add `model:` to `agents/reviewer.md` (strongest available) and consider it for skills. Add a "Models" table to `templates/project-claude.md` and a question to the bootstrap quiz (round 7 or a new round): which model for review, for bulk mechanical work, for searches. The project override should live in `CLAUDE.md` so the owner can change it without touching the plugin.
+- ✅ **UI standards as a core rule.** Consider a `rules/core/ui.md` with the stack-neutral parts (one behavior everywhere, one icon family behind semantic names, one way to edit an item, destructive-action confirmation, list states, action vocabulary) and a quiz question in round 5 (icon family, edit pattern). Consider a "UI kit and gallery" step in the web profiles before the first screen is built.
+- ✅ **Bootstrap quiz gaps found in this session.** Entitlements were reduced to "plans with features" and the owner had to raise time-bound grants and promo codes; taxonomy shape came up only after the summary. Suggestion: in round 3, when the brief mentions plans, ask about trials, time-bound grants and usage limits; add a closing question "which domain concept worries you most?" before the summary.
 
 ## 2026-09-17 — Plugin notes delivered; project brought to agile@canary 0.0.7
 - The three `plugin` notes above went into agile@canary **0.0.7** (commit `97053a3` in `D:\dev\agile-canary`, with the owner's authorization): `model:` on the reviewer, core rule `ui`, quiz questions 13b, 23b–23d, 34 and the closing question.
 - This project was refreshed by hand from 0.0.4 to 0.0.7 (there is no `/agile:sync` yet): `workflow.md`, templates, profile (Simulab section kept), rules `build-config` and `ui` (core). The Simulab UI choices moved from `ui.md` to `ui-project.md`.
 - Build configuration from `templates/dotnet/` adopted: `.editorconfig`, `BannedSymbols.txt`, `global.json`, `.gitattributes`, analyzers in `Directory.Build.props`. `TreatWarningsAsErrors` is now **off**, as the core rule says: the gate fails on new warnings instead.
 - Findings fixed, not suppressed: unused using, `Shared` renamed `SharedResources` (CA1716), a test that constructed `JsonSerializerOptions`. Two local, commented pragmas: `Error` (CA1716, Visual Basic keyword only) and `AppJson` (RS0030, the one allowed place).
-- `plugin` — the template `.editorconfig` asks `_camelCase` for every private field, constants and `static readonly` included. This project added a PascalCase rule for those two in its own `.editorconfig`. Proposed for `templates/dotnet/.editorconfig` (the owner's file, not edited).
+- ✅ `plugin` — the template `.editorconfig` asks `_camelCase` for every private field, constants and `static readonly` included. This project added a PascalCase rule for those two in its own `.editorconfig`. Proposed for `templates/dotnet/.editorconfig` (the owner's file, not edited).
 
 ## 2026-09-17 — agile@canary 0.0.8: `/agile:sync`
 - The manual refresh done twice today became the command `/agile:sync` (plugin commit `0361053`, with the owner's authorization). From now on plugin updates reach this project through it, between features.
@@ -35,6 +52,13 @@ Raised by the owner after the bootstrap, approved the same day.
 | 3 | bUnit + MudBlazor tests hung the suite for 5 minutes: `await InvokeAsync` waited for a dialog result, and MudBlazor services need async disposal | Project rule + plugin improvement | `.claude/rules/agile/project.md` ("UI tests"); `KitTestContext` in `tests/Simulab.Web.Tests/Ui`; this log |
 
 ### Plugin notes (`plugin`)
-- **App host left running.** `feature-build` should stop any app host Claude started (preview) before ending the turn; `gate.js` could detect MSB3027/MSB3021 "file is locked" and report "close the app host" instead of a plain build failure.
-- **Commit on the wrong branch.** Skills should check `git branch --show-current` right before each commit; consider a PreToolUse hook that refuses `git commit` on the main branch outside `/agile:ship` or an explicit authorization.
-- **Hanging tests.** `gate.js` (stop and ship) should run `dotnet test` with `--blame-hang-timeout` so a hung test fails in seconds with its name instead of blocking the turn.
+- ✅ **App host left running.** `feature-build` should stop any app host Claude started (preview) before ending the turn; `gate.js` could detect MSB3027/MSB3021 "file is locked" and report "close the app host" instead of a plain build failure.
+- ✅ **Commit on the wrong branch.** Skills should check `git branch --show-current` right before each commit; consider a PreToolUse hook that refuses `git commit` on the main branch outside `/agile:ship` or an explicit authorization.
+- ✅ **Hanging tests.** `gate.js` (stop and ship) should run `dotnet test` with `--blame-hang-timeout` so a hung test fails in seconds with its name instead of blocking the turn.
+
+## 2026-09-17 — Plugin notes of F-1 delivered in agile@canary 0.0.10
+- The owner asked to bring every open recommendation of this log to the plugin. Done in 0.0.10 (plugin commit `b7128e5`); 0.0.9 (`8ab237e`) had added `--worktree`. The status table at the top of this file now tracks every `plugin` note.
+- What changed for this project once it syncs: the gate says "build blocked" and names the process when an app host locks the DLLs; a test running for more than 120 s fails with its name; a commit on `main` is refused while `feature/F-<n>` is open and checked out nowhere (bypass: the comment `# agile:main-ok`, after the owner's yes).
+- How it was implemented differs from the note in one point: the guard does not look for "outside `/agile:ship`" (a hook cannot know which skill is running). It looks at git: current branch is main, no merge in progress, an unmerged item branch that no worktree holds.
+- Not verified inside a real session yet: the `PreToolUse` hook firing on the PowerShell tool, and its message reaching Claude. Tested from the command line (nine scenarios).
+- This project is still at 0.0.8 in `.claude/agile/sync.json`. Run `/agile:sync` between features, after updating the installed plugin.
