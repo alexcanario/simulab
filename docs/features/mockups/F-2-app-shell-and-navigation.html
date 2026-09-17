@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-2 App shell and navigation - mockup</title>
+<style>
+  :root {
+    --primary: #2478C5; --primary-lighten: #EBF3FD;
+    --background: #F2F5FB; --surface: #FFFFFF;
+    --appbar: #0F3266; --appbar-text: #FFFFFF;
+    --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.92);
+    --text: #19243E; --text-2: #4A5A7A; --divider: #D0D8EA;
+    --active-bg: rgba(255,255,255,0.14);
+  }
+  .dark {
+    --primary-lighten: #162540;
+    --background: #0E1828; --surface: #172035;
+    --appbar: #091422; --drawer: #091422;
+    --text: #E0E8F8; --text-2: #7A8EB0; --divider: #263352;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #d9dee8; color: #19243E; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #ccd; font-size: 13px; position: sticky; top: 0; z-index: 50; }
+  .controls label { font-weight: 600; margin-right: 4px; }
+  .controls select, .controls button { font: inherit; padding: 4px 8px; }
+  .note { padding: 8px 16px; font-size: 12px; color: #4A5A7A; }
+  .stage { display: flex; justify-content: center; padding: 16px; }
+  .frame { background: var(--background); color: var(--text); border: 1px solid #99a; border-radius: 8px; overflow: hidden; position: relative; height: 620px; display: flex; flex-direction: column; transition: width .2s; }
+  .frame.desktop { width: 1100px; max-width: 100%; }
+  .frame.phone { width: 380px; }
+  .skip { position: absolute; left: 8px; top: 8px; z-index: 30; background: var(--surface); color: var(--primary); padding: 8px 12px; border-radius: 6px; outline: 2px solid var(--primary); outline-offset: 2px; transform: translateY(-200%); }
+  .skip.show { transform: none; }
+  .appbar { height: 56px; background: var(--appbar); color: var(--appbar-text); display: flex; align-items: center; gap: 4px; padding: 0 8px; flex: none; box-shadow: 0 1px 3px rgba(0,0,0,.2); z-index: 10; }
+  .iconbtn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+  .iconbtn:hover { background: rgba(255,255,255,.12); }
+  .iconbtn:focus-visible, .navlink:focus-visible, .brand:focus-visible { outline: 2px solid #9cc8f2; outline-offset: 2px; }
+  .iconbtn[data-tip]:hover::after { content: attr(data-tip); position: absolute; top: 44px; right: 0; white-space: nowrap; background: #333; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; z-index: 40; }
+  .brand { color: inherit; text-decoration: none; font-weight: 700; font-size: 1.125rem; margin-left: 4px; }
+  .spacer { flex: 1; }
+  .userslot { width: 40px; height: 40px; border: 1px dashed rgba(255,255,255,.35); border-radius: 50%; margin-left: 4px; }
+  .body { flex: 1; display: flex; min-height: 0; position: relative; }
+  .drawer { background: var(--drawer); color: var(--drawer-text); width: 240px; flex: none; overflow: hidden auto; transition: width .2s; padding: 8px 0; }
+  .drawer.mini { width: 56px; }
+  .phone .drawer { position: absolute; top: 0; bottom: 0; left: 0; z-index: 20; transform: translateX(-100%); transition: transform .2s; width: 260px; box-shadow: 2px 0 8px rgba(0,0,0,.3); }
+  .phone .drawer.open { transform: none; }
+  .backdrop { display: none; position: absolute; inset: 0; background: rgba(0,0,0,.4); z-index: 15; }
+  .phone .backdrop.open { display: block; }
+  .section { padding: 16px 16px 4px; font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; white-space: nowrap; }
+  .divider { height: 1px; background: rgba(255,255,255,.18); margin: 8px 8px; }
+  .navlink { display: flex; align-items: center; gap: 16px; height: 44px; padding: 0 16px; margin: 2px 8px; border-radius: 8px; color: inherit; text-decoration: none; cursor: pointer; white-space: nowrap; position: relative; }
+  .navlink:hover { background: rgba(255,255,255,.08); }
+  .navlink[aria-current="page"] { background: var(--active-bg); font-weight: 600; }
+  .navlink[aria-current="page"]::before { content: ""; position: absolute; left: -8px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: #6fb2ee; }
+  .mini .navlink { padding: 0 8px; justify-content: center; gap: 0; margin: 2px 6px; }
+  .mini .navlink .label, .mini .section { display: none; }
+  .mini .navlink:hover::after { content: attr(data-label); position: absolute; left: 52px; background: #333; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; z-index: 40; }
+  main { flex: 1; overflow: auto; padding: 24px; outline: none; }
+  .phone main { padding: 16px; }
+  h1 { font-size: 1.75rem; margin: 0 0 8px; }
+  .crumbs { font-size: .8125rem; color: var(--text-2); margin-bottom: 4px; }
+  .card { background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .alert { background: var(--primary-lighten); border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 10px; margin-top: 16px; }
+  .langmenu { position: absolute; right: 52px; top: 50px; background: var(--surface); color: var(--text); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.25); padding: 4px 0; z-index: 40; display: none; min-width: 180px; }
+  .langmenu.open { display: block; }
+  .langmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; color: inherit; padding: 10px 16px; font: inherit; cursor: pointer; }
+  .langmenu button:hover { background: var(--primary-lighten); }
+  .langmenu button[disabled] { opacity: .5; cursor: default; }
+  svg { width: 24px; height: 24px; fill: currentColor; flex: none; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span><label for="state">State</label>
+    <select id="state">
+      <option value="desktop-expanded">Desktop - menu expanded</option>
+      <option value="desktop-collapsed">Desktop - menu collapsed (icons)</option>
+      <option value="phone-closed">Phone - menu closed</option>
+      <option value="phone-open">Phone - menu open</option>
+      <option value="skip">Skip link focused (keyboard)</option>
+    </select></span>
+  <span><label for="env">Environment</label>
+    <select id="env"><option value="dev">Development</option><option value="prod">Production</option></select></span>
+  <span><label for="route">Current page</label>
+    <select id="route"><option value="home">/ (Home)</option><option value="ui">/dev/ui (UI kit)</option></select></span>
+  <span><label for="lang">Language</label>
+    <select id="lang"><option value="en">en</option><option value="pt-BR">pt-BR</option><option value="pt-PT">pt-PT</option></select></span>
+  <span><label>Theme</label><button id="themeCtl" type="button">light / dark</button></span>
+</div>
+<div class="note">The mockup controls above are not part of the app. Inside the frame, the menu button, the theme switch (moon/sun) and the language menu (globe) work as in the app.</div>
+
+<div class="stage">
+  <div class="frame desktop" id="frame">
+    <a class="skip" id="skip" href="#main-content" data-t="Layout.SkipToContent"></a>
+    <header class="appbar">
+      <button class="iconbtn" id="menuBtn" type="button" aria-expanded="true">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+      <a class="brand" href="#" id="brand">Simulab</a>
+      <span class="spacer"></span>
+      <button class="iconbtn" id="themeBtn" type="button"></button>
+      <button class="iconbtn" id="langBtn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.08 16zm2.95-8H5.08a7.99 7.99 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
+      </button>
+      <span class="userslot" title="User menu slot (empty until F-5)" aria-hidden="true"></span>
+      <div class="langmenu" id="langMenu" role="menu">
+        <button type="button" data-lang="en" lang="en">English</button>
+        <button type="button" data-lang="pt-BR" lang="pt-BR">Português (Brasil)</button>
+        <button type="button" data-lang="pt-PT" lang="pt-PT">Português (Portugal)</button>
+      </div>
+    </header>
+    <div class="body">
+      <div class="backdrop" id="backdrop"></div>
+      <nav class="drawer" id="drawer"></nav>
+      <main id="main-content" tabindex="-1"></main>
+    </div>
+  </div>
+</div>
+
+<script>
+const T = {
+  "Layout.SkipToContent": ["Skip to main content", "Pular para o conteúdo", "Saltar para o conteúdo"],
+  "Layout.HomeLink": ["Simulab, home page", "Simulab, página inicial", "Simulab, página inicial"],
+  "Layout.Menu.Label": ["Main menu", "Menu principal", "Menu principal"],
+  "Layout.Menu.Open": ["Open menu", "Abrir menu", "Abrir menu"],
+  "Layout.Menu.Close": ["Close menu", "Fechar menu", "Fechar menu"],
+  "Layout.Menu.Collapse": ["Collapse menu", "Recolher menu", "Recolher menu"],
+  "Layout.Menu.Expand": ["Expand menu", "Expandir menu", "Expandir menu"],
+  "Layout.LanguageSwitch.Label": ["Language", "Idioma", "Idioma"],
+  "Common.ThemeSwitch.ToDark": ["Switch to dark mode", "Mudar para o modo escuro", "Mudar para o modo escuro"],
+  "Common.ThemeSwitch.ToLight": ["Switch to light mode", "Mudar para o modo claro", "Mudar para o modo claro"],
+  "Nav.Home": ["Home", "Início", "Início"],
+  "Nav.Section.Study": ["Study", "Estudo", "Estudo"],
+  "Nav.Section.Content": ["Content", "Conteúdo", "Conteúdo"],
+  "Nav.Section.Administration": ["Administration", "Administração", "Administração"],
+  "Nav.Section.Development": ["Development", "Desenvolvimento", "Desenvolvimento"],
+  "Nav.Dev.UiKit": ["UI kit", "Kit de interface", "Kit de interface"],
+  "Home.Title": ["Practice like it is exam day", "Pratique como se fosse o dia da prova", "Simulações realistas"],
+  "Home.Tagline": ["Realistic practice exams and a coach that tells you what to study next.", "Simulados realistas e um coach que diz o que estudar em seguida.", "Simulações realistas e um coach que lhe diz o que estudar a seguir."],
+  "Home.Status": ["Simulab is under construction. Features arrive here one at a time.", "O Simulab está em construção. As funcionalidades chegam aqui uma de cada vez.", "O Simulab está em construção. As funcionalidades chegam aqui uma de cada vez."],
+  "Gallery.Title": ["UI kit gallery", "Galeria do kit de interface", "Galeria do kit de interface"],
+  "Gallery.Intro": ["Every kit pattern, with sample data.", "Todos os padrões do kit, com dados de exemplo.", "Todos os padrões do kit, com dados de exemplo."],
+};
+const LANGS = ["en", "pt-BR", "pt-PT"];
+const ICON = {
+  home: '<path d="m12 5.69 5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>',
+  build: '<path d="m22.61 18.99-9.08-9.08c.93-2.34.45-5.1-1.44-7C9.79.61 6.21.4 3.66 2.26L7.5 6.11 6.08 7.52 2.25 3.69C.39 6.23.6 9.82 2.9 12.11c1.86 1.86 4.57 2.35 6.89 1.48l9.11 9.11c.39.39 1.02.39 1.41 0l2.3-2.3c.4-.38.4-1.01 0-1.41zm-3 1.6-9.46-9.46c-.61.45-1.29.72-2 .82-1.36.2-2.79-.21-3.83-1.25C3.37 9.76 2.93 8.5 3 7.26l3.09 3.09 4.24-4.24-3.09-3.09c1.24-.07 2.49.37 3.44 1.31a4.469 4.469 0 0 1 1.24 3.96 4.35 4.35 0 0 1-.88 1.96l9.45 9.45-.88.89z"/>',
+  moon: '<path d="M9.37 5.51A7.35 7.35 0 0 0 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27A7.014 7.014 0 0 1 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>',
+  sun: '<path d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>',
+};
+// Navigation registry, as in BR2-BR5 (sections with no visible item are not shown).
+const NAV = [
+  { key: "Nav.Home", icon: "home", route: "home", section: null },
+  { key: "Nav.Dev.UiKit", icon: "build", route: "ui", section: "Nav.Section.Development", devOnly: true },
+];
+const SECTIONS = ["Nav.Section.Study", "Nav.Section.Content", "Nav.Section.Administration", "Nav.Section.Development"];
+
+const s = { state: "desktop-expanded", env: "dev", route: "home", lang: "en", dark: false, collapsed: false, phoneOpen: false };
+const $ = id => document.getElementById(id);
+const t = key => T[key][LANGS.indexOf(s.lang)];
+const svg = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[name]}</svg>`;
+
+function render() {
+  const phone = s.state.startsWith("phone");
+  const frame = $("frame");
+  frame.className = "frame " + (phone ? "phone" : "desktop") + (s.dark ? " dark" : "");
+  document.documentElement.lang = s.lang;
+  frame.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  $("skip").classList.toggle("show", s.state === "skip");
+
+  const menuLabel = phone ? (s.phoneOpen ? t("Layout.Menu.Close") : t("Layout.Menu.Open"))
+                          : (s.collapsed ? t("Layout.Menu.Expand") : t("Layout.Menu.Collapse"));
+  const menuBtn = $("menuBtn");
+  menuBtn.dataset.tip = menuLabel; menuBtn.setAttribute("aria-label", menuLabel);
+  menuBtn.setAttribute("aria-expanded", String(phone ? s.phoneOpen : !s.collapsed));
+  $("brand").setAttribute("aria-label", t("Layout.HomeLink"));
+
+  const themeLabel = s.dark ? t("Common.ThemeSwitch.ToLight") : t("Common.ThemeSwitch.ToDark");
+  const themeBtn = $("themeBtn");
+  themeBtn.innerHTML = svg(s.dark ? "sun" : "moon");
+  themeBtn.dataset.tip = themeLabel; themeBtn.setAttribute("aria-label", themeLabel);
+  const langBtn = $("langBtn");
+  langBtn.dataset.tip = t("Layout.LanguageSwitch.Label"); langBtn.setAttribute("aria-label", t("Layout.LanguageSwitch.Label"));
+  document.querySelectorAll("#langMenu button").forEach(b => b.disabled = b.dataset.lang === s.lang);
+
+  const drawer = $("drawer");
+  drawer.setAttribute("aria-label", t("Layout.Menu.Label"));
+  drawer.className = "drawer" + (!phone && s.collapsed ? " mini" : "") + (phone && s.phoneOpen ? " open" : "");
+  $("backdrop").className = "backdrop" + (phone && s.phoneOpen ? " open" : "");
+  const visible = NAV.filter(i => !i.devOnly || s.env === "dev");
+  const link = i => `<a class="navlink" href="#" data-route="${i.route}" data-label="${t(i.key)}" ${i.route === s.route ? 'aria-current="page"' : ""}>${svg(i.icon)}<span class="label">${t(i.key)}</span></a>`;
+  let html = visible.filter(i => !i.section).map(link).join("");
+  for (const sec of SECTIONS) {
+    const items = visible.filter(i => i.section === sec);
+    if (!items.length) continue;
+    html += (!phone && s.collapsed) ? '<div class="divider"></div>' : `<div class="section">${t(sec)}</div>`;
+    html += items.map(link).join("");
+  }
+  drawer.innerHTML = html;
+
+  const main = $("main-content");
+  main.innerHTML = s.route === "home"
+    ? `<h1>${t("Home.Title")}</h1><p>${t("Home.Tagline")}</p><div class="alert">${t("Home.Status")}</div>`
+    : `<div class="crumbs">${t("Nav.Section.Development")} / ${t("Gallery.Title")}</div><h1>${t("Gallery.Title")}</h1><p>${t("Gallery.Intro")}</p><div class="card">…</div>`;
+}
+
+$("state").onchange = e => {
+  s.state = e.target.value;
+  s.collapsed = s.state === "desktop-collapsed";
+  s.phoneOpen = s.state === "phone-open";
+  render();
+};
+$("env").onchange = e => { s.env = e.target.value; if (s.env === "prod" && s.route === "ui") s.route = "home"; $("route").value = s.route; render(); };
+$("route").onchange = e => { s.route = e.target.value; render(); };
+$("lang").onchange = e => { s.lang = e.target.value; render(); };
+$("themeCtl").onclick = () => { s.dark = !s.dark; render(); };
+$("themeBtn").onclick = () => { s.dark = !s.dark; render(); };
+$("menuBtn").onclick = () => {
+  if (s.state.startsWith("phone")) { s.phoneOpen = !s.phoneOpen; s.state = s.phoneOpen ? "phone-open" : "phone-closed"; }
+  else { s.collapsed = !s.collapsed; s.state = s.collapsed ? "desktop-collapsed" : "desktop-expanded"; }
+  $("state").value = s.state; render();
+};
+$("backdrop").onclick = () => { s.phoneOpen = false; s.state = "phone-closed"; $("state").value = s.state; render(); };
+$("drawer").onclick = e => {
+  const a = e.target.closest(".navlink"); if (!a) return;
+  e.preventDefault(); s.route = a.dataset.route; $("route").value = s.route;
+  if (s.state === "phone-open") { s.phoneOpen = false; s.state = "phone-closed"; $("state").value = s.state; }
+  render();
+};
+$("brand").onclick = e => { e.preventDefault(); s.route = "home"; $("route").value = "home"; render(); };
+$("langBtn").onclick = () => $("langMenu").classList.toggle("open");
+$("langMenu").onclick = e => {
+  const b = e.target.closest("button[data-lang]"); if (!b || b.disabled) return;
+  s.lang = b.dataset.lang; $("lang").value = s.lang; $("langMenu").classList.remove("open"); render();
+};
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("langMenu").classList.remove("open"); if (s.phoneOpen) { s.phoneOpen = false; s.state = "phone-closed"; $("state").value = s.state; render(); } }
+});
+render();
+</script>
+</body>
+</html>
