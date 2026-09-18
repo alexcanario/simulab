@@ -18,8 +18,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
 | ✅ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | 0.0.11 (`a9babf4`) |
 | ✅ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | 0.0.11 (`a9babf4`) |
-| ⏳ | A building block that reads an app-host connection string is exercised through the app host in the item that creates it, not only against a test container | F-4 | |
-| ⏳ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | |
+| ✅ | A building block that reads an app-host connection string is exercised through the app host in the item that creates it, not only against a test container | F-4 | 0.0.15 (`b221360`) |
+| ✅ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -109,3 +109,7 @@ Approved by the owner the same day.
 | 1 | The verification email never reached Mailpit under the app host: the MailPit connection string carries the container's own SMTP port (1025). F-3 tested `IEmailSender` only against a test container, so the wiring was first exercised when F-4 sent an email | Test + plugin | `AppHostModelTests.Api_GetsTheSmtpAddressFromTheMappedEndpoint` (seen failing without the fix) and `Api_GetsTheVerificationLinkOfTheWeb`; `plugin` note |
 | 2 | An approved decision said the `AuthLayout` exception would be written in `ui-project.md`, and it was not | Project rule + plugin | `.claude/rules/agile/ui-project.md` (the missing line); `plugin` note: check decisions that name a file at ship |
 | 3 | BR11 (always the same answer) and AC9 (a code for the throttled resend) contradicted each other and were caught only in build; a code that only an existing account can reach reveals who is registered. F-5 and F-7 face the same risk | Project rule | `.claude/rules/agile/project.md`, "Access and entitlements" |
+
+## 2026-09-18 — Plugin notes of F-4 delivered in agile@canary 0.0.15
+- Both notes went into the plugin (commit `b221360`): `feature-build` exercises anything wired through the app host in the item that creates it; `feature-ship` checks that every decision naming a file is true in that file before `## Delivery`. No ⏳ row is left.
+- Recorded from a temporary worktree of `main` while F-12 was in progress on its own branch. This project is still at 0.0.10 in `.claude/agile/sync.json`; `/agile:sync` after F-12 brings 0.0.11–0.0.15 (workflow copies in en and pt-BR, CA1716 line, rules).
