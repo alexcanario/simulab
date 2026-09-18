@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Simulab.AppHost.Tests;
 
@@ -61,6 +62,21 @@ public class AppHostModelTests : IAsyncLifetime
             .Should().Contain("api");
     }
 
+    /// <summary>B-1: the environment values, the supported way since `GetEnvironmentVariableValuesAsync` was marked obsolete.</summary>
+    private async Task<Dictionary<string, string>> EnvironmentOfAsync(IResource resource)
+    {
+        var options = new DistributedApplicationExecutionContextOptions(DistributedApplicationOperation.Publish)
+        {
+            Services = _builder!.Services.BuildServiceProvider(),
+        };
+
+        var result = await ExecutionConfigurationBuilder.Create(resource)
+            .WithEnvironmentVariablesConfig()
+            .BuildAsync(new DistributedApplicationExecutionContext(options));
+
+        return result.EnvironmentVariables.ToDictionary(pair => pair.Key, pair => pair.Value);
+    }
+
     /// <summary>
     /// F-4 retro: the MailPit connection string carries the container's own SMTP port, which the Api cannot
     /// reach from the host. The Api must get the SMTP address from the mapped endpoint instead.
@@ -68,9 +84,7 @@ public class AppHostModelTests : IAsyncLifetime
     [Fact]
     public async Task Api_GetsTheSmtpAddressFromTheMappedEndpoint()
     {
-        var api = (IResourceWithEnvironment)Resource("api");
-
-        var environment = await api.GetEnvironmentVariableValuesAsync(DistributedApplicationOperation.Publish);
+        var environment = await EnvironmentOfAsync(Resource("api"));
 
         environment.Should().ContainKey("ConnectionStrings__mailpit");
         environment["ConnectionStrings__mailpit"].Should().StartWith("smtp://")
@@ -81,9 +95,7 @@ public class AppHostModelTests : IAsyncLifetime
     [Fact]
     public async Task Api_GetsTheVerificationLinkOfTheWeb()
     {
-        var api = (IResourceWithEnvironment)Resource("api");
-
-        var environment = await api.GetEnvironmentVariableValuesAsync(DistributedApplicationOperation.Publish);
+        var environment = await EnvironmentOfAsync(Resource("api"));
 
         environment.Should().ContainKey("Identity__VerificationUrl");
         environment["Identity__VerificationUrl"].Should().Contain("web.bindings.https").And.EndWith("/verify-email");
