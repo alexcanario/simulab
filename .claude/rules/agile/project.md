@@ -25,6 +25,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Only the `Plans` module reads plan columns. Everyone else asks `IEntitlementService` (`HasFeature`, `GetLimit`, `GetRemaining`).
 - The effective plan is computed at read time from the base plan and the active time-bound grant. No job flips a user back to Free.
 - After a trial expires, AI-made data (coach history, study plan) stays readable and frozen. Block new AI calls, never hide existing data.
+- An anonymous endpoint answers the same way whether an account exists or not: same status, body and code (sign-up, resend, sign-in, password recovery).
 - The OpenIddict password flow is for the first-party Web only. Never register a third-party client for it.
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
 

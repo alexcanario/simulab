@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 
@@ -58,5 +59,33 @@ public class AppHostModelTests : IAsyncLifetime
     {
         Resource("web").Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name)
             .Should().Contain("api");
+    }
+
+    /// <summary>
+    /// F-4 retro: the MailPit connection string carries the container's own SMTP port, which the Api cannot
+    /// reach from the host. The Api must get the SMTP address from the mapped endpoint instead.
+    /// </summary>
+    [Fact]
+    public async Task Api_GetsTheSmtpAddressFromTheMappedEndpoint()
+    {
+        var api = (IResourceWithEnvironment)Resource("api");
+
+        var environment = await api.GetEnvironmentVariableValuesAsync(DistributedApplicationOperation.Publish);
+
+        environment.Should().ContainKey("ConnectionStrings__mailpit");
+        environment["ConnectionStrings__mailpit"].Should().StartWith("smtp://")
+            .And.Contain("mailpit.bindings.smtp")
+            .And.NotContain("mailpit.connectionString");
+    }
+
+    [Fact]
+    public async Task Api_GetsTheVerificationLinkOfTheWeb()
+    {
+        var api = (IResourceWithEnvironment)Resource("api");
+
+        var environment = await api.GetEnvironmentVariableValuesAsync(DistributedApplicationOperation.Publish);
+
+        environment.Should().ContainKey("Identity__VerificationUrl");
+        environment["Identity__VerificationUrl"].Should().Contain("web.bindings.https").And.EndWith("/verify-email");
     }
 }
