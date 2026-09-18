@@ -1,0 +1,58 @@
+@page "/admin/roles"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
+@layout MainLayout
+@inject IdentityApiClient Api
+@inject IStringLocalizer<SharedResources> L
+
+<AppPageHeader Title="@L["Roles.Title"]" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_error)
+{
+    <AppErrorState OnRetry="LoadAsync" />
+}
+else
+{
+    <MudList T="string">
+        @foreach (var name in _roles)
+        {
+            <MudListItem T="string" Text="@name" Icon="@AppIcons.Roles" />
+        }
+    </MudList>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private bool _loading = true;
+    private bool _error;
+    private IReadOnlyList<string> _roles = [];
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    /// <summary>F-9 replaces this read-only list with full role management; today it only proves BR8-BR9 on screen.</summary>
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = false;
+        StateHasChanged();
+
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        var accessToken = user?.FindFirst(Simulab.Web.Services.Auth.WebAuthClaims.AccessToken)?.Value;
+
+        var result = accessToken is null ? null : await Api.GetRoleNamesAsync(accessToken);
+
+        _loading = false;
+        if (result is { IsSuccess: true })
+        {
+            _roles = result.Value!.Names;
+        }
+        else
+        {
+            _error = true;
+        }
+    }
+}

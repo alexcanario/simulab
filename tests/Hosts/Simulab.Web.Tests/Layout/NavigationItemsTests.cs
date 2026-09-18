@@ -6,10 +6,12 @@ namespace Simulab.Web.Tests.Layout;
 
 public class NavigationItemsTests
 {
+    private static bool NoPermissions(string permission) => false;
+
     [Fact]
     public void Visible_Development_ShowsHomeAndUiKit()
     {
-        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: true);
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: true, NoPermissions);
 
         visible.Select(i => i.Route).Should().Equal("/", "/dev/ui");
         NavigationItems.Sections(visible).Select(s => s.Key).Should().Equal(NavigationSection.Development);
@@ -18,14 +20,14 @@ public class NavigationItemsTests
     [Fact]
     public void Visible_Production_ShowsOnlyHome()
     {
-        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: false);
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, NoPermissions);
 
         visible.Select(i => i.Route).Should().Equal("/");
         NavigationItems.Sections(visible).Should().BeEmpty();
     }
 
     [Fact]
-    public void Visible_ItemWithPermission_IsHidden()
+    public void Visible_ItemWithPermission_IsHiddenWithoutIt()
     {
         var items = new[]
         {
@@ -33,10 +35,24 @@ public class NavigationItemsTests
             new NavigationItem(NavigationSection.Study, "/study", AppIcons.Edit, "Nav.Home"),
         };
 
-        var visible = NavigationItems.Visible(items, isDevelopment: true);
+        var visible = NavigationItems.Visible(items, isDevelopment: true, NoPermissions);
 
         visible.Select(i => i.Route).Should().Equal("/study");
         NavigationItems.Sections(visible).Select(s => s.Key).Should().Equal(NavigationSection.Study);
+    }
+
+    [Fact]
+    public void Visible_ItemWithPermission_IsShownWhenGranted()
+    {
+        var items = new[]
+        {
+            new NavigationItem(NavigationSection.Administration, "/admin/roles", AppIcons.Edit, "Nav.Home", RequiredPermission: "roles.manage"),
+            new NavigationItem(NavigationSection.Study, "/study", AppIcons.Edit, "Nav.Home"),
+        };
+
+        var visible = NavigationItems.Visible(items, isDevelopment: true, permission => permission == "roles.manage");
+
+        visible.Select(i => i.Route).Should().Equal("/admin/roles", "/study");
     }
 
     [Fact]

@@ -165,7 +165,7 @@
             return;
         }
 
-        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!);
+        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!, session.Permissions);
         var ticketId = Tickets.Issue(ticket);
 
         // A real browser navigation (BR1's constraint): only this can carry a Set-Cookie response header.
