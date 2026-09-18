@@ -77,6 +77,9 @@ public sealed class RegisterUserHandler(
             return FromIdentityErrors(created);
         }
 
+        // BR2: every new account starts as a Student; there is no other way to sign up.
+        await userManager.AddToRoleAsync(user, IdentityRoles.Student);
+
         await consentStore.AddAsync(
             new ConsentRecord
             {

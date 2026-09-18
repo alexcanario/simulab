@@ -24,4 +24,5 @@ public static class IdentityErrorCodes
     public const string AccountLocked = "identity.account_locked";
     public const string RefreshTokenInvalid = "identity.refresh_token_invalid";
     public const string TokenRevoked = "identity.token_revoked";
+    public const string Forbidden = "identity.forbidden";
 }
