@@ -61,3 +61,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
 - Assertions: AwesomeAssertions. Never FluentAssertions.
+
+## Sessions and retro
+- One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
+- A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
