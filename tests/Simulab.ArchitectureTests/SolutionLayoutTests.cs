@@ -17,7 +17,9 @@ public class SolutionLayoutTests
 
     private static readonly string[] TestsRootProjects = ["Simulab.ArchitectureTests", "Simulab.Testing"];
 
-    private static IReadOnlyList<(string Folder, string Path)> ListedProjects(XDocument solution) =>
+    private static readonly string[] RootFolders = ["src", "tests"];
+
+    private static List<(string Folder, string Path)> ListedProjects(XDocument solution) =>
         solution.Descendants("Project")
             .Select(project => (
                 Folder: project.Parent!.Attribute("Name")!.Value.Trim('/'),
@@ -80,7 +82,7 @@ public class SolutionLayoutTests
         var root = SolutionAssemblies.RepositoryRoot();
         var listed = ListedProjects(LoadSolution()).Select(project => project.Path).ToHashSet();
 
-        var onDisk = new[] { "src", "tests" }
+        var onDisk = RootFolders
             .SelectMany(folder => Directory.EnumerateFiles(Path.Combine(root, folder), "*.csproj", SearchOption.AllDirectories))
             .Select(file => Path.GetRelativePath(root, file).Replace('\\', '/'))
             .Where(path => !path.Contains("/bin/", StringComparison.Ordinal) && !path.Contains("/obj/", StringComparison.Ordinal))
