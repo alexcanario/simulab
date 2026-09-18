@@ -1,7 +1,7 @@
 ---
 bug: B-1
 feature: F-4
-status: approved
+status: validating
 board: 718
 severity: low
 ---
@@ -18,18 +18,23 @@ The AppHost tests read the Api environment through the supported API, with no `C
 `tests/Hosts/Simulab.AppHost.Tests/AppHostModelTests.cs:73` and `:86` call `GetEnvironmentVariableValuesAsync` (added by the F-4 retro, commit `e03cb5c`). Aspire 13.4.6 marks it obsolete in favor of `ExecutionConfigurationBuilder`. No other call to the obsolete method exists in the solution (checked: only this file).
 
 ## Fix
-Confirmed against the installed `Aspire.Hosting` 13.4.6 assembly (reflection, since the source is not vendored). In both tests, replace:
+Central package management floats `Aspire.Hosting` itself to **13.5.4** for this test project (pulled in transitively by `Aspire.Hosting.Redis` 13.5.4, F-5), even though `Aspire.Hosting.Testing` stays pinned at 13.4.6 — so the real obsolete-vs-current API is 13.5.4's, not 13.4.6's. Confirmed by building: the simple `new DistributedApplicationExecutionContext(DistributedApplicationOperation.Publish)` throws at runtime ("`IServiceProvider` is not available"), and `DistributedApplicationExecutionContextOptions.ServiceProvider` is itself obsolete in 13.5.4 in favor of `Services`. Added a helper in `AppHostModelTests`:
 ```csharp
-var environment = await api.GetEnvironmentVariableValuesAsync(DistributedApplicationOperation.Publish);
+private async Task<Dictionary<string, string>> EnvironmentOfAsync(IResource resource)
+{
+    var options = new DistributedApplicationExecutionContextOptions(DistributedApplicationOperation.Publish)
+    {
+        Services = _builder!.Services.BuildServiceProvider(),
+    };
+
+    var result = await ExecutionConfigurationBuilder.Create(resource)
+        .WithEnvironmentVariablesConfig()
+        .BuildAsync(new DistributedApplicationExecutionContext(options));
+
+    return result.EnvironmentVariables.ToDictionary(pair => pair.Key, pair => pair.Value);
+}
 ```
-with:
-```csharp
-var result = await ExecutionConfigurationBuilder.Create(api)
-    .WithEnvironmentVariablesConfig()
-    .BuildAsync(new DistributedApplicationExecutionContext(DistributedApplicationOperation.Publish));
-var environment = result.EnvironmentVariables.ToDictionary(kv => kv.Key, kv => kv.Value);
-```
-`IExecutionConfigurationResult.EnvironmentVariables` is `IEnumerable<KeyValuePair<string, string>>` of the **processed** values (the same shape `GetEnvironmentVariableValuesAsync` returned) — the existing assertions (`ContainKey`, `StartWith`, `Contain`, `NotContain`) do not change. No new package: `ExecutionConfigurationBuilder` is already in `Aspire.Hosting`, referenced transitively through `Aspire.Hosting.Testing` (already in the test project).
+`IExecutionConfigurationResult.EnvironmentVariables` is `IEnumerable<KeyValuePair<string, string>>` of the **processed** values (the same shape `GetEnvironmentVariableValuesAsync` returned) — the existing assertions (`ContainKey`, `StartWith`, `Contain`, `NotContain`) do not change. No new package.
 
 ## Regression test
 - `Api_GetsTheSmtpAddressFromTheMappedEndpoint` and `Api_GetsTheVerificationLinkOfTheWeb` — `Simulab.AppHost.Tests`; both already exist and pass today (the bug is a compiler warning, not a behavior defect, so there is no red test to show — the gate check is the warning count and the baseline entry going back to 0).
@@ -44,9 +49,9 @@ var environment = result.EnvironmentVariables.ToDictionary(kv => kv.Key, kv => k
 - (none)
 
 ## Validation script
-1. `dotnet build Simulab.slnx` → 0 warnings (no `CS0618`).
-2. `dotnet test tests/Hosts/Simulab.AppHost.Tests` → both tests still pass.
-3. `.claude/agile/warnings-baseline.json` no longer has an entry for `AppHostModelTests.cs`.
+1. `dotnet build Simulab.slnx` → 0 warnings, no `CS0618`.
+2. `dotnet test tests/Hosts/Simulab.AppHost.Tests` → 6 passed, 0 failed.
+3. Open `.claude/agile/warnings-baseline.json` → `{}`.
 
 ## Delivery
 - Branch: `bug/B-1`
