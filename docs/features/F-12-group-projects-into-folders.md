@@ -1,7 +1,7 @@
 ---
 feature: F-12
 epic: Foundation and identity
-status: building
+status: validating
 board: 716
 version: 2
 ---
@@ -81,6 +81,8 @@ Make the solution readable by role as it grows (four more modules and two more b
 3. `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard shows Api and Web running.
 4. Open `/sign-up` on the Web → the sign-up screen opens as before.
 5. `git log --follow --oneline src/Hosts/Simulab.Api/Program.cs` → commits from before the move are listed.
+6. Open any `.cs` file in the IDE and remove the braces of a one-line `if` → the IDE marks IDE0011 as a warning, not an error.
+7. Switch the language on `/sign-up` to English → the page reads "Create your account" (the moved Web still finds its resources).
 
 ## Delivery
 - Branch: feature/F-12
