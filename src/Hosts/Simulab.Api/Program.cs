@@ -29,11 +29,14 @@ builder.Services.AddIntegrationEvents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, ClaimsPrincipalCurrentUser>();
 
-// Modules (F-4: Identity; F-5: sign-in, sign-out, OpenIddict, Redis sessions).
+// Refresh-token sessions and the access-token revocation set (F-5). The Aspire client integration (not
+// a plain ConnectionMultiplexer.Connect) is what trusts the local Redis container's TLS certificate.
+builder.AddRedisClient("redis");
+
+// Modules (F-4: Identity; F-5: sign-in, sign-out, OpenIddict).
 builder.Services.AddIdentityModule(
     builder.Configuration,
     builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."),
-    builder.Configuration.GetConnectionString("redis") ?? throw new InvalidOperationException("The connection string 'redis' is missing."),
     builder.Environment.IsDevelopment());
 builder.Services.AddSingleton<ClientRateLimiter>();
 builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);

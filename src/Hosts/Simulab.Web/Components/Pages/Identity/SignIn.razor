@@ -158,15 +158,14 @@
             return;
         }
 
-        var claims = JwtPayload.ReadClaims(result.AccessToken!);
-        var ticket = new SignInTicket(
-            claims.GetValueOrDefault("sub", string.Empty),
-            claims.GetValueOrDefault("email", _email!.Trim()),
-            DisplayName: null,
-            claims.GetValueOrDefault(SessionClaims.SessionJti, string.Empty),
-            result.AccessToken!,
-            result.RefreshToken!);
+        var session = await Auth.GetSessionAsync(result.AccessToken!);
+        if (session is null)
+        {
+            _serverError = Components.Ui.ErrorText.UnexpectedCode;
+            return;
+        }
 
+        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!);
         var ticketId = Tickets.Issue(ticket);
 
         // A real browser navigation (BR1's constraint): only this can carry a Set-Cookie response header.

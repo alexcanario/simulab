@@ -14,7 +14,6 @@ using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Sessions;
 using Simulab.Persistence;
-using StackExchange.Redis;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Simulab.Identity.Infrastructure;
@@ -25,11 +24,15 @@ public static class IdentityModule
     /// <summary>Client id of the single first-party confidential client (F-5, decision 2).</summary>
     public const string WebClientId = "simulab-web";
 
+    /// <summary>
+    /// <paramref name="services"/> already has an <c>IConnectionMultiplexer</c> registered by the host
+    /// (<c>builder.AddRedisClient("redis")</c>): that Aspire client integration is what trusts the local
+    /// Redis container's TLS certificate, which a plain <c>ConnectionMultiplexer.Connect</c> call cannot.
+    /// </summary>
     public static IServiceCollection AddIdentityModule(
         this IServiceCollection services,
         IConfiguration configuration,
         string connectionString,
-        string redisConnectionString,
         bool isDevelopment = false)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -71,10 +74,7 @@ public static class IdentityModule
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));
 
-        // Refresh-token sessions and the access-token revocation set (F-5, BR4-BR7). Registered the same
-        // way the database connection is (Simulab.Persistence.AddAppDatabase): a plain client, no Aspire
-        // client-integration package.
-        services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnectionString));
+        // Refresh-token sessions and the access-token revocation set (F-5, BR4-BR7).
         services.AddScoped<IRefreshSessionStore, RedisRefreshSessionStore>();
 
         services.AddOpenIddict()

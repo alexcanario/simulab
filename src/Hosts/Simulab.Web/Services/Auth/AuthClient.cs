@@ -1,5 +1,8 @@
+using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
+using Simulab.Identity.Contracts;
+using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Web.Services.Auth;
 
@@ -51,7 +54,7 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
     public async Task SignOutAsync(string accessToken, CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/identity/sign-out");
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         try
         {
@@ -61,6 +64,18 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
         {
             // The session still expires on its own (BR4); losing this call only delays the revocation.
         }
+    }
+
+    /// <summary>Reads the just-issued token's own claims back from the Api (build decision: the token may be encrypted).</summary>
+    public async Task<SessionInfoResponse?> GetSessionAsync(string accessToken, CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/identity/session");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        using var response = await http.SendAsync(request, cancellationToken);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<SessionInfoResponse>(AppJson.Options, cancellationToken)
+            : null;
     }
 
     private async Task<TokenResult> RequestAsync(Dictionary<string, string> form, CancellationToken cancellationToken)

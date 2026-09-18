@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
@@ -33,12 +34,31 @@ public static class IdentityEndpoints
         group.MapGet("/legal-documents/{topic}", GetLegalDocumentAsync)
             .WithName("GetLegalDocument");
 
-        // BR9: the only endpoint here that requires a signed-in caller (F-5).
+        // BR9: the only endpoints here that require a signed-in caller (F-5).
         group.MapPost("/sign-out", SignOutAsync)
             .WithName("SignOut")
             .RequireAuthorization();
 
+        group.MapGet("/session", GetSessionAsync)
+            .WithName("GetSession")
+            .RequireAuthorization();
+
         return endpoints;
+    }
+
+    /// <summary>
+    /// Lets the Web read its own just-issued access token's claims without decoding the token itself
+    /// (F-5, build decision: the token may be encrypted, and decoding it is not the Web's job either way).
+    /// </summary>
+    private static IResult GetSessionAsync(ClaimsPrincipal user)
+    {
+        var subject = user.FindFirstValue(OpenIddictConstants.Claims.Subject);
+        var email = user.FindFirstValue(OpenIddictConstants.Claims.Email);
+        var sessionJti = user.FindFirstValue(SessionClaims.SessionJti);
+
+        return subject is null || email is null || sessionJti is null
+            ? Problem(new Error(IdentityErrorCodes.RefreshTokenInvalid, ErrorKind.Validation), StatusCodes.Status400BadRequest)
+            : Results.Ok(new SessionInfoResponse(subject, email, sessionJti));
     }
 
     /// <summary>BR6: drops the caller's own session and revokes its access token, regardless of whether either call finds anything to act on.</summary>
