@@ -1,7 +1,7 @@
 ---
 feature: F-4
 epic: Foundation and identity
-status: validating
+status: done
 board: 708
 version: 2
 ---
@@ -266,8 +266,8 @@ A container runtime (Docker Desktop or Podman) must be running. Close any app ho
 8. Sign up a **second** address and do not open its link. On "Check your email", wait for the counter to end and press "Send a new link": a success message appears, the counter starts again, and exactly one new message for that address arrives in Mailpit. The link in its first message now says it is not valid; the link in the newest one verifies. (The server-side limits are covered by tests; the counter keeps you inside them.)
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: feature/F-4
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-4` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge feature/F-4: sign-up and email verification (AB#708)" on `main`, 2026-09-18
+- Validated on screen by the owner: 2026-09-18
+- Tests: full suite 252 passed, 0 failed (SharedKernel 12, AppHost 4, Architecture 22, Web 136, Persistence 14, Api 5, Identity 57, Email 2), 9 s; full build 12 s, 0 warnings
+- Manual pages: `docs/manual/en/create-account.md`, `docs/manual/pt-BR/create-account.md`, `docs/manual/pt-PT/create-account.md` (and the three indexes)
