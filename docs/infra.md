@@ -51,5 +51,5 @@ Names only. None exists yet; each arrives with the feature that needs it.
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 12 s, 0 new warnings; 2 accepted CS0618 in the baseline (B-1) (2026-09-18, F-5) |
-| Full test suite | < 5 min | 268 tests, 28 s (2026-09-18, F-5) |
+| Full build | | 9 s, 0 warnings; the baseline is empty again (B-1) (2026-09-18, B-1) |
+| Full test suite | < 5 min | 268 tests, 27 s (2026-09-18, B-1) |
