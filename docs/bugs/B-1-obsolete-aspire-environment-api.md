@@ -1,7 +1,7 @@
 ---
 bug: B-1
 feature: F-4
-status: validating
+status: done
 board: 718
 severity: low
 ---
@@ -54,5 +54,7 @@ private async Task<Dictionary<string, string>> EnvironmentOfAsync(IResource reso
 3. Open `.claude/agile/warnings-baseline.json` → `{}`.
 
 ## Delivery
-- Branch: `bug/B-1`
-- Merge: <commit>
+- Branch: `bug/B-1` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge bug/B-1: replace the obsolete Aspire environment API (AB#718)" on `main`, 2026-09-18 (`7231e41`)
+- Validated on screen by the owner: 2026-09-18
+- Tests: full suite 268 passed, 0 failed, 27 s; full build 9 s, 0 warnings; `.claude/agile/warnings-baseline.json` back to `{}`
