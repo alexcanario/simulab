@@ -1,7 +1,7 @@
 ---
 feature: F-5
 epic: Foundation and identity
-status: validating
+status: done
 board: 709
 version: 1
 ---
@@ -164,8 +164,8 @@ A container runtime (Docker Desktop or Podman) must be running. Close any app ho
 8. Sign up a fresh account and, without verifying the email, try to sign in: the "Confirm your email before signing in" alert appears with a "Resend the verification email" action; use it and check Mailpit for a second message.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-5` (deleted after merge)
+- Merge: the `--no-ff` merge commit "Merge feature/F-5: sign-in and sign-out (AB#709)" on `main`, 2026-09-18 (`f44ab02`)
+- Validated on screen by the owner: 2026-09-18
+- Tests: full suite 268 passed, 0 failed (SharedKernel 12, Architecture 27, AppHost 6, Web 138, Persistence 14, Email 2, Identity 63, Api 6), 28 s; full build 12 s, 0 new warnings
+- Manual pages: `docs/manual/en/sign-in-and-sign-out.md`, `docs/manual/pt-BR/sign-in-and-sign-out.md`, `docs/manual/pt-PT/sign-in-and-sign-out.md` (and the three indexes)
