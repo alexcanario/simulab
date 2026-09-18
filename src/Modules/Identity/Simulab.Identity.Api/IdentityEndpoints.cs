@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Simulab.Identity.Application.Registration;
+using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
@@ -31,7 +33,25 @@ public static class IdentityEndpoints
         group.MapGet("/legal-documents/{topic}", GetLegalDocumentAsync)
             .WithName("GetLegalDocument");
 
+        // BR9: the only endpoint here that requires a signed-in caller (F-5).
+        group.MapPost("/sign-out", SignOutAsync)
+            .WithName("SignOut")
+            .RequireAuthorization();
+
         return endpoints;
+    }
+
+    /// <summary>BR6: drops the caller's own session and revokes its access token, regardless of whether either call finds anything to act on.</summary>
+    private static async Task<IResult> SignOutAsync(ClaimsPrincipal user, IRefreshSessionStore sessions, CancellationToken cancellationToken)
+    {
+        var sessionJti = user.FindFirstValue(SessionClaims.SessionJti);
+        if (!string.IsNullOrEmpty(sessionJti))
+        {
+            await sessions.RemoveAsync(sessionJti, cancellationToken);
+            await sessions.RevokeAccessTokenAsync(sessionJti, TokenLifetimes.AccessToken, cancellationToken);
+        }
+
+        return Results.NoContent();
     }
 
     /// <summary>

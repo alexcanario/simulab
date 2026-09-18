@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Npgsql" />
+    <PackageReference Include="Testcontainers.Redis" />
   </ItemGroup>
 
 </Project>

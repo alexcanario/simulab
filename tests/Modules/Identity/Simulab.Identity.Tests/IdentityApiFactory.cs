@@ -26,9 +26,14 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
     /// <summary>Extra configuration a test class adds on top of the defaults.</summary>
     public Action<IWebHostBuilder>? ConfigureHost { get; set; }
 
-    /// <summary>Creates this host's own database. Called before the first request.</summary>
-    public async Task PrepareAsync(string name) =>
+    private string _redisConnectionString = string.Empty;
+
+    /// <summary>Creates this host's own database and points it at the shared Redis container. Called before the first request.</summary>
+    public async Task PrepareAsync(string name)
+    {
         _connectionString = await PostgresServer.CreateDatabaseAsync(name);
+        _redisConnectionString = await RedisServer.ConnectionStringAsync();
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -36,6 +41,7 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
 
         builder.UseSetting("ConnectionStrings:simulab", _connectionString);
         builder.UseSetting("ConnectionStrings:mailpit", "smtp://localhost:1025");
+        builder.UseSetting("ConnectionStrings:redis", _redisConnectionString);
         builder.UseSetting("Database:ApplyMigrationsOnStart", "true");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -43,6 +49,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
                 ["Email:FromAddress"] = "no-reply@simulab.app",
                 ["Email:FromName"] = "Simulab",
                 ["Identity:VerificationUrl"] = "https://localhost/verify-email",
+                ["Authentication:OpenIddict:ClientId"] = TestClient.ClientId,
+                ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
             }));
 
         ConfigureHost?.Invoke(builder);

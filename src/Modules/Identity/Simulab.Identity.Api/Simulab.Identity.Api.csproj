@@ -5,6 +5,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The token endpoint (F-5) talks to OpenIddict directly, not only through Infrastructure's registration. -->
+    <PackageReference Include="OpenIddict.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Simulab.Identity.Application\Simulab.Identity.Application.csproj" />
     <!-- Infrastructure is referenced for composition only (AddIdentityModule), per the profile. -->
     <ProjectReference Include="..\Simulab.Identity.Infrastructure\Simulab.Identity.Infrastructure.csproj" />
