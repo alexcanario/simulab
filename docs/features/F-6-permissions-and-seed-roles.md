@@ -1,9 +1,9 @@
 ---
 feature: F-6
 epic: Foundation and identity
-status: approved
+status: validating
 board: 710
-version: 1
+version: 2
 ---
 # Permissions and seed roles
 
@@ -22,7 +22,7 @@ Give Simulab real access control — three seed roles and a permission-check mec
 ## Users and use cases
 - UC1 A visitor signs up (F-4) and the new account gets the Student role automatically, with no extra step.
 - UC2 An Admin (assigned outside the UI in v1) sees "Roles" in the app bar's Administration section; a Student or Curator does not.
-- UC3 An Admin opens `/admin/roles` and sees a "coming soon" placeholder that F-9 replaces later; a Student who opens the same address directly gets the ordinary Not Found page.
+- UC3 An Admin opens `/admin/roles` and sees the three seed role names (a minimal list, not yet the full back office F-9 replaces it with); a Student who opens the same address directly gets the ordinary Not Found page.
 - UC4 A caller without `identity.roles.manage` gets a 403 from an endpoint that requires it, even with an otherwise valid, unexpired access token; a caller with it succeeds.
 - UC5 A developer runs the app host and assigns Curator or Admin to a test account by hand (documented step), since F-9 does not exist yet.
 
@@ -35,12 +35,13 @@ Give Simulab real access control — three seed roles and a permission-check mec
 - BR6 `NavigationItems.Visible` shows an item with a `RequiredPermission` only when the current visitor's cached permissions contain it (replaces the "always hidden" placeholder from F-2).
 - BR7 A routed page can require a permission the same way (`Routes.razor` moves from `RouteView` to `AuthorizeRouteView`). Opening such a route without the permission renders the app's ordinary Not Found page — never a distinct "forbidden" page, so the route's existence is not revealed to someone without access.
 - BR8 One permission is seeded now: `identity.roles.manage`, assigned to Admin only, reserved for F-9. It gates the new placeholder nav item and page (BR9).
-- BR9 A minimal placeholder page, `/admin/roles` ("Coming soon", same style as the Home page), and its nav item "Roles" (Administration section) exist only to prove BR3–BR7 on screen; F-9 replaces the page's content and keeps the nav item and the gate.
+- BR9 A minimal placeholder page, `/admin/roles` (lists the seed role names, read from `GET /api/v1/identity/roles`), and its nav item "Roles" (Administration section) exist only to prove BR3–BR7 on screen; F-9 replaces the page's content and keeps the nav item and the gate.
 - BR10 In v1 there is no screen to assign Curator or Admin to a user; it is done directly against the database, documented as a temporary step in `docs/infra.md` until F-9 ships.
 
 ## Screens and API
-- Route `/admin/roles` — placeholder page ("Coming soon"), Administration section; requires `identity.roles.manage`.
+- Route `/admin/roles` — placeholder page listing the seed role names, Administration section; requires `identity.roles.manage`.
 - Nav item "Roles" — Administration section, same permission; hidden for anyone without it (BR6).
+- `GET /api/v1/identity/roles` — new: `RoleNamesResponse { Names: string[] }`, the seed role names; requires `identity.roles.manage` (BR3, BR4, BR8, BR9). What `/admin/roles` calls; also the endpoint AC3/AC4 exercise.
 - `GET /api/v1/identity/session` — extended: `SessionInfoResponse` gains `Permissions: string[]` (the caller's effective permission names). Unchanged status codes (F-5).
 - Error codes: `identity.forbidden` (403, BR4).
 
@@ -77,18 +78,33 @@ Give Simulab real access control — three seed roles and a permission-check mec
 - (none)
 
 ## Change notes
-<!-- Added by /agile:change during build. Increase `version` in the header. -->
-<!--
-### v2 — YYYY-MM-DD
-- What: <change>
-- Why: <reason>
-- Affected: <BR/AC ids>; other criteria unchanged.
-- Re-approved: <YYYY-MM-DD>
--->
+### v2 — 2026-09-18
+- What: `/admin/roles` lists the three seed role names (via a new `GET /api/v1/identity/roles`, gated by `identity.roles.manage`) instead of a static "coming soon" text.
+- Why: the endpoint doubles as the concrete example AC3/AC4 exercise for permission enforcement (403 without the permission, 200 with it), and a real list is no more work than a static placeholder while proving BR3-BR7 more directly on screen.
+- Affected: BR9, UC3, Screens and API section; AC3-AC6 now point at this endpoint and page. Other criteria unchanged.
+- Re-approved: 2026-09-18 (owner, in the build session)
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+1. Run the app host (`dotnet run --project src/Hosts/Simulab.AppHost`), open the Web app, sign up a new account and verify its email → the account can sign in.
+2. Open the app bar menu → "Roles" is not shown (Student has no `identity.roles.manage`).
+3. Navigate directly to `/admin/roles` → the ordinary "Page not found" page shows, not a distinct forbidden page.
+4. In the local database, insert a row into `identity.user_roles` for this user and the `Admin` role id (`docs/infra.md`, BR10), then sign out and sign in again.
+5. Open the app bar menu → "Roles" now shows; click it → `/admin/roles` lists Student, Curator, Admin.
+6. Switch the language to pt-BR (language switch in the app bar) → the page title and nav item read "Papéis"; switch to pt-PT → "Perfis".
+7. Tab through the app bar and the nav menu with the keyboard only → the "Roles" link is reachable and shows a focus ring, same as any other nav item.
+8. Check light and dark mode on `/admin/roles` and the "not found" page → both are legible in both modes.
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `PermissionEnforcementTests.SignUp_NewAccount_IsAssignedTheStudentRoleAutomatically` |
+| AC2 | `PermissionEnforcementTests.Migration_SeedsTheThreeRolesAndOnlyAdminHasRolesManage` |
+| AC3 | `PermissionEnforcementTests.GetRoles_SignedInAsStudent_IsForbidden`, `PermissionEnforcementTests.GetRoles_SignedInAsAdmin_ReturnsTheSeedRoleNames` |
+| AC4 | `PermissionEnforcementTests.GetRoles_PermissionRevokedAfterTokenIssued_TakesEffectOnceTheCacheExpires` |
+| AC5 | `NavigationItemsTests.Visible_ItemWithPermission_IsHiddenWithoutIt`, `NavigationItemsTests.Visible_ItemWithPermission_IsShownWhenGranted`, `NavMenuTests.Render_EmptySectionAndPermissionItem_AreNotRendered`, `NavMenuTests.Render_PermissionItem_IsShownOnceTheVisitorHasTheClaim`; validation script step 2, 5 |
+| AC6 | Validation script step 3 (screen-only: `AuthorizeRouteView` + `NotFoundContent`, no bUnit router harness in this codebase yet) |
+| AC7 | `IdentityModuleBoundaryTests.InnerLayers_DoNotDependOnEfCoreOrAspNetCore`, `IdentityModuleBoundaryTests.Application_ReferencesDomainAndContractsOnly` (pre-existing, still green with the new Domain/Infrastructure/Api types) |
+| AC8 | `ResourceParityTests` (Web, all cases); `EmailResourceParityTests` (unaffected, no new email text) |
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

@@ -45,6 +45,16 @@ Names only. None exists yet; each arrives with the feature that needs it.
 | `Authentication:Google:ClientId` / `ClientSecret` | Api | not used in v1 (Google sign-in is off) |
 | `OpenIddict` signing and encryption certificates | Api | local: development certificates (F-5); cloud: Key Vault, planned |
 
+## Assigning Curator or Admin (temporary, until F-9, BR10)
+There is no screen to grant a role in v1. Every new account gets `Student` automatically (F-6); to grant `Curator` or `Admin`, insert the row directly against the module's database:
+```sql
+insert into identity.user_roles (user_id, role_id)
+select u.id, r.id
+from identity.users u, identity.roles r
+where u.email = '<email>' and r.name = 'Admin'; -- or 'Curator'
+```
+The signed-in user must sign out and sign in again for the Web's permission cookie to pick up the change (BR5); the Api's own check (BR3) reflects it within 10 seconds regardless. F-9 replaces this with a back-office screen.
+
 ## Release steps
 1. No release process yet.
 

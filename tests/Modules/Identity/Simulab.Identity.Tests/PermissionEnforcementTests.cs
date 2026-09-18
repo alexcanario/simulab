@@ -10,6 +10,29 @@ namespace Simulab.Identity.Tests;
 public sealed class PermissionEnforcementTests : IdentityApiTests
 {
     [Fact]
+    public async Task Migration_SeedsTheThreeRolesAndOnlyAdminHasRolesManage()
+    {
+        // Touching Services starts the host, which runs the seed this test is about.
+        _ = Factory.Services;
+
+        var (roleNames, grantedTo) = await QueryAsync(async context =>
+        {
+            var names = await context.Roles.Select(r => r.Name!).ToListAsync();
+            var permission = await context.Permissions.SingleAsync(p => p.Name == IdentityPermissions.RolesManage);
+            var granted = await (
+                from rolePermission in context.RolePermissions
+                where rolePermission.PermissionName == permission.Name
+                join role in context.Roles on rolePermission.RoleId equals role.Id
+                select role.Name!)
+                .ToListAsync();
+            return (names, granted);
+        });
+
+        roleNames.Should().BeEquivalentTo(IdentityRoles.All);
+        grantedTo.Should().Equal(IdentityRoles.Admin);
+    }
+
+    [Fact]
     public async Task SignUp_NewAccount_IsAssignedTheStudentRoleAutomatically()
     {
         var client = Client();
