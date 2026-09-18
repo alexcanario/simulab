@@ -1,8 +1,13 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Fixed local-only password (owner decision): easier to reach the container by hand (psql, DataGrip)
+// without checking the dashboard every run. Never used outside local development.
+var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+
 // One PostgreSQL server with the app database. The named volume keeps local data across restarts.
-var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume("simulab-postgres-data");
+var postgres = builder.AddPostgres("postgres", password: postgresPassword)
+    .WithDataVolume("simulab-postgres-data")
+    .WithHostPort(5432);
 
 var database = postgres.AddDatabase("simulab");
 
