@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.10 (draft). Português: [pt-BR](../pt-BR/MANUAL.md).
+> Version 0.0.16 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -18,6 +18,7 @@ Contents
 13. Sessions and pauses
 14. Worked examples
 15. Quick reference
+16. Command flows
 
 ---
 
@@ -74,7 +75,7 @@ Outputs, all in English:
 - `CLAUDE.md` — short (≤ 60 lines), pointing to one profile.
 - `docs/decisions/ADR-0001-foundation.md` — every quiz decision with its reason.
 - `docs/agile/profile.md` — copy of the chosen architecture profile.
-- `docs/agile/workflow.md` and `docs/agile/templates/` — this workflow and the templates, copied into the project.
+- `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` — this workflow in both languages, and `docs/agile/templates/` — the templates, copied into the project.
 - `docs/glossary.md` — business terms and their English identifiers.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
@@ -85,9 +86,9 @@ Outputs, all in English:
 | Status | What happens | Who moves it |
 |---|---|---|
 | `idea` | Captured from the chat with `/agile:idea`. Title and 2-3 lines. | Claude |
-| `refining` | `/agile:refine`: Claude reads the related code, then asks every open question in one round. You answer; at most one follow-up round. The feature file is written. | Claude |
+| `refining` | `/agile:refine`: Claude reads the related code, then asks every open question in one round. The round includes the new packages the item needs, for the code **and for the tests**, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: branch, code, tests for what changed. Only one feature can be here. | Claude |
+| `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, merge after your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 
@@ -200,9 +201,45 @@ What every profile shares:
 - **Simple code.** CRUD is a thin vertical slice (endpoint or page → `DbContext`): no repository, no mediator, no mapping library. A rule lives in its entity, or in the feature handler when it needs data. Structure is added on the second use.
 - **One project per module.** In `modular-monolith` a module is one project plus a `Contracts` project. A module with a rich domain can use the Clean Architecture variant (five projects: Domain, Application, Infrastructure, Api, Contracts); Claude suggests it with a reason, you decide per module, and an ADR records it.
 - **Time budget.** Unit < 30 s, integration < 2 min per test project, full suite < 5 min (smaller for `web-app` and `monolith`, < 10 min for `microservices`). **One PostgreSQL container per test project**, never one per test class.
-- **Architecture tests** guard the boundaries and the English vocabulary in every assembly, and every rule of absence is paired with a rule of presence, so an empty assembly fails.
+- **Architecture tests** guard the boundaries and the English vocabulary in every assembly, and every rule of absence is paired with a rule of presence, so an empty assembly fails. A layout test keeps every project in the folder its profile assigns.
 
-Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file.
+**Folder layout per profile.** Bootstrap creates it, and every project a feature adds later goes into the folder its kind has here; the solution folders mirror the disk folders, and a layout test fails when a project lands elsewhere. `<App>` is your app's name.
+
+`modular-monolith` — hosts, technical building blocks and business modules in separate groups:
+```
+src/Hosts/<App>.AppHost | .ServiceDefaults | .Api | .Web
+src/BuildingBlocks/<App>.SharedKernel | .<Block>        (Persistence, Email, Storage, Ai — created by the first feature that needs it)
+src/Modules/<Module>/<App>.<Module> | .<Module>.Contracts (five projects when the module uses Clean Architecture)
+tests/Hosts/ · tests/BuildingBlocks/ · tests/Modules/<Module>/ · tests/<App>.ArchitectureTests · tests/<App>.Testing
+```
+
+`monolith` — one deployable with the business code inside it:
+```
+src/<App>.AppHost (optional) · src/<App>.Api (Features/, Domain/, Data/, Contracts/, Common/, Resources/) · src/<App>.Web
+tests/<App>.Tests · tests/<App>.Web.Tests
+```
+
+`web-app` — one Blazor project is the whole app:
+```
+src/<App>.Web (Pages/<Area>/, Components/, Features/, Domain/, Data/, Api/, Common/, Resources/)
+tests/<App>.Tests
+```
+
+`microservices` — one solution, one folder per service, each a small monolith:
+```
+src/<App>.AppHost | .ServiceDefaults | .Gateway | .Web
+src/BuildingBlocks/<App>.Messaging
+src/Services/<Service>/<App>.<Service> | .<Service>.Contracts
+tests/<App>.<Service>.Tests · tests/<App>.Web.Tests · tests/<App>.ArchitectureTests · tests/<App>.SystemTests
+```
+
+`mobile` — a testable core, a thin MAUI head, and the backend under its own profile:
+```
+src/<App>.Api (per its profile) · src/<App>.Contracts · src/<App>.Mobile.Core (Features/, Api/, Storage/, Resources/) · src/<App>.Mobile
+tests/<App>.Mobile.Core.Tests · tests/<App>.Tests
+```
+
+Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
 
 **Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (a basic one; replace it with yours), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
 
@@ -560,6 +597,110 @@ Criterion → test: AC1-AC6 covered; AC7 (language switch) in the validation scr
 Status: validating. Validation script: ...
 ```
 
+### 14.9 Two items in parallel
+
+F-6 is a long build in one session. A bug appears and the owner wants it fixed meanwhile, in another session:
+
+```
+> /agile:build B-2 --worktree
+Claude: F-6 is building in this checkout (feature/F-6). B-2 touches Identity/Login only;
+F-6 touches Catalog. No shared schema or screen: they can run in parallel.
+Worktree: D:\dev\wt\examprep\bug-2 (outside the repository). Create it?
+> yes
+Claude: Created bug/B-2 in D:\dev\wt\examprep\bug-2, status building (on that branch).
+Only one app host at a time: stop the one from the main checkout before I open the screen here.
+```
+
+At the start of any session, the status shows both:
+
+```
+[agile] branch feature/F-6
+In progress: F-6 Practice test by level — building (docs/features/F-6-...)
+In progress in a worktree: B-2 — building [bug/B-2] D:/dev/wt/examprep/bug-2
+```
+
+Shipping the bug: the full check runs in the worktree, the merge in the main checkout.
+
+```
+> /agile:ship B-2
+Claude: Close any IDE or app host running from D:\dev\wt\examprep\bug-2, then say "closed".
+> closed
+Claude: Full suite green in the worktree (212 tests, 1 min 58 s). Ready to merge bug/B-2 into main. Authorize?
+> yes
+Claude: Merged. Worktree removed, branch deleted, 0 0 against origin/main. F-6 is now 1 commit behind main:
+bringing it up to date before its next test run.
+```
+
+### 14.10 Updating the plugin and the project
+
+The plugin moved from 0.0.10 to 0.0.13. First the plugin itself (terminal, then a new session):
+
+```
+claude plugin marketplace update canary
+claude plugin update agile@canary
+```
+
+Then, in the project, between features:
+
+```
+> /agile:sync
+Claude: agile@canary 0.0.10 → 0.0.13.
+| File                                   | State  | Proposal                                              |
+| .claude/rules/agile/git.md             | update | copy: branch check before every commit, guard hook    |
+| docs/agile/workflow.md                 | update | copy: manual 0.0.13                                   |
+| docs/agile/profile.md                  | edited | merge: two new test lines; your Simulab section stays |
+| .editorconfig                          | manual | one line differs: CA1716 = none. Add it?              |
+Nothing else changed. Your project.md, ui-project.md and CLAUDE.md are not touched.
+> ok
+Claude: Copied 2, merged 1 (no conflicts), .editorconfig edited. Build 0 warnings; 252 tests green (9 s).
+Recorded 0.0.13 in .claude/agile/sync.json. Commit "chore: sync with agile@canary 0.0.13" on main. Authorize?
+```
+
+### 14.11 When a gate says no
+
+**A running app locks the build.** Claude opened the screen to check it and forgot the app host:
+
+```
+[agile gate] build blocked: ExamPrep.slnx
+the build output is locked by a running process (ExamPrep.Web (18344)): stop the app host, preview or
+debugger started from this folder, then build again.
+Claude: My app host was still running. Stopped it; building again... green.
+```
+
+**A test hangs.** Instead of blocking the turn for minutes:
+
+```
+[agile gate] a test hung (more than 120 s) or the test host crashed: tests/ExamPrep.Web.Tests
+not finished: ExamPrep.Web.Tests.Ui.ConfirmDialogTests.Confirm_ReturnsTrue
+Claude: The test awaited a dialog result inside InvokeAsync. Fixed with the shared test context; 14 tests green (2 s).
+```
+
+**A commit on the wrong branch.** The IDE switched the branch to main while F-6 was being built:
+
+```
+Claude: git commit -m "feat(F-6): add level filter"
+[agile guard] This commit would land on `main`, but `feature/F-6` is not merged and is checked out nowhere.
+The branch was probably switched outside this session (an IDE?). Run `git branch --show-current` ...
+Claude: The checkout is on main; feature/F-6 is where this belongs. I am switching back to feature/F-6
+and committing there. Nothing landed on main.
+```
+
+When a commit really belongs on main while an item is open (a retro note, for instance), Claude asks, and with your yes repeats the command ending with `# agile:main-ok`.
+
+### 14.12 The closing question of the quiz
+
+After round 7, before the summary:
+
+```
+Claude: Closing question, no recommendation: which domain concept worries you most, or did the quiz not touch?
+> The subject taxonomy. Every exam board names subjects differently and some group two of them.
+Claude: Facts from the code you gave me: three fixed levels, questions point to the lowest one, no aliases.
+Options: A) keep three levels; B) two canonical levels + the notice's own subjects mapped to them + aliases.
+Recommendation: B — the notice keeps its vocabulary, analytics compare across exams.
+> B
+Claude: Recorded in ADR-0001 under "After the quiz"; brief capability 2 updated. Now the summary...
+```
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -579,3 +720,195 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:status` | Feature in progress, backlog head, open questions |
 | `/agile:sync` | After a plugin update: refresh the project's copies of rules, templates, workflow and profile |
+
+## 16. Command flows
+
+One diagram per command: what you do, what Claude does, and where it stops to ask you. Rectangles are Claude's steps, diamonds are your decisions, rounded boxes are the result.
+
+### /agile:bootstrap
+```mermaid
+flowchart TD
+    A["product/brief.md exists?"] -->|no| A1(["Template copied; fill it and run again"])
+    A -->|yes| B["Read the brief and the code base it names"]
+    B --> C["Rounds 1 to 7, one message each:<br/>questions with recommendation and reason"]
+    C --> D{"Your answers ('ok' accepts)"}
+    D --> E["Closing question: which domain concept worries you most?"]
+    E --> F["Summary of every decision"]
+    F --> G{"'confirmo'?"}
+    G -->|no| C
+    G -->|yes| H["Generate: CLAUDE.md, ADR-0001, profile, workflow copies,<br/>templates, rules, glossary, infra, manual index"]
+    H --> I{"Epics on the board? Skeleton?"}
+    I -->|yes| J["Create, build, test once, warnings baseline, sync record"]
+    J --> K{"Authorize the first commit?"}
+    K -->|yes| L(["Committed on main; next: /agile:epic or /agile:refine"])
+```
+
+### /agile:idea
+```mermaid
+flowchart TD
+    A["Text from the chat"] --> B["Classify: epic, feature or bug"]
+    B --> C["Find its epic"]
+    C -->|none fits| C1{"Propose an epic; agree?"}
+    C1 -->|yes| D
+    C --> D["Next id, English slug, file from the template<br/>with status: idea; header and Summary only"]
+    D --> E["Mirror on the board; board id in the header"]
+    E --> F(["Nothing else until /agile:refine <id>"])
+```
+
+### /agile:discuss
+```mermaid
+flowchart TD
+    A["An idea with no shape yet"] --> B["Context: brief, decisions, the code it touches"]
+    B --> C["Options with trade-offs, one recommendation"]
+    C --> D{"Your choice, or more questions"}
+    D -->|decide| E["docs/discussions/D-n: decisions, parked points"]
+    D -->|park| E
+    E --> F["Items that came out are captured as idea"]
+    F --> G(["No spec, no code; next: /agile:refine or /agile:epic"])
+```
+
+### /agile:epic
+```mermaid
+flowchart TD
+    A["An epic to plan"] --> B["Read brief, existing items and code"]
+    B --> C["Session-sized features: value, priority,<br/>size, dependencies, screen design yes/no"]
+    C --> D["Order and first release cut"]
+    D --> E{"Agree with the breakdown?"}
+    E -->|change| C
+    E -->|yes| F["docs/epics/<slug>.md; each feature captured as idea<br/>and mirrored on the board"]
+    F --> G(["Next: /agile:refine <first feature>"])
+```
+
+### /agile:refine
+```mermaid
+flowchart TD
+    A["Item in idea or refining"] --> B["status: refining; read brief, profile, code it touches"]
+    B --> C["Check every premise in the code"]
+    C -->|a premise is false| C1["Say so first"]
+    C1 --> D
+    C --> D["One round of numbered questions with recommendations:<br/>use cases, rules, permissions, states, screens, data,<br/>packages for code and tests, out of scope"]
+    D --> E{"Your answers"}
+    E --> F["Fill the file: UC, BR, screens and API,<br/>acceptance criteria, decisions, out of scope"]
+    F --> G{"At most one follow-up round needed?"}
+    G -->|yes| D
+    G -->|no| H["Summary; ask you to read the file"]
+    H --> I{"'aprovo F-n' and no open question?"}
+    I -->|no| H
+    I -->|yes| J(["status: approved; board and commit; next: /agile:build"])
+```
+
+### /agile:screen
+```mermaid
+flowchart TD
+    A["Feature in refining with a new or complex screen"] --> B["Read the feature file, the UI kit and the gallery"]
+    B --> C["Screen section: layout, states, actions, messages, permissions"]
+    C --> D["Standalone HTML mockup: every state,<br/>three languages, kit patterns only"]
+    D --> E{"Your questions and changes"}
+    E -->|change| C
+    E -->|fine| F(["Approved together with the feature"])
+```
+
+### /agile:build
+```mermaid
+flowchart TD
+    A["Item approved?"] -->|no| A1(["Stop: refine and approve first"])
+    A -->|yes| B["Another item building or validating?"]
+    B -->|yes, no --worktree| B1(["Stop and name it"])
+    B -->|yes, --worktree| B2{"Can the two collide? Confirm parallel work"}
+    B2 -->|yes| C2["Worktree outside the repository; work only there"]
+    B -->|no| C["Branch feature/F-n; status: building; plan in 8 steps"]
+    C2 --> D
+    C --> D["Code by the profile and rules; tests per criterion;<br/>affected tests only; small commits, branch checked first"]
+    D --> E{"False premise or impossible criterion?"}
+    E -->|yes| E1["Options A/B → /agile:change"]
+    E1 --> D
+    E -->|no| F["App-host check; screen check in both themes"]
+    F --> G["Stop app hosts you started; build with no new warnings"]
+    G --> H["Coverage table: criterion → test"]
+    H --> I{"Risky change?"}
+    I -->|yes| I1["/agile:review"]
+    I1 --> J
+    I -->|no| J["Validation script, at most 8 steps"]
+    J --> K(["status: validating; you validate on screen"])
+```
+
+### /agile:review
+```mermaid
+flowchart TD
+    A["Risky change before validation"] --> B["Base commit = merge base with main"]
+    B --> C["Reviewer agent, fresh context, review model:<br/>item file, profile, rules, diff — paths only"]
+    C --> D["Findings: blocker / major / minor, file:line"]
+    D --> E["Claude checks every blocker and major in the code"]
+    E --> F["Table: finding, verdict, action"]
+    F --> G{"Your triage"}
+    G --> H["Fix confirmed blockers and majors; tests; rerun"]
+    H --> I(["One line per finding in ## Decisions; build continues"])
+```
+
+### /agile:change
+```mermaid
+flowchart TD
+    A["Change of mind, or a wrong premise, on an approved or building item"] --> B["Change note: what changed, why,<br/>which criteria are affected"]
+    B --> C["New version of the file; affected criteria rewritten"]
+    C --> D{"Re-approve the affected criteria only"}
+    D -->|yes| E(["Work continues; the rest stays approved"])
+```
+
+### /agile:ship
+```mermaid
+flowchart TD
+    A["status: validating and you said 'validado'?"] -->|no| A1(["Ask"])
+    A -->|yes| B["Branch up to date with main; worktree: close IDE and app host"]
+    B --> C["gate.js ship: full rebuild, full suite, architecture tests"]
+    C -->|red| C1["Fix on the branch"]
+    C1 --> C
+    C -->|green| D["App manual in pt-BR, pt-PT, en; infra.md; baseline"]
+    D --> E{"Authorize the merge into main?"}
+    E -->|no| E1(["Wait"])
+    E -->|yes| F["Merge --no-ff; push; verify 0 0,<br/>branch and worktree gone"]
+    F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
+    G --> H["Close the board item with evidence"]
+    H --> I["Retro: at most 3 lessons"]
+    I --> J(["Next item at the top of the backlog"])
+```
+
+### /agile:retro
+```mermaid
+flowchart TD
+    A["A shipped item, or a session"] --> B["At most 3 lessons that change future work"]
+    B --> C["Classify each: project rule, project setting,<br/>build check, template tweak, plugin note, nothing"]
+    C --> D["Show lessons with destination and exact line"]
+    D --> E{"Approve each one"}
+    E --> F["Apply; CLAUDE.md under 60 lines; one line per rule"]
+    F --> G["retro-log.md entry; a plugin note gets a ⏳ row<br/>in the status table with its scope"]
+    G --> H(["Commit with your authorization if on main"])
+```
+
+### /agile:status
+```mermaid
+flowchart TD
+    A["Read-only"] --> B["Git: branch, uncommitted files,<br/>every worktree and its item status"]
+    B --> C["Files: item in progress, approved items with open questions"]
+    C --> D["Board: top 5, drift from the files"]
+    D --> E["Retro log: ⏳ plugin notes, count"]
+    E --> F(["Short report: in progress, next step, waiting on you,<br/>uncommitted work, backlog head, board drift"])
+```
+
+### /agile:sync
+```mermaid
+flowchart TD
+    A["Plugin updated; working tree clean; no item in progress?"] -->|no| A1{"Continue anyway?"}
+    A1 -->|no| A2(["Wait for the item to finish"])
+    A -->|yes| B["sync.js plan: recorded version → plugin version;<br/>one state per file"]
+    A1 -->|yes| B
+    B -->|all same| B1(["Nothing to do"])
+    B --> C["Table: new, update, edited, manual; a proposal per file"]
+    C --> D{"Approve per file"}
+    D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit; never touch project rules"]
+    E --> F{"Build files or checked rules changed?"}
+    F -->|yes| G["Build, full suite, fix findings, baseline"]
+    F -->|no| H
+    G --> H["sync.js record; retro-log entry"]
+    H --> I{"Authorize the commit on main?"}
+    I -->|yes| J(["chore: sync with agile@canary <version>"])
+```
