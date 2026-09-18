@@ -112,6 +112,14 @@
   <data name="email_verification.expired" xml:space="preserve"><value>This verification link expired.</value></data>
   <data name="email_verification.rate_limited" xml:space="preserve"><value>You asked for a link a moment ago. Wait a little before asking again.</value></data>
   <data name="legal_document.not_found" xml:space="preserve"><value>This document does not exist.</value></data>
+  <data name="identity.invalid_credentials" xml:space="preserve"><value>Incorrect email or password.</value></data>
+  <data name="identity.email_not_verified" xml:space="preserve"><value>Confirm your email before signing in.</value></data>
+  <data name="identity.account_locked" xml:space="preserve"><value>Too many attempts. Try again in {0}.</value></data>
+  <data name="identity.refresh_token_invalid" xml:space="preserve"><value>Your session ended. Sign in again.</value></data>
+  <data name="identity.token_revoked" xml:space="preserve"><value>Your session ended. Sign in again.</value></data>
+  <data name="Layout.UserMenu.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Layout.UserMenu.SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Layout.UserMenu.Label" xml:space="preserve"><value>Account menu for {0}</value></data>
   <data name="Gallery.Section.Fields" xml:space="preserve"><value>Form fields</value></data>
   <data name="Gallery.Fields.Hint" xml:space="preserve"><value>Label above, required marker, hint or error below, and the reveal button on a password.</value></data>
   <data name="Gallery.Section.Alerts" xml:space="preserve"><value>Alerts</value></data>

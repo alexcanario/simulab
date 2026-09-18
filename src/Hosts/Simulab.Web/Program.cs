@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
+using Simulab.Identity.Contracts;
 using Simulab.Web.Components;
 using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
 using Simulab.Web.Services;
+using Simulab.Web.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,25 @@ builder.Services.AddSingleton(TimeProvider.System);
 // First typed client (F-4). The base address comes from service discovery: no host or port in the code.
 builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 builder.Services.AddScoped<SignUpFlow>();
+
+// Sign-in and sign-out (F-5). The cookie is what keeps a visitor signed in across page loads; it also
+// carries the access and refresh tokens (never the browser, never JavaScript - see WebAuthClaims).
+builder.Services.AddHttpClient<AuthClient>(client => client.BaseAddress = new Uri("https+http://api"));
+builder.Services.AddSingleton<SignInTicketStore>();
+builder.Services.AddOptions<OpenIddictClientOptions>().Bind(builder.Configuration.GetSection(OpenIddictClientOptions.SectionName));
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "simulab.auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TokenLifetimes.RefreshToken;
+        options.SlidingExpiration = false;
+        options.LoginPath = "/sign-in";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 // Culture: cookie (set by the language switch), then the browser, then en.
 // The user profile becomes the first source when Identity arrives.
@@ -57,10 +79,13 @@ if (!app.Environment.IsDevelopment())
     });
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapDefaultEndpoints();
+app.MapAccountEndpoints();
 
 // Language switch: stores the culture in a cookie and returns to a page inside the app only.
 app.MapGet("/culture/set", (string culture, string? redirectUri, HttpContext context) =>

@@ -23,6 +23,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         // These tests check the host, not a module: no migration runs against the (unreachable) database.
         builder.UseSetting("Database:ApplyMigrationsOnStart", "false");
         builder.UseSetting("ConnectionStrings:mailpit", "smtp://localhost:1025");
+        // Not opened by these host-level tests: IConnectionMultiplexer is only resolved lazily (F-5).
+        builder.UseSetting("ConnectionStrings:redis", "localhost:6379");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {

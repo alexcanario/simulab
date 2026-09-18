@@ -35,4 +35,6 @@ public static class AppIcons
     public const string Mail = Icons.Material.Outlined.MailOutline;
     public const string Verified = Icons.Material.Outlined.CheckCircle;
     public const string Expired = Icons.Material.Outlined.HistoryToggleOff;
+    public const string Account = Icons.Material.Outlined.AccountCircle;
+    public const string SignOut = Icons.Material.Outlined.Logout;
 }

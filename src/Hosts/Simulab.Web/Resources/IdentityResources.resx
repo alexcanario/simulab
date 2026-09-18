@@ -49,4 +49,18 @@
   <data name="VerifyEmail.Invalid.Title" xml:space="preserve"><value>This link is not valid</value></data>
   <data name="VerifyEmail.Invalid.Message" xml:space="preserve"><value>It may have been used already, or copied only in part. Sign up again or ask for a new link.</value></data>
   <data name="VerifyEmail.BackToSignUp" xml:space="preserve"><value>Go to sign-up</value></data>
+  <data name="SignIn.Title" xml:space="preserve"><value>Sign in</value></data>
+  <data name="SignIn.Subtitle" xml:space="preserve"><value>Welcome back. Keep practising.</value></data>
+  <data name="SignIn.Email.Label" xml:space="preserve"><value>Email</value></data>
+  <data name="SignIn.Email.Placeholder" xml:space="preserve"><value>you@example.com</value></data>
+  <data name="SignIn.Email.Required" xml:space="preserve"><value>Enter your email.</value></data>
+  <data name="SignIn.Password.Label" xml:space="preserve"><value>Password</value></data>
+  <data name="SignIn.Password.Required" xml:space="preserve"><value>Enter your password.</value></data>
+  <data name="SignIn.Password.Show" xml:space="preserve"><value>Show password</value></data>
+  <data name="SignIn.Password.Hide" xml:space="preserve"><value>Hide password</value></data>
+  <data name="SignIn.Submit" xml:space="preserve"><value>Sign in</value></data>
+  <data name="SignIn.Submitting" xml:space="preserve"><value>Signing in...</value></data>
+  <data name="SignIn.NoAccount" xml:space="preserve"><value>New here? {0}</value></data>
+  <data name="SignIn.CreateAccount" xml:space="preserve"><value>Create an account</value></data>
+  <data name="SignIn.ResendVerification" xml:space="preserve"><value>Resend the verification email</value></data>
 </root>

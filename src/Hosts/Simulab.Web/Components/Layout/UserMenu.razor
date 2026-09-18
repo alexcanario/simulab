@@ -1,0 +1,35 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+
+@* Fills the slot F-2 (BR1) left empty: BR10 of F-5. *@
+<AuthorizeView>
+    <Authorized Context="authState">
+        <MudTooltip Text="@Label(authState.User)">
+            <MudMenu Class="app-user-menu-button">
+                <ActivatorContent>
+                    <MudIconButton Icon="@AppIcons.Account"
+                                   Color="Color.Inherit"
+                                   aria-label="@Label(authState.User)" />
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Icon="@AppIcons.SignOut" OnClick="SignOutAsync" Class="app-user-menu-signout">@L["Layout.UserMenu.SignOut"]</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </MudTooltip>
+    </Authorized>
+    <NotAuthorized>
+        <MudLink Href="/sign-in" Color="Color.Inherit" Underline="Underline.None" Class="app-sign-in-link">
+            @L["Layout.UserMenu.SignIn"]
+        </MudLink>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string Label(ClaimsPrincipal user) =>
+        L["Layout.UserMenu.Label", user.Identity?.Name ?? user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty];
+
+    // A real navigation (not a Blazor route): the endpoint clears the auth cookie and returns a redirect.
+    private void SignOutAsync() => Navigation.NavigateTo("/account/sign-out", forceLoad: true);
+}

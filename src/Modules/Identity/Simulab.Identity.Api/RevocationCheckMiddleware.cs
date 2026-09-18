@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Serialization;
@@ -13,12 +14,21 @@ namespace Simulab.Identity.Api;
 /// </summary>
 public sealed class RevocationCheckMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, IRefreshSessionStore sessions)
+    public async Task InvokeAsync(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
         var sessionJti = context.User.FindFirst(SessionClaims.SessionJti)?.Value;
-        if (!string.IsNullOrEmpty(sessionJti) && await sessions.IsAccessTokenRevokedAsync(sessionJti, context.RequestAborted))
+        if (string.IsNullOrEmpty(sessionJti))
+        {
+            await next(context);
+            return;
+        }
+
+        // Resolved only for a request that actually carries a session: most anonymous traffic (BR9's
+        // registration, sign-in, legal pages) never needs Redis at all.
+        var sessions = context.RequestServices.GetRequiredService<IRefreshSessionStore>();
+        if (await sessions.IsAccessTokenRevokedAsync(sessionJti, context.RequestAborted))
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await context.Response.WriteAsJsonAsync(

@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bunit;
+using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;
 using Simulab.Web.Components.Ui;
 
@@ -11,6 +12,11 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     private readonly CultureInfo _previousUiCulture = CultureInfo.CurrentUICulture;
     private readonly CultureInfo _previousCulture = CultureInfo.CurrentCulture;
 
+    /// <summary>AuthorizeView (F-5's UserMenu, in the app bar every layout renders) needs this even when
+    /// a test has nothing to do with sign-in. Defaults to an anonymous visitor; a test can call
+    /// <c>Authorization.SetAuthorized(...)</c> to render the signed-in state instead.</summary>
+    protected BunitAuthorizationContext Authorization { get; }
+
     protected KitTestContext()
     {
         CultureInfo.CurrentUICulture = new CultureInfo("en");
@@ -18,6 +24,8 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         Services.AddLocalization();
         Services.AddUiKit();
         JSInterop.Mode = JSRuntimeMode.Loose;
+
+        Authorization = AddAuthorization().SetNotAuthorized();
     }
 
     public Task InitializeAsync() => Task.CompletedTask;
