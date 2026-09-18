@@ -3,7 +3,7 @@ feature: F-4
 epic: Foundation and identity
 status: validating
 board: 708
-version: 1
+version: 2
 ---
 # Sign-up and email verification
 
@@ -40,7 +40,7 @@ Give Simulab its first module and its first real user: a visitor can create an a
 - BR9 Verifying with a valid token sets `Status = Active`, `EmailConfirmed = true` and `EmailVerifiedAt`, and consumes the token. `Pending` is the only status that can become `Active`.
 - BR10 Verifying again with the token of an account that is already active succeeds and changes nothing. An unknown or already consumed token returns `email_verification.invalid`; an expired one returns `email_verification.expired` and the page offers a resend.
 - BR11 Resending always returns the same generic answer. A new email is sent only when the account exists and is `Pending`; every pending token of that user is invalidated first.
-- BR12 Resending is limited to one email every 60 seconds per address, and to 5 per hour per address and per client address. Sign-up is limited to 10 attempts per hour per client address. Refused attempts return `email_verification.rate_limited` or `registration.rate_limited` and send nothing.
+- BR12 Resending is limited to one email every 60 seconds per address and to 5 per hour per address; a refused resend sends nothing and still gets the generic answer of BR11, so the limit never reveals that an address exists. Resending is also limited to 5 per hour per client address, and sign-up to 10 attempts per hour per client address; these do not depend on any account, so they answer `email_verification.rate_limited` or `registration.rate_limited` and send nothing.
 - BR13 The verification email is rendered in the user's `PreferredLanguage` and exists in pt-BR, pt-PT and en. It carries the link with the raw token and says how long the link is valid.
 - BR14 A legal document (terms of use, privacy policy) is a Markdown file plus a manifest per locale, under `Legal/<locale>/<topic>/`. The manifest names the current version; the version code is the same in the three locales. The body is rendered to sanitized HTML, with raw HTML tags disabled.
 - BR15 A document whose manifest marks the current version a placeholder is shown with a visible draft notice, on the public page and on sign-up.
@@ -89,7 +89,7 @@ States:
 Layout: `AuthLayout` → title, message with the address, "did not arrive" hint, resend button.
 Actions: **Send a new link** — starts disabled for 60 seconds, showing the remaining seconds (BR12).
 Navigation: reached from `/sign-up`. Opened directly, with no address in the navigation state, it asks for the email in an `AppTextField` before resending.
-States: **ready**, **cooling down** (button disabled with the counter), **sending**, **sent** (success alert with the generic text), **throttled** (`email_verification.rate_limited`), **server error**.
+States: **ready**, **cooling down** (button disabled with the counter), **sending**, **sent** (success alert with the generic text), **throttled** (`email_verification.rate_limited`, only from the per-client limit; the per-address limit answers like a normal resend), **server error**.
 
 ### Route `/verify-email?token=...`
 The page reads the token from the query string and posts it (Decisions, 2026-09-17). The token never appears on screen.
@@ -198,7 +198,7 @@ New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus 
 - AC6 Given a valid unconsumed token, when it is posted, then the user is `Active` with `EmailConfirmed` true and `EmailVerifiedAt` set, and the token is consumed. (BR9)
 - AC7 Given the token of an account that is already active, when it is posted again, then the answer is success and nothing changes; given an unknown or consumed token, then `email_verification.invalid`; given a token older than 24 hours, then `email_verification.expired`. (BR8, BR10)
 - AC8 Given a pending account with an outstanding token, when a resend is requested, then the previous token no longer verifies, a new email is sent, and the answer is the generic one; given an unknown email or an already active account, then the same generic answer is returned and no email is sent. (BR11)
-- AC9 Given a resend less than 60 seconds after the previous one, or the sixth in an hour for that address, then the answer is `email_verification.rate_limited` and no email is sent; given the eleventh sign-up attempt in an hour from one client address, then `registration.rate_limited`. (BR12)
+- AC9 Given a resend less than 60 seconds after the previous one, or the sixth in an hour for that address, then no email is sent and the answer is the same generic 202 as any other resend; given the sixth resend in an hour from one client address, then `email_verification.rate_limited`; given the eleventh sign-up attempt in an hour from one client address, then `registration.rate_limited`. (BR11, BR12)
 - AC10 Given a user whose `PreferredLanguage` is pt-PT, when the verification email is sent, then its subject and body come from the pt-PT resources and the link carries the raw token; the same holds for pt-BR and en. (BR13)
 - AC11 Given a manifest and Markdown for a locale and topic, when the legal document is requested, then the current version, effective date, title and sanitized HTML come back, raw HTML in the source is not rendered as markup, and an unknown topic returns `legal_document.not_found`. (BR14)
 - AC12 Given a manifest marking the current version a placeholder, when the public page is rendered, then the draft notice is visible. (BR15)
@@ -248,6 +248,12 @@ New resource set `Simulab.Identity/Resources/Identity.resx` (neutral = en) plus 
 
 ## Change notes
 
+### v2 — 2026-09-18
+- What: the per-address resend limit answers with the generic 202 of BR11 instead of `email_verification.rate_limited`; only the per-client limits answer 429 with a code.
+- Why: BR11 (always the same answer) and the old AC9 contradicted each other. A 429 that only a real pending account can reach tells an attacker which addresses are registered, which BR4 and BR11 exist to prevent. Found during build.
+- Affected: BR12, AC9 and the `/check-email` throttled state; other criteria unchanged. Implementation and tests already follow v2.
+- Re-approved: 2026-09-18 (owner, option 4a)
+
 ## Validation script
 A container runtime (Docker Desktop or Podman) must be running. Close any app host or IDE running from this checkout first.
 1. Start `dotnet run --project src/Simulab.AppHost` and open the dashboard URL printed on start. Wait for `postgres`, `simulab`, `mailpit`, `api` and `web` to reach Running.
@@ -257,7 +263,7 @@ A container runtime (Docker Desktop or Podman) must be running. Close any app ho
 5. Open the same link again: it still says "Email verified" (clicking twice is not an error). Now change one character of the token in the address bar and reload: the page says the link is not valid and offers sign-up.
 6. Go back to `/sign-up` and repeat step 3 with the **same** address: the answer is the same "Check your email" page, and no second message arrives in Mailpit. (An address that is already registered is never revealed.)
 7. Switch the language to Português (Portugal) with the globe, then to English, on `/sign-up`, `/terms` and `/privacy`: every text changes, including the field labels, the draft notice and the document body. Switch the theme (moon/sun) on the same pages.
-8. On `/check-email`, press "Send a new link" as soon as the counter ends, then press it again at once: the second attempt is refused by the server and no extra message arrives in Mailpit.
+8. Sign up a **second** address and do not open its link. On "Check your email", wait for the counter to end and press "Send a new link": a success message appears, the counter starts again, and exactly one new message for that address arrives in Mailpit. The link in its first message now says it is not valid; the link in the newest one verifies. (The server-side limits are covered by tests; the counter keeps you inside them.)
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
