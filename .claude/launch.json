@@ -4,7 +4,7 @@
     {
       "name": "apphost",
       "runtimeExecutable": "dotnet",
-      "runtimeArgs": ["run", "--project", "src/Simulab.AppHost", "--launch-profile", "https"],
+      "runtimeArgs": ["run", "--project", "src/Hosts/Simulab.AppHost", "--launch-profile", "https"],
       "port": 17162,
       "url": "https://localhost:17162"
     }

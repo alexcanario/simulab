@@ -7,7 +7,7 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 
 ## Run locally
 - Prerequisites: .NET 10 SDK, a container runtime (Docker Desktop or Podman), Aspire tooling.
-- Start: `dotnet run --project src/Simulab.AppHost` → the Aspire dashboard URL is printed on start. Web: https://localhost:7125 (UI kit gallery at `/dev/ui`, Development only; close the app host before building, it locks the Web DLLs). Api: https://localhost:7287 (OpenAPI at `/openapi/v1.json`). Sign in as: no sign-in yet (F-5). Create an account at `/sign-up`; the verification email arrives in Mailpit and its link opens `/verify-email` on the Web.
+- Start: `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard URL is printed on start. Web: https://localhost:7125 (UI kit gallery at `/dev/ui`, Development only; close the app host before building, it locks the Web DLLs). Api: https://localhost:7287 (OpenAPI at `/openapi/v1.json`). Sign in as: no sign-in yet (F-5). Create an account at `/sign-up`; the verification email arrives in Mailpit and its link opens `/verify-email` on the Web.
 - Local containers started by the app host: PostgreSQL (database `simulab`, named volume `simulab-postgres-data`) and Mailpit (SMTP capture; its web UI is linked from the dashboard). Planned, each added by the first feature that needs it: Redis (F-5), Azurite (blob storage).
 - Reset local data: stop the app host and remove the volume (`docker volume rm simulab-postgres-data`); it is recreated empty on the next start.
 

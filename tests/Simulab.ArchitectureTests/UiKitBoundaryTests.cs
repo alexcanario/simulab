@@ -26,7 +26,7 @@ public class UiKitBoundaryTests
     [Fact]
     public void Web_OutsideKit_UsesNoRawTableOrIconConstant()
     {
-        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Simulab.Web");
+        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Hosts", "Simulab.Web");
 
         FindViolations(webRoot).Should().BeEmpty("pages use AppDataTable and AppIcons from Components/Ui");
     }
@@ -40,7 +40,7 @@ public class UiKitBoundaryTests
     [Fact]
     public void Razor_MudNavLink_HasNoOnClick()
     {
-        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Simulab.Web");
+        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Hosts", "Simulab.Web");
 
         Directory.EnumerateFiles(webRoot, "*.razor", SearchOption.AllDirectories)
             .Should().Contain(path => File.ReadAllText(path).Contains("<MudNavLink", StringComparison.Ordinal), "the rule must match at least one nav link");

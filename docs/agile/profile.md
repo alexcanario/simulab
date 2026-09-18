@@ -25,11 +25,14 @@ One deployable, several business modules with clear boundaries. Each module is *
 ## Layout
 ```
 src/
-  <App>.AppHost/                 local orchestration (Aspire)
-  <App>.ServiceDefaults/         telemetry, health, resilience
-  <App>.Api/                     host only: composition, auth, middleware, OpenAPI. No business code.
-  <App>.Web/                     Blazor UI. Talks to the API through typed clients. No business rules.
-  <App>.SharedKernel/            Entity, TenantEntity, Result/Error, clock, AppJson.Options
+  Hosts/
+    <App>.AppHost/               local orchestration (Aspire)
+    <App>.ServiceDefaults/       telemetry, health, resilience
+    <App>.Api/                   host only: composition, auth, middleware, OpenAPI. No business code.
+    <App>.Web/                   Blazor UI. Talks to the API through typed clients. No business rules.
+  BuildingBlocks/
+    <App>.SharedKernel/          Entity, TenantEntity, Result/Error, clock, AppJson.Options
+    <App>.Persistence/ ...       every building block (Email, Ai, Storage) goes here
   Modules/<Module>/
     <App>.<Module>/
       Features/<Feature>/        vertical slice: endpoint, request/response, handler, validator
@@ -39,10 +42,13 @@ src/
       <Module>Module.cs          AddXxxModule() / MapXxxEndpoints()
     <App>.<Module>.Contracts/    what other modules may see: DTOs, query interfaces, integration events
 tests/
-  <App>.<Module>.Tests/          unit + integration for the module
-  <App>.Web.Tests/               bUnit
-  <App>.ArchitectureTests/
+  Hosts/<App>.Web.Tests/         bUnit (Api and AppHost tests sit next to it)
+  BuildingBlocks/<App>.<Block>.Tests/
+  Modules/<Module>/<App>.<Module>.Tests/   unit + integration for the module
+  <App>.ArchitectureTests/       serves every group
+  <App>.Testing/                 shared test helpers
 ```
+Simulab (F-12): the solution folders in `Simulab.slnx` mirror these disk folders, and `SolutionLayoutTests` checks it. `Directory.Build.props` exists only at the root and in `tests/`; a group gets its own file only when it has a first property to share. `Directory.Packages.props` stays single, at the root.
 Every solution root also has `Directory.Build.props`, `Directory.Packages.props` (central package versions), `.editorconfig`, `BannedSymbols.txt` and `global.json`, copied from the plugin at bootstrap; rules the build can check live there, and the Stop gate fails on new warnings.
 
 ## Where business rules live
