@@ -25,6 +25,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | — |
 | ⏳ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | — |
 | ⏳ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | — |
+| ⏳ | Central Package Management's transitive pinning can float a shared package (e.g. `Aspire.Hosting`) to a higher version than a sibling package (`Aspire.Hosting.Testing`) pins, because another package elsewhere in the solution needs the newer one. An obsolete-API investigation must check the resolved version in `obj/project.assets.json`, not the pinned version in `Directory.Packages.props` | B-1 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -145,3 +146,13 @@ Approved by the owner the same day. All three lessons found on screen, while bui
 - ⏳ **Middleware and optional dependencies.** A core rule or a note in the ASP.NET Core / stack profile: a custom middleware's `InvokeAsync` should resolve an optional or heavy dependency (a cache, a second data store) from `HttpContext.RequestServices` inside the branch that needs it, never as a declared parameter — the latter runs on every request regardless of the branch taken.
 - ⏳ **Aspire secures local resources by default.** `AddRedis()` (and likely other Aspire hosting resources) enables TLS and a password for the local container unless told otherwise. A stack note or quiz question for any profile using Aspire: consume it through the matching `Aspire.<Client>` client-integration package (`builder.Add<X>Client(...)`), which wires the certificate trust, never a plain driver connection built from the raw connection string.
 - ⏳ **OpenIddict encrypted tokens.** When an encryption certificate is registered (the common default-cert quickstart), OpenIddict's access token is a JWE, not a JWS: a client cannot decode its own claims out of it. A note for an OpenIddict-based auth profile: the client that needs its own `sub`/`email`/custom claims should ask the resource server (an authenticated "who am I" endpoint), not self-decode the token.
+
+## 2026-09-18 — B-1 Replace the obsolete Aspire environment API in AppHostModelTests
+Approved by the owner the same day.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The first fix attempt was based on reflecting the `Aspire.Hosting` assembly at the version pinned for `Aspire.Hosting.Testing` (13.4.6) in `Directory.Packages.props`, and it threw at runtime: Central Package Management's transitive pinning had actually floated `Aspire.Hosting` to 13.5.4 for this test project, because `Aspire.Hosting.Redis` (added by F-5, in the same solution) needs that version. The obsolete-vs-current API differs between the two | Plugin improvement | This log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **CPM transitive pinning floats shared packages.** A core rule or a note wherever build-config is documented: when investigating an obsolete-API warning or any version-dependent behavior, check the *resolved* version in `obj/project.assets.json` for that specific project, not the version pinned in `Directory.Packages.props` — `CentralPackageTransitivePinningEnabled` can raise a shared package's version because a sibling package elsewhere in the solution needs it, even though nothing pins that shared package directly.
