@@ -52,3 +52,4 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 - Modules and pages never read plan columns; they ask `IEntitlementService`.
 - Never reference MassTransit, RabbitMQ or FluentAssertions.
 - Screens follow the rules `ui` (core) and `ui-project` (Simulab choices): UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
+- Redis: always through `Aspire.StackExchange.Redis` (`builder.AddRedisClient(...)`), never a plain `ConnectionMultiplexer.Connect` — the local container uses TLS by default and a plain client cannot trust its dev certificate.

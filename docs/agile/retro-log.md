@@ -22,6 +22,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
 | ✅ | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | 0.0.19 (`c48c34e`) |
 | ✅ | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | 0.0.19 (`c48c34e`) |
+| ⏳ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | — |
+| ⏳ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | — |
+| ⏳ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -128,3 +131,17 @@ Approved by the owner the same day.
 ## 2026-09-18 — Plugin notes of F-12 delivered in agile@canary 0.0.19
 - Both notes went into the plugin (commit `c48c34e`): the guard also refuses a commit on `main` that carries an item file in refining, approved, building or validating; a retro commit carries no code or tests. The sync `apply` now records the hash of each copied file, so the partial manual refreshes of this project stop looking like edits.
 - Workflow manuals refreshed to 0.0.19 in the same commit. `.claude/agile/sync.json` is still at 0.0.10: `/agile:sync` brings the profile, the CA1716 line and the rules.
+
+## 2026-09-18 — F-5 Sign-in and sign-out
+Approved by the owner the same day. All three lessons found on screen, while building the OpenIddict/Redis session code.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | `RevocationCheckMiddleware` declared `IRefreshSessionStore` as an `InvokeAsync` parameter; ASP.NET Core resolved it (opening a Redis connection) on every request, authenticated or not, even though the code only used it inside an `if` that most anonymous requests never enter | Plugin improvement | This log (see below) |
+| 2 | The first sign-in through the app host hung indefinitely: `ConnectionMultiplexer.Connect(connectionString)` could not validate the TLS certificate Aspire's local Redis container uses by default | Project setting + plugin | `CLAUDE.md`, Project-specific rules; this log |
+| 3 | The Web tried to decode `sub`/`email` out of the access token itself and threw, because OpenIddict's development encryption certificate makes it a JWE, not a plain JWT; Blazor Server's error boundary then froze the page mid-render with no useful message | Plugin improvement | This log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **Middleware and optional dependencies.** A core rule or a note in the ASP.NET Core / stack profile: a custom middleware's `InvokeAsync` should resolve an optional or heavy dependency (a cache, a second data store) from `HttpContext.RequestServices` inside the branch that needs it, never as a declared parameter — the latter runs on every request regardless of the branch taken.
+- ⏳ **Aspire secures local resources by default.** `AddRedis()` (and likely other Aspire hosting resources) enables TLS and a password for the local container unless told otherwise. A stack note or quiz question for any profile using Aspire: consume it through the matching `Aspire.<Client>` client-integration package (`builder.Add<X>Client(...)`), which wires the certificate trust, never a plain driver connection built from the raw connection string.
+- ⏳ **OpenIddict encrypted tokens.** When an encryption certificate is registered (the common default-cert quickstart), OpenIddict's access token is a JWE, not a JWS: a client cannot decode its own claims out of it. A note for an OpenIddict-based auth profile: the client that needs its own `sub`/`email`/custom claims should ask the resource server (an authenticated "who am I" endpoint), not self-decode the token.
