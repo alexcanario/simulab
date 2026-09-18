@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Simulab.Web\Simulab.Web.csproj" />
+    <ProjectReference Include="..\..\..\src\Hosts\Simulab.Web\Simulab.Web.csproj" />
   </ItemGroup>
 
 </Project>

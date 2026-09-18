@@ -14,8 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Simulab.Identity.Application\Simulab.Identity.Application.csproj" />
-    <ProjectReference Include="..\..\..\Simulab.Email\Simulab.Email.csproj" />
-    <ProjectReference Include="..\..\..\Simulab.Persistence\Simulab.Persistence.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
   </ItemGroup>
 
   <!-- The legal documents are read from disk at run time (BR14), so they travel with the build. -->

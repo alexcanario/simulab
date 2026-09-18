@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>
