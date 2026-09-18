@@ -1,7 +1,7 @@
 ---
 feature: F-5
 epic: Foundation and identity
-status: approved
+status: building
 board: 709
 version: 1
 ---
@@ -95,6 +95,7 @@ Extends `Simulab.Identity/Resources/Identity.resx` (F-4) plus the shared layout 
 ### API
 - `POST /connect/token` — OpenIddict token endpoint; `grant_type=password` for sign-in, `grant_type=refresh_token` for silent refresh (decision, question 1). 200 with the token pair; `invalid_grant` for wrong credentials (mapped to `identity.invalid_credentials`); custom errors for `identity.email_not_verified` and `identity.account_locked`.
 - `POST /api/v1/identity/sign-out` — revokes the caller's current session (BR6). 204; requires a valid access token.
+- `GET /api/v1/identity/session` — the caller's own `sub`, `email` and `session_jti`, read from its access token server-side (build decision: the token is encrypted, so the Web asks for these instead of decoding it). 200; requires a valid access token.
 - Error codes: `identity.invalid_credentials`, `identity.email_not_verified`, `identity.account_locked`, `identity.refresh_token_invalid`, `identity.token_revoked`.
 
 ## Acceptance criteria
@@ -122,7 +123,12 @@ Extends `Simulab.Identity/Resources/Identity.resx` (F-4) plus the shared layout 
 - 2026-09-18 — OpenIddict signing/encryption certificates: development certificates in dev; staging/production stay `planned`, same as the rest of `docs/infra.md` — no real decision needed yet, only path today.
 - 2026-09-18 — Token claims in F-5 are `sub`, `email`, `tenant_id` only; no role or permission claim until F-6 exists — owner, question 11.
 - 2026-09-18 — Admin "terminate all sessions" and a per-device session list are out of scope, deferred to the Institutions epic — owner, question 12.
-- 2026-09-18 — New packages approved: `OpenIddict.AspNetCore` 7.7.1 and `OpenIddict.EntityFrameworkCore` 7.7.1 (Apache-2.0), `Microsoft.Extensions.Caching.StackExchangeRedis` 10.0.12 (MIT, `Api`), `Aspire.Hosting.Redis` 13.5.4 (MIT, `AppHost`), `Aspire.StackExchange.Redis` 13.5.4 (MIT, client integration), `Testcontainers.Redis` 4.15.0 (MIT, tests only) — owner, question 13.
+- 2026-09-18 — New packages approved: `OpenIddict.AspNetCore` 7.7.1 and `OpenIddict.EntityFrameworkCore` 7.7.1 (Apache-2.0), `Aspire.Hosting.Redis` 13.5.4 (MIT, `AppHost`), `StackExchange.Redis` 3.3.0 (MIT, `Infrastructure`), `Testcontainers.Redis` 4.15.0 (MIT, tests only) — owner, question 13.
+- 2026-09-18 — Build: dropped `Microsoft.Extensions.Caching.StackExchangeRedis` from the approved list — the session store needs `IConnectionMultiplexer` (sets, per-key TTL), not the `IDistributedCache` abstraction that package provides.
+- 2026-09-18 — Build: the Web host writes its own cookie session after a successful `/connect/token` call (claims: `sub`, `email`, `name`, `session_jti`, plus the access/refresh tokens so later calls and sign-out can use them); Blazor Interactive Server cannot call `HttpContext.SignInAsync` mid-circuit (no open HTTP response), so the interactive `/sign-in` page hands the tokens to a single-use, 30-second server-side ticket and does a full page navigation (`forceLoad: true`) to a small Web-host endpoint that finishes the cookie sign-in and redirects to `/`. Sign-out follows the same shape in reverse. No product-visible difference from the mockup.
+- 2026-09-18 — Build (found on screen): `AddRedis` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect(...)` cannot validate its dev certificate and the first sign-in hung until the socket timed out. Fixed by adding `Aspire.StackExchange.Redis` back and registering the multiplexer with `builder.AddRedisClient("redis")` on the `Api` host instead — that client integration is what wires the certificate trust; the module only asks for `IConnectionMultiplexer` from `services`.
+- 2026-09-18 — Build (found on screen): `RevocationCheckMiddleware` declared `IRefreshSessionStore` as an `InvokeAsync` parameter, so ASP.NET Core resolved it (and opened a Redis connection) on every request, authenticated or not — every anonymous page paid for a Redis round trip it never needed, and broke host-level tests that run without Redis at all. Fixed to resolve it from `HttpContext.RequestServices` only inside the branch that already found a `session_jti` claim.
+- 2026-09-18 — Build (found on screen): the encryption certificate makes access tokens an encrypted JWE, not a plain signed JWT, so the Web's first attempt at decoding `sub`/`email` itself out of the token failed with an unhandled exception (visible as a frozen "Signing in..." button, since Blazor Server's error boundary stops further re-renders). Added `GET /api/v1/identity/session` (authenticated) so the Api — which already validates and decrypts its own tokens — hands those claims back as JSON; the Web never inspects the token's contents itself.
 
 ## Out of scope
 - MFA (TOTP) and Google sign-in (F-11): switched off, not imported yet.
