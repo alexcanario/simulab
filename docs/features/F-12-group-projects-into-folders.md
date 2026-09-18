@@ -52,7 +52,11 @@ Make the solution readable by role as it grows (four more modules and two more b
 - 2026-09-18 — New architecture test that compares `Simulab.slnx` folders with disk folders — keeps BR3 true as projects are added.
 - 2026-09-18 — Old paths in the files of F-1 to F-4 and in `docs/agile/retro-log.md` stay as they are — they are history.
 - 2026-09-18 — No new packages; the agile Stop gate needs no change (it builds its graph from the `.csproj` files, not from paths).
-- 2026-09-18 — Build starts only after F-4 ships (WIP limit); the refinement is committed on `feature/F-4`, where the idea file lives, and reaches `main` with the F-4 merge.
+- 2026-09-18 — F-4 shipped during this refinement (merge `389ea17`); the refinement reached `main` in `a856f94` and the build runs on `feature/F-12`.
+- 2026-09-18 — The basic `.editorconfig` is not created by F-12: it already exists at the root (from the bootstrap). The owner replaces it with the final version in board task 717 (child of 716) — owner request; the warnings of the final version are checked by the Stop gate against the baseline.
+
+## Owner tasks
+- Board 717 — replace the basic `.editorconfig` with the final version (owner). Not an acceptance criterion of F-12.
 
 ## Out of scope
 - Renaming projects, assemblies or namespaces.
