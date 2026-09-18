@@ -20,8 +20,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | 0.0.11 (`a9babf4`) |
 | ✅ | A building block that reads an app-host connection string is exercised through the app host in the item that creates it, not only against a test container | F-4 | 0.0.15 (`b221360`) |
 | ✅ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
-| ⏳ | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | — |
-| ⏳ | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | — |
+| ✅ | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | 0.0.19 (`c48c34e`) |
+| ✅ | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | 0.0.19 (`c48c34e`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -124,3 +124,7 @@ Approved by the owner the same day.
 | 1 | Two Claude sessions shared one checkout: the other one shipped F-4, deleted `feature/F-4` and switched to `main` while F-12 was being refined, so the refinement commit landed on `main`; it later rewrote a commit of this session | Project rule | `.claude/rules/agile/project.md`, "Sessions and retro" |
 | 2 | The guard hook refuses a commit on `main` only while an item is in `building`; a refinement commit of an item in `refining` went through | Plugin | `plugin` note (⏳) |
 | 3 | The F-4 retro commit (`e03cb5c`) added test code with 2 `CS0618` straight to `main`, outside the gate; it surfaced in F-12 and became B-1 | Project rule + plugin | `.claude/rules/agile/project.md`, "Sessions and retro"; `plugin` note (⏳) |
+
+## 2026-09-18 — Plugin notes of F-12 delivered in agile@canary 0.0.19
+- Both notes went into the plugin (commit `c48c34e`): the guard also refuses a commit on `main` that carries an item file in refining, approved, building or validating; a retro commit carries no code or tests. The sync `apply` now records the hash of each copied file, so the partial manual refreshes of this project stop looking like edits.
+- Workflow manuals refreshed to 0.0.19 in the same commit. `.claude/agile/sync.json` is still at 0.0.10: `/agile:sync` brings the profile, the CA1716 line and the rules.

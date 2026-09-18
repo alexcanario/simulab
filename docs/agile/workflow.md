@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.18 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.19 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -172,7 +172,7 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | When | What happens |
 |---|---|
 | **Session start** | Shows the branch, the item in progress, the backlog head, approved files with open questions, and uncommitted work in **every** worktree. |
-| **Every commit** | A guard refuses a `git commit` on the main branch while an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
+| **Every commit** | A guard refuses a `git commit` on the main branch in two cases: an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session — or the commit carries an item file that is not `done` (refining, approved, building, validating), which belongs on the item branch. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Builds the changed projects and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
 | **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests. |
@@ -774,7 +774,16 @@ Claude: The checkout is on main; feature/F-6 is where this belongs. I am switchi
 and committing there. Nothing landed on main.
 ```
 
-When a commit really belongs on main while an item is open (a retro note, for instance), Claude asks, and with your yes repeats the command ending with `# agile:main-ok`.
+The same guard refuses a refinement or build commit that would put an item file on main:
+
+```
+Claude: git commit -m "docs(F-8): refine and approve"
+[agile guard] This commit would land on `main` and carries `docs/features/F-8-question-review-queue.md` (approved).
+An item that is not done is committed on its own branch ...
+Claude: Creating feature/F-8 from main and committing there.
+```
+
+When a commit really belongs on main while an item is open (a retro note, for instance), Claude asks, and with your yes repeats the command ending with `# agile:main-ok`. A retro commit carries only rules, `CLAUDE.md`, templates and the retro log; a lesson that needs code becomes an item, so the code goes through the gate on its own branch.
 
 ### 14.12 The closing question of the quiz
 

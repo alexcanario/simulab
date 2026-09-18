@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.18 (rascunho). English: [en](workflow.md).
+> Versão 0.0.19 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -174,7 +174,7 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | Quando | O que acontece |
 |---|---|
 | **Início da sessão** | Mostra a branch, o item em andamento, o topo do backlog, os arquivos aprovados com perguntas em aberto e o trabalho sem commit em **todas** as worktrees. |
-| **A cada commit** | Uma guarda recusa um `git commit` na branch principal enquanto uma branch de item (`feature/F-<n>`, `bug/B-<n>`) está sem merge e não está aberta em nenhum lugar — o sinal de que uma IDE trocou a branch por trás da sessão. O Claude avisa você e volta para a branch certa; se o commit for mesmo da branch principal, você confirma e o Claude repete o comando terminando com o comentário `# agile:main-ok`. |
+| **A cada commit** | Uma guarda recusa um `git commit` na branch principal em dois casos: uma branch de item (`feature/F-<n>`, `bug/B-<n>`) está sem merge e não está aberta em nenhum lugar — o sinal de que uma IDE trocou a branch por trás da sessão — ou o commit carrega o arquivo de um item que não está `done` (refining, approved, building, validating), que pertence à branch do item. O Claude avisa você e volta para a branch certa; se o commit for mesmo da branch principal, você confirma e o Claude repete o comando terminando com o comentário `# agile:main-ok`. |
 | **A cada edição** | Nada é compilado. O arquivo editado só é anotado, sob a raiz git a que pertence — assim, uma edição dentro de uma worktree é verificada naquela worktree, e não na pasta onde a sessão começou. |
 | **Fim do turno** (só se houve mudança de código) | Compila os projetos alterados e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
 | **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura. |
@@ -779,7 +779,16 @@ Claude: O checkout está na main; o lugar disto é a feature/F-6. Voltando para 
 o commit lá. Nada entrou na main.
 ```
 
-Quando um commit é mesmo da main com um item aberto (uma nota de retro, por exemplo), o Claude pergunta, e com o seu sim repete o comando terminando com `# agile:main-ok`.
+A mesma guarda recusa um commit de refinamento ou de build que colocaria o arquivo de um item na main:
+
+```
+Claude: git commit -m "docs(F-8): refine and approve"
+[agile guard] This commit would land on `main` and carries `docs/features/F-8-question-review-queue.md` (approved).
+An item that is not done is committed on its own branch ...
+Claude: Criando a feature/F-8 a partir da main e fazendo o commit lá.
+```
+
+Quando um commit é mesmo da main com um item aberto (uma nota de retro, por exemplo), o Claude pergunta, e com o seu sim repete o comando terminando com `# agile:main-ok`. Um commit de retro carrega só regras, `CLAUDE.md`, templates e o retro-log; uma lição que precisa de código vira item, para que o código passe pelo gate na branch dele.
 
 ### 14.12 A pergunta de fechamento do quiz
 
