@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\..\Simulab.Testing\Simulab.Testing.csproj" />
+  </ItemGroup>
+
+</Project>

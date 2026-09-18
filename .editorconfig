@@ -1,6 +1,6 @@
-# Basic .editorconfig shipped by agile@canary. The owner replaces it with the final version.
+# Simulab .editorconfig: the agile@canary base plus the rules the owner took from the Evently file (F-12, board 717).
 # Severities matter: with EnforceCodeStyleInBuild (Directory.Build.props) every `warning` below is a build
-# warning, and the Stop gate fails on NEW warnings. Use `suggestion` for taste, `warning` for rules.
+# warning, and the Stop gate fails on NEW warnings. Use `suggestion` for taste, `warning` for rules. Never `error`.
 root = true
 
 [*]
@@ -22,8 +22,8 @@ trim_trailing_whitespace = false
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_using_directive_placement = outside_namespace:warning
 dotnet_sort_system_directives_first = true
-csharp_new_line_before_open_brace = all
-csharp_prefer_braces = when_multiline:suggestion
+dotnet_separate_import_directive_groups = false
+csharp_prefer_braces = true:warning
 
 # Language
 csharp_style_var_for_built_in_types = true:suggestion
@@ -34,7 +34,68 @@ dotnet_style_readonly_field = true:warning
 dotnet_style_qualification_for_field = false:warning
 dotnet_style_qualification_for_property = false:warning
 dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_predefined_type_for_member_access = true:warning
 csharp_style_prefer_primary_constructors = true:suggestion
+
+# Expressions and patterns (from Evently)
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_prefer_switch_expression = true:warning
+csharp_prefer_simple_using_statement = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+csharp_prefer_static_local_function = true:warning
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async:suggestion
+
+# Expression-bodied members (from Evently)
+csharp_style_expression_bodied_properties = true:warning
+csharp_style_expression_bodied_accessors = true:warning
+csharp_style_expression_bodied_indexers = true:warning
+csharp_style_expression_bodied_operators = true:warning
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+
+# Formatting (from Evently; applied by the formatter, not reported by the build)
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_between_query_expression_clauses = true
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = one_less_than_current
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = false
 
 # Naming: interfaces start with I, private fields are _camelCase, async methods end with Async
 dotnet_naming_symbols.interfaces.applicable_kinds = interface
@@ -78,9 +139,14 @@ dotnet_diagnostic.IDE1006.severity = warning   # naming rules above (needed for 
 dotnet_diagnostic.IDE0005.severity = warning   # unnecessary using
 dotnet_diagnostic.IDE0051.severity = warning   # unused private member
 dotnet_diagnostic.IDE0052.severity = warning   # unread private member
+dotnet_diagnostic.RS0030.severity = warning    # banned API (BannedSymbols.txt)
+
+# Analyzers turned down
 dotnet_diagnostic.CA2007.severity = none       # ConfigureAwait: not needed in ASP.NET Core / Blazor
 dotnet_diagnostic.CA1848.severity = suggestion # LoggerMessage delegates
-dotnet_diagnostic.RS0030.severity = warning    # banned API (BannedSymbols.txt)
+dotnet_diagnostic.CA1062.severity = none       # argument null checks: nullable reference types cover them (from Evently)
+dotnet_diagnostic.CA1031.severity = none       # catching general exceptions is allowed at boundaries (from Evently)
+dotnet_diagnostic.CA1716.severity = none       # names that match keywords of other .NET languages (from Evently)
 
 [{tests/**.cs,**/*Tests/**.cs}]
 dotnet_diagnostic.CA1707.severity = none       # Method_Scenario_Expected

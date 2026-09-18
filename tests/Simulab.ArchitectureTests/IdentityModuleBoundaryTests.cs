@@ -92,6 +92,6 @@ public class IdentityModuleBoundaryTests
             listed.Should().Contain($"src/Modules/Identity/Simulab.Identity.{layer}/Simulab.Identity.{layer}.csproj");
         }
 
-        listed.Should().Contain("tests/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj");
+        listed.Should().Contain("tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj");
     }
 }

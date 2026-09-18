@@ -24,7 +24,9 @@ internal static class SolutionAssemblies
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Simulab.slnx")))
+        {
             directory = directory.Parent;
+        }
 
         return directory?.FullName ?? throw new InvalidOperationException("Simulab.slnx was not found above the test output folder.");
     }

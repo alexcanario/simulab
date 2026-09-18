@@ -35,7 +35,9 @@ public partial class VocabularyTests
         {
             yield return type.Name;
             foreach (var member in type.GetMembers(Declared))
+            {
                 yield return member.Name;
+            }
         }
     }
 

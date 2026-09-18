@@ -1,27 +1,46 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Simulab.Api/Simulab.Api.csproj" />
-    <Project Path="src/Simulab.AppHost/Simulab.AppHost.csproj" />
-    <Project Path="src/Simulab.ServiceDefaults/Simulab.ServiceDefaults.csproj" />
-    <Project Path="src/Simulab.Email/Simulab.Email.csproj" />
-    <Project Path="src/Simulab.Persistence/Simulab.Persistence.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Hosts/">
+    <Project Path="src/Hosts/Simulab.Api/Simulab.Api.csproj" />
+    <Project Path="src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj" />
+    <Project Path="src/Hosts/Simulab.ServiceDefaults/Simulab.ServiceDefaults.csproj" />
+    <Project Path="src/Hosts/Simulab.Web/Simulab.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Simulab.Identity.Api/Simulab.Identity.Api.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Application/Simulab.Identity.Application.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Contracts/Simulab.Identity.Contracts.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Domain/Simulab.Identity.Domain.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj" />
-    <Project Path="src/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
-    <Project Path="src/Simulab.Web/Simulab.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Simulab.Api.Tests/Simulab.Api.Tests.csproj" />
-    <Project Path="tests/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj" />
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
-    <Project Path="tests/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
-    <Project Path="tests/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />
-    <Project Path="tests/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
-    <Project Path="tests/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />
-    <Project Path="tests/Simulab.Web.Tests/Simulab.Web.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/BuildingBlocks/">
+    <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Hosts/">
+    <Project Path="tests/Hosts/Simulab.Api.Tests/Simulab.Api.Tests.csproj" />
+    <Project Path="tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj" />
+    <Project Path="tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Identity/">
+    <Project Path="tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />
   </Folder>
 </Solution>

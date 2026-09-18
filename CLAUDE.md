@@ -28,7 +28,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 - Build: `dotnet build Simulab.slnx`
 - Affected tests: run by the agile Stop hook (budget: unit < 30 s, integration < 2 min)
 - Full suite (ship only): `dotnet test Simulab.slnx` (budget: < 5 min)
-- Run locally: `dotnet run --project src/Simulab.AppHost`
+- Run locally: `dotnet run --project src/Hosts/Simulab.AppHost`
 
 ## Models
 - Independent review (`/agile:review`): strongest available model, passed on the call.

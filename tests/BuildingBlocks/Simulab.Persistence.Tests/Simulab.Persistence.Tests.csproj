@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
+    <ProjectReference Include="..\..\Simulab.Testing\Simulab.Testing.csproj" />
+  </ItemGroup>
+
+</Project>

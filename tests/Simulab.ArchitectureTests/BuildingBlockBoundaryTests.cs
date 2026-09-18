@@ -74,7 +74,7 @@ public class BuildingBlockBoundaryTests
         var solution = XDocument.Load(Path.Combine(SolutionAssemblies.RepositoryRoot(), "Simulab.slnx"));
         var listed = solution.Descendants("Project").Select(project => project.Attribute("Path")!.Value.Replace('\\', '/')).ToList();
 
-        listed.Should().Contain("src/Simulab.Persistence/Simulab.Persistence.csproj");
-        listed.Should().Contain("src/Simulab.Email/Simulab.Email.csproj");
+        listed.Should().Contain("src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj");
+        listed.Should().Contain("src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj");
     }
 }
