@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2]
-updated: 2026-09-17
+features: [F-2, F-4]
+updated: 2026-09-18
 ---
 # Simulab
 
@@ -25,10 +25,11 @@ As páginas entram aqui à medida que cada funcionalidade é lançada.
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e assunto, e a distância até a nota de corte | Em breve |
 | Recomendações de estudo | Ver quais assuntos estudar em seguida | Em breve |
 | Coach de IA | Perguntar por que uma resposta está certa ou errada e receber um plano de estudos para a sua prova-alvo | Em breve |
-| Conta | Cadastrar-se, entrar, trocar o idioma e gerenciar os seus dados | Em breve |
+| Conta | Cadastrar-se, entrar, trocar o idioma e gerenciar os seus dados | Cadastro disponível ([Criar uma conta](create-account.md)); o resto em breve |
 
 ## Idiomas
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Você escolhe o idioma no seu perfil. As questões das provas aparecem sempre no idioma original.
 
 ## Páginas relacionadas
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
+- [Criar uma conta](create-account.md): cadastro e confirmação do e-mail
