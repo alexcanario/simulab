@@ -1,7 +1,7 @@
 ---
 feature: F-5
 epic: Foundation and identity
-status: building
+status: validating
 board: 709
 version: 1
 ---
@@ -153,8 +153,15 @@ Extends `Simulab.Identity/Resources/Identity.resx` (F-4) plus the shared layout 
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+A container runtime (Docker Desktop or Podman) must be running. Close any app host or IDE running from this checkout first.
+1. Start `dotnet run --project src/Hosts/Simulab.AppHost` and open the dashboard URL printed on start. Wait for `postgres`, `mailpit`, `redis`, `api` and `web` to reach Running.
+2. Open the `web` URL and go to `/sign-in` with an account already created and verified through F-4 (or sign one up first). Submit the empty form: both fields show their own message.
+3. Sign in with a wrong password: the generic "Incorrect email or password" alert appears (never a hint about which field is wrong). Sign in with a correct password: the page returns to `/`, and the app bar's account icon now shows your email in its tooltip.
+4. Fail the password 5 times in a row for the same account (open `/sign-in` again each time), then try once more with the correct password: "Too many attempts" with a countdown. Wait 15 minutes (or use a fresh account to move on) and it succeeds again.
+5. Click the account icon in the app bar: a menu opens with "Sign out". Choose it: the page returns to `/` and the app bar shows "Sign in" again.
+6. Sign in again, then open the same address directly in a new tab: instead of the form, it goes straight to `/`.
+7. Switch the language to Português (Brasil) and to English on `/sign-in`: every text changes, including the "New here?" line and the error alerts.
+8. Sign up a fresh account and, without verifying the email, try to sign in: the "Confirm your email before signing in" alert appears with a "Resend the verification email" action; use it and check Mailpit for a second message.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
