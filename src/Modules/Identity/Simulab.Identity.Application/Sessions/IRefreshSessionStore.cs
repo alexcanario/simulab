@@ -1,0 +1,29 @@
+namespace Simulab.Identity.Application.Sessions;
+
+/// <summary>
+/// One row per signed-in session, keyed by the <c>session_jti</c> claim carried by both the access and
+/// the refresh token of that session (BR4). Backed by Redis so a session survives a restart of the Api
+/// and can be checked from any instance.
+/// </summary>
+public interface IRefreshSessionStore
+{
+    Task CreateAsync(string sessionJti, Guid userId, DateTimeOffset expiresAt, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Atomically reads and removes the session (BR5): a refresh token is exchanged exactly once. Returns
+    /// the user id it belonged to, or null when the token is unknown or was already used.
+    /// </summary>
+    Task<Guid?> ConsumeAsync(string sessionJti, CancellationToken cancellationToken = default);
+
+    /// <summary>Sign-out (BR6): drops the session without returning it. A missing session is not an error.</summary>
+    Task RemoveAsync(string sessionJti, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Marks the session's access token unusable for the rest of its own lifetime (BR6, BR7).
+    /// <paramref name="timeToLive"/> is the access token's remaining lifetime; the revocation entry expires
+    /// with it, so Redis never keeps it longer than the token could have been valid anyway.
+    /// </summary>
+    Task RevokeAccessTokenAsync(string sessionJti, TimeSpan timeToLive, CancellationToken cancellationToken = default);
+
+    Task<bool> IsAccessTokenRevokedAsync(string sessionJti, CancellationToken cancellationToken = default);
+}

@@ -20,7 +20,11 @@ public class IdentityModuleBoundaryTests
     private static bool IsEfCoreOrAspNetCore(string name) =>
         name.StartsWith("Microsoft.EntityFrameworkCore", StringComparison.Ordinal)
         || name.StartsWith("Microsoft.AspNetCore", StringComparison.Ordinal)
-        || name.StartsWith("Npgsql", StringComparison.Ordinal);
+        || name.StartsWith("Npgsql", StringComparison.Ordinal)
+        // F-5, AC8: OpenIddict and the Redis client are Infrastructure/Api concerns; the session store is
+        // only an interface (Simulab.Identity.Application.Sessions.IRefreshSessionStore) in Application.
+        || name.StartsWith("OpenIddict", StringComparison.Ordinal)
+        || name.StartsWith("StackExchange.Redis", StringComparison.Ordinal);
 
     [Theory]
     [InlineData("Domain")]

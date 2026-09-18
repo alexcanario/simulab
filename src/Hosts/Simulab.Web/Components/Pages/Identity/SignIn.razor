@@ -1,0 +1,208 @@
+@page "/sign-in"
+@layout AuthLayout
+@using Microsoft.AspNetCore.Components.Authorization
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services.Auth
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject AuthClient Auth
+@inject IdentityApiClient IdentityApi
+@inject SignInTicketStore Tickets
+@inject NavigationManager Navigation
+
+<PageTitle>@I["SignIn.Title"] — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card">
+    <h1 class="app-auth-title">@I["SignIn.Title"]</h1>
+    <p class="app-auth-subtitle">@I["SignIn.Subtitle"]</p>
+
+    @if (_serverError is not null)
+    {
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(_serverError)" />
+    }
+    else if (_locked)
+    {
+        <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", _lockedFor]" />
+    }
+    else if (_resent)
+    {
+        <AppAlert Severity="Severity.Success" Text="@I["CheckEmail.Resend.Sent"]" />
+    }
+    else if (_unverified)
+    {
+        <AppAlert Severity="Severity.Warning"
+                  Text="@L["identity.email_not_verified"]"
+                  ActionText="@I["SignIn.ResendVerification"]"
+                  OnAction="ResendAsync" />
+    }
+
+    <AppTextField TValue="string"
+                  Id="sign-in-email"
+                  Label="@I["SignIn.Email.Label"]"
+                  Placeholder="@I["SignIn.Email.Placeholder"]"
+                  InputType="InputType.Email"
+                  Autocomplete="username"
+                  MaxLength="254"
+                  Required="true"
+                  Disabled="_submitting"
+                  Error="@_emailError"
+                  Value="@_email"
+                  ValueChanged="@(value => { _email = value; _emailError = null; })" />
+
+    <AppPasswordField Id="sign-in-password"
+                      Label="@I["SignIn.Password.Label"]"
+                      ShowLabel="@I["SignIn.Password.Show"]"
+                      HideLabel="@I["SignIn.Password.Hide"]"
+                      Required="true"
+                      Disabled="_submitting"
+                      Error="@_passwordError"
+                      Value="@_password"
+                      ValueChanged="@(value => { _password = value; _passwordError = null; })" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               FullWidth="true"
+               Size="Size.Large"
+               Disabled="_submitting"
+               OnClick="SubmitAsync"
+               Class="app-sign-in-submit">
+        @if (_submitting)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@I["SignIn.Submitting"]</span>
+        }
+        else
+        {
+            @I["SignIn.Submit"]
+        }
+    </MudButton>
+</div>
+
+<p class="app-auth-footer-line">@Footer()</p>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+
+    [SupplyParameterFromQuery] public string? Email { get; set; }
+
+    private string? _email;
+    private string? _password;
+    private string? _emailError;
+    private string? _passwordError;
+    private string? _serverError;
+    private bool _locked;
+    private string _lockedFor = "0:00";
+    private bool _unverified;
+    private bool _resent;
+    private bool _submitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState is not null && (await AuthState).User.Identity?.IsAuthenticated == true)
+        {
+            // Screen decision 4: an already signed-in visitor never sees the form again.
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        _email = Email;
+        ApplyServerCode(Error);
+    }
+
+    private void ApplyServerCode(string? code)
+    {
+        _serverError = null;
+        _locked = code == IdentityErrorCodes.AccountLocked;
+        _unverified = code == IdentityErrorCodes.EmailNotVerified;
+        if (code is not null && !_locked && !_unverified)
+        {
+            _serverError = code;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        _serverError = null;
+        _locked = false;
+        _unverified = false;
+        _resent = false;
+        if (!Validate())
+        {
+            return;
+        }
+
+        _submitting = true;
+        var result = await Auth.SignInAsync(_email!.Trim(), _password!);
+        _submitting = false;
+        _password = null;
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == IdentityErrorCodes.AccountLocked)
+            {
+                _locked = true;
+                _lockedFor = FormatSeconds(result.ErrorDescription);
+            }
+            else if (result.ErrorCode == IdentityErrorCodes.EmailNotVerified)
+            {
+                _unverified = true;
+            }
+            else
+            {
+                _serverError = result.ErrorCode;
+            }
+
+            return;
+        }
+
+        var session = await Auth.GetSessionAsync(result.AccessToken!);
+        if (session is null)
+        {
+            _serverError = Components.Ui.ErrorText.UnexpectedCode;
+            return;
+        }
+
+        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!);
+        var ticketId = Tickets.Issue(ticket);
+
+        // A real browser navigation (BR1's constraint): only this can carry a Set-Cookie response header.
+        Navigation.NavigateTo($"/account/sign-in-complete?ticket={ticketId}", forceLoad: true);
+    }
+
+    /// <summary>Screen decision 1: resend right here, with the address already at hand.</summary>
+    private async Task ResendAsync()
+    {
+        await IdentityApi.ResendVerificationAsync(_email?.Trim() ?? string.Empty);
+        _unverified = false;
+        _resent = true;
+    }
+
+    private bool Validate()
+    {
+        _emailError = string.IsNullOrWhiteSpace(_email) ? I["SignIn.Email.Required"].Value : null;
+        _passwordError = string.IsNullOrWhiteSpace(_password) ? I["SignIn.Password.Required"].Value : null;
+        return _emailError is null && _passwordError is null;
+    }
+
+    private static string FormatSeconds(string? raw) =>
+        int.TryParse(raw, out var seconds) && seconds > 0
+            ? TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss")
+            : "0:00";
+
+    private RenderFragment Footer() => builder =>
+    {
+        var parts = I["SignIn.NoAccount"].Value.Split("{0}");
+        builder.AddContent(0, parts[0]);
+        builder.OpenElement(1, "a");
+        builder.AddAttribute(2, "href", "/sign-up");
+        builder.AddContent(3, I["SignIn.CreateAccount"].Value);
+        builder.CloseElement();
+        if (parts.Length > 1)
+        {
+            builder.AddContent(4, parts[1]);
+        }
+    };
+}

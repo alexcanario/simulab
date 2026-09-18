@@ -66,6 +66,16 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3" />
   </ItemGroup>
 
+  <!-- Sign-in and sign-out (F-5): OpenIddict server + Redis-backed sessions -->
+  <ItemGroup>
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.7.1" />
+    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.7.1" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.5.4" />
+    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.5.4" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.3.0" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
+  </ItemGroup>
+
   <!-- Email (F-3) -->
   <ItemGroup>
     <PackageVersion Include="MailKit" Version="4.18.0" />

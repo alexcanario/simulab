@@ -18,4 +18,10 @@ public static class IdentityErrorCodes
     public const string VerificationRateLimited = "email_verification.rate_limited";
 
     public const string LegalDocumentNotFound = "legal_document.not_found";
+
+    public const string InvalidCredentials = "identity.invalid_credentials";
+    public const string EmailNotVerified = "identity.email_not_verified";
+    public const string AccountLocked = "identity.account_locked";
+    public const string RefreshTokenInvalid = "identity.refresh_token_invalid";
+    public const string TokenRevoked = "identity.token_revoked";
 }

@@ -46,7 +46,8 @@ public class MainLayoutTests : ShellTestContext
         name.GetAttribute("href").Should().Be("/");
         name.TextContent.Trim().Should().Be("Simulab");
         name.GetAttribute("aria-label").Should().Be("Simulab, home page");
-        bar.QuerySelector(".app-user-menu")!.ChildNodes.Should().BeEmpty();
+        // F-5, BR10: anonymous shows "Sign in"; the KitTestContext default is not-authorized.
+        bar.QuerySelector(".app-user-menu .app-sign-in-link")!.TextContent.Trim().Should().Be("Sign in");
     }
 
     [Fact]

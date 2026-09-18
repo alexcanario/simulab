@@ -13,7 +13,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     /// <summary>A server that is not listening: the health check must report it as unhealthy.</summary>
     public const string UnreachableDatabase = "Host=localhost;Port=1;Database=simulab;Username=simulab;Password=simulab;Timeout=1";
 
+    /// <summary>A port nothing listens on: the Redis client integration's own health check must report it as unhealthy.</summary>
+    public const string UnreachableRedis = "localhost:1";
+
     public string DatabaseConnectionString { get; set; } = UnreachableDatabase;
+
+    public string RedisConnectionString { get; set; } = UnreachableRedis;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -23,6 +28,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         // These tests check the host, not a module: no migration runs against the (unreachable) database.
         builder.UseSetting("Database:ApplyMigrationsOnStart", "false");
         builder.UseSetting("ConnectionStrings:mailpit", "smtp://localhost:1025");
+        builder.UseSetting("ConnectionStrings:redis", RedisConnectionString);
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {

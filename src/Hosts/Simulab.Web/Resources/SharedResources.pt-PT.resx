@@ -112,6 +112,14 @@
   <data name="email_verification.expired" xml:space="preserve"><value>Esta ligação de verificação expirou.</value></data>
   <data name="email_verification.rate_limited" xml:space="preserve"><value>Pediu uma ligação há pouco. Aguarde um pouco antes de pedir novamente.</value></data>
   <data name="legal_document.not_found" xml:space="preserve"><value>Este documento não existe.</value></data>
+  <data name="identity.invalid_credentials" xml:space="preserve"><value>E-mail ou palavra-passe incorretos.</value></data>
+  <data name="identity.email_not_verified" xml:space="preserve"><value>Confirme o seu e-mail antes de iniciar sessão.</value></data>
+  <data name="identity.account_locked" xml:space="preserve"><value>Demasiadas tentativas. Tente novamente dentro de {0}.</value></data>
+  <data name="identity.refresh_token_invalid" xml:space="preserve"><value>A sua sessão terminou. Inicie sessão novamente.</value></data>
+  <data name="identity.token_revoked" xml:space="preserve"><value>A sua sessão terminou. Inicie sessão novamente.</value></data>
+  <data name="Layout.UserMenu.SignIn" xml:space="preserve"><value>Iniciar sessão</value></data>
+  <data name="Layout.UserMenu.SignOut" xml:space="preserve"><value>Terminar sessão</value></data>
+  <data name="Layout.UserMenu.Label" xml:space="preserve"><value>Menu da conta de {0}</value></data>
   <data name="Gallery.Section.Fields" xml:space="preserve"><value>Campos de formulário</value></data>
   <data name="Gallery.Fields.Hint" xml:space="preserve"><value>Etiqueta acima, marca de obrigatório, dica ou erro abaixo, e o botão de revelar na palavra-passe.</value></data>
   <data name="Gallery.Section.Alerts" xml:space="preserve"><value>Alertas</value></data>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.EntityFrameworkCore.Models;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Persistence.Configurations;
 using Simulab.Persistence;
@@ -44,6 +45,16 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.ApplyConfiguration(new IdentityUserClaimConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserLoginConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserTokenConfiguration());
+
+        // The OpenIddict client (F-5, decision 2: one confidential client, "simulab-web") lives in this
+        // schema too; the module owns its own protocol tables like every other identity table.
+        // UseOpenIddict() hardcodes PascalCase table names (same reason the Identity tables above need
+        // their own ToTable calls): the naming convention plugin never gets a chance to rename them.
+        modelBuilder.UseOpenIddict();
+        modelBuilder.Entity<OpenIddictEntityFrameworkCoreApplication>().ToTable("openiddict_applications");
+        modelBuilder.Entity<OpenIddictEntityFrameworkCoreAuthorization>().ToTable("openiddict_authorizations");
+        modelBuilder.Entity<OpenIddictEntityFrameworkCoreScope>().ToTable("openiddict_scopes");
+        modelBuilder.Entity<OpenIddictEntityFrameworkCoreToken>().ToTable("openiddict_tokens");
 
         // User cannot inherit TenantEntity (declared exception of the profile), so the base context does
         // not reach it. Its filters are declared here, with the same names, and capture the context and
