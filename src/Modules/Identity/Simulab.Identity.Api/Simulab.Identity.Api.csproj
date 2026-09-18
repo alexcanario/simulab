@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Identity.Application\Simulab.Identity.Application.csproj" />
+    <!-- Infrastructure is referenced for composition only (AddIdentityModule), per the profile. -->
+    <ProjectReference Include="..\Simulab.Identity.Infrastructure\Simulab.Identity.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,6 @@
 @page "/dev/ui"
 @inject IStringLocalizer<SharedResources> L
+@inject IStringLocalizer<IdentityResources> I
 @inject IHostEnvironment Environment
 @inject NavigationManager Navigation
 @inject IConfirmService Confirm
@@ -86,6 +87,39 @@
     <MudLink Href="/" Class="mt-2 d-inline-block">@L["Gallery.Form.Leave"]</MudLink>
 </section>
 
+<section id="gallery-fields" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Fields"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Fields.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppTextField TValue="string" Id="gallery-field-ok" Label="@I["SignUp.Email.Label"]"
+                      Placeholder="@I["SignUp.Email.Placeholder"]" Hint="@I["SignUp.Password.Hint"]" Required="true"
+                      Value="@_fieldValue" ValueChanged="@(value => _fieldValue = value)" />
+
+        <AppTextField TValue="string" Id="gallery-field-error" Label="@I["SignUp.Email.Label"]" Required="true"
+                      Error="@I["SignUp.Email.Required"].Value" Value="@("")" />
+
+        <AppPasswordField Id="gallery-password" Label="@I["SignUp.Password.Label"]"
+                          ShowLabel="@I["SignUp.Password.Show"]" HideLabel="@I["SignUp.Password.Hide"]"
+                          Required="true" Value="@_passwordValue" ValueChanged="@(value => _passwordValue = value)" />
+        <AppPasswordStrength Password="@_passwordValue" TextFor="@GalleryStrengthText" />
+
+        <AppCheckbox Id="gallery-checkbox" Required="true" Value="@_checked"
+                     ValueChanged="@(value => _checked = value)">@I["SignUp.Adult.Label"]</AppCheckbox>
+        <AppCheckbox Id="gallery-checkbox-error" Required="true" Value="false"
+                     Error="@L["registration.consent_required"].Value">@I["SignUp.Terms.Label"].Value</AppCheckbox>
+    </MudPaper>
+</section>
+
+<section id="gallery-alerts" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Alerts"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Alerts.Hint"]</MudText>
+    <AppAlert Severity="Severity.Info" Text="@L["Gallery.Alerts.Info"]" />
+    <AppAlert Severity="Severity.Warning" Text="@I["Legal.DraftNotice"]" />
+    <AppAlert Severity="Severity.Error" Text="@L["registration.rate_limited"]"
+              ActionText="@L["Common.TryAgain"]" OnAction="@(() => { })" />
+    <AppAlert Severity="Severity.Success" Text="@I["CheckEmail.Resend.Sent"]" />
+</section>
+
 <section id="gallery-errors" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Errors"]</MudText>
     <MudAlert Severity="Severity.Error" Class="mb-2">@L["Gallery.Errors.Known"]: @ErrorText.For("common.not_found")</MudAlert>
@@ -111,6 +145,13 @@
 </section>
 
 @code {
+    private string? _fieldValue;
+    private string? _passwordValue;
+    private bool _checked;
+
+    private string GalleryStrengthText(PasswordStrength strength) =>
+        I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
+
     private static readonly DateTimeOffset SampleBaseDate = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
 
     private static readonly IReadOnlyList<(string Name, string Icon)> IconList =

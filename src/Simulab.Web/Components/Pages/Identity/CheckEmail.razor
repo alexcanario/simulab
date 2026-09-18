@@ -1,0 +1,145 @@
+@page "/check-email"
+@layout AuthLayout
+@implements IDisposable
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject ErrorText Errors
+@inject SignUpFlow Flow
+@inject TimeProvider Clock
+
+<PageTitle>@I["CheckEmail.Title"] — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card">
+    <div class="app-auth-result">
+        <span class="app-auth-badge app-auth-badge-info">
+            <MudIcon Icon="@AppIcons.Mail" Size="Size.Large" Color="Color.Primary" aria-hidden="true" />
+        </span>
+        <h1 class="app-auth-title">@I["CheckEmail.Title"]</h1>
+
+        @if (_sent)
+        {
+            <AppAlert Severity="Severity.Success" Text="@I["CheckEmail.Resend.Sent"]" />
+        }
+        else if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@Errors.For(_error)" />
+        }
+
+        @if (_email is not null)
+        {
+            <p>@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, I["CheckEmail.Message"], $"<strong>{System.Net.WebUtility.HtmlEncode(_email)}</strong>"))</p>
+        }
+        <p>@I["CheckEmail.NotArrived"]</p>
+    </div>
+
+    @if (_email is null)
+    {
+        <AppTextField TValue="string"
+                      Id="check-email-address"
+                      Label="@I["SignUp.Email.Label"]"
+                      Placeholder="@I["SignUp.Email.Placeholder"]"
+                      InputType="InputType.Email"
+                      Autocomplete="username"
+                      MaxLength="254"
+                      Required="true"
+                      Value="@_typedEmail"
+                      ValueChanged="@(value => _typedEmail = value)" />
+    }
+
+    <MudButton Variant="Variant.Outlined"
+               Color="Color.Primary"
+               FullWidth="true"
+               Disabled="@(_sending || Remaining > 0)"
+               OnClick="ResendAsync">
+        @if (_sending)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@I["CheckEmail.Sending"]</span>
+        }
+        else
+        {
+            @I["CheckEmail.Resend"]
+        }
+    </MudButton>
+
+    @if (Remaining > 0)
+    {
+        @* Announced every ten seconds, not on every tick: a per-second live region is unusable with a screen reader. *@
+        <p class="app-auth-cooldown" aria-live="polite">@string.Format(System.Globalization.CultureInfo.CurrentCulture, I["CheckEmail.Resend.Cooldown"], AnnouncedRemaining)</p>
+    }
+</div>
+
+@code {
+    /// <summary>The cooldown the button shows. The server has its own, which this one never reveals (BR11, BR12).</summary>
+    private static readonly TimeSpan Cooldown = TimeSpan.FromSeconds(60);
+
+    private string? _email;
+    private string? _typedEmail;
+    private bool _sending;
+    private bool _sent;
+    private string? _error;
+    private DateTimeOffset? _cooldownStartedAt;
+    private Timer? _ticker;
+
+    private int Remaining => _cooldownStartedAt is null
+        ? 0
+        : Math.Max(0, (int)(Cooldown - (Clock.GetUtcNow() - _cooldownStartedAt.Value)).TotalSeconds);
+
+    // The announced value moves in steps of ten so the live region speaks about six times, not sixty.
+    private int AnnouncedRemaining => (int)(Math.Ceiling(Remaining / 10.0) * 10);
+
+    protected override void OnInitialized()
+    {
+        _email = Flow.PendingEmail;
+
+        // Arriving from sign-up means an email has just gone out: the button starts in its cooldown.
+        if (_email is not null)
+        {
+            StartCooldown();
+        }
+    }
+
+    private async Task ResendAsync()
+    {
+        var address = _email ?? _typedEmail;
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            return;
+        }
+
+        _sending = true;
+        _error = null;
+        var result = await Api.ResendVerificationAsync(address.Trim());
+        _sending = false;
+
+        if (result.IsSuccess)
+        {
+            _sent = true;
+            StartCooldown();
+        }
+        else
+        {
+            _error = result.ErrorCode;
+        }
+    }
+
+    private void StartCooldown()
+    {
+        _cooldownStartedAt = Clock.GetUtcNow();
+        _ticker?.Dispose();
+        _ticker = new Timer(_ =>
+        {
+            if (Remaining <= 0)
+            {
+                _cooldownStartedAt = null;
+                _ticker?.Dispose();
+                _ticker = null;
+            }
+
+            InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    public void Dispose() => _ticker?.Dispose();
+}

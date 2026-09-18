@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" />
+    <!-- Design-time only: the migrations of this module are created from this project. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Localization" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Identity.Application\Simulab.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\..\..\Simulab.Persistence\Simulab.Persistence.csproj" />
+  </ItemGroup>
+
+  <!-- The legal documents are read from disk at run time (BR14), so they travel with the build. -->
+  <ItemGroup>
+    <Content Include="Content\Legal\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

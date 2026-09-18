@@ -5,6 +5,11 @@
     <Project Path="src/Simulab.ServiceDefaults/Simulab.ServiceDefaults.csproj" />
     <Project Path="src/Simulab.Email/Simulab.Email.csproj" />
     <Project Path="src/Simulab.Persistence/Simulab.Persistence.csproj" />
+    <Project Path="src/Modules/Identity/Simulab.Identity.Api/Simulab.Identity.Api.csproj" />
+    <Project Path="src/Modules/Identity/Simulab.Identity.Application/Simulab.Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Simulab.Identity.Contracts/Simulab.Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/Simulab.Identity.Domain/Simulab.Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj" />
     <Project Path="src/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
     <Project Path="src/Simulab.Web/Simulab.Web.csproj" />
   </Folder>
@@ -13,6 +18,7 @@
     <Project Path="tests/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj" />
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
     <Project Path="tests/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
+    <Project Path="tests/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />
     <Project Path="tests/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
     <Project Path="tests/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />

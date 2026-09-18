@@ -102,4 +102,19 @@
   <data name="Nav.Section.Administration" xml:space="preserve"><value>Administração</value></data>
   <data name="Nav.Section.Development" xml:space="preserve"><value>Desenvolvimento</value></data>
   <data name="Nav.Dev.UiKit" xml:space="preserve"><value>Kit de interface</value></data>
+  <data name="registration.age_declaration_required" xml:space="preserve"><value>É preciso ter 18 anos ou mais para criar uma conta.</value></data>
+  <data name="registration.consent_required" xml:space="preserve"><value>Aceite os Termos de Utilização e a Política de Privacidade.</value></data>
+  <data name="registration.terms_version_outdated" xml:space="preserve"><value>Os textos legais mudaram enquanto preenchia o formulário. Leia novamente e aceite.</value></data>
+  <data name="registration.password_too_weak" xml:space="preserve"><value>Esta palavra-passe não segue as regras acima.</value></data>
+  <data name="registration.email_invalid" xml:space="preserve"><value>Indique um e-mail válido.</value></data>
+  <data name="registration.rate_limited" xml:space="preserve"><value>Demasiadas tentativas neste dispositivo. Tente novamente dentro de uma hora.</value></data>
+  <data name="email_verification.invalid" xml:space="preserve"><value>Esta ligação de verificação não é válida.</value></data>
+  <data name="email_verification.expired" xml:space="preserve"><value>Esta ligação de verificação expirou.</value></data>
+  <data name="email_verification.rate_limited" xml:space="preserve"><value>Pediu uma ligação há pouco. Aguarde um pouco antes de pedir novamente.</value></data>
+  <data name="legal_document.not_found" xml:space="preserve"><value>Este documento não existe.</value></data>
+  <data name="Gallery.Section.Fields" xml:space="preserve"><value>Campos de formulário</value></data>
+  <data name="Gallery.Fields.Hint" xml:space="preserve"><value>Etiqueta acima, marca de obrigatório, dica ou erro abaixo, e o botão de revelar na palavra-passe.</value></data>
+  <data name="Gallery.Section.Alerts" xml:space="preserve"><value>Alertas</value></data>
+  <data name="Gallery.Alerts.Hint" xml:space="preserve"><value>Mensagens de negócio e de servidor que pertencem à página. O sucesso em snackbar fica para as ações.</value></data>
+  <data name="Gallery.Alerts.Info" xml:space="preserve"><value>Algo que vale a pena ler antes de agir.</value></data>
 </root>

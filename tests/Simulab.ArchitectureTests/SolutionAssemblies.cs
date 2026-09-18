@@ -11,6 +11,11 @@ internal static class SolutionAssemblies
         typeof(Simulab.Persistence.ModuleDbContext).Assembly,
         typeof(Simulab.Email.IEmailSender).Assembly,
         typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
+        typeof(Simulab.Identity.Domain.Entities.User).Assembly,
+        typeof(Simulab.Identity.Contracts.IdentityErrorCodes).Assembly,
+        typeof(Simulab.Identity.Application.Registration.RegisterUserHandler).Assembly,
+        typeof(Simulab.Identity.Infrastructure.IdentityModule).Assembly,
+        typeof(Simulab.Identity.Api.IdentityEndpoints).Assembly,
         typeof(Simulab.Web.Resources.SharedResources).Assembly,
         typeof(Microsoft.Extensions.Hosting.Extensions).Assembly // Simulab.ServiceDefaults
     ];

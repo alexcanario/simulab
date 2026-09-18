@@ -20,6 +20,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.UseSetting("ConnectionStrings:simulab", DatabaseConnectionString);
+        // These tests check the host, not a module: no migration runs against the (unreachable) database.
+        builder.UseSetting("Database:ApplyMigrationsOnStart", "false");
         builder.UseSetting("ConnectionStrings:mailpit", "smtp://localhost:1025");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>

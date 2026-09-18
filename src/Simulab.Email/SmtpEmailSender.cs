@@ -25,11 +25,20 @@ public sealed class SmtpEmailSender(IOptions<EmailOptions> options) : IEmailSend
         }.ToMessageBody();
 
         using var client = new SmtpClient();
-        await client.ConnectAsync(
-            _options.Host,
-            _options.Port,
-            _options.UseStartTls ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
-            cancellationToken);
+        try
+        {
+            await client.ConnectAsync(
+                _options.Host,
+                _options.Port,
+                _options.UseStartTls ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
+                cancellationToken);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // Without the address, "connection refused" says nothing about which server was misconfigured.
+            throw new InvalidOperationException(
+                $"Could not reach the SMTP server at {_options.Host}:{_options.Port}.", exception);
+        }
 
         if (!string.IsNullOrEmpty(_options.UserName))
         {

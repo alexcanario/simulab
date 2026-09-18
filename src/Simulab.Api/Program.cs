@@ -1,6 +1,8 @@
 using System.Reflection;
 using Simulab.Api.Features.System;
 using Simulab.Email;
+using Simulab.Identity.Api;
+using Simulab.Identity.Infrastructure;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Serialization;
@@ -18,6 +20,11 @@ builder.Services.AddAppDatabase(builder.Configuration.GetConnectionString("simul
 builder.Services.AddModulePersistence();
 builder.Services.AddEmailSender(builder.Configuration, builder.Configuration.GetConnectionString("mailpit"));
 builder.Services.AddIntegrationEvents();
+
+// Modules (F-4: Identity).
+builder.Services.AddIdentityModule(builder.Configuration, builder.Configuration.GetConnectionString("simulab")
+    ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
+builder.Services.AddSingleton<ClientRateLimiter>();
 
 var app = builder.Build();
 
@@ -39,5 +46,14 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
         Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0",
         environment.EnvironmentName))
     .WithName("GetSystemInfo");
+
+v1.MapIdentityEndpoints();
+
+// Development applies the module migrations on start; a release applies them from the pipeline.
+// A test host that does not need a database turns it off with Database:ApplyMigrationsOnStart.
+if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environment.IsDevelopment()))
+{
+    await app.Services.MigrateIdentityModuleAsync();
+}
 
 app.Run();

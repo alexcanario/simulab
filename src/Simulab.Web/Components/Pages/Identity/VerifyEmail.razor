@@ -1,0 +1,158 @@
+@page "/verify-email"
+@layout AuthLayout
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject ErrorText Errors
+
+<PageTitle>@Title — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card">
+    <div class="app-auth-result">
+        @switch (_state)
+        {
+            case State.Verifying:
+                <span class="app-auth-badge app-auth-badge-info">
+                    <MudProgressCircular Indeterminate="true" Size="Size.Medium" Color="Color.Primary" aria-hidden="true" />
+                </span>
+                <h1 class="app-auth-title" role="status">@I["VerifyEmail.Verifying"]</h1>
+                break;
+
+            case State.Verified:
+                <span class="app-auth-badge app-auth-badge-success">
+                    <MudIcon Icon="@AppIcons.Verified" Size="Size.Large" Color="Color.Success" aria-hidden="true" />
+                </span>
+                <h1 class="app-auth-title">@I["VerifyEmail.Verified.Title"]</h1>
+                @* No sign-in link: /sign-in arrives with F-5, and a dead link fails validation on screen. *@
+                <p role="status">@I["VerifyEmail.Verified.Message"]</p>
+                break;
+
+            case State.Expired:
+                <span class="app-auth-badge app-auth-badge-warning">
+                    <MudIcon Icon="@AppIcons.Expired" Size="Size.Large" Color="Color.Warning" aria-hidden="true" />
+                </span>
+                <h1 class="app-auth-title">@I["VerifyEmail.Expired.Title"]</h1>
+                <p>@I["VerifyEmail.Expired.Message"]</p>
+                break;
+
+            case State.Invalid:
+                <span class="app-auth-badge app-auth-badge-error">
+                    <MudIcon Icon="@AppIcons.Error" Size="Size.Large" Color="Color.Error" aria-hidden="true" />
+                </span>
+                <h1 class="app-auth-title">@I["VerifyEmail.Invalid.Title"]</h1>
+                <p>@I["VerifyEmail.Invalid.Message"]</p>
+                break;
+
+            case State.Failed:
+                <span class="app-auth-badge app-auth-badge-error">
+                    <MudIcon Icon="@AppIcons.Error" Size="Size.Large" Color="Color.Error" aria-hidden="true" />
+                </span>
+                <h1 class="app-auth-title">@I["VerifyEmail.Invalid.Title"]</h1>
+                <AppAlert Severity="Severity.Error"
+                          Text="@Errors.For(_errorCode)"
+                          ActionText="@L["Common.TryAgain"]"
+                          OnAction="VerifyAsync" />
+                break;
+        }
+    </div>
+
+    @if (_state == State.Expired)
+    {
+        <AppTextField TValue="string"
+                      Id="verify-email-address"
+                      Label="@I["SignUp.Email.Label"]"
+                      Placeholder="@I["SignUp.Email.Placeholder"]"
+                      InputType="InputType.Email"
+                      Autocomplete="username"
+                      MaxLength="254"
+                      Required="true"
+                      Value="@_email"
+                      ValueChanged="@(value => _email = value)" />
+
+        @if (_resent)
+        {
+            <AppAlert Severity="Severity.Success" Text="@I["CheckEmail.Resend.Sent"]" />
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                   Disabled="@(_resending || _resent)" OnClick="ResendAsync">
+            @if (_resending)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                <span role="status">@I["CheckEmail.Sending"]</span>
+            }
+            else
+            {
+                @I["CheckEmail.Resend"]
+            }
+        </MudButton>
+    }
+
+    @if (_state == State.Invalid)
+    {
+        <div class="app-auth-links">
+            <MudLink Href="/sign-up" Color="Color.Primary">@I["VerifyEmail.BackToSignUp"]</MudLink>
+        </div>
+    }
+</div>
+
+@code {
+    private enum State { Verifying, Verified, Expired, Invalid, Failed }
+
+    /// <summary>The raw token from the link. It is posted to the API and never shown on screen.</summary>
+    [SupplyParameterFromQuery(Name = "token")] public string? Token { get; set; }
+
+    private State _state = State.Verifying;
+    private string? _errorCode;
+    private string? _email;
+    private bool _resending;
+    private bool _resent;
+
+    private string Title => _state switch
+    {
+        State.Verified => I["VerifyEmail.Verified.Title"],
+        State.Expired => I["VerifyEmail.Expired.Title"],
+        State.Verifying => I["VerifyEmail.Verifying"],
+        _ => I["VerifyEmail.Invalid.Title"]
+    };
+
+    protected override Task OnInitializedAsync() => VerifyAsync();
+
+    private async Task VerifyAsync()
+    {
+        _state = State.Verifying;
+        _errorCode = null;
+
+        if (string.IsNullOrWhiteSpace(Token))
+        {
+            _state = State.Invalid;
+            return;
+        }
+
+        var result = await Api.VerifyEmailAsync(Token);
+
+        _state = result switch
+        {
+            { IsSuccess: true } => State.Verified,
+            { ErrorCode: IdentityErrorCodes.VerificationExpired } => State.Expired,
+            { ErrorCode: IdentityErrorCodes.VerificationInvalid } => State.Invalid,
+            _ => State.Failed
+        };
+
+        _errorCode = result.ErrorCode;
+    }
+
+    private async Task ResendAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_email))
+        {
+            return;
+        }
+
+        _resending = true;
+        var result = await Api.ResendVerificationAsync(_email.Trim());
+        _resending = false;
+        _resent = result.IsSuccess;
+        _errorCode = result.ErrorCode;
+    }
+}
