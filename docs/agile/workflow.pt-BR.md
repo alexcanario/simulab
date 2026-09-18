@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.16 (rascunho). English: [en](workflow.md).
+> Versão 0.0.18 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -82,6 +82,21 @@ Saídas, todas em inglês:
 - Os primeiros épicos no board, se o brief já os citar.
 
 ## 5. Ciclo de vida de uma feature
+
+```mermaid
+stateDiagram-v2
+    [*] --> idea: /agile:idea
+    idea --> refining: /agile:refine
+    refining --> approved: você diz "aprovo F-n"
+    approved --> building: /agile:build
+    building --> validating: tabela de cobertura + roteiro de validação
+    validating --> building: um ajuste que você reportou
+    validating --> done: você diz "validado", depois /agile:ship (merge autorizado)
+    done --> [*]
+    note right of approved: gate 1 — aprovada
+    note right of validating: gate 2 — validada na tela
+    note right of done: gate 3 — merge autorizado
+```
 
 | Status | O que acontece | Quem muda |
 |---|---|---|
@@ -209,36 +224,98 @@ O que todos os perfis têm em comum:
 
 `modular-monolith` — hosts, blocos técnicos e módulos de negócio em grupos separados:
 ```
-src/Hosts/<App>.AppHost | .ServiceDefaults | .Api | .Web
-src/BuildingBlocks/<App>.SharedKernel | .<Block>        (Persistence, Email, Storage, Ai — criado pela primeira feature que precisar)
-src/Modules/<Module>/<App>.<Module> | .<Module>.Contracts (cinco projetos quando o módulo usa Clean Architecture)
-tests/Hosts/ · tests/BuildingBlocks/ · tests/Modules/<Module>/ · tests/<App>.ArchitectureTests · tests/<App>.Testing
+src/
+├── Hosts/
+│   ├── <App>.AppHost/                orquestração local (Aspire)
+│   ├── <App>.ServiceDefaults/        telemetria, health, resiliência
+│   ├── <App>.Api/                    só host: composição, auth, OpenAPI
+│   └── <App>.Web/                    UI Blazor, clientes tipados para a API
+├── BuildingBlocks/
+│   ├── <App>.SharedKernel/           Entity, TenantEntity, Result/Error, AppJson
+│   └── <App>.<Block>/                Persistence, Email, Storage, Ai — pela primeira feature que precisar
+└── Modules/
+    └── <Module>/
+        ├── <App>.<Module>/           um projeto por módulo (ou cinco com Clean Architecture)
+        │   ├── Features/<Feature>/   fatias verticais
+        │   ├── Domain/               entidades com regras
+        │   ├── Data/                 DbContext, schema próprio, migrations
+        │   └── Resources/            .resx em en, pt-BR, pt-PT
+        └── <App>.<Module>.Contracts/ o que os outros módulos podem ver
+tests/
+├── Hosts/<App>.Web.Tests/            bUnit
+├── BuildingBlocks/<App>.<Block>.Tests/
+├── Modules/<Module>/<App>.<Module>.Tests/
+├── <App>.ArchitectureTests/          fronteiras, vocabulário, layout
+└── <App>.Testing/                    auxiliares de teste compartilhados
 ```
 
 `monolith` — um deployable com o código de negócio dentro dele:
 ```
-src/<App>.AppHost (opcional) · src/<App>.Api (Features/, Domain/, Data/, Contracts/, Common/, Resources/) · src/<App>.Web
-tests/<App>.Tests · tests/<App>.Web.Tests
+src/
+├── <App>.AppHost/                    opcional
+├── <App>.Api/                        host + código de negócio
+│   ├── Features/<Feature>/
+│   ├── Domain/
+│   ├── Data/                         um DbContext, migrations
+│   ├── Contracts/                    records compartilhados com a UI
+│   ├── Common/                       Result/Error, AppJson, auxiliares
+│   └── Resources/
+└── <App>.Web/                        UI Blazor, clientes tipados para a API
+tests/
+├── <App>.Tests/                      unitários + integração
+└── <App>.Web.Tests/                  bUnit
 ```
 
 `web-app` — um projeto Blazor é o app inteiro:
 ```
-src/<App>.Web (Pages/<Area>/, Components/, Features/, Domain/, Data/, Api/, Common/, Resources/)
-tests/<App>.Tests
+src/
+└── <App>.Web/                        o único deployable
+    ├── Pages/<Area>/                 página + code-behind
+    ├── Components/                   componentes de UI compartilhados
+    ├── Features/<Feature>/           só quando uma operação tem regras
+    ├── Domain/
+    ├── Data/                         um DbContext, migrations
+    ├── Api/                          endpoints só para clientes externos
+    ├── Common/                       Result/Error, AppJson, auxiliares
+    └── Resources/
+tests/
+└── <App>.Tests/                      unitários + integração + bUnit
 ```
 
 `microservices` — uma solução, uma pasta por serviço, cada um um monolito pequeno:
 ```
-src/<App>.AppHost | .ServiceDefaults | .Gateway | .Web
-src/BuildingBlocks/<App>.Messaging
-src/Services/<Service>/<App>.<Service> | .<Service>.Contracts
-tests/<App>.<Service>.Tests · tests/<App>.Web.Tests · tests/<App>.ArchitectureTests · tests/<App>.SystemTests
+src/
+├── <App>.AppHost/                    todos os serviços, broker, bancos
+├── <App>.ServiceDefaults/
+├── <App>.Gateway/                    roteamento e auth na borda (YARP)
+├── <App>.Web/                        UI Blazor, chama só o gateway
+├── BuildingBlocks/
+│   └── <App>.Messaging/              outbox, inbox, configuração do broker
+└── Services/
+    └── <Service>/
+        ├── <App>.<Service>/          Features/, Domain/, Data/ (banco próprio)
+        └── <App>.<Service>.Contracts/ records e eventos de integração
+tests/
+├── <App>.<Service>.Tests/            unitários + integração + contrato
+├── <App>.Web.Tests/                  bUnit
+├── <App>.ArchitectureTests/
+└── <App>.SystemTests/                alguns fluxos ponta a ponta
 ```
 
 `mobile` — um núcleo testável, uma cabeça MAUI fina e o backend no perfil dele:
 ```
-src/<App>.Api (pelo perfil dele) · src/<App>.Contracts · src/<App>.Mobile.Core (Features/, Api/, Storage/, Resources/) · src/<App>.Mobile
-tests/<App>.Mobile.Core.Tests · tests/<App>.Tests
+src/
+├── <App>.Api/                        backend, pelo perfil dele
+├── <App>.Contracts/                  records e códigos de erro compartilhados com o app
+├── <App>.Mobile.Core/                biblioteca simples: tudo que é testável
+│   ├── Features/<Feature>/           view models, serviços de feature
+│   ├── Api/                          clientes tipados, AppJson
+│   ├── Storage/                      cache local, fila offline
+│   └── Resources/
+└── <App>.Mobile/                     cabeça MAUI: páginas XAML, shell, código de plataforma
+tests/
+├── <App>.Mobile.Core.Tests/          view models, serviços, fila offline
+└── <App>.Tests/                      testes do backend, pelo perfil dele
 ```
 
 As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agile/` no bootstrap: `workflow`, `naming`, `git`, `definition-of-done` e `output-style` são sempre carregadas; `i18n` e `api-contracts` só são carregadas quando o Claude trabalha em arquivos de código, `ui` só em arquivos de tela (`.razor`, `.xaml`), e `build-config` só em arquivos de projeto e de build. Uma regra por linha, no máximo 30 linhas por arquivo. As regras core são genéricas: valem para todos os perfis. O que depende de um perfil, de uma stack ou de uma biblioteca de UI fica no arquivo do perfil, em `templates/dotnet/` ou numa regra limitada por tipo de arquivo, e o plugin aplica isso a todos os perfis a que diz respeito.
@@ -254,7 +331,8 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 ## 13. Sessões e pausas
 
 - **Início:** o Claude confere a branch, o board e a feature em andamento antes de qualquer ação.
-- **Pausa no meio da feature:** commit na branch da feature com o prefixo `wip:`; nada fica só no disco.
+- **Retomada:** `/agile:build <id>` no item que está em `building` continua a partir do último commit `wip`.
+- **Pausa no meio da feature:** `/agile:pause`, ou só diga que vai parar. O Claude faz o commit na branch da feature com o prefixo `wip(F-<n>):` e escreve uma nota (onde paramos, o que vem a seguir, quem decide); nada fica só no disco. Fechar a sessão sem pausar também não perde nada: a sessão seguinte commita o que sobrou como `wip` antes de tudo.
 - **Fim:** uma nota curta (onde paramos, o que vem a seguir, quem decide).
 - **Antes do merge a partir de uma worktree:** feche a IDE e o app host que estiverem rodando daquela pasta.
 
@@ -514,12 +592,15 @@ O bug segue o mesmo ciclo, com um arquivo curto: causa, comportamento esperado, 
 
 ### 14.6 Pausa e retomada
 
-Fim de uma sessão no meio da F-7:
+Você para quando quiser, com as suas palavras ou com o comando; os dois fazem a mesma coisa. No meio da F-7:
 
 ```
-Claude: Pausado. Commit "wip: F-7 question form without type editor" em feature/F-7.
-Próximo passo: editor dos tipos T1-T3. Decisão pendente com você: nenhuma.
+> /agile:pause
+Claude: Pausado. Commit "wip(F-7): question form without type editor" em feature/F-7 (local, sem push).
+Próximo passo: editor dos tipos T1-T3. Decisão pendente com você: nenhuma. Nada rodando.
 ```
+
+"Vamos parar por hoje" ou "continuo amanhã" faz exatamente o mesmo. Se você só fechar a sessão, nada se perde: a sessão seguinte começa mostrando o trabalho sem commit, e o Claude o commita como `wip` antes de qualquer outra coisa, com o seu ok.
 
 Na sessão seguinte:
 
@@ -533,6 +614,14 @@ Em andamento: F-7 Question registration — building (branch feature/F-7, 1 comm
 Próximo passo: editor dos tipos T1-T3
 Perguntas em aberto: nenhuma
 Topo do backlog: F-8 Question review queue (idea), B-3 Search accents (idea)
+```
+
+Para continuar, rode o build de novo no mesmo item; o Claude retoma em vez de recomeçar:
+
+```
+> /agile:build F-7
+Claude: Retomando a F-7 a partir do commit wip "question form without type editor" em feature/F-7.
+Próximo passo: editor dos tipos T1-T3 (passo 4 do plano). Continuando.
 ```
 
 ### 14.7 De uma ideia solta a um épico
@@ -723,6 +812,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
 | `/agile:ship <feature>` | Suíte completa, merge, board e manual da app |
 | `/agile:retro` | Transforma lições em regras ou skills |
+| `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
 | `/agile:status` | Feature em andamento, topo do backlog e perguntas em aberto |
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow e perfil dentro do projeto |
 
@@ -816,7 +906,9 @@ flowchart TD
 ### /agile:build
 ```mermaid
 flowchart TD
-    A["Item aprovado?"] -->|não| A1(["Parar: refinar e aprovar antes"])
+    A["Item aprovado?"] -->|já em building| A2["Retomar: branch, último commit wip, próximo passo do plano"]
+    A2 --> D
+    A -->|não| A1(["Parar: refinar e aprovar antes"])
     A -->|sim| B["Outro item em building ou validating?"]
     B -->|sim, sem --worktree| B1(["Parar e dizer qual"])
     B -->|sim, com --worktree| B2{"Os dois podem colidir? Confirmar o paralelo"}
@@ -887,6 +979,18 @@ flowchart TD
     E --> F["Aplicar; CLAUDE.md abaixo de 60 linhas; uma linha por regra"]
     F --> G["Entrada no retro-log.md; nota do plugin ganha linha ⏳<br/>na tabela de status, com o escopo"]
     G --> H(["Commit com a sua autorização se for na main"])
+```
+
+### /agile:pause
+```mermaid
+flowchart TD
+    A["/agile:pause, ou 'vamos parar' com quaisquer palavras"] --> B["git status no checkout e em cada worktree"]
+    B -->|nada a salvar| B1(["Uma linha: nada em andamento"])
+    B --> C{"Trabalho sem commit numa branch de item?"}
+    C -->|na main| C1(["Parar e mostrar o git status"])
+    C -->|sim| D["Branch conferida; commit wip(F-n): o que ficou pela metade"]
+    D --> E["Nota de pausa: onde paramos, próximo passo,<br/>decisões pendentes, o que fechar"]
+    E --> F(["Status inalterado; retomar com /agile:build <id>"])
 ```
 
 ### /agile:status

@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.16 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.18 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -82,6 +82,21 @@ Outputs, all in English:
 - The first epics on the board, if the brief already names them.
 
 ## 5. Feature lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> idea: /agile:idea
+    idea --> refining: /agile:refine
+    refining --> approved: you say "aprovo F-n"
+    approved --> building: /agile:build
+    building --> validating: coverage table + validation script
+    validating --> building: a fix you reported
+    validating --> done: you say "validado", then /agile:ship (merge authorized)
+    done --> [*]
+    note right of approved: gate 1 — approved
+    note right of validating: gate 2 — validated on screen
+    note right of done: gate 3 — merge authorized
+```
 
 | Status | What happens | Who moves it |
 |---|---|---|
@@ -207,36 +222,98 @@ What every profile shares:
 
 `modular-monolith` — hosts, technical building blocks and business modules in separate groups:
 ```
-src/Hosts/<App>.AppHost | .ServiceDefaults | .Api | .Web
-src/BuildingBlocks/<App>.SharedKernel | .<Block>        (Persistence, Email, Storage, Ai — created by the first feature that needs it)
-src/Modules/<Module>/<App>.<Module> | .<Module>.Contracts (five projects when the module uses Clean Architecture)
-tests/Hosts/ · tests/BuildingBlocks/ · tests/Modules/<Module>/ · tests/<App>.ArchitectureTests · tests/<App>.Testing
+src/
+├── Hosts/
+│   ├── <App>.AppHost/                local orchestration (Aspire)
+│   ├── <App>.ServiceDefaults/        telemetry, health, resilience
+│   ├── <App>.Api/                    host only: composition, auth, OpenAPI
+│   └── <App>.Web/                    Blazor UI, typed clients to the API
+├── BuildingBlocks/
+│   ├── <App>.SharedKernel/           Entity, TenantEntity, Result/Error, AppJson
+│   └── <App>.<Block>/                Persistence, Email, Storage, Ai — by the first feature that needs it
+└── Modules/
+    └── <Module>/
+        ├── <App>.<Module>/           one project per module (or five with Clean Architecture)
+        │   ├── Features/<Feature>/   vertical slices
+        │   ├── Domain/               entities with rules
+        │   ├── Data/                 DbContext, own schema, migrations
+        │   └── Resources/            .resx in en, pt-BR, pt-PT
+        └── <App>.<Module>.Contracts/ what other modules may see
+tests/
+├── Hosts/<App>.Web.Tests/            bUnit
+├── BuildingBlocks/<App>.<Block>.Tests/
+├── Modules/<Module>/<App>.<Module>.Tests/
+├── <App>.ArchitectureTests/          boundaries, vocabulary, layout
+└── <App>.Testing/                    shared test helpers
 ```
 
 `monolith` — one deployable with the business code inside it:
 ```
-src/<App>.AppHost (optional) · src/<App>.Api (Features/, Domain/, Data/, Contracts/, Common/, Resources/) · src/<App>.Web
-tests/<App>.Tests · tests/<App>.Web.Tests
+src/
+├── <App>.AppHost/                    optional
+├── <App>.Api/                        host + business code
+│   ├── Features/<Feature>/
+│   ├── Domain/
+│   ├── Data/                         one DbContext, migrations
+│   ├── Contracts/                    records shared with the UI
+│   ├── Common/                       Result/Error, AppJson, helpers
+│   └── Resources/
+└── <App>.Web/                        Blazor UI, typed clients to the API
+tests/
+├── <App>.Tests/                      unit + integration
+└── <App>.Web.Tests/                  bUnit
 ```
 
 `web-app` — one Blazor project is the whole app:
 ```
-src/<App>.Web (Pages/<Area>/, Components/, Features/, Domain/, Data/, Api/, Common/, Resources/)
-tests/<App>.Tests
+src/
+└── <App>.Web/                        the only deployable
+    ├── Pages/<Area>/                 page + code-behind
+    ├── Components/                   shared UI components
+    ├── Features/<Feature>/           only when an operation has rules
+    ├── Domain/
+    ├── Data/                         one DbContext, migrations
+    ├── Api/                          endpoints only for external clients
+    ├── Common/                       Result/Error, AppJson, helpers
+    └── Resources/
+tests/
+└── <App>.Tests/                      unit + integration + bUnit
 ```
 
 `microservices` — one solution, one folder per service, each a small monolith:
 ```
-src/<App>.AppHost | .ServiceDefaults | .Gateway | .Web
-src/BuildingBlocks/<App>.Messaging
-src/Services/<Service>/<App>.<Service> | .<Service>.Contracts
-tests/<App>.<Service>.Tests · tests/<App>.Web.Tests · tests/<App>.ArchitectureTests · tests/<App>.SystemTests
+src/
+├── <App>.AppHost/                    every service, broker, databases
+├── <App>.ServiceDefaults/
+├── <App>.Gateway/                    routing and auth at the edge (YARP)
+├── <App>.Web/                        Blazor UI, calls the gateway only
+├── BuildingBlocks/
+│   └── <App>.Messaging/              outbox, inbox, broker setup
+└── Services/
+    └── <Service>/
+        ├── <App>.<Service>/          Features/, Domain/, Data/ (own database)
+        └── <App>.<Service>.Contracts/ records and integration events
+tests/
+├── <App>.<Service>.Tests/            unit + integration + contract
+├── <App>.Web.Tests/                  bUnit
+├── <App>.ArchitectureTests/
+└── <App>.SystemTests/                a few end-to-end flows
 ```
 
 `mobile` — a testable core, a thin MAUI head, and the backend under its own profile:
 ```
-src/<App>.Api (per its profile) · src/<App>.Contracts · src/<App>.Mobile.Core (Features/, Api/, Storage/, Resources/) · src/<App>.Mobile
-tests/<App>.Mobile.Core.Tests · tests/<App>.Tests
+src/
+├── <App>.Api/                        backend, per its own profile
+├── <App>.Contracts/                  records and error codes shared with the app
+├── <App>.Mobile.Core/                plain library: everything testable
+│   ├── Features/<Feature>/           view models, feature services
+│   ├── Api/                          typed clients, AppJson
+│   ├── Storage/                      local cache, offline queue
+│   └── Resources/
+└── <App>.Mobile/                     MAUI head: XAML pages, shell, platform code
+tests/
+├── <App>.Mobile.Core.Tests/          view models, services, offline queue
+└── <App>.Tests/                      backend tests, per its profile
 ```
 
 Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
@@ -252,7 +329,8 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 ## 13. Sessions and pauses
 
 - Start: Claude checks the branch, the board and the feature in progress before doing anything.
-- Pause mid-feature: commit on the feature branch with a `wip:` prefix; nothing stays only on disk.
+- Resume: `/agile:build <id>` on the item that is `building` continues from the last `wip` commit.
+- Pause mid-feature: `/agile:pause`, or just say you are stopping. Claude commits on the feature branch with a `wip(F-<n>):` prefix and writes a note (where we stopped, what is next, who decides); nothing stays only on disk. Closing the session without a pause is fine too: the next session commits the leftover work as `wip` first.
 - End: a short note (where we stopped, what is next, who decides).
 - Before merging from a worktree: close any IDE or app host running from that folder.
 
@@ -512,12 +590,15 @@ The bug follows the same lifecycle, with one short file: cause, expected behavio
 
 ### 14.6 Pausing and resuming
 
-End of a session in the middle of F-7:
+You stop whenever you want, in your own words or with the command; both do the same thing. In the middle of F-7:
 
 ```
-Claude: Paused. Commit "wip: F-7 question form without type editor" on feature/F-7.
-Next: type editor for T1-T3. Decision pending with you: none.
+> /agile:pause
+Claude: Paused. Commit "wip(F-7): question form without type editor" on feature/F-7 (local, not pushed).
+Next: type editor for T1-T3. Decision pending with you: none. Nothing running.
 ```
+
+"Vamos parar por hoje" or "continuo amanhã" does exactly the same. If you just close the session, nothing is lost either: the next session starts by showing the uncommitted work, and Claude commits it as `wip` before anything else, with your OK.
 
 Next session:
 
@@ -531,6 +612,14 @@ In progress: F-7 Question registration — building (branch feature/F-7, 1 wip c
 Next step: type editor for T1-T3
 Open questions: none
 Backlog head: F-8 Question review queue (idea), B-3 Search accents (idea)
+```
+
+To continue, run the build again on the same item; Claude resumes instead of starting over:
+
+```
+> /agile:build F-7
+Claude: Resuming F-7 from wip commit "question form without type editor" on feature/F-7.
+Next: type editor for T1-T3 (step 4 of the plan). Continuing.
 ```
 
 ### 14.7 From a loose idea to an epic
@@ -718,6 +807,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:change <feature>` | Record a change of mind during build |
 | `/agile:ship <feature>` | Full suite, merge, board, app manual |
 | `/agile:retro` | Turn lessons into rules or skills |
+| `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions |
 | `/agile:sync` | After a plugin update: refresh the project's copies of rules, templates, workflow and profile |
 
@@ -811,7 +901,9 @@ flowchart TD
 ### /agile:build
 ```mermaid
 flowchart TD
-    A["Item approved?"] -->|no| A1(["Stop: refine and approve first"])
+    A["Item approved?"] -->|already building| A2["Resume: branch, last wip commit, next step of the plan"]
+    A2 --> D
+    A -->|no| A1(["Stop: refine and approve first"])
     A -->|yes| B["Another item building or validating?"]
     B -->|yes, no --worktree| B1(["Stop and name it"])
     B -->|yes, --worktree| B2{"Can the two collide? Confirm parallel work"}
@@ -882,6 +974,18 @@ flowchart TD
     E --> F["Apply; CLAUDE.md under 60 lines; one line per rule"]
     F --> G["retro-log.md entry; a plugin note gets a ⏳ row<br/>in the status table with its scope"]
     G --> H(["Commit with your authorization if on main"])
+```
+
+### /agile:pause
+```mermaid
+flowchart TD
+    A["/agile:pause, or 'vamos parar' in any words"] --> B["git status in the checkout and every worktree"]
+    B -->|nothing to save| B1(["One line: nothing in progress"])
+    B --> C{"Uncommitted work on an item branch?"}
+    C -->|on main| C1(["Stop and show git status"])
+    C -->|yes| D["Branch checked; commit wip(F-n): what is half done"]
+    D --> E["Pause note: where we stopped, next step,<br/>pending decisions, anything to close"]
+    E --> F(["Status unchanged; resume with /agile:build <id>"])
 ```
 
 ### /agile:status
