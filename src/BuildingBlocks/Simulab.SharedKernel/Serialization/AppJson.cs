@@ -18,7 +18,10 @@ public static class AppJson
     {
         options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         if (!options.Converters.OfType<JsonStringEnumConverter>().Any())
+        {
             options.Converters.Add(new JsonStringEnumConverter());
+        }
+
         return options;
     }
 }

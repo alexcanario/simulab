@@ -3,7 +3,7 @@ feature: F-12
 epic: Foundation and identity
 status: building
 board: 716
-version: 1
+version: 2
 ---
 # Group projects into folders
 
@@ -30,7 +30,8 @@ Make the solution readable by role as it grows (four more modules and two more b
 - BR3 Every project in `Simulab.slnx` sits in a solution folder equal to its disk folder (for example `/src/Hosts/` for `src/Hosts/Simulab.Api/Simulab.Api.csproj`).
 - BR4 `Directory.Build.props` exists only at the root and in `tests/`. A group gets its own file only when it has a first property to share, and that file imports the one above it.
 - BR5 `Directory.Packages.props` stays single, at the root.
-- BR6 Project names, assembly names and namespaces do not change; no production code changes except paths.
+- BR6 Project names, assembly names and namespaces do not change; no production code changes except paths and the fixes the final `.editorconfig` asks for (v2).
+- BR7 The root `.editorconfig` is the final version: the agile base plus the rules the owner took from the Evently file, every rule at `warning` or below, never `error`, `var` everywhere and braces always (v2).
 
 ## Screens and API
 - No screens, routes or error codes change.
@@ -42,6 +43,7 @@ Make the solution readable by role as it grows (four more modules and two more b
 - AC4 Given the repository, when the `Directory.Build.props` files are listed, then only the root and `tests/` ones exist, and `Directory.Packages.props` exists only at the root. (BR4, BR5)
 - AC5 Given the moved layout, when the app host starts from `src/Hosts/Simulab.AppHost`, then Api and Web come up and `/sign-up` opens. (on screen, validation script)
 - AC6 Given a moved file, when `git log --follow` runs on it, then its history before the move is shown. (validation script)
+- AC7 Given the final `.editorconfig`, when `dotnet build Simulab.slnx --no-incremental` runs, then there is no `IDE0011` warning and no rule is set to `error`. (BR7)
 - Localization: not applicable, no UI text is added or changed.
 
 ## Decisions
@@ -56,7 +58,7 @@ Make the solution readable by role as it grows (four more modules and two more b
 - 2026-09-18 — The basic `.editorconfig` is not created by F-12: it already exists at the root (from the bootstrap). The owner replaces it with the final version in board task 717 (child of 716) — owner request; the warnings of the final version are checked by the Stop gate against the baseline.
 
 ## Owner tasks
-- Board 717 — replace the basic `.editorconfig` with the final version (owner). Not an acceptance criterion of F-12.
+- Board 717 — replace the basic `.editorconfig` with the final version. Done inside F-12 (change note v2) and closed.
 
 ## Out of scope
 - Renaming projects, assemblies or namespaces.
@@ -67,6 +69,11 @@ Make the solution readable by role as it grows (four more modules and two more b
 - (none)
 
 ## Change notes
+### v2 — 2026-09-18
+- What: the final `.editorconfig` enters F-12. Base: the agile file; added from the Evently file at `warning`: event qualification, predefined types, pattern matching, switch expression, simple using, null check with `is`, static local functions, expression-bodied properties/accessors/indexers/operators, braces always, formatting options; `CA1062`, `CA1031`, `CA1716` off. Not taken: `error` severities, explicit types instead of `var`, `crlf`, nullable warnings off, Sonar rules. The 17 `IDE0011` warnings it raised were fixed with `dotnet format` (braces only).
+- Why: the owner reviewed the Evently file with Claude and asked to apply the recommendations and close board task 717.
+- Affected: BR6, BR7 (new), AC7 (new); other criteria unchanged.
+- Re-approved: 2026-09-18 (owner: "Atualize o .editorconfig com as suas recomendações e feche a #717")
 
 ## Validation script
 1. `dotnet build Simulab.slnx` → build succeeds, no new warnings.

@@ -26,7 +26,9 @@ public sealed record NavigationItem(
         var route = "/" + Route.Trim('/');
 
         if (Match == NavLinkMatch.All || route == "/")
+        {
             return string.Equals(current, route, StringComparison.OrdinalIgnoreCase);
+        }
 
         return string.Equals(current, route, StringComparison.OrdinalIgnoreCase)
             || current.StartsWith(route + "/", StringComparison.OrdinalIgnoreCase);

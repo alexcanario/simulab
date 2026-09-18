@@ -25,10 +25,25 @@ public static class PasswordStrengthRules
         }
 
         var met = 0;
-        if (password.Length >= MinimumLength) met++;
-        if (password.Any(char.IsUpper)) met++;
-        if (password.Any(char.IsDigit)) met++;
-        if (password.Any(character => !char.IsLetterOrDigit(character))) met++;
+        if (password.Length >= MinimumLength)
+        {
+            met++;
+        }
+
+        if (password.Any(char.IsUpper))
+        {
+            met++;
+        }
+
+        if (password.Any(char.IsDigit))
+        {
+            met++;
+        }
+
+        if (password.Any(character => !char.IsLetterOrDigit(character)))
+        {
+            met++;
+        }
 
         return met switch
         {

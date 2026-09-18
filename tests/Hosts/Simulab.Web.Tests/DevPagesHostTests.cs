@@ -32,6 +32,8 @@ public class DevPagesHostTests(WebApplicationFactory<Program> factory) : IClassF
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Contain("UI kit gallery");
         foreach (var section in GallerySections.All)
+        {
             html.Should().Contain($"id=\"{section}\"");
+        }
     }
 }

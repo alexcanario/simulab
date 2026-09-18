@@ -17,7 +17,9 @@ public class NavMenuTests : ShellTestContext
         return Render<NavMenu>(p =>
         {
             if (items is not null)
+            {
                 p.Add(m => m.Items, items);
+            }
         });
     }
 

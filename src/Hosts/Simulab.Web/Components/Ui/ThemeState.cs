@@ -10,7 +10,9 @@ public sealed class ThemeState
     public void SetDarkMode(bool isDarkMode)
     {
         if (IsDarkMode == isDarkMode)
+        {
             return;
+        }
 
         IsDarkMode = isDarkMode;
         Changed?.Invoke();

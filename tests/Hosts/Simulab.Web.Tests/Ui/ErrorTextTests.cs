@@ -24,7 +24,9 @@ public class ErrorTextTests : KitTestContext
 
         text.Should().Be("Something went wrong. Please try again.");
         if (!string.IsNullOrEmpty(code))
+        {
             text.Should().NotContain(code);
+        }
     }
 
     [Fact]

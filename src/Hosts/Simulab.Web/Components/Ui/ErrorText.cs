@@ -17,7 +17,9 @@ public sealed class ErrorText(IStringLocalizer<SharedResources> l)
         {
             var text = l[code];
             if (!text.ResourceNotFound)
+            {
                 return text;
+            }
         }
 
         return l[UnexpectedCode];

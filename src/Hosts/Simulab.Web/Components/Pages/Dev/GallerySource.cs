@@ -13,10 +13,14 @@ public sealed class GallerySource(Func<int, GallerySample> create, TimeSpan dela
     public async Task<AppTablePage<GallerySample>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
     {
         if (delay > TimeSpan.Zero)
+        {
             await Task.Delay(delay, cancellationToken);
+        }
 
         if (Mode == GallerySourceMode.Failing)
+        {
             throw new InvalidOperationException("Gallery source is set to fail.");
+        }
 
         var items = Mode == GallerySourceMode.Empty
             ? []

@@ -23,7 +23,10 @@ public class UiGalleryTests : KitTestContext
 
         gallery.Find("h1").TextContent.Should().Be("UI kit gallery");
         foreach (var section in GallerySections.All)
+        {
             gallery.FindAll($"#{section}").Should().ContainSingle(section);
+        }
+
         gallery.WaitForAssertion(() => gallery.FindAll("#gallery-table tbody tr.mud-table-row").Should().HaveCount(25));
         gallery.Markup.Should().Contain("AppIcons.Edit");
     }

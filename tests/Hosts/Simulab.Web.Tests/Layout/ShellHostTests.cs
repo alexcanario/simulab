@@ -14,7 +14,9 @@ public class ShellHostTests(WebApplicationFactory<Program> factory) : IClassFixt
         var client = factory.WithWebHostBuilder(builder => builder.UseEnvironment(environment)).CreateClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, "/");
         if (cookie is not null)
+        {
             request.Headers.Add("Cookie", cookie);
+        }
 
         var response = await client.SendAsync(request);
 
