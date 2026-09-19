@@ -51,6 +51,10 @@ api.WithEnvironment(context =>
         ReferenceExpression.Create($"{web.GetEndpoint("https")}/reset-password");
     context.EnvironmentVariables["Identity__ForgotPasswordUrl"] =
         ReferenceExpression.Create($"{web.GetEndpoint("https")}/forgot-password");
+
+    // F-10: the farewell email says the address is free again and points back at sign-up.
+    context.EnvironmentVariables["Identity__SignUpUrl"] =
+        ReferenceExpression.Create($"{web.GetEndpoint("https")}/sign-up");
 });
 
 builder.Build().Run();

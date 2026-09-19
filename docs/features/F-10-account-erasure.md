@@ -1,7 +1,7 @@
 ---
 feature: F-10
 epic: Foundation and identity
-status: approved
+status: building
 board: 714
 version: 1
 ---

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
+using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -82,6 +83,7 @@ public static class IdentityModule
         services.AddScoped<IVerificationMailer, VerificationMailer>();
         services.AddScoped<IPasswordResetTokenStore, PasswordResetTokenStore>();
         services.AddScoped<IPasswordMailer, PasswordMailer>();
+        services.AddScoped<IErasureMailer, ErasureMailer>();
         services.AddSingleton<ILegalDocumentProvider, LegalDocumentProvider>();
 
         // The verification email is written from this module's own resources.
@@ -103,9 +105,14 @@ public static class IdentityModule
         services.AddScoped<DeleteRoleHandler>();
         services.AddScoped<SetUserRolesHandler>();
 
+        // F-10: erasing the own account reuses the role-administration transaction (BR11).
+        services.AddScoped<IAccountErasureStore, AccountErasureStore>();
+        services.AddScoped<EraseAccountHandler>();
+
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));
         services.AddOptions<PasswordEmailOptions>().Bind(configuration.GetSection(PasswordEmailOptions.SectionName));
+        services.AddOptions<ErasureEmailOptions>().Bind(configuration.GetSection(ErasureEmailOptions.SectionName));
 
         // Refresh-token sessions and the access-token revocation set (F-5, BR4-BR7).
         services.AddScoped<IRefreshSessionStore, RedisRefreshSessionStore>();

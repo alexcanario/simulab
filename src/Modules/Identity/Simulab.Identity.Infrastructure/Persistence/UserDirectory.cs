@@ -8,7 +8,9 @@ namespace Simulab.Identity.Infrastructure.Persistence;
 
 /// <summary>
 /// Looks an account up before there is a session. The tenant filter is ignored on purpose (see
-/// <see cref="IUserDirectory"/>); the soft-delete filter is not, so an erased account frees its address.
+/// <see cref="IUserDirectory"/>); the soft-delete filter is not, so an erased account is never found.
+/// That alone does not free the address — the unique index does not read <c>IsDeleted</c> — which is why
+/// erasure overwrites the address columns themselves (F-10, BR4, BR5).
 /// </summary>
 public sealed class UserDirectory(IdentityModuleDbContext context, ILookupNormalizer normalizer) : IUserDirectory
 {

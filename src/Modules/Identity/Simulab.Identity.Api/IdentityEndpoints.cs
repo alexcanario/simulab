@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Abstractions;
+using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -55,6 +56,11 @@ public static class IdentityEndpoints
 
         group.MapGet("/session", GetSessionAsync)
             .WithName("GetSession")
+            .RequireAuthorization();
+
+        // F-10 BR1: the caller's own account, found by the token subject; no permission is involved.
+        group.MapPost("/account-erasures", EraseAccountAsync)
+            .WithName("EraseAccount")
             .RequireAuthorization();
 
         // F-8 BR1: the caller's own profile, found by the token subject; no permission is involved.
@@ -310,6 +316,39 @@ public static class IdentityEndpoints
             request.CurrentPassword,
             request.NewPassword,
             cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        if (result.Error!.Code != IdentityErrorCodes.AccountLocked)
+        {
+            return Problem(result.Error);
+        }
+
+        var seconds = int.TryParse(result.Error.Detail, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? parsed : 0;
+        return Problem(result.Error with { Detail = null }, StatusCodes.Status423Locked, ("retryAfterSeconds", seconds));
+    }
+
+    /// <summary>
+    /// F-10 BR1, BR2: the caller's own account, confirmed with the current password. A lockout answers 423
+    /// with the remaining seconds, exactly as a password change does.
+    /// </summary>
+    private static async Task<IResult> EraseAccountAsync(
+        EraseAccountRequest request,
+        ClaimsPrincipal user,
+        EraseAccountHandler handler,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await handler.HandleAsync(userId, request.CurrentPassword, cancellationToken);
 
         if (result.IsSuccess)
         {
