@@ -1,7 +1,7 @@
 ---
 feature: F-8
 epic: Foundation and identity
-status: building
+status: validating
 board: 712
 version: 1
 ---
@@ -18,7 +18,7 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - `PreferredLanguage` already chooses the language of the verification, password reset and password changed emails (F-4, F-7). It is not a culture source for the screens yet.
 - Web culture today: `CookieRequestCultureProvider` then `AcceptLanguageHeaderRequestCultureProvider` then `en` (`src/Hosts/Simulab.Web/Program.cs`). The header `LanguageSwitch` writes the cookie through `GET /culture/set` with a full page load.
 - No profile endpoint and no My account page. The user menu has "Change password" (`/account/password`, F-7) and "Sign out".
-- The Web auth cookie carries `ClaimTypes.Name` (display name) from sign-in (`AccountEndpoints.CompleteSignInAsync`); it is not refreshed until the next sign-in.
+- The Web auth cookie can carry `ClaimTypes.Name` (display name) from sign-in (`AccountEndpoints.CompleteSignInAsync`), but the sign-in page always passed `DisplayName: null` (found in build): the menu label showed the email. F-8 fills it from `SessionInfoResponse.DisplayName`.
 - Supported locales: `en`, `pt-BR`, `pt-PT` (`SupportedCultures` in the Web, `RequestLocale.Supported` in the Api).
 
 ## Users and use cases
@@ -82,8 +82,14 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - 2026-09-19 — A separate `PUT .../profile/preferred-language` for the header switch — the switch knows only the language and must not overwrite the name.
 - 2026-09-19 — The culture source stays the cookie in the Web: the profile value is written into the cookie at sign-in (from `SessionInfoResponse.PreferredLanguage`) and on save, instead of a new `RequestCultureProvider` that calls the Api per request — no Api call per page, same effect. Another device already signed in picks up the change at its next sign-in.
 - 2026-09-19 — Save goes through a non-Blazor Web endpoint (`/account/profile-applied`) with a full page load — a Blazor circuit cannot write cookies, and its culture is fixed when the circuit starts (same reason as `LanguageSwitch`, F-5).
-- 2026-09-19 — Handlers live in `Simulab.Identity.Application/Profile/`; validation reuses `RequestLocale.Supported` for the language list; the rules are in the handler (a thin update, no domain method needed beyond the existing properties).
+- 2026-09-19 — One `ProfileHandler` in `Simulab.Identity.Application/Profile/` (get, update, update language); the rules are in the handler (a thin update, no domain method needed beyond the existing properties).
 - 2026-09-19 — No new packages, for code or tests.
+- 2026-09-19 (build) — The language list moved to `SupportedLanguages` in `Simulab.Identity.Contracts`; `RequestLocale` (Api) and `SupportedCultures` (Web) read it — the handler needs it, and three copies of one list would drift. The name limit is `ProfileLimits.FullNameMaxLength` in the contracts, read by the handler (authority) and the page (comfort).
+- 2026-09-19 (build) — `SessionInfoResponse` also gains optional `DisplayName`, so the sign-in writes the menu label (AC11 needs the name in the menu, and sign-in never set it before). Both new fields are optional: no contract break.
+- 2026-09-19 (build) — The kit gains `AppSelectField` (label above, hint or error below, like `AppTextField`), shown in the gallery's fields section; the page uses it for the language.
+- 2026-09-19 (build) — After a successful save the page yields one render before navigating, so the unsaved-changes guard sees the saved state and does not ask to discard.
+- 2026-09-19 (build) — `IdentityApiFactory` clears its Npgsql pool on dispose: one more test class pushed the idle pooled connections of finished classes past the container limit (`53300: too many clients`).
+- 2026-09-19 (build) — Found and captured, not fixed: B-7 (sign-up does not check the name length in the Api).
 
 ## Out of scope
 - Changing the email address.
@@ -99,7 +105,14 @@ A signed-in user sees and edits their own profile (display name and preferred la
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+1. Close any open IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost`, open the Web at https://localhost:7125. Sign in with your account (or create one at `/sign-up` and verify it through Mailpit). → The app opens in your account's preferred language, whatever language the browser had before.
+2. Open the user menu (top right). → It shows "My account" and "Sign out" only; its accessible name has your display name, or your email when you have none.
+3. Click "My account". → `/account` shows your email (read only, with the hint), display name, preferred language and a "Change password" link that opens `/account/password`.
+4. Type a display name of 121 characters. → "Use at most 120 characters." under the field and Save disabled. Click Cancel. → The saved values are back.
+5. Change the display name and pick another preferred language, then Save. → The page reloads in the new language with "Your profile was saved." (in that language), and the user menu name is the new one.
+6. Use the header language switch (globe) to pick a third language, then reload `/account`. → The page is in that language and the preferred language field shows it.
+7. Sign out, pick English in the header switch, sign in again. → The app opens in the preferred language from step 6, not in English.
+8. Keyboard only, on `/account`: Tab through email, display name, language (open with Space or Alt+Down, choose with the arrows), "Change password", Cancel and Save; change the name and save with Enter on Save. → Every element gets a visible focus ring, in that order, and the save works. Repeat step 3 in the light and dark themes.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
