@@ -8,7 +8,7 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 ## Run locally
 - Prerequisites: .NET 10 SDK, a container runtime (Docker Desktop or Podman), Aspire tooling.
 - Start: `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard URL is printed on start. Web: https://localhost:7125 (UI kit gallery at `/dev/ui`, Development only; close the app host before building, it locks the Web DLLs). Api: https://localhost:7287 (OpenAPI at `/openapi/v1.json`; the OpenIddict token endpoint is `/connect/token`, outside `/api/v1` — see F-5). Create an account at `/sign-up`; the verification email arrives in Mailpit and its link opens `/verify-email` on the Web. Sign in at `/sign-in` with that account.
-- Local containers started by the app host: PostgreSQL (database `simulab`, named volume `simulab-postgres-data`), Mailpit (SMTP capture; its web UI is linked from the dashboard) and Redis (refresh-token sessions and access-token revocation, F-5; TLS and a password by default — the `Api` host trusts it through the `Aspire.StackExchange.Redis` client integration, not a plain connection string). Planned, added by the first feature that needs it: Azurite (blob storage).
+- Local containers started by the app host: PostgreSQL (database `simulab`, named volume `simulab-postgres-data`, fixed local-only credentials `postgres`/`postgres` on host port 5432 — reach it by hand with `psql`/DataGrip at `Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres`; the port is exposed by Aspire's own `dcp` proxy, so it may not match the random port `docker ps` shows for the container), Mailpit (SMTP capture; its web UI is linked from the dashboard) and Redis (refresh-token sessions and access-token revocation, F-5; TLS and a password by default — the `Api` host trusts it through the `Aspire.StackExchange.Redis` client integration, not a plain connection string). Planned, added by the first feature that needs it: Azurite (blob storage).
 - Reset local data: stop the app host and remove the volume (`docker volume rm simulab-postgres-data`); it is recreated empty on the next start.
 
 ## Environments
@@ -61,5 +61,5 @@ The signed-in user must sign out and sign in again for the Web's permission cook
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 9 s, 0 warnings; the baseline is empty again (B-1) (2026-09-18, B-1) |
-| Full test suite | < 5 min | 268 tests, 27 s (2026-09-18, B-1) |
+| Full build | | 10 s, 0 warnings; baseline stays empty (2026-09-19, F-6) |
+| Full test suite | < 5 min | 277 tests, 27 s (2026-09-19, F-6) |

@@ -1,8 +1,8 @@
 ---
 page: index
 locale: en
-features: [F-2, F-4, F-5]
-updated: 2026-09-18
+features: [F-2, F-4, F-5, F-6]
+updated: 2026-09-19
 ---
 # Simulab
 
@@ -34,3 +34,4 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Create an account](create-account.md): sign up and confirm your email
 - [Sign in and sign out](sign-in-and-sign-out.md): sign in, sign out, lockout
+- [Roles and permissions](roles.md): what Student, Curator and Admin can do

@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5]
-updated: 2026-09-18
+features: [F-2, F-4, F-5, F-6]
+updated: 2026-09-19
 ---
 # Simulab
 
@@ -34,3 +34,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Criar uma conta](create-account.md): registo e confirmação do e-mail
 - [Iniciar e terminar sessão](sign-in-and-sign-out.md): início de sessão, término, bloqueio por tentativas
+- [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer
