@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: pt-BR
-features: [F-2]
-updated: 2026-09-17
+features: [F-2, F-8]
+updated: 2026-09-19
 ---
 # Como navegar
 
@@ -25,7 +25,7 @@ Todos, com ou sem login.
 2. O Simulab guarda a sua escolha neste navegador. Enquanto você não escolher, ele segue a configuração do seu dispositivo.
 
 ### Trocar o idioma
-1. Clique no ícone de globo na barra superior e escolha um idioma. A página recarrega nesse idioma e mantém o modo claro ou escuro.
+1. Clique no ícone de globo na barra superior e escolha um idioma. A página recarrega nesse idioma e mantém o modo claro ou escuro. Se você estiver conectado, esse passa a ser também o seu idioma preferido ([Minha conta](my-account.md)).
 
 ### Usar o teclado
 1. Pressione Tab uma vez depois que a página carregar: aparece o link "Pular para o conteúdo" no canto superior esquerdo. Pressione Enter para ir direto ao conteúdo da página.

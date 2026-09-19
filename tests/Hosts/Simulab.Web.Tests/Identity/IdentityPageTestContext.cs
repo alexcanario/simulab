@@ -59,6 +59,15 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>When set, a password change answers 423 with these seconds left.</summary>
         public int? ChangeLockedSeconds { get; set; }
 
+        /// <summary>F-8: what GET /profile answers. Null means a server error.</summary>
+        public ProfileResponse? Profile { get; set; } = new("ana@exemplo.com", "Ana", "en");
+
+        /// <summary>F-8: what PUT /profile answers. Null means 204.</summary>
+        public (HttpStatusCode Status, string Code)? UpdateProfileFailure { get; set; }
+
+        /// <summary>F-8: the bodies PUT /profile received, in order.</summary>
+        public List<UpdateProfileRequest> ProfileUpdates { get; } = [];
+
         public IReadOnlyList<HttpRequestMessage> Requests => _requests;
 
         public int CountOf(string route) => _requests.Count(request => request.RequestUri!.AbsolutePath.EndsWith(route, StringComparison.Ordinal));
@@ -126,7 +135,20 @@ public abstract class IdentityPageTestContext : KitTestContext
                 return ChangeFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
-            await Task.CompletedTask;
+            // F-8.
+            if (path.EndsWith("/profile", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                return Profile is null
+                    ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    : new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(Profile, options: AppJson.Options) };
+            }
+
+            if (path.EndsWith("/profile", StringComparison.Ordinal) && request.Method == HttpMethod.Put)
+            {
+                ProfileUpdates.Add((await request.Content!.ReadFromJsonAsync<UpdateProfileRequest>(AppJson.Options, cancellationToken))!);
+                return UpdateProfileFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 

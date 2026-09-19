@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: en
-features: [F-2]
-updated: 2026-09-17
+features: [F-2, F-8]
+updated: 2026-09-19
 ---
 # Getting around
 
@@ -25,7 +25,7 @@ Everyone, signed in or not.
 2. Simulab remembers your choice on this browser. Until you choose, it follows your device's setting.
 
 ### Change the language
-1. Press the globe icon in the top bar and choose a language. The page reloads in that language and keeps your light or dark mode.
+1. Press the globe icon in the top bar and choose a language. The page reloads in that language and keeps your light or dark mode. When you are signed in, it also becomes your preferred language ([My account](my-account.md)).
 
 ### Use the keyboard
 1. Press Tab once after a page loads: a "Skip to main content" link appears at the top left. Press Enter to jump straight to the page content.

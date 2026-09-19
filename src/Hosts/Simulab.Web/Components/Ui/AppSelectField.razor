@@ -1,0 +1,83 @@
+@* One select field everywhere, laid out like AppTextField: label above, required marker, hint or error below (rule: ui). *@
+@typeparam TValue
+
+<div class="app-field @(HasError ? "app-field-error" : null)">
+    <label class="app-field-label" id="@LabelId" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <MudSelect T="TValue"
+               Value="Value"
+               ValueChanged="OnValueChanged"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               AnchorOrigin="Origin.BottomLeft"
+               Disabled="Disabled"
+               Error="HasError"
+               ToStringFunc="TextOf"
+               UserAttributes="@Attributes">
+        @foreach (var option in Options)
+        {
+            <MudSelectItem T="TValue" Value="@option.Value"><span lang="@option.Lang">@option.Text</span></MudSelectItem>
+        }
+    </MudSelect>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public IReadOnlyList<AppSelectOption<TValue>> Options { get; set; } = [];
+
+    [Parameter] public TValue? Value { get; set; }
+
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["id"] = Id,
+        ["aria-labelledby"] = LabelId,
+        ["aria-describedby"] = DescriptionId,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-required"] = Required ? "true" : null
+    };
+
+    private string TextOf(TValue? value) =>
+        Options.FirstOrDefault(option => EqualityComparer<TValue>.Default.Equals(option.Value, value))?.Text ?? string.Empty;
+
+    private Task OnValueChanged(TValue? value)
+    {
+        Value = value;
+        return ValueChanged.InvokeAsync(value);
+    }
+}

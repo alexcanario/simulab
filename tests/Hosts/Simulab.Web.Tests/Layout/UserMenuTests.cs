@@ -30,8 +30,9 @@ public sealed class UserMenuTests : KitTestContext
         cut.FindAll(".app-sign-in-link").Should().BeEmpty();
     }
 
+    /// <summary>F-8 AC12: "My account" then "Sign out"; Change password is reached from the account page.</summary>
     [Fact]
-    public void SignedIn_OffersChangePasswordBeforeSignOut()
+    public void SignedIn_OffersMyAccountAndSignOutOnly()
     {
         Authorization.SetAuthorized("ana@exemplo.com");
 
@@ -40,10 +41,11 @@ public sealed class UserMenuTests : KitTestContext
         var cut = Render<UserMenu>();
         cut.Find(".app-user-menu-button button").Click();
 
-        var item = popovers.Find(".app-user-menu-password");
-        item.TextContent.Trim().Should().Be("Change password");
-        item.GetAttribute("href").Should().Be("/account/password");
-        popovers.Markup.IndexOf("app-user-menu-password", StringComparison.Ordinal)
+        var item = popovers.Find(".app-user-menu-account");
+        item.TextContent.Trim().Should().Be("My account");
+        item.GetAttribute("href").Should().Be("/account");
+        popovers.FindAll(".mud-menu-item").Should().HaveCount(2);
+        popovers.Markup.IndexOf("app-user-menu-account", StringComparison.Ordinal)
             .Should().BeLessThan(popovers.Markup.IndexOf("app-user-menu-signout", StringComparison.Ordinal));
     }
 }

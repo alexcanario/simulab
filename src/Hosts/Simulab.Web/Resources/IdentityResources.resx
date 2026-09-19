@@ -92,4 +92,13 @@
   <data name="ChangePassword.ConfirmPassword.Label" xml:space="preserve"><value>Confirm new password</value></data>
   <data name="ChangePassword.Changed" xml:space="preserve"><value>Password changed. Other devices were signed out.</value></data>
   <data name="ResetPassword.SendNewLink" xml:space="preserve"><value>Send a new link</value></data>
+  <data name="Account.Title" xml:space="preserve"><value>My account</value></data>
+  <data name="Account.Email.Label" xml:space="preserve"><value>Email</value></data>
+  <data name="Account.Email.Hint" xml:space="preserve"><value>The address you sign in with. It cannot be changed here.</value></data>
+  <data name="Account.FullName.Label" xml:space="preserve"><value>Display name</value></data>
+  <data name="Account.FullName.Hint" xml:space="preserve"><value>Optional. Shown in the account menu.</value></data>
+  <data name="Account.PreferredLanguage.Label" xml:space="preserve"><value>Preferred language</value></data>
+  <data name="Account.PreferredLanguage.Hint" xml:space="preserve"><value>The app opens in this language when you sign in, and your emails are written in it.</value></data>
+  <data name="Account.Saved" xml:space="preserve"><value>Your profile was saved.</value></data>
+  <data name="Account.LoadFailed" xml:space="preserve"><value>We could not load your profile.</value></data>
 </root>

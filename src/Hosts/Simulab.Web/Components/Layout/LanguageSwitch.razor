@@ -10,7 +10,7 @@
     {
         <MudMenuItem OnClick="@(() => Switch(culture))"
                      Disabled="@(culture.Name == CultureInfo.CurrentUICulture.Name)">
-            <span lang="@culture.Name">@Capitalize(culture.NativeName, culture)</span>
+            <span lang="@culture.Name">@SupportedCultures.NativeName(culture)</span>
         </MudMenuItem>
     }
 </MudMenu>
@@ -23,7 +23,4 @@
         var target = $"/culture/set?culture={Uri.EscapeDataString(culture.Name)}&redirectUri={Uri.EscapeDataString(current)}";
         Navigation.NavigateTo(target, forceLoad: true);
     }
-
-    private static string Capitalize(string name, CultureInfo culture) =>
-        name.Length == 0 ? name : char.ToUpper(name[0], culture) + name[1..];
 }

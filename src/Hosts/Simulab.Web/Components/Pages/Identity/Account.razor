@@ -1,0 +1,182 @@
+@page "/account"
+@layout MainLayout
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services.Auth
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject WebSessionTokenAccessor Tokens
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+<PageTitle>@I["Account.Title"] — @L["App.Name"]</PageTitle>
+
+@* F-8 UC1-UC2: the signed-in user's own profile. Reached from the user menu. *@
+<AppPageHeader Title="@I["Account.Title"]" />
+
+@if (_profile is null && !_loadFailed)
+{
+    <AppLoadingState />
+}
+else if (_profile is null)
+{
+    <AppErrorState Message="@I["Account.LoadFailed"]" OnRetry="LoadAsync" />
+}
+else
+{
+    <MudPaper Class="app-form-card pa-6" Elevation="0" Outlined="true" MaxWidth="560px">
+        @if (Saved == true && _error is null)
+        {
+            <AppAlert Severity="Severity.Success" Text="@I["Account.Saved"]" />
+        }
+        else if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@Errors.For(_error)" ActionText="@L["Common.TryAgain"]" OnAction="SaveAsync" />
+        }
+
+        <AppTextField TValue="string"
+                      Id="account-email"
+                      Label="@I["Account.Email.Label"]"
+                      Hint="@I["Account.Email.Hint"]"
+                      ReadOnly="true"
+                      Value="@_profile.Email" />
+
+        <AppTextField TValue="string"
+                      Id="account-full-name"
+                      Label="@I["Account.FullName.Label"]"
+                      Hint="@I["Account.FullName.Hint"]"
+                      Autocomplete="name"
+                      Disabled="_saving"
+                      Error="@_fullNameError"
+                      Value="@_fullName"
+                      ValueChanged="OnFullNameChanged" />
+
+        <AppSelectField TValue="string"
+                        Id="account-preferred-language"
+                        Label="@I["Account.PreferredLanguage.Label"]"
+                        Hint="@I["Account.PreferredLanguage.Hint"]"
+                        Required="true"
+                        Disabled="_saving"
+                        Options="LanguageOptions"
+                        Value="@_language"
+                        ValueChanged="@(value => { _language = value ?? _profile.PreferredLanguage; _error = null; })" />
+
+        <MudLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</MudLink>
+
+        <AppFormActions Saving="_saving" Disabled="@(_fullNameError is not null)" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+    </MudPaper>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    /// <summary>Set by the reload that follows a save (BR8): the success alert shows in the new language.</summary>
+    [SupplyParameterFromQuery] public bool? Saved { get; set; }
+
+    private static readonly IReadOnlyList<AppSelectOption<string>> LanguageOptions =
+        [.. SupportedCultures.All.Select(culture => new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    private ProfileResponse? _profile;
+    private bool _loadFailed;
+    private string? _fullName;
+    private string? _language;
+    private string? _fullNameError;
+    private string? _error;
+    private bool _saving;
+    private bool _leaving;
+
+    private bool HasChanges => !_leaving && _profile is not null
+        && ((_fullName ?? string.Empty).Trim() != (_profile.FullName ?? string.Empty) || _language != _profile.PreferredLanguage);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Signed-in users only, as on /account/password: an anonymous visitor signs in first.
+        if (AuthState is null || (await AuthState).User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/sign-in", forceLoad: true);
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loadFailed = false;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null ? null : await Api.GetProfileAsync(accessToken);
+        if (result?.Value is null)
+        {
+            _loadFailed = true;
+            return;
+        }
+
+        _profile = result.Value;
+        Cancel();
+    }
+
+    private void OnFullNameChanged(string? value)
+    {
+        _fullName = value;
+        _error = null;
+
+        // BR2: validated as it is typed, so Save is disabled while the name is too long (AC13).
+        _fullNameError = (value ?? string.Empty).Trim().Length > ProfileLimits.FullNameMaxLength
+            ? L[IdentityErrorCodes.ProfileFullNameTooLong].Value
+            : null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_profile is null || _fullNameError is not null || _language is null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null
+            ? ApiResult.Failed<bool>(ErrorText.UnexpectedCode)
+            : await Api.UpdateProfileAsync(accessToken, _fullName, _language);
+        _saving = false;
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == IdentityErrorCodes.ProfileFullNameTooLong)
+            {
+                _fullNameError = Errors.For(result.ErrorCode);
+            }
+            else
+            {
+                _error = result.ErrorCode;
+            }
+
+            return;
+        }
+
+        // BR8: a full page load through the Web, which writes the name and the culture into the cookies.
+        // The unsaved-changes guard must see the saved state first: yielding lets the pending render run.
+        _leaving = true;
+        StateHasChanged();
+        await Task.Yield();
+        var target = Uri.EscapeDataString("/account?saved=true");
+        Navigation.NavigateTo($"/account/profile-applied?redirectUri={target}", forceLoad: true);
+    }
+
+    private void Cancel()
+    {
+        _fullName = _profile?.FullName;
+        _language = _profile?.PreferredLanguage;
+        _fullNameError = null;
+        _error = null;
+    }
+
+    private async Task<string?> AccessTokenAsync()
+    {
+        var user = AuthState is null ? null : (await AuthState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

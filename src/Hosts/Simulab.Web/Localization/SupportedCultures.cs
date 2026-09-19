@@ -1,18 +1,23 @@
 using System.Globalization;
+using Simulab.Identity.Contracts;
 
 namespace Simulab.Web.Localization;
 
-/// <summary>UI languages. Adding a language means adding resource files and one entry here.</summary>
+/// <summary>UI languages, from the one list the Api also uses (<see cref="SupportedLanguages"/>, F-8).</summary>
 public static class SupportedCultures
 {
-    public const string Default = "en";
+    public const string Default = SupportedLanguages.Default;
 
-    public static readonly IReadOnlyList<CultureInfo> All =
-    [
-        new("en"),
-        new("pt-BR"),
-        new("pt-PT")
-    ];
+    public static readonly IReadOnlyList<CultureInfo> All = [.. SupportedLanguages.All.Select(name => new CultureInfo(name))];
+
+    /// <summary>A language's own name, capitalized in that language ("Português (Brasil)"): how a language picker shows it.</summary>
+    public static string NativeName(CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+
+        var name = culture.NativeName;
+        return name.Length == 0 ? name : char.ToUpper(name[0], culture) + name[1..];
+    }
 
     public static bool IsSupported(string? name) =>
         All.Any(culture => string.Equals(culture.Name, name, StringComparison.OrdinalIgnoreCase));

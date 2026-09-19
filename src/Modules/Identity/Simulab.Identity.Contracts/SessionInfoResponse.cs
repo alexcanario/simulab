@@ -10,4 +10,14 @@ namespace Simulab.Identity.Contracts;
 /// once at sign-in and refreshed on the Web's own silent-refresh cadence. The Api never trusts it back;
 /// every enforcement check re-reads the database through <see cref="IPermissionQueryService"/>.
 /// </remarks>
-public sealed record SessionInfoResponse(string Subject, string Email, string SessionJti, IReadOnlyList<string> Permissions);
+/// <remarks>
+/// F-8: <paramref name="FullName"/> and <paramref name="PreferredLanguage"/> are read from the account at
+/// each call, so the Web can write the menu label and the culture cookie at sign-in (BR5, BR8).
+/// </remarks>
+public sealed record SessionInfoResponse(
+    string Subject,
+    string Email,
+    string SessionJti,
+    IReadOnlyList<string> Permissions,
+    string? FullName = null,
+    string? PreferredLanguage = null);

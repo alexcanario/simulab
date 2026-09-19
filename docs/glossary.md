@@ -70,7 +70,31 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) |
 | Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts |
 | Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts |
-| Idioma preferido | Idioma preferido | `PreferredLanguage` | The locale used for this user's emails; editable from F-8 |
+| Idioma preferido | Idioma preferido | `PreferredLanguage` | The user's locale: first culture source after sign-in and the language of their emails (F-8) |
+| Minha conta | A minha conta | `Account` (page `/account`) | The signed-in user's own page: profile and link to change the password (F-8) |
+| Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
+
+## Technical terms
+Terms used in reports, reviews and item files. They are not identifiers. The pt-BR column is the word to use when talking to the owner.
+
+| Term | pt-BR | Meaning |
+|---|---|---|
+| blocker | bloqueador | Review finding that stops the merge until it is fixed. |
+| major | grave | Review finding that is a real defect or a test gap; fixed before validation unless the owner decides otherwise. |
+| minor | leve | Small review finding; fixed, accepted with a reason, or turned into a new item. |
+| acceptance criterion (AC) | critério de aceite | A Given/When/Then sentence that a test proves. |
+| app host | app host | The Aspire project (`Simulab.AppHost`) that starts the Web, the Api and the local containers (PostgreSQL, Redis, Mailpit) together. |
+| claim | claim (dado da sessão) | A fact about the user kept in the cookie or the token: id, email, name, permissions. |
+| concurrency failure | conflito de concorrência | Two saves of the same record at once; the second finds the record already changed. |
+| last-write-wins | a última gravação vale | Concurrency rule where the latest save prevails. |
+| CSRF | CSRF (requisição forjada) | Cross-site request forgery: another site makes a signed-in user's browser trigger an action in the app. |
+| SameSite=Lax | SameSite=Lax | Cookie setting: the browser does not send it on requests from another site, except a top-level GET navigation (a link). |
+| Sec-Fetch-Site | Sec-Fetch-Site | Header the browser sends saying where a request came from (`same-origin` means from the app itself). |
+| open redirect | redirecionamento aberto | A flaw where the app redirects to an outside address taken from the URL; avoided by accepting only paths inside the app. |
+| connection pool | pool de conexões | Database connections kept open for reuse; when they are not released they exhaust the server's limit. |
+| merge base | base do merge | The commit where the item branch left `main`; a review compares from it. |
+| bUnit | bUnit | Library that tests Blazor components without a browser. |
+| WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. |

@@ -19,6 +19,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 // First typed client (F-4). The base address comes from service discovery: no host or port in the code.
 builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
+builder.Services.AddScoped<ProfileLanguageSaver>();
 builder.Services.AddScoped<SignUpFlow>();
 
 // Sign-in and sign-out (F-5). The cookie is what keeps a visitor signed in across page loads; it also
@@ -56,8 +57,8 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddCascadingAuthenticationState();
 
-// Culture: cookie (set by the language switch), then the browser, then en.
-// The user profile becomes the first source when Identity arrives.
+// Culture: cookie, then the browser, then en. For a signed-in user the cookie is written from the
+// profile at sign-in and after each change (F-8 BR5), so the profile comes first without an Api call per page.
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.SetDefaultCulture(SupportedCultures.Default);
@@ -105,14 +106,17 @@ app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
 
 // Language switch: stores the culture in a cookie and returns to a page inside the app only.
-app.MapGet("/culture/set", (string culture, string? redirectUri, HttpContext context) =>
+// F-8 BR6: a signed-in user's choice is also saved as the preferred language (best effort), but only when
+// the switch itself asked: a link from another site (the auth cookie is SameSite=Lax) changes the screen only.
+app.MapGet("/culture/set", async (string culture, string? redirectUri, HttpContext context, ProfileLanguageSaver saver) =>
 {
     if (SupportedCultures.IsSupported(culture))
     {
-        context.Response.Cookies.Append(
-            CookieRequestCultureProvider.DefaultCookieName,
-            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true, SameSite = SameSiteMode.Lax, Secure = true });
+        CultureCookie.Write(context, culture);
+        if (context.Request.Headers["Sec-Fetch-Site"] == "same-origin")
+        {
+            await saver.SaveAsync(context.User, culture, context.RequestAborted);
+        }
     }
 
     return Results.LocalRedirect(SupportedCultures.SafeLocalPath(redirectUri));

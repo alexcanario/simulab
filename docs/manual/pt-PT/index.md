@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7]
+features: [F-2, F-4, F-5, F-6, F-7, F-8]
 updated: 2026-09-19
 ---
 # Simulab
@@ -25,7 +25,7 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e tópico, e a distância até à nota mínima | Brevemente |
 | Recomendações de estudo | Ver que tópicos estudar a seguir | Brevemente |
 | Coach de IA | Perguntar porque é que uma resposta está certa ou errada e receber um plano de estudo para a sua prova-alvo | Brevemente |
-| Conta | Registar-se, iniciar sessão, mudar o idioma e gerir os seus dados | Registo, início de sessão e palavra-passe disponíveis ([Criar uma conta](create-account.md), [Iniciar e terminar sessão](sign-in-and-sign-out.md), [Palavra-passe](password.md)); o resto brevemente |
+| Conta | Registar-se, iniciar sessão, mudar o idioma e gerir os seus dados | Registo, início de sessão, palavra-passe e A minha conta disponíveis ([Criar uma conta](create-account.md), [Iniciar e terminar sessão](sign-in-and-sign-out.md), [Palavra-passe](password.md), [A minha conta](my-account.md)); o resto brevemente |
 
 ## Idiomas
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Escolhe o idioma no seu perfil. As questões das provas são sempre apresentadas no idioma original.
@@ -35,4 +35,5 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Criar uma conta](create-account.md): registo e confirmação do e-mail
 - [Iniciar e terminar sessão](sign-in-and-sign-out.md): início de sessão, término, bloqueio por tentativas
 - [Palavra-passe](password.md): esqueci-me, redefinir e alterar
+- [A minha conta](my-account.md): nome de apresentação e idioma preferido
 - [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer

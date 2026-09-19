@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Passwords;
+using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
@@ -56,6 +57,12 @@ public static class IdentityEndpoints
             .WithName("GetSession")
             .RequireAuthorization();
 
+        // F-8 BR1: the caller's own profile, found by the token subject; no permission is involved.
+        var profile = group.MapGroup("/profile").RequireAuthorization();
+        profile.MapGet(string.Empty, GetProfileAsync).WithName("GetProfile");
+        profile.MapPut(string.Empty, UpdateProfileAsync).WithName("UpdateProfile");
+        profile.MapPut("/preferred-language", UpdatePreferredLanguageAsync).WithName("UpdatePreferredLanguage");
+
         // F-6, BR8-BR9: the seed role names, for the placeholder /admin/roles screen. Admin-only.
         group.MapGet("/roles", GetRoleNamesAsync)
             .WithName("GetRoleNames")
@@ -68,7 +75,7 @@ public static class IdentityEndpoints
     /// Lets the Web read its own just-issued access token's claims without decoding the token itself
     /// (F-5, build decision: the token may be encrypted, and decoding it is not the Web's job either way).
     /// </summary>
-    private static async Task<IResult> GetSessionAsync(ClaimsPrincipal user, IPermissionQueryService permissions, CancellationToken cancellationToken)
+    private static async Task<IResult> GetSessionAsync(ClaimsPrincipal user, IPermissionQueryService permissions, ProfileHandler profiles, CancellationToken cancellationToken)
     {
         var subject = user.FindFirstValue(OpenIddictConstants.Claims.Subject);
         var email = user.FindFirstValue(OpenIddictConstants.Claims.Email);
@@ -80,8 +87,48 @@ public static class IdentityEndpoints
         }
 
         var effective = await permissions.GetEffectivePermissionsAsync(userId, cancellationToken);
-        return Results.Ok(new SessionInfoResponse(subject, email, sessionJti, effective.ToList()));
+
+        // F-8 BR5, BR8: the name and language as they are now, so a sign-in on any device starts with them.
+        var profile = await profiles.GetAsync(userId);
+        return Results.Ok(new SessionInfoResponse(subject, email, sessionJti, effective.ToList(), profile?.FullName, profile?.PreferredLanguage));
     }
+
+    private static async Task<IResult> GetProfileAsync(ClaimsPrincipal user, ProfileHandler handler)
+    {
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var profile = await handler.GetAsync(userId);
+        return profile is null ? Results.Unauthorized() : Results.Ok(profile);
+    }
+
+    private static async Task<IResult> UpdateProfileAsync(UpdateProfileRequest request, ClaimsPrincipal user, ProfileHandler handler)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        return TryGetUserId(user, out var userId)
+            ? ProfileAnswer(await handler.UpdateAsync(userId, request.FullName, request.PreferredLanguage))
+            : Results.Unauthorized();
+    }
+
+    private static async Task<IResult> UpdatePreferredLanguageAsync(UpdatePreferredLanguageRequest request, ClaimsPrincipal user, ProfileHandler handler)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        return TryGetUserId(user, out var userId)
+            ? ProfileAnswer(await handler.UpdatePreferredLanguageAsync(userId, request.PreferredLanguage))
+            : Results.Unauthorized();
+    }
+
+    private static IResult ProfileAnswer(Result result) =>
+        result.IsSuccess ? Results.NoContent()
+        : result.Error!.Kind == ErrorKind.NotFound ? Results.Unauthorized()
+        : Problem(result.Error);
+
+    private static bool TryGetUserId(ClaimsPrincipal user, out Guid userId) =>
+        Guid.TryParse(user.FindFirstValue(OpenIddictConstants.Claims.Subject), out userId);
 
     /// <summary>F-9 replaces this with full role management; today it only proves the permission mechanism on screen.</summary>
     private static IResult GetRoleNamesAsync() => Results.Ok(new RoleNamesResponse(IdentityRoles.All));

@@ -12,7 +12,8 @@ public sealed record SignInTicket(
     string AccessToken,
     string RefreshToken,
     TimeSpan AccessTokenLifetime,
-    IReadOnlyList<string> Permissions);
+    IReadOnlyList<string> Permissions,
+    string? PreferredLanguage = null);
 
 /// <summary>
 /// A single-use, short-lived relay between the interactive sign-in page and the plain endpoint that
