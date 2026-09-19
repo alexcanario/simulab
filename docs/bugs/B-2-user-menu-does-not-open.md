@@ -49,5 +49,7 @@ button's own `aria-label`) is dropped in the same change, since it was also nest
 
 ## Delivery
 - Branch: `feature/F-6` (found and fixed while validating F-6's screen check, not on its own `bug/B-2`
-  branch — flagged to the owner for confirmation, not yet explicitly approved as the process exception).
-- Merge: ships with F-6, pending that confirmation.
+  branch). The owner confirmed this process exception on 2026-09-19.
+- Fix: `2560c39` (fix(B-2): account menu never opened, MudMenu activator missing its class).
+- Merge: `a0a6f02` (Merge feature/F-6: permissions and seed roles, AB#710).
+- Board: AB#725, created after the fact on 2026-09-19 and closed with this evidence.
