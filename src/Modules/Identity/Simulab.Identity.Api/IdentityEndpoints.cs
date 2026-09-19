@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using OpenIddict.Abstractions;
+using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
@@ -13,8 +14,8 @@ using Simulab.SharedKernel.Results;
 namespace Simulab.Identity.Api;
 
 /// <summary>
-/// The module's HTTP surface. Everything here is anonymous (BR16): these are the calls a visitor makes
-/// before there is an account to authorise.
+/// The module's HTTP surface. Most of it is anonymous (F-4 BR16, F-7 BR12): the calls a visitor makes
+/// before there is an account to authorise, or when the password is lost.
 /// </summary>
 public static class IdentityEndpoints
 {
@@ -33,6 +34,18 @@ public static class IdentityEndpoints
 
         group.MapGet("/legal-documents/{topic}", GetLegalDocumentAsync)
             .WithName("GetLegalDocument");
+
+        // F-7: password recovery is anonymous (BR12) and answers the same whether the account exists.
+        group.MapPost("/password-reset-requests", RequestPasswordResetAsync).WithName("RequestPasswordReset");
+
+        group.MapPost("/password-reset-token-checks", CheckPasswordResetTokenAsync).WithName("CheckPasswordResetToken");
+
+        group.MapPost("/password-resets", ResetPasswordAsync).WithName("ResetPassword");
+
+        // F-7 BR12: the caller's own account only, so no permission is involved.
+        group.MapPost("/password-changes", ChangePasswordAsync)
+            .WithName("ChangePassword")
+            .RequireAuthorization();
 
         // BR9: the only endpoints here that require a signed-in caller (F-5).
         group.MapPost("/sign-out", SignOutAsync)
@@ -160,6 +173,117 @@ public static class IdentityEndpoints
 
         await handler.HandleAsync(request.Email, cancellationToken);
         return Results.Accepted();
+    }
+
+    /// <summary>F-7 BR1: always 202 when the client is within its limit; the per-account limit is silent (BR3).</summary>
+    private static async Task<IResult> RequestPasswordResetAsync(
+        RequestPasswordResetRequest request,
+        HttpContext context,
+        RequestPasswordResetHandler handler,
+        ClientRateLimiter rateLimiter,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset-request"), IdentityRateLimits.PasswordResetRequestsPerHour, IdentityRateLimits.Window))
+        {
+            return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
+        }
+
+        await handler.HandleAsync(request.Email, cancellationToken);
+        return Results.Accepted();
+    }
+
+    /// <summary>F-7: the reset page checks its link on load, without using it. Shares the reset's per-client limit.</summary>
+    private static async Task<IResult> CheckPasswordResetTokenAsync(
+        PasswordResetTokenCheckRequest request,
+        HttpContext context,
+        CheckPasswordResetTokenHandler handler,
+        ClientRateLimiter rateLimiter,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        {
+            return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
+        }
+
+        return await handler.HandleAsync(request.Token, cancellationToken) switch
+        {
+            PasswordResetTokenStatus.Valid => Results.NoContent(),
+            PasswordResetTokenStatus.Expired => Problem(new Error(IdentityErrorCodes.PasswordResetExpired, ErrorKind.BusinessRule), StatusCodes.Status410Gone),
+            _ => Problem(new Error(IdentityErrorCodes.PasswordResetInvalid, ErrorKind.Validation))
+        };
+    }
+
+    private static async Task<IResult> ResetPasswordAsync(
+        ResetPasswordRequest request,
+        HttpContext context,
+        ResetPasswordHandler handler,
+        ClientRateLimiter rateLimiter,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        {
+            return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
+        }
+
+        var result = await handler.HandleAsync(request.Token, request.NewPassword, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        return result.Error!.Code == IdentityErrorCodes.PasswordResetExpired
+            ? Problem(result.Error, StatusCodes.Status410Gone)
+            : Problem(result.Error);
+    }
+
+    /// <summary>F-7 BR8-BR10: the caller's own password; a lockout answers 423 with the remaining seconds.</summary>
+    private static async Task<IResult> ChangePasswordAsync(
+        ChangePasswordRequest request,
+        ClaimsPrincipal user,
+        ChangePasswordHandler handler,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var subject = user.FindFirstValue(OpenIddictConstants.Claims.Subject);
+        if (subject is null || !Guid.TryParse(subject, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await handler.HandleAsync(
+            userId,
+            user.FindFirstValue(SessionClaims.SessionJti),
+            request.CurrentPassword,
+            request.NewPassword,
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        if (result.Error!.Code != IdentityErrorCodes.AccountLocked)
+        {
+            return Problem(result.Error);
+        }
+
+        return Results.Problem(new ProblemDetails
+        {
+            Status = StatusCodes.Status423Locked,
+            Title = result.Error.Code,
+            Extensions =
+            {
+                ["code"] = result.Error.Code,
+                ["retryAfterSeconds"] = int.Parse(result.Error.Detail ?? "0", System.Globalization.CultureInfo.InvariantCulture)
+            }
+        });
     }
 
     private static async Task<IResult> GetLegalDocumentAsync(

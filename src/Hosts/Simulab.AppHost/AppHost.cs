@@ -42,7 +42,15 @@ var web = builder.AddProject<Projects.Simulab_Web>("web")
 // The verification link in the email points at the Web page that consumes the token (F-4). The Api
 // cannot know that address on its own, and the ports change on every run.
 api.WithEnvironment(context =>
+{
     context.EnvironmentVariables["Identity__VerificationUrl"] =
-        ReferenceExpression.Create($"{web.GetEndpoint("https")}/verify-email"));
+        ReferenceExpression.Create($"{web.GetEndpoint("https")}/verify-email");
+
+    // F-7: the reset link, and the "was it not you?" link in the password-changed email.
+    context.EnvironmentVariables["Identity__PasswordResetUrl"] =
+        ReferenceExpression.Create($"{web.GetEndpoint("https")}/reset-password");
+    context.EnvironmentVariables["Identity__ForgotPasswordUrl"] =
+        ReferenceExpression.Create($"{web.GetEndpoint("https")}/forgot-password");
+});
 
 builder.Build().Run();

@@ -1,7 +1,7 @@
 ---
 feature: F-7
 epic: Foundation and identity
-status: approved
+status: building
 board: 711
 version: 1
 ---

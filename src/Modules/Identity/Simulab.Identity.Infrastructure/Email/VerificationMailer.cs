@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
@@ -20,26 +19,17 @@ public sealed class VerificationMailer(
 {
     public Task SendAsync(string email, string rawToken, string locale, CancellationToken cancellationToken = default)
     {
-        var culture = ToCulture(locale);
         var link = $"{options.Value.VerificationUrl.TrimEnd('/')}?token={Uri.EscapeDataString(rawToken)}";
 
         // IStringLocalizer reads CurrentUICulture; the recipient's language is the one that matters here.
-        var previous = CultureInfo.CurrentUICulture;
-        try
-        {
-            CultureInfo.CurrentUICulture = culture;
-            var message = new EmailMessage(
-                email,
-                localizer["Email.Verification.Subject"],
-                RenderHtml(link),
-                RenderText(link));
+        using var culture = EmailCulture.Use(locale);
+        var message = new EmailMessage(
+            email,
+            localizer["Email.Verification.Subject"],
+            RenderHtml(link),
+            RenderText(link));
 
-            return sender.SendAsync(message, cancellationToken);
-        }
-        finally
-        {
-            CultureInfo.CurrentUICulture = previous;
-        }
+        return sender.SendAsync(message, cancellationToken);
     }
 
     private string RenderHtml(string link)
@@ -76,16 +66,4 @@ public sealed class VerificationMailer(
         {localizer["Email.Verification.Expiry"]}
         {localizer["Email.Verification.Ignore"]}
         """;
-
-    private static CultureInfo ToCulture(string locale)
-    {
-        try
-        {
-            return CultureInfo.GetCultureInfo(locale);
-        }
-        catch (CultureNotFoundException)
-        {
-            return CultureInfo.GetCultureInfo("en");
-        }
-    }
 }

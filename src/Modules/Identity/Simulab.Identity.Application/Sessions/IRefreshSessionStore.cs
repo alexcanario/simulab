@@ -26,4 +26,10 @@ public interface IRefreshSessionStore
     Task RevokeAccessTokenAsync(string sessionJti, TimeSpan timeToLive, CancellationToken cancellationToken = default);
 
     Task<bool> IsAccessTokenRevokedAsync(string sessionJti, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Ends every session of the user (F-7 BR9): each refresh session is removed and each session's access
+    /// token revoked. <paramref name="exceptSessionJti"/> keeps the caller's own session (a password change).
+    /// </summary>
+    Task RevokeAllAsync(Guid userId, string? exceptSessionJti = null, CancellationToken cancellationToken = default);
 }
