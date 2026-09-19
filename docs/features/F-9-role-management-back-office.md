@@ -244,6 +244,8 @@ You need two accounts: your Admin account (from F-6; if you have none, make one 
 7. Switch the language to pt-BR, then pt-PT → "Papéis"/"Usuários" and "Perfis"/"Utilizadores", "Estudante", "Gerenciar papéis e atribuições" / "Gerir perfis e atribuições"; toggle dark mode → badge, chips, status dots and dialogs legible in both themes.
 8. Keyboard only on "Roles": Tab to Add, Enter, type a name, Tab to the permission, Space, Esc → asks to discard; on "Users": Tab to search, the Role filter (arrow keys pick a role) and a row's "Edit roles" button, each with a visible focus ring.
 
+Validated on screen by the owner on 2026-09-19: every step passed.
+
 ## Coverage
 | Criterion | Test(s) |
 |---|---|
