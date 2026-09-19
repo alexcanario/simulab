@@ -103,7 +103,7 @@ Detailed screens and mockup: `/agile:screen F-9` (to be added before approval).
 - 2026-09-19 — Role name 2–50 characters, unique case-insensitively including deleted roles; custom names are data, not translated; seed names are translated — owner, question 8.
 - 2026-09-19 — One permission, `identity.roles.manage`, gates roles, users and assignments — owner, question 9 — only Admin manages today; a split brings no real gain.
 - 2026-09-19 — Propagation unchanged from F-6 (API ≤10 s, menu at next refresh) — owner, question 10 — nothing new to build for a visual-only gain.
-- 2026-09-19 — No audit history of role changes in F-9; roles only get CreatedBy/UpdatedBy — owner, question 11 — captured as an idea.
+- 2026-09-19 — No audit history of role changes in F-9; roles only get CreatedBy/UpdatedBy — owner, question 11 — already captured as F-14 (role change audit trail, AB#726).
 - 2026-09-19 — Two pages with dialogs (roles, users) — owner, question 12 — rule "simple entity = dialog".
 - 2026-09-19 — Permissions shown by translated name and description, grouped by module, technical name below — owner, question 13 — no hardcoded UI text.
 - 2026-09-19 — Mockup through `/agile:screen F-9` before approval — owner, question 14.
@@ -115,7 +115,7 @@ Detailed screens and mockup: `/agile:screen F-9` (to be added before approval).
 - 2026-09-19 — Claude: user search is a case-insensitive `ILIKE` on email and full name; default sort by email; page sizes from the kit.
 
 ## Out of scope
-- History of role and permission changes (audit log) — becomes an idea.
+- History of role and permission changes (audit log) — F-14 (AB#726).
 - Tenant-scoped roles (Institutions epic).
 - Blocking, suspending, editing or deleting user accounts (F-10 covers erasure), ending a user's sessions.
 - Permissions granted directly to a user (only through roles).
