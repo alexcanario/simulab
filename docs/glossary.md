@@ -75,6 +75,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Idioma preferido | Idioma preferido | `PreferredLanguage` | The user's locale: first culture source after sign-in and the language of their emails (F-8) |
 | Minha conta | A minha conta | `Account` (page `/account`) | The signed-in user's own page: profile and link to change the password (F-8) |
 | Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
+| Apagamento de conta | Eliminação da conta | `AccountErasure` | The user erasing their own account: the personal data in Identity is overwritten and the id stays as a pseudonym (F-10, ADR-0001 #9) |
+| Conta apagada | Conta eliminada | `AccountStatus.Erased` | The state of an account after erasure: invisible to every lookup, with a tombstone address (F-10) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
@@ -106,4 +108,8 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |
 | WCAG 2.2 AA | WCAG 2.2 AA | The accessibility level the app targets (ADR-0001 #29); among other things, text needs a contrast of at least 4.5:1 with its background (3:1 for large text). |
 | contrast ratio | contraste | How far apart a text colour and its background are in brightness, from 1:1 (same colour) to 21:1 (black on white). |
+| anonymization | anonimização | Overwriting the data that names a person, keeping the rest of the record usable as statistics. |
+| tombstone | lápide (valor-lápide) | The meaningless value written over a personal one so the column stays filled and unique (F-10: `erased-<id>@erased.invalid`). |
+| danger zone | zona de risco | The part of a screen that holds the destructive actions, set apart and marked as such. |
+| integration event | evento de integração | A past-tense record one module publishes so other modules can react, without either knowing the other (`IIntegrationEvent`). |
 | UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |
