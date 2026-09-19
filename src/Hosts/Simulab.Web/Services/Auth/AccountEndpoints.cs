@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Simulab.Identity.Contracts;
+using Simulab.Web.Localization;
 
 namespace Simulab.Web.Services.Auth;
 
@@ -27,6 +28,7 @@ public static class AccountEndpoints
 
         group.MapGet("/sign-in-complete", CompleteSignInAsync).WithName("CompleteSignIn");
         group.MapGet("/sign-out", SignOutAsync).WithName("WebSignOut");
+        group.MapGet("/profile-applied", ApplyProfileAsync).WithName("ApplyProfile");
 
         return endpoints;
     }
@@ -76,7 +78,43 @@ public static class AccountEndpoints
         identity.AddClaim(new Claim(WebAuthClaims.WebSessionId, webSessionId));
 
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+        // F-8 BR5: the profile's language wins over whatever this browser had.
+        CultureCookie.Write(context, signIn.PreferredLanguage);
         return Results.LocalRedirect("/");
+    }
+
+    /// <summary>
+    /// F-8 BR8: after a profile save, the cookie gets the saved display name and the culture cookie the saved
+    /// language. A full page load, because a Blazor circuit can write neither and its culture is fixed when it starts.
+    /// </summary>
+    private static async Task<IResult> ApplyProfileAsync(
+        string? redirectUri,
+        HttpContext context,
+        WebSessionTokenAccessor tokens,
+        IdentityApiClient api)
+    {
+        var target = SupportedCultures.SafeLocalPath(redirectUri);
+        var accessToken = context.User.Identity?.IsAuthenticated == true
+            ? await tokens.GetAccessTokenAsync(context.User, context.RequestAborted)
+            : null;
+        var profile = accessToken is null ? null : (await api.GetProfileAsync(accessToken, context.RequestAborted)).Value;
+        if (profile is null)
+        {
+            return Results.LocalRedirect(target);
+        }
+
+        var identity = new ClaimsIdentity(
+            context.User.Claims.Where(claim => claim.Type != ClaimTypes.Name),
+            CookieAuthenticationDefaults.AuthenticationScheme);
+        if (!string.IsNullOrWhiteSpace(profile.FullName))
+        {
+            identity.AddClaim(new Claim(ClaimTypes.Name, profile.FullName));
+        }
+
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        CultureCookie.Write(context, profile.PreferredLanguage);
+        return Results.LocalRedirect(target);
     }
 
     /// <summary>

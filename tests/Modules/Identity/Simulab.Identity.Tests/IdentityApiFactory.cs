@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
+using Npgsql;
 using Simulab.Email;
 using Simulab.Testing;
 
@@ -76,4 +77,19 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
     }
 
     public string ConnectionString => _connectionString;
+
+    /// <summary>
+    /// EF Core's <c>UseNpgsql(connectionString)</c> pools connections per connection string for the whole
+    /// process, so a disposed host leaves its idle connections open. With one database per test class they
+    /// add up past the container's limit (<c>53300: too many clients</c>, found in F-8): close them here.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing && _connectionString.Length > 0)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            NpgsqlConnection.ClearPool(connection);
+        }
+    }
 }

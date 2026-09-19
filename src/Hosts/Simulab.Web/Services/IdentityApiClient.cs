@@ -112,6 +112,38 @@ public sealed class IdentityApiClient(HttpClient http)
             },
             cancellationToken);
 
+    /// <summary>F-8 UC1: the caller's own profile.</summary>
+    public Task<ApiResult<ProfileResponse>> GetProfileAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<ProfileResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/profile"), accessToken), cancellationToken);
+
+    /// <summary>F-8 UC2: name and language together.</summary>
+    public Task<ApiResult<bool>> UpdateProfileAsync(string accessToken, string? fullName, string preferredLanguage, CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(
+                new HttpRequestMessage(HttpMethod.Put, $"{Base}/profile")
+                {
+                    Content = JsonContent.Create(new UpdateProfileRequest(fullName, preferredLanguage), options: AppJson.Options)
+                },
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-8 UC3: the header switch saves the language alone (BR6).</summary>
+    public Task<ApiResult<bool>> UpdatePreferredLanguageAsync(string accessToken, string preferredLanguage, CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(
+                new HttpRequestMessage(HttpMethod.Put, $"{Base}/profile/preferred-language")
+                {
+                    Content = JsonContent.Create(new UpdatePreferredLanguageRequest(preferredLanguage), options: AppJson.Options)
+                },
+                accessToken),
+            cancellationToken);
+
+    private static HttpRequestMessage Authorized(HttpRequestMessage request, string accessToken)
+    {
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        return request;
+    }
+
     private Task<ApiResult<TResponse>> PostAsync<TRequest, TResponse>(string route, TRequest body, CancellationToken cancellationToken) =>
         SendAsync<TResponse>(
             () => new HttpRequestMessage(HttpMethod.Post, route)

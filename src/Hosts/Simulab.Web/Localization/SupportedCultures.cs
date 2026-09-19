@@ -10,6 +10,15 @@ public static class SupportedCultures
 
     public static readonly IReadOnlyList<CultureInfo> All = [.. SupportedLanguages.All.Select(name => new CultureInfo(name))];
 
+    /// <summary>A language's own name, capitalized in that language ("Português (Brasil)"): how a language picker shows it.</summary>
+    public static string NativeName(CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+
+        var name = culture.NativeName;
+        return name.Length == 0 ? name : char.ToUpper(name[0], culture) + name[1..];
+    }
+
     public static bool IsSupported(string? name) =>
         All.Any(culture => string.Equals(culture.Name, name, StringComparison.OrdinalIgnoreCase));
 

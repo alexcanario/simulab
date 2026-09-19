@@ -6,8 +6,9 @@ using Simulab.SharedKernel.Serialization;
 namespace Simulab.Web.Tests.Auth;
 
 /// <summary>
-/// The two Api calls the web session makes (B-3): the token endpoint and <c>GET /api/v1/identity/session</c>.
-/// Each answer is what the test sets; nothing reaches a real server.
+/// The Api calls the web session makes (B-3): the token endpoint and <c>GET /api/v1/identity/session</c>;
+/// and, for F-8, the profile calls the Web's own endpoints make. Each answer is what the test sets;
+/// nothing reaches a real server.
 /// </summary>
 public sealed class FakeAuthApi : HttpMessageHandler
 {
@@ -34,6 +35,15 @@ public sealed class FakeAuthApi : HttpMessageHandler
 
     /// <summary>What the Api's sign-out answers.</summary>
     public HttpStatusCode SignOutStatus { get; set; } = HttpStatusCode.NoContent;
+
+    /// <summary>F-8: what GET /profile answers; null answers 500.</summary>
+    public ProfileResponse? Profile { get; set; } = new("ana@example.com", "Ana", "en");
+
+    /// <summary>F-8: what PUT /profile/preferred-language answers.</summary>
+    public HttpStatusCode PreferredLanguageStatus { get; set; } = HttpStatusCode.NoContent;
+
+    /// <summary>F-8: the languages PUT /profile/preferred-language received, in order.</summary>
+    public List<string?> SavedLanguages { get; } = [];
 
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
@@ -84,6 +94,18 @@ public sealed class FakeAuthApi : HttpMessageHandler
 
             var token = request.Headers.Authorization?.Parameter ?? string.Empty;
             return Json(new SessionInfoResponse(Guid.Empty.ToString(), "ana@example.com", $"jti-of-{token}", Permissions), options: AppJson.Options);
+        }
+
+        if (path == "/api/v1/identity/profile" && request.Method == HttpMethod.Get)
+        {
+            return Profile is null ? new HttpResponseMessage(HttpStatusCode.InternalServerError) : Json(Profile, options: AppJson.Options);
+        }
+
+        if (path == "/api/v1/identity/profile/preferred-language")
+        {
+            var body = await request.Content!.ReadFromJsonAsync<UpdatePreferredLanguageRequest>(AppJson.Options, cancellationToken);
+            SavedLanguages.Add(body!.PreferredLanguage);
+            return new HttpResponseMessage(PreferredLanguageStatus);
         }
 
         return new HttpResponseMessage(HttpStatusCode.NotFound);

@@ -98,6 +98,9 @@
         <AppTextField TValue="string" Id="gallery-field-error" Label="@I["SignUp.Email.Label"]" Required="true"
                       Error="@I["SignUp.Email.Required"].Value" Value="@("")" />
 
+        <AppSelectField TValue="string" Id="gallery-select" Label="@L["Layout.LanguageSwitch.Label"]" Required="true"
+                        Options="@_selectOptions" Value="@_selectValue" ValueChanged="@(value => _selectValue = value)" />
+
         <AppPasswordField Id="gallery-password" Label="@I["SignUp.Password.Label"]"
                           ShowLabel="@I["SignUp.Password.Show"]" HideLabel="@I["SignUp.Password.Hide"]"
                           Required="true" Value="@_passwordValue" ValueChanged="@(value => _passwordValue = value)" />
@@ -148,6 +151,9 @@
     private string? _fieldValue;
     private string? _passwordValue;
     private bool _checked;
+    private string? _selectValue = SupportedCultures.Default;
+    private static readonly IReadOnlyList<AppSelectOption<string>> _selectOptions =
+        [.. SupportedCultures.All.Select(culture => new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
 
     private string GalleryStrengthText(PasswordStrength strength) =>
         I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];

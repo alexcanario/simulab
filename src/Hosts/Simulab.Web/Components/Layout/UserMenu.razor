@@ -12,7 +12,7 @@
                  Icon="@AppIcons.Account"
                  Color="Color.Inherit"
                  AriaLabel="@Label(authState.User)">
-            <MudMenuItem Icon="@AppIcons.Password" Href="/account/password" Class="app-user-menu-password">@L["Layout.UserMenu.ChangePassword"]</MudMenuItem>
+            <MudMenuItem Icon="@AppIcons.Account" Href="/account" Class="app-user-menu-account">@L["Layout.UserMenu.Account"]</MudMenuItem>
             <MudMenuItem Icon="@AppIcons.SignOut" OnClick="SignOutAsync" Class="app-user-menu-signout">@L["Layout.UserMenu.SignOut"]</MudMenuItem>
         </MudMenu>
     </Authorized>

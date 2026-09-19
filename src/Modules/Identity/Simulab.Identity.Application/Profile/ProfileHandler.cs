@@ -11,9 +11,6 @@ namespace Simulab.Identity.Application.Profile;
 /// </summary>
 public sealed class ProfileHandler(UserManager<User> userManager)
 {
-    /// <summary>The column's length (F-4); a longer name is refused, not cut (BR2).</summary>
-    public const int FullNameMaxLength = 120;
-
     public async Task<ProfileResponse?> GetAsync(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
@@ -24,7 +21,7 @@ public sealed class ProfileHandler(UserManager<User> userManager)
     public async Task<Result> UpdateAsync(Guid userId, string? fullName, string? preferredLanguage)
     {
         var name = string.IsNullOrWhiteSpace(fullName) ? null : fullName.Trim();
-        if (name?.Length > FullNameMaxLength)
+        if (name?.Length > ProfileLimits.FullNameMaxLength)
         {
             return Failure(IdentityErrorCodes.ProfileFullNameTooLong);
         }
