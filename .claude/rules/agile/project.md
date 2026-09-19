@@ -57,11 +57,15 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## UI tests
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
+- After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
 - Assertions: AwesomeAssertions. Never FluentAssertions.
 - A cache whose expiry a test must control is not `IMemoryCache` (its clock is not a `TimeProvider` in this stack) - a small `TimeProvider`-backed class instead, like `PermissionCache` (F-6).
+
+## Talking to the owner
+- A technical term used with the owner for the first time gets a row in `## Technical terms` of `docs/glossary.md` (term, pt-BR word, meaning) in the same step (F-8).
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
