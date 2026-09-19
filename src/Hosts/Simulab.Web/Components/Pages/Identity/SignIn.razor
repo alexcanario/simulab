@@ -36,6 +36,11 @@
                   ActionText="@I["SignIn.ResendVerification"]"
                   OnAction="ResendAsync" />
     }
+    else if (_sessionEnded)
+    {
+        @* B-3, BR5: the session ended elsewhere (sign-out, password reset) while a page was open. *@
+        <AppAlert Severity="Severity.Info" Text="@I["SignIn.SessionEnded"]" />
+    }
 
     <AppTextField TValue="string"
                   Id="sign-in-email"
@@ -88,6 +93,8 @@
 
     [SupplyParameterFromQuery] public string? Email { get; set; }
 
+    [SupplyParameterFromQuery] public string? Session { get; set; }
+
     private string? _email;
     private string? _password;
     private string? _emailError;
@@ -98,6 +105,7 @@
     private bool _unverified;
     private bool _resent;
     private bool _submitting;
+    private bool _sessionEnded;
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,6 +117,7 @@
         }
 
         _email = Email;
+        _sessionEnded = Session == "ended";
         ApplyServerCode(Error);
     }
 
@@ -135,6 +144,7 @@
         }
 
         _submitting = true;
+        _sessionEnded = false;
         var result = await Auth.SignInAsync(_email!.Trim(), _password!);
         _submitting = false;
         _password = null;
@@ -165,7 +175,8 @@
             return;
         }
 
-        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!, session.Permissions);
+        var lifetime = result.ExpiresInSeconds is > 0 ? TimeSpan.FromSeconds(result.ExpiresInSeconds.Value) : TokenLifetimes.AccessToken;
+        var ticket = new SignInTicket(session.Subject, session.Email, DisplayName: null, session.SessionJti, result.AccessToken!, result.RefreshToken!, lifetime, session.Permissions);
         var ticketId = Tickets.Issue(ticket);
 
         // A real browser navigation (BR1's constraint): only this can carry a Set-Cookie response header.

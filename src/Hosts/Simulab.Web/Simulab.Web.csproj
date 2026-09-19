@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="MudBlazor" />
+    <!-- B-3: server-side web sessions. The Aspire client integration trusts the local container's TLS certificate. -->
+    <PackageReference Include="Aspire.StackExchange.Redis" />
   </ItemGroup>
 
   <ItemGroup>

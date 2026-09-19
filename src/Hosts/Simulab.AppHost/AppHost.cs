@@ -34,7 +34,10 @@ var api = builder.AddProject<Projects.Simulab_Api>("api")
 var web = builder.AddProject<Projects.Simulab_Web>("web")
     .WithExternalHttpEndpoints()
     .WithReference(api)
-    .WaitFor(api);
+    .WaitFor(api)
+    // B-3: each signed-in browser's tokens live here, not in its cookie.
+    .WithReference(redis)
+    .WaitFor(redis);
 
 // The verification link in the email points at the Web page that consumes the token (F-4). The Api
 // cannot know that address on its own, and the ports change on every run.

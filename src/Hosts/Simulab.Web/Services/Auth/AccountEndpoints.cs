@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Simulab.Identity.Contracts;
@@ -12,6 +13,9 @@ namespace Simulab.Web.Services.Auth;
 /// </summary>
 public static class AccountEndpoints
 {
+    /// <summary>The sign-out reason that sends the visitor to sign in again with the "session ended" alert (B-3, BR5).</summary>
+    public const string SessionEndedReason = "session-ended";
+
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
@@ -24,12 +28,31 @@ public static class AccountEndpoints
         return endpoints;
     }
 
-    private static async Task<IResult> CompleteSignInAsync(string ticket, HttpContext context, SignInTicketStore tickets)
+    /// <summary>B-3, BR1: the tokens go to the server-side store; the cookie gets the identity and the store key only.</summary>
+    private static async Task<IResult> CompleteSignInAsync(
+        string ticket,
+        HttpContext context,
+        SignInTicketStore tickets,
+        IWebSessionStore sessions,
+        TimeProvider timeProvider)
     {
         if (!tickets.TryConsume(ticket, out var signIn))
         {
             return Results.Redirect($"/sign-in?error={IdentityErrorCodes.InvalidCredentials}");
         }
+
+        var now = timeProvider.GetUtcNow();
+        var webSessionId = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
+        await sessions.SaveAsync(
+            webSessionId,
+            new WebSession(
+                signIn.SessionJti,
+                signIn.AccessToken,
+                signIn.RefreshToken,
+                now.Add(signIn.AccessTokenLifetime),
+                signIn.Permissions,
+                now),
+            context.RequestAborted);
 
         var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
         identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, signIn.Subject));
@@ -39,28 +62,33 @@ public static class AccountEndpoints
             identity.AddClaim(new Claim(ClaimTypes.Name, signIn.DisplayName));
         }
 
-        identity.AddClaim(new Claim(SessionClaims.SessionJti, signIn.SessionJti));
-        identity.AddClaim(new Claim(WebAuthClaims.AccessToken, signIn.AccessToken));
-        identity.AddClaim(new Claim(WebAuthClaims.RefreshToken, signIn.RefreshToken));
-        foreach (var permission in signIn.Permissions)
-        {
-            identity.AddClaim(new Claim(WebAuthClaims.Permission, permission));
-        }
+        identity.AddClaim(new Claim(WebAuthClaims.WebSessionId, webSessionId));
 
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         return Results.LocalRedirect("/");
     }
 
-    /// <summary>BR6: best-effort server-side revocation, then the cookie clears regardless.</summary>
-    private static async Task<IResult> SignOutAsync(HttpContext context, AuthClient authClient)
+    /// <summary>
+    /// F-5 BR6: best-effort server-side revocation, then the stored session and the cookie clear regardless.
+    /// With <see cref="SessionEndedReason"/> the session is already gone at the Api (B-3, BR5): no call,
+    /// and the visitor lands on sign-in with the alert.
+    /// </summary>
+    private static async Task<IResult> SignOutAsync(string? reason, HttpContext context, AuthClient authClient, WebSessionTokenAccessor tokens)
     {
-        var accessToken = context.User.FindFirstValue(WebAuthClaims.AccessToken);
-        if (accessToken is not null)
+        var sessionEnded = reason == SessionEndedReason;
+        var webSessionId = context.User.FindFirstValue(WebAuthClaims.WebSessionId);
+        if (webSessionId is not null)
         {
-            await authClient.SignOutAsync(accessToken);
+            var session = sessionEnded ? null : await tokens.GetFreshAsync(webSessionId, context.RequestAborted);
+            if (session is not null)
+            {
+                await authClient.SignOutAsync(session.AccessToken, context.RequestAborted);
+            }
+
+            await tokens.EndAsync(webSessionId, context.RequestAborted);
         }
 
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Results.LocalRedirect("/");
+        return Results.LocalRedirect(sessionEnded ? "/sign-in?session=ended" : "/");
     }
 }

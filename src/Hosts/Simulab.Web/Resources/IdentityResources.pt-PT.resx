@@ -51,6 +51,7 @@
   <data name="VerifyEmail.BackToSignUp" xml:space="preserve"><value>Ir para o registo</value></data>
   <data name="SignIn.Title" xml:space="preserve"><value>Iniciar sessão</value></data>
   <data name="SignIn.Subtitle" xml:space="preserve"><value>Bem-vindo de volta. Continue a praticar.</value></data>
+  <data name="SignIn.SessionEnded" xml:space="preserve"><value>A sua sessão terminou. Inicie sessão novamente.</value></data>
   <data name="SignIn.Email.Label" xml:space="preserve"><value>E-mail</value></data>
   <data name="SignIn.Email.Placeholder" xml:space="preserve"><value>voce@exemplo.com</value></data>
   <data name="SignIn.Email.Required" xml:space="preserve"><value>Indique o seu e-mail.</value></data>
