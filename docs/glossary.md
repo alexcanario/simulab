@@ -98,3 +98,7 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | merge base | base do merge | The commit where the item branch left `main`; a review compares from it. |
 | bUnit | bUnit | Library that tests Blazor components without a browser. |
 | WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. |
+| coverage gap | lacuna de cobertura | A criterion with no test through the path a user reaches. |
+| validation script | roteiro de validação | At most 8 steps the owner follows on screen before the merge. |
+| gate | gate (portão) | An automatic check that must pass before the work goes on: build, tests, no new warnings. |
+| warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |

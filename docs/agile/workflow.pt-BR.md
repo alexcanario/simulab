@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.25 (rascunho). English: [en](workflow.md).
+> Versão 0.0.29 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -77,7 +77,7 @@ Saídas, todas em inglês:
 - `docs/decisions/ADR-0001-foundation.md` — cada decisão do quiz, com o motivo.
 - `docs/agile/profile.md` — cópia do perfil de arquitetura escolhido.
 - `docs/agile/workflow.md` e `docs/agile/workflow.pt-BR.md` — este workflow nos dois idiomas, e `docs/agile/templates/` — os templates, copiados para o projeto.
-- `docs/glossary.md` — termos de negócio e os identificadores em inglês.
+- `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. Um termo técnico novo ganha uma linha na primeira vez que aparece.
 - `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
 - `docs/architecture/` — quando a rodada 8 escolheu algum documento: o `tools/<App>.DocGen` gera diagramas de entidades e dicionário de dados por módulo (do modelo EF), mapa de rotas por área (do documento OpenAPI) e diagrama de módulos (das referências entre projetos), tudo em Mermaid; o `/agile:ship` regenera e o `--check` reprova quando estão desatualizados. Opcionalmente uma visão geral de uma página escrita à mão (C4 contexto e containers).
@@ -111,7 +111,7 @@ stateDiagram-v2
 
 Pequenas correções encontradas na validação são feitas na hora, sem sair de `validating`.
 
-Antes de entregar o roteiro de validação, o Claude mostra uma tabela **critério → teste**: cada critério de aceite aponta para os seus testes, ou fica explicitamente para o roteiro de validação.
+Antes de entregar o roteiro de validação, o Claude mostra uma tabela **critério → teste**: cada critério de aceite aponta para os seus testes, ou fica explicitamente para o roteiro de validação. O teste precisa passar pelo caminho que o usuário usa (página, endpoint, o handler que chama o código): um método escrito para um critério que nada na app chama é uma lacuna, mesmo que o seu próprio teste passe.
 
 ### Etapas opcionais
 
@@ -325,6 +325,8 @@ As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agil
 
 **Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
 
+**Lições da stack.** Uma lição de um item real que depende da stack vai para a regra restrita àqueles arquivos ou para os perfis a que diz respeito, nunca para uma regra sempre carregada. Exemplos da primeira app: a `api-contracts` diz que um middleware próprio resolve uma dependência opcional dentro do ramo que precisa dela (um parâmetro do `InvokeAsync` é resolvido em toda requisição) e que um cliente pede à API os claims do usuário em vez de decodificar o seu access token (ele pode ser criptografado); a `build-config` diz que uma investigação que depende de versão lê a versão resolvida em `obj/project.assets.json`, não a fixada; os perfis com AppHost do Aspire dizem que o código chega a Redis, PostgreSQL ou a um broker pela integração de cliente do Aspire, porque os recursos locais rodam com TLS por padrão, e que o `ServiceDefaults` gerado desliga as novas tentativas de POST (um POST repetido reusa tokens de uso único); os perfis com UI Blazor dizem que, no Interactive Server, estado que muda durante a sessão fica num store no servidor, com a chave num id do cookie, porque um circuito não consegue reescrever o cookie; e a estratégia de testes dos perfis diz que um teste bUnit espera o que um handler assíncrono de clique faz (`WaitForAssertion`), e que um host de teste criado por classe de teste limpa o pool do Npgsql ao ser descartado, senão o banco de teste fica sem conexões.
+
 **Um comportamento só em todas as telas.** A regra `ui` impede que as telas se afastem umas das outras: um padrão é definido uma vez, num kit de UI mostrado numa página de galeria só de desenvolvimento, e as páginas usam o kit em vez dos componentes crus da biblioteca. Uma família de ícones atrás de nomes semânticos (`AppIcons.Edit`), um jeito só de editar um item (ações de linha na última coluna; diálogo para entidades simples, página própria para as complexas; o link no nome só abre uma página de detalhe para leitura), o mesmo hover e o mesmo foco em todo lugar, um diálogo único de confirmação para ações destrutivas, e o mesmo feedback, estados de lista, layout de formulário e vocabulário de ações. Testes de arquitetura proíbem ícones e tabelas crus fora do kit, e o kit vem antes da primeira tela. O projeto registra as suas escolhas (família de ícones, exceções declaradas) nas suas próprias regras.
 
 **Mantendo um projeto atualizado.** O bootstrap copia arquivos do plugin para dentro do projeto (regras, templates, este workflow, o perfil, os arquivos de build), então uma atualização do plugin não chega a eles sozinha. Atualize o plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, sessão nova) e rode `/agile:sync` no projeto. O Claude mostra uma tabela do que mudou e só copia o que você aprovar: uma cópia que você nunca editou é substituída; um arquivo que você editou (normalmente o perfil) é mesclado à mão, mantendo as suas seções; os arquivos de build (`Directory.Build.props`, `.editorconfig`, `global.json`...) nunca são copiados por cima — cada diferença é proposta como uma edição; as suas regras próprias (`project.md`, `*-project.md`) e o `CLAUDE.md` nunca são tocados. Se arquivos de build ou regras conferidas pelo build mudaram, o Claude compila, roda a suíte completa e refaz a baseline de avisos. A versão e o que foi copiado ficam registrados em `.claude/agile/sync.json`. Rode entre features, não no meio de uma.
@@ -530,6 +532,14 @@ Pronto:
 - Telas List / Form, textos nos 3 arquivos de recursos
 - 14 testes (Catalog.Tests 3,1 s, Web.Tests 1,8 s) — verdes
 
+Critério → teste:
+| AC1 lista       | ExamBoardsPage_Open_ShowsActiveBoards                        |
+| AC3 única       | CreateExamBoard_DuplicateAcronym_Returns409                  |
+| AC5 desativar   | ExamBoardsPage_Deactivate_ShowsInactive                      |
+| AC7 idiomas     | roteiro de validação, passo 7                                |
+A AC5 era uma lacuna: ExamBoard.Deactivate tinha um teste verde, mas nenhuma página
+nem endpoint o chamava. Acrescentei o endpoint e o botão, depois o teste de página acima.
+
 Roteiro de validação (F-3):
 1. Suba o AppHost e entre como admin.
 2. Menu Catalog → Exam boards: lista vazia.
@@ -723,10 +733,10 @@ No fim do build da F-14 (ela grava resultados e mexe nos dados dos alunos):
 
 ```
 Claude: Esta mudança mexe em dados de alunos. Rodando /agile:review antes da validação.
-| Gravidade | Achado                                      | Veredito   | Ação                     |
-| blocker   | O endpoint de resultados não confere o dono | confirmado | corrigido + teste        |
-| minor     | Mapeamento duplicado em ResultsPage         | confirmado | corrigido                |
-| major     | "A nota pode ficar negativa"                | rejeitado  | a BR2 permite penalidade |
+| Gravidade  | Achado                                      | Veredito   | Ação                     |
+| bloqueador | O endpoint de resultados não confere o dono | confirmado | corrigido + teste        |
+| leve       | Mapeamento duplicado em ResultsPage         | confirmado | corrigido                |
+| grave      | "A nota pode ficar negativa"                | rejeitado  | a BR2 permite penalidade |
 Critério → teste: AC1 a AC6 cobertos; AC7 (troca de idioma) no roteiro de validação.
 Status: validating. Roteiro de validação: ...
 ```
@@ -976,7 +986,7 @@ flowchart TD
     E1 --> D
     E -->|não| F["Conferência pelo app host; tela nos dois temas"]
     F --> G["Encerrar app hosts que abriu; build sem avisos novos"]
-    G --> H["Tabela de cobertura: critério → teste"]
+    G --> H["Tabela de cobertura: critério → teste pelo caminho que o usuário usa;<br/>um método que nada chama é lacuna"]
     H --> I{"Mudança arriscada?"}
     I -->|sim| I1["/agile:review"]
     I1 --> J
@@ -989,11 +999,11 @@ flowchart TD
 flowchart TD
     A["Mudança arriscada antes da validação"] --> B["Commit base = merge base com a main"]
     B --> C["Agente revisor, contexto limpo, modelo de revisão:<br/>arquivo do item, perfil, regras, diff — só caminhos"]
-    C --> D["Achados: blocker / major / minor, arquivo:linha"]
-    D --> E["Claude confere cada blocker e major no código"]
+    C --> D["Achados: bloqueador / grave / leve, arquivo:linha"]
+    D --> E["Claude confere cada bloqueador e grave no código"]
     E --> F["Tabela: achado, veredito, ação"]
     F --> G{"Sua triagem"}
-    G --> H["Corrigir blockers e majors confirmados; testes; rodar de novo"]
+    G --> H["Corrigir bloqueadores e graves confirmados; testes; rodar de novo"]
     H --> I(["Uma linha por achado em ## Decisions; o build continua"])
 ```
 

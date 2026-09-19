@@ -13,6 +13,7 @@ paths:
 - A new project is created in the folder the profile's `## Layout` gives it (never at the root of `src/` or `tests/` unless the layout says so), added to the solution under a solution folder that mirrors its disk folder, and registered in the architecture tests and the layout test in the same commit.
 - A `.csproj` holds only what is specific to that project: SDK, references, and properties that differ from the shared file. Never repeat `TargetFramework`, `Nullable` or `ImplicitUsings` there.
 - Central Package Management: a `PackageReference` never has `Version=`. Add the version as `PackageVersion` in `Directory.Packages.props`, at the latest stable release, checked at the time of adding.
+- A version-dependent investigation (an obsolete API, a changed default) reads the version resolved for that project in `obj/project.assets.json`, not the one pinned in `Directory.Packages.props`: transitive pinning can raise a shared package because a sibling package elsewhere in the solution needs a newer one.
 - A new package needs the owner's yes. Check its license first: FluentAssertions 8+ and MassTransit 9+ are commercial and not allowed.
 - Rules the build can check belong in the build, not in prose: style and naming in `.editorconfig` (severity `warning`), forbidden APIs in `BannedSymbols.txt`. The Stop gate fails on new warnings.
 - The `.editorconfig` is the owner's. Do not change a severity, add a `NoWarn` or a `#pragma warning disable` to make a warning go away: fix the code, or ask.

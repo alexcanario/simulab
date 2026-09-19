@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.25 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.29 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -77,7 +77,7 @@ Outputs, all in English:
 - `docs/decisions/ADR-0001-foundation.md` — every quiz decision with its reason.
 - `docs/agile/profile.md` — copy of the chosen architecture profile.
 - `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` — this workflow in both languages, and `docs/agile/templates/` — the templates, copied into the project.
-- `docs/glossary.md` — business terms and their English identifiers.
+- `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
 - `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates entity diagrams and a data dictionary per module (from the EF model), a route map per area (from the OpenAPI document) and a module diagram (from project references), all Mermaid; `/agile:ship` regenerates them and `--check` fails when they are stale. Optionally a one-page hand-written overview (C4 context and containers).
@@ -111,7 +111,7 @@ stateDiagram-v2
 
 Small fixes found during validation are done right away, without leaving `validating`.
 
-Before handing over the validation script, Claude shows a **criterion → test** table: every acceptance criterion points to its tests, or is explicitly left to the validation script.
+Before handing over the validation script, Claude shows a **criterion → test** table: every acceptance criterion points to its tests, or is explicitly left to the validation script. The test must go through the path a user reaches (page, endpoint, the handler that calls the code): a method written for a criterion that nothing in the app calls is a gap, even when its own test passes.
 
 ### Optional steps
 
@@ -323,6 +323,8 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 **Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
 
+**Stack lessons.** A lesson from a real item that depends on the stack goes to the rule scoped to those files or to the profiles it concerns, never to an always-loaded rule. Examples from the first app: `api-contracts` says a custom middleware resolves an optional dependency inside the branch that needs it (an `InvokeAsync` parameter is resolved on every request) and that a client asks the API for the user's claims instead of decoding its access token (it may be encrypted); `build-config` says a version-dependent investigation reads the version resolved in `obj/project.assets.json`, not the pinned one; the profiles with an Aspire AppHost say code reaches Redis, PostgreSQL or a broker through the Aspire client integration, because local resources run with TLS by default, and that the generated `ServiceDefaults` turns off retries for POST (a retried POST replays single-use tokens); the profiles with a Blazor UI say that, with Interactive Server, state that changes during a session lives in a server-side store keyed by an id in the cookie, because a circuit cannot rewrite the cookie; and the test strategy of the profiles says a bUnit test waits for what an async click handler does (`WaitForAssertion`), and a test host created per test class clears its Npgsql pool on dispose, or the test database runs out of connections.
+
 **One behavior on every screen.** The `ui` rule keeps screens from drifting apart: a pattern is defined once, in a UI kit shown on a dev-only gallery page, and pages use the kit instead of raw library components. One icon family behind semantic names (`AppIcons.Edit`), one way to edit an item (row actions in the last column; dialog for simple entities, own page for complex ones; a name link only opens a read-only detail page), the same hover and focus everywhere, one confirmation dialog for destructive actions, the same feedback, list states, form layout and action vocabulary. Architecture tests forbid raw icons and raw tables outside the kit, and the kit comes before the first screen. The project records its choices (icon family, declared exceptions) in its own rules.
 
 **Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) and `CLAUDE.md` are never touched. If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one.
@@ -527,6 +529,14 @@ Done:
 - Endpoints with error codes exam_board.acronym_taken / exam_board.not_found
 - Pages List / Form, texts in 3 resource files
 - 14 tests (Catalog.Tests 3.1 s, Web.Tests 1.8 s) — green
+
+Criterion → test:
+| AC1 list        | ExamBoardsPage_Open_ShowsActiveBoards                        |
+| AC3 unique      | CreateExamBoard_DuplicateAcronym_Returns409                  |
+| AC5 deactivate  | ExamBoardsPage_Deactivate_ShowsInactive                      |
+| AC7 languages   | validation script, step 7                                    |
+AC5 was first a gap: ExamBoard.Deactivate had a passing test, but no page or
+endpoint called it. Added the endpoint and the button, then the page test above.
 
 Validation script (F-3):
 1. Start the AppHost and sign in as admin.
@@ -971,7 +981,7 @@ flowchart TD
     E1 --> D
     E -->|no| F["App-host check; screen check in both themes"]
     F --> G["Stop app hosts you started; build with no new warnings"]
-    G --> H["Coverage table: criterion → test"]
+    G --> H["Coverage table: criterion → test through the path a user reaches;<br/>a method nothing calls is a gap"]
     H --> I{"Risky change?"}
     I -->|yes| I1["/agile:review"]
     I1 --> J

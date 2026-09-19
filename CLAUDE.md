@@ -42,7 +42,7 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 ## Files
 - Brief: `product/brief.md`
 - Features: `docs/features/F-<n>-<slug>.md`; bugs: `docs/bugs/B-<n>-<slug>.md`
-- Glossary: `docs/glossary.md` (business term → English identifier)
+- Glossary: `docs/glossary.md` (business term → English identifier; technical terms → the pt-BR word used with the owner)
 - Infra: `docs/infra.md`
 - Rules: `.claude/rules/agile/` (project rules in `project.md`)
 
