@@ -1,7 +1,7 @@
 ---
 bug: B-5
 feature: F-5
-status: validating
+status: done
 board: 721
 severity: low
 ---
@@ -68,3 +68,9 @@ Build check (BR2): with `Autocomplete` removed from the sign-in page, `dotnet bu
 6. Sign out, switch the language with the globe, open https://localhost:7125/sign-up and inspect both password fields. → `new-password` on both, in any language.
 
 ## Delivery
+- Branch: bug/B-5 (removed; never pushed)
+- Merge: 38b40ef (--no-ff, AB#721)
+- Validation: passed by the owner, 2026-09-19
+- Regression: PasswordAutocompleteTests.SignIn_AsksForTheCurrentPassword seen failing (new-password) before the fix; RZ2012 seen on a page without the value
+- Tests: full suite 430 passed, 0 failed; build 14 s, tests 29 s; 0 warnings, baseline empty; agile gate GREEN
+- Manual pages: none changed (the manual does not describe password managers; the screens look the same)
