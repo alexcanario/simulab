@@ -81,11 +81,38 @@ Web side: `VisitorAddressHostTests.PageRequest_HandsTheVisitorsAddressToTheApiCl
 1. Close any IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost`, open https://localhost:7125/forgot-password (signed out).
 2. Keyboard only: type an email, Tab to "Send link", press Enter. → The generic answer and the 60 s countdown, as before (the Web now sends your address to the Api; nothing changes on screen).
 3. Switch the language with the globe and repeat step 2 after the countdown. → Same answer in the other language.
-4. In a terminal, read the shared secret: `grep ClientSecret src/Hosts/Simulab.Api/appsettings.Development.json`.
-5. Ask for 6 links as one visitor (Bash; replace SECRET):
-   `for i in 1 2 3 4 5 6; do curl -sk -o /dev/null -w "%{http_code} " -X POST https://localhost:7287/api/v1/identity/password-reset-requests -H "Content-Type: application/json" -H "X-Simulab-Client-Address: 203.0.113.10" -H "X-Simulab-Client-Secret: SECRET" -d '{"email":"x@example.com"}'; done`
-   → `202 202 202 202 202 429`.
-6. Repeat once with `X-Simulab-Client-Address: 198.51.100.20`. → `202`: another visitor has their own limit (before the fix: 429 for everyone).
-7. Repeat step 6 with a wrong secret and a new address, `203.0.113.99`. → Counted under your own connection, not the claimed address: the header is not believed without the secret.
+4. Open a terminal at the repository root (`D:\dev\_icontrol\simulab`), with the app host still running, and load the shared secret and a helper that asks for one reset link as a given visitor. The secret is the Web's OpenIddict client secret, the dev-only value in `src/Hosts/Simulab.Api/appsettings.Development.json` (`Authentication:OpenIddict:ClientSecret`); the Web sends it with the visitor's address so the Api believes the address. The helper prints only the HTTP status.
+
+   Git Bash:
+   ```bash
+   SECRET=$(grep -o '"ClientSecret": *"[^"]*"' src/Hosts/Simulab.Api/appsettings.Development.json | sed 's/.*: *"//; s/"$//')
+   URL=https://localhost:7287/api/v1/identity/password-reset-requests
+   ask() { curl -sk -o /dev/null -w "%{http_code} " -X POST $URL -H "Content-Type: application/json" -H "X-Simulab-Client-Address: $1" -H "X-Simulab-Client-Secret: $2" -d '{"email":"x@example.com"}'; }
+   ```
+
+   PowerShell 7:
+   ```powershell
+   $secret = (Get-Content src/Hosts/Simulab.Api/appsettings.Development.json -Raw | ConvertFrom-Json).Authentication.OpenIddict.ClientSecret
+   $url = 'https://localhost:7287/api/v1/identity/password-reset-requests'
+   function Ask($address, $key) { (Invoke-WebRequest -Uri $url -Method Post -ContentType 'application/json' -Body '{"email":"x@example.com"}' -Headers @{ 'X-Simulab-Client-Address' = $address; 'X-Simulab-Client-Secret' = $key } -SkipCertificateCheck -SkipHttpErrorCheck).StatusCode }
+   ```
+   → Nothing is printed. In Bash `echo ${#SECRET}` and in PowerShell `$secret.Length` print a number above 0: the secret was found.
+5. Ask for 6 links as one visitor, `203.0.113.50`:
+   - Bash: `for i in 1 2 3 4 5 6; do ask 203.0.113.50 "$SECRET"; done; echo`
+   - PowerShell: `(1..6 | ForEach-Object { Ask '203.0.113.50' $secret }) -join ' '`
+
+   → `202 202 202 202 202 429`: the limit is 5 links an hour per visitor, and the sixth is refused.
+6. Ask once as another visitor, `198.51.100.50`:
+   - Bash: `ask 198.51.100.50 "$SECRET"; echo`
+   - PowerShell: `Ask '198.51.100.50' $secret`
+
+   → `202`: this visitor has their own limit. Before the fix every visitor shared one limit, so this answer was `429`.
+7. Claim a new address, `203.0.113.150`, with a wrong secret:
+   - Bash: `ask 203.0.113.150 wrong; echo`
+   - PowerShell: `Ask '203.0.113.150' 'wrong'`
+
+   → `202` or `429`, never judged by `203.0.113.150`: without the Web's secret the Api ignores the claimed address and counts the call under your own connection, which the browser in step 2 and earlier runs may already have used. The automated test `AddressHeader_WithoutTheWebSecret_IsIgnored` proves this case exactly.
+
+   To run steps 5-7 again within the hour, restart the app host (the counters live in the Api's memory) or use other addresses: a used address stays at `429` for one hour.
 
 ## Delivery
