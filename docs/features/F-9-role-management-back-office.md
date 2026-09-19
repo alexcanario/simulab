@@ -28,7 +28,7 @@ Let an Admin manage access from the app instead of editing the database: create 
 - UC2 An Admin adds a custom role with a name and a set of permissions picked from the catalog.
 - UC3 An Admin edits a role: the name and permissions of a custom role, only the permissions of a system role.
 - UC4 An Admin deletes a custom role that no user holds.
-- UC5 An Admin opens `/admin/users`, searches a user by email or name and sees their account status and roles.
+- UC5 An Admin opens `/admin/users`, searches a user by email or name, or filters by a role (also by clicking a role's user count on `/admin/roles`), and sees their account status and roles.
 - UC6 An Admin edits a user's roles (several roles allowed) and the user's API access reflects it within 10 s; their menu reflects it at their next token refresh or sign-in.
 - UC7 A Student or Curator never sees the Administration items and gets the ordinary Not Found page on `/admin/roles` and `/admin/users`.
 
@@ -51,7 +51,7 @@ Mockup: `docs/features/mockups/F-9-role-management-back-office.html` (every stat
 
 ### Screen: Roles (`/admin/roles`)
 - Layout: `AppPageHeader` (breadcrumb "Administration / Roles", title, primary action **Add** at the top right), then one `AppDataTable` card. `MainLayout`.
-- Table columns: Name (sortable, default ascending; system roles show their translated name and a "System" badge), Permissions (count, right-aligned), Users (count, right-aligned, user's culture), actions (last column, `AppRowActions`): **Edit**, then **Delete**.
+- Table columns: Name (sortable, default ascending; system roles show their translated name and a "System" badge), Permissions (count, right-aligned), Users (count, right-aligned, user's culture; a link to `/admin/users?role=<id>` with the accessible name `Roles.UsersLink`), actions (last column, `AppRowActions`): **Edit**, then **Delete**.
   - Delete is not rendered for a system role; for a custom role held by users it is disabled with the tooltip `Roles.Delete.InUseTip` (the API's `role.in_use` still guards a race).
   - Five roles at most for a long time: the list is loaded whole and paged in the table (kit page sizes 10/25/50, default 25); no search box.
 - Role dialog (Add / Edit, kit dialog, Esc closes, unsaved changes ask `Common.Discard.*`):
@@ -64,7 +64,7 @@ Mockup: `docs/features/mockups/F-9-role-management-back-office.html` (every stat
 - States: loading (`AppLoadingState`); ready; empty is not reachable (three system roles always exist) and uses the kit's empty text if it ever is; server error (`AppErrorState` with **Try again**); dialog: add, edit custom, edit system, validation error, saving, server errors `role.name_taken`, `role.permission_unknown`, `role.admin_permission_required`, `role_assignment.last_manager`, `role.system_role_protected`, `role.not_found`; delete: confirmation, success, refused `role.in_use` (alert above the table); permission denied: ordinary Not Found page.
 
 ### Screen: Users (`/admin/users`)
-- Layout: `AppPageHeader` (breadcrumb "Administration / Users", title, no primary action — users are created by sign-up), then one `AppDataTable` card with the kit search box (placeholder `Users.Search.Placeholder`, debounced by the kit), server-side paging (10/25/50, default 25) and sorting.
+- Layout: `AppPageHeader` (breadcrumb "Administration / Users", title, no primary action — users are created by sign-up), then one `AppDataTable` card with the kit search box (placeholder `Users.Search.Placeholder`, debounced by the kit) and, next to it, a role filter (`AppSelectField`, label `Users.Filter.Role`, first option `Users.Filter.AllRoles`, then every role by name; kept in the query string `?role=<id>` so the link from the roles page opens it pre-selected), server-side paging (10/25/50, default 25) and sorting.
 - Table columns: Email (sortable, default ascending), Name (sortable; "—" when empty; long text truncated with tooltip), Status (dot + `AccountStatus.Pending` / `AccountStatus.Active`), Roles (chips with the role names; `Users.NoRoles` when empty), actions: **Edit roles** (edit icon, tooltip and accessible name `Users.EditRoles.Action` + email).
 - Edit roles dialog: title `Users.Dialog.Title` with the email; info `AppAlert` `Users.Dialog.Help` (roles add up; menu updates at next sign-in or within 15 min, BR9); one `AppCheckbox` per role (translated or stored name; its permissions, translated, as the description) inside a `fieldset` with a hidden legend; **Save** / **Cancel** as above.
 - Success: snackbar `Users.Saved`; the row reloads.
@@ -108,6 +108,9 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 | `Users.Column.Status` | Status | Situação | Estado |
 | `Users.Column.Roles` | Roles | Papéis | Perfis |
 | `Users.Search.Placeholder` | Search by email or name | Pesquisar por e-mail ou nome | Pesquisar por e-mail ou nome |
+| `Users.Filter.Role` | Role | Papel | Perfil |
+| `Users.Filter.AllRoles` | All roles | Todos os papéis | Todos os perfis |
+| `Roles.UsersLink` | See the {0} users with the role {1} | Ver os {0} usuários com o papel {1} | Ver os {0} utilizadores com o perfil {1} |
 | `Users.NoRoles` | No roles | Sem papéis | Sem perfis |
 | `Users.NoMatch` | No user matches "{0}". | Nenhum usuário corresponde a "{0}". | Nenhum utilizador corresponde a "{0}". |
 | `Users.EditRoles.Action` | Edit roles | Editar papéis | Editar perfis |
@@ -133,7 +136,7 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - `POST /api/v1/identity/roles` — `SaveRoleRequest { Name, Permissions: string[] }` → 201 `RoleResponse`.
 - `PUT /api/v1/identity/roles/{id}` — `SaveRoleRequest` → 200 `RoleResponse`.
 - `DELETE /api/v1/identity/roles/{id}` → 204.
-- `GET /api/v1/identity/users?page=&pageSize=&search=&sortBy=&descending=` → `UserPageResponse { Items: UserSummaryResponse[] { Id, Email, FullName, Status, Roles: { Id, Name, IsSystem }[] }, TotalCount }`.
+- `GET /api/v1/identity/users?page=&pageSize=&search=&roleId=&sortBy=&descending=` (`roleId` optional: only users holding that role; an unknown id gives an empty page) → `UserPageResponse { Items: UserSummaryResponse[] { Id, Email, FullName, Status, Roles: { Id, Name, IsSystem }[] }, TotalCount }`.
 - `PUT /api/v1/identity/users/{id}/roles` — `SetUserRolesRequest { RoleIds: Guid[] }` → 200 `UserSummaryResponse`.
 - Error codes:
   - `role.name_invalid` (400) — blank, shorter than 2 or longer than 50 (BR3).
@@ -159,7 +162,7 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - AC8 Given a system role, when it is renamed or deleted, then the answer is 409 `role.system_role_protected`; when only its permissions change, the change is saved. (BR2)
 - AC9 Given the Admin role, when a save would remove `identity.roles.manage` from it, then the answer is 409 `role.admin_permission_required`. (BR8a)
 - AC10 Given a custom role held by at least one user, when it is deleted, then the answer is 409 `role.in_use`; given no holder, then 204, it leaves the list and its name stays taken. (UC4, BR3, BR5)
-- AC11 Given users with Pending and Active accounts and one deleted account, when an Admin lists users with a search term, then the page holds the matching non-deleted accounts (email or name, case-insensitive), with status, roles and the total count, paged and sorted on the server. (UC5, BR7)
+- AC11 Given users with Pending and Active accounts and one deleted account, when an Admin lists users with a search term and/or a role filter, then the page holds the matching non-deleted accounts (email or name, case-insensitive; holding that role), with status, roles and the total count, paged and sorted on the server. (UC5, BR7)
 - AC12 Given a user, when an Admin sets their roles to Curator and a custom role, then the user holds exactly those two and their effective permissions are the union; an empty set is also accepted. (UC6, BR6)
 - AC13 Given exactly one Active user holding `identity.roles.manage`, when a change would take it from them (their roles, or a custom role's permissions), then the answer is 409 `role_assignment.last_manager` and nothing changes; given a second Active manager, the same change succeeds. (BR8b)
 - AC14 Given an unknown user id, an unknown or deleted role id in a set, or an unknown role id on PUT/DELETE, then the answers are 404 `user.not_found`, 400 `role_assignment.role_unknown` and 404 `role.not_found`. (BR5, BR6)
@@ -190,10 +193,11 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - 2026-09-19 — Claude: saving a role's permissions or a user's roles replaces the whole set (PUT), which matches the checkbox dialogs and keeps one endpoint per dialog.
 - 2026-09-19 — Claude: the rules live in the Application layer (`SaveRoleHandler`, `DeleteRoleHandler`, `SetUserRolesHandler`), the BR8b check in one serializable transaction with the write; concurrent edits of the same role are last-write-wins (two Admins today, no conflict screen).
 - 2026-09-19 — Claude: user search is a case-insensitive `ILIKE` on email and full name; default sort by email; page sizes from the kit.
-- 2026-09-19 — Claude (screen): Delete of a custom role in use is shown disabled with a tooltip giving the user count, instead of opening a dialog that would only fail; the API check stays for races.
+- 2026-09-19 — The users list has a role filter next to the search, and each role's user count on `/admin/roles` links to it — owner, screen question 1 — finding the Admins among thousands of Students by search alone is not workable, and `role_assignment.last_manager` asks for exactly that.
+- 2026-09-19 — Delete of a custom role in use is shown disabled with a tooltip giving the user count, instead of opening a dialog that would only fail; the API check stays for races — owner, screen question 2.
+- 2026-09-19 — The edit-roles dialog shows each role's translated permissions under its name — owner, screen question 3 — the Admin sees what they grant.
 - 2026-09-19 — Claude (screen): the roles table has no search box (a handful of rows); the users table has search, paging and sorting on the server.
 - 2026-09-19 — Claude (screen): the users page has no primary action (accounts come from sign-up); its only row action is "Edit roles", with the edit icon.
-- 2026-09-19 — Claude (screen): the role and edit-roles dialogs show each permission's translated description, so the Admin sees what a role grants without leaving the dialog.
 
 ## Out of scope
 - History of role and permission changes (audit log) — F-14 (AB#726).

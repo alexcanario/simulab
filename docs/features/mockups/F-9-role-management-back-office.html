@@ -63,6 +63,11 @@
   .toolbar { display: flex; align-items: center; padding: 12px 16px; gap: 12px; border-bottom: 1px solid var(--divider); }
   .search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--divider); border-radius: 10px; padding: 6px 10px; width: 340px; background: var(--surface); color: var(--text-2); }
   .search input { border: 0; background: transparent; color: var(--text); font: inherit; flex: 1; outline: none; }
+  .filter { display: flex; flex-direction: column; font-size: .75rem; color: var(--text-2); gap: 2px; }
+  .filter select { font: inherit; font-size: .875rem; padding: 6px 10px; border: 1px solid var(--divider); border-radius: 10px; background: var(--surface); color: var(--text); min-width: 200px; }
+  .filter select:focus-visible, a.count:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  a.count { color: var(--primary); text-decoration: underline; cursor: pointer; }
+  .dark a.count { color: #9cc8f2; }
   table { width: 100%; border-collapse: collapse; font-size: .875rem; }
   th { text-align: left; font-weight: 600; color: var(--text-2); padding: 10px 16px; border-bottom: 1px solid var(--divider); white-space: nowrap; }
   th.sortable { cursor: pointer; }
@@ -150,6 +155,7 @@
         <option value="users-loading">Users - loading</option>
         <option value="users-ready">Users - ready</option>
         <option value="users-search">Users - search with results</option>
+        <option value="users-by-role">Users - filtered by role (link from the roles page)</option>
         <option value="users-nomatch">Users - search without results</option>
         <option value="users-error">Users - server error</option>
         <option value="user-roles">Edit roles dialog</option>
@@ -228,6 +234,9 @@ const T = {
   "Users.Column.Status": ["Status", "Situação", "Estado"],
   "Users.Column.Roles": ["Roles", "Papéis", "Perfis"],
   "Users.Search.Placeholder": ["Search by email or name", "Pesquisar por e-mail ou nome", "Pesquisar por e-mail ou nome"],
+  "Users.Filter.Role": ["Role", "Papel", "Perfil"],
+  "Users.Filter.AllRoles": ["All roles", "Todos os papéis", "Todos os perfis"],
+  "Roles.UsersLink": ["See the {0} users with the role {1}", "Ver os {0} usuários com o papel {1}", "Ver os {0} utilizadores com o perfil {1}"],
   "Users.NoRoles": ["No roles", "Sem papéis", "Sem perfis"],
   "Users.NoMatch": ["No user matches \"{0}\".", "Nenhum usuário corresponde a \"{0}\".", "Nenhum utilizador corresponde a \"{0}\"."],
   "Users.EditRoles.Action": ["Edit roles", "Editar papéis", "Editar perfis"],
@@ -263,9 +272,9 @@ const I = {
 // Sample data. System role names are resource keys; custom names are data (shown as stored).
 const roles = [
   { key: "Student", system: true, perms: [], users: 1243 },
-  { key: "Curator", system: true, perms: [], users: 4 },
-  { key: "Admin", system: true, perms: ["identity.roles.manage"], users: 2 },
-  { name: "Revisor de conteúdo", system: false, perms: [], users: 3 },
+  { key: "Curator", system: true, perms: [], users: 2 },
+  { key: "Admin", system: true, perms: ["identity.roles.manage"], users: 1 },
+  { name: "Revisor de conteúdo", system: false, perms: [], users: 2 },
   { name: "Suporte", system: false, perms: ["identity.roles.manage"], users: 0 }
 ];
 const roleName = r => r.system ? t("Role.System." + r.key) : r.name;
@@ -316,7 +325,7 @@ function rolesPage(mode, alert) {
         ? `<button class="iconbtn danger" type="button" aria-disabled="true" data-tip="${esc(t("Roles.Delete.InUseTip", r.users))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), n))}">${I.del}</button>`
         : `<button class="iconbtn danger" type="button" data-tip="${esc(t("Common.Delete"))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), n))}">${I.del}</button>`);
       body += `<tr><td>${esc(n)}${r.system ? `<span class="badge">${t("Roles.SystemBadge")}</span>` : ""}</td>
-        <td class="num">${r.perms.length}</td><td class="num">${r.users.toLocaleString(["en", "pt-BR", "pt-PT"][lang])}</td>
+        <td class="num">${r.perms.length}</td><td class="num">${r.users ? `<a class="count" href="#" aria-label="${esc(t("Roles.UsersLink", r.users, n))}">${r.users.toLocaleString(["en", "pt-BR", "pt-PT"][lang])}</a>` : "0"}</td>
         <td class="actions"><button class="iconbtn" type="button" data-tip="${esc(t("Common.Edit"))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Edit"), n))}">${I.edit}</button>${del}</td></tr>`;
     });
     body += `</tbody></table>${footer(roles.length)}`;
@@ -324,13 +333,17 @@ function rolesPage(mode, alert) {
   return header(t("Roles.Title"), t("Common.Add")) + (alert || "") + `<div class="card">${body}</div>`;
 }
 
-function usersPage(mode, query) {
+function usersPage(mode, query, roleIdx) {
   let body;
-  const tb = `<div class="toolbar"><label class="search">${I.search}<input type="search" value="${esc(query || "")}" placeholder="${esc(t("Users.Search.Placeholder"))}" aria-label="${esc(t("Common.Search"))}"></label></div>`;
+  const opts = `<option>${t("Users.Filter.AllRoles")}</option>` + roles.map((r, i) => `<option ${i === roleIdx ? "selected" : ""}>${esc(roleName(r))}</option>`).join("");
+  const tb = `<div class="toolbar"><label class="search">${I.search}<input type="search" value="${esc(query || "")}" placeholder="${esc(t("Users.Search.Placeholder"))}" aria-label="${esc(t("Common.Search"))}"></label>
+    <label class="filter">${t("Users.Filter.Role")}<select>${opts}</select></label></div>`;
   if (mode === "loading") body = tb + loading();
   else if (mode === "error") body = tb + failed();
   else {
-    const list = query ? users.filter(u => (u.email + " " + u.name).toLowerCase().includes(query.toLowerCase())) : users;
+    const list = users
+      .filter(u => !query || (u.email + " " + u.name).toLowerCase().includes(query.toLowerCase()))
+      .filter(u => roleIdx === undefined || u.roles.includes(roleIdx));
     if (!list.length) body = tb + `<div class="state" role="status">${I.search}<span>${esc(t("Users.NoMatch", query))}</span></div>`;
     else {
       body = tb + `<table><thead><tr>
@@ -436,6 +449,7 @@ function render() {
     case "users-loading": h = usersPage("loading"); break;
     case "users-ready": h = usersPage(); break;
     case "users-search": h = usersPage(null, "souza"); break;
+    case "users-by-role": h = usersPage(null, "", 2); break;
     case "users-nomatch": h = usersPage(null, "zeca"); break;
     case "users-error": h = usersPage("error"); break;
     case "user-roles": h = usersPage() + userDialog({ index: 1 }); break;
