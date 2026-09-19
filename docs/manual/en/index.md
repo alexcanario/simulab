@@ -1,7 +1,7 @@
 ---
 page: index
 locale: en
-features: [F-2, F-4, F-5, F-6, F-7, F-8]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9]
 updated: 2026-09-19
 ---
 # Simulab
@@ -36,4 +36,5 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Sign in and sign out](sign-in-and-sign-out.md): sign in, sign out, lockout
 - [Password](password.md): forgot, reset and change your password
 - [My account](my-account.md): display name and preferred language
-- [Roles and permissions](roles.md): what Student, Curator and Admin can do
+- [Roles and permissions](roles.md): what Student, Curator and Admin can do, and how an Admin changes a role
+- [Users](users.md): find an account and change its roles (Admins)
