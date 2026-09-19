@@ -21,3 +21,4 @@
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
 - End every step with: what changed (files), what is next, who acts next.
 - Quote real command output for builds and tests (counts, duration). Never paraphrase a result.
+- Write files (code, tests, docs) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.

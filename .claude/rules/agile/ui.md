@@ -7,7 +7,7 @@ paths:
 ---
 # UI standards
 
-- One behavior everywhere: a pattern is defined once, in the UI kit or the theme, never page by page. If the kit lacks something, extend the kit.
+- One behavior everywhere: a pattern is defined once, in the UI kit or the theme, never page by page. If the kit lacks something, extend the kit. A kit parameter whose right value depends on what the page means (autocomplete, input purpose, a destructive action's wording) has no default: it is required (Blazor `[EditorRequired]`, whose `RZ2012` warning the gate refuses), so a page that forgets it fails the build.
 - Pages use the kit, not raw library components, for data tables, row actions, page header, confirmation dialog, form actions and the empty, loading and error states.
 - Every kit pattern is shown on a dev-only gallery page. Screen mockups use only patterns from the gallery.
 - Every table row has hover; every clickable element has a pointer cursor and a visible focus ring. Never set or remove these on a single page.
@@ -27,4 +27,4 @@ paths:
 - Everything is operable by keyboard, in a logical tab order; click targets are at least 24 px.
 - A declared exception (for example a distraction-free exam or checkout flow) is written in the project rules, and its patterns are also kit components.
 - What the build can check goes into the build: architecture tests forbid raw icon constants and raw table components outside the kit.
-- A screen is done when it uses only kit patterns and was checked in light and dark mode, with one language switch, and by keyboard alone.
+- A screen is done when it uses only kit patterns and was checked in light and dark mode, with one language switch, and by keyboard alone. A colour or contrast bug is checked in both themes and on every surface the component sits on (card, page background, app bar): the ratio is computed from the theme tokens, then measured on screen; a premise such as "dark theme only" is verified, not assumed.

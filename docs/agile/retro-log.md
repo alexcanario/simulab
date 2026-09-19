@@ -277,3 +277,10 @@ Recorded in this log at the owner's request (2026-09-19); no project rule was ad
 ### Plugin notes (`plugin`)
 - ✅ **`[generic]` Write code with the file tools.** Source and test files are written with the Write and Edit tools, never through a script's string literals (a heredoc'd Python or shell string): escapes such as `\b` or `\t` become control characters, and a test can compile and pass without matching anything.
 - ✅ **`[generic]` Contrast is checked everywhere the component sits.** In the `ui` rule: a colour or contrast bug is checked in both themes and against every surface the same component sits on (card, page background, app bar), with the ratio first computed from the theme tokens and then measured on screen; a premise like "dark theme only" is verified, not assumed.
+
+## 2026-09-19 — Sync with agile@canary 0.0.33
+From 0.0.31 to 0.0.33. Approved by the owner.
+- Copied: `.claude/rules/agile/ui.md` (kit parameters whose value depends on the page's meaning are `[EditorRequired]`, from B-5; contrast checked in both themes and on every surface, from B-6), `.claude/rules/agile/workflow.md` (files written with Write/Edit, never through a script's string literals, from B-6), `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` (the same rules and the `/agile:version` section).
+- Merged by hand: nothing. `docs/agile/profile.md` stays edited with no upstream change.
+- Left alone: the six build files and `tests/Directory.Build.props` (no upstream change).
+- `ui.md` now has a build check (`RZ2012`), so the build and the full suite ran: build 0 warnings, 0 errors, 0 `RZ2012`; 433 tests passed, 0 failed; warnings baseline unchanged (0 entries), gate GREEN.
