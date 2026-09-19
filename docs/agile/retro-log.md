@@ -26,6 +26,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Central Package Management's transitive pinning can float a shared package (e.g. `Aspire.Hosting`) to a higher version than a sibling package (`Aspire.Hosting.Testing`) pins, because another package elsewhere in the solution needs the newer one. An obsolete-API investigation must check the resolved version in `obj/project.assets.json`, not the pinned version in `Directory.Packages.props` | B-1 | 0.0.26 (`557c7ff`) |
+| ⏳ | `[generic]` A coverage row maps a criterion to a test that goes through the path the user reaches; a method written for a criterion with no caller in production code is a gap, not coverage | B-3 | — |
+| ⏳ | `[stack: aspire]` The ServiceDefaults template disables retries for unsafe HTTP methods (`Retry.DisableForUnsafeHttpMethods()`): a retried POST replays single-use tokens and sends emails twice | B-3 | — |
+| ⏳ | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -171,3 +174,17 @@ From 0.0.10 to 0.0.25, run with `/agile:sync` on `main` after F-6 shipped.
 - Merged by hand: `docs/agile/profile.md`. The plugin's layout change generalizes what this project did in F-12, so the Simulab text was kept in both conflicts; the architecture test line "Layout" was added (`SolutionLayoutTests` exists); the DocGen sentence was left out until the "Technical docs" feature adopts it.
 - Proposed and declined as not needed: `.editorconfig` differs from the plugin's only in two comments (this file names Simulab and F-12). The other build files did not change upstream.
 - Build: 0 warnings, 0 errors; the full suite was skipped with the owner's OK (no build file changed; `build-config` gained a prose line only).
+
+## 2026-09-19 — B-3 The Web never refreshes the access token nor notices a revoked session
+Approved by the owner the same day, after the ship.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | F-5 counted UC5 (silent refresh) as covered, yet `AuthClient.RefreshAsync` had no caller: the coverage table pointed at a test of the method, not of the path a user reaches. Found only while refining F-7 | Plugin improvement | This log (see below) |
+| 2 | The Aspire ServiceDefaults template's `AddStandardResilienceHandler()` retries POST by default; a retried refresh presents a token the first attempt consumed and ends a live session (found by `/agile:review`). Fixed in this project's `ServiceDefaults` in B-3 | Plugin improvement | This log (see below) |
+| 3 | In Blazor Interactive Server the auth cookie cannot be rewritten from a circuit, so rotating refresh tokens kept in the cookie die on the first in-page refresh. B-3 moved them to a Redis store keyed by an id in the cookie | Plugin improvement | This log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` Coverage goes through the caller.** In the build skill's coverage check: a criterion maps to a test that exercises the path the user reaches (page, endpoint, handler that calls the code); a public method added for a criterion that nothing in production calls is reported as a gap.
+- ⏳ **`[stack: aspire]` No retries for unsafe methods.** The `ServiceDefaults` template calls `http.AddStandardResilienceHandler(options => options.Retry.DisableForUnsafeHttpMethods())`. The per-client alternative, `RemoveAllResilienceHandlers`, is experimental (`EXTEXP0001`).
+- ⏳ **`[stack: blazor-server]` Session state stays on the server.** Tokens and anything else that changes during a session live in a server-side store (Redis, data-protected) keyed by an id the cookie carries; the cookie is checked in `OnValidatePrincipal` and open circuits revalidate with `RevalidatingServerAuthenticationStateProvider`.
