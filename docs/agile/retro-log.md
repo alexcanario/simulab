@@ -22,9 +22,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
 | ✅ | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | 0.0.19 (`c48c34e`) |
 | ✅ | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | 0.0.19 (`c48c34e`) |
-| ⏳ | Technical terms used with the owner go into a glossary section in the same step | F-8 | |
-| ⏳ | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | |
-| ⏳ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | |
+| ✅ | Technical terms used with the owner go into a glossary section in the same step | F-8 | 0.0.28 (`6f1a488`) |
+| ✅ | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | 0.0.29 (`afe7431`) |
+| ✅ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -202,6 +202,6 @@ Approved by the owner the same day, after the ship.
 | 3 | One more test class exhausted the test PostgreSQL's connections (`53300: too many clients`): each disposed host kept its Npgsql pool. Fixed in `IdentityApiFactory` in F-8 | Plugin improvement | This log (see below) |
 
 ### Plugin notes (`plugin`)
-- ⏳ **`[generic]` Explain technical terms to the owner.** The project glossary template gets a `## Technical terms` section (term, owner-language word, meaning), and the output-style rule says a technical term used with the owner for the first time is added there in the same step.
-- ⏳ **`[stack: bunit]` Wait for what an async handler does.** After a click whose handler awaits (an Api call, `Task.Yield`), assert with `WaitForAssertion`: `Click()` returns when the handler first yields, not when it finishes.
-- ⏳ **`[stack: ef-core-npgsql]` Clear the pool of a per-class test host.** A `WebApplicationFactory` with a database per test class clears its Npgsql pool on dispose (`NpgsqlConnection.ClearPool`), or idle pooled connections exhaust the container's `max_connections`.
+- ✅ **`[generic]` Explain technical terms to the owner.** The project glossary template gets a `## Technical terms` section (term, owner-language word, meaning), and the output-style rule says a technical term used with the owner for the first time is added there in the same step.
+- ✅ **`[stack: bunit]` Wait for what an async handler does.** After a click whose handler awaits (an Api call, `Task.Yield`), assert with `WaitForAssertion`: `Click()` returns when the handler first yields, not when it finishes.
+- ✅ **`[stack: ef-core-npgsql]` Clear the pool of a per-class test host.** A `WebApplicationFactory` with a database per test class clears its Npgsql pool on dispose (`NpgsqlConnection.ClearPool`), or idle pooled connections exhaust the container's `max_connections`.
