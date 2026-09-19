@@ -43,6 +43,7 @@
                   ValueChanged="@(value => { _email = value; _emailError = null; })" />
 
     <AppPasswordField Id="sign-up-password"
+                      Autocomplete="PasswordAutocomplete.NewPassword"
                       Label="@I["SignUp.Password.Label"]"
                       Hint="@I["SignUp.Password.Hint"]"
                       ShowLabel="@I["SignUp.Password.Show"]"
@@ -56,6 +57,7 @@
     <AppPasswordStrength Password="@_password" TextFor="StrengthText" />
 
     <AppPasswordField Id="sign-up-confirm"
+                      Autocomplete="PasswordAutocomplete.NewPassword"
                       Label="@I["SignUp.ConfirmPassword.Label"]"
                       ShowLabel="@I["SignUp.Password.Show"]"
                       HideLabel="@I["SignUp.Password.Hide"]"

@@ -101,7 +101,7 @@
         <AppSelectField TValue="string" Id="gallery-select" Label="@L["Layout.LanguageSwitch.Label"]" Required="true"
                         Options="@_selectOptions" Value="@_selectValue" ValueChanged="@(value => _selectValue = value)" />
 
-        <AppPasswordField Id="gallery-password" Label="@I["SignUp.Password.Label"]"
+        <AppPasswordField Id="gallery-password" Autocomplete="PasswordAutocomplete.NewPassword" Label="@I["SignUp.Password.Label"]"
                           ShowLabel="@I["SignUp.Password.Show"]" HideLabel="@I["SignUp.Password.Hide"]"
                           Required="true" Value="@_passwordValue" ValueChanged="@(value => _passwordValue = value)" />
         <AppPasswordStrength Password="@_passwordValue" TextFor="@GalleryStrengthText" />
