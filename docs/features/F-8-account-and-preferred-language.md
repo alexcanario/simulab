@@ -1,7 +1,7 @@
 ---
 feature: F-8
 epic: Foundation and identity
-status: validating
+status: done
 board: 712
 version: 1
 ---
@@ -124,4 +124,10 @@ A signed-in user sees and edits their own profile (display name and preferred la
 8. Keyboard only, on `/account`: Tab through email, display name, language (open with Space or Alt+Down, choose with the arrows), "Change password", Cancel and Save; change the name and save with Enter on Save. → Every element gets a visible focus ring, in that order, and the save works. Repeat step 3 in the light and dark themes.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: feature/F-8 (removed; never pushed)
+- Merge: b4646de (--no-ff, AB#712)
+- Validation: passed by the owner on screen, 2026-09-19
+- Review: agile:reviewer, 0 blockers, 1 major and 7 minors; 6 fixed, 1 accepted, 1 done at ship (manual)
+- Tests: full suite 399 passed, 0 failed; gate ship run 37 s with the build; 0 warnings, baseline empty
+- Manual pages: docs/manual/{pt-BR,pt-PT,en}/my-account.md (new); password.md, getting-around.md, index.md (updated)
+- Captured during build: B-7 (AB#724)
