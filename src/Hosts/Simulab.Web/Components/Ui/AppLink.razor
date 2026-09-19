@@ -1,0 +1,15 @@
+@* One link everywhere (B-6): a real link, underlined, in the text colour of the surface it sits on, so it
+   reaches AA contrast in both themes (the primary blue does not: 3.5:1 on the dark card, 4.2:1 on the
+   light background). Hover and focus come from the kit's shared styles. *@
+<a href="@Href" class="app-link @Class" @attributes="Attributes">@ChildContent</a>
+
+@code {
+    [Parameter, EditorRequired] public string Href { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Layout classes only (spacing, display); the colour and underline are the kit's.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

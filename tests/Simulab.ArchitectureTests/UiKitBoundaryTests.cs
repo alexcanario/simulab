@@ -90,4 +90,29 @@ public class UiKitBoundaryTests
             root.Delete(recursive: true);
         }
     }
+
+    /// <summary>
+    /// B-6: a library link is the primary blue, under AA contrast on the dark card and on the light background.
+    /// Pages use the kit's AppLink; only app-bar links, whose colour comes from the bar, keep MudLink with Color.Inherit.
+    /// </summary>
+    internal static IReadOnlyList<string> FindRawLinks(string webRoot)
+    {
+        var kit = Path.Combine(webRoot, "Components", "Ui") + Path.DirectorySeparatorChar;
+        return [.. Directory.EnumerateFiles(webRoot, "*.razor", SearchOption.AllDirectories)
+            .Where(path => !path.StartsWith(kit, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(path => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(path), @"<MudLink\b[^>]*>")
+                .Where(match => !match.Value.Contains("Color=\"Color.Inherit\"", StringComparison.Ordinal))
+                .Select(match => $"{Path.GetRelativePath(webRoot, path)}: {match.Value}"))];
+    }
+
+    [Fact]
+    public void Razor_OutsideKit_UsesAppLinkNotALibraryLink()
+    {
+        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Hosts", "Simulab.Web");
+
+        // Rule of presence: the app-bar exception exists, so the scan sees links at all.
+        Directory.EnumerateFiles(webRoot, "*.razor", SearchOption.AllDirectories)
+            .Should().Contain(path => File.ReadAllText(path).Contains("<MudLink", StringComparison.Ordinal), "the rule must match at least one link");
+        FindRawLinks(webRoot).Should().BeEmpty("a page link is AppLink, underlined in the text colour (AA in both themes)");
+    }
 }

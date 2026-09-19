@@ -102,3 +102,6 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | validation script | roteiro de validação | At most 8 steps the owner follows on screen before the merge. |
 | gate | gate (portão) | An automatic check that must pass before the work goes on: build, tests, no new warnings. |
 | warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |
+| WCAG 2.2 AA | WCAG 2.2 AA | The accessibility level the app targets (ADR-0001 #29); among other things, text needs a contrast of at least 4.5:1 with its background (3:1 for large text). |
+| contrast ratio | contraste | How far apart a text colour and its background are in brightness, from 1:1 (same colour) to 21:1 (black on white). |
+| UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |

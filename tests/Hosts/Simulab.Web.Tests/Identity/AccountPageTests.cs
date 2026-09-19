@@ -59,6 +59,7 @@ public sealed class AccountPageTests : IdentityPageTestContext
         page.Find("#account-full-name").GetAttribute("value").Should().Be("Ana");
         page.Markup.Should().Contain("English");
         page.Find("a.app-account-password").GetAttribute("href").Should().Be("/account/password");
+        page.Find("a.app-account-password").ClassList.Should().Contain("app-link", "B-6: a kit link, AA in both themes");
     }
 
     [Fact]
