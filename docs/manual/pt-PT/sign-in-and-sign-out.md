@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-PT
-features: [F-5]
-updated: 2026-09-18
+features: [F-5, B-3]
+updated: 2026-09-19
 ---
 # Iniciar e terminar sessão
 
@@ -37,8 +37,12 @@ Abrir **Iniciar sessão** enquanto já tem sessão iniciada leva-o diretamente �
 | E-mail ou palavra-passe incorretos. | O e-mail ou a palavra-passe não correspondem a uma conta ativa | Verifique ambos e tente novamente; esta mensagem nunca indica qual dos dois está errado |
 | Confirme o seu e-mail antes de iniciar sessão. | A sua conta ainda está pendente, desde o registo | Selecione **Reenviar o e-mail de verificação** na mesma página e depois verifique a sua caixa de correio |
 | Demasiadas tentativas. Tente novamente dentro de {0}. | Cinco palavras-passe erradas seguidas bloquearam a conta durante 15 minutos | Aguarde o tempo indicado antes de tentar novamente |
+| A sua sessão terminou. Inicie sessão novamente. | A sua sessão foi terminada noutro sítio — por exemplo, terminou a sessão noutro separador — e esta página voltou ao início de sessão | Inicie sessão novamente |
 
 Se iniciar sessão num dispositivo enquanto já tem sessão iniciada noutro, ambas as sessões continuam a funcionar: não há limite de quantos dispositivos podem ter sessão iniciada ao mesmo tempo.
+
+## Durante quanto tempo a sessão se mantém
+A sessão mantém-se durante até 30 dias em cada dispositivo, mesmo que deixe uma página aberta durante horas ou que a aplicação seja reiniciada; não precisa de iniciar sessão novamente nesse período. Quando a sua sessão é terminada noutro sítio, uma página aberta dá por isso no espaço de um minuto e leva-o para **Iniciar sessão** com a mensagem *A sua sessão terminou. Inicie sessão novamente.* Uma função ou permissão nova aparece no seu menu da próxima vez que abrir uma página, sem iniciar sessão novamente.
 
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
