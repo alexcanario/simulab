@@ -1,7 +1,7 @@
 ---
 feature: F-10
 epic: Foundation and identity
-status: building
+status: validating
 board: 714
 version: 1
 ---
@@ -96,6 +96,13 @@ A signed-in user can end their relationship with Simulab on their own: the perso
 - 2026-09-19 — The Web reuses `/account/sign-out` with a new `reason`, instead of a new endpoint — the cookie and the stored Web session are already cleared there, and a Blazor circuit cannot clear a cookie (F-8).
 - 2026-09-19 — Found and to fix here: the comment in `UserDirectory` claiming that soft delete frees the address is wrong; it is corrected by BR4 and by the comment itself.
 - 2026-09-20 — Approved by the owner.
+- 2026-09-20 (build) — BR11 refined: the erasure is refused only when there was an active manager **before** it and none is left after. As first written it also refused an ordinary account in a system with no manager at all (a fresh database), which blocked every erasure. AC9 is unchanged.
+- 2026-09-20 (build) — The erasure runs inside `IRoleAdministrationStore.RunExclusiveAsync`, reusing F-9's advisory lock instead of taking a second one — the last-manager count has to see role changes and erasures in one order, and both now take the same lock.
+- 2026-09-20 (build) — The consent records lose their IP through one `ExecuteUpdateAsync` in the store, not through a domain method: the record is written once everywhere else and has no other reason to be loaded. `IpAddress` stays `init`-only.
+- 2026-09-20 (build) — A refresh token of an erased account is refused by OpenIddict with `invalid_grant`, not by our own `identity.refresh_token_invalid`: BR8 deletes the stored protocol token, so the grant fails before the module's session check. Asserted as such in AC7's test.
+- 2026-09-20 (build) — The Web gets its own `AccountErasureResult` instead of reusing `PasswordChangeResult`: the two answers have the same shape but one name each, so neither lies about its call.
+- 2026-09-20 (build) — Found on screen and fixed here: the dark palette had kept the light error red, so every error text on a dark card read at 2.93:1, and the light `ErrorContrastText` read at 1.92:1 on a filled destructive button — both below WCAG AA (ADR-0001 #29). Dark `Error` is now `#E06C6C` with `#19243E` ink (5.05:1 and 4.79:1), light keeps its red with white ink (5.54:1), and `ThemeContrastTests` holds the numbers. Captured, not fixed: the success and warning contrast texts have the same flaw, invisible today because no filled success or warning button exists.
+- 2026-09-20 (build) — App host check: the whole path was exercised on the running app (wrong password reaching the Api and raising the failure count, erasure anonymizing the row to the tombstone, consent kept with a null IP, farewell email in Mailpit carrying the app host's sign-up URL, and the same address signing up again).
 
 ## Out of scope
 - An admin erasing someone else's account.
@@ -120,8 +127,18 @@ A signed-in user can end their relationship with Simulab on their own: the perso
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+1. Close any IDE build and start the app host. Git Bash and PowerShell 7 take the same command; it prints the dashboard address and keeps running.
+   ```
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   → The Aspire dashboard answers and the Web is at https://localhost:7125.
+2. Create an account at `/sign-up` with an address you do not use elsewhere, open Mailpit from the dashboard, click the verification link and sign in. → You are signed in.
+3. Open the user menu and click "My account", then look at the bottom of the page. → Below the profile card there is a red-bordered "Erase my account" section saying what is erased, what is kept and that the address becomes free.
+4. Click "Erase my account". → A dialog asks for your current password; its "Erase my account" button is disabled while the field is empty.
+5. Type a wrong password and confirm. → The dialog stays open with "The current password is not correct." under the field. Cancel the dialog. → Nothing was erased; you are still signed in.
+6. Switch to the dark theme (the header switch) and reopen the dialog; then switch the language to Português (Brasil) and reopen it again. → The section and the dialog are readable in both themes, and every text is in the chosen language.
+7. Open the dialog, type the right password and confirm. → You land on the sign-in page, signed out, with "Sua conta foi apagada..." (in the language you chose). Trying to sign in with that address and password fails.
+8. Keyboard only, from `/account`: Tab to "Erase my account" and press Enter, Tab to the password field, type the password, then Tab to "Erase my account" in the dialog and press Enter (or press Enter in the password field). → Every element gets a visible focus ring and the erasure works from the keyboard. Then in Mailpit, open the last message to the erased address, and finally sign up again with that same address. → The farewell email is in your language and points at sign-up; the new sign-up is accepted.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
