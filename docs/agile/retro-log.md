@@ -40,6 +40,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` A coverage row maps a criterion to a test that goes through the path the user reaches; a method written for a criterion with no caller in production code is a gap, not coverage | B-3 | 0.0.27 (`641d463`) |
 | ✅ | `[stack: aspire]` The ServiceDefaults template disables retries for unsafe HTTP methods (`Retry.DisableForUnsafeHttpMethods()`): a retried POST replays single-use tokens and sends emails twice | B-3 | 0.0.27 (`641d463`) |
 | ✅ | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | 0.0.27 (`641d463`) |
+| ⏳ | `[stack: blazor]` A Razor attribute mistake compiles: a string parameter without `@` is literal text, and a wrong generic parameter name only fails at runtime. Every new page gets a bUnit test that renders it | F-9 | — |
+| ⏳ | `[generic]` A premise taken from an earlier item's file is verified against the code and against the items that touched it since; a bug can have moved the behaviour | F-9 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -284,3 +286,16 @@ From 0.0.31 to 0.0.33. Approved by the owner.
 - Merged by hand: nothing. `docs/agile/profile.md` stays edited with no upstream change.
 - Left alone: the six build files and `tests/Directory.Build.props` (no upstream change).
 - `ui.md` now has a build check (`RZ2012`), so the build and the full suite ran: build 0 warnings, 0 errors, 0 `RZ2012`; 433 tests passed, 0 failed; warnings baseline unchanged (0 entries), gate GREEN.
+
+## 2026-09-19 — F-9 Role management back office
+Recorded in this log at the owner's request (2026-09-19); no project rule and no `CLAUDE.md` line were added.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | Two bugs reached the tests because Razor compiles them: `Value="_name"` on a string parameter is the literal text `_name` (the `@` was missing), and the kit's generic parameter is `TValue`, not `T` — the wrong name only fails when the component renders. Both pages and both dialogs were covered by bUnit tests, which is why they were caught before validation | Plugin improvement | This log (see below); the one-line project rule was offered and not added |
+| 2 | BR9 promised "the menu follows within 15 minutes", taken from F-6's file. B-3 had already changed it: the Web re-reads the permissions on every page load. The premise came from an earlier item's file, not from today's code, and would have told the Admin something untrue on screen | Plugin improvement | This log (see below) |
+| 3 | The independent review (`/agile:review`) found the users list keeping its current page when the role filter changed — a bug no test covered | Nothing | The rule that triggers a review on an authorization change already exists; this was it working |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[stack: blazor]` A Razor attribute mistake compiles.** On a component parameter, a string attribute written without `@` is literal text (`Value="_name"` sets the two words), and a generic type parameter under the wrong name (`T` instead of the component's `TValue`) fails only when the component renders. Neither is a build error, so every new page and dialog gets a bUnit test that renders it with its real parameters.
+- ⏳ **`[generic]` A premise about another item is checked against today's code.** When refinement states how something already behaves, quoting the file of an earlier item is not enough: a later bug or feature may have moved it (F-9 inherited "within 15 minutes" from F-6 after B-3 had made it "at the next page load"). Verify it in the code, and look at the items that touched that code since.
