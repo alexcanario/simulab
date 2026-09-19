@@ -1,7 +1,7 @@
 ---
 bug: B-6
 feature: F-4
-status: refining
+status: approved
 board: 722
 severity: medium
 ---
