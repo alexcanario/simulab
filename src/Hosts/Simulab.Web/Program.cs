@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Simulab.Identity.Contracts;
 using Simulab.Web.Components;
@@ -24,6 +25,14 @@ builder.Services.AddScoped<SignUpFlow>();
 // carries the access and refresh tokens (never the browser, never JavaScript - see WebAuthClaims).
 builder.Services.AddHttpClient<AuthClient>(client => client.BaseAddress = new Uri("https+http://api"));
 builder.Services.AddSingleton<SignInTicketStore>();
+
+// B-3: the tokens live on the server, one entry per signed-in browser; the cookie only points at it.
+// Through the Aspire client integration (project rule): it trusts the local Redis container's TLS certificate.
+builder.AddRedisClient("redis");
+builder.Services.AddSingleton<IWebSessionStore, RedisWebSessionStore>();
+builder.Services.AddSingleton<SessionRefreshGate>();
+builder.Services.AddScoped<WebSessionTokenAccessor>();
+builder.Services.AddScoped<AuthenticationStateProvider, SessionRevalidatingStateProvider>();
 builder.Services.AddOptions<OpenIddictClientOptions>().Bind(builder.Configuration.GetSection(OpenIddictClientOptions.SectionName));
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -35,6 +44,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TokenLifetimes.RefreshToken;
         options.SlidingExpiration = false;
         options.LoginPath = "/sign-in";
+        options.Events = new SessionCookieEvents();
     });
 // F-6, BR5-BR7: a policy per permission claim. UI comfort only - the Api still enforces every call.
 builder.Services.AddAuthorization(options =>

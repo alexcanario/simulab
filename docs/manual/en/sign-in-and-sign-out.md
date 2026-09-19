@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: en
-features: [F-5]
-updated: 2026-09-18
+features: [F-5, B-3]
+updated: 2026-09-19
 ---
 # Sign in and sign out
 
@@ -37,8 +37,12 @@ Opening **Sign in** while you are already signed in takes you straight to the ho
 | Incorrect email or password. | The email or the password does not match an active account | Check both and try again; this message never says which one is wrong |
 | Confirm your email before signing in. | Your account is still pending, from sign-up | Select **Resend the verification email** on the same page, then check your inbox |
 | Too many attempts. Try again in {0}. | Five wrong passwords in a row locked the account for 15 minutes | Wait for the time shown before trying again |
+| Your session ended. Sign in again. | Your session was ended somewhere else — for example you signed out in another tab — so this page took you back to sign in | Sign in again |
 
 If you sign in on one device while already signed in on another, both sessions keep working: there is no limit on how many devices can be signed in at once.
+
+## How long you stay signed in
+You stay signed in for up to 30 days on each device, even if you leave a page open for hours or the app restarts; you do not need to sign in again in the meantime. When your session ends somewhere else, an open page notices within a minute and takes you to **Sign in** with the message *Your session ended. Sign in again.* A new role or permission appears in your menu the next time you open a page, without signing in again.
 
 ## Related pages
 - [Create an account](create-account.md)

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -27,8 +28,10 @@ public static class Extensions
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            // Turn on resilience by default
-            http.AddStandardResilienceHandler();
+            // Turn on resilience by default. Never retry POST, PUT, PATCH or DELETE (B-3): a retried call is
+            // not the same call - a retried refresh presents a token the first attempt already consumed
+            // (F-5 BR5), and a retried sign-up or email sends twice.
+            http.AddStandardResilienceHandler(options => options.Retry.DisableForUnsafeHttpMethods());
 
             // Turn on service discovery by default
             http.AddServiceDiscovery();

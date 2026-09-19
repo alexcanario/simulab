@@ -2,6 +2,7 @@
 @attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
 @layout MainLayout
 @inject IdentityApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
 @inject IStringLocalizer<SharedResources> L
 
 <AppPageHeader Title="@L["Roles.Title"]" />
@@ -41,7 +42,8 @@ else
         StateHasChanged();
 
         var user = AuthenticationState is null ? null : (await AuthenticationState).User;
-        var accessToken = user?.FindFirst(Simulab.Web.Services.Auth.WebAuthClaims.AccessToken)?.Value;
+        // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+        var accessToken = user is null ? null : await Tokens.GetAccessTokenAsync(user);
 
         var result = accessToken is null ? null : await Api.GetRoleNamesAsync(accessToken);
 

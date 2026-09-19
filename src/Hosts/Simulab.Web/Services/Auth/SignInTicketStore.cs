@@ -11,6 +11,7 @@ public sealed record SignInTicket(
     string SessionJti,
     string AccessToken,
     string RefreshToken,
+    TimeSpan AccessTokenLifetime,
     IReadOnlyList<string> Permissions);
 
 /// <summary>
