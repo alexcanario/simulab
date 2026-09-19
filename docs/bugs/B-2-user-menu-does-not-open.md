@@ -2,7 +2,7 @@
 bug: B-2
 feature: F-5
 status: done
-board: -
+board: 725
 severity: high
 ---
 # The app bar's account menu does not open
