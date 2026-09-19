@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.29 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.31 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -105,8 +105,8 @@ stateDiagram-v2
 | `idea` | Captured from the chat with `/agile:idea`. Title and 2-3 lines. | Claude |
 | `refining` | `/agile:refine`: Claude reads the related code, then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Only one feature can be here. | Claude |
-| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. **Gate 2.** | You |
+| `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. Only one feature can be here. | Claude |
+| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, merge after your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 
 Small fixes found during validation are done right away, without leaving `validating`.
@@ -181,7 +181,8 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests. |
 
 Details:
-- **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
+- **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
+- **The verdict is the last line.** Every report ends with `agile gate GREEN` or `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build). Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
 - **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
@@ -323,7 +324,7 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 **Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
 
-**Stack lessons.** A lesson from a real item that depends on the stack goes to the rule scoped to those files or to the profiles it concerns, never to an always-loaded rule. Examples from the first app: `api-contracts` says a custom middleware resolves an optional dependency inside the branch that needs it (an `InvokeAsync` parameter is resolved on every request) and that a client asks the API for the user's claims instead of decoding its access token (it may be encrypted); `build-config` says a version-dependent investigation reads the version resolved in `obj/project.assets.json`, not the pinned one; the profiles with an Aspire AppHost say code reaches Redis, PostgreSQL or a broker through the Aspire client integration, because local resources run with TLS by default, and that the generated `ServiceDefaults` turns off retries for POST (a retried POST replays single-use tokens); the profiles with a Blazor UI say that, with Interactive Server, state that changes during a session lives in a server-side store keyed by an id in the cookie, because a circuit cannot rewrite the cookie; and the test strategy of the profiles says a bUnit test waits for what an async click handler does (`WaitForAssertion`), and a test host created per test class clears its Npgsql pool on dispose, or the test database runs out of connections.
+**Stack lessons.** A lesson from a real item that depends on the stack goes to the rule scoped to those files or to the profiles it concerns, never to an always-loaded rule. Examples from the first app: `api-contracts` says a custom middleware resolves an optional dependency inside the branch that needs it (an `InvokeAsync` parameter is resolved on every request) and that a client asks the API for the user's claims instead of decoding its access token (it may be encrypted); `build-config` says a version-dependent investigation reads the version resolved in `obj/project.assets.json`, not the pinned one; the profiles with an Aspire AppHost say code reaches Redis, PostgreSQL or a broker through the Aspire client integration, because local resources run with TLS by default, and that the generated `ServiceDefaults` turns off retries for POST (a retried POST replays single-use tokens); the profiles with a Blazor UI say that, with Interactive Server, state that changes during a session lives in a server-side store keyed by an id in the cookie, because a circuit cannot rewrite the cookie; and the test strategy of the profiles says a bUnit test waits for what an async click handler does (`WaitForAssertion`), and a test host created per test class clears its Npgsql pool on dispose, or the test database runs out of connections; and, with Interactive Server, data from the first request that a circuit needs (the visitor's address, a header) is read in `App` and passed to the interactive root, because a circuit has no `HttpContext`. `api-contracts` also says an anonymous endpoint that must give the same answer on every path runs every input check before the lookup that tells the paths apart.
 
 **One behavior on every screen.** The `ui` rule keeps screens from drifting apart: a pattern is defined once, in a UI kit shown on a dev-only gallery page, and pages use the kit instead of raw library components. One icon family behind semantic names (`AppIcons.Edit`), one way to edit an item (row actions in the last column; dialog for simple entities, own page for complex ones; a name link only opens a read-only detail page), the same hover and focus everywhere, one confirmation dialog for destructive actions, the same feedback, list states, form layout and action vocabulary. Architecture tests forbid raw icons and raw tables outside the kit, and the kit comes before the first screen. The project records its choices (icon family, declared exceptions) in its own rules.
 
@@ -550,6 +551,15 @@ Validation script (F-3):
 Status: validating.
 ```
 
+When a step needs a terminal (a limit, an endpoint with no screen yet), it comes for both shells, already run by Claude:
+
+```
+4. Six sign-up attempts in a row from the same address: the 6th is refused.
+   Git Bash:     for i in 1 2 3 4 5 6; do curl -sk -o /dev/null -w "%{http_code}\n" -X POST https://localhost:7101/api/v1/auth/sign-up -H "Content-Type: application/json" -d '{}'; done
+   PowerShell 7: 1..6 | % { (Invoke-WebRequest -Method Post https://localhost:7101/api/v1/auth/sign-up -ContentType application/json -Body '{}' -SkipCertificateCheck -SkipHttpErrorCheck).StatusCode }
+   Expected: 400 five times, then 429. To repeat: wait one minute.
+```
+
 **Validation** (**Gate 2**):
 
 ```
@@ -773,6 +783,18 @@ bringing it up to date before its next test run.
 
 ### 14.10 Updating the plugin and the project
 
+A lesson for the plugin starts in a project's retro: it becomes a ⏳ row under "Plugin notes — status" in `docs/agile/retro-log.md`. From the plugin's session:
+
+```
+> vamos ajustar o plugin com as recomendações em retro-log.md
+Claude: 2 open notes (F-8). Done in 0.0.29: bUnit waits (4 profiles), Npgsql pool (5 profiles),
+manuals en/pt-BR. Rows marked ✅ in retro-log.md (not committed).
+1. Push the plugin?  2. Update the installed plugin?  3. Commit in the project?
+> pode fazer o push, atualizar o plugin e o commit no simulab
+```
+
+Each of the three is asked for separately, and so is the project's push. The project gets the new files only through `/agile:sync`, between features.
+
 The plugin moved from 0.0.10 to 0.0.13. First the plugin itself (terminal, then a new session):
 
 ```
@@ -807,6 +829,16 @@ From 0.0.23 the template carries the final `.editorconfig`. In a project that st
 the build output is locked by a running process (ExamPrep.Web (18344)): stop the app host, preview or
 debugger started from this folder, then build again.
 Claude: My app host was still running. Stopped it; building again... green.
+```
+
+**A new warning at ship.** The list and the verdict come last, so they survive any view of the output:
+
+```
+new warnings (fix them, or accept with `node gate.js baseline` after the owner agrees):
+src/ExamPrep.Web/Pages/Results.razor.cs|RS0030 (0 -> 1)
+  src/ExamPrep.Web/Pages/Results.razor.cs(42,19): RS0030 The symbol 'DateTime.Now' is banned in this project: ...
+agile gate RED: 1 new warning(s): RS0030 in src/ExamPrep.Web/Pages/Results.razor.cs
+Claude: Replaced DateTime.Now with the injected TimeProvider; ship again... agile gate GREEN.
 ```
 
 **A test hangs.** Instead of blocking the turn for minutes:
@@ -1016,7 +1048,7 @@ flowchart TD
 flowchart TD
     A["status: validating and you said 'validado'?"] -->|no| A1(["Ask"])
     A -->|yes| B["Branch up to date with main; worktree: close IDE and app host"]
-    B --> C["gate.js ship: full rebuild, full suite, architecture tests"]
+    B --> C["gate.js ship: full rebuild, full suite, architecture tests;<br/>output saved whole, last line GREEN or RED: what failed"]
     C -->|red| C1["Fix on the branch"]
     C1 --> C
     C -->|green| D["App manual in pt-BR, pt-PT, en; technical docs regenerated; infra.md; baseline"]

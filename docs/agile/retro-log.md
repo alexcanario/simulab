@@ -25,11 +25,11 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Technical terms used with the owner go into a glossary section in the same step | F-8 | 0.0.28 (`6f1a488`) |
 | ✅ | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | 0.0.29 (`afe7431`) |
 | ✅ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
-| ⏳ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | |
-| ⏳ | Anonymous endpoints check every input limit before the account lookup | B-7 | |
-| ⏳ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | |
-| ⏳ | Never change state in an app host Claude did not start | B-4 | |
-| ⏳ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | |
+| ✅ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
+| ✅ | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
+| ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
+| ✅ | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
+| ✅ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -221,8 +221,8 @@ Approved by the owner the same day, after the ship.
 | 3 | The 500 also told whether an account existed (registered address 202, new one 500), breaking the same-answer rule of anonymous endpoints | Project rule + plugin improvement | `.claude/rules/agile/project.md`, "Access and entitlements"; this log (see below) |
 
 ### Plugin notes (`plugin`)
-- ⏳ **`[generic]` Keep the gate's failure visible.** The build and ship skills say to save the gate's whole output to a file and quote from it; `gate.js` repeats the new warnings (code, file, line) in its last lines, so a truncated view still shows them.
-- ⏳ **`[generic]` Same answer means same checks first.** In the API contract rules: on an anonymous endpoint, every input check (format, length, column width) runs before the lookup that tells the paths apart; an unhandled error on one path (a 500) is an answer too.
+- ✅ **`[generic]` Keep the gate's failure visible.** The build and ship skills say to save the gate's whole output to a file and quote from it; `gate.js` repeats the new warnings (code, file, line) in its last lines, so a truncated view still shows them.
+- ✅ **`[generic]` Same answer means same checks first.** In the API contract rules: on an anonymous endpoint, every input check (format, length, column width) runs before the lookup that tells the paths apart; an unhandled error on one path (a 500) is an answer too.
 
 ## 2026-09-19 — B-4 Per-client limits are shared by the whole site
 Approved by the owner the same day, after the ship. The owner said another session updates the plugin with these notes.
@@ -234,9 +234,9 @@ Approved by the owner the same day, after the ship. The owner said another sessi
 | 3 | A Blazor Server circuit has no HTTP request of its own: the visitor's address had to be read at the first request and carried into the circuit | Plugin improvement | This log (see below) |
 
 ### Plugin notes (`plugin`)
-- ⏳ **`[generic]` Terminal steps for both shells.** The build skill's validation script: a step that needs a terminal gives the command for Git Bash and for PowerShell 7 (on Windows), run by Claude before handing over, with the expected output and how to repeat it.
-- ⏳ **`[generic]` Hands off the owner's running app.** Claude never changes state (sign-ups, counted requests, data) in an app host it did not start; it asks first, or uses data no one else uses and says which.
-- ⏳ **`[stack: blazor-server]` Request data reaches the circuit through the root.** Data from the first HTTP request that a circuit needs later (visitor address, a header) is read in `App` (static render, `HttpContext` available), passed to the interactive root component as a parameter (the framework protects it in the page) and kept in a scoped service; a circuit has no `HttpContext`.
+- ✅ **`[generic]` Terminal steps for both shells.** The build skill's validation script: a step that needs a terminal gives the command for Git Bash and for PowerShell 7 (on Windows), run by Claude before handing over, with the expected output and how to repeat it.
+- ✅ **`[generic]` Hands off the owner's running app.** Claude never changes state (sign-ups, counted requests, data) in an app host it did not start; it asks first, or uses data no one else uses and says which.
+- ✅ **`[stack: blazor-server]` Request data reaches the circuit through the root.** Data from the first HTTP request that a circuit needs later (visitor address, a header) is read in `App` (static render, `HttpContext` available), passed to the interactive root component as a parameter (the framework protects it in the page) and kept in a scoped service; a circuit has no `HttpContext`.
 
 ## 2026-09-19 — Sync with agile@canary 0.0.29
 From 0.0.25 to 0.0.29, run with `/agile:sync` on `main` after B-7 shipped.
@@ -244,3 +244,11 @@ From 0.0.25 to 0.0.29, run with `/agile:sync` on `main` after B-7 shipped.
 - Merged by hand: `docs/agile/profile.md`. One conflict, Simulab text kept (F-12 note, build files line); added the Aspire client integration, `ServiceDefaults` without retries for unsafe methods, session state on the server with Interactive Server, the Npgsql pool of a per-class test host and bUnit `WaitForAssertion`. The DocGen sentence stays out until the "Technical docs" feature.
 - Proposed and applied: four rows in `docs/glossary.md` "Technical terms" from the plugin template (coverage gap, validation script, gate, warnings baseline); the glossary line of `CLAUDE.md` names the technical terms.
 - Build files did not change upstream. Build: 0 warnings, 0 errors; the full suite was skipped with the owner's OK (the rules gained prose lines only).
+
+## 2026-09-19 — Sync with agile@canary 0.0.31
+From 0.0.29 to 0.0.31. Approved by the owner.
+- Copied: `.claude/rules/agile/api-contracts.md` (anonymous endpoints run every input check before the lookup, from B-7), `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` (gate verdict on the last line and whole output saved, from B-7; terminal steps for Git Bash and PowerShell 7 and hands off the owner's app host, from B-4).
+- Merged by hand (`git merge-file`, no conflict): `docs/agile/profile.md` gained the Blazor Interactive Server line on request data reaching the circuit through the root component (from B-4); the Simulab sections are kept.
+- Left alone: the six build files (no upstream change).
+- Noted, not changed: the anonymous-endpoint rule now lives in `api-contracts.md` and also in `project.md` (B-7); a later retro may drop the project copy.
+- No build file or build-checked rule changed, so the suite was not rerun.
