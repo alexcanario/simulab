@@ -1,7 +1,7 @@
 ---
 feature: F-9
 epic: Foundation and identity
-status: validating
+status: done
 board: 713
 version: 3
 ---
@@ -270,8 +270,7 @@ Validated on screen by the owner on 2026-09-19: every step passed.
 | AC19 | `ResourceParityTests` (Web, all cases), `RoleResourcesTests` |
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-9>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-9` (merged and deleted)
+- Merge: `db7a88c` (`--no-ff` into `main`, AB#713)
+- Tests: 488, 27 s (full suite, architecture tests included); full build 14 s, 0 warnings, baseline still empty
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/roles.md` (rewritten) and `users.md` (new), linked from each locale's `index.md`; `docs/infra.md` now keeps the database step for the first Admin only
