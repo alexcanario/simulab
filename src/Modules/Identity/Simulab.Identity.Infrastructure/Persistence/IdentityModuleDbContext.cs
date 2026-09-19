@@ -27,6 +27,8 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
 
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
 
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+
     /// <summary>Required by the Identity user store. Claims, external logins and tokens arrive with F-5, F-6 and F-11.</summary>
     public DbSet<IdentityUserClaim<Guid>> UserClaims => Set<IdentityUserClaim<Guid>>();
 
@@ -53,6 +55,7 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new ConsentRecordConfiguration());
         modelBuilder.ApplyConfiguration(new EmailVerificationTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new PasswordResetTokenConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserClaimConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserLoginConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserTokenConfiguration());

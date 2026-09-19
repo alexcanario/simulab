@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
+using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
@@ -61,7 +62,10 @@ public static class IdentityModule
             })
             .AddRoles<Role>()
             .AddUserStore<UserStore<User, Role, IdentityModuleDbContext, Guid>>()
-            .AddRoleStore<RoleStore<Role, IdentityModuleDbContext, Guid>>();
+            .AddRoleStore<RoleStore<Role, IdentityModuleDbContext, Guid>>()
+            // F-7: ResetPasswordAsync asks for Identity's own reset token. Our emailed token is the real proof;
+            // this provider only issues the key that API needs, in the same call (ResetPasswordHandler).
+            .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
         // BR3: the 10s cache mirrors Simulae's pattern - a revoked permission takes effect almost
         // immediately without the Api ever trusting a token claim. It reads the same TimeProvider as the
@@ -74,6 +78,8 @@ public static class IdentityModule
         services.AddScoped<IConsentRecordStore, ConsentRecordStore>();
         services.AddScoped<IUserDirectory, UserDirectory>();
         services.AddScoped<IVerificationMailer, VerificationMailer>();
+        services.AddScoped<IPasswordResetTokenStore, PasswordResetTokenStore>();
+        services.AddScoped<IPasswordMailer, PasswordMailer>();
         services.AddSingleton<ILegalDocumentProvider, LegalDocumentProvider>();
 
         // The verification email is written from this module's own resources.
@@ -82,9 +88,14 @@ public static class IdentityModule
         services.AddScoped<RegisterUserHandler>();
         services.AddScoped<VerifyEmailHandler>();
         services.AddScoped<ResendVerificationHandler>();
+        services.AddScoped<RequestPasswordResetHandler>();
+        services.AddScoped<CheckPasswordResetTokenHandler>();
+        services.AddScoped<ResetPasswordHandler>();
+        services.AddScoped<ChangePasswordHandler>();
 
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));
+        services.AddOptions<PasswordEmailOptions>().Bind(configuration.GetSection(PasswordEmailOptions.SectionName));
 
         // Refresh-token sessions and the access-token revocation set (F-5, BR4-BR7).
         services.AddScoped<IRefreshSessionStore, RedisRefreshSessionStore>();

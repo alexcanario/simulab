@@ -282,6 +282,40 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     max-width: 760px;
 }
 
+/* Plain links on the sign-in pages look like links: underlined, in the text colour, which keeps AA contrast
+   in both themes (the primary blue is 3.5:1 on the dark card). Found on screen in F-7: "Forgot your
+   password?" and "Create an account" read as plain text. */
+.app-auth-card p a,
+.app-auth-footer-line a {
+    color: var(--mud-palette-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Text for screen readers only (a live region the page announces without showing it twice). */
+.app-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.app-sign-in-forgot {
+    margin: -4px 0 16px;
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.app-auth-footer-line {
+    margin-top: 16px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
 .app-auth-footer {
     display: flex;
     gap: 16px;

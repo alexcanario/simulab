@@ -1,7 +1,7 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-PT
-features: [F-5, B-3]
+features: [F-5, B-3, F-7]
 updated: 2026-09-19
 ---
 # Iniciar e terminar sessão
@@ -47,3 +47,4 @@ A sessão mantém-se durante até 30 dias em cada dispositivo, mesmo que deixe u
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
 - [Como navegar](getting-around.md)
+- [Palavra-passe](password.md): esqueci-me, redefinir e alterar

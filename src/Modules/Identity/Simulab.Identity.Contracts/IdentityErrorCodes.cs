@@ -25,4 +25,14 @@ public static class IdentityErrorCodes
     public const string RefreshTokenInvalid = "identity.refresh_token_invalid";
     public const string TokenRevoked = "identity.token_revoked";
     public const string Forbidden = "identity.forbidden";
+
+    public const string PasswordResetInvalid = "password_reset.invalid";
+    public const string PasswordResetExpired = "password_reset.expired";
+    public const string PasswordResetRateLimited = "password_reset.rate_limited";
+    public const string PasswordResetTooWeak = "password_reset.password_too_weak";
+    public const string PasswordResetSameAsCurrent = "password_reset.same_as_current";
+
+    public const string PasswordChangeCurrentInvalid = "password_change.current_password_invalid";
+    public const string PasswordChangeTooWeak = "password_change.password_too_weak";
+    public const string PasswordChangeSameAsCurrent = "password_change.same_as_current";
 }

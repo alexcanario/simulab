@@ -127,4 +127,13 @@
   <data name="Gallery.Section.Alerts" xml:space="preserve"><value>Alertas</value></data>
   <data name="Gallery.Alerts.Hint" xml:space="preserve"><value>Mensagens de negócio e de servidor que pertencem à página. O sucesso em snackbar fica para as ações.</value></data>
   <data name="Gallery.Alerts.Info" xml:space="preserve"><value>Algo que vale ler antes de agir.</value></data>
+  <data name="Layout.UserMenu.ChangePassword" xml:space="preserve"><value>Alterar senha</value></data>
+  <data name="password_reset.invalid" xml:space="preserve"><value>Este link de redefinição não é válido.</value></data>
+  <data name="password_reset.expired" xml:space="preserve"><value>Este link de redefinição expirou.</value></data>
+  <data name="password_reset.rate_limited" xml:space="preserve"><value>Muitas tentativas neste dispositivo. Tente de novo em uma hora.</value></data>
+  <data name="password_reset.password_too_weak" xml:space="preserve"><value>Esta senha não segue as regras acima.</value></data>
+  <data name="password_reset.same_as_current" xml:space="preserve"><value>Escolha uma senha diferente da atual.</value></data>
+  <data name="password_change.current_password_invalid" xml:space="preserve"><value>A senha atual não está correta.</value></data>
+  <data name="password_change.password_too_weak" xml:space="preserve"><value>Esta senha não segue as regras acima.</value></data>
+  <data name="password_change.same_as_current" xml:space="preserve"><value>Escolha uma senha diferente da atual.</value></data>
 </root>

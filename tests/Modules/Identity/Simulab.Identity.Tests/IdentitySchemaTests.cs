@@ -38,7 +38,7 @@ public sealed class IdentitySchemaTests : IdentityApiTests
         var tables = await ReadNamesAsync(connection,
             $"SELECT table_name FROM information_schema.tables WHERE table_schema = '{IdentityModuleDbContext.SchemaName}'");
 
-        tables.Should().Contain(["users", "consent_records", "email_verification_tokens"]);
+        tables.Should().Contain(["users", "consent_records", "email_verification_tokens", "password_reset_tokens"]);
         tables.Should().Contain(PersistenceServiceCollectionExtensions.HistoryTableName,
             "the module keeps its own migrations history in its own schema");
     }

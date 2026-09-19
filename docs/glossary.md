@@ -64,6 +64,9 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Situação da conta | Estado da conta | `AccountStatus` | `Pending` until the email is verified, then `Active` |
 | Verificação de e-mail | Verificação de e-mail | `EmailVerification` / `EmailVerificationToken` | The single-use hashed token, valid 24 h, that activates an account |
 | Reenvio da verificação | Reenvio da verificação | `ResendVerification` | Asking for a new verification email; throttled |
+| Redefinição de senha / Esqueci a senha | Redefinição da palavra-passe | `PasswordReset` / `PasswordResetToken` | Asking for a link by email and choosing a new password with it; the single-use hashed token lives 1 h (F-7) |
+| Troca de senha | Alteração da palavra-passe | `PasswordChange` | A signed-in user changing the password with the current one (F-7) |
+| Senha | Palavra-passe | `Password` | The account's secret; policy 12 / uppercase / digit / symbol |
 | Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) |
 | Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts |
 | Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts |

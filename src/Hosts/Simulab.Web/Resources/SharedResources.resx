@@ -127,4 +127,13 @@
   <data name="Gallery.Section.Alerts" xml:space="preserve"><value>Alerts</value></data>
   <data name="Gallery.Alerts.Hint" xml:space="preserve"><value>Business and server messages that belong to the page. Success as a snackbar stays for actions.</value></data>
   <data name="Gallery.Alerts.Info" xml:space="preserve"><value>Something worth reading before acting.</value></data>
+  <data name="Layout.UserMenu.ChangePassword" xml:space="preserve"><value>Change password</value></data>
+  <data name="password_reset.invalid" xml:space="preserve"><value>This reset link is not valid.</value></data>
+  <data name="password_reset.expired" xml:space="preserve"><value>This reset link expired.</value></data>
+  <data name="password_reset.rate_limited" xml:space="preserve"><value>Too many attempts from this device. Try again in an hour.</value></data>
+  <data name="password_reset.password_too_weak" xml:space="preserve"><value>This password does not follow the rules above.</value></data>
+  <data name="password_reset.same_as_current" xml:space="preserve"><value>Choose a password different from the current one.</value></data>
+  <data name="password_change.current_password_invalid" xml:space="preserve"><value>The current password is not correct.</value></data>
+  <data name="password_change.password_too_weak" xml:space="preserve"><value>This password does not follow the rules above.</value></data>
+  <data name="password_change.same_as_current" xml:space="preserve"><value>Choose a password different from the current one.</value></data>
 </root>

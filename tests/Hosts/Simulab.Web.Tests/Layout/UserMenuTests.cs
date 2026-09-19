@@ -29,4 +29,21 @@ public sealed class UserMenuTests : KitTestContext
         cut.Find(".app-user-menu-button button").GetAttribute("aria-label").Should().Be("Account menu for ana@exemplo.com");
         cut.FindAll(".app-sign-in-link").Should().BeEmpty();
     }
+
+    [Fact]
+    public void SignedIn_OffersChangePasswordBeforeSignOut()
+    {
+        Authorization.SetAuthorized("ana@exemplo.com");
+
+        // The menu items render in MudBlazor's popover host, as in the app bar.
+        var popovers = Render<MudBlazor.MudPopoverProvider>();
+        var cut = Render<UserMenu>();
+        cut.Find(".app-user-menu-button button").Click();
+
+        var item = popovers.Find(".app-user-menu-password");
+        item.TextContent.Trim().Should().Be("Change password");
+        item.GetAttribute("href").Should().Be("/account/password");
+        popovers.Markup.IndexOf("app-user-menu-password", StringComparison.Ordinal)
+            .Should().BeLessThan(popovers.Markup.IndexOf("app-user-menu-signout", StringComparison.Ordinal));
+    }
 }
