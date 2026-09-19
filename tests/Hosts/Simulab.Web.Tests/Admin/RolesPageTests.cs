@@ -30,6 +30,8 @@ public sealed class RolesPageTests : AdminPageTestContext
         link.TextContent.Trim().Should().Be("1,243");
         link.GetAttribute("aria-label").Should().Be("See the 1,243 users with the role Student");
         RowOf(page, "Support").QuerySelector("a.app-link").Should().BeNull("nobody holds it");
+        RowOf(page, "Admin").QuerySelector("a.app-link")!.GetAttribute("aria-label")
+            .Should().Be("See the user with the role Admin", "one holder has its own text (rule: i18n, plurals)");
     }
 
     [Fact]

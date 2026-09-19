@@ -40,7 +40,7 @@
                 @if (context.Item.UserCount > 0)
                 {
                     <AppLink Href="@($"/admin/users?role={context.Item.Role.Id}")"
-                             aria-label="@L["Roles.UsersLink", context.Item.UserCount.ToString("N0", CultureInfo.CurrentCulture), context.Item.DisplayName]">
+                             aria-label="@UsersLinkLabel(context.Item)">
                         @context.Item.UserCount.ToString("N0", CultureInfo.CurrentCulture)
                     </AppLink>
                 }
@@ -61,7 +61,7 @@
             <AppRowActions ItemName="@context.DisplayName"
                            OnEdit="@(() => EditAsync(context))"
                            OnDelete="@(() => DeleteAsync(context))"
-                           DeleteDisabledReason="@(context.UserCount > 0 ? L["Roles.Delete.InUseTip", context.UserCount.ToString("N0", CultureInfo.CurrentCulture)].Value : null)" />
+                           DeleteDisabledReason="@InUseReason(context)" />
         }
     </RowActions>
 </AppDataTable>
@@ -100,6 +100,18 @@
         var all = sorted.ToList();
         return new AppTablePage<RoleRow>([.. all.Skip(query.Page * query.PageSize).Take(query.PageSize)], all.Count);
     }
+
+    // Plurals get their own key (rule: i18n); one holder reads "the user", not "the 1 users".
+    private string UsersLinkLabel(RoleRow row) => row.UserCount == 1
+        ? L["Roles.UsersLink.One", row.DisplayName]
+        : L["Roles.UsersLink", row.UserCount.ToString("N0", CultureInfo.CurrentCulture), row.DisplayName];
+
+    private string? InUseReason(RoleRow row) => row.UserCount switch
+    {
+        0 => null,
+        1 => L["Roles.Delete.InUseTip.One"].Value,
+        _ => L["Roles.Delete.InUseTip", row.UserCount.ToString("N0", CultureInfo.CurrentCulture)].Value
+    };
 
     private Task AddAsync() => OpenAsync(null);
 

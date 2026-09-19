@@ -122,6 +122,8 @@
   <data name="Roles.Deleted" xml:space="preserve"><value>Role deleted.</value></data>
   <data name="Roles.Delete.Message" xml:space="preserve"><value>The role {0} will be deleted. No user holds it, so nobody loses access. Its name cannot be reused.</value></data>
   <data name="Roles.UsersLink" xml:space="preserve"><value>See the {0} users with the role {1}</value></data>
+  <data name="Roles.UsersLink.One" xml:space="preserve"><value>See the user with the role {0}</value></data>
+  <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>Held by 1 user: remove it from them first</value></data>
   <data name="Role.System.Student" xml:space="preserve"><value>Student</value></data>
   <data name="Role.System.Curator" xml:space="preserve"><value>Curator</value></data>
   <data name="Role.System.Admin" xml:space="preserve"><value>Admin</value></data>
@@ -139,7 +141,7 @@
   <data name="Users.NoMatch" xml:space="preserve"><value>No user matches "{0}".</value></data>
   <data name="Users.EditRoles.Action" xml:space="preserve"><value>Edit roles</value></data>
   <data name="Users.Dialog.Title" xml:space="preserve"><value>Roles of {0}</value></data>
-  <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. Changes reach the user's menu at their next sign-in or within 15 minutes.</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. The user's menu changes on their next page load.</value></data>
   <data name="Users.Saved" xml:space="preserve"><value>Roles of {0} saved.</value></data>
   <data name="AccountStatus.Pending" xml:space="preserve"><value>Pending</value></data>
   <data name="AccountStatus.Active" xml:space="preserve"><value>Active</value></data>

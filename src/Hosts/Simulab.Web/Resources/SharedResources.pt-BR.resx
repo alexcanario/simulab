@@ -122,6 +122,8 @@
   <data name="Roles.Deleted" xml:space="preserve"><value>Papel excluído.</value></data>
   <data name="Roles.Delete.Message" xml:space="preserve"><value>O papel {0} será excluído. Nenhum usuário o possui, então ninguém perde acesso. O nome não poderá ser reutilizado.</value></data>
   <data name="Roles.UsersLink" xml:space="preserve"><value>Ver os {0} usuários com o papel {1}</value></data>
+  <data name="Roles.UsersLink.One" xml:space="preserve"><value>Ver o usuário com o papel {0}</value></data>
+  <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>1 usuário tem este papel: tire dele antes</value></data>
   <data name="Role.System.Student" xml:space="preserve"><value>Estudante</value></data>
   <data name="Role.System.Curator" xml:space="preserve"><value>Curador</value></data>
   <data name="Role.System.Admin" xml:space="preserve"><value>Administrador</value></data>
@@ -139,7 +141,7 @@
   <data name="Users.NoMatch" xml:space="preserve"><value>Nenhum usuário corresponde a "{0}".</value></data>
   <data name="Users.EditRoles.Action" xml:space="preserve"><value>Editar papéis</value></data>
   <data name="Users.Dialog.Title" xml:space="preserve"><value>Papéis de {0}</value></data>
-  <data name="Users.Dialog.Help" xml:space="preserve"><value>Um usuário pode ter vários papéis; as permissões se somam. A mudança aparece no menu do usuário no próximo acesso ou em até 15 minutos.</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>Um usuário pode ter vários papéis; as permissões se somam. O menu do usuário muda no próximo carregamento de página.</value></data>
   <data name="Users.Saved" xml:space="preserve"><value>Papéis de {0} salvos.</value></data>
   <data name="AccountStatus.Pending" xml:space="preserve"><value>Pendente</value></data>
   <data name="AccountStatus.Active" xml:space="preserve"><value>Ativa</value></data>

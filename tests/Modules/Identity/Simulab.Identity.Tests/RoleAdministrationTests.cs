@@ -40,9 +40,9 @@ public sealed class RoleAdministrationTests : IdentityApiTests
         var gone = await CreateAsync(admin, Unique("Gone"));
         (await admin.DeleteAsync($"{Roles}/{gone.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var roles = await admin.GetFromJsonAsync<List<RoleResponse>>(Roles, AppJson.Options);
+        var roles = (await admin.GetFromJsonAsync<List<RoleResponse>>(Roles, AppJson.Options))!;
 
-        var listed = roles!.Single(role => role.Id == custom.Id);
+        var listed = roles.Single(role => role.Id == custom.Id);
         listed.IsSystem.Should().BeFalse();
         listed.Permissions.Should().Equal(IdentityPermissions.RolesManage);
         listed.UserCount.Should().Be(1, "a deleted account does not hold roles");
