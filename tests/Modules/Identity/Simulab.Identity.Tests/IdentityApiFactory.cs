@@ -49,6 +49,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
                 ["Email:FromAddress"] = "no-reply@simulab.app",
                 ["Email:FromName"] = "Simulab",
                 ["Identity:VerificationUrl"] = "https://localhost/verify-email",
+                ["Identity:PasswordResetUrl"] = "https://localhost/reset-password",
+                ["Identity:ForgotPasswordUrl"] = "https://localhost/forgot-password",
                 ["Authentication:OpenIddict:ClientId"] = TestClient.ClientId,
                 ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
             }));
