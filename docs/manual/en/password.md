@@ -1,7 +1,7 @@
 ---
 page: password
 locale: en
-features: [F-7]
+features: [F-7, F-8]
 updated: 2026-09-19
 ---
 # Password: forgot, reset and change
@@ -22,7 +22,7 @@ Anyone with a Simulab account. Changing the password needs you to be signed in; 
 If your account was still waiting for its email confirmation, resetting the password also confirms it. If the account was locked after too many attempts, the reset unlocks it at once.
 
 ### Change your password
-1. Select the account icon in the top-right corner, then **Change password**.
+1. Select the account icon in the top-right corner, then **My account**, then **Change password**.
 2. Type your current password, then the new one twice, and select **Save**.
 3. "Password changed. Other devices were signed out." You stay signed in on this device.
 

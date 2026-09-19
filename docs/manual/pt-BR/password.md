@@ -1,7 +1,7 @@
 ---
 page: password
 locale: pt-BR
-features: [F-7]
+features: [F-7, F-8]
 updated: 2026-09-19
 ---
 # Senha: esqueci, redefinir e alterar
@@ -22,7 +22,7 @@ Qualquer pessoa com uma conta no Simulab. Para alterar a senha é preciso estar 
 Se sua conta ainda aguardava a confirmação do e-mail, redefinir a senha também a confirma. Se a conta estava bloqueada por excesso de tentativas, a redefinição a desbloqueia na hora.
 
 ### Alterar sua senha
-1. Clique no ícone da conta no canto superior direito e depois em **Alterar senha**.
+1. Clique no ícone da conta no canto superior direito, depois em **Minha conta** e em **Alterar senha**.
 2. Digite a senha atual, depois a nova duas vezes, e clique em **Salvar**.
 3. "Senha alterada. Os outros dispositivos foram desconectados." Você continua conectado neste dispositivo.
 

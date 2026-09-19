@@ -1,7 +1,7 @@
 ---
 page: password
 locale: pt-PT
-features: [F-7]
+features: [F-7, F-8]
 updated: 2026-09-19
 ---
 # Palavra-passe: esqueci-me, redefinir e alterar
@@ -22,7 +22,7 @@ Qualquer pessoa com uma conta no Simulab. Para alterar a palavra-passe é precis
 Se a sua conta ainda aguardava a confirmação do e-mail, redefinir a palavra-passe também a confirma. Se a conta estava bloqueada por excesso de tentativas, a redefinição desbloqueia-a de imediato.
 
 ### Alterar a sua palavra-passe
-1. Selecione o ícone da conta no canto superior direito e depois **Alterar palavra-passe**.
+1. Selecione o ícone da conta no canto superior direito, depois **A minha conta** e **Alterar palavra-passe**.
 2. Escreva a palavra-passe atual, depois a nova duas vezes, e selecione **Guardar**.
 3. "Palavra-passe alterada. Os outros dispositivos terminaram a sessão." Mantém a sessão neste dispositivo.
 
