@@ -1,9 +1,9 @@
 ---
 feature: F-7
 epic: Foundation and identity
-status: building
+status: validating
 board: 711
-version: 1
+version: 2
 ---
 # Password recovery and change
 
@@ -231,26 +231,16 @@ Extends `IdentityResources` (screens), the shared resources (error codes, menu) 
   - major, two concurrent resets with one link could both succeed: the link is now spent first with one conditional update; a failure of Identity's own reset after the checks is a server error, never `password_too_weak`. Fixed; test `Reset_TwoConcurrentResetsWithOneLink_OnlyOneSucceeds`.
   - major, a failing mail server made a 500 that only real accounts reach: the reset email failure is logged and the answer stays 202. Fixed; test `RequestLink_MailServerFails_SameAnswerAsAnUnknownAddress`. The response time still differs (only real accounts wait for SMTP) until emails go through the job table: accepted and recorded as an idea.
   - major, the password-changed email failing after a successful change returned 500: the notice is best effort (`PasswordNotice`). Fixed; test `Change_MailServerFails_TheChangeStillSucceeds`.
-  - major, the per-client limits key on the connection address, and the Api only ever sees the Web server: see `## Open questions` (owner decision).
-  - minor, the 423 answer was built by hand: it goes through the one `Problem` helper, with `retryAfterSeconds` as a typed value. Fixed.
-  - minor, no email format check and no Try again on `/forgot-password`: added (`EmailRules`, the Try again action); the check runs on submit, as on the other identity pages. Fixed; test `Submit_NotAnEmail_ShowsTheFormatMessageAndSendsNothing`.
-  - minor, the cooldown showed the announced value (tens) instead of the seconds: the seconds are shown, and a visually hidden live region announces every ten. Fixed.
-  - minor, the expired state borrowed F-4's `CheckEmail.Resend` key and ignored an empty email: `ResetPassword.SendNewLink` in three languages and a field error. Fixed.
-  - minor, the session tests asserted only 401: they assert `identity.token_revoked`. Fixed.
-  - minor, no race tests: the concurrent-reset and stale-stamp tests above. Fixed.
-
-## Out of scope
-- Fixing the Web's token refresh and revoked-session handling: B-3.
-- "My account" page and linking the change from it (F-8).
-- An admin resetting another user's password, and a "sign out everywhere" button (F-9 / Institutions epic).
-- Password history, expiry, breached-password checks.
-- A lockout warning email (idea from F-5).
-- Google sign-in and TOTP (F-11).
-
-## Open questions
-- Review, major: every per-client limit (F-4 registration and resend, F-7 reset request, check and reset) keys on `Connection.RemoteIpAddress`. The Web calls the Api from the server (B-3), so every visitor shares the Web's one bucket: 5 reset links an hour for the whole site, and anyone can spend it. BR3 cannot be met as written without the visitor's address reaching the Api. Owner decision pending (2026-09-19).
+  - major, the per-client limits key on the connection address, and the Api only ever sees the Web server: see `## Open questions
+- (none) — the per-client limit question from the review was answered by the owner on 2026-09-19: see change note v2.
 
 ## Change notes
+
+### v2 — 2026-09-19
+- What: BR3's per-client limits hold at the Api (they key on the connection address), but end to end every visitor arrives from the Web server, so they are shared by the whole site until bug B-4 makes the Web send the visitor's address. F-7 ships with the per-client limits as built; B-4 fixes them for F-4 and F-7 together, right after F-7.
+- Why: found by `/agile:review`. The bug predates F-7 (F-4's registration and resend have it too) and nothing is deployed, so no visitor is affected now.
+- Affected: BR3 and AC2 (per-client half, end to end); other criteria unchanged. AC2 stays proved at the Api by its tests.
+- Re-approved: 2026-09-19 (owner, option "Bug B-4, after F-7").
 
 ## Coverage
 | Criterion | Tests (`Simulab.Identity.Tests` unless noted) |
