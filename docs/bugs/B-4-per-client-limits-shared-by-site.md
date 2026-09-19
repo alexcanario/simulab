@@ -1,7 +1,7 @@
 ---
 bug: B-4
 feature: F-4
-status: validating
+status: done
 board: 720
 severity: high
 ---
@@ -116,3 +116,11 @@ Web side: `VisitorAddressHostTests.PageRequest_HandsTheVisitorsAddressToTheApiCl
    To run steps 5-7 again within the hour, restart the app host (the counters live in the Api's memory) or use other addresses: a used address stays at `429` for one hour.
 
 ## Delivery
+- Branch: bug/B-4 (removed; never pushed)
+- Merge: 2f2f32c (--no-ff, AB#720)
+- Validation: passed by the owner, 2026-09-19
+- Regression: ClientAddressTests seen failing (429 for the second visitor, null consent address) before the fix
+- Review: agile:reviewer, 0 blockers, 2 majors and 1 minor, all fixed
+- Tests: full suite 425 passed, 0 failed; build 14 s, tests 27 s; 0 warnings, baseline empty
+- Manual pages: none changed (password.md already says "this device"; now it is true)
+- Infra: `ForwardedHeaders:KnownProxies` / `KnownNetworks` must be filled when the cloud environment is created (docs/infra.md)
