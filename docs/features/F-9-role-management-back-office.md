@@ -3,7 +3,7 @@ feature: F-9
 epic: Foundation and identity
 status: building
 board: 713
-version: 1
+version: 2
 ---
 # Role management back office
 
@@ -33,7 +33,7 @@ Let an Admin manage access from the app instead of editing the database: create 
 - UC7 A Student or Curator never sees the Administration items and gets the ordinary Not Found page on `/admin/roles` and `/admin/users`.
 
 ## Business rules
-- BR1 Roles are global (no tenant) as in F-6. A role is a system role (`IsSystem`) or a custom role. Student, Curator and Admin are system roles, marked by the migration.
+- BR1 Roles are global (no tenant) as in F-6. A role is a system role (`IsSystem`) or a custom role. Student, Curator and Admin are system roles, marked by the migration (existing rows) and by the startup seed (new installations).
 - BR2 A system role cannot be renamed or deleted; its permissions can be changed (subject to BR8).
 - BR3 A role name is trimmed, 2 to 50 characters, and unique case-insensitively among all roles, deleted ones included (the unique index covers deleted rows, so a deleted role's name stays taken).
 - BR4 A role's permissions are a set of names from the catalog; an unknown name is refused. Saving replaces the whole set.
@@ -136,18 +136,18 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - `POST /api/v1/identity/roles` — `SaveRoleRequest { Name, Permissions: string[] }` → 201 `RoleResponse`.
 - `PUT /api/v1/identity/roles/{id}` — `SaveRoleRequest` → 200 `RoleResponse`.
 - `DELETE /api/v1/identity/roles/{id}` → 204.
-- `GET /api/v1/identity/users?page=&pageSize=&search=&roleId=&sortBy=&descending=` (`roleId` optional: only users holding that role; an unknown id gives an empty page) → `UserPageResponse { Items: UserSummaryResponse[] { Id, Email, FullName, Status, Roles: { Id, Name, IsSystem }[] }, TotalCount }`.
+- `GET /api/v1/identity/users?page=&pageSize=&search=&roleId=&sortBy=&descending=` (`roleId` optional: only users holding that role; an unknown id gives an empty page) → `UserPageResponse { Items: UserSummaryResponse[] { Id, Email, FullName, Status, Roles: { Id, Name, IsSystem }[] }, Total }` (rule api-contracts: `{ items, total }`, `pageSize` capped at 100).
 - `PUT /api/v1/identity/users/{id}/roles` — `SetUserRolesRequest { RoleIds: Guid[] }` → 200 `UserSummaryResponse`.
 - Error codes:
   - `role.name_invalid` (400) — blank, shorter than 2 or longer than 50 (BR3).
   - `role.name_taken` (409) (BR3).
   - `role.permission_unknown` (400) (BR4).
   - `role.not_found` (404).
-  - `role.system_role_protected` (409) — rename or delete of a system role (BR2).
-  - `role.admin_permission_required` (409) — removing `identity.roles.manage` from Admin (BR8a).
-  - `role.in_use` (409) — delete while users hold it (BR5).
+  - `role.system_role_protected` (422) — rename or delete of a system role (BR2).
+  - `role.admin_permission_required` (422) — removing `identity.roles.manage` from Admin (BR8a).
+  - `role.in_use` (422) — delete while users hold it (BR5).
   - `role_assignment.role_unknown` (400) — a role id that does not exist or is deleted (BR6).
-  - `role_assignment.last_manager` (409) — the change would leave no active manager (BR8b); also returned by `PUT /roles/{id}` when a custom role's permission change causes it.
+  - `role_assignment.last_manager` (422) — the change would leave no active manager (BR8b); also returned by `PUT /roles/{id}` when a custom role's permission change causes it.
   - `user.not_found` (404).
   - `identity.forbidden` (403, F-6).
 
@@ -159,12 +159,12 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - AC5 Given an existing role "Reviewer" (active or deleted) or a seed role, when another role is saved as "reviewer" or "ADMIN", then the answer is 409 `role.name_taken`. (BR3)
 - AC6 Given a permission name that is not in the catalog, when a role is saved with it, then the answer is 400 `role.permission_unknown` and nothing changes. (BR4)
 - AC7 Given a custom role held by a user, when an Admin changes its permissions, then that user's next API call after the cache window reflects the new set. (UC3, BR4, BR9)
-- AC8 Given a system role, when it is renamed or deleted, then the answer is 409 `role.system_role_protected`; when only its permissions change, the change is saved. (BR2)
-- AC9 Given the Admin role, when a save would remove `identity.roles.manage` from it, then the answer is 409 `role.admin_permission_required`. (BR8a)
-- AC10 Given a custom role held by at least one user, when it is deleted, then the answer is 409 `role.in_use`; given no holder, then 204, it leaves the list and its name stays taken. (UC4, BR3, BR5)
+- AC8 Given a system role, when it is renamed or deleted, then the answer is 422 `role.system_role_protected`; when only its permissions change, the change is saved. (BR2)
+- AC9 Given the Admin role, when a save would remove `identity.roles.manage` from it, then the answer is 422 `role.admin_permission_required`. (BR8a)
+- AC10 Given a custom role held by at least one user, when it is deleted, then the answer is 422 `role.in_use`; given no holder, then 204, it leaves the list and its name stays taken. (UC4, BR3, BR5)
 - AC11 Given users with Pending and Active accounts and one deleted account, when an Admin lists users with a search term and/or a role filter, then the page holds the matching non-deleted accounts (email or name, case-insensitive; holding that role), with status, roles and the total count, paged and sorted on the server. (UC5, BR7)
 - AC12 Given a user, when an Admin sets their roles to Curator and a custom role, then the user holds exactly those two and their effective permissions are the union; an empty set is also accepted. (UC6, BR6)
-- AC13 Given exactly one Active user holding `identity.roles.manage`, when a change would take it from them (their roles, or a custom role's permissions), then the answer is 409 `role_assignment.last_manager` and nothing changes; given a second Active manager, the same change succeeds. (BR8b)
+- AC13 Given exactly one Active user holding `identity.roles.manage`, when a change would take it from them (their roles, or a custom role's permissions), then the answer is 422 `role_assignment.last_manager` and nothing changes; given a second Active manager, the same change succeeds. (BR8b)
 - AC14 Given an unknown user id, an unknown or deleted role id in a set, or an unknown role id on PUT/DELETE, then the answers are 404 `user.not_found`, 400 `role_assignment.role_unknown` and 404 `role.not_found`. (BR5, BR6)
 - AC15 Given a caller without `identity.roles.manage`, when it calls any endpoint of this feature, then the answer is 403 `identity.forbidden`; the "Users" nav item is hidden and `/admin/users` shows the ordinary Not Found page. (UC7, BR10)
 - AC16 Given the roles and users screens, then each list has loading, empty and error states, Delete asks for confirmation naming the role, Delete is not offered for system roles, the name field is read-only for a system role, and an API error code is shown as translated text next to the form. (UC1–UC6)
@@ -193,6 +193,7 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - 2026-09-19 — Claude: saving a role's permissions or a user's roles replaces the whole set (PUT), which matches the checkbox dialogs and keeps one endpoint per dialog.
 - 2026-09-19 — Claude: the rules live in the Application layer (`SaveRoleHandler`, `DeleteRoleHandler`, `SetUserRolesHandler`), the BR8b check in one serializable transaction with the write; concurrent edits of the same role are last-write-wins (two Admins today, no conflict screen).
 - 2026-09-19 — Claude: user search is a case-insensitive `ILIKE` on email and full name; default sort by email; page sizes from the kit.
+- 2026-09-19 — Claude (build): the seed roles are created at startup by `EnsureRolesAndPermissionsAsync` (F-6), not by a migration, so `IsSystem` is set in both places: the migration marks the three existing rows, the seed creates them marked. The paged response is `{ Items, Total }` (rule `api-contracts`), not `TotalCount`.
 - 2026-09-19 — The users list has a role filter next to the search, and each role's user count on `/admin/roles` links to it — owner, screen question 1 — finding the Admins among thousands of Students by search alone is not workable, and `role_assignment.last_manager` asks for exactly that.
 - 2026-09-19 — Delete of a custom role in use is shown disabled with a tooltip giving the user count, instead of opening a dialog that would only fail; the API check stays for races — owner, screen question 2.
 - 2026-09-19 — The edit-roles dialog shows each role's translated permissions under its name — owner, screen question 3 — the Admin sees what they grant.
@@ -211,7 +212,11 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - (none)
 
 ## Change notes
-<!-- Added by /agile:change during build. Increase `version` in the header. -->
+### v2 — 2026-09-19
+- What: the business-rule refusals `role.system_role_protected`, `role.admin_permission_required`, `role.in_use` and `role_assignment.last_manager` answer 422 instead of 409; `role.name_taken` stays 409. Codes and texts unchanged.
+- Why: rule `api-contracts` (409 conflict, 422 business rule) and the module's existing `ErrorKind.BusinessRule` → 422 mapping; the approved file contradicted both (false premise found at the start of build).
+- Affected: AC8, AC9, AC10, AC13 (status number only); other criteria unchanged.
+- Re-approved: 2026-09-19 (owner, option A in the build session)
 
 ## Validation script
 <!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
