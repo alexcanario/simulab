@@ -1,4 +1,5 @@
 using Npgsql;
+using Simulab.Identity.Contracts;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Persistence;
 
@@ -91,5 +92,24 @@ public sealed class IdentitySchemaTests : IdentityApiTests
         command.Parameters.AddWithValue("normalized", normalizedEmail);
         command.Parameters.AddWithValue("userName", normalizedEmail + Guid.CreateVersion7().ToString("N"));
         await command.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>B-7 AC4: the columns are as wide as the limits the Api checks, read from the migrated database.</summary>
+    [Theory]
+    [InlineData("full_name", AccountLimits.FullNameMaxLength)]
+    [InlineData("email", AccountLimits.EmailMaxLength)]
+    [InlineData("normalized_email", AccountLimits.EmailMaxLength)]
+    [InlineData("user_name", AccountLimits.EmailMaxLength)]
+    [InlineData("normalized_user_name", AccountLimits.EmailMaxLength)]
+    public async Task UserColumns_AreAsWideAsTheAccountLimits(string column, int length)
+    {
+        await using var connection = await OpenAsync();
+        await using var command = new NpgsqlCommand(
+            "SELECT character_maximum_length FROM information_schema.columns WHERE table_schema = @schema AND table_name = 'users' AND column_name = @column",
+            connection);
+        command.Parameters.AddWithValue("schema", IdentityModuleDbContext.SchemaName);
+        command.Parameters.AddWithValue("column", column);
+
+        (await command.ExecuteScalarAsync()).Should().Be(length);
     }
 }

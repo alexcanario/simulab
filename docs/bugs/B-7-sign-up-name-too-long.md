@@ -1,7 +1,7 @@
 ---
 bug: B-7
 feature: F-4
-status: approved
+status: building
 board: 724
 severity: low
 ---

@@ -41,7 +41,7 @@
                       Placeholder="@I["SignUp.Email.Placeholder"]"
                       InputType="InputType.Email"
                       Autocomplete="username"
-                      MaxLength="254"
+                      MaxLength="AccountLimits.EmailMaxLength"
                       Required="true"
                       Value="@_typedEmail"
                       ValueChanged="@(value => _typedEmail = value)" />

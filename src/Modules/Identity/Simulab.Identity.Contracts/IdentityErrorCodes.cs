@@ -11,6 +11,7 @@ public static class IdentityErrorCodes
     public const string TermsVersionOutdated = "registration.terms_version_outdated";
     public const string PasswordTooWeak = "registration.password_too_weak";
     public const string EmailInvalid = "registration.email_invalid";
+    public const string RegistrationFullNameTooLong = "registration.full_name_too_long";
     public const string RegistrationRateLimited = "registration.rate_limited";
 
     public const string VerificationInvalid = "email_verification.invalid";

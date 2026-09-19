@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Persistence;
 
@@ -14,11 +15,11 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
         builder.HasKey(user => user.Id);
 
-        builder.Property(user => user.UserName).HasMaxLength(254);
-        builder.Property(user => user.NormalizedUserName).HasMaxLength(254);
-        builder.Property(user => user.Email).HasMaxLength(254).IsRequired();
-        builder.Property(user => user.NormalizedEmail).HasMaxLength(254).IsRequired();
-        builder.Property(user => user.FullName).HasMaxLength(120);
+        builder.Property(user => user.UserName).HasMaxLength(AccountLimits.EmailMaxLength);
+        builder.Property(user => user.NormalizedUserName).HasMaxLength(AccountLimits.EmailMaxLength);
+        builder.Property(user => user.Email).HasMaxLength(AccountLimits.EmailMaxLength).IsRequired();
+        builder.Property(user => user.NormalizedEmail).HasMaxLength(AccountLimits.EmailMaxLength).IsRequired();
+        builder.Property(user => user.FullName).HasMaxLength(AccountLimits.FullNameMaxLength);
         builder.Property(user => user.PreferredLanguage).HasMaxLength(10).IsRequired();
         builder.Property(user => user.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(user => user.ConcurrencyStamp).IsConcurrencyToken();

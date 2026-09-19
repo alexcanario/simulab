@@ -36,6 +36,16 @@ public class SignUpTests : IdentityPageTestContext
         page.FindAll("input[type=checkbox]").Should().HaveCount(3);
     }
 
+    /// <summary>B-7 AC4: the comfort limits are the Api's own, read from the contracts.</summary>
+    [Fact]
+    public void Fields_AreLimitedToTheAccountLimits()
+    {
+        var page = Render();
+
+        page.Find("#sign-up-full-name").GetAttribute("maxlength").Should().Be("120");
+        page.Find("#sign-up-email").GetAttribute("maxlength").Should().Be("254");
+    }
+
     [Fact]
     public void Submit_EmptyForm_ShowsOneMessagePerRule()
     {

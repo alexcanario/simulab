@@ -21,7 +21,7 @@ public sealed class ProfileHandler(UserManager<User> userManager)
     public async Task<Result> UpdateAsync(Guid userId, string? fullName, string? preferredLanguage)
     {
         var name = string.IsNullOrWhiteSpace(fullName) ? null : fullName.Trim();
-        if (name?.Length > ProfileLimits.FullNameMaxLength)
+        if (name?.Length > AccountLimits.FullNameMaxLength)
         {
             return Failure(IdentityErrorCodes.ProfileFullNameTooLong);
         }
