@@ -13,6 +13,8 @@
 
 <a class="app-skip-link" href="#main-content">@L["Layout.SkipToContent"]</a>
 
+<SessionEndedWatcher />
+
 <MudLayout Class="@(_isDesktop is null ? "app-shell app-shell-pending" : "app-shell")">
     <MudAppBar Elevation="1" Dense="false">
         <MudTooltip Text="@MenuButtonLabel">

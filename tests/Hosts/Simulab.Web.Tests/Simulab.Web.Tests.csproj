@@ -3,10 +3,12 @@
   <ItemGroup>
     <PackageReference Include="bunit" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Hosts\Simulab.Web\Simulab.Web.csproj" />
+    <ProjectReference Include="..\..\Simulab.Testing\Simulab.Testing.csproj" />
   </ItemGroup>
 
 </Project>

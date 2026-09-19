@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-BR
-features: [F-5]
-updated: 2026-09-18
+features: [F-5, B-3]
+updated: 2026-09-19
 ---
 # Entrar e sair
 
@@ -37,8 +37,12 @@ Abrir **Entrar** enquanto você já está conectado leva direto para a página i
 | E-mail ou senha incorretos. | O e-mail ou a senha não correspondem a uma conta ativa | Confira os dois e tente de novo; esta mensagem nunca diz qual dos dois está errado |
 | Confirme seu e-mail antes de entrar. | Sua conta ainda está pendente, desde o cadastro | Clique em **Reenviar o e-mail de verificação** na mesma página e depois confira sua caixa de entrada |
 | Muitas tentativas. Tente de novo em {0}. | Cinco senhas erradas seguidas bloquearam a conta por 15 minutos | Espere o tempo mostrado antes de tentar de novo |
+| Sua sessão terminou. Entre novamente. | Sua sessão foi encerrada em outro lugar — por exemplo, você saiu em outra aba — e esta página voltou para o login | Entre de novo |
 
 Se você entrar em um dispositivo enquanto já está conectado em outro, as duas sessões continuam funcionando: não há limite de quantos dispositivos podem estar conectados ao mesmo tempo.
+
+## Por quanto tempo você fica conectado
+Você fica conectado por até 30 dias em cada dispositivo, mesmo deixando uma página aberta por horas ou quando o app é reiniciado; não precisa entrar de novo nesse período. Quando sua sessão é encerrada em outro lugar, uma página aberta percebe em até um minuto e leva você para **Entrar** com a mensagem *Sua sessão terminou. Entre novamente.* Um papel ou permissão novo aparece no seu menu na próxima vez que você abrir uma página, sem precisar entrar de novo.
 
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)

@@ -16,6 +16,13 @@ public sealed record TokenResult(
     string? ErrorDescription)
 {
     public static TokenResult Failed(string code, string? description) => new(false, null, null, null, code, description);
+
+    /// <summary>
+    /// The token endpoint refused this refresh token itself (B-3, BR3): only then does a web session end.
+    /// Any other error (<c>server_error</c>, <c>invalid_client</c> after a config change, no answer) is not
+    /// the session's fault and never signs anyone out.
+    /// </summary>
+    public bool IsRejected => ErrorCode is IdentityErrorCodes.RefreshTokenInvalid or "invalid_grant";
 }
 
 file sealed record TokenResponseBody(
@@ -58,24 +65,46 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
 
         try
         {
-            await http.SendAsync(request, cancellationToken);
+            using var response = await http.SendAsync(request, cancellationToken);
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
         {
             // The session still expires on its own (BR4); losing this call only delays the revocation.
         }
     }
 
     /// <summary>Reads the just-issued token's own claims back from the Api (build decision: the token may be encrypted).</summary>
-    public async Task<SessionInfoResponse?> GetSessionAsync(string accessToken, CancellationToken cancellationToken = default)
+    public async Task<SessionInfoResponse?> GetSessionAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        (await LookUpSessionAsync(accessToken, cancellationToken)).Session;
+
+    /// <summary>
+    /// Asks the Api whether the session behind this access token is still alive (B-3, BR3). Only a 401 says
+    /// it is not; any other failure is <see cref="SessionLookupStatus.Unavailable"/>, never a sign-out.
+    /// </summary>
+    public async Task<SessionLookup> LookUpSessionAsync(string accessToken, CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/identity/session");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        using var response = await http.SendAsync(request, cancellationToken);
-        return response.IsSuccessStatusCode
-            ? await response.Content.ReadFromJsonAsync<SessionInfoResponse>(AppJson.Options, cancellationToken)
-            : null;
+        try
+        {
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return new SessionLookup(SessionLookupStatus.Ended, null);
+            }
+
+            var session = response.IsSuccessStatusCode
+                ? await response.Content.ReadFromJsonAsync<SessionInfoResponse>(AppJson.Options, cancellationToken)
+                : null;
+            return session is null
+                ? new SessionLookup(SessionLookupStatus.Unavailable, null)
+                : new SessionLookup(SessionLookupStatus.Alive, session);
+        }
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
+        {
+            return new SessionLookup(SessionLookupStatus.Unavailable, null);
+        }
     }
 
     private async Task<TokenResult> RequestAsync(Dictionary<string, string> form, CancellationToken cancellationToken)
@@ -83,11 +112,31 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
         form["client_id"] = options.Value.ClientId;
         form["client_secret"] = options.Value.ClientSecret;
 
-        using var response = await http.PostAsync("/connect/token", new FormUrlEncodedContent(form), cancellationToken);
-        var body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
+        try
+        {
+            using var response = await http.PostAsync("/connect/token", new FormUrlEncodedContent(form), cancellationToken);
+            var body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
 
-        return body is { Error: null }
-            ? new TokenResult(true, body.AccessToken, body.RefreshToken, body.ExpiresIn, null, null)
-            : TokenResult.Failed(body?.Error ?? Components.Ui.ErrorText.UnexpectedCode, body?.ErrorDescription);
+            if (body?.Error is not null)
+            {
+                return TokenResult.Failed(body.Error, body.ErrorDescription);
+            }
+
+            // A 5xx comes back as problem details with no OAuth "error": that is no answer, not a token pair.
+            return response.IsSuccessStatusCode && body?.AccessToken is not null && body.RefreshToken is not null
+                ? new TokenResult(true, body.AccessToken, body.RefreshToken, body.ExpiresIn, null, null)
+                : TokenResult.Failed(Components.Ui.ErrorText.UnexpectedCode, null);
+        }
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
+        {
+            return TokenResult.Failed(Components.Ui.ErrorText.UnexpectedCode, null);
+        }
     }
+
+    /// <summary>
+    /// Anything that means "the Api did not give a usable answer": network, timeout, the resilience
+    /// handler's own rejections, a body that is not JSON. A cancellation the caller asked for is not one.
+    /// </summary>
+    private static bool IsTransportFailure(Exception exception, CancellationToken cancellationToken) =>
+        exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested;
 }
