@@ -39,4 +39,17 @@ public static class IdentityErrorCodes
 
     public const string ProfileFullNameTooLong = "profile.full_name_too_long";
     public const string ProfileLanguageNotSupported = "profile.language_not_supported";
+
+    public const string RoleNameInvalid = "role.name_invalid";
+    public const string RoleNameTaken = "role.name_taken";
+    public const string RolePermissionUnknown = "role.permission_unknown";
+    public const string RoleNotFound = "role.not_found";
+    public const string RoleSystemRoleProtected = "role.system_role_protected";
+    public const string RoleAdminPermissionRequired = "role.admin_permission_required";
+    public const string RoleInUse = "role.in_use";
+
+    public const string RoleAssignmentRoleUnknown = "role_assignment.role_unknown";
+    public const string RoleAssignmentLastManager = "role_assignment.last_manager";
+
+    public const string UserNotFound = "user.not_found";
 }

@@ -71,10 +71,10 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
 
-        var roles = await client.GetFromJsonAsync<RoleNamesResponse>(
+        var roles = await client.GetFromJsonAsync<List<RoleResponse>>(
             "/api/v1/identity/roles", Simulab.SharedKernel.Serialization.AppJson.Options);
 
-        roles!.Names.Should().BeEquivalentTo(IdentityRoles.All);
+        roles!.Select(role => role.Name).Should().BeEquivalentTo(IdentityRoles.All);
     }
 
     [Fact]

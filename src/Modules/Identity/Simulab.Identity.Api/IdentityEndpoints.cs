@@ -63,10 +63,8 @@ public static class IdentityEndpoints
         profile.MapPut(string.Empty, UpdateProfileAsync).WithName("UpdateProfile");
         profile.MapPut("/preferred-language", UpdatePreferredLanguageAsync).WithName("UpdatePreferredLanguage");
 
-        // F-6, BR8-BR9: the seed role names, for the placeholder /admin/roles screen. Admin-only.
-        group.MapGet("/roles", GetRoleNamesAsync)
-            .WithName("GetRoleNames")
-            .RequireAuthorization(PermissionPolicy.NameFor(IdentityPermissions.RolesManage));
+        // F-9: the role management back office, every route behind identity.roles.manage (BR10).
+        group.MapRoleAdministrationEndpoints();
 
         return endpoints;
     }
@@ -129,9 +127,6 @@ public static class IdentityEndpoints
 
     private static bool TryGetUserId(ClaimsPrincipal user, out Guid userId) =>
         Guid.TryParse(user.FindFirstValue(OpenIddictConstants.Claims.Subject), out userId);
-
-    /// <summary>F-9 replaces this with full role management; today it only proves the permission mechanism on screen.</summary>
-    private static IResult GetRoleNamesAsync() => Results.Ok(new RoleNamesResponse(IdentityRoles.All));
 
     /// <summary>BR6: drops the caller's own session and revokes its access token, regardless of whether either call finds anything to act on.</summary>
     private static async Task<IResult> SignOutAsync(ClaimsPrincipal user, IRefreshSessionStore sessions, CancellationToken cancellationToken)
@@ -352,7 +347,7 @@ public static class IdentityEndpoints
         Enum.TryParse(topic, ignoreCase: true, out parsed) && Enum.IsDefined(parsed);
 
     /// <summary>RFC 9457 problem details plus the stable code the UI turns into text (rule: api-contracts).</summary>
-    private static IResult Problem(Error error, int? status = null, params (string Name, object Value)[] extensions)
+    internal static IResult Problem(Error error, int? status = null, params (string Name, object Value)[] extensions)
     {
         var problem = new ProblemDetails
         {

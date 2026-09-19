@@ -9,6 +9,7 @@ using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
+using Simulab.Identity.Application.Roles;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
@@ -94,6 +95,13 @@ public static class IdentityModule
         services.AddScoped<ResetPasswordHandler>();
         services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<ProfileHandler>();
+
+        // F-9: the role management back office.
+        services.AddScoped<IRoleAdministrationStore, RoleAdministrationStore>();
+        services.AddScoped<IRoleAdministrationQueries, RoleAdministrationQueries>();
+        services.AddScoped<SaveRoleHandler>();
+        services.AddScoped<DeleteRoleHandler>();
+        services.AddScoped<SetUserRolesHandler>();
 
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));
@@ -199,11 +207,18 @@ public static class IdentityModule
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
         var context = scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>();
 
+        // F-9, BR1: the seed roles are system roles; one created before F-9 is marked on the next start.
         foreach (var name in IdentityRoles.All)
         {
-            if (await roleManager.FindByNameAsync(name) is null)
+            var existing = await roleManager.FindByNameAsync(name);
+            if (existing is null)
             {
-                await roleManager.CreateAsync(new Role { Name = name });
+                await roleManager.CreateAsync(Role.CreateSystem(name));
+            }
+            else if (!existing.IsSystem)
+            {
+                existing.MarkAsSystem();
+                await roleManager.UpdateAsync(existing);
             }
         }
 

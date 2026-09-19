@@ -81,5 +81,8 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.Entity<User>()
             .HasQueryFilter(TenantFilter, user => user.TenantId == null || user.TenantId == CurrentTenantId)
             .HasQueryFilter(SoftDeleteFilter, user => !user.IsDeleted);
+
+        // F-9, BR5: roles are global (no tenant filter) and soft deleted; a deleted role disappears everywhere.
+        modelBuilder.Entity<Role>().HasQueryFilter(SoftDeleteFilter, role => !role.IsDeleted);
     }
 }
