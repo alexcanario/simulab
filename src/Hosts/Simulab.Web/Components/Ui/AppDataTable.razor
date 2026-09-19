@@ -97,6 +97,14 @@
 
     public Task ReloadAsync() => _grid.ReloadServerData();
 
+    /// <summary>Reloads from the first page: after a filter outside the table changes (F-9: the role filter), as the search box does.</summary>
+    public async Task ReloadFromFirstPageAsync()
+    {
+        if (_grid.CurrentPage != 0)
+            _grid.NavigateTo(Page.First);
+        await _grid.ReloadServerData();
+    }
+
     private async Task<GridData<TItem>> LoadServerDataAsync(GridState<TItem> state, CancellationToken cancellationToken)
     {
         _failed = false;

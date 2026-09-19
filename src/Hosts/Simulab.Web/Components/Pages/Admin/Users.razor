@@ -137,7 +137,7 @@
     {
         RoleFilter = roleId;
         Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("role", roleId), replace: true);
-        await _table.ReloadAsync();
+        await _table.ReloadFromFirstPageAsync();
     }
 
     private async Task EditRolesAsync(UserSummaryResponse user)

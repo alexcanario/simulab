@@ -134,9 +134,12 @@
             { dialog => dialog.Catalog, catalog.Value!.Select(permission => permission.Name).ToList() },
             {
                 dialog => dialog.Save,
-                async request => role is null
-                    ? await Api.CreateRoleAsync(await TokenAsync() ?? token, request)
-                    : await Api.UpdateRoleAsync(await TokenAsync() ?? token, role.Id, request)
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<RoleResponse>(ErrorText.UnexpectedCode)
+                    : role is null
+                        ? await Api.CreateRoleAsync(fresh, request)
+                        : await Api.UpdateRoleAsync(fresh, role.Id, request)
             }
         };
 

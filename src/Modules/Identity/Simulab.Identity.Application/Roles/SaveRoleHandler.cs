@@ -60,17 +60,15 @@ public sealed class SaveRoleHandler(IRoleAdministrationStore store, IRoleAdminis
             }
 
             var name = RoleName.Normalize(request.Name);
-            if (role.IsSystem)
-            {
-                // BR2: the dialog sends the name back unchanged; anything else is a rename.
-                if (name is not null && !string.Equals(name, role.Name, StringComparison.Ordinal))
-                {
-                    return Failure<Guid>(IdentityErrorCodes.RoleSystemRoleProtected, ErrorKind.BusinessRule);
-                }
-            }
-            else if (name is null)
+            if (name is null)
             {
                 return Failure<Guid>(IdentityErrorCodes.RoleNameInvalid, ErrorKind.Validation);
+            }
+
+            // BR2: the dialog sends a system role's name back unchanged; anything else is a rename.
+            if (role.IsSystem && !string.Equals(name, role.Name, StringComparison.Ordinal))
+            {
+                return Failure<Guid>(IdentityErrorCodes.RoleSystemRoleProtected, ErrorKind.BusinessRule);
             }
 
             if ((await store.UnknownPermissionsAsync(permissions, cancellationToken)).Count > 0)
@@ -86,12 +84,12 @@ public sealed class SaveRoleHandler(IRoleAdministrationStore store, IRoleAdminis
 
             if (!role.IsSystem && name != role.Name)
             {
-                if (await store.IsNameTakenAsync(name!, role.Id, cancellationToken))
+                if (await store.IsNameTakenAsync(name, role.Id, cancellationToken))
                 {
                     return Failure<Guid>(IdentityErrorCodes.RoleNameTaken, ErrorKind.Conflict);
                 }
 
-                store.Rename(role, name!);
+                store.Rename(role, name);
             }
 
             await store.ReplacePermissionsAsync(role.Id, permissions, cancellationToken);

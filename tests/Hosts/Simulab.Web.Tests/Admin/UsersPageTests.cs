@@ -49,6 +49,34 @@ public sealed class UsersPageTests : AdminPageTestContext
     }
 
     [Fact]
+    public void RoleFilterChanged_OnALaterPage_ReloadsFromTheFirstPage()
+    {
+        Api.Users = [.. Enumerable.Range(1, 30).Select(n => new UserSummaryResponse(Guid.NewGuid(), $"user{n}@exemplo.com", null, "Active", []))];
+        var page = RenderPage();
+        page.WaitForAssertion(() => page.FindAll("tbody tr").Should().NotBeEmpty());
+        var grid = page.FindComponent<MudBlazor.MudDataGrid<UserSummaryResponse>>();
+        page.InvokeAsync(() => grid.Instance.NavigateTo(MudBlazor.Page.Next));
+        page.WaitForAssertion(() => Api.Received.Last(call => call.Path.EndsWith("/users", StringComparison.Ordinal)).Query.Should().Contain("page=1&"));
+
+        var filter = page.FindComponent<Simulab.Web.Components.Ui.AppSelectField<Guid?>>();
+        page.InvokeAsync(() => filter.Instance.ValueChanged.InvokeAsync(Admin.Id));
+
+        page.WaitForAssertion(() => Api.Received.Last(call => call.Path.EndsWith("/users", StringComparison.Ordinal)).Query
+            .Should().Contain("page=0&").And.Contain($"roleId={Admin.Id}"));
+    }
+
+    [Fact]
+    public void Load_ApiFails_ShowsTheErrorStateWithTryAgain()
+    {
+        Api.UsersFail = true;
+
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("We could not load this list."));
+        page.FindAll("button.app-retry").Should().ContainSingle();
+    }
+
+    [Fact]
     public void Search_WithoutMatches_SaysNoUserMatchesTheTerm()
     {
         var page = RenderPage();

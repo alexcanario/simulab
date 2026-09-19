@@ -1,7 +1,7 @@
 ---
 feature: F-9
 epic: Foundation and identity
-status: building
+status: validating
 board: 713
 version: 3
 ---
@@ -195,6 +195,13 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - 2026-09-19 — Claude: saving a role's permissions or a user's roles replaces the whole set (PUT), which matches the checkbox dialogs and keeps one endpoint per dialog.
 - 2026-09-19 — Claude: the rules live in the Application layer (`SaveRoleHandler`, `DeleteRoleHandler`, `SetUserRolesHandler`), the BR8b check in one serializable transaction with the write; concurrent edits of the same role are last-write-wins (two Admins today, no conflict screen).
 - 2026-09-19 — Claude: user search is a case-insensitive `ILIKE` on email and full name; default sort by email; page sizes from the kit.
+- 2026-09-19 — Review (major, confirmed, fixed): changing the role filter kept the current page; it now reloads from the first page (`AppDataTable.ReloadFromFirstPageAsync`), test `UsersPageTests.RoleFilterChanged_OnALaterPage_ReloadsFromTheFirstPage`.
+- 2026-09-19 — Review (minor, fixed): effective permissions now join through `Roles`, so a deleted role grants nothing by construction, not only because it has no holder.
+- 2026-09-19 — Review (minor, fixed): a system role saved with a blank or out-of-bounds name answers 400 `role.name_invalid`, like a custom role (`UpdateSystemRole_BlankName_IsRefusedAsInvalid`).
+- 2026-09-19 — Review (minor, fixed): the role dialog asks for a fresh token at Save and never falls back to the one read when it opened.
+- 2026-09-19 — Review (minor, fixed): tests added for concurrent last-manager removal (`ConcurrentLastManagerTests`, seen failing with the advisory lock removed), for `_` and `\` in the search, and for the users list error state.
+- 2026-09-19 — Review (minor, accepted): a disabled Delete gives its reason in a tooltip only; the user count, a link in the same row, says the same thing to keyboard and screen-reader users. Focusable disabled buttons would be a kit-wide change.
+- 2026-09-19 — Review (minor, accepted): roles created before F-9 keep `created_at = 0001-01-01` (their real date is unknown), and the migration's `UPDATE … is_system` is not tested on a pre-F-9 database; the startup seed marks the same rows and is tested (`SystemRoleSeedTests`). The migration already ran on the local database, so editing it would not re-run.
 - 2026-09-19 — Claude (build): the seed roles are created at startup by `EnsureRolesAndPermissionsAsync` (F-6), not by a migration, so `IsSystem` is set in both places: the migration marks the three existing rows, the seed creates them marked. The paged response is `{ Items, Total }` (rule `api-contracts`), not `TotalCount`.
 - 2026-09-19 — The users list has a role filter next to the search, and each role's user count on `/admin/roles` links to it — owner, screen question 1 — finding the Admins among thousands of Students by search alone is not workable, and `role_assignment.last_manager` asks for exactly that.
 - 2026-09-19 — Delete of a custom role in use is shown disabled with a tooltip giving the user count, instead of opening a dialog that would only fail; the API check stays for races — owner, screen question 2.
@@ -247,15 +254,15 @@ You need two accounts: your Admin account (from F-6; if you have none, make one 
 | AC5 | `RoleAdministrationTests.SaveRole_NameTakenIgnoringCaseByActiveDeletedOrSeedRole_IsRefused`, `UpdateRole_SameNameDifferentCase_RenamesItself`; `RolesPageTests.Save_ApiRefuses_ShowsTheTranslatedErrorInTheDialog` |
 | AC6 | `RoleAdministrationTests.SaveRole_UnknownPermission_IsRefusedAndNothingChanges` |
 | AC7 | `RoleAdministrationTests.UpdateRole_PermissionsChanged_ReachTheHolderAfterTheCacheWindow` |
-| AC8 | `RoleAdministrationTests.SystemRole_RenameOrDelete_IsRefusedButItsPermissionsChange`; `RolesPageTests.EditSystemRole_NameIsReadOnlyAndTheStoredNameIsSent` |
+| AC8 | `RoleAdministrationTests.SystemRole_RenameOrDelete_IsRefusedButItsPermissionsChange`, `UpdateSystemRole_BlankName_IsRefusedAsInvalid`; `RolesPageTests.EditSystemRole_NameIsReadOnlyAndTheStoredNameIsSent` |
 | AC9 | `RoleAdministrationTests.AdminRole_LosingRolesManage_IsRefused` |
 | AC10 | `RoleAdministrationTests.DeleteRole_InUse_IsRefused_ThenWithoutHolders_IsSoftDeletedAndItsNameStaysTaken`; `RolesPageTests.Delete_Confirmed_DeletesAndShowsTheSnackbar`, `Delete_RefusedBecauseSomeoneGotTheRoleMeanwhile_ShowsTheAlert` |
-| AC11 | `RoleAdministrationTests.ListUsers_SearchAndRoleFilter_ReturnNonDeletedAccountsOfAnyStatusPagedOnTheServer`, `ListUsers_SearchWithPatternCharacters_MatchesThemLiterally`; `UsersPageTests.Load_ShowsEmailNameStatusAndRoleChips`, `RoleInTheAddress_IsPreselectedAndSentAsTheFilter`, `Search_WithoutMatches_SaysNoUserMatchesTheTerm` |
+| AC11 | `RoleAdministrationTests.ListUsers_SearchAndRoleFilter_ReturnNonDeletedAccountsOfAnyStatusPagedOnTheServer`, `ListUsers_SearchWithPatternCharacters_MatchesThemLiterally` (`%`, `_`, `\`); `UsersPageTests.Load_ShowsEmailNameStatusAndRoleChips`, `RoleFilterChanged_OnALaterPage_ReloadsFromTheFirstPage`, `RoleInTheAddress_IsPreselectedAndSentAsTheFilter`, `Search_WithoutMatches_SaysNoUserMatchesTheTerm` |
 | AC12 | `RoleAdministrationTests.SetUserRoles_SeveralRoles_ReplacesTheSetAndPermissionsAreTheirUnion`; `UsersPageTests.EditRoles_ShowsEveryRoleWithItsPermissions_SavesTheSetAndShowsTheSnackbar` |
-| AC13 | `LastManagerTests.Change_ThatLeavesNoActiveManager_IsRefusedAndNothingChanges_UntilASecondManagerExists`; `UsersPageTests.EditRoles_LastManager_ShowsTheErrorAndKeepsTheDialogOpen` |
+| AC13 | `LastManagerTests.Change_ThatLeavesNoActiveManager_IsRefusedAndNothingChanges_UntilASecondManagerExists`, `ConcurrentLastManagerTests.TwoManagersRemovingThemselvesAtOnce_ExactlyOneIsRefused`; `UsersPageTests.EditRoles_LastManager_ShowsTheErrorAndKeepsTheDialogOpen` |
 | AC14 | `RoleAdministrationTests.UnknownTargets_AnswerNotFoundOrRoleUnknown` |
 | AC15 | `RoleAdministrationTests.EveryEndpoint_WithoutRolesManage_IsForbidden` (7 routes); `NavigationItemsTests.All_AdministrationItems_AreRolesAndUsersBehindRolesManage`, `Visible_ItemWithPermission_IsHiddenWithoutIt` (F-6); Not Found page: validation script step 5 (screen-only, as F-6 AC6) |
-| AC16 | `RolesPageTests.RowActions_SystemRoleHasNoDelete_CustomRoleInUseHasItDisabledWithTheReason`, `Load_ApiFails_ShowsTheErrorStateWithTryAgain`, `EditSystemRole_…`, `Delete_…`; `AppRowActionsTests.Render_DeleteDisabledReason_ShowsDeleteDisabledWithTheReasonAsTooltip`; Esc/discard and focus: validation script steps 3 and 8 |
+| AC16 | `RolesPageTests.RowActions_SystemRoleHasNoDelete_CustomRoleInUseHasItDisabledWithTheReason`, `Load_ApiFails_ShowsTheErrorStateWithTryAgain`, `EditSystemRole_…`, `Delete_…`; `UsersPageTests.Load_ApiFails_ShowsTheErrorStateWithTryAgain`; `AppRowActionsTests.Render_DeleteDisabledReason_ShowsDeleteDisabledWithTheReasonAsTooltip`; Esc/discard and focus: validation script steps 3 and 8 |
 | AC17 | `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (en, pt-BR, pt-PT); `RolesPageTests.Load_InPortuguesePortugal_TranslatesSystemRolesAndKeepsCustomNames` |
 | AC18 | `IdentityModuleBoundaryTests` (pre-existing, green with the new Application ports and Infrastructure adapters) |
 | AC19 | `ResourceParityTests` (Web, all cases), `RoleResourcesTests` |

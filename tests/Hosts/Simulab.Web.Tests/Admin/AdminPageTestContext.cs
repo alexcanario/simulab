@@ -73,6 +73,9 @@ public abstract class AdminPageTestContext : KitTestContext
             new(Guid.Parse("0198f0a2-0000-7000-8000-0000000000a3"), "diego.alves@exemplo.com.br", null, "Pending", [])
         ];
 
+        /// <summary>When true, the user list answers a server error.</summary>
+        public bool UsersFail { get; set; }
+
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
 
@@ -118,7 +121,16 @@ public abstract class AdminPageTestContext : KitTestContext
 
             if (path.EndsWith("/users", StringComparison.Ordinal))
             {
-                return Json(new UserPageResponse(Users, Users.Count));
+                if (UsersFail)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                }
+
+                // Paged like the Api: the page the query asks for, and the total.
+                var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+                var size = int.Parse(query["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+                var number = int.Parse(query["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+                return Json(new UserPageResponse([.. Users.Skip(number * size).Take(size)], Users.Count));
             }
 
             if (path.EndsWith("/roles", StringComparison.Ordinal) && request.Method == HttpMethod.Put)

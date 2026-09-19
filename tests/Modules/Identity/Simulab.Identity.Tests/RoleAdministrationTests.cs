@@ -263,14 +263,32 @@ public sealed class RoleAdministrationTests : IdentityApiTests
         unknownRole!.Items.Should().BeEmpty();
     }
 
-    [Fact]
-    public async Task ListUsers_SearchWithPatternCharacters_MatchesThemLiterally()
+    [Theory]
+    [InlineData("%")]
+    [InlineData("_")]
+    [InlineData("\\")]
+    public async Task ListUsers_SearchWithPatternCharacters_MatchesThemLiterally(string character)
     {
         var admin = await AdminAsync();
+        var tag = Guid.NewGuid().ToString("N")[..8];
+        var literal = await Accounts.CreateAsync(Factory.Services, fullName: $"Ana{character}{tag}");
+        await Accounts.CreateAsync(Factory.Services, fullName: $"AnaX{tag}");
 
-        var page = await admin.GetFromJsonAsync<UserPageResponse>($"{Users}?search=%25", AppJson.Options);
+        var page = await admin.GetFromJsonAsync<UserPageResponse>($"{Users}?search={Uri.EscapeDataString($"a{character}{tag}")}", AppJson.Options);
 
-        page!.Items.Should().BeEmpty("no address or name contains a literal %");
+        page!.Items.Select(user => user.Id).Should().Equal([literal.Id], "the character matches only itself, not any text");
+    }
+
+    [Fact]
+    public async Task UpdateSystemRole_BlankName_IsRefusedAsInvalid()
+    {
+        var admin = await AdminAsync();
+        var curator = await RoleNamedAsync(admin, IdentityRoles.Curator);
+
+        var response = await admin.PutAsJsonAsync($"{Roles}/{curator.Id}", new SaveRoleRequest(" ", []), AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(IdentityErrorCodes.RoleNameInvalid);
     }
 
     [Fact]
