@@ -63,5 +63,5 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 0 warnings; baseline stays empty; not timed apart from the suite (2026-09-19, B-7) |
-| Full test suite | < 5 min | 410 tests, 0 failed; longest project Api.Tests 24 s (2026-09-19, B-7) |
+| Full build | | 14 s, 0 warnings; baseline stays empty (2026-09-19, B-4) |
+| Full test suite | < 5 min | 425 tests, 27 s (2026-09-19, B-4) |
