@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Security;
 using Simulab.Identity.Application.Sessions;
@@ -19,7 +20,8 @@ public sealed class ResetPasswordHandler(
     IEmailVerificationTokenStore verificationTokens,
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<ResetPasswordHandler> logger)
 {
     public async Task<Result> HandleAsync(string? rawToken, string? newPassword, CancellationToken cancellationToken = default)
     {
@@ -54,15 +56,22 @@ public sealed class ResetPasswordHandler(
             return Result.Failure(refusal);
         }
 
+        // BR2: the link is spent before anything changes, in one conditional update, so two concurrent
+        // resets with the same link cannot both succeed.
+        if (!await tokenStore.TryConsumeAsync(token, now, cancellationToken))
+        {
+            return Failure(IdentityErrorCodes.PasswordResetInvalid, ErrorKind.Validation);
+        }
+
         // Our own token proved the mailbox; Identity's own reset token is only the key its API asks for.
+        // The rules were checked above, so a failure here is not the visitor's password: a server error.
         var identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
         var reset = await userManager.ResetPasswordAsync(user, identityToken, newPassword!);
         if (!reset.Succeeded)
         {
-            return Failure(IdentityErrorCodes.PasswordResetTooWeak, ErrorKind.Validation);
+            throw new InvalidOperationException(
+                $"Resetting the password failed after the checks passed: {string.Join(", ", reset.Errors.Select(error => error.Code))}.");
         }
-
-        await tokenStore.ConsumeAsync(token, now, cancellationToken);
 
         // BR5: the person who opened the link owns the mailbox; making them wait out a lockout protects nothing.
         await userManager.ResetAccessFailedCountAsync(user);
@@ -79,7 +88,7 @@ public sealed class ResetPasswordHandler(
         // BR9: whoever holds the old password may hold a session too.
         await sessions.RevokeAllAsync(user.Id, exceptSessionJti: null, cancellationToken);
 
-        await mailer.SendPasswordChangedAsync(user.Email!, now, user.PreferredLanguage, cancellationToken);
+        await PasswordNotice.SendAsync(mailer, logger, user, now, cancellationToken);
         return Result.Success();
     }
 

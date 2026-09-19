@@ -225,6 +225,20 @@ Extends `IdentityResources` (screens), the shared resources (error codes, menu) 
 - 2026-09-19 — Build (found on screen): raw links on the sign-in pages ("Forgot your password?", and F-5's "Create an account") had the text colour and no underline, so they read as text. They are now underlined in the text colour; the primary blue was tried and gives 3.5:1 on the dark card, under AA.
 - 2026-09-19 — Build, noticed and not built (ideas): the sign-in password field still says `autocomplete="new-password"` (F-5 asked for `current-password`); the Terms/Privacy links in the auth footer are primary blue on the dark background, about 3.5:1.
 
+- 2026-09-19 — Review (`/agile:review`, 0 blockers, 6 majors, 7 minors; every major checked in the code):
+  - major, a refresh took the old session id out of the per-user index without revoking its access token, so a reset missed it for up to 15 min: a refresh now revokes the access token it replaces. Fixed; test `Reset_SessionThatRefreshed_EndsTooAndItsOlderAccessTokenIsRevoked`.
+  - major, a refresh racing a revoke-all could leave a new session behind: each session now remembers the user's security stamp, which a reset or change renews, and a refresh with an old stamp is refused. The caller of a change gets the new stamp on its own session, so it keeps working (found by the tests: without it the caller was signed out at its next refresh). Worst case left: an access token from that race lives until its own 15 minutes. Fixed; test `Refresh_SessionFromBeforeThePasswordChanged_IsRefusedEvenIfRevokeAllMissedIt`.
+  - major, two concurrent resets with one link could both succeed: the link is now spent first with one conditional update; a failure of Identity's own reset after the checks is a server error, never `password_too_weak`. Fixed; test `Reset_TwoConcurrentResetsWithOneLink_OnlyOneSucceeds`.
+  - major, a failing mail server made a 500 that only real accounts reach: the reset email failure is logged and the answer stays 202. Fixed; test `RequestLink_MailServerFails_SameAnswerAsAnUnknownAddress`. The response time still differs (only real accounts wait for SMTP) until emails go through the job table: accepted and recorded as an idea.
+  - major, the password-changed email failing after a successful change returned 500: the notice is best effort (`PasswordNotice`). Fixed; test `Change_MailServerFails_TheChangeStillSucceeds`.
+  - major, the per-client limits key on the connection address, and the Api only ever sees the Web server: see `## Open questions` (owner decision).
+  - minor, the 423 answer was built by hand: it goes through the one `Problem` helper, with `retryAfterSeconds` as a typed value. Fixed.
+  - minor, no email format check and no Try again on `/forgot-password`: added (`EmailRules`, the Try again action); the check runs on submit, as on the other identity pages. Fixed; test `Submit_NotAnEmail_ShowsTheFormatMessageAndSendsNothing`.
+  - minor, the cooldown showed the announced value (tens) instead of the seconds: the seconds are shown, and a visually hidden live region announces every ten. Fixed.
+  - minor, the expired state borrowed F-4's `CheckEmail.Resend` key and ignored an empty email: `ResetPassword.SendNewLink` in three languages and a field error. Fixed.
+  - minor, the session tests asserted only 401: they assert `identity.token_revoked`. Fixed.
+  - minor, no race tests: the concurrent-reset and stale-stamp tests above. Fixed.
+
 ## Out of scope
 - Fixing the Web's token refresh and revoked-session handling: B-3.
 - "My account" page and linking the change from it (F-8).
@@ -234,7 +248,7 @@ Extends `IdentityResources` (screens), the shared resources (error codes, menu) 
 - Google sign-in and TOTP (F-11).
 
 ## Open questions
-- (none)
+- Review, major: every per-client limit (F-4 registration and resend, F-7 reset request, check and reset) keys on `Connection.RemoteIpAddress`. The Web calls the Api from the server (B-3), so every visitor shares the Web's one bucket: 5 reset links an hour for the whole site, and anyone can spend it. BR3 cannot be met as written without the visitor's address reaching the Api. Owner decision pending (2026-09-19).
 
 ## Change notes
 

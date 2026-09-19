@@ -91,4 +91,5 @@
   <data name="ChangePassword.NewPassword.Label" xml:space="preserve"><value>Nova palavra-passe</value></data>
   <data name="ChangePassword.ConfirmPassword.Label" xml:space="preserve"><value>Confirmar nova palavra-passe</value></data>
   <data name="ChangePassword.Changed" xml:space="preserve"><value>Palavra-passe alterada. Os outros dispositivos terminaram a sessão.</value></data>
+  <data name="ResetPassword.SendNewLink" xml:space="preserve"><value>Enviar uma nova ligação</value></data>
 </root>

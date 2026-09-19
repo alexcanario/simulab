@@ -274,16 +274,8 @@ public static class IdentityEndpoints
             return Problem(result.Error);
         }
 
-        return Results.Problem(new ProblemDetails
-        {
-            Status = StatusCodes.Status423Locked,
-            Title = result.Error.Code,
-            Extensions =
-            {
-                ["code"] = result.Error.Code,
-                ["retryAfterSeconds"] = int.Parse(result.Error.Detail ?? "0", System.Globalization.CultureInfo.InvariantCulture)
-            }
-        });
+        var seconds = int.TryParse(result.Error.Detail, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? parsed : 0;
+        return Problem(result.Error with { Detail = null }, StatusCodes.Status423Locked, ("retryAfterSeconds", seconds));
     }
 
     private static async Task<IResult> GetLegalDocumentAsync(
@@ -313,14 +305,23 @@ public static class IdentityEndpoints
         Enum.TryParse(topic, ignoreCase: true, out parsed) && Enum.IsDefined(parsed);
 
     /// <summary>RFC 9457 problem details plus the stable code the UI turns into text (rule: api-contracts).</summary>
-    private static IResult Problem(Error error, int? status = null) =>
-        Results.Problem(new ProblemDetails
+    private static IResult Problem(Error error, int? status = null, params (string Name, object Value)[] extensions)
+    {
+        var problem = new ProblemDetails
         {
             Status = status ?? StatusFor(error.Kind),
             Title = error.Code,
             Detail = error.Detail,
             Extensions = { ["code"] = error.Code }
-        });
+        };
+
+        foreach (var (name, value) in extensions)
+        {
+            problem.Extensions[name] = value;
+        }
+
+        return Results.Problem(problem);
+    }
 
     private static int StatusFor(ErrorKind kind) => kind switch
     {

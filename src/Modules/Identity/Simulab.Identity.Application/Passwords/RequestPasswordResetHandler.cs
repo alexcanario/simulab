@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Security;
 using Simulab.Identity.Domain.Entities;
@@ -12,7 +13,8 @@ public sealed class RequestPasswordResetHandler(
     IUserDirectory userDirectory,
     IPasswordResetTokenStore tokenStore,
     IPasswordMailer mailer,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<RequestPasswordResetHandler> logger)
 {
     public async Task HandleAsync(string? email, CancellationToken cancellationToken = default)
     {
@@ -48,7 +50,15 @@ public sealed class RequestPasswordResetHandler(
             },
             cancellationToken);
 
-        await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+        // BR1: a mail server that fails must not turn into a 500 that only real accounts can reach.
+        try
+        {
+            await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            logger.LogError(exception, "Sending a password reset email failed.");
+        }
     }
 
     /// <summary>BR3, per account and silent: one email a minute, five an hour, counted from the token rows.</summary>

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Simulab.Identity.Api;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
@@ -239,9 +240,74 @@ public sealed class PasswordResetTests : IdentityApiTests
 
         foreach (var session in sessions)
         {
-            (await SignedInSessions.StatusOfAsync(client, session)).Should().Be(HttpStatusCode.Unauthorized);
+            (await SignedInSessions.AnswerOfAsync(client, session.AccessToken!)).Should().Be((HttpStatusCode.Unauthorized, IdentityErrorCodes.TokenRevoked));
             (await TokenClient.RefreshAsync(client, session.RefreshToken!)).Error.Should().Be(IdentityErrorCodes.RefreshTokenInvalid);
         }
+    }
+
+    [Fact]
+    public async Task Reset_SessionThatRefreshed_EndsTooAndItsOlderAccessTokenIsRevoked()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Emails);
+        var first = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        var refreshed = await TokenClient.RefreshAsync(client, first.RefreshToken!);
+
+        // Rotation itself retires the older access token (review finding, F-7).
+        (await SignedInSessions.AnswerOfAsync(client, first.AccessToken!)).Should().Be((HttpStatusCode.Unauthorized, IdentityErrorCodes.TokenRevoked));
+
+        var token = await RequestLinkAsync(client, email);
+        await PostAsync(client, ResetRoute, new ResetPasswordRequest(token, NewPassword), HttpStatusCode.NoContent);
+
+        (await SignedInSessions.AnswerOfAsync(client, refreshed.AccessToken!)).Should().Be((HttpStatusCode.Unauthorized, IdentityErrorCodes.TokenRevoked));
+        (await TokenClient.RefreshAsync(client, refreshed.RefreshToken!)).Error.Should().Be(IdentityErrorCodes.RefreshTokenInvalid);
+    }
+
+    [Fact]
+    public async Task Refresh_SessionFromBeforeThePasswordChanged_IsRefusedEvenIfRevokeAllMissedIt()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Emails);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        var user = await QueryAsync(context => context.Users.SingleAsync(u => u.Email == email));
+        var oldStamp = user.SecurityStamp;
+        var sessionJti = await SignedInSessions.SessionJtiAsync(client, session.AccessToken!);
+        var token = await RequestLinkAsync(client, email);
+        await PostAsync(client, ResetRoute, new ResetPasswordRequest(token, NewPassword), HttpStatusCode.NoContent);
+
+        // Plays the race the review found: the session is back in Redis with the stamp it began with.
+        await using (var scope = Factory.Services.CreateAsyncScope())
+        {
+            var sessions = scope.ServiceProvider.GetRequiredService<Simulab.Identity.Application.Sessions.IRefreshSessionStore>();
+            await sessions.CreateAsync(sessionJti, user.Id, oldStamp, Factory.Clock.GetUtcNow().AddDays(1));
+        }
+
+        (await TokenClient.RefreshAsync(client, session.RefreshToken!)).Error.Should().Be(IdentityErrorCodes.RefreshTokenInvalid);
+    }
+
+    [Fact]
+    public async Task Reset_TwoConcurrentResetsWithOneLink_OnlyOneSucceeds()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Emails);
+        var token = await RequestLinkAsync(client, email);
+
+        var answers = await Task.WhenAll(
+            client.PostAsJsonAsync(ResetRoute, new ResetPasswordRequest(token, NewPassword), AppJson.Options),
+            Client().PostAsJsonAsync(ResetRoute, new ResetPasswordRequest(token, "Outra#Senha2026x"), AppJson.Options));
+
+        answers.Count(answer => answer.StatusCode == HttpStatusCode.NoContent).Should().Be(1);
+        answers.Count(answer => answer.StatusCode == HttpStatusCode.BadRequest).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task RequestLink_MailServerFails_SameAnswerAsAnUnknownAddress()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Emails);
+        Emails.FailNext = true;
+
+        await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
     }
 
     [Fact]

@@ -54,8 +54,8 @@ public sealed class PasswordChangeTests : IdentityApiTests
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await SignedInSessions.StatusOfAsync(client, sessions[0])).Should().Be(HttpStatusCode.OK);
-        (await SignedInSessions.StatusOfAsync(client, sessions[1])).Should().Be(HttpStatusCode.Unauthorized);
-        (await SignedInSessions.StatusOfAsync(client, sessions[2])).Should().Be(HttpStatusCode.Unauthorized);
+        (await SignedInSessions.AnswerOfAsync(client, sessions[1].AccessToken!)).Should().Be((HttpStatusCode.Unauthorized, IdentityErrorCodes.TokenRevoked));
+        (await SignedInSessions.AnswerOfAsync(client, sessions[2].AccessToken!)).Should().Be((HttpStatusCode.Unauthorized, IdentityErrorCodes.TokenRevoked));
         (await TokenClient.RefreshAsync(client, sessions[0].RefreshToken!)).AccessToken.Should().NotBeNull();
         (await TokenClient.RefreshAsync(client, sessions[1].RefreshToken!)).Error.Should().Be(IdentityErrorCodes.RefreshTokenInvalid);
     }
@@ -122,6 +122,20 @@ public sealed class PasswordChangeTests : IdentityApiTests
         (await QueryAsync(context => context.Users.SingleAsync(u => u.Email == email))).AccessFailedCount.Should().Be(0);
         Emails.Count.Should().Be(1);
         Emails.Last!.Subject.Should().StartWith("Your password was changed");
+    }
+
+    [Fact]
+    public async Task Change_MailServerFails_TheChangeStillSucceeds()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Emails);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        Emails.FailNext = true;
+
+        using var response = await ChangeAsync(client, session, SignUpForm.ValidPassword, NewPassword);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await TokenClient.SignInAsync(client, email, NewPassword)).AccessToken.Should().NotBeNull();
     }
 
     // Simulae: POST_password_change_sem_token_retorna_401.

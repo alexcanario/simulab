@@ -105,9 +105,20 @@ public static class TokenEndpoints
             return Forbid(IdentityErrorCodes.RefreshTokenInvalid);
         }
 
-        var userId = await sessions.ConsumeAsync(sessionJti, cancellationToken);
-        var user = userId is null ? null : await userManager.FindByIdAsync(userId.Value.ToString());
-        if (user is null)
+        var session = await sessions.ConsumeAsync(sessionJti, cancellationToken);
+        if (session is null)
+        {
+            return Forbid(IdentityErrorCodes.RefreshTokenInvalid);
+        }
+
+        // The old access token carries the old session id, which leaves the per-user index with this
+        // refresh: revoke it now, or a revoke-all could no longer find it (F-7 BR9).
+        await sessions.RevokeAccessTokenAsync(sessionJti, TokenLifetimes.AccessToken, cancellationToken);
+
+        // F-7 BR9: a password reset or change renewed the stamp, so a session from before it ends here,
+        // even one a concurrent revoke-all did not see.
+        var user = await userManager.FindByIdAsync(session.UserId.ToString());
+        if (user is null || session.SecurityStamp is null || !string.Equals(session.SecurityStamp, user.SecurityStamp, StringComparison.Ordinal))
         {
             return Forbid(IdentityErrorCodes.RefreshTokenInvalid);
         }
@@ -122,7 +133,7 @@ public static class TokenEndpoints
         CancellationToken cancellationToken)
     {
         var sessionJti = Guid.CreateVersion7().ToString();
-        await sessions.CreateAsync(sessionJti, user.Id, timeProvider.GetUtcNow().Add(TokenLifetimes.RefreshToken), cancellationToken);
+        await sessions.CreateAsync(sessionJti, user.Id, user.SecurityStamp, timeProvider.GetUtcNow().Add(TokenLifetimes.RefreshToken), cancellationToken);
 
         var identity = new ClaimsIdentity(authenticationType: "OpenIddict", Claims.Name, Claims.Role);
         identity.SetClaim(Claims.Subject, user.Id.ToString())

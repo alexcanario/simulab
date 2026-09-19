@@ -17,34 +17,43 @@ public sealed class RedisRefreshSessionStore(IConnectionMultiplexer redis, TimeP
 
     private IDatabase Database => redis.GetDatabase();
 
-    public async Task CreateAsync(string sessionJti, Guid userId, DateTimeOffset expiresAt, CancellationToken cancellationToken = default)
+    public async Task CreateAsync(string sessionJti, Guid userId, string? securityStamp, DateTimeOffset expiresAt, CancellationToken cancellationToken = default)
     {
         var ttl = TtlUntil(expiresAt);
-        await Database.StringSetAsync(SessionKey(sessionJti), userId.ToString(), ttl);
+        await Database.StringSetAsync(SessionKey(sessionJti), $"{userId:D}|{securityStamp}", ttl);
 
         // The index lives as long as the newest session in it.
         await Database.SetAddAsync(UserSessionsKey(userId), sessionJti);
         await Database.KeyExpireAsync(UserSessionsKey(userId), ttl);
     }
 
-    public async Task<Guid?> ConsumeAsync(string sessionJti, CancellationToken cancellationToken = default)
+    public async Task<RefreshSession?> ConsumeAsync(string sessionJti, CancellationToken cancellationToken = default)
     {
-        var value = await Database.StringGetDeleteAsync(SessionKey(sessionJti));
-        if (!value.HasValue || !Guid.TryParse(value.ToString(), out var userId))
+        var session = Parse(await Database.StringGetDeleteAsync(SessionKey(sessionJti)));
+        if (session is null)
         {
             return null;
         }
 
-        await Database.SetRemoveAsync(UserSessionsKey(userId), sessionJti);
-        return userId;
+        await Database.SetRemoveAsync(UserSessionsKey(session.UserId), sessionJti);
+        return session;
     }
 
     public async Task RemoveAsync(string sessionJti, CancellationToken cancellationToken = default)
     {
-        var value = await Database.StringGetDeleteAsync(SessionKey(sessionJti));
-        if (value.HasValue && Guid.TryParse(value.ToString(), out var userId))
+        var session = Parse(await Database.StringGetDeleteAsync(SessionKey(sessionJti)));
+        if (session is not null)
         {
-            await Database.SetRemoveAsync(UserSessionsKey(userId), sessionJti);
+            await Database.SetRemoveAsync(UserSessionsKey(session.UserId), sessionJti);
+        }
+    }
+
+    public async Task RestampAsync(string sessionJti, string? securityStamp, CancellationToken cancellationToken = default)
+    {
+        var session = Parse(await Database.StringGetAsync(SessionKey(sessionJti)));
+        if (session is not null)
+        {
+            await Database.StringSetAsync(SessionKey(sessionJti), $"{session.UserId:D}|{securityStamp}", expiry: null, keepTtl: true, when: When.Exists);
         }
     }
 
@@ -74,6 +83,20 @@ public sealed class RedisRefreshSessionStore(IConnectionMultiplexer redis, TimeP
     {
         var ttl = expiresAt - timeProvider.GetUtcNow();
         return ttl > TimeSpan.Zero ? ttl : TimeSpan.FromSeconds(1);
+    }
+
+    /// <summary>The value is <c>userId|securityStamp</c>. A value from before F-7 has no stamp and reads as a stale session.</summary>
+    private static RefreshSession? Parse(RedisValue value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var parts = value.ToString().Split('|', 2);
+        return Guid.TryParse(parts[0], out var userId)
+            ? new RefreshSession(userId, parts.Length > 1 && parts[1].Length > 0 ? parts[1] : null)
+            : null;
     }
 
     private static string SessionKey(string jti) => SessionPrefix + jti;

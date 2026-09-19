@@ -292,6 +292,18 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     text-underline-offset: 2px;
 }
 
+/* Text for screen readers only (a live region the page announces without showing it twice). */
+.app-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .app-sign-in-forgot {
     margin: -4px 0 16px;
     font-size: 0.875rem;

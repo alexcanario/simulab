@@ -7,13 +7,14 @@ namespace Simulab.Identity.Application.Sessions;
 /// </summary>
 public interface IRefreshSessionStore
 {
-    Task CreateAsync(string sessionJti, Guid userId, DateTimeOffset expiresAt, CancellationToken cancellationToken = default);
+    /// <summary>Starts a session. <paramref name="securityStamp"/> is the user's stamp now; a later reset or change renews it (F-7 BR9).</summary>
+    Task CreateAsync(string sessionJti, Guid userId, string? securityStamp, DateTimeOffset expiresAt, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Atomically reads and removes the session (BR5): a refresh token is exchanged exactly once. Returns
-    /// the user id it belonged to, or null when the token is unknown or was already used.
+    /// what the session remembered, or null when the token is unknown or was already used.
     /// </summary>
-    Task<Guid?> ConsumeAsync(string sessionJti, CancellationToken cancellationToken = default);
+    Task<RefreshSession?> ConsumeAsync(string sessionJti, CancellationToken cancellationToken = default);
 
     /// <summary>Sign-out (BR6): drops the session without returning it. A missing session is not an error.</summary>
     Task RemoveAsync(string sessionJti, CancellationToken cancellationToken = default);
@@ -32,4 +33,11 @@ public interface IRefreshSessionStore
     /// token revoked. <paramref name="exceptSessionJti"/> keeps the caller's own session (a password change).
     /// </summary>
     Task RevokeAllAsync(Guid userId, string? exceptSessionJti = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gives a surviving session the user's new security stamp (F-7 BR9): after a password change the
+    /// caller's own session keeps refreshing, while every other one fails the stamp check. A missing
+    /// session is not an error.
+    /// </summary>
+    Task RestampAsync(string sessionJti, string? securityStamp, CancellationToken cancellationToken = default);
 }

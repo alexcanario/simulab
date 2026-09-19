@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Contracts;
@@ -16,7 +17,8 @@ public sealed class ChangePasswordHandler(
     UserManager<User> userManager,
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<ChangePasswordHandler> logger)
 {
     public async Task<Result> HandleAsync(
         Guid userId,
@@ -61,10 +63,14 @@ public sealed class ChangePasswordHandler(
         // BR10.
         await userManager.ResetAccessFailedCountAsync(user);
 
-        // BR9: the other devices sign out; this one keeps working.
+        // BR9: the other devices sign out; this one keeps working, with the stamp the change just renewed.
         await sessions.RevokeAllAsync(user.Id, callerSessionJti, cancellationToken);
+        if (callerSessionJti is not null)
+        {
+            await sessions.RestampAsync(callerSessionJti, user.SecurityStamp, cancellationToken);
+        }
 
-        await mailer.SendPasswordChangedAsync(user.Email!, timeProvider.GetUtcNow(), user.PreferredLanguage, cancellationToken);
+        await PasswordNotice.SendAsync(mailer, logger, user, timeProvider.GetUtcNow(), cancellationToken);
         return Result.Success();
     }
 

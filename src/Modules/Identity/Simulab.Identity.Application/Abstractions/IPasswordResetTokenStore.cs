@@ -19,5 +19,9 @@ public interface IPasswordResetTokenStore
     /// <summary>When the newest token of this user was created; null when the user has none.</summary>
     Task<DateTimeOffset?> LastCreatedAtAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    Task ConsumeAsync(PasswordResetToken token, DateTimeOffset consumedAt, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Marks the token used only if nobody did first, in one conditional update (BR2). True for exactly one
+    /// of two concurrent callers with the same token.
+    /// </summary>
+    Task<bool> TryConsumeAsync(PasswordResetToken token, DateTimeOffset consumedAt, CancellationToken cancellationToken = default);
 }

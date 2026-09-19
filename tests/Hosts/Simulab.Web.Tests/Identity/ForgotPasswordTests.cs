@@ -20,6 +20,18 @@ public class ForgotPasswordTests : IdentityPageTestContext
     }
 
     [Fact]
+    public void Submit_NotAnEmail_ShowsTheFormatMessageAndSendsNothing()
+    {
+        var page = Render<ForgotPassword>();
+        page.Find("#forgot-password-email").Change("ana@");
+
+        page.Find("button.app-forgot-password-submit").Click();
+
+        page.Markup.Should().Contain("Enter a valid email address.");
+        Api.CountOf("/password-reset-requests").Should().Be(0);
+    }
+
+    [Fact]
     public void Submit_Address_ShowsTheGenericAnswerAndStartsTheCooldown()
     {
         var page = Render<ForgotPassword>();

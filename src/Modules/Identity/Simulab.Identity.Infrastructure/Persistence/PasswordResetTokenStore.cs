@@ -39,10 +39,14 @@ public sealed class PasswordResetTokenStore(IdentityModuleDbContext context) : I
             .Select(token => (DateTimeOffset?)token.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task ConsumeAsync(PasswordResetToken token, DateTimeOffset consumedAt, CancellationToken cancellationToken = default)
+    public async Task<bool> TryConsumeAsync(PasswordResetToken token, DateTimeOffset consumedAt, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(token);
-        token.Consume(consumedAt);
-        await context.SaveChangesAsync(cancellationToken);
+
+        var updated = await context.PasswordResetTokens
+            .Where(row => row.Id == token.Id && row.ConsumedAt == null)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.ConsumedAt, consumedAt), cancellationToken);
+
+        return updated == 1;
     }
 }
