@@ -1,7 +1,7 @@
 ---
 bug: B-5
 feature: F-5
-status: refining
+status: approved
 board: 721
 severity: low
 ---
