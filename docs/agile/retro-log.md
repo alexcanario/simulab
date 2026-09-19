@@ -25,6 +25,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Technical terms used with the owner go into a glossary section in the same step | F-8 | 0.0.28 (`6f1a488`) |
 | ✅ | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | 0.0.29 (`afe7431`) |
 | ✅ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
+| ⏳ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | |
+| ⏳ | Anonymous endpoints check every input limit before the account lookup | B-7 | |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -205,3 +207,16 @@ Approved by the owner the same day, after the ship.
 - ✅ **`[generic]` Explain technical terms to the owner.** The project glossary template gets a `## Technical terms` section (term, owner-language word, meaning), and the output-style rule says a technical term used with the owner for the first time is added there in the same step.
 - ✅ **`[stack: bunit]` Wait for what an async handler does.** After a click whose handler awaits (an Api call, `Task.Yield`), assert with `WaitForAssertion`: `Click()` returns when the handler first yields, not when it finishes.
 - ✅ **`[stack: ef-core-npgsql]` Clear the pool of a per-class test host.** A `WebApplicationFactory` with a database per test class clears its Npgsql pool on dispose (`NpgsqlConnection.ClearPool`), or idle pooled connections exhaust the container's `max_connections`.
+
+## 2026-09-19 — B-7 Sign-up accepts a name or email longer than the column
+Approved by the owner the same day, after the ship.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The first ship run of the gate stopped on "new warnings", and the list was lost: its output had been piped through `grep`. A second run was clean; the warning stays unknown | Project rule + plugin improvement | `.claude/rules/agile/project.md`, "Sessions and retro"; this log (see below) |
+| 2 | B-7 was written by hand during the F-8 build, without the bug template: `## Validation script` and `## Delivery` were missing and found only in the build | Project rule | `.claude/rules/agile/project.md`, "Sessions and retro" |
+| 3 | The 500 also told whether an account existed (registered address 202, new one 500), breaking the same-answer rule of anonymous endpoints | Project rule + plugin improvement | `.claude/rules/agile/project.md`, "Access and entitlements"; this log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` Keep the gate's failure visible.** The build and ship skills say to save the gate's whole output to a file and quote from it; `gate.js` repeats the new warnings (code, file, line) in its last lines, so a truncated view still shows them.
+- ⏳ **`[generic]` Same answer means same checks first.** In the API contract rules: on an anonymous endpoint, every input check (format, length, column width) runs before the lookup that tells the paths apart; an unhandled error on one path (a 500) is an answer too.

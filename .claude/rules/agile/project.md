@@ -26,6 +26,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The effective plan is computed at read time from the base plan and the active time-bound grant. No job flips a user back to Free.
 - After a trial expires, AI-made data (coach history, study plan) stays readable and frozen. Block new AI calls, never hide existing data.
 - An anonymous endpoint answers the same way whether an account exists or not: same status, body and code (sign-up, resend, sign-in, password recovery).
+- On an anonymous endpoint every input limit (column width, format) is checked before the account lookup: a failure only one path can hit, even a 500, reveals whether the account exists (B-7).
 - The OpenIddict password flow is for the first-party Web only. Never register a third-party client for it.
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
 
@@ -70,3 +71,5 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
 - A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
+- Run the gate with its whole output saved to a file (scratchpad) and quote from that file; never pipe it through a filter that can drop the failure (B-7).
+- A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
