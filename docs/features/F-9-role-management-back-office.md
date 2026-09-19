@@ -225,7 +225,7 @@ Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save
 - What: (1) the affected user's menu follows a role change at their next page load, not at the next token refresh (up to 15 min); `Users.Dialog.Help` says so in the three languages. (2) The role name field has no "n/50" counter: it stops accepting input at 50 characters, and the 2-character minimum is shown by the help text and the error.
 - Why: (1) false premise found during build: since B-3 (BR4) the Web re-reads the permissions on every page load, so "within 15 minutes" would have told the Admin something untrue. (2) The kit's `AppTextField` has one hint line and no counter; adding one to the kit for one field is out of proportion.
 - Affected: UC6, BR9, the `Users.Dialog.Help` text and the name field description in Screens; no acceptance criterion changes.
-- Re-approved: pending (owner, at validation)
+- Re-approved: 2026-09-19 (owner, in the build session)
 
 ### v2 — 2026-09-19
 - What: the business-rule refusals `role.system_role_protected`, `role.admin_permission_required`, `role.in_use` and `role_assignment.last_manager` answer 422 instead of 409; `role.name_taken` stays 409. Codes and texts unchanged.
