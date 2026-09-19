@@ -64,4 +64,31 @@
   <data name="SignIn.NoAccount" xml:space="preserve"><value>Novo por aqui? {0}</value></data>
   <data name="SignIn.CreateAccount" xml:space="preserve"><value>Criar uma conta</value></data>
   <data name="SignIn.ResendVerification" xml:space="preserve"><value>Reenviar o e-mail de verificação</value></data>
+  <data name="SignIn.ForgotPassword" xml:space="preserve"><value>Esqueceu-se da palavra-passe?</value></data>
+  <data name="SignIn.PasswordReset" xml:space="preserve"><value>A sua palavra-passe foi alterada. Inicie sessão com a nova.</value></data>
+  <data name="ForgotPassword.Title" xml:space="preserve"><value>Redefinir a palavra-passe</value></data>
+  <data name="ForgotPassword.Subtitle" xml:space="preserve"><value>Indique o e-mail da sua conta e enviaremos uma ligação para escolher uma nova palavra-passe.</value></data>
+  <data name="ForgotPassword.Email.Label" xml:space="preserve"><value>E-mail</value></data>
+  <data name="ForgotPassword.Submit" xml:space="preserve"><value>Enviar ligação</value></data>
+  <data name="ForgotPassword.Sending" xml:space="preserve"><value>A enviar...</value></data>
+  <data name="ForgotPassword.Sent" xml:space="preserve"><value>Se este e-mail pertencer a uma conta, será enviada uma ligação para redefinir a palavra-passe. É válida durante 1 hora.</value></data>
+  <data name="ForgotPassword.Cooldown" xml:space="preserve"><value>Pode pedir uma nova ligação dentro de {0} s.</value></data>
+  <data name="ForgotPassword.BackToSignIn" xml:space="preserve"><value>Voltar ao início de sessão</value></data>
+  <data name="ResetPassword.Title" xml:space="preserve"><value>Escolha uma nova palavra-passe</value></data>
+  <data name="ResetPassword.Checking" xml:space="preserve"><value>A verificar a ligação...</value></data>
+  <data name="ResetPassword.NewPassword.Label" xml:space="preserve"><value>Nova palavra-passe</value></data>
+  <data name="ResetPassword.ConfirmPassword.Label" xml:space="preserve"><value>Confirmar nova palavra-passe</value></data>
+  <data name="ResetPassword.Submit" xml:space="preserve"><value>Guardar nova palavra-passe</value></data>
+  <data name="ResetPassword.Submitting" xml:space="preserve"><value>A guardar...</value></data>
+  <data name="ResetPassword.Expired.Title" xml:space="preserve"><value>Esta ligação expirou</value></data>
+  <data name="ResetPassword.Expired.Message" xml:space="preserve"><value>As ligações de redefinição duram 1 hora. Indique o seu e-mail e enviamos uma nova.</value></data>
+  <data name="ResetPassword.Invalid.Title" xml:space="preserve"><value>Esta ligação não é válida</value></data>
+  <data name="ResetPassword.Invalid.Message" xml:space="preserve"><value>Pode já ter sido usada, substituída por uma mais recente, ou copiada apenas em parte.</value></data>
+  <data name="ResetPassword.AskNewLink" xml:space="preserve"><value>Pedir uma nova ligação</value></data>
+  <data name="ChangePassword.Title" xml:space="preserve"><value>Alterar palavra-passe</value></data>
+  <data name="ChangePassword.CurrentPassword.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
+  <data name="ChangePassword.CurrentPassword.Required" xml:space="preserve"><value>Indique a sua palavra-passe atual.</value></data>
+  <data name="ChangePassword.NewPassword.Label" xml:space="preserve"><value>Nova palavra-passe</value></data>
+  <data name="ChangePassword.ConfirmPassword.Label" xml:space="preserve"><value>Confirmar nova palavra-passe</value></data>
+  <data name="ChangePassword.Changed" xml:space="preserve"><value>Palavra-passe alterada. Os outros dispositivos terminaram a sessão.</value></data>
 </root>

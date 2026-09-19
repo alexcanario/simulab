@@ -36,6 +36,11 @@
                   ActionText="@I["SignIn.ResendVerification"]"
                   OnAction="ResendAsync" />
     }
+    else if (_passwordChanged)
+    {
+        @* F-7 UC2: back from a successful reset. *@
+        <AppAlert Severity="Severity.Success" Text="@I["SignIn.PasswordReset"]" />
+    }
     else if (_sessionEnded)
     {
         @* B-3, BR5: the session ended elsewhere (sign-out, password reset) while a page was open. *@
@@ -64,6 +69,8 @@
                       Error="@_passwordError"
                       Value="@_password"
                       ValueChanged="@(value => { _password = value; _passwordError = null; })" />
+
+    <p class="app-sign-in-forgot"><a href="/forgot-password">@I["SignIn.ForgotPassword"]</a></p>
 
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
@@ -104,6 +111,7 @@
     private bool _resent;
     private bool _submitting;
     private bool _sessionEnded;
+    private bool _passwordChanged;
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,7 +123,9 @@
         }
 
         _email = Email;
-        _sessionEnded = Uri.TryCreate(Navigation.Uri, UriKind.Absolute, out var uri) && uri.PathAndQuery == AccountEndpoints.SessionEndedSignInPath;
+        var path = Uri.TryCreate(Navigation.Uri, UriKind.Absolute, out var uri) ? uri.PathAndQuery : string.Empty;
+        _sessionEnded = path == AccountEndpoints.SessionEndedSignInPath;
+        _passwordChanged = path == ResetPassword.SignInAfterResetPath;
         ApplyServerCode(Error);
     }
 
@@ -143,6 +153,7 @@
 
         _submitting = true;
         _sessionEnded = false;
+        _passwordChanged = false;
         var result = await Auth.SignInAsync(_email!.Trim(), _password!);
         _submitting = false;
         _password = null;

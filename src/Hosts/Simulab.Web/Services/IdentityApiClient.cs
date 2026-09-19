@@ -52,6 +52,55 @@ public sealed class IdentityApiClient(HttpClient http)
     public Task<ApiResult<bool>> ResendVerificationAsync(string email, CancellationToken cancellationToken = default) =>
         PostAsync<ResendVerificationRequest, bool>($"{Base}/email-verifications/resend", new ResendVerificationRequest(email), cancellationToken);
 
+    /// <summary>F-7 UC1: always a success within the client's limit; the answer never says whether the account exists.</summary>
+    public Task<ApiResult<bool>> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default) =>
+        PostAsync<RequestPasswordResetRequest, bool>($"{Base}/password-reset-requests", new RequestPasswordResetRequest(email), cancellationToken);
+
+    /// <summary>F-7: whether a reset link still works, without using it.</summary>
+    public Task<ApiResult<bool>> CheckPasswordResetTokenAsync(string token, CancellationToken cancellationToken = default) =>
+        PostAsync<PasswordResetTokenCheckRequest, bool>($"{Base}/password-reset-token-checks", new PasswordResetTokenCheckRequest(token), cancellationToken);
+
+    public Task<ApiResult<bool>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken = default) =>
+        PostAsync<ResetPasswordRequest, bool>($"{Base}/password-resets", new ResetPasswordRequest(token, newPassword), cancellationToken);
+
+    /// <summary>
+    /// F-7 UC6, the caller's own password. A lockout answer carries the seconds left, which the page counts
+    /// down (BR8); every other failure is a code, like any other call.
+    /// </summary>
+    public async Task<PasswordChangeResult> ChangePasswordAsync(string accessToken, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{Base}/password-changes")
+            {
+                Content = JsonContent.Create(new ChangePasswordRequest(currentPassword, newPassword), options: AppJson.Options)
+            };
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return new PasswordChangeResult(null, null);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Locked)
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(AppJson.Options, cancellationToken);
+                var seconds = problem?.Extensions.TryGetValue("retryAfterSeconds", out var value) == true && value is JsonElement { ValueKind: JsonValueKind.Number } element
+                    ? element.GetInt32()
+                    : 0;
+                return new PasswordChangeResult(IdentityErrorCodes.AccountLocked, seconds);
+            }
+
+            return new PasswordChangeResult(await ReadCodeAsync(response, cancellationToken), null);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException or NotSupportedException)
+        {
+            return new PasswordChangeResult(Components.Ui.ErrorText.UnexpectedCode, null);
+        }
+    }
+
     /// <summary>F-6, BR9: the placeholder /admin/roles screen. The Api still checks the permission itself.</summary>
     public Task<ApiResult<RoleNamesResponse>> GetRoleNamesAsync(string accessToken, CancellationToken cancellationToken = default) =>
         SendAsync<RoleNamesResponse>(

@@ -48,6 +48,17 @@ public abstract class IdentityPageTestContext : KitTestContext
 
         public VerificationOutcome VerifyOutcome { get; set; } = VerificationOutcome.Verified;
 
+        public (HttpStatusCode Status, string Code)? RequestResetFailure { get; set; }
+
+        public (HttpStatusCode Status, string Code)? CheckFailure { get; set; }
+
+        public (HttpStatusCode Status, string Code)? ResetFailure { get; set; }
+
+        public (HttpStatusCode Status, string Code)? ChangeFailure { get; set; }
+
+        /// <summary>When set, a password change answers 423 with these seconds left.</summary>
+        public int? ChangeLockedSeconds { get; set; }
+
         public IReadOnlyList<HttpRequestMessage> Requests => _requests;
 
         public int CountOf(string route) => _requests.Count(request => request.RequestUri!.AbsolutePath.EndsWith(route, StringComparison.Ordinal));
@@ -82,6 +93,37 @@ public abstract class IdentityPageTestContext : KitTestContext
             if (path.EndsWith("/resend", StringComparison.Ordinal))
             {
                 return new HttpResponseMessage(HttpStatusCode.Accepted);
+            }
+
+            // F-7.
+            if (path.EndsWith("/password-reset-requests", StringComparison.Ordinal))
+            {
+                return RequestResetFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.Accepted);
+            }
+
+            if (path.EndsWith("/password-reset-token-checks", StringComparison.Ordinal))
+            {
+                return CheckFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            if (path.EndsWith("/password-resets", StringComparison.Ordinal))
+            {
+                return ResetFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            if (path.EndsWith("/password-changes", StringComparison.Ordinal))
+            {
+                if (ChangeLockedSeconds is { } seconds)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Locked)
+                    {
+                        Content = JsonContent.Create(
+                            new Dictionary<string, object> { ["status"] = 423, ["code"] = IdentityErrorCodes.AccountLocked, ["retryAfterSeconds"] = seconds },
+                            options: AppJson.Options)
+                    };
+                }
+
+                return ChangeFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             await Task.CompletedTask;
