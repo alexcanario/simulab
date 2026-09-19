@@ -30,6 +30,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
+| ⏳ | Kit parameters whose value depends on the page's meaning have no default (`[EditorRequired]`) | B-5 | |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -252,3 +253,13 @@ From 0.0.29 to 0.0.31. Approved by the owner.
 - Left alone: the six build files (no upstream change).
 - Noted, not changed: the anonymous-endpoint rule now lives in `api-contracts.md` and also in `project.md` (B-7); a later retro may drop the project copy.
 - No build file or build-checked rule changed, so the suite was not rerun.
+
+## 2026-09-19 — B-5 The sign-in password field asks for a new password
+Approved by the owner the same day, after the ship.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The bug came from a silent default in a kit component: the sign-in page said nothing and inherited `new-password` | Project rule + plugin improvement | `.claude/rules/agile/ui-project.md` (commit `cf97ec3`); this log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` No silent defaults for meaning.** In the core `ui` rule: a kit parameter whose right value depends on what the page means (autocomplete, input purpose, a destructive action's wording) has no default; it is required (in Blazor `[EditorRequired]`, whose `RZ2012` warning the gate refuses), so a page that forgets it fails the build.
