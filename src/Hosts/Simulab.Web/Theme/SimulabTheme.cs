@@ -32,7 +32,9 @@ public static class SimulabTheme
             Info = "#2478C5",
             SuccessContrastText = "#0D6056",
             WarningContrastText = "#7A4A00",
-            ErrorContrastText = "#7A1818",
+            // F-10: this is the text of a filled destructive button, on top of Error. The dark red it had
+            // read at 1.92:1 there; white reads at 5.54:1. ThemeContrastTests holds the numbers.
+            ErrorContrastText = "#FFFFFF",
         },
         PaletteDark = new PaletteDark
         {
@@ -52,7 +54,11 @@ public static class SimulabTheme
             TableLines = "#263352",
             Success = "#1A9E8C",
             Warning = "#D98B1A",
-            Error = "#BE3737",
+            // F-10: the light red is 2.93:1 on the dark surface, so error text failed AA there. This one is
+            // 5.05:1 on the surface and 5.53:1 on the background; the filled button gets dark ink instead of
+            // white, which white could no longer give on a lighter red. ThemeContrastTests holds the numbers.
+            Error = "#E06C6C",
+            ErrorContrastText = "#19243E",
             Info = "#2478C5",
         },
         Typography = new Typography
