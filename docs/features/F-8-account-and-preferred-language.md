@@ -98,6 +98,7 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - 2026-09-19 (review) — minor, accepted: `GET /identity/session` now reads the account once more per call (primary-key lookup next to the permission query it already runs); a separate sign-in call would add a round trip for the same data.
 - 2026-09-19 (review) — minor, fixed in the file: `/account` is signed-in only through a redirect, like `/account/password`, not `[Authorize]`.
 - 2026-09-19 (review) — minor, at ship: the manual (three languages) must say Change password moved to My account.
+- 2026-09-19 — Retro candidate (owner agreed): a rule that every technical term used with the owner is added to `## Technical terms` in `docs/glossary.md` in the same step.
 
 ## Out of scope
 - Changing the email address.
