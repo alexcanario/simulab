@@ -40,6 +40,7 @@ builder.Services.AddIdentityModule(
     builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."),
     builder.Environment.IsDevelopment());
 builder.Services.AddSingleton<ClientRateLimiter>();
+builder.Services.AddSingleton<ClientAddress>();
 builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityAuthorization();

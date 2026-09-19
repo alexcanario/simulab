@@ -155,11 +155,12 @@ public static class IdentityEndpoints
         HttpContext context,
         RegisterUserHandler handler,
         ClientRateLimiter rateLimiter,
+        ClientAddress clientAddress,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(ClientKey(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
+        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.RegistrationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -174,7 +175,7 @@ public static class IdentityEndpoints
             request.PrivacyVersion,
             RequestLocale.From(context.Request),
             request.FullName,
-            context.Connection.RemoteIpAddress?.ToString());
+            clientAddress.Of(context));
 
         var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -209,11 +210,12 @@ public static class IdentityEndpoints
         HttpContext context,
         ResendVerificationHandler handler,
         ClientRateLimiter rateLimiter,
+        ClientAddress clientAddress,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(ClientKey(context, "resend"), IdentityRateLimits.ResendsPerHour, IdentityRateLimits.Window))
+        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "resend"), IdentityRateLimits.ResendsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.VerificationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -228,11 +230,12 @@ public static class IdentityEndpoints
         HttpContext context,
         RequestPasswordResetHandler handler,
         ClientRateLimiter rateLimiter,
+        ClientAddress clientAddress,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset-request"), IdentityRateLimits.PasswordResetRequestsPerHour, IdentityRateLimits.Window))
+        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset-request"), IdentityRateLimits.PasswordResetRequestsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -247,11 +250,12 @@ public static class IdentityEndpoints
         HttpContext context,
         CheckPasswordResetTokenHandler handler,
         ClientRateLimiter rateLimiter,
+        ClientAddress clientAddress,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -269,11 +273,12 @@ public static class IdentityEndpoints
         HttpContext context,
         ResetPasswordHandler handler,
         ClientRateLimiter rateLimiter,
+        ClientAddress clientAddress,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(ClientKey(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -342,11 +347,6 @@ public static class IdentityEndpoints
             ? Problem(new Error(IdentityErrorCodes.LegalDocumentNotFound, ErrorKind.NotFound), StatusCodes.Status404NotFound)
             : Results.Ok(document);
     }
-
-    // Behind a proxy this is the proxy's address until forwarded headers are configured: a deployment
-    // concern, and the limit still holds as one bucket instead of many.
-    private static string ClientKey(HttpContext context, string scope) =>
-        $"{scope}:{context.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
 
     private static bool TryParseTopic(string topic, out LegalTopic parsed) =>
         Enum.TryParse(topic, ignoreCase: true, out parsed) && Enum.IsDefined(parsed);

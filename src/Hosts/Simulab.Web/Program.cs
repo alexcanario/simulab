@@ -20,6 +20,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 // First typed client (F-4). The base address comes from service discovery: no host or port in the code.
 builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 builder.Services.AddScoped<ProfileLanguageSaver>();
+builder.Services.AddScoped<VisitorContext>();
 builder.Services.AddScoped<SignUpFlow>();
 
 // Sign-in and sign-out (F-5). The cookie is what keeps a visitor signed in across page loads; it also
@@ -71,7 +72,16 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     ];
 });
 
+// B-4 BR5: X-Forwarded-For only from the proxies the configuration lists (none in dev).
+var forwarded = new ForwardedHeadersOptions();
+var behindTrustedProxy = TrustedProxies.Configure(forwarded, builder.Configuration);
+
 var app = builder.Build();
+
+if (behindTrustedProxy)
+{
+    app.UseForwardedHeaders(forwarded);
+}
 
 if (!app.Environment.IsDevelopment())
 {
