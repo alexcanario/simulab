@@ -101,4 +101,5 @@
   <data name="Account.PreferredLanguage.Hint" xml:space="preserve"><value>A aplicação abre neste idioma quando inicia sessão, e os seus e-mails são escritos nele.</value></data>
   <data name="Account.Saved" xml:space="preserve"><value>O seu perfil foi guardado.</value></data>
   <data name="Account.LoadFailed" xml:space="preserve"><value>Não foi possível carregar o seu perfil.</value></data>
+  <data name="Auth.Legal.Label" xml:space="preserve"><value>Documentos legais</value></data>
 </root>

@@ -101,4 +101,5 @@
   <data name="Account.PreferredLanguage.Hint" xml:space="preserve"><value>The app opens in this language when you sign in, and your emails are written in it.</value></data>
   <data name="Account.Saved" xml:space="preserve"><value>Your profile was saved.</value></data>
   <data name="Account.LoadFailed" xml:space="preserve"><value>We could not load your profile.</value></data>
+  <data name="Auth.Legal.Label" xml:space="preserve"><value>Legal</value></data>
 </root>

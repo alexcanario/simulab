@@ -282,6 +282,17 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     max-width: 760px;
 }
 
+/* The kit link (B-6): underlined, in the text colour of its surface, AA in both themes. */
+.app-link {
+    color: var(--mud-palette-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.app-link:hover {
+    text-decoration-thickness: 2px;
+}
+
 /* Plain links on the sign-in pages look like links: underlined, in the text colour, which keeps AA contrast
    in both themes (the primary blue is 3.5:1 on the dark card). Found on screen in F-7: "Forgot your
    password?" and "Create an account" read as plain text. */
@@ -320,6 +331,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: flex;
     gap: 16px;
     margin-top: 20px;
+    font-size: 0.875rem;
 }
 
 .app-auth-title {

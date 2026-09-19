@@ -63,7 +63,7 @@ else
                         Value="@_language"
                         ValueChanged="@(value => { _language = value ?? _profile.PreferredLanguage; _error = null; })" />
 
-        <MudLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</MudLink>
+        <AppLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</AppLink>
 
         <AppFormActions Saving="_saving" Disabled="@(_fullNameError is not null)" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
     </MudPaper>

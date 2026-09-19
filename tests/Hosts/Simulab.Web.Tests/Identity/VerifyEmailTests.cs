@@ -54,7 +54,7 @@ public class VerifyEmailTests : IdentityPageTestContext
         var page = RenderWithToken();
 
         page.Markup.Should().Contain("This link is not valid");
-        page.Find("a[href='/sign-up']").Should().NotBeNull();
+        page.Find("a[href='/sign-up']").ClassList.Should().Contain("app-link", "B-6: a kit link, AA in both themes");
     }
 
     [Fact]

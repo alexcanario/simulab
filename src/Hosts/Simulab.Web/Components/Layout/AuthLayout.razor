@@ -26,9 +26,9 @@
     <main id="main-content" tabindex="-1" class="app-auth-main">
         @Body
 
-        <nav class="app-auth-footer" aria-label="@L["Layout.LanguageSwitch.Label"]">
-            <MudLink Href="/terms" Color="Color.Primary" Typo="Typo.body2">@I["Auth.Legal.Terms"]</MudLink>
-            <MudLink Href="/privacy" Color="Color.Primary" Typo="Typo.body2">@I["Auth.Legal.Privacy"]</MudLink>
+        <nav class="app-auth-footer" aria-label="@I["Auth.Legal.Label"]">
+            <AppLink Href="/terms">@I["Auth.Legal.Terms"]</AppLink>
+            <AppLink Href="/privacy">@I["Auth.Legal.Privacy"]</AppLink>
         </nav>
     </main>
 </div>
