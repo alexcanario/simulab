@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject ILogger<SessionEndedWatcher> Logger
 
 @* B-3, BR5: renders nothing. When the circuit's revalidation finds the session ended, the browser goes
    through the plain sign-out endpoint (which clears the cookie) to sign in again with the alert. *@
@@ -16,16 +17,26 @@
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
     }
 
-    private async void OnAuthenticationStateChanged(Task<AuthenticationState> state)
-    {
-        var signedIn = IsSignedIn(await state);
-        if (_wasSignedIn && !signedIn)
+    // The event fires on the revalidation loop's thread: everything runs on the circuit's own context,
+    // and nothing may escape an async void handler.
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> state) =>
+        _ = InvokeAsync(async () =>
         {
-            await InvokeAsync(() => Navigation.NavigateTo($"/account/sign-out?reason={AccountEndpoints.SessionEndedReason}", forceLoad: true));
-        }
+            try
+            {
+                var signedIn = IsSignedIn(await state);
+                if (_wasSignedIn && !signedIn)
+                {
+                    Navigation.NavigateTo($"/account/sign-out?reason={AccountEndpoints.SessionEndedReason}", forceLoad: true);
+                }
 
-        _wasSignedIn = signedIn;
-    }
+                _wasSignedIn = signedIn;
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                Logger.LogWarning(exception, "Following the authentication state failed.");
+            }
+        });
 
     private static bool IsSignedIn(AuthenticationState state) => state.User.Identity?.IsAuthenticated == true;
 

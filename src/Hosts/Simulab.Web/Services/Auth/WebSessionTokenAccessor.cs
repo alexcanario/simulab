@@ -20,6 +20,9 @@ public sealed class WebSessionTokenAccessor(
     /// <summary>A token this close to its expiry is refreshed first, so a call never leaves with one that dies on the way.</summary>
     private static readonly TimeSpan RefreshMargin = TimeSpan.FromMinutes(1);
 
+    /// <summary>How long a refresh may take once started, whoever asked for it.</summary>
+    private static readonly TimeSpan RefreshTimeout = TimeSpan.FromSeconds(30);
+
     public async Task<string?> GetAccessTokenAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -46,7 +49,11 @@ public sealed class WebSessionTokenAccessor(
                 return session;
             }
 
-            var result = await auth.RefreshAsync(session.RefreshToken, cancellationToken);
+            // Past this point the Api consumes the single-use refresh token (F-5 BR5). A caller that goes
+            // away (a closed tab, an aborted asset request) must not lose the new pair: finish and save it
+            // regardless, with a bound of its own.
+            using var refreshTimeout = new CancellationTokenSource(RefreshTimeout, timeProvider);
+            var result = await auth.RefreshAsync(session.RefreshToken, refreshTimeout.Token);
             if (!result.IsSuccess)
             {
                 if (!result.IsRejected)
@@ -59,16 +66,17 @@ public sealed class WebSessionTokenAccessor(
             }
 
             var now = timeProvider.GetUtcNow();
-            var lookup = await auth.LookUpSessionAsync(result.AccessToken!, cancellationToken);
+            var lookup = await auth.LookUpSessionAsync(result.AccessToken!, refreshTimeout.Token);
             var refreshed = new WebSession(
                 lookup.Session?.SessionJti ?? session.ApiSessionJti,
                 result.AccessToken!,
                 result.RefreshToken!,
                 now.Add(ExpiresIn(result.ExpiresInSeconds)),
                 lookup.Session?.Permissions ?? session.Permissions,
-                lookup.Status == SessionLookupStatus.Alive ? now : session.CheckedAt);
+                lookup.Status == SessionLookupStatus.Alive ? now : session.CheckedAt,
+                session.ExpiresAt);
 
-            await store.SaveAsync(webSessionId, refreshed, cancellationToken);
+            await store.SaveAsync(webSessionId, refreshed, CancellationToken.None);
             return refreshed;
         }
     }
@@ -87,6 +95,13 @@ public sealed class WebSessionTokenAccessor(
 
         var now = timeProvider.GetUtcNow();
         if (!force && now - session.CheckedAt < CheckInterval)
+        {
+            return session;
+        }
+
+        // The refresh above did not get an answer, so the token is still the expired one. The Api would
+        // answer 401 for the expiry alone, which is not a refusal of the session (BR3): ask next time.
+        if (session.AccessTokenExpiresAt <= now)
         {
             return session;
         }

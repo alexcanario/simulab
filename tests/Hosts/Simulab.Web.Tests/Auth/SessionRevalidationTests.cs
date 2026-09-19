@@ -28,7 +28,7 @@ public sealed class SessionRevalidationTests : IAsyncDisposable
         services.AddScoped<WebSessionTokenAccessor>();
         _services = services.BuildServiceProvider();
 
-        _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), [], DateTimeOffset.UtcNow));
+        _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), [], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(30)));
     }
 
     [Fact]

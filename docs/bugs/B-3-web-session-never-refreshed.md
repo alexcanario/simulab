@@ -54,17 +54,37 @@ Not a business rule. Other places that read the tokens from the cookie claims, a
 - 2026-09-19 — Build: the planned architecture test `WebTokenClaimsTests.NoComponent_ReadsTokenClaims` became `SignInCompleteTests.SignInComplete_StoresTokensServerSide_CookieCarriesOnlyIdentityAndSession`: the token claim types were removed from `WebAuthClaims`, so no code can read them (the build proves it), and the test decrypts the real cookie to prove it carries none.
 - 2026-09-19 — Build: `docs/infra.md` no longer asks for a new sign-in after granting a role; the Web picks it up on the next page load.
 
+- 2026-09-19 — Review (`/agile:review`, 2 blockers, 7 majors, 9 minors; all blockers and majors confirmed in the code and fixed):
+  - blocker, refresh cancelled by the caller lost the new pair: once sent, the refresh finishes and saves under its own 30 s bound, never the caller's token.
+  - blocker, a 5xx problem-details answer from `/connect/token` read as a successful empty pair: success now needs a 2xx and both tokens.
+  - major, resilience, timeout and non-JSON exceptions escaped `AuthClient`: every failure that is not the caller's own cancellation is "no answer".
+  - major, an exception in the circuit revalidation made the framework sign the user out: caught and logged; the session is kept until the next check.
+  - major, an expired token after an unanswered refresh was checked at the Api and its 401 read as a refusal: the check is skipped until a refresh succeeds.
+  - major, every OAuth error ended the session: only `identity.refresh_token_invalid` / `invalid_grant` does.
+  - major, the standard resilience handler retried POST, replaying a consumed refresh token: `ServiceDefaults` now disables retries for unsafe methods for every client (a retried sign-up or resend would also send twice). The per-client alternative (`RemoveAllResilienceHandlers`) is an experimental API (`EXTEXP0001`), rejected.
+  - major, sign-out endpoint and `SessionEndedWatcher` untested: `SignOutEndpointTests` (4) and `SessionEndedWatcherTests` (2) added; sign-out now removes the entry and the cookie in a `finally`.
+  - major, tests used only idealised failures: added problem-details 500, `invalid_client`, timeout and in-flight cancellation cases.
+  - minor, tokens in clear text in Redis: the entry is protected with Data Protection (`Simulab.Web.WebSession`); an entry that cannot be unprotected reads as no session. Fixed.
+  - minor, Redis TTL reset to 30 days on every save: the entry now expires with the cookie (`WebSession.ExpiresAt`). Fixed.
+  - minor, signing in again over a live cookie left an orphan entry: the old entry is removed. Fixed.
+  - minor, `async void` watcher outside the circuit context: runs inside `InvokeAsync` with a catch. Fixed.
+  - minor, `session=ended` written in two places: one constant, `AccountEndpoints.SessionEndedSignInPath`. Fixed.
+  - minor, two public types in `FakeAuthApi.cs`: `RefreshAnswer` has its own file. Fixed.
+  - minor, the Redis store test uses a plain client: accepted; the test container has no TLS, and the Aspire-client rule is about the app's wiring, which the app host check covers.
+  - minor, the regression test was rewritten after it was seen failing: accepted and stated in `## Regression test`; the final form uses types that do not exist on the base commit.
+  - minor, app manual not updated: accepted for now; `/agile:ship` updates it in the three languages.
+
 ## Regression test
-`AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal` was seen failing on the unfixed code (`Expected context.Principal to be <null>, but found ...`, commit `7fbecb9`) and passes after the fix.
+`AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal` was seen failing on the unfixed code (`Expected context.Principal to be <null>, but found ...`, commit `7fbecb9`). After the fix it was rewritten to seed a live stored session so the Api's 401 is the path under test; that final form needs types that do not exist on the base commit, so it was not run against it (review finding, accepted).
 
 | Rule | Tests (`Simulab.Web.Tests` unless noted) |
 |---|---|
-| BR1 tokens server side, cookie with identity and id only | `SignInCompleteTests.SignInComplete_StoresTokensServerSide_CookieCarriesOnlyIdentityAndSession`; `RedisWebSessionStoreTests.Save_ThenGet_RoundTripsAndExpiresWithRefreshLifetime`, `Remove_ThenGet_ReturnsNull` (Redis container) |
-| BR2 one accessor, refresh, permissions, single flight | `WebSessionTokenAccessorTests.GetAccessToken_ValidAccessToken_ReturnsItWithoutRefreshing`, `GetAccessToken_ExpiredAccessToken_RefreshesAndStoresNewPairAndPermissions`, `GetAccessToken_ConcurrentCallsOnExpiredToken_RefreshesOnce` |
-| BR3 refusal ends the session, silence does not | `WebSessionTokenAccessorTests.GetAccessToken_RefreshRejected_EndsSessionAndRemovesEntry`, `GetAccessToken_ApiUnreachable_KeepsSession`, `GetAccessToken_NoStoredSession_ReturnsNull`, `Check_ApiSaysEnded_RemovesEntry`, `Check_ApiFails_KeepsSession` |
+| BR1 tokens server side, cookie with identity and id only | `SignInCompleteTests.SignInComplete_StoresTokensServerSide_CookieCarriesOnlyIdentityAndSession`; `SignOutEndpointTests.SignInAgain_OverALiveCookie_LeavesNoOrphanEntry`; `RedisWebSessionStoreTests.Save_ThenGet_RoundTripsAndExpiresWithTheCookie`, `Save_StoresNoTokenInClearText`, `Get_EntryProtectedWithOtherKeys_ReturnsNull`, `Remove_ThenGet_ReturnsNull` (Redis container) |
+| BR2 one accessor, refresh, permissions, single flight | `WebSessionTokenAccessorTests.GetAccessToken_ValidAccessToken_ReturnsItWithoutRefreshing`, `GetAccessToken_ExpiredAccessToken_RefreshesAndStoresNewPairAndPermissions`, `GetAccessToken_ConcurrentCallsOnExpiredToken_RefreshesOnce`, `GetAccessToken_CallerCancelsDuringRefresh_NewPairIsStillSaved` |
+| BR3 refusal ends the session, silence does not | `WebSessionTokenAccessorTests.GetAccessToken_RefreshRejected_EndsSessionAndRemovesEntry`, `GetAccessToken_ApiUnreachable_KeepsSession`, `GetAccessToken_NoStoredSession_ReturnsNull`, `Check_ApiSaysEnded_RemovesEntry`, `Check_ApiFails_KeepsSession`, `GetAccessToken_RefreshFailsWithoutRefusingTheToken_KeepsSession` (500 problem details, `invalid_client`, timeout), `Check_ExpiredTokenAndRefreshUnanswered_KeepsSessionWithoutAskingApi` |
 | BR4 cookie checked per request, permissions applied | `AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal`, `ValidatePrincipal_PermissionsChanged_PrincipalCarriesNewPermissions`, `ValidatePrincipal_AssetRequestRecentlyChecked_DoesNotCallApi`; `WebSessionTokenAccessorTests.Check_RecentlyCheckedWithoutForce_DoesNotCallApi`, `Check_Forced_AsksApiAndStoresPermissions` |
-| BR5 circuit revalidation and the sign-in alert | `SessionRevalidationTests.Revalidate_RevokedSession_ReturnsFalse`, `Revalidate_LiveSession_ReturnsTrueAndAsksTheApiEveryTime`, `Revalidate_Anonymous_ReturnsTrue`; `SignInSessionEndedTests.SessionEndedQuery_ShowsTheSessionEndedAlert`, `NoQuery_ShowsNoAlert`; the redirect from an open page: validation script step 6 |
-| BR6 no code reads tokens from the cookie | `SignInCompleteTests` (above); the token claim types no longer exist; `/admin/roles` after 15 minutes: validation script step 4 |
+| BR5 circuit revalidation and the sign-in alert | `SessionRevalidationTests.Revalidate_RevokedSession_ReturnsFalse`, `Revalidate_LiveSession_ReturnsTrueAndAsksTheApiEveryTime`, `Revalidate_Anonymous_ReturnsTrue`; `SessionEndedWatcherTests.SignedInThenAnonymous_GoesThroughSignOutWithTheSessionEndedReason`, `AnonymousFromTheStart_StaysPut`; `SignOutEndpointTests.SignOut_SessionEnded_SkipsTheApiAndGoesToSignInWithTheAlert`; `SignInSessionEndedTests.SessionEndedQuery_ShowsTheSessionEndedAlert`, `NoQuery_ShowsNoAlert`; end to end in an open page: validation script step 6 |
+| BR6 no code reads tokens from the cookie | `SignInCompleteTests` (above); `SignOutEndpointTests.SignOut_UsesTheStoredTokenRevokesAtTheApiAndRemovesTheEntry`, `SignOut_ApiFails_StillRemovesTheEntryAndClearsTheCookie`; the token claim types no longer exist; `/admin/roles` after 15 minutes: validation script step 4 |
 | BR7 a cookie from before the fix | `AuthCookieValidationTests.ValidatePrincipal_CookieFromBeforeTheFix_RejectsPrincipal` |
 | UI text in three languages | `ResourceParityTests` |
 

@@ -17,8 +17,12 @@ public sealed record TokenResult(
 {
     public static TokenResult Failed(string code, string? description) => new(false, null, null, null, code, description);
 
-    /// <summary>The token endpoint refused the grant itself (an OAuth error), as opposed to not answering at all.</summary>
-    public bool IsRejected => !IsSuccess && ErrorCode != Components.Ui.ErrorText.UnexpectedCode;
+    /// <summary>
+    /// The token endpoint refused this refresh token itself (B-3, BR3): only then does a web session end.
+    /// Any other error (<c>server_error</c>, <c>invalid_client</c> after a config change, no answer) is not
+    /// the session's fault and never signs anyone out.
+    /// </summary>
+    public bool IsRejected => ErrorCode is IdentityErrorCodes.RefreshTokenInvalid or "invalid_grant";
 }
 
 file sealed record TokenResponseBody(
@@ -61,9 +65,9 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
 
         try
         {
-            await http.SendAsync(request, cancellationToken);
+            using var response = await http.SendAsync(request, cancellationToken);
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
         {
             // The session still expires on its own (BR4); losing this call only delays the revocation.
         }
@@ -97,7 +101,7 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ? new SessionLookup(SessionLookupStatus.Unavailable, null)
                 : new SessionLookup(SessionLookupStatus.Alive, session);
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
         {
             return new SessionLookup(SessionLookupStatus.Unavailable, null);
         }
@@ -108,19 +112,31 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
         form["client_id"] = options.Value.ClientId;
         form["client_secret"] = options.Value.ClientSecret;
 
-        TokenResponseBody? body;
         try
         {
             using var response = await http.PostAsync("/connect/token", new FormUrlEncodedContent(form), cancellationToken);
-            body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
+            var body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
+
+            if (body?.Error is not null)
+            {
+                return TokenResult.Failed(body.Error, body.ErrorDescription);
+            }
+
+            // A 5xx comes back as problem details with no OAuth "error": that is no answer, not a token pair.
+            return response.IsSuccessStatusCode && body?.AccessToken is not null && body.RefreshToken is not null
+                ? new TokenResult(true, body.AccessToken, body.RefreshToken, body.ExpiresIn, null, null)
+                : TokenResult.Failed(Components.Ui.ErrorText.UnexpectedCode, null);
         }
-        catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException)
+        catch (Exception exception) when (IsTransportFailure(exception, cancellationToken))
         {
             return TokenResult.Failed(Components.Ui.ErrorText.UnexpectedCode, null);
         }
-
-        return body is { Error: null }
-            ? new TokenResult(true, body.AccessToken, body.RefreshToken, body.ExpiresIn, null, null)
-            : TokenResult.Failed(body?.Error ?? Components.Ui.ErrorText.UnexpectedCode, body?.ErrorDescription);
     }
+
+    /// <summary>
+    /// Anything that means "the Api did not give a usable answer": network, timeout, the resilience
+    /// handler's own rejections, a body that is not JSON. A cancellation the caller asked for is not one.
+    /// </summary>
+    private static bool IsTransportFailure(Exception exception, CancellationToken cancellationToken) =>
+        exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested;
 }

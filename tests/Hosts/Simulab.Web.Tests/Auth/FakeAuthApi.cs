@@ -13,6 +13,7 @@ public sealed class FakeAuthApi : HttpMessageHandler
 {
     private int _refreshCount;
     private int _sessionCount;
+    private int _signOutCount;
 
     /// <summary>What a refresh answers: a new pair (the default), a rejection, or no answer at all.</summary>
     public RefreshAnswer Refresh { get; set; } = RefreshAnswer.NewPair;
@@ -28,6 +29,11 @@ public sealed class FakeAuthApi : HttpMessageHandler
     public int RefreshCount => _refreshCount;
 
     public int SessionCount => _sessionCount;
+
+    public int SignOutCount => _signOutCount;
+
+    /// <summary>What the Api's sign-out answers.</summary>
+    public HttpStatusCode SignOutStatus { get; set; } = HttpStatusCode.NoContent;
 
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
@@ -45,6 +51,12 @@ public sealed class FakeAuthApi : HttpMessageHandler
 
             return Refresh switch
             {
+                RefreshAnswer.InvalidClient => Json(new { error = "invalid_client" }, HttpStatusCode.BadRequest),
+                RefreshAnswer.ServerError => new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent("{\"title\":\"An error occurred\",\"status\":500}", System.Text.Encoding.UTF8, "application/problem+json")
+                },
+                RefreshAnswer.TimedOut => throw new TaskCanceledException("The request timed out."),
                 RefreshAnswer.NewPair => Json(new
                 {
                     access_token = $"access-{count}",
@@ -54,6 +66,12 @@ public sealed class FakeAuthApi : HttpMessageHandler
                 RefreshAnswer.Rejected => Json(new { error = IdentityErrorCodes.RefreshTokenInvalid }, HttpStatusCode.BadRequest),
                 _ => throw new HttpRequestException("The Api did not answer.")
             };
+        }
+
+        if (path == "/api/v1/identity/sign-out")
+        {
+            Interlocked.Increment(ref _signOutCount);
+            return new HttpResponseMessage(SignOutStatus);
         }
 
         if (path == "/api/v1/identity/session")
@@ -75,9 +93,3 @@ public sealed class FakeAuthApi : HttpMessageHandler
         new(status) { Content = JsonContent.Create(body, options: options) };
 }
 
-public enum RefreshAnswer
-{
-    NewPair,
-    Rejected,
-    Unreachable
-}

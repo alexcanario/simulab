@@ -18,7 +18,7 @@ public sealed class WebSessionTokenAccessorTests : IDisposable
         new(_store, new AuthClient(_api.Client(), Options.Create(new OpenIddictClientOptions { ClientId = "simulab-web", ClientSecret = "secret" })), gate ?? new SessionRefreshGate(), _clock);
 
     private Task StoreSession(TimeSpan expiresIn, IReadOnlyList<string>? permissions = null) =>
-        _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", _clock.GetUtcNow().Add(expiresIn), permissions ?? [], _clock.GetUtcNow()));
+        _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", _clock.GetUtcNow().Add(expiresIn), permissions ?? [], _clock.GetUtcNow(), _clock.GetUtcNow().AddDays(30)));
 
     private static ClaimsPrincipal UserWith(string webSessionId) =>
         new(new ClaimsIdentity([new Claim(WebAuthClaims.WebSessionId, webSessionId)], "test"));
@@ -146,6 +146,50 @@ public sealed class WebSessionTokenAccessorTests : IDisposable
         var session = await CreateAccessor().CheckAsync(WebSessionId, force: true);
 
         session.Should().NotBeNull();
+        _store.Sessions.Should().ContainKey(WebSessionId);
+    }
+
+    [Theory]
+    [InlineData(RefreshAnswer.ServerError)]
+    [InlineData(RefreshAnswer.InvalidClient)]
+    [InlineData(RefreshAnswer.TimedOut)]
+    public async Task GetAccessToken_RefreshFailsWithoutRefusingTheToken_KeepsSession(RefreshAnswer answer)
+    {
+        await StoreSession(TimeSpan.Zero);
+        _api.Refresh = answer;
+
+        var token = await CreateAccessor().GetAccessTokenAsync(UserWith(WebSessionId));
+
+        token.Should().Be("access-0");
+        _store.Sessions[WebSessionId].RefreshToken.Should().Be("refresh-0");
+    }
+
+    [Fact]
+    public async Task GetAccessToken_CallerCancelsDuringRefresh_NewPairIsStillSaved()
+    {
+        await StoreSession(TimeSpan.Zero);
+        _api.RefreshGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var caller = new CancellationTokenSource();
+
+        var call = CreateAccessor().GetAccessTokenAsync(UserWith(WebSessionId), caller.Token);
+        await caller.CancelAsync();
+        _api.RefreshGate.SetResult();
+        await call;
+
+        _store.Sessions[WebSessionId].RefreshToken.Should().Be("refresh-1");
+    }
+
+    [Fact]
+    public async Task Check_ExpiredTokenAndRefreshUnanswered_KeepsSessionWithoutAskingApi()
+    {
+        await StoreSession(TimeSpan.Zero);
+        _api.Refresh = RefreshAnswer.ServerError;
+        _api.SessionStatus = System.Net.HttpStatusCode.Unauthorized;
+
+        var session = await CreateAccessor().CheckAsync(WebSessionId, force: true);
+
+        session.Should().NotBeNull();
+        _api.SessionCount.Should().Be(0);
         _store.Sessions.Should().ContainKey(WebSessionId);
     }
 

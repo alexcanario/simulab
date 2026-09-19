@@ -28,7 +28,7 @@ public sealed class AuthCookieValidationTests(WebApplicationFactory<Program> fac
 
     private Task StoreLiveSession(IReadOnlyList<string>? permissions = null) =>
         _store.SaveAsync(WebSessionId, new WebSession(
-            "jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), permissions ?? [], DateTimeOffset.UtcNow.AddMinutes(-5)));
+            "jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), permissions ?? [], DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddDays(30)));
 
     [Fact]
     public async Task ValidatePrincipal_RevokedSession_RejectsPrincipal()
@@ -69,7 +69,7 @@ public sealed class AuthCookieValidationTests(WebApplicationFactory<Program> fac
     [Fact]
     public async Task ValidatePrincipal_AssetRequestRecentlyChecked_DoesNotCallApi()
     {
-        await _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), [], DateTimeOffset.UtcNow));
+        await _store.SaveAsync(WebSessionId, new WebSession("jti-0", "access-0", "refresh-0", DateTimeOffset.UtcNow.AddMinutes(10), [], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(30)));
         await using var host = Host();
 
         var context = await ValidateAsync(host.Services, SignedInPrincipal(WebSessionId), pageLoad: false);

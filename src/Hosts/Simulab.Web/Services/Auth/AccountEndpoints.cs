@@ -16,6 +16,9 @@ public static class AccountEndpoints
     /// <summary>The sign-out reason that sends the visitor to sign in again with the "session ended" alert (B-3, BR5).</summary>
     public const string SessionEndedReason = "session-ended";
 
+    /// <summary>The query that makes `/sign-in` show the "session ended" alert (B-3, BR5).</summary>
+    public const string SessionEndedSignInPath = "/sign-in?session=ended";
+
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
@@ -41,6 +44,13 @@ public static class AccountEndpoints
             return Results.Redirect($"/sign-in?error={IdentityErrorCodes.InvalidCredentials}");
         }
 
+        // A browser that signs in again over a live cookie leaves no orphan entry behind.
+        var previousWebSessionId = context.User.FindFirstValue(WebAuthClaims.WebSessionId);
+        if (previousWebSessionId is not null)
+        {
+            await sessions.RemoveAsync(previousWebSessionId, context.RequestAborted);
+        }
+
         var now = timeProvider.GetUtcNow();
         var webSessionId = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         await sessions.SaveAsync(
@@ -51,7 +61,8 @@ public static class AccountEndpoints
                 signIn.RefreshToken,
                 now.Add(signIn.AccessTokenLifetime),
                 signIn.Permissions,
-                now),
+                now,
+                now.Add(TokenLifetimes.RefreshToken)),
             context.RequestAborted);
 
         var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -77,18 +88,25 @@ public static class AccountEndpoints
     {
         var sessionEnded = reason == SessionEndedReason;
         var webSessionId = context.User.FindFirstValue(WebAuthClaims.WebSessionId);
-        if (webSessionId is not null)
+        try
         {
-            var session = sessionEnded ? null : await tokens.GetFreshAsync(webSessionId, context.RequestAborted);
+            var session = sessionEnded || webSessionId is null ? null : await tokens.GetFreshAsync(webSessionId, context.RequestAborted);
             if (session is not null)
             {
                 await authClient.SignOutAsync(session.AccessToken, context.RequestAborted);
             }
+        }
+        finally
+        {
+            // Whatever the Api did, this browser's session is gone.
+            if (webSessionId is not null)
+            {
+                await tokens.EndAsync(webSessionId, CancellationToken.None);
+            }
 
-            await tokens.EndAsync(webSessionId, context.RequestAborted);
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Results.LocalRedirect(sessionEnded ? "/sign-in?session=ended" : "/");
+        return Results.LocalRedirect(sessionEnded ? SessionEndedSignInPath : "/");
     }
 }

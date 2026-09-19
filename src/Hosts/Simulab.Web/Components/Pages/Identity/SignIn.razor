@@ -93,8 +93,6 @@
 
     [SupplyParameterFromQuery] public string? Email { get; set; }
 
-    [SupplyParameterFromQuery] public string? Session { get; set; }
-
     private string? _email;
     private string? _password;
     private string? _emailError;
@@ -117,7 +115,7 @@
         }
 
         _email = Email;
-        _sessionEnded = Session == "ended";
+        _sessionEnded = Uri.TryCreate(Navigation.Uri, UriKind.Absolute, out var uri) && uri.PathAndQuery == AccountEndpoints.SessionEndedSignInPath;
         ApplyServerCode(Error);
     }
 
