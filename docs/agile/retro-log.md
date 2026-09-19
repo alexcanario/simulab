@@ -244,3 +244,11 @@ From 0.0.25 to 0.0.29, run with `/agile:sync` on `main` after B-7 shipped.
 - Merged by hand: `docs/agile/profile.md`. One conflict, Simulab text kept (F-12 note, build files line); added the Aspire client integration, `ServiceDefaults` without retries for unsafe methods, session state on the server with Interactive Server, the Npgsql pool of a per-class test host and bUnit `WaitForAssertion`. The DocGen sentence stays out until the "Technical docs" feature.
 - Proposed and applied: four rows in `docs/glossary.md` "Technical terms" from the plugin template (coverage gap, validation script, gate, warnings baseline); the glossary line of `CLAUDE.md` names the technical terms.
 - Build files did not change upstream. Build: 0 warnings, 0 errors; the full suite was skipped with the owner's OK (the rules gained prose lines only).
+
+## 2026-09-19 — Sync with agile@canary 0.0.31
+From 0.0.29 to 0.0.31. Approved by the owner.
+- Copied: `.claude/rules/agile/api-contracts.md` (anonymous endpoints run every input check before the lookup, from B-7), `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` (gate verdict on the last line and whole output saved, from B-7; terminal steps for Git Bash and PowerShell 7 and hands off the owner's app host, from B-4).
+- Merged by hand (`git merge-file`, no conflict): `docs/agile/profile.md` gained the Blazor Interactive Server line on request data reaching the circuit through the root component (from B-4); the Simulab sections are kept.
+- Left alone: the six build files (no upstream change).
+- Noted, not changed: the anonymous-endpoint rule now lives in `api-contracts.md` and also in `project.md` (B-7); a later retro may drop the project copy.
+- No build file or build-checked rule changed, so the suite was not rerun.

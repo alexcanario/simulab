@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.29 (rascunho). English: [en](workflow.md).
+> Versão 0.0.31 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -105,8 +105,8 @@ stateDiagram-v2
 | `idea` | Registrada a partir da conversa com `/agile:idea`. Título e 2 ou 3 linhas. | Claude |
 | `refining` | `/agile:refine`: o Claude lê o código relacionado e faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. O arquivo da feature é escrito. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
-| `building` | `/agile:build`: branch, código e testes do que mudou. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
-| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. **Portão 2.** | Você |
+| `building` | `/agile:build`: branch, código e testes do que mudou. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Só uma feature pode estar aqui. | Claude |
+| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. **Portão 2.** | Você |
 | `done` | `/agile:ship`: suíte completa, merge com o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
 
 Pequenas correções encontradas na validação são feitas na hora, sem sair de `validating`.
@@ -183,7 +183,8 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura. |
 
 Detalhes:
-- **Só avisos novos.** Os avisos são comparados com `.claude/agile/warnings-baseline.json`, um arquivo versionado. Avisos que já existiam não reprovam o gate; um aviso novo, sim. A baseline só é reescrita por um ship verde (ou por `gate.js baseline`, com o seu sim).
+- **Só avisos novos.** Os avisos são comparados com `.claude/agile/warnings-baseline.json`, um arquivo versionado. Avisos que já existiam não reprovam o gate; um aviso novo, sim, listado com arquivo, linha e mensagem. A baseline só é reescrita por um ship verde (ou por `gate.js baseline`, com o seu sim).
+- **O veredito é a última linha.** Todo relatório termina com `agile gate GREEN` ou `agile gate RED: <o que falhou>` (os avisos novos, os testes que falharam, o build bloqueado). O Claude grava a saída inteira num arquivo e cita dali, sem nunca filtrá-la com `grep`, `head` ou `tail`: uma vez, uma saída filtrada escondeu a única lista de avisos novos.
 - **Mudanças amplas.** Se uma mudança alcança mais de 6 projetos de teste, rodam só os que a referenciam diretamente; o resto fica para o ship (`AGILE_GATE_MAX_TESTS`). Uma mudança em `.props`, `.targets` ou na solução compila a solução inteira e deixa os testes para o ship.
 - **Busca da solução.** A solução é procurada na raiz git e uma pasta abaixo (`repo/App.slnx`, `src/App.sln`).
 - **Saída de build travada.** Um app host, preview ou depurador rodando mantém as DLLs abertas. O gate então informa "build blocked" e o nome do processo, em vez de uma falha de build genérica; o Claude encerra o que ele mesmo iniciou antes do fim do turno e pede que você feche o seu.
@@ -325,7 +326,7 @@ As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agil
 
 **Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
 
-**Lições da stack.** Uma lição de um item real que depende da stack vai para a regra restrita àqueles arquivos ou para os perfis a que diz respeito, nunca para uma regra sempre carregada. Exemplos da primeira app: a `api-contracts` diz que um middleware próprio resolve uma dependência opcional dentro do ramo que precisa dela (um parâmetro do `InvokeAsync` é resolvido em toda requisição) e que um cliente pede à API os claims do usuário em vez de decodificar o seu access token (ele pode ser criptografado); a `build-config` diz que uma investigação que depende de versão lê a versão resolvida em `obj/project.assets.json`, não a fixada; os perfis com AppHost do Aspire dizem que o código chega a Redis, PostgreSQL ou a um broker pela integração de cliente do Aspire, porque os recursos locais rodam com TLS por padrão, e que o `ServiceDefaults` gerado desliga as novas tentativas de POST (um POST repetido reusa tokens de uso único); os perfis com UI Blazor dizem que, no Interactive Server, estado que muda durante a sessão fica num store no servidor, com a chave num id do cookie, porque um circuito não consegue reescrever o cookie; e a estratégia de testes dos perfis diz que um teste bUnit espera o que um handler assíncrono de clique faz (`WaitForAssertion`), e que um host de teste criado por classe de teste limpa o pool do Npgsql ao ser descartado, senão o banco de teste fica sem conexões.
+**Lições da stack.** Uma lição de um item real que depende da stack vai para a regra restrita àqueles arquivos ou para os perfis a que diz respeito, nunca para uma regra sempre carregada. Exemplos da primeira app: a `api-contracts` diz que um middleware próprio resolve uma dependência opcional dentro do ramo que precisa dela (um parâmetro do `InvokeAsync` é resolvido em toda requisição) e que um cliente pede à API os claims do usuário em vez de decodificar o seu access token (ele pode ser criptografado); a `build-config` diz que uma investigação que depende de versão lê a versão resolvida em `obj/project.assets.json`, não a fixada; os perfis com AppHost do Aspire dizem que o código chega a Redis, PostgreSQL ou a um broker pela integração de cliente do Aspire, porque os recursos locais rodam com TLS por padrão, e que o `ServiceDefaults` gerado desliga as novas tentativas de POST (um POST repetido reusa tokens de uso único); os perfis com UI Blazor dizem que, no Interactive Server, estado que muda durante a sessão fica num store no servidor, com a chave num id do cookie, porque um circuito não consegue reescrever o cookie; e a estratégia de testes dos perfis diz que um teste bUnit espera o que um handler assíncrono de clique faz (`WaitForAssertion`), e que um host de teste criado por classe de teste limpa o pool do Npgsql ao ser descartado, senão o banco de teste fica sem conexões; e, no Interactive Server, um dado da primeira requisição que o circuito vai precisar (o endereço do visitante, um cabeçalho) é lido no `App` e passado ao componente raiz interativo, porque o circuito não tem `HttpContext`. A `api-contracts` também diz que um endpoint anônimo que precisa dar a mesma resposta em todos os caminhos faz todas as conferências de entrada antes da consulta que diferencia esses caminhos.
 
 **Um comportamento só em todas as telas.** A regra `ui` impede que as telas se afastem umas das outras: um padrão é definido uma vez, num kit de UI mostrado numa página de galeria só de desenvolvimento, e as páginas usam o kit em vez dos componentes crus da biblioteca. Uma família de ícones atrás de nomes semânticos (`AppIcons.Edit`), um jeito só de editar um item (ações de linha na última coluna; diálogo para entidades simples, página própria para as complexas; o link no nome só abre uma página de detalhe para leitura), o mesmo hover e o mesmo foco em todo lugar, um diálogo único de confirmação para ações destrutivas, e o mesmo feedback, estados de lista, layout de formulário e vocabulário de ações. Testes de arquitetura proíbem ícones e tabelas crus fora do kit, e o kit vem antes da primeira tela. O projeto registra as suas escolhas (família de ícones, exceções declaradas) nas suas próprias regras.
 
@@ -550,6 +551,15 @@ Roteiro de validação (F-3):
 7. Troque o idioma para pt-PT e en → os textos mudam.
 8. Entre como curador → Nova/Editar não aparecem.
 Status: validating.
+```
+
+Quando um passo precisa de terminal (um limite, um endpoint ainda sem tela), ele vem para os dois shells, já rodado pelo Claude:
+
+```
+4. Seis tentativas de cadastro seguidas do mesmo endereço: a 6ª é recusada.
+   Git Bash:     for i in 1 2 3 4 5 6; do curl -sk -o /dev/null -w "%{http_code}\n" -X POST https://localhost:7101/api/v1/auth/sign-up -H "Content-Type: application/json" -d '{}'; done
+   PowerShell 7: 1..6 | % { (Invoke-WebRequest -Method Post https://localhost:7101/api/v1/auth/sign-up -ContentType application/json -Body '{}' -SkipCertificateCheck -SkipHttpErrorCheck).StatusCode }
+   Esperado: 400 cinco vezes, depois 429. Para repetir: espere um minuto.
 ```
 
 **Validação** (**Portão 2**):
@@ -777,6 +787,18 @@ da main: vou atualizá-la antes da próxima rodada de testes.
 
 ### 14.10 Atualizando o plugin e o projeto
 
+Uma lição para o plugin nasce na retro de um projeto: vira uma linha ⏳ em "Plugin notes — status" no `docs/agile/retro-log.md`. Na sessão do plugin:
+
+```
+> vamos ajustar o plugin com as recomendações em retro-log.md
+Claude: 2 notas em aberto (F-8). Feito na 0.0.29: espera do bUnit (4 perfis), pool do Npgsql (5 perfis),
+manuais en/pt-BR. Linhas marcadas ✅ no retro-log.md (sem commit).
+1. Push do plugin?  2. Atualizar o plugin instalado?  3. Commit no projeto?
+> pode fazer o push, atualizar o plugin e o commit no simulab
+```
+
+Cada um dos três é pedido separadamente, assim como o push do projeto. O projeto só recebe os arquivos novos pelo `/agile:sync`, entre features.
+
 O plugin passou de 0.0.10 para 0.0.13. Primeiro o plugin em si (terminal, depois uma sessão nova):
 
 ```
@@ -811,6 +833,16 @@ A partir da 0.0.23 o template traz o `.editorconfig` definitivo. Num projeto que
 the build output is locked by a running process (ExamPrep.Web (18344)): stop the app host, preview or
 debugger started from this folder, then build again.
 Claude: Meu app host ainda estava rodando. Encerrei; compilando de novo... verde.
+```
+
+**Um aviso novo no ship.** A lista e o veredito vêm por último, então sobrevivem a qualquer forma de ver a saída:
+
+```
+new warnings (fix them, or accept with `node gate.js baseline` after the owner agrees):
+src/ExamPrep.Web/Pages/Results.razor.cs|RS0030 (0 -> 1)
+  src/ExamPrep.Web/Pages/Results.razor.cs(42,19): RS0030 The symbol 'DateTime.Now' is banned in this project: ...
+agile gate RED: 1 new warning(s): RS0030 in src/ExamPrep.Web/Pages/Results.razor.cs
+Claude: Troquei DateTime.Now pelo TimeProvider injetado; ship de novo... agile gate GREEN.
 ```
 
 **Um teste pendura.** Em vez de travar o turno por minutos:
@@ -1021,7 +1053,7 @@ flowchart TD
 flowchart TD
     A["status: validating e você disse 'validado'?"] -->|não| A1(["Perguntar"])
     A -->|sim| B["Branch atualizada com a main; worktree: fechar IDE e app host"]
-    B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura"]
+    B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura;<br/>saída gravada inteira, última linha GREEN ou RED: o que falhou"]
     C -->|vermelho| C1["Corrigir na branch"]
     C1 --> C
     C -->|verde| D["Manual da app em pt-BR, pt-PT, en; docs técnicas regeneradas; infra.md; baseline"]

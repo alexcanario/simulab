@@ -20,7 +20,7 @@ paths:
 - Enums travel as strings. Instants are ISO 8601 UTC (`DateTimeOffset`); calendar dates are `DateOnly`.
 - Polymorphic payloads use a `type` discriminator registered in the shared options.
 - Lists are paged: `page` and `pageSize` (cap 100) in, `{ items, total }` out.
-- Endpoints authorize by permission or policy, never by role name.
+- Endpoints authorize by permission or policy, never by role name. An anonymous endpoint that must give the same answer on every path (sign-up, password reset) runs every input check (format, length, column width) before the lookup that tells the paths apart: a 500 on one path is an answer too.
 - A client never decodes an access token to read the user's claims: the token may be encrypted (OpenIddict with an encryption certificate issues a JWE). It asks the API (an authenticated `me` endpoint).
 - A custom middleware resolves an optional or heavy dependency (a cache, a second store) from `HttpContext.RequestServices` inside the branch that needs it, never as an `InvokeAsync` parameter: parameters are resolved on every request.
 - Global data in a tenant table (`TenantId` null): the unique index includes `TenantId` and is `NULLS NOT DISTINCT` (PostgreSQL 15+; Npgsql `.AreNullsDistinct(false)`). Without it duplicates pass.
