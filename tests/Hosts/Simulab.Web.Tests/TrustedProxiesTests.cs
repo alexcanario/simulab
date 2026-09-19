@@ -53,6 +53,19 @@ public sealed class TrustedProxiesTests
         result.Should().Be((true, "198.51.100.20"));
     }
 
+    /// <summary>Review finding: a wrong entry stops the start with the key and the value, not a bare format error.</summary>
+    [Theory]
+    [InlineData("ForwardedHeaders:KnownProxies:0", "10.0.0.x")]
+    [InlineData("ForwardedHeaders:KnownNetworks:0", "10.0.0.0/99")]
+    public void WrongEntry_NamesTheSetting(string key, string value)
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { [key] = value }).Build();
+
+        var configure = () => TrustedProxies.Configure(new ForwardedHeadersOptions(), configuration);
+
+        configure.Should().Throw<InvalidOperationException>().WithMessage($"*{value}*");
+    }
+
     /// <summary>Dev: nothing listed, not even loopback (the framework's default), so the middleware is not added.</summary>
     [Fact]
     public async Task NothingListed_TheHeaderIsIgnored()

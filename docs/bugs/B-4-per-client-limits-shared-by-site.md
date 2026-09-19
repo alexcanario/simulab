@@ -1,7 +1,7 @@
 ---
 bug: B-4
 feature: F-4
-status: building
+status: validating
 board: 720
 severity: high
 ---
@@ -50,6 +50,14 @@ No other reimplementation of the per-client limit found: sign-in (`/connect/toke
 - 2026-09-19 — The secret reused is the OpenIddict client secret (`Authentication:OpenIddict:ClientSecret`), already configured on both hosts — no new secret to provision; it only travels between the two hosts, over the service-discovery connection.
 - 2026-09-19 — Out of scope (default, not asked): a per-client limit on sign-in (it has the per-account lockout), and a shared (Redis) counter for several Api instances (`ClientRateLimiter` remarks: one instance in v1).
 - 2026-09-19 — No new packages, for code or tests (`ForwardedHeaders` is part of ASP.NET Core).
+- 2026-09-19 (build) — The address travels from `App` to `Routes` as a root parameter of the interactive component, like `ShellPreferences`: the framework protects root parameters in the page, so the browser cannot change them. `Routes` stores it in a scoped `VisitorContext`, which `IdentityApiClient` reads.
+- 2026-09-19 (build) — The Web's forwarded-headers middleware is added only when a proxy is listed, and the framework's default trust of loopback is dropped: in dev a local caller cannot claim another address.
+- 2026-09-19 (build) — Plain Web endpoints (`/account/profile-applied`, `/culture/set`) have no circuit, so they send no address; they only call the profile endpoints, which have no per-client limit.
+- 2026-09-19 (build) — Checked through the app host: six reset requests with the headers for one visitor answer 202 ×5 then 429, and another visitor still gets 202; `/forgot-password` works from the browser.
+- 2026-09-19 (review) — `/agile:review`: 0 blockers, 2 majors, 1 minor, all confirmed and fixed:
+  - major, `docs/infra.md` did not list `ForwardedHeaders:KnownProxies`/`KnownNetworks` although BR5 says it does: added to the settings table, marked as required in the cloud.
+  - major, `## Regression test` was empty: filled with the failing output seen before the fix (above).
+  - minor, a wrong proxy entry failed the start with a bare `FormatException`: it now names the setting and the value (`TrustedProxiesTests.WrongEntry_NamesTheSetting`).
 
 ## Out of scope
 - A per-client limit on sign-in (`/connect/token`).
@@ -57,6 +65,12 @@ No other reimplementation of the per-client limit found: sign-in (`/connect/toke
 - Rewriting the address of existing consent records.
 
 ## Regression test
+`ClientAddressTests` (Identity, through the real Api pipeline), written first and run on the unfixed code on 2026-09-19, before `ClientAddress` existed (the tests and the fix landed in one commit, `c73137e`, but the failing run came first):
+- `TwoVisitors_ThroughTheWeb_HaveTheirOwnLimit` — "Expected otherVisitor.StatusCode to be HttpStatusCode.Accepted {value: 202}, but found HttpStatusCode.TooManyRequests {value: 429}": the second visitor was refused by the first one's bucket.
+- `SignUp_ThroughTheWeb_RecordsTheVisitorsAddressInTheConsent` — "Expected consent.IpAddress to be "203.0.113.10", but found <null>" (the duplicate occurrence: the consent record).
+- The three guards (`AddressHeader_WithoutTheWebSecret_IsIgnored` ×2, `AddressHeader_ThatIsNotAnAddress_IsIgnored`) passed before and after: the header must stay ignored without the secret.
+
+Web side: `VisitorAddressHostTests.PageRequest_HandsTheVisitorsAddressToTheApiClient` was run with the capture line removed from `App.razor` and failed ("Expected visitor.Address to be "203.0.113.10", but found <null>"), then passed with it restored.
 
 ## Open questions
 - (none)
@@ -64,5 +78,14 @@ No other reimplementation of the per-client limit found: sign-in (`/connect/toke
 ## Change notes
 
 ## Validation script
+1. Close any IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost`, open https://localhost:7125/forgot-password (signed out).
+2. Keyboard only: type an email, Tab to "Send link", press Enter. → The generic answer and the 60 s countdown, as before (the Web now sends your address to the Api; nothing changes on screen).
+3. Switch the language with the globe and repeat step 2 after the countdown. → Same answer in the other language.
+4. In a terminal, read the shared secret: `grep ClientSecret src/Hosts/Simulab.Api/appsettings.Development.json`.
+5. Ask for 6 links as one visitor (Bash; replace SECRET):
+   `for i in 1 2 3 4 5 6; do curl -sk -o /dev/null -w "%{http_code} " -X POST https://localhost:7287/api/v1/identity/password-reset-requests -H "Content-Type: application/json" -H "X-Simulab-Client-Address: 203.0.113.10" -H "X-Simulab-Client-Secret: SECRET" -d '{"email":"x@example.com"}'; done`
+   → `202 202 202 202 202 429`.
+6. Repeat once with `X-Simulab-Client-Address: 198.51.100.20`. → `202`: another visitor has their own limit (before the fix: 429 for everyone).
+7. Repeat step 6 with a wrong secret and a new address, `203.0.113.99`. → Counted under your own connection, not the claimed address: the header is not believed without the secret.
 
 ## Delivery

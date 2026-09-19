@@ -28,14 +28,21 @@ public static class TrustedProxies
         var section = configuration.GetSection(SectionName);
         foreach (var proxy in section.GetSection("KnownProxies").Get<string[]>() ?? [])
         {
-            options.KnownProxies.Add(IPAddress.Parse(proxy));
+            options.KnownProxies.Add(IPAddress.TryParse(proxy, out var address)
+                ? address
+                : throw Invalid("KnownProxies", proxy));
         }
 
         foreach (var network in section.GetSection("KnownNetworks").Get<string[]>() ?? [])
         {
-            options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+            options.KnownIPNetworks.Add(System.Net.IPNetwork.TryParse(network, out var range)
+                ? range
+                : throw Invalid("KnownNetworks", network));
         }
 
         return options.KnownProxies.Count > 0 || options.KnownIPNetworks.Count > 0;
     }
+
+    private static InvalidOperationException Invalid(string key, string value) =>
+        new($"The configuration '{SectionName}:{key}' has '{value}', which is not an IP address or network.");
 }
