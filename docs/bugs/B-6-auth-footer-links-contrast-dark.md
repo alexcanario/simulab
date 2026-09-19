@@ -1,7 +1,7 @@
 ---
 bug: B-6
 feature: F-4
-status: building
+status: validating
 board: 722
 severity: medium
 ---
@@ -47,12 +47,30 @@ Found in passing, same lines: the footer `nav` is named with `Layout.LanguageSwi
 - 2026-09-19 — Out of scope: a contrast audit of the whole app (buttons, chips, secondary text) — owner; only links. No new packages.
 - 2026-09-19 — The app-bar links keep `MudLink` with `Color="Color.Inherit"`: their colour is the bar's text colour, which passes; moving them would change the bar for no gain.
 - 2026-09-19 — The contrast values in `## Cause` are computed from `SimulabTheme` with the WCAG formula; AC5 measures them on screen, because the component library's own styles can override a colour.
+- 2026-09-19 (build) — `AppLink` renders a plain `a` with the kit class `app-link` (text colour, underline, thicker underline on hover) instead of wrapping `MudLink`: the library's colour classes are what failed, and the shared focus ring and pointer already apply to every `a`.
+- 2026-09-19 (build) — The auth footer keeps its 14 px text (`font-size: 0.875rem` on `.app-auth-footer`), as with `Typo.body2` before.
+- 2026-09-19 (build) — No `/agile:review`: markup and CSS of four links, a kit component and an architecture test; no logic, data or contract change.
 
 ## Out of scope
 - A contrast audit of the whole app.
 - Plain `<a>` links already styled by the F-7 rule (`.app-auth-card p a`, `.app-auth-footer-line a`).
 
 ## Regression test
+Written first and run on the unfixed code on 2026-09-19:
+- `UiKitBoundaryTests.Razor_OutsideKit_UsesAppLinkNotALibraryLink` (architecture, every page and layout) failed, listing the library links starting with `Components\Layout\AuthLayout.razor: <MudLink Href="/terms" Color="Color.Primary" Typo="Typo.body2">`. A first version passed by mistake: a backspace character had replaced `\b` in its pattern, so it matched nothing; fixed before any code change and seen failing.
+- `AuthLayoutLinksTests.Footer_IsNamedLegal_AndItsLinksAreKitLinks` (bUnit, the real layout) failed: the footer was named "Language".
+- One check per occurrence: `AppLinkTests` (the kit link), `AuthLayoutLinksTests` (footer), `AccountPageTests.Load_ShowsTheEmailReadOnly_…` ("Change password"), `VerifyEmailTests.InvalidToken_LinksBackToSignUp` ("Back to sign-up"); the gallery link is covered by the architecture test.
+
+Measured on screen through the app host (computed colour against the first opaque background, WCAG formula):
+
+| Link | Dark | Light | Before (computed) |
+|---|---|---|---|
+| Footer: terms, privacy | 14.46:1 | 14.11:1 | 3.87 / 4.21 |
+| My account: Change password | 13.19:1 | 15.40:1 | 3.53 / 4.60 |
+| Verify email: Back to sign-up | 13.19:1 | 15.40:1 | 3.53 / 4.60 |
+| Gallery: leave link | 14.46:1 | 14.11:1 | 3.87 / 4.21 |
+
+All are underlined; the footer is announced as "Documentos legais" (pt-PT) on screen.
 
 ## Open questions
 - (none)
@@ -60,5 +78,12 @@ Found in passing, same lines: the footer `nav` is named with `Layout.LanguageSwi
 ## Change notes
 
 ## Validation script
+1. Close any IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost`, and open https://localhost:7125/sign-in signed out.
+2. In the light theme, look at "Terms of use" and "Privacy policy" at the bottom. → Underlined, in the dark text colour, clearly readable; not blue.
+3. Switch to the dark theme (sun/moon button). → Same links, light text colour, underlined, clearly readable on the dark background.
+4. Keyboard only: press Tab until the focus reaches "Terms of use", then "Privacy policy". → A visible focus ring on each; Enter opens the page.
+5. Switch the language with the globe. With a screen reader (Windows Narrator: Ctrl+Win+Enter) move to the footer. → It is announced as "Documentos legais" (pt) or "Legal" (en), not "Language".
+6. Open https://localhost:7125/verify-email?token=invalid. → "Back to sign-up" is underlined in the text colour, in both themes.
+7. Sign in (your account, or `f8.check@example.com` / `Estudar#2026!`), open "My account". → "Change password" is underlined in the text colour, in both themes.
 
 ## Delivery
