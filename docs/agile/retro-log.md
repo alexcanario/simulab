@@ -27,6 +27,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
 | ⏳ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | |
 | ⏳ | Anonymous endpoints check every input limit before the account lookup | B-7 | |
+| ⏳ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | |
+| ⏳ | Never change state in an app host Claude did not start | B-4 | |
+| ⏳ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -220,3 +223,17 @@ Approved by the owner the same day, after the ship.
 ### Plugin notes (`plugin`)
 - ⏳ **`[generic]` Keep the gate's failure visible.** The build and ship skills say to save the gate's whole output to a file and quote from it; `gate.js` repeats the new warnings (code, file, line) in its last lines, so a truncated view still shows them.
 - ⏳ **`[generic]` Same answer means same checks first.** In the API contract rules: on an anonymous endpoint, every input check (format, length, column width) runs before the lookup that tells the paths apart; an unhandled error on one path (a 500) is an answer too.
+
+## 2026-09-19 — B-4 Per-client limits are shared by the whole site
+Approved by the owner the same day, after the ship. The owner said another session updates the plugin with these notes.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The owner asked for more detail and PowerShell commands: the validation script had one Bash line with a secret to paste by hand | Project rule + plugin improvement | `.claude/rules/agile/project.md`, "Talking to the owner"; this log (see below) |
+| 2 | Claude tested the validation commands against the app host the owner had open and used up the limits of four addresses in that instance | Project rule + plugin improvement | `.claude/rules/agile/project.md`, "Sessions and retro"; this log (see below) |
+| 3 | A Blazor Server circuit has no HTTP request of its own: the visitor's address had to be read at the first request and carried into the circuit | Plugin improvement | This log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` Terminal steps for both shells.** The build skill's validation script: a step that needs a terminal gives the command for Git Bash and for PowerShell 7 (on Windows), run by Claude before handing over, with the expected output and how to repeat it.
+- ⏳ **`[generic]` Hands off the owner's running app.** Claude never changes state (sign-ups, counted requests, data) in an app host it did not start; it asks first, or uses data no one else uses and says which.
+- ⏳ **`[stack: blazor-server]` Request data reaches the circuit through the root.** Data from the first HTTP request that a circuit needs later (visitor address, a header) is read in `App` (static render, `HttpContext` available), passed to the interactive root component as a parameter (the framework protects it in the page) and kept in a scoped service; a circuit has no `HttpContext`.

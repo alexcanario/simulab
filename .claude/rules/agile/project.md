@@ -67,9 +67,11 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## Talking to the owner
 - A technical term used with the owner for the first time gets a row in `## Technical terms` of `docs/glossary.md` (term, pt-BR word, meaning) in the same step (F-8).
+- A validation script step that needs a terminal gives the command for Git Bash and for PowerShell 7, each run by Claude before handing over, with the expected output (B-4).
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
 - A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
 - Run the gate with its whole output saved to a file (scratchpad) and quote from that file; never pipe it through a filter that can drop the failure (B-7).
 - A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
+- Never change state (sign-ups, requests that count, data) in an app host Claude did not start; ask first, or use data no one else uses and say which (B-4).
