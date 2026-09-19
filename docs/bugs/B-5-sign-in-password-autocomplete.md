@@ -1,7 +1,7 @@
 ---
 bug: B-5
 feature: F-5
-status: building
+status: validating
 board: 721
 severity: low
 ---
@@ -42,12 +42,17 @@ No duplicate found.
 - 2026-09-19 — Out of scope: other fields' autocomplete (email and name already state theirs) and testing specific password managers; only the HTML attribute is checked — owner.
 - 2026-09-19 — The parameter becomes an enum (`PasswordAutocomplete.CurrentPassword` / `NewPassword`) marked `[EditorRequired]`, rendered as `current-password` / `new-password` — two valid values only, no typo possible, and a missing value is the compiler's warning `RZ2012`, which the gate fails on.
 - 2026-09-19 — No new packages, for code or tests.
+- 2026-09-19 (build) — Checked through the app host: `/sign-in` renders `autocomplete="current-password"` on the password and `username` on the email; `/sign-up` renders `new-password` on both password fields.
+- 2026-09-19 (build) — No `/agile:review`: a one-attribute change on the sign-in page and a required parameter in the kit, no auth logic, data or contract change.
 
 ## Out of scope
 - The autocomplete of other fields (email, name).
 - Behaviour of specific password managers.
 
 ## Regression test
+`PasswordAutocompleteTests.SignIn_AsksForTheCurrentPassword` (bUnit, the real sign-in page), run on the unfixed code on 2026-09-19: "Expected AutocompleteOf(page, "sign-in-password") to be the same string, but they differ at index 0" (it rendered `new-password`). The three other page tests (sign-up, change password, reset password) passed before and after: they guard the fields that were already right.
+
+Build check (BR2): with `Autocomplete` removed from the sign-in page, `dotnet build` reports `warning RZ2012: Component 'AppPasswordField' expects a value for the parameter 'Autocomplete'`, which the gate refuses as a new warning. `KitField_RequiresTheAutocomplete` keeps the parameter required.
 
 ## Open questions
 - (none)
@@ -55,5 +60,11 @@ No duplicate found.
 ## Change notes
 
 ## Validation script
+1. Close any IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost`, and sign out if you are signed in.
+2. Open https://localhost:7125/sign-in, right-click the password field and choose "Inspect" (F12). → The `input` has `autocomplete="current-password"`.
+3. If your browser or password manager has a saved password for `localhost:7125`: click the password field. → It offers to fill the saved password, not to generate a new one.
+4. Keyboard only: Tab to the email, type it, Tab to the password (the manager's offer appears on focus), type it, press Enter. → You are signed in as before.
+5. Open "My account", then "Change password", and inspect the three fields. → Current password: `current-password`; new and confirmation: `new-password`.
+6. Sign out, switch the language with the globe, open https://localhost:7125/sign-up and inspect both password fields. → `new-password` on both, in any language.
 
 ## Delivery
