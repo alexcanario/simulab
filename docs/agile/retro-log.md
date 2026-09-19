@@ -31,6 +31,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
 | ⏳ | Kit parameters whose value depends on the page's meaning have no default (`[EditorRequired]`) | B-5 | |
+| ⏳ | Source and test files are written with the Write/Edit tools, never through a script's string literals | B-6 | |
+| ⏳ | A colour or contrast bug is checked in both themes and on every surface the component sits on | B-6 | |
 | ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
 | ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
@@ -263,3 +265,15 @@ Approved by the owner the same day, after the ship.
 
 ### Plugin notes (`plugin`)
 - ⏳ **`[generic]` No silent defaults for meaning.** In the core `ui` rule: a kit parameter whose right value depends on what the page means (autocomplete, input purpose, a destructive action's wording) has no default; it is required (in Blazor `[EditorRequired]`, whose `RZ2012` warning the gate refuses), so a page that forgets it fails the build.
+
+## 2026-09-19 — B-6 Links fail the AA contrast (auth footer and three more)
+Recorded in this log at the owner's request (2026-09-19); no project rule was added.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | A C# test written through a Python script had its `\b` turned into a backspace character: the architecture test matched nothing and passed. Caught only because a regression test must be seen failing before the fix | Plugin improvement | This log (see below) |
+| 2 | The bug said "dark theme only"; computing the ratio from the theme found the footer failing in both themes and the same library link failing on three more screens | Plugin improvement | This log (see below) |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` Write code with the file tools.** Source and test files are written with the Write and Edit tools, never through a script's string literals (a heredoc'd Python or shell string): escapes such as `\b` or `\t` become control characters, and a test can compile and pass without matching anything.
+- ⏳ **`[generic]` Contrast is checked everywhere the component sits.** In the `ui` rule: a colour or contrast bug is checked in both themes and against every surface the same component sits on (card, page background, app bar), with the ratio first computed from the theme tokens and then measured on screen; a premise like "dark theme only" is verified, not assumed.
