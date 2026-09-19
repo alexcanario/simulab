@@ -542,3 +542,15 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     font-family: Consolas, "Courier New", monospace;
     font-size: 0.75rem;
 }
+
+/* F-10: the danger zone on /account, set apart from the profile card by its border, not by colour alone. */
+.app-danger-zone {
+    border-color: var(--mud-palette-error);
+}
+
+.app-danger-zone-title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mud-palette-error);
+}

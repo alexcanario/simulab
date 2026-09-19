@@ -20,6 +20,12 @@ public static class AccountEndpoints
     /// <summary>The query that makes `/sign-in` show the "session ended" alert (B-3, BR5).</summary>
     public const string SessionEndedSignInPath = "/sign-in?session=ended";
 
+    /// <summary>The sign-out reason that follows an account erasure (F-10, Screens).</summary>
+    public const string AccountErasedReason = "account-erased";
+
+    /// <summary>The query that makes `/sign-in` show the farewell alert (F-10, AC13).</summary>
+    public const string AccountErasedSignInPath = "/sign-in?account=erased";
+
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
@@ -123,15 +129,20 @@ public static class AccountEndpoints
     /// <summary>
     /// F-5 BR6: best-effort server-side revocation, then the stored session and the cookie clear regardless.
     /// With <see cref="SessionEndedReason"/> the session is already gone at the Api (B-3, BR5): no call,
-    /// and the visitor lands on sign-in with the alert.
+    /// and the visitor lands on sign-in with the alert. <see cref="AccountErasedReason"/> works the same
+    /// way after an erasure (F-10), with the farewell alert instead.
     /// </summary>
     private static async Task<IResult> SignOutAsync(string? reason, HttpContext context, AuthClient authClient, WebSessionTokenAccessor tokens)
     {
         var sessionEnded = reason == SessionEndedReason;
+        var accountErased = reason == AccountErasedReason;
         var webSessionId = context.User.FindFirstValue(WebAuthClaims.WebSessionId);
         try
         {
-            var session = sessionEnded || webSessionId is null ? null : await tokens.GetFreshAsync(webSessionId, context.RequestAborted);
+            // F-10 BR10: the erasure already revoked every session at the Api, so there is nothing to call.
+            var session = sessionEnded || accountErased || webSessionId is null
+                ? null
+                : await tokens.GetFreshAsync(webSessionId, context.RequestAborted);
             if (session is not null)
             {
                 await authClient.SignOutAsync(session.AccessToken, context.RequestAborted);
@@ -146,6 +157,11 @@ public static class AccountEndpoints
             }
 
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        if (accountErased)
+        {
+            return Results.LocalRedirect(AccountErasedSignInPath);
         }
 
         return Results.LocalRedirect(sessionEnded ? SessionEndedSignInPath : "/");

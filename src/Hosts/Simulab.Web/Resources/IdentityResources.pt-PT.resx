@@ -102,4 +102,12 @@
   <data name="Account.Saved" xml:space="preserve"><value>O seu perfil foi guardado.</value></data>
   <data name="Account.LoadFailed" xml:space="preserve"><value>Não foi possível carregar o seu perfil.</value></data>
   <data name="Auth.Legal.Label" xml:space="preserve"><value>Documentos legais</value></data>
+  <data name="SignIn.AccountErased" xml:space="preserve"><value>A sua conta foi eliminada. Obrigado pelo tempo que passou connosco.</value></data>
+  <data name="Account.Erase.Title" xml:space="preserve"><value>Eliminar a minha conta</value></data>
+  <data name="Account.Erase.Explanation" xml:space="preserve"><value>Eliminar remove definitivamente o seu nome, o seu endereço de correio eletrónico e a sua palavra-passe, e termina a sessão em todos os dispositivos. Não é possível anular. Guardamos apenas registos que já não o identificam e a prova de que aceitou os termos, que a lei nos obriga a conservar. O endereço fica novamente livre para uma conta nova.</value></data>
+  <data name="Account.Erase.Action" xml:space="preserve"><value>Eliminar a minha conta</value></data>
+  <data name="Account.Erase.Dialog.Title" xml:space="preserve"><value>Eliminar a minha conta</value></data>
+  <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>Isto não pode ser anulado. Escreva a sua palavra-passe atual para confirmar que a conta é sua.</value></data>
+  <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
+  <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A palavra-passe com que inicia sessão.</value></data>
 </root>

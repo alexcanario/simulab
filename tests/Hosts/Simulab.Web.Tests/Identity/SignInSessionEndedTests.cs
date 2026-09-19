@@ -36,6 +36,17 @@ public class SignInSessionEndedTests : IdentityPageTestContext
         page.Markup.Should().NotContain("Your session ended");
     }
 
+    /// <summary>F-10 AC13: the browser lands here after erasing the account.</summary>
+    [Fact]
+    public void AccountErasedQuery_ShowsTheFarewellAlert()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(AccountEndpoints.AccountErasedSignInPath);
+
+        var page = Render<SignIn>();
+
+        page.Markup.Should().Contain("Your account was erased. Thank you for the time you spent with us.");
+    }
+
     [Fact]
     public void PasswordChangedQuery_ShowsTheSuccessAlert()
     {

@@ -80,6 +80,15 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>F-8: the bodies PUT /profile received, in order.</summary>
         public List<UpdateProfileRequest> ProfileUpdates { get; } = [];
 
+        /// <summary>F-10: what POST /account-erasures answers. Null means 204.</summary>
+        public (HttpStatusCode Status, string Code)? EraseFailure { get; set; }
+
+        /// <summary>F-10: when set, an erasure answers 423 with these seconds left.</summary>
+        public int? EraseLockedSeconds { get; set; }
+
+        /// <summary>F-10: the passwords POST /account-erasures received, in order.</summary>
+        public List<string?> ErasureAttempts { get; } = [];
+
         public IReadOnlyList<HttpRequestMessage> Requests => _requests;
 
         public int CountOf(string route) => _requests.Count(request => request.RequestUri!.AbsolutePath.EndsWith(route, StringComparison.Ordinal));
@@ -145,6 +154,24 @@ public abstract class IdentityPageTestContext : KitTestContext
                 }
 
                 return ChangeFailure is { } failure ? Problem(failure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            // F-10.
+            if (path.EndsWith("/account-erasures", StringComparison.Ordinal))
+            {
+                ErasureAttempts.Add((await request.Content!.ReadFromJsonAsync<EraseAccountRequest>(AppJson.Options, cancellationToken))!.CurrentPassword);
+
+                if (EraseLockedSeconds is { } eraseSeconds)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Locked)
+                    {
+                        Content = JsonContent.Create(
+                            new Dictionary<string, object> { ["status"] = 423, ["code"] = IdentityErrorCodes.AccountLocked, ["retryAfterSeconds"] = eraseSeconds },
+                            options: AppJson.Options)
+                    };
+                }
+
+                return EraseFailure is { } eraseFailure ? Problem(eraseFailure) : new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             // F-8.

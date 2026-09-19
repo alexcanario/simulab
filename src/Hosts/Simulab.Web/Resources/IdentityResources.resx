@@ -102,4 +102,12 @@
   <data name="Account.Saved" xml:space="preserve"><value>Your profile was saved.</value></data>
   <data name="Account.LoadFailed" xml:space="preserve"><value>We could not load your profile.</value></data>
   <data name="Auth.Legal.Label" xml:space="preserve"><value>Legal</value></data>
+  <data name="SignIn.AccountErased" xml:space="preserve"><value>Your account was erased. Thank you for the time you spent with us.</value></data>
+  <data name="Account.Erase.Title" xml:space="preserve"><value>Erase my account</value></data>
+  <data name="Account.Erase.Explanation" xml:space="preserve"><value>Erasing removes your name, your email address and your password for good, and signs you out of every device. It cannot be undone. We keep only records that no longer identify you and the proof that you accepted the terms, which the law requires us to keep. The email address becomes free again for a new account.</value></data>
+  <data name="Account.Erase.Action" xml:space="preserve"><value>Erase my account</value></data>
+  <data name="Account.Erase.Dialog.Title" xml:space="preserve"><value>Erase my account</value></data>
+  <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>This cannot be undone. Type your current password to confirm that this account is yours.</value></data>
+  <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Current password</value></data>
+  <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>The password you sign in with.</value></data>
 </root>

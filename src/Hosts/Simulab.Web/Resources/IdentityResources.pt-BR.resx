@@ -102,4 +102,12 @@
   <data name="Account.Saved" xml:space="preserve"><value>Seu perfil foi salvo.</value></data>
   <data name="Account.LoadFailed" xml:space="preserve"><value>Não foi possível carregar seu perfil.</value></data>
   <data name="Auth.Legal.Label" xml:space="preserve"><value>Documentos legais</value></data>
+  <data name="SignIn.AccountErased" xml:space="preserve"><value>Sua conta foi apagada. Obrigado pelo tempo que você passou com a gente.</value></data>
+  <data name="Account.Erase.Title" xml:space="preserve"><value>Apagar minha conta</value></data>
+  <data name="Account.Erase.Explanation" xml:space="preserve"><value>Apagar remove para sempre seu nome, seu e-mail e sua senha, e encerra a sessão em todos os aparelhos. Não dá para desfazer. Guardamos apenas registros que não identificam mais você e a prova de que você aceitou os termos, que a lei nos obriga a manter. O e-mail fica livre de novo para uma conta nova.</value></data>
+  <data name="Account.Erase.Action" xml:space="preserve"><value>Apagar minha conta</value></data>
+  <data name="Account.Erase.Dialog.Title" xml:space="preserve"><value>Apagar minha conta</value></data>
+  <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>Isso não pode ser desfeito. Digite sua senha atual para confirmar que a conta é sua.</value></data>
+  <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
+  <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A senha com que você entra.</value></data>
 </root>

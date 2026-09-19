@@ -191,4 +191,6 @@
   <data name="profile.full_name_too_long" xml:space="preserve"><value>Use no máximo 120 caracteres.</value></data>
   <data name="profile.language_not_supported" xml:space="preserve"><value>Escolha um dos idiomas da lista.</value></data>
   <data name="registration.full_name_too_long" xml:space="preserve"><value>Use no máximo 120 caracteres.</value></data>
+  <data name="account_erasure.current_password_invalid" xml:space="preserve"><value>A senha atual não está correta.</value></data>
+  <data name="account_erasure.last_manager" xml:space="preserve"><value>Você é o último usuário que pode gerenciar papéis. Dê essa permissão a outro usuário ativo antes de apagar sua conta.</value></data>
 </root>
