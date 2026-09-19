@@ -1,7 +1,7 @@
 ---
 bug: B-6
 feature: F-4
-status: validating
+status: done
 board: 722
 severity: medium
 ---
@@ -87,3 +87,9 @@ All are underlined; the footer is announced as "Documentos legais" (pt-PT) on sc
 7. Sign in (your account, or `f8.check@example.com` / `Estudar#2026!`), open "My account". → "Change password" is underlined in the text colour, in both themes.
 
 ## Delivery
+- Branch: bug/B-6 (removed; never pushed)
+- Merge: f1e66a1 (--no-ff, AB#722)
+- Validation: passed by the owner, 2026-09-19
+- Regression: the architecture test and the footer test seen failing before the fix; contrast measured on screen, 13.19:1 to 15.40:1 in both themes
+- Tests: full suite 432 passed, 0 failed; build 10 s, tests 27 s; 0 warnings, baseline empty; agile gate GREEN
+- Manual pages: none changed (the manual describes tasks, not link colours; no visible text changed)
