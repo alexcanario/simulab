@@ -123,7 +123,7 @@ else
         _error = null;
 
         // BR2: validated as it is typed, so Save is disabled while the name is too long (AC13).
-        _fullNameError = (value ?? string.Empty).Trim().Length > ProfileLimits.FullNameMaxLength
+        _fullNameError = (value ?? string.Empty).Trim().Length > AccountLimits.FullNameMaxLength
             ? L[IdentityErrorCodes.ProfileFullNameTooLong].Value
             : null;
     }

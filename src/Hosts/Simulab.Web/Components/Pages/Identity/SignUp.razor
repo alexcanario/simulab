@@ -35,7 +35,7 @@
                   Placeholder="@I["SignUp.Email.Placeholder"]"
                   InputType="InputType.Email"
                   Autocomplete="username"
-                  MaxLength="254"
+                  MaxLength="AccountLimits.EmailMaxLength"
                   Required="true"
                   Disabled="Busy"
                   Error="@_emailError"
@@ -69,7 +69,7 @@
                   Id="sign-up-full-name"
                   Label="@I["SignUp.FullName.Label"]"
                   Autocomplete="name"
-                  MaxLength="120"
+                  MaxLength="AccountLimits.FullNameMaxLength"
                   Disabled="Busy"
                   Value="@_fullName"
                   ValueChanged="@(value => _fullName = value)" />

@@ -29,9 +29,19 @@ public sealed class RegisterUserHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (string.IsNullOrWhiteSpace(command.Email) || !EmailFormat.IsValid(command.Email))
+        // B-7 BR2: an address longer than its column is not a valid address.
+        if (string.IsNullOrWhiteSpace(command.Email)
+            || command.Email.Length > AccountLimits.EmailMaxLength
+            || !EmailFormat.IsValid(command.Email))
         {
             return Failure(IdentityErrorCodes.EmailInvalid, ErrorKind.Validation);
+        }
+
+        // B-7 BR1, BR3: refused before the account lookup below, so the answer is the same for a registered address.
+        var fullName = string.IsNullOrWhiteSpace(command.FullName) ? null : command.FullName.Trim();
+        if (fullName?.Length > AccountLimits.FullNameMaxLength)
+        {
+            return Failure(IdentityErrorCodes.RegistrationFullNameTooLong, ErrorKind.Validation);
         }
 
         // BR1: the three acceptances are checked before anything is written. The endpoint validates them
@@ -66,7 +76,7 @@ public sealed class RegisterUserHandler(
             Id = Guid.CreateVersion7(),
             UserName = command.Email,
             Email = command.Email,
-            FullName = string.IsNullOrWhiteSpace(command.FullName) ? null : command.FullName.Trim(),
+            FullName = fullName,
             IsAdultDeclared = command.DeclaresAdult,
             PreferredLanguage = command.Locale
         };

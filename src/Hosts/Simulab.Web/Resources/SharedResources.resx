@@ -138,4 +138,5 @@
   <data name="Layout.UserMenu.Account" xml:space="preserve"><value>My account</value></data>
   <data name="profile.full_name_too_long" xml:space="preserve"><value>Use at most 120 characters.</value></data>
   <data name="profile.language_not_supported" xml:space="preserve"><value>Choose one of the languages in the list.</value></data>
+  <data name="registration.full_name_too_long" xml:space="preserve"><value>Use at most 120 characters.</value></data>
 </root>
