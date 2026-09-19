@@ -70,7 +70,9 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) |
 | Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts |
 | Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts |
-| Idioma preferido | Idioma preferido | `PreferredLanguage` | The locale used for this user's emails; editable from F-8 |
+| Idioma preferido | Idioma preferido | `PreferredLanguage` | The user's locale: first culture source after sign-in and the language of their emails (F-8) |
+| Minha conta | A minha conta | `Account` (page `/account`) | The signed-in user's own page: profile and link to change the password (F-8) |
+| Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
