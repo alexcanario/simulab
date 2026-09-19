@@ -22,3 +22,4 @@ The core rule `ui.md` holds the standard. This file holds only what Simulab deci
 - Declared exception — sign-up, verification and legal pages use `AuthLayout`: no app menu, no breadcrumb, language and theme switches kept. Its field, alert and strength patterns are kit components in the gallery (F-4).
 - A screen imported from Simulae is converted to the kit on the way in; it never enters with its original table, icons or edit pattern.
 - In-page links (`href="#id"`) leave the page because of `<base href="/">`; handle them in `wwwroot/js/shell.js`, as the skip link does.
+- A `MudMenu`'s icon activator uses `MudMenu`'s own `Icon`/`AriaLabel` parameters, never a custom `MudIconButton` in `ActivatorContent` — that button never gets the click-handling class `MudMenu` wires to (found B-2: the account menu never opened).

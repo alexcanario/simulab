@@ -61,6 +61,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
 - Assertions: AwesomeAssertions. Never FluentAssertions.
+- A cache whose expiry a test must control is not `IMemoryCache` (its clock is not a `TimeProvider` in this stack) - a small `TimeProvider`-backed class instead, like `PermissionCache` (F-6).
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.

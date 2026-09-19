@@ -156,3 +156,11 @@ Approved by the owner the same day.
 
 ### Plugin notes (`plugin`)
 - ⏳ **CPM transitive pinning floats shared packages.** A core rule or a note wherever build-config is documented: when investigating an obsolete-API warning or any version-dependent behavior, check the *resolved* version in `obj/project.assets.json` for that specific project, not the version pinned in `Directory.Packages.props` — `CentralPackageTransitivePinningEnabled` can raise a shared package's version because a sibling package elsewhere in the solution needs it, even though nothing pins that shared package directly.
+
+## 2026-09-19 — F-6 Permissions and seed roles
+Approved by the owner in the previous session. Both lessons found on screen, while validating the item.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The account menu (`UserMenu.razor`, shipped with F-5) never opened on a real click: it wrapped a custom `MudIconButton` inside `MudMenu`'s `ActivatorContent`, which never receives the `mud-menu-icon-button-activator` class `MudMenu` wires its click handling to — only its own `Icon` parameter does. Confirmed live: `LanguageSwitch.razor` (using `Icon`, no custom activator) opened fine on the same page. Registered as B-2, fixed on the F-6 branch | Project rule | `.claude/rules/agile/ui-project.md` |
+| 2 | A test needed to move the clock forward past the 10 s permission cache window; `IMemoryCache`'s expiration clock is not a swappable `TimeProvider` in this stack, so a `FakeTimeProvider` in the test host had no effect on it. Replaced with a small `TimeProvider`-backed cache class (`PermissionCache`) instead | Project rule | `.claude/rules/agile/project.md`, "Packages" |
