@@ -1,7 +1,7 @@
 ---
 feature: F-6
 epic: Foundation and identity
-status: validating
+status: done
 board: 710
 version: 2
 ---
@@ -107,8 +107,8 @@ Give Simulab real access control — three seed roles and a permission-check mec
 | AC8 | `ResourceParityTests` (Web, all cases); `EmailResourceParityTests` (unaffected, no new email text) |
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-6` (merged and deleted; includes B-2, a bug found and fixed while validating this
+  item's screen — see `docs/bugs/B-2-user-menu-does-not-open.md`)
+- Merge: `a0a6f02` (`--no-ff` into `main`, AB#710)
+- Tests: 277, 27 s (full suite, architecture tests included)
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/roles.md`, linked from each locale's `index.md`
