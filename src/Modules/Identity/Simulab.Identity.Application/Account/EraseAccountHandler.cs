@@ -79,6 +79,10 @@ public sealed class EraseAccountHandler(
             return Result.Failure<bool>(new Error(IdentityErrorCodes.AccountErasureCurrentPasswordInvalid, ErrorKind.BusinessRule));
         }
 
+        // BR11: what the erasure has to leave behind. Counted before, so erasing an ordinary account in a
+        // system that has no manager at all is not blamed for a hole it did not open.
+        var managersBefore = await roleStore.CountActiveManagersAsync(cancellationToken);
+
         await store.RemoveAccountDataAsync(userId, cancellationToken);
         await store.ClearConsentAddressesAsync(userId, cancellationToken);
 
@@ -86,8 +90,8 @@ public sealed class EraseAccountHandler(
         store.ApplyErasure(user, tombstone);
         await store.SaveChangesAsync(cancellationToken);
 
-        // BR11: judged after the change, inside the same transaction, which rolls back on failure.
-        return await roleStore.CountActiveManagersAsync(cancellationToken) == 0
+        // Judged after the change, inside the same transaction, which rolls back on failure.
+        return managersBefore > 0 && await roleStore.CountActiveManagersAsync(cancellationToken) == 0
             ? Result.Failure<bool>(new Error(IdentityErrorCodes.AccountErasureLastManager, ErrorKind.BusinessRule))
             : Result.Success(true);
     }
