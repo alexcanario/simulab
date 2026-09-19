@@ -52,6 +52,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Curador | Curador | `Curator` | Role: imports, reviews, writes and publishes content |
 | Administrador | Administrador | `Admin` | Role: manages catalog, users, roles, plans |
 | Papel / Permissão | Perfil / Permissão (?) | `Role` / `Permission` | RBAC |
+| Papel de sistema | Perfil de sistema (?) | `Role.IsSystem` | A seed role (Student, Curator, Admin): cannot be renamed or deleted, only its permissions change (F-9) |
+| Atribuição de papel | Atribuição de perfil (?) | `UserRole` | A role given to a user; a user may hold several and gets the union of their permissions (F-9) |
 | Plano | Plano | `Plan` | What a user is entitled to: features and limits. Not to be confused with `StudyPlan` |
 | Atribuição de plano | Atribuição de plano | `PlanAssignment` | A plan given to a user, with validity and source |
 | Código promocional | Código promocional | `PromoCode` | A code that grants a target plan for a number of days |
