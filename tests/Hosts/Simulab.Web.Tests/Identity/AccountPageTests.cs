@@ -95,9 +95,10 @@ public sealed class AccountPageTests : IdentityPageTestContext
 
         Save(page);
 
+        // The page yields one render before it navigates (the unsaved-changes guard), so wait for it.
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri
+            .Should().EndWith("/account/profile-applied?redirectUri=%2Faccount%3Fsaved%3Dtrue"));
         Api.ProfileUpdates.Should().Equal(new UpdateProfileRequest("Ana Souza", "en"));
-        Services.GetRequiredService<NavigationManager>().Uri
-            .Should().EndWith("/account/profile-applied?redirectUri=%2Faccount%3Fsaved%3Dtrue");
     }
 
     [Fact]
