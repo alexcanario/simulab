@@ -14,7 +14,7 @@ An item is `done` only when every line is true. "Almost" is `validating`.
 - A screen that calls the API was opened through the app host by Claude before handing over the validation script.
 - The owner followed the validation script and said it passed, in this conversation.
 - The item file reflects what was built: decisions, change notes, `## Delivery`.
-- The app manual is updated in the three languages when visible behavior changed.
+- The app manual is updated in the three languages when visible behavior changed; the generated technical docs (`docs/architecture/`) pass `DocGen --check` when the project has them.
 - The merge was authorized by the owner, verified (`0 0`, branch and worktree gone) and the board item is closed with evidence.
 - Nothing is left uncommitted in any worktree.
 - The retro ran: at most three lessons, each one proposed as a rule, a skill change or nothing.

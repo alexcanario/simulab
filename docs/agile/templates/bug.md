@@ -20,12 +20,14 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 
 ## Cause
 <!-- Confirmed in code: file and line. Never a guess. -->
+<!-- If this is a business rule, list every duplicate occurrence found elsewhere in the solution (file:line each), or write "no duplicate found". -->
 
 ## Fix
 <!-- What changes. Keep it minimal. -->
+<!-- If duplicates were listed above: which are fixed here, which are deferred and why. -->
 
 ## Regression test
-<!-- The test that fails before the fix and passes after it. -->
+<!-- The test that fails before the fix and passes after it. One per occurrence fixed. -->
 - <Test name> — <project>
 
 ## Open questions

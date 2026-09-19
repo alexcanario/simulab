@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.21 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.25 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -131,7 +131,7 @@ Before handing over the validation script, Claude shows a **criterion → test**
 
 ## 7. The feature file
 
-`docs/features/F-<number>-<slug>.md`, one per feature, created from `docs/agile/templates/feature.md`. Bugs use a shorter file, `docs/bugs/B-<number>-<slug>.md` (template `bug.md`): what happens, expected, confirmed cause, fix, regression test and validation script.
+`docs/features/F-<number>-<slug>.md`, one per feature, created from `docs/agile/templates/feature.md`. Bugs use a shorter file, `docs/bugs/B-<number>-<slug>.md` (template `bug.md`): what happens, expected, confirmed cause (with every duplicate of a business rule), fix (which occurrences now, which deferred), one regression test per occurrence fixed and validation script.
 
 Epics live in `docs/epics/<slug>.md` (features table, order, first release cut) and discussions in `docs/discussions/D-<n>-<slug>.md`. Screen mockups go to `docs/features/mockups/`.
 
@@ -321,7 +321,7 @@ tests/
 
 Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
 
-**Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (a basic one; replace it with yours), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
+**Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
 
 **One behavior on every screen.** The `ui` rule keeps screens from drifting apart: a pattern is defined once, in a UI kit shown on a dev-only gallery page, and pages use the kit instead of raw library components. One icon family behind semantic names (`AppIcons.Edit`), one way to edit an item (row actions in the last column; dialog for simple entities, own page for complex ones; a name link only opens a read-only detail page), the same hover and focus everywhere, one confirmation dialog for destructive actions, the same feedback, list states, form layout and action vocabulary. Architecture tests forbid raw icons and raw tables outside the kit, and the kit comes before the first screen. The project records its choices (icon family, declared exceptions) in its own rules.
 
@@ -611,6 +611,24 @@ ignore accents ("Fundacao" finds "Fundação")? Recommendation: yes.
 
 The bug follows the same lifecycle, with one short file: cause, expected behavior, a test that reproduces it, and the validation script.
 
+When the cause is a business rule, refinement also searches the whole solution for the same rule implemented again elsewhere (common in apps that grew without a shared rules layer), writes every occurrence under `## Cause` before asking anything, and asks which ones to fix now and which to record as debt:
+
+```
+> /agile:refine B-4
+Claude: Cause confirmed: Enrollment/CpfValidator.cs:41 skips the second check digit.
+The same check is implemented again in two other places (not callers of the validator):
+  - Import/StudentCsvReader.cs:88 (own copy, same defect)
+  - Web/Pages/Enroll.razor.cs:132 (own copy, correct)
+All three are listed under ## Cause in docs/bugs/B-4-cpf-check-digit.md.
+[card: Business rules]
+  Which occurrences does B-4 fix?
+  ● All three: the reader and the page call CpfValidator (Recommended)
+    Only the validator and the reader; the page copy stays as recorded debt
+    Only the validator
+> (picks the first)
+Claude: B-4 approved. The build adds one regression test per occurrence fixed.
+```
+
 ### 14.6 Pausing and resuming
 
 You stop whenever you want, in your own words or with the command; both do the same thing. In the middle of F-7:
@@ -768,6 +786,8 @@ Claude: Copied 2, merged 1 (no conflicts), .editorconfig edited. Build 0 warning
 Recorded 0.0.13 in .claude/agile/sync.json. Commit "chore: sync with agile@canary 0.0.13" on main. Authorize?
 ```
 
+From 0.0.23 the template carries the final `.editorconfig`. In a project that still has the basic one, the `.editorconfig` row lists the new groups of rules (braces, pattern matching, expression-bodied members, formatting) and Claude proposes them one group at a time; code that breaks an approved rule shows up as warnings in the build that follows the sync.
+
 ### 14.11 When a gate says no
 
 **A running app locks the build.** Claude opened the screen to check it and forgot the app host:
@@ -908,7 +928,10 @@ flowchart TD
     B --> C["Check every premise in the code"]
     C -->|a premise is false| C1["Say so first"]
     C1 --> D
-    C --> D["One round as quiz cards, one per topic, recommended option first:<br/>use cases, rules, permissions, states, screens, data,<br/>packages for code and tests, out of scope"]
+    C -->|a bug| C2["Cause in the code, file:line; a business rule:<br/>search the solution for the same rule implemented again"]
+    C2 --> C3["Write ## Cause with every occurrence; re-read the file"]
+    C3 --> D
+    C --> D["One round as quiz cards, one per topic, recommended option first:<br/>use cases, rules (duplicates: fix now or debt), permissions, states, screens, data,<br/>packages for code and tests, out of scope"]
     D --> E{"Your answers"}
     E --> F["Fill the file: UC, BR, screens and API,<br/>acceptance criteria, decisions, out of scope"]
     F --> G{"At most one follow-up round needed?"}
@@ -942,7 +965,7 @@ flowchart TD
     B2 -->|yes| C2["Worktree outside the repository; work only there"]
     B -->|no| C["Branch feature/F-n; status: building; plan in 8 steps"]
     C2 --> D
-    C --> D["Code by the profile and rules; tests per criterion;<br/>affected tests only; small commits, branch checked first"]
+    C --> D["Code by the profile and rules; tests per criterion;<br/>a bug: one regression test per occurrence fixed;<br/>affected tests only; small commits, branch checked first"]
     D --> E{"False premise or impossible criterion?"}
     E -->|yes| E1["Options A/B → /agile:change"]
     E1 --> D

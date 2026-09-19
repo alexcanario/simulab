@@ -5,11 +5,14 @@ One deployable, several business modules with clear boundaries. Each module is *
 ## Layout
 ```
 src/
-  <App>.AppHost/                 local orchestration (Aspire)
-  <App>.ServiceDefaults/         telemetry, health, resilience
-  <App>.Api/                     host only: composition, auth, middleware, OpenAPI. No business code.
-  <App>.Web/                     Blazor UI. Talks to the API through typed clients. No business rules.
-  <App>.SharedKernel/            Entity, TenantEntity, Result/Error, clock, AppJson.Options
+  Hosts/
+    <App>.AppHost/               local orchestration (Aspire)
+    <App>.ServiceDefaults/       telemetry, health, resilience
+    <App>.Api/                   host only: composition, auth, middleware, OpenAPI. No business code.
+    <App>.Web/                   Blazor UI. Talks to the API through typed clients. No business rules.
+  BuildingBlocks/
+    <App>.SharedKernel/          Entity, TenantEntity, Result/Error, clock, AppJson.Options
+    <App>.<Block>/               every other technical block (Persistence, Email, Storage, Ai): created by the first feature that needs it
   Modules/<Module>/
     <App>.<Module>/
       Features/<Feature>/        vertical slice: endpoint, request/response, handler, validator
@@ -19,11 +22,14 @@ src/
       <Module>Module.cs          AddXxxModule() / MapXxxEndpoints()
     <App>.<Module>.Contracts/    what other modules may see: DTOs, query interfaces, integration events
 tests/
-  <App>.<Module>.Tests/          unit + integration for the module
-  <App>.Web.Tests/               bUnit
-  <App>.ArchitectureTests/
+  Hosts/<App>.Web.Tests/         bUnit; Api and AppHost tests sit next to it
+  BuildingBlocks/<App>.<Block>.Tests/
+  Modules/<Module>/<App>.<Module>.Tests/   unit + integration for the module
+  <App>.ArchitectureTests/       serves every group
+  <App>.Testing/                 shared test helpers (container fixture, factories)
 ```
-Every solution root also has `Directory.Build.props`, `Directory.Packages.props` (central package versions), `.editorconfig`, `BannedSymbols.txt` and `global.json`, copied from the plugin at bootstrap; rules the build can check live there, and the Stop gate fails on new warnings.
+The solution folders in the `.slnx` mirror these disk folders (`Hosts`, `BuildingBlocks`, `Modules/<Module>`), and a layout test checks it. `Directory.Build.props` exists at the root and in `tests/`; a group gets its own only when it has a first property to share. `Directory.Packages.props` stays single, at the root.
+Every solution root also has `Directory.Build.props`, `Directory.Packages.props` (central package versions), `.editorconfig`, `BannedSymbols.txt` and `global.json`, copied from the plugin at bootstrap; rules the build can check live there, and the Stop gate fails on new warnings. With technical docs chosen in the quiz (round 8), `tools/<App>.DocGen/` generates `docs/architecture/` from the EF model, the OpenAPI document and the project references, and `--check` runs at ship.
 
 ## Where business rules live
 - A rule about one entity lives in that entity (`Domain/`): methods that return `Result`, no public setters on ruled state.
@@ -73,3 +79,4 @@ Modules/<Module>/
 - Vocabulary: identifiers in **every** assembly (modules, Api and Web) are English; forbidden terms come from `docs/glossary.md`.
 - Every rule of absence is paired with a rule of presence (the test asserts it matched at least one type). An empty assembly must fail, not pass.
 - Screens follow the `ui` rule: a UI kit and a dev-only gallery come before the first screen; pages use the kit, icons go through semantic names, and architecture tests forbid raw icons and raw tables outside the kit.
+- Layout: every project sits in the folder the `## Layout` assigns to its kind, and the solution folders mirror the disk folders. The test lists the solution and fails on a project outside its group (rule of presence: it saw at least one project per group).

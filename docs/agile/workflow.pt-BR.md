@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.21 (rascunho). English: [en](workflow.md).
+> Versão 0.0.25 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -131,7 +131,7 @@ Antes de entregar o roteiro de validação, o Claude mostra uma tabela **critér
 
 ## 7. O arquivo da feature
 
-`docs/features/F-<número>-<slug>.md`, um por feature, criado a partir de `docs/agile/templates/feature.md`. Bugs usam um arquivo mais curto, `docs/bugs/B-<número>-<slug>.md` (template `bug.md`): o que acontece, o esperado, a causa confirmada, a correção, o teste de regressão e o roteiro de validação.
+`docs/features/F-<número>-<slug>.md`, um por feature, criado a partir de `docs/agile/templates/feature.md`. Bugs usam um arquivo mais curto, `docs/bugs/B-<número>-<slug>.md` (template `bug.md`): o que acontece, o esperado, a causa confirmada (com cada duplicata de uma regra de negócio), a correção (quais ocorrências agora, quais adiadas), um teste de regressão por ocorrência corrigida e o roteiro de validação.
 
 Épicos ficam em `docs/epics/<slug>.md` (tabela de features, ordem, corte da primeira versão) e discussões em `docs/discussions/D-<n>-<slug>.md`. Mockups de tela vão para `docs/features/mockups/`.
 
@@ -323,7 +323,7 @@ tests/
 
 As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agile/` no bootstrap: `workflow`, `naming`, `git`, `definition-of-done` e `output-style` são sempre carregadas; `i18n` e `api-contracts` só são carregadas quando o Claude trabalha em arquivos de código, `ui` só em arquivos de tela (`.razor`, `.xaml`), e `build-config` só em arquivos de projeto e de build. Uma regra por linha, no máximo 30 linhas por arquivo. As regras core são genéricas: valem para todos os perfis. O que depende de um perfil, de uma stack ou de uma biblioteca de UI fica no arquivo do perfil, em `templates/dotnet/` ou numa regra limitada por tipo de arquivo, e o plugin aplica isso a todos os perfis a que diz respeito.
 
-**Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (um básico; troque pelo seu), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
+**Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
 
 **Um comportamento só em todas as telas.** A regra `ui` impede que as telas se afastem umas das outras: um padrão é definido uma vez, num kit de UI mostrado numa página de galeria só de desenvolvimento, e as páginas usam o kit em vez dos componentes crus da biblioteca. Uma família de ícones atrás de nomes semânticos (`AppIcons.Edit`), um jeito só de editar um item (ações de linha na última coluna; diálogo para entidades simples, página própria para as complexas; o link no nome só abre uma página de detalhe para leitura), o mesmo hover e o mesmo foco em todo lugar, um diálogo único de confirmação para ações destrutivas, e o mesmo feedback, estados de lista, layout de formulário e vocabulário de ações. Testes de arquitetura proíbem ícones e tabelas crus fora do kit, e o kit vem antes da primeira tela. O projeto registra as suas escolhas (família de ícones, exceções declaradas) nas suas próprias regras.
 
@@ -613,6 +613,24 @@ ignorar acentos ("Fundacao" encontra "Fundação")? Recomendação: sim.
 
 O bug segue o mesmo ciclo, com um arquivo curto: causa, comportamento esperado, um teste que reproduz o problema e o roteiro de validação.
 
+Quando a causa é uma regra de negócio, o refinamento também procura na solução inteira a mesma regra implementada de novo em outro lugar (comum em apps que cresceram sem uma camada de regras compartilhada), escreve todas as ocorrências em `## Cause` antes de perguntar qualquer coisa e pergunta quais corrigir agora e quais registrar como dívida:
+
+```
+> /agile:refine B-4
+Claude: Causa confirmada: Enrollment/CpfValidator.cs:41 ignora o segundo dígito verificador.
+A mesma conferência está implementada de novo em outros dois lugares (não são chamadas do validador):
+  - Import/StudentCsvReader.cs:88 (cópia própria, mesmo defeito)
+  - Web/Pages/Enroll.razor.cs:132 (cópia própria, correta)
+As três estão em ## Cause, em docs/bugs/B-4-cpf-check-digit.md.
+[cartão: Regras de negócio]
+  Quais ocorrências o B-4 corrige?
+  ● As três: o leitor e a página passam a chamar o CpfValidator (Recomendado)
+    Só o validador e o leitor; a cópia da página fica como dívida registrada
+    Só o validador
+> (escolhe a primeira)
+Claude: B-4 aprovado. O build acrescenta um teste de regressão por ocorrência corrigida.
+```
+
 ### 14.6 Pausa e retomada
 
 Você para quando quiser, com as suas palavras ou com o comando; os dois fazem a mesma coisa. No meio da F-7:
@@ -772,6 +790,8 @@ Claude: Copiados 2, mesclado 1 (sem conflitos), .editorconfig editado. Build com
 Registrei 0.0.13 em .claude/agile/sync.json. Commit "chore: sync with agile@canary 0.0.13" na main. Autoriza?
 ```
 
+A partir da 0.0.23 o template traz o `.editorconfig` definitivo. Num projeto que ainda tem o básico, a linha do `.editorconfig` lista os novos grupos de regras (chaves, pattern matching, membros com corpo de expressão, formatação) e o Claude propõe um grupo de cada vez; código que quebra uma regra aprovada aparece como aviso no build que vem depois do sync.
+
 ### 14.11 Quando um gate diz não
 
 **Um app rodando trava o build.** O Claude abriu a tela para conferir e esqueceu o app host:
@@ -913,7 +933,10 @@ flowchart TD
     B --> C["Conferir cada premissa no código"]
     C -->|premissa falsa| C1["Dizer isso primeiro"]
     C1 --> D
-    C --> D["Uma rodada como cartões de quiz, um por tema, opção recomendada primeiro:<br/>casos de uso, regras, permissões, estados, telas, dados,<br/>pacotes do código e dos testes, fora de escopo"]
+    C -->|um bug| C2["Causa no código, arquivo:linha; regra de negócio:<br/>procurar na solução a mesma regra implementada de novo"]
+    C2 --> C3["Escrever ## Cause com todas as ocorrências; reler o arquivo"]
+    C3 --> D
+    C --> D["Uma rodada como cartões de quiz, um por tema, opção recomendada primeiro:<br/>casos de uso, regras (duplicatas: corrigir agora ou dívida), permissões, estados, telas, dados,<br/>pacotes do código e dos testes, fora de escopo"]
     D --> E{"Suas respostas"}
     E --> F["Preencher o arquivo: UC, BR, telas e API,<br/>critérios de aceite, decisões, fora de escopo"]
     F --> G{"Precisa de no máximo mais uma rodada?"}
@@ -947,7 +970,7 @@ flowchart TD
     B2 -->|sim| C2["Worktree fora do repositório; trabalhar só lá"]
     B -->|não| C["Branch feature/F-n; status: building; plano em 8 passos"]
     C2 --> D
-    C --> D["Código pelo perfil e pelas regras; testes por critério;<br/>só testes afetados; commits pequenos, branch conferida antes"]
+    C --> D["Código pelo perfil e pelas regras; testes por critério;<br/>um bug: um teste de regressão por ocorrência corrigida;<br/>só testes afetados; commits pequenos, branch conferida antes"]
     D --> E{"Premissa falsa ou critério impossível?"}
     E -->|sim| E1["Opções A/B → /agile:change"]
     E1 --> D

@@ -5,6 +5,7 @@
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
+- An item file that is not `done` (refining, approved, building, validating) is committed on the item branch, never on the main branch; the guard hook refuses it. Docs-only commits on the main branch (ideas, epics, retro, sync) carry no code or tests.
 - A commit message says what the diff really does. Check `git diff --staged` and `git branch --show-current` right before every commit: an IDE can switch the branch behind the session. A guard hook refuses a commit on the main branch while an item branch is open.
 - Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work before anything else.
 - If git and the board or the files disagree, stop and ask.

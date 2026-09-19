@@ -10,6 +10,7 @@ paths:
 # Build configuration
 
 - Every solution, in every profile, has at its root: `Directory.Build.props`, `Directory.Packages.props`, `.editorconfig`, `BannedSymbols.txt` and `global.json`; `tests/Directory.Build.props` holds test-only settings.
+- A new project is created in the folder the profile's `## Layout` gives it (never at the root of `src/` or `tests/` unless the layout says so), added to the solution under a solution folder that mirrors its disk folder, and registered in the architecture tests and the layout test in the same commit.
 - A `.csproj` holds only what is specific to that project: SDK, references, and properties that differ from the shared file. Never repeat `TargetFramework`, `Nullable` or `ImplicitUsings` there.
 - Central Package Management: a `PackageReference` never has `Version=`. Add the version as `PackageVersion` in `Directory.Packages.props`, at the latest stable release, checked at the time of adding.
 - A new package needs the owner's yes. Check its license first: FluentAssertions 8+ and MassTransit 9+ are commercial and not allowed.
