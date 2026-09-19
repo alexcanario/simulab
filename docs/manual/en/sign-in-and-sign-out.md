@@ -1,7 +1,7 @@
 ---
 page: sign-in-and-sign-out
 locale: en
-features: [F-5, B-3]
+features: [F-5, B-3, F-7]
 updated: 2026-09-19
 ---
 # Sign in and sign out
@@ -47,3 +47,4 @@ You stay signed in for up to 30 days on each device, even if you leave a page op
 ## Related pages
 - [Create an account](create-account.md)
 - [Getting around](getting-around.md)
+- [Password](password.md): forgot, reset and change your password
