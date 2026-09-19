@@ -1,7 +1,7 @@
 ---
 bug: B-7
 feature: F-4
-status: building
+status: validating
 board: 724
 severity: low
 ---
@@ -55,12 +55,23 @@ Other places that implement the same limits (reimplementations, not callers of s
 - 2026-09-19 — An email over 254 characters reuses `registration.email_invalid` — it is an invalid address; no new text for the user.
 - 2026-09-19 — The name uses a new code, `registration.full_name_too_long`, not `profile.full_name_too_long` — codes are per area (`registration.*`), and the sign-up page maps registration codes.
 - 2026-09-19 — No new packages, for code or tests.
+- 2026-09-19 (build) — The hand-written page limits are guarded by an architecture test that reads the Razor sources (like `UiKitBoundaryTests`), not by rendering each of the six email pages: most of them show the field only in one state, and a source rule also catches the next page.
+- 2026-09-19 (build) — `dotnet ef migrations has-pending-model-changes` reports no changes: the constants have the columns' values, so no migration.
+- 2026-09-19 (build) — Checked through the app host: the Api answers 400 `registration.full_name_too_long` and 400 `registration.email_invalid`, `/openapi/v1.json` answers 200, and the sign-up page renders `maxlength` 120 and 254.
+- 2026-09-19 (build) — No `/agile:review`: under 400 changed lines, no auth, permission or data change; the anonymity of the answer (BR3) has its own test.
 
 ## Out of scope
 - Length checks on other Identity endpoints (sign-in, forgot password, resend, reset).
 - The password length.
 
 ## Regression test
+`RegistrationLengthTests` (Identity, through `POST /api/v1/identity/registrations`), seen failing on the unfixed code on 2026-09-19:
+- `Register_NameOver120Characters_IsRefusedAndCreatesNothing` — expected 400, got **500**.
+- `Register_EmailOver254Characters_IsRefusedAndCreatesNothing` — expected 400, got **500**.
+- `Register_ExistingAddressWithLongName_GetsTheSameAnswerAsANewOne` — expected 400, got **202**: a registered address answered 202 while a new one answered 500, so the answer told whether the account existed.
+- `Register_NameOf120CharactersAfterTrimming_IsAccepted` passed before and after (the boundary).
+
+Duplicates (one check each): `IdentitySchemaTests.UserColumns_AreAsWideAsTheAccountLimits` (the five columns, from the migrated database), `SignUpTests.Fields_AreLimitedToTheAccountLimits` (the rendered `maxlength`), and `FieldLengthTests.Web_Pages_ReadLengthLimitsFromTheContracts` (architecture test: no page types a number into `MaxLength`; it covers the six email fields and the name field, and any new one). The architecture test was not run against the unfixed code; it would have listed the seven hand-written values.
 
 ## Open questions
 - (none)
