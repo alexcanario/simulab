@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" Preferences="_preferences" />
+    <Routes @rendermode="InteractiveServer" Preferences="_preferences" VisitorAddress="@_visitorAddress" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
@@ -28,6 +28,10 @@
 
     private ShellPreferences _preferences = ShellPreferences.Default;
 
+    // B-4: the circuit has no request of its own; the address travels as a root parameter, which the
+    // framework protects in the page, so the browser cannot change it.
+    private string? _visitorAddress;
+
     protected override void OnInitialized()
     {
         if (HttpContext is not null)
@@ -35,6 +39,7 @@
             _preferences = ShellPreferences.From(
                 HttpContext.Request.Cookies[PreferenceCookies.Theme],
                 HttpContext.Request.Cookies[PreferenceCookies.Navigation]);
+            _visitorAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         }
     }
 }

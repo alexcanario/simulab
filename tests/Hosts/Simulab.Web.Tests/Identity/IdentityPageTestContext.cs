@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Serialization;
 using Simulab.Web.Services;
+using Simulab.Web.Services.Auth;
 using Simulab.Web.Tests.Ui;
 
 namespace Simulab.Web.Tests.Identity;
@@ -14,11 +16,21 @@ namespace Simulab.Web.Tests.Identity;
 /// </summary>
 public abstract class IdentityPageTestContext : KitTestContext
 {
+    /// <summary>B-4: the secret the Web proves its visitor addresses with.</summary>
+    protected const string WebSecret = "web-client-secret";
+
     protected StubApiHandler Api { get; } = new();
+
+    /// <summary>B-4: the visitor of this circuit; a test sets its address as <c>Routes</c> would.</summary>
+    protected VisitorContext Visitor { get; } = new();
 
     protected IdentityPageTestContext()
     {
-        Services.AddSingleton(new IdentityApiClient(new HttpClient(Api) { BaseAddress = new Uri("https://api.test") }));
+        Services.AddSingleton(Visitor);
+        Services.AddSingleton(new IdentityApiClient(
+            new HttpClient(Api) { BaseAddress = new Uri("https://api.test") },
+            Visitor,
+            Options.Create(new OpenIddictClientOptions { ClientSecret = WebSecret })));
         Services.AddScoped<SignUpFlow>();
         Services.AddSingleton(TimeProvider.System);
 

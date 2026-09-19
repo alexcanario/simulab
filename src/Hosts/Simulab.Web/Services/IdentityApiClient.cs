@@ -2,8 +2,10 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Serialization;
+using Simulab.Web.Services.Auth;
 
 namespace Simulab.Web.Services;
 
@@ -27,9 +29,10 @@ public static class ApiResult
 /// <summary>
 /// The Web's typed client for the Identity endpoints. The base address comes from service discovery
 /// (rule: api-contracts), and every call carries the visitor's language so the API answers, and writes
-/// the verification email, in it.
+/// the verification email, in it. B-4: every call also carries the visitor's address, proven by the Web's
+/// client secret, so the Api's per-client limits count each visitor, not the Web server.
 /// </summary>
-public sealed class IdentityApiClient(HttpClient http)
+public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, IOptions<OpenIddictClientOptions> client)
 {
     public const string ClientName = "api";
 
@@ -77,6 +80,7 @@ public sealed class IdentityApiClient(HttpClient http)
             };
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
 
             using var response = await http.SendAsync(request, cancellationToken);
             if (response.IsSuccessStatusCode)
@@ -158,6 +162,7 @@ public sealed class IdentityApiClient(HttpClient http)
         {
             using var request = create();
             request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
 
             using var response = await http.SendAsync(request, cancellationToken);
             if (response.IsSuccessStatusCode)
@@ -174,6 +179,18 @@ public sealed class IdentityApiClient(HttpClient http)
             // A broken call is not a business answer: the page shows the generic message.
             return ApiResult.Failed<T>(Components.Ui.ErrorText.UnexpectedCode);
         }
+    }
+
+    /// <summary>B-4: the visitor's address and the proof that it comes from the Web. Nothing when the address is unknown.</summary>
+    private void AddVisitor(HttpRequestMessage request)
+    {
+        if (string.IsNullOrEmpty(visitor.Address) || string.IsNullOrEmpty(client.Value.ClientSecret))
+        {
+            return;
+        }
+
+        request.Headers.Add(ClientAddressHeaders.Address, visitor.Address);
+        request.Headers.Add(ClientAddressHeaders.Secret, client.Value.ClientSecret);
     }
 
     /// <summary>The <c>code</c> of the problem details. Without one, the page shows the generic message.</summary>

@@ -12,7 +12,14 @@
     </Router>
 </CascadingValue>
 
+@inject VisitorContext Visitor
+
 @code {
     /// <summary>Theme and menu state from the cookies, read by App at the first request.</summary>
     [Parameter] public ShellPreferences Preferences { get; set; } = ShellPreferences.Default;
+
+    /// <summary>B-4: the visitor's address, read by App at the first request, for the Api's per-client limits.</summary>
+    [Parameter] public string? VisitorAddress { get; set; }
+
+    protected override void OnParametersSet() => Visitor.Address = VisitorAddress;
 }
