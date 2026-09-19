@@ -61,6 +61,7 @@
                   ValueChanged="@(value => { _email = value; _emailError = null; })" />
 
     <AppPasswordField Id="sign-in-password"
+                      Autocomplete="PasswordAutocomplete.CurrentPassword"
                       Label="@I["SignIn.Password.Label"]"
                       ShowLabel="@I["SignIn.Password.Show"]"
                       HideLabel="@I["SignIn.Password.Hide"]"
