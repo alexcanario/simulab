@@ -1,7 +1,7 @@
 ---
 bug: B-7
 feature: F-4
-status: validating
+status: done
 board: 724
 severity: low
 ---
@@ -90,4 +90,9 @@ Duplicates (one check each): `IdentitySchemaTests.UserColumns_AreAsWideAsTheAcco
 6. Repeat step 5 with the email of step 4 (already registered). → The same 400 and code, not 202.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: bug/B-7 (removed; never pushed)
+- Merge: 0c879da (--no-ff, AB#724)
+- Validation: passed by the owner, 2026-09-19
+- Regression: RegistrationLengthTests seen failing (500, 500, 202) before the fix
+- Tests: full suite 410 passed, 0 failed; 0 warnings, baseline empty
+- Manual pages: none changed (create-account.md already states the 120 and 254 limits; the screen did not change)
