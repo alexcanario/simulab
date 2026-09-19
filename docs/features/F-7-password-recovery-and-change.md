@@ -212,6 +212,19 @@ Extends `IdentityResources` (screens), the shared resources (error codes, menu) 
 - 2026-09-19 — The Simulae tests listed in "What exists" come with the code, renamed to English (rule: import with tests).
 - 2026-09-19 — New packages: none. Redis, Testcontainers.Redis and the rest are already approved (F-4, F-5).
 
+- 2026-09-19 — Build: `EmailVerificationToken` and `PasswordResetToken` share an abstract `SingleUseToken` (hash, expiry, consume): the second use of the shape (profile: add structure on the second use). Neither is mapped as a hierarchy; the migration only adds `password_reset_tokens`.
+- 2026-09-19 — Build: Identity's `DataProtectorTokenProvider` is registered as the default token provider: `ResetPasswordAsync` asks for Identity's own token, generated in the same call after our emailed token was checked. The emailed token stays the only proof.
+- 2026-09-19 — Build: BR7's checks (policy, not the current password) run before anything changes, in one shared `PasswordRules` used by reset and change; checking the current password there never counts as a failed sign-in.
+- 2026-09-19 — Build: the token check and the reset share one per-client bucket (10 per hour), so the check is no free guessing oracle.
+- 2026-09-19 — Build: a lockout on change answers 423 with `retryAfterSeconds`; the page counts it down and keeps Save disabled until zero.
+- 2026-09-19 — Build: the password-changed email states the instant in UTC ("... UTC"): the user's time zone is not known until F-8.
+- 2026-09-19 — Build: the email-culture switch used by the verification email became `EmailCulture`, shared with the new `PasswordMailer`.
+- 2026-09-19 — Build: after a reset the page goes to `/sign-in?password=changed` (no personal data in the URL); sign-in shows the success alert from that path.
+- 2026-09-19 — Build: `/account/password` sends an anonymous visitor to `/sign-in` itself, instead of the Not Found `AuthorizeRouteView` shows for a missing permission (F-6 BR7): this page is no secret, and Not Found would read as a broken link from the user menu.
+- 2026-09-19 — Build: kit additions — `AppPasswordField.Autocomplete` (default `new-password`; `current-password` on the change page) and `AppIcons.Password` for the user-menu item. The cooldown and lockout counters use one small `Countdown` class in the identity pages.
+- 2026-09-19 — Build (found on screen): raw links on the sign-in pages ("Forgot your password?", and F-5's "Create an account") had the text colour and no underline, so they read as text. They are now underlined in the text colour; the primary blue was tried and gives 3.5:1 on the dark card, under AA.
+- 2026-09-19 — Build, noticed and not built (ideas): the sign-in password field still says `autocomplete="new-password"` (F-5 asked for `current-password`); the Terms/Privacy links in the auth footer are primary blue on the dark background, about 3.5:1.
+
 ## Out of scope
 - Fixing the Web's token refresh and revoked-session handling: B-3.
 - "My account" page and linking the change from it (F-8).
@@ -225,8 +238,36 @@ Extends `IdentityResources` (screens), the shared resources (error codes, menu) 
 
 ## Change notes
 
+## Coverage
+| Criterion | Tests (`Simulab.Identity.Tests` unless noted) |
+|---|---|
+| AC1 link for Active/Pending, generic answer | `PasswordResetTests.RequestLink_ActiveAccount_StoresOneHashedTokenForAnHourAndInvalidatesTheOlderOne`, `RequestLink_UnknownOrEmptyAddress_SameAnswerAndNothingStoredOrSent`; Pending: `Reset_PendingAccount_ActivatesItAndConsumesItsVerificationLinks` |
+| AC2 limits | `PasswordResetTests.RequestLink_PerAccountLimits_AreSilent`, `RequestLink_AboveTheHourlyCapForOneClient_IsRefused`, `Reset_AboveTheHourlyCapForOneClient_IsRefused` |
+| AC3 reset email language | `PasswordEmailLanguageTests.ResetAndChangedEmails_UseTheAccountLanguage` (en, pt-BR, pt-PT) |
+| AC4 check without consuming, invalid, expired | `PasswordResetTests.CheckAndReset_UnknownOrExpiredToken_AnswerWithTheirOwnCodes`, `RequestLink_ActiveAccount_...` |
+| AC5 reset works once | `PasswordResetTests.Reset_ValidToken_NewPasswordSignsInOldDoesNotAndTheLinkWorksOnce` |
+| AC6 lockout cleared | `PasswordResetTests.Reset_LockedOutAccount_ClearsTheLockoutAndSignsInAtOnce` |
+| AC7 pending activated | `PasswordResetTests.Reset_PendingAccount_ActivatesItAndConsumesItsVerificationLinks` |
+| AC8 refused password | `PasswordResetTests.Reset_RefusedPassword_ChangesNothingAndKeepsTheLink`, `PasswordChangeTests.Change_RefusedNewPassword_ChangesNothing` (both codes each) |
+| AC9 wrong current and lockout | `PasswordChangeTests.Change_WrongCurrentPassword_CountsTowardTheSignInLockout` |
+| AC10 sessions | `PasswordResetTests.Reset_EndsEverySessionOfTheAccount`, `PasswordChangeTests.Change_KeepsTheCallersSessionAndEndsTheOthers` |
+| AC11 failed count, changed email | `PasswordChangeTests.Change_Success_ClearsTheFailedCountAndSendsThePasswordChangedEmail`, `PasswordResetTests.Reset_SendsOnePasswordChangedEmailWithTheInstantAndNoToken`, `PasswordEmailLanguageTests` |
+| AC12 anonymous / signed in | `PasswordChangeTests.Change_Anonymous_Returns401`, `PasswordResetTests.Endpoints_ForTheLostPassword_AreAnonymous`; the page: `ChangePasswordTests.Anonymous_IsSentToSignIn` (`Simulab.Web.Tests`) |
+| AC13 schema | `IdentitySchemaTests.Migration_CreatesEveryTableInTheModuleSchema`, `Migration_NamesEveryColumnInSnakeCase` |
+| AC14 sign-in link and alert, user menu | `Simulab.Web.Tests`: `SignInSessionEndedTests.Page_LinksToForgotPassword`, `PasswordChangedQuery_ShowsTheSuccessAlert`; `UserMenuTests.SignedIn_OffersChangePasswordBeforeSignOut`; `ResetPasswordTests.Submit_Success_GoesToSignInWithTheAlertAndNoPersonalData` |
+| AC15 three languages | `ResourceParityTests` (`Simulab.Web.Tests`), `EmailResourceParityTests` |
+| AC16 on screen | validation script below; screen states: `ForgotPasswordTests` (4), `ResetPasswordTests` (7), `ChangePasswordTests` (5) in `Simulab.Web.Tests` |
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+A container runtime must be running. Close any app host or IDE running from this checkout first.
+1. Start `dotnet run --project src/Hosts/Simulab.AppHost` and open the dashboard. Wait for `postgres`, `redis`, `mailpit`, `api` and `web` to reach Running.
+2. Keyboard only: open the `web` URL at `/sign-in`, Tab to "Forgot your password?", press Enter. Type your account's email, Tab to "Send link", press Enter: the generic message appears and the button counts down from 60 s.
+3. Open Mailpit: the reset email is in your account's language. Open its link: "Choose a new password". Type your **current** password twice and save: "Choose a password different from the current one." Type a new one twice and save: sign-in opens with "Your password was changed. Sign in with the new one." Sign in with the new password. Mailpit also has "Your password was changed".
+4. Open the same reset link again: "This link is not valid", with "Ask for a new link".
+5. Sign in with the same account in a private window too. In the first window: account menu → "Change password". Type a wrong current password and save: the message sits on that field. Then the right current password and a new one twice: "Password changed. Other devices were signed out."
+6. Go to the private window and do nothing: within a minute it moves to sign-in with "Your session ended. Sign in again." The first window is still signed in.
+7. On `/forgot-password` and `/account/password`, switch the language with the globe to Português (Brasil) and Português (Portugal), and switch the theme: texts change, and the links on the sign-in pages are underlined and readable in both themes.
+8. On "Change password", type a wrong current password five times: the lock message shows the time left and Save stays disabled. (Wait 15 minutes, or reset the password by email, which unlocks at once.)
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
