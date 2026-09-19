@@ -106,13 +106,17 @@ app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
 
 // Language switch: stores the culture in a cookie and returns to a page inside the app only.
-// F-8 BR6: a signed-in user's choice is also saved as the preferred language (best effort).
+// F-8 BR6: a signed-in user's choice is also saved as the preferred language (best effort), but only when
+// the switch itself asked: a link from another site (the auth cookie is SameSite=Lax) changes the screen only.
 app.MapGet("/culture/set", async (string culture, string? redirectUri, HttpContext context, ProfileLanguageSaver saver) =>
 {
     if (SupportedCultures.IsSupported(culture))
     {
         CultureCookie.Write(context, culture);
-        await saver.SaveAsync(context.User, culture, context.RequestAborted);
+        if (context.Request.Headers["Sec-Fetch-Site"] == "same-origin")
+        {
+            await saver.SaveAsync(context.User, culture, context.RequestAborted);
+        }
     }
 
     return Results.LocalRedirect(SupportedCultures.SafeLocalPath(redirectUri));

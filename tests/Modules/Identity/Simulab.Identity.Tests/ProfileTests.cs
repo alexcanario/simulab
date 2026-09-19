@@ -175,7 +175,7 @@ public sealed class ProfileTests : IdentityApiTests
         using var response = await SendAsync(client, HttpMethod.Get, "/api/v1/identity/session", token);
 
         var session = await response.Content.ReadFromJsonAsync<SessionInfoResponse>(AppJson.Options);
-        session!.DisplayName.Should().Be("Ana");
+        session!.FullName.Should().Be("Ana");
         session.PreferredLanguage.Should().Be("pt-PT");
     }
 

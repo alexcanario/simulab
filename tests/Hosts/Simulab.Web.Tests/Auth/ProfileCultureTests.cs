@@ -74,7 +74,7 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
         await using var host = Host();
         var client = await SignedInAsync(host);
 
-        var response = await client.GetAsync("/culture/set?culture=pt-BR&redirectUri=%2Faccount");
+        var response = await SwitchAsync(client, "/culture/set?culture=pt-BR&redirectUri=%2Faccount", "same-origin");
 
         _api.SavedLanguages.Should().Equal("pt-BR");
         CultureCookieOf(response).Should().Be("c=pt-BR|uic=pt-BR");
@@ -88,11 +88,26 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
         await using var host = Host();
         var client = await SignedInAsync(host);
 
-        var response = await client.GetAsync("/culture/set?culture=pt-BR&redirectUri=%2F");
+        var response = await SwitchAsync(client, "/culture/set?culture=pt-BR&redirectUri=%2F", "same-origin");
 
         _api.SavedLanguages.Should().ContainSingle();
         CultureCookieOf(response).Should().Be("c=pt-BR|uic=pt-BR");
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+    }
+
+    /// <summary>Review finding: a link from another site must not change the stored language (the auth cookie is SameSite=Lax).</summary>
+    [Theory]
+    [InlineData("cross-site")]
+    [InlineData(null)]
+    public async Task LanguageSwitch_NotFromTheApp_ChangesTheScreenOnly(string? fetchSite)
+    {
+        await using var host = Host();
+        var client = await SignedInAsync(host);
+
+        var response = await SwitchAsync(client, "/culture/set?culture=pt-PT&redirectUri=%2F", fetchSite);
+
+        _api.SavedLanguages.Should().BeEmpty();
+        CultureCookieOf(response).Should().Be("c=pt-PT|uic=pt-PT");
     }
 
     [Fact]
@@ -100,7 +115,7 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
     {
         await using var host = Host();
 
-        var response = await Browser(host).GetAsync("/culture/set?culture=pt-PT&redirectUri=%2F");
+        var response = await SwitchAsync(Browser(host), "/culture/set?culture=pt-PT&redirectUri=%2F", "same-origin");
 
         _api.SavedLanguages.Should().BeEmpty();
         CultureCookieOf(response).Should().Be("c=pt-PT|uic=pt-PT");
@@ -110,6 +125,7 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
     public async Task ProfileApplied_RewritesTheNameAndTheCulture_ThenReturnsInsideTheApp()
     {
         _api.Profile = new ProfileResponse("ana@example.com", "Ana Souza", "pt-PT");
+        _api.Permissions = ["identity.roles.manage"];
         await using var host = Host();
         var client = await SignedInAsync(host);
 
@@ -120,6 +136,7 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
         var claims = AuthClaimsOf(host, response);
         claims.Single(claim => claim.Type == ClaimTypes.Name).Value.Should().Be("Ana Souza");
         claims.Should().Contain(claim => claim.Type == WebAuthClaims.WebSessionId);
+        claims.Should().NotContain(claim => claim.Type == WebAuthClaims.Permission);
     }
 
     [Fact]
@@ -140,6 +157,17 @@ public sealed class ProfileCultureTests(WebApplicationFactory<Program> factory) 
             services.AddHttpClient<AuthClient>().ConfigurePrimaryHttpMessageHandler(() => _api);
             services.AddHttpClient<IdentityApiClient>().ConfigurePrimaryHttpMessageHandler(() => _api);
         }));
+
+    private static async Task<HttpResponseMessage> SwitchAsync(HttpClient client, string url, string? fetchSite)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        if (fetchSite is not null)
+        {
+            request.Headers.Add("Sec-Fetch-Site", fetchSite);
+        }
+
+        return await client.SendAsync(request);
+    }
 
     private static HttpClient Browser(WebApplicationFactory<Program> host) =>
         host.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false, BaseAddress = new Uri("https://localhost") });

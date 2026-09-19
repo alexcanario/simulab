@@ -39,7 +39,7 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - BR8 After a save, the page reloads: the new culture applies to the whole circuit and the display name in the user menu is the saved one.
 
 ## Screens and API
-- `/account` — My account page (`[Authorize]`), reached from the user menu item "My account". One `MudPaper` form card in the style of `/account/password` (F-7), kit components only:
+- `/account` — My account page (signed-in only: an anonymous visitor is sent to `/sign-in`, as on `/account/password`), reached from the user menu item "My account". One `MudPaper` form card in the style of `/account/password` (F-7), kit components only:
   - Email (read-only text field).
   - Display name (text field, max 120, helper text "optional").
   - Preferred language (select with the three languages, each in its native name, as in `LanguageSwitch`).
@@ -52,7 +52,7 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - `PUT /api/v1/identity/profile/preferred-language` — `UpdatePreferredLanguageRequest(PreferredLanguage)`; used by the header switch so it does not overwrite the name. 204 / 400. Requires authentication.
 - `GET /api/v1/identity/session` — `SessionInfoResponse` gains `PreferredLanguage`, so the Web can write the culture cookie at sign-in.
 - Web endpoint (non-Blazor, like F-5): `GET /account/profile-applied?redirectUri=...` re-issues the auth cookie with the current display name and writes the culture cookie from the profile, then redirects to a local path only.
-- `GET /culture/set` — when the visitor is signed in, also calls `PUT .../profile/preferred-language` (BR6).
+- `GET /culture/set` — when the visitor is signed in and the request comes from the app itself (`Sec-Fetch-Site: same-origin`), also calls `PUT .../profile/preferred-language` (BR6).
 - Error codes: `profile.full_name_too_long`, `profile.language_not_supported`.
 
 ## Acceptance criteria
@@ -85,11 +85,19 @@ A signed-in user sees and edits their own profile (display name and preferred la
 - 2026-09-19 — One `ProfileHandler` in `Simulab.Identity.Application/Profile/` (get, update, update language); the rules are in the handler (a thin update, no domain method needed beyond the existing properties).
 - 2026-09-19 — No new packages, for code or tests.
 - 2026-09-19 (build) — The language list moved to `SupportedLanguages` in `Simulab.Identity.Contracts`; `RequestLocale` (Api) and `SupportedCultures` (Web) read it — the handler needs it, and three copies of one list would drift. The name limit is `ProfileLimits.FullNameMaxLength` in the contracts, read by the handler (authority) and the page (comfort).
-- 2026-09-19 (build) — `SessionInfoResponse` also gains optional `DisplayName`, so the sign-in writes the menu label (AC11 needs the name in the menu, and sign-in never set it before). Both new fields are optional: no contract break.
+- 2026-09-19 (build) — `SessionInfoResponse` also gains optional `FullName`, so the sign-in writes the menu label (AC11 needs the name in the menu, and sign-in never set it before). Both new fields are optional: no contract break.
 - 2026-09-19 (build) — The kit gains `AppSelectField` (label above, hint or error below, like `AppTextField`), shown in the gallery's fields section; the page uses it for the language.
 - 2026-09-19 (build) — After a successful save the page yields one render before navigating, so the unsaved-changes guard sees the saved state and does not ask to discard.
 - 2026-09-19 (build) — `IdentityApiFactory` clears its Npgsql pool on dispose: one more test class pushed the idle pooled connections of finished classes past the container limit (`53300: too many clients`).
 - 2026-09-19 (build) — Found and captured, not fixed: B-7 (sign-up does not check the name length in the Api).
+- 2026-09-19 (review) — major, fixed: no test covered the sign-in page copying the name and language into the ticket; `SignInProfileTests` now does, and `FakeAuthApi` answers both fields.
+- 2026-09-19 (review) — minor, fixed: `/account/profile-applied` stored the per-request permission claims in the cookie and restarted its expiry; it now keeps sign-in's claims and the original issue and expiry.
+- 2026-09-19 (review) — minor, fixed: a cross-site link to `/culture/set` could change a signed-in user's stored language (CSRF, auth cookie `SameSite=Lax`); the profile is saved only on `Sec-Fetch-Site: same-origin`, the screen still changes.
+- 2026-09-19 (review) — minor, fixed: `SessionInfoResponse.DisplayName` renamed `FullName` — one identifier per business term (glossary); not shipped yet.
+- 2026-09-19 (review) — minor, fixed: a concurrency failure between the header switch and a save answered 500; the handler retries once on a fresh copy (the profile is last-write-wins). No test: the race cannot be provoked deterministically through HTTP.
+- 2026-09-19 (review) — minor, accepted: `GET /identity/session` now reads the account once more per call (primary-key lookup next to the permission query it already runs); a separate sign-in call would add a round trip for the same data.
+- 2026-09-19 (review) — minor, fixed in the file: `/account` is signed-in only through a redirect, like `/account/password`, not `[Authorize]`.
+- 2026-09-19 (review) — minor, at ship: the manual (three languages) must say Change password moved to My account.
 
 ## Out of scope
 - Changing the email address.

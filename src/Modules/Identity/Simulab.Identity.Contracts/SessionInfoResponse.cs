@@ -11,7 +11,7 @@ namespace Simulab.Identity.Contracts;
 /// every enforcement check re-reads the database through <see cref="IPermissionQueryService"/>.
 /// </remarks>
 /// <remarks>
-/// F-8: <paramref name="DisplayName"/> and <paramref name="PreferredLanguage"/> are read from the account at
+/// F-8: <paramref name="FullName"/> and <paramref name="PreferredLanguage"/> are read from the account at
 /// each call, so the Web can write the menu label and the culture cookie at sign-in (BR5, BR8).
 /// </remarks>
 public sealed record SessionInfoResponse(
@@ -19,5 +19,5 @@ public sealed record SessionInfoResponse(
     string Email,
     string SessionJti,
     IReadOnlyList<string> Permissions,
-    string? DisplayName = null,
+    string? FullName = null,
     string? PreferredLanguage = null);

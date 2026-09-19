@@ -104,15 +104,18 @@ public static class AccountEndpoints
             return Results.LocalRedirect(target);
         }
 
+        // The same claims sign-in writes (permissions are added per request, never stored), with the new name,
+        // and the cookie's original issue and expiry: a save does not extend the sign-in.
         var identity = new ClaimsIdentity(
-            context.User.Claims.Where(claim => claim.Type != ClaimTypes.Name),
+            context.User.Claims.Where(claim => claim.Type is not (ClaimTypes.Name or WebAuthClaims.Permission)),
             CookieAuthenticationDefaults.AuthenticationScheme);
         if (!string.IsNullOrWhiteSpace(profile.FullName))
         {
             identity.AddClaim(new Claim(ClaimTypes.Name, profile.FullName));
         }
 
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        var current = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), current.Properties);
         CultureCookie.Write(context, profile.PreferredLanguage);
         return Results.LocalRedirect(target);
     }

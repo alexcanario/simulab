@@ -59,9 +59,24 @@ public sealed class ProfileHandler(UserManager<User> userManager)
 
         change(user);
         var updated = await userManager.UpdateAsync(user);
+
+        // The header switch and the My account save can cross: the profile is last-write-wins, so apply the
+        // change once more on a fresh copy instead of failing the user.
+        if (!updated.Succeeded && updated.Errors.Any(error => error.Code == nameof(IdentityErrorDescriber.ConcurrencyFailure)))
+        {
+            user = await userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+            {
+                return Result.Failure(new Error(IdentityErrorCodes.TokenRevoked, ErrorKind.NotFound));
+            }
+
+            change(user);
+            updated = await userManager.UpdateAsync(user);
+        }
+
         if (!updated.Succeeded)
         {
-            // Both fields were validated above; what is left (a concurrency stamp) is not the caller's to fix.
+            // Both fields were validated above; what is left is not the caller's to fix.
             throw new InvalidOperationException($"The profile could not be saved: {string.Join(", ", updated.Errors.Select(error => error.Code))}.");
         }
 

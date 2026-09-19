@@ -186,7 +186,7 @@
 
         var lifetime = result.ExpiresInSeconds is > 0 ? TimeSpan.FromSeconds(result.ExpiresInSeconds.Value) : TokenLifetimes.AccessToken;
         var ticket = new SignInTicket(
-            session.Subject, session.Email, session.DisplayName, session.SessionJti, result.AccessToken!, result.RefreshToken!, lifetime, session.Permissions,
+            session.Subject, session.Email, session.FullName, session.SessionJti, result.AccessToken!, result.RefreshToken!, lifetime, session.Permissions,
             session.PreferredLanguage);
         var ticketId = Tickets.Issue(ticket);
 

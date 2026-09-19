@@ -36,6 +36,11 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>What the Api's sign-out answers.</summary>
     public HttpStatusCode SignOutStatus { get; set; } = HttpStatusCode.NoContent;
 
+    /// <summary>F-8: the name and language the session answer carries, as the Api reads them from the account.</summary>
+    public string? SessionFullName { get; set; }
+
+    public string? SessionPreferredLanguage { get; set; }
+
     /// <summary>F-8: what GET /profile answers; null answers 500.</summary>
     public ProfileResponse? Profile { get; set; } = new("ana@example.com", "Ana", "en");
 
@@ -93,7 +98,9 @@ public sealed class FakeAuthApi : HttpMessageHandler
             }
 
             var token = request.Headers.Authorization?.Parameter ?? string.Empty;
-            return Json(new SessionInfoResponse(Guid.Empty.ToString(), "ana@example.com", $"jti-of-{token}", Permissions), options: AppJson.Options);
+            return Json(
+                new SessionInfoResponse(Guid.Empty.ToString(), "ana@example.com", $"jti-of-{token}", Permissions, SessionFullName, SessionPreferredLanguage),
+                options: AppJson.Options);
         }
 
         if (path == "/api/v1/identity/profile" && request.Method == HttpMethod.Get)
