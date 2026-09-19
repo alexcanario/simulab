@@ -1,7 +1,7 @@
 ---
 bug: B-4
 feature: F-4
-status: refining
+status: approved
 board: 720
 severity: high
 ---
