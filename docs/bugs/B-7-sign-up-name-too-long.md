@@ -77,3 +77,17 @@ Duplicates (one check each): `IdentitySchemaTests.UserColumns_AreAsWideAsTheAcco
 - (none)
 
 ## Change notes
+
+## Validation script
+## Validation script
+1. Close any IDE build, run `dotnet run --project src/Hosts/Simulab.AppHost` and open https://localhost:7125/sign-up (signed out).
+2. Keyboard only: Tab to "Full name (optional)" and type or paste more than 120 characters. → The field stops at 120. Tab to the email field and do the same with more than 254 characters. → It stops at 254.
+3. Switch the language with the globe and repeat step 2 on one field. → Same limits in the other language.
+4. Sign up normally with a short name. → "Check your email" as before (nothing else changed).
+5. Call the Api directly with a 121-character name (Bash):
+   `curl -sk -X POST https://localhost:7287/api/v1/identity/registrations -H "Content-Type: application/json" -d "{\"email\":\"b7@example.com\",\"password\":\"Estudar#2026!\",\"declaresAdult\":true,\"acceptsTerms\":true,\"acceptsPrivacy\":true,\"termsVersion\":\"x\",\"privacyVersion\":\"x\",\"fullName\":\"$(printf 'a%.0s' {1..121})\"}"`
+   → 400 with `"code":"registration.full_name_too_long"` (before the fix: 500).
+6. Repeat step 5 with the email of step 4 (already registered). → The same 400 and code, not 202.
+
+## Delivery
+<!-- Filled by /agile:ship. -->
