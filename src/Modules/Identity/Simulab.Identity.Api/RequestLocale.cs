@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Simulab.Identity.Contracts;
 
 namespace Simulab.Identity.Api;
 
@@ -9,10 +10,10 @@ namespace Simulab.Identity.Api;
 /// </summary>
 public static class RequestLocale
 {
-    public const string Default = "en";
+    public const string Default = SupportedLanguages.Default;
 
-    /// <summary>The locales the app ships in. Mirrors <c>Simulab.Web.Localization.SupportedCultures</c>, which the API cannot reference.</summary>
-    public static readonly string[] Supported = ["en", "pt-BR", "pt-PT"];
+    /// <summary>The locales the app ships in (F-8: one list, in the contracts, shared with the Web).</summary>
+    public static IReadOnlyList<string> Supported => SupportedLanguages.All;
 
     public static string From(HttpRequest request)
     {

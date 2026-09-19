@@ -35,4 +35,7 @@ public static class IdentityErrorCodes
     public const string PasswordChangeCurrentInvalid = "password_change.current_password_invalid";
     public const string PasswordChangeTooWeak = "password_change.password_too_weak";
     public const string PasswordChangeSameAsCurrent = "password_change.same_as_current";
+
+    public const string ProfileFullNameTooLong = "profile.full_name_too_long";
+    public const string ProfileLanguageNotSupported = "profile.language_not_supported";
 }

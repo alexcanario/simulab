@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Passwords;
+using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
@@ -92,6 +93,7 @@ public static class IdentityModule
         services.AddScoped<CheckPasswordResetTokenHandler>();
         services.AddScoped<ResetPasswordHandler>();
         services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<ProfileHandler>();
 
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));

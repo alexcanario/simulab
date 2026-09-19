@@ -1,18 +1,14 @@
 using System.Globalization;
+using Simulab.Identity.Contracts;
 
 namespace Simulab.Web.Localization;
 
-/// <summary>UI languages. Adding a language means adding resource files and one entry here.</summary>
+/// <summary>UI languages, from the one list the Api also uses (<see cref="SupportedLanguages"/>, F-8).</summary>
 public static class SupportedCultures
 {
-    public const string Default = "en";
+    public const string Default = SupportedLanguages.Default;
 
-    public static readonly IReadOnlyList<CultureInfo> All =
-    [
-        new("en"),
-        new("pt-BR"),
-        new("pt-PT")
-    ];
+    public static readonly IReadOnlyList<CultureInfo> All = [.. SupportedLanguages.All.Select(name => new CultureInfo(name))];
 
     public static bool IsSupported(string? name) =>
         All.Any(culture => string.Equals(culture.Name, name, StringComparison.OrdinalIgnoreCase));
