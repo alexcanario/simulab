@@ -36,7 +36,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = false;
         options.LoginPath = "/sign-in";
     });
-builder.Services.AddAuthorization();
+// F-6, BR5-BR7: a policy per permission claim. UI comfort only - the Api still enforces every call.
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in IdentityPermissions.All)
+    {
+        options.AddPolicy(PermissionPolicy.NameFor(permission), policy => policy.RequireClaim(WebAuthClaims.Permission, permission));
+    }
+});
 builder.Services.AddCascadingAuthenticationState();
 
 // Culture: cookie (set by the language switch), then the browser, then en.

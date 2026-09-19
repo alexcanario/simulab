@@ -4,6 +4,7 @@ using Simulab.Api;
 using Simulab.Api.Features.System;
 using Simulab.Email;
 using Simulab.Identity.Api;
+using Simulab.Identity.Api.Authorization;
 using Simulab.Identity.Infrastructure;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Messaging;
@@ -41,6 +42,7 @@ builder.Services.AddIdentityModule(
 builder.Services.AddSingleton<ClientRateLimiter>();
 builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
+builder.Services.AddIdentityAuthorization();
 
 var app = builder.Build();
 
@@ -78,6 +80,7 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
 {
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.EnsureIdentityClientAsync(app.Configuration);
+    await app.Services.EnsureRolesAndPermissionsAsync();
 }
 
 app.Run();

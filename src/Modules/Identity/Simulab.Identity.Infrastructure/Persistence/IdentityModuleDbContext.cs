@@ -34,6 +34,17 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
 
     public DbSet<IdentityUserToken<Guid>> UserTokens => Set<IdentityUserToken<Guid>>();
 
+    /// <summary>F-6: the seed roles (Student, Curator, Admin) and the permission catalog.</summary>
+    public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<IdentityRoleClaim<Guid>> RoleClaims => Set<IdentityRoleClaim<Guid>>();
+
+    public DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
+
+    public DbSet<Permission> Permissions => Set<Permission>();
+
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -45,6 +56,11 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.ApplyConfiguration(new IdentityUserClaimConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserLoginConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new IdentityRoleClaimConfiguration());
+        modelBuilder.ApplyConfiguration(new IdentityUserRoleConfiguration());
+        modelBuilder.ApplyConfiguration(new PermissionConfiguration());
+        modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
 
         // The OpenIddict client (F-5, decision 2: one confidential client, "simulab-web") lives in this
         // schema too; the module owns its own protocol tables like every other identity table.

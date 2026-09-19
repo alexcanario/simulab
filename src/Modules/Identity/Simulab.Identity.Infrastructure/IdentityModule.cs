@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Registration;
@@ -9,6 +11,7 @@ using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
+using Simulab.Identity.Infrastructure.Authorization;
 using Simulab.Identity.Infrastructure.Content;
 using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.Persistence;
@@ -56,7 +59,16 @@ public static class IdentityModule
                 identity.Lockout.MaxFailedAccessAttempts = 5;
                 identity.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
-            .AddUserStore<UserOnlyStore<User, IdentityModuleDbContext, Guid>>();
+            .AddRoles<Role>()
+            .AddUserStore<UserStore<User, Role, IdentityModuleDbContext, Guid>>()
+            .AddRoleStore<RoleStore<Role, IdentityModuleDbContext, Guid>>();
+
+        // BR3: the 10s cache mirrors Simulae's pattern - a revoked permission takes effect almost
+        // immediately without the Api ever trusting a token claim. It reads the same TimeProvider as the
+        // rest of the host, so a test can move the clock instead of sleeping 10 real seconds.
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<PermissionCache>();
+        services.AddScoped<IPermissionQueryService, PermissionQueryService>();
 
         services.AddScoped<IEmailVerificationTokenStore, EmailVerificationTokenStore>();
         services.AddScoped<IConsentRecordStore, ConsentRecordStore>();
@@ -160,5 +172,43 @@ public static class IdentityModule
                 Permissions.GrantTypes.RefreshToken
             }
         }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Creates the seed roles (F-6, BR1) and the one seed permission (BR8), granted to Admin, if they do
+    /// not exist yet. Idempotent, like <see cref="EnsureIdentityClientAsync"/>.
+    /// </summary>
+    public static async Task EnsureRolesAndPermissionsAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        await using var scope = services.CreateAsyncScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+        var context = scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>();
+
+        foreach (var name in IdentityRoles.All)
+        {
+            if (await roleManager.FindByNameAsync(name) is null)
+            {
+                await roleManager.CreateAsync(new Role { Name = name });
+            }
+        }
+
+        if (await context.Permissions.FindAsync([IdentityPermissions.RolesManage], cancellationToken) is null)
+        {
+            context.Permissions.Add(new Permission { Name = IdentityPermissions.RolesManage });
+        }
+
+        var adminRole = await roleManager.FindByNameAsync(IdentityRoles.Admin);
+        if (adminRole is not null)
+        {
+            var granted = await context.RolePermissions.FindAsync([adminRole.Id, IdentityPermissions.RolesManage], cancellationToken);
+            if (granted is null)
+            {
+                context.RolePermissions.Add(new RolePermission { RoleId = adminRole.Id, PermissionName = IdentityPermissions.RolesManage });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

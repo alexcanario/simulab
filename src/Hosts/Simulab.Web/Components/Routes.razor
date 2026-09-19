@@ -1,7 +1,12 @@
 <CascadingValue Value="Preferences" IsFixed="true">
     <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
-            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            @* BR7: a page whose permission the visitor lacks looks exactly like one that does not exist. *@
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <NotFoundContent />
+                </NotAuthorized>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="routeData" Selector="h1" />
         </Found>
     </Router>

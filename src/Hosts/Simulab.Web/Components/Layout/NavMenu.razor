@@ -1,4 +1,5 @@
 @implements IDisposable
+@using Simulab.Web.Services.Auth
 @inject IStringLocalizer<SharedResources> L
 @inject NavigationManager Navigation
 @inject IHostEnvironment Environment
@@ -34,10 +35,19 @@
     /// <summary>Desktop menu collapsed to icons: section headers become dividers, labels become tooltips.</summary>
     [Parameter] public bool Collapsed { get; set; }
 
+    /// <summary>The signed-in visitor's permission claims (F-6, BR6): UI comfort only, from the cascading authentication state.</summary>
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
     protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
 
-    protected override void OnParametersSet() =>
-        _visible = NavigationItems.Visible(Items, Environment.IsDevelopment());
+    protected override async Task OnParametersSetAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        _visible = NavigationItems.Visible(
+            Items,
+            Environment.IsDevelopment(),
+            permission => user?.HasClaim(WebAuthClaims.Permission, permission) == true);
+    }
 
     private RenderFragment Link(NavigationItem item) => __builder =>
     {

@@ -43,6 +43,11 @@ public static class IdentityEndpoints
             .WithName("GetSession")
             .RequireAuthorization();
 
+        // F-6, BR8-BR9: the seed role names, for the placeholder /admin/roles screen. Admin-only.
+        group.MapGet("/roles", GetRoleNamesAsync)
+            .WithName("GetRoleNames")
+            .RequireAuthorization(PermissionPolicy.NameFor(IdentityPermissions.RolesManage));
+
         return endpoints;
     }
 
@@ -50,16 +55,23 @@ public static class IdentityEndpoints
     /// Lets the Web read its own just-issued access token's claims without decoding the token itself
     /// (F-5, build decision: the token may be encrypted, and decoding it is not the Web's job either way).
     /// </summary>
-    private static IResult GetSessionAsync(ClaimsPrincipal user)
+    private static async Task<IResult> GetSessionAsync(ClaimsPrincipal user, IPermissionQueryService permissions, CancellationToken cancellationToken)
     {
         var subject = user.FindFirstValue(OpenIddictConstants.Claims.Subject);
         var email = user.FindFirstValue(OpenIddictConstants.Claims.Email);
         var sessionJti = user.FindFirstValue(SessionClaims.SessionJti);
 
-        return subject is null || email is null || sessionJti is null
-            ? Problem(new Error(IdentityErrorCodes.RefreshTokenInvalid, ErrorKind.Validation), StatusCodes.Status400BadRequest)
-            : Results.Ok(new SessionInfoResponse(subject, email, sessionJti));
+        if (subject is null || email is null || sessionJti is null || !Guid.TryParse(subject, out var userId))
+        {
+            return Problem(new Error(IdentityErrorCodes.RefreshTokenInvalid, ErrorKind.Validation), StatusCodes.Status400BadRequest);
+        }
+
+        var effective = await permissions.GetEffectivePermissionsAsync(userId, cancellationToken);
+        return Results.Ok(new SessionInfoResponse(subject, email, sessionJti, effective.ToList()));
     }
+
+    /// <summary>F-9 replaces this with full role management; today it only proves the permission mechanism on screen.</summary>
+    private static IResult GetRoleNamesAsync() => Results.Ok(new RoleNamesResponse(IdentityRoles.All));
 
     /// <summary>BR6: drops the caller's own session and revokes its access token, regardless of whether either call finds anything to act on.</summary>
     private static async Task<IResult> SignOutAsync(ClaimsPrincipal user, IRefreshSessionStore sessions, CancellationToken cancellationToken)

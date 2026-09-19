@@ -52,6 +52,17 @@ public sealed class IdentityApiClient(HttpClient http)
     public Task<ApiResult<bool>> ResendVerificationAsync(string email, CancellationToken cancellationToken = default) =>
         PostAsync<ResendVerificationRequest, bool>($"{Base}/email-verifications/resend", new ResendVerificationRequest(email), cancellationToken);
 
+    /// <summary>F-6, BR9: the placeholder /admin/roles screen. The Api still checks the permission itself.</summary>
+    public Task<ApiResult<RoleNamesResponse>> GetRoleNamesAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<RoleNamesResponse>(
+            () =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{Base}/roles");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                return request;
+            },
+            cancellationToken);
+
     private Task<ApiResult<TResponse>> PostAsync<TRequest, TResponse>(string route, TRequest body, CancellationToken cancellationToken) =>
         SendAsync<TResponse>(
             () => new HttpRequestMessage(HttpMethod.Post, route)

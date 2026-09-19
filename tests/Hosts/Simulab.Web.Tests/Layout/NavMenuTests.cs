@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Bunit;
 using MudBlazor;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Ui;
+using Simulab.Web.Services.Auth;
 
 namespace Simulab.Web.Tests.Layout;
 
@@ -62,6 +64,21 @@ public class NavMenuTests : ShellTestContext
         Headers(menu).Should().Equal("Study");
         menu.FindAll("a[data-route='/admin/roles']").Should().BeEmpty();
         menu.FindAll("a[data-route='/study']").Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Render_PermissionItem_IsShownOnceTheVisitorHasTheClaim()
+    {
+        var items = new[]
+        {
+            new NavigationItem(null, "/", AppIcons.Home, "Nav.Home", Microsoft.AspNetCore.Components.Routing.NavLinkMatch.All),
+            new NavigationItem(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: "identity.roles.manage"),
+        };
+        Authorization.SetAuthorized("admin@exemplo.com").SetClaims(new Claim(WebAuthClaims.Permission, "identity.roles.manage"));
+
+        var menu = RenderMenu(items: items);
+
+        menu.FindAll("a[data-route='/admin/roles']").Should().ContainSingle();
     }
 
     [Fact]

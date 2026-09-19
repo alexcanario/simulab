@@ -23,6 +23,36 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text")
+                        .HasColumnName("claim_type");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text")
+                        .HasColumnName("claim_value");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_role_claims");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_role_claims_role_id");
+
+                    b.ToTable("role_claims", "identity");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -77,6 +107,25 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                         .HasName("pk_user_logins");
 
                     b.ToTable("user_logins", "identity");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("UserId", "RoleId")
+                        .HasName("pk_user_roles");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_user_roles_role_id");
+
+                    b.ToTable("user_roles", "identity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -523,6 +572,75 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                     b.ToTable("email_verification_tokens", "identity");
                 });
 
+            modelBuilder.Entity("Simulab.Identity.Domain.Entities.Permission", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.HasKey("Name")
+                        .HasName("pk_permissions");
+
+                    b.ToTable("permissions", "identity");
+                });
+
+            modelBuilder.Entity("Simulab.Identity.Domain.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_roles");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("ux_roles_normalized_name");
+
+                    b.ToTable("roles", "identity");
+                });
+
+            modelBuilder.Entity("Simulab.Identity.Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<string>("PermissionName")
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("permission_name");
+
+                    b.HasKey("RoleId", "PermissionName")
+                        .HasName("pk_role_permissions");
+
+                    b.HasIndex("PermissionName")
+                        .HasDatabaseName("ix_role_permissions_permission_name");
+
+                    b.ToTable("role_permissions", "identity");
+                });
+
             modelBuilder.Entity("Simulab.Identity.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -693,6 +811,27 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                     b.Navigation("Application");
 
                     b.Navigation("Authorization");
+                });
+
+            modelBuilder.Entity("Simulab.Identity.Domain.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Simulab.Identity.Domain.Entities.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_permissions_permission_name");
+
+                    b.HasOne("Simulab.Identity.Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_roles_role_id");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

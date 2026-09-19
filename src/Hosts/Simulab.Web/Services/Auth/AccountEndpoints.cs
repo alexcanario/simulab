@@ -42,6 +42,10 @@ public static class AccountEndpoints
         identity.AddClaim(new Claim(SessionClaims.SessionJti, signIn.SessionJti));
         identity.AddClaim(new Claim(WebAuthClaims.AccessToken, signIn.AccessToken));
         identity.AddClaim(new Claim(WebAuthClaims.RefreshToken, signIn.RefreshToken));
+        foreach (var permission in signIn.Permissions)
+        {
+            identity.AddClaim(new Claim(WebAuthClaims.Permission, permission));
+        }
 
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         return Results.LocalRedirect("/");

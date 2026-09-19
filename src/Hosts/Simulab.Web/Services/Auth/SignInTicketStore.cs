@@ -4,7 +4,14 @@ using System.Security.Cryptography;
 namespace Simulab.Web.Services.Auth;
 
 /// <summary>Everything the completion endpoint needs to write the auth cookie, carried by one ticket.</summary>
-public sealed record SignInTicket(string Subject, string Email, string? DisplayName, string SessionJti, string AccessToken, string RefreshToken);
+public sealed record SignInTicket(
+    string Subject,
+    string Email,
+    string? DisplayName,
+    string SessionJti,
+    string AccessToken,
+    string RefreshToken,
+    IReadOnlyList<string> Permissions);
 
 /// <summary>
 /// A single-use, short-lived relay between the interactive sign-in page and the plain endpoint that
