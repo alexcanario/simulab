@@ -53,7 +53,7 @@ select u.id, r.id
 from identity.users u, identity.roles r
 where u.email = '<email>' and r.name = 'Admin'; -- or 'Curator'
 ```
-The signed-in user must sign out and sign in again for the Web's permission cookie to pick up the change (BR5); the Api's own check (BR3) reflects it within 10 seconds regardless. F-9 replaces this with a back-office screen.
+The Web picks up the change on the next page load, at most a minute after its last check of the session (B-3, BR4); no new sign-in is needed. The Api's own check (F-6 BR3) reflects it within 10 seconds regardless. F-9 replaces this with a back-office screen.
 
 ## Release steps
 1. No release process yet.

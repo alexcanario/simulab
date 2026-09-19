@@ -1,7 +1,7 @@
 ---
 bug: B-3
 feature: F-5
-status: building
+status: validating
 board: 719
 severity: high
 ---
@@ -47,21 +47,39 @@ Not a business rule. Other places that read the tokens from the cookie claims, a
 - 2026-09-19 — The single-flight refresh (BR2) is an in-process lock per session: v1 runs one Web instance. A second instance needs a Redis lock; recorded here, not built.
 - 2026-09-19 — No new package: `Aspire.StackExchange.Redis` 13.5.4 (MIT) is already approved and pinned (F-5); the Web project only gains the reference. Tests use the existing `RedisServer` (Testcontainers.Redis) from `Simulab.Testing`.
 
+- 2026-09-19 — Build: the store key is a Web-owned random id, not the Api's `session_jti`: every refresh issues a new `session_jti` (`TokenEndpoints.IssueTokensAsync`), and inside an open page the cookie that holds the key cannot be rewritten. The entry keeps the current `session_jti` instead.
+- 2026-09-19 — Build: only an explicit refusal ends a session (an OAuth error on refresh, a 401 on the session check). An Api that does not answer, or answers 5xx, keeps the session and its current token, so an Api outage never signs everyone out.
+- 2026-09-19 — Build: a page load (`Sec-Fetch-Mode: navigate` or an HTML `Accept`) always asks the Api; any other request with the cookie (assets, the circuit's own) asks at most once a minute. Without this, each page would cost one Api call per asset.
+- 2026-09-19 — Build: permissions are added to the principal per request (`ReplacePrincipal`), never written to the cookie; an open page keeps the permissions it started with until the next page load.
+- 2026-09-19 — Build: the planned architecture test `WebTokenClaimsTests.NoComponent_ReadsTokenClaims` became `SignInCompleteTests.SignInComplete_StoresTokensServerSide_CookieCarriesOnlyIdentityAndSession`: the token claim types were removed from `WebAuthClaims`, so no code can read them (the build proves it), and the test decrypts the real cookie to prove it carries none.
+- 2026-09-19 — Build: `docs/infra.md` no longer asks for a new sign-in after granting a role; the Web picks it up on the next page load.
+
 ## Regression test
-Each one fails on `main` before the fix and passes after it.
-- `WebSessionTokenAccessorTests.GetAccessToken_ExpiredAccessToken_RefreshesAndStoresNewPairAndPermissions` — `Simulab.Web.Tests` (BR2)
-- `WebSessionTokenAccessorTests.GetAccessToken_ConcurrentCallsOnExpiredToken_RefreshesOnce` — `Simulab.Web.Tests` (BR2)
-- `WebSessionTokenAccessorTests.GetAccessToken_RefreshRejected_EndsSessionAndRemovesEntry` — `Simulab.Web.Tests` (BR3)
-- `AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal` — `Simulab.Web.Tests`, against the cookie options `Program` really configures (BR4)
-- `AuthCookieValidationTests.ValidatePrincipal_PermissionsChanged_PrincipalCarriesNewPermissions` — `Simulab.Web.Tests` (BR4, F-6 BR5)
-- `SessionRevalidationTests.Revalidate_RevokedSession_ReturnsFalse` — `Simulab.Web.Tests` (BR5)
-- `RedisWebSessionStoreTests.Save_ThenGet_RoundTripsAndExpiresWithRefreshLifetime` — `Simulab.Web.Tests`, Redis container (BR1)
-- `WebTokenClaimsTests.NoComponent_ReadsTokenClaims` — `Simulab.ArchitectureTests` (BR6)
-- `ResourceParityTests` stays green with the new key (the three languages).
+`AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal` was seen failing on the unfixed code (`Expected context.Principal to be <null>, but found ...`, commit `7fbecb9`) and passes after the fix.
+
+| Rule | Tests (`Simulab.Web.Tests` unless noted) |
+|---|---|
+| BR1 tokens server side, cookie with identity and id only | `SignInCompleteTests.SignInComplete_StoresTokensServerSide_CookieCarriesOnlyIdentityAndSession`; `RedisWebSessionStoreTests.Save_ThenGet_RoundTripsAndExpiresWithRefreshLifetime`, `Remove_ThenGet_ReturnsNull` (Redis container) |
+| BR2 one accessor, refresh, permissions, single flight | `WebSessionTokenAccessorTests.GetAccessToken_ValidAccessToken_ReturnsItWithoutRefreshing`, `GetAccessToken_ExpiredAccessToken_RefreshesAndStoresNewPairAndPermissions`, `GetAccessToken_ConcurrentCallsOnExpiredToken_RefreshesOnce` |
+| BR3 refusal ends the session, silence does not | `WebSessionTokenAccessorTests.GetAccessToken_RefreshRejected_EndsSessionAndRemovesEntry`, `GetAccessToken_ApiUnreachable_KeepsSession`, `GetAccessToken_NoStoredSession_ReturnsNull`, `Check_ApiSaysEnded_RemovesEntry`, `Check_ApiFails_KeepsSession` |
+| BR4 cookie checked per request, permissions applied | `AuthCookieValidationTests.ValidatePrincipal_RevokedSession_RejectsPrincipal`, `ValidatePrincipal_PermissionsChanged_PrincipalCarriesNewPermissions`, `ValidatePrincipal_AssetRequestRecentlyChecked_DoesNotCallApi`; `WebSessionTokenAccessorTests.Check_RecentlyCheckedWithoutForce_DoesNotCallApi`, `Check_Forced_AsksApiAndStoresPermissions` |
+| BR5 circuit revalidation and the sign-in alert | `SessionRevalidationTests.Revalidate_RevokedSession_ReturnsFalse`, `Revalidate_LiveSession_ReturnsTrueAndAsksTheApiEveryTime`, `Revalidate_Anonymous_ReturnsTrue`; `SignInSessionEndedTests.SessionEndedQuery_ShowsTheSessionEndedAlert`, `NoQuery_ShowsNoAlert`; the redirect from an open page: validation script step 6 |
+| BR6 no code reads tokens from the cookie | `SignInCompleteTests` (above); the token claim types no longer exist; `/admin/roles` after 15 minutes: validation script step 4 |
+| BR7 a cookie from before the fix | `AuthCookieValidationTests.ValidatePrincipal_CookieFromBeforeTheFix_RejectsPrincipal` |
+| UI text in three languages | `ResourceParityTests` |
 
 ## Open questions
 - (none)
 
 ## Validation script
+A container runtime must be running. Close any app host or IDE running from this checkout first.
+1. Start `dotnet run --project src/Hosts/Simulab.AppHost` and open the dashboard URL printed on start. Wait for `redis`, `api` and `web` to reach Running.
+2. Keyboard only: open the `web` URL, go to `/sign-in`, Tab to the email, type your account from F-4, Tab to the password, type it, press Enter. The home page opens with your account menu.
+3. Grant yourself Admin with the SQL in `docs/infra.md` ("Assigning Curator or Admin") **without signing out**. Wait one minute and reload the page: "Roles" appears in the menu. (Before B-3 it needed a new sign-in.)
+4. Leave the app open for at least 16 minutes (or come back later), then open "Roles": the three roles load. (Before B-3 the page failed once the 15-minute access token expired.)
+5. In the dashboard, restart the `web` resource, then reload the page: you are still signed in.
+6. Open a second tab of the same browser on the `web` URL and sign out there. Go back to the first tab and do nothing: within one minute it moves to sign-in with "Your session ended. Sign in again."
+7. On that page switch the language with the globe to English and to Português (Brasil): the alert text changes. Switch the theme (sun/moon): the alert stays readable.
+8. Sign in again: it works as usual.
 
 ## Delivery
