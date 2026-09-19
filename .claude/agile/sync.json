@@ -21,7 +21,7 @@
     "docs/agile/templates/infra.md": "1972ada03af0d155",
     "docs/agile/templates/manual-page.md": "4a2863b0b4805ba5",
     "docs/agile/templates/project-claude.md": "c4f01de2eaa5408b",
-    "docs/agile/workflow.md": "3234e0a1e81a21c9",
+    "docs/agile/workflow.md": "96f51ed3a739a502",
     "docs/agile/profile.md": "a52ceeada38d9ea1",
     ".editorconfig": "db1b1782078fc2b4",
     "BannedSymbols.txt": "3949fcbfeb3d446c",
@@ -31,6 +31,6 @@
     ".gitignore": "a38751bee8050191",
     "global.json": "b48d6da8fa62c0da",
     "tests/Directory.Build.props": "ce5fa4c25ae4980c",
-    "docs/agile/workflow.pt-BR.md": "e2b9bbca30e04ece"
+    "docs/agile/workflow.pt-BR.md": "55ac5f7f796bba25"
   }
 }

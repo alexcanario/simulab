@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.19 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.21 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -68,8 +68,9 @@ Subagents are the exception: a fresh-context reviewer for risky changes, or para
 | 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, icon family, how an item is edited, UI kit and gallery |
 | 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments |
 | 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity |
+| 8. Documentation | Technical docs generated from the code (entity diagrams, data dictionary, route map, module diagram) and a hand-written architecture overview |
 
-When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 7 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
+When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 8 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
 Outputs, all in English:
 - `CLAUDE.md` — short (≤ 60 lines), pointing to one profile.
@@ -79,6 +80,7 @@ Outputs, all in English:
 - `docs/glossary.md` — business terms and their English identifiers.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
+- `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates entity diagrams and a data dictionary per module (from the EF model), a route map per area (from the OpenAPI document) and a module diagram (from project references), all Mermaid; `/agile:ship` regenerates them and `--check` fails when they are stale. Optionally a one-page hand-written overview (C4 context and containers).
 - The first epics on the board, if the brief already names them.
 
 ## 5. Feature lifecycle
@@ -101,7 +103,7 @@ stateDiagram-v2
 | Status | What happens | Who moves it |
 |---|---|---|
 | `idea` | Captured from the chat with `/agile:idea`. Title and 2-3 lines. | Claude |
-| `refining` | `/agile:refine`: Claude reads the related code, then asks every open question in one round. The round includes the new packages the item needs, for the code **and for the tests**, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
+| `refining` | `/agile:refine`: Claude reads the related code, then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
 | `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. **Gate 2.** | You |
@@ -162,6 +164,7 @@ board: <work item id>
 - [ ] Every UI string localized in pt-BR, pt-PT and en.
 - [ ] Validated on screen by you.
 - [ ] Full test suite green before merge.
+- [ ] Generated technical docs up to date (`DocGen --check`), when the project has them.
 - [ ] App manual updated in the three languages.
 - [ ] Board updated; the feature file reflects what was decided.
 
@@ -423,19 +426,39 @@ Status: idea. Nothing else is done until we refine it.
 ```
 Claude: I checked the code: the Catalog module exists but has no entities yet.
 The user and role model from bootstrap has Curator and Admin.
+```
 
-Questions (one round):
-1. Is the acronym unique? → Recommendation: yes, case-insensitive ("FGV" = "fgv").
-2. Can an exam board be deleted? → Recommendation: deactivate only, because exams
-   will reference it.
-3. Who can edit? → Recommendation: Curator and Admin.
-4. Maximum lengths? → Recommendation: name 120, acronym 20.
-5. Is the list paged or searchable? → Recommendation: search by name/acronym,
-   20 per page.
+The questions come as quiz cards, one per topic, the recommended option first. In the desktop app you click; in a terminal the same questions arrive as a numbered list you answer with "ok" or a letter. The first card, "Rules":
+
+```
+[Rules]
+1. Is the acronym unique?
+   ● Yes, case-insensitive (Recommended) — "FGV" and "fgv" are the same board
+   ○ Yes, case-sensitive
+   ○ No
+2. Can an exam board be deleted?
+   ● Deactivate only (Recommended) — exams will reference it
+   ○ Hard delete
+3. Maximum lengths?
+   ● Name 120, acronym 20 (Recommended)
+   ○ Other (type them)
+```
+
+Then "Permissions" and "Screens":
+
+```
+[Permissions]
+1. Who can edit?
+   ● Curator and Admin (Recommended) — curators own the catalog
+   ○ Admin only
+[Screens]
+1. Is the list paged or searchable?
+   ● Search by name/acronym, 20 per page (Recommended)
+   ○ Plain list, no search
 ```
 
 ```
-> 1 ok. 2 ok. 3 Admin only. 4 ok. 5 ok.
+> Rules: all recommended. Permissions: Admin only. Screens: recommended.
 ```
 
 Claude writes `docs/features/F-3-exam-board-registration.md`:
@@ -829,7 +852,7 @@ One diagram per command: what you do, what Claude does, and where it stops to as
 flowchart TD
     A["product/brief.md exists?"] -->|no| A1(["Template copied; fill it and run again"])
     A -->|yes| B["Read the brief and the code base it names"]
-    B --> C["Rounds 1 to 7, one message each:<br/>questions with recommendation and reason"]
+    B --> C["Rounds 1 to 8, one message each:<br/>questions with recommendation and reason"]
     C --> D{"Your answers ('ok' accepts)"}
     D --> E["Closing question: which domain concept worries you most?"]
     E --> F["Summary of every decision"]
@@ -885,7 +908,7 @@ flowchart TD
     B --> C["Check every premise in the code"]
     C -->|a premise is false| C1["Say so first"]
     C1 --> D
-    C --> D["One round of numbered questions with recommendations:<br/>use cases, rules, permissions, states, screens, data,<br/>packages for code and tests, out of scope"]
+    C --> D["One round as quiz cards, one per topic, recommended option first:<br/>use cases, rules, permissions, states, screens, data,<br/>packages for code and tests, out of scope"]
     D --> E{"Your answers"}
     E --> F["Fill the file: UC, BR, screens and API,<br/>acceptance criteria, decisions, out of scope"]
     F --> G{"At most one follow-up round needed?"}
@@ -963,7 +986,7 @@ flowchart TD
     B --> C["gate.js ship: full rebuild, full suite, architecture tests"]
     C -->|red| C1["Fix on the branch"]
     C1 --> C
-    C -->|green| D["App manual in pt-BR, pt-PT, en; infra.md; baseline"]
+    C -->|green| D["App manual in pt-BR, pt-PT, en; technical docs regenerated; infra.md; baseline"]
     D --> E{"Authorize the merge into main?"}
     E -->|no| E1(["Wait"])
     E -->|yes| F["Merge --no-ff; push; verify 0 0,<br/>branch and worktree gone"]

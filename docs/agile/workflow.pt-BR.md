@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.19 (rascunho). English: [en](workflow.md).
+> Versão 0.0.21 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -68,8 +68,9 @@ O `/agile:bootstrap` lê o `product/brief.md` e faz perguntas em **rodadas por t
 | 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, família de ícones, como um item é editado, kit de UI e galeria |
 | 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes |
 | 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade |
+| 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos) e uma visão geral da arquitetura escrita à mão |
 
-Quando o brief cita uma base de código existente para reaproveitar e você dá acesso a ela, o Claude lê esse código (nunca edita) e usa o que encontra como motivo das recomendações. Depois da rodada 7 vem uma **pergunta de fechamento** — "qual conceito do domínio mais preocupa você, ou o quiz não tocou?" — porque o vocabulário central de um domínio (uma taxonomia, um modelo de entitlement, uma regra de pontuação) raramente cabe numa lista fixa de perguntas. O que ela levantar é decidido como qualquer pergunta do quiz e registrado na ADR-0001.
+Quando o brief cita uma base de código existente para reaproveitar e você dá acesso a ela, o Claude lê esse código (nunca edita) e usa o que encontra como motivo das recomendações. Depois da rodada 8 vem uma **pergunta de fechamento** — "qual conceito do domínio mais preocupa você, ou o quiz não tocou?" — porque o vocabulário central de um domínio (uma taxonomia, um modelo de entitlement, uma regra de pontuação) raramente cabe numa lista fixa de perguntas. O que ela levantar é decidido como qualquer pergunta do quiz e registrado na ADR-0001.
 
 Saídas, todas em inglês:
 - `CLAUDE.md` — curto (até 60 linhas), apontando para um perfil.
@@ -79,6 +80,7 @@ Saídas, todas em inglês:
 - `docs/glossary.md` — termos de negócio e os identificadores em inglês.
 - `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
+- `docs/architecture/` — quando a rodada 8 escolheu algum documento: o `tools/<App>.DocGen` gera diagramas de entidades e dicionário de dados por módulo (do modelo EF), mapa de rotas por área (do documento OpenAPI) e diagrama de módulos (das referências entre projetos), tudo em Mermaid; o `/agile:ship` regenera e o `--check` reprova quando estão desatualizados. Opcionalmente uma visão geral de uma página escrita à mão (C4 contexto e containers).
 - Os primeiros épicos no board, se o brief já os citar.
 
 ## 5. Ciclo de vida de uma feature
@@ -101,7 +103,7 @@ stateDiagram-v2
 | Status | O que acontece | Quem muda |
 |---|---|---|
 | `idea` | Registrada a partir da conversa com `/agile:idea`. Título e 2 ou 3 linhas. | Claude |
-| `refining` | `/agile:refine`: o Claude lê o código relacionado e faz todas as perguntas abertas numa rodada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. O arquivo da feature é escrito. | Claude |
+| `refining` | `/agile:refine`: o Claude lê o código relacionado e faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. O arquivo da feature é escrito. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
 | `building` | `/agile:build`: branch, código e testes do que mudou. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
 | `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. **Portão 2.** | Você |
@@ -164,6 +166,7 @@ O arquivo é escrito em inglês, como todo o projeto.
 - [ ] Todo texto de tela traduzido em pt-BR, pt-PT e en.
 - [ ] Validado na tela por você.
 - [ ] Suíte completa verde antes do merge.
+- [ ] Documentação técnica gerada em dia (`DocGen --check`), quando o projeto a tem.
 - [ ] Manual da app atualizado nos três idiomas.
 - [ ] Board atualizado; o arquivo da feature reflete o que foi decidido.
 
@@ -424,20 +427,40 @@ Status: idea. Nada mais acontece até a refinarmos.
 
 ```
 Claude: Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
-O modelo de usuários do bootstrap tem Curator e Admin.
+O modelo de usuários e papéis do bootstrap tem Curator e Admin.
+```
 
-Perguntas (uma rodada):
-1. A sigla é única? → Recomendação: sim, sem diferenciar maiúsculas ("FGV" = "fgv").
-2. Uma banca pode ser excluída? → Recomendação: só desativada, porque os concursos
-   vão apontar para ela.
-3. Quem pode editar? → Recomendação: Curator e Admin.
-4. Tamanho máximo? → Recomendação: nome 120, sigla 20.
-5. A lista tem paginação ou busca? → Recomendação: busca por nome/sigla,
-   20 por página.
+As perguntas vêm como cartões de quiz, um por tema, com a opção recomendada primeiro. No app desktop você clica; num terminal as mesmas perguntas chegam como lista numerada, respondida com "ok" ou uma letra. O primeiro cartão, "Regras":
+
+```
+[Regras]
+1. A sigla é única?
+   ● Sim, sem diferenciar maiúsculas (Recomendado) — "FGV" e "fgv" são a mesma banca
+   ○ Sim, diferenciando maiúsculas
+   ○ Não
+2. Uma banca pode ser excluída?
+   ● Só desativada (Recomendado) — os concursos vão referenciá-la
+   ○ Exclusão definitiva
+3. Tamanho máximo?
+   ● Nome 120, sigla 20 (Recomendado)
+   ○ Outro (digite)
+```
+
+Depois "Permissões" e "Telas":
+
+```
+[Permissões]
+1. Quem pode editar?
+   ● Curator e Admin (Recomendado) — os curadores são donos do catálogo
+   ○ Só Admin
+[Telas]
+1. A lista tem paginação ou busca?
+   ● Busca por nome/sigla, 20 por página (Recomendado)
+   ○ Lista simples, sem busca
 ```
 
 ```
-> 1 ok. 2 ok. 3 só Admin. 4 ok. 5 ok.
+> Regras: tudo recomendado. Permissões: só Admin. Telas: recomendado.
 ```
 
 O Claude escreve `docs/features/F-3-exam-board-registration.md`:
@@ -834,7 +857,7 @@ Um diagrama por comando: o que você faz, o que o Claude faz e onde ele para par
 flowchart TD
     A["product/brief.md existe?"] -->|não| A1(["Template copiado; preencha e rode de novo"])
     A -->|sim| B["Ler o brief e a base de código que ele cita"]
-    B --> C["Rodadas 1 a 7, uma mensagem cada:<br/>perguntas com recomendação e motivo"]
+    B --> C["Rodadas 1 a 8, uma mensagem cada:<br/>perguntas com recomendação e motivo"]
     C --> D{"Suas respostas ('ok' aceita)"}
     D --> E["Pergunta de fechamento: qual conceito do domínio mais preocupa?"]
     E --> F["Resumo de todas as decisões"]
@@ -890,7 +913,7 @@ flowchart TD
     B --> C["Conferir cada premissa no código"]
     C -->|premissa falsa| C1["Dizer isso primeiro"]
     C1 --> D
-    C --> D["Uma rodada de perguntas numeradas com recomendação:<br/>casos de uso, regras, permissões, estados, telas, dados,<br/>pacotes do código e dos testes, fora de escopo"]
+    C --> D["Uma rodada como cartões de quiz, um por tema, opção recomendada primeiro:<br/>casos de uso, regras, permissões, estados, telas, dados,<br/>pacotes do código e dos testes, fora de escopo"]
     D --> E{"Suas respostas"}
     E --> F["Preencher o arquivo: UC, BR, telas e API,<br/>critérios de aceite, decisões, fora de escopo"]
     F --> G{"Precisa de no máximo mais uma rodada?"}
@@ -968,7 +991,7 @@ flowchart TD
     B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura"]
     C -->|vermelho| C1["Corrigir na branch"]
     C1 --> C
-    C -->|verde| D["Manual da app em pt-BR, pt-PT, en; infra.md; baseline"]
+    C -->|verde| D["Manual da app em pt-BR, pt-PT, en; docs técnicas regeneradas; infra.md; baseline"]
     D --> E{"Autoriza o merge na main?"}
     E -->|não| E1(["Esperar"])
     E -->|sim| F["Merge --no-ff; push; verificar 0 0,<br/>branch e worktree removidas"]
