@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2, F-4, F-5, F-6, F-7, F-8]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9]
 updated: 2026-09-19
 ---
 # Simulab
@@ -36,4 +36,5 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Entrar e sair](sign-in-and-sign-out.md): login, logout, bloqueio por tentativas
 - [Senha](password.md): esqueci a senha, redefinir e alterar
 - [Minha conta](my-account.md): nome de exibição e idioma preferido
-- [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer
+- [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um papel
+- [Usuários](users.md): achar uma conta e mudar os papéis dela (Administradores)

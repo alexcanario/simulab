@@ -104,6 +104,58 @@
   <data name="Nav.Dev.UiKit" xml:space="preserve"><value>Kit de interface</value></data>
   <data name="Nav.Roles" xml:space="preserve"><value>Perfis</value></data>
   <data name="Roles.Title" xml:space="preserve"><value>Perfis</value></data>
+  <data name="Nav.Users" xml:space="preserve"><value>Utilizadores</value></data>
+  <data name="Users.Title" xml:space="preserve"><value>Utilizadores</value></data>
+  <data name="Roles.Column.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Roles.Column.Permissions" xml:space="preserve"><value>Permissões</value></data>
+  <data name="Roles.Column.Users" xml:space="preserve"><value>Utilizadores</value></data>
+  <data name="Roles.SystemBadge" xml:space="preserve"><value>Sistema</value></data>
+  <data name="Roles.Delete.InUseTip" xml:space="preserve"><value>{0} utilizadores têm este perfil: retire-o primeiro</value></data>
+  <data name="Roles.Dialog.AddTitle" xml:space="preserve"><value>Adicionar perfil</value></data>
+  <data name="Roles.Dialog.EditTitle" xml:space="preserve"><value>Editar perfil</value></data>
+  <data name="Roles.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Roles.Field.Name.Help" xml:space="preserve"><value>Entre 2 e 50 caracteres</value></data>
+  <data name="Roles.Field.Name.SystemHelp" xml:space="preserve"><value>Os perfis de sistema mantêm o nome.</value></data>
+  <data name="Roles.Field.Permissions" xml:space="preserve"><value>Permissões</value></data>
+  <data name="Roles.Permissions.Selected" xml:space="preserve"><value>{0} de {1} selecionadas</value></data>
+  <data name="Roles.Saved" xml:space="preserve"><value>Perfil guardado.</value></data>
+  <data name="Roles.Deleted" xml:space="preserve"><value>Perfil eliminado.</value></data>
+  <data name="Roles.Delete.Message" xml:space="preserve"><value>O perfil {0} será eliminado. Nenhum utilizador o tem, por isso ninguém perde acesso. O nome não poderá ser reutilizado.</value></data>
+  <data name="Roles.UsersLink" xml:space="preserve"><value>Ver os {0} utilizadores com o perfil {1}</value></data>
+  <data name="Roles.UsersLink.One" xml:space="preserve"><value>Ver o utilizador com o perfil {0}</value></data>
+  <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>1 utilizador tem este perfil: retire-o primeiro</value></data>
+  <data name="Role.System.Student" xml:space="preserve"><value>Estudante</value></data>
+  <data name="Role.System.Curator" xml:space="preserve"><value>Curador</value></data>
+  <data name="Role.System.Admin" xml:space="preserve"><value>Administrador</value></data>
+  <data name="PermissionGroup.identity" xml:space="preserve"><value>Identidade e acesso</value></data>
+  <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Gerir perfis e atribuições</value></data>
+  <data name="Permission.identity.roles.manage.Description" xml:space="preserve"><value>Criar, editar e eliminar perfis, escolher as suas permissões e atribuir perfis a utilizadores.</value></data>
+  <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Users.Column.Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Users.Column.Roles" xml:space="preserve"><value>Perfis</value></data>
+  <data name="Users.Search.Placeholder" xml:space="preserve"><value>Pesquisar por e-mail ou nome</value></data>
+  <data name="Users.Filter.Role" xml:space="preserve"><value>Perfil</value></data>
+  <data name="Users.Filter.AllRoles" xml:space="preserve"><value>Todos os perfis</value></data>
+  <data name="Users.NoRoles" xml:space="preserve"><value>Sem perfis</value></data>
+  <data name="Users.NoMatch" xml:space="preserve"><value>Nenhum utilizador corresponde a "{0}".</value></data>
+  <data name="Users.EditRoles.Action" xml:space="preserve"><value>Editar perfis</value></data>
+  <data name="Users.Dialog.Title" xml:space="preserve"><value>Perfis de {0}</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>Um utilizador pode ter vários perfis; as permissões somam-se. O menu do utilizador muda no próximo carregamento de página.</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>Perfis de {0} guardados.</value></data>
+  <data name="AccountStatus.Pending" xml:space="preserve"><value>Pendente</value></data>
+  <data name="AccountStatus.Active" xml:space="preserve"><value>Ativa</value></data>
+  <data name="role.name_invalid" xml:space="preserve"><value>Use entre 2 e 50 caracteres.</value></data>
+  <data name="role.name_taken" xml:space="preserve"><value>Já existe um perfil com este nome (incluindo perfis eliminados).</value></data>
+  <data name="role.permission_unknown" xml:space="preserve"><value>Uma das permissões já não existe. Recarregue a página e tente novamente.</value></data>
+  <data name="role.not_found" xml:space="preserve"><value>Este perfil já não existe.</value></data>
+  <data name="role.system_role_protected" xml:space="preserve"><value>Os perfis de sistema não podem ser renomeados nem eliminados.</value></data>
+  <data name="role.admin_permission_required" xml:space="preserve"><value>O perfil Administrador tem de manter "Gerir perfis e atribuições".</value></data>
+  <data name="role.in_use" xml:space="preserve"><value>Retire este perfil de todos os utilizadores antes de o eliminar.</value></data>
+  <data name="role_assignment.role_unknown" xml:space="preserve"><value>Um dos perfis já não existe. Recarregue a página e tente novamente.</value></data>
+  <data name="role_assignment.last_manager" xml:space="preserve"><value>Assim ninguém mais poderia gerir perfis. Dê essa permissão a outro utilizador ativo primeiro.</value></data>
+  <data name="user.not_found" xml:space="preserve"><value>Este utilizador já não existe.</value></data>
+  <data name="Gallery.RowActions.DeleteDisabledReason" xml:space="preserve"><value>Não pode ser eliminado enquanto estiver em uso</value></data>
   <data name="registration.age_declaration_required" xml:space="preserve"><value>É preciso ter 18 anos ou mais para criar uma conta.</value></data>
   <data name="registration.consent_required" xml:space="preserve"><value>Aceite os Termos de Utilização e a Política de Privacidade.</value></data>
   <data name="registration.terms_version_outdated" xml:space="preserve"><value>Os textos legais mudaram enquanto preenchia o formulário. Leia novamente e aceite.</value></data>

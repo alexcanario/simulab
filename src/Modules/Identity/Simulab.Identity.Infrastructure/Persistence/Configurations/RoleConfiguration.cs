@@ -17,6 +17,7 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.Property(role => role.NormalizedName).HasMaxLength(256);
         builder.Property(role => role.ConcurrencyStamp).IsConcurrencyToken();
 
+        // F-9, BR3: not filtered by IsDeleted on purpose - a deleted role's name stays taken.
         builder.HasIndex(role => role.NormalizedName).HasDatabaseName("ux_roles_normalized_name").IsUnique();
     }
 }

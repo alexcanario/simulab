@@ -1,0 +1,188 @@
+@page "/admin/users"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
+@layout MainLayout
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IdentityApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-9, UC5-UC6: every account, searched and filtered on the server; roles edited in a dialog. *@
+<AppPageHeader Title="@L["Users.Title"]" Breadcrumbs="_breadcrumbs" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="UserSummaryResponse"
+              LoadAsync="LoadAsync"
+              SearchPlaceholder="@L["Users.Search.Placeholder"]"
+              EmptySearchMessage="@(term => L["Users.NoMatch", term])">
+    <ToolBarContent>
+        <div class="app-table-filter">
+            <AppSelectField TValue="Guid?"
+                            Id="users-role-filter"
+                            Label="@L["Users.Filter.Role"]"
+                            Options="_roleOptions"
+                            Value="RoleFilter"
+                            ValueChanged="@((Guid? value) => OnRoleFilterChangedAsync(value))" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn T="UserSummaryResponse" TProperty="string" Property="user => user.Email" Title="@L["Users.Column.Email"]" />
+        <PropertyColumn T="UserSummaryResponse" TProperty="string" Property="user => user.FullName!" Title="@L["Users.Column.Name"]">
+            <CellTemplate>
+                @if (string.IsNullOrEmpty(context.Item.FullName))
+                {
+                    <span class="app-muted" aria-hidden="true">—</span>
+                }
+                else
+                {
+                    <AppTruncatedText Text="@context.Item.FullName" MaxWidth="16rem" />
+                }
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn T="UserSummaryResponse" Title="@L["Users.Column.Status"]" Sortable="false">
+            <CellTemplate>
+                <span class="app-status app-status-@context.Item.Status.ToLowerInvariant()">@L[$"AccountStatus.{context.Item.Status}"]</span>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="UserSummaryResponse" Title="@L["Users.Column.Roles"]" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.Roles.Count == 0)
+                {
+                    <span class="app-muted">@L["Users.NoRoles"]</span>
+                }
+                else
+                {
+                    @foreach (var role in context.Item.Roles)
+                    {
+                        <span class="app-chip">@RoleText.NameOf(L, role.Name, role.IsSystem)</span>
+                    }
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@context.Email"
+                       MoreActions="@([new AppRowAction(L["Users.EditRoles.Action"], AppIcons.Edit, () => EditRolesAsync(context))])" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The role filter, kept in the address so the roles page can link to it (<c>?role=</c>).</summary>
+    [SupplyParameterFromQuery(Name = "role")] public Guid? RoleFilter { get; set; }
+
+    private AppDataTable<UserSummaryResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AppSelectOption<Guid?>> _roleOptions = [];
+    private List<RoleResponse> _roles = [];
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Administration"], href: null, disabled: true),
+            new BreadcrumbItem(L["Users.Title"], href: null, disabled: true)
+        ];
+
+        await LoadRolesAsync();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListRolesAsync(token);
+        _roles = result is { IsSuccess: true }
+            ? [.. result.Value!.OrderBy(role => RoleText.NameOf(L, role.Name, role.IsSystem), StringComparer.Create(CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace))]
+            : [];
+        _roleOptions =
+        [
+            new AppSelectOption<Guid?>(null, L["Users.Filter.AllRoles"]),
+            .. _roles.Select(role => new AppSelectOption<Guid?>(role.Id, RoleText.NameOf(L, role.Name, role.IsSystem)))
+        ];
+    }
+
+    private async Task<AppTablePage<UserSummaryResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var sortBy = query.SortBy switch
+        {
+            nameof(UserSummaryResponse.FullName) => UserListQuery.SortByName,
+            _ => UserListQuery.SortByEmail
+        };
+
+        var result = await Api.ListUsersAsync(
+            token,
+            new UserListQuery(query.Page, query.PageSize, query.Search, RoleFilter, sortBy, query.Descending),
+            cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Users failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<UserSummaryResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    private async Task OnRoleFilterChangedAsync(Guid? roleId)
+    {
+        RoleFilter = roleId;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("role", roleId), replace: true);
+        await _table.ReloadFromFirstPageAsync();
+    }
+
+    private async Task EditRolesAsync(UserSummaryResponse user)
+    {
+        _error = null;
+        await LoadRolesAsync();
+        if (_roles.Count == 0)
+        {
+            _error = Errors.For(null);
+            return;
+        }
+
+        var parameters = new DialogParameters<UserRolesDialog>
+        {
+            { dialog => dialog.User, user },
+            { dialog => dialog.Roles, _roles },
+            {
+                dialog => dialog.Save,
+                async roleIds => await TokenAsync() is { } token
+                    ? await Api.SetUserRolesAsync(token, user.Id, roleIds)
+                    : ApiResult.Failed<UserSummaryResponse>(ErrorText.UnexpectedCode)
+            }
+        };
+
+        var dialog = await Dialogs.ShowAsync<UserRolesDialog>(L["Users.Dialog.Title", user.Email], parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add(L["Users.Saved", user.Email], Severity.Success);
+            await _table.ReloadAsync();
+        }
+    }
+
+    // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

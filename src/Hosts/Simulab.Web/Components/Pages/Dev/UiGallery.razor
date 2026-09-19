@@ -56,6 +56,10 @@
                    OnEdit="@(() => Done(L["Common.Edit"]))"
                    OnDelete="@(() => DeleteAsync(_sample))"
                    MoreActions="_moreActions" />
+    <AppRowActions ItemName="@SampleName(2)"
+                   OnEdit="@(() => Done(L["Common.Edit"]))"
+                   OnDelete="@(() => DeleteAsync(_sample))"
+                   DeleteDisabledReason="@L["Gallery.RowActions.DeleteDisabledReason"]" />
 </section>
 
 <section id="gallery-states" class="gallery-section">

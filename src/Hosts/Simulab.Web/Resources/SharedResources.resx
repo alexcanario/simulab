@@ -104,6 +104,58 @@
   <data name="Nav.Dev.UiKit" xml:space="preserve"><value>UI kit</value></data>
   <data name="Nav.Roles" xml:space="preserve"><value>Roles</value></data>
   <data name="Roles.Title" xml:space="preserve"><value>Roles</value></data>
+  <data name="Nav.Users" xml:space="preserve"><value>Users</value></data>
+  <data name="Users.Title" xml:space="preserve"><value>Users</value></data>
+  <data name="Roles.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Roles.Column.Permissions" xml:space="preserve"><value>Permissions</value></data>
+  <data name="Roles.Column.Users" xml:space="preserve"><value>Users</value></data>
+  <data name="Roles.SystemBadge" xml:space="preserve"><value>System</value></data>
+  <data name="Roles.Delete.InUseTip" xml:space="preserve"><value>Held by {0} users: remove it from them first</value></data>
+  <data name="Roles.Dialog.AddTitle" xml:space="preserve"><value>Add role</value></data>
+  <data name="Roles.Dialog.EditTitle" xml:space="preserve"><value>Edit role</value></data>
+  <data name="Roles.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Roles.Field.Name.Help" xml:space="preserve"><value>2 to 50 characters</value></data>
+  <data name="Roles.Field.Name.SystemHelp" xml:space="preserve"><value>System roles keep their name.</value></data>
+  <data name="Roles.Field.Permissions" xml:space="preserve"><value>Permissions</value></data>
+  <data name="Roles.Permissions.Selected" xml:space="preserve"><value>{0} of {1} selected</value></data>
+  <data name="Roles.Saved" xml:space="preserve"><value>Role saved.</value></data>
+  <data name="Roles.Deleted" xml:space="preserve"><value>Role deleted.</value></data>
+  <data name="Roles.Delete.Message" xml:space="preserve"><value>The role {0} will be deleted. No user holds it, so nobody loses access. Its name cannot be reused.</value></data>
+  <data name="Roles.UsersLink" xml:space="preserve"><value>See the {0} users with the role {1}</value></data>
+  <data name="Roles.UsersLink.One" xml:space="preserve"><value>See the user with the role {0}</value></data>
+  <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>Held by 1 user: remove it from them first</value></data>
+  <data name="Role.System.Student" xml:space="preserve"><value>Student</value></data>
+  <data name="Role.System.Curator" xml:space="preserve"><value>Curator</value></data>
+  <data name="Role.System.Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="PermissionGroup.identity" xml:space="preserve"><value>Identity and access</value></data>
+  <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Manage roles and user roles</value></data>
+  <data name="Permission.identity.roles.manage.Description" xml:space="preserve"><value>Create, edit and delete roles, choose their permissions and give roles to users.</value></data>
+  <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Users.Column.Roles" xml:space="preserve"><value>Roles</value></data>
+  <data name="Users.Search.Placeholder" xml:space="preserve"><value>Search by email or name</value></data>
+  <data name="Users.Filter.Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Users.Filter.AllRoles" xml:space="preserve"><value>All roles</value></data>
+  <data name="Users.NoRoles" xml:space="preserve"><value>No roles</value></data>
+  <data name="Users.NoMatch" xml:space="preserve"><value>No user matches "{0}".</value></data>
+  <data name="Users.EditRoles.Action" xml:space="preserve"><value>Edit roles</value></data>
+  <data name="Users.Dialog.Title" xml:space="preserve"><value>Roles of {0}</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. The user's menu changes on their next page load.</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>Roles of {0} saved.</value></data>
+  <data name="AccountStatus.Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="AccountStatus.Active" xml:space="preserve"><value>Active</value></data>
+  <data name="role.name_invalid" xml:space="preserve"><value>Use 2 to 50 characters.</value></data>
+  <data name="role.name_taken" xml:space="preserve"><value>A role with this name already exists (deleted roles included).</value></data>
+  <data name="role.permission_unknown" xml:space="preserve"><value>One of the permissions no longer exists. Reload the page and try again.</value></data>
+  <data name="role.not_found" xml:space="preserve"><value>This role no longer exists.</value></data>
+  <data name="role.system_role_protected" xml:space="preserve"><value>System roles cannot be renamed or deleted.</value></data>
+  <data name="role.admin_permission_required" xml:space="preserve"><value>The Admin role must keep "Manage roles and user roles".</value></data>
+  <data name="role.in_use" xml:space="preserve"><value>Remove this role from every user before deleting it.</value></data>
+  <data name="role_assignment.role_unknown" xml:space="preserve"><value>One of the roles no longer exists. Reload the page and try again.</value></data>
+  <data name="role_assignment.last_manager" xml:space="preserve"><value>This would leave nobody able to manage roles. Give that permission to another active user first.</value></data>
+  <data name="user.not_found" xml:space="preserve"><value>This user no longer exists.</value></data>
+  <data name="Gallery.RowActions.DeleteDisabledReason" xml:space="preserve"><value>Cannot be deleted while in use</value></data>
   <data name="registration.age_declaration_required" xml:space="preserve"><value>You must be 18 or older to create an account.</value></data>
   <data name="registration.consent_required" xml:space="preserve"><value>Accept the terms of use and the privacy policy.</value></data>
   <data name="registration.terms_version_outdated" xml:space="preserve"><value>The legal texts changed while you were filling the form. Read them again and accept.</value></data>

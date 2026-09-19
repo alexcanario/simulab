@@ -1,60 +1,193 @@
 @page "/admin/roles"
 @attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
 @layout MainLayout
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
 @inject IdentityApiClient Api
 @inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
 @inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
 
-<AppPageHeader Title="@L["Roles.Title"]" />
+@* F-9, UC1-UC4: every role, its permissions and holders; add, edit and delete in dialogs. *@
+<AppPageHeader Title="@L["Roles.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
 
-@if (_loading)
+@if (_error is not null)
 {
-    <AppLoadingState />
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
 }
-else if (_error)
-{
-    <AppErrorState OnRetry="LoadAsync" />
-}
-else
-{
-    <MudList T="string">
-        @foreach (var name in _roles)
+
+<AppDataTable @ref="_table" TItem="RoleRow" LoadAsync="LoadAsync" Searchable="false">
+    <Columns>
+        <PropertyColumn T="RoleRow" TProperty="string" Property="row => row.DisplayName" Title="@L["Roles.Column.Name"]">
+            <CellTemplate>
+                <span class="app-role-name">@context.Item.DisplayName</span>
+                @if (context.Item.Role.IsSystem)
+                {
+                    <span class="app-badge">@L["Roles.SystemBadge"]</span>
+                }
+            </CellTemplate>
+        </PropertyColumn>
+        <AppNumberColumn TItem="RoleRow" TProperty="int" Property="row => row.PermissionCount" Title="@L["Roles.Column.Permissions"]" Sortable="false" />
+        <TemplateColumn T="RoleRow" Title="@L["Roles.Column.Users"]" Sortable="false" CellClass="@NumberClass" HeaderClass="@NumberClass">
+            <CellTemplate>
+                @if (context.Item.UserCount > 0)
+                {
+                    <AppLink Href="@($"/admin/users?role={context.Item.Role.Id}")"
+                             aria-label="@UsersLinkLabel(context.Item)">
+                        @context.Item.UserCount.ToString("N0", CultureInfo.CurrentCulture)
+                    </AppLink>
+                }
+                else
+                {
+                    @(0.ToString("N0", CultureInfo.CurrentCulture))
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <RowActions>
+        @if (context.Role.IsSystem)
         {
-            <MudListItem T="string" Text="@name" Icon="@AppIcons.Roles" />
+            <AppRowActions ItemName="@context.DisplayName" OnEdit="@(() => EditAsync(context))" />
         }
-    </MudList>
-}
+        else
+        {
+            <AppRowActions ItemName="@context.DisplayName"
+                           OnEdit="@(() => EditAsync(context))"
+                           OnDelete="@(() => DeleteAsync(context))"
+                           DeleteDisabledReason="@InUseReason(context)" />
+        }
+    </RowActions>
+</AppDataTable>
 
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
-    private bool _loading = true;
-    private bool _error;
-    private IReadOnlyList<string> _roles = [];
+    /// <summary>The users column is a link, so it is a template column with the number column's alignment.</summary>
+    private const string NumberClass = "app-cell-number";
 
-    protected override Task OnInitializedAsync() => LoadAsync();
+    private AppDataTable<RoleRow> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private string? _error;
 
-    /// <summary>F-9 replaces this read-only list with full role management; today it only proves BR8-BR9 on screen.</summary>
-    private async Task LoadAsync()
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Administration"], href: null, disabled: true),
+            new BreadcrumbItem(L["Roles.Title"], href: null, disabled: true)
+        ];
+
+    /// <summary>A handful of roles: loaded whole, then sorted and paged here.</summary>
+    private async Task<AppTablePage<RoleRow>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
     {
-        _loading = true;
-        _error = false;
-        StateHasChanged();
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListRolesAsync(token, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Roles failed to load: {result.ErrorCode}.");
+        }
 
-        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
-        // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
-        var accessToken = user is null ? null : await Tokens.GetAccessTokenAsync(user);
+        var rows = result.Value!.Select(role => new RoleRow(role, RoleText.NameOf(L, role.Name, role.IsSystem)));
+        var sorted = query.Descending
+            ? rows.OrderByDescending(row => row.DisplayName, StringComparer.Create(CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace))
+            : rows.OrderBy(row => row.DisplayName, StringComparer.Create(CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
+        var all = sorted.ToList();
+        return new AppTablePage<RoleRow>([.. all.Skip(query.Page * query.PageSize).Take(query.PageSize)], all.Count);
+    }
 
-        var result = accessToken is null ? null : await Api.GetRoleNamesAsync(accessToken);
+    // Plurals get their own key (rule: i18n); one holder reads "the user", not "the 1 users".
+    private string UsersLinkLabel(RoleRow row) => row.UserCount == 1
+        ? L["Roles.UsersLink.One", row.DisplayName]
+        : L["Roles.UsersLink", row.UserCount.ToString("N0", CultureInfo.CurrentCulture), row.DisplayName];
 
-        _loading = false;
+    private string? InUseReason(RoleRow row) => row.UserCount switch
+    {
+        0 => null,
+        1 => L["Roles.Delete.InUseTip.One"].Value,
+        _ => L["Roles.Delete.InUseTip", row.UserCount.ToString("N0", CultureInfo.CurrentCulture)].Value
+    };
+
+    private Task AddAsync() => OpenAsync(null);
+
+    private Task EditAsync(RoleRow row) => OpenAsync(row.Role);
+
+    private async Task OpenAsync(RoleResponse? role)
+    {
+        _error = null;
+        var token = await TokenAsync();
+        var catalog = token is null ? null : await Api.ListPermissionsAsync(token);
+        if (token is null || catalog is not { IsSuccess: true })
+        {
+            _error = Errors.For(catalog?.ErrorCode);
+            return;
+        }
+
+        var parameters = new DialogParameters<RoleDialog>
+        {
+            { dialog => dialog.Role, role },
+            { dialog => dialog.Catalog, catalog.Value!.Select(permission => permission.Name).ToList() },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<RoleResponse>(ErrorText.UnexpectedCode)
+                    : role is null
+                        ? await Api.CreateRoleAsync(fresh, request)
+                        : await Api.UpdateRoleAsync(fresh, role.Id, request)
+            }
+        };
+
+        var title = role is null ? L["Roles.Dialog.AddTitle"] : L["Roles.Dialog.EditTitle"];
+        var dialog = await Dialogs.ShowAsync<RoleDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add(L["Roles.Saved"], Severity.Success);
+            await _table.ReloadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(RoleRow row)
+    {
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, row.DisplayName, L["Roles.Delete.Message", row.DisplayName]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteRoleAsync(token, row.Role.Id);
         if (result is { IsSuccess: true })
         {
-            _roles = result.Value!.Names;
+            Snackbar.Add(L["Roles.Deleted"], Severity.Success);
         }
         else
         {
-            _error = true;
+            // BR5: another Admin may have given the role to someone since the list was loaded.
+            _error = Errors.For(result?.ErrorCode);
         }
+
+        await _table.ReloadAsync();
     }
+
+    // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
 }

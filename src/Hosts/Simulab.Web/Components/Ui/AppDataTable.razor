@@ -17,7 +17,7 @@
             <MudTextField T="string"
                           Value="_search"
                           ValueChanged="OnSearchChangedAsync"
-                          Placeholder="@L["Common.Search"]"
+                          Placeholder="@(SearchPlaceholder ?? L["Common.Search"])"
                           aria-label="@L["Common.Search"]"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@AppIcons.Search"
@@ -48,7 +48,8 @@
         }
         else
         {
-            <AppEmptyState Message="@EmptyMessage" ActionText="@EmptyActionText" ActionIcon="@EmptyActionIcon" OnAction="OnEmptyAction" />
+            <AppEmptyState Message="@(_search is not null && EmptySearchMessage is not null ? EmptySearchMessage(_search) : EmptyMessage)"
+                           ActionText="@EmptyActionText" ActionIcon="@EmptyActionIcon" OnAction="OnEmptyAction" />
         }
     </NoRecordsContent>
     <PagerContent>
@@ -82,6 +83,12 @@
 
     [Parameter] public string? EmptyMessage { get; set; }
 
+    /// <summary>What the search box says when empty; the kit's "Search" by default.</summary>
+    [Parameter] public string? SearchPlaceholder { get; set; }
+
+    /// <summary>The empty message while a search term is typed, given the term (F-9: "No user matches ...").</summary>
+    [Parameter] public Func<string, string>? EmptySearchMessage { get; set; }
+
     [Parameter] public string? EmptyActionText { get; set; }
 
     [Parameter] public string? EmptyActionIcon { get; set; }
@@ -89,6 +96,14 @@
     [Parameter] public EventCallback OnEmptyAction { get; set; }
 
     public Task ReloadAsync() => _grid.ReloadServerData();
+
+    /// <summary>Reloads from the first page: after a filter outside the table changes (F-9: the role filter), as the search box does.</summary>
+    public async Task ReloadFromFirstPageAsync()
+    {
+        if (_grid.CurrentPage != 0)
+            _grid.NavigateTo(Page.First);
+        await _grid.ReloadServerData();
+    }
 
     private async Task<GridData<TItem>> LoadServerDataAsync(GridState<TItem> state, CancellationToken cancellationToken)
     {

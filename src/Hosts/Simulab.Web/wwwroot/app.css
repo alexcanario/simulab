@@ -444,3 +444,101 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     flex-direction: column;
     align-items: flex-start;
 }
+
+/* F-9: role and user administration. Text sits in text-primary on every surface, so it keeps AA contrast
+   in both themes (the primary blue on its lighten tone is 4.3:1 in the light theme). */
+.app-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border: 1px solid var(--mud-palette-primary);
+    border-radius: 10px;
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-text-primary);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.app-chip {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 2px 10px;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 12px;
+    color: var(--mud-palette-text-primary);
+    font-size: 0.75rem;
+}
+
+.app-muted {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--mud-palette-text-primary);
+}
+
+.app-status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mud-palette-text-secondary);
+}
+
+.app-status-active::before {
+    background: var(--mud-palette-success);
+}
+
+.app-status-pending::before {
+    background: var(--mud-palette-warning);
+}
+
+.app-table-filter {
+    min-width: 220px;
+    margin-left: 16px;
+}
+
+.app-permission-group {
+    margin: 0 0 12px;
+    padding: 4px 14px 8px;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 10px;
+}
+
+.app-permission-group-head {
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 0 4px;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.app-permission {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-permission-name {
+    color: var(--mud-palette-text-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.app-permission-description {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-permission-technical {
+    color: var(--mud-palette-text-secondary);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.75rem;
+}

@@ -1,0 +1,101 @@
+@* F-9, UC6: the whole set of roles a user holds; several are allowed and their permissions add up (BR6). *@
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog Class="app-user-roles-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+            <AppAlert Severity="Severity.Info" Text="@L["Users.Dialog.Help"]" Class="mb-4" />
+
+            <fieldset class="app-permission-group">
+                <legend class="app-visually-hidden">@L["Users.Column.Roles"]</legend>
+                @foreach (var role in Roles)
+                {
+                    <AppCheckbox Id="@($"role-{role.Id}")"
+                                 Value="_selected.Contains(role.Id)"
+                                 ValueChanged="@(value => Toggle(role.Id, value))"
+                                 Disabled="_saving">
+                        <span class="app-permission">
+                            <span class="app-permission-name">@RoleText.NameOf(L, role.Name, role.IsSystem)</span>
+                            @if (role.Permissions.Count > 0)
+                            {
+                                <span class="app-permission-description">@string.Join(", ", role.Permissions.Select(permission => RoleText.PermissionName(L, permission)))</span>
+                            }
+                        </span>
+                    </AppCheckbox>
+                }
+            </fieldset>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter, EditorRequired] public UserSummaryResponse User { get; set; } = default!;
+
+    /// <summary>Every role that can be given, in the order to show them.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<RoleResponse> Roles { get; set; } = [];
+
+    /// <summary>Sends the new set to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired] public Func<IReadOnlyList<Guid>, Task<ApiResult<UserSummaryResponse>>> Save { get; set; } = default!;
+
+    private HashSet<Guid> _selected = [];
+    private string? _error;
+    private bool _saving;
+
+    private bool HasChanges => !_selected.SetEquals(User.Roles.Select(role => role.Id));
+
+    protected override void OnInitialized() => _selected = [.. User.Roles.Select(role => role.Id)];
+
+    private void Toggle(Guid roleId, bool on)
+    {
+        if (on)
+        {
+            _selected.Add(roleId);
+        }
+        else
+        {
+            _selected.Remove(roleId);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _error = null;
+        var result = await Save([.. _selected]);
+        _saving = false;
+
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        _error = Errors.For(result.ErrorCode);
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7, F-8]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9]
 updated: 2026-09-19
 ---
 # Simulab
@@ -36,4 +36,5 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Iniciar e terminar sessão](sign-in-and-sign-out.md): início de sessão, término, bloqueio por tentativas
 - [Palavra-passe](password.md): esqueci-me, redefinir e alterar
 - [A minha conta](my-account.md): nome de apresentação e idioma preferido
-- [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer
+- [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um perfil
+- [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis (Administradores)

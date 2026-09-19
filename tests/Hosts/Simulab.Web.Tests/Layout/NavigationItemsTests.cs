@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Routing;
+using Simulab.Identity.Contracts;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Ui;
 
@@ -53,6 +54,15 @@ public class NavigationItemsTests
         var visible = NavigationItems.Visible(items, isDevelopment: true, permission => permission == "roles.manage");
 
         visible.Select(i => i.Route).Should().Equal("/admin/roles", "/study");
+    }
+
+    [Fact]
+    public void All_AdministrationItems_AreRolesAndUsersBehindRolesManage()
+    {
+        // F-9, BR10: both back office screens share the one permission that gates them in the Api.
+        NavigationItems.All.Where(item => item.Section == NavigationSection.Administration)
+            .Select(item => (item.Route, item.RequiredPermission))
+            .Should().Equal(("/admin/roles", IdentityPermissions.RolesManage), ("/admin/users", IdentityPermissions.RolesManage));
     }
 
     [Fact]

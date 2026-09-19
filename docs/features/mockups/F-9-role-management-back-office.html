@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-9 Role management back office - mockup</title>
+<style>
+  :root {
+    --primary: #2478C5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD;
+    --background: #F2F5FB; --surface: #FFFFFF;
+    --appbar: #0F3266; --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.92);
+    --text: #19243E; --text-2: #4A5A7A; --divider: #D0D8EA; --row-hover: #F5F8FD;
+    --error: #BE3737; --error-bg: #FBEAEA; --error-text: #7A1818;
+    --success: #1A9E8C; --success-bg: #E3F4F1; --success-text: #0D6056;
+    --warning: #D98B1A; --warning-bg: #FCF1E1; --warning-text: #7A4A00;
+    --chip: #E6EDF8; --focus: #2478C5;
+  }
+  .dark {
+    --primary-lighten: #162540;
+    --background: #0E1828; --surface: #172035;
+    --appbar: #091422; --drawer: #091422;
+    --text: #E0E8F8; --text-2: #7A8EB0; --divider: #263352; --row-hover: #1C2840;
+    --error-bg: #3A1C22; --error-text: #F2B8B8;
+    --success-bg: #12302E; --success-text: #8FDCCF;
+    --warning-bg: #3A2C14; --warning-text: #F2CF96;
+    --chip: #22304D; --focus: #6FB2EE;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #d9dee8; color: #19243E; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #ccd; font-size: 13px; position: sticky; top: 0; z-index: 50; }
+  .controls label { font-weight: 600; margin-right: 4px; }
+  .controls select, .controls button { font: inherit; padding: 4px 8px; }
+  .note { padding: 8px 16px; font-size: 12px; color: #4A5A7A; }
+  .stage { display: flex; justify-content: center; padding: 16px; }
+  .frame { background: var(--background); color: var(--text); border: 1px solid #99a; border-radius: 8px; overflow: hidden; position: relative; width: 1180px; max-width: 100%; height: 700px; display: flex; flex-direction: column; }
+  .appbar { height: 56px; background: var(--appbar); color: #fff; display: flex; align-items: center; padding: 0 16px; flex: none; font-weight: 700; font-size: 1.125rem; gap: 12px; }
+  .appbar .spacer { flex: 1; }
+  .appbar .who { font-size: 13px; font-weight: 400; opacity: .85; }
+  .body { flex: 1; display: flex; min-height: 0; position: relative; }
+  .drawer { background: var(--drawer); color: var(--drawer-text); width: 230px; flex: none; padding: 8px 0; }
+  .section { padding: 16px 16px 4px; font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+  .navlink { display: flex; align-items: center; gap: 14px; height: 44px; padding: 0 16px; margin: 2px 8px; border-radius: 8px; color: inherit; text-decoration: none; cursor: pointer; position: relative; }
+  .navlink:hover { background: rgba(255,255,255,.08); }
+  .navlink[aria-current="page"] { background: rgba(255,255,255,.14); font-weight: 600; }
+  .navlink[aria-current="page"]::before { content: ""; position: absolute; left: -8px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: #6fb2ee; }
+  main { flex: 1; overflow: auto; padding: 24px; position: relative; }
+  .pagehead { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
+  .pagehead .titles { flex: 1; }
+  .crumbs { font-size: .8125rem; color: var(--text-2); margin-bottom: 4px; }
+  h1 { font-size: 1.75rem; margin: 0; font-weight: 600; }
+  .btn { font: inherit; font-size: .875rem; font-weight: 600; border-radius: 10px; padding: 8px 16px; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+  .btn:focus-visible, .iconbtn:focus-visible, input:focus-visible, .check input:focus-visible + .box { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn.filled { background: var(--primary); color: #fff; }
+  .btn.filled:hover { background: var(--primary-darken); }
+  .btn.filled.danger { background: var(--error); }
+  .btn.text { background: transparent; color: var(--primary); }
+  .btn.text:hover { background: var(--primary-lighten); }
+  .btn[disabled] { opacity: .6; cursor: default; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+  .spinner.big { width: 36px; height: 36px; border-width: 3px; border-color: var(--divider); border-top-color: var(--primary); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .card { background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; overflow: hidden; }
+  .toolbar { display: flex; align-items: center; padding: 12px 16px; gap: 12px; border-bottom: 1px solid var(--divider); }
+  .search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--divider); border-radius: 10px; padding: 6px 10px; width: 340px; background: var(--surface); color: var(--text-2); }
+  .search input { border: 0; background: transparent; color: var(--text); font: inherit; flex: 1; outline: none; }
+  .filter { display: flex; flex-direction: column; font-size: .75rem; color: var(--text-2); gap: 2px; }
+  .filter select { font: inherit; font-size: .875rem; padding: 6px 10px; border: 1px solid var(--divider); border-radius: 10px; background: var(--surface); color: var(--text); min-width: 200px; }
+  .filter select:focus-visible, a.count:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  a.count { color: var(--primary); text-decoration: underline; cursor: pointer; }
+  .dark a.count { color: #9cc8f2; }
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  th { text-align: left; font-weight: 600; color: var(--text-2); padding: 10px 16px; border-bottom: 1px solid var(--divider); white-space: nowrap; }
+  th.sortable { cursor: pointer; }
+  th .sort { font-size: 11px; opacity: .7; margin-left: 4px; }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--divider); vertical-align: middle; }
+  tbody tr:hover { background: var(--row-hover); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.actions, th.actions { text-align: right; width: 110px; white-space: nowrap; }
+  .iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--text-2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+  .iconbtn:hover { background: var(--primary-lighten); color: var(--primary); }
+  .iconbtn.danger:hover { color: var(--error); background: var(--error-bg); }
+  .iconbtn[aria-disabled="true"] { opacity: .4; cursor: default; }
+  .iconbtn[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: 40px; right: 0; white-space: nowrap; background: #333; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; z-index: 40; font-weight: 400; }
+  .badge { display: inline-block; font-size: .6875rem; font-weight: 600; letter-spacing: .03em; padding: 2px 8px; border-radius: 10px; background: var(--primary-lighten); color: var(--primary); margin-left: 8px; vertical-align: middle; }
+  .dark .badge { color: #9cc8f2; }
+  .chip { display: inline-block; font-size: .75rem; padding: 3px 10px; border-radius: 12px; background: var(--chip); margin: 2px 4px 2px 0; }
+  .muted { color: var(--text-2); }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: .8125rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.active { background: var(--success); } .dot.pending { background: var(--warning); }
+  .footer { display: flex; justify-content: flex-end; align-items: center; gap: 24px; padding: 8px 16px; font-size: .8125rem; color: var(--text-2); }
+  .state { padding: 48px 16px; text-align: center; color: var(--text-2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .state svg { width: 40px; height: 40px; opacity: .7; }
+  .alert { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: .875rem; border-left: 4px solid; }
+  .alert.error { background: var(--error-bg); color: var(--error-text); border-color: var(--error); }
+  .alert.info { background: var(--primary-lighten); color: var(--text); border-color: var(--primary); }
+  .overlay { position: absolute; inset: 0; background: rgba(8,16,32,.5); display: flex; align-items: center; justify-content: center; z-index: 30; }
+  .dialog { background: var(--surface); color: var(--text); border-radius: 12px; width: 560px; max-width: calc(100% - 32px); max-height: calc(100% - 48px); display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+  .dialog.small { width: 440px; }
+  .dialog h2 { font-size: 1.25rem; margin: 0; padding: 20px 24px 8px; font-weight: 600; }
+  .dialog .content { padding: 8px 24px; overflow: auto; }
+  .dialog .actions { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px 20px; }
+  .field { margin-bottom: 16px; }
+  .field label.lbl { display: block; font-size: .8125rem; font-weight: 600; margin-bottom: 6px; }
+  .field label.lbl .req { color: var(--error); margin-left: 2px; }
+  .input { width: 100%; font: inherit; padding: 9px 12px; border: 1px solid var(--divider); border-radius: 10px; background: var(--surface); color: var(--text); }
+  .input[readonly] { background: var(--background); color: var(--text-2); }
+  .input.invalid { border-color: var(--error); }
+  .help { font-size: .75rem; color: var(--text-2); margin-top: 4px; display: flex; justify-content: space-between; }
+  .help.err { color: var(--error); }
+  .dark .help.err { color: #F2B8B8; }
+  .group { border: 1px solid var(--divider); border-radius: 10px; margin-bottom: 12px; }
+  .group-head { padding: 10px 14px; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-2); border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; }
+  .check { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; cursor: pointer; }
+  .check + .check { border-top: 1px solid var(--divider); }
+  .check:hover { background: var(--row-hover); }
+  .check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .box { width: 20px; height: 20px; border: 2px solid var(--text-2); border-radius: 4px; flex: none; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .check input:checked + .box { background: var(--primary); border-color: var(--primary); }
+  .check input:checked + .box::after { content: ""; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px,-1px); }
+  .check .name { font-weight: 600; font-size: .875rem; }
+  .check .desc { font-size: .8125rem; color: var(--text-2); margin-top: 2px; }
+  .check .tech { font-family: Consolas, monospace; font-size: .75rem; color: var(--text-2); margin-top: 4px; }
+  .snackbar { position: absolute; right: 24px; bottom: 24px; background: #1f2a3f; color: #fff; padding: 12px 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.3); font-size: .875rem; z-index: 40; display: flex; gap: 10px; align-items: center; }
+  .snackbar::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #5fd3c1; }
+  .notfound { text-align: center; padding: 80px 16px; }
+  .notfound h1 { font-size: 2rem; margin-bottom: 8px; }
+  svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  .drawer svg { width: 22px; height: 22px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span><label for="state">State</label>
+    <select id="state">
+      <optgroup label="/admin/roles">
+        <option value="roles-loading">Roles - loading</option>
+        <option value="roles-ready" selected>Roles - ready</option>
+        <option value="roles-error">Roles - server error</option>
+        <option value="role-add">Role dialog - add (empty)</option>
+        <option value="role-edit">Role dialog - edit custom role</option>
+        <option value="role-edit-system">Role dialog - edit system role (name read-only)</option>
+        <option value="role-invalid">Role dialog - validation error (name)</option>
+        <option value="role-taken">Role dialog - server error: name taken</option>
+        <option value="role-admin-perm">Role dialog - Admin must keep its permission</option>
+        <option value="role-saving">Role dialog - saving</option>
+        <option value="role-saved">Roles - saved (snackbar)</option>
+        <option value="role-delete">Delete - confirmation</option>
+        <option value="role-deleted">Roles - deleted (snackbar)</option>
+        <option value="role-in-use">Roles - delete refused: in use (race)</option>
+      </optgroup>
+      <optgroup label="/admin/users">
+        <option value="users-loading">Users - loading</option>
+        <option value="users-ready">Users - ready</option>
+        <option value="users-search">Users - search with results</option>
+        <option value="users-by-role">Users - filtered by role (link from the roles page)</option>
+        <option value="users-nomatch">Users - search without results</option>
+        <option value="users-error">Users - server error</option>
+        <option value="user-roles">Edit roles dialog</option>
+        <option value="user-roles-saving">Edit roles dialog - saving</option>
+        <option value="user-last-manager">Edit roles dialog - last manager refused</option>
+        <option value="user-saved">Users - saved (snackbar)</option>
+      </optgroup>
+      <optgroup label="Permission denied">
+        <option value="denied">Student opens /admin/roles or /admin/users</option>
+      </optgroup>
+    </select></span>
+  <span><label for="lang">Language</label>
+    <select id="lang"><option value="0">en</option><option value="1">pt-BR</option><option value="2">pt-PT</option></select></span>
+  <span><label>Theme</label><button id="themeCtl" type="button">light / dark</button></span>
+</div>
+<div class="note">The controls above are not part of the app. Sample data: 3 system roles, 2 custom roles, 7 users. The permission catalog has one permission today (identity.roles.manage); later features add theirs and each module becomes one group.</div>
+
+<div class="stage">
+  <div class="frame" id="frame">
+    <header class="appbar"><span>Simulab</span><span class="spacer"></span><span class="who" id="who"></span></header>
+    <div class="body">
+      <nav class="drawer" id="drawer"></nav>
+      <main id="main"></main>
+    </div>
+  </div>
+</div>
+
+<script>
+// [en, pt-BR, pt-PT]
+const T = {
+  "Nav.Home": ["Home", "Início", "Início"],
+  "Nav.Section.Administration": ["Administration", "Administração", "Administração"],
+  "Nav.Roles": ["Roles", "Papéis", "Perfis"],
+  "Nav.Users": ["Users", "Usuários", "Utilizadores"],
+  "Roles.Title": ["Roles", "Papéis", "Perfis"],
+  "Users.Title": ["Users", "Usuários", "Utilizadores"],
+  "Common.Add": ["Add", "Adicionar", "Adicionar"],
+  "Common.Edit": ["Edit", "Editar", "Editar"],
+  "Common.Delete": ["Delete", "Excluir", "Eliminar"],
+  "Common.Save": ["Save", "Salvar", "Guardar"],
+  "Common.Saving": ["Saving...", "Salvando...", "A guardar..."],
+  "Common.Cancel": ["Cancel", "Cancelar", "Cancelar"],
+  "Common.Search": ["Search", "Pesquisar", "Pesquisar"],
+  "Common.TryAgain": ["Try again", "Tentar novamente", "Tentar novamente"],
+  "Common.LoadFailed": ["We could not load this list.", "Não foi possível carregar esta lista.", "Não foi possível carregar esta lista."],
+  "Common.Loading": ["Loading...", "Carregando...", "A carregar..."],
+  "Common.Actions": ["Actions", "Ações", "Ações"],
+  "Common.Table.RowsPerPage": ["Rows per page:", "Linhas por página:", "Linhas por página:"],
+  "Common.Table.PageInfo": ["{0}-{1} of {2}", "{0}-{1} de {2}", "{0}-{1} de {2}"],
+  "Common.ActionOnItem": ["{0}: {1}", "{0}: {1}", "{0}: {1}"],
+  "Common.Delete.Title": ["Delete item?", "Excluir item?", "Eliminar item?"],
+  "Common.Delete.Confirm": ["Delete {0}", "Excluir {0}", "Eliminar {0}"],
+  "Roles.Column.Name": ["Name", "Nome", "Nome"],
+  "Roles.Column.Permissions": ["Permissions", "Permissões", "Permissões"],
+  "Roles.Column.Users": ["Users", "Usuários", "Utilizadores"],
+  "Roles.SystemBadge": ["System", "Sistema", "Sistema"],
+  "Roles.Delete.InUseTip": ["Held by {0} users: remove it from them first", "{0} usuários têm este papel: tire dele antes", "{0} utilizadores têm este perfil: retire-o primeiro"],
+  "Roles.Dialog.AddTitle": ["Add role", "Adicionar papel", "Adicionar perfil"],
+  "Roles.Dialog.EditTitle": ["Edit role", "Editar papel", "Editar perfil"],
+  "Roles.Field.Name": ["Name", "Nome", "Nome"],
+  "Roles.Field.Name.Help": ["2 to 50 characters", "De 2 a 50 caracteres", "Entre 2 e 50 caracteres"],
+  "Roles.Field.Name.SystemHelp": ["System roles keep their name.", "Papéis de sistema mantêm o nome.", "Os perfis de sistema mantêm o nome."],
+  "Roles.Field.Permissions": ["Permissions", "Permissões", "Permissões"],
+  "Roles.Permissions.Selected": ["{0} of {1} selected", "{0} de {1} selecionadas", "{0} de {1} selecionadas"],
+  "Roles.Saved": ["Role saved.", "Papel salvo.", "Perfil guardado."],
+  "Roles.Deleted": ["Role deleted.", "Papel excluído.", "Perfil eliminado."],
+  "Roles.Delete.Message": ["The role {0} will be deleted. No user holds it, so nobody loses access. Its name cannot be reused.", "O papel {0} será excluído. Nenhum usuário o possui, então ninguém perde acesso. O nome não poderá ser reutilizado.", "O perfil {0} será eliminado. Nenhum utilizador o tem, por isso ninguém perde acesso. O nome não poderá ser reutilizado."],
+  "Role.System.Student": ["Student", "Estudante", "Estudante"],
+  "Role.System.Curator": ["Curator", "Curador", "Curador"],
+  "Role.System.Admin": ["Admin", "Administrador", "Administrador"],
+  "PermissionGroup.identity": ["Identity and access", "Identidade e acesso", "Identidade e acesso"],
+  "Permission.identity.roles.manage.Name": ["Manage roles and user roles", "Gerenciar papéis e atribuições", "Gerir perfis e atribuições"],
+  "Permission.identity.roles.manage.Description": ["Create, edit and delete roles, choose their permissions and give roles to users.", "Criar, editar e excluir papéis, escolher suas permissões e atribuir papéis a usuários.", "Criar, editar e eliminar perfis, escolher as suas permissões e atribuir perfis a utilizadores."],
+  "Users.Column.Email": ["Email", "E-mail", "E-mail"],
+  "Users.Column.Name": ["Name", "Nome", "Nome"],
+  "Users.Column.Status": ["Status", "Situação", "Estado"],
+  "Users.Column.Roles": ["Roles", "Papéis", "Perfis"],
+  "Users.Search.Placeholder": ["Search by email or name", "Pesquisar por e-mail ou nome", "Pesquisar por e-mail ou nome"],
+  "Users.Filter.Role": ["Role", "Papel", "Perfil"],
+  "Users.Filter.AllRoles": ["All roles", "Todos os papéis", "Todos os perfis"],
+  "Roles.UsersLink": ["See the {0} users with the role {1}", "Ver os {0} usuários com o papel {1}", "Ver os {0} utilizadores com o perfil {1}"],
+  "Users.NoRoles": ["No roles", "Sem papéis", "Sem perfis"],
+  "Users.NoMatch": ["No user matches \"{0}\".", "Nenhum usuário corresponde a \"{0}\".", "Nenhum utilizador corresponde a \"{0}\"."],
+  "Users.EditRoles.Action": ["Edit roles", "Editar papéis", "Editar perfis"],
+  "Users.Dialog.Title": ["Roles of {0}", "Papéis de {0}", "Perfis de {0}"],
+  "Users.Dialog.Help": ["A user can hold several roles; their permissions add up. Changes reach the user's menu at their next sign-in or within 15 minutes.", "Um usuário pode ter vários papéis; as permissões se somam. A mudança aparece no menu do usuário no próximo acesso ou em até 15 minutos.", "Um utilizador pode ter vários perfis; as permissões somam-se. A alteração chega ao menu do utilizador na próxima entrada ou em até 15 minutos."],
+  "Users.Saved": ["Roles of {0} saved.", "Papéis de {0} salvos.", "Perfis de {0} guardados."],
+  "AccountStatus.Pending": ["Pending", "Pendente", "Pendente"],
+  "AccountStatus.Active": ["Active", "Ativa", "Ativa"],
+  "role.name_invalid": ["Use 2 to 50 characters.", "Use de 2 a 50 caracteres.", "Use entre 2 e 50 caracteres."],
+  "role.name_taken": ["A role with this name already exists (deleted roles included).", "Já existe um papel com este nome (incluindo papéis excluídos).", "Já existe um perfil com este nome (incluindo perfis eliminados)."],
+  "role.admin_permission_required": ["The Admin role must keep \"Manage roles and user roles\".", "O papel Administrador precisa manter \"Gerenciar papéis e atribuições\".", "O perfil Administrador tem de manter \"Gerir perfis e atribuições\"."],
+  "role.in_use": ["Remove this role from every user before deleting it.", "Tire este papel de todos os usuários antes de excluí-lo.", "Retire este perfil de todos os utilizadores antes de o eliminar."],
+  "role_assignment.last_manager": ["This would leave nobody able to manage roles. Give that permission to another active user first.", "Assim ninguém mais poderia gerenciar papéis. Dê essa permissão a outro usuário ativo antes.", "Assim ninguém mais poderia gerir perfis. Dê essa permissão a outro utilizador ativo primeiro."],
+  "NotFound.Title": ["Page not found", "Página não encontrada", "Página não encontrada"],
+  "NotFound.Message": ["The address you opened does not exist.", "O endereço que você abriu não existe.", "O endereço que abriu não existe."]
+};
+let lang = 0, dark = false;
+const t = (k, ...a) => { let s = (T[k] || [k])[lang]; a.forEach((v, i) => s = s.replace("{" + i + "}", v)); return s; };
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+const I = {
+  roles: '<svg viewBox="0 0 24 24"><path d="M17 11c.34 0 .67.04 1 .09V6.27L10.5 3 3 6.27v4.91c0 4.54 3.2 8.79 7.5 9.82.55-.13 1.08-.32 1.6-.55A5.97 5.97 0 0 1 11 17c0-3.31 2.69-6 6-6zm0 2c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 1.38c.62 0 1.12.51 1.12 1.12s-.51 1.12-1.12 1.12-1.12-.51-1.12-1.12.5-1.12 1.12-1.12zm0 5.37c-.93 0-1.74-.46-2.24-1.17.05-.72 1.51-1.08 2.24-1.08s2.19.36 2.24 1.08c-.5.71-1.31 1.17-2.24 1.17z"/></svg>',
+  users: '<svg viewBox="0 0 24 24"><path d="M9 13.75c-2.34 0-7 1.17-7 3.5V19h14v-1.75c0-2.33-4.66-3.5-7-3.5zM4.34 17c.84-.58 2.87-1.25 4.66-1.25s3.82.67 4.66 1.25H4.34zM9 12c1.93 0 3.5-1.57 3.5-3.5S10.93 5 9 5 5.5 6.57 5.5 8.5 7.07 12 9 12zm0-5c.83 0 1.5.67 1.5 1.5S9.83 10 9 10s-1.5-.67-1.5-1.5S8.17 7 9 7zm7.04 6.81c1.16.84 1.96 1.96 1.96 3.44V19h4v-1.75c0-2.02-3.5-3.17-5.96-3.44zM15 12c1.93 0 3.5-1.57 3.5-3.5S16.93 5 15 5c-.54 0-1.04.13-1.5.35.63.89 1 1.98 1 3.15s-.37 2.26-1 3.15c.46.22.96.35 1.5.35z"/></svg>',
+  home: '<svg viewBox="0 0 24 24"><path d="m12 5.69 5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>',
+  edit: '<svg viewBox="0 0 24 24"><path d="m14.06 9.02.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83a.996.996 0 0 0 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"/></svg>',
+  del: '<svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>',
+  add: '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
+  search: '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>',
+  error: '<svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>'
+};
+
+// Sample data. System role names are resource keys; custom names are data (shown as stored).
+const roles = [
+  { key: "Student", system: true, perms: [], users: 1243 },
+  { key: "Curator", system: true, perms: [], users: 2 },
+  { key: "Admin", system: true, perms: ["identity.roles.manage"], users: 1 },
+  { name: "Revisor de conteúdo", system: false, perms: [], users: 2 },
+  { name: "Suporte", system: false, perms: ["identity.roles.manage"], users: 0 }
+];
+const roleName = r => r.system ? t("Role.System." + r.key) : r.name;
+const catalog = [{ group: "identity", perms: ["identity.roles.manage"] }];
+const users = [
+  { email: "ana.souza@exemplo.com.br", name: "Ana Souza", status: "Active", roles: [2] },
+  { email: "bruno.lima@exemplo.com.br", name: "Bruno Lima", status: "Active", roles: [1, 3] },
+  { email: "carla.mendes@exemplo.pt", name: "Carla Mendes", status: "Active", roles: [0] },
+  { email: "diego.alves@exemplo.com.br", name: "", status: "Pending", roles: [0] },
+  { email: "elisa.rocha@exemplo.com.br", name: "Elisa Rocha", status: "Active", roles: [1] },
+  { email: "fabio.teixeira@exemplo.pt", name: "Fábio Teixeira", status: "Active", roles: [] },
+  { email: "gabriela.nunes@exemplo.com.br", name: "Gabriela Nunes", status: "Active", roles: [0, 3] }
+];
+
+function drawer(page) {
+  const denied = page === "denied";
+  let h = `<a class="navlink">${I.home}<span>${t("Nav.Home")}</span></a>`;
+  if (!denied) {
+    h += `<div class="section">${t("Nav.Section.Administration")}</div>
+      <a class="navlink" ${page === "roles" ? 'aria-current="page"' : ""}>${I.roles}<span>${t("Nav.Roles")}</span></a>
+      <a class="navlink" ${page === "users" ? 'aria-current="page"' : ""}>${I.users}<span>${t("Nav.Users")}</span></a>`;
+  }
+  document.getElementById("drawer").innerHTML = h;
+  document.getElementById("who").textContent = denied ? "carla.mendes@exemplo.pt" : "ana.souza@exemplo.com.br";
+}
+
+function header(title, primary) {
+  return `<div class="pagehead"><div class="titles"><div class="crumbs">${t("Nav.Section.Administration")} / ${title}</div><h1>${title}</h1></div>
+    ${primary ? `<button class="btn filled" type="button">${I.add}${primary}</button>` : ""}</div>`;
+}
+const loading = () => `<div class="state" role="status"><div class="spinner big"></div><span>${t("Common.Loading")}</span></div>`;
+const failed = () => `<div class="state" role="alert">${I.error}<span>${t("Common.LoadFailed")}</span><button class="btn text" type="button">${t("Common.TryAgain")}</button></div>`;
+const footer = n => `<div class="footer"><span>${t("Common.Table.RowsPerPage")} <strong>25</strong> ▾</span><span>${t("Common.Table.PageInfo", n ? 1 : 0, n, n)}</span><span>‹ ›</span></div>`;
+
+function rolesPage(mode, alert) {
+  let body;
+  if (mode === "loading") body = loading();
+  else if (mode === "error") body = failed();
+  else {
+    body = `<table><thead><tr>
+        <th class="sortable">${t("Roles.Column.Name")}<span class="sort">▲</span></th>
+        <th class="num">${t("Roles.Column.Permissions")}</th>
+        <th class="num">${t("Roles.Column.Users")}</th>
+        <th class="actions"><span class="sr">${t("Common.Actions")}</span></th></tr></thead><tbody>`;
+    roles.forEach(r => {
+      const n = roleName(r);
+      const del = r.system ? "" : (r.users > 0
+        ? `<button class="iconbtn danger" type="button" aria-disabled="true" data-tip="${esc(t("Roles.Delete.InUseTip", r.users))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), n))}">${I.del}</button>`
+        : `<button class="iconbtn danger" type="button" data-tip="${esc(t("Common.Delete"))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), n))}">${I.del}</button>`);
+      body += `<tr><td>${esc(n)}${r.system ? `<span class="badge">${t("Roles.SystemBadge")}</span>` : ""}</td>
+        <td class="num">${r.perms.length}</td><td class="num">${r.users ? `<a class="count" href="#" aria-label="${esc(t("Roles.UsersLink", r.users, n))}">${r.users.toLocaleString(["en", "pt-BR", "pt-PT"][lang])}</a>` : "0"}</td>
+        <td class="actions"><button class="iconbtn" type="button" data-tip="${esc(t("Common.Edit"))}" aria-label="${esc(t("Common.ActionOnItem", t("Common.Edit"), n))}">${I.edit}</button>${del}</td></tr>`;
+    });
+    body += `</tbody></table>${footer(roles.length)}`;
+  }
+  return header(t("Roles.Title"), t("Common.Add")) + (alert || "") + `<div class="card">${body}</div>`;
+}
+
+function usersPage(mode, query, roleIdx) {
+  let body;
+  const opts = `<option>${t("Users.Filter.AllRoles")}</option>` + roles.map((r, i) => `<option ${i === roleIdx ? "selected" : ""}>${esc(roleName(r))}</option>`).join("");
+  const tb = `<div class="toolbar"><label class="search">${I.search}<input type="search" value="${esc(query || "")}" placeholder="${esc(t("Users.Search.Placeholder"))}" aria-label="${esc(t("Common.Search"))}"></label>
+    <label class="filter">${t("Users.Filter.Role")}<select>${opts}</select></label></div>`;
+  if (mode === "loading") body = tb + loading();
+  else if (mode === "error") body = tb + failed();
+  else {
+    const list = users
+      .filter(u => !query || (u.email + " " + u.name).toLowerCase().includes(query.toLowerCase()))
+      .filter(u => roleIdx === undefined || u.roles.includes(roleIdx));
+    if (!list.length) body = tb + `<div class="state" role="status">${I.search}<span>${esc(t("Users.NoMatch", query))}</span></div>`;
+    else {
+      body = tb + `<table><thead><tr>
+        <th class="sortable">${t("Users.Column.Email")}<span class="sort">▲</span></th>
+        <th class="sortable">${t("Users.Column.Name")}</th>
+        <th>${t("Users.Column.Status")}</th>
+        <th>${t("Users.Column.Roles")}</th>
+        <th class="actions"><span class="sr">${t("Common.Actions")}</span></th></tr></thead><tbody>`;
+      list.forEach(u => {
+        const chips = u.roles.length ? u.roles.map(i => `<span class="chip">${esc(roleName(roles[i]))}</span>`).join("") : `<span class="muted">${t("Users.NoRoles")}</span>`;
+        body += `<tr><td>${esc(u.email)}</td><td>${u.name ? esc(u.name) : '<span class="muted">—</span>'}</td>
+          <td><span class="status"><span class="dot ${u.status.toLowerCase()}"></span>${t("AccountStatus." + u.status)}</span></td>
+          <td>${chips}</td>
+          <td class="actions"><button class="iconbtn" type="button" data-tip="${esc(t("Users.EditRoles.Action"))}" aria-label="${esc(t("Common.ActionOnItem", t("Users.EditRoles.Action"), u.email))}">${I.edit}</button></td></tr>`;
+      });
+      body += `</tbody></table>` + footer(list.length);
+    }
+  }
+  return header(t("Users.Title")) + `<div class="card">${body}</div>`;
+}
+
+function check(id, checked, name, desc, tech, disabled) {
+  return `<label class="check"><input type="checkbox" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""} id="${id}"><span class="box"></span>
+    <span><div class="name">${esc(name)}</div>${desc ? `<div class="desc">${esc(desc)}</div>` : ""}${tech ? `<div class="tech">${esc(tech)}</div>` : ""}</span></label>`;
+}
+
+function roleDialog(opts) {
+  const r = opts.role;
+  const sys = r && r.system;
+  const perms = opts.perms !== undefined ? opts.perms : (r ? r.perms : []);
+  const name = opts.name !== undefined ? opts.name : (r ? roleName(r) : "");
+  let groups = "";
+  catalog.forEach(g => {
+    groups += `<div class="group"><div class="group-head"><span>${t("PermissionGroup." + g.group)}</span><span>${t("Roles.Permissions.Selected", g.perms.filter(p => perms.includes(p)).length, g.perms.length)}</span></div>`;
+    g.perms.forEach(p => groups += check("p-" + p, perms.includes(p), t("Permission." + p + ".Name"), t("Permission." + p + ".Description"), p));
+    groups += `</div>`;
+  });
+  const alert = opts.alert ? `<div class="alert error" role="alert">${I.error}<span>${t(opts.alert)}</span></div>` : "";
+  const nameHelp = opts.nameError
+    ? `<div class="help err" id="name-help">${t("role.name_invalid")}<span>${name.length}/50</span></div>`
+    : `<div class="help" id="name-help">${sys ? t("Roles.Field.Name.SystemHelp") : t("Roles.Field.Name.Help")}${sys ? "" : `<span>${name.length}/50</span>`}</div>`;
+  return `<div class="overlay"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <h2 id="dlg-title">${r ? t("Roles.Dialog.EditTitle") : t("Roles.Dialog.AddTitle")}</h2>
+    <div class="content">${alert}
+      <div class="field"><label class="lbl" for="role-name">${t("Roles.Field.Name")}<span class="req" aria-hidden="true">*</span></label>
+        <input class="input ${opts.nameError ? "invalid" : ""}" id="role-name" value="${esc(name)}" maxlength="50" ${sys ? "readonly" : ""} aria-required="true" aria-describedby="name-help" ${opts.nameError ? 'aria-invalid="true"' : ""}>${nameHelp}</div>
+      <div class="field"><span class="lbl" style="display:block;font-size:.8125rem;font-weight:600;margin-bottom:6px">${t("Roles.Field.Permissions")}</span>${groups}</div>
+    </div>
+    <div class="actions"><button class="btn text" type="button" ${opts.saving ? "disabled" : ""}>${t("Common.Cancel")}</button>
+      <button class="btn filled" type="button" ${opts.saving ? "disabled" : ""}>${opts.saving ? `<span class="spinner"></span>${t("Common.Saving")}` : t("Common.Save")}</button></div>
+  </div></div>`;
+}
+
+function deleteDialog(r) {
+  const n = roleName(r);
+  return `<div class="overlay"><div class="dialog small" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-msg">
+    <h2 id="del-title">${t("Common.Delete.Title")}</h2>
+    <div class="content"><p id="del-msg">${esc(t("Roles.Delete.Message", n))}</p></div>
+    <div class="actions"><button class="btn text" type="button">${t("Common.Cancel")}</button>
+      <button class="btn filled danger" type="button">${esc(t("Common.Delete.Confirm", n))}</button></div></div></div>`;
+}
+
+function userDialog(opts) {
+  const u = users[0 + (opts.index || 0)];
+  const selected = opts.selected || u.roles;
+  const alert = opts.alert ? `<div class="alert error" role="alert">${I.error}<span>${t(opts.alert)}</span></div>` : "";
+  let list = "";
+  roles.forEach((r, i) => list += check("r-" + i, selected.includes(i), roleName(r) + (r.system ? "" : ""), r.perms.map(p => t("Permission." + p + ".Name")).join(", ")));
+  return `<div class="overlay"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="udlg-title">
+    <h2 id="udlg-title">${esc(t("Users.Dialog.Title", u.email))}</h2>
+    <div class="content">${alert}<div class="alert info">${I.info}<span>${t("Users.Dialog.Help")}</span></div>
+      <fieldset style="border:0;padding:0;margin:0"><legend class="sr">${t("Users.Column.Roles")}</legend><div class="group">${list}</div></fieldset></div>
+    <div class="actions"><button class="btn text" type="button" ${opts.saving ? "disabled" : ""}>${t("Common.Cancel")}</button>
+      <button class="btn filled" type="button" ${opts.saving ? "disabled" : ""}>${opts.saving ? `<span class="spinner"></span>${t("Common.Saving")}` : t("Common.Save")}</button></div>
+  </div></div>`;
+}
+
+const snack = msg => `<div class="snackbar" role="status">${esc(msg)}</div>`;
+
+function render() {
+  document.documentElement.lang = ["en", "pt-BR", "pt-PT"][lang];
+  document.getElementById("frame").classList.toggle("dark", dark);
+  const s = document.getElementById("state").value;
+  const main = document.getElementById("main");
+  let page = s.startsWith("user") ? "users" : (s === "denied" ? "denied" : "roles");
+  drawer(page);
+  let h = "";
+  switch (s) {
+    case "roles-loading": h = rolesPage("loading"); break;
+    case "roles-ready": h = rolesPage(); break;
+    case "roles-error": h = rolesPage("error"); break;
+    case "role-add": h = rolesPage() + roleDialog({}); break;
+    case "role-edit": h = rolesPage() + roleDialog({ role: roles[3] }); break;
+    case "role-edit-system": h = rolesPage() + roleDialog({ role: roles[1] }); break;
+    case "role-invalid": h = rolesPage() + roleDialog({ name: "R", nameError: true }); break;
+    case "role-taken": h = rolesPage() + roleDialog({ name: "suporte", perms: [], alert: "role.name_taken" }); break;
+    case "role-admin-perm": h = rolesPage() + roleDialog({ role: roles[2], perms: [], alert: "role.admin_permission_required" }); break;
+    case "role-saving": h = rolesPage() + roleDialog({ role: roles[3], perms: ["identity.roles.manage"], saving: true }); break;
+    case "role-saved": h = rolesPage() + snack(t("Roles.Saved")); break;
+    case "role-delete": h = rolesPage() + deleteDialog(roles[4]); break;
+    case "role-deleted": h = rolesPage() + snack(t("Roles.Deleted")); break;
+    case "role-in-use": h = rolesPage(null, `<div class="alert error" role="alert">${I.error}<span>${t("role.in_use")}</span></div>`); break;
+    case "users-loading": h = usersPage("loading"); break;
+    case "users-ready": h = usersPage(); break;
+    case "users-search": h = usersPage(null, "souza"); break;
+    case "users-by-role": h = usersPage(null, "", 2); break;
+    case "users-nomatch": h = usersPage(null, "zeca"); break;
+    case "users-error": h = usersPage("error"); break;
+    case "user-roles": h = usersPage() + userDialog({ index: 1 }); break;
+    case "user-roles-saving": h = usersPage() + userDialog({ index: 1, selected: [1, 3, 4], saving: true }); break;
+    case "user-last-manager": h = usersPage() + userDialog({ index: 0, selected: [], alert: "role_assignment.last_manager" }); break;
+    case "user-saved": h = usersPage() + snack(t("Users.Saved", users[1].email)); break;
+    case "denied": h = `<div class="notfound"><h1>${t("NotFound.Title")}</h1><p class="muted">${t("NotFound.Message")}</p></div>`; break;
+  }
+  main.innerHTML = h;
+}
+document.getElementById("state").addEventListener("change", render);
+document.getElementById("lang").addEventListener("change", e => { lang = +e.target.value; render(); });
+document.getElementById("themeCtl").addEventListener("click", () => { dark = !dark; render(); });
+render();
+</script>
+</body>
+</html>

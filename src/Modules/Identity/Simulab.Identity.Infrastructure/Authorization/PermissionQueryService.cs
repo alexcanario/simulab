@@ -29,7 +29,9 @@ public sealed class PermissionQueryService(IdentityModuleDbContext context, Perm
         var permissions = await (
             from userRole in context.UserRoles
             where userRole.UserId == userId
-            join rolePermission in context.RolePermissions on userRole.RoleId equals rolePermission.RoleId
+            // F-9, BR5: through Roles, whose soft-delete filter makes a deleted role grant nothing.
+            join role in context.Roles on userRole.RoleId equals role.Id
+            join rolePermission in context.RolePermissions on role.Id equals rolePermission.RoleId
             select rolePermission.PermissionName)
             .Distinct()
             .ToListAsync(cancellationToken);
