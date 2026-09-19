@@ -105,16 +105,58 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         }
     }
 
-    /// <summary>F-6, BR9: the placeholder /admin/roles screen. The Api still checks the permission itself.</summary>
-    public Task<ApiResult<RoleNamesResponse>> GetRoleNamesAsync(string accessToken, CancellationToken cancellationToken = default) =>
-        SendAsync<RoleNamesResponse>(
-            () =>
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, $"{Base}/roles");
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-                return request;
-            },
+    /// <summary>F-9, UC1: every role with its permissions and user count. The Api checks the permission itself.</summary>
+    public Task<ApiResult<List<RoleResponse>>> ListRolesAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<List<RoleResponse>>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/roles"), accessToken), cancellationToken);
+
+    /// <summary>F-9: the permission catalog the role dialog offers.</summary>
+    public Task<ApiResult<List<PermissionResponse>>> ListPermissionsAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<List<PermissionResponse>>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/permissions"), accessToken), cancellationToken);
+
+    /// <summary>F-9, UC2.</summary>
+    public Task<ApiResult<RoleResponse>> CreateRoleAsync(string accessToken, SaveRoleRequest body, CancellationToken cancellationToken = default) =>
+        SendAsync<RoleResponse>(() => Authorized(WithJson(HttpMethod.Post, $"{Base}/roles", body), accessToken), cancellationToken);
+
+    /// <summary>F-9, UC3: the name and the whole permission set.</summary>
+    public Task<ApiResult<RoleResponse>> UpdateRoleAsync(string accessToken, Guid roleId, SaveRoleRequest body, CancellationToken cancellationToken = default) =>
+        SendAsync<RoleResponse>(() => Authorized(WithJson(HttpMethod.Put, $"{Base}/roles/{roleId}", body), accessToken), cancellationToken);
+
+    /// <summary>F-9, UC4.</summary>
+    public Task<ApiResult<bool>> DeleteRoleAsync(string accessToken, Guid roleId, CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/roles/{roleId}"), accessToken), cancellationToken);
+
+    /// <summary>F-9, UC5: one page of users, searched and filtered on the server.</summary>
+    public Task<ApiResult<UserPageResponse>> ListUsersAsync(string accessToken, UserListQuery query, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/users?page={query.Page}&pageSize={query.PageSize}&descending={(query.Descending ? "true" : "false")}";
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (query.RoleId is { } roleId)
+        {
+            route += $"&roleId={roleId}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            route += $"&sortBy={Uri.EscapeDataString(query.SortBy)}";
+        }
+
+        return SendAsync<UserPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
+    /// <summary>F-9, UC6: the whole set of roles the user holds afterwards.</summary>
+    public Task<ApiResult<UserSummaryResponse>> SetUserRolesAsync(string accessToken, Guid userId, IReadOnlyList<Guid> roleIds, CancellationToken cancellationToken = default) =>
+        SendAsync<UserSummaryResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/users/{userId}/roles", new SetUserRolesRequest(roleIds)), accessToken),
             cancellationToken);
+
+    private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
+        new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };
 
     /// <summary>F-8 UC1: the caller's own profile.</summary>
     public Task<ApiResult<ProfileResponse>> GetProfileAsync(string accessToken, CancellationToken cancellationToken = default) =>

@@ -1,0 +1,160 @@
+@* F-9, UC2-UC3: add or edit a role - its name (read-only for a system role) and its permissions by module. *@
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog Class="app-role-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppTextField TValue="string"
+                          Id="role-name"
+                          Label="@L["Roles.Field.Name"]"
+                          Value="@_name"
+                          ValueChanged="@((string? value) => OnNameChanged(value))"
+                          Required="true"
+                          ReadOnly="IsSystem"
+                          MaxLength="RoleLimits.NameMaxLength"
+                          Hint="@(IsSystem ? L["Roles.Field.Name.SystemHelp"] : L["Roles.Field.Name.Help"])"
+                          Error="@_nameError" />
+
+            <p class="app-field-label" id="role-permissions-label">@L["Roles.Field.Permissions"]</p>
+            @foreach (var group in RoleText.Groups(Catalog))
+            {
+                <fieldset class="app-permission-group">
+                    <legend class="app-permission-group-head">
+                        <span>@RoleText.GroupName(L, group.Key)</span>
+                        <span class="app-permission-group-count">@L["Roles.Permissions.Selected", group.Count(_selected.Contains), group.Count()]</span>
+                    </legend>
+                    @foreach (var permission in group)
+                    {
+                        <AppCheckbox Id="@($"permission-{permission.Replace('.', '-')}")"
+                                     Value="_selected.Contains(permission)"
+                                     ValueChanged="@(value => Toggle(permission, value))"
+                                     Disabled="_saving">
+                            <span class="app-permission">
+                                <span class="app-permission-name">@RoleText.PermissionName(L, permission)</span>
+                                <span class="app-permission-description">@RoleText.PermissionDescription(L, permission)</span>
+                                <span class="app-permission-technical">@permission</span>
+                            </span>
+                        </AppCheckbox>
+                    }
+                </fieldset>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The role being edited; null to add one.</summary>
+    [Parameter] public RoleResponse? Role { get; set; }
+
+    /// <summary>The permission catalog, by name.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Catalog { get; set; } = [];
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired] public Func<SaveRoleRequest, Task<ApiResult<RoleResponse>>> Save { get; set; } = default!;
+
+    private string? _name;
+    private string? _nameError;
+    private string? _error;
+    private bool _saving;
+    private HashSet<string> _selected = [];
+
+    private bool IsSystem => Role?.IsSystem == true;
+
+    private bool HasChanges =>
+        !string.Equals(_name ?? string.Empty, Role is null ? string.Empty : RoleText.NameOf(L, Role.Name, Role.IsSystem), StringComparison.Ordinal)
+        || !_selected.SetEquals(Role?.Permissions ?? []);
+
+    protected override void OnInitialized()
+    {
+        _name = Role is null ? string.Empty : RoleText.NameOf(L, Role.Name, Role.IsSystem);
+        _selected = [.. Role?.Permissions ?? []];
+    }
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError(value);
+    }
+
+    private string? NameError(string? value)
+    {
+        if (IsSystem)
+        {
+            return null;
+        }
+
+        var trimmed = value?.Trim() ?? string.Empty;
+        return trimmed.Length is < RoleLimits.NameMinLength or > RoleLimits.NameMaxLength ? Errors.For(IdentityErrorCodes.RoleNameInvalid) : null;
+    }
+
+    private void Toggle(string permission, bool on)
+    {
+        if (on)
+        {
+            _selected.Add(permission);
+        }
+        else
+        {
+            _selected.Remove(permission);
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _nameError = NameError(_name);
+        if (_nameError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        // A system role keeps its stored name: the field shows its translation (BR2, BR12).
+        var name = IsSystem ? Role!.Name : _name!.Trim();
+        var result = await Save(new SaveRoleRequest(name, [.. _selected]));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        if (result.ErrorCode == IdentityErrorCodes.RoleNameInvalid)
+        {
+            _nameError = Errors.For(result.ErrorCode);
+        }
+        else
+        {
+            _error = Errors.For(result.ErrorCode);
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

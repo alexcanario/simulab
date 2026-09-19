@@ -3,11 +3,12 @@
 <div class="app-row-actions" role="group" aria-label="@L["Common.Actions"]">
     @foreach (var action in _visible)
     {
-        <MudTooltip Text="@action.Label">
+        <MudTooltip Text="@(action.DisabledReason ?? action.Label)">
             <MudIconButton Icon="@action.Icon"
                            aria-label="@AccessibleName(action)"
                            Color="@(action.Destructive ? Color.Error : Color.Default)"
                            Size="Size.Small"
+                           Disabled="@(action.DisabledReason is not null)"
                            OnClick="() => action.OnClick()"
                            Class="app-row-action" />
         </MudTooltip>
@@ -41,6 +42,9 @@
 
     [Parameter] public EventCallback OnDelete { get; set; }
 
+    /// <summary>When set, Delete is shown disabled and its tooltip gives this reason (F-9: a role still in use).</summary>
+    [Parameter] public string? DeleteDisabledReason { get; set; }
+
     /// <summary>Actions after edit and delete, in order.</summary>
     [Parameter] public IReadOnlyList<AppRowAction>? MoreActions { get; set; }
 
@@ -53,7 +57,7 @@
         if (OnEdit.HasDelegate)
             all.Add(new AppRowAction(L["Common.Edit"], AppIcons.Edit, () => OnEdit.InvokeAsync()));
         if (OnDelete.HasDelegate)
-            all.Add(new AppRowAction(L["Common.Delete"], AppIcons.Delete, () => OnDelete.InvokeAsync(), Destructive: true));
+            all.Add(new AppRowAction(L["Common.Delete"], AppIcons.Delete, () => OnDelete.InvokeAsync(), Destructive: true, DisabledReason: DeleteDisabledReason));
         all.AddRange(MoreActions ?? []);
 
         _visible = [.. all.Take(MaxVisible)];

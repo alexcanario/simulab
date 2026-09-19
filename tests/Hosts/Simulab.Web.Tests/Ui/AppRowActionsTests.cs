@@ -25,6 +25,23 @@ public class AppRowActionsTests : KitTestContext
     }
 
     [Fact]
+    public void Render_DeleteDisabledReason_ShowsDeleteDisabledWithTheReasonAsTooltip()
+    {
+        var deleted = false;
+        var actions = Render<AppRowActions>(parameters => parameters
+            .Add(p => p.ItemName, "ABC")
+            .Add(p => p.OnEdit, () => { })
+            .Add(p => p.OnDelete, () => deleted = true)
+            .Add(p => p.DeleteDisabledReason, "Held by 2 users"));
+
+        var delete = actions.FindAll("button.app-row-action")[1];
+        delete.HasAttribute("disabled").Should().BeTrue();
+        delete.GetAttribute("aria-label").Should().Be("Delete: ABC");
+        actions.FindComponents<MudTooltip>().Select(t => t.Instance.Text).Should().Equal("Edit", "Held by 2 users");
+        deleted.Should().BeFalse();
+    }
+
+    [Fact]
     public void Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu()
     {
         var popovers = Render<MudPopoverProvider>();
