@@ -47,10 +47,87 @@ Let an Admin manage access from the app instead of editing the database: create 
 - BR12 Permission names and descriptions shown on screen come from resource files in the three languages (key = the permission name), grouped by module (the name's prefix before the first dot). The technical name is shown below, small. Seed role names are shown translated; custom role names are shown as stored.
 
 ## Screens and API
-Detailed screens and mockup: `/agile:screen F-9` (to be added before approval).
-- `/admin/roles` — replaces the F-6 placeholder. Kit table: name, system badge, permission count, user count; row actions Edit, Delete (Delete hidden for system roles); primary action Add. Add/Edit in a dialog: name field (read-only for a system role) and permission checkboxes grouped by module. Delete through the kit confirmation dialog naming the role.
-- `/admin/users` — new. Kit table, server-side paging, search by email or name: email, name, account status, roles (chips); row action "Edit roles" opens a dialog with one checkbox per role.
-- Nav: "Roles" stays; new "Users" in the Administration section, same permission.
+Mockup: `docs/features/mockups/F-9-role-management-back-office.html` (every state below, three languages, light and dark).
+
+### Screen: Roles (`/admin/roles`)
+- Layout: `AppPageHeader` (breadcrumb "Administration / Roles", title, primary action **Add** at the top right), then one `AppDataTable` card. `MainLayout`.
+- Table columns: Name (sortable, default ascending; system roles show their translated name and a "System" badge), Permissions (count, right-aligned), Users (count, right-aligned, user's culture), actions (last column, `AppRowActions`): **Edit**, then **Delete**.
+  - Delete is not rendered for a system role; for a custom role held by users it is disabled with the tooltip `Roles.Delete.InUseTip` (the API's `role.in_use` still guards a race).
+  - Five roles at most for a long time: the list is loaded whole and paged in the table (kit page sizes 10/25/50, default 25); no search box.
+- Role dialog (Add / Edit, kit dialog, Esc closes, unsaved changes ask `Common.Discard.*`):
+  - Name — `AppTextField`, required, 2–50 characters, counter "n/50", validated on blur and on submit; read-only for a system role with the help text `Roles.Field.Name.SystemHelp`.
+  - Permissions — one bordered group per module (`PermissionGroup.<prefix>`, with "n of m selected"), one `AppCheckbox` per permission: translated name (bold), translated description, technical name below in monospace.
+  - `AppFormActions`: **Save** (primary, disabled with progress while saving), **Cancel** (text).
+  - A business or server error is an `AppAlert` at the top of the dialog; a name error sits under the field.
+- Delete: kit confirmation dialog (`IConfirmService`), title `Common.Delete.Title`, message `Roles.Delete.Message`, error-coloured button `Common.Delete.Confirm` naming the role.
+- Success: snackbar `Roles.Saved` / `Roles.Deleted`; the list reloads.
+- States: loading (`AppLoadingState`); ready; empty is not reachable (three system roles always exist) and uses the kit's empty text if it ever is; server error (`AppErrorState` with **Try again**); dialog: add, edit custom, edit system, validation error, saving, server errors `role.name_taken`, `role.permission_unknown`, `role.admin_permission_required`, `role_assignment.last_manager`, `role.system_role_protected`, `role.not_found`; delete: confirmation, success, refused `role.in_use` (alert above the table); permission denied: ordinary Not Found page.
+
+### Screen: Users (`/admin/users`)
+- Layout: `AppPageHeader` (breadcrumb "Administration / Users", title, no primary action — users are created by sign-up), then one `AppDataTable` card with the kit search box (placeholder `Users.Search.Placeholder`, debounced by the kit), server-side paging (10/25/50, default 25) and sorting.
+- Table columns: Email (sortable, default ascending), Name (sortable; "—" when empty; long text truncated with tooltip), Status (dot + `AccountStatus.Pending` / `AccountStatus.Active`), Roles (chips with the role names; `Users.NoRoles` when empty), actions: **Edit roles** (edit icon, tooltip and accessible name `Users.EditRoles.Action` + email).
+- Edit roles dialog: title `Users.Dialog.Title` with the email; info `AppAlert` `Users.Dialog.Help` (roles add up; menu updates at next sign-in or within 15 min, BR9); one `AppCheckbox` per role (translated or stored name; its permissions, translated, as the description) inside a `fieldset` with a hidden legend; **Save** / **Cancel** as above.
+- Success: snackbar `Users.Saved`; the row reloads.
+- States: loading; ready; empty search (`Users.NoMatch` with the term); server error with **Try again**; dialog: ready, saving, errors `role_assignment.last_manager`, `role_assignment.role_unknown`, `user.not_found`; permission denied: ordinary Not Found page.
+
+### Navigation and permissions
+- Administration section of the drawer: "Roles" (`AppIcons.Roles`, existing) and new "Users" (new semantic icon `AppIcons.Users`, Material Outlined `Group`), both gated by `identity.roles.manage`. Admin sees both; Student and Curator see neither and get Not Found on both routes (BR10).
+
+### Accessibility
+- Tab order: primary action, search (users), table header sort buttons, row actions left to right, pager. In a dialog: first field, checkboxes, Cancel, Save; focus returns to the row action that opened it.
+- Icon-only row actions have a tooltip and an accessible name "<action>: <item>" (`Common.ActionOnItem`).
+- The error alert in a dialog and the `role.in_use` alert use `role="alert"`; the snackbar and loading states use `role="status"`; the delete dialog is an `alertdialog` described by its message.
+- Checkboxes are native inputs with the permission or role name as label; the counter "n/50" is part of the field's description.
+
+### UI texts (resource key — en / pt-BR / pt-PT)
+Existing keys reused: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `Common.Saving`, `Common.Cancel`, `Common.Search`, `Common.TryAgain`, `Common.LoadFailed`, `Common.Loading`, `Common.Actions`, `Common.ActionOnItem`, `Common.Table.*`, `Common.Delete.Title`, `Common.Delete.Confirm`, `Common.Discard.*`, `Nav.Section.Administration`, `Nav.Roles`, `Roles.Title`.
+
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `Nav.Users` / `Users.Title` | Users | Usuários | Utilizadores |
+| `Roles.Column.Name` / `Users.Column.Name` / `Roles.Field.Name` | Name | Nome | Nome |
+| `Roles.Column.Permissions` / `Roles.Field.Permissions` | Permissions | Permissões | Permissões |
+| `Roles.Column.Users` | Users | Usuários | Utilizadores |
+| `Roles.SystemBadge` | System | Sistema | Sistema |
+| `Roles.Delete.InUseTip` | Held by {0} users: remove it from them first | {0} usuários têm este papel: tire dele antes | {0} utilizadores têm este perfil: retire-o primeiro |
+| `Roles.Dialog.AddTitle` | Add role | Adicionar papel | Adicionar perfil |
+| `Roles.Dialog.EditTitle` | Edit role | Editar papel | Editar perfil |
+| `Roles.Field.Name.Help` | 2 to 50 characters | De 2 a 50 caracteres | Entre 2 e 50 caracteres |
+| `Roles.Field.Name.SystemHelp` | System roles keep their name. | Papéis de sistema mantêm o nome. | Os perfis de sistema mantêm o nome. |
+| `Roles.Permissions.Selected` | {0} of {1} selected | {0} de {1} selecionadas | {0} de {1} selecionadas |
+| `Roles.Saved` | Role saved. | Papel salvo. | Perfil guardado. |
+| `Roles.Deleted` | Role deleted. | Papel excluído. | Perfil eliminado. |
+| `Roles.Delete.Message` | The role {0} will be deleted. No user holds it, so nobody loses access. Its name cannot be reused. | O papel {0} será excluído. Nenhum usuário o possui, então ninguém perde acesso. O nome não poderá ser reutilizado. | O perfil {0} será eliminado. Nenhum utilizador o tem, por isso ninguém perde acesso. O nome não poderá ser reutilizado. |
+| `Role.System.Student` | Student | Estudante | Estudante |
+| `Role.System.Curator` | Curator | Curador | Curador |
+| `Role.System.Admin` | Admin | Administrador | Administrador |
+| `PermissionGroup.identity` | Identity and access | Identidade e acesso | Identidade e acesso |
+| `Permission.identity.roles.manage.Name` | Manage roles and user roles | Gerenciar papéis e atribuições | Gerir perfis e atribuições |
+| `Permission.identity.roles.manage.Description` | Create, edit and delete roles, choose their permissions and give roles to users. | Criar, editar e excluir papéis, escolher suas permissões e atribuir papéis a usuários. | Criar, editar e eliminar perfis, escolher as suas permissões e atribuir perfis a utilizadores. |
+| `Users.Column.Email` | Email | E-mail | E-mail |
+| `Users.Column.Status` | Status | Situação | Estado |
+| `Users.Column.Roles` | Roles | Papéis | Perfis |
+| `Users.Search.Placeholder` | Search by email or name | Pesquisar por e-mail ou nome | Pesquisar por e-mail ou nome |
+| `Users.NoRoles` | No roles | Sem papéis | Sem perfis |
+| `Users.NoMatch` | No user matches "{0}". | Nenhum usuário corresponde a "{0}". | Nenhum utilizador corresponde a "{0}". |
+| `Users.EditRoles.Action` | Edit roles | Editar papéis | Editar perfis |
+| `Users.Dialog.Title` | Roles of {0} | Papéis de {0} | Perfis de {0} |
+| `Users.Dialog.Help` | A user can hold several roles; their permissions add up. Changes reach the user's menu at their next sign-in or within 15 minutes. | Um usuário pode ter vários papéis; as permissões se somam. A mudança aparece no menu do usuário no próximo acesso ou em até 15 minutos. | Um utilizador pode ter vários perfis; as permissões somam-se. A alteração chega ao menu do utilizador na próxima entrada ou em até 15 minutos. |
+| `Users.Saved` | Roles of {0} saved. | Papéis de {0} salvos. | Perfis de {0} guardados. |
+| `AccountStatus.Pending` | Pending | Pendente | Pendente |
+| `AccountStatus.Active` | Active | Ativa | Ativa |
+| `role.name_invalid` | Use 2 to 50 characters. | Use de 2 a 50 caracteres. | Use entre 2 e 50 caracteres. |
+| `role.name_taken` | A role with this name already exists (deleted roles included). | Já existe um papel com este nome (incluindo papéis excluídos). | Já existe um perfil com este nome (incluindo perfis eliminados). |
+| `role.permission_unknown` | One of the permissions no longer exists. Reload the page and try again. | Uma das permissões não existe mais. Recarregue a página e tente de novo. | Uma das permissões já não existe. Recarregue a página e tente novamente. |
+| `role.not_found` | This role no longer exists. | Este papel não existe mais. | Este perfil já não existe. |
+| `role.system_role_protected` | System roles cannot be renamed or deleted. | Papéis de sistema não podem ser renomeados nem excluídos. | Os perfis de sistema não podem ser renomeados nem eliminados. |
+| `role.admin_permission_required` | The Admin role must keep "Manage roles and user roles". | O papel Administrador precisa manter "Gerenciar papéis e atribuições". | O perfil Administrador tem de manter "Gerir perfis e atribuições". |
+| `role.in_use` | Remove this role from every user before deleting it. | Tire este papel de todos os usuários antes de excluí-lo. | Retire este perfil de todos os utilizadores antes de o eliminar. |
+| `role_assignment.role_unknown` | One of the roles no longer exists. Reload the page and try again. | Um dos papéis não existe mais. Recarregue a página e tente de novo. | Um dos perfis já não existe. Recarregue a página e tente novamente. |
+| `role_assignment.last_manager` | This would leave nobody able to manage roles. Give that permission to another active user first. | Assim ninguém mais poderia gerenciar papéis. Dê essa permissão a outro usuário ativo antes. | Assim ninguém mais poderia gerir perfis. Dê essa permissão a outro utilizador ativo primeiro. |
+| `user.not_found` | This user no longer exists. | Este usuário não existe mais. | Este utilizador já não existe. |
+
+### API
 - `GET /api/v1/identity/permissions` — the catalog: `PermissionResponse[] { Name }`.
 - `GET /api/v1/identity/roles` — changed: `RoleResponse[] { Id, Name, IsSystem, Permissions: string[], UserCount }` (replaces `RoleNamesResponse`; its only caller is the Web).
 - `POST /api/v1/identity/roles` — `SaveRoleRequest { Name, Permissions: string[] }` → 201 `RoleResponse`.
@@ -113,6 +190,10 @@ Detailed screens and mockup: `/agile:screen F-9` (to be added before approval).
 - 2026-09-19 — Claude: saving a role's permissions or a user's roles replaces the whole set (PUT), which matches the checkbox dialogs and keeps one endpoint per dialog.
 - 2026-09-19 — Claude: the rules live in the Application layer (`SaveRoleHandler`, `DeleteRoleHandler`, `SetUserRolesHandler`), the BR8b check in one serializable transaction with the write; concurrent edits of the same role are last-write-wins (two Admins today, no conflict screen).
 - 2026-09-19 — Claude: user search is a case-insensitive `ILIKE` on email and full name; default sort by email; page sizes from the kit.
+- 2026-09-19 — Claude (screen): Delete of a custom role in use is shown disabled with a tooltip giving the user count, instead of opening a dialog that would only fail; the API check stays for races.
+- 2026-09-19 — Claude (screen): the roles table has no search box (a handful of rows); the users table has search, paging and sorting on the server.
+- 2026-09-19 — Claude (screen): the users page has no primary action (accounts come from sign-up); its only row action is "Edit roles", with the edit icon.
+- 2026-09-19 — Claude (screen): the role and edit-roles dialogs show each permission's translated description, so the Admin sees what a role grants without leaving the dialog.
 
 ## Out of scope
 - History of role and permission changes (audit log) — F-14 (AB#726).
