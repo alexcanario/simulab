@@ -28,6 +28,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
+| ⏳ | A "never leave zero X" rule is judged before and after, not only after | F-10 | |
+| ⏳ | A theme's colour tokens get a contrast test over the palette | F-10 | |
+| ⏳ | A Blazor Server dialog is driven from the browser pane in one call | F-10 | |
 | ✅ | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
 | ✅ | Kit parameters whose value depends on the page's meaning have no default (`[EditorRequired]`) | B-5 | 0.0.32 (`33dfa1e`) |
@@ -299,3 +302,16 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 ### Plugin notes (`plugin`)
 - ⏳ **`[stack: blazor]` A Razor attribute mistake compiles.** On a component parameter, a string attribute written without `@` is literal text (`Value="_name"` sets the two words), and a generic type parameter under the wrong name (`T` instead of the component's `TValue`) fails only when the component renders. Neither is a build error, so every new page and dialog gets a bUnit test that renders it with its real parameters.
 - ⏳ **`[generic]` A premise about another item is checked against today's code.** When refinement states how something already behaves, quoting the file of an earlier item is not enough: a later bug or feature may have moved it (F-9 inherited "within 15 minutes" from F-6 after B-3 had made it "at the next page load"). Verify it in the code, and look at the items that touched that code since.
+
+## 2026-09-20 — F-10 Account erasure
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | BR11 said the erasure is refused when no active manager is left. As written it also refused an ordinary account in a system that had no manager at all, so every erasure failed on a fresh database. The rule had to count managers before the change as well | Plugin improvement | This log (see below) |
+| 2 | The dark palette had kept the light error red. No screen had used it as text on a dark card until the danger zone, so 2.93:1 went through F-4 to F-9 unseen; the light `ErrorContrastText` was worse (1.92:1) on a filled destructive button | Test or build check + project rule | `ThemeContrastTests` in the repository, one line in `project.md`, and this log |
+| 3 | The browser pane recreates the Blazor circuit between tool calls, so a dialog opened in one call is gone in the next. Several rounds were spent clicking a dialog that no longer existed; driving the whole flow inside one call worked | Project rule | One line in `project.md`, and this log |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` A "never leave zero X" rule is judged before and after.** Written as "none after", it also blocks the case where the hole already existed (F-10: erasing an ordinary account in a system with no manager at all). Write it, and build it, as "there was at least one before and none after".
+- ⏳ **`[generic]` A theme's colour tokens get a contrast test over the palette.** A screen check finds a bad ratio once, on the surfaces that screen happens to use; a test over the theme keeps every token honest and catches the pair that no screen has rendered yet (F-10 found the dark error red at 2.93:1 after six features).
+- ⏳ **`[stack: Blazor Interactive Server]` A dialog is driven from the browser pane in one call.** The pane recreates the circuit between tool calls, so refs go stale and an open dialog disappears; open, fill and confirm in a single call, and keep keyboard steps in the validation script.
