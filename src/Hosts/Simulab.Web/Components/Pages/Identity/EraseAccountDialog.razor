@@ -1,0 +1,111 @@
+@* F-10, UC2: the confirmation of an erasure that cannot be undone — the current password, nothing else. *@
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+<MudDialog Class="app-erase-account-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            <MudText Typo="Typo.body1" Class="mb-4">@I["Account.Erase.Dialog.Explanation"]</MudText>
+
+            @if (_lockedSeconds is not null)
+            {
+                <div aria-live="polite">
+                    <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockedSeconds.Value)]" Class="mb-4" />
+                </div>
+            }
+            else if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppPasswordField Id="erase-account-password"
+                              Label="@I["Account.Erase.Dialog.Password.Label"]"
+                              Hint="@I["Account.Erase.Dialog.Password.Hint"]"
+                              ShowLabel="@I["SignUp.Password.Show"]"
+                              HideLabel="@I["SignUp.Password.Hide"]"
+                              Autocomplete="PasswordAutocomplete.CurrentPassword"
+                              Required="true"
+                              Disabled="_erasing"
+                              Error="@_passwordError"
+                              Value="@_password"
+                              ValueChanged="@(value => { _password = value; _passwordError = null; _error = null; })" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_erasing" Class="app-erase-cancel">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Error"
+                   OnClick="EraseAsync"
+                   Disabled="@(_erasing || string.IsNullOrEmpty(_password))"
+                   Class="app-erase-confirm">
+            @if (_erasing)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+            }
+            @I["Account.Erase.Action"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Sends the erasure to the Api; the dialog stays open and shows the failure (Screens).</summary>
+    [Parameter, EditorRequired] public Func<string, Task<AccountErasureResult>> Erase { get; set; } = default!;
+
+    private string? _password;
+    private string? _passwordError;
+    private string? _error;
+    private int? _lockedSeconds;
+    private bool _erasing;
+
+    private async Task EraseAsync()
+    {
+        if (_erasing || string.IsNullOrEmpty(_password))
+        {
+            return;
+        }
+
+        _erasing = true;
+        _passwordError = null;
+        _error = null;
+        _lockedSeconds = null;
+
+        var result = await Erase(_password);
+
+        _erasing = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(true));
+            return;
+        }
+
+        switch (result.ErrorCode)
+        {
+            case IdentityErrorCodes.AccountErasureCurrentPasswordInvalid:
+                _passwordError = Errors.For(result.ErrorCode);
+                break;
+            case IdentityErrorCodes.AccountLocked:
+                _lockedSeconds = result.RetryAfterSeconds ?? 0;
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode!);
+                break;
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await EraseAsync();
+        }
+    }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private static string FormatSeconds(int seconds) => TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss");
+}

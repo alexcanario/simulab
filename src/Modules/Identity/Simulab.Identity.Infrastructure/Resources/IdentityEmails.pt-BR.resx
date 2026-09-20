@@ -21,4 +21,9 @@
   <data name="Email.PasswordChanged.Heading" xml:space="preserve"><value>Sua senha foi alterada</value></data>
   <data name="Email.PasswordChanged.Body" xml:space="preserve"><value>A senha da sua conta Simulab foi alterada em {0}.</value></data>
   <data name="Email.PasswordChanged.NotYou" xml:space="preserve"><value>Se não foi você, redefina a senha agora:</value></data>
+  <data name="Email.AccountErased.Subject" xml:space="preserve"><value>Sua conta foi apagada — Simulab</value></data>
+  <data name="Email.AccountErased.Heading" xml:space="preserve"><value>Sua conta foi apagada</value></data>
+  <data name="Email.AccountErased.Body" xml:space="preserve"><value>Sua conta Simulab foi apagada em {0}, como você pediu. Seu nome, seu e-mail e sua senha foram removidos para sempre, e esta é a última mensagem que enviamos para este endereço.</value></data>
+  <data name="Email.AccountErased.Kept" xml:space="preserve"><value>Guardamos apenas o que não identifica mais você: registros sem nenhum nome associado, usados nas estatísticas das questões, e a prova de que um dia você aceitou os termos e a política de privacidade, que a lei nos obriga a manter.</value></data>
+  <data name="Email.AccountErased.ComeBack" xml:space="preserve"><value>Este e-mail está livre de novo. Se um dia quiser voltar, pode criar uma conta nova com ele:</value></data>
 </root>

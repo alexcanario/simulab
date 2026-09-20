@@ -21,4 +21,9 @@
   <data name="Email.PasswordChanged.Heading" xml:space="preserve"><value>A sua palavra-passe foi alterada</value></data>
   <data name="Email.PasswordChanged.Body" xml:space="preserve"><value>A palavra-passe da sua conta Simulab foi alterada em {0}.</value></data>
   <data name="Email.PasswordChanged.NotYou" xml:space="preserve"><value>Se não foi você, redefina a palavra-passe agora:</value></data>
+  <data name="Email.AccountErased.Subject" xml:space="preserve"><value>A sua conta foi eliminada — Simulab</value></data>
+  <data name="Email.AccountErased.Heading" xml:space="preserve"><value>A sua conta foi eliminada</value></data>
+  <data name="Email.AccountErased.Body" xml:space="preserve"><value>A sua conta Simulab foi eliminada em {0}, tal como pediu. O seu nome, o seu endereço de correio eletrónico e a sua palavra-passe foram removidos definitivamente, e esta é a última mensagem que enviamos para este endereço.</value></data>
+  <data name="Email.AccountErased.Kept" xml:space="preserve"><value>Guardamos apenas o que já não o identifica: registos sem qualquer nome associado, usados nas estatísticas das perguntas, e a prova de que aceitou os termos e a política de privacidade, que a lei nos obriga a conservar.</value></data>
+  <data name="Email.AccountErased.ComeBack" xml:space="preserve"><value>Este endereço ficou novamente livre. Se um dia quiser regressar, pode criar uma conta nova com ele:</value></data>
 </root>

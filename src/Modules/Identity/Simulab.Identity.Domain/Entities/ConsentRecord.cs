@@ -4,7 +4,9 @@ namespace Simulab.Identity.Domain.Entities;
 
 /// <summary>
 /// What a user accepted, when, from where and in which language (BR6). Written once at sign-up and
-/// never updated or deleted: it is the evidence LGPD and GDPR ask for.
+/// never deleted: it is the evidence LGPD and GDPR ask for. The only change it ever takes is losing
+/// <see cref="IpAddress"/> when the account is erased (F-10, BR9), which the store writes in one
+/// statement because the record has no other reason to be loaded.
 /// </summary>
 public class ConsentRecord : TenantEntity
 {
@@ -24,6 +26,7 @@ public class ConsentRecord : TenantEntity
 
     public DateTimeOffset AcceptedAt { get; init; }
 
-    /// <summary>The client address, when the host knows it.</summary>
+    /// <summary>The client address, when the host knows it. The one personal field of the record.</summary>
     public string? IpAddress { get; init; }
+
 }

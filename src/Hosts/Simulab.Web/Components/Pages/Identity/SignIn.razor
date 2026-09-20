@@ -46,6 +46,11 @@
         @* B-3, BR5: the session ended elsewhere (sign-out, password reset) while a page was open. *@
         <AppAlert Severity="Severity.Info" Text="@I["SignIn.SessionEnded"]" />
     }
+    else if (_accountErased)
+    {
+        @* F-10, AC13: the account this browser was signed in with no longer exists. *@
+        <AppAlert Severity="Severity.Info" Text="@I["SignIn.AccountErased"]" />
+    }
 
     <AppTextField TValue="string"
                   Id="sign-in-email"
@@ -112,6 +117,7 @@
     private bool _resent;
     private bool _submitting;
     private bool _sessionEnded;
+    private bool _accountErased;
     private bool _passwordChanged;
 
     protected override async Task OnInitializedAsync()
@@ -126,6 +132,7 @@
         _email = Email;
         var path = Uri.TryCreate(Navigation.Uri, UriKind.Absolute, out var uri) ? uri.PathAndQuery : string.Empty;
         _sessionEnded = path == AccountEndpoints.SessionEndedSignInPath;
+        _accountErased = path == AccountEndpoints.AccountErasedSignInPath;
         _passwordChanged = path == ResetPassword.SignInAfterResetPath;
         ApplyServerCode(Error);
     }

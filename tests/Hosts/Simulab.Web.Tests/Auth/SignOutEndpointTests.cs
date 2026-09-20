@@ -38,6 +38,21 @@ public sealed class SignOutEndpointTests(WebApplicationFactory<Program> factory)
         _store.Sessions.Should().BeEmpty();
     }
 
+    /// <summary>F-10 AC13: the erasure already revoked every session at the Api, so there is nothing to call.</summary>
+    [Fact]
+    public async Task SignOut_AccountErased_SkipsTheApiClearsTheCookieAndShowsTheFarewell()
+    {
+        await using var host = Host();
+        var client = await SignedInClientAsync(host);
+
+        var response = await client.GetAsync($"/account/sign-out?reason={AccountEndpoints.AccountErasedReason}");
+
+        response.Headers.Location!.OriginalString.Should().Be(AccountEndpoints.AccountErasedSignInPath);
+        _api.SignOutCount.Should().Be(0);
+        _store.Sessions.Should().BeEmpty();
+        response.Headers.GetValues("Set-Cookie").Should().Contain(value => value.StartsWith("simulab.auth=;", StringComparison.Ordinal));
+    }
+
     [Fact]
     public async Task SignOut_ApiFails_StillRemovesTheEntryAndClearsTheCookie()
     {

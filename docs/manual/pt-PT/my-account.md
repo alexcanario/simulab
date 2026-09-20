@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-PT
-features: [F-8]
-updated: 2026-09-19
+features: [F-8, F-10]
+updated: 2026-09-20
 ---
 # A minha conta
 
@@ -31,6 +31,9 @@ Qualquer pessoa com sessão iniciada. Cada um vê e altera apenas a sua própria
 ### Alterar a palavra-passe
 Selecione **Alterar palavra-passe**, logo abaixo dos campos. Consulte [Palavra-passe](password.md).
 
+### Eliminar a sua conta
+No fim da página, **Eliminar a minha conta** remove os seus dados pessoais definitivamente. Consulte [Eliminar a sua conta](erase-account.md).
+
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
@@ -48,4 +51,5 @@ Selecione **Alterar palavra-passe**, logo abaixo dos campos. Consulte [Palavra-p
 
 ## Páginas relacionadas
 - [Palavra-passe](password.md)
+- [Eliminar a sua conta](erase-account.md)
 - [Como navegar](getting-around.md)

@@ -105,6 +105,45 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         }
     }
 
+    /// <summary>
+    /// F-10 UC2: the caller erases their own account. The answer has the same two shapes as a password
+    /// change — a code, or a lockout with the seconds left — because it is the same password check (BR2).
+    /// </summary>
+    public async Task<AccountErasureResult> EraseAccountAsync(string accessToken, string currentPassword, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{Base}/account-erasures")
+            {
+                Content = JsonContent.Create(new EraseAccountRequest(currentPassword), options: AppJson.Options)
+            };
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return new AccountErasureResult(null, null);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Locked)
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(AppJson.Options, cancellationToken);
+                var seconds = problem?.Extensions.TryGetValue("retryAfterSeconds", out var value) == true && value is JsonElement { ValueKind: JsonValueKind.Number } element
+                    ? element.GetInt32()
+                    : 0;
+                return new AccountErasureResult(IdentityErrorCodes.AccountLocked, seconds);
+            }
+
+            return new AccountErasureResult(await ReadCodeAsync(response, cancellationToken), null);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException or NotSupportedException)
+        {
+            return new AccountErasureResult(Components.Ui.ErrorText.UnexpectedCode, null);
+        }
+    }
+
     /// <summary>F-9, UC1: every role with its permissions and user count. The Api checks the permission itself.</summary>
     public Task<ApiResult<List<RoleResponse>>> ListRolesAsync(string accessToken, CancellationToken cancellationToken = default) =>
         SendAsync<List<RoleResponse>>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/roles"), accessToken), cancellationToken);

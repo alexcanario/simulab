@@ -53,4 +53,45 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
         EmailVerifiedAt = verifiedAt;
         EmailConfirmed = true;
     }
+
+    /// <summary>
+    /// The address that replaces the real one when the account is erased (F-10, BR5). The TLD
+    /// <c>.invalid</c> is reserved by RFC 2606, so it can never reach a mailbox, and the account id makes
+    /// it unique: two erased accounts never collide under <c>ux_users_tenant_normalized_email</c>.
+    /// </summary>
+    public static string TombstoneAddressFor(Guid userId) => $"erased-{userId:N}@erased.invalid";
+
+    /// <summary>
+    /// Overwrites every personal column with the tombstone or nothing (F-10, BR4) and ends the account at
+    /// <see cref="AccountStatus.Erased"/>. <see cref="IdentityUser{TKey}.Id"/>, <see cref="CreatedAt"/> and
+    /// <see cref="PreferredLanguage"/> stay: the id is the pseudonym future statistics hang from
+    /// (ADR-0001 #9) and the language is not personal data. The caller writes the normalized columns and
+    /// soft deletes the row; returns the tombstone address it has to normalize.
+    /// </summary>
+    public string Erase()
+    {
+        var tombstone = TombstoneAddressFor(Id);
+
+        Email = tombstone;
+        UserName = tombstone;
+        FullName = null;
+        PhoneNumber = null;
+        PhoneNumberConfirmed = false;
+
+        // A null hash cannot be checked against any password, and a fresh stamp invalidates what the old one signed.
+        PasswordHash = null;
+        SecurityStamp = Guid.NewGuid().ToString();
+        ConcurrencyStamp = Guid.NewGuid().ToString();
+
+        LockoutEnd = null;
+        AccessFailedCount = 0;
+        TwoFactorEnabled = false;
+
+        EmailConfirmed = false;
+        EmailVerifiedAt = null;
+        IsAdultDeclared = false;
+
+        Status = AccountStatus.Erased;
+        return tombstone;
+    }
 }

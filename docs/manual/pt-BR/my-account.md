@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-BR
-features: [F-8]
-updated: 2026-09-19
+features: [F-8, F-10]
+updated: 2026-09-20
 ---
 # Minha conta
 
@@ -31,6 +31,9 @@ Qualquer pessoa conectada. Cada um vê e muda só a própria conta.
 ### Alterar a senha
 Clique em **Alterar senha**, logo abaixo dos campos. Veja [Senha](password.md).
 
+### Apagar sua conta
+No fim da página, **Apagar minha conta** remove seus dados pessoais para sempre. Veja [Apagar sua conta](erase-account.md).
+
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
@@ -48,4 +51,5 @@ Clique em **Alterar senha**, logo abaixo dos campos. Veja [Senha](password.md).
 
 ## Páginas relacionadas
 - [Senha](password.md)
+- [Apagar sua conta](erase-account.md)
 - [Como navegar](getting-around.md)

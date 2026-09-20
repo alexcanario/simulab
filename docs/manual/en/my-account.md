@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: en
-features: [F-8]
-updated: 2026-09-19
+features: [F-8, F-10]
+updated: 2026-09-20
 ---
 # My account
 
@@ -31,6 +31,9 @@ Anyone who is signed in. Each person sees and changes only their own account.
 ### Change your password
 Select **Change password**, just below the fields. See [Password](password.md).
 
+### Erase your account
+At the bottom of the page, **Erase my account** removes your personal data for good. See [Erase your account](erase-account.md).
+
 ## Fields
 | Field | Meaning | Rules |
 |---|---|---|
@@ -48,4 +51,5 @@ Select **Change password**, just below the fields. See [Password](password.md).
 
 ## Related pages
 - [Password](password.md)
+- [Erase your account](erase-account.md)
 - [Getting around](getting-around.md)

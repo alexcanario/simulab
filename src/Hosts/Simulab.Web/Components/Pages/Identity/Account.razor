@@ -10,6 +10,7 @@
 @inject WebSessionTokenAccessor Tokens
 @inject ErrorText Errors
 @inject NavigationManager Navigation
+@inject IDialogService Dialogs
 
 <PageTitle>@I["Account.Title"] — @L["App.Name"]</PageTitle>
 
@@ -66,6 +67,15 @@ else
         <AppLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</AppLink>
 
         <AppFormActions Saving="_saving" Disabled="@(_fullNameError is not null)" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+    </MudPaper>
+
+    @* F-10, UC1: set apart from the profile card, because nothing here can be undone. *@
+    <MudPaper Class="app-danger-zone pa-6 mt-6" Elevation="0" Outlined="true" MaxWidth="560px">
+        <h2 class="app-danger-zone-title">@I["Account.Erase.Title"]</h2>
+        <MudText Typo="Typo.body2" Class="mb-4">@I["Account.Erase.Explanation"]</MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="EraseAsync" Class="app-erase-open">
+            @I["Account.Erase.Action"]
+        </MudButton>
     </MudPaper>
 }
 
@@ -164,6 +174,39 @@ else
         await Task.Yield();
         var target = Uri.EscapeDataString("/account?saved=true");
         Navigation.NavigateTo($"/account/profile-applied?redirectUri={target}", forceLoad: true);
+    }
+
+    /// <summary>
+    /// F-10 UC2: the dialog owns the password and the failures; a success ends the session through the
+    /// Web's own sign-out, because a circuit cannot clear the auth cookie (same reason as the save above).
+    /// </summary>
+    private async Task EraseAsync()
+    {
+        var parameters = new DialogParameters<EraseAccountDialog>
+        {
+            { dialog => dialog.Erase, EraseOnApiAsync }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await Dialogs.ShowAsync<EraseAccountDialog>(I["Account.Erase.Dialog.Title"], parameters, options);
+        var result = await dialog.Result;
+
+        if (result?.Canceled != false)
+        {
+            return;
+        }
+
+        _leaving = true;
+        StateHasChanged();
+        await Task.Yield();
+        Navigation.NavigateTo($"/account/sign-out?reason={AccountEndpoints.AccountErasedReason}", forceLoad: true);
+    }
+
+    private async Task<AccountErasureResult> EraseOnApiAsync(string currentPassword)
+    {
+        var accessToken = await AccessTokenAsync();
+        return accessToken is null
+            ? new AccountErasureResult(ErrorText.UnexpectedCode, null)
+            : await Api.EraseAccountAsync(accessToken, currentPassword);
     }
 
     private void Cancel()

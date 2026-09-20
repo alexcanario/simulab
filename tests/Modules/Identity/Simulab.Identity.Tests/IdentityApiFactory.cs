@@ -52,6 +52,7 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
                 ["Identity:VerificationUrl"] = "https://localhost/verify-email",
                 ["Identity:PasswordResetUrl"] = "https://localhost/reset-password",
                 ["Identity:ForgotPasswordUrl"] = "https://localhost/forgot-password",
+                ["Identity:SignUpUrl"] = "https://localhost/sign-up",
                 ["Authentication:OpenIddict:ClientId"] = TestClient.ClientId,
                 ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
             }));
