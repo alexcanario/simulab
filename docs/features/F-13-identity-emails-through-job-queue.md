@@ -1,7 +1,7 @@
 ---
 feature: F-13
 epic: Foundation and identity
-status: building
+status: validating
 board: 723
 version: 1
 ---
@@ -87,6 +87,14 @@ New building block, following the profile's `BuildingBlocks` shape:
 - 2026-09-20 — `run_after` exists but only the retry backoff writes it — owner, question 11; the column keeps a grace period (F-10) or a cleanup job from needing a migration, without being exposed or tested as a feature.
 - 2026-09-20 — No new package — owner, question 12; `BackgroundService`, `System.Text.Json` and EF Core raw SQL cover it. Hangfire and Quartz bring a dashboard that would need its own authentication.
 - 2026-09-20 — Claude: `IEmailSender` keeps its interface and its SMTP implementation. The mailers keep rendering; only their last line changes from `sender.SendAsync(...)` to `queue.EnqueueAsync(...)`.
+- 2026-09-20 — Build: `Simulab.Jobs` references `Simulab.Email`, not the other way round, so `Simulab.Email` stays free of EF Core. The `email.send` handler is the one job type the block ships with.
+- 2026-09-20 — Build: `Job` does not inherit `TenantEntity`. It is infrastructure, not business data: BR6 deletes the row for real (soft delete would keep the live link), and the worker has to see every row whatever the tenant. `JobsDbContext` still inherits `ModuleDbContext` with its own `jobs` schema, which is what the architecture tests check.
+- 2026-09-20 — Build: the job table is mapped a second time into `IdentityModuleDbContext` with `ExcludeFromMigrations()`. That is what makes BR2 possible without sharing a connection between two contexts: staging a job puts it in the module's change tracker, and the module's own `SaveChanges` commits both rows. `JobsDbContext` owns the table and its migration.
+- 2026-09-20 — Build: `IIdentityUnitOfWork` is added to the Application layer. `Application_ReferencesDomainAndContractsOnly` forbids a reference to `Simulab.Jobs` there, and the two notice emails (password changed, F-7 BR11) have no later save of their own to ride on, because `UserManager` has already written the password.
+- 2026-09-20 — Build: one new package after all, `Microsoft.Extensions.Hosting.Abstractions` 10.0.12 — `BackgroundService` is not in a class library's framework reference. First-party, same version line as the other `Microsoft.Extensions.*` entries; no third-party job library was added.
+- 2026-09-20 — Build: CA1711 ("do not end a name in Queue") is suppressed locally on `IJobQueue` and `DbContextJobQueue`, with the reason in the attribute. The name is the one the owner and the item use.
+- 2026-09-20 — Build: `RecordingEmailSender` moved from the Identity tests to `tests/Simulab.Testing`; two test projects need it now.
+- 2026-09-20 — Build: the three "the mail server fails" tests were rewritten. With the queue the request never reaches SMTP, so the old assertions proved nothing; they now assert that the answer is unchanged **and** that the failed send leaves the job for a retry instead of losing it.
 
 ## Out of scope
 - Any screen or endpoint for jobs (listing, retrying, cancelling).
@@ -103,7 +111,25 @@ New building block, following the profile's `BuildingBlocks` shape:
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Use an address you have not used before; the app host keeps its database between runs.
+
+1. Start the app host (`dotnet run --project src/Hosts/Simulab.AppHost`) and open `https://localhost:7125/sign-up`.
+2. Sign up as `valida.f13@exemplo.com` with the password `Estudar#2026!x`, accepting the three checkboxes. → "Check your email" appears at once; the page does not wait for a mail server.
+3. In the Aspire dashboard open the `mailpit` endpoint. → "Confirm your email — Simulab" is there within a few seconds. Follow its link. → The account is verified and signs in.
+4. Switch the language to **Português (Portugal)**, open `/forgot-password` and ask for a link for the same address. → The message in Mailpit is in pt-PT ("Redefina a sua palavra-passe").
+5. On `/forgot-password` type `ninguem.f13@exemplo.com`, which does not exist. → The same screen, as fast as step 4, and no new message in Mailpit.
+6. In the Aspire dashboard **stop** the `mailpit` resource. Wait a minute (the per-account cooldown) and ask for a reset link for `valida.f13@exemplo.com` again. → The page answers exactly as in step 4; nothing arrives, because nothing is running.
+7. In a terminal, look at the queue, then start `mailpit` again in the dashboard, wait a minute (the first retry) and run the same command. → First one row with `attempts` 1 and the connection error; after the retry, no rows, and the email is in Mailpit.
+
+   Git Bash:
+   ```bash
+   docker exec -e PGPASSWORD=postgres $(docker ps --format "{{.Names}}" | grep -i "^postgres" | head -1) psql -U postgres -d simulab -c "select status, attempts, left(coalesce(last_error,''), 60) as last_error from jobs.jobs;"
+   ```
+   PowerShell 7:
+   ```powershell
+   $pg = (docker ps --format "{{.Names}}" | Select-String -Pattern "^postgres").ToString(); docker exec -e PGPASSWORD=postgres $pg psql -U postgres -d simulab -c "select status, attempts, left(coalesce(last_error,''), 60) as last_error from jobs.jobs;"
+   ```
+8. Keyboard only: reload `/sign-up` and fill the whole form with `Tab`, `Space` (checkboxes) and `Enter`. → It can be completed and submitted without a mouse, and the focus ring is visible on every field.
 
 ## Delivery
 - Branch: `feature/F-13`
