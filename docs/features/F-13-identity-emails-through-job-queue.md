@@ -1,7 +1,7 @@
 ---
 feature: F-13
 epic: Foundation and identity
-status: validating
+status: done
 board: 723
 version: 2
 ---
@@ -157,6 +157,7 @@ Use an address you have not used before; the app host keeps its database between
 
 ## Delivery
 - Branch: `feature/F-13`
-- Merge: -
-- Tests: 531 green across 9 projects (Identity 178 / 20 s, Web 272 / 3 s, Architecture 29 / 0.2 s, Persistence 14 / 4 s, SharedKernel 12 / 0.3 s, Jobs 12 / 5 s, Api 8 / 23 s, AppHost 6 / 1 s, Email 2 / 4 s); build 0 warnings, 0 errors.
-- Manual pages: - (no visible behaviour changes)
+- Merge: `ff28e8a` — merge(F-13): identity emails through the job queue (AB#723)
+- Tests: `agile gate GREEN` — build 15 s with 0 warnings, full suite 533 green in 28 s across 9 projects (Identity 178, Web 272, Architecture 29, Persistence 14, SharedKernel 12, Jobs 12, Api 8, AppHost 6, Email 2). Budget < 5 min.
+- Manual pages: none — nothing the end user sees changed, and no page promised an instant email. `docs/infra.md` gained the worker, `Jobs:WorkerEnabled` and the measured times.
+- Validated on screen by the owner on 2026-09-20, following the script above.
