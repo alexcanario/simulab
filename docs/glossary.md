@@ -77,6 +77,9 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
 | Apagamento de conta | Eliminação da conta | `AccountErasure` | The user erasing their own account: the personal data in Identity is overwritten and the id stays as a pseudonym (F-10, ADR-0001 #9) |
 | Conta apagada | Conta eliminada | `AccountStatus.Erased` | The state of an account after erasure: invisible to every lookup, with a tombstone address (F-10) |
+| Verificação em duas etapas | Verificação em dois passos | `TwoFactor` / `Totp` | The second barrier at sign-in: a six-digit code from an authenticator app (F-11) |
+| Código de recuperação | Código de recuperação | `RecoveryCode` | One of the ten single-use codes that replace the authenticator when the phone is gone (F-11) |
+| Desafio de segunda etapa | Desafio de segundo passo | `TotpChallenge` | The single-use token the password step returns when the account asks for a code (F-11) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
@@ -117,4 +120,8 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | backoff | espera progressiva | Waiting longer before each retry (F-13: 1, 2, 4, 8, 16 minutes). |
 | SKIP LOCKED | SKIP LOCKED | PostgreSQL clause that makes a reader skip rows another transaction has locked instead of waiting for them; it is what lets two workers share one queue (F-13 BR8). |
 | at-least-once | pelo menos uma vez | Delivery guarantee where a message may arrive more than once but never zero times (F-13 BR10). |
+| TOTP | TOTP (código temporário) | Time-based one-time password (RFC 6238): a six-digit code an authenticator app derives from a shared secret and the clock, valid for 30 seconds. |
+| replay | reuso do código | Sending a code that was already accepted, while its 30-second window is still open; refused by storing the last accepted step. |
+| AES-GCM | AES-GCM | The encryption used for the TOTP secret at rest: it both hides the value and detects a tampered one. |
+| grant (OAuth2) | grant (tipo de concessão) | The kind of exchange the token endpoint performs: password, refresh token, and the `totp` one F-11 adds for the second step. |
 | UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |
