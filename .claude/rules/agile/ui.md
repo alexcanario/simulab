@@ -26,5 +26,5 @@ paths:
 - One term per action per language, from shared `Common.*` resource keys. Never "Add" on one screen and "New" on another.
 - Everything is operable by keyboard, in a logical tab order; click targets are at least 24 px.
 - A declared exception (for example a distraction-free exam or checkout flow) is written in the project rules, and its patterns are also kit components.
-- What the build can check goes into the build: architecture tests forbid raw icon constants and raw table components outside the kit.
+- What the build can check goes into the build: architecture tests forbid raw icon constants and raw table components outside the kit, and a test over the theme tokens checks the contrast ratio of every foreground/background pair, in both themes — a screen check only sees the pairs that screen happens to render.
 - A screen is done when it uses only kit patterns and was checked in light and dark mode, with one language switch, and by keyboard alone. A colour or contrast bug is checked in both themes and on every surface the component sits on (card, page background, app bar): the ratio is computed from the theme tokens, then measured on screen; a premise such as "dark theme only" is verified, not assumed.
