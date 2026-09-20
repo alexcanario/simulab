@@ -42,6 +42,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Long work (import, OCR, extraction) is a job in the job table, run by the worker in the `Api` host. Never inside a request or a Blazor circuit.
 - Files go through `IFileStorage`, in private containers. Never a public blob URL; never a path on local disk.
 - Email goes through `IEmailSender`, with templates in the three languages, chosen by the user's language.
+- When an effect moves out of the request (an email, an event, long work), re-read every test that asserted it instead of only making it compile: an assertion that "nothing was sent" passes for free once the effect is deferred (F-13).
+- EF Core keeps the entry in the state you set: a `SaveChanges` that fails after `Remove` leaves it `Deleted`, and the next save repeats the DELETE instead of writing the error you just set. The delete that closes a unit of work goes outside the `try` that handles the work's own failure (F-13).
 
 ## Exam sessions
 - Every answer is saved on the server as it is given. A lost Blazor circuit must not lose answers or time: the timer lives on the server (Redis), never in the browser.

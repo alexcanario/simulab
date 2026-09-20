@@ -45,6 +45,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | 0.0.27 (`641d463`) |
 | ✅ | `[stack: blazor]` A Razor attribute mistake compiles: a string parameter without `@` is literal text, and a wrong generic parameter name only fails at runtime. Every new page gets a bUnit test that renders it | F-9 | 0.0.35 (`7303a61`) |
 | ✅ | `[generic]` A premise taken from an earlier item's file is verified against the code and against the items that touched it since; a bug can have moved the behaviour | F-9 | 0.0.35 (`7303a61`) |
+| ⏳ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | — |
+| ⏳ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | — |
+| ⏳ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -315,6 +318,19 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 - ✅ **`[generic]` A "never leave zero X" rule is judged before and after.** Written as "none after", it also blocks the case where the hole already existed (F-10: erasing an ordinary account in a system with no manager at all). Write it, and build it, as "there was at least one before and none after".
 - ✅ **`[generic]` A theme's colour tokens get a contrast test over the palette.** A screen check finds a bad ratio once, on the surfaces that screen happens to use; a test over the theme keeps every token honest and catches the pair that no screen has rendered yet (F-10 found the dark error red at 2.93:1 after six features).
 - ✅ **`[stack: Blazor Interactive Server]` A dialog is driven from the browser pane in one call.** The pane recreates the circuit between tool calls, so refs go stale and an open dialog disappears; open, fill and confirm in a single call, and keep keyboard steps in the validation script.
+
+## 2026-09-20 — F-13 Identity emails through the job queue
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | BR2 asked for the job and the token in one transaction. Two `DbContext`s over one PostgreSQL connection is not available with Npgsql; mapping the shared table into the caller's own context (`ExcludeFromMigrations()`, the owning context keeps the migration) made one `SaveChanges` do both | Project setting | One line in `docs/agile/profile.md`, and this log |
+| 2 | Moving the emails out of the request emptied three tests without failing them: "the mail server fails, the answer is the same" no longer touched the mail server at all, so it proved nothing. Found by `/agile:review`, not by the suite | Project rule | One line in `project.md` (Integration), and this log |
+| 3 | The `Remove` of a finished job sat inside the handler's `try`. A delete that fails there leaves the entry `Deleted`, so the error-handling save repeats the DELETE instead of writing `Status` and `LastError`, and the exception escapes the whole poll. Reachable through the at-least-once path (BR10) | Project rule | One line in `project.md` (Integration), and this log |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[profile: modular-monolith]` An outbox row is staged on the caller's unit of work.** A row a request must not lose (a job, an outbox message) is written by the same `SaveChanges` as the data that justifies it: the shared table is mapped into the caller's own `DbContext` with `ExcludeFromMigrations()`, while the context that owns the table keeps the migration. Sharing one connection between two contexts is neither needed nor available with Npgsql.
+- ⏳ **`[generic]` An effect that leaves the request empties the tests that asserted it.** When an email, an event or long work moves to a queue, every test that asserted the effect is re-read, not only made to compile: an assertion that "nothing was sent" passes for free once nothing is sent synchronously. F-13 shipped three such tests past a green suite; the independent review caught them.
+- ⏳ **`[stack: ef-core]` A failed `SaveChanges` keeps the entry state you set.** After `Remove`, the entry stays `Deleted`: a later save on the same entity repeats the DELETE instead of writing the fields the error handler just set, and throws again. The delete that closes a unit of work goes outside the `try` that handles that unit of work's own failure.
 
 ## 2026-09-20 — Sync agile@canary 0.0.33 -> 0.0.35
 - Copied: `.claude/rules/agile/ui.md` (a test over the theme tokens checks the contrast of every foreground/background pair, in both themes), `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` (version 0.0.35: refinement checks every premise against today's code; a rule that protects a minimum is written as a before-and-after; the stack lessons and the `ui` section carry the three notes this project sent back from F-9 and F-10).

@@ -61,6 +61,7 @@ With Blazor Interactive Server, data from the first HTTP request that a circuit 
 - CRUD without rules is a thin slice: endpoint → `DbContext`. No repository, no mediator, no mapping library, no interface with a single implementation.
 - Add structure on the second use, not the first: a domain service when two features share a rule, an abstraction when a second implementation exists.
 - Modules talk only through `Contracts`: a query interface or an in-process integration event. Never another module's `DbContext`, tables or entities.
+- A row a request must not lose (a job, an outbox message) is staged on the caller's own `DbContext`: the shared table is mapped into it with `ExcludeFromMigrations()` while the owning context keeps the migration, so one `SaveChanges` commits the row and the data that justifies it. Two contexts over one connection is neither needed nor available with Npgsql (F-13).
 - EF mappings are `IEntityTypeConfiguration<T>` classes in `Data/Configurations/`. Tenant and soft-delete filters are global, never repeated per query.
 - The UI validates for comfort only. The API is the authority.
 - The default is per module, not per solution: a module may use the Clean Architecture variant below while its neighbours stay with one project.
