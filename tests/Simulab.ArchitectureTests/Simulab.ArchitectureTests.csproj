@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Hosts\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />

@@ -76,5 +76,6 @@ public class BuildingBlockBoundaryTests
 
         listed.Should().Contain("src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj");
         listed.Should().Contain("src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj");
+        listed.Should().Contain("src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj");
     }
 }

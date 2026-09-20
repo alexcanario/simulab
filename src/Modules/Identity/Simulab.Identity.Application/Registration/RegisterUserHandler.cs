@@ -104,6 +104,11 @@ public sealed class RegisterUserHandler(
             cancellationToken);
 
         var (rawToken, tokenHash) = SecureToken.Generate();
+
+        // F-13 BR2: the mailer only stages the job. It runs before the store, whose save writes the token
+        // and the job in one transaction: a valid link never exists without the email that carries it.
+        await mailer.SendAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+
         await tokenStore.AddAsync(
             new EmailVerificationToken
             {
@@ -113,7 +118,6 @@ public sealed class RegisterUserHandler(
             },
             cancellationToken);
 
-        await mailer.SendAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
         return Result.Success();
     }
 

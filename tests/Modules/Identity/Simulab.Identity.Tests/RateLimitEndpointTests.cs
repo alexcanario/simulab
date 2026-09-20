@@ -43,6 +43,7 @@ public sealed class RateLimitEndpointTests : IdentityApiTests
         var body = await PostAsync(client, ResendRoute, new ResendVerificationRequest("mais.um@exemplo.com"), HttpStatusCode.TooManyRequests);
 
         CodeOf(body).Should().Be(IdentityErrorCodes.VerificationRateLimited);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0, "none of those addresses exists, and the refused one was not even looked up");
     }
 }

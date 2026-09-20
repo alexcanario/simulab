@@ -13,13 +13,16 @@ public sealed class PasswordEmailLanguageTests : IdentityApiTests
     public async Task ResetAndChangedEmails_UseTheAccountLanguage(string locale, string resetSubject, string button, string changedSubject)
     {
         var client = Client(locale);
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        await RunJobsAsync();
         Emails.Clear();
 
         // Asked from an English page: the account's language wins, not the request's.
         await PostAsync(Client("en"), "/api/v1/identity/password-reset-requests", new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         var reset = Emails.Last!;
         await PostAsync(client, "/api/v1/identity/password-resets", new ResetPasswordRequest(ResetLink.TokenOf(reset.HtmlBody), "Revisar#2026!x"), HttpStatusCode.NoContent);
+        await RunJobsAsync();
         var changed = Emails.Last!;
 
         reset.Subject.Should().StartWith(resetSubject);

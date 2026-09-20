@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.EntityFrameworkCore.Models;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
+using Simulab.Jobs;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Serialization;
@@ -48,7 +49,7 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_WithTheRightPassword_AnonymizesTheRowAndPublishesTheEvent()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         var userId = await UserIdOfAsync(email);
 
@@ -83,18 +84,20 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_ThenPasswordReset_ForTheOldAddress_SendsNothing()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         using (await EraseAsync(client, session, SignUpForm.ValidPassword))
         {
         }
 
+        await RunJobsAsync();
         Emails.Clear();
         using var reset = await client.PostAsJsonAsync(
             "/api/v1/identity/password-reset-requests", new RequestPasswordResetRequest(email), AppJson.Options);
 
         // The same answer an unknown address gets (F-7 BR12), and no email at all.
         reset.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 
@@ -115,6 +118,7 @@ public sealed class AccountErasureTests : IdentityApiTests
             accepted.StatusCode.Should().Be(HttpStatusCode.Accepted);
         }
 
+        await RunJobsAsync();
         var raw = VerificationLink.TokenOf(Emails.Last!.HtmlBody);
         await client.PostAsJsonAsync("/api/v1/identity/email-verifications", new VerifyEmailRequest(raw), AppJson.Options);
 
@@ -153,7 +157,7 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_RemovesTheAccountFromTheBackOfficeList()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var userId = await UserIdOfAsync(email);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
 
@@ -174,14 +178,14 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_FreesTheAddressForANewAccount()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var firstId = await UserIdOfAsync(email);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         using (await EraseAsync(client, session, SignUpForm.ValidPassword))
         {
         }
 
-        var again = await ActiveUser.CreateAsync(client, Emails, email);
+        var again = await ActiveUser.CreateAsync(client, Factory, email);
 
         again.Should().Be(email);
         var secondId = await UserIdOfAsync(email);
@@ -194,7 +198,7 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_WrongCurrentPassword_ChangesNothingAndCountsTowardTheLockout()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         var userId = await UserIdOfAsync(email);
 
@@ -236,7 +240,7 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_EndsEverySessionOfTheAccount()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var sessions = await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 3);
 
         using var response = await EraseAsync(client, sessions[0], SignUpForm.ValidPassword);
@@ -259,7 +263,7 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_SendsTheFarewellEmailInTheAccountsLanguage()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
 
         using var language = new HttpRequestMessage(HttpMethod.Put, "/api/v1/identity/profile/preferred-language")
@@ -269,10 +273,12 @@ public sealed class AccountErasureTests : IdentityApiTests
         language.Headers.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
         (await client.SendAsync(language)).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
+        await RunJobsAsync();
         Emails.Clear();
         using var response = await EraseAsync(client, session, SignUpForm.ValidPassword);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
         // It goes to the real address, before the tombstone replaced it.
         Emails.Last!.To.Should().Be(email);
@@ -285,16 +291,29 @@ public sealed class AccountErasureTests : IdentityApiTests
     public async Task Erase_WhenTheFarewellEmailFails_StillErasesTheAccount()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         var userId = await UserIdOfAsync(email);
 
+        await RunJobsAsync();
+        Emails.Clear();
         Emails.FailNext = true;
         using var response = await EraseAsync(client, session, SignUpForm.ValidPassword);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await ErasedRowAsync(userId)).Status.Should().Be(AccountStatus.Erased);
         Erased.Events.Should().ContainSingle();
+
+        // F-13: the farewell email is a job now. The worker's failure does not touch the erasure, and
+        // the message is tried again instead of being lost.
+        await RunJobsAsync();
+        Emails.Count.Should().Be(0);
+        (await PendingJobCountAsync()).Should().Be(1);
+
+        Factory.Clock.Advance(JobPolicy.BackoffAfter(1));
+        await RunJobsAsync();
+        Emails.Count.Should().Be(1);
+        Emails.Last!.To.Should().Be(email);
     }
 
     private Task<Guid> UserIdOfAsync(string email) =>

@@ -11,7 +11,7 @@ public sealed class SignInTests : IdentityApiTests
     public async Task SignIn_ActiveAccountWithRightPassword_IssuesTokens()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
 
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
 
@@ -37,7 +37,7 @@ public sealed class SignInTests : IdentityApiTests
     public async Task SignIn_WrongPasswordOrUnknownEmail_ReturnsTheSameGenericCode()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
 
         var wrongPassword = await TokenClient.SignInAsync(client, email, "not-the-password");
         var unknownEmail = await TokenClient.SignInAsync(client, "nao.existe@exemplo.com", SignUpForm.ValidPassword);
@@ -50,7 +50,7 @@ public sealed class SignInTests : IdentityApiTests
     public async Task SignIn_AfterFiveWrongPasswords_LocksTheAccountForFifteenMinutes()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
 
         for (var attempt = 0; attempt < 5; attempt++)
         {
@@ -78,7 +78,7 @@ public sealed class SignInTests : IdentityApiTests
     public async Task Refresh_ValidToken_IssuesNewPairAndInvalidatesTheOldOne()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var first = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
 
         var refreshed = await TokenClient.RefreshAsync(client, first.RefreshToken!);
@@ -94,7 +94,7 @@ public sealed class SignInTests : IdentityApiTests
     public async Task SignOut_RevokesTheSessionSoTheSameAccessTokenStopsWorking()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
 
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);

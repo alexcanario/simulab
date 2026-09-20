@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Simulab.Identity.Application\Simulab.Identity.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
   </ItemGroup>
 

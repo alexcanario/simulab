@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Security;
 using Simulab.Identity.Domain.Entities;
@@ -13,8 +12,7 @@ public sealed class RequestPasswordResetHandler(
     IUserDirectory userDirectory,
     IPasswordResetTokenStore tokenStore,
     IPasswordMailer mailer,
-    TimeProvider timeProvider,
-    ILogger<RequestPasswordResetHandler> logger)
+    TimeProvider timeProvider)
 {
     public async Task HandleAsync(string? email, CancellationToken cancellationToken = default)
     {
@@ -41,6 +39,12 @@ public sealed class RequestPasswordResetHandler(
         await tokenStore.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
 
         var (rawToken, tokenHash) = SecureToken.Generate();
+
+        // F-13 BR2, BR3: the mailer stages the job and the store's save writes both rows. Nothing here
+        // talks to the mail server any more, so BR1 holds by construction: a slow or broken SMTP server
+        // cannot make this path answer differently, or later, than the unknown-address path above.
+        await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+
         await tokenStore.AddAsync(
             new PasswordResetToken
             {
@@ -49,16 +53,6 @@ public sealed class RequestPasswordResetHandler(
                 ExpiresAt = now.Add(PasswordResetPolicy.Lifetime)
             },
             cancellationToken);
-
-        // BR1: a mail server that fails must not turn into a 500 that only real accounts can reach.
-        try
-        {
-            await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
-        }
-        catch (Exception exception) when (exception is not OperationCanceledException)
-        {
-            logger.LogError(exception, "Sending a password reset email failed.");
-        }
     }
 
     /// <summary>BR3, per account and silent: one email a minute, five an hour, counted from the token rows.</summary>

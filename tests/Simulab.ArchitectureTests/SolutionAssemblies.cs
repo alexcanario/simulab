@@ -10,6 +10,7 @@ internal static class SolutionAssemblies
         typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
         typeof(Simulab.Persistence.ModuleDbContext).Assembly,
         typeof(Simulab.Email.IEmailSender).Assembly,
+        typeof(Simulab.Jobs.IJobQueue).Assembly,
         typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
         typeof(Simulab.Identity.Domain.Entities.User).Assembly,
         typeof(Simulab.Identity.Contracts.IdentityErrorCodes).Assembly,

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Security;
 using Simulab.Identity.Application.Sessions;
@@ -20,8 +19,8 @@ public sealed class ResetPasswordHandler(
     IEmailVerificationTokenStore verificationTokens,
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
-    TimeProvider timeProvider,
-    ILogger<ResetPasswordHandler> logger)
+    IIdentityUnitOfWork unitOfWork,
+    TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(string? rawToken, string? newPassword, CancellationToken cancellationToken = default)
     {
@@ -88,7 +87,7 @@ public sealed class ResetPasswordHandler(
         // BR9: whoever holds the old password may hold a session too.
         await sessions.RevokeAllAsync(user.Id, exceptSessionJti: null, cancellationToken);
 
-        await PasswordNotice.SendAsync(mailer, logger, user, now, cancellationToken);
+        await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, now, cancellationToken);
         return Result.Success();
     }
 

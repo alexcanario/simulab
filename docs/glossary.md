@@ -112,4 +112,9 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | tombstone | lápide (valor-lápide) | The meaningless value written over a personal one so the column stays filled and unique (F-10: `erased-<id>@erased.invalid`). |
 | danger zone | zona de risco | The part of a screen that holds the destructive actions, set apart and marked as such. |
 | integration event | evento de integração | A past-tense record one module publishes so other modules can react, without either knowing the other (`IIntegrationEvent`). |
+| job queue | fila de jobs | The `jobs` table plus the worker in the Api host (ADR-0001 #20, F-13): work a request stages and a background worker runs, retries and gives up on. |
+| outbox | outbox (caixa de saida) | Writing the message to send in the same transaction as the data that justifies it, so the two can never disagree (F-13 BR2). |
+| backoff | espera progressiva | Waiting longer before each retry (F-13: 1, 2, 4, 8, 16 minutes). |
+| SKIP LOCKED | SKIP LOCKED | PostgreSQL clause that makes a reader skip rows another transaction has locked instead of waiting for them; it is what lets two workers share one queue (F-13 BR8). |
+| at-least-once | pelo menos uma vez | Delivery guarantee where a message may arrive more than once but never zero times (F-13 BR10). |
 | UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |

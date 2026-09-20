@@ -41,6 +41,7 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
         tokens[0].TokenHash.Should().NotBeNullOrWhiteSpace();
         tokens[0].ExpiresAt.Should().Be(Factory.Clock.GetUtcNow().AddHours(24));
 
+        await RunJobsAsync();
         Emails.Messages.Should().ContainSingle();
         Emails.Last!.To.Should().Be(request.Email);
 
@@ -59,6 +60,7 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
 
         CodeOf(body).Should().Be(IdentityErrorCodes.AgeDeclarationRequired);
         (await QueryAsync(context => context.Users.CountAsync(u => u.Email == request.Email))).Should().Be(0);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 
@@ -108,6 +110,7 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
         var client = Factory.CreateClient("en");
         var request = SignUpForm.Valid("repetida@exemplo.com");
         await PostAsync(client, Route, request, HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Clear();
 
         // Same answer as a new account: the caller cannot tell the two apart (BR4).
@@ -115,6 +118,7 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
 
         (await QueryAsync(context => context.Users.CountAsync(u => u.Email == request.Email))).Should().Be(1);
         (await QueryAsync(context => context.EmailVerificationTokens.CountAsync())).Should().Be(1);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 
@@ -138,12 +142,14 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
                 .CountAsync(u => u.Email == request.Email)).Should().Be(1);
         }
 
+        await RunJobsAsync();
         Emails.Clear();
         await PostAsync(client, Route, request, HttpStatusCode.Accepted);
 
         var all = await QueryAsync(context => context.Users.IgnoreQueryFilters([ModuleDbContext.TenantFilter])
             .CountAsync(u => u.Email == request.Email));
         all.Should().Be(1, "no second account was created for an address that is already taken");
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 

@@ -31,7 +31,7 @@ public sealed class ProfileTests : IdentityApiTests
 
     private async Task<(string Email, string AccessToken)> SignedInAsync(HttpClient client)
     {
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         return (email, session.AccessToken!);
     }
@@ -189,9 +189,11 @@ public sealed class ProfileTests : IdentityApiTests
         {
         }
 
+        await RunJobsAsync();
         Emails.Clear();
         await PostAsync(Client("en"), "/api/v1/identity/password-reset-requests", new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
 
+        await RunJobsAsync();
         Emails.Last!.Subject.Should().StartWith("Redefina a sua palavra-passe");
     }
 }
