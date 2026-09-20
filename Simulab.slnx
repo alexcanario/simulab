@@ -8,6 +8,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
   </Folder>
@@ -31,6 +32,7 @@
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
   </Folder>

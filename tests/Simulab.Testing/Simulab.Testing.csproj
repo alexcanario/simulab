@@ -10,4 +10,8 @@
     <PackageReference Include="Testcontainers.Redis" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
+  </ItemGroup>
+
 </Project>
