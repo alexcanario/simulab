@@ -132,7 +132,7 @@ Nothing is checked only on screen: every criterion goes through the endpoint or 
 - What: (a) BR2 gains its stated exception — the password-changed notice is saved on its own, right after `UserManager` commits the password, because there is no later save to ride on; BR3 spells out the consequence. (b) BR7: a job given up on has its payload cleared; it keeps its type, its attempt count and the exception type, and the full exception stays in the log.
 - Why: raised by `/agile:review` on 2026-09-20. (a) BR2 was written without exception and the code could not honour it for that one email; saying so beats a silent divergence. (b) The decision of question 7 promised that an erased account leaves no job row carrying its old address — true only when the send succeeds. A mail server that stays down was leaving a live reset link and a recipient address at rest indefinitely.
 - Affected: BR2, BR3, BR7, AC6; every other criterion unchanged.
-- Re-approved: <pending>
+- Re-approved: 2026-09-20 (owner, in conversation: BR2, BR3, BR7, AC6)
 
 ## Validation script
 Use an address you have not used before; the app host keeps its database between runs.
