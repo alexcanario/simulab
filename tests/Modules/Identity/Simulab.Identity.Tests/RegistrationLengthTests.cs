@@ -18,6 +18,7 @@ public sealed class RegistrationLengthTests : IdentityApiTests
 
         CodeOf(body).Should().Be(IdentityErrorCodes.RegistrationFullNameTooLong);
         (await QueryAsync(context => context.Users.AnyAsync(u => u.Email == request.Email))).Should().BeFalse();
+        await RunJobsAsync();
         Emails.Messages.Should().BeEmpty();
     }
 
@@ -42,6 +43,7 @@ public sealed class RegistrationLengthTests : IdentityApiTests
 
         CodeOf(body).Should().Be(IdentityErrorCodes.EmailInvalid);
         (await QueryAsync(context => context.Users.CountAsync())).Should().Be(0);
+        await RunJobsAsync();
         Emails.Messages.Should().BeEmpty();
     }
 
@@ -52,6 +54,7 @@ public sealed class RegistrationLengthTests : IdentityApiTests
         var client = Client();
         var existing = SignUpForm.Valid("ja.existe@exemplo.com");
         await PostAsync(client, Route, existing, HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Clear();
         var longName = new string('a', 121);
 
@@ -60,6 +63,7 @@ public sealed class RegistrationLengthTests : IdentityApiTests
 
         CodeOf(forExisting).Should().Be(IdentityErrorCodes.RegistrationFullNameTooLong);
         CodeOf(forNew).Should().Be(CodeOf(forExisting));
+        await RunJobsAsync();
         Emails.Messages.Should().BeEmpty();
     }
 }

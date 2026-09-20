@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Npgsql;
 using Simulab.Email;
+using Simulab.Jobs;
 using Simulab.Testing;
 
 namespace Simulab.Identity.Tests;
@@ -44,6 +45,8 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:mailpit", "smtp://localhost:1025");
         builder.UseSetting("ConnectionStrings:redis", _redisConnectionString);
         builder.UseSetting("Database:ApplyMigrationsOnStart", "true");
+        // F-13 BR13: the hosted worker never polls here; a test drains the queue itself (AC11).
+        builder.UseSetting("Jobs:WorkerEnabled", "false");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -68,6 +71,12 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<TimeProvider>(Clock);
         });
     }
+
+    /// <summary>
+    /// Runs every job the requests so far have enqueued, and returns how many ran (F-13 AC11). It is
+    /// what makes the emails observable without waiting for anything: the worker is switched off.
+    /// </summary>
+    public Task<int> RunJobsAsync() => Services.GetRequiredService<JobRunner>().RunPendingAsync();
 
     /// <summary>A client whose calls carry one language, the way the Web sends the visitor's culture.</summary>
     public HttpClient CreateClient(string locale)

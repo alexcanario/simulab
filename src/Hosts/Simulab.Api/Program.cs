@@ -6,6 +6,7 @@ using Simulab.Email;
 using Simulab.Identity.Api;
 using Simulab.Identity.Api.Authorization;
 using Simulab.Identity.Infrastructure;
+using Simulab.Jobs;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
@@ -24,6 +25,13 @@ builder.Services.AddAppDatabase(builder.Configuration.GetConnectionString("simul
 builder.Services.AddModulePersistence();
 builder.Services.AddEmailSender(builder.Configuration, builder.Configuration.GetConnectionString("mailpit"));
 builder.Services.AddIntegrationEvents();
+
+// The job table and its worker (F-13, ADR-0001 #20). Every identity email leaves through it, so no
+// request ever waits for the mail server.
+builder.Services.AddJobs(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("simulab")
+        ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 
 // The signed-in caller (F-5), read from the access token; registered before AddModulePersistence's
 // fallback so the audit interceptor sees the real user instead of AnonymousUser.
@@ -79,6 +87,7 @@ app.MapTokenEndpoints();
 // A test host that does not need a database turns it off with Database:ApplyMigrationsOnStart.
 if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environment.IsDevelopment()))
 {
+    await app.Services.MigrateJobsAsync();
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.EnsureIdentityClientAsync(app.Configuration);
     await app.Services.EnsureRolesAndPermissionsAsync();

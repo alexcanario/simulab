@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Simulab.Email;
 
-namespace Simulab.Identity.Tests;
+namespace Simulab.Testing;
 
 /// <summary>Keeps every message instead of sending it, so a test can read what the app wrote.</summary>
 public sealed class RecordingEmailSender : IEmailSender

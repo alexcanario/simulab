@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Simulab.Email;
+using Simulab.Jobs;
+using Simulab.Jobs.Email;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Infrastructure.Resources;
 
@@ -12,7 +14,7 @@ namespace Simulab.Identity.Infrastructure.Email;
 /// Same shape as <see cref="PasswordMailer"/> — the recipient's language, HTML and plain text.
 /// </summary>
 public sealed class ErasureMailer(
-    IEmailSender sender,
+    IJobQueue queue,
     IStringLocalizer<IdentityEmails> localizer,
     IOptions<ErasureEmailOptions> options) : IErasureMailer
 {
@@ -44,7 +46,9 @@ public sealed class ErasureMailer(
             {signUpLink}
             """;
 
-        return sender.SendAsync(new EmailMessage(email, localizer["Email.AccountErased.Subject"], html, text), cancellationToken);
+        // F-13 BR2: staged on the erasure's own transaction, so an erasure that rolls back sends nothing.
+        queue.EnqueueEmail(new EmailMessage(email, localizer["Email.AccountErased.Subject"], html, text));
+        return Task.CompletedTask;
     }
 
     private string Encode(string key) => WebUtility.HtmlEncode(localizer[key]);

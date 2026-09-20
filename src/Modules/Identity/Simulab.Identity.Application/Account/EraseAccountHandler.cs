@@ -1,6 +1,5 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Contracts;
@@ -22,8 +21,7 @@ public sealed class EraseAccountHandler(
     IRefreshSessionStore sessions,
     IErasureMailer mailer,
     IIntegrationEventPublisher events,
-    TimeProvider timeProvider,
-    ILogger<EraseAccountHandler> logger)
+    TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(Guid userId, string? currentPassword, CancellationToken cancellationToken = default)
     {
@@ -53,7 +51,8 @@ public sealed class EraseAccountHandler(
         var locale = user.PreferredLanguage;
         var erasedAt = timeProvider.GetUtcNow();
 
-        var erased = await roleStore.RunExclusiveAsync(() => EraseAsync(userId, cancellationToken), cancellationToken);
+        var erased = await roleStore.RunExclusiveAsync(
+            () => EraseAsync(userId, address, erasedAt, locale, cancellationToken), cancellationToken);
         if (erased.IsFailure)
         {
             return Result.Failure(erased.Error!);
@@ -62,16 +61,19 @@ public sealed class EraseAccountHandler(
         // BR10: every device of this account stops, the caller's included.
         await sessions.RevokeAllAsync(userId, cancellationToken: cancellationToken);
 
-        await NotifyAsync(address, erasedAt, locale, cancellationToken);
-
         // BR13: after the data changed, so a consumer never sees an account that is still there.
         await events.PublishAsync(new UserErased(userId, erasedAt), cancellationToken);
 
         return Result.Success();
     }
 
-    /// <summary>The whole erasure, in one transaction (BR4, BR8, BR9, BR11).</summary>
-    private async Task<Result<bool>> EraseAsync(Guid userId, CancellationToken cancellationToken)
+    /// <summary>The whole erasure, in one transaction (BR4, BR8, BR9, BR11), farewell email included.</summary>
+    private async Task<Result<bool>> EraseAsync(
+        Guid userId,
+        string address,
+        DateTimeOffset erasedAt,
+        string locale,
+        CancellationToken cancellationToken)
     {
         var user = await store.FindAsync(userId, cancellationToken);
         if (user is null)
@@ -88,28 +90,17 @@ public sealed class EraseAccountHandler(
 
         var tombstone = user.Erase();
         store.ApplyErasure(user, tombstone);
+
+        // BR12 through F-13 BR2: the farewell email is staged on this very transaction. An erasure that
+        // rolls back below takes the job with it, and no job row outlives the address it was written for.
+        await mailer.SendAccountErasedAsync(address, erasedAt, locale, cancellationToken);
+
         await store.SaveChangesAsync(cancellationToken);
 
         // Judged after the change, inside the same transaction, which rolls back on failure.
         return managersBefore > 0 && await roleStore.CountActiveManagersAsync(cancellationToken) == 0
             ? Result.Failure<bool>(new Error(IdentityErrorCodes.AccountErasureLastManager, ErrorKind.BusinessRule))
             : Result.Success(true);
-    }
-
-    /// <summary>
-    /// BR12, best effort: the account is already gone when this runs. A mail server that fails is logged,
-    /// never reported as a failed erasure, or the user would try again on an account that no longer exists.
-    /// </summary>
-    private async Task NotifyAsync(string address, DateTimeOffset erasedAt, string locale, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await mailer.SendAccountErasedAsync(address, erasedAt, locale, cancellationToken);
-        }
-        catch (Exception exception) when (exception is not OperationCanceledException)
-        {
-            logger.LogError(exception, "Sending the account-erased email failed; the erasure itself stands.");
-        }
     }
 
     /// <summary><see cref="IdentityErrorCodes.AccountLocked"/> with the remaining whole seconds, as a password change does.</summary>

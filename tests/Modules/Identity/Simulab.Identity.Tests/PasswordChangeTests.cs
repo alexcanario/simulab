@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Simulab.Identity.Contracts;
+using Simulab.Jobs;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Tests;
@@ -32,7 +33,7 @@ public sealed class PasswordChangeTests : IdentityApiTests
     public async Task Change_RightCurrentPassword_NewPasswordSignsIn()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
 
         using var response = await ChangeAsync(client, session, SignUpForm.ValidPassword, NewPassword);
@@ -47,7 +48,7 @@ public sealed class PasswordChangeTests : IdentityApiTests
     public async Task Change_KeepsTheCallersSessionAndEndsTheOthers()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var sessions = await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 3);
 
         using var response = await ChangeAsync(client, sessions[0], SignUpForm.ValidPassword, NewPassword);
@@ -65,7 +66,7 @@ public sealed class PasswordChangeTests : IdentityApiTests
     public async Task Change_WrongCurrentPassword_CountsTowardTheSignInLockout()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
 
         for (var attempt = 1; attempt < 5; attempt++)
@@ -95,7 +96,7 @@ public sealed class PasswordChangeTests : IdentityApiTests
     public async Task Change_RefusedNewPassword_ChangesNothing(string next, string code, HttpStatusCode status)
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
 
         using var response = await ChangeAsync(client, session, SignUpForm.ValidPassword, next);
@@ -109,33 +110,50 @@ public sealed class PasswordChangeTests : IdentityApiTests
     public async Task Change_Success_ClearsTheFailedCountAndSendsThePasswordChangedEmail()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         using (await ChangeAsync(client, session, "not-the-password", NewPassword))
         {
         }
 
+        await RunJobsAsync();
         Emails.Clear();
         using var response = await ChangeAsync(client, session, SignUpForm.ValidPassword, NewPassword);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await QueryAsync(context => context.Users.SingleAsync(u => u.Email == email))).AccessFailedCount.Should().Be(0);
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
         Emails.Last!.Subject.Should().StartWith("Your password was changed");
     }
 
+    /// <summary>
+    /// F-7 BR11 through F-13: the change never waits for the mail server, and a send that fails on the
+    /// worker leaves the notice in the queue to be tried again instead of losing it in a log line.
+    /// </summary>
     [Fact]
-    public async Task Change_MailServerFails_TheChangeStillSucceeds()
+    public async Task Change_MailServerFails_TheChangeSucceedsAndTheNoticeIsKeptForARetry()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        await RunJobsAsync();
+        Emails.Clear();
         Emails.FailNext = true;
 
         using var response = await ChangeAsync(client, session, SignUpForm.ValidPassword, NewPassword);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await TokenClient.SignInAsync(client, email, NewPassword)).AccessToken.Should().NotBeNull();
+
+        await RunJobsAsync();
+        Emails.Count.Should().Be(0, "the worker's send is the one that failed");
+        (await PendingJobCountAsync()).Should().Be(1);
+
+        Factory.Clock.Advance(JobPolicy.BackoffAfter(1));
+        await RunJobsAsync();
+        Emails.Count.Should().Be(1);
+        Emails.Last!.Subject.Should().StartWith("Your password was changed");
     }
 
     // Simulae: POST_password_change_sem_token_retorna_401.

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenIddict.EntityFrameworkCore.Models;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Persistence.Configurations;
+using Simulab.Jobs.Persistence;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Security;
 
@@ -84,5 +85,9 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
 
         // F-9, BR5: roles are global (no tenant filter) and soft deleted; a deleted role disappears everywhere.
         modelBuilder.Entity<Role>().HasQueryFilter(SoftDeleteFilter, role => !role.IsDeleted);
+
+        // F-13 BR2: the job table of the `jobs` schema, mapped here so a handler can stage an email in
+        // the very transaction that writes its token. JobsDbContext owns the table and its migration.
+        modelBuilder.AddJobQueue();
     }
 }

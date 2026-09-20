@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Simulab.Email;
+using Simulab.Jobs;
+using Simulab.Jobs.Email;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Infrastructure.Resources;
 
@@ -12,7 +14,7 @@ namespace Simulab.Identity.Infrastructure.Email;
 /// the shared <see cref="IEmailSender"/>, the way <see cref="VerificationMailer"/> does for verification.
 /// </summary>
 public sealed class PasswordMailer(
-    IEmailSender sender,
+    IJobQueue queue,
     IStringLocalizer<IdentityEmails> localizer,
     IOptions<PasswordEmailOptions> options) : IPasswordMailer
 {
@@ -42,7 +44,9 @@ public sealed class PasswordMailer(
             {localizer["Email.PasswordReset.Ignore"]}
             """;
 
-        return sender.SendAsync(new EmailMessage(email, localizer["Email.PasswordReset.Subject"], html, text), cancellationToken);
+        // F-13 BR2: staged on the caller's unit of work; the save that writes the token writes it too.
+        queue.EnqueueEmail(new EmailMessage(email, localizer["Email.PasswordReset.Subject"], html, text));
+        return Task.CompletedTask;
     }
 
     public Task SendPasswordChangedAsync(string email, DateTimeOffset changedAt, string locale, CancellationToken cancellationToken = default)
@@ -70,7 +74,9 @@ public sealed class PasswordMailer(
             {forgotLink}
             """;
 
-        return sender.SendAsync(new EmailMessage(email, localizer["Email.PasswordChanged.Subject"], html, text), cancellationToken);
+        // F-13 BR2: staged; the caller saves it (PasswordNotice), since the password itself is already written.
+        queue.EnqueueEmail(new EmailMessage(email, localizer["Email.PasswordChanged.Subject"], html, text));
+        return Task.CompletedTask;
     }
 
     private string Encode(string key) => WebUtility.HtmlEncode(localizer[key]);

@@ -49,6 +49,10 @@ public sealed class ResendVerificationHandler(
         await tokenStore.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
 
         var (rawToken, tokenHash) = SecureToken.Generate();
+
+        // F-13 BR2: staged first, written by the store's save, in the token's own transaction.
+        await mailer.SendAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+
         await tokenStore.AddAsync(
             new EmailVerificationToken
             {
@@ -58,7 +62,6 @@ public sealed class ResendVerificationHandler(
             },
             cancellationToken);
 
-        await mailer.SendAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
         return ResendOutcome.Accepted;
     }
 

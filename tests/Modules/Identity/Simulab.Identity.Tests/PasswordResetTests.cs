@@ -6,6 +6,7 @@ using Simulab.Identity.Api;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
+using Simulab.Jobs;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Tests;
@@ -23,8 +24,10 @@ public sealed class PasswordResetTests : IdentityApiTests
 
     private async Task<string> RequestLinkAsync(HttpClient client, string email)
     {
+        await RunJobsAsync();
         Emails.Clear();
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         return ResetLink.TokenOf(Emails.Last!.HtmlBody);
     }
 
@@ -33,12 +36,13 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task RequestLink_ActiveAccount_StoresOneHashedTokenForAnHourAndInvalidatesTheOlderOne()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var first = await RequestLinkAsync(client, email);
         Factory.Clock.Advance(PasswordResetPolicy.Cooldown);
 
         var second = await RequestLinkAsync(client, email);
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
         var tokens = await QueryAsync(context => context.PasswordResetTokens.OrderBy(token => token.CreatedAt).ToListAsync());
         tokens.Should().HaveCount(2);
@@ -60,6 +64,7 @@ public sealed class PasswordResetTests : IdentityApiTests
 
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
         (await QueryAsync(context => context.PasswordResetTokens.CountAsync())).Should().Be(0);
     }
@@ -68,12 +73,14 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task RequestLink_PerAccountLimits_AreSilent()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         await RequestLinkAsync(client, email);
 
         // Inside the cooldown: same 202, nothing sent.
+        await RunJobsAsync();
         Emails.Clear();
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
 
         // Five in the hour: the sixth is refused silently too. The tokens are written directly, one a
@@ -97,11 +104,13 @@ public sealed class PasswordResetTests : IdentityApiTests
 
         Factory.Clock.Advance(PasswordResetPolicy.Cooldown);
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
 
         // An hour later the account may ask again.
         Factory.Clock.Advance(PasswordResetPolicy.Window);
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
     }
 
@@ -138,7 +147,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_ValidToken_NewPasswordSignsInOldDoesNotAndTheLinkWorksOnce()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await RequestLinkAsync(client, email);
 
         await PostAsync(client, ResetRoute, new ResetPasswordRequest(token, NewPassword), HttpStatusCode.NoContent);
@@ -154,7 +163,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task CheckAndReset_UnknownOrExpiredToken_AnswerWithTheirOwnCodes()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await RequestLinkAsync(client, email);
 
         var unknown = await PostAsync(client, CheckRoute, new PasswordResetTokenCheckRequest("not-a-token"), HttpStatusCode.BadRequest);
@@ -178,7 +187,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_RefusedPassword_ChangesNothingAndKeepsTheLink(string password, string code, HttpStatusCode status)
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await RequestLinkAsync(client, email);
 
         var body = await PostAsync(client, ResetRoute, new ResetPasswordRequest(token, password), status);
@@ -193,7 +202,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_LockedOutAccount_ClearsTheLockoutAndSignsInAtOnce()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         for (var attempt = 0; attempt < 5; attempt++)
         {
             await TokenClient.SignInAsync(client, email, "not-the-password");
@@ -232,7 +241,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_EndsEverySessionOfTheAccount()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var sessions = await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 3);
         var token = await RequestLinkAsync(client, email);
 
@@ -249,7 +258,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_SessionThatRefreshed_EndsTooAndItsOlderAccessTokenIsRevoked()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var first = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         var refreshed = await TokenClient.RefreshAsync(client, first.RefreshToken!);
 
@@ -267,7 +276,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Refresh_SessionFromBeforeThePasswordChanged_IsRefusedEvenIfRevokeAllMissedIt()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
         var user = await QueryAsync(context => context.Users.SingleAsync(u => u.Email == email));
         var oldStamp = user.SecurityStamp;
@@ -289,7 +298,7 @@ public sealed class PasswordResetTests : IdentityApiTests
     public async Task Reset_TwoConcurrentResetsWithOneLink_OnlyOneSucceeds()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await RequestLinkAsync(client, email);
 
         var answers = await Task.WhenAll(
@@ -300,26 +309,49 @@ public sealed class PasswordResetTests : IdentityApiTests
         answers.Count(answer => answer.StatusCode == HttpStatusCode.BadRequest).Should().Be(1);
     }
 
+    /// <summary>
+    /// F-7 BR1 through F-13: the request no longer touches the mail server at all, so a broken SMTP
+    /// server cannot change the answer of the real-account path. The failed send lands on the worker,
+    /// where the job survives and is tried again (F-13 BR5).
+    /// </summary>
     [Fact]
-    public async Task RequestLink_MailServerFails_SameAnswerAsAnUnknownAddress()
+    public async Task RequestLink_MailServerFails_AnswersTheSameAndKeepsTheEmailForARetry()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        await RunJobsAsync();
+        Emails.Clear();
         Emails.FailNext = true;
 
         await PostAsync(client, RequestRoute, new RequestPasswordResetRequest(email), HttpStatusCode.Accepted);
+
+        // The answer is already given; nothing was sent yet, and the job is still waiting.
+        Emails.Count.Should().Be(0);
+        (await PendingJobCountAsync()).Should().Be(1);
+
+        // The worker tries and fails: the email is not lost, it is due again after the backoff.
+        await RunJobsAsync();
+        Emails.Count.Should().Be(0);
+        (await PendingJobCountAsync()).Should().Be(1);
+
+        Factory.Clock.Advance(JobPolicy.BackoffAfter(1));
+        await RunJobsAsync();
+        Emails.Count.Should().Be(1);
+        Emails.Last!.To.Should().Be(email);
     }
 
     [Fact]
     public async Task Reset_SendsOnePasswordChangedEmailWithTheInstantAndNoToken()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await RequestLinkAsync(client, email);
+        await RunJobsAsync();
         Emails.Clear();
 
         await PostAsync(client, ResetRoute, new ResetPasswordRequest(token, NewPassword), HttpStatusCode.NoContent);
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
         var message = Emails.Last!;
         message.Subject.Should().StartWith("Your password was changed");

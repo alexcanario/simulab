@@ -20,6 +20,7 @@ using Simulab.Identity.Infrastructure.Content;
 using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Sessions;
+using Simulab.Jobs;
 using Simulab.Persistence;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -76,6 +77,10 @@ public static class IdentityModule
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<PermissionCache>();
         services.AddScoped<IPermissionQueryService, PermissionQueryService>();
+
+        // F-13 BR2: the module's own context is the unit of work a mailer stages its job on.
+        services.AddJobQueueFor<IdentityModuleDbContext>();
+        services.AddScoped<IIdentityUnitOfWork, IdentityUnitOfWork>();
 
         services.AddScoped<IEmailVerificationTokenStore, EmailVerificationTokenStore>();
         services.AddScoped<IConsentRecordStore, ConsentRecordStore>();

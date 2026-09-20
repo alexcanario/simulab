@@ -27,6 +27,7 @@ public sealed class RegistrationWithoutDocumentsTests : IdentityApiTests
         await PostAsync(Client(), "/api/v1/identity/registrations", request, HttpStatusCode.Accepted);
 
         (await QueryAsync(context => Task.FromResult(context.Users.Count(u => u.Email == request.Email)))).Should().Be(1);
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
     }
 

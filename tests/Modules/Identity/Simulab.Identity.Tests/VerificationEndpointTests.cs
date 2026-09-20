@@ -18,8 +18,10 @@ public sealed class VerificationEndpointTests : IdentityApiTests
     /// <summary>Signs a visitor up and returns the raw token that reached the inbox.</summary>
     private async Task<(string Email, string Token)> SignUpAsync(string email)
     {
+        await RunJobsAsync();
         Emails.Clear();
         await PostAsync(Client(), RegisterRoute, SignUpForm.Valid(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         return (email, VerificationLink.TokenOf(Emails.Last!.HtmlBody));
     }
 
@@ -83,6 +85,7 @@ public sealed class VerificationEndpointTests : IdentityApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(IdentityErrorCodes.VerificationInvalid);
 
         // The link from the newest email still works.
+        await RunJobsAsync();
         var newToken = VerificationLink.TokenOf(Emails.Last!.HtmlBody);
         (await VerifyAsync(newToken)).StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -102,10 +105,12 @@ public sealed class VerificationEndpointTests : IdentityApiTests
     [Fact]
     public async Task Resend_UnknownAddress_AnswersTheSameAndSendsNothing()
     {
+        await RunJobsAsync();
         Emails.Clear();
 
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest("ninguem@exemplo.com"), HttpStatusCode.Accepted);
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 
@@ -114,11 +119,13 @@ public sealed class VerificationEndpointTests : IdentityApiTests
     {
         var (email, token) = await SignUpAsync("ja.ativa@exemplo.com");
         await VerifyAsync(token);
+        await RunJobsAsync();
         Emails.Clear();
         Factory.Clock.Advance(VerificationTokenPolicy.ResendCooldown);
 
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
     }
 
@@ -126,15 +133,18 @@ public sealed class VerificationEndpointTests : IdentityApiTests
     public async Task Resend_InsideTheCooldown_SendsNothingAndStillAnswersTheSame()
     {
         var (email, _) = await SignUpAsync("no.cooldown@exemplo.com");
+        await RunJobsAsync();
         Emails.Clear();
 
         // Less than a minute after the sign-up email: refused, and the answer gives nothing away (BR11).
         Factory.Clock.Advance(VerificationTokenPolicy.ResendCooldown - TimeSpan.FromSeconds(1));
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(0);
 
         Factory.Clock.Advance(TimeSpan.FromSeconds(2));
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(1);
     }
 
@@ -142,6 +152,7 @@ public sealed class VerificationEndpointTests : IdentityApiTests
     public async Task Resend_AboveTheHourlyCapForOneAddress_SendsNothing()
     {
         var (email, _) = await SignUpAsync("cap.por.endereco@exemplo.com");
+        await RunJobsAsync();
         Emails.Clear();
 
         // The sign-up email counts as the first of the window; four resends fill the cap of five.
@@ -151,15 +162,18 @@ public sealed class VerificationEndpointTests : IdentityApiTests
             await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
         }
 
+        await RunJobsAsync();
         Emails.Count.Should().Be(VerificationTokenPolicy.MaxResendsPerWindow - 1);
 
         Factory.Clock.Advance(VerificationTokenPolicy.ResendCooldown + TimeSpan.FromSeconds(1));
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(VerificationTokenPolicy.MaxResendsPerWindow - 1, "the cap for this address is full");
 
         // Once the window has passed, the address can ask again.
         Factory.Clock.Advance(VerificationTokenPolicy.ResendWindow);
         await PostAsync(Client(), ResendRoute, new ResendVerificationRequest(email), HttpStatusCode.Accepted);
+        await RunJobsAsync();
         Emails.Count.Should().Be(VerificationTokenPolicy.MaxResendsPerWindow);
     }
 }

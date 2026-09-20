@@ -36,7 +36,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task SignUp_NewAccount_IsAssignedTheStudentRoleAutomatically()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
 
         var roleName = await QueryAsync(async context =>
         {
@@ -52,7 +52,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task GetRoles_SignedInAsStudent_IsForbidden()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
 
@@ -66,7 +66,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task GetRoles_SignedInAsAdmin_ReturnsTheSeedRoleNames()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         await GrantAsync(email, IdentityRoles.Admin);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
@@ -81,7 +81,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task GetSession_SignedInAsAdmin_IncludesTheGrantedPermission()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         await GrantAsync(email, IdentityRoles.Admin);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
@@ -96,7 +96,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task GetSession_SignedInAsStudent_HasNoPermissions()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
 
@@ -110,7 +110,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     public async Task GetRoles_PermissionRevokedAfterTokenIssued_TakesEffectOnceTheCacheExpires()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Emails);
+        var email = await ActiveUser.CreateAsync(client, Factory);
         await GrantAsync(email, IdentityRoles.Admin);
         var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);

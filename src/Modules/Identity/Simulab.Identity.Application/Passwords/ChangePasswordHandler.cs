@@ -1,6 +1,5 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Contracts;
@@ -17,8 +16,8 @@ public sealed class ChangePasswordHandler(
     UserManager<User> userManager,
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
-    TimeProvider timeProvider,
-    ILogger<ChangePasswordHandler> logger)
+    IIdentityUnitOfWork unitOfWork,
+    TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(
         Guid userId,
@@ -70,7 +69,7 @@ public sealed class ChangePasswordHandler(
             await sessions.RestampAsync(callerSessionJti, user.SecurityStamp, cancellationToken);
         }
 
-        await PasswordNotice.SendAsync(mailer, logger, user, timeProvider.GetUtcNow(), cancellationToken);
+        await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, timeProvider.GetUtcNow(), cancellationToken);
         return Result.Success();
     }
 

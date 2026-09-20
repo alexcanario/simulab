@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Simulab.Email;
+using Simulab.Jobs;
+using Simulab.Jobs.Email;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Infrastructure.Resources;
 
@@ -13,7 +15,7 @@ namespace Simulab.Identity.Infrastructure.Email;
 /// user's stored locale and not from the current thread.
 /// </summary>
 public sealed class VerificationMailer(
-    IEmailSender sender,
+    IJobQueue queue,
     IStringLocalizer<IdentityEmails> localizer,
     IOptions<VerificationEmailOptions> options) : IVerificationMailer
 {
@@ -29,7 +31,9 @@ public sealed class VerificationMailer(
             RenderHtml(link),
             RenderText(link));
 
-        return sender.SendAsync(message, cancellationToken);
+        // F-13 BR2: staged on the caller's unit of work; the save that writes the token writes it too.
+        queue.EnqueueEmail(message);
+        return Task.CompletedTask;
     }
 
     private string RenderHtml(string link)

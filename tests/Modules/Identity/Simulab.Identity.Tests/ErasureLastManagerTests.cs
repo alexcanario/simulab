@@ -37,6 +37,7 @@ public sealed class ErasureLastManagerTests : IdentityApiTests
         row.Status.Should().Be(AccountStatus.Active);
         (await QueryAsync(context => context.UserRoles.CountAsync(role => role.UserId == admin.Id))).Should().Be(1);
         (await SignedInSessions.StatusOfAsync(client, session)).Should().Be(HttpStatusCode.OK);
+        await RunJobsAsync();
         Emails.Messages.Should().NotContain(message => message.To == admin.Email && message.Subject.Contains("erased", StringComparison.OrdinalIgnoreCase));
 
         // With a second active manager, the same call goes through.
