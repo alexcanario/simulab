@@ -1,7 +1,7 @@
 ---
 feature: F-10
 epic: Foundation and identity
-status: validating
+status: done
 board: 714
 version: 1
 ---
@@ -142,8 +142,9 @@ A signed-in user can end their relationship with Simulab on their own: the perso
 8. Keyboard only, from `/account`: Tab to "Erase my account" and press Enter, Tab to the password field, type the password, then Tab to "Erase my account" in the dialog and press Enter (or press Enter in the password field). → Every element gets a visible focus ring and the erasure works from the keyboard. Then in Mailpit, open the last message to the erased address, and finally sign up again with that same address. → The farewell email is in your language and points at sign-up; the new sign-up is accepted.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: feature/F-10 (removed after the merge)
+- Merge: 903911d (--no-ff, AB#714)
+- Validation: passed by the owner on screen, 2026-09-20
+- Tests: full suite 514 passed, 0 failed, 28 s; full build 14 s, 0 warnings, baseline empty
+- Manual pages: docs/manual/{pt-BR,pt-PT,en}/erase-account.md (new); my-account.md and index.md (updated); docs/infra.md (Identity:SignUpUrl, measured times)
+- Captured during refinement: F-16 Download my data (AB#729). Captured during build: the success and warning contrast texts of the theme, same flaw as the error one, invisible today
