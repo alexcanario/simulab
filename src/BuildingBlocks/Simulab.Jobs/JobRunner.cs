@@ -31,11 +31,17 @@ public sealed class JobRunner(
         RETURNING *
         """;
 
-    /// <summary>Runs every job that is due, oldest first, until none is left. Returns how many ran.</summary>
+    /// <summary>
+    /// Runs the jobs that are due, oldest first, and returns how many ran. It stops at
+    /// <see cref="JobPolicy.MaxJobsPerPoll"/> so one poll of a long backlog cannot hold a scope and a
+    /// database connection indefinitely, nor ignore the worker's stopping token for that long.
+    /// </summary>
     public async Task<int> RunPendingAsync(CancellationToken cancellationToken = default)
     {
         var ran = 0;
-        while (!cancellationToken.IsCancellationRequested && await RunNextAsync(cancellationToken))
+        while (ran < JobPolicy.MaxJobsPerPoll
+               && !cancellationToken.IsCancellationRequested
+               && await RunNextAsync(cancellationToken))
         {
             ran++;
         }
@@ -62,14 +68,25 @@ public sealed class JobRunner(
                 ?? throw new InvalidOperationException($"No handler is registered for job type '{job.Type}'.");
 
             await handler.HandleAsync(job.Payload, cancellationToken);
-
-            // BR6: the job is gone, with the live link and the address it carried.
-            context.Jobs.Remove(job);
-            await context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
             await FailAsync(context, job, exception, cancellationToken);
+            return true;
+        }
+
+        // BR6, outside the handler's own try on purpose: once the message is out, a delete that fails is
+        // a database problem, not a failed send. Marking the job failed here would leave the entry in the
+        // Deleted state, so the next save would repeat the DELETE and lose the error instead of writing it.
+        try
+        {
+            context.Jobs.Remove(job);
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // BR10: another worker had taken the stale row and finished it first. The message went out.
+            logger.LogWarning("Job {JobId} of type {JobType} was already gone when it was removed.", job.Id, job.Type);
         }
 
         return true;
@@ -90,19 +107,26 @@ public sealed class JobRunner(
     /// <summary>BR5, BR7: back off and try again, or give up and keep the row as the evidence.</summary>
     private async Task FailAsync(JobsDbContext context, Job job, Exception exception, CancellationToken cancellationToken)
     {
-        job.LastError = Truncate(exception.Message);
-
         if (job.Attempts >= JobPolicy.MaxAttempts)
         {
             job.Status = JobStatus.Failed;
+
+            // BR7 keeps the evidence, and BR6 keeps nothing sensitive at rest. The message itself is not
+            // evidence: it is a live link and a recipient address, and a mail server error often echoes
+            // the address back. What is lost stays in the log, with the whole exception; the row keeps
+            // what it is, how often it was tried and what kind of failure stopped it.
+            job.Payload = string.Empty;
+            job.LastError = Truncate(exception.GetType().FullName ?? exception.GetType().Name);
+
             logger.LogError(
                 exception,
-                "Job {JobId} of type {JobType} failed {Attempts} times and was given up on.",
+                "Job {JobId} of type {JobType} failed {Attempts} times and was given up on; its payload was cleared.",
                 job.Id, job.Type, job.Attempts);
         }
         else
         {
             job.Status = JobStatus.Pending;
+            job.LastError = Truncate(exception.Message);
             job.RunAfter = timeProvider.GetUtcNow().Add(JobPolicy.BackoffAfter(job.Attempts));
             logger.LogWarning(
                 exception,

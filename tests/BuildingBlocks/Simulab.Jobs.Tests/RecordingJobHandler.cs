@@ -19,14 +19,21 @@ public sealed class RecordingJobHandler : IJobHandler
     /// <summary>The message of the failure, so a test can read it back from <see cref="Job.LastError"/>.</summary>
     public string FailureMessage { get; set; } = "The mail server could not be reached.";
 
-    public Task HandleAsync(string payload, CancellationToken cancellationToken = default)
+    /// <summary>Runs while the job is still <see cref="JobStatus.Running"/>, so a test can race the runner.</summary>
+    public Func<Task>? WhileRunning { get; set; }
+
+    public async Task HandleAsync(string payload, CancellationToken cancellationToken = default)
     {
         if (Fails)
         {
             throw new InvalidOperationException(FailureMessage);
         }
 
+        if (WhileRunning is not null)
+        {
+            await WhileRunning();
+        }
+
         _handled.Enqueue(payload);
-        return Task.CompletedTask;
     }
 }

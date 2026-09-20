@@ -75,10 +75,31 @@ public sealed class JobRunnerTests : IAsyncLifetime
         job.Should().NotBeNull();
         job!.Attempts.Should().Be(JobPolicy.MaxAttempts);
         job.Status.Should().Be(JobStatus.Failed);
-        job.LastError.Should().Be(_host.Handler.FailureMessage, "BR7: the row keeps the evidence");
+
+        // BR7: the row is the evidence of what was lost — what kind of job, how often, what stopped it.
+        job.Type.Should().Be(RecordingJobHandler.JobType);
+        job.LastError.Should().Be(typeof(InvalidOperationException).FullName);
+
+        // The message itself is not evidence: it is a live link and a recipient address (BR6).
+        job.Payload.Should().BeEmpty();
 
         _host.Clock.Advance(TimeSpan.FromDays(1));
         (await _host.Runner.RunNextAsync()).Should().BeFalse("a failed job is never taken again");
+    }
+
+    [Fact]
+    public async Task RunPending_MoreJobsThanOnePollTakes_LeavesTheRestForTheNextTick()
+    {
+        for (var number = 1; number <= JobPolicy.MaxJobsPerPoll + 3; number++)
+        {
+            await _host.EnqueueAsync(RecordingJobHandler.JobType, $"work-{number}");
+        }
+
+        (await _host.Runner.RunPendingAsync()).Should().Be(JobPolicy.MaxJobsPerPoll);
+
+        (await _host.CountAsync()).Should().Be(3);
+        (await _host.Runner.RunPendingAsync()).Should().Be(3);
+        (await _host.CountAsync()).Should().Be(0);
     }
 
     [Fact]
@@ -127,6 +148,28 @@ public sealed class JobRunnerTests : IAsyncLifetime
         ran.Sum().Should().Be(payloads.Count);
         _host.Handler.Handled.Should().BeEquivalentTo(payloads);
         (await _host.CountAsync()).Should().Be(0);
+    }
+
+    /// <summary>
+    /// BR10: a stale row can be taken by a second worker, which may finish and delete it while this one
+    /// is still sending. The delete that then finds nothing must not abort the poll.
+    /// </summary>
+    [Fact]
+    public async Task RunNext_RowRemovedWhileTheJobWasRunning_FinishesQuietly()
+    {
+        var id = await _host.EnqueueAsync(RecordingJobHandler.JobType, "work");
+        _host.Handler.WhileRunning = () => _host.DeleteAsync(id);
+
+        var ran = await _host.Runner.RunNextAsync();
+
+        ran.Should().BeTrue();
+        _host.Handler.Handled.Should().Equal("work");
+        (await _host.CountAsync()).Should().Be(0);
+
+        // The poll goes on: the next job in the queue still runs.
+        _host.Handler.WhileRunning = null;
+        await _host.EnqueueAsync(RecordingJobHandler.JobType, "next");
+        (await _host.Runner.RunPendingAsync()).Should().Be(1);
     }
 
     [Fact]

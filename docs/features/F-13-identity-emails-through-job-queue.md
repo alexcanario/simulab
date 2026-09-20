@@ -3,7 +3,7 @@ feature: F-13
 epic: Foundation and identity
 status: validating
 board: 723
-version: 1
+version: 2
 ---
 # Identity emails through the job queue
 
@@ -37,12 +37,12 @@ Take the mail server off the request path. Today a failing or slow SMTP server i
 
 ## Business rules
 - BR1 A job is one row in table `jobs.jobs`: id, type, payload (JSON), `status`, `attempts`, `run_after`, `created_at`, `last_error`. States: `Pending → Running → Failed` (a job that succeeds leaves no row, BR6).
-- BR2 Enqueuing happens in the same `SaveChanges` / transaction as the data that justifies the email. Either the token row and the job row both exist, or neither does. There is no state where a token is valid and no email was ever enqueued.
-- BR3 Because BR2 makes enqueuing a local database write, the `try/catch`-and-log around the mailers is removed from the five handlers: a failure to enqueue is a database failure and the request fails with it, the way any other failed write does.
+- BR2 Enqueuing happens in the same `SaveChanges` / transaction as the data that justifies the email, wherever that data has a save of its own: the verification token, the resend token, the reset token and the erasure. Either both rows exist, or neither does; there is no state where a token is valid and no email was ever enqueued. The two after-the-fact notices are the stated exception: `UserManager` has already committed the new password when the password-changed email is written, so that job is saved on its own, immediately after (v2).
+- BR3 Because BR2 makes enqueuing a local database write, the `try/catch`-and-log around the mailers is removed from the five handlers: a failure to enqueue is a database failure and the request fails with it, the way any other failed write does. For the password-changed notice this means a database that fails right after the password changed turns that request into an error, which the old best-effort `catch` used to hide (v2).
 - BR4 The payload is the message already rendered — recipient, subject, HTML body and text body — built inside the request in the recipient's language. The worker never localizes and never reads the Identity module.
 - BR5 A failed send is retried up to 5 times, with `run_after` set to 1, 2, 4, 8 and 16 minutes after the failed attempt. After the fifth attempt the row becomes `Failed`, keeps `last_error`, and is logged at error level.
 - BR6 A job whose send succeeds is deleted in the same transaction that marks it done. A valid reset or verification link and the recipient's address never stay at rest in the database.
-- BR7 A `Failed` row is kept: it holds the evidence of what was lost. There is no automatic cleanup and no automatic retry after the fifth attempt.
+- BR7 A `Failed` row is kept: it holds the evidence of what was lost — the job type, how many attempts it took and the type of the exception that stopped it. Its payload is cleared when it is given up on, because the message is not evidence: it is a live link and a recipient address, and BR6's promise would otherwise be defeated by a mail server that stays down (v2). The whole exception, with its message, is in the log. There is no automatic cleanup and no automatic retry after the fifth attempt.
 - BR8 The worker claims jobs with `SELECT ... FOR UPDATE SKIP LOCKED`, so two `Api` instances never send the same message twice.
 - BR9 The worker polls every 5 seconds for jobs with `status = Pending` and `run_after <= now`, oldest first.
 - BR10 A worker that is stopped mid-send leaves the row `Running`; a job `Running` for more than 5 minutes is taken again by the next poll. Delivery is at-least-once, not exactly-once.
@@ -65,13 +65,31 @@ New building block, following the profile's `BuildingBlocks` shape:
 - AC3 Given a pending email job, when the worker runs, then `IEmailSender` receives exactly the recipient, subject, HTML body and text body that the handler rendered. (BR4)
 - AC4 Given a sign-up whose token row fails to save, when the transaction rolls back, then no job row exists. (BR2)
 - AC5 Given a job whose send throws, when the worker runs it, then `attempts` is 1, `run_after` is one minute later, `last_error` holds the message, and the row is still `Pending`. (BR5)
-- AC6 Given a job that has already failed 4 times, when the fifth attempt throws, then the row becomes `Failed` and is not picked again. (BR5, BR7)
+- AC6 Given a job that has already failed 4 times, when the fifth attempt throws, then the row becomes `Failed`, keeps its type, its attempt count and the exception type, has its payload cleared, and is not picked again. (BR5, BR7)
 - AC7 Given a job whose send succeeds, when the worker finishes it, then no row is left in `jobs.jobs`. (BR6)
 - AC8 Given two workers polling the same table, when one claims a job, then the other never claims the same row. (BR8)
 - AC9 Given a job left `Running` more than 5 minutes ago, when the worker polls, then it is claimed again. (BR10)
 - AC10 Given each of the five identity emails, when its handler runs, then the message reaches `IEmailSender` in the account's language, with the same subject and body the current tests assert. (BR4; regression over F-4, F-7, F-8 and F-10)
 - AC11 Given the test host, when it starts, then the worker is not running and a test drains the queue by calling it explicitly. (BR13)
 - AC12 No UI resource key is added or removed; the existing email keys stay complete in pt-BR, pt-PT and en and the missing-key test is green.
+
+## Coverage
+| Criterion | Test |
+|---|---|
+| AC1 | `IdentityEmailQueueTests.ResetRequest_KnownAndUnknownAddress_NeitherTouchesTheMailServer` |
+| AC2 | `IdentityEmailQueueTests.SignUp_LeavesTheVerificationEmailAsOnePendingJobCarryingTheRenderedMessage` |
+| AC3 | `IdentityEmailQueueTests.RunningTheQueue_SendsExactlyTheStoredMessageAndLeavesNoRow`; `JobRunnerTests.RunNext_EmailJob_SendsTheMessageThatWasStored` |
+| AC4 | `IdentityEmailQueueTests.SignUp_WhenTheTokenWriteFails_LeavesNoJobBehind` |
+| AC5 | `JobRunnerTests.RunNext_HandlerThrows_KeepsTheJobPendingWithABackoff`; `RunNext_BeforeTheBackoffHasPassed_DoesNotTakeTheJobAgain`; `RunNext_RetryAfterTheBackoff_Succeeds`; end to end: `PasswordResetTests.RequestLink_MailServerFails_AnswersTheSameAndKeepsTheEmailForARetry`, `PasswordChangeTests.Change_MailServerFails_TheChangeSucceedsAndTheNoticeIsKeptForARetry`, `AccountErasureTests.Erase_WhenTheFarewellEmailFails_StillErasesTheAccount` |
+| AC6 | `JobRunnerTests.RunNext_FifthAttemptFails_MarksTheJobFailedAndStopsTakingIt` |
+| AC7 | `JobRunnerTests.RunNext_JobSucceeds_LeavesNoRow`; `IdentityEmailQueueTests.RunningTheQueue_SendsExactlyTheStoredMessageAndLeavesNoRow` |
+| AC8 | `JobRunnerTests.RunPending_SeveralWorkersAtOnce_RunsEachJobExactlyOnce` |
+| AC9 | `JobRunnerTests.RunNext_JobLeftRunningTooLong_IsClaimedAgain`; `RunNext_RowRemovedWhileTheJobWasRunning_FinishesQuietly` |
+| AC10 | `VerificationEmailLanguageTests.Register_WritesTheEmailInTheRequestLanguage` (en, pt-BR, pt-PT); `VerificationEndpointTests.Verify_TokenReplacedByAResend_IsInvalid` (resend); `PasswordEmailLanguageTests.ResetAndChangedEmails_UseTheAccountLanguage` (en, pt-BR, pt-PT); `PasswordChangeTests.Change_Success_ClearsTheFailedCountAndSendsThePasswordChangedEmail`; `AccountErasureTests.Erase_SendsTheFarewellEmailInTheAccountsLanguage` |
+| AC11 | `IdentityEmailQueueTests.TestHost_RegistersTheWorkerAndKeepsItOff`; `JobCompositionTests.The_host_wires_the_queue_the_runner_and_the_worker`; and the whole Identity suite, which drains the queue explicitly |
+| AC12 | `EmailResourceParityTests.Every_key_exists_in_every_language`; `Every_text_differs_from_the_neutral_one` |
+
+Nothing is checked only on screen: every criterion goes through the endpoint or the runner the worker itself uses. The validation script confirms the wiring through the app host, which no test covers.
 
 ## Decisions
 - 2026-09-20 — All five identity emails go through the queue, including the F-10 farewell email — owner, question 1; leaving one out keeps a second, synchronous way of sending email alive.
@@ -110,6 +128,12 @@ New building block, following the profile's `BuildingBlocks` shape:
 
 ## Change notes
 
+### v2 — 2026-09-20
+- What: (a) BR2 gains its stated exception — the password-changed notice is saved on its own, right after `UserManager` commits the password, because there is no later save to ride on; BR3 spells out the consequence. (b) BR7: a job given up on has its payload cleared; it keeps its type, its attempt count and the exception type, and the full exception stays in the log.
+- Why: raised by `/agile:review` on 2026-09-20. (a) BR2 was written without exception and the code could not honour it for that one email; saying so beats a silent divergence. (b) The decision of question 7 promised that an erased account leaves no job row carrying its old address — true only when the send succeeds. A mail server that stays down was leaving a live reset link and a recipient address at rest indefinitely.
+- Affected: BR2, BR3, BR7, AC6; every other criterion unchanged.
+- Re-approved: <pending>
+
 ## Validation script
 Use an address you have not used before; the app host keeps its database between runs.
 
@@ -134,5 +158,5 @@ Use an address you have not used before; the app host keeps its database between
 ## Delivery
 - Branch: `feature/F-13`
 - Merge: -
-- Tests: -
+- Tests: 531 green across 9 projects (Identity 178 / 20 s, Web 272 / 3 s, Architecture 29 / 0.2 s, Persistence 14 / 4 s, SharedKernel 12 / 0.3 s, Jobs 12 / 5 s, Api 8 / 23 s, AppHost 6 / 1 s, Email 2 / 4 s); build 0 warnings, 0 errors.
 - Manual pages: - (no visible behaviour changes)

@@ -9,6 +9,9 @@ public static class JobPolicy
     /// <summary>BR9: how often the worker looks for work.</summary>
     public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
+    /// <summary>How many jobs one poll runs before it lets the worker breathe. A backlog waits 5 s more.</summary>
+    public const int MaxJobsPerPoll = 100;
+
     /// <summary>BR10: a job left <see cref="JobStatus.Running"/> longer than this is taken again.</summary>
     public static readonly TimeSpan StaleAfter = TimeSpan.FromMinutes(5);
 

@@ -64,6 +64,14 @@ public sealed class JobTestHost : IAsyncDisposable
                 .SetProperty(job => job.StartedAt, startedAt));
     }
 
+    /// <summary>Removes the row behind the runner's back, as a second worker finishing it first would (BR10).</summary>
+    public async Task DeleteAsync(Guid id)
+    {
+        await using var scope = _services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<JobsDbContext>();
+        await context.Jobs.Where(job => job.Id == id).ExecuteDeleteAsync();
+    }
+
     public async Task<Job?> FindAsync(Guid id)
     {
         await using var scope = _services.CreateAsyncScope();

@@ -12,8 +12,11 @@ public sealed class Job : Entity
     /// <summary>What kind of work this is, for example <see cref="Email.EmailJob.Type"/>.</summary>
     public required string Type { get; init; }
 
-    /// <summary>The whole input of the job, as JSON. The worker needs nothing else to run it.</summary>
-    public required string Payload { get; init; }
+    /// <summary>
+    /// The whole input of the job, as JSON. The worker needs nothing else to run it. It is cleared when
+    /// the job is given up on (BR7): the message is a live link and an address, not evidence.
+    /// </summary>
+    public required string Payload { get; set; }
 
     public JobStatus Status { get; set; } = JobStatus.Pending;
 
