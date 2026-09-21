@@ -1,7 +1,7 @@
 ---
 bug: B-9
 feature: F-1
-status: validating
+status: done
 board: 735
 severity: medium
 ---
@@ -170,8 +170,11 @@ Before the change the same page read 2.24 (success, light), 3.33 (success, dark)
    ("Try again") and activate it with Enter: the focus ring is visible, nothing shows a raw key.
 
 ## Delivery
-- Branch: `bug/B-9`.
+- Branch: `bug/B-9`, merged with `dee5225` (AB#735).
 - Approved by the owner on 2026-09-21; the file was committed once B-8 was merged.
+- Validated on screen by the owner on 2026-09-21.
+- Full suite before the merge: 627 tests, 32 s; build 13 s, 0 warnings (`agile gate GREEN`).
+- The app manual is unchanged: no screen, field, rule or message changed, only the contrast of the notices.
 - Tests at the end of the build: `Simulab.Web.Tests` 312 passed (3 s), `Simulab.ArchitectureTests` 29 passed
   (237 ms), `Simulab.Identity.Tests` 232 passed (25 s). The regression tests were seen failing first
   (5 of the web ones, 1 of the e-mail ones).
