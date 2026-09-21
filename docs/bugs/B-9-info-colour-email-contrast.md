@@ -1,7 +1,7 @@
 ---
 bug: B-9
 feature: F-1
-status: refining
+status: validating
 board: 735
 severity: medium
 ---
@@ -73,10 +73,13 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
    - `PaletteLight.WarningContrastText` `#7A4A00` → `#19243E`: 5.62:1 on `Warning` (was 2.73).
    - `PaletteDark.WarningContrastText` (white by default) → `#19243E`: 5.62:1 (was 2.74).
    - A comment on each changed colour points to `ThemeContrastTests`, as B-8 left on the primary.
-4. Emails (D3): the `Button` helper of `PasswordMailer` moves to a shared internal `EmailHtml` in the same
+4. Emails (D3): the `Button` helper of `PasswordMailer` moves to a shared `EmailHtml` in the same
    folder, with the colour as a single constant `#216DB5` (white on it 5.36:1); `VerificationMailer` uses the
    helper instead of its inline anchor. The markup stays the same apart from the colour.
 5. Nothing else in the palette changes; the info, success and warning hues stay as they are.
+6. Found on screen while checking the fix (D7): the two error alerts of `UiGallery.razor:132-133` are bare
+   `MudAlert`s too and read at 4.12:1 in the dark theme. They become `AppAlert`, and `UiKitBoundaryTests`
+   now forbids `<MudAlert` outside the kit, so the third occurrence of this defect is the last one.
 
 ## Regression test
 `tests/Hosts/Simulab.Web.Tests/Ui/ThemeContrastTests.cs`, each seen failing before the change:
@@ -88,7 +91,11 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
 - `tests/Modules/Identity/Simulab.Identity.Tests/EmailButtonTests.cs` (new, in the existing project):
   `Button_UsesAColourThatIsReadableUnderWhiteText` (>= 4.5:1) and
   `VerificationAndPasswordEmails_UseTheSameButtonColour`, both reading the e-mails the mailers produce.
-  Before: the second fails on the inline anchor of `VerificationMailer`.
+  Before: the second fails on the inline anchor of `VerificationMailer` (seen failing by pinning the constant
+  back to `#2478C5`: `Failed: 1, Passed: 1`).
+- `tests/Simulab.ArchitectureTests/UiKitBoundaryTests.cs`: `<MudAlert` joins the tokens forbidden outside the
+  kit, with the temp-folder case `FindViolations_FileOutsideKit_NamesTheFile` naming a bad file. Before the
+  page fixes, `Web_OutsideKit_UsesNoRawTableOrIconConstant` names `Home.razor` and `UiGallery.razor`.
 
 ## Acceptance criteria
 | # | Criterion | Test |
@@ -97,6 +104,7 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
 | AC2 | Given the home page, when the status notice is shown, then it is the kit alert (`AppAlert`), so it is readable in the dark theme. | `HomeTests.StatusNotice_UsesTheFilledKitAlert` + validation script |
 | AC3 | Given a verification or password e-mail, when its button is rendered, then both e-mails use the same colour `#216DB5`, readable under white text. | `EmailButtonTests` (two tests) |
 | AC4 | Localization: no UI text is added or changed (`Home.Status` and the e-mail keys stay); the missing-key test stays green. | `ResourceParityTests` (existing) |
+| AC5 | Given any page outside the kit, when it shows a notice, then it uses `AppAlert`; a bare `MudAlert` fails the build. | `UiKitBoundaryTests.Web_OutsideKit_UsesNoRawTableOrIconConstant` + `FindViolations_FileOutsideKit_NamesTheFile` |
 
 ## Decisions
 - D1 (owner, 2026-09-21): the home alert moves to `AppAlert` instead of changing the info colour. Reason: it is
@@ -110,8 +118,12 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
 - D5 (Claude, 2026-09-21): success and warning keep their hues and get dark ink (`#19243E`), instead of darker
   hues with white ink. Reason: dark ink passes in both themes with one value, and the darker teal that white
   would need (4.88:1) would fail as text on the dark surface; same choice as F-10 (error) and B-8 (primary).
-- D6 (Claude, 2026-09-21): the shared e-mail helper is an internal static class in the mailers' own folder, not
-  a new building block. Reason: only the Identity module sends these e-mails.
+- D6 (Claude, 2026-09-21): the shared e-mail helper is `EmailHtml`, a static class in the mailers' own folder,
+  not a new building block. Reason: only the Identity module sends these e-mails; it is public because the
+  module's test project reads the colour from it.
+- D7 (Claude, 2026-09-21): the two bare error alerts of the gallery are fixed here and `<MudAlert` outside the
+  kit becomes a build failure. Reason: same cause as D1, found on screen while checking this fix (4.12:1 in
+  the dark theme); a rule the build holds stops the fourth occurrence. Two lines of markup, one test token.
 
 ## Out of scope
 - A brand palette for Simulab (ADR-0001, decision 30 still applies).
@@ -123,6 +135,23 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
 ## Open questions
 None.
 
+## Screen check (Claude, 2026-09-21)
+Opened through the app host (`https://localhost:7125`), both themes, colours read from the rendered page after
+the theme transition settled and measured:
+
+| Element | Light | Dark |
+|---|---|---|
+| Home status notice (now `AppAlert`) | 4.60 | 4.60 |
+| Gallery info alert | 4.60 | 4.60 |
+| Gallery warning alert | 5.62 | 5.62 |
+| Gallery success alert | 4.63 | 4.63 |
+| Gallery error alert and its action ("Tentar novamente") | 5.54 | 4.79 |
+| The two error-code alerts (now `AppAlert`) | 5.54 | 4.79 |
+| Success snackbar | 4.63 | 4.63 |
+
+Before the change the same page read 2.24 (success, light), 3.33 (success, dark), 2.73 / 2.74 (warning) and
+4.12 (the error-code alerts, dark). The e-mails were checked by test, not on screen; step 6 below covers them.
+
 ## Validation script
 1. Start the app from the repository root: `dotnet run --project src/Hosts/Simulab.AppHost`, then open
    `https://localhost:7125` and sign in.
@@ -132,9 +161,17 @@ None.
    text that is easy to read; the info alert is unchanged.
 4. Switch to the light theme on `/dev/ui`: the same two alerts keep dark text, now on the same teal and amber.
 5. Trigger a snackbar on `/dev/ui` ("Mostrar notificação") in both themes: its text is readable.
-6. Sign out and ask for a password reset; open Mailpit (`http://localhost:8025`): the button in the e-mail is
-   the same blue as the app's buttons, white text on it.
-7. Switch the language to English on `/dev/ui`: nothing shows a raw key.
+6. Sign out and ask for a password reset at `/forgot-password`; open Mailpit from the Aspire dashboard (its
+   web UI is linked there, `docs/infra.md`): the button in the e-mail is the same blue as the app's buttons,
+   with white text on it.
+7. Still on `/dev/ui`, in the "Mensagens de erro" section: both error-code notices are filled red alerts with
+   dark text in the dark theme (they used to be a pale red block).
+8. Switch the language to English on `/dev/ui` and, keyboard only, press Tab to the error alert's action
+   ("Try again") and activate it with Enter: the focus ring is visible, nothing shows a raw key.
 
 ## Delivery
-- Branch: <bug/B-9>
+- Branch: `bug/B-9`.
+- Approved by the owner on 2026-09-21; the file was committed once B-8 was merged.
+- Tests at the end of the build: `Simulab.Web.Tests` 312 passed (3 s), `Simulab.ArchitectureTests` 29 passed
+  (237 ms), `Simulab.Identity.Tests` 232 passed (25 s). The regression tests were seen failing first
+  (5 of the web ones, 1 of the e-mail ones).

@@ -32,8 +32,11 @@ public static class SimulabTheme
             Warning = "#D98B1A",
             Error = "#BE3737",
             Info = "#2478C5",
-            SuccessContrastText = "#0D6056",
-            WarningContrastText = "#7A4A00",
+            // B-9: the kit's alert is filled, so this is the text on top of Success and Warning. The dark teal
+            // read at 2.24:1 there and the brown at 2.73:1; this ink is 4.63:1 and 5.62:1. ThemeContrastTests
+            // holds the numbers.
+            SuccessContrastText = "#19243E",
+            WarningContrastText = "#19243E",
             // F-10: this is the text of a filled destructive button, on top of Error. The dark red it had
             // read at 1.92:1 there; white reads at 5.54:1. ThemeContrastTests holds the numbers.
             ErrorContrastText = "#FFFFFF",
@@ -66,6 +69,10 @@ public static class SimulabTheme
             Error = "#E06C6C",
             ErrorContrastText = "#19243E",
             Info = "#2478C5",
+            // B-9: white on the teal was 3.33:1 and on the amber 2.74:1, so a filled success or warning alert
+            // failed AA here too. The dark ink is 4.63:1 and 5.62:1. ThemeContrastTests holds the numbers.
+            SuccessContrastText = "#19243E",
+            WarningContrastText = "#19243E",
         },
         Typography = new Typography
         {

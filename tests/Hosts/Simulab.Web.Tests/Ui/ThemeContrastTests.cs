@@ -91,6 +91,33 @@ public sealed class ThemeContrastTests
         Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForText, $"filled primary button text must be AA readable ({what})");
     }
 
+    public static TheoryData<string, string, string> AlertContrastTextOnItsSeverities()
+    {
+        var light = Theme.PaletteLight;
+        var dark = Theme.PaletteDark;
+        return new TheoryData<string, string, string>
+        {
+            { "light info", light.InfoContrastText.ToString(), light.Info.ToString() },
+            { "light success", light.SuccessContrastText.ToString(), light.Success.ToString() },
+            { "light warning", light.WarningContrastText.ToString(), light.Warning.ToString() },
+            { "dark info", dark.InfoContrastText.ToString(), dark.Info.ToString() },
+            { "dark success", dark.SuccessContrastText.ToString(), dark.Success.ToString() },
+            { "dark warning", dark.WarningContrastText.ToString(), dark.Warning.ToString() }
+        };
+    }
+
+    /// <summary>
+    /// B-9: the kit's alert (<c>AppAlert</c>) is always filled, so every notice on a page paints its text in the
+    /// severity's contrast text on top of the severity colour. Success read at 2.24:1 in the light theme and
+    /// warning at 2.74:1 in the dark one, on sign-in, sign-up, account, password and security pages.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(AlertContrastTextOnItsSeverities))]
+    public void AlertContrastText_ReadsAtAaOnItsSeverityColour(string what, string foreground, string background)
+    {
+        Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForText, $"a filled alert must be AA readable ({what})");
+    }
+
     private static double Contrast(string foreground, string background)
     {
         var first = Luminance(foreground);

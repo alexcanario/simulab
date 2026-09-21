@@ -28,7 +28,7 @@ public sealed class PasswordMailer(
             localizer["Email.PasswordReset.Heading"],
             $"""
             <p>{Encode("Email.PasswordReset.Body")}</p>
-            {Button(link, localizer["Email.PasswordReset.Button"])}
+            {EmailHtml.Button(link, localizer["Email.PasswordReset.Button"])}
             <p>{Encode("Email.PasswordReset.Expiry")}</p>
             <p style="color: #4A5A7A; font-size: 13px;">{Encode("Email.Verification.LinkFallback")}<br><a href="{safeLink}">{safeLink}</a></p>
             <p style="color: #4A5A7A; font-size: 13px;">{Encode("Email.PasswordReset.Ignore")}</p>
@@ -80,15 +80,6 @@ public sealed class PasswordMailer(
     }
 
     private string Encode(string key) => WebUtility.HtmlEncode(localizer[key]);
-
-    private static string Button(string link, string text) =>
-        $"""
-        <p>
-          <a href="{WebUtility.HtmlEncode(link)}" style="display: inline-block; background: #2478C5; color: #FFFFFF; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 700;">
-            {WebUtility.HtmlEncode(text)}
-          </a>
-        </p>
-        """;
 
     private static string Page(string heading, string innerHtml) =>
         $"""

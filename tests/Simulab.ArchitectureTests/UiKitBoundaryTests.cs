@@ -6,7 +6,9 @@ namespace Simulab.ArchitectureTests;
 /// </summary>
 public class UiKitBoundaryTests
 {
-    private static readonly string[] ForbiddenOutsideKit = ["<MudTable", "<MudDataGrid", "Icons.Material"];
+    // B-9: a raw MudAlert renders the text variant, whose ink fails AA in the dark theme (2.70:1 on the home
+    // page, 4.12:1 in the gallery). AppAlert is filled and readable in both themes.
+    private static readonly string[] ForbiddenOutsideKit = ["<MudTable", "<MudDataGrid", "<MudAlert", "Icons.Material"];
 
     internal static IReadOnlyList<string> FindViolations(string webRoot)
     {
@@ -74,6 +76,7 @@ public class UiKitBoundaryTests
             var kit = Directory.CreateDirectory(Path.Combine(root.FullName, "Components", "Ui"));
             File.WriteAllText(Path.Combine(pages.FullName, "Bad.razor"), "<MudDataGrid T=\"int\" />");
             File.WriteAllText(Path.Combine(pages.FullName, "BadIcon.cs"), "var icon = Icons.Material.Filled.Add;");
+            File.WriteAllText(Path.Combine(pages.FullName, "BadAlert.razor"), "<MudAlert Severity=\"Severity.Info\">Notice</MudAlert>");
             File.WriteAllText(Path.Combine(pages.FullName, "Good.razor"), "<AppDataTable />");
             File.WriteAllText(Path.Combine(kit.FullName, "AppDataTable.razor"), "<MudDataGrid T=\"int\" /> <MudTable />");
 
@@ -83,6 +86,7 @@ public class UiKitBoundaryTests
             [
                 Path.Combine("Components", "Pages", "Bad.razor") + " uses <MudDataGrid",
                 Path.Combine("Components", "Pages", "BadIcon.cs") + " uses Icons.Material",
+                Path.Combine("Components", "Pages", "BadAlert.razor") + " uses <MudAlert",
             ]);
         }
         finally

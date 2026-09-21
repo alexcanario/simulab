@@ -46,11 +46,7 @@ public sealed class VerificationMailer(
               <body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #19243E; line-height: 1.6;">
                 <h1 style="font-size: 20px;">{WebUtility.HtmlEncode(localizer["Email.Verification.Heading"])}</h1>
                 <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Body"])}</p>
-                <p>
-                  <a href="{safeLink}" style="display: inline-block; background: #2478C5; color: #FFFFFF; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 700;">
-                    {WebUtility.HtmlEncode(localizer["Email.Verification.Button"])}
-                  </a>
-                </p>
+                {EmailHtml.Button(link, localizer["Email.Verification.Button"])}
                 <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Expiry"])}</p>
                 <p style="color: #4A5A7A; font-size: 13px;">{WebUtility.HtmlEncode(localizer["Email.Verification.LinkFallback"])}<br><a href="{safeLink}">{safeLink}</a></p>
                 <p style="color: #4A5A7A; font-size: 13px;">{WebUtility.HtmlEncode(localizer["Email.Verification.Ignore"])}</p>
