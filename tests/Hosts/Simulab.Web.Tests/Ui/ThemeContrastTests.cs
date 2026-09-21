@@ -12,6 +12,9 @@ public sealed class ThemeContrastTests
 {
     private const double MinimumForText = 4.5;
 
+    /// <summary>WCAG 2.2 1.4.11: an icon or a control's boundary, with no text of its own.</summary>
+    private const double MinimumForNonText = 3.0;
+
     private static readonly MudTheme Theme = SimulabTheme.Create();
 
     public static TheoryData<string, string, string> ErrorTextOnItsSurfaces()
@@ -116,6 +119,31 @@ public sealed class ThemeContrastTests
     public void AlertContrastText_ReadsAtAaOnItsSeverityColour(string what, string foreground, string background)
     {
         Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForText, $"a filled alert must be AA readable ({what})");
+    }
+
+    public static TheoryData<string, string, string> ActionIconOnItsSurfaces()
+    {
+        var light = Theme.PaletteLight;
+        var dark = Theme.PaletteDark;
+        return new TheoryData<string, string, string>
+        {
+            { "light on surface", light.ActionDefault.ToString(), light.Surface.ToString() },
+            { "light on background", light.ActionDefault.ToString(), light.Background.ToString() },
+            { "dark on surface", dark.ActionDefault.ToString(), dark.Surface.ToString() },
+            { "dark on background", dark.ActionDefault.ToString(), dark.Background.ToString() }
+        };
+    }
+
+    /// <summary>
+    /// B-10: MudBlazor paints an icon-only button and a menu item's icon in <c>ActionDefault</c>: the row actions,
+    /// the "More" menu, the filter chip's remove button and the user menu. The icon is the only sign of the
+    /// control, so it needs the non-text minimum; it read at 1.94:1 on the dark card.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(ActionIconOnItsSurfaces))]
+    public void ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces(string what, string foreground, string background)
+    {
+        Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"an action icon must be visible ({what})");
     }
 
     private static double Contrast(string foreground, string background)
