@@ -1,7 +1,7 @@
 ---
 feature: F-16
 epic: Foundation and identity
-status: refining
+status: approved
 board: 729
 version: 1
 ---
