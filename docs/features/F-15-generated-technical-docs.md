@@ -1,7 +1,7 @@
 ---
 feature: F-15
 epic: Foundation and identity
-status: approved
+status: building
 board: 728
 version: 1
 ---
