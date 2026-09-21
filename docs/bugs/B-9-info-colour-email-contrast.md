@@ -73,7 +73,7 @@ Both fail AA in both themes and appear on sign-in, sign-up, check email, account
    - `PaletteLight.WarningContrastText` `#7A4A00` → `#19243E`: 5.62:1 on `Warning` (was 2.73).
    - `PaletteDark.WarningContrastText` (white by default) → `#19243E`: 5.62:1 (was 2.74).
    - A comment on each changed colour points to `ThemeContrastTests`, as B-8 left on the primary.
-4. Emails (D3): the `Button` helper of `PasswordMailer` moves to a shared internal `EmailHtml` in the same
+4. Emails (D3): the `Button` helper of `PasswordMailer` moves to a shared `EmailHtml` in the same
    folder, with the colour as a single constant `#216DB5` (white on it 5.36:1); `VerificationMailer` uses the
    helper instead of its inline anchor. The markup stays the same apart from the colour.
 5. Nothing else in the palette changes; the info, success and warning hues stay as they are.
