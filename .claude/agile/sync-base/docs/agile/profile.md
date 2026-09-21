@@ -34,6 +34,8 @@ Code reaches an Aspire resource (Redis, PostgreSQL, a broker) through its client
 The `ServiceDefaults` project the bootstrap generates calls `AddStandardResilienceHandler(options => options.Retry.DisableForUnsafeHttpMethods())`: by default the handler retries a POST, which replays single-use tokens and sends emails twice.
 With Blazor Interactive Server, state that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id the cookie carries, never in the cookie itself: a circuit cannot rewrite the cookie. The cookie is checked in `OnValidatePrincipal`, and open circuits revalidate through `RevalidatingServerAuthenticationStateProvider`.
 With Blazor Interactive Server, data from the first HTTP request that a circuit needs later (the visitor's address, a header) is read in `App` (static render, `HttpContext` available), passed to the interactive root component as a parameter and kept in a scoped service: a circuit has no `HttpContext`.
+A failed `SaveChanges` keeps the entry state you set: after `Remove` the entry stays `Deleted`, so a later save repeats the DELETE instead of writing what the error handler just set. The delete that closes a unit of work goes outside the `try` that handles that unit of work's own failure.
+With ASP.NET Core Identity, a sign-in with more than one step (password, then a second factor) clears the failure count (`ResetAccessFailedCountAsync`) only in its last step: a step that clears it gives the next one unlimited tries.
 
 ## Where business rules live
 - A rule about one entity lives in that entity (`Domain/`): methods that return `Result`, no public setters on ruled state.
@@ -41,6 +43,7 @@ With Blazor Interactive Server, data from the first HTTP request that a circuit 
 - CRUD without rules is a thin slice: endpoint → `DbContext`. No repository, no mediator, no mapping library, no interface with a single implementation.
 - Add structure on the second use, not the first: a domain service when two features share a rule, an abstraction when a second implementation exists.
 - Modules talk only through `Contracts`: a query interface or an in-process integration event. Never another module's `DbContext`, tables or entities.
+- A row a request must not lose (a queued job, an outbox message) is written by the same `SaveChanges` as the data that justifies it: the shared table is mapped into the caller's own `DbContext` with `ExcludeFromMigrations()`, and the context that owns the table keeps the migration. Two contexts sharing one connection is neither needed nor available with Npgsql.
 - EF mappings are `IEntityTypeConfiguration<T>` classes in `Data/Configurations/`. Tenant and soft-delete filters are global, never repeated per query.
 - The UI validates for comfort only. The API is the authority.
 - The default is per module, not per solution: a module may use the Clean Architecture variant below while its neighbours stay with one project.
