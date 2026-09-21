@@ -129,8 +129,8 @@
 
 <section id="gallery-errors" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Errors"]</MudText>
-    <MudAlert Severity="Severity.Error" Class="mb-2">@L["Gallery.Errors.Known"]: @ErrorText.For("common.not_found")</MudAlert>
-    <MudAlert Severity="Severity.Error">@L["Gallery.Errors.Unknown"]: @ErrorText.For("exam_board.does_not_exist_yet")</MudAlert>
+    <AppAlert Severity="Severity.Error" Class="mb-2" Text="@($"{L["Gallery.Errors.Known"]}: {ErrorText.For("common.not_found")}")" />
+    <AppAlert Severity="Severity.Error" Text="@($"{L["Gallery.Errors.Unknown"]}: {ErrorText.For("exam_board.does_not_exist_yet")}")" />
 </section>
 
 <section id="gallery-feedback" class="gallery-section">
