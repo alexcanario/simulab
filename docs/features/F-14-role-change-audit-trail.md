@@ -3,7 +3,7 @@ feature: F-14
 epic: Foundation and identity
 status: validating
 board: 726
-version: 1
+version: 2
 ---
 # Role change audit trail
 
