@@ -41,6 +41,8 @@ public sealed class UserMenuTests : KitTestContext
         var cut = Render<UserMenu>();
         cut.Find(".app-user-menu-button button").Click();
 
+        // B-11: the menu opens while the popover renders; wait for the item instead of reading it on the next line.
+        popovers.WaitForAssertion(() => popovers.FindAll(".app-user-menu-account").Should().ContainSingle());
         var item = popovers.Find(".app-user-menu-account");
         item.TextContent.Trim().Should().Be("My account");
         item.GetAttribute("href").Should().Be("/account");
