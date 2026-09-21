@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Sessions;
+using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
@@ -71,6 +74,12 @@ public static class IdentityEndpoints
 
         // F-9: the role management back office, every route behind identity.roles.manage (BR10).
         group.MapRoleAdministrationEndpoints();
+
+        // F-11 BR12: two-factor routes exist only while the feature is on.
+        if (endpoints.ServiceProvider.GetRequiredService<IOptions<TotpOptions>>().Value.TotpEnabled)
+        {
+            group.MapTotpEndpoints();
+        }
 
         return endpoints;
     }
