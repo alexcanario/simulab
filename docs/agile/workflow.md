@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.37 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.38 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -80,7 +80,7 @@ Outputs, all in English:
 - `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
-- `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates entity diagrams and a data dictionary per module (from the EF model), a route map per area (from the OpenAPI document) and a module diagram (from project references), all Mermaid; `/agile:ship` regenerates them and `--check` fails when they are stale. Optionally a one-page hand-written overview (C4 context and containers).
+- `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates entity diagrams and a data dictionary per module (from the EF model), a route map per area (from the OpenAPI document that the `/openapi/v1.json` integration test writes to `docs/api/`) and a module diagram (from project references), all Mermaid; a context with a design-time factory is built through it, so the names follow the database (snake_case, for example); `/agile:ship` regenerates them and `--check` fails when they are stale. Optionally a one-page hand-written overview (C4 context and containers).
 - The first epics on the board, if the brief already names them.
 
 ## 5. Feature lifecycle
@@ -103,7 +103,7 @@ stateDiagram-v2
 | Status | What happens | Who moves it |
 |---|---|---|
 | `idea` | Captured from the chat with `/agile:idea`. Title and 2-3 lines. | Claude |
-| `refining` | `/agile:refine`: Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it) and every premise about how a library stores or protects data in the library's source or docs, then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
+| `refining` | `/agile:refine`: Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it) and every premise about how a library stores or protects data in the library's source or docs (a premise that nothing uses a feature is checked by its effect, not by the callers of one helper), then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
 | `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |

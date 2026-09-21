@@ -25,6 +25,6 @@ paths:
 - A custom middleware resolves an optional or heavy dependency (a cache, a second store) from `HttpContext.RequestServices` inside the branch that needs it, never as an `InvokeAsync` parameter: parameters are resolved on every request.
 - Global data in a tenant table (`TenantId` null): the unique index includes `TenantId` and is `NULLS NOT DISTINCT` (PostgreSQL 15+; Npgsql `.AreNullsDistinct(false)`). Without it duplicates pass.
 - Every tenant-scoped endpoint has a test proving tenant A cannot read or change tenant B's data.
-- An integration test fetches `/openapi/v1.json` and expects 200.
+- An integration test fetches `/openapi/v1.json` and expects 200; with DocGen it also writes the document to `docs/api/openapi.json` (never generated at build: that starts `Program` without its connection strings).
 - Each feature has at least one test through the real HTTP pipeline (`WebApplicationFactory`) using the shared JSON options.
 - A screen that calls the API is smoke-tested through the app host before the validation script is handed over: green tests do not prove the Web → API wiring.

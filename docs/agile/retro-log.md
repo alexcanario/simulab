@@ -431,3 +431,10 @@ From 0.0.36 to 0.0.37, run with `/agile:sync` on `main` after F-15 shipped.
 - `[stack: ef-core]` DocGen template: build each model through the context's `IDesignTimeDbContextFactory` when there is one (conventions such as snake_case live in the options); strip a trailing `Module` from the module name; drop the explicit `Microsoft.EntityFrameworkCore.Relational` reference (no central version, it comes through Npgsql) and the `NoWarn` (it conflicts with rule `build-config`; use `CultureInfo.InvariantCulture`); never read the OpenAPI document from `bin/`/`obj/`; show the Auth column only when the document declares security; a file the generator no longer produces counts as stale (F-15).
 - `[profile: modular-monolith]` The route map's OpenAPI document is written by the existing `/openapi/v1.json` integration test (`WebApplicationFactory`) into `docs/api/`, not by `Microsoft.Extensions.ApiDescription.Server`: build-time generation starts `Program` and fails when it requires connection strings (F-15).
 - `[generic]` feature-refinement step 4: a premise that nothing uses a feature is verified by its effect (the built model, the migration snapshot, the generated output), not by the callers of one helper: code can reach the same effect without it (F-15).
+
+## 2026-09-21 — Sync with agile@canary 0.0.38
+From 0.0.37 to 0.0.38, run with `/agile:sync` on `main`. It brings the three F-15 plugin notes.
+- Copied (untouched copies): rule `api-contracts` (the `/openapi/v1.json` test writes the document to `docs/api/` when DocGen is used; never generated at build), `workflow.md` and `workflow.pt-BR.md` (DocGen through the design-time factory and the OpenAPI document from the test; a "nothing uses X" premise is checked by its effect).
+- Left alone: `docs/agile/profile.md` (edited here, unchanged upstream). Build files unchanged upstream.
+- Kept on purpose: the rule names `docs/api/openapi.json`; this project writes `docs/api/Simulab.Api.json`, which `tools/Simulab.DocGen` accepts as well.
+- No build: no build file and no rule with a build check changed.

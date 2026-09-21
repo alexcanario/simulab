@@ -1,7 +1,7 @@
 {
-  "version": "0.0.37",
+  "version": "0.0.38",
   "files": {
-    ".claude/rules/agile/api-contracts.md": "ca1c7aa7f0fdf188",
+    ".claude/rules/agile/api-contracts.md": "5f7774ffb46f25fe",
     ".claude/rules/agile/build-config.md": "64d2516a691af738",
     ".claude/rules/agile/definition-of-done.md": "85dba378d7085941",
     ".claude/rules/agile/git.md": "f699c545051f99f1",
@@ -21,8 +21,8 @@
     "docs/agile/templates/infra.md": "1972ada03af0d155",
     "docs/agile/templates/manual-page.md": "4a2863b0b4805ba5",
     "docs/agile/templates/project-claude.md": "858b0b9d2bf13cf0",
-    "docs/agile/workflow.md": "74e21969a8e31d73",
-    "docs/agile/workflow.pt-BR.md": "2e0d597266bd91fc",
+    "docs/agile/workflow.md": "52563d8eb6a6bf48",
+    "docs/agile/workflow.pt-BR.md": "4bd15bf7cc9e477b",
     "docs/agile/profile.md": "a469607afe166db2",
     ".editorconfig": "3e4b965db9964dcd",
     "BannedSymbols.txt": "3949fcbfeb3d446c",
