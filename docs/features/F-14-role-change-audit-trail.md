@@ -1,7 +1,7 @@
 ---
 feature: F-14
 epic: Foundation and identity
-status: building
+status: validating
 board: 726
 version: 1
 ---
@@ -121,13 +121,17 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - 2026-09-21 — Claude: the three handlers compute the difference and add the entry through `IRoleAdministrationStore` inside `RunExclusiveAsync`, before `SaveChangesAsync`, so the rollback of BR8b also removes the entry (BR3). The author is `ICurrentUser`.
 - 2026-09-21 — Claude: `role_name` stores the name at the moment (the new name on a rename) — role names are not personal data, and a renamed or deleted role must still read correctly (BR8).
 - 2026-09-21 — Approved by the owner ("aprovo F-14").
-- 2026-09-21 — Claude (build): `RoleChange` inherits `TenantEntity` like every module entity (rule `project`, same as `ConsentRecord`), so the table also has the tenant, audit and soft-delete columns; "when" and "author" are its `created_at`/`created_by`, filled by the F-3 interceptor from `TimeProvider` and `ICurrentUser` — no separate `occurred_at`/`author_id` columns. Nothing ever updates or deletes the row. `role_ids` holds the role itself for role entries too, so the role filter is one `= ANY` over the GIN index. `added`/`removed` are owned JSON collections (`jsonb`).
+- 2026-09-21 — Claude (build): `RoleChange` inherits `TenantEntity` like every module entity (rule `project`, same as `ConsentRecord`), so the table also has the tenant, audit and soft-delete columns; "when" and "author" are its `created_at`/`created_by`, filled by the F-3 interceptor from `TimeProvider` and `ICurrentUser` — no separate `occurred_at`/`author_id` columns. Nothing ever updates or deletes the row. `role_ids` holds the role itself for role entries too, so the role filter is one containment test, `role_ids @> ARRAY[@id]` (SQL checked with `ToQueryString`), which the GIN index serves. `added`/`removed` are owned JSON collections (`jsonb`).
 - 2026-09-21 — Claude (build): the difference (BR2, BR3) is computed in the domain (`RoleChange.RoleUpdated` / `UserRolesChanged` return null when nothing changed); the store gained `PermissionsOfAsync`, `RolesOfUserAsync`, `RoleNamesAsync` and `AddRoleChange`.
 - 2026-09-21 — Claude (build): `RoleChangeActions` in Contracts carries the action names the screen translates; a test pins them to the domain enum.
 - 2026-09-21 — Claude (build): times are shown in the browser's time zone (rule `i18n`): a new scoped `UserTimeZone` asks `simulabShell.timeZone()` once per circuit, after the first render; until then, or if the browser does not answer, times are UTC. No such service existed.
 - 2026-09-21 — Claude (build): the user filter chip is a new kit component `AppFilterChip` (text + remove button with tooltip and accessible name `Common.RemoveFilter`), shown in the gallery (`gallery-fields`) and tested; icon `AppIcons.History` (Material Outlined `History`) added.
 - 2026-09-21 — Claude (build): Web → API wiring checked through the app host: migration `AddRoleChanges` applied on the local database, `/openapi/v1.json` 200 with both new routes, both routes 401 without a token, `/admin/role-history` redirects an anonymous visitor to sign-in. **Not verified by Claude:** the signed-in page itself — signing in needs a password, which Claude does not type; it is in the validation script.
 - 2026-09-21 — Found during build, not fixed here: the theme token `ActionDefault` (every icon button: row actions, the chip's remove button) is 1.94:1 on the dark surface (`#404E6A` on `#172035`) and 2.97:1 on white (`#8A96B0`), under the 3:1 WCAG asks for icons. Pre-existing since F-1; proposed as a bug.
+- 2026-09-21 — Review (major, confirmed, fixed): `role_change.period_invalid` had no text in the three languages; added, and `RoleResourcesTests` now also checks `role_change.*` codes and every `RoleHistory.Action.*` (seen failing in the three cultures first).
+- 2026-09-21 — Review (major, confirmed, fixed): the missing-key test did not cover the new code prefix — same fix as above.
+- 2026-09-21 — Review (minor, fixed): nothing pinned the page's policy; `AdminPagesAuthorizationTests` asserts that every `/admin/*` page (Roles, Users, Role history) requires `identity.roles.manage`. The loading state is the kit's (`AppDataTableTests`); the coverage table is below.
+- 2026-09-21 — Review (minor, rejected): "the GIN index is never used because the filter is `= ANY`" — Npgsql generates `role_ids @> ARRAY[@id]::uuid[]`, which GIN serves; the decision text now says so.
 
 ## Out of scope
 - CSV or other export of the trail.
@@ -158,6 +162,23 @@ You need your Admin account and a second, ordinary account (as in F-9), used in 
 6. Switch to pt-BR, then pt-PT → "Histórico de papéis" / "Histórico de perfis", "Papel alterado" / "Perfil alterado"; toggle dark mode → table, filters and chip legible in both themes.
 7. Permission check: in the private window, signed in with the second account (now Curator) → no "Role history" item, and `/admin/role-history` shows "Page not found".
 8. Keyboard only on "Role history": Tab through the search box, the three filters (arrow keys pick a value), the column "When" sort button and the pager, each with a visible focus ring; open a user's History and remove the chip with Enter.
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `RoleChangeTrailTests.CreateRole_RecordsAuthorTimeRoleAndItsPermissions` |
+| AC2 | `RoleChangeTrailTests.UpdateRole_RenamedAndPermissionsChangedInOneSave_RecordsOneEntryWithBeforeAndAfter` |
+| AC3 | `RoleChangeTrailTests.SetUserRoles_RecordsTheTargetAndExactlyTheRolesAddedAndRemoved` |
+| AC4 | `RoleChangeTrailTests.DeleteRole_RecordsItsName` |
+| AC5 | `RoleChangeTrailTests.RefusedOrUnchangedSaves_RecordNothing`, `RoleChangeLastManagerTests.LastManagerRefusal_LeavesNoEntry` |
+| AC6 | `RoleChangeTrailTests.SignUpErasureAndSeed_RecordNothing` |
+| AC7 | `RoleChangeTrailTests.ListRoleChanges_FiltersCombineAndPageNewestFirst`; `RoleHistoryPageTests.FiltersInTheAddress_AreSentAndOfferedWithDeletedRolesAndErasedAuthorsNamed`, `FilterChanged_OnALaterPage_ReloadsFromTheFirstPageWithTheFilter` |
+| AC8 | `RoleChangeTrailTests.ErasedAccountsAndARenamedThenDeletedRole_ReadAsTheyWere`; `RoleHistoryPageTests.Load_ShowsWhenAuthorActionTargetAndChanges` |
+| AC9 | `RoleChangeTrailTests.Trail_HasNoWriteRouteAndHoldsNoPersonalData` |
+| AC10 | `RoleAdministrationTests.EveryEndpoint_WithoutRolesManage_IsForbidden` (2 new routes); `NavigationItemsTests.All_AdministrationItems_AreRolesUsersAndRoleHistoryBehindRolesManage`; `AdminPagesAuthorizationTests.EveryAdminPage_RequiresRolesManage`; Not Found page on screen: validation script step 7 |
+| AC11 | `RoleHistoryPageTests.Empty_WithoutFilters_SaysNothingWasRecorded_WithAFilter_SaysNothingMatches`, `Load_ApiFails_ShowsTheErrorStateWithTryAgain`, `UserInTheAddress_ShowsARemovableChipInsteadOfTheSearch`, `FilterChanged_…`, `HistoryAction_OnRolesAndUsers_OpensTheHistoryFilteredToTheRow`, `Load_BrowserInSaoPaulo_ShowsTheLocalTime`; `AppFilterChipTests`; loading state: `AppDataTableTests` (kit) |
+| AC12 | `IdentityModuleBoundaryTests` and the rest of `Simulab.ArchitectureTests` (29, green) |
+| AC13 | `ResourceParityTests`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (now with `role_change.*` and the actions), `RoleHistoryPageTests.Load_InPortuguesePortugal_TranslatesTitleActionsAndErasedAccounts`; `RoleChangeActionsTests` |
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
