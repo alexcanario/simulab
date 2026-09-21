@@ -1,7 +1,7 @@
 ---
 bug: B-11
 feature: F-1
-status: validating
+status: done
 board: 739
 severity: low
 ---
@@ -90,6 +90,11 @@ Result after the fix (2026-09-21, branch `bug/B-11`): 10 builds with `--no-incre
 ## Validation script
 1. `dotnet build tests/Hosts/Simulab.Web.Tests --no-incremental`, then `dotnet test tests/Hosts/Simulab.Web.Tests --no-build` → `Failed: 0, Passed: 328`. Repeat 3 times; every run is green.
 
+Validated by the owner, 2026-09-21 (the 10 clean-build runs above).
+
 ## Delivery
-- Branch: <bug/B-<number>>
-- Merge: <commit>
+- Branch: `bug/B-11`, merged into `main` with `--no-ff` (AB#739).
+- Tests: full suite 676 passed, 0 failed, 30 s; build 12 s, 0 warnings (`gate.js ship`, 2026-09-21).
+  Changed: `AppRowActionsTests.Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu`, `UserMenuTests.SignedIn_OffersMyAccountAndSignOutOnly`.
+- Technical docs: `DocGen --check` up to date (no model, route or project change).
+- App manual: unchanged; test code only.
