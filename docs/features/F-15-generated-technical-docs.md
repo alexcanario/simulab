@@ -1,7 +1,7 @@
 ---
 feature: F-15
 epic: Foundation and identity
-status: building
+status: validating
 board: 728
 version: 2
 ---
@@ -81,6 +81,17 @@ No screen and no endpoint change. New files only:
 - Blazor pages and the Web host's `/account` endpoints in the route map.
 - Running `--check` in the Stop hook or the test suite.
 - Any change to production behavior, screens or the app manual.
+
+## Validation script
+No screen changes, so there is no sign-in, language switch or keyboard pass. Run from the repository root on `feature/F-15`. Each command is the same in Git Bash and PowerShell 7, except the exit code: `echo $?` in Git Bash, `$LASTEXITCODE` in PowerShell.
+1. `dotnet build Simulab.slnx` → `Build succeeded.` and `0 Warning(s)`.
+2. `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`, exit 0.
+3. Make one file stale. Git Bash: `echo x >> docs/architecture/Jobs/entities.md`. PowerShell: `Add-Content docs/architecture/Jobs/entities.md "x"`. Run step 2 again → `docs/architecture is stale (1 file(s)): Jobs/entities.md. Run the generator and commit.`, exit 1. Undo with `git checkout -- docs/architecture/Jobs/entities.md`, then run step 2 again → exit 0.
+4. Open `docs/architecture/README.md` in the IDE's Markdown preview (or on Azure DevOps). It shows the two commands and links to 7 files. Open `modules.md` and `Identity/entities.md`: the Mermaid diagrams render.
+5. Open `Identity/data-dictionary.md`: the columns are snake_case, and `ux_users_tenant_normalized_email` shows `(unique, NULLS NOT DISTINCT)`.
+6. Open `Identity/routes.md` and `System/routes.md`: only `/api/v1/...` routes, with no `/connect/token`.
+7. `dotnet test tests/Hosts/Simulab.Api.Tests --filter "FullyQualifiedName~OpenApi_document_is_written"` (needs Docker running) → `Passed! - Failed: 0, Passed: 1`. Then `git status --short docs/api` prints nothing: the committed document is current.
+8. `docs/agile/profile.md` has `tools/` in `## Layout` and the "Technical docs (F-15)" paragraph.
 
 ## Change notes
 
