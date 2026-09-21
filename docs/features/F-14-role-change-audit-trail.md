@@ -185,5 +185,6 @@ Validated on screen by the owner on 2026-09-21: every step passed, after the men
 
 ## Delivery
 - Branch: `feature/F-14` (merged with `--no-ff` into `main`, AB#726, and deleted)
+- Merge: `4cb261a`
 - Tests: 652, 33 s (full suite, architecture tests included); full build 12 s, 0 warnings, baseline still empty
 - Manual pages: `docs/manual/{en,pt-BR,pt-PT}/role-history.md` (new), linked from each locale's `index.md`, `roles.md` and `users.md`
