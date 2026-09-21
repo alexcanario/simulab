@@ -1,7 +1,7 @@
 ---
 bug: B-11
 feature: F-1
-status: refining
+status: approved
 board: 739
 severity: low
 ---
