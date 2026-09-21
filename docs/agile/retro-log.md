@@ -28,9 +28,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
-| ⏳ | A premise about how a library stores or protects data is verified in its source or docs during refinement | F-11 | — |
-| ⏳ | In a multi-step sign-in, only the last step clears the failure count | F-11 | — |
-| ⏳ | Refinement checks package versions against the registry; build re-checks before adding | F-11 | — |
+| ✅ | A premise about how a library stores or protects data is verified in its source or docs during refinement | F-11 | 0.0.36 (`cfedd49`) |
+| ✅ | In a multi-step sign-in, only the last step clears the failure count | F-11 | 0.0.36 (`cfedd49`) |
+| ✅ | Refinement checks package versions against the registry; build re-checks before adding | F-11 | 0.0.36 (`cfedd49`) |
 | ✅ | A "never leave zero X" rule is judged before and after, not only after | F-10 | 0.0.35 (`7303a61`) |
 | ✅ | A theme's colour tokens get a contrast test over the palette | F-10 | 0.0.35 (`7303a61`) |
 | ✅ | A Blazor Server dialog is driven from the browser pane in one call | F-10 | 0.0.35 (`7303a61`) |
@@ -48,9 +48,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | 0.0.27 (`641d463`) |
 | ✅ | `[stack: blazor]` A Razor attribute mistake compiles: a string parameter without `@` is literal text, and a wrong generic parameter name only fails at runtime. Every new page gets a bUnit test that renders it | F-9 | 0.0.35 (`7303a61`) |
 | ✅ | `[generic]` A premise taken from an earlier item's file is verified against the code and against the items that touched it since; a bug can have moved the behaviour | F-9 | 0.0.35 (`7303a61`) |
-| ⏳ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | — |
-| ⏳ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | — |
-| ⏳ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | — |
+| ✅ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | 0.0.36 (`cfedd49`) |
+| ✅ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
+| ✅ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -331,9 +331,9 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 | 3 | The `Remove` of a finished job sat inside the handler's `try`. A delete that fails there leaves the entry `Deleted`, so the error-handling save repeats the DELETE instead of writing `Status` and `LastError`, and the exception escapes the whole poll. Reachable through the at-least-once path (BR10) | Project rule | One line in `project.md` (Integration), and this log |
 
 ### Plugin notes (`plugin`)
-- ⏳ **`[profile: modular-monolith]` An outbox row is staged on the caller's unit of work.** A row a request must not lose (a job, an outbox message) is written by the same `SaveChanges` as the data that justifies it: the shared table is mapped into the caller's own `DbContext` with `ExcludeFromMigrations()`, while the context that owns the table keeps the migration. Sharing one connection between two contexts is neither needed nor available with Npgsql.
-- ⏳ **`[generic]` An effect that leaves the request empties the tests that asserted it.** When an email, an event or long work moves to a queue, every test that asserted the effect is re-read, not only made to compile: an assertion that "nothing was sent" passes for free once nothing is sent synchronously. F-13 shipped three such tests past a green suite; the independent review caught them.
-- ⏳ **`[stack: ef-core]` A failed `SaveChanges` keeps the entry state you set.** After `Remove`, the entry stays `Deleted`: a later save on the same entity repeats the DELETE instead of writing the fields the error handler just set, and throws again. The delete that closes a unit of work goes outside the `try` that handles that unit of work's own failure.
+- ✅ **`[profile: modular-monolith]` An outbox row is staged on the caller's unit of work.** A row a request must not lose (a job, an outbox message) is written by the same `SaveChanges` as the data that justifies it: the shared table is mapped into the caller's own `DbContext` with `ExcludeFromMigrations()`, while the context that owns the table keeps the migration. Sharing one connection between two contexts is neither needed nor available with Npgsql.
+- ✅ **`[generic]` An effect that leaves the request empties the tests that asserted it.** When an email, an event or long work moves to a queue, every test that asserted the effect is re-read, not only made to compile: an assertion that "nothing was sent" passes for free once nothing is sent synchronously. F-13 shipped three such tests past a green suite; the independent review caught them.
+- ✅ **`[stack: ef-core]` A failed `SaveChanges` keeps the entry state you set.** After `Remove`, the entry stays `Deleted`: a later save on the same entity repeats the DELETE instead of writing the fields the error handler just set, and throws again. The delete that closes a unit of work goes outside the `try` that handles that unit of work's own failure.
 
 ## 2026-09-20 — Sync agile@canary 0.0.33 -> 0.0.35
 - Copied: `.claude/rules/agile/ui.md` (a test over the theme tokens checks the contrast of every foreground/background pair, in both themes), `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` (version 0.0.35: refinement checks every premise against today's code; a rule that protects a minimum is written as a before-and-after; the stack lessons and the `ui` section carry the three notes this project sent back from F-9 and F-10).
@@ -351,6 +351,6 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 | 3 | The approved package versions (Otp.NET 1.4.0, QRCoder 1.6.0) were behind the latest stable (1.4.1, 1.8.0) | Plugin improvement | This log |
 
 ### Plugin notes (`plugin`)
-- ⏳ **`[generic]` Verify a library's storage premise in refinement.** A premise about how a library stores or protects data (hashing, encryption, what it writes where) is verified in the library's source or docs during refinement, never taken from memory. F-11 approved "hashed, as Identity does" and the build found plain text.
-- ⏳ **`[stack: aspnet-identity]` Multi-step sign-in and the lockout.** In a sign-in with more than one step, only the last step clears the failure count (`ResetAccessFailedCountAsync`); a step that clears it gives unlimited tries to the next one.
-- ⏳ **`[generic]` Package versions are checked at refinement time.** The refinement package list is checked against the registry at that moment; the build re-checks it before adding the package.
+- ✅ **`[generic]` Verify a library's storage premise in refinement.** A premise about how a library stores or protects data (hashing, encryption, what it writes where) is verified in the library's source or docs during refinement, never taken from memory. F-11 approved "hashed, as Identity does" and the build found plain text.
+- ✅ **`[stack: aspnet-identity]` Multi-step sign-in and the lockout.** In a sign-in with more than one step, only the last step clears the failure count (`ResetAccessFailedCountAsync`); a step that clears it gives unlimited tries to the next one.
+- ✅ **`[generic]` Package versions are checked at refinement time.** The refinement package list is checked against the registry at that moment; the build re-checks it before adding the package.
