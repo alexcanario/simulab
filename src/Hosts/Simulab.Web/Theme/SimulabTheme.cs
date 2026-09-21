@@ -25,7 +25,9 @@ public static class SimulabTheme
             AppbarText = "#FFFFFF",
             TextPrimary = "#19243E",
             TextSecondary = "#4A5A7A",
-            ActionDefault = "#8A96B0",
+            // B-10: the colour of every icon-only button and menu icon. #8A96B0 read at 2.97:1 on the surface; the
+            // secondary text colour is 6.92:1 there, 6.34:1 on the background. ThemeContrastTests holds the numbers.
+            ActionDefault = "#4A5A7A",
             Divider = "#D0D8EA",
             TableLines = "#D0D8EA",
             Success = "#1A9E8C",
@@ -58,7 +60,10 @@ public static class SimulabTheme
             AppbarBackground = "#091422",
             TextPrimary = "#E0E8F8",
             TextSecondary = "#7A8EB0",
-            ActionDefault = "#404E6A",
+            // B-10: the dark icon colour read at 1.94:1 on the surface, so row actions and menu icons almost
+            // vanished. The secondary text colour is 4.89:1 there, 5.36:1 on the background. ThemeContrastTests
+            // holds the numbers.
+            ActionDefault = "#7A8EB0",
             Divider = "#263352",
             TableLines = "#263352",
             Success = "#1A9E8C",
