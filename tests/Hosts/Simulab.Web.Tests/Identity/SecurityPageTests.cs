@@ -166,6 +166,9 @@ public sealed class SecurityPageTests : IdentityPageTestContext
 
         page.Markup.Should().Contain("Two-factor sign-in is on since").And.Contain("You have 1 recovery code left.");
         page.Find(".app-danger-zone button.app-security-disable").ClassList.Should().Contain("mud-button-outlined-error");
+
+        // Measured on screen: primary text on the dark card is 3.5:1, below AA; the default colour is 13:1.
+        page.Find("button.app-security-regenerate").ClassList.Should().NotContain("mud-button-outlined-primary");
     }
 
     [Fact]
