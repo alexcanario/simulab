@@ -1,7 +1,7 @@
 ---
 bug: B-8
 feature: F-1
-status: validating
+status: done
 board: 734
 severity: medium
 ---
@@ -128,3 +128,13 @@ session and signing it out was not done. They read the same palette variables me
    Tab on to "Tentar novamente".
 7. Switch the language to English: the gallery shows English texts, nothing shows a raw key.
 8. No permission changed in this bug; nothing to check there.
+
+Validated by the owner on screen, 2026-09-21.
+
+## Delivery
+- Branch: `bug/B-8`, merged into `main` with `--no-ff` (AB#734).
+- Tests: full suite 618 passed, 0 failed, 30 s; build 16 s, 0 warnings (`gate.js ship`, 2026-09-21).
+  New: `ThemeContrastTests.PrimaryText_ReadsAtAaOnItsSurface` (4 cases),
+  `ThemeContrastTests.PrimaryContrastText_ReadsAtAaOnThePrimaryColour` (4 cases); seen failing 3 of 14 before the fix.
+- App manual: unchanged; it does not describe colours, and no text, step or rule changed.
+- Follow-up: B-9 (AB#735), the info colour and the email buttons still on the old blue.
