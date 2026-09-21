@@ -1,0 +1,48 @@
+# Simulab — modules and dependencies
+
+Generated from the project references under `src/`. Do not edit.
+
+```mermaid
+flowchart LR
+    subgraph BuildingBlocks["BuildingBlocks"]
+        Simulab_Email["Simulab.Email"]
+        Simulab_Jobs["Simulab.Jobs"]
+        Simulab_Persistence["Simulab.Persistence"]
+        Simulab_SharedKernel["Simulab.SharedKernel"]
+    end
+    subgraph Hosts["Hosts"]
+        Simulab_Api["Simulab.Api"]
+        Simulab_AppHost["Simulab.AppHost"]
+        Simulab_ServiceDefaults["Simulab.ServiceDefaults"]
+        Simulab_Web["Simulab.Web"]
+    end
+    subgraph Modules_Identity["Modules/Identity"]
+        Simulab_Identity_Api["Simulab.Identity.Api"]
+        Simulab_Identity_Application["Simulab.Identity.Application"]
+        Simulab_Identity_Contracts["Simulab.Identity.Contracts"]
+        Simulab_Identity_Domain["Simulab.Identity.Domain"]
+        Simulab_Identity_Infrastructure["Simulab.Identity.Infrastructure"]
+    end
+    Simulab_Api --> Simulab_Email
+    Simulab_Api --> Simulab_Identity_Api
+    Simulab_Api --> Simulab_Persistence
+    Simulab_Api --> Simulab_ServiceDefaults
+    Simulab_Api --> Simulab_SharedKernel
+    Simulab_AppHost --> Simulab_Api
+    Simulab_AppHost --> Simulab_Web
+    Simulab_Identity_Api --> Simulab_Identity_Application
+    Simulab_Identity_Api --> Simulab_Identity_Infrastructure
+    Simulab_Identity_Application --> Simulab_Identity_Contracts
+    Simulab_Identity_Application --> Simulab_Identity_Domain
+    Simulab_Identity_Contracts --> Simulab_SharedKernel
+    Simulab_Identity_Domain --> Simulab_SharedKernel
+    Simulab_Identity_Infrastructure --> Simulab_Email
+    Simulab_Identity_Infrastructure --> Simulab_Identity_Application
+    Simulab_Identity_Infrastructure --> Simulab_Jobs
+    Simulab_Identity_Infrastructure --> Simulab_Persistence
+    Simulab_Jobs --> Simulab_Email
+    Simulab_Jobs --> Simulab_Persistence
+    Simulab_Persistence --> Simulab_SharedKernel
+    Simulab_Web --> Simulab_Identity_Contracts
+    Simulab_Web --> Simulab_ServiceDefaults
+```

@@ -1,0 +1,47 @@
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace Simulab.DocGen;
+
+/// <summary>Every generated document, keyed by its path relative to docs/architecture/.</summary>
+internal static class DocSet
+{
+    public static SortedDictionary<string, string> Generate(
+        string root,
+        string appName,
+        DocGenOptions options,
+        IEnumerable<(string Module, IModel Model)> models)
+    {
+        var generated = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        if (options.Modules)
+        {
+            generated["modules.md"] = ModuleMapDoc.Render(root, appName);
+        }
+
+        if (options.Entities || options.DataDictionary)
+        {
+            foreach (var (module, model) in models)
+            {
+                if (options.Entities)
+                {
+                    generated[$"{module}/entities.md"] = EntityModels.RenderEntities(module, model);
+                }
+
+                if (options.DataDictionary)
+                {
+                    generated[$"{module}/data-dictionary.md"] = EntityModels.RenderDictionary(module, model);
+                }
+            }
+        }
+
+        if (options.Routes)
+        {
+            foreach (var (area, text) in RouteMapDoc.Render(root))
+            {
+                generated[$"{area}/routes.md"] = text;
+            }
+        }
+
+        generated["README.md"] = IndexDoc.Render(appName, generated.Keys);
+        return generated;
+    }
+}

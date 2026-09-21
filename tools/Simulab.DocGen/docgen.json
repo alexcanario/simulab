@@ -1,0 +1,6 @@
+{
+  "entities": true,
+  "dataDictionary": true,
+  "routes": true,
+  "modules": true
+}

@@ -1,0 +1,1083 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Simulab.Api | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost/"
+    }
+  ],
+  "paths": {
+    "/connect/token": {
+      "post": {
+        "tags": [
+          "TokenEndpoints"
+        ],
+        "operationId": "Token",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/system/info": {
+      "get": {
+        "tags": [
+          "Simulab.Api"
+        ],
+        "operationId": "GetSystemInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/identity/registrations": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "Register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/email-verifications": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "VerifyEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/email-verifications/resend": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ResendVerification",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/legal-documents/{topic}": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetLegalDocument",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/password-reset-requests": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "RequestPasswordReset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPasswordResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/password-reset-token-checks": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "CheckPasswordResetToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetTokenCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/password-resets": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ResetPassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/password-changes": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ChangePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/sign-out": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "SignOut",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/session": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetSession",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/account-erasures": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "EraseAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EraseAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/profile": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetProfile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "UpdateProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/profile/preferred-language": {
+      "put": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "UpdatePreferredLanguage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePreferredLanguageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/permissions": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ListPermissions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/roles": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ListRoles",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "CreateRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/roles/{id}": {
+      "put": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "UpdateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "DeleteRole",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/users": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ListUsers",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/users/{id}/roles": {
+      "put": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "SetUserRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserRolesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/role-changes": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ListRoleChanges",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "authorId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ascending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/role-changes/filters": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "RoleChangeFilters",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/totp": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetTotpStatus",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "DisableTotp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisableTotpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/totp/enrolments": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "StartTotpEnrolment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/totp/enrolments/confirmations": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ConfirmTotpEnrolment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmTotpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/totp/recovery-codes": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "RegenerateRecoveryCodes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateRecoveryCodesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangePasswordRequest": {
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "newPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A signed-in user changes the password with the current one (F-7 UC6)."
+      },
+      "ConfirmTotpRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "The first code from the authenticator app, which turns two-factor on (F-11 BR2)."
+      },
+      "DisableTotpRequest": {
+        "required": [
+          "currentPassword",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Turning two-factor off needs the current password and a code or recovery code (F-11 BR8)."
+      },
+      "EraseAccountRequest": {
+        "required": [
+          "currentPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A signed-in user erases their own account (F-10 UC2). The account is the token subject (BR1), so the\r\nbody carries only the proof that the person at the keyboard owns it (BR2)."
+      },
+      "PasswordResetTokenCheckRequest": {
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Asks whether a reset link still works, without using it (F-7, decision: the page checks on load)."
+      },
+      "RegenerateRecoveryCodesRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A current code or a recovery code, which proves the second factor before new codes replace the old ones (F-11 BR7)."
+      },
+      "RegisterRequest": {
+        "required": [
+          "email",
+          "password",
+          "declaresAdult",
+          "acceptsTerms",
+          "acceptsPrivacy",
+          "termsVersion",
+          "privacyVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "The address that identifies the account."
+          },
+          "password": {
+            "type": "string",
+            "description": "The chosen password; the policy is checked by the server (BR2)."
+          },
+          "declaresAdult": {
+            "type": "boolean",
+            "description": "The 18+ self-declaration (BR1)."
+          },
+          "acceptsTerms": {
+            "type": "boolean",
+            "description": "Acceptance of the terms of use."
+          },
+          "acceptsPrivacy": {
+            "type": "boolean",
+            "description": "Acceptance of the privacy policy."
+          },
+          "termsVersion": {
+            "type": "string",
+            "description": "The terms version the page showed."
+          },
+          "privacyVersion": {
+            "type": "string",
+            "description": "The privacy version the page showed."
+          },
+          "fullName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Optional display name."
+          }
+        },
+        "description": "What the sign-up form sends. The document versions are the ones the page showed, so the server can\r\nrefuse a form filled against texts that have since changed (BR5)."
+      },
+      "RequestPasswordResetRequest": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Asks for a reset link (F-7 UC1). The answer never says whether the address exists."
+      },
+      "ResendVerificationRequest": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "description": "Asks for a new verification link. The answer is always the same, whatever the address is (BR11)."
+      },
+      "ResetPasswordRequest": {
+        "required": [
+          "token",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "newPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Chooses a new password with the token from the reset email (F-7 UC2)."
+      },
+      "SaveRoleRequest": {
+        "required": [
+          "name",
+          "permissions"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permissions": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Creates or replaces a role (F-9, UC2-UC3): the whole permission set, never a patch (BR4)."
+      },
+      "SetUserRolesRequest": {
+        "required": [
+          "roleIds"
+        ],
+        "type": "object",
+        "properties": {
+          "roleIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "The whole set of roles a user holds after the call (F-9, BR6); an empty set is allowed."
+      },
+      "SystemInfoResponse": {
+        "required": [
+          "name",
+          "version",
+          "environment"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePreferredLanguageRequest": {
+        "required": [
+          "preferredLanguage"
+        ],
+        "type": "object",
+        "properties": {
+          "preferredLanguage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "F-8 UC3: the header language switch saves the language alone, so it never touches the name (BR6)."
+      },
+      "UpdateProfileRequest": {
+        "required": [
+          "fullName",
+          "preferredLanguage"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "preferredLanguage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "F-8 UC2: the whole editable profile. A blank name clears it (BR2)."
+      },
+      "VerifyEmailRequest": {
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "description": "The raw token from the verification link. It is posted, never sent as a query string to the API."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "TokenEndpoints"
+    },
+    {
+      "name": "Simulab.Api"
+    },
+    {
+      "name": "Identity"
+    }
+  ]
+}

@@ -18,7 +18,8 @@ internal static class SolutionAssemblies
         typeof(Simulab.Identity.Infrastructure.IdentityModule).Assembly,
         typeof(Simulab.Identity.Api.IdentityEndpoints).Assembly,
         typeof(Simulab.Web.Resources.SharedResources).Assembly,
-        typeof(Microsoft.Extensions.Hosting.Extensions).Assembly // Simulab.ServiceDefaults
+        typeof(Microsoft.Extensions.Hosting.Extensions).Assembly, // Simulab.ServiceDefaults
+        typeof(Simulab.DocGen.DocSet).Assembly
     ];
 
     public static string RepositoryRoot()
