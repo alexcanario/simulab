@@ -73,6 +73,20 @@ public sealed class RedisRefreshSessionStore(IConnectionMultiplexer redis, TimeP
         }
     }
 
+    public async Task<int> CountActiveAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var count = 0;
+        foreach (var member in await Database.SetMembersAsync(UserSessionsKey(userId)))
+        {
+            if (await Database.KeyExistsAsync(SessionKey(member.ToString())))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     public Task RevokeAccessTokenAsync(string sessionJti, TimeSpan timeToLive, CancellationToken cancellationToken = default) =>
         Database.StringSetAsync(RevokedKey(sessionJti), true, timeToLive > TimeSpan.Zero ? timeToLive : TimeSpan.FromSeconds(1));
 

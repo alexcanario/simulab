@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
+using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Api;
 
@@ -64,6 +66,11 @@ public static class IdentityEndpoints
         // F-10 BR1: the caller's own account, found by the token subject; no permission is involved.
         group.MapPost("/account-erasures", EraseAccountAsync)
             .WithName("EraseAccount")
+            .RequireAuthorization();
+
+        // F-16 BR1: the caller's own data, found by the token subject; no permission is involved.
+        group.MapPost("/data-exports", ExportDataAsync)
+            .WithName("ExportData")
             .RequireAuthorization();
 
         // F-8 BR1: the caller's own profile, found by the token subject; no permission is involved.
@@ -362,6 +369,42 @@ public static class IdentityEndpoints
         if (result.IsSuccess)
         {
             return Results.NoContent();
+        }
+
+        if (result.Error!.Code != IdentityErrorCodes.AccountLocked)
+        {
+            return Problem(result.Error);
+        }
+
+        var seconds = int.TryParse(result.Error.Detail, System.Globalization.CultureInfo.InvariantCulture, out var parsed) ? parsed : 0;
+        return Problem(result.Error with { Detail = null }, StatusCodes.Status423Locked, ("retryAfterSeconds", seconds));
+    }
+
+    /// <summary>
+    /// F-16 BR1, BR2, BR8: the caller's own data as one JSON attachment, confirmed with the current password. A
+    /// lockout answers 423 with the remaining seconds, exactly as an erasure does.
+    /// </summary>
+    private static async Task<IResult> ExportDataAsync(
+        DataExportRequest request,
+        ClaimsPrincipal user,
+        ExportDataHandler handler,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await handler.HandleAsync(userId, request.CurrentPassword, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            var export = result.Value;
+            var fileName = $"simulab-my-data-{export.ExportedAt.UtcDateTime.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}.json";
+            var body = JsonSerializer.SerializeToUtf8Bytes(export, AppJson.Options);
+            return Results.File(body, "application/json", fileName);
         }
 
         if (result.Error!.Code != IdentityErrorCodes.AccountLocked)

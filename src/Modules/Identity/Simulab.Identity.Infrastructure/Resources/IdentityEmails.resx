@@ -26,4 +26,8 @@
   <data name="Email.AccountErased.Body" xml:space="preserve"><value>Your Simulab account was erased on {0}, as you asked. Your name, your email address and your password are gone for good, and this is the last message we send to this address.</value></data>
   <data name="Email.AccountErased.Kept" xml:space="preserve"><value>We keep only what no longer identifies you: records with no name attached, used for the statistics of the questions, and the proof that you once accepted the terms and the privacy policy, which the law requires us to keep.</value></data>
   <data name="Email.AccountErased.ComeBack" xml:space="preserve"><value>This email address is free again. If you want to come back one day, you can create a new account with it:</value></data>
+  <data name="Email.DataExported.Subject" xml:space="preserve"><value>Your data was downloaded — Simulab</value></data>
+  <data name="Email.DataExported.Heading" xml:space="preserve"><value>Your data was downloaded</value></data>
+  <data name="Email.DataExported.Body" xml:space="preserve"><value>A copy of the data your Simulab account holds was downloaded on {0}, after your password was confirmed.</value></data>
+  <data name="Email.DataExported.NotYou" xml:space="preserve"><value>If it was not you, someone knows your password: change it now.</value></data>
 </root>

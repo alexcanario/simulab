@@ -35,6 +35,12 @@ public interface IRefreshSessionStore
     Task RevokeAllAsync(Guid userId, string? exceptSessionJti = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// The user's sessions that still exist (F-16 BR4). The per-user set keeps the ids of sessions that expired
+    /// on their own, so only ids whose session key is still there are counted.
+    /// </summary>
+    Task<int> CountActiveAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gives a surviving session the user's new security stamp (F-7 BR9): after a password change the
     /// caller's own session keeps refreshing, while every other one fails the stamp check. A missing
     /// session is not an error.
