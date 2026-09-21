@@ -9,7 +9,9 @@ public static class SimulabTheme
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#2478C5",
+            // B-8: primary is also a text colour (outlined buttons, the app name). #2478C5 read at 4.21:1 on the
+            // background; this one is 4.91:1 there, 5.36:1 on the surface. ThemeContrastTests holds the numbers.
+            Primary = "#216DB5",
             PrimaryDarken = "#1858A0",
             PrimaryLighten = "#EBF3FD",
             Secondary = "#1A9E8C",
@@ -38,8 +40,12 @@ public static class SimulabTheme
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#2478C5",
-            PrimaryDarken = "#1858A0",
+            // B-8: the light blue was 3.53:1 as text on the dark surface. This one is 6.04:1 there and 6.63:1 on the
+            // background; white cannot sit on it, so filled buttons get dark ink, and the hover tone stays light
+            // enough for that ink. ThemeContrastTests holds the numbers.
+            Primary = "#64A2E3",
+            PrimaryDarken = "#5096DC",
+            PrimaryContrastText = "#19243E",
             PrimaryLighten = "#162540",
             Secondary = "#1A9E8C",
             Tertiary = "#F5A020",
