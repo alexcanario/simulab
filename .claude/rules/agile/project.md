@@ -67,6 +67,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A contrast fix on a theme token covers the whole family in the same item (the colour and its contrast text, every severity): F-10, B-8 and B-9 chased the same defect one token at a time.
 - Measuring a rendered colour whose background has alpha: composite it over the first opaque ancestor before computing the ratio; the raw `rgba` reads as a false failure (B-9).
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
+- A kit CSS rule that overrides a MudBlazor class carries that class too (`.mud-tooltip-root.app-nav-tooltip`): MudBlazor's one-class rules load later and win; pin it with a test that reads `app.css` (F-14).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.

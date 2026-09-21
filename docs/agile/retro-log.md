@@ -51,6 +51,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | 0.0.36 (`cfedd49`) |
 | ✅ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
 | ✅ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
+| ⏳ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -383,3 +384,14 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 
 ### Plugin notes (`plugin`)
 - None. All three are MudBlazor or Simulab specific.
+
+## 2026-09-21 — F-14 Role change audit trail
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | Incremental builds reported 0 warnings while a CS1573 sat in the new domain entity; only the app host's fresh build showed it | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 2 | The missing-key test listed error-code prefixes by hand, so `role_change.period_invalid` had no text in any language until the review caught it | Test or build check | New item F-22 (every error code has a text, by reflection) |
+| 3 | `.app-nav-tooltip { display: block }` lost to MudBlazor's later `.mud-tooltip-inline`, so short menu items sat side by side since F-2 (found in validation) | Project rule | One line in `project.md` (UI tests) |
+
+### Plugin notes (`plugin`)
+- `[stack: .NET]` feature-build step 14: a warning count is quoted only from the gate or a `--no-incremental` build; an incremental build skips unchanged projects and hides their warnings (F-14).
