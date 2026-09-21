@@ -1,7 +1,7 @@
 ---
 bug: B-10
 feature: F-1
-status: building
+status: validating
 board: 737
 severity: medium
 ---
@@ -91,8 +91,35 @@ Fix the token in the palette, once, as B-8 did for primary (D1).
 ## Open questions
 - (none)
 
+## Screen check (Claude, 2026-09-21)
+Opened through the app host on `/dev/ui`, both themes, colours read from the rendered page after the theme
+transition and measured against the first opaque ancestor:
+
+| Element | Light | Dark |
+|---|---|---|
+| Row action Edit (`button.app-row-action`, on the card) | 6.92 | 4.89 |
+| Row action Delete (error colour, unchanged) | 5.54 | 5.05 |
+| "More" button (`.app-row-more button`) | 6.34 | 5.36 |
+| "More" menu item icons (on the menu surface) | 6.92 | 4.89 |
+| Filter chip remove (`.app-filter-chip-remove`, on the card) | 6.92 | 4.89 |
+
+The user menu was not opened: the pane was signed out. Its item icons use the same rule
+(`.mud-menu-item > .mud-icon-root`) as the "More" menu items measured above.
+
 ## Validation script
-Written at the end of the build.
+1. Start the app from the repository root (same command in Git Bash and PowerShell 7; both run on 2026-09-21,
+   the web app answered 200 on `/dev/ui`): `dotnet run --project src/Hosts/Simulab.AppHost`, then open
+   `https://localhost:7125/dev/ui`.
+2. In the dark theme, in "Tabela de dados e ações por linha": the pencil (Editar) and the "⋮" (Mais ações) icons
+   are clearly visible grey-blue; the bin (Excluir) stays red.
+3. Click "⋮" on a row: the icons of the menu items are as visible as their text.
+4. Find the filter chip ("Usuário: ana@exemplo.com"): its "×" is clearly visible.
+5. Switch to the light theme (sun icon): the same icons read as dark grey-blue, on the card and on the grey page.
+6. Sign in with your own account and open the user menu (top right): the Conta and Sair icons are visible in
+   both themes.
+7. Switch the language to English: the gallery shows English texts, nothing shows a raw key.
+8. Keyboard only: Tab to a row's pencil; the focus ring shows and the tooltip "Editar" (or "Edit") appears.
+   No permission changed in this bug; nothing to check there.
 
 ## Delivery
 - Branch: <bug/B-<number>>
