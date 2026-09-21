@@ -89,6 +89,27 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>F-10: the passwords POST /account-erasures received, in order.</summary>
         public List<string?> ErasureAttempts { get; } = [];
 
+        /// <summary>F-11: what GET /totp answers. Null means 404, the answer while the feature is off.</summary>
+        public TotpStatusResponse? TotpStatus { get; set; }
+
+        /// <summary>F-11: when true, GET /totp answers 500 — a failure, not the switch.</summary>
+        public bool TotpStatusFails { get; set; }
+
+        /// <summary>F-11: what POST /totp/enrolments answers.</summary>
+        public TotpEnrolmentResponse TotpEnrolment { get; set; } = new("JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP", "otpauth://totp/Simulab%3Aana", "data:image/png;base64,iVBORw0KGgo=");
+
+        /// <summary>F-11: the recovery codes a confirmation or a regeneration answers.</summary>
+        public IReadOnlyList<string> RecoveryCodes { get; set; } = [.. Enumerable.Range(0, 10).Select(i => $"AAAA{i}-BBBB{i}")];
+
+        /// <summary>F-11: a failure every confirm, regenerate and disable call answers with. Null means success.</summary>
+        public (HttpStatusCode Status, string Code)? TotpFailure { get; set; }
+
+        /// <summary>F-11: when set, those calls answer 423 with these seconds left.</summary>
+        public int? TotpLockedSeconds { get; set; }
+
+        /// <summary>F-11: the bodies the confirm, regenerate and disable calls received, as raw JSON, in order.</summary>
+        public List<string> TotpBodies { get; } = [];
+
         public IReadOnlyList<HttpRequestMessage> Requests => _requests;
 
         public int CountOf(string route) => _requests.Count(request => request.RequestUri!.AbsolutePath.EndsWith(route, StringComparison.Ordinal));
@@ -172,6 +193,48 @@ public abstract class IdentityPageTestContext : KitTestContext
                 }
 
                 return EraseFailure is { } eraseFailure ? Problem(eraseFailure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            // F-11.
+            if (path.EndsWith("/totp", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                if (TotpStatusFails)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                }
+
+                return TotpStatus is null ? new HttpResponseMessage(HttpStatusCode.NotFound) : Json(TotpStatus);
+            }
+
+            if (path.EndsWith("/totp/enrolments", StringComparison.Ordinal))
+            {
+                return Json(TotpEnrolment);
+            }
+
+            if (path.EndsWith("/totp/enrolments/confirmations", StringComparison.Ordinal)
+                || path.EndsWith("/totp/recovery-codes", StringComparison.Ordinal)
+                || (path.EndsWith("/totp", StringComparison.Ordinal) && request.Method == HttpMethod.Delete))
+            {
+                TotpBodies.Add(await request.Content!.ReadAsStringAsync(cancellationToken));
+
+                if (TotpLockedSeconds is { } totpSeconds)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Locked)
+                    {
+                        Content = JsonContent.Create(
+                            new Dictionary<string, object> { ["status"] = 423, ["code"] = IdentityErrorCodes.AccountLocked, ["retryAfterSeconds"] = totpSeconds },
+                            options: AppJson.Options)
+                    };
+                }
+
+                if (TotpFailure is { } totpFailure)
+                {
+                    return Problem(totpFailure);
+                }
+
+                return request.Method == HttpMethod.Delete
+                    ? new HttpResponseMessage(HttpStatusCode.NoContent)
+                    : Json(new RecoveryCodesResponse(RecoveryCodes));
             }
 
             // F-8.

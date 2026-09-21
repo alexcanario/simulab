@@ -65,6 +65,10 @@ else
                         ValueChanged="@(value => { _language = value ?? _profile.PreferredLanguage; _error = null; })" />
 
         <AppLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</AppLink>
+        @if (_securityAvailable)
+        {
+            <AppLink Href="/account/security" Class="app-account-security d-inline-block mb-4 ml-6">@I["Security.Title"]</AppLink>
+        }
 
         <AppFormActions Saving="_saving" Disabled="@(_fullNameError is not null)" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
     </MudPaper>
@@ -90,6 +94,7 @@ else
 
     private ProfileResponse? _profile;
     private bool _loadFailed;
+    private bool _securityAvailable;
     private string? _fullName;
     private string? _language;
     private string? _fullNameError;
@@ -124,6 +129,9 @@ else
         }
 
         _profile = result.Value;
+
+        // F-11 BR12: the Security link exists only while the Api has the feature on. Any failure hides it.
+        _securityAvailable = (await Api.GetTotpStatusAsync(accessToken!)).IsSuccess;
         Cancel();
     }
 

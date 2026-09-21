@@ -62,6 +62,30 @@ public sealed class AccountPageTests : IdentityPageTestContext
         page.Find("a.app-account-password").ClassList.Should().Contain("app-link", "B-6: a kit link, AA in both themes");
     }
 
+    // F-11 AC13: the Security link follows the Api's switch.
+    [Fact]
+    public void Load_TwoFactorFeatureOn_ShowsTheSecurityLink()
+    {
+        Api.TotpStatus = new TotpStatusResponse(false);
+
+        var page = RenderSignedIn();
+
+        page.Find("a.app-account-security").GetAttribute("href").Should().Be("/account/security");
+        page.Find("a.app-account-security").ClassList.Should().Contain("app-link");
+    }
+
+    // F-11 AC13.
+    [Fact]
+    public void Load_TwoFactorFeatureOff_HasNoSecurityLink()
+    {
+        Api.TotpStatus = null;
+
+        var page = RenderSignedIn();
+
+        page.FindAll("a.app-account-security").Should().BeEmpty();
+        page.Find("a.app-account-password").Should().NotBeNull();
+    }
+
     [Fact]
     public void Load_ApiFails_ShowsTheErrorStateWithTryAgain()
     {

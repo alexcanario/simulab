@@ -50,11 +50,40 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-8: the languages PUT /profile/preferred-language received, in order.</summary>
     public List<string?> SavedLanguages { get; } = [];
 
+    /// <summary>F-11: when true, the password grant answers <c>mfa_required</c> with a challenge.</summary>
+    public bool RequireTotp { get; set; }
+
+    /// <summary>F-11: what the <c>totp</c> grant answers; null issues a token pair.</summary>
+    public string? TotpError { get; set; }
+
+    public string? TotpErrorDescription { get; set; }
+
+    /// <summary>F-11: the form bodies the <c>totp</c> grant received, in order.</summary>
+    public List<string> TotpForms { get; } = [];
+
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var path = request.RequestUri!.AbsolutePath;
+
+        if (path == "/connect/token" && (RequireTotp || TotpForms.Count > 0))
+        {
+            // F-11: the two steps of a sign-in with two-factor on.
+            var form = await request.Content!.ReadAsStringAsync(cancellationToken);
+            if (form.Contains("grant_type=password", StringComparison.Ordinal))
+            {
+                return Json(new { error = IdentityErrorCodes.TotpRequired, challenge = "challenge-1", expires_in = 300 }, HttpStatusCode.BadRequest);
+            }
+
+            if (form.Contains("grant_type=totp", StringComparison.Ordinal))
+            {
+                TotpForms.Add(form);
+                return TotpError is null
+                    ? Json(new { access_token = "access-totp", refresh_token = "refresh-totp", expires_in = 900 })
+                    : Json(new { error = TotpError, error_description = TotpErrorDescription }, HttpStatusCode.BadRequest);
+            }
+        }
 
         if (path == "/connect/token")
         {

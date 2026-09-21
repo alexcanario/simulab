@@ -15,11 +15,61 @@
 
 <div class="app-auth-card">
     <h1 class="app-auth-title">@I["SignIn.Title"]</h1>
-    <p class="app-auth-subtitle">@I["SignIn.Subtitle"]</p>
+    <p class="app-auth-subtitle">@(_challenge is null ? I["SignIn.Subtitle"] : _useRecoveryCode ? I["SignIn.RecoveryCode.Subtitle"] : I["SignIn.Code.Subtitle"])</p>
 
+    @if (_challenge is not null)
+    {
+        @* F-11 UC3, UC4: the second step. The challenge lives in this page's state, never in the URL. *@
+        <AppTextField TValue="string"
+                      Id="sign-in-code"
+                      Label="@(_useRecoveryCode ? I["SignIn.RecoveryCode.Label"] : I["SignIn.Code.Label"])"
+                      Hint="@(_useRecoveryCode ? I["SignIn.RecoveryCode.Hint"] : I["SignIn.Code.Hint"])"
+                      Autocomplete="one-time-code"
+                      MaxLength="AccountLimits.TotpCodeMaxLength"
+                      Required="true"
+                      Disabled="_submitting"
+                      Error="@_codeError"
+                      Value="@_code"
+                      ValueChanged="@(value => { _code = value; _codeError = null; })" />
+
+        <p class="app-sign-in-forgot">
+            <MudButton Variant="Variant.Text" Size="Size.Small" Disabled="_submitting" OnClick="ToggleRecoveryCode" Class="app-sign-in-code-mode">
+                @(_useRecoveryCode ? I["SignIn.Code.UseApp"] : I["SignIn.Code.UseRecoveryCode"])
+            </MudButton>
+        </p>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Size="Size.Large"
+                   Disabled="_submitting"
+                   OnClick="SubmitCodeAsync"
+                   Class="app-sign-in-code-submit">
+            @if (_submitting)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                <span role="status">@I["SignIn.Submitting"]</span>
+            }
+            else
+            {
+                @I["SignIn.Submit"]
+            }
+        </MudButton>
+
+        <MudButton Variant="Variant.Text" FullWidth="true" Disabled="_submitting" OnClick="CancelCode" Class="app-sign-in-code-cancel mt-2">
+            @L["Common.Cancel"]
+        </MudButton>
+    }
+    else
+    {
     @if (_serverError is not null)
     {
         <AppAlert Severity="Severity.Error" Text="@Errors.For(_serverError)" />
+    }
+    else if (_codeFailure is not null)
+    {
+        @* F-11 BR9: the code step spent its challenge, so the next try starts from the password. *@
+        <AppAlert Severity="Severity.Error" Text="@_codeFailure" />
     }
     else if (_locked)
     {
@@ -95,6 +145,7 @@
             @I["SignIn.Submit"]
         }
     </MudButton>
+    }
 </div>
 
 <p class="app-auth-footer-line">@Footer()</p>
@@ -119,6 +170,13 @@
     private bool _sessionEnded;
     private bool _accountErased;
     private bool _passwordChanged;
+
+    // F-11: the code step.
+    private string? _challenge;
+    private string? _code;
+    private string? _codeError;
+    private string? _codeFailure;
+    private bool _useRecoveryCode;
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,6 +209,7 @@
     private async Task SubmitAsync()
     {
         _serverError = null;
+        _codeFailure = null;
         _locked = false;
         _unverified = false;
         _resent = false;
@@ -166,25 +225,98 @@
         _submitting = false;
         _password = null;
 
-        if (!result.IsSuccess)
+        if (result.NeedsTotpCode)
         {
-            if (result.ErrorCode == IdentityErrorCodes.AccountLocked)
-            {
-                _locked = true;
-                _lockedFor = FormatSeconds(result.ErrorDescription);
-            }
-            else if (result.ErrorCode == IdentityErrorCodes.EmailNotVerified)
-            {
-                _unverified = true;
-            }
-            else
-            {
-                _serverError = result.ErrorCode;
-            }
-
+            // F-11 BR9: the password was right; the code step takes over.
+            _challenge = result.Challenge;
+            _code = null;
+            _codeError = null;
+            _useRecoveryCode = false;
             return;
         }
 
+        if (!result.IsSuccess)
+        {
+            ShowFailure(result);
+            return;
+        }
+
+        await FinishAsync(result);
+    }
+
+    /// <summary>
+    /// F-11 UC3, UC4, BR9: trades the challenge and the code for the tokens. The challenge is spent whatever the
+    /// answer, so any failure goes back to the password with the reason.
+    /// </summary>
+    private async Task SubmitCodeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_code))
+        {
+            _codeError = _useRecoveryCode ? I["SignIn.RecoveryCode.Required"].Value : I["SignIn.Code.Required"].Value;
+            return;
+        }
+
+        _submitting = true;
+        var result = await Auth.CompleteTotpSignInAsync(_challenge!, _code.Trim());
+        _submitting = false;
+
+        if (result.IsSuccess)
+        {
+            await FinishAsync(result);
+            return;
+        }
+
+        _challenge = null;
+        _code = null;
+        switch (result.ErrorCode)
+        {
+            case IdentityErrorCodes.TotpCodeInvalid:
+                _codeFailure = I["SignIn.Code.Rejected"].Value;
+                break;
+            case IdentityErrorCodes.TotpChallengeInvalid:
+                _codeFailure = I["SignIn.Code.Expired"].Value;
+                break;
+            default:
+                ShowFailure(result);
+                break;
+        }
+    }
+
+    private void ToggleRecoveryCode()
+    {
+        _useRecoveryCode = !_useRecoveryCode;
+        _code = null;
+        _codeError = null;
+    }
+
+    /// <summary>Back to the password form. The challenge is simply dropped; it expires on its own (BR9).</summary>
+    private void CancelCode()
+    {
+        _challenge = null;
+        _code = null;
+        _codeError = null;
+        _codeFailure = null;
+    }
+
+    private void ShowFailure(TokenResult result)
+    {
+        if (result.ErrorCode == IdentityErrorCodes.AccountLocked)
+        {
+            _locked = true;
+            _lockedFor = FormatSeconds(result.ErrorDescription);
+        }
+        else if (result.ErrorCode == IdentityErrorCodes.EmailNotVerified)
+        {
+            _unverified = true;
+        }
+        else
+        {
+            _serverError = result.ErrorCode;
+        }
+    }
+
+    private async Task FinishAsync(TokenResult result)
+    {
         var session = await Auth.GetSessionAsync(result.AccessToken!);
         if (session is null)
         {

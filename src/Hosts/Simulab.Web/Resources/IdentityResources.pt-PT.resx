@@ -110,4 +110,53 @@
   <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>Isto não pode ser anulado. Escreva a sua palavra-passe atual para confirmar que a conta é sua.</value></data>
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A palavra-passe com que inicia sessão.</value></data>
+  <data name="SignIn.Code.Subtitle" xml:space="preserve"><value>A sua conta usa verificação em dois passos. Introduza o código da sua aplicação de autenticação.</value></data>
+  <data name="SignIn.RecoveryCode.Subtitle" xml:space="preserve"><value>Introduza um dos códigos de recuperação que guardou. Cada código só funciona uma vez.</value></data>
+  <data name="SignIn.Code.Label" xml:space="preserve"><value>Código de seis dígitos</value></data>
+  <data name="SignIn.Code.Hint" xml:space="preserve"><value>O código muda a cada 30 segundos.</value></data>
+  <data name="SignIn.RecoveryCode.Label" xml:space="preserve"><value>Código de recuperação</value></data>
+  <data name="SignIn.RecoveryCode.Hint" xml:space="preserve"><value>Por exemplo, ABCDE-FGHJK.</value></data>
+  <data name="SignIn.Code.UseApp" xml:space="preserve"><value>Usar o código da aplicação</value></data>
+  <data name="SignIn.Code.UseRecoveryCode" xml:space="preserve"><value>Usar um código de recuperação</value></data>
+  <data name="SignIn.Code.Required" xml:space="preserve"><value>Introduza o código.</value></data>
+  <data name="SignIn.RecoveryCode.Required" xml:space="preserve"><value>Introduza um código de recuperação.</value></data>
+  <data name="SignIn.Code.Rejected" xml:space="preserve"><value>O código não foi aceite. Introduza novamente a palavra-passe para tentar outra vez.</value></data>
+  <data name="SignIn.Code.Expired" xml:space="preserve"><value>O início de sessão demorou demasiado. Introduza novamente a palavra-passe.</value></data>
+  <data name="Security.Title" xml:space="preserve"><value>Segurança</value></data>
+  <data name="Security.LoadFailed" xml:space="preserve"><value>Não foi possível carregar as suas definições de segurança.</value></data>
+  <data name="Security.TwoFactor.Title" xml:space="preserve"><value>Verificação em dois passos</value></data>
+  <data name="Security.Off.Explanation" xml:space="preserve"><value>A verificação em dois passos pede, depois da palavra-passe, um código de uma aplicação de autenticação no seu telemóvel. Quem descobrir a sua palavra-passe continua a não conseguir entrar sem o seu telemóvel.</value></data>
+  <data name="Security.Off.TurnOn" xml:space="preserve"><value>Ativar a verificação em dois passos</value></data>
+  <data name="Security.Enrol.Step.Install" xml:space="preserve"><value>Instale uma aplicação de autenticação no telemóvel, como o Google Authenticator, o Microsoft Authenticator ou o 2FAS.</value></data>
+  <data name="Security.Enrol.Step.Scan" xml:space="preserve"><value>Na aplicação, adicione uma conta e leia este código QR.</value></data>
+  <data name="Security.Enrol.QrCode.Alt" xml:space="preserve"><value>Código QR para adicionar a sua conta Simulab a uma aplicação de autenticação</value></data>
+  <data name="Security.Enrol.Secret.Label" xml:space="preserve"><value>Não consegue ler o código? Introduza esta chave na aplicação:</value></data>
+  <data name="Security.Enrol.Step.Confirm" xml:space="preserve"><value>Introduza o código de seis dígitos que a aplicação mostra.</value></data>
+  <data name="Security.Enrol.Confirm" xml:space="preserve"><value>Confirmar e ativar</value></data>
+  <data name="Security.Code.Label" xml:space="preserve"><value>Código de seis dígitos</value></data>
+  <data name="Security.Code.Hint" xml:space="preserve"><value>O código da sua aplicação de autenticação.</value></data>
+  <data name="Security.Code.Required" xml:space="preserve"><value>Introduza o código da aplicação.</value></data>
+  <data name="Security.Code.LabelOrRecovery" xml:space="preserve"><value>Código da aplicação ou código de recuperação</value></data>
+  <data name="Security.Code.HintOrRecovery" xml:space="preserve"><value>Um código de recuperação só funciona uma vez.</value></data>
+  <data name="Security.Code.RequiredOrRecovery" xml:space="preserve"><value>Introduza um código da aplicação ou um código de recuperação.</value></data>
+  <data name="Security.Codes.Title" xml:space="preserve"><value>Códigos de recuperação</value></data>
+  <data name="Security.Codes.ShownOnce" xml:space="preserve"><value>Guarde estes códigos agora. Não os voltará a ver.</value></data>
+  <data name="Security.Codes.Explanation" xml:space="preserve"><value>Se perder o telemóvel, inicie sessão com um destes códigos em vez do código da aplicação. Cada código só funciona uma vez.</value></data>
+  <data name="Security.Codes.Copy" xml:space="preserve"><value>Copiar</value></data>
+  <data name="Security.Codes.Download" xml:space="preserve"><value>Transferir</value></data>
+  <data name="Security.Codes.Copied" xml:space="preserve"><value>Códigos de recuperação copiados.</value></data>
+  <data name="Security.Codes.Saved" xml:space="preserve"><value>Guardei os meus códigos de recuperação</value></data>
+  <data name="Security.Codes.Done" xml:space="preserve"><value>Concluir</value></data>
+  <data name="Security.Codes.Stored" xml:space="preserve"><value>A verificação em dois passos está ativa.</value></data>
+  <data name="Security.On.Since" xml:space="preserve"><value>A verificação em dois passos está ativa desde {0}.</value></data>
+  <data name="Security.On.Enabled" xml:space="preserve"><value>A verificação em dois passos está ativa.</value></data>
+  <data name="Security.On.CodesLeft.One" xml:space="preserve"><value>Resta 1 código de recuperação.</value></data>
+  <data name="Security.On.CodesLeft.Other" xml:space="preserve"><value>Restam {0} códigos de recuperação.</value></data>
+  <data name="Security.On.Regenerate" xml:space="preserve"><value>Gerar novos códigos de recuperação</value></data>
+  <data name="Security.On.Regenerate.Confirm" xml:space="preserve"><value>Gerar novos códigos</value></data>
+  <data name="Security.Off.Title" xml:space="preserve"><value>Desativar a verificação em dois passos</value></data>
+  <data name="Security.Off.Explanation.Danger" xml:space="preserve"><value>Voltará a bastar a palavra-passe para iniciar sessão. A chave da aplicação e os códigos de recuperação deixam de funcionar.</value></data>
+  <data name="Security.Off.Action" xml:space="preserve"><value>Desativar a verificação em dois passos</value></data>
+  <data name="Security.Off.Done" xml:space="preserve"><value>A verificação em dois passos foi desativada.</value></data>
+  <data name="Security.Disable.Password.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
 </root>
