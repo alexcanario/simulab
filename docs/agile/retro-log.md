@@ -54,6 +54,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | 0.0.37 (`fd68a6c`) |
 | ✅ | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | 0.0.37 (`fd68a6c`) |
 | ✅ | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | 0.0.37 (`fd68a6c`) |
+| ⏳ | `[stack: ef-core]` DocGen template: build each model through its design-time factory (snake_case), strip `Module` from the name, drop the `Relational` reference and the `NoWarn`, skip `bin/`/`obj/`, Auth column only with security, orphans are stale | F-15 | |
+| ⏳ | `[profile: modular-monolith]` The route map's OpenAPI document comes from the `/openapi/v1.json` integration test, not from `ApiDescription.Server` at build | F-15 | |
+| ⏳ | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -415,3 +418,16 @@ From 0.0.36 to 0.0.37, run with `/agile:sync` on `main` after F-15 shipped.
 - Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.36 → 0.0.37: the gate's `SKIPPED` verdict and "Honest counts" in section 9).
 - Left alone: `docs/agile/profile.md` (edited here, unchanged upstream since the last sync). Build files did not change upstream.
 - No build: no build file and no rule changed. The rest of 0.0.37 (`gate.js`, the `feature-build` and `feature-ship` steps) comes from the plugin itself.
+
+## 2026-09-21 — F-15 Generated technical docs
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The DocGen template built the EF model with plain `UseNpgsql` options, so the data dictionary came out in PascalCase while the database is snake_case; it also kept `Module` in the module name, referenced `Relational` without a central version, carried a `NoWarn`, searched `bin/`/`obj/` for the OpenAPI document and showed an empty Auth column | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 2 | `Microsoft.Extensions.ApiDescription.Server` starts `Program` at build and failed on the missing `simulab` connection string; change note v2 moved the document to the `/openapi/v1.json` test | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 3 | Refinement concluded "no entity uses `NULLS NOT DISTINCT`" from the callers of `TenantIndexBuilderExtensions`; `users` calls `AreNullsDistinct` directly (AC3 corrected in v2) | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+
+### Plugin notes (`plugin`)
+- `[stack: ef-core]` DocGen template: build each model through the context's `IDesignTimeDbContextFactory` when there is one (conventions such as snake_case live in the options); strip a trailing `Module` from the module name; drop the explicit `Microsoft.EntityFrameworkCore.Relational` reference (no central version, it comes through Npgsql) and the `NoWarn` (it conflicts with rule `build-config`; use `CultureInfo.InvariantCulture`); never read the OpenAPI document from `bin/`/`obj/`; show the Auth column only when the document declares security; a file the generator no longer produces counts as stale (F-15).
+- `[profile: modular-monolith]` The route map's OpenAPI document is written by the existing `/openapi/v1.json` integration test (`WebApplicationFactory`) into `docs/api/`, not by `Microsoft.Extensions.ApiDescription.Server`: build-time generation starts `Program` and fails when it requires connection strings (F-15).
+- `[generic]` feature-refinement step 4: a premise that nothing uses a feature is verified by its effect (the built model, the migration snapshot, the generated output), not by the callers of one helper: code can reach the same effect without it (F-15).
