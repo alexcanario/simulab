@@ -42,7 +42,7 @@ Checked in the code on 2026-09-21, on `main` at `ff22f8f`.
 ## Screens and API
 No screen and no endpoint change. New files only:
 - `tools/Simulab.DocGen/` (console tool, never deployed), listed in `Simulab.slnx` under `/tools/`.
-- `docs/api/Simulab.Api.json` (generated at build).
+- `docs/api/Simulab.Api.json` (written by the Api host test, v2).
 - `docs/architecture/README.md`, `modules.md`, `Identity/{entities,data-dictionary}.md`, `Jobs/{entities,data-dictionary}.md`, `Identity/routes.md`, `System/routes.md`.
 
 ## Acceptance criteria
@@ -66,6 +66,7 @@ No screen and no endpoint change. New files only:
 - 2026-09-21 - ~~The OpenAPI document comes from `Microsoft.Extensions.ApiDescription.Server` 10.0.12 at the Api build.~~ Superseded by v2: no new package; the Api host test that fetches `/openapi/v1.json` writes `docs/api/Simulab.Api.json` - owner; see change note v2.
 - 2026-09-21 - Each EF model is built through the context's `IDesignTimeDbContextFactory` when it has one (both do), falling back to plain Npgsql options - technical; the template's plain options skip `UseSnakeCaseNamingConvention()`, and the dictionary came out in PascalCase, unlike the database.
 - 2026-09-21 - Files under `docs/architecture/` that the generator no longer produces count as stale and are removed on write - technical; BR1 says every file there is generated, so an orphan (a module removed) must not linger.
+- 2026-09-21 - The route map shows an Auth column only when the OpenAPI document declares security on some operation - technical; today it declares none (the endpoints use `RequireAuthorization`, which the document does not describe), so an empty column would read as "anonymous", which is false.
 - 2026-09-21 - The tool assembly joins `SolutionAssemblies` (vocabulary and forbidden-reference rules) - technical; it lives in the solution, so the same naming rules hold.
 - 2026-09-21 - Business descriptions per table and column (`HasComment`) stay out, as an idea - owner; it needs a migration and text review; the dictionary is useful without it.
 - 2026-09-21 - `tools/` becomes an allowed root folder in `SolutionLayoutTests`, and the tool is listed in `Simulab.slnx` under `/tools/` - technical; the solution build then compiles the tool, so it cannot rot unnoticed.

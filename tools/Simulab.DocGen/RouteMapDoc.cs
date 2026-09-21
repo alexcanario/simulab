@@ -31,7 +31,7 @@ internal static partial class RouteMapDoc
             return [];
         }
 
-        var byArea = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
+        var byArea = new SortedDictionary<string, List<Operation>>(StringComparer.Ordinal);
         foreach (var path in paths.EnumerateObject())
         {
             var segments = path.Name.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -46,21 +46,28 @@ internal static partial class RouteMapDoc
                 var summary = operation.Value.TryGetProperty("summary", out var s) ? s.GetString()
                     : operation.Value.TryGetProperty("operationId", out var id) ? id.GetString() : "";
                 var responses = operation.Value.TryGetProperty("responses", out var r) ? string.Join(", ", r.EnumerateObject().Select(x => x.Name)) : "";
-                var secured = operation.Value.TryGetProperty("security", out var security) && security.GetArrayLength() > 0 ? "yes" : "";
+                var secured = operation.Value.TryGetProperty("security", out var security) && security.GetArrayLength() > 0;
                 if (!byArea.TryGetValue(area, out var rows))
                 {
                     byArea[area] = rows = [];
                 }
 
-                rows.Add($"| `{operation.Name.ToUpperInvariant()}` | `{path.Name}` | {summary} | {responses} | {secured} |");
+                rows.Add(new(operation.Name.ToUpperInvariant(), path.Name, summary ?? "", responses, secured));
             }
         }
 
+        // An Auth column only when the document declares security somewhere: without security schemes every row
+        // would read as anonymous, which is false for endpoints that call RequireAuthorization.
+        var showAuth = byArea.Values.SelectMany(rows => rows).Any(o => o.Secured);
         return byArea.Select(pair =>
         {
             var sb = new StringBuilder();
-            sb.Append(CultureInfo.InvariantCulture, $"# {pair.Key} — routes\n\nGenerated from `{source}`. Do not edit.\n\n| Verb | Route | Summary | Responses | Auth |\n|---|---|---|---|---|\n");
-            foreach (var row in pair.Value.Order(StringComparer.Ordinal))
+            sb.Append(CultureInfo.InvariantCulture, $"# {pair.Key} — routes\n\nGenerated from `{source}`. Do not edit.\n\n");
+            sb.Append(showAuth ? "| Verb | Route | Summary | Responses | Auth |\n|---|---|---|---|---|\n" : "| Verb | Route | Summary | Responses |\n|---|---|---|---|\n");
+            var rows = pair.Value
+                .Select(o => $"| `{o.Verb}` | `{o.Route}` | {o.Summary} | {o.Responses} |" + (showAuth ? $" {(o.Secured ? "yes" : "")} |" : ""))
+                .Order(StringComparer.Ordinal);
+            foreach (var row in rows)
             {
                 sb.Append(row).Append('\n');
             }
@@ -68,6 +75,8 @@ internal static partial class RouteMapDoc
             return (pair.Key, sb.ToString());
         }).ToList();
     }
+
+    private sealed record Operation(string Verb, string Route, string Summary, string Responses, bool Secured);
 
     // The committed document under docs/api/; build output (bin/, obj/) never counts, a stale copy there could win.
     private static string? FindDocument(string root)
