@@ -52,6 +52,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
 | ✅ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
 | ⏳ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | — |
+| ⏳ | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | — |
+| ⏳ | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -395,3 +397,15 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 
 ### Plugin notes (`plugin`)
 - `[stack: .NET]` feature-build step 14: a warning count is quoted only from the gate or a `--no-incremental` build; an incremental build skips unchanged projects and hides their warnings (F-14).
+
+## 2026-09-21 — B-10 Icon buttons below 3:1 contrast
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | Board 737 was set to `Active` at approval and `Resolved` at validation; `references/board.md` maps them to `New` and `Active`, and it was not read before the change | Nothing | One-off; the reference already holds the mapping |
+| 2 | After `git stash` / `stash pop`, `dotnet test --no-build` ran the binaries built without the change: 324 tests instead of 328 | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 3 | `gate.js stop` run by hand printed nothing when no file was marked, though the skill says its last line is always GREEN or RED; a silent gate proves nothing | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+
+### Plugin notes (`plugin`)
+- `[stack: .NET]` feature-build step 10: after `git stash` / `stash pop` (or any branch switch), rebuild before running tests; `--no-build` runs the binaries of the other tree and the counts lie (B-10: 324 of 328).
+- `[generic]` gate.js: every mode ends with a verdict line; `stop` with nothing marked prints `agile gate SKIPPED: nothing marked` instead of exiting silently (B-10).
