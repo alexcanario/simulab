@@ -197,7 +197,9 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-.app-nav-tooltip {
+/* One menu item per line. MudBlazor's own .mud-tooltip-inline (inline-block) came later with the same weight
+   and won, so short items sat side by side (F-14 validation); two classes outweigh it. */
+.mud-tooltip-root.app-nav-tooltip {
     display: block;
 }
 

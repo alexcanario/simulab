@@ -131,6 +131,7 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - 2026-09-21 — Review (major, confirmed, fixed): `role_change.period_invalid` had no text in the three languages; added, and `RoleResourcesTests` now also checks `role_change.*` codes and every `RoleHistory.Action.*` (seen failing in the three cultures first).
 - 2026-09-21 — Review (major, confirmed, fixed): the missing-key test did not cover the new code prefix — same fix as above.
 - 2026-09-21 — Review (minor, fixed): nothing pinned the page's policy; `AdminPagesAuthorizationTests` asserts that every `/admin/*` page (Roles, Users, Role history) requires `identity.roles.manage`. The loading state is the kit's (`AppDataTableTests`); the coverage table is below.
+- 2026-09-21 — Validation (owner, fixed): "Roles" and "Users" sat on one line in the menu. Cause: MudBlazor's `.mud-tooltip-inline` (inline-block) outweighed `.app-nav-tooltip { display: block }` — present since F-2, visible once short items fit side by side. The rule is now `.mud-tooltip-root.app-nav-tooltip`; measured on screen (each item 230 px wide, one per line) and pinned by `NavMenuStylesTests` (seen failing without the fix).
 - 2026-09-21 — Review (minor, rejected): "the GIN index is never used because the filter is `= ANY`" — Npgsql generates `role_ids @> ARRAY[@id]::uuid[]`, which GIN serves; the decision text now says so.
 
 ## Out of scope
@@ -150,7 +151,7 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - What: (1) BR8: the role filter lists every current role plus the deleted roles found in the trail (not only the roles found in the trail). (2) The address keys are `?role=`, `?user=`, `?author=`, `?days=` (not `roleId`/`userId`), as F-9's `/admin/users?role=`. (3) Row actions on `/admin/roles` are Edit, Delete, History: the kit always puts Edit then Delete first (rule `ui`). (4) The Changes cell says "Added: …" / "Removed: …" (`RoleHistory.Change.Added` / `.Removed`, three languages) instead of "+ …" / "− …", which a screen reader reads as symbols.
 - Why: (1) the History action on a role with no entry yet (a seed role) must open the page with that role selected, and a role absent from the list would show an empty filter; (2)–(4) found while building on the existing kit and pages.
 - Affected: BR8 and the Screens section; no acceptance criterion changes.
-- Re-approved: (pending — owner)
+- Re-approved: 2026-09-21 (owner, "Aprovado com ressalva")
 
 ## Validation script
 You need your Admin account and a second, ordinary account (as in F-9), used in a private window.
