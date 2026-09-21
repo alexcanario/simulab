@@ -1,7 +1,7 @@
 ---
 bug: B-8
 feature: F-1
-status: building
+status: validating
 board: 734
 severity: medium
 ---
@@ -99,3 +99,32 @@ Fix the colour in the palette, once, instead of a fifth site-by-site patch (D1).
 
 ## Open questions
 None.
+
+## Screen check (Claude, 2026-09-21)
+Opened through the app host on `/dev/ui`, both themes, colours read from the rendered page and measured:
+
+| Element | Light | Dark |
+|---|---|---|
+| Outlined primary on the card (`app-retry`, `app-empty-action`) | 5.36 | 6.04 |
+| Outlined primary on the page ("Show snackbar") | 4.91 | 6.63 |
+| Outlined primary on hover (6% primary tint), card / page | 4.95 / 4.54 | 5.51 / 6.09 |
+| Filled primary (`app-primary-action`, `app-form-save`) at rest | 5.36 (white) | 5.74 (dark ink) |
+| Filled primary on hover (`PrimaryDarken`) | 7.14 | 4.94 |
+| Skip link on the surface | 5.36 | 6.04 |
+
+The auth pages (`.app-auth-name`, "Resend" on `/check-email`) were not opened: the pane had a signed-in
+session and signing it out was not done. They read the same palette variables measured above.
+
+## Validation script
+1. Start the app from the repository root (same command in Git Bash and PowerShell 7):
+   `dotnet run --project src/Hosts/Simulab.AppHost`, then open `https://localhost:7125`.
+2. Signed out, on `/sign-in` in the light theme: the "Entrar" button is blue with white text and the app name
+   "Simulab" in the top bar is readable blue.
+3. Switch to the dark theme (moon icon): "Entrar" is now light blue with dark text; hover it, the text stays readable.
+4. Sign in with your own account, open `/dev/ui` in the dark theme: "Tentar novamente" and "Adicionar" in the
+   states section, and "Mostrar notificação" below, read as light blue on the card and on the page.
+5. Switch to the light theme: the same three buttons read as blue, "Mostrar notificação" on the grey page background.
+6. Keyboard only: reload, press Tab once: the "Pular para o conteúdo" link appears readable; activate it and
+   Tab on to "Tentar novamente".
+7. Switch the language to English: the gallery shows English texts, nothing shows a raw key.
+8. No permission changed in this bug; nothing to check there.
