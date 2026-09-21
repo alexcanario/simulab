@@ -3,7 +3,7 @@ feature: F-11
 epic: Foundation and identity
 status: building
 board: 715
-version: 2
+version: 3
 ---
 # Two-factor sign-in with an authenticator app (TOTP)
 
@@ -38,7 +38,7 @@ Give a user who wants it a second barrier on their account, without turning it i
 - BR2 Enrolment is two steps: the app asks for a secret and shows it as a QR code and as text; two-factor turns on only when the user sends a code that the secret validates. An unconfirmed secret grants nothing and is replaced by the next enrolment attempt.
 - BR3 The secret is stored encrypted (AES-256-GCM) with the key in `Identity:TotpEncryptionKey`. The key is required when the feature is on and is validated at startup; without it the Api refuses to start rather than storing secrets in the clear.
 - BR4 A code is valid for its own 30-second step and one step either side (clock skew). A code already accepted for an account cannot be accepted again: the last accepted step is stored and a code at or below it is refused.
-- BR5 Turning two-factor on generates ten single-use recovery codes, shown once and never again. They are stored the way ASP.NET Identity stores them (hashed, in `user_tokens`).
+- BR5 Turning two-factor on generates ten single-use recovery codes, shown once and never again. Only the SHA-256 hash of each code is stored (in `user_tokens`); the plain codes exist only in the answer that shows them (v3).
 - BR6 A recovery code is accepted wherever a six-digit code is, at sign-in and to turn two-factor off, and is consumed on use.
 - BR7 Regenerating the recovery codes needs a valid code or recovery code; the previous ten stop working at once.
 - BR8 Turning two-factor off needs the current password **and** a valid code or recovery code. It clears the secret, the flag, the recovery codes and the last accepted step.
@@ -66,7 +66,7 @@ Give a user who wants it a second barrier on their account, without turning it i
 
 ## Acceptance criteria
 - AC1 Given a signed-in user with the feature on, when they start enrolment, then they get a secret, an `otpauth://` URI carrying the account's email and a QR image, and two-factor is still off. (UC1, BR2)
-- AC2 Given an enrolment in progress, when the user confirms with a code generated from that secret, then two-factor is on, the stored secret is encrypted (the column does not contain the plain secret) and ten recovery codes come back. (UC1, UC2, BR2, BR3, BR5)
+- AC2 Given an enrolment in progress, when the user confirms with a code generated from that secret, then two-factor is on, the stored secret is encrypted (the column does not contain the plain secret) and ten recovery codes come back, none of which appears in plain text in `user_tokens`. (UC1, UC2, BR2, BR3, BR5)
 - AC3 Given an enrolment in progress, when the user confirms with a wrong code, then the answer is `totp.code_invalid`, two-factor stays off and the access-failure count went up. (UC1, BR10)
 - AC4 Given a user with two-factor on, when they sign in with the right password, then no tokens are issued: the answer is `mfa_required` with a challenge; and when the challenge and a valid code are sent, then the tokens are issued. (UC3, BR9)
 - AC5 Given a challenge, when it is used a second time, or after 5 minutes, or with another account's code, then it is refused with `totp.challenge_invalid` and no tokens are issued. (BR9)
@@ -93,12 +93,14 @@ Give a user who wants it a second barrier on their account, without turning it i
 - 2026-09-20 — The secret is encrypted at rest with a configuration key — owner's choice; a database dump must not hand over anybody's second factor. Operational consequence, to record in `docs/infra.md`: losing the key invalidates every enrolment.
 - 2026-09-20 — Enrolment lives on its own page `/account/security` — owner's choice; a QR code, a manual secret, a code field and ten recovery codes do not fit a dialog (rule `ui-project`).
 - 2026-09-20 — The challenge between the password and the code lasts 5 minutes and is single-use, kept in Redis — owner's choice; long enough to pick up the phone, short enough not to leave a half-open door.
-- 2026-09-20 — New packages, approved by the owner (rule `build-config`): `Otp.NET` 1.4.0 (MIT) and `QRCoder` 1.6.0 (MIT). No new test package: the encryption comes from .NET and the recovery codes from ASP.NET Identity.
+- 2026-09-20 — New packages, approved by the owner (rule `build-config`): `Otp.NET` 1.4.0 (MIT) and `QRCoder` 1.6.0 (MIT). No new test package: the encryption and the recovery-code hashes come from .NET.
 - 2026-09-20 — The account reuses `TwoFactorEnabled` from `IdentityUser` instead of Simulae's `MfaEnabled`; the new columns are the encrypted secret, the instant it was turned on and the last accepted step — one flag, not two.
 - 2026-09-20 — The second step is a custom OpenIddict grant `totp` on `/connect/token`, not a new REST route: it issues tokens, which is what that endpoint is for, and the page already talks to it.
 - 2026-09-20 — The replay rule (BR4) is ours, not Simulae's: without it a code works for up to 90 seconds after being used.
 - 2026-09-20 — Approved by the owner.
 - 2026-09-21 — Package versions raised to the latest stable releases, `Otp.NET` 1.4.1 and `QRCoder` 1.8.0 (both MIT, the versions Simulae runs) — owner's choice at build start; the approved 1.4.0 and 1.6.0 were behind, and rule `build-config` asks for the latest stable release when a package is added.
+- 2026-09-21 — Build: the flag is written through the entity, not `UserManager.SetTwoFactorEnabledAsync` — that method renews the security stamp, and the refresh grant ends every session whose stamp changed (F-7 BR9), which would break BR11.
+- 2026-09-21 — Build: the Web does not read `Identity:TotpEnabled`; it asks the Api (`GET /api/v1/identity/totp`, 404 while off) — one switch in one host, so the two can never disagree.
 
 ## Out of scope
 - Google sign-in — F-20 (AB#733), refined when the Google Cloud credentials exist.
@@ -112,6 +114,12 @@ Give a user who wants it a second barrier on their account, without turning it i
 - (none)
 
 ## Change notes
+### v3 — 2026-09-21
+- What: recovery codes are generated by the module and only their SHA-256 hashes are stored in `user_tokens` (helper `SecureToken`), instead of ASP.NET Identity's built-in recovery codes.
+- Why: false premise found at build start. BR5 said Identity stores the codes hashed; it does not — `UserStoreBase.ReplaceCodesAsync` joins them in plain text into one `user_tokens` row, so a database dump would hand over every second factor. Owner chose option A (our own hashing) over B (accept plain text).
+- Affected: BR5, AC2; other criteria unchanged.
+- Re-approved: 2026-09-21 (owner's answer A).
+
 ### v2 — 2026-09-20
 - What: the item drops Google sign-in and becomes TOTP only; the file is renamed `F-11-two-factor-totp.md`.
 - Why: refinement found that neither feature exists in Simulab (the summary implied a flag flip), that Google needs credentials the owner has to create outside the repository, and that a fully switched-off feature cannot pass the validation gate.
