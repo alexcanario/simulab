@@ -229,6 +229,7 @@ public sealed class RoleChangeTrailTests : IdentityApiTests
         entries[1].Added.Single().Name.Should().Be(first);
         var filters = (await reader.GetFromJsonAsync<RoleChangeFiltersResponse>($"{RoleChanges}/filters?userId={target.Id}", AppJson.Options))!;
         filters.Roles.Should().Contain(option => option.Id == role.Id && option.IsDeleted);
+        filters.Roles.Should().Contain(option => option.Name == IdentityRoles.Student && !option.IsDeleted, "every current role is offered");
         filters.Authors.Should().Contain(new RoleChangeUserResponse(author.Id, null));
         filters.User.Should().Be(new RoleChangeUserResponse(target.Id, null));
     }

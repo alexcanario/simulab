@@ -121,6 +121,13 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - 2026-09-21 — Claude: the three handlers compute the difference and add the entry through `IRoleAdministrationStore` inside `RunExclusiveAsync`, before `SaveChangesAsync`, so the rollback of BR8b also removes the entry (BR3). The author is `ICurrentUser`.
 - 2026-09-21 — Claude: `role_name` stores the name at the moment (the new name on a rename) — role names are not personal data, and a renamed or deleted role must still read correctly (BR8).
 - 2026-09-21 — Approved by the owner ("aprovo F-14").
+- 2026-09-21 — Claude (build): `RoleChange` inherits `TenantEntity` like every module entity (rule `project`, same as `ConsentRecord`), so the table also has the tenant, audit and soft-delete columns; "when" and "author" are its `created_at`/`created_by`, filled by the F-3 interceptor from `TimeProvider` and `ICurrentUser` — no separate `occurred_at`/`author_id` columns. Nothing ever updates or deletes the row. `role_ids` holds the role itself for role entries too, so the role filter is one `= ANY` over the GIN index. `added`/`removed` are owned JSON collections (`jsonb`).
+- 2026-09-21 — Claude (build): the difference (BR2, BR3) is computed in the domain (`RoleChange.RoleUpdated` / `UserRolesChanged` return null when nothing changed); the store gained `PermissionsOfAsync`, `RolesOfUserAsync`, `RoleNamesAsync` and `AddRoleChange`.
+- 2026-09-21 — Claude (build): `RoleChangeActions` in Contracts carries the action names the screen translates; a test pins them to the domain enum.
+- 2026-09-21 — Claude (build): times are shown in the browser's time zone (rule `i18n`): a new scoped `UserTimeZone` asks `simulabShell.timeZone()` once per circuit, after the first render; until then, or if the browser does not answer, times are UTC. No such service existed.
+- 2026-09-21 — Claude (build): the user filter chip is a new kit component `AppFilterChip` (text + remove button with tooltip and accessible name `Common.RemoveFilter`), shown in the gallery (`gallery-fields`) and tested; icon `AppIcons.History` (Material Outlined `History`) added.
+- 2026-09-21 — Claude (build): Web → API wiring checked through the app host: migration `AddRoleChanges` applied on the local database, `/openapi/v1.json` 200 with both new routes, both routes 401 without a token, `/admin/role-history` redirects an anonymous visitor to sign-in. **Not verified by Claude:** the signed-in page itself — signing in needs a password, which Claude does not type; it is in the validation script.
+- 2026-09-21 — Found during build, not fixed here: the theme token `ActionDefault` (every icon button: row actions, the chip's remove button) is 1.94:1 on the dark surface (`#404E6A` on `#172035`) and 2.97:1 on white (`#8A96B0`), under the 3:1 WCAG asks for icons. Pre-existing since F-1; proposed as a bug.
 
 ## Out of scope
 - CSV or other export of the trail.
@@ -135,9 +142,22 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - (none)
 
 ## Change notes
+### v2 — 2026-09-21
+- What: (1) BR8: the role filter lists every current role plus the deleted roles found in the trail (not only the roles found in the trail). (2) The address keys are `?role=`, `?user=`, `?author=`, `?days=` (not `roleId`/`userId`), as F-9's `/admin/users?role=`. (3) Row actions on `/admin/roles` are Edit, Delete, History: the kit always puts Edit then Delete first (rule `ui`). (4) The Changes cell says "Added: …" / "Removed: …" (`RoleHistory.Change.Added` / `.Removed`, three languages) instead of "+ …" / "− …", which a screen reader reads as symbols.
+- Why: (1) the History action on a role with no entry yet (a seed role) must open the page with that role selected, and a role absent from the list would show an empty filter; (2)–(4) found while building on the existing kit and pages.
+- Affected: BR8 and the Screens section; no acceptance criterion changes.
+- Re-approved: (pending — owner)
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+You need your Admin account and a second, ordinary account (as in F-9), used in a private window.
+1. Start the app host — Git Bash and PowerShell 7, same command: `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard URL is printed; the Web answers at https://localhost:7125. Sign in as Admin → Administration shows "Roles", "Users" and "Role history". Open "Role history" → "No role change has been recorded yet." (or earlier entries, if you already changed something today).
+2. On "Roles", Add "Revisor" with "Manage roles and user roles"; then Edit it: rename to "Revisor sênior" and untick the permission, Save. Click its **History** action → the page opens filtered by that role with 2 entries, newest first: "Role changed" (Name: Revisor → Revisor sênior; Removed: Manage roles and user roles) and "Role created" (Added: Manage roles and user roles); "Changed by" is your email and the time is your local time.
+3. On "Users", Edit roles of the second account: tick Curator, Save. Click **History** on that row → a chip "User: <email>" replaces the search box and one entry shows "User's roles changed" (Added: Curator). Remove the chip with its × → the search box is back and every entry is listed.
+4. On "Users", Edit roles on your own row, untick Admin, Save → the last-manager error; Cancel. Back on "Role history" → no new entry.
+5. Filters: pick "Changed by" = your email and "Period" = Last 7 days → your entries; pick Role = "Admin" → only entries that added or removed Admin (or "No change matches these filters."). Reload the page → the filters stay (they are in the address).
+6. Switch to pt-BR, then pt-PT → "Histórico de papéis" / "Histórico de perfis", "Papel alterado" / "Perfil alterado"; toggle dark mode → table, filters and chip legible in both themes.
+7. Permission check: in the private window, signed in with the second account (now Curator) → no "Role history" item, and `/admin/role-history` shows "Page not found".
+8. Keyboard only on "Role history": Tab through the search box, the three filters (arrow keys pick a value), the column "When" sort button and the pager, each with a visible focus ring; open a user's History and remove the chip with Enter.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

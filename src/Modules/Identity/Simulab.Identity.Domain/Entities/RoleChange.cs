@@ -86,6 +86,7 @@ public sealed class RoleChange : TenantEntity
             RoleIds = [roleId]
         };
 
+    /// <param name="userId">The user whose roles changed.</param>
     /// <param name="rolesBefore">The roles the user held, by id, with their names.</param>
     /// <param name="rolesAfter">The roles the user holds now, by id, with their names.</param>
     public static RoleChange? UserRolesChanged(
