@@ -46,6 +46,51 @@ public sealed class ThemeContrastTests
         Contrast(colours.Item2.ToString(), colours.Item1.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForText);
     }
 
+    public static TheoryData<string, string, string> PrimaryTextOnItsSurfaces()
+    {
+        var light = Theme.PaletteLight;
+        var dark = Theme.PaletteDark;
+        return new TheoryData<string, string, string>
+        {
+            { "light on surface", light.Primary.ToString(), light.Surface.ToString() },
+            { "light on background", light.Primary.ToString(), light.Background.ToString() },
+            { "dark on surface", dark.Primary.ToString(), dark.Surface.ToString() },
+            { "dark on background", dark.Primary.ToString(), dark.Background.ToString() }
+        };
+    }
+
+    /// <summary>
+    /// B-8: the primary colour is the text of an outlined or text button, the kit's "Try again" and the app name
+    /// in the auth bar. At 3.53:1 on the dark card it had been patched away site by site (F-7, B-6, F-9, F-11).
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(PrimaryTextOnItsSurfaces))]
+    public void PrimaryText_ReadsAtAaOnItsSurface(string what, string foreground, string background)
+    {
+        Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForText, $"primary text must be AA readable ({what})");
+    }
+
+    public static TheoryData<string, string, string> PrimaryContrastTextOnItsFills()
+    {
+        var light = Theme.PaletteLight;
+        var dark = Theme.PaletteDark;
+        return new TheoryData<string, string, string>
+        {
+            { "light at rest", light.PrimaryContrastText.ToString(), light.Primary.ToString() },
+            { "light on hover", light.PrimaryContrastText.ToString(), light.PrimaryDarken },
+            { "dark at rest", dark.PrimaryContrastText.ToString(), dark.Primary.ToString() },
+            { "dark on hover", dark.PrimaryContrastText.ToString(), dark.PrimaryDarken }
+        };
+    }
+
+    /// <summary>And a filled primary button puts its contrast text on the primary colour, and on its darken tone on hover.</summary>
+    [Theory]
+    [MemberData(nameof(PrimaryContrastTextOnItsFills))]
+    public void PrimaryContrastText_ReadsAtAaOnThePrimaryColour(string what, string foreground, string background)
+    {
+        Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForText, $"filled primary button text must be AA readable ({what})");
+    }
+
     private static double Contrast(string foreground, string background)
     {
         var first = Luminance(foreground);
