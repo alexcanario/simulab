@@ -3,7 +3,7 @@ feature: F-15
 epic: Foundation and identity
 status: building
 board: 728
-version: 1
+version: 2
 ---
 # Generated technical docs
 
@@ -34,7 +34,7 @@ Checked in the code on 2026-09-21, on `main` at `ff22f8f`.
 - BR2 The generator produces the four documents: `modules.md`; `<Module>/entities.md` and `<Module>/data-dictionary.md` for every `DbContext`; `<Area>/routes.md` for every area under `/api/v1/`.
 - BR3 The module name is the context type name without `DbContext`, `Context` and a trailing `Module` (`IdentityModuleDbContext` → `Identity`, `JobsDbContext` → `Jobs`).
 - BR4 The route map covers only the API described by the OpenAPI document (`/api/v1/...`); Blazor pages and the Web host's `/account` endpoints are not listed.
-- BR5 The OpenAPI document is produced by the Api build into `docs/api/Simulab.Api.json` and committed with the change that produced it (rule `git`, generated files).
+- BR5 The OpenAPI document is written to `docs/api/Simulab.Api.json` by the Api host test that fetches `/openapi/v1.json` (test host with containers) and committed with the change that produced it (rule `git`, generated files). `/agile:ship` runs the full suite before DocGen, so the file is current when the route map is generated.
 - BR6 `--check` exits 1 and lists the stale files when any generated file differs from what the code produces now; exits 0 and writes nothing otherwise. It never needs a database, a container or a running host.
 - BR7 The check runs in `/agile:ship` only (definition of done), not in the Stop hook and not in the test suite.
 - BR8 A second run with no code change writes nothing (output is deterministic: stable ordering, `\n` line endings).
@@ -48,8 +48,8 @@ No screen and no endpoint change. New files only:
 ## Acceptance criteria
 - AC1 (BR2, UC1) Given the solution builds, when the generator runs, then `docs/architecture/` holds `README.md`, `modules.md`, `Identity/entities.md`, `Identity/data-dictionary.md`, `Jobs/entities.md`, `Jobs/data-dictionary.md`, `Identity/routes.md` and `System/routes.md`, and the README links each of them.
 - AC2 (BR3) Given `IdentityModuleDbContext` and `JobsDbContext`, when the module name is derived, then it is `Identity` and `Jobs`.
-- AC3 (BR2) Given the Identity model, when the data dictionary is rendered, then every table of schema `identity` appears with its columns, keys and indexes; and given a test model with a unique index built by `TenantIndexBuilderExtensions` (no real entity uses it today), the index line shows `NULLS NOT DISTINCT`.
-- AC4 (BR4, BR5) Given the Api is built, when the build finishes, then `docs/api/Simulab.Api.json` exists and the route map lists every `/api/v1/identity/...` and `/api/v1/system/...` operation and nothing outside `/api/v1/`.
+- AC3 (BR2) Given the Identity model, when the data dictionary is rendered, then every table of schema `identity` appears with its columns (snake_case, as in the database), keys and indexes, and the tenant unique index `ux_users_tenant_normalized_email` shows `NULLS NOT DISTINCT`.
+- AC4 (BR4, BR5) Given the Api host tests run, when the OpenAPI test finishes, then `docs/api/Simulab.Api.json` equals the served document, and the route map lists every `/api/v1/identity/...` and `/api/v1/system/...` operation and nothing outside `/api/v1/`.
 - AC5 (BR6) Given the docs are up to date, when `--check` runs, then it exits 0 and no file changes.
 - AC6 (BR6) Given a generated file differs from the code (e.g., a column added to the model), when `--check` runs, then it exits 1 and names that file.
 - AC7 (BR8) Given no code change, when the generator runs twice, then the second run reports 0 files written.
@@ -63,7 +63,10 @@ No screen and no endpoint change. New files only:
 - 2026-09-21 - The hand-written C4 overview (context and containers) comes later, as an idea - owner; with a single business module today it adds little; more useful once the exam and coach modules exist.
 - 2026-09-21 - The route map covers only `/api/v1` from the OpenAPI document - owner; the template already does it; Blazor pages would need a second generator to maintain.
 - 2026-09-21 - `--check` runs only in `/agile:ship` - owner; the definition of done already asks for it, and building and running the tool would break the 30 s budget of the Stop hook's unit tests.
-- 2026-09-21 - The OpenAPI document comes from `Microsoft.Extensions.ApiDescription.Server` 10.0.12 (MIT, latest stable on nuget.org on 2026-09-21), written to `docs/api/Simulab.Api.json` at the Api build and committed - owner; the owner's yes for the package (rule `build-config`) is given here. Risk: build-time generation starts the Api's host builder without Redis or PostgreSQL; if it fails and cannot be fixed without touching production startup, the fallback is the existing `/openapi/v1.json` test writing the file, recorded as a change note.
+- 2026-09-21 - ~~The OpenAPI document comes from `Microsoft.Extensions.ApiDescription.Server` 10.0.12 at the Api build.~~ Superseded by v2: no new package; the Api host test that fetches `/openapi/v1.json` writes `docs/api/Simulab.Api.json` - owner; see change note v2.
+- 2026-09-21 - Each EF model is built through the context's `IDesignTimeDbContextFactory` when it has one (both do), falling back to plain Npgsql options - technical; the template's plain options skip `UseSnakeCaseNamingConvention()`, and the dictionary came out in PascalCase, unlike the database.
+- 2026-09-21 - Files under `docs/architecture/` that the generator no longer produces count as stale and are removed on write - technical; BR1 says every file there is generated, so an orphan (a module removed) must not linger.
+- 2026-09-21 - The tool assembly joins `SolutionAssemblies` (vocabulary and forbidden-reference rules) - technical; it lives in the solution, so the same naming rules hold.
 - 2026-09-21 - Business descriptions per table and column (`HasComment`) stay out, as an idea - owner; it needs a migration and text review; the dictionary is useful without it.
 - 2026-09-21 - `tools/` becomes an allowed root folder in `SolutionLayoutTests`, and the tool is listed in `Simulab.slnx` under `/tools/` - technical; the solution build then compiles the tool, so it cannot rot unnoticed.
 - 2026-09-21 - Drop the template's explicit `Microsoft.EntityFrameworkCore.Relational` reference - technical; it has no central version and arrives through `Npgsql.EntityFrameworkCore.PostgreSQL`.
@@ -77,5 +80,13 @@ No screen and no endpoint change. New files only:
 - Blazor pages and the Web host's `/account` endpoints in the route map.
 - Running `--check` in the Stop hook or the test suite.
 - Any change to production behavior, screens or the app manual.
+
+## Change notes
+
+### v2 — 2026-09-21
+- What: the OpenAPI document is no longer produced at the Api build; the Api host test that fetches `/openapi/v1.json` writes `docs/api/Simulab.Api.json`. No new package. AC3 checks the real `users` tenant unique index instead of a test model.
+- Why: with `Microsoft.Extensions.ApiDescription.Server` 10.0.12, `dotnet-getdocument` starts the Api host at build and `src/Hosts/Simulab.Api/Program.cs:23` throws `System.InvalidOperationException: The connection string 'simulab' is missing.` (build exit 1). Fixing it would touch production startup and start the host on every Api build. The AC3 premise "no real entity uses it today" was false: `ux_users_tenant_normalized_email` and `ux_users_tenant_normalized_user_name` are `NULLS NOT DISTINCT`.
+- Affected: BR5, AC3, AC4, the package decision. Package change reverted (`Simulab.Api.csproj`, `Directory.Packages.props`).
+- Re-approved by the owner on 2026-09-21.
 
 ## Open questions
