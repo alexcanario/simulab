@@ -1,7 +1,7 @@
 ---
 bug: B-9
 feature: F-1
-status: refining
+status: approved
 board: 735
 severity: medium
 ---
@@ -138,3 +138,5 @@ None.
 
 ## Delivery
 - Branch: <bug/B-9>
+- Approved by the owner on 2026-09-21. The file stays uncommitted on disk until B-8 is merged: the
+  checkout is on `bug/B-8` (validating) and the owner asked not to switch branches before that merge.
