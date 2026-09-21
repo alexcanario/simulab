@@ -1,7 +1,7 @@
 ---
 bug: B-11
 feature: F-1
-status: building
+status: validating
 board: 739
 severity: low
 ---
@@ -61,6 +61,15 @@ the reproduction recorded under `## Cause` (2 in 3, then 3 in 8).
 
 Proof of the fix: the loop that reproduced the fault (a clean build with `--no-incremental`, then
 `dotnet test tests/Hosts/Simulab.Web.Tests --no-build`) gives 10 green runs in 10. The real output is recorded here.
+
+Result after the fix (2026-09-21, branch `bug/B-11`): 10 builds with `--no-incremental`, each with `0 Warning(s)`. Every test run printed
+`Passed! - Failed: 0, Passed: 328, Skipped: 0, Total: 328`, with durations of 2 to 3 s (runs 1 to 10).
+
+| Criterion | Test |
+|---|---|
+| AC1 | `AppRowActionsTests.Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu`: 10 green runs in 10 |
+| AC2 | `UserMenuTests.SignedIn_OffersMyAccountAndSignOutOnly`: 10 green runs in 10, waits with `WaitForAssertion` |
+| Localization | no resource file changed |
 
 ## Acceptance criteria
 - AC1 Given the fixed `AppRowActionsTests`, when the reproduction loop runs 10 times after a clean build each time, then all 10 runs report `Failed: 0`.
