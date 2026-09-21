@@ -15,17 +15,15 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
 | Organizadora / Banca | Entidade organizadora (?) | `Organizer` | Exam board, certifying body or university that runs an exam |
 | Prova / Concurso | Prova | `Exam` | An assessment run by an organizer |
-| Edição | Edição | `ExamEdition` | One occurrence of an exam: notice, year, position or track, stages |
-| Edital | Aviso de abertura (?) | `Notice` | The official document that opens an edition and lists its subject coverage |
-| Cargo | Cargo | `Position` | The job an edition selects for |
-| Fase / Etapa | Fase | `Stage` | A step of an edition (objective test, essay, ...) |
-| Caderno / Seção | Secção | `Section` | A part of an exam with its own questions, order and rules |
+| Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) |
+| Edital | Aviso de abertura (?) | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |
+| Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) |
 | Matéria / Disciplina | Disciplina | `Subject` | Top level of the canonical taxonomy: what a student studies (Constitutional Law, Portuguese, Logical Reasoning). Simulae's `KnowledgeDomain` becomes this |
 | Assunto / Tópico | Tópico | `Topic` | Second and last level of the canonical taxonomy, inside a subject |
 | Área | Área | `Area` | Optional grouping attribute of a subject (Law, Languages, Natural Sciences). Not a taxonomy level. Simulae's top-level `Subject` becomes this |
 | Disciplina do edital | Disciplina do aviso (?) | `NoticeSubject` | A subject as one edition's notice names and groups it, with number of questions, weight and minimum; mapped to canonical subjects and topics |
 | Apelido | Alias (?) | `SubjectAlias` / `TopicAlias` | A name an organizer uses for a canonical subject or topic; used to map imports |
-| Conteúdo programático | Conteúdo programático | `SubjectCoverage` | The canonical subjects and topics an edition covers, through its notice subjects |
+| Conteúdo programático | Conteúdo programático | `NoticeSubject` (the rows of a notice) | What the notice says the edition covers: it is the list of notice subjects, not an entity of its own (owner, 2026-09-20). `SubjectCoverage` is retired before its first use |
 | Questão | Questão | `Question` | An item a student answers, of one of the supported types |
 | Tipo de questão | Tipo de questão | `QuestionType` | SingleChoice, MultipleAnswer, TrueFalse, Matching, FillInTheBlanks, ShortAnswer, OpenAnswer, Essay |
 | Texto-base | Texto de apoio (?) | `BaseText` | Text or image shared by one or more questions |
