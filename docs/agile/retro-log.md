@@ -51,9 +51,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | 0.0.36 (`cfedd49`) |
 | ✅ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
 | ✅ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
-| ⏳ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | — |
-| ⏳ | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | — |
-| ⏳ | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | — |
+| ✅ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | 0.0.37 (`fd68a6c`) |
+| ✅ | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | 0.0.37 (`fd68a6c`) |
+| ✅ | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | 0.0.37 (`fd68a6c`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
