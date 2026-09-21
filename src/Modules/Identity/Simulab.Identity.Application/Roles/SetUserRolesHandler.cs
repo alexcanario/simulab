@@ -1,5 +1,6 @@
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.Identity.Application.Roles;
@@ -28,10 +29,18 @@ public sealed class SetUserRolesHandler(IRoleAdministrationStore store, IRoleAdm
                 return Failure(IdentityErrorCodes.RoleAssignmentRoleUnknown, ErrorKind.Validation);
             }
 
+            var rolesBefore = await store.RolesOfUserAsync(userId, cancellationToken);
+            var rolesAfter = await store.RoleNamesAsync(roleIds, cancellationToken);
             await store.ReplaceUserRolesAsync(userId, roleIds, cancellationToken);
+            if (RoleChange.UserRolesChanged(userId, rolesBefore, rolesAfter) is { } change)
+            {
+                store.AddRoleChange(change);
+            }
+
             await store.SaveChangesAsync(cancellationToken);
 
-            // BR8b: judged after the change, inside the same transaction, which rolls back on failure.
+            // BR8b: judged after the change, inside the same transaction, which rolls back on failure - the
+            // F-14 audit entry with it (BR3).
             return await store.CountActiveManagersAsync(cancellationToken) == 0
                 ? Failure(IdentityErrorCodes.RoleAssignmentLastManager, ErrorKind.BusinessRule)
                 : Result.Success(true);

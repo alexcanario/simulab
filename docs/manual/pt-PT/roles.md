@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: pt-PT
-features: [F-6, F-9]
-updated: 2026-09-19
+features: [F-6, F-9, F-14]
+updated: 2026-09-21
 ---
 # Perfis e permissões
 
@@ -52,5 +52,6 @@ Toda a conta tem um perfil. Só uma conta com a permissão "Gerir perfis e atrib
 
 ## Páginas relacionadas
 - [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis
+- [Histórico de perfis](role-history.md): cada alteração de um perfil — escolha **Histórico** na linha dele
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)

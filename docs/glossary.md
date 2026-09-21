@@ -52,6 +52,7 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Papel / Permissão | Perfil / Permissão (?) | `Role` / `Permission` | RBAC |
 | Papel de sistema | Perfil de sistema (?) | `Role.IsSystem` | A seed role (Student, Curator, Admin): cannot be renamed or deleted, only its permissions change (F-9) |
 | Atribuição de papel | Atribuição de perfil (?) | `UserRole` | A role given to a user; a user may hold several and gets the union of their permissions (F-9) |
+| Mudança de papel / Histórico de papéis | Alteração de perfil / Histórico de perfis (?) | `RoleChange` | One recorded change to a role or to a user's roles: author, time, before and after (F-14) |
 | Plano | Plano | `Plan` | What a user is entitled to: features and limits. Not to be confused with `StudyPlan` |
 | Atribuição de plano | Atribuição de plano | `PlanAssignment` | A plan given to a user, with validity and source |
 | Código promocional | Código promocional | `PromoCode` | A code that grants a target plan for a number of days |
@@ -95,6 +96,7 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | claim | claim (dado da sessão) | A fact about the user kept in the cookie or the token: id, email, name, permissions. |
 | concurrency failure | conflito de concorrência | Two saves of the same record at once; the second finds the record already changed. |
 | last-write-wins | a última gravação vale | Concurrency rule where the latest save prevails. |
+| audit trail | trilha de auditoria | Recorded history of who changed what and when, kept unchanged. |
 | CSRF | CSRF (requisição forjada) | Cross-site request forgery: another site makes a signed-in user's browser trigger an action in the app. |
 | SameSite=Lax | SameSite=Lax | Cookie setting: the browser does not send it on requests from another site, except a top-level GET navigation (a link). |
 | Sec-Fetch-Site | Sec-Fetch-Site | Header the browser sends saying where a request came from (`same-origin` means from the app itself). |

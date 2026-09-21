@@ -37,6 +37,7 @@ public sealed class SaveRoleHandler(IRoleAdministrationStore store, IRoleAdminis
 
             store.AddRole(role);
             await store.ReplacePermissionsAsync(role.Id, permissions, cancellationToken);
+            store.AddRoleChange(RoleChange.RoleCreated(role.Id, name, permissions));
             await store.SaveChangesAsync(cancellationToken);
 
             // A new role has no holder yet, so it cannot change who manages roles (BR8b).
@@ -82,6 +83,7 @@ public sealed class SaveRoleHandler(IRoleAdministrationStore store, IRoleAdminis
                 return Failure<Guid>(IdentityErrorCodes.RoleAdminPermissionRequired, ErrorKind.BusinessRule);
             }
 
+            var nameBefore = role.Name!;
             if (!role.IsSystem && name != role.Name)
             {
                 if (await store.IsNameTakenAsync(name, role.Id, cancellationToken))
@@ -92,10 +94,17 @@ public sealed class SaveRoleHandler(IRoleAdministrationStore store, IRoleAdminis
                 store.Rename(role, name);
             }
 
+            var permissionsBefore = await store.PermissionsOfAsync(role.Id, cancellationToken);
             await store.ReplacePermissionsAsync(role.Id, permissions, cancellationToken);
+            if (RoleChange.RoleUpdated(role.Id, nameBefore, role.Name!, permissionsBefore, permissions) is { } change)
+            {
+                store.AddRoleChange(change);
+            }
+
             await store.SaveChangesAsync(cancellationToken);
 
-            // BR8b: judged after the change, inside the same transaction, which rolls back on failure.
+            // BR8b: judged after the change, inside the same transaction, which rolls back on failure - the
+            // F-14 audit entry with it (BR3).
             return await store.CountActiveManagersAsync(cancellationToken) == 0
                 ? Failure<Guid>(IdentityErrorCodes.RoleAssignmentLastManager, ErrorKind.BusinessRule)
                 : Result.Success(role.Id);

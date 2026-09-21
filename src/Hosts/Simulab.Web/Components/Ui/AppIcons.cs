@@ -15,6 +15,7 @@ public static class AppIcons
     public const string More = Icons.Material.Outlined.MoreVert;
     public const string Retry = Icons.Material.Outlined.Refresh;
     public const string Close = Icons.Material.Outlined.Close;
+    public const string History = Icons.Material.Outlined.History;
     public const string Back = Icons.Material.Outlined.ArrowBack;
     public const string Save = Icons.Material.Outlined.Save;
     public const string Warning = Icons.Material.Outlined.WarningAmber;

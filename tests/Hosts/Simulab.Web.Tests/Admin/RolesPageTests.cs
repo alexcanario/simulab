@@ -41,7 +41,7 @@ public sealed class RolesPageTests : AdminPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(5));
 
         RowOf(page, "Admin").QuerySelectorAll("button.app-row-action").Select(button => button.GetAttribute("aria-label"))
-            .Should().Equal("Edit: Admin");
+            .Should().Equal("Edit: Admin", "History: Admin");
         var inUse = RowOf(page, "Content reviewer").QuerySelectorAll("button.app-row-action")[1];
         inUse.HasAttribute("disabled").Should().BeTrue();
         page.FindComponents<MudTooltip>().Select(tooltip => tooltip.Instance.Text).Should().Contain("Held by 2 users: remove it from them first");

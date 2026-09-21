@@ -35,7 +35,9 @@ public sealed class RoleResourcesTests : KitTestContext
                 .Select(field => (string)field.GetValue(null)!)
                 .Where(code => code.StartsWith("role.", StringComparison.Ordinal)
                     || code.StartsWith("role_assignment.", StringComparison.Ordinal)
-                    || code.StartsWith("user.", StringComparison.Ordinal)));
+                    || code.StartsWith("user.", StringComparison.Ordinal)
+                    || code.StartsWith("role_change.", StringComparison.Ordinal)))
+            .Concat(RoleChangeActions.All.Select(action => $"RoleHistory.Action.{action}"));
 
         keys.Where(key => l[key].ResourceNotFound).Should().BeEmpty();
     }

@@ -71,7 +71,7 @@
     </Columns>
     <RowActions>
         <AppRowActions ItemName="@context.Email"
-                       MoreActions="@([new AppRowAction(L["Users.EditRoles.Action"], AppIcons.Edit, () => EditRolesAsync(context))])" />
+                       MoreActions="@([new AppRowAction(L["Users.EditRoles.Action"], AppIcons.Edit, () => EditRolesAsync(context)), HistoryAction(context)])" />
     </RowActions>
 </AppDataTable>
 
@@ -132,6 +132,14 @@
 
         return new AppTablePage<UserSummaryResponse>(result.Value!.Items, result.Value.Total);
     }
+
+    // F-14, UC3: the role history, already filtered to this user.
+    private AppRowAction HistoryAction(UserSummaryResponse user) =>
+        new(L["RoleHistory.Action.History"], AppIcons.History, () =>
+        {
+            Navigation.NavigateTo($"/admin/role-history?user={user.Id}");
+            return Task.CompletedTask;
+        });
 
     private async Task OnRoleFilterChangedAsync(Guid? roleId)
     {

@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: pt-BR
-features: [F-6, F-9]
-updated: 2026-09-19
+features: [F-6, F-9, F-14]
+updated: 2026-09-21
 ---
 # Papéis e permissões
 
@@ -52,5 +52,6 @@ Toda conta tem um papel. Só uma conta com a permissão "Gerenciar papéis e atr
 
 ## Páginas relacionadas
 - [Usuários](users.md): achar uma conta e mudar os papéis dela
+- [Histórico de papéis](role-history.md): cada mudança de um papel — escolha **Histórico** na linha dele
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)

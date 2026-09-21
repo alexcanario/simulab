@@ -197,7 +197,9 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-.app-nav-tooltip {
+/* One menu item per line. MudBlazor's own .mud-tooltip-inline (inline-block) came later with the same weight
+   and won, so short items sat side by side (F-14 validation); two classes outweigh it. */
+.mud-tooltip-root.app-nav-tooltip {
     display: block;
 }
 
@@ -501,6 +503,24 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-table-filter {
     min-width: 220px;
     margin-left: 16px;
+}
+
+/* F-14: an active filter with its remove button, next to the table's other filters. */
+.app-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 2px 0 12px;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 16px;
+    color: var(--mud-palette-text-primary);
+    font-size: 0.875rem;
+}
+
+.app-history-changes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .app-permission-group {

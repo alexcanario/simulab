@@ -1,8 +1,8 @@
 ---
 page: users
 locale: pt-PT
-features: [F-9]
-updated: 2026-09-19
+features: [F-9, F-14]
+updated: 2026-09-21
 ---
 # Utilizadores
 
@@ -41,5 +41,6 @@ Só uma conta com a permissão "Gerir perfis e atribuições" — o perfil Admin
 
 ## Páginas relacionadas
 - [Perfis e permissões](roles.md): o que cada perfil permite
+- [Histórico de perfis](role-history.md): cada alteração aos perfis de uma conta — escolha **Histórico** na linha dela
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)

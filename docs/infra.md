@@ -68,5 +68,5 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 13 s, 0 warnings; baseline stays empty (2026-09-21, B-9) |
-| Full test suite | < 5 min | 627 tests, 32 s (2026-09-21, B-9) |
+| Full build | | 12 s, 0 warnings; baseline stays empty (2026-09-21, F-14) |
+| Full test suite | < 5 min | 652 tests, 33 s (2026-09-21, F-14) |

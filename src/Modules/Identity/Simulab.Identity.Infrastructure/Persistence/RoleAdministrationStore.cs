@@ -109,6 +109,34 @@ public sealed class RoleAdministrationStore(IdentityModuleDbContext context, ILo
 
     public void DeleteRole(Role role) => context.Roles.Remove(role);
 
+    public async Task<IReadOnlyList<string>> PermissionsOfAsync(Guid roleId, CancellationToken cancellationToken = default) =>
+        await context.RolePermissions
+            .Where(grant => grant.RoleId == roleId)
+            .Select(grant => grant.PermissionName)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyDictionary<Guid, string>> RolesOfUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        await (from userRole in context.UserRoles
+               join role in context.Roles on userRole.RoleId equals role.Id
+               where userRole.UserId == userId
+               select new { role.Id, Name = role.Name! })
+            .ToDictionaryAsync(role => role.Id, role => role.Name, cancellationToken);
+
+    public async Task<IReadOnlyDictionary<Guid, string>> RoleNamesAsync(IReadOnlyCollection<Guid> roleIds, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(roleIds);
+        return await context.Roles
+            .Where(role => roleIds.Contains(role.Id))
+            .Select(role => new { role.Id, Name = role.Name! })
+            .ToDictionaryAsync(role => role.Id, role => role.Name, cancellationToken);
+    }
+
+    public void AddRoleChange(RoleChange change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        context.RoleChanges.Add(change);
+    }
+
     public async Task ReplacePermissionsAsync(Guid roleId, IReadOnlyCollection<string> permissions, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(permissions);

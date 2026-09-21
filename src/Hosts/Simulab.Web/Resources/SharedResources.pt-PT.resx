@@ -140,6 +140,38 @@
   <data name="Users.NoRoles" xml:space="preserve"><value>Sem perfis</value></data>
   <data name="Users.NoMatch" xml:space="preserve"><value>Nenhum utilizador corresponde a "{0}".</value></data>
   <data name="Users.EditRoles.Action" xml:space="preserve"><value>Editar perfis</value></data>
+  <data name="Nav.RoleHistory" xml:space="preserve"><value>Histórico de perfis</value></data>
+  <data name="RoleHistory.Title" xml:space="preserve"><value>Histórico de perfis</value></data>
+  <data name="RoleHistory.Column.When" xml:space="preserve"><value>Quando</value></data>
+  <data name="RoleHistory.Column.Author" xml:space="preserve"><value>Alterado por</value></data>
+  <data name="RoleHistory.Column.Action" xml:space="preserve"><value>Ação</value></data>
+  <data name="RoleHistory.Column.Target" xml:space="preserve"><value>Perfil ou utilizador</value></data>
+  <data name="RoleHistory.Column.Changes" xml:space="preserve"><value>Alterações</value></data>
+  <data name="RoleHistory.Action.RoleCreated" xml:space="preserve"><value>Perfil criado</value></data>
+  <data name="RoleHistory.Action.RoleUpdated" xml:space="preserve"><value>Perfil alterado</value></data>
+  <data name="RoleHistory.Action.RoleDeleted" xml:space="preserve"><value>Perfil eliminado</value></data>
+  <data name="RoleHistory.Action.UserRolesChanged" xml:space="preserve"><value>Perfis do utilizador alterados</value></data>
+  <data name="RoleHistory.Change.Renamed" xml:space="preserve"><value>Nome: {0} → {1}</value></data>
+  <data name="RoleHistory.Change.Added" xml:space="preserve"><value>Adicionado: {0}</value></data>
+  <data name="RoleHistory.Change.Removed" xml:space="preserve"><value>Retirado: {0}</value></data>
+  <data name="RoleHistory.Filter.Role" xml:space="preserve"><value>Perfil</value></data>
+  <data name="RoleHistory.Filter.AllRoles" xml:space="preserve"><value>Todos os perfis</value></data>
+  <data name="RoleHistory.Filter.Author" xml:space="preserve"><value>Alterado por</value></data>
+  <data name="RoleHistory.Filter.AllAuthors" xml:space="preserve"><value>Qualquer pessoa</value></data>
+  <data name="RoleHistory.Filter.Period" xml:space="preserve"><value>Período</value></data>
+  <data name="RoleHistory.Filter.Period.Days7" xml:space="preserve"><value>Últimos 7 dias</value></data>
+  <data name="RoleHistory.Filter.Period.Days30" xml:space="preserve"><value>Últimos 30 dias</value></data>
+  <data name="RoleHistory.Filter.Period.Days90" xml:space="preserve"><value>Últimos 90 dias</value></data>
+  <data name="RoleHistory.Filter.Period.All" xml:space="preserve"><value>Todo o período</value></data>
+  <data name="RoleHistory.Filter.User" xml:space="preserve"><value>Utilizador: {0}</value></data>
+  <data name="RoleHistory.Filter.DeletedRole" xml:space="preserve"><value>{0} (eliminado)</value></data>
+  <data name="RoleHistory.Search.Placeholder" xml:space="preserve"><value>Pesquisar o utilizador por e-mail ou nome</value></data>
+  <data name="RoleHistory.ErasedAccount" xml:space="preserve"><value>Conta eliminada</value></data>
+  <data name="RoleHistory.Empty" xml:space="preserve"><value>Ainda não foi registada nenhuma alteração de perfil.</value></data>
+  <data name="RoleHistory.NoMatch" xml:space="preserve"><value>Nenhuma alteração corresponde a estes filtros.</value></data>
+  <data name="RoleHistory.Action.History" xml:space="preserve"><value>Histórico</value></data>
+  <data name="Common.RemoveFilter" xml:space="preserve"><value>Retirar o filtro {0}</value></data>
+  <data name="role_change.period_invalid" xml:space="preserve"><value>Escolha os últimos 7, 30 ou 90 dias, ou todo o período.</value></data>
   <data name="Users.Dialog.Title" xml:space="preserve"><value>Perfis de {0}</value></data>
   <data name="Users.Dialog.Help" xml:space="preserve"><value>Um utilizador pode ter vários perfis; as permissões somam-se. O menu do utilizador muda no próximo carregamento de página.</value></data>
   <data name="Users.Saved" xml:space="preserve"><value>Perfis de {0} guardados.</value></data>

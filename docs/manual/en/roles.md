@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: en
-features: [F-6, F-9]
-updated: 2026-09-19
+features: [F-6, F-9, F-14]
+updated: 2026-09-21
 ---
 # Roles and permissions
 
@@ -52,5 +52,6 @@ Everyone has a role. Only an account with the permission "Manage roles and user 
 
 ## Related pages
 - [Users](users.md): find an account and change its roles
+- [Role history](role-history.md): every change of a role — choose **History** on its line
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Simulab](index.md)

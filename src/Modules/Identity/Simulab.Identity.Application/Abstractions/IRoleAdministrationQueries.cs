@@ -15,4 +15,10 @@ public interface IRoleAdministrationQueries
     Task<UserPageResponse> ListUsersAsync(UserListQuery query, CancellationToken cancellationToken = default);
 
     Task<UserSummaryResponse?> FindUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>F-14, UC2: one page of the role history. <see cref="RoleChangeListQuery.Days"/> is already checked.</summary>
+    Task<RoleChangePageResponse> ListRoleChangesAsync(RoleChangeListQuery query, CancellationToken cancellationToken = default);
+
+    /// <summary>F-14, BR8: every current role and the deleted ones found in the history, the authors found in it, and the user <paramref name="userId"/> when given.</summary>
+    Task<RoleChangeFiltersResponse> RoleChangeFiltersAsync(Guid? userId, CancellationToken cancellationToken = default);
 }

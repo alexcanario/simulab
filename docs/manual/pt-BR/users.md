@@ -1,8 +1,8 @@
 ---
 page: users
 locale: pt-BR
-features: [F-9]
-updated: 2026-09-19
+features: [F-9, F-14]
+updated: 2026-09-21
 ---
 # Usuários
 
@@ -41,5 +41,6 @@ Só uma conta com a permissão "Gerenciar papéis e atribuições" — o papel A
 
 ## Páginas relacionadas
 - [Papéis e permissões](roles.md): o que cada papel libera
+- [Histórico de papéis](role-history.md): cada mudança nos papéis de uma conta — escolha **Histórico** na linha dela
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)
