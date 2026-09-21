@@ -1,7 +1,7 @@
 ---
 bug: B-8
 feature: F-1
-status: refining
+status: approved
 board: 734
 severity: medium
 ---
