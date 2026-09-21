@@ -361,3 +361,14 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 - Left alone: the six build files and `tests/Directory.Build.props` (no upstream change).
 - No build file and no rule with a build check changed: no build or suite run was needed.
 - Decided with the owner: the rule "the delete that closes a unit of work goes outside the `try`" now lives in `profile.md`, so its copy in `project.md` (F-13 retro) is removed in a separate retro commit.
+
+## 2026-09-21 — B-8 Outlined primary buttons in the kit may fail AA contrast
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The same primary blue had been patched screen by screen four times (F-7, B-6, F-9, F-11) before anyone measured it in the palette; the palette fix plus two theory tests closed all six occurrences at once | Project rule | One line in `project.md` (UI tests) |
+| 2 | Right after the theme switch the filled buttons measured 2.88:1; the value was read during MudBlazor's 0.25 s background-color transition. Parked, they read 5.74:1 | Project rule | One line in `project.md` (UI tests) |
+| 3 | The browser pane failed two screenshots while the app window was behind another window; the computed-style measurements were the real evidence anyway | Nothing | One-off |
+
+### Plugin notes (`plugin`)
+- None. Lesson 1 is a Simulab design choice and lesson 2 is specific to MudBlazor.

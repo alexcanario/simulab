@@ -62,6 +62,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
 - After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
+- A contrast failure of a theme token is fixed in the palette, with `ThemeContrastTests` holding the numbers; patching the screen that showed it is debt, not a fix (B-8).
+- Read a rendered colour only after the theme transition settles (0.25 s in MudBlazor): a value read right after the theme switch is still the old colour (B-8).
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
 
 ## Packages
