@@ -57,6 +57,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: ef-core]` DocGen template: build each model through its design-time factory (snake_case), strip `Module` from the name, drop the `Relational` reference and the `NoWarn`, skip `bin/`/`obj/`, Auth column only with security, orphans are stale | F-15 | 0.0.38 (`836a0c1`) |
 | ✅ | `[profile: modular-monolith]` The route map's OpenAPI document comes from the `/openapi/v1.json` integration test, not from `ApiDescription.Server` at build | F-15 | 0.0.38 (`836a0c1`) |
 | ✅ | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | 0.0.38 (`836a0c1`) |
+| ⏳ | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | |
+| ⏳ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -438,3 +440,14 @@ From 0.0.37 to 0.0.38, run with `/agile:sync` on `main`. It brings the three F-1
 - Left alone: `docs/agile/profile.md` (edited here, unchanged upstream). Build files unchanged upstream.
 - Kept on purpose: the rule names `docs/api/openapi.json`; this project writes `docs/api/Simulab.Api.json`, which `tools/Simulab.DocGen` accepts as well.
 - No build: no build file and no rule with a build check changed.
+
+## 2026-09-21 — B-11 Flaky overflow menu test
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The F-8 rule (assert with `WaitForAssertion` after a click whose handler awaits) left two older tests with the same pattern; one was flaky for weeks | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 2 | The fault showed in about 35% of runs, so one green gate proved nothing; a clean-build loop reproduced it (2 in 3, 3 in 8) and proved the fix (10 in 10) | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+
+### Plugin notes (`plugin`)
+- `[generic]` retro-lessons: a new rule about a test pattern comes with a sweep of the existing tests for that pattern in the same retro; each hit is fixed in the item or captured as a bug (B-11: the F-8 rule left two older tests flaky).
+- `[generic]` feature-build, bugs: a flaky test is reproduced with a loop (clean build before each run), and its fix is proven by the same loop, N green runs in a row, with the real counts in the bug file (B-11: 2 in 3 and 3 in 8 before, 10 in 10 after).
