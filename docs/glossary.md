@@ -121,5 +121,6 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | TOTP | TOTP (código temporário) | Time-based one-time password (RFC 6238): a six-digit code an authenticator app derives from a shared secret and the clock, valid for 30 seconds. |
 | replay | reuso do código | Sending a code that was already accepted, while its 30-second window is still open; refused by storing the last accepted step. |
 | AES-GCM | AES-GCM | The encryption used for the TOTP secret at rest: it both hides the value and detects a tampered one. |
+| HMAC | hash com chave | A hash computed with a secret key (F-11: the recovery codes); without the key, a copy of the database cannot be used to guess the codes. |
 | grant (OAuth2) | grant (tipo de concessão) | The kind of exchange the token endpoint performs: password, refresh token, and the `totp` one F-11 adds for the second step. |
 | UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |
