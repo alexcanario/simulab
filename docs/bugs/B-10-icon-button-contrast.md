@@ -1,7 +1,7 @@
 ---
 bug: B-10
 feature: F-1
-status: approved
+status: building
 board: 737
 severity: medium
 ---
