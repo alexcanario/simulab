@@ -164,6 +164,8 @@ You need your Admin account and a second, ordinary account (as in F-9), used in 
 7. Permission check: in the private window, signed in with the second account (now Curator) → no "Role history" item, and `/admin/role-history` shows "Page not found".
 8. Keyboard only on "Role history": Tab through the search box, the three filters (arrow keys pick a value), the column "When" sort button and the pager, each with a visible focus ring; open a user's History and remove the chip with Enter.
 
+Validated on screen by the owner on 2026-09-21: every step passed, after the menu fix (each item on its own line).
+
 ## Coverage
 | Criterion | Test(s) |
 |---|---|
