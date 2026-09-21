@@ -1,7 +1,7 @@
 ---
 bug: B-10
 feature: F-1
-status: validating
+status: done
 board: 737
 severity: medium
 ---
@@ -121,6 +121,11 @@ The user menu was not opened: the pane was signed out. Its item icons use the sa
 8. Keyboard only: Tab to a row's pencil; the focus ring shows and the tooltip "Editar" (or "Edit") appears.
    No permission changed in this bug; nothing to check there.
 
+Validated by the owner on screen, 2026-09-21.
+
 ## Delivery
-- Branch: <bug/B-<number>>
-- Merge: <commit>
+- Branch: `bug/B-10`, merged into `main` with `--no-ff` (AB#737).
+- Tests: full suite 656 passed, 0 failed, 30 s; build 11 s, 0 warnings (`gate.js ship`, 2026-09-21).
+  New: `ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces` (4 cases); seen failing 4 of 4 before the fix.
+- App manual: unchanged; it does not describe colours, and no text, step or rule changed.
+- Follow-up: B-11 (AB#739), the flaky overflow menu test seen during this build.
