@@ -1,9 +1,9 @@
 ---
 feature: F-16
 epic: Foundation and identity
-status: building
+status: validating
 board: 729
-version: 1
+version: 2
 ---
 # Download my data
 
@@ -49,17 +49,17 @@ Checked in the code on 2026-09-21, on `main` at `c919a94`.
 
 ## Screens and API
 - `/account` gains a **Your data** card between the profile card and the danger zone. It has a heading, one paragraph listing what the file contains (account, roles, consents with IP address, role changes, number of active sessions), and a button "Download my data".
-  - The button opens a dialog built on `AppConfirmDialog`: the same list, an `AppPasswordField` for the current password, "Cancel" and "Download". The confirm button is disabled while the password field is empty and while the call runs.
+  - The button opens a dialog with the same shape as the erasure dialog (v2): the same list, an `AppPasswordField` for the current password, "Cancel" and "Download". The confirm button is disabled while the password field is empty and while the call runs.
   - States: submitting (button disabled with progress); wrong password (error text under the field, from the error code); locked out (`AppAlert` with the wait); unexpected failure (`AppAlert` with Try again). The dialog stays open on every failure.
   - Success: the dialog closes, the browser saves the file, and a snackbar says the download started and that a confirmation email is on its way.
-- `POST /api/v1/identity/data-exports`: `DataExportRequest(CurrentPassword)`. It answers 200 with `application/json` and `Content-Disposition: attachment; filename=simulab-my-data-<date>.json`, 400 with `data_export.current_password_invalid`, or 423 with `identity.account_locked`. It requires authentication and no permission (own account only, as F-8 and F-10).
+- `POST /api/v1/identity/data-exports`: `DataExportRequest(CurrentPassword)`. It answers 200 with `application/json` and `Content-Disposition: attachment; filename=simulab-my-data-<date>.json`, 422 with `data_export.current_password_invalid`, or 423 with `identity.account_locked`. It requires authentication and no permission (own account only, as F-8 and F-10).
 - Error codes: `data_export.current_password_invalid` (new); `identity.account_locked` (reused).
 
 ## Acceptance criteria
 - AC1 (UC2, BR1, BR3, BR4) Given a signed-in user with the right current password, a consent record and a role change as target, when they `POST /api/v1/identity/data-exports`, then the answer is 200 JSON with `format` `simulab.data-export`, `version` 1, and an `identity` section holding their account, roles, consents with IP address, the role change with `byYou` false, and `sessions.active`.
 - AC2 (BR1) Given two users, when user A exports, then nothing of user B appears in the file: not B's consents, B's role changes, or B's id and email as actor.
 - AC3 (BR5) Given a user with a password, TOTP turned on and an active session, when they export, then the file contains none of: password hash, security stamp, TOTP secret, token, session id, `access_failed_count`, concurrency stamp.
-- AC4 (UC3, BR2) Given a wrong current password, when the user exports, then the answer is 400 `data_export.current_password_invalid`, the access failure count goes up by one, and no email is enqueued.
+- AC4 (UC3, BR2) Given a wrong current password, when the user exports, then the answer is 422 `data_export.current_password_invalid`, the access failure count goes up by one, and no email is enqueued.
 - AC5 (BR2) Given an account locked out by failed attempts, when the user exports with the right password, then the answer is 423 `identity.account_locked` with `retryAfterSeconds`.
 - AC6 (BR2) Given one failed attempt, when the user then exports with the right password, then the export succeeds and the failure count is back to zero.
 - AC7 (BR7) Given a successful export, when the request ends, then one `email.send` job is enqueued for the account's address in its preferred language, with the export time in UTC.
@@ -92,5 +92,38 @@ Checked in the code on 2026-09-21, on `main` at `c919a94`.
 - Security state as its own section, and session creation times.
 - Exporting another user's data (for example by an administrator on a request).
 - ZIP or CSV formats.
+
+## Coverage
+| Criterion | Test |
+|---|---|
+| AC1, AC2, AC8 | `DataExportTests.Export_WithTheRightPassword_ReturnsTheAccountsDataAsAJsonAttachment` |
+| AC3 | `DataExportTests.Export_NeverContainsSecretsOrSecurityMaterial` (TOTP on) |
+| AC4 | `DataExportTests.Export_WrongPassword_FailsCountsTheFailureAndSendsNothing` |
+| AC5 | `DataExportTests.Export_WhileLockedOut_IsRefusedEvenWithTheRightPassword` |
+| AC6 | `DataExportTests.Export_AfterAFailedAttempt_SucceedsAndClearsTheFailureCount` |
+| AC7, AC8 | `DataExportTests.Export_QueuesOneNoticeInTheAccountsLanguageAndStoresNothingElse` |
+| AC9 | `DataExportPageTests` (6 tests) and the validation script |
+| AC10 | `DataExportTests.Export_WithoutAToken_IsUnauthorized`; also 401 through the app host |
+| Localization | Web missing-key test green (334/334); email texts in the three `IdentityEmails` files |
+
+App-host check (2026-09-22, app host started and stopped by Claude): the route is in the OpenAPI document, an unauthenticated POST answers 401, `/account` redirects to sign-in, and `shell.js` serves `downloadFile`. The signed-in flow was not run by Claude: its rules forbid creating accounts and typing passwords to sign in. It is in the validation script.
+
+## Validation script
+1. Start the app: `dotnet run --project src/Hosts/Simulab.AppHost` (Git Bash and PowerShell 7). Open the dashboard link it prints and wait until `web` and `api` are Running, then open `https://localhost:7125`.
+2. Sign in with a test account of yours. Open **Minha conta**: a **Seus dados** card sits between the profile and **Apagar minha conta**, listing what the file contains.
+3. Click **Baixar meus dados**. The **Baixar** button stays disabled until you type a password. Type a wrong password and confirm: "A senha atual não está correta." shows under the field and the dialog stays open.
+4. Type the right password and confirm: the dialog closes, the browser saves `simulab-my-data-<today UTC>.json`, and a green snackbar says the download started.
+5. Open the file: `format` is `simulab.data-export`, and `identity` has your email, roles, consents with an `ipAddress`, `roleChanges` and `sessions.active`. Search it for `password`, `stamp`, `totp` and `token`: none of them appears.
+6. Open Mailpit (the `mailpit` link on the dashboard): one email "Seus dados foram baixados — Simulab" in your account's language, with the time in UTC.
+7. Switch the language to **English** in the app bar, reopen the dialog: the card, the dialog and the button read "Your data", "Download my data", "Download".
+8. Keyboard only: Tab to **Download my data**, Enter, type the password, Enter. The file downloads as in step 4.
+
+## Change notes
+
+### v2 — 2026-09-22
+- What: a wrong current password answers **422** (not 400) with `data_export.current_password_invalid`; the dialog has the same shape as the erasure dialog instead of being built on `AppConfirmDialog`.
+- Why: rule `api-contracts` maps a business rule to 422, and the erasure (F-10) already answers 422 for the same check; the 400 in v1 was a refinement mistake. `AppConfirmDialog` has no password field, so the erasure dialog's shape was reused.
+- Affected: AC4, Screens and API. No code change: the build already did this.
+- Re-approved by the owner on 2026-09-22.
 
 ## Open questions
