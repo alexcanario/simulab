@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: en
-features: [F-8, F-10]
-updated: 2026-09-20
+features: [F-8, F-10, F-11]
+updated: 2026-09-21
 ---
 # My account
 
@@ -31,6 +31,9 @@ Anyone who is signed in. Each person sees and changes only their own account.
 ### Change your password
 Select **Change password**, just below the fields. See [Password](password.md).
 
+### Protect your account with a code
+Select **Security**, next to **Change password**, to turn on two-factor sign-in. The link appears only where two-factor sign-in is available. See [Two-factor sign-in](two-factor.md).
+
 ### Erase your account
 At the bottom of the page, **Erase my account** removes your personal data for good. See [Erase your account](erase-account.md).
 
@@ -51,5 +54,6 @@ At the bottom of the page, **Erase my account** removes your personal data for g
 
 ## Related pages
 - [Password](password.md)
+- [Two-factor sign-in](two-factor.md)
 - [Erase your account](erase-account.md)
 - [Getting around](getting-around.md)

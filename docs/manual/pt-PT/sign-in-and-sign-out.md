@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-PT
-features: [F-5, B-3, F-7]
-updated: 2026-09-19
+features: [F-5, B-3, F-7, F-11]
+updated: 2026-09-21
 ---
 # Iniciar e terminar sessão
 
@@ -44,7 +44,11 @@ Se iniciar sessão num dispositivo enquanto já tem sessão iniciada noutro, amb
 ## Durante quanto tempo a sessão se mantém
 A sessão mantém-se durante até 30 dias em cada dispositivo, mesmo que deixe uma página aberta durante horas ou que a aplicação seja reiniciada; não precisa de iniciar sessão novamente nesse período. Quando a sua sessão é terminada noutro sítio, uma página aberta dá por isso no espaço de um minuto e leva-o para **Iniciar sessão** com a mensagem *A sua sessão terminou. Inicie sessão novamente.* Uma função ou permissão nova aparece no seu menu da próxima vez que abrir uma página, sem iniciar sessão novamente.
 
+## Com a verificação em dois passos
+Se ativou a verificação em dois passos, depois da palavra-passe a página pede o código de seis dígitos da sua aplicação de autenticação, ou um dos seus códigos de recuperação. Consulte [Verificação em dois passos](two-factor.md).
+
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
 - [Como navegar](getting-around.md)
 - [Palavra-passe](password.md): esqueci-me, redefinir e alterar
+- [Verificação em dois passos](two-factor.md)

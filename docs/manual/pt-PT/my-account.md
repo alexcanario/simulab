@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-PT
-features: [F-8, F-10]
-updated: 2026-09-20
+features: [F-8, F-10, F-11]
+updated: 2026-09-21
 ---
 # A minha conta
 
@@ -31,6 +31,9 @@ Qualquer pessoa com sessão iniciada. Cada um vê e altera apenas a sua própria
 ### Alterar a palavra-passe
 Selecione **Alterar palavra-passe**, logo abaixo dos campos. Consulte [Palavra-passe](password.md).
 
+### Proteger a conta com um código
+Selecione **Segurança**, ao lado de **Alterar palavra-passe**, para ativar a verificação em dois passos. A ligação só aparece onde a verificação em dois passos está disponível. Consulte [Verificação em dois passos](two-factor.md).
+
 ### Eliminar a sua conta
 No fim da página, **Eliminar a minha conta** remove os seus dados pessoais definitivamente. Consulte [Eliminar a sua conta](erase-account.md).
 
@@ -51,5 +54,6 @@ No fim da página, **Eliminar a minha conta** remove os seus dados pessoais defi
 
 ## Páginas relacionadas
 - [Palavra-passe](password.md)
+- [Verificação em dois passos](two-factor.md)
 - [Eliminar a sua conta](erase-account.md)
 - [Como navegar](getting-around.md)

@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-BR
-features: [F-8, F-10]
-updated: 2026-09-20
+features: [F-8, F-10, F-11]
+updated: 2026-09-21
 ---
 # Minha conta
 
@@ -31,6 +31,9 @@ Qualquer pessoa conectada. Cada um vê e muda só a própria conta.
 ### Alterar a senha
 Clique em **Alterar senha**, logo abaixo dos campos. Veja [Senha](password.md).
 
+### Proteger a conta com um código
+Selecione **Segurança**, ao lado de **Alterar senha**, para ativar a verificação em duas etapas. O link só aparece onde a verificação em duas etapas está disponível. Veja [Verificação em duas etapas](two-factor.md).
+
 ### Apagar sua conta
 No fim da página, **Apagar minha conta** remove seus dados pessoais para sempre. Veja [Apagar sua conta](erase-account.md).
 
@@ -51,5 +54,6 @@ No fim da página, **Apagar minha conta** remove seus dados pessoais para sempre
 
 ## Páginas relacionadas
 - [Senha](password.md)
+- [Verificação em duas etapas](two-factor.md)
 - [Apagar sua conta](erase-account.md)
 - [Como navegar](getting-around.md)
