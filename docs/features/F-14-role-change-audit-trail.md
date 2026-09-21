@@ -1,7 +1,7 @@
 ---
 feature: F-14
 epic: Foundation and identity
-status: refining
+status: approved
 board: 726
 version: 1
 ---
@@ -120,6 +120,7 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - 2026-09-21 — Claude: one table `identity.role_changes` (`id` Guid v7, `occurred_at`, `author_id`, `action` as text, `role_id` null, `role_name` null, `target_user_id` null, `name_before` null, `name_after` null, `added`/`removed` as `jsonb` arrays of `{ key, name }`), indexes on `occurred_at`, `role_id`, `target_user_id`, `author_id`. The entity is neither auditable nor soft-deletable (it is the audit). Global, no tenant (roles are global, F-9 BR1). A user entry also stores the role ids of `added`/`removed` in a `role_ids uuid[]` column (GIN index) so the role filter (BR6) is a plain index lookup.
 - 2026-09-21 — Claude: the three handlers compute the difference and add the entry through `IRoleAdministrationStore` inside `RunExclusiveAsync`, before `SaveChangesAsync`, so the rollback of BR8b also removes the entry (BR3). The author is `ICurrentUser`.
 - 2026-09-21 — Claude: `role_name` stores the name at the moment (the new name on a rename) — role names are not personal data, and a renamed or deleted role must still read correctly (BR8).
+- 2026-09-21 — Approved by the owner ("aprovo F-14").
 
 ## Out of scope
 - CSV or other export of the trail.
