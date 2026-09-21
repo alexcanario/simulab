@@ -124,7 +124,7 @@ The user menu was not opened: the pane was signed out. Its item icons use the sa
 Validated by the owner on screen, 2026-09-21.
 
 ## Delivery
-- Branch: `bug/B-10`, merged into `main` with `--no-ff` (AB#737).
+- Branch: `bug/B-10`, merged into `main` with `--no-ff` in `3450026` (AB#737).
 - Tests: full suite 656 passed, 0 failed, 30 s; build 11 s, 0 warnings (`gate.js ship`, 2026-09-21).
   New: `ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces` (4 cases); seen failing 4 of 4 before the fix.
 - App manual: unchanged; it does not describe colours, and no text, step or rule changed.
