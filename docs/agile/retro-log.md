@@ -28,6 +28,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
 | ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
+| ⏳ | A premise about how a library stores or protects data is verified in its source or docs during refinement | F-11 | — |
+| ⏳ | In a multi-step sign-in, only the last step clears the failure count | F-11 | — |
+| ⏳ | Refinement checks package versions against the registry; build re-checks before adding | F-11 | — |
 | ✅ | A "never leave zero X" rule is judged before and after, not only after | F-10 | 0.0.35 (`7303a61`) |
 | ✅ | A theme's colour tokens get a contrast test over the palette | F-10 | 0.0.35 (`7303a61`) |
 | ✅ | A Blazor Server dialog is driven from the browser pane in one call | F-10 | 0.0.35 (`7303a61`) |
@@ -338,3 +341,16 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 - Left alone: the six build files and `tests/Directory.Build.props` (no upstream change). Templates and the other rules were already identical.
 - `ui.md` has a build check, so the build and the full suite ran: build 0 warnings, 0 errors; 514 tests passed, 0 failed, 0 skipped (slowest project 24 s); warnings baseline unchanged (0 entries), gate GREEN.
 - Open: the new `ui.md` line asks for a contrast test over the theme tokens covering every pair. `ThemeContrastTests` (F-10) covers the pairs the screens use, not the whole palette. Registered as F-17 (board 730).
+
+## 2026-09-21 — F-11 Two-factor sign-in with TOTP
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The approved file said ASP.NET Identity stores recovery codes hashed; it stores them in plain text (`UserStoreBase.ReplaceCodesAsync`). Found only at build start, and it became change note v3 | Plugin improvement | This log |
+| 2 | The password step cleared the failure count, so with a second step whoever had the password could try unlimited codes and the lockout (AC9) could never trigger. Found during the build, not by a test written from the file | Project rule + plugin improvement | One line in `project.md` (Access and entitlements), and this log |
+| 3 | The approved package versions (Otp.NET 1.4.0, QRCoder 1.6.0) were behind the latest stable (1.4.1, 1.8.0) | Plugin improvement | This log |
+
+### Plugin notes (`plugin`)
+- ⏳ **`[generic]` Verify a library's storage premise in refinement.** A premise about how a library stores or protects data (hashing, encryption, what it writes where) is verified in the library's source or docs during refinement, never taken from memory. F-11 approved "hashed, as Identity does" and the build found plain text.
+- ⏳ **`[stack: aspnet-identity]` Multi-step sign-in and the lockout.** In a sign-in with more than one step, only the last step clears the failure count (`ResetAccessFailedCountAsync`); a step that clears it gives unlimited tries to the next one.
+- ⏳ **`[generic]` Package versions are checked at refinement time.** The refinement package list is checked against the registry at that moment; the build re-checks it before adding the package.

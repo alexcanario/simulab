@@ -28,6 +28,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - An anonymous endpoint answers the same way whether an account exists or not: same status, body and code (sign-up, resend, sign-in, password recovery).
 - On an anonymous endpoint every input limit (column width, format) is checked before the account lookup: a failure only one path can hit, even a 500, reveals whether the account exists (B-7).
 - The OpenIddict password flow is for the first-party Web only. Never register a third-party client for it.
+- In a sign-in with more than one step, only the last step clears the failure count: a step that clears it gives unlimited tries to the next one (F-11).
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
 
 ## AI
