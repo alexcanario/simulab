@@ -12,6 +12,18 @@ window.simulabShell = {
   // F-14: the browser's IANA time zone, so times are shown where the user is.
   timeZone: function () {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  },
+  // F-16: saves a file the circuit streamed (DotNetStreamReference); nothing is stored on the server.
+  downloadFile: async function (fileName, contentType, streamReference) {
+    var buffer = await streamReference.arrayBuffer();
+    var url = URL.createObjectURL(new Blob([buffer], { type: contentType }));
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 };
 

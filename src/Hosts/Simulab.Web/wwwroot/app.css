@@ -575,6 +575,13 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-error);
 }
 
+/* F-16: the "Your data" card on /account, same heading size as the danger zone in the ordinary text colour. */
+.app-data-title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
 /* F-11: the two-factor card on /account/security. */
 .app-security-title {
     margin: 0 0 12px;
