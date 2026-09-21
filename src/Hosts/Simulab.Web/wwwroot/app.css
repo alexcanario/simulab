@@ -503,6 +503,24 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-left: 16px;
 }
 
+/* F-14: an active filter with its remove button, next to the table's other filters. */
+.app-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 2px 0 12px;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 16px;
+    color: var(--mud-palette-text-primary);
+    font-size: 0.875rem;
+}
+
+.app-history-changes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .app-permission-group {
     margin: 0 0 12px;
     padding: 4px 14px 8px;

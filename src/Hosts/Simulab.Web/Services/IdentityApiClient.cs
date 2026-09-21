@@ -164,6 +164,47 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
     public Task<ApiResult<bool>> DeleteRoleAsync(string accessToken, Guid roleId, CancellationToken cancellationToken = default) =>
         SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/roles/{roleId}"), accessToken), cancellationToken);
 
+    /// <summary>F-14, UC2: one page of the role history, filtered on the server.</summary>
+    public Task<ApiResult<RoleChangePageResponse>> ListRoleChangesAsync(string accessToken, RoleChangeListQuery query, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/role-changes?page={query.Page}&pageSize={query.PageSize}&ascending={(query.Ascending ? "true" : "false")}";
+        if (query.RoleId is { } roleId)
+        {
+            route += $"&roleId={roleId}";
+        }
+
+        if (query.UserId is { } userId)
+        {
+            route += $"&userId={userId}";
+        }
+
+        if (query.AuthorId is { } authorId)
+        {
+            route += $"&authorId={authorId}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (query.Days is { } days)
+        {
+            route += $"&days={days.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        return SendAsync<RoleChangePageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
+    /// <summary>F-14, BR8: the roles and authors the history's filters offer, and the filtered user's email.</summary>
+    public Task<ApiResult<RoleChangeFiltersResponse>> RoleChangeFiltersAsync(string accessToken, Guid? userId, CancellationToken cancellationToken = default)
+    {
+        var route = userId is { } id ? $"{Base}/role-changes/filters?userId={id}" : $"{Base}/role-changes/filters";
+        return SendAsync<RoleChangeFiltersResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
     /// <summary>F-9, UC5: one page of users, searched and filtered on the server.</summary>
     public Task<ApiResult<UserPageResponse>> ListUsersAsync(string accessToken, UserListQuery query, CancellationToken cancellationToken = default)
     {

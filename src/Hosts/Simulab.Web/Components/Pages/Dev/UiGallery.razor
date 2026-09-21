@@ -114,6 +114,11 @@
                      ValueChanged="@(value => _checked = value)">@I["SignUp.Adult.Label"]</AppCheckbox>
         <AppCheckbox Id="gallery-checkbox-error" Required="true" Value="false"
                      Error="@L["registration.consent_required"].Value">@I["SignUp.Terms.Label"].Value</AppCheckbox>
+
+        @if (_filterChipShown)
+        {
+            <AppFilterChip Text="@L["RoleHistory.Filter.User", "ana@exemplo.com"]" OnRemove="@(() => _filterChipShown = false)" />
+        }
     </MudPaper>
 </section>
 
@@ -155,6 +160,7 @@
     private string? _fieldValue;
     private string? _passwordValue;
     private bool _checked;
+    private bool _filterChipShown = true;
     private string? _selectValue = SupportedCultures.Default;
     private static readonly IReadOnlyList<AppSelectOption<string>> _selectOptions =
         [.. SupportedCultures.All.Select(culture => new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];

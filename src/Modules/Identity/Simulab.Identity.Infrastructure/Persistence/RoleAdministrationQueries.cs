@@ -99,7 +99,7 @@ public sealed class RoleAdministrationQueries(IdentityModuleDbContext context, T
         var roleIds = await context.RoleChanges.SelectMany(change => change.RoleIds).Distinct().ToListAsync(cancellationToken);
         var roles = await context.Roles.AsNoTracking()
             .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
-            .Where(role => roleIds.Contains(role.Id))
+            .Where(role => !role.IsDeleted || roleIds.Contains(role.Id))
             .Select(role => new RoleChangeFilterRoleResponse(role.Id, role.Name!, role.IsSystem, role.IsDeleted))
             .ToListAsync(cancellationToken);
 

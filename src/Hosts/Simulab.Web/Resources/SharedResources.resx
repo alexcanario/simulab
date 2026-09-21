@@ -140,6 +140,37 @@
   <data name="Users.NoRoles" xml:space="preserve"><value>No roles</value></data>
   <data name="Users.NoMatch" xml:space="preserve"><value>No user matches "{0}".</value></data>
   <data name="Users.EditRoles.Action" xml:space="preserve"><value>Edit roles</value></data>
+  <data name="Nav.RoleHistory" xml:space="preserve"><value>Role history</value></data>
+  <data name="RoleHistory.Title" xml:space="preserve"><value>Role history</value></data>
+  <data name="RoleHistory.Column.When" xml:space="preserve"><value>When</value></data>
+  <data name="RoleHistory.Column.Author" xml:space="preserve"><value>Changed by</value></data>
+  <data name="RoleHistory.Column.Action" xml:space="preserve"><value>Action</value></data>
+  <data name="RoleHistory.Column.Target" xml:space="preserve"><value>Role or user</value></data>
+  <data name="RoleHistory.Column.Changes" xml:space="preserve"><value>Changes</value></data>
+  <data name="RoleHistory.Action.RoleCreated" xml:space="preserve"><value>Role created</value></data>
+  <data name="RoleHistory.Action.RoleUpdated" xml:space="preserve"><value>Role changed</value></data>
+  <data name="RoleHistory.Action.RoleDeleted" xml:space="preserve"><value>Role deleted</value></data>
+  <data name="RoleHistory.Action.UserRolesChanged" xml:space="preserve"><value>User's roles changed</value></data>
+  <data name="RoleHistory.Change.Renamed" xml:space="preserve"><value>Name: {0} → {1}</value></data>
+  <data name="RoleHistory.Change.Added" xml:space="preserve"><value>Added: {0}</value></data>
+  <data name="RoleHistory.Change.Removed" xml:space="preserve"><value>Removed: {0}</value></data>
+  <data name="RoleHistory.Filter.Role" xml:space="preserve"><value>Role</value></data>
+  <data name="RoleHistory.Filter.AllRoles" xml:space="preserve"><value>All roles</value></data>
+  <data name="RoleHistory.Filter.Author" xml:space="preserve"><value>Changed by</value></data>
+  <data name="RoleHistory.Filter.AllAuthors" xml:space="preserve"><value>Anyone</value></data>
+  <data name="RoleHistory.Filter.Period" xml:space="preserve"><value>Period</value></data>
+  <data name="RoleHistory.Filter.Period.Days7" xml:space="preserve"><value>Last 7 days</value></data>
+  <data name="RoleHistory.Filter.Period.Days30" xml:space="preserve"><value>Last 30 days</value></data>
+  <data name="RoleHistory.Filter.Period.Days90" xml:space="preserve"><value>Last 90 days</value></data>
+  <data name="RoleHistory.Filter.Period.All" xml:space="preserve"><value>All time</value></data>
+  <data name="RoleHistory.Filter.User" xml:space="preserve"><value>User: {0}</value></data>
+  <data name="RoleHistory.Filter.DeletedRole" xml:space="preserve"><value>{0} (deleted)</value></data>
+  <data name="RoleHistory.Search.Placeholder" xml:space="preserve"><value>Search the user by email or name</value></data>
+  <data name="RoleHistory.ErasedAccount" xml:space="preserve"><value>Erased account</value></data>
+  <data name="RoleHistory.Empty" xml:space="preserve"><value>No role change has been recorded yet.</value></data>
+  <data name="RoleHistory.NoMatch" xml:space="preserve"><value>No change matches these filters.</value></data>
+  <data name="RoleHistory.Action.History" xml:space="preserve"><value>History</value></data>
+  <data name="Common.RemoveFilter" xml:space="preserve"><value>Remove the filter {0}</value></data>
   <data name="Users.Dialog.Title" xml:space="preserve"><value>Roles of {0}</value></data>
   <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. The user's menu changes on their next page load.</value></data>
   <data name="Users.Saved" xml:space="preserve"><value>Roles of {0} saved.</value></data>

@@ -8,6 +8,10 @@ window.simulabShell = {
   // F-11: the recovery codes' Copy action.
   copyText: function (text) {
     return navigator.clipboard.writeText(text);
+  },
+  // F-14: the browser's IANA time zone, so times are shown where the user is.
+  timeZone: function () {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 };
 

@@ -10,6 +10,7 @@
 @inject IConfirmService Confirm
 @inject ISnackbar Snackbar
 @inject ErrorText Errors
+@inject NavigationManager Navigation
 
 @* F-9, UC1-UC4: every role, its permissions and holders; add, edit and delete in dialogs. *@
 <AppPageHeader Title="@L["Roles.Title"]"
@@ -54,14 +55,15 @@
     <RowActions>
         @if (context.Role.IsSystem)
         {
-            <AppRowActions ItemName="@context.DisplayName" OnEdit="@(() => EditAsync(context))" />
+            <AppRowActions ItemName="@context.DisplayName" OnEdit="@(() => EditAsync(context))" MoreActions="@HistoryAction(context)" />
         }
         else
         {
             <AppRowActions ItemName="@context.DisplayName"
                            OnEdit="@(() => EditAsync(context))"
                            OnDelete="@(() => DeleteAsync(context))"
-                           DeleteDisabledReason="@InUseReason(context)" />
+                           DeleteDisabledReason="@InUseReason(context)"
+                           MoreActions="@HistoryAction(context)" />
         }
     </RowActions>
 </AppDataTable>
@@ -116,6 +118,14 @@
     private Task AddAsync() => OpenAsync(null);
 
     private Task EditAsync(RoleRow row) => OpenAsync(row.Role);
+
+    // F-14, UC3: the role history, already filtered to this role.
+    private IReadOnlyList<AppRowAction> HistoryAction(RoleRow row) =>
+        [new AppRowAction(L["RoleHistory.Action.History"], AppIcons.History, () =>
+        {
+            Navigation.NavigateTo($"/admin/role-history?role={row.Role.Id}");
+            return Task.CompletedTask;
+        })];
 
     private async Task OpenAsync(RoleResponse? role)
     {

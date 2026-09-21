@@ -1,0 +1,229 @@
+@page "/admin/role-history"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
+@layout MainLayout
+@inject IdentityApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+@inject UserTimeZone TimeZone
+
+@* F-14, UC2-UC4: the role change audit trail, newest first, filtered on the server; every filter lives in the address. *@
+<AppPageHeader Title="@L["RoleHistory.Title"]" Breadcrumbs="_breadcrumbs" />
+
+<AppDataTable @ref="_table"
+              TItem="RoleChangeResponse"
+              LoadAsync="LoadAsync"
+              Searchable="@(UserFilter is null)"
+              SearchPlaceholder="@L["RoleHistory.Search.Placeholder"]"
+              EmptyMessage="@EmptyText"
+              EmptySearchMessage="@(_ => L["RoleHistory.NoMatch"])">
+    <ToolBarContent>
+        @if (UserFilter is not null)
+        {
+            <div class="app-table-filter">
+                <AppFilterChip Text="@L["RoleHistory.Filter.User", _userText ?? string.Empty]" OnRemove="RemoveUserFilterAsync" />
+            </div>
+        }
+        <div class="app-table-filter">
+            <AppSelectField TValue="Guid?"
+                            Id="history-role-filter"
+                            Label="@L["RoleHistory.Filter.Role"]"
+                            Options="_roleOptions"
+                            Value="RoleFilter"
+                            ValueChanged="@((Guid? value) => FilterChangedAsync("role", value, () => RoleFilter = value))" />
+        </div>
+        <div class="app-table-filter">
+            <AppSelectField TValue="Guid?"
+                            Id="history-author-filter"
+                            Label="@L["RoleHistory.Filter.Author"]"
+                            Options="_authorOptions"
+                            Value="AuthorFilter"
+                            ValueChanged="@((Guid? value) => FilterChangedAsync("author", value, () => AuthorFilter = value))" />
+        </div>
+        <div class="app-table-filter">
+            <AppSelectField TValue="int?"
+                            Id="history-period-filter"
+                            Label="@L["RoleHistory.Filter.Period"]"
+                            Options="_periodOptions"
+                            Value="DaysFilter"
+                            ValueChanged="@((int? value) => FilterChangedAsync("days", value, () => DaysFilter = value))" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        <AppDateColumn TItem="RoleChangeResponse"
+                       TProperty="DateTimeOffset"
+                       Property="change => TimeZone.ToLocal(change.OccurredAt)"
+                       Format="g"
+                       Title="@L["RoleHistory.Column.When"]" />
+        <TemplateColumn T="RoleChangeResponse" Title="@L["RoleHistory.Column.Author"]" Sortable="false">
+            <CellTemplate>@PersonText(context.Item.Author)</CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="RoleChangeResponse" Title="@L["RoleHistory.Column.Action"]" Sortable="false">
+            <CellTemplate>@L[$"RoleHistory.Action.{context.Item.Action}"]</CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="RoleChangeResponse" Title="@L["RoleHistory.Column.Target"]" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.Role is { } role)
+                {
+                    @RoleText.NameOf(L, role.Name, role.IsSystem)
+                }
+                else
+                {
+                    @PersonText(context.Item.TargetUser)
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="RoleChangeResponse" Title="@L["RoleHistory.Column.Changes"]" Sortable="false">
+            <CellTemplate>
+                <div class="app-history-changes">
+                    @foreach (var line in ChangeLines(context.Item))
+                    {
+                        <AppTruncatedText Text="@line" MaxWidth="24rem" />
+                    }
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The role filter (<c>?role=</c>): entries about the role and user entries that added or removed it (BR6).</summary>
+    [SupplyParameterFromQuery(Name = "role")] public Guid? RoleFilter { get; set; }
+
+    /// <summary>The user filter (<c>?user=</c>), set by the users page's History action and shown as a chip.</summary>
+    [SupplyParameterFromQuery(Name = "user")] public Guid? UserFilter { get; set; }
+
+    [SupplyParameterFromQuery(Name = "author")] public Guid? AuthorFilter { get; set; }
+
+    [SupplyParameterFromQuery(Name = "days")] public int? DaysFilter { get; set; }
+
+    private AppDataTable<RoleChangeResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AppSelectOption<Guid?>> _roleOptions = [];
+    private IReadOnlyList<AppSelectOption<Guid?>> _authorOptions = [];
+    private IReadOnlyList<AppSelectOption<int?>> _periodOptions = [];
+    private string? _userText;
+
+    private bool HasFilters => RoleFilter is not null || UserFilter is not null || AuthorFilter is not null || DaysFilter is not null;
+
+    private string EmptyText => HasFilters ? L["RoleHistory.NoMatch"] : L["RoleHistory.Empty"];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Administration"], href: null, disabled: true),
+            new BreadcrumbItem(L["RoleHistory.Title"], href: null, disabled: true)
+        ];
+
+        _periodOptions =
+        [
+            new AppSelectOption<int?>(null, L["RoleHistory.Filter.Period.All"]),
+            .. RoleChangeListQuery.Periods.Select(days => new AppSelectOption<int?>(days, L[$"RoleHistory.Filter.Period.Days{days}"]))
+        ];
+
+        await LoadFiltersAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Times are shown where the user is; the browser answers only once the page is interactive.
+        if (firstRender && TimeZone.Current == TimeZoneInfo.Utc && await TimeZone.ResolveAsync() != TimeZoneInfo.Utc)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadFiltersAsync()
+    {
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.RoleChangeFiltersAsync(token, UserFilter);
+        var filters = result is { IsSuccess: true } ? result.Value! : new RoleChangeFiltersResponse([], [], null);
+        var byText = StringComparer.Create(CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace);
+
+        _roleOptions =
+        [
+            new AppSelectOption<Guid?>(null, L["RoleHistory.Filter.AllRoles"]),
+            .. filters.Roles
+                .Select(role => new AppSelectOption<Guid?>(role.Id, RoleOptionText(role)))
+                .OrderBy(option => option.Text, byText)
+        ];
+        _authorOptions =
+        [
+            new AppSelectOption<Guid?>(null, L["RoleHistory.Filter.AllAuthors"]),
+            .. filters.Authors.Select(author => new AppSelectOption<Guid?>(author.Id, PersonText(author)))
+        ];
+        _userText = filters.User is { } user ? PersonText(user) : null;
+    }
+
+    private string RoleOptionText(RoleChangeFilterRoleResponse role)
+    {
+        var name = RoleText.NameOf(L, role.Name, role.IsSystem);
+        return role.IsDeleted ? L["RoleHistory.Filter.DeletedRole", name] : name;
+    }
+
+    private async Task<AppTablePage<RoleChangeResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var ascending = query.SortBy is not null && !query.Descending;
+
+        var result = await Api.ListRoleChangesAsync(
+            token,
+            new RoleChangeListQuery(query.Page, query.PageSize, RoleFilter, UserFilter, AuthorFilter, query.Search, DaysFilter, ascending),
+            cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Role history failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<RoleChangeResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    private async Task FilterChangedAsync<T>(string name, T value, Action apply)
+    {
+        apply();
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter(name, value?.ToString()), replace: true);
+        await _table.ReloadFromFirstPageAsync();
+    }
+
+    private Task RemoveUserFilterAsync() => FilterChangedAsync<Guid?>("user", null, () =>
+    {
+        UserFilter = null;
+        _userText = null;
+    });
+
+    private string PersonText(RoleChangeUserResponse? person) => person?.Email ?? L["RoleHistory.ErasedAccount"];
+
+    /// <summary>One line per change (BR2): the rename, then what was added, then what was removed.</summary>
+    private IEnumerable<string> ChangeLines(RoleChangeResponse change)
+    {
+        if (change.NameBefore is not null && change.NameAfter is not null)
+        {
+            yield return L["RoleHistory.Change.Renamed", change.NameBefore, change.NameAfter];
+        }
+
+        if (change.Added.Count > 0)
+        {
+            yield return L["RoleHistory.Change.Added", ItemsText(change, change.Added)];
+        }
+
+        if (change.Removed.Count > 0)
+        {
+            yield return L["RoleHistory.Change.Removed", ItemsText(change, change.Removed)];
+        }
+    }
+
+    private string ItemsText(RoleChangeResponse change, IReadOnlyList<RoleChangeItemResponse> items) =>
+        string.Join(", ", items.Select(item => change.Action == RoleChangeActions.UserRolesChanged
+            ? RoleText.NameOf(L, item.Name, item.IsSystem)
+            : RoleText.PermissionName(L, item.Key)));
+
+    // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

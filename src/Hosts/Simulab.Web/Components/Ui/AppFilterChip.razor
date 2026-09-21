@@ -1,0 +1,20 @@
+@* An active filter shown as a chip with a remove button (F-14: the user the role history is filtered to). *@
+@inject IStringLocalizer<SharedResources> L
+
+<span class="app-filter-chip">
+    <span class="app-filter-chip-text">@Text</span>
+    <MudTooltip Text="@L["Common.RemoveFilter", Text]">
+        <MudIconButton Icon="@AppIcons.Close"
+                       Size="Size.Small"
+                       aria-label="@L["Common.RemoveFilter", Text]"
+                       OnClick="OnRemove"
+                       Class="app-filter-chip-remove" />
+    </MudTooltip>
+</span>
+
+@code {
+    /// <summary>What the filter keeps, as the user reads it ("User: ana@exemplo.com").</summary>
+    [Parameter, EditorRequired] public string Text { get; set; } = default!;
+
+    [Parameter, EditorRequired] public EventCallback OnRemove { get; set; }
+}

@@ -34,6 +34,7 @@ public abstract class AdminPageTestContext : KitTestContext
     {
         var visitor = new VisitorContext();
         Services.AddSingleton(visitor);
+        Services.AddScoped<UserTimeZone>();
         Services.AddSingleton(new IdentityApiClient(
             new HttpClient(Api) { BaseAddress = new Uri("https://api.test") },
             visitor,
@@ -76,6 +77,21 @@ public abstract class AdminPageTestContext : KitTestContext
         /// <summary>When true, the user list answers a server error.</summary>
         public bool UsersFail { get; set; }
 
+        /// <summary>F-14: what the role history answers, whatever the filters (the Api filters; the page only sends them).</summary>
+        public List<RoleChangeResponse> RoleChanges { get; set; } = [];
+
+        /// <summary>When true, the role history answers a server error.</summary>
+        public bool RoleChangesFail { get; set; }
+
+        public RoleChangeFiltersResponse RoleChangeFilters { get; set; } = new(
+            [
+                new(Admin.Id, Admin.Name, true, false),
+                new(Reviewer.Id, Reviewer.Name, false, false),
+                new(Guid.Parse("0198f0a2-0000-7000-8000-000000000009"), "Old team", false, true)
+            ],
+            [new(Guid.Parse("0198f0a2-0000-7000-8000-0000000000a1"), "ana.souza@exemplo.com.br"), new(Guid.Parse("0198f0a2-0000-7000-8000-0000000000e1"), null)],
+            null);
+
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
 
@@ -90,6 +106,19 @@ public abstract class AdminPageTestContext : KitTestContext
             if (request.Method != HttpMethod.Get && WriteFailure is { } failure)
             {
                 return Problem(failure);
+            }
+
+            if (path.EndsWith("/role-changes/filters", StringComparison.Ordinal))
+            {
+                var userId = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query)["userId"];
+                return Json(RoleChangeFilters with { User = userId is null ? null : new RoleChangeUserResponse(Guid.Parse(userId), "bruno.lima@exemplo.com.br") });
+            }
+
+            if (path.EndsWith("/role-changes", StringComparison.Ordinal))
+            {
+                return RoleChangesFail
+                    ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    : Json(new RoleChangePageResponse(RoleChanges, RoleChanges.Count));
             }
 
             if (path.EndsWith("/permissions", StringComparison.Ordinal))
