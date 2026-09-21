@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Hosts\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
     <ProjectReference Include="..\..\src\Hosts\Simulab.Web\Simulab.Web.csproj" />
+    <ProjectReference Include="..\..\tools\Simulab.DocGen\Simulab.DocGen.csproj" />
   </ItemGroup>
 
   <!-- The sample module context of the persistence tests stands in for a module until F-4. -->

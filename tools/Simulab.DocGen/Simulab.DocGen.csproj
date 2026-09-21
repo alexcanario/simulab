@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Technical documentation generated from the code (F-15, from the agile@canary DocGen template).
+    Run it without arguments to rewrite docs/architecture/, or with the check flag to exit 1 when it is stale;
+    the exact commands are in docs/architecture/README.md (XML comments cannot hold a double dash).
+    Reference every project that owns a DbContext, so the tool can build the EF model. The route map reads the
+    OpenAPI document in docs/api/. Nothing here runs in production.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Simulab.ArchitectureTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="docgen.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Infrastructure\Simulab.Identity.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -12,12 +12,13 @@ public class SolutionLayoutTests
         "src/Modules/",
         "tests/Hosts/",
         "tests/BuildingBlocks/",
-        "tests/Modules/"
+        "tests/Modules/",
+        "tools/" // F-15: developer tools that never ship (DocGen)
     ];
 
     private static readonly string[] TestsRootProjects = ["Simulab.ArchitectureTests", "Simulab.Testing"];
 
-    private static readonly string[] RootFolders = ["src", "tests"];
+    private static readonly string[] RootFolders = ["src", "tests", "tools"];
 
     private static List<(string Folder, string Path)> ListedProjects(XDocument solution) =>
         solution.Descendants("Project")
