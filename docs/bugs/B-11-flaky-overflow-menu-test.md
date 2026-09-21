@@ -93,7 +93,7 @@ Result after the fix (2026-09-21, branch `bug/B-11`): 10 builds with `--no-incre
 Validated by the owner, 2026-09-21 (the 10 clean-build runs above).
 
 ## Delivery
-- Branch: `bug/B-11`, merged into `main` with `--no-ff` (AB#739).
+- Branch: `bug/B-11`, merged into `main` with `--no-ff` in `14751a8` (AB#739).
 - Tests: full suite 676 passed, 0 failed, 30 s; build 12 s, 0 warnings (`gate.js ship`, 2026-09-21).
   Changed: `AppRowActionsTests.Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu`, `UserMenuTests.SignedIn_OffersMyAccountAndSignOutOnly`.
 - Technical docs: `DocGen --check` up to date (no model, route or project change).
