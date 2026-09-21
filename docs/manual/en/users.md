@@ -1,8 +1,8 @@
 ---
 page: users
 locale: en
-features: [F-9]
-updated: 2026-09-19
+features: [F-9, F-14]
+updated: 2026-09-21
 ---
 # Users
 
@@ -41,5 +41,6 @@ Only an account with the permission "Manage roles and user roles" — the Admin 
 
 ## Related pages
 - [Roles and permissions](roles.md): what each role allows
+- [Role history](role-history.md): every change of an account's roles — choose **History** on its line
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Simulab](index.md)

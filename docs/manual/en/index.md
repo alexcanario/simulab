@@ -1,7 +1,7 @@
 ---
 page: index
 locale: en
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14]
 updated: 2026-09-21
 ---
 # Simulab
@@ -40,3 +40,4 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Two-factor sign-in](two-factor.md): a code from your phone after your password, and recovery codes
 - [Roles and permissions](roles.md): what Student, Curator and Admin can do, and how an Admin changes a role
 - [Users](users.md): find an account and change its roles (Admins)
+- [Role history](role-history.md): who changed which role or whose roles, and when (Admins)
