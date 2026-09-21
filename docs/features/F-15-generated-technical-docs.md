@@ -76,8 +76,8 @@ No screen and no endpoint change. New files only:
 - 2026-09-21 - The app manual is not touched - technical; nothing visible to users changes (definition of done).
 
 ## Out of scope
-- The hand-written C4 overview (idea to capture).
-- `HasComment` descriptions on tables and columns (idea to capture).
+- The hand-written C4 overview (captured as F-23, AB#740).
+- `HasComment` descriptions on tables and columns (captured as F-24, AB#741).
 - Blazor pages and the Web host's `/account` endpoints in the route map.
 - Running `--check` in the Stop hook or the test suite.
 - Any change to production behavior, screens or the app manual.
@@ -96,7 +96,7 @@ No screen changes, so there is no sign-in, language switch or keyboard pass. Run
 Validated by the owner, 2026-09-21.
 
 ## Delivery
-- Branch: `feature/F-15`, merged into `main` with `--no-ff` (AB#728).
+- Branch: `feature/F-15`, merged into `main` with `--no-ff` in `7140610` (AB#728).
 - Tests: full suite 676 passed, 0 failed, 30 s; build 14 s, 0 warnings (`gate.js ship`, 2026-09-21).
   New: `EntityModelsTests` (7), `GeneratedDocsTests` (5), `ModuleMapDocTests` (2), `RouteMapDocTests` (2), `DocSetTests` (3), `ApiHostTests.OpenApi_document_is_written_to_docs_api`.
 - Technical docs: `docs/architecture/` (8 files) and `docs/api/Simulab.Api.json`; `DocGen --check` up to date.
