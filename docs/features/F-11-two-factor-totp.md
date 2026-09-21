@@ -1,7 +1,7 @@
 ---
 feature: F-11
 epic: Foundation and identity
-status: approved
+status: building
 board: 715
 version: 2
 ---
@@ -98,6 +98,7 @@ Give a user who wants it a second barrier on their account, without turning it i
 - 2026-09-20 — The second step is a custom OpenIddict grant `totp` on `/connect/token`, not a new REST route: it issues tokens, which is what that endpoint is for, and the page already talks to it.
 - 2026-09-20 — The replay rule (BR4) is ours, not Simulae's: without it a code works for up to 90 seconds after being used.
 - 2026-09-20 — Approved by the owner.
+- 2026-09-21 — Package versions raised to the latest stable releases, `Otp.NET` 1.4.1 and `QRCoder` 1.8.0 (both MIT, the versions Simulae runs) — owner's choice at build start; the approved 1.4.0 and 1.6.0 were behind, and rule `build-config` asks for the latest stable release when a package is added.
 
 ## Out of scope
 - Google sign-in — F-20 (AB#733), refined when the Google Cloud credentials exist.
