@@ -1,7 +1,7 @@
 ---
 feature: F-11
 epic: Foundation and identity
-status: validating
+status: done
 board: 715
 version: 3
 ---
@@ -151,8 +151,8 @@ You need an authenticator app on your phone (Google Authenticator, Microsoft Aut
    - PowerShell 7: `$env:Identity__TotpEnabled='false'; dotnet run --project src/Hosts/Simulab.AppHost` (then `Remove-Item Env:Identity__TotpEnabled`)
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-11>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-11`, validated on screen by the owner on 2026-09-21.
+- Merge: the `--no-ff` merge commit "merge(F-11): two-factor sign-in with TOTP (AB#715)" on `main`.
+- Tests: full suite 610 tests, 0 failed, 31 s; full build 16 s, 0 warnings (ship gate, 2026-09-21). F-11 added 52 Identity tests (HTTP, switch, key and unit) and 25 Web tests (Security page, sign-in code step, Account link).
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/two-factor.md` (new); `sign-in-and-sign-out.md`, `my-account.md` and `index.md` updated in the three languages.
+- Follow-up captured: B-8 (AB#734), the kit's outlined primary buttons may fail AA contrast.
