@@ -1,7 +1,7 @@
 ---
 feature: F-15
 epic: Foundation and identity
-status: validating
+status: done
 board: 728
 version: 2
 ---
@@ -92,6 +92,16 @@ No screen changes, so there is no sign-in, language switch or keyboard pass. Run
 6. Open `Identity/routes.md` and `System/routes.md`: only `/api/v1/...` routes, with no `/connect/token`.
 7. `dotnet test tests/Hosts/Simulab.Api.Tests --filter "FullyQualifiedName~OpenApi_document_is_written"` (needs Docker running) → `Passed! - Failed: 0, Passed: 1`. Then `git status --short docs/api` prints nothing: the committed document is current.
 8. `docs/agile/profile.md` has `tools/` in `## Layout` and the "Technical docs (F-15)" paragraph.
+
+Validated by the owner, 2026-09-21.
+
+## Delivery
+- Branch: `feature/F-15`, merged into `main` with `--no-ff` (AB#728).
+- Tests: full suite 676 passed, 0 failed, 30 s; build 14 s, 0 warnings (`gate.js ship`, 2026-09-21).
+  New: `EntityModelsTests` (7), `GeneratedDocsTests` (5), `ModuleMapDocTests` (2), `RouteMapDocTests` (2), `DocSetTests` (3), `ApiHostTests.OpenApi_document_is_written_to_docs_api`.
+- Technical docs: `docs/architecture/` (8 files) and `docs/api/Simulab.Api.json`; `DocGen --check` up to date.
+- `docs/agile/profile.md`: `tools/` in `## Layout` and the DocGen paragraph. `docs/infra.md`: measured times and the technical docs commands.
+- App manual: unchanged; nothing visible to users changed.
 
 ## Change notes
 
