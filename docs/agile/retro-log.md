@@ -372,3 +372,14 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 
 ### Plugin notes (`plugin`)
 - None. Lesson 1 is a Simulab design choice and lesson 2 is specific to MudBlazor.
+
+## 2026-09-21 — B-9 Info colour and email buttons still use the old primary blue
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | Three items in a row (F-10 error, B-8 primary, B-9 info/success/warning) fixed the same contrast defect one token at a time; success read at 2.24:1 on every account and sign-in page while two palette fixes shipped | Project rule | One line in `project.md` (UI tests) |
+| 2 | An alert with `rgba(..., 0.06)` behind its text measures 1.26:1 read straight from the CSS; composited over the first opaque ancestor it is 4.12:1 — a real failure, but not the one the raw number showed | Project rule | One line in `project.md` (UI tests) |
+| 3 | A bare `MudAlert` outside the kit had slipped into three pages; `<MudAlert` joined the tokens `UiKitBoundaryTests` forbids, so the build holds the rule instead of a written line | Test or build check | `tests/Simulab.ArchitectureTests/UiKitBoundaryTests.cs` (shipped with B-9) |
+
+### Plugin notes (`plugin`)
+- None. All three are MudBlazor or Simulab specific.

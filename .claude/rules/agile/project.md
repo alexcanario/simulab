@@ -64,6 +64,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
 - A contrast failure of a theme token is fixed in the palette, with `ThemeContrastTests` holding the numbers; patching the screen that showed it is debt, not a fix (B-8).
 - Read a rendered colour only after the theme transition settles (0.25 s in MudBlazor): a value read right after the theme switch is still the old colour (B-8).
+- A contrast fix on a theme token covers the whole family in the same item (the colour and its contrast text, every severity): F-10, B-8 and B-9 chased the same defect one token at a time.
+- Measuring a rendered colour whose background has alpha: composite it over the first opaque ancestor before computing the ratio; the raw `rgba` reads as a false failure (B-9).
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
 
 ## Packages
