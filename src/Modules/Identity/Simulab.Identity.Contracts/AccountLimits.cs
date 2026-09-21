@@ -11,4 +11,13 @@ public static class AccountLimits
 
     /// <summary>The longest valid address (RFC 5321); the email and user-name columns.</summary>
     public const int EmailMaxLength = 254;
+
+    /// <summary>The encrypted authenticator secret column (F-11 BR3): 80 characters today, room for a longer secret.</summary>
+    public const int TotpSecretEncryptedMaxLength = 256;
+
+    /// <summary>
+    /// The longest second-factor input read (F-11): a recovery code is 11 characters, a six-digit code 6.
+    /// Anything longer is refused before it is hashed or compared.
+    /// </summary>
+    public const int TotpCodeMaxLength = 32;
 }

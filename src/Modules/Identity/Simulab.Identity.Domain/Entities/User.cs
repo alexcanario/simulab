@@ -39,6 +39,65 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
     public string PreferredLanguage { get; set; } = "en";
 
     /// <summary>
+    /// The authenticator secret, encrypted (F-11 BR3). Set by an enrolment before two-factor is on (BR2);
+    /// the plain secret never reaches the database.
+    /// </summary>
+    public string? TotpSecretEncrypted { get; private set; }
+
+    /// <summary>When two-factor was turned on (F-11); null while it is off.</summary>
+    public DateTimeOffset? TotpEnabledAt { get; private set; }
+
+    /// <summary>The last 30-second step whose code was accepted (F-11 BR4). A code at or below it is a replay.</summary>
+    public long? TotpLastAcceptedStep { get; private set; }
+
+    /// <summary>
+    /// F-11 BR2: stores a new secret for an enrolment. An earlier unconfirmed secret is simply replaced;
+    /// two-factor stays off until <see cref="EnableTotp"/>.
+    /// </summary>
+    public void StartTotpEnrolment(string encryptedSecret)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(encryptedSecret);
+
+        TotpSecretEncrypted = encryptedSecret;
+        TotpLastAcceptedStep = null;
+    }
+
+    /// <summary>
+    /// F-11 BR4: records <paramref name="step"/> as used. False when it is at or below the last accepted
+    /// step, so a code works once even inside its 90-second window.
+    /// </summary>
+    public bool AcceptTotpStep(long step)
+    {
+        if (TotpLastAcceptedStep is { } last && step <= last)
+        {
+            return false;
+        }
+
+        TotpLastAcceptedStep = step;
+        return true;
+    }
+
+    /// <summary>
+    /// F-11 BR2: turns two-factor on after the first valid code. The flag is written here, not through
+    /// <c>UserManager.SetTwoFactorEnabledAsync</c>, which renews the security stamp and would end every
+    /// other session (BR11).
+    /// </summary>
+    public void EnableTotp(DateTimeOffset enabledAt)
+    {
+        TwoFactorEnabled = true;
+        TotpEnabledAt = enabledAt;
+    }
+
+    /// <summary>F-11 BR8: clears the flag, the secret and the last step. The caller removes the recovery codes.</summary>
+    public void DisableTotp()
+    {
+        TwoFactorEnabled = false;
+        TotpEnabledAt = null;
+        TotpSecretEncrypted = null;
+        TotpLastAcceptedStep = null;
+    }
+
+    /// <summary>
     /// The only way to <see cref="AccountStatus.Active"/> (BR9). Verifying an account that is already
     /// active changes nothing, so a repeated link is not an error (BR10).
     /// </summary>
@@ -85,7 +144,9 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
 
         LockoutEnd = null;
         AccessFailedCount = 0;
-        TwoFactorEnabled = false;
+
+        // F-11 BR13: the second factor goes with the account; the recovery codes go with user_tokens.
+        DisableTotp();
 
         EmailConfirmed = false;
         EmailVerifiedAt = null;

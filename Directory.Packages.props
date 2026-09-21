@@ -78,6 +78,12 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
   </ItemGroup>
 
+  <!-- Two-factor sign-in (F-11): RFC 6238 codes and the enrolment QR code, both MIT -->
+  <ItemGroup>
+    <PackageVersion Include="Otp.NET" Version="1.4.1" />
+    <PackageVersion Include="QRCoder" Version="1.8.0" />
+  </ItemGroup>
+
   <!-- Email (F-3) -->
   <ItemGroup>
     <PackageVersion Include="MailKit" Version="4.18.0" />

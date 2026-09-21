@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="OpenIddict.AspNetCore" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+    <PackageReference Include="Otp.NET" />
+    <PackageReference Include="QRCoder" />
     <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
 
