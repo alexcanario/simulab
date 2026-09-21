@@ -48,6 +48,9 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
 
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
+    /// <summary>F-14: the role change audit trail.</summary>
+    public DbSet<RoleChange> RoleChanges => Set<RoleChange>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -65,6 +68,7 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.ApplyConfiguration(new IdentityUserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new PermissionConfiguration());
         modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleChangeConfiguration());
 
         // The OpenIddict client (F-5, decision 2: one confidential client, "simulab-web") lives in this
         // schema too; the module owns its own protocol tables like every other identity table.

@@ -33,8 +33,37 @@ public static class RoleAdministrationEndpoints
         users.MapGet(string.Empty, ListUsersAsync).WithName("ListUsers");
         users.MapPut("/{id:guid}/roles", SetUserRolesAsync).WithName("SetUserRoles");
 
+        // F-14, BR7: the role history is read with the same permission.
+        var roleChanges = group.MapGroup("/role-changes").RequireAuthorization(policy);
+        roleChanges.MapGet(string.Empty, ListRoleChangesAsync).WithName("ListRoleChanges");
+        roleChanges.MapGet("/filters", RoleChangeFiltersAsync).WithName("RoleChangeFilters");
+
         return group;
     }
+
+    private static async Task<IResult> ListRoleChangesAsync(
+        IRoleAdministrationQueries queries,
+        CancellationToken cancellationToken,
+        int page = 0,
+        int pageSize = 25,
+        Guid? roleId = null,
+        Guid? userId = null,
+        Guid? authorId = null,
+        string? search = null,
+        int? days = null,
+        bool ascending = false)
+    {
+        if (days is { } value && !RoleChangeListQuery.Periods.Contains(value))
+        {
+            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.RoleChangePeriodInvalid, ErrorKind.Validation));
+        }
+
+        var query = new RoleChangeListQuery(page, pageSize, roleId, userId, authorId, search, days, ascending);
+        return Results.Ok(await queries.ListRoleChangesAsync(query, cancellationToken));
+    }
+
+    private static async Task<IResult> RoleChangeFiltersAsync(IRoleAdministrationQueries queries, CancellationToken cancellationToken, Guid? userId = null) =>
+        Results.Ok(await queries.RoleChangeFiltersAsync(userId, cancellationToken));
 
     private static async Task<IResult> ListPermissionsAsync(IRoleAdministrationQueries queries, CancellationToken cancellationToken)
     {

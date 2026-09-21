@@ -347,6 +347,8 @@ public sealed class RoleAdministrationTests : IdentityApiTests
     [InlineData("DELETE", Roles + "/0198f0a2-0000-7000-8000-000000000001")]
     [InlineData("GET", Users)]
     [InlineData("PUT", Users + "/0198f0a2-0000-7000-8000-000000000001/roles")]
+    [InlineData("GET", "/api/v1/identity/role-changes")]
+    [InlineData("GET", "/api/v1/identity/role-changes/filters")]
     public async Task EveryEndpoint_WithoutRolesManage_IsForbidden(string method, string route)
     {
         var student = await Accounts.CreateAsync(Factory.Services, roles: IdentityRoles.Student);

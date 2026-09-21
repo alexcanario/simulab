@@ -40,6 +40,18 @@ public interface IRoleAdministrationStore
 
     void DeleteRole(Role role);
 
+    /// <summary>F-14: the permission names a role grants now, before a change replaces them.</summary>
+    Task<IReadOnlyList<string>> PermissionsOfAsync(Guid roleId, CancellationToken cancellationToken = default);
+
+    /// <summary>F-14: the non-deleted roles a user holds now, by id, with their names.</summary>
+    Task<IReadOnlyDictionary<Guid, string>> RolesOfUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>F-14: the names of the given non-deleted roles, by id.</summary>
+    Task<IReadOnlyDictionary<Guid, string>> RoleNamesAsync(IReadOnlyCollection<Guid> roleIds, CancellationToken cancellationToken = default);
+
+    /// <summary>F-14: stages an audit trail entry, written by the same save as the change it records (BR3).</summary>
+    void AddRoleChange(RoleChange change);
+
     Task ReplacePermissionsAsync(Guid roleId, IReadOnlyCollection<string> permissions, CancellationToken cancellationToken = default);
 
     Task ReplaceUserRolesAsync(Guid userId, IReadOnlyCollection<Guid> roleIds, CancellationToken cancellationToken = default);

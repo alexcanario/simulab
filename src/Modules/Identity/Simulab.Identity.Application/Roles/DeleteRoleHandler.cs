@@ -1,5 +1,6 @@
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.Identity.Application.Roles;
@@ -30,6 +31,7 @@ public sealed class DeleteRoleHandler(IRoleAdministrationStore store)
             }
 
             store.DeleteRole(role);
+            store.AddRoleChange(RoleChange.RoleDeleted(role.Id, role.Name!));
             await store.SaveChangesAsync(cancellationToken);
             return Result.Success(true);
         }, cancellationToken);

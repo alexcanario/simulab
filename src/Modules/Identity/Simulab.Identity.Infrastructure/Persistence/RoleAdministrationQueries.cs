@@ -1,15 +1,134 @@
 using Microsoft.EntityFrameworkCore;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Domain.Entities;
+using Simulab.Persistence;
 
 namespace Simulab.Identity.Infrastructure.Persistence;
 
 /// <summary>
-/// The back office's lists (F-9, UC1, UC5), read with the module's filters on: deleted roles and deleted
+/// The back office's lists (F-9, UC1, UC5; F-14, UC2), read with the module's filters on: deleted roles and deleted
 /// accounts never show, and a deleted account does not count as a role's holder.
 /// </summary>
-public sealed class RoleAdministrationQueries(IdentityModuleDbContext context) : IRoleAdministrationQueries
+public sealed class RoleAdministrationQueries(IdentityModuleDbContext context, TimeProvider timeProvider) : IRoleAdministrationQueries
 {
+    public async Task<RoleChangePageResponse> ListRoleChangesAsync(RoleChangeListQuery query, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var changes = context.RoleChanges.AsNoTracking();
+
+        if (query.RoleId is { } roleId)
+        {
+            changes = changes.Where(change => change.RoleIds.Contains(roleId));
+        }
+
+        if (query.UserId is { } userId)
+        {
+            changes = changes.Where(change => change.TargetUserId == userId);
+        }
+
+        if (query.AuthorId is { } authorId)
+        {
+            changes = changes.Where(change => change.CreatedBy == authorId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var pattern = $"%{Escape(query.Search.Trim())}%";
+            var matching = context.Users
+                .Where(user => EF.Functions.ILike(user.Email!, pattern, "\\")
+                    || (user.FullName != null && EF.Functions.ILike(user.FullName, pattern, "\\")))
+                .Select(user => (Guid?)user.Id);
+            changes = changes.Where(change => matching.Contains(change.TargetUserId));
+        }
+
+        if (query.Days is { } days)
+        {
+            var since = timeProvider.GetUtcNow().AddDays(-days);
+            changes = changes.Where(change => change.CreatedAt >= since);
+        }
+
+        var total = await changes.CountAsync(cancellationToken);
+
+        changes = query.Ascending
+            ? changes.OrderBy(change => change.CreatedAt).ThenBy(change => change.Id)
+            : changes.OrderByDescending(change => change.CreatedAt).ThenByDescending(change => change.Id);
+
+        var pageSize = Math.Clamp(query.PageSize, 1, RoleChangeListQuery.MaxPageSize);
+        var page = Math.Max(query.Page, 0);
+        var rows = await changes.Skip(page * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
+        var emails = await EmailsAsync(
+            [.. rows.SelectMany(row => new[] { row.CreatedBy, row.TargetUserId }).OfType<Guid>().Distinct()],
+            cancellationToken);
+        var systemRoles = (await context.Roles.AsNoTracking()
+                .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
+                .Where(role => role.IsSystem)
+                .Select(role => role.Id)
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
+
+        RoleChangeUserResponse? Person(Guid? id) => id is { } value ? new RoleChangeUserResponse(value, emails.GetValueOrDefault(value)) : null;
+
+        IReadOnlyList<RoleChangeItemResponse> Items(IEnumerable<RoleChangeItem> items) =>
+            [.. items.Select(item => new RoleChangeItemResponse(
+                item.Key,
+                item.Name,
+                Guid.TryParse(item.Key, out var id) && systemRoles.Contains(id)))];
+
+        var items = rows
+            .Select(row => new RoleChangeResponse(
+                row.Id,
+                row.CreatedAt,
+                Person(row.CreatedBy),
+                row.Action.ToString(),
+                row.RoleId is { } id ? new UserRoleResponse(id, row.RoleName ?? string.Empty, systemRoles.Contains(id)) : null,
+                Person(row.TargetUserId),
+                row.NameBefore,
+                row.NameAfter,
+                Items(row.Added),
+                Items(row.Removed)))
+            .ToList();
+
+        return new RoleChangePageResponse(items, total);
+    }
+
+    public async Task<RoleChangeFiltersResponse> RoleChangeFiltersAsync(Guid? userId, CancellationToken cancellationToken = default)
+    {
+        var roleIds = await context.RoleChanges.SelectMany(change => change.RoleIds).Distinct().ToListAsync(cancellationToken);
+        var roles = await context.Roles.AsNoTracking()
+            .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
+            .Where(role => roleIds.Contains(role.Id))
+            .Select(role => new RoleChangeFilterRoleResponse(role.Id, role.Name!, role.IsSystem, role.IsDeleted))
+            .ToListAsync(cancellationToken);
+
+        var authorIds = await context.RoleChanges
+            .Where(change => change.CreatedBy != null)
+            .Select(change => change.CreatedBy!.Value)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var emails = await EmailsAsync([.. (userId is { } filtered ? authorIds.Append(filtered) : authorIds).Distinct()], cancellationToken);
+        var authors = authorIds
+            .Select(id => new RoleChangeUserResponse(id, emails.GetValueOrDefault(id)))
+            .OrderBy(author => author.Email is null)
+            .ThenBy(author => author.Email, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new RoleChangeFiltersResponse(
+            [.. roles.OrderBy(role => role.Name, StringComparer.OrdinalIgnoreCase)],
+            authors,
+            userId is { } id ? new RoleChangeUserResponse(id, emails.GetValueOrDefault(id)) : null);
+    }
+
+    /// <summary>F-14, BR5: emails read at display time; an erased (soft-deleted) or unknown account has none.</summary>
+    private async Task<Dictionary<Guid, string?>> EmailsAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken) =>
+        await context.Users.AsNoTracking()
+            .Where(user => userIds.Contains(user.Id))
+            .Select(user => new { user.Id, user.Email })
+            .ToDictionaryAsync(user => user.Id, user => user.Email, cancellationToken);
+
     public async Task<IReadOnlyList<RoleResponse>> ListRolesAsync(CancellationToken cancellationToken = default) =>
         await RolesAsync(roleId: null, cancellationToken);
 
