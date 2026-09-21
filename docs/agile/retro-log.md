@@ -409,3 +409,9 @@ Recorded in this log at the owner's request (2026-09-19); no project rule and no
 ### Plugin notes (`plugin`)
 - `[stack: .NET]` feature-build step 10: after `git stash` / `stash pop` (or any branch switch), rebuild before running tests; `--no-build` runs the binaries of the other tree and the counts lie (B-10: 324 of 328).
 - `[generic]` gate.js: every mode ends with a verdict line; `stop` with nothing marked prints `agile gate SKIPPED: nothing marked` instead of exiting silently (B-10).
+
+## 2026-09-21 — Sync with agile@canary 0.0.37
+From 0.0.36 to 0.0.37, run with `/agile:sync` on `main` after F-15 shipped.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.36 → 0.0.37: the gate's `SKIPPED` verdict and "Honest counts" in section 9).
+- Left alone: `docs/agile/profile.md` (edited here, unchanged upstream since the last sync). Build files did not change upstream.
+- No build: no build file and no rule changed. The rest of 0.0.37 (`gate.js`, the `feature-build` and `feature-ship` steps) comes from the plugin itself.

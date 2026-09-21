@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.36 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.37 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -184,10 +184,11 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
-- **The verdict is the last line.** Every report ends with `agile gate GREEN` or `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build). Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
+- **The verdict is the last line.** Every report ends with `agile gate GREEN`, `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build) or `agile gate SKIPPED: <why>` (nothing was edited, no solution, not a git repository). As a hook, a turn with no code change stays silent; run by hand, the gate always prints its verdict. Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
 - **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
+- **Honest counts.** Claude quotes a warning count only from the gate or a `--no-incremental` build (an incremental build skips unchanged projects and hides their warnings), and builds again after `git stash` or a branch switch before running tests: `--no-build` would run the other tree's binaries.
 - **Hung tests.** A test that runs for more than 120 seconds (`AGILE_GATE_HANG_TIMEOUT`) counts as hung: the run fails with its name instead of blocking the turn for minutes.
 - **No loops.** After 3 red gates in a row the turn ends and you see the failure; the pending check stays for the next turn.
 - **Known limit.** Only edits made with the editing tools are tracked. Changes made by a shell command (`dotnet format`, a merge) are caught at ship.
