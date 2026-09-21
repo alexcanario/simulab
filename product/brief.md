@@ -11,7 +11,7 @@ Candidates prepare with scattered PDFs of past exams and generic question banks.
 - **Admin**: manages the catalog (organizers, exams, subjects), users, roles, plans and content publishing.
 
 ## Capabilities
-1. **Assessment catalog.** Assessment types: public service exam (concurso), certification, university entrance exam (vestibular), ENEM; Portuguese national exams later. Organizers: exam boards, certifying bodies, universities. Exams with editions (notice, year, position or track, stages), sections and subject coverage per edition.
+1. **Assessment catalog.** Assessment types: public service exam (concurso), certification, university entrance exam (vestibular), ENEM; Portuguese national exams later. Organizers: exam boards, certifying bodies, universities. Exams with editions, where an edition is one paper actually applied: its notice, its year and the job it selects for. An edital that opens several jobs with different papers becomes one edition per paper; there is no separate entity for the job or for a stage of the contest (owner, 2026-09-20). Each edition carries the subjects its notice lists, which are its syllabus.
 2. **Subject taxonomy.**
    - Canonical taxonomy in two levels, Subject → Topic, shared across assessment types. A subject may carry an optional area (Law, Languages, Natural Sciences) used only for grouping.
    - Each exam edition keeps its own notice subjects: the label, grouping, number of questions and weight exactly as the notice states them, mapped to the canonical subjects and topics (for example "Raciocínio Lógico-Matemático" maps to Mathematics and Logical Reasoning).
