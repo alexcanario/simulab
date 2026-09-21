@@ -67,7 +67,8 @@ public class AppRowActionsTests : KitTestContext
         popovers.WaitForAssertion(() => popovers.FindAll(".app-row-more-item").Select(i => i.TextContent.Trim()).Should().Equal("Duplicate", "Archive"));
 
         popovers.FindAll(".app-row-more-item")[1].Click();
-        clicked.Should().Equal("Archive");
+        // B-11: Click() can return before the item's handler runs while the popover is still rendering.
+        popovers.WaitForAssertion(() => clicked.Should().Equal("Archive"));
     }
 
     [Fact]
