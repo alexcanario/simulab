@@ -4,6 +4,10 @@ window.simulabShell = {
   setPreference: function (name, value, maxAgeSeconds) {
     document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value)
       + "; max-age=" + maxAgeSeconds + "; path=/; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
+  },
+  // F-11: the recovery codes' Copy action.
+  copyText: function (text) {
+    return navigator.clipboard.writeText(text);
   }
 };
 

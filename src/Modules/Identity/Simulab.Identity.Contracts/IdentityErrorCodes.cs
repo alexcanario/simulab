@@ -55,4 +55,16 @@ public static class IdentityErrorCodes
     public const string RoleAssignmentLastManager = "role_assignment.last_manager";
 
     public const string UserNotFound = "user.not_found";
+
+    /// <summary>
+    /// F-11 BR9: the password was right and the account has two-factor on. An OAuth <c>error</c> of the token
+    /// endpoint, not a failure the user reads: the sign-in page moves to the code step.
+    /// </summary>
+    public const string TotpRequired = "mfa_required";
+
+    public const string TotpCodeInvalid = "totp.code_invalid";
+    public const string TotpChallengeInvalid = "totp.challenge_invalid";
+    public const string TotpAlreadyEnabled = "totp.already_enabled";
+    public const string TotpNotEnabled = "totp.not_enabled";
+    public const string TotpCurrentPasswordInvalid = "totp.current_password_invalid";
 }

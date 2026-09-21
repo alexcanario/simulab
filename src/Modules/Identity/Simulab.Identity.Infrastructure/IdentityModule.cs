@@ -12,6 +12,7 @@ using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
 using Simulab.Identity.Application.Roles;
 using Simulab.Identity.Application.Sessions;
+using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
@@ -20,6 +21,7 @@ using Simulab.Identity.Infrastructure.Content;
 using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Sessions;
+using Simulab.Identity.Infrastructure.Totp;
 using Simulab.Jobs;
 using Simulab.Persistence;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -31,6 +33,9 @@ public static class IdentityModule
 {
     /// <summary>Client id of the single first-party confidential client (F-5, decision 2).</summary>
     public const string WebClientId = "simulab-web";
+
+    /// <summary>The custom grant of the code step at sign-in (F-11 BR9): <c>challenge</c> and <c>code</c> in, tokens out.</summary>
+    public const string TotpGrantType = "totp";
 
     /// <summary>
     /// <paramref name="services"/> already has an <c>IConnectionMultiplexer</c> registered by the host
@@ -122,6 +127,24 @@ public static class IdentityModule
         // Refresh-token sessions and the access-token revocation set (F-5, BR4-BR7).
         services.AddScoped<IRefreshSessionStore, RedisRefreshSessionStore>();
 
+        // F-11 BR12: two-factor is registered only while it is on; the key is checked when the host starts (AC14).
+        var totp = configuration.GetSection(TotpOptions.SectionName).Get<TotpOptions>() ?? new TotpOptions();
+        services.AddOptions<TotpOptions>()
+            .Bind(configuration.GetSection(TotpOptions.SectionName))
+            .Validate(options => options.Problem() is null, totp.Problem() ?? "Identity:TotpEncryptionKey is not valid.")
+            .ValidateOnStart();
+
+        if (totp.TotpEnabled)
+        {
+            services.AddSingleton<ITotpAuthenticator, TotpAuthenticator>();
+            services.AddSingleton<ITotpSecretProtector, AesGcmTotpSecretProtector>();
+            services.AddScoped<ITotpChallengeStore, RedisTotpChallengeStore>();
+            services.AddScoped<RecoveryCodes>();
+            services.AddScoped<SecondFactor>();
+            services.AddScoped<TotpAccountHandler>();
+            services.AddScoped<TotpSignInHandler>();
+        }
+
         services.AddOpenIddict()
             .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityModuleDbContext>())
             .AddServer(options =>
@@ -131,6 +154,12 @@ public static class IdentityModule
                 // Password flow is first-party only (ADR-0001 #12); refresh keeps a session alive silently.
                 options.AllowPasswordFlow();
                 options.AllowRefreshTokenFlow();
+
+                // F-11 BR9: the code step of a two-factor sign-in, only while the feature is on (BR12).
+                if (totp.TotpEnabled)
+                {
+                    options.AllowCustomFlow(TotpGrantType);
+                }
 
                 options.SetAccessTokenLifetime(TokenLifetimes.AccessToken);
                 options.SetRefreshTokenLifetime(TokenLifetimes.RefreshToken);
@@ -185,8 +214,19 @@ public static class IdentityModule
         await using var scope = services.CreateAsyncScope();
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
-        if (await manager.FindByClientIdAsync(WebClientId, cancellationToken) is not null)
+        var existing = await manager.FindByClientIdAsync(WebClientId, cancellationToken);
+        if (existing is not null)
         {
+            // F-11: a client registered before the totp grant existed gains its permission on the next start.
+            var permissions = await manager.GetPermissionsAsync(existing, cancellationToken);
+            if (!permissions.Contains(TotpGrantPermission))
+            {
+                var descriptor = new OpenIddictApplicationDescriptor();
+                await manager.PopulateAsync(descriptor, existing, cancellationToken);
+                descriptor.Permissions.Add(TotpGrantPermission);
+                await manager.UpdateAsync(existing, descriptor, cancellationToken);
+            }
+
             return;
         }
 
@@ -202,10 +242,17 @@ public static class IdentityModule
             {
                 Permissions.Endpoints.Token,
                 Permissions.GrantTypes.Password,
-                Permissions.GrantTypes.RefreshToken
+                Permissions.GrantTypes.RefreshToken,
+                TotpGrantPermission
             }
         }, cancellationToken);
     }
+
+    /// <summary>
+    /// Granted whether the feature is on or off: the permission alone opens nothing, because the server only
+    /// accepts the grant while <c>Identity:TotpEnabled</c> is true (BR12), and turning it on needs no data change.
+    /// </summary>
+    private const string TotpGrantPermission = Permissions.Prefixes.GrantType + TotpGrantType;
 
     /// <summary>
     /// Creates the seed roles (F-6, BR1) and the one seed permission (BR8), granted to Admin, if they do

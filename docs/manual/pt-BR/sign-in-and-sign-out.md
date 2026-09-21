@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-BR
-features: [F-5, B-3, F-7]
-updated: 2026-09-19
+features: [F-5, B-3, F-7, F-11]
+updated: 2026-09-21
 ---
 # Entrar e sair
 
@@ -44,7 +44,11 @@ Se você entrar em um dispositivo enquanto já está conectado em outro, as duas
 ## Por quanto tempo você fica conectado
 Você fica conectado por até 30 dias em cada dispositivo, mesmo deixando uma página aberta por horas ou quando o app é reiniciado; não precisa entrar de novo nesse período. Quando sua sessão é encerrada em outro lugar, uma página aberta percebe em até um minuto e leva você para **Entrar** com a mensagem *Sua sessão terminou. Entre novamente.* Um papel ou permissão novo aparece no seu menu na próxima vez que você abrir uma página, sem precisar entrar de novo.
 
+## Com a verificação em duas etapas
+Se você ativou a verificação em duas etapas, depois da senha a página pede o código de seis dígitos do seu aplicativo autenticador, ou um dos seus códigos de recuperação. Veja [Verificação em duas etapas](two-factor.md).
+
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
 - [Como navegar](getting-around.md)
 - [Senha](password.md): esqueci a senha, redefinir e alterar
+- [Verificação em duas etapas](two-factor.md)

@@ -223,6 +223,88 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
                 accessToken),
             cancellationToken);
 
+    /// <summary>
+    /// The Api answers the two-factor routes with 404 while <c>Identity:TotpEnabled</c> is false (F-11 BR12): the Web
+    /// reads that as "the feature is off" and shows nothing of it. A marker, never shown to anyone.
+    /// </summary>
+    public const string TotpSwitchedOffCode = "totp.switched_off";
+
+    /// <summary>F-11: whether two-factor is on for the caller, or <see cref="TotpSwitchedOffCode"/>.</summary>
+    public async Task<ApiResult<TotpStatusResponse>> GetTotpStatusAsync(string accessToken, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/totp"), accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return ApiResult.Failed<TotpStatusResponse>(TotpSwitchedOffCode);
+            }
+
+            return response.IsSuccessStatusCode
+                ? ApiResult.Ok(await response.Content.ReadFromJsonAsync<TotpStatusResponse>(AppJson.Options, cancellationToken))
+                : ApiResult.Failed<TotpStatusResponse>(await ReadCodeAsync(response, cancellationToken));
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException)
+        {
+            return ApiResult.Failed<TotpStatusResponse>(Components.Ui.ErrorText.UnexpectedCode);
+        }
+    }
+
+    /// <summary>F-11 UC1: a new secret and its QR code; two-factor stays off until confirmed.</summary>
+    public Task<ApiResult<TotpEnrolmentResponse>> StartTotpEnrolmentAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<TotpEnrolmentResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Post, $"{Base}/totp/enrolments"), accessToken), cancellationToken);
+
+    /// <summary>F-11 UC1, UC2: the first code turns two-factor on and brings the ten recovery codes.</summary>
+    public Task<LockableResult<RecoveryCodesResponse>> ConfirmTotpAsync(string accessToken, string code, CancellationToken cancellationToken = default) =>
+        SendLockableAsync<RecoveryCodesResponse>(HttpMethod.Post, $"{Base}/totp/enrolments/confirmations", new ConfirmTotpRequest(code), accessToken, cancellationToken);
+
+    /// <summary>F-11 UC5.</summary>
+    public Task<LockableResult<RecoveryCodesResponse>> RegenerateRecoveryCodesAsync(string accessToken, string code, CancellationToken cancellationToken = default) =>
+        SendLockableAsync<RecoveryCodesResponse>(HttpMethod.Post, $"{Base}/totp/recovery-codes", new RegenerateRecoveryCodesRequest(code), accessToken, cancellationToken);
+
+    /// <summary>F-11 UC6: the password and a code, both.</summary>
+    public Task<LockableResult<bool>> DisableTotpAsync(string accessToken, string currentPassword, string code, CancellationToken cancellationToken = default) =>
+        SendLockableAsync<bool>(HttpMethod.Delete, $"{Base}/totp", new DisableTotpRequest(currentPassword, code), accessToken, cancellationToken);
+
+    /// <summary>A call whose failure may be the sign-in lockout: 423 carries the seconds left (F-7 BR8, F-11 BR10).</summary>
+    private async Task<LockableResult<T>> SendLockableAsync<T>(HttpMethod method, string route, object body, string accessToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var request = Authorized(new HttpRequestMessage(method, route) { Content = JsonContent.Create(body, body.GetType(), options: AppJson.Options) }, accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var value = response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength is 0
+                    ? default
+                    : await response.Content.ReadFromJsonAsync<T>(AppJson.Options, cancellationToken);
+                return new LockableResult<T>(value, null, null);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Locked)
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(AppJson.Options, cancellationToken);
+                var seconds = problem?.Extensions.TryGetValue("retryAfterSeconds", out var raw) == true && raw is JsonElement { ValueKind: JsonValueKind.Number } element
+                    ? element.GetInt32()
+                    : 0;
+                return new LockableResult<T>(default, IdentityErrorCodes.AccountLocked, seconds);
+            }
+
+            return new LockableResult<T>(default, await ReadCodeAsync(response, cancellationToken), null);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException or NotSupportedException)
+        {
+            return new LockableResult<T>(default, Components.Ui.ErrorText.UnexpectedCode, null);
+        }
+    }
+
     private static HttpRequestMessage Authorized(HttpRequestMessage request, string accessToken)
     {
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);

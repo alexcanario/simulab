@@ -554,3 +554,56 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     font-weight: 700;
     color: var(--mud-palette-error);
 }
+
+/* F-11: the two-factor card on /account/security. */
+.app-security-title {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.app-security-steps {
+    margin: 0 0 16px;
+    padding-left: 20px;
+}
+
+.app-security-steps li {
+    margin-bottom: 8px;
+}
+
+.app-security-qr {
+    /* A QR code needs a light quiet zone to scan, in both themes. */
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 4px;
+    image-rendering: pixelated;
+}
+
+.app-security-secret,
+.app-security-codes code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    color: var(--mud-palette-text-primary);
+}
+
+.app-security-codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 24px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
+
+.app-security-code-tools,
+.app-security-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.app-security-actions {
+    justify-content: flex-end;
+    margin-top: 16px;
+}

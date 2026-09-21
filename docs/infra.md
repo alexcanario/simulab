@@ -48,6 +48,8 @@ Names only. None exists yet; each arrives with the feature that needs it.
 | `Ai:Anthropic:ApiKey` | Api (`IAiGateway`) | local: user secrets; cloud: Key Vault |
 | `Email:SendGrid:ApiKey` | Api | local: not used (Mailpit); cloud: Key Vault |
 | `Authentication:Google:ClientId` / `ClientSecret` | Api | not used in v1 (Google sign-in is off) |
+| `Identity:TotpEnabled` | Api | the two-factor switch (F-11 BR12). Default false (`appsettings.json` has no value); local: true in `appsettings.Development.json`; cloud: false in v1. The Web has no copy: it asks the Api |
+| `Identity:TotpEncryptionKey` | Api | base64 of 32 random bytes; required only while `Identity:TotpEnabled` is true, and the Api refuses to start without a valid one (F-11 AC14). Local: a development-only key in `appsettings.Development.json`; cloud: Key Vault. **Losing or changing it invalidates every enrolment and every recovery code**: the secrets are encrypted and the codes hashed with it, so each user would have to turn two-factor off and on again (which needs a code they can no longer produce) |
 | `OpenIddict` signing and encryption certificates | Api | local: development certificates (F-5); cloud: Key Vault, planned |
 
 ## The first Admin (F-9, BR11)
@@ -66,5 +68,5 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 15 s, 0 warnings; baseline stays empty (2026-09-20, F-13) |
-| Full test suite | < 5 min | 533 tests, 28 s (2026-09-20, F-13) |
+| Full build | | 16 s, 0 warnings; baseline stays empty (2026-09-21, F-11) |
+| Full test suite | < 5 min | 610 tests, 31 s (2026-09-21, F-11) |

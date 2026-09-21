@@ -1,0 +1,450 @@
+@page "/account/security"
+@layout MainLayout
+@implements IDisposable
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services.Auth
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject WebSessionTokenAccessor Tokens
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@inject TimeProvider Clock
+
+<PageTitle>@I["Security.Title"] — @L["App.Name"]</PageTitle>
+
+@* F-11: two-factor on the signed-in user's own account. Reached from "My account"; not reachable while the feature is off (BR12). *@
+<AppPageHeader Title="@I["Security.Title"]" />
+
+@if (_view == View.Loading)
+{
+    <AppLoadingState />
+}
+else if (_view == View.LoadFailed)
+{
+    <AppErrorState Message="@I["Security.LoadFailed"]" OnRetry="LoadAsync" />
+}
+else
+{
+    <MudPaper Class="app-form-card app-security-card pa-6" Elevation="0" Outlined="true" MaxWidth="560px">
+        <h2 class="app-security-title">@I["Security.TwoFactor.Title"]</h2>
+
+        @if (_lockout.IsRunning)
+        {
+            <div aria-live="polite">
+                <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockout.Announced)]" />
+            </div>
+        }
+        else if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@Errors.For(_error)" />
+        }
+
+        @switch (_view)
+        {
+            case View.Off:
+                <MudText Typo="Typo.body2" Class="mb-4 app-security-explanation">@I["Security.Off.Explanation"]</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy" OnClick="StartAsync" Class="app-security-turn-on">
+                    @if (_busy)
+                    {
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                    }
+                    @I["Security.Off.TurnOn"]
+                </MudButton>
+                break;
+
+            case View.Enrolling:
+                <ol class="app-security-steps">
+                    <li>@I["Security.Enrol.Step.Install"]</li>
+                    <li>
+                        @I["Security.Enrol.Step.Scan"]
+                        <img src="@_enrolment!.QrCodeDataUri" alt="@I["Security.Enrol.QrCode.Alt"]" width="200" height="200" class="app-security-qr d-block my-3" />
+                        <span class="app-field-hint">@I["Security.Enrol.Secret.Label"]</span>
+                        <code class="app-security-secret d-block mb-3">@GroupedSecret</code>
+                    </li>
+                    <li>@I["Security.Enrol.Step.Confirm"]</li>
+                </ol>
+                <AppTextField TValue="string"
+                              Id="security-enrol-code"
+                              Label="@I["Security.Code.Label"]"
+                              Hint="@I["Security.Code.Hint"]"
+                              Autocomplete="one-time-code"
+                              MaxLength="AccountLimits.TotpCodeMaxLength"
+                              Required="true"
+                              Disabled="_busy"
+                              Error="@_codeError"
+                              Value="@_code"
+                              ValueChanged="@(value => { _code = value; _codeError = null; })" />
+                <div class="app-security-actions">
+                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CancelAsync" Class="app-security-cancel">@L["Common.Cancel"]</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_busy || _lockout.IsRunning)" OnClick="ConfirmAsync" Class="app-security-confirm">
+                        @if (_busy)
+                        {
+                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                        }
+                        @I["Security.Enrol.Confirm"]
+                    </MudButton>
+                </div>
+                break;
+
+            case View.RecoveryCodes:
+                <AppAlert Severity="Severity.Warning" Text="@I["Security.Codes.ShownOnce"]" />
+                <MudText Typo="Typo.body2" Class="mb-2">@I["Security.Codes.Explanation"]</MudText>
+                <ul class="app-security-codes" aria-label="@I["Security.Codes.Title"]">
+                    @foreach (var recoveryCode in _codes)
+                    {
+                        <li><code>@recoveryCode</code></li>
+                    }
+                </ul>
+                <div class="app-security-code-tools mb-4">
+                    <MudButton Variant="Variant.Outlined" StartIcon="@AppIcons.Copy" OnClick="CopyCodesAsync" Class="app-security-copy">@I["Security.Codes.Copy"]</MudButton>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@AppIcons.Download" Href="@CodesFile" UserAttributes="@DownloadAttributes" Class="app-security-download">@I["Security.Codes.Download"]</MudButton>
+                </div>
+                <AppCheckbox Id="security-codes-saved" Value="_codesSaved" ValueChanged="@(value => _codesSaved = value)">
+                    @I["Security.Codes.Saved"]
+                </AppCheckbox>
+                <div class="app-security-actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_codesSaved)" OnClick="DoneAsync" Class="app-security-done">@I["Security.Codes.Done"]</MudButton>
+                </div>
+                break;
+
+            case View.On:
+                <MudText Typo="Typo.body2" Class="app-security-on">@EnabledText</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4 app-security-codes-left">@CodesLeftText</MudText>
+
+                @if (_regenerating)
+                {
+                    <AppTextField TValue="string"
+                                  Id="security-regenerate-code"
+                                  Label="@I["Security.Code.LabelOrRecovery"]"
+                                  Hint="@I["Security.Code.HintOrRecovery"]"
+                                  Autocomplete="one-time-code"
+                                  MaxLength="AccountLimits.TotpCodeMaxLength"
+                                  Required="true"
+                                  Disabled="_busy"
+                                  Error="@_codeError"
+                                  Value="@_code"
+                                  ValueChanged="@(value => { _code = value; _codeError = null; })" />
+                    <div class="app-security-actions">
+                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CloseForms" Class="app-security-cancel">@L["Common.Cancel"]</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_busy || _lockout.IsRunning)" OnClick="RegenerateAsync" Class="app-security-regenerate-confirm">
+                            @I["Security.On.Regenerate.Confirm"]
+                        </MudButton>
+                    </div>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Outlined" Disabled="_disabling" OnClick="OpenRegenerate" Class="app-security-regenerate">@I["Security.On.Regenerate"]</MudButton>
+                }
+                break;
+        }
+    </MudPaper>
+
+    @if (_view == View.On)
+    {
+        @* BR8: set apart like F-10's danger zone; the password and a code are the confirmation. *@
+        <MudPaper Class="app-danger-zone pa-6 mt-6" Elevation="0" Outlined="true" MaxWidth="560px">
+            <h2 class="app-danger-zone-title">@I["Security.Off.Title"]</h2>
+            <MudText Typo="Typo.body2" Class="mb-4">@I["Security.Off.Explanation.Danger"]</MudText>
+
+            @if (_disabling)
+            {
+                <AppPasswordField Id="security-disable-password"
+                                  Label="@I["Security.Disable.Password.Label"]"
+                                  ShowLabel="@I["SignUp.Password.Show"]"
+                                  HideLabel="@I["SignUp.Password.Hide"]"
+                                  Autocomplete="PasswordAutocomplete.CurrentPassword"
+                                  Required="true"
+                                  Disabled="_busy"
+                                  Error="@_passwordError"
+                                  Value="@_password"
+                                  ValueChanged="@(value => { _password = value; _passwordError = null; })" />
+                <AppTextField TValue="string"
+                              Id="security-disable-code"
+                              Label="@I["Security.Code.LabelOrRecovery"]"
+                              Hint="@I["Security.Code.HintOrRecovery"]"
+                              Autocomplete="one-time-code"
+                              MaxLength="AccountLimits.TotpCodeMaxLength"
+                              Required="true"
+                              Disabled="_busy"
+                              Error="@_codeError"
+                              Value="@_code"
+                              ValueChanged="@(value => { _code = value; _codeError = null; })" />
+                <div class="app-security-actions">
+                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CloseForms" Class="app-security-cancel">@L["Common.Cancel"]</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@(_busy || _lockout.IsRunning)" OnClick="DisableAsync" Class="app-security-disable-confirm">
+                        @I["Security.Off.Action"]
+                    </MudButton>
+                </div>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_regenerating" OnClick="OpenDisable" Class="app-security-disable">@I["Security.Off.Action"]</MudButton>
+            }
+        </MudPaper>
+    }
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    private enum View
+    {
+        Loading,
+        LoadFailed,
+        Off,
+        Enrolling,
+        RecoveryCodes,
+        On
+    }
+
+    private const string DownloadFileName = "simulab-recovery-codes.txt";
+
+    private static readonly Dictionary<string, object> DownloadAttributes = new() { ["download"] = DownloadFileName };
+
+    private Countdown _lockout = default!;
+    private View _view = View.Loading;
+    private TotpStatusResponse? _status;
+    private TotpEnrolmentResponse? _enrolment;
+    private IReadOnlyList<string> _codes = [];
+    private bool _codesSaved;
+    private bool _busy;
+    private bool _regenerating;
+    private bool _disabling;
+    private string? _code;
+    private string? _codeError;
+    private string? _password;
+    private string? _passwordError;
+    private string? _error;
+
+    private string GroupedSecret => string.Join(' ', _enrolment!.Secret.Chunk(4).Select(chunk => new string(chunk)));
+
+    /// <summary>A plain text file, built here so the codes never travel again: one code per line.</summary>
+    private string CodesFile => "data:text/plain;charset=utf-8," + Uri.EscapeDataString(string.Join("\r\n", _codes) + "\r\n");
+
+    private string EnabledText => _status?.EnabledAt is { } enabledAt
+        ? I["Security.On.Since", enabledAt.UtcDateTime.ToString("D", CultureInfo.CurrentCulture)]
+        : I["Security.On.Enabled"];
+
+    private string CodesLeftText => _status?.RecoveryCodesLeft == 1
+        ? I["Security.On.CodesLeft.One"]
+        : I["Security.On.CodesLeft.Other", _status?.RecoveryCodesLeft ?? 0];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _lockout = new Countdown(Clock, () => InvokeAsync(StateHasChanged));
+
+        // Signed-in users only, as on /account and /account/password.
+        if (AuthState is null || (await AuthState).User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/sign-in", forceLoad: true);
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _view = View.Loading;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null ? null : await Api.GetTotpStatusAsync(accessToken);
+
+        if (result?.ErrorCode == IdentityApiClient.TotpSwitchedOffCode)
+        {
+            // BR12: with the feature off, this page does not exist.
+            Navigation.NotFound();
+            return;
+        }
+
+        if (result?.Value is null)
+        {
+            _view = View.LoadFailed;
+            return;
+        }
+
+        _status = result.Value;
+        _view = _status.Enabled ? View.On : View.Off;
+    }
+
+    private async Task StartAsync()
+    {
+        _error = null;
+        _busy = true;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null ? null : await Api.StartTotpEnrolmentAsync(accessToken);
+        _busy = false;
+
+        if (result?.Value is null)
+        {
+            _error = result?.ErrorCode ?? ErrorText.UnexpectedCode;
+            return;
+        }
+
+        _enrolment = result.Value;
+        _code = null;
+        _codeError = null;
+        _view = View.Enrolling;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (!CodeEntered(I["Security.Code.Required"].Value))
+        {
+            return;
+        }
+
+        var result = await CallAsync(token => Api.ConfirmTotpAsync(token, _code!.Trim()));
+        if (result?.Value is not null)
+        {
+            ShowCodes(result.Value.Codes);
+        }
+    }
+
+    private async Task RegenerateAsync()
+    {
+        if (!CodeEntered(I["Security.Code.RequiredOrRecovery"].Value))
+        {
+            return;
+        }
+
+        var result = await CallAsync(token => Api.RegenerateRecoveryCodesAsync(token, _code!.Trim()));
+        if (result?.Value is not null)
+        {
+            ShowCodes(result.Value.Codes);
+        }
+    }
+
+    private async Task DisableAsync()
+    {
+        _passwordError = string.IsNullOrEmpty(_password) ? I["ChangePassword.CurrentPassword.Required"].Value : null;
+        if (!CodeEntered(I["Security.Code.RequiredOrRecovery"].Value) || _passwordError is not null)
+        {
+            return;
+        }
+
+        var result = await CallAsync(token => Api.DisableTotpAsync(token, _password!, _code!.Trim()));
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(I["Security.Off.Done"], Severity.Success);
+            CloseForms();
+            await LoadAsync();
+        }
+    }
+
+    /// <summary>
+    /// Runs a call guarded by the lockout and puts each failure where it belongs: the code or the password under
+    /// its field, the lockout as a countdown, anything else as an alert. Null when there was no session.
+    /// </summary>
+    private async Task<LockableResult<T>?> CallAsync<T>(Func<string, Task<LockableResult<T>>> call)
+    {
+        _error = null;
+        _busy = true;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null ? null : await call(accessToken);
+        _busy = false;
+
+        switch (result?.ErrorCode)
+        {
+            case null when result is not null:
+                break;
+            case null:
+                _error = ErrorText.UnexpectedCode;
+                break;
+            case IdentityErrorCodes.TotpCodeInvalid:
+                _codeError = Errors.For(result.ErrorCode);
+                _code = null;
+                break;
+            case IdentityErrorCodes.TotpCurrentPasswordInvalid:
+                _passwordError = Errors.For(result.ErrorCode);
+                _password = null;
+                break;
+            case IdentityErrorCodes.AccountLocked:
+                _code = null;
+                _password = null;
+                _lockout.Start(TimeSpan.FromSeconds(Math.Max(1, result.RetryAfterSeconds ?? 0)));
+                break;
+            default:
+                _error = result.ErrorCode;
+                break;
+        }
+
+        return result;
+    }
+
+    private bool CodeEntered(string requiredText)
+    {
+        _codeError = string.IsNullOrWhiteSpace(_code) ? requiredText : null;
+        return _codeError is null;
+    }
+
+    private void ShowCodes(IReadOnlyList<string> codes)
+    {
+        _codes = codes;
+        _codesSaved = false;
+        _enrolment = null;
+        CloseForms();
+        _view = View.RecoveryCodes;
+    }
+
+    private async Task DoneAsync()
+    {
+        _codes = [];
+        Snackbar.Add(I["Security.Codes.Stored"], Severity.Success);
+        await LoadAsync();
+    }
+
+    private async Task CopyCodesAsync()
+    {
+        await JS.InvokeVoidAsync("simulabShell.copyText", string.Join("\n", _codes));
+        Snackbar.Add(I["Security.Codes.Copied"], Severity.Success);
+    }
+
+    /// <summary>The unconfirmed secret stays on the account and grants nothing (BR2); the next enrolment replaces it.</summary>
+    private Task CancelAsync()
+    {
+        _enrolment = null;
+        _code = null;
+        _codeError = null;
+        _error = null;
+        _view = View.Off;
+        return Task.CompletedTask;
+    }
+
+    private void OpenRegenerate()
+    {
+        CloseForms();
+        _regenerating = true;
+    }
+
+    private void OpenDisable()
+    {
+        CloseForms();
+        _disabling = true;
+    }
+
+    private void CloseForms()
+    {
+        _regenerating = false;
+        _disabling = false;
+        _code = null;
+        _codeError = null;
+        _password = null;
+        _passwordError = null;
+        _error = null;
+    }
+
+    private async Task<string?> AccessTokenAsync()
+    {
+        var user = AuthState is null ? null : (await AuthState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static string FormatSeconds(int seconds) => TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss");
+
+    public void Dispose() => _lockout?.Dispose();
+}

@@ -193,4 +193,9 @@
   <data name="registration.full_name_too_long" xml:space="preserve"><value>Use no máximo 120 caracteres.</value></data>
   <data name="account_erasure.current_password_invalid" xml:space="preserve"><value>A senha atual não está correta.</value></data>
   <data name="account_erasure.last_manager" xml:space="preserve"><value>Você é o último usuário que pode gerenciar papéis. Dê essa permissão a outro usuário ativo antes de apagar sua conta.</value></data>
+  <data name="totp.code_invalid" xml:space="preserve"><value>O código não está correto ou já foi usado.</value></data>
+  <data name="totp.challenge_invalid" xml:space="preserve"><value>O login demorou demais. Digite sua senha de novo.</value></data>
+  <data name="totp.already_enabled" xml:space="preserve"><value>A verificação em duas etapas já está ativa.</value></data>
+  <data name="totp.not_enabled" xml:space="preserve"><value>A verificação em duas etapas não está ativa.</value></data>
+  <data name="totp.current_password_invalid" xml:space="preserve"><value>A senha atual não está correta.</value></data>
 </root>

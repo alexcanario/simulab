@@ -5,11 +5,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Simulab.Identity.Application.Sessions;
+using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
+using Simulab.Identity.Infrastructure;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Simulab.Identity.Api;
@@ -43,7 +47,7 @@ public static class TokenEndpoints
 
         if (request.IsPasswordGrantType())
         {
-            return await HandlePasswordGrantAsync(request, userManager, sessions, timeProvider, cancellationToken);
+            return await HandlePasswordGrantAsync(context, request, userManager, sessions, timeProvider, cancellationToken);
         }
 
         if (request.IsRefreshTokenGrantType())
@@ -51,11 +55,44 @@ public static class TokenEndpoints
             return await HandleRefreshGrantAsync(context, userManager, sessions, timeProvider, cancellationToken);
         }
 
+        if (request.GrantType == IdentityModule.TotpGrantType && TotpEnabled(context))
+        {
+            return await HandleTotpGrantAsync(context, request, sessions, timeProvider, cancellationToken);
+        }
+
         return Forbid(Errors.UnsupportedGrantType);
+    }
+
+    /// <summary>F-11 BR12: read per request from the options, the same switch that maps the routes.</summary>
+    private static bool TotpEnabled(HttpContext context) =>
+        context.RequestServices.GetRequiredService<IOptions<TotpOptions>>().Value.TotpEnabled;
+
+    /// <summary>
+    /// F-11 BR9: the code step. The challenge is spent whatever the code; a wrong code counts on the lockout
+    /// (BR10) and a lockout answers with the seconds left, as the password step does.
+    /// </summary>
+    private static async Task<IResult> HandleTotpGrantAsync(
+        HttpContext context,
+        OpenIddictRequest request,
+        IRefreshSessionStore sessions,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        // Resolved here, not as a parameter: it exists only while the feature is on.
+        var handler = context.RequestServices.GetRequiredService<TotpSignInHandler>();
+        var result = await handler.CompleteAsync((string?)request[TotpChallengeParameter], (string?)request[TotpCodeParameter], cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return await IssueTokensAsync(result.Value, sessions, timeProvider, cancellationToken);
+        }
+
+        return Forbid(result.Error!.Code, result.Error.Code == IdentityErrorCodes.AccountLocked ? result.Error.Detail : null);
     }
 
     /// <summary>BR2, BR3: lockout is checked before the password, so a correct password during lockout is still refused.</summary>
     private static async Task<IResult> HandlePasswordGrantAsync(
+        HttpContext context,
         OpenIddictRequest request,
         UserManager<User> userManager,
         IRefreshSessionStore sessions,
@@ -86,9 +123,27 @@ public static class TokenEndpoints
             return Forbid(IdentityErrorCodes.EmailNotVerified);
         }
 
+        // F-11 BR9, BR12: with the feature on, an account with two-factor gets a challenge instead of tokens.
+        // With it off, the flag is ignored, so nobody is locked out by the switch. The failure count is not
+        // cleared here: each code needs a new password step, and clearing it would give whoever has the
+        // password unlimited codes (BR10). The code step clears it.
+        if (user.TwoFactorEnabled && TotpEnabled(context))
+        {
+            var challenge = await context.RequestServices.GetRequiredService<TotpSignInHandler>().IssueChallengeAsync(user, cancellationToken);
+            return Forbid(IdentityErrorCodes.TotpRequired, parameters: new Dictionary<string, object?>
+            {
+                [TotpChallengeParameter] = challenge,
+                [Parameters.ExpiresIn] = (long)TotpSignInHandler.ChallengeLifetime.TotalSeconds,
+            });
+        }
+
         await userManager.ResetAccessFailedCountAsync(user);
         return await IssueTokensAsync(user, sessions, timeProvider, cancellationToken);
     }
+
+    /// <summary>The token-request and error-response parameter names of the code step (F-11).</summary>
+    public const string TotpChallengeParameter = "challenge";
+    public const string TotpCodeParameter = "code";
 
     /// <summary>BR5: the presented refresh token is consumed exactly once; rotation issues a brand new pair.</summary>
     private static async Task<IResult> HandleRefreshGrantAsync(
@@ -149,12 +204,15 @@ public static class TokenEndpoints
     private static string SecondsOf(TimeSpan remaining) =>
         Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds)).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-    private static IResult Forbid(string errorCode, string? errorDescription = null) =>
+    /// <summary><paramref name="parameters"/> are written into the error response next to <c>error</c> (F-11: the challenge).</summary>
+    private static IResult Forbid(string errorCode, string? errorDescription = null, IDictionary<string, object?>? parameters = null) =>
         Results.Forbid(
             authenticationSchemes: [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme],
-            properties: new AuthenticationProperties(new Dictionary<string, string?>
-            {
-                [OpenIddictServerAspNetCoreConstants.Properties.Error] = errorCode,
-                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = errorDescription
-            }));
+            properties: new AuthenticationProperties(
+                new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = errorCode,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = errorDescription
+                },
+                parameters ?? new Dictionary<string, object?>()));
 }

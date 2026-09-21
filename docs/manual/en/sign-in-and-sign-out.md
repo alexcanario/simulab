@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: en
-features: [F-5, B-3, F-7]
-updated: 2026-09-19
+features: [F-5, B-3, F-7, F-11]
+updated: 2026-09-21
 ---
 # Sign in and sign out
 
@@ -44,7 +44,11 @@ If you sign in on one device while already signed in on another, both sessions k
 ## How long you stay signed in
 You stay signed in for up to 30 days on each device, even if you leave a page open for hours or the app restarts; you do not need to sign in again in the meantime. When your session ends somewhere else, an open page notices within a minute and takes you to **Sign in** with the message *Your session ended. Sign in again.* A new role or permission appears in your menu the next time you open a page, without signing in again.
 
+## With two-factor sign-in
+If you turned on two-factor sign-in, the page asks for the six-digit code from your authenticator app after your password, or one of your recovery codes. See [Two-factor sign-in](two-factor.md).
+
 ## Related pages
 - [Create an account](create-account.md)
 - [Getting around](getting-around.md)
 - [Password](password.md): forgot, reset and change your password
+- [Two-factor sign-in](two-factor.md)

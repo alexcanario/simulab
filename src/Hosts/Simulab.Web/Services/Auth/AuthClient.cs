@@ -13,9 +13,13 @@ public sealed record TokenResult(
     string? RefreshToken,
     int? ExpiresInSeconds,
     string? ErrorCode,
-    string? ErrorDescription)
+    string? ErrorDescription,
+    string? Challenge = null)
 {
-    public static TokenResult Failed(string code, string? description) => new(false, null, null, null, code, description);
+    public static TokenResult Failed(string code, string? description, string? challenge = null) => new(false, null, null, null, code, description, challenge);
+
+    /// <summary>F-11 BR9: the password was right and the account asks for a code; <see cref="Challenge"/> carries the attempt on.</summary>
+    public bool NeedsTotpCode => ErrorCode == IdentityErrorCodes.TotpRequired && !string.IsNullOrEmpty(Challenge);
 
     /// <summary>
     /// The token endpoint refused this refresh token itself (B-3, BR3): only then does a web session end.
@@ -30,7 +34,8 @@ file sealed record TokenResponseBody(
     [property: JsonPropertyName("refresh_token")] string? RefreshToken,
     [property: JsonPropertyName("expires_in")] int? ExpiresIn,
     [property: JsonPropertyName("error")] string? Error,
-    [property: JsonPropertyName("error_description")] string? ErrorDescription);
+    [property: JsonPropertyName("error_description")] string? ErrorDescription,
+    [property: JsonPropertyName("challenge")] string? Challenge);
 
 /// <summary>
 /// Talks to the Api's OpenIddict token endpoint the way BR1 describes it: form-encoded, with the
@@ -45,6 +50,17 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ["grant_type"] = "password",
                 ["username"] = email,
                 ["password"] = password,
+            },
+            cancellationToken);
+
+    /// <summary>F-11 BR9: the code step, the custom <c>totp</c> grant. The challenge is spent whatever the answer.</summary>
+    public Task<TokenResult> CompleteTotpSignInAsync(string challenge, string code, CancellationToken cancellationToken = default) =>
+        RequestAsync(
+            new Dictionary<string, string>
+            {
+                ["grant_type"] = "totp",
+                ["challenge"] = challenge,
+                ["code"] = code,
             },
             cancellationToken);
 
@@ -119,7 +135,7 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
 
             if (body?.Error is not null)
             {
-                return TokenResult.Failed(body.Error, body.ErrorDescription);
+                return TokenResult.Failed(body.Error, body.ErrorDescription, body.Challenge);
             }
 
             // A 5xx comes back as problem details with no OAuth "error": that is no answer, not a token pair.

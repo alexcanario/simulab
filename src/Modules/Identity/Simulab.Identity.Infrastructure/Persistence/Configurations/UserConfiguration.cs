@@ -24,6 +24,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(user => user.ConcurrencyStamp).IsConcurrencyToken();
 
+        // F-11 BR3: base64 of nonce, ciphertext and tag of a 32-character secret is 80 characters.
+        builder.Property(user => user.TotpSecretEncrypted).HasMaxLength(AccountLimits.TotpSecretEncryptedMaxLength);
+
         // BR3: the address identifies the account across every tenant, so the index includes TenantId and
         // treats two nulls as equal — without that, two global accounts could share one address.
         builder.HasIndex(user => new { user.TenantId, user.NormalizedEmail })
