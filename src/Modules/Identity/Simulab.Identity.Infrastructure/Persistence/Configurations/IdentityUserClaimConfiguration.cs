@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Simulab.Identity.Domain.Entities;
 
 namespace Simulab.Identity.Infrastructure.Persistence.Configurations;
 
@@ -14,5 +15,6 @@ public sealed class IdentityUserClaimConfiguration : IEntityTypeConfiguration<Id
         builder.ToTable("user_claims");
         builder.HasKey(claim => claim.Id);
         builder.HasIndex(claim => claim.UserId).HasDatabaseName("ix_user_claims_user_id");
+        builder.HasOne<User>().WithMany().HasForeignKey(claim => claim.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

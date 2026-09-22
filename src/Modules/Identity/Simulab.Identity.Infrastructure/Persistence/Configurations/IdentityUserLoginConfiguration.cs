@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Simulab.Identity.Domain.Entities;
 
 namespace Simulab.Identity.Infrastructure.Persistence.Configurations;
 
@@ -15,5 +16,6 @@ public sealed class IdentityUserLoginConfiguration : IEntityTypeConfiguration<Id
         builder.HasKey(login => new { login.LoginProvider, login.ProviderKey });
         builder.Property(login => login.LoginProvider).HasMaxLength(128);
         builder.Property(login => login.ProviderKey).HasMaxLength(128);
+        builder.HasOne<User>().WithMany().HasForeignKey(login => login.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

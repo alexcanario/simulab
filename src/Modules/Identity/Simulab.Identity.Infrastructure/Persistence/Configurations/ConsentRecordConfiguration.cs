@@ -19,5 +19,8 @@ public sealed class ConsentRecordConfiguration : IEntityTypeConfiguration<Consen
         builder.Property(record => record.IpAddress).HasMaxLength(45);
 
         builder.HasIndex(record => record.UserId).HasDatabaseName("ix_consent_records_user_id");
+
+        // B-13 D2: consent is legal evidence, so a hard delete of the user never takes it along.
+        builder.HasOne<User>().WithMany().HasForeignKey(record => record.UserId).OnDelete(DeleteBehavior.Restrict);
     }
 }

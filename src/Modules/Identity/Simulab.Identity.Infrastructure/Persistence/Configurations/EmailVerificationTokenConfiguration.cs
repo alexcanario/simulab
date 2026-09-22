@@ -18,5 +18,6 @@ public sealed class EmailVerificationTokenConfiguration : IEntityTypeConfigurati
         // The hash is what a verification looks up, and two users never share one.
         builder.HasIndex(token => token.TokenHash).HasDatabaseName("ux_email_verification_tokens_hash").IsUnique();
         builder.HasIndex(token => token.UserId).HasDatabaseName("ix_email_verification_tokens_user_id");
+        builder.HasOne<User>().WithMany().HasForeignKey(token => token.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
