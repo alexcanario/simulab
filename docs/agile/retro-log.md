@@ -482,3 +482,9 @@ Approved by the owner the same day, after the ship.
 - `[generic]` feature-refinement and feature-build: when an owner's answer or a request during build or validation becomes an idea, the skill calls `idea-capture` (template, board mirror, next number) instead of writing the file by hand (B-12: F-25 and F-26).
 - `[generic]` gate.js `stop`: with nothing marked, the `SKIPPED` line also names what to run instead (the changed projects since the main branch, built `--no-incremental`, and their test projects), so a manual check is not left to guesswork (B-12; follows the B-10 note).
 - `[stack: DocGen]` DocGen template tests: a test of generated output counts the occurrences of each section or box (exactly one per table), not only its presence (B-12: three `role_changes` sections passed the F-15 test).
+
+## 2026-09-22 — Sync with agile@canary 0.0.39
+From 0.0.38 to 0.0.39, run with `/agile:sync` on `main`.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.38 → 0.0.39: `gate.js stop` run by hand now takes the changed files from git, a screen behind sign-in, flaky tests proven by a loop, generated output counted, ideas through `idea-capture`, and the test sweep in the retro).
+- Merged: `docs/agile/profile.md`, no conflict — the bUnit line now covers anything that follows a click and the tests written today.
+- Build files did not change upstream. No build: no build file and no rule changed; the rest of 0.0.39 (`gate.js` and the skill steps) comes from the plugin itself.
