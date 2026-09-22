@@ -75,6 +75,7 @@ No screen and no endpoint. The output is `docs/architecture/<Module>/schema.dbml
 - 2026-09-22 — v1 build: Mermaid 11 with `@mermaid-js/layout-elk` parsed the v1 constructs and routed the edges orthogonally, but the whole Identity diagram was 6016 px wide. Splitting it into one diagram per group was measured (680 to 1002 px each) and set aside for DBML (owner).
 - 2026-09-22 — DBML replaces the Mermaid page instead of living next to it — two diagrams of the same schema would be two things to keep readable (owner, v2).
 - 2026-09-22 — No DBML parser in .NET: the tests check the generated text; the parse is checked in the extension, in the validation script (Claude, v2).
+- 2026-09-22 — v2 build: composite keys keep the key's column order (`role_permissions` is `(role_id, permission_name)`, `user_roles` `(user_id, role_id)`), and a generic entity type is named without its arity (`IdentityUserClaim`, not ``IdentityUserClaim`1``). The `jobs` index over `status, run_after, created_at` is left out of the schema by BR9, since `created_at` is a standard column (Claude, build).
 
 ## Out of scope
 - The module map (`modules.md`) and the data dictionary.
@@ -94,7 +95,20 @@ No screen and no endpoint. The output is `docs/architecture/<Module>/schema.dbml
 - Re-approved by the owner on 2026-09-22 ("Aprovado").
 
 ## Validation script
-<!-- Rewritten at the end of the v2 build. -->
+No app host: the output is a DBML file. Everything happens in the worktree `D:\dev\_icontrol\wt\simulab\feature-26`, with the dbdiagram VS Code extension installed.
+
+1. Open the folder `D:\dev\_icontrol\wt\simulab\feature-26` in VS Code.
+2. Open `docs/architecture/README.md`: `Identity/schema.dbml` and `Jobs/schema.dbml` are listed with the dbdiagram hint; there is no `entities.md`.
+3. Open `docs/architecture/Identity/schema.dbml`, then `Ctrl+Shift+P` → "DBML: Open Preview to the Side". Expected: no parse error; 18 tables, the relations drawn, the groups `users_group` and `openiddict_applications_group`.
+4. In the diagram, `users` and `consent_records` have no `tenant_id`, `created_*`, `updated_*`, `is_deleted`, `deleted_*` columns; their note says `standard columns: 8 (see data dictionary)`. `openiddict_applications` has no such note.
+5. Types read `varchar(45)` (`ip_address`) and `timestamptz` (`accepted_at`); `user_claims` says `Entity: IdentityUserClaim`.
+6. Open `docs/architecture/Jobs/schema.dbml` in the same preview: one table, `jobs`, no parse error.
+7. Open `docs/architecture/Identity/data-dictionary.md`: `users` still lists `created_at` with type `timestamp with time zone`.
+8. The generated docs match the code. Git Bash:
+   `cd /d/dev/_icontrol/wt/simulab/feature-26 && dotnet run --project tools/Simulab.DocGen -- --check`
+   PowerShell 7:
+   `cd D:\dev\_icontrol\wt\simulab\feature-26; dotnet run --project tools/Simulab.DocGen -- --check`
+   Expected: `docs/architecture is up to date`, exit code 0 (`echo $?` in Git Bash, `$LASTEXITCODE` in PowerShell). Repeat by running the same command again.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
