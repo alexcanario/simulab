@@ -507,3 +507,10 @@ Two lessons approved by the owner at the B-13 retro, recorded now that this file
 Shipped in `814f79e`. Built in a worktree; the format changed during validation (change note v2: Mermaid with ELK → DBML).
 - `plugin` `[generic]` feature-refinement: a feature whose output is visual (a diagram, a generated page) is prototyped and rendered at real size in the target viewer before approval, with its size measured against the viewer's width (F-26: the approved Mermaid ELK diagram was 6016 px wide in a fixed-width Markdown preview, and the format changed to DBML during validation).
 - `plugin` `[stack: DocGen]` Entity diagrams as a DBML schema per module (`<Module>/schema.dbml`: short types, not null, keys, standard columns counted in the table note, one `Ref` per foreign key, a `TableGroup` per set of linked tables, indexes over shown columns), linked in the index with the dbdiagram VS Code extension, in place of the Mermaid `entities.md` (F-26).
+
+## 2026-09-22 — Sync with agile@canary 0.0.41
+From 0.0.40 to 0.0.41, run with `/agile:sync` on `main`.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.40 → 0.0.41: entity diagrams as DBML by default with Mermaid as an option, a visual output prototyped at real size before approval, a checkout on another item's branch never switched, and the ship checking the current branch and `main..branch` before merging).
+- Left alone: `docs/agile/profile.md` (edited here, unchanged upstream since the last sync). Build files did not change upstream.
+- The plugin reported no missing capability: this project already has DocGen (F-15). Its `tools/Simulab.DocGen` is the project's own; the plugin template is never copied over it.
+- No build: no build file and no rule changed.
