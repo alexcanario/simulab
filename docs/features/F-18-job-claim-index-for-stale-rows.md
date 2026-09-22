@@ -1,7 +1,7 @@
 ---
 feature: F-18
 epic: Foundation and identity
-status: building
+status: validating
 board: 731
 version: 2
 ---
@@ -64,8 +64,22 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - Re-approved: 2026-09-23 ("aprovo").
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+No screen, no UI text and no permission: the item changes an index. Claude did not start the app host: its first start applies `ActiveJobsIndex` to the local development database, which is the owner's data (rule: never change a database outside the test containers). Steps 2-4 are that check.
+1. In `D:\dev\_icontrol\wt\simulab\feature-18`, run the plan tests (run by Claude in both shells on 2026-09-23):
+   - Git Bash: `dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests --filter "FullyQualifiedName~JobClaimPlanTests"`
+   - PowerShell 7: `dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests --filter "FullyQualifiedName~JobClaimPlanTests"`
+   → `Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3`. Repeat the same command as often as you like; each run makes its own database.
+2. Stop any app host running from `D:\dev\_icontrol\simulab`. In the worktree folder run `dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https` and open the dashboard → the `api` resource reaches `Running` (the migration applied without error).
+3. Open https://localhost:7125/forgot-password, type the email of your own test account and send → the page says the link is on its way.
+4. Open Mailpit from the dashboard → the password reset email arrives within about 5 seconds: the worker claimed the job through the new index. Switch the page to English once before sending, to see the usual language switch still works.
+
+## Coverage
+| Criterion | Test |
+|---|---|
+| AC1 | `JobClaimPlanTests.Claim_ManyFailedRowsKept_ReadsOnlyTheActiveRowsIndex` (explains the runner's own `ClaimSql`) |
+| AC2 | `JobClaimPlanTests.Migrations_JobTable_HasThePartialActiveIndexOnly` (migrated by `MigrateJobsAsync`, as the Api host does) |
+| AC3 | `JobRunnerTests` (12, unchanged) and `JobClaimPlanTests.RunPending_ManyFailedRowsKept_RunsTheDueAndTheStaleJobs`; `Simulab.Api.Tests` and `Simulab.Identity.Tests` green with the new migrations |
+| AC4 | No resource change |
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
