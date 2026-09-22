@@ -59,6 +59,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | 0.0.38 (`836a0c1`) |
 | ⏳ | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | |
 | ⏳ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | |
+| ⏳ | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | |
+| ⏳ | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -451,3 +453,15 @@ From 0.0.37 to 0.0.38, run with `/agile:sync` on `main`. It brings the three F-1
 ### Plugin notes (`plugin`)
 - `[generic]` retro-lessons: a new rule about a test pattern comes with a sweep of the existing tests for that pattern in the same retro; each hit is fixed in the item or captured as a bug (B-11: the F-8 rule left two older tests flaky).
 - `[generic]` feature-build, bugs: a flaky test is reproduced with a loop (clean build before each run), and its fix is proven by the same loop, N green runs in a row, with the real counts in the bug file (B-11: 2 in 3 and 3 in 8 before, 10 in 10 after).
+
+## 2026-09-22 — F-16 Download my data
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | The new bUnit test for the snackbar asserted on the line after the action and failed, the same defect B-11 had just fixed in older tests | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 2 | The signed-in screen could not be checked through the app host: Claude's rules forbid creating accounts and typing passwords. The route, the 401, the sign-in redirect and the served script were checked; the rest went to the validation script | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 3 | Refinement wrote 400 for a wrong password; the rule `api-contracts` and the erasure say 422 (change note v2) | Nothing | One-off; the rule already holds the answer |
+
+### Plugin notes (`plugin`)
+- `[stack: blazor]` feature-build: a bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, including in tests written in the same session where that rule was applied to older tests (F-16, right after B-11).
+- `[generic]` feature-build step 12: a screen behind sign-in cannot be checked by Claude when its rules forbid entering credentials. Say so in the report, cover the signed-in flow in the validation script, and check through the app host what needs no account (the route in the OpenAPI document, the 401, the redirect to sign-in, the served static asset) (F-16).
