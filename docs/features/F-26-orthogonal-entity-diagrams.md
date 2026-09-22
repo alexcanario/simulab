@@ -1,7 +1,7 @@
 ---
 feature: F-26
 epic: Foundation and identity
-status: building
+status: validating
 board: 744
 version: 1
 ---
@@ -68,6 +68,9 @@ No screen and no endpoint. The output is `docs/architecture/<Module>/entities.md
 - 2026-09-22 — F-26 is built after F-25 merges — both change `EntityModels.cs`, and F-25 is building in its worktree (Claude).
 - 2026-09-22 — The missing foreign keys between `users` and the other Identity tables, found while reading the diagram, are a separate bug (B-13), not this feature — it is data integrity, not documentation (owner).
 - 2026-09-22 — Approved ("aprovo F-26"). Built in the worktree `D:\dev\_icontrol\wt\simulab\feature-26` so the shared main checkout stays on `main` (owner).
+- 2026-09-22 — Folded line wording: `standard columns "<n>: <groups> - see data dictionary"`, the groups present among tenant, audit, soft delete. `roles` has no `tenant_id` (7: audit, soft delete) and `jobs` only `created_at` (1: audit) (Claude, build).
+- 2026-09-22 — Short types by plain prefixes, no regex table; any character an attribute type rejects still becomes `_` (Claude, build).
+- 2026-09-22 — Checked before handing over: Mermaid 11 with `@mermaid-js/layout-elk` parses the new constructs (folded line with a comment, `varchar(45)`, `uuid[]`, a multi-column label) without a syntax error and routes the edges orthogonally. The VS Code preview itself is checked in the validation script (Claude, build).
 
 ## Out of scope
 - The module map (`modules.md`) and the data dictionary.
@@ -81,7 +84,19 @@ No screen and no endpoint. The output is `docs/architecture/<Module>/entities.md
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+No app host: the output is a Markdown file. Everything happens in the worktree `D:\dev\_icontrol\wt\simulab\feature-26`.
+
+1. Open the folder `D:\dev\_icontrol\wt\simulab\feature-26` in VS Code.
+2. Open `docs/architecture/Identity/entities.md` and open the built-in preview (`Ctrl+Shift+V`, not Markdown Preview Enhanced). Expected: under the title, the sentence about ELK viewers; the relations are drawn with right-angle lines (rounded corners).
+3. In the preview, look at `users` and `consent_records`: no `tenant_id`, `created_*`, `updated_*`, `is_deleted`, `deleted_*` rows; the last row reads `standard columns 8: tenant, audit, soft delete - see data dictionary`. `openiddict_applications` has no such row; `roles` says 7, `jobs` says 1.
+4. Types read `varchar(45) ip_address`, `timestamptz accepted_at`; relation labels read `user_id`, `application_id` — no `fk_...`.
+5. Open `docs/architecture/Identity/data-dictionary.md`: `users` still lists `created_at` with type `timestamp with time zone`.
+6. Optional: open the same `entities.md` in Markdown Preview Enhanced. Expected: the same diagram with curved lines, as the sentence says.
+7. The generated docs match the code. Git Bash:
+   `cd /d/dev/_icontrol/wt/simulab/feature-26 && dotnet run --project tools/Simulab.DocGen -- --check`
+   PowerShell 7:
+   `cd D:\dev\_icontrol\wt\simulab\feature-26; dotnet run --project tools/Simulab.DocGen -- --check`
+   Expected: `docs/architecture is up to date`, exit code 0 (`echo $?` in Git Bash, `$LASTEXITCODE` in PowerShell). Repeat by running the same command again.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
