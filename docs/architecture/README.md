@@ -6,9 +6,9 @@ Generated from the code by `tools/Simulab.DocGen` at every ship. Do not edit by 
 - Check (exit 1 when stale): `dotnet run --project tools/Simulab.DocGen -- --check`
 
 - [Identity/data-dictionary.md](Identity/data-dictionary.md)
-- [Identity/entities.md](Identity/entities.md)
 - [Identity/routes.md](Identity/routes.md)
+- [Identity/schema.dbml](Identity/schema.dbml) — open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side")
 - [Jobs/data-dictionary.md](Jobs/data-dictionary.md)
-- [Jobs/entities.md](Jobs/entities.md)
+- [Jobs/schema.dbml](Jobs/schema.dbml) — open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side")
 - [System/routes.md](System/routes.md)
 - [modules.md](modules.md)

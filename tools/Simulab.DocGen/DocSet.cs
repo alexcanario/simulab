@@ -23,7 +23,7 @@ internal static class DocSet
             {
                 if (options.Entities)
                 {
-                    generated[$"{module}/entities.md"] = EntityModels.RenderEntities(module, model);
+                    generated[$"{module}/schema.dbml"] = EntityModels.RenderSchema(module, model);
                 }
 
                 if (options.DataDictionary)
