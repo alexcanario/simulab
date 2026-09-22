@@ -2,17 +2,23 @@
 
 Generated from the EF model. Do not edit.
 
+Right-angle lines need a Mermaid viewer with the ELK layout, such as the VS Code built-in Markdown preview; other viewers draw the same diagram with curved lines.
+
 ```mermaid
+---
+config:
+  layout: elk
+---
 erDiagram
     jobs {
         uuid id PK
         integer attempts
-        timestamp_with_time_zone created_at
-        character_varying_2000_ last_error
+        varchar(2000) last_error
         text payload
-        timestamp_with_time_zone run_after
-        timestamp_with_time_zone started_at
+        timestamptz run_after
+        timestamptz started_at
         integer status
-        character_varying_100_ type
+        varchar(100) type
+        standard columns "1: audit - see data dictionary"
     }
 ```

@@ -65,7 +65,105 @@ public class EntityModelsTests
 
         var text = EntityModels.RenderEntities(module, model);
 
-        text.Should().StartWith("# Jobs — entities").And.Contain("```mermaid\nerDiagram\n").And.Contain("    jobs {\n").And.Contain("uuid id PK");
+        text.Should().StartWith("# Jobs — entities").And.Contain("    jobs {\n").And.Contain("uuid id PK");
+    }
+
+    // F-26 AC1, AC2: the ELK front matter opens every block, and the page says what a viewer without ELK draws.
+    [Fact]
+    public void RenderEntities_OpensEveryBlockWithTheElkLayoutUnderTheViewerNote()
+    {
+        foreach (var (module, model) in RealModels())
+        {
+            var text = EntityModels.RenderEntities(module, model);
+
+            Occurrences(text, "```mermaid\n---\nconfig:\n  layout: elk\n---\nerDiagram\n").Should().Be(1, $"{module} has one diagram");
+            Occurrences(text, "```mermaid").Should().Be(1, $"{module} has one diagram");
+            text.Should().StartWith($"# {module} — entities\n\nGenerated from the EF model. Do not edit.\n\n{EntityModels.ElkNote}\n\n```mermaid\n");
+        }
+    }
+
+    // F-26 AC3: the tenant, audit and soft-delete columns are one line per table, the dictionary keeps them.
+    [Fact]
+    public void RenderEntities_FoldsTheStandardColumnsIntoOneLine()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderEntities(module, model);
+
+        foreach (var column in new[] { "tenant_id", "created_at", "created_by", "updated_at", "updated_by", "is_deleted", "deleted_at", "deleted_by" })
+        {
+            text.Should().NotMatchRegex($"(?m)^        \\S+ {column}( |$)", $"{column} is folded");
+        }
+
+        const string folded = "        standard columns \"8: tenant, audit, soft delete - see data dictionary\"\n    }\n";
+        Box(text, "users").Should().EndWith(folded);
+        Box(text, "consent_records").Should().EndWith(folded);
+        Occurrences(Box(text, "users"), "standard columns").Should().Be(1);
+    }
+
+    // F-26 AC4: a table without standard columns has no folded line.
+    [Fact]
+    public void RenderEntities_AddsNoFoldedLineToATableWithoutStandardColumns()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        Box(EntityModels.RenderEntities(module, model), "openiddict_applications").Should().NotContain("standard columns");
+    }
+
+    // F-26 AC5: short PostgreSQL type names with their lengths.
+    [Fact]
+    public void RenderEntities_ShowsShortTypeNames()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderEntities(module, model);
+
+        text.Should().Contain("        varchar(45) ip_address\n")
+            .And.Contain("        timestamptz accepted_at\n")
+            .And.NotContain("character_varying")
+            .And.NotContain("timestamp_with_time_zone");
+    }
+
+    [Theory]
+    [InlineData("character varying(45)", "varchar(45)")]
+    [InlineData("character varying", "varchar")]
+    [InlineData("character(2)", "char(2)")]
+    [InlineData("timestamp with time zone", "timestamptz")]
+    [InlineData("timestamp(3) with time zone", "timestamptz(3)")]
+    [InlineData("timestamp without time zone", "timestamp")]
+    [InlineData("time with time zone", "timetz")]
+    [InlineData("time without time zone", "time")]
+    [InlineData("double precision", "float8")]
+    [InlineData("bit varying(8)", "varbit(8)")]
+    [InlineData("numeric(10,2)", "numeric(10,2)")]
+    [InlineData("text[]", "text[]")]
+    [InlineData("uuid", "uuid")]
+    [InlineData("some type", "some_type")]
+    public void TypeId_ShortensPostgreSqlTypeNames(string storeType, string expected) =>
+        EntityModels.TypeId(storeType).Should().Be(expected);
+
+    // F-26 AC6: relations are labelled with the dependent's key columns, not the constraint name.
+    [Fact]
+    public void RenderEntities_LabelsRelationsWithTheForeignKeyColumns()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderEntities(module, model);
+
+        Occurrences(text, "    openiddict_applications ||--}o openiddict_tokens : \"application_id\"\n").Should().Be(1);
+        text.Should().NotContain(": \"fk_");
+    }
+
+    // F-26 AC7: the data dictionary keeps every column with its full type.
+    [Fact]
+    public void RenderDictionary_KeepsTheStandardColumnsWithTheFullType()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var section = Section(EntityModels.RenderDictionary(module, model), "users");
+
+        section.Should().Contain("| created_at | timestamp with time zone |");
+        Rows(section).Should().Contain(["tenant_id", "created_at", "created_by", "updated_at", "updated_by", "is_deleted", "deleted_at", "deleted_by"]);
     }
 
     // B-12: an owned type mapped with ToJson is a column of its owner's table, not a table of its own.
@@ -203,7 +301,7 @@ public class EntityModelsTests
         var (module, model) = SharedTableModel();
 
         EntityModels.RenderEntities(module, model)
-            .Should().Contain("    categories ||--}o categories : \"fk_categories_categories_parent_id\"\n");
+            .Should().Contain("    categories ||--}o categories : \"parent_id\"\n");
     }
 
     [Fact]
@@ -222,6 +320,15 @@ public class EntityModelsTests
         start.Should().BeGreaterThanOrEqualTo(0, $"the dictionary has a {table} section");
         var end = dictionary.IndexOf("\n## ", start + 1, StringComparison.Ordinal);
         return end < 0 ? dictionary[start..] : dictionary[start..end];
+    }
+
+    // One table's box in the diagram, from its opening line to its closing brace.
+    private static string Box(string entities, string table)
+    {
+        var start = entities.IndexOf($"    {table} {{\n", StringComparison.Ordinal);
+        start.Should().BeGreaterThanOrEqualTo(0, $"the diagram has a {table} box");
+        var end = entities.IndexOf("\n    }\n", start, StringComparison.Ordinal);
+        return entities[start..(end + "\n    }\n".Length)];
     }
 
     private static List<string> Rows(string section) =>

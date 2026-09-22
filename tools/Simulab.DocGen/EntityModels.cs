@@ -96,18 +96,55 @@ internal static partial class EntityModels
     public static string ModuleName(string contextTypeName) =>
         ContextSuffix().Replace(contextTypeName, "") is { Length: > 0 } name ? name : contextTypeName;
 
+    /// <summary>The sentence under the title of every entities page: without ELK a viewer falls back to curves silently (F-26).</summary>
+    public const string ElkNote =
+        "Right-angle lines need a Mermaid viewer with the ELK layout, such as the VS Code built-in Markdown preview; other viewers draw the same diagram with curved lines.";
+
+    // The tenant, audit and soft-delete columns of the shared kernel, folded into one line of the diagram (F-26). Known by
+    // name: User declares its own TenantId and implements the audit interfaces directly, so names hold for every table.
+    private static readonly (string Group, string[] Columns)[] StandardColumns =
+    [
+        ("tenant", ["tenant_id"]),
+        ("audit", ["created_at", "created_by", "updated_at", "updated_by"]),
+        ("soft delete", ["is_deleted", "deleted_at", "deleted_by"])
+    ];
+
+    // PostgreSQL long type names and the short ones the diagram shows, first match wins; the dictionary keeps the long ones (F-26).
+    private static readonly (string Long, string Short)[] ShortTypePrefixes =
+    [
+        ("character varying", "varchar"),
+        ("character", "char"),
+        ("bit varying", "varbit"),
+        ("double precision", "float8")
+    ];
+
     public static string RenderEntities(string module, IModel model)
     {
         var sb = new StringBuilder();
-        sb.Append(CultureInfo.InvariantCulture, $"# {module} — entities\n\nGenerated from the EF model. Do not edit.\n\n```mermaid\nerDiagram\n");
+        sb.Append(CultureInfo.InvariantCulture, $"# {module} — entities\n\nGenerated from the EF model. Do not edit.\n\n{ElkNote}\n\n```mermaid\n---\nconfig:\n  layout: elk\n---\nerDiagram\n");
         var tables = Tables(model);
         foreach (var table in tables)
         {
             sb.Append(CultureInfo.InvariantCulture, $"    {Id(table.Table.Name)} {{\n");
+            var folded = new List<string>();
             foreach (var column in table.Columns)
             {
-                var flags = column.Property?.IsPrimaryKey() == true ? " PK" : column.Property?.IsForeignKey() == true ? " FK" : "";
-                sb.Append(CultureInfo.InvariantCulture, $"        {Id(column.Column.StoreType)} {Id(column.Column.Name)}{flags}\n");
+                var isKey = column.Property?.IsPrimaryKey() == true;
+                var isForeignKey = !isKey && column.Property?.IsForeignKey() == true;
+                if (!isKey && !isForeignKey && StandardGroup(column.Column.Name) is { } group)
+                {
+                    folded.Add(group);
+                    continue;
+                }
+
+                var flags = isKey ? " PK" : isForeignKey ? " FK" : "";
+                sb.Append(CultureInfo.InvariantCulture, $"        {TypeId(column.Column.StoreType)} {Id(column.Column.Name)}{flags}\n");
+            }
+
+            if (folded.Count > 0)
+            {
+                var groups = StandardColumns.Select(s => s.Group).Where(folded.Contains);
+                sb.Append(CultureInfo.InvariantCulture, $"        standard columns \"{folded.Count}: {string.Join(", ", groups)} - see data dictionary\"\n");
             }
 
             sb.Append("    }\n");
@@ -115,9 +152,10 @@ internal static partial class EntityModels
 
         // Foreign key constraints only: the key-to-key link between types sharing a table (table splitting, an owned
         // type, JSON) is not a constraint, so it never draws a table related to itself; a real self-reference is one (F-25).
+        // The label is the dependent's key columns: constraint names repeat both table names and are cut at 63 characters.
         var relations = tables
             .SelectMany(table => table.Table.ForeignKeyConstraints
-                .Select(fk => $"    {Id(fk.PrincipalTable.Name)} ||--{(fk.MappedForeignKeys.First().IsUnique ? "||" : "}o")} {Id(table.Table.Name)} : \"{Id(fk.Name)}\"\n"))
+                .Select(fk => $"    {Id(fk.PrincipalTable.Name)} ||--{(fk.MappedForeignKeys.First().IsUnique ? "||" : "}o")} {Id(table.Table.Name)} : \"{string.Join(", ", fk.Columns.Select(c => c.Name))}\"\n"))
             .Distinct()
             .OrderBy(line => line, StringComparer.Ordinal);
         foreach (var line in relations)
@@ -309,9 +347,55 @@ internal static partial class EntityModels
 
     private static string Id(string text) => NotIdentifier().Replace(text, "_");
 
+    /// <summary>The group of a tenant, audit or soft-delete column, or null for any other column.</summary>
+    private static string? StandardGroup(string column) =>
+        StandardColumns.FirstOrDefault(s => s.Columns.Contains(column, StringComparer.Ordinal)).Group;
+
+    /// <summary>
+    /// The short PostgreSQL name of a store type, with its length or precision (`character varying(45)` -> `varchar(45)`,
+    /// `timestamp with time zone` -> `timestamptz`), as an attribute type the diagram accepts.
+    /// </summary>
+    public static string TypeId(string storeType)
+    {
+        var type = storeType;
+        foreach (var (time, zoned) in new[] { ("timestamp", "timestamptz"), ("time", "timetz") })
+        {
+            if (!type.StartsWith(time, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (type.EndsWith(" without time zone", StringComparison.Ordinal))
+            {
+                type = type[..^" without time zone".Length];
+            }
+            else if (type.EndsWith(" with time zone", StringComparison.Ordinal))
+            {
+                type = zoned + type[time.Length..^" with time zone".Length];
+            }
+
+            break;
+        }
+
+        foreach (var (longName, shortName) in ShortTypePrefixes)
+        {
+            if (type.StartsWith(longName, StringComparison.Ordinal))
+            {
+                type = shortName + type[longName.Length..];
+                break;
+            }
+        }
+
+        return NotTypeCharacter().Replace(type, "_");
+    }
+
     [GeneratedRegex("(Module)?(Db)?Context$")]
     private static partial Regex ContextSuffix();
 
     [GeneratedRegex("[^A-Za-z0-9_]")]
     private static partial Regex NotIdentifier();
+
+    // The characters an erDiagram attribute type accepts besides letters, digits and `_`: `-`, `[]`, `()`, `.` and `,`.
+    [GeneratedRegex(@"[^A-Za-z0-9_\-\[\]().,]")]
+    private static partial Regex NotTypeCharacter();
 }
