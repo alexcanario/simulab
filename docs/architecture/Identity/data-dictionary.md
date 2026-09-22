@@ -23,7 +23,7 @@ Entity: `ConsentRecord`
 | terms_version | character varying(40) | no |  |  | max 40 |
 | updated_at | timestamp with time zone | yes |  |  |  |
 | updated_by | uuid | yes |  |  |  |
-| user_id | uuid | no |  |  |  |
+| user_id | uuid | no | FK → users |  |  |
 
 Indexes:
 - `ix_consent_records_user_id` on user_id
@@ -46,7 +46,7 @@ Entity: `EmailVerificationToken`
 | token_hash | character varying(64) | no |  |  | max 64 |
 | updated_at | timestamp with time zone | yes |  |  |  |
 | updated_by | uuid | yes |  |  |  |
-| user_id | uuid | no |  |  |  |
+| user_id | uuid | no | FK → users |  |  |
 
 Indexes:
 - `ix_email_verification_tokens_user_id` on user_id
@@ -178,7 +178,7 @@ Entity: `PasswordResetToken`
 | token_hash | character varying(64) | no |  |  | max 64 |
 | updated_at | timestamp with time zone | yes |  |  |  |
 | updated_by | uuid | yes |  |  |  |
-| user_id | uuid | no |  |  |  |
+| user_id | uuid | no | FK → users |  |  |
 
 Indexes:
 - `ix_password_reset_tokens_user_id` on user_id
@@ -233,7 +233,7 @@ Entity: `IdentityRoleClaim`1`
 | id | integer | no | PK |  |  |
 | claim_type | text | yes |  |  |  |
 | claim_value | text | yes |  |  |  |
-| role_id | uuid | no |  |  |  |
+| role_id | uuid | no | FK → roles |  |  |
 
 Indexes:
 - `ix_role_claims_role_id` on role_id
@@ -281,7 +281,7 @@ Entity: `IdentityUserClaim`1`
 | id | integer | no | PK |  |  |
 | claim_type | text | yes |  |  |  |
 | claim_value | text | yes |  |  |  |
-| user_id | uuid | no |  |  |  |
+| user_id | uuid | no | FK → users |  |  |
 
 Indexes:
 - `ix_user_claims_user_id` on user_id
@@ -295,7 +295,10 @@ Entity: `IdentityUserLogin`1`
 | login_provider | character varying(128) | no | PK |  | max 128 |
 | provider_key | character varying(128) | no | PK |  | max 128 |
 | provider_display_name | text | yes |  |  |  |
-| user_id | uuid | no |  |  |  |
+| user_id | uuid | no | FK → users |  |  |
+
+Indexes:
+- `ix_user_logins_user_id` on user_id
 
 ## user_roles
 

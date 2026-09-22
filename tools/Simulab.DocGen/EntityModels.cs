@@ -100,27 +100,24 @@ internal static partial class EntityModels
     {
         var sb = new StringBuilder();
         sb.Append(CultureInfo.InvariantCulture, $"# {module} — entities\n\nGenerated from the EF model. Do not edit.\n\n```mermaid\nerDiagram\n");
-        foreach (var entity in Tables(model))
+        var tables = Tables(model);
+        foreach (var table in tables)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"    {Id(entity.GetTableName()!)} {{\n");
-            foreach (var property in Columns(entity))
+            sb.Append(CultureInfo.InvariantCulture, $"    {Id(table.Table.Name)} {{\n");
+            foreach (var column in table.Columns)
             {
-                var flags = property.IsPrimaryKey() ? " PK" : property.IsForeignKey() ? " FK" : "";
-                sb.Append(CultureInfo.InvariantCulture, $"        {ColumnType(property)} {Id(property.GetColumnName())}{flags}\n");
-            }
-
-            foreach (var json in JsonColumns(entity))
-            {
-                sb.Append(CultureInfo.InvariantCulture, $"        {Id(json.Column.StoreType)} {Id(json.Column.Name)}\n");
+                var flags = column.Property?.IsPrimaryKey() == true ? " PK" : column.Property?.IsForeignKey() == true ? " FK" : "";
+                sb.Append(CultureInfo.InvariantCulture, $"        {Id(column.Column.StoreType)} {Id(column.Column.Name)}{flags}\n");
             }
 
             sb.Append("    }\n");
         }
 
-        var relations = Tables(model)
-            .SelectMany(entity => entity.GetForeignKeys()
-                .Where(fk => fk.PrincipalEntityType.GetTableName() is not null)
-                .Select(fk => $"    {Id(fk.PrincipalEntityType.GetTableName()!)} ||--{(fk.IsUnique ? "||" : "}o")} {Id(entity.GetTableName()!)} : \"{Id(fk.GetConstraintName() ?? "fk")}\"\n"))
+        // Foreign key constraints only: the key-to-key link between types sharing a table (table splitting, an owned
+        // type, JSON) is not a constraint, so it never draws a table related to itself; a real self-reference is one (F-25).
+        var relations = tables
+            .SelectMany(table => table.Table.ForeignKeyConstraints
+                .Select(fk => $"    {Id(fk.PrincipalTable.Name)} ||--{(fk.MappedForeignKeys.First().IsUnique ? "||" : "}o")} {Id(table.Table.Name)} : \"{Id(fk.Name)}\"\n"))
             .Distinct()
             .OrderBy(line => line, StringComparer.Ordinal);
         foreach (var line in relations)
@@ -136,49 +133,29 @@ internal static partial class EntityModels
     {
         var sb = new StringBuilder();
         sb.Append(CultureInfo.InvariantCulture, $"# {module} — data dictionary\n\nGenerated from the EF model. Do not edit. Schema: `{model.GetDefaultSchema() ?? "public"}`.\n");
-        foreach (var entity in Tables(model))
+        foreach (var table in Tables(model))
         {
-            sb.Append(CultureInfo.InvariantCulture, $"\n## {entity.GetTableName()}\n\nEntity: `{entity.ClrType.Name}`");
-            if (entity.GetComment() is { } comment)
+            var header = table.Entities.Count == 1 ? "Entity" : "Entities";
+            sb.Append(CultureInfo.InvariantCulture, $"\n## {table.Table.Name}\n\n{header}: {string.Join(", ", table.Entities.Select(e => $"`{e.ClrType.Name}`"))}");
+            if (table.Entities[0].GetComment() is { } comment)
             {
                 sb.Append(CultureInfo.InvariantCulture, $" — {comment}");
             }
 
             sb.Append("\n\n| Column | Type | Null | Key | Default | Notes |\n|---|---|---|---|---|---|\n");
-            foreach (var property in Columns(entity))
+            foreach (var column in table.Columns)
             {
-                var key = property.IsPrimaryKey()
-                    ? "PK"
-                    : property.IsForeignKey()
-                        ? "FK → " + string.Join(", ", property.GetContainingForeignKeys().Select(f => f.PrincipalEntityType.GetTableName()).Distinct().Order(StringComparer.Ordinal))
-                        : "";
-                var notes = new List<string>();
-                if (property.GetMaxLength() is { } max)
-                {
-                    notes.Add($"max {max}");
-                }
-
-                if (property.GetComment() is { } note)
-                {
-                    notes.Add(note);
-                }
-
-                sb.Append(CultureInfo.InvariantCulture, $"| {property.GetColumnName()} | {property.GetColumnType()} | {(property.IsNullable ? "yes" : "no")} | {key} | {property.GetDefaultValueSql() ?? DefaultText(property)} | {string.Join("; ", notes)} |\n");
+                sb.Append(CultureInfo.InvariantCulture, $"| {column.Column.Name} | {column.Column.StoreType} | {(column.Column.IsNullable ? "yes" : "no")} | {KeyText(column.Property)} | {DefaultText(column.Property)} | {Notes(column)} |\n");
             }
 
-            foreach (var json in JsonColumns(entity))
-            {
-                sb.Append(CultureInfo.InvariantCulture, $"| {json.Column.Name} | {json.Column.StoreType} | {(json.Column.IsNullable ? "yes" : "no")} |  |  | {JsonNote(json.Target)} |\n");
-            }
-
-            var indexes = entity.GetIndexes().OrderBy(i => i.GetDatabaseName(), StringComparer.Ordinal).ToList();
+            var indexes = table.Table.Indexes.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
             if (indexes.Count > 0)
             {
                 sb.Append("\nIndexes:\n");
                 foreach (var index in indexes)
                 {
-                    var unique = index.IsUnique ? " (unique" + (index.GetAreNullsDistinct() == false ? ", NULLS NOT DISTINCT" : "") + ")" : "";
-                    sb.Append(CultureInfo.InvariantCulture, $"- `{index.GetDatabaseName()}` on {string.Join(", ", index.Properties.Select(p => p.GetColumnName()))}{unique}\n");
+                    var unique = index.IsUnique ? " (unique" + (index.MappedIndexes.First().GetAreNullsDistinct() == false ? ", NULLS NOT DISTINCT" : "") + ")" : "";
+                    sb.Append(CultureInfo.InvariantCulture, $"- `{index.Name}` on {string.Join(", ", index.Columns.Select(c => c.Name))}{unique}\n");
                 }
             }
         }
@@ -186,39 +163,140 @@ internal static partial class EntityModels
         return sb.ToString();
     }
 
-    // An owned type mapped with ToJson reports its owner's table name but is stored in one of the owner's columns (B-12).
-    // Leaving it out also drops the ownership foreign key, which would draw the owner's table related to itself.
-    private static IEnumerable<IEntityType> Tables(IModel model) =>
-        model.GetEntityTypes()
-            .Where(e => e.GetTableName() is not null && !e.IsMappedToJson())
-            .OrderBy(e => e.GetTableName(), StringComparer.Ordinal);
+    /// <summary>A database table with the entity types stored in it (principal first) and its columns in document order.</summary>
+    private sealed record TableDoc(ITable Table, IReadOnlyList<IEntityType> Entities, IReadOnlyList<ColumnDoc> Columns);
 
-    private static IEnumerable<IProperty> Columns(IEntityType entity) =>
-        entity.GetProperties().OrderBy(p => p.IsPrimaryKey() ? 0 : 1).ThenBy(p => p.GetColumnName(), StringComparer.Ordinal);
+    /// <summary>
+    /// A column with the property that documents it (null for a JSON container), where that property comes from when it is
+    /// not the principal's (`Owned: Address`), and the type a JSON container stores.
+    /// </summary>
+    private sealed record ColumnDoc(IColumn Column, IProperty? Property, string? Origin, ITypeBase? Json);
 
-    /// <summary>The JSON container columns of <paramref name="entity"/>'s table, with the owned type each one stores.</summary>
-    private static IEnumerable<(IColumn Column, IEntityType Target)> JsonColumns(IEntityType entity)
+    // One entry per database table of the relational model, the model the migrations are built from: types that share a
+    // table (an owned type with or without ToJson, a complex type, table splitting) are one table with all its columns (F-25).
+    private static List<TableDoc> Tables(IModel model) =>
+    [
+        .. model.GetRelationalModel().Tables
+            .Select(Describe)
+            .Where(t => t.Entities.Count > 0)
+            .OrderBy(t => t.Table.Name, StringComparer.Ordinal)
+    ];
+
+    private static TableDoc Describe(ITable table)
     {
-        var table = entity.GetTableMappings().First().Table;
-        return entity.GetNavigations()
+        var types = table.EntityTypeMappings.Select(m => m.TypeBase).OfType<IEntityType>().Where(e => !e.IsMappedToJson()).Distinct().ToList();
+        // The principal is the entity type that is not owned and is not linked key to key to another type of the table.
+        var entities = types.Where(e => !e.IsOwned())
+            .OrderBy(e => table.GetRowInternalForeignKeys(e).Any() || e.BaseType is not null ? 1 : 0)
+            .ThenBy(e => e.ClrType.Name, StringComparer.Ordinal)
+            .ToList();
+        if (entities.Count == 0)
+        {
+            return new TableDoc(table, entities, []);
+        }
+
+        var principal = entities[0];
+        var json = types.SelectMany(JsonTypes).ToDictionary(j => j.Column, j => j.Type, StringComparer.Ordinal);
+        var columns = table.Columns
+            .Select(column => json.TryGetValue(column.Name, out var stored)
+                ? new ColumnDoc(column, null, null, stored)
+                : Documented(column, principal))
+            .OrderBy(c => c.Json is not null ? 3 : c.Property!.IsPrimaryKey() ? 0 : c.Origin is null ? 1 : 2)
+            .ThenBy(c => c.Origin, StringComparer.Ordinal)
+            .ThenBy(c => c.Column.Name, StringComparer.Ordinal)
+            .ToList();
+        return new TableDoc(table, entities, columns);
+    }
+
+    // A column shared by several types (the key under table splitting) is documented once, as the principal's.
+    private static ColumnDoc Documented(IColumn column, IEntityType principal)
+    {
+        var properties = column.PropertyMappings.Select(m => m.Property).ToList();
+        var property = properties.FirstOrDefault(p => p.DeclaringType == principal)
+            ?? properties.OrderBy(p => Origin(p, principal), StringComparer.Ordinal).First();
+        return new ColumnDoc(column, property, Origin(property, principal), null);
+    }
+
+    private static string? Origin(IProperty property, IEntityType principal) => property.DeclaringType switch
+    {
+        IComplexType complex => $"Complex: {complex.ClrType.Name}",
+        IEntityType owned when owned.IsOwned() => $"Owned: {owned.ClrType.Name}",
+        IEntityType other when other != principal => $"Entity: {other.ClrType.Name}",
+        _ => null
+    };
+
+    /// <summary>The JSON container columns of <paramref name="entity"/>, with the owned or complex type each one stores.</summary>
+    private static IEnumerable<(string Column, ITypeBase Type)> JsonTypes(IEntityType entity) =>
+        entity.GetNavigations()
             .Where(n => !n.IsOnDependent && n.ForeignKey.IsOwnership && n.TargetEntityType.IsMappedToJson())
-            .Select(n => (Column: table.FindColumn(n.TargetEntityType.GetContainerColumnName()!)!, Target: n.TargetEntityType))
-            .OrderBy(json => json.Column.Name, StringComparer.Ordinal);
+            .Select(n => (n.TargetEntityType.GetContainerColumnName()!, (ITypeBase)n.TargetEntityType))
+            .Concat(JsonComplexTypes(entity));
+
+    // Complex types stored as columns can hold a complex type stored as JSON, so the walk goes down until it meets one.
+    private static IEnumerable<(string Column, ITypeBase Type)> JsonComplexTypes(ITypeBase type) =>
+        type.GetComplexProperties().SelectMany(p => p.ComplexType.IsMappedToJson()
+            ? [(p.ComplexType.GetContainerColumnName()!, (ITypeBase)p.ComplexType)]
+            : JsonComplexTypes(p.ComplexType));
+
+    private static string KeyText(IProperty? property) =>
+        property is null
+            ? ""
+            : property.IsPrimaryKey()
+                ? "PK"
+                : property.IsForeignKey()
+                    ? "FK → " + string.Join(", ", property.GetContainingForeignKeys().Select(f => f.PrincipalEntityType.GetTableName()).Distinct().Order(StringComparer.Ordinal))
+                    : "";
+
+    private static string Notes(ColumnDoc column)
+    {
+        if (column.Json is not null)
+        {
+            return JsonNote(column.Json);
+        }
+
+        var notes = new List<string>();
+        if (column.Origin is not null)
+        {
+            notes.Add(column.Origin);
+        }
+
+        if (column.Property!.GetMaxLength() is { } max)
+        {
+            notes.Add($"max {max}");
+        }
+
+        if (column.Property.GetComment() is { } note)
+        {
+            notes.Add(note);
+        }
+
+        return string.Join("; ", notes);
     }
 
     // The JSON property names EF writes, without the key it synthesizes for the collection; a nested JSON type by name only.
-    private static string JsonNote(IEntityType target)
+    private static string JsonNote(ITypeBase target)
     {
         var members = target.GetProperties()
             .Where(p => !p.IsKey() && !p.IsForeignKey())
             .Select(p => p.GetJsonPropertyName() ?? p.Name)
-            .Concat(target.GetNavigations().Where(n => !n.IsOnDependent).Select(n => n.Name));
+            .Concat(target is IEntityType entity ? entity.GetNavigations().Where(n => !n.IsOnDependent).Select(n => n.Name) : [])
+            .Concat(target.GetComplexProperties().Select(p => p.Name));
         return $"JSON: {target.ClrType.Name} ({string.Join(", ", members)})";
     }
 
-    // A CLR default (Guid.Empty, 0) is not a database default: show only values that were configured.
-    private static string DefaultText(IProperty property)
+    // The configured SQL default or value; a CLR default (Guid.Empty, 0) is not a database default.
+    private static string DefaultText(IProperty? property)
     {
+        if (property is null)
+        {
+            return "";
+        }
+
+        if (property.GetDefaultValueSql() is { } sql)
+        {
+            return sql;
+        }
+
         var value = property.GetDefaultValue();
         if (value is null)
         {
@@ -228,8 +306,6 @@ internal static partial class EntityModels
         var clr = Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType;
         return clr.IsValueType && Equals(value, Activator.CreateInstance(clr)) ? "" : value.ToString() ?? "";
     }
-
-    private static string ColumnType(IProperty property) => NotIdentifier().Replace(property.GetColumnType() ?? property.ClrType.Name, "_");
 
     private static string Id(string text) => NotIdentifier().Replace(text, "_");
 

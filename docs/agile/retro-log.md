@@ -57,13 +57,13 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: ef-core]` DocGen template: build each model through its design-time factory (snake_case), strip `Module` from the name, drop the `Relational` reference and the `NoWarn`, skip `bin/`/`obj/`, Auth column only with security, orphans are stale | F-15 | 0.0.38 (`836a0c1`) |
 | ✅ | `[profile: modular-monolith]` The route map's OpenAPI document comes from the `/openapi/v1.json` integration test, not from `ApiDescription.Server` at build | F-15 | 0.0.38 (`836a0c1`) |
 | ✅ | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | 0.0.38 (`836a0c1`) |
-| ⏳ | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | |
-| ⏳ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | |
-| ⏳ | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | |
-| ⏳ | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | |
-| ⏳ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | |
-| ⏳ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | |
-| ⏳ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | |
+| ✅ | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | 0.0.39 (`a8b2ded`) |
+| ✅ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | 0.0.39 (`a8b2ded`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -482,3 +482,14 @@ Approved by the owner the same day, after the ship.
 - `[generic]` feature-refinement and feature-build: when an owner's answer or a request during build or validation becomes an idea, the skill calls `idea-capture` (template, board mirror, next number) instead of writing the file by hand (B-12: F-25 and F-26).
 - `[generic]` gate.js `stop`: with nothing marked, the `SKIPPED` line also names what to run instead (the changed projects since the main branch, built `--no-incremental`, and their test projects), so a manual check is not left to guesswork (B-12; follows the B-10 note).
 - `[stack: DocGen]` DocGen template tests: a test of generated output counts the occurrences of each section or box (exactly one per table), not only its presence (B-12: three `role_changes` sections passed the F-15 test).
+
+## 2026-09-22 — Sync with agile@canary 0.0.39
+From 0.0.38 to 0.0.39, run with `/agile:sync` on `main`.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.38 → 0.0.39: `gate.js stop` run by hand now takes the changed files from git, a screen behind sign-in, flaky tests proven by a loop, generated output counted, ideas through `idea-capture`, and the test sweep in the retro).
+- Merged: `docs/agile/profile.md`, no conflict — the bUnit line now covers anything that follows a click and the tests written today.
+- Build files did not change upstream. No build: no build file and no rule changed; the rest of 0.0.39 (`gate.js` and the skill steps) comes from the plugin itself.
+
+## 2026-09-22 — Sync with agile@canary 0.0.40
+From 0.0.39 to 0.0.40, run with `/agile:sync` on `main`.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.39 → 0.0.40: the sync names what only `/agile:bootstrap` installs and the project lacks, and offers to capture a feature for it).
+- Left alone: `docs/agile/profile.md` (edited here, unchanged upstream). Build files did not change upstream. `missingCapabilities` empty. No build: no build file and no rule changed.

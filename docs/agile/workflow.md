@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.38 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.40 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -103,15 +103,15 @@ stateDiagram-v2
 | Status | What happens | Who moves it |
 |---|---|---|
 | `idea` | Captured from the chat with `/agile:idea`. Title and 2-3 lines. | Claude |
-| `refining` | `/agile:refine`: Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it) and every premise about how a library stores or protects data in the library's source or docs (a premise that nothing uses a feature is checked by its effect, not by the callers of one helper), then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
+| `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number): Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it) and every premise about how a library stores or protects data in the library's source or docs (a premise that nothing uses a feature is checked by its effect, not by the callers of one helper), then asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. The feature file is written. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. Only one feature can be here. | Claude |
+| `building` | `/agile:build`: branch, code, tests for what changed. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, merge after your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 
 Small fixes found during validation are done right away, without leaving `validating`.
 
-Before handing over the validation script, Claude shows a **criterion → test** table: every acceptance criterion points to its tests, or is explicitly left to the validation script. The test must go through the path a user reaches (page, endpoint, the handler that calls the code): a method written for a criterion that nothing in the app calls is a gap, even when its own test passes. When an effect leaves the request (an email or an event moves to a queue), every test that asserted it is re-read: "nothing was sent" passes for free once nothing is sent right away.
+Before handing over the validation script, Claude shows a **criterion → test** table: every acceptance criterion points to its tests, or is explicitly left to the validation script. The test must go through the path a user reaches (page, endpoint, the handler that calls the code): a method written for a criterion that nothing in the app calls is a gap, even when its own test passes. When an effect leaves the request (an email or an event moves to a queue), every test that asserted it is re-read: "nothing was sent" passes for free once nothing is sent right away. A flaky test is reproduced in a loop (clean build before each run) and its fix proven by the same loop, N green in a row; a test of generated output counts each section, exactly once.
 
 ### Optional steps
 
@@ -184,7 +184,7 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
-- **The verdict is the last line.** Every report ends with `agile gate GREEN`, `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build) or `agile gate SKIPPED: <why>` (nothing was edited, no solution, not a git repository). As a hook, a turn with no code change stays silent; run by hand, the gate always prints its verdict. Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
+- **The verdict is the last line.** Every report ends with `agile gate GREEN`, `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build) or `agile gate SKIPPED: <why>` (nothing was edited, no solution, not a git repository). As a hook, a turn with no code change stays silent. Run by hand, `stop` cannot see the hook's marks (they belong to the session), so it asks git which code files changed since the main branch — committed, uncommitted and new — builds and tests those, and always prints its verdict. Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
 - **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
@@ -333,7 +333,7 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 Claude writes every file (code, tests, docs) with its editing tools, never through the text of a script: escapes such as `\t` or `\b` turn into control characters, and a test can pass while checking nothing.
 
-**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) and `CLAUDE.md` are never touched. If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step.
+**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) and `CLAUDE.md` are never touched. If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back.
 
 `output-style` sets how Claude talks to you: in pt-BR, answer first, step reports of at most 10 lines, details in the file instead of the chat, one recommendation with its reason, no narration of the work, "not verified" said in those words, and bad news first. Long answers only when a gate failed, a question needs context, or you ask.
 
@@ -828,6 +828,7 @@ Claude: agile@canary 0.0.10 → 0.0.13.
 Nothing else changed. Your project.md, ui-project.md and CLAUDE.md are not touched.
 > ok
 Claude: Copied 2, merged 1 (no conflicts), .editorconfig edited. Build 0 warnings; 252 tests green (9 s).
+The plugin also ships DocGen (technical docs from the code, since 0.0.21), which bootstrap installs and this project does not have. Capture it as a feature?
 Recorded 0.0.13 in .claude/agile/sync.json. Commit "chore: sync with agile@canary 0.0.13" on main. Authorize?
 ```
 
@@ -1083,7 +1084,8 @@ flowchart TD
     C --> D["Show lessons with destination and exact line"]
     D --> E{"Approve each one"}
     E --> F["Apply; CLAUDE.md under 60 lines; one line per rule"]
-    F --> G["retro-log.md entry; a plugin note gets a ⏳ row<br/>in the status table with its scope"]
+    F --> F2["A new rule about a test pattern: sweep the existing tests;<br/>fix each hit or capture it as a bug"]
+    F2 --> G["retro-log.md entry; a plugin note gets a ⏳ row<br/>in the status table with its scope"]
     G --> H(["Commit with your authorization if on main"])
 ```
 
@@ -1120,7 +1122,8 @@ flowchart TD
     B --> C["Table: new, update, edited, manual; a proposal per file"]
     C --> D{"Approve per file"}
     D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit; never touch project rules"]
-    E --> F{"Build files or checked rules changed?"}
+    E --> E2["Something only bootstrap installs and this project lacks:<br/>name it and offer to capture a feature"]
+    E2 --> F{"Build files or checked rules changed?"}
     F -->|yes| G["Build, full suite, fix findings, baseline"]
     F -->|no| H
     G --> H["sync.js record; retro-log entry"]
