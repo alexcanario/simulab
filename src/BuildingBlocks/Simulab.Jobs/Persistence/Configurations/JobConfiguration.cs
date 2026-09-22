@@ -28,9 +28,14 @@ public sealed class JobConfiguration : IEntityTypeConfiguration<Job>
         builder.Property(job => job.RunAfter).IsRequired();
         builder.Property(job => job.LastError).HasMaxLength(LastErrorMaxLength);
 
-        // BR9: the worker asks for the due rows, oldest first. Without this index that scan grows with
-        // every Failed row kept by BR7.
-        builder.HasIndex(job => new { job.Status, job.RunAfter, job.CreatedAt })
-            .HasDatabaseName("ix_jobs_status_run_after_created_at");
+        // BR9: the worker asks for the due rows, oldest first. F-18: the index holds only the rows a claim can
+        // take, so the Failed rows kept by BR7 never enter it and the claim's cost follows the active queue.
+        // The claim states both statuses as constants, which is what lets the planner prove this filter.
+        builder.HasIndex(job => job.CreatedAt)
+            .HasFilter(ActiveFilter)
+            .HasDatabaseName("ix_jobs_active_created_at");
     }
+
+    /// <summary>The rows <see cref="JobRunner"/> can claim: waiting for their turn, or left running by a worker.</summary>
+    public static readonly string ActiveFilter = $"status IN ({(int)JobStatus.Pending}, {(int)JobStatus.Running})";
 }
