@@ -64,6 +64,7 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - Re-approved: 2026-09-23 ("aprovo").
 
 ## Validation script
+Validated by the owner on 2026-09-23 ("validado, passou").
 No screen, no UI text and no permission: the item changes an index. Claude did not start the app host: its first start applies `ActiveJobsIndex` to the local development database, which is the owner's data (rule: never change a database outside the test containers). Steps 2-4 are that check.
 1. In `D:\dev\_icontrol\wt\simulab\feature-18`, run the plan tests (run by Claude in both shells on 2026-09-23):
    - Git Bash: `dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests --filter "FullyQualifiedName~JobClaimPlanTests"`
