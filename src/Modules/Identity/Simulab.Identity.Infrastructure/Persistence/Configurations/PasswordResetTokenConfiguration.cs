@@ -18,5 +18,6 @@ public sealed class PasswordResetTokenConfiguration : IEntityTypeConfiguration<P
         // The hash is what a reset looks up, and two users never share one.
         builder.HasIndex(token => token.TokenHash).HasDatabaseName("ux_password_reset_tokens_hash").IsUnique();
         builder.HasIndex(token => token.UserId).HasDatabaseName("ix_password_reset_tokens_user_id");
+        builder.HasOne<User>().WithMany().HasForeignKey(token => token.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
