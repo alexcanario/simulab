@@ -1,7 +1,7 @@
 ---
 feature: F-17
 epic: Foundation and identity
-status: building
+status: validating
 board: 730
 version: 1
 ---
@@ -65,6 +65,14 @@ Every colour of `SimulabTheme` has a declared role, and the build proves each ro
 - 2026-09-22 — Disabled states (`TextDisabled`, `ActionDisabled`, `ActionDisabledBackground`), dividers, table lines, skeleton, overlays, surfaces and the `*Lighten` tones are exempt, each with its reason in the test — Claude: WCAG 2.2 exempts disabled controls and decorative lines.
 - 2026-09-22 — The contrast helper moves to one place in the test project and parses alpha — Claude: BR7; the architecture test and the palette test share it.
 - 2026-09-22 — No new package — Claude: xUnit, AwesomeAssertions and the existing architecture tests cover it.
+- 2026-09-23 — Build in the worktree `D:\dev\_icontrol\wt\simulab\feature-17` — owner: the main checkout is shared with the plugin session, which commits on `main`.
+- 2026-09-23 — The contrast helper is `ColourContrast` in `Simulab.Web.Tests/Ui`, used by `ThemeContrastTests` and `ThemePaletteTests`; the architecture test reads source text and needs no ratio — Claude: corrects the 2026-09-22 line above.
+- 2026-09-23 — New values, both themes unless noted — Claude, each the smallest change that passes with margin:
+  - `SecondaryContrastText` and `TertiaryContrastText` `#19243E` (the dark ink of success and warning, B-9);
+  - `SecondaryDarken` and `SuccessDarken` `#24AE9A`: the hover tone of the teal is **lighter**, because the dark ink reads only 3.00:1 on any darker teal;
+  - `WarningDarken` `#CF8419`; dark `ErrorDarken` `#DE6868` (4.61:1 under the ink);
+  - `LinesInputs` light `#7E8AA1` (3.48:1 on the card, 3.19:1 on the page), dark `#61718F` (3.30:1, 3.62:1);
+  - `DrawerIcon` equal to `DrawerText` (light `rgba(255,255,255,0.92)`, dark `rgba(255,255,255,0.5)`, MudBlazor's own dark drawer text written down).
 
 ## Out of scope
 - A new brand palette (ADR-0001 decision 30 revisits it when Simulab has its own brand).
@@ -84,8 +92,27 @@ Every colour of `SimulabTheme` has a declared role, and the build proves each ro
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+No permission step: the item changes colours only, the same for every user.
+1. Stop any app host running from `D:\dev\_icontrol\simulab`. In `D:\dev\_icontrol\wt\simulab\feature-17` run `dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`, then open https://localhost:7125/sign-in → the sign-in page opens.
+2. Light theme: look at the email and password fields → each has a grey-blue border, clearly visible on the white card (it was a pale grey).
+3. Switch to the dark theme (sun/moon button in the top bar) → the field borders stay visible on the dark card.
+4. Switch the language to English → the texts change; the borders do not.
+5. Open https://localhost:7125/dev/ui (no sign-in needed), dark theme. Click the outlined red button of the confirmation sample, then hold the pointer over the red **filled** button in the dialog → its dark text stays readable while the red changes tone. Click Cancel.
+6. Repeat step 5 in the light theme → white text on the red, readable at rest and on hover.
+7. Keyboard only, on https://localhost:7125/sign-in: press Tab from the top of the page to the email field, the password field and the sign-in button → each shows its focus, and each field's border is visible without the pointer.
+
+## Coverage
+| Criterion | Test |
+|---|---|
+| AC1 | `ThemePaletteTests.EveryPaletteColour_HasADeclaredRole`, `EveryPairOfARole_NamesColoursThePaletteHas`, `Pairs_CoverEveryRoleThatIsMeasured` |
+| AC2 | `ThemePaletteTests.Pair_ReadsAtTheMinimumOfItsRole` (text rows) |
+| AC3 | `ThemePaletteTests.Pair_ReadsAtTheMinimumOfItsRole` (`<Fill>ContrastText` on `<Fill>` and `<Fill>Darken` rows) |
+| AC4 | `ThemePaletteTests.Pair_ReadsAtTheMinimumOfItsRole` (`ActionDefault`, `LinesInputs`, `DrawerIcon` rows) |
+| AC5 | `FillColourTextTests.Web_WritesNoTextInAFillColour`, `FindFillColourText_TextInAFillColour_NamesTheFile` |
+| AC6 | `ColourContrastTests.Ratio_TranslucentForeground_IsCompositedOverTheBackground`, `Ratio_HexWithAlpha_IsCompositedToo` |
+| AC7 | `ThemeContrastTests` (every theory kept, now on `ColourContrast`) |
+| AC8 | Validation script steps 2, 3, 5, 6; measured by Claude through the app host on 2026-09-23 (borders above; filled-button hover in both themes from 4.61:1 to 7.28:1) |
+| AC9 | No resource change; `ResourceParityTests` green in the Web test run |
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
