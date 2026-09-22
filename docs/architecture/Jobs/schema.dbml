@@ -1,0 +1,16 @@
+// Jobs — schema. Generated from the EF model. Do not edit.
+// To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
+// Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
+
+Table jobs {
+  id uuid [pk]
+  attempts integer [not null]
+  last_error varchar(2000)
+  payload text [not null]
+  run_after timestamptz [not null]
+  started_at timestamptz
+  status integer [not null]
+  type varchar(100) [not null]
+
+  Note: 'Entity: Job - standard columns: 1 (see data dictionary)'
+}

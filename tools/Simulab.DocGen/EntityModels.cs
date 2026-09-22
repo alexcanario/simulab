@@ -96,38 +96,171 @@ internal static partial class EntityModels
     public static string ModuleName(string contextTypeName) =>
         ContextSuffix().Replace(contextTypeName, "") is { Length: > 0 } name ? name : contextTypeName;
 
-    public static string RenderEntities(string module, IModel model)
+    /// <summary>How to open a schema file, at its top and next to its link in the index (F-26).</summary>
+    public const string SchemaViewerHint = "open it with the dbdiagram VS Code extension (\"DBML: Open Preview to the Side\")";
+
+    // The tenant, audit and soft-delete columns of the shared kernel, counted in the table note instead of listed (F-26).
+    // Known by name: User declares its own TenantId and implements the audit interfaces directly, so names hold for every table.
+    private static readonly HashSet<string> StandardColumns = new(
+        ["tenant_id", "created_at", "created_by", "updated_at", "updated_by", "is_deleted", "deleted_at", "deleted_by"],
+        StringComparer.Ordinal);
+
+    // PostgreSQL long type names and the short ones the schema shows, first match wins; the dictionary keeps the long ones (F-26).
+    private static readonly (string Long, string Short)[] ShortTypePrefixes =
+    [
+        ("character varying", "varchar"),
+        ("character", "char"),
+        ("bit varying", "varbit"),
+        ("double precision", "float8")
+    ];
+
+    /// <summary>The module's tables and foreign keys as DBML, drawn by a DBML viewer (F-26).</summary>
+    public static string RenderSchema(string module, IModel model)
     {
         var sb = new StringBuilder();
-        sb.Append(CultureInfo.InvariantCulture, $"# {module} — entities\n\nGenerated from the EF model. Do not edit.\n\n```mermaid\nerDiagram\n");
+        sb.Append(CultureInfo.InvariantCulture, $"// {module} — schema. Generated from the EF model. Do not edit.\n// To see the diagram, {SchemaViewerHint}.\n// Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.\n");
         var tables = Tables(model);
         foreach (var table in tables)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"    {Id(table.Table.Name)} {{\n");
-            foreach (var column in table.Columns)
-            {
-                var flags = column.Property?.IsPrimaryKey() == true ? " PK" : column.Property?.IsForeignKey() == true ? " FK" : "";
-                sb.Append(CultureInfo.InvariantCulture, $"        {Id(column.Column.StoreType)} {Id(column.Column.Name)}{flags}\n");
-            }
-
-            sb.Append("    }\n");
+            sb.Append('\n');
+            AppendTable(sb, table);
         }
 
         // Foreign key constraints only: the key-to-key link between types sharing a table (table splitting, an owned
         // type, JSON) is not a constraint, so it never draws a table related to itself; a real self-reference is one (F-25).
-        var relations = tables
-            .SelectMany(table => table.Table.ForeignKeyConstraints
-                .Select(fk => $"    {Id(fk.PrincipalTable.Name)} ||--{(fk.MappedForeignKeys.First().IsUnique ? "||" : "}o")} {Id(table.Table.Name)} : \"{Id(fk.Name)}\"\n"))
+        var names = tables.Select(t => t.Table.Name).ToHashSet(StringComparer.Ordinal);
+        var foreignKeys = tables
+            .SelectMany(table => table.Table.ForeignKeyConstraints)
+            .Where(fk => names.Contains(fk.PrincipalTable.Name))
+            .ToList();
+        var refs = foreignKeys
+            .Select(fk => $"Ref: {fk.Table.Name}.{ColumnList(fk.Columns)} {(fk.MappedForeignKeys.First().IsUnique ? "-" : ">")} {fk.PrincipalTable.Name}.{ColumnList(fk.PrincipalUniqueConstraint.Columns)}\n")
             .Distinct()
-            .OrderBy(line => line, StringComparer.Ordinal);
-        foreach (var line in relations)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        if (refs.Count > 0)
         {
-            sb.Append(line);
+            sb.Append('\n');
+            refs.ForEach(r => sb.Append(r));
         }
 
-        sb.Append("```\n");
+        foreach (var (name, members) in TableGroups(tables, foreignKeys))
+        {
+            sb.Append(CultureInfo.InvariantCulture, $"\nTableGroup {name}_group {{\n");
+            members.ForEach(m => sb.Append(CultureInfo.InvariantCulture, $"  {m}\n"));
+            sb.Append("}\n");
+        }
+
         return sb.ToString();
     }
+
+    private static void AppendTable(StringBuilder sb, TableDoc table)
+    {
+        var keyColumns = table.Table.PrimaryKey?.Columns.Select(c => c.Name).ToList() ?? [];
+        var foreignKeyColumns = table.Table.ForeignKeyConstraints.SelectMany(fk => fk.Columns).Select(c => c.Name).ToHashSet(StringComparer.Ordinal);
+        var shown = table.Columns
+            .Where(c => !StandardColumns.Contains(c.Column.Name) || keyColumns.Contains(c.Column.Name) || foreignKeyColumns.Contains(c.Column.Name))
+            .ToList();
+        var folded = table.Columns.Count - shown.Count;
+
+        sb.Append(CultureInfo.InvariantCulture, $"Table {table.Table.Name} {{\n");
+        foreach (var column in shown)
+        {
+            var settings = new List<string>();
+            var isKey = keyColumns.Count == 1 && keyColumns[0] == column.Column.Name;
+            if (isKey)
+            {
+                settings.Add("pk");
+            }
+            else if (!column.Column.IsNullable)
+            {
+                settings.Add("not null");
+            }
+
+            if (DefaultText(column.Property) is { Length: > 0 } value)
+            {
+                settings.Add($"default: `{value}`");
+            }
+
+            if (SchemaNote(column) is { Length: > 0 } note)
+            {
+                settings.Add($"note: {Quoted(note)}");
+            }
+
+            var suffix = settings.Count > 0 ? $" [{string.Join(", ", settings)}]" : "";
+            sb.Append(CultureInfo.InvariantCulture, $"  {column.Column.Name} {SchemaType(column.Column.StoreType)}{suffix}\n");
+        }
+
+        // A composite key, then every index whose columns are all in the table as shown; the rest are in the dictionary.
+        var shownNames = shown.Select(c => c.Column.Name).ToHashSet(StringComparer.Ordinal);
+        var indexes = new List<string>();
+        if (keyColumns.Count > 1)
+        {
+            indexes.Add($"    {ColumnList(table.Table.PrimaryKey!.Columns)} [pk]");
+        }
+
+        indexes.AddRange(table.Table.Indexes
+            .Where(i => i.Columns.All(c => shownNames.Contains(c.Name)))
+            .OrderBy(i => i.Name, StringComparer.Ordinal)
+            .Select(i => $"    {ColumnList(i.Columns)} [name: {Quoted(i.Name)}{(i.IsUnique ? ", unique" : "")}]"));
+        if (indexes.Count > 0)
+        {
+            sb.Append("\n  indexes {\n").Append(string.Join("\n", indexes)).Append("\n  }\n");
+        }
+
+        var header = table.Entities.Count == 1 ? "Entity" : "Entities";
+        // A generic type without its arity: IdentityUserClaim`1 -> IdentityUserClaim.
+        var tableNote = $"{header}: {string.Join(", ", table.Entities.Select(e => e.ClrType.Name.Split('`')[0]))}";
+        if (folded > 0)
+        {
+            tableNote += $" - standard columns: {folded} (see data dictionary)";
+        }
+
+        sb.Append(CultureInfo.InvariantCulture, $"\n  Note: {Quoted(tableNote)}\n}}\n");
+    }
+
+    // Tables linked by foreign keys, two or more per group, named after the table with the most dependent tables.
+    private static List<(string Name, List<string> Members)> TableGroups(List<TableDoc> tables, List<IForeignKeyConstraint> foreignKeys)
+    {
+        var root = tables.ToDictionary(t => t.Table.Name, t => t.Table.Name, StringComparer.Ordinal);
+        string Find(string table) => root[table] == table ? table : root[table] = Find(root[table]);
+        foreach (var fk in foreignKeys)
+        {
+            root[Find(fk.Table.Name)] = Find(fk.PrincipalTable.Name);
+        }
+
+        int Dependents(string table) => foreignKeys
+            .Where(fk => fk.PrincipalTable.Name == table && fk.Table.Name != table)
+            .Select(fk => fk.Table.Name)
+            .Distinct()
+            .Count();
+        return
+        [
+            .. root.Keys
+                .GroupBy(Find)
+                .Select(g => g.Order(StringComparer.Ordinal).ToList())
+                .Where(members => members.Count > 1)
+                .Select(members => (Name: members.OrderByDescending(Dependents).ThenBy(m => m, StringComparer.Ordinal).First(), Members: members))
+                .OrderByDescending(g => g.Members.Count)
+                .ThenBy(g => g.Name, StringComparer.Ordinal)
+        ];
+    }
+
+    private static string ColumnList(IEnumerable<IColumn> columns) =>
+        columns.Select(c => c.Name).ToList() is [var single] ? single : $"({string.Join(", ", columns.Select(c => c.Name))})";
+
+    // Where the column comes from, its comment and a JSON container's content; the length is already in the type.
+    private static string SchemaNote(ColumnDoc column)
+    {
+        if (column.Json is not null)
+        {
+            return JsonNote(column.Json);
+        }
+
+        return string.Join("; ", new[] { column.Origin, column.Property!.GetComment() }.OfType<string>());
+    }
+
+    private static string Quoted(string text) => $"'{text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("'", "\\'", StringComparison.Ordinal)}'";
 
     public static string RenderDictionary(string module, IModel model)
     {
@@ -307,11 +440,48 @@ internal static partial class EntityModels
         return clr.IsValueType && Equals(value, Activator.CreateInstance(clr)) ? "" : value.ToString() ?? "";
     }
 
-    private static string Id(string text) => NotIdentifier().Replace(text, "_");
+    /// <summary>
+    /// The short PostgreSQL name of a store type, with its length or precision (`character varying(45)` -> `varchar(45)`,
+    /// `timestamp with time zone` -> `timestamptz`), quoted when DBML does not accept it bare (`"uuid[]"`).
+    /// </summary>
+    public static string SchemaType(string storeType)
+    {
+        var type = storeType;
+        foreach (var (time, zoned) in new[] { ("timestamp", "timestamptz"), ("time", "timetz") })
+        {
+            if (!type.StartsWith(time, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (type.EndsWith(" without time zone", StringComparison.Ordinal))
+            {
+                type = type[..^" without time zone".Length];
+            }
+            else if (type.EndsWith(" with time zone", StringComparison.Ordinal))
+            {
+                type = zoned + type[time.Length..^" with time zone".Length];
+            }
+
+            break;
+        }
+
+        foreach (var (longName, shortName) in ShortTypePrefixes)
+        {
+            if (type.StartsWith(longName, StringComparison.Ordinal))
+            {
+                type = shortName + type[longName.Length..];
+                break;
+            }
+        }
+
+        return BareType().IsMatch(type) ? type : $"\"{type}\"";
+    }
 
     [GeneratedRegex("(Module)?(Db)?Context$")]
     private static partial Regex ContextSuffix();
 
-    [GeneratedRegex("[^A-Za-z0-9_]")]
-    private static partial Regex NotIdentifier();
+    // A type DBML reads without quotes: a name, with an optional length or precision (`varchar(45)`, `numeric(10,2)`).
+    [GeneratedRegex(@"^[A-Za-z0-9_]+(\([0-9, ]+\))?$")]
+    private static partial Regex BareType();
 }

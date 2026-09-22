@@ -15,8 +15,8 @@ public class DocSetTests
         var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
 
         generated.Keys.Should().Equal(
-            "Identity/data-dictionary.md", "Identity/entities.md", "Identity/routes.md",
-            "Jobs/data-dictionary.md", "Jobs/entities.md",
+            "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
+            "Jobs/data-dictionary.md", "Jobs/schema.dbml",
             "README.md", "System/routes.md", "modules.md");
         foreach (var file in generated.Keys.Where(f => f != "README.md"))
         {
@@ -24,6 +24,20 @@ public class DocSetTests
         }
 
         generated.Values.Should().OnlyContain(text => text.Contains("Do not edit", StringComparison.Ordinal) && !text.Contains('\r', StringComparison.Ordinal));
+    }
+
+    // F-26 AC1, AC2: a DBML schema per module in place of the Mermaid page, linked with the viewer that draws it.
+    [Fact]
+    public void Generate_WritesASchemaPerModuleLinkedWithItsViewer()
+    {
+        var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
+
+        generated.Keys.Should().NotContain(k => k.EndsWith("entities.md", StringComparison.Ordinal));
+        foreach (var module in new[] { "Identity", "Jobs" })
+        {
+            var file = $"{module}/schema.dbml";
+            generated["README.md"].Should().Contain($"- [{file}]({file}) — {EntityModels.SchemaViewerHint}\n");
+        }
     }
 
     [Fact]

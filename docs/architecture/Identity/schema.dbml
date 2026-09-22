@@ -1,0 +1,330 @@
+// Identity — schema. Generated from the EF model. Do not edit.
+// To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
+// Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
+
+Table consent_records {
+  id uuid [pk]
+  accepted_at timestamptz [not null]
+  declares_adult boolean [not null]
+  ip_address varchar(45)
+  locale varchar(10) [not null]
+  privacy_version varchar(40) [not null]
+  terms_version varchar(40) [not null]
+  user_id uuid [not null]
+
+  indexes {
+    user_id [name: 'ix_consent_records_user_id']
+  }
+
+  Note: 'Entity: ConsentRecord - standard columns: 8 (see data dictionary)'
+}
+
+Table email_verification_tokens {
+  id uuid [pk]
+  consumed_at timestamptz
+  expires_at timestamptz [not null]
+  token_hash varchar(64) [not null]
+  user_id uuid [not null]
+
+  indexes {
+    user_id [name: 'ix_email_verification_tokens_user_id']
+    token_hash [name: 'ux_email_verification_tokens_hash', unique]
+  }
+
+  Note: 'Entity: EmailVerificationToken - standard columns: 8 (see data dictionary)'
+}
+
+Table jobs {
+  id uuid [pk]
+  attempts integer [not null]
+  last_error varchar(2000)
+  payload text [not null]
+  run_after timestamptz [not null]
+  started_at timestamptz
+  status integer [not null]
+  type varchar(100) [not null]
+
+  Note: 'Entity: Job - standard columns: 1 (see data dictionary)'
+}
+
+Table openiddict_applications {
+  id text [pk]
+  application_type varchar(50)
+  client_id varchar(100)
+  client_secret text
+  client_type varchar(50)
+  concurrency_token varchar(50)
+  consent_type varchar(50)
+  display_name text
+  display_names text
+  json_web_key_set text
+  permissions text
+  post_logout_redirect_uris text
+  properties text
+  redirect_uris text
+  requirements text
+  settings text
+
+  indexes {
+    client_id [name: 'ix_openiddict_applications_client_id', unique]
+  }
+
+  Note: 'Entity: OpenIddictEntityFrameworkCoreApplication'
+}
+
+Table openiddict_authorizations {
+  id text [pk]
+  application_id text
+  concurrency_token varchar(50)
+  creation_date timestamptz
+  properties text
+  scopes text
+  status varchar(50)
+  subject varchar(400)
+  type varchar(50)
+
+  indexes {
+    (application_id, status, subject, type) [name: 'ix_openiddict_authorizations_application_id_status_subject_type']
+  }
+
+  Note: 'Entity: OpenIddictEntityFrameworkCoreAuthorization'
+}
+
+Table openiddict_scopes {
+  id text [pk]
+  concurrency_token varchar(50)
+  description text
+  descriptions text
+  display_name text
+  display_names text
+  name varchar(200)
+  properties text
+  resources text
+
+  indexes {
+    name [name: 'ix_openiddict_scopes_name', unique]
+  }
+
+  Note: 'Entity: OpenIddictEntityFrameworkCoreScope'
+}
+
+Table openiddict_tokens {
+  id text [pk]
+  application_id text
+  authorization_id text
+  concurrency_token varchar(50)
+  creation_date timestamptz
+  expiration_date timestamptz
+  payload text
+  properties text
+  redemption_date timestamptz
+  reference_id varchar(100)
+  status varchar(50)
+  subject varchar(400)
+  type varchar(150)
+
+  indexes {
+    (application_id, status, subject, type) [name: 'ix_openiddict_tokens_application_id_status_subject_type']
+    authorization_id [name: 'ix_openiddict_tokens_authorization_id']
+    reference_id [name: 'ix_openiddict_tokens_reference_id', unique]
+  }
+
+  Note: 'Entity: OpenIddictEntityFrameworkCoreToken'
+}
+
+Table password_reset_tokens {
+  id uuid [pk]
+  consumed_at timestamptz
+  expires_at timestamptz [not null]
+  token_hash varchar(64) [not null]
+  user_id uuid [not null]
+
+  indexes {
+    user_id [name: 'ix_password_reset_tokens_user_id']
+    token_hash [name: 'ux_password_reset_tokens_hash', unique]
+  }
+
+  Note: 'Entity: PasswordResetToken - standard columns: 8 (see data dictionary)'
+}
+
+Table permissions {
+  name varchar(100) [pk]
+  description varchar(500)
+
+  Note: 'Entity: Permission'
+}
+
+Table role_changes {
+  id uuid [pk]
+  action varchar(40) [not null]
+  name_after varchar(256)
+  name_before varchar(256)
+  role_id uuid
+  role_ids "uuid[]" [not null]
+  role_name varchar(256)
+  target_user_id uuid
+  added jsonb [note: 'JSON: RoleChangeItem (Key, Name)']
+  removed jsonb [note: 'JSON: RoleChangeItem (Key, Name)']
+
+  indexes {
+    role_ids [name: 'ix_role_changes_role_ids']
+    target_user_id [name: 'ix_role_changes_target_user_id']
+  }
+
+  Note: 'Entity: RoleChange - standard columns: 8 (see data dictionary)'
+}
+
+Table role_claims {
+  id integer [pk]
+  claim_type text
+  claim_value text
+  role_id uuid [not null]
+
+  indexes {
+    role_id [name: 'ix_role_claims_role_id']
+  }
+
+  Note: 'Entity: IdentityRoleClaim'
+}
+
+Table role_permissions {
+  permission_name varchar(100) [not null]
+  role_id uuid [not null]
+
+  indexes {
+    (role_id, permission_name) [pk]
+    permission_name [name: 'ix_role_permissions_permission_name']
+  }
+
+  Note: 'Entity: RolePermission'
+}
+
+Table roles {
+  id uuid [pk]
+  concurrency_stamp text
+  is_system boolean [not null]
+  name varchar(256)
+  normalized_name varchar(256)
+
+  indexes {
+    normalized_name [name: 'ux_roles_normalized_name', unique]
+  }
+
+  Note: 'Entity: Role - standard columns: 7 (see data dictionary)'
+}
+
+Table user_claims {
+  id integer [pk]
+  claim_type text
+  claim_value text
+  user_id uuid [not null]
+
+  indexes {
+    user_id [name: 'ix_user_claims_user_id']
+  }
+
+  Note: 'Entity: IdentityUserClaim'
+}
+
+Table user_logins {
+  login_provider varchar(128) [not null]
+  provider_key varchar(128) [not null]
+  provider_display_name text
+  user_id uuid [not null]
+
+  indexes {
+    (login_provider, provider_key) [pk]
+    user_id [name: 'ix_user_logins_user_id']
+  }
+
+  Note: 'Entity: IdentityUserLogin'
+}
+
+Table user_roles {
+  role_id uuid [not null]
+  user_id uuid [not null]
+
+  indexes {
+    (user_id, role_id) [pk]
+    role_id [name: 'ix_user_roles_role_id']
+  }
+
+  Note: 'Entity: IdentityUserRole'
+}
+
+Table user_tokens {
+  login_provider varchar(128) [not null]
+  name varchar(128) [not null]
+  user_id uuid [not null]
+  value text
+
+  indexes {
+    (user_id, login_provider, name) [pk]
+  }
+
+  Note: 'Entity: IdentityUserToken'
+}
+
+Table users {
+  id uuid [pk]
+  access_failed_count integer [not null]
+  concurrency_stamp text
+  email varchar(254) [not null]
+  email_confirmed boolean [not null]
+  email_verified_at timestamptz
+  full_name varchar(120)
+  is_adult_declared boolean [not null]
+  lockout_enabled boolean [not null]
+  lockout_end timestamptz
+  normalized_email varchar(254) [not null]
+  normalized_user_name varchar(254)
+  password_hash text
+  phone_number text
+  phone_number_confirmed boolean [not null]
+  preferred_language varchar(10) [not null]
+  security_stamp text
+  status varchar(20) [not null]
+  totp_enabled_at timestamptz
+  totp_last_accepted_step bigint
+  totp_secret_encrypted varchar(256)
+  two_factor_enabled boolean [not null]
+  user_name varchar(254)
+
+  Note: 'Entity: User - standard columns: 8 (see data dictionary)'
+}
+
+Ref: consent_records.user_id > users.id
+Ref: email_verification_tokens.user_id > users.id
+Ref: openiddict_authorizations.application_id > openiddict_applications.id
+Ref: openiddict_tokens.application_id > openiddict_applications.id
+Ref: openiddict_tokens.authorization_id > openiddict_authorizations.id
+Ref: password_reset_tokens.user_id > users.id
+Ref: role_claims.role_id > roles.id
+Ref: role_permissions.permission_name > permissions.name
+Ref: role_permissions.role_id > roles.id
+Ref: user_claims.user_id > users.id
+Ref: user_logins.user_id > users.id
+Ref: user_roles.role_id > roles.id
+Ref: user_roles.user_id > users.id
+Ref: user_tokens.user_id > users.id
+
+TableGroup users_group {
+  consent_records
+  email_verification_tokens
+  password_reset_tokens
+  permissions
+  role_claims
+  role_permissions
+  roles
+  user_claims
+  user_logins
+  user_roles
+  user_tokens
+  users
+}
+
+TableGroup openiddict_applications_group {
+  openiddict_applications
+  openiddict_authorizations
+  openiddict_tokens
+}
