@@ -146,4 +146,4 @@ stay without a foreign key: see `## Decisions`.
 - Validated by the owner on screen, 2026-09-22.
 - Full check (`gate.js ship`): build 24 s, 0 warnings; 695 tests, 0 failed, 56 s; `agile gate GREEN`.
 - App manual: unchanged (no visible behavior). `docs/infra.md`: measured times.
-- Merge: -
+- Merge: `eea4a8f` (`--no-ff` into `main`, 2026-09-22).
