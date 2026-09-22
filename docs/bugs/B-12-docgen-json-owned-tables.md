@@ -1,7 +1,7 @@
 ---
 bug: B-12
 feature: F-15
-status: building
+status: validating
 board: 742
 severity: low
 ---
@@ -45,11 +45,12 @@ also draws three `role_changes` boxes. Found while refining F-16 (2026-09-21).
 
 ## Fix
 - `EntityModels.Tables`: skip entity types that are mapped to JSON (`IsMappedToJson()`).
-- `EntityModels` column rendering: after the owner's scalar properties, add one row per JSON navigation of the entity
-  (`GetContainerColumnName()`, `GetContainerColumnType()`, nullable unless the navigation is required), with the note
-  built from the target type's non-key properties and their `GetJsonPropertyName()`. Nested JSON owned types, if any
-  appear later, are listed by name only in the note.
-- Relations: skip foreign keys whose dependent is mapped to JSON.
+- `EntityModels.JsonColumns`: after the owner's scalar properties, one row (dictionary) or line (diagram) per JSON
+  navigation of the entity. Name, store type and nullability come from the column of the relational model
+  (`GetTableMappings().First().Table.FindColumn(GetContainerColumnName())`), the same model the migrations use, so they
+  match the migration without guessing a provider default. `JsonNote` builds the note from the target type's non-key
+  properties and their `GetJsonPropertyName()`; a nested JSON owned type, if one appears later, is listed by name only.
+- Relations: no separate change. The ownership foreign key belongs to the JSON type, which `Tables` now skips.
 - Regenerate `docs/architecture/` with `dotnet run --project tools/Simulab.DocGen` in the same commit (`--check` stays green).
 - Owned types without `ToJson` (table splitting) are out of scope: captured as F-25.
 
@@ -87,11 +88,19 @@ All three new tests are run and seen failing before the fix.
 - (none)
 
 ## Validation script
-1. `dotnet run --project tools/Simulab.DocGen` → finishes without error; `git status` shows no change under `docs/architecture/`.
-2. Open `docs/architecture/Identity/data-dictionary.md` → one `## role_changes` section, with the `added` and `removed`
-   rows (`jsonb`, null yes, note `JSON: RoleChangeItem (Key, Name)`).
-3. Open `docs/architecture/Identity/entities.md` in a Markdown preview → one `role_changes` box with `added` and `removed`,
-   and no line from `role_changes` to itself.
+No app host needed: this is a docs tool. Checkout: `bug/B-12`.
+1. In the repository root, run the check (same command in Git Bash and PowerShell 7):
+   `dotnet run --project tools/Simulab.DocGen -- --check` → prints `docs/architecture is up to date`, exit code 0.
+   Repeat any time; it only reads.
+2. Count the sections and boxes:
+   - Git Bash: `grep -c '^## role_changes$' docs/architecture/Identity/data-dictionary.md` → `1`;
+     `grep -c '^    role_changes {$' docs/architecture/Identity/entities.md` → `1`.
+   - PowerShell 7: `(Select-String -Path docs/architecture/Identity/data-dictionary.md -Pattern '^## role_changes$').Count` → `1`;
+     `(Select-String -Path docs/architecture/Identity/entities.md -Pattern '^    role_changes \{$').Count` → `1`.
+3. Open `docs/architecture/Identity/data-dictionary.md`, section `role_changes` → the last two rows are `added` and
+   `removed`, type `jsonb`, null `yes`, note `JSON: RoleChangeItem (Key, Name)`; no `RoleChangeItem` section.
+4. Open `docs/architecture/Identity/entities.md` in the Markdown preview → one `role_changes` box ending in
+   `jsonb added` and `jsonb removed`, and no relation line from `role_changes` to itself.
 
 ## Delivery
 - Branch: bug/B-12
