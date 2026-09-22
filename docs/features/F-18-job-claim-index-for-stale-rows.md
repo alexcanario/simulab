@@ -3,7 +3,7 @@ feature: F-18
 epic: Foundation and identity
 status: building
 board: 731
-version: 1
+version: 2
 ---
 # Job claim index for stale rows
 
@@ -21,6 +21,7 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - Tests: `Simulab.Jobs.Tests` runs the queue on a real PostgreSQL container (`JobTestHost`).
 - No item touched this code after F-13 (`ed24feb`, `572f4c5`).
 - **Premise corrected:** "PostgreSQL cannot use the index for the OR" is not true in principle — the index starts with `status`, so both branches can use it and the planner may combine them (BitmapOr). Whether it does, or scans the table, depends on the statistics; not measured. The risk the item names stands either way: the plan is up to the planner, and `Failed` rows sit in the index and the table the claim reads.
+- **Measured during build (2026-09-23)**, 10,000 `Failed` rows and one due job, after `ANALYZE`: with the old index the planner already avoided a sequential scan — two bitmap index scans combined by `BitmapOr`, then a `Sort` on `created_at`, estimated cost 16.23. With the partial index: one `Index Scan using ix_jobs_active_created_at`, already in `created_at` order, no sort, estimated cost 8.46. The owner kept F-18 for that simpler plan and an index that does not grow with `Failed` rows (change note v2).
 
 ## Users and use cases
 - UC1 The Api host's job worker claims the next due job every 5 seconds; with thousands of `Failed` rows kept, the claim reads only the active rows.
@@ -34,7 +35,7 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - No screen, route, endpoint or error code. One migration in the `jobs` schema.
 
 ## Acceptance criteria
-- AC1 Given `jobs.jobs` with 10,000 `Failed` rows and a few `Pending` and `Running` rows, analyzed, when the claim query is explained, then the plan uses the active-rows index and has no sequential scan of `jobs.jobs`. (BR1)
+- AC1 Given `jobs.jobs` with 10,000 `Failed` rows and a few `Pending` and `Running` rows, analyzed, when the claim query is explained, then the plan reads `jobs.jobs` through `ix_jobs_active_created_at` alone, in `created_at` order: no sequential scan, no bitmap scan and no sort. (BR1)
 - AC2 Given the model and the migrations, when the schema is built, then the index is partial on `status IN (Pending, Running)` and `ix_jobs_status_run_after_created_at` is gone. (BR1)
 - AC3 Given the existing `JobRunnerTests` (due, not yet due, oldest first, stale retake, `SKIP LOCKED`, `Failed` never taken), when they run after the migration, then all pass unchanged. (BR2, BR3)
 - AC4 No UI text; nothing to localize.
@@ -45,6 +46,8 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - 2026-09-23 — The index is proven by an `EXPLAIN` test on the test container with 10,000 `Failed` rows after `ANALYZE` — Claude: the planner picks by statistics, so only a plan over a realistic table proves the claim; asserting the index exists is not enough.
 - 2026-09-23 — Retention of `Failed` rows stays out of F-18 and is captured as F-27 (board 746) — owner: F-18 only fixes the index, and with it the kept rows no longer weigh on the claim; how long to keep the evidence is its own decision.
 - 2026-09-23 — No new package — Claude: `Simulab.Jobs.Tests` already runs a PostgreSQL container.
+- 2026-09-23 — The runner changes after all: `ClaimSql` states `Pending` and `Running` as constants instead of parameters, and is `internal` (with `InternalsVisibleTo Simulab.Jobs.Tests`) so the plan test explains the runner's own statement — Claude: a parameter can hide the status from a cached generic plan, and then the planner cannot prove the partial index's filter; corrects "no change to the runner" above.
+- 2026-09-23 — An empty Identity migration, `JobsActiveIndexSnapshot`, moves the Identity snapshot — Claude: `IdentityModuleDbContext` maps the job table excluded from its migrations (F-13), so its snapshot names the index; without it EF reports pending model changes at startup.
 
 ## Out of scope
 - Cleanup or retention of `Failed` rows: F-27.
@@ -54,13 +57,11 @@ The cost of each poll of the job queue depends only on the jobs still to run, ne
 - (none)
 
 ## Change notes
-<!--
-### v2 — YYYY-MM-DD
-- What: <change>
-- Why: <reason>
-- Affected: <BR/AC ids>; other criteria unchanged.
-- Re-approved: <YYYY-MM-DD>
--->
+### v2 — 2026-09-23
+- What: AC1 requires the claim plan to read `jobs.jobs` through `ix_jobs_active_created_at` alone, in order, with no sequential scan, no bitmap scan and no sort; "What already exists" records the measured plans.
+- Why: the premise was measured false during build — the old index already avoided a sequential scan (BitmapOr + Sort, cost 16.23). The partial index wins by a single ordered index scan (cost 8.46); the owner kept the item (option a).
+- Affected: AC1; other criteria unchanged.
+- Re-approved: 2026-09-23 ("aprovo").
 
 ## Validation script
 <!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->

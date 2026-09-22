@@ -14,7 +14,11 @@ public sealed class JobClaimPlanTests : IAsyncLifetime
 
     public async Task DisposeAsync() => await _host.DisposeAsync();
 
-    /// <summary>AC1: with ten thousand failed rows kept, the claim goes through the active-rows index.</summary>
+    /// <summary>
+    /// AC1 (v2): with ten thousand failed rows kept, the claim reads the active-rows index alone, already in
+    /// <c>created_at</c> order. The old index avoided a sequential scan too, through a BitmapOr and a sort
+    /// (measured 2026-09-23); what the partial index buys is one ordered scan, so that is what is asserted.
+    /// </summary>
     [Fact]
     public async Task Claim_ManyFailedRowsKept_ReadsOnlyTheActiveRowsIndex()
     {
@@ -25,8 +29,10 @@ public sealed class JobClaimPlanTests : IAsyncLifetime
 
         var plan = await _host.ExplainClaimAsync();
 
-        plan.Should().Contain("ix_jobs_active_created_at", "the claim must read the partial index of active rows");
+        plan.Should().Contain("Index Scan using ix_jobs_active_created_at on jobs", "the claim must read the partial index of active rows");
         plan.Should().NotContain("Seq Scan on jobs", "a sequential scan reads every failed row kept by BR7");
+        plan.Should().NotContain("Bitmap", "a bitmap scan loses the index order and needs a sort");
+        plan.Should().NotContain("Sort", "the index already gives the oldest row first");
     }
 
     /// <summary>AC2: the migration leaves one partial index over the active rows, and the old one is gone.</summary>
