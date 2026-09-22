@@ -20,7 +20,7 @@ erDiagram
         character_varying_40_ terms_version
         timestamp_with_time_zone updated_at
         uuid updated_by
-        uuid user_id
+        uuid user_id FK
     }
     email_verification_tokens {
         uuid id PK
@@ -35,7 +35,7 @@ erDiagram
         character_varying_64_ token_hash
         timestamp_with_time_zone updated_at
         uuid updated_by
-        uuid user_id
+        uuid user_id FK
     }
     jobs {
         uuid id PK
@@ -116,7 +116,7 @@ erDiagram
         character_varying_64_ token_hash
         timestamp_with_time_zone updated_at
         uuid updated_by
-        uuid user_id
+        uuid user_id FK
     }
     permissions {
         character_varying_100_ name PK
@@ -146,7 +146,7 @@ erDiagram
         integer id PK
         text claim_type
         text claim_value
-        uuid role_id
+        uuid role_id FK
     }
     role_permissions {
         character_varying_100_ permission_name PK
@@ -170,13 +170,13 @@ erDiagram
         integer id PK
         text claim_type
         text claim_value
-        uuid user_id
+        uuid user_id FK
     }
     user_logins {
         character_varying_128_ login_provider PK
         character_varying_128_ provider_key PK
         text provider_display_name
-        uuid user_id
+        uuid user_id FK
     }
     user_roles {
         uuid role_id PK
@@ -225,5 +225,14 @@ erDiagram
     openiddict_applications ||--}o openiddict_tokens : "fk_openiddict_tokens_openiddict_applications_application_id"
     openiddict_authorizations ||--}o openiddict_tokens : "fk_openiddict_tokens_openiddict_authorizations_authorization_id"
     permissions ||--}o role_permissions : "fk_role_permissions_permissions_permission_name"
+    roles ||--}o role_claims : "fk_role_claims_roles_role_id"
     roles ||--}o role_permissions : "fk_role_permissions_roles_role_id"
+    roles ||--}o user_roles : "fk_user_roles_roles_role_id"
+    users ||--}o consent_records : "fk_consent_records_users_user_id"
+    users ||--}o email_verification_tokens : "fk_email_verification_tokens_users_user_id"
+    users ||--}o password_reset_tokens : "fk_password_reset_tokens_users_user_id"
+    users ||--}o user_claims : "fk_user_claims_users_user_id"
+    users ||--}o user_logins : "fk_user_logins_users_user_id"
+    users ||--}o user_roles : "fk_user_roles_users_user_id"
+    users ||--}o user_tokens : "fk_user_tokens_users_user_id"
 ```
