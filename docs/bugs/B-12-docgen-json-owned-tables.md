@@ -104,7 +104,7 @@ No app host needed: this is a docs tool. Checkout: `bug/B-12`.
 
 ## Delivery
 - Branch: bug/B-12
-- Merge: <commit>
+- Merge: 012022c
 - Validated by the owner on screen (2026-09-22). During validation the owner asked for an orthogonal diagram layout:
   captured as F-26, out of this bug.
 - Full check (`gate.js ship`): build 20 s, 0 warnings, baseline stays empty; suite 692 tests, 0 failed, 44 s
