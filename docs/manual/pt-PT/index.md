@@ -35,7 +35,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Criar uma conta](create-account.md): registo e confirmação do e-mail
 - [Iniciar e terminar sessão](sign-in-and-sign-out.md): início de sessão, término, bloqueio por tentativas
 - [Palavra-passe](password.md): esqueci-me, redefinir e alterar
-- [A minha conta](my-account.md): nome de apresentação e idioma preferido
+- [A minha conta](my-account.md): nome de apresentação, idioma preferido e transferir os seus dados
 - [Eliminar a sua conta](erase-account.md): eliminar a conta e o que fica guardado
 - [Verificação em dois passos](two-factor.md): um código do telemóvel depois da palavra-passe, e códigos de recuperação
 - [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um perfil

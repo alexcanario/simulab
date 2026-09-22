@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-PT
-features: [F-8, F-10, F-11]
-updated: 2026-09-21
+features: [F-8, F-10, F-11, F-16]
+updated: 2026-09-22
 ---
 # A minha conta
 
@@ -34,6 +34,16 @@ Selecione **Alterar palavra-passe**, logo abaixo dos campos. Consulte [Palavra-p
 ### Proteger a conta com um código
 Selecione **Segurança**, ao lado de **Alterar palavra-passe**, para ativar a verificação em dois passos. A ligação só aparece onde a verificação em dois passos está disponível. Consulte [Verificação em dois passos](two-factor.md).
 
+### Transferir os seus dados
+**Os seus dados**, mesmo acima de **Eliminar a minha conta**, dá-lhe uma cópia de tudo o que o Simulab guarda sobre si, num ficheiro JSON.
+1. Selecione **Transferir os meus dados**.
+2. Escreva a sua palavra-passe atual e selecione **Transferir**. A palavra-passe protege o ficheiro: contém dados pessoais.
+3. O navegador guarda `simulab-my-data-<data>.json`, e uma mensagem avisa que a transferência começou.
+
+O ficheiro traz a sua conta (endereço de correio eletrónico, nome de apresentação, telefone, idioma preferido, datas), os perfis que tem, os termos e a política de privacidade que aceitou com o endereço IP a partir do qual aceitou, as alterações feitas aos seus perfis e quantos dispositivos têm sessão iniciada. Nunca traz a sua palavra-passe nem qualquer código de segurança. Nada fica guardado no servidor, e pode transferir as vezes que quiser.
+
+Cada transferência envia-lhe um e-mail a avisar. Se esse e-mail chegar e não tiver sido o próprio, alguém conhece a sua palavra-passe: altere-a de imediato.
+
 ### Eliminar a sua conta
 No fim da página, **Eliminar a minha conta** remove os seus dados pessoais definitivamente. Consulte [Eliminar a sua conta](erase-account.md).
 
@@ -51,6 +61,8 @@ No fim da página, **Eliminar a minha conta** remove os seus dados pessoais defi
 | Utilize no máximo 120 caracteres. | O nome de apresentação é demasiado longo; **Guardar** fica desativado | Encurte o nome |
 | Escolha um dos idiomas da lista. | O idioma enviado não é um dos três disponíveis | Escolha um idioma da lista e guarde novamente |
 | Não foi possível carregar o seu perfil. | O Simulab não conseguiu ler os seus dados neste momento | Selecione **Tentar novamente** |
+| A transferência começou. Está a caminho um e-mail de confirmação. | O ficheiro foi montado e entregue ao navegador | Nada; procure o ficheiro nas suas transferências |
+| A palavra-passe atual não está correta. | A palavra-passe escrita na janela de transferência está errada | Escreva novamente; demasiadas tentativas bloqueiam a conta durante algum tempo |
 
 ## Páginas relacionadas
 - [Palavra-passe](password.md)

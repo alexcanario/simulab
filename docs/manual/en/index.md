@@ -35,7 +35,7 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Create an account](create-account.md): sign up and confirm your email
 - [Sign in and sign out](sign-in-and-sign-out.md): sign in, sign out, lockout
 - [Password](password.md): forgot, reset and change your password
-- [My account](my-account.md): display name and preferred language
+- [My account](my-account.md): display name, preferred language and downloading your data
 - [Erase your account](erase-account.md): erase your account and what is kept
 - [Two-factor sign-in](two-factor.md): a code from your phone after your password, and recovery codes
 - [Roles and permissions](roles.md): what Student, Curator and Admin can do, and how an Admin changes a role
