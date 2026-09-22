@@ -1,7 +1,7 @@
 ---
 feature: F-25
 epic: Foundation and identity
-status: validating
+status: done
 board: 743
 version: 1
 ---
@@ -156,4 +156,10 @@ commands are the same in Git Bash and PowerShell 7; each one only reads and can 
    `Entities: `Order`, `OrderSummary``).
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: feature/F-25 (worktree `wt/simulab/feature-25`)
+- Merge: see the `merge(F-25)` commit on `main`
+- Validated by the owner (2026-09-22).
+- Full check (`gate.js ship`): build 16 s, 0 warnings, baseline stays empty; suite 700 tests, 0 failed, 45 s
+  (ArchitectureTests 59, including the 8 new F-25 tests; 6 seen failing first: `Failed: 6, Passed: 12`).
+- `DocGen --check`: `docs/architecture is up to date` (no change to the generated docs).
+- App manual: unchanged (no user-visible behavior). `docs/infra.md`: measured times.
