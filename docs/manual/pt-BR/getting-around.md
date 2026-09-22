@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: pt-BR
-features: [F-2, F-8]
-updated: 2026-09-19
+features: [F-2, F-8, F-17]
+updated: 2026-09-23
 ---
 # Como navegar
 
@@ -23,6 +23,7 @@ Todos, com ou sem login.
 ### Alternar entre modo claro e escuro
 1. Clique no ícone de lua na barra superior para o modo escuro, ou no ícone de sol para o modo claro.
 2. O Simulab guarda a sua escolha neste navegador. Enquanto você não escolher, ele segue a configuração do seu dispositivo.
+3. Os dois modos foram feitos para uma leitura confortável, inclusive para quem tem baixa visão: textos, ícones, botões (também quando você passa o mouse sobre eles) e as bordas dos campos em que você digita mantêm contraste suficiente com o que está atrás deles.
 
 ### Trocar o idioma
 1. Clique no ícone de globo na barra superior e escolha um idioma. A página recarrega nesse idioma e mantém o modo claro ou escuro. Se você estiver conectado, esse passa a ser também o seu idioma preferido ([Minha conta](my-account.md)).

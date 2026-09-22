@@ -1,4 +1,3 @@
-using System.Globalization;
 using MudBlazor;
 using Simulab.Web.Theme;
 
@@ -7,13 +6,13 @@ namespace Simulab.Web.Tests.Ui;
 /// <summary>
 /// WCAG 2.2 AA (ADR-0001 #29) on the colours a screen shows as text. Found in F-10: the dark palette had
 /// kept the light red, so every error message on a dark card sat at 2.93:1. A number, not an opinion.
+/// These are the pairs each fix named; <see cref="ThemePaletteTests"/> holds every token of both palettes (F-17).
 /// </summary>
 public sealed class ThemeContrastTests
 {
-    private const double MinimumForText = 4.5;
+    private const double MinimumForText = ColourContrast.MinimumForText;
 
-    /// <summary>WCAG 2.2 1.4.11: an icon or a control's boundary, with no text of its own.</summary>
-    private const double MinimumForNonText = 3.0;
+    private const double MinimumForNonText = ColourContrast.MinimumForNonText;
 
     private static readonly MudTheme Theme = SimulabTheme.Create();
 
@@ -146,28 +145,5 @@ public sealed class ThemeContrastTests
         Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"an action icon must be visible ({what})");
     }
 
-    private static double Contrast(string foreground, string background)
-    {
-        var first = Luminance(foreground);
-        var second = Luminance(background);
-        return (Math.Max(first, second) + 0.05) / (Math.Min(first, second) + 0.05);
-    }
-
-    /// <summary>The palette gives its colours as <c>rgba(r,g,b,a)</c>; a hex literal is accepted too.</summary>
-    private static double Luminance(string colour)
-    {
-        var hex = colour.TrimStart('#');
-        var channels = (colour.StartsWith('#')
-            ? Enumerable.Range(0, 3).Select(index => int.Parse(hex.AsSpan(index * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture))
-            : colour[(colour.IndexOf('(', StringComparison.Ordinal) + 1)..colour.IndexOf(')', StringComparison.Ordinal)]
-                .Split(',')
-                .Take(3)
-                .Select(part => int.Parse(part.Trim(), CultureInfo.InvariantCulture)))
-            .Select(value => value / 255d)
-            .Select(value => value <= 0.03928 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4))
-            .ToArray();
-
-        channels.Should().HaveCount(3, $"'{colour}' must be a colour");
-        return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
-    }
+    private static double Contrast(string foreground, string background) => ColourContrast.Ratio(foreground, background);
 }

@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: en
-features: [F-2, F-8]
-updated: 2026-09-19
+features: [F-2, F-8, F-17]
+updated: 2026-09-23
 ---
 # Getting around
 
@@ -23,6 +23,7 @@ Everyone, signed in or not.
 ### Switch between light and dark mode
 1. Press the moon icon in the top bar for dark mode, or the sun icon for light mode.
 2. Simulab remembers your choice on this browser. Until you choose, it follows your device's setting.
+3. Both modes are made to be read comfortably, including with low vision: text, icons, buttons (also while you point at them) and the borders of the fields you type in keep enough contrast with what is behind them.
 
 ### Change the language
 1. Press the globe icon in the top bar and choose a language. The page reloads in that language and keeps your light or dark mode. When you are signed in, it also becomes your preferred language ([My account](my-account.md)).

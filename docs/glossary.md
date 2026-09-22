@@ -112,6 +112,8 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |
 | WCAG 2.2 AA | WCAG 2.2 AA | The accessibility level the app targets (ADR-0001 #29); among other things, text needs a contrast of at least 4.5:1 with its background (3:1 for large text). |
 | contrast ratio | contraste | How far apart a text colour and its background are in brightness, from 1:1 (same colour) to 21:1 (black on white). |
+| theme token | cor do tema | A named colour of the palette (`Primary`, `Surface`, `LinesInputs`...), defined once in `SimulabTheme` for each theme and used by every screen (F-17). |
+| hover tone | tom ao passar o mouse | The darker shade (`<Colour>Darken`) a filled button takes while the pointer is over it (F-17). |
 | anonymization | anonimização | Overwriting the data that names a person, keeping the rest of the record usable as statistics. |
 | tombstone | lápide (valor-lápide) | The meaningless value written over a personal one so the column stays filled and unique (F-10: `erased-<id>@erased.invalid`). |
 | danger zone | zona de risco | The part of a screen that holds the destructive actions, set apart and marked as such. |
