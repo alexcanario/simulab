@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Simulab.ArchitectureTests.DocGen.SharedTables;
 using Simulab.DocGen;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Jobs.Persistence;
@@ -109,6 +110,126 @@ public class EntityModelsTests
             }
         }
     }
+
+    // F-25: types sharing a table, over a test-only model (no module maps one yet).
+    internal static (string Module, IModel Model) SharedTableModel() =>
+        EntityModels.Load([typeof(SharedTableDbContext), typeof(SharedTableDbContextFactory)]).Single();
+
+    [Fact]
+    public void RenderDictionary_ListsOwnedColumnsInTheOwnerTableOnce()
+    {
+        var (module, model) = SharedTableModel();
+
+        var text = EntityModels.RenderDictionary(module, model);
+
+        Occurrences(text, "\n## customers\n").Should().Be(1);
+        text.Should().Contain("| address_street | character varying(200) | yes |  |  | Owned: Address; max 200 |\n",
+                "the address is optional, so its columns are nullable even when the property is required")
+            .And.Contain("| address_city | text | yes |  |  | Owned: Address |\n")
+            .And.NotContain("Entity: `Address`");
+    }
+
+    [Fact]
+    public void RenderDictionary_ListsOwnedColumnsAfterTheOwnerColumns()
+    {
+        var (module, model) = SharedTableModel();
+
+        var section = Section(EntityModels.RenderDictionary(module, model), "customers");
+
+        Rows(section).Should().Equal("id", "name", "address_city", "address_street");
+    }
+
+    [Fact]
+    public void Render_ListsComplexColumnsInTheOwnerTable()
+    {
+        var (module, model) = SharedTableModel();
+
+        var dictionary = EntityModels.RenderDictionary(module, model);
+        var entities = EntityModels.RenderEntities(module, model);
+
+        Rows(Section(dictionary, "products")).Should().Equal("id", "name", "price_amount", "price_currency", "dimensions");
+        dictionary.Should().Contain("| price_amount | numeric | no |  |  | Complex: Money |\n")
+            .And.Contain("| price_currency | text | no |  |  | Complex: Money |\n");
+        entities.Should().Contain("        numeric price_amount\n").And.Contain("        text price_currency\n");
+    }
+
+    [Fact]
+    public void RenderDictionary_ListsComplexJsonAsOneColumn()
+    {
+        var (module, model) = SharedTableModel();
+
+        var text = EntityModels.RenderDictionary(module, model);
+
+        text.Should().Contain("| dimensions | jsonb | no |  |  | JSON: Dimensions (Height, Width) |\n")
+            .And.NotContain("| height |")
+            .And.NotContain("| width |");
+    }
+
+    [Fact]
+    public void RenderDictionary_ListsEntitiesSharingATableInOneSection()
+    {
+        var (module, model) = SharedTableModel();
+
+        var text = EntityModels.RenderDictionary(module, model);
+
+        Occurrences(text, "\n## orders\n").Should().Be(1);
+        var section = Section(text, "orders");
+        section.Should().Contain("Entities: `Order`, `OrderSummary`\n")
+            .And.Contain("| id | uuid | no | PK |  |  |\n")
+            .And.Contain("| total | numeric | no |  |  | Entity: OrderSummary |\n");
+        Rows(section).Should().Equal("id", "placed_at", "total");
+    }
+
+    [Fact]
+    public void RenderEntities_DrawsOneBoxPerTableWithoutSplittingSelfRelations()
+    {
+        var (module, model) = SharedTableModel();
+
+        var text = EntityModels.RenderEntities(module, model);
+
+        foreach (var table in new[] { "categories", "customers", "orders", "products" })
+        {
+            Occurrences(text, $"    {table} {{\n").Should().Be(1, $"{table} is one table");
+        }
+
+        text.Should().Contain("        text address_city\n")
+            .And.NotContain("customers ||--")
+            .And.NotContain("orders ||--");
+    }
+
+    [Fact]
+    public void RenderEntities_KeepsARealSelfReference()
+    {
+        var (module, model) = SharedTableModel();
+
+        EntityModels.RenderEntities(module, model)
+            .Should().Contain("    categories ||--}o categories : \"fk_categories_categories_parent_id\"\n");
+    }
+
+    [Fact]
+    public void RenderDictionary_ListsAnOwnedTypeIndexInTheOwnerTableOnce()
+    {
+        var (module, model) = SharedTableModel();
+
+        var section = Section(EntityModels.RenderDictionary(module, model), "customers");
+
+        Occurrences(section, "- `ix_customers_address_city` on address_city\n").Should().Be(1);
+    }
+
+    private static string Section(string dictionary, string table)
+    {
+        var start = dictionary.IndexOf($"\n## {table}\n", StringComparison.Ordinal);
+        start.Should().BeGreaterThanOrEqualTo(0, $"the dictionary has a {table} section");
+        var end = dictionary.IndexOf("\n## ", start + 1, StringComparison.Ordinal);
+        return end < 0 ? dictionary[start..] : dictionary[start..end];
+    }
+
+    private static List<string> Rows(string section) =>
+    [
+        .. section.Split('\n')
+            .Where(line => line.StartsWith("| ", StringComparison.Ordinal) && !line.StartsWith("| Column |", StringComparison.Ordinal))
+            .Select(line => line.Split('|')[1].Trim())
+    ];
 
     private static int Occurrences(string text, string value) =>
         (text.Length - text.Replace(value, "", StringComparison.Ordinal).Length) / value.Length;
