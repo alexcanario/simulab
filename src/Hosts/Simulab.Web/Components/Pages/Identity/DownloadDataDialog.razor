@@ -1,0 +1,111 @@
+@* F-16, UC2: the confirmation of a data download — the current password, nothing else. Same shape as EraseAccountDialog. *@
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+<MudDialog Class="app-download-data-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            <MudText Typo="Typo.body1" Class="mb-4">@I["Account.Data.Dialog.Explanation"]</MudText>
+
+            @if (_lockedSeconds is not null)
+            {
+                <div aria-live="polite">
+                    <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockedSeconds.Value)]" Class="mb-4" />
+                </div>
+            }
+            else if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppPasswordField Id="download-data-password"
+                              Label="@I["Account.Data.Dialog.Password.Label"]"
+                              Hint="@I["Account.Data.Dialog.Password.Hint"]"
+                              ShowLabel="@I["SignUp.Password.Show"]"
+                              HideLabel="@I["SignUp.Password.Hide"]"
+                              Autocomplete="PasswordAutocomplete.CurrentPassword"
+                              Required="true"
+                              Disabled="_exporting"
+                              Error="@_passwordError"
+                              Value="@_password"
+                              ValueChanged="@(value => { _password = value; _passwordError = null; _error = null; })" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_exporting" Class="app-download-cancel">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="ExportAsync"
+                   Disabled="@(_exporting || string.IsNullOrEmpty(_password))"
+                   Class="app-download-confirm">
+            @if (_exporting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+            }
+            @I["Account.Data.Dialog.Confirm"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Asks the Api for the file; the dialog stays open and shows the failure (Screens).</summary>
+    [Parameter, EditorRequired] public Func<string, Task<DataExportResult>> Export { get; set; } = default!;
+
+    private string? _password;
+    private string? _passwordError;
+    private string? _error;
+    private int? _lockedSeconds;
+    private bool _exporting;
+
+    private async Task ExportAsync()
+    {
+        if (_exporting || string.IsNullOrEmpty(_password))
+        {
+            return;
+        }
+
+        _exporting = true;
+        _passwordError = null;
+        _error = null;
+        _lockedSeconds = null;
+
+        var result = await Export(_password);
+
+        _exporting = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result));
+            return;
+        }
+
+        switch (result.ErrorCode)
+        {
+            case IdentityErrorCodes.DataExportCurrentPasswordInvalid:
+                _passwordError = Errors.For(result.ErrorCode);
+                break;
+            case IdentityErrorCodes.AccountLocked:
+                _lockedSeconds = result.RetryAfterSeconds ?? 0;
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode!);
+                break;
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await ExportAsync();
+        }
+    }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private static string FormatSeconds(int seconds) => TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss");
+}

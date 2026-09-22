@@ -11,6 +11,8 @@
 @inject ErrorText Errors
 @inject NavigationManager Navigation
 @inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
 
 <PageTitle>@I["Account.Title"] — @L["App.Name"]</PageTitle>
 
@@ -71,6 +73,15 @@ else
         }
 
         <AppFormActions Saving="_saving" Disabled="@(_fullNameError is not null)" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+    </MudPaper>
+
+    @* F-16, UC1: between the profile and the danger zone; the file is built on request and never stored. *@
+    <MudPaper Class="app-form-card app-data-card pa-6 mt-6" Elevation="0" Outlined="true" MaxWidth="560px">
+        <h2 class="app-data-title">@I["Account.Data.Title"]</h2>
+        <MudText Typo="Typo.body2" Class="mb-4">@I["Account.Data.Explanation"]</MudText>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@AppIcons.Download" OnClick="DownloadAsync" Class="app-download-open">
+            @I["Account.Data.Action"]
+        </MudButton>
     </MudPaper>
 
     @* F-10, UC1: set apart from the profile card, because nothing here can be undone. *@
@@ -207,6 +218,42 @@ else
         StateHasChanged();
         await Task.Yield();
         Navigation.NavigateTo($"/account/sign-out?reason={AccountEndpoints.AccountErasedReason}", forceLoad: true);
+    }
+
+    /// <summary>
+    /// F-16 UC2: the dialog owns the password and the failures; on success the circuit streams the file to the
+    /// browser (it cannot answer an HTTP request itself) and says the confirmation email is on its way.
+    /// </summary>
+    private async Task DownloadAsync()
+    {
+        var parameters = new DialogParameters<DownloadDataDialog>
+        {
+            { dialog => dialog.Export, ExportOnApiAsync }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await Dialogs.ShowAsync<DownloadDataDialog>(I["Account.Data.Dialog.Title"], parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false, Data: DataExportResult { Content: { } content, FileName: { } fileName } })
+        {
+            return;
+        }
+
+        using var stream = new MemoryStream(content);
+        using var reference = new DotNetStreamReference(stream);
+        await JS.InvokeVoidAsync(DownloadFunction, fileName, "application/json", reference);
+        Snackbar.Add(I["Account.Data.Started"], Severity.Success);
+    }
+
+    /// <summary>The browser function that saves the streamed file (wwwroot/js/shell.js).</summary>
+    internal const string DownloadFunction = "simulabShell.downloadFile";
+
+    private async Task<DataExportResult> ExportOnApiAsync(string currentPassword)
+    {
+        var accessToken = await AccessTokenAsync();
+        return accessToken is null
+            ? new DataExportResult(ErrorText.UnexpectedCode, null)
+            : await Api.ExportDataAsync(accessToken, currentPassword);
     }
 
     private async Task<AccountErasureResult> EraseOnApiAsync(string currentPassword)

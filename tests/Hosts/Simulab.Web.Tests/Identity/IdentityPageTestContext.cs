@@ -89,6 +89,18 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>F-10: the passwords POST /account-erasures received, in order.</summary>
         public List<string?> ErasureAttempts { get; } = [];
 
+        /// <summary>F-16: what POST /data-exports answers when it fails. Null means 200 with <see cref="ExportFile"/>.</summary>
+        public (HttpStatusCode Status, string Code)? ExportFailure { get; set; }
+
+        /// <summary>F-16: when set, an export answers 423 with these seconds left.</summary>
+        public int? ExportLockedSeconds { get; set; }
+
+        /// <summary>F-16: the body of a successful export.</summary>
+        public string ExportFile { get; set; } = """{"format":"simulab.data-export","version":1}""";
+
+        /// <summary>F-16: the passwords POST /data-exports received, in order.</summary>
+        public List<string?> ExportAttempts { get; } = [];
+
         /// <summary>F-11: what GET /totp answers. Null means 404, the answer while the feature is off.</summary>
         public TotpStatusResponse? TotpStatus { get; set; }
 
@@ -193,6 +205,31 @@ public abstract class IdentityPageTestContext : KitTestContext
                 }
 
                 return EraseFailure is { } eraseFailure ? Problem(eraseFailure) : new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            // F-16.
+            if (path.EndsWith("/data-exports", StringComparison.Ordinal))
+            {
+                ExportAttempts.Add((await request.Content!.ReadFromJsonAsync<DataExportRequest>(AppJson.Options, cancellationToken))!.CurrentPassword);
+
+                if (ExportLockedSeconds is { } exportSeconds)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.Locked)
+                    {
+                        Content = JsonContent.Create(
+                            new Dictionary<string, object> { ["status"] = 423, ["code"] = IdentityErrorCodes.AccountLocked, ["retryAfterSeconds"] = exportSeconds },
+                            options: AppJson.Options)
+                    };
+                }
+
+                if (ExportFailure is { } exportFailure)
+                {
+                    return Problem(exportFailure);
+                }
+
+                var file = new StringContent(ExportFile, System.Text.Encoding.UTF8, "application/json");
+                file.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment") { FileName = "simulab-my-data-2026-09-21.json" };
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = file };
             }
 
             // F-11.

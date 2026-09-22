@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-BR
-features: [F-8, F-10, F-11]
-updated: 2026-09-21
+features: [F-8, F-10, F-11, F-16]
+updated: 2026-09-22
 ---
 # Minha conta
 
@@ -34,6 +34,16 @@ Clique em **Alterar senha**, logo abaixo dos campos. Veja [Senha](password.md).
 ### Proteger a conta com um código
 Selecione **Segurança**, ao lado de **Alterar senha**, para ativar a verificação em duas etapas. O link só aparece onde a verificação em duas etapas está disponível. Veja [Verificação em duas etapas](two-factor.md).
 
+### Baixar seus dados
+**Seus dados**, logo acima de **Apagar minha conta**, dá uma cópia de tudo o que o Simulab guarda sobre você, em um arquivo JSON.
+1. Clique em **Baixar meus dados**.
+2. Digite sua senha atual e clique em **Baixar**. A senha protege o arquivo: ele tem dados pessoais.
+3. O navegador salva `simulab-my-data-<data>.json`, e uma mensagem avisa que o download começou.
+
+O arquivo traz sua conta (e-mail, nome de exibição, telefone, idioma preferido, datas), os papéis que você tem, os termos e a política de privacidade que você aceitou com o endereço IP de onde aceitou, as mudanças feitas nos seus papéis e quantos aparelhos estão conectados. Nunca traz sua senha nem qualquer código de segurança. Nada fica guardado no servidor, e você pode baixar quantas vezes quiser.
+
+Cada download envia um e-mail avisando. Se esse e-mail chegar e não foi você, alguém sabe sua senha: troque-a na hora.
+
 ### Apagar sua conta
 No fim da página, **Apagar minha conta** remove seus dados pessoais para sempre. Veja [Apagar sua conta](erase-account.md).
 
@@ -51,6 +61,8 @@ No fim da página, **Apagar minha conta** remove seus dados pessoais para sempre
 | Use no máximo 120 caracteres. | O nome de exibição é longo demais; **Salvar** fica desativado | Encurte o nome |
 | Escolha um dos idiomas da lista. | O idioma enviado não é um dos três disponíveis | Escolha um idioma da lista e salve de novo |
 | Não foi possível carregar seu perfil. | O Simulab não conseguiu ler seus dados agora | Clique em **Tentar novamente** |
+| O download começou. Um e-mail de confirmação está a caminho. | O arquivo foi montado e entregue ao navegador | Nada; procure o arquivo nos seus downloads |
+| A senha atual não está correta. | A senha digitada no diálogo de download está errada | Digite de novo; tentativas demais bloqueiam a conta por um tempo |
 
 ## Páginas relacionadas
 - [Senha](password.md)

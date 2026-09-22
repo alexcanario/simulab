@@ -225,6 +225,7 @@
   <data name="registration.full_name_too_long" xml:space="preserve"><value>Use at most 120 characters.</value></data>
   <data name="account_erasure.current_password_invalid" xml:space="preserve"><value>The current password is not correct.</value></data>
   <data name="account_erasure.last_manager" xml:space="preserve"><value>You are the last user able to manage roles. Give that permission to another active user before erasing your account.</value></data>
+  <data name="data_export.current_password_invalid" xml:space="preserve"><value>The current password is not correct.</value></data>
   <data name="totp.code_invalid" xml:space="preserve"><value>The code is not correct or was already used.</value></data>
   <data name="totp.challenge_invalid" xml:space="preserve"><value>The sign-in took too long. Enter your password again.</value></data>
   <data name="totp.already_enabled" xml:space="preserve"><value>Two-factor sign-in is already on.</value></data>

@@ -76,6 +76,7 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
 | Apagamento de conta | Eliminação da conta | `AccountErasure` | The user erasing their own account: the personal data in Identity is overwritten and the id stays as a pseudonym (F-10, ADR-0001 #9) |
 | Conta apagada | Conta eliminada | `AccountStatus.Erased` | The state of an account after erasure: invisible to every lookup, with a tombstone address (F-10) |
+| Baixar meus dados | Transferir os meus dados | `DataExport` | The user downloading, as one JSON file, everything the app holds about them (portability, F-16) |
 | Verificação em duas etapas | Verificação em dois passos | `TwoFactor` / `Totp` | The second barrier at sign-in: a six-digit code from an authenticator app (F-11) |
 | Código de recuperação | Código de recuperação | `RecoveryCode` | One of the ten single-use codes that replace the authenticator when the phone is gone (F-11) |
 | Desafio de segunda etapa | Desafio de segundo passo | `TotpChallenge` | The single-use token the password step returns when the account asks for a code (F-11) |

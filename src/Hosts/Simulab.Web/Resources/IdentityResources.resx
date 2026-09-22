@@ -110,6 +110,15 @@
   <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>This cannot be undone. Type your current password to confirm that this account is yours.</value></data>
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Current password</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>The password you sign in with.</value></data>
+  <data name="Account.Data.Title" xml:space="preserve"><value>Your data</value></data>
+  <data name="Account.Data.Explanation" xml:space="preserve"><value>Download a copy of everything Simulab holds about you, as one JSON file: your account, your roles, the terms and privacy policy you accepted (with the IP address they were accepted from), the changes made to your roles and the number of devices signed in.</value></data>
+  <data name="Account.Data.Action" xml:space="preserve"><value>Download my data</value></data>
+  <data name="Account.Data.Dialog.Title" xml:space="preserve"><value>Download my data</value></data>
+  <data name="Account.Data.Dialog.Explanation" xml:space="preserve"><value>The file holds personal data. Type your current password to confirm that this account is yours; we will email you that it was downloaded.</value></data>
+  <data name="Account.Data.Dialog.Password.Label" xml:space="preserve"><value>Current password</value></data>
+  <data name="Account.Data.Dialog.Password.Hint" xml:space="preserve"><value>The password you sign in with.</value></data>
+  <data name="Account.Data.Dialog.Confirm" xml:space="preserve"><value>Download</value></data>
+  <data name="Account.Data.Started" xml:space="preserve"><value>Your download has started. A confirmation email is on its way.</value></data>
   <data name="SignIn.Code.Subtitle" xml:space="preserve"><value>Your account uses two-factor sign-in. Enter the code from your authenticator app.</value></data>
   <data name="SignIn.RecoveryCode.Subtitle" xml:space="preserve"><value>Enter one of the recovery codes you saved. Each code works only once.</value></data>
   <data name="SignIn.Code.Label" xml:space="preserve"><value>Six-digit code</value></data>

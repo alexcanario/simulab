@@ -276,6 +276,29 @@
         }
       }
     },
+    "/api/v1/identity/data-exports": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "ExportData",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataExportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/identity/profile": {
       "get": {
         "tags": [
@@ -788,6 +811,21 @@
           }
         },
         "description": "The first code from the authenticator app, which turns two-factor on (F-11 BR2)."
+      },
+      "DataExportRequest": {
+        "required": [
+          "currentPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A signed-in user downloads their own data (F-16 UC2). The account is the token subject (BR1), so the body\r\ncarries only the proof that the person at the keyboard owns it (BR2)."
       },
       "DisableTotpRequest": {
         "required": [

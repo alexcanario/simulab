@@ -16,6 +16,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/identity/totp` | GetTotpStatus | 200 |
 | `GET` | `/api/v1/identity/users` | ListUsers | 200 |
 | `POST` | `/api/v1/identity/account-erasures` | EraseAccount | 200 |
+| `POST` | `/api/v1/identity/data-exports` | ExportData | 200 |
 | `POST` | `/api/v1/identity/email-verifications/resend` | ResendVerification | 200 |
 | `POST` | `/api/v1/identity/email-verifications` | VerifyEmail | 200 |
 | `POST` | `/api/v1/identity/password-changes` | ChangePassword | 200 |

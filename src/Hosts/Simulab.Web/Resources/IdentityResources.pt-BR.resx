@@ -110,6 +110,15 @@
   <data name="Account.Erase.Dialog.Explanation" xml:space="preserve"><value>Isso não pode ser desfeito. Digite sua senha atual para confirmar que a conta é sua.</value></data>
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A senha com que você entra.</value></data>
+  <data name="Account.Data.Title" xml:space="preserve"><value>Seus dados</value></data>
+  <data name="Account.Data.Explanation" xml:space="preserve"><value>Baixe uma cópia de tudo o que o Simulab guarda sobre você, em um arquivo JSON: sua conta, seus papéis, os termos e a política de privacidade que você aceitou (com o endereço IP de onde aceitou), as mudanças feitas nos seus papéis e o número de aparelhos conectados.</value></data>
+  <data name="Account.Data.Action" xml:space="preserve"><value>Baixar meus dados</value></data>
+  <data name="Account.Data.Dialog.Title" xml:space="preserve"><value>Baixar meus dados</value></data>
+  <data name="Account.Data.Dialog.Explanation" xml:space="preserve"><value>O arquivo tem dados pessoais. Digite sua senha atual para confirmar que a conta é sua; vamos avisar por e-mail que os dados foram baixados.</value></data>
+  <data name="Account.Data.Dialog.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
+  <data name="Account.Data.Dialog.Password.Hint" xml:space="preserve"><value>A senha com que você entra.</value></data>
+  <data name="Account.Data.Dialog.Confirm" xml:space="preserve"><value>Baixar</value></data>
+  <data name="Account.Data.Started" xml:space="preserve"><value>O download começou. Um e-mail de confirmação está a caminho.</value></data>
   <data name="SignIn.Code.Subtitle" xml:space="preserve"><value>Sua conta usa verificação em duas etapas. Digite o código do seu aplicativo autenticador.</value></data>
   <data name="SignIn.RecoveryCode.Subtitle" xml:space="preserve"><value>Digite um dos códigos de recuperação que você guardou. Cada código funciona uma única vez.</value></data>
   <data name="SignIn.Code.Label" xml:space="preserve"><value>Código de seis dígitos</value></data>

@@ -144,6 +144,49 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         }
     }
 
+    /// <summary>
+    /// F-16 UC2: the caller downloads their own data. The answer is the file itself, or the same two failure
+    /// shapes as an erasure, because it is the same password check (BR2).
+    /// </summary>
+    public async Task<DataExportResult> ExportDataAsync(string accessToken, string currentPassword, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{Base}/data-exports")
+            {
+                Content = JsonContent.Create(new DataExportRequest(currentPassword), options: AppJson.Options)
+            };
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                var fileName = response.Content.Headers.ContentDisposition?.FileNameStar
+                    ?? response.Content.Headers.ContentDisposition?.FileName?.Trim('"')
+                    ?? "simulab-my-data.json";
+                return new DataExportResult(null, null, content, fileName);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Locked)
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(AppJson.Options, cancellationToken);
+                var seconds = problem?.Extensions.TryGetValue("retryAfterSeconds", out var value) == true && value is JsonElement { ValueKind: JsonValueKind.Number } element
+                    ? element.GetInt32()
+                    : 0;
+                return new DataExportResult(IdentityErrorCodes.AccountLocked, seconds);
+            }
+
+            return new DataExportResult(await ReadCodeAsync(response, cancellationToken), null);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException or NotSupportedException)
+        {
+            return new DataExportResult(Components.Ui.ErrorText.UnexpectedCode, null);
+        }
+    }
+
     /// <summary>F-9, UC1: every role with its permissions and user count. The Api checks the permission itself.</summary>
     public Task<ApiResult<List<RoleResponse>>> ListRolesAsync(string accessToken, CancellationToken cancellationToken = default) =>
         SendAsync<List<RoleResponse>>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/roles"), accessToken), cancellationToken);

@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: en
-features: [F-8, F-10, F-11]
-updated: 2026-09-21
+features: [F-8, F-10, F-11, F-16]
+updated: 2026-09-22
 ---
 # My account
 
@@ -34,6 +34,16 @@ Select **Change password**, just below the fields. See [Password](password.md).
 ### Protect your account with a code
 Select **Security**, next to **Change password**, to turn on two-factor sign-in. The link appears only where two-factor sign-in is available. See [Two-factor sign-in](two-factor.md).
 
+### Download your data
+**Your data**, just above **Erase my account**, gives you a copy of everything Simulab holds about you, as one JSON file.
+1. Select **Download my data**.
+2. Type your current password and select **Download**. The password protects the file: it holds personal data.
+3. The browser saves `simulab-my-data-<date>.json`, and a message says the download started.
+
+The file holds your account (email, display name, phone number, preferred language, dates), the roles you hold, the terms and privacy policy you accepted with the IP address they were accepted from, the changes made to your roles, and how many devices are signed in. It never holds your password or any security code. Nothing is stored on the server, and you can download it as often as you like.
+
+Every download sends you an email saying so. If that email arrives and it was not you, someone knows your password: change it at once.
+
 ### Erase your account
 At the bottom of the page, **Erase my account** removes your personal data for good. See [Erase your account](erase-account.md).
 
@@ -51,6 +61,8 @@ At the bottom of the page, **Erase my account** removes your personal data for g
 | Use at most 120 characters. | The display name is too long; **Save** is disabled | Shorten the name |
 | Choose one of the languages in the list. | The language sent is not one of the three available | Choose a language from the list and save again |
 | We could not load your profile. | Simulab could not read your data right now | Select **Try again** |
+| Your download has started. A confirmation email is on its way. | The file was built and handed to the browser | Nothing; look for the file in your downloads |
+| The current password is not correct. | The password typed in the download dialog is wrong | Type it again; too many attempts lock the account for a while |
 
 ## Related pages
 - [Password](password.md)

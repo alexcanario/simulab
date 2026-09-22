@@ -119,6 +119,11 @@ public static class IdentityModule
         services.AddScoped<IAccountErasureStore, AccountErasureStore>();
         services.AddScoped<EraseAccountHandler>();
 
+        // F-16: the user downloads their own data, confirmed with the password as an erasure is.
+        services.AddScoped<IDataExportQueries, DataExportQueries>();
+        services.AddScoped<IDataExportMailer, DataExportMailer>();
+        services.AddScoped<ExportDataHandler>();
+
         services.AddOptions<LegalContentOptions>().Bind(configuration.GetSection(LegalContentOptions.SectionName));
         services.AddOptions<VerificationEmailOptions>().Bind(configuration.GetSection(VerificationEmailOptions.SectionName));
         services.AddOptions<PasswordEmailOptions>().Bind(configuration.GetSection(PasswordEmailOptions.SectionName));
