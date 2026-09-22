@@ -85,6 +85,6 @@ No screen, no UI text and no permission: the item changes an index. Claude did n
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: `feature/F-18`, built in the worktree `D:\dev\_icontrol\wt\simulab\feature-18`
-- Merge: recorded after the merge
+- Merge: `2ce7ec8` on `main` (2026-09-23, authorized by the owner)
 - Tests: 801 passed, 0 failed, suite 41 s, full build 15 s, 0 warnings (`gate.js ship`, 2026-09-23)
 - Manual pages: none (no visible behaviour changed). Technical docs regenerated: `docs/architecture/Jobs/data-dictionary.md` and `docs/architecture/Identity/data-dictionary.md` name the new index; `DocGen --check` up to date
