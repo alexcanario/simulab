@@ -61,6 +61,9 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | |
 | ⏳ | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | |
 | ⏳ | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | |
+| ⏳ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | |
+| ⏳ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | |
+| ⏳ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -465,3 +468,17 @@ From 0.0.37 to 0.0.38, run with `/agile:sync` on `main`. It brings the three F-1
 ### Plugin notes (`plugin`)
 - `[stack: blazor]` feature-build: a bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, including in tests written in the same session where that rule was applied to older tests (F-16, right after B-11).
 - `[generic]` feature-build step 12: a screen behind sign-in cannot be checked by Claude when its rules forbid entering credentials. Say so in the report, cover the signed-in flow in the validation script, and check through the app host what needs no account (the route in the OpenAPI document, the 401, the redirect to sign-in, the served static asset) (F-16).
+
+## 2026-09-22 — B-12 DocGen lists JSON-owned types as extra tables
+Approved by the owner the same day, after the ship.
+
+| # | Lesson | Kind | Where it went |
+|---|---|---|---|
+| 1 | F-25 (from a refinement answer) and F-26 (from a request during validation) were written by hand instead of through `/agile:idea`, against the B-7 line in `project.md`: no template comment block, and a board title with the id prefix that had to be fixed | Plugin improvement | Note below, row ⏳ in "Plugin notes — status"; the project rule already covers it |
+| 2 | `gate.js stop` run by hand after the fix said `agile gate SKIPPED: nothing marked` although the files had been edited with Edit; why nothing was marked was not verified. A `--no-incremental` build of the affected project and its tests stood in for it | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+| 3 | The F-15 test checked that each table appears in the dictionary, not that it appears once, so three `role_changes` sections passed | Plugin improvement | Note below, row ⏳ in "Plugin notes — status" |
+
+### Plugin notes (`plugin`)
+- `[generic]` feature-refinement and feature-build: when an owner's answer or a request during build or validation becomes an idea, the skill calls `idea-capture` (template, board mirror, next number) instead of writing the file by hand (B-12: F-25 and F-26).
+- `[generic]` gate.js `stop`: with nothing marked, the `SKIPPED` line also names what to run instead (the changed projects since the main branch, built `--no-incremental`, and their test projects), so a manual check is not left to guesswork (B-12; follows the B-10 note).
+- `[stack: DocGen]` DocGen template tests: a test of generated output counts the occurrences of each section or box (exactly one per table), not only its presence (B-12: three `role_changes` sections passed the F-15 test).
