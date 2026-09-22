@@ -93,6 +93,7 @@ Every colour of `SimulabTheme` has a declared role, and the build proves each ro
 
 ## Validation script
 No permission step: the item changes colours only, the same for every user.
+Validated by the owner on 2026-09-23 ("validado, passou").
 1. Stop any app host running from `D:\dev\_icontrol\simulab`. In `D:\dev\_icontrol\wt\simulab\feature-17` run `dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`, then open https://localhost:7125/sign-in → the sign-in page opens.
 2. Light theme: look at the email and password fields → each has a grey-blue border, clearly visible on the white card (it was a pale grey).
 3. Switch to the dark theme (sun/moon button in the top bar) → the field borders stay visible on the dark card.
