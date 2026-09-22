@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- F-18: the plan test explains the runner's own claim statement, not a copy of it. -->
+    <InternalsVisibleTo Include="Simulab.Jobs.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Simulab.Email\Simulab.Email.csproj" />
     <ProjectReference Include="..\Simulab.Persistence\Simulab.Persistence.csproj" />
   </ItemGroup>

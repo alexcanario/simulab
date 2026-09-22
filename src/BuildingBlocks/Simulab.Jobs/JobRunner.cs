@@ -18,12 +18,14 @@ public sealed class JobRunner(
     /// BR8, BR9, BR10: one statement claims the oldest due row and marks it <see cref="JobStatus.Running"/>.
     /// <c>SKIP LOCKED</c> is what lets a second Api instance poll the same table without ever taking the
     /// row this one is taking. A row left <c>Running</c> by a stopped worker becomes due again.
+    /// F-18: the statuses are constants, not parameters, so the planner can prove the query only wants the rows
+    /// of the partial index <c>ix_jobs_active_created_at</c>, whatever plan it keeps.
     /// </summary>
-    private const string ClaimSql = $$"""
-        UPDATE {{JobsDbContext.QualifiedTableName}} SET status = {1}, started_at = {0}, attempts = attempts + 1
+    internal static readonly string ClaimSql = $$"""
+        UPDATE {{JobsDbContext.QualifiedTableName}} SET status = {{(int)JobStatus.Running}}, started_at = {0}, attempts = attempts + 1
         WHERE id = (
             SELECT id FROM {{JobsDbContext.QualifiedTableName}}
-            WHERE (status = {2} AND run_after <= {0}) OR (status = {1} AND started_at <= {3})
+            WHERE (status = {{(int)JobStatus.Pending}} AND run_after <= {0}) OR (status = {{(int)JobStatus.Running}} AND started_at <= {1})
             ORDER BY created_at
             FOR UPDATE SKIP LOCKED
             LIMIT 1
@@ -98,7 +100,7 @@ public sealed class JobRunner(
         var stale = now - JobPolicy.StaleAfter;
 
         var claimed = await context.Jobs
-            .FromSqlRaw(ClaimSql, now, (int)JobStatus.Running, (int)JobStatus.Pending, stale)
+            .FromSqlRaw(ClaimSql, now, stale)
             .ToListAsync(cancellationToken);
 
         return claimed.Count == 0 ? null : claimed[0];

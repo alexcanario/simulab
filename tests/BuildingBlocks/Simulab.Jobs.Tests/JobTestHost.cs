@@ -86,6 +86,70 @@ public sealed class JobTestHost : IAsyncDisposable
         return await context.Jobs.CountAsync();
     }
 
+    /// <summary>
+    /// F-18: fills the table the way months of BR7 would, with rows given up on that no claim may read, and
+    /// refreshes the statistics the planner chooses by.
+    /// </summary>
+    public async Task SeedFailedAsync(int count)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var insert = new NpgsqlCommand(
+            $"""
+            INSERT INTO {JobsDbContext.QualifiedTableName} (id, type, payload, status, attempts, created_at, run_after, last_error)
+            SELECT gen_random_uuid(), 'test.failed', '', {(int)JobStatus.Failed}, 5, $1 - n * interval '1 minute', $1, 'System.Exception'
+            FROM generate_series(1, $2) AS n
+            """,
+            connection);
+        insert.Parameters.Add(new NpgsqlParameter { Value = Clock.GetUtcNow() });
+        insert.Parameters.Add(new NpgsqlParameter { Value = count });
+        await insert.ExecuteNonQueryAsync();
+
+        await using var analyze = new NpgsqlCommand($"ANALYZE {JobsDbContext.QualifiedTableName}", connection);
+        await analyze.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>F-18: the plan PostgreSQL picks for the runner's own claim statement, as text.</summary>
+    public async Task<string> ExplainClaimAsync()
+    {
+        var now = Clock.GetUtcNow();
+        var sql = JobRunner.ClaimSql.Replace("{0}", "$1", StringComparison.Ordinal).Replace("{1}", "$2", StringComparison.Ordinal);
+
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var explain = new NpgsqlCommand($"EXPLAIN {sql}", connection);
+        explain.Parameters.Add(new NpgsqlParameter { Value = now });
+        explain.Parameters.Add(new NpgsqlParameter { Value = now - JobPolicy.StaleAfter });
+
+        var lines = new List<string>();
+        await using var reader = await explain.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            lines.Add(reader.GetString(0));
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    /// <summary>F-18: the definitions of the job table's indexes, as PostgreSQL states them.</summary>
+    public async Task<IReadOnlyList<string>> IndexDefinitionsAsync()
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var query = new NpgsqlCommand(
+            $"SELECT indexdef FROM pg_indexes WHERE schemaname = '{JobsDbContext.SchemaName}' AND tablename = '{JobsDbContext.TableName}' ORDER BY indexname",
+            connection);
+
+        var definitions = new List<string>();
+        await using var reader = await query.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            definitions.Add(reader.GetString(0));
+        }
+
+        return definitions;
+    }
+
     private async Task InitializeAsync(string name)
     {
         _connectionString = await PostgresServer.CreateDatabaseAsync(name);
