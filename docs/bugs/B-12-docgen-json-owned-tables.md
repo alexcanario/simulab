@@ -1,7 +1,7 @@
 ---
 bug: B-12
 feature: F-15
-status: validating
+status: done
 board: 742
 severity: low
 ---
@@ -105,3 +105,10 @@ No app host needed: this is a docs tool. Checkout: `bug/B-12`.
 ## Delivery
 - Branch: bug/B-12
 - Merge: <commit>
+- Validated by the owner on screen (2026-09-22). During validation the owner asked for an orthogonal diagram layout:
+  captured as F-26, out of this bug.
+- Full check (`gate.js ship`): build 20 s, 0 warnings, baseline stays empty; suite 692 tests, 0 failed, 44 s
+  (ArchitectureTests 51, including the 3 new regression tests seen failing first: `Failed: 3, Passed: 7`).
+- `DocGen --check`: `docs/architecture is up to date`.
+- App manual: unchanged (no user-visible behavior). `docs/infra.md`: measured times.
+- Ideas captured: F-25 (owned types sharing a table), F-26 (orthogonal entity diagrams).
