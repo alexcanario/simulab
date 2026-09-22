@@ -1,7 +1,7 @@
 ---
 feature: F-26
 epic: Foundation and identity
-status: validating
+status: done
 board: 744
 version: 2
 ---
@@ -111,4 +111,8 @@ No app host: the output is a DBML file. Everything happens in the worktree `D:\d
    Expected: `docs/architecture is up to date`, exit code 0 (`echo $?` in Git Bash, `$LASTEXITCODE` in PowerShell). Repeat by running the same command again.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-26`, built in the worktree `D:\dev\_icontrol\wt\simulab\feature-26`; merged into `main` with `--no-ff` (AB#744).
+- Validated on screen by the owner on 2026-09-22 (v2, DBML in the dbdiagram VS Code extension).
+- Full check (`gate.js ship`): build 12 s, 0 warnings, baseline stays empty; 725 tests green in 39 s (ArchitectureTests 81, Identity 255, Web 334, Persistence 14, Jobs 12, SharedKernel 12, Api 9, AppHost 6, Email 2).
+- Technical docs: `docs/architecture/Identity/schema.dbml` and `Jobs/schema.dbml` replace `entities.md`; `README.md` links them with the viewer; `DocGen --check` exits 0. `docs/infra.md` names the viewer and the measured times.
+- App manual: not changed — no visible behavior of the app changed (the output is developer documentation).
