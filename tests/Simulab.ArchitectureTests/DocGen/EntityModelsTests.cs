@@ -66,4 +66,50 @@ public class EntityModelsTests
 
         text.Should().StartWith("# Jobs — entities").And.Contain("```mermaid\nerDiagram\n").And.Contain("    jobs {\n").And.Contain("uuid id PK");
     }
+
+    // B-12: an owned type mapped with ToJson is a column of its owner's table, not a table of its own.
+    [Fact]
+    public void RenderDictionary_ListsJsonColumnsInTheOwnerTableOnce()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderDictionary(module, model);
+
+        Occurrences(text, "\n## role_changes\n").Should().Be(1);
+        text.Should().Contain("| added | jsonb | yes |  |  | JSON: RoleChangeItem (Key, Name) |\n")
+            .And.Contain("| removed | jsonb | yes |  |  | JSON: RoleChangeItem (Key, Name) |\n")
+            .And.NotContain("__synthesizedOrdinal")
+            .And.NotContain("Entity: `RoleChangeItem`");
+    }
+
+    [Fact]
+    public void RenderEntities_DrawsJsonColumnsInTheOwnerBoxWithoutSelfRelation()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderEntities(module, model);
+
+        Occurrences(text, "    role_changes {\n").Should().Be(1);
+        text.Should().Contain("        jsonb added\n")
+            .And.Contain("        jsonb removed\n")
+            .And.NotContain("role_changes ||--}o role_changes");
+    }
+
+    [Fact]
+    public void Render_ListsEachTableOnce()
+    {
+        foreach (var (module, model) in RealModels())
+        {
+            var dictionary = EntityModels.RenderDictionary(module, model);
+            var entities = EntityModels.RenderEntities(module, model);
+            foreach (var table in model.GetEntityTypes().Select(e => e.GetTableName()).OfType<string>().Distinct())
+            {
+                Occurrences(dictionary, $"\n## {table}\n").Should().Be(1, $"{module}.{table} is one table");
+                Occurrences(entities, $"    {table} {{\n").Should().Be(1, $"{module}.{table} is one table");
+            }
+        }
+    }
+
+    private static int Occurrences(string text, string value) =>
+        (text.Length - text.Replace(value, "", StringComparison.Ordinal).Length) / value.Length;
 }

@@ -109,6 +109,11 @@ internal static partial class EntityModels
                 sb.Append(CultureInfo.InvariantCulture, $"        {ColumnType(property)} {Id(property.GetColumnName())}{flags}\n");
             }
 
+            foreach (var json in JsonColumns(entity))
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"        {Id(json.Column.StoreType)} {Id(json.Column.Name)}\n");
+            }
+
             sb.Append("    }\n");
         }
 
@@ -161,6 +166,11 @@ internal static partial class EntityModels
                 sb.Append(CultureInfo.InvariantCulture, $"| {property.GetColumnName()} | {property.GetColumnType()} | {(property.IsNullable ? "yes" : "no")} | {key} | {property.GetDefaultValueSql() ?? DefaultText(property)} | {string.Join("; ", notes)} |\n");
             }
 
+            foreach (var json in JsonColumns(entity))
+            {
+                sb.Append(CultureInfo.InvariantCulture, $"| {json.Column.Name} | {json.Column.StoreType} | {(json.Column.IsNullable ? "yes" : "no")} |  |  | {JsonNote(json.Target)} |\n");
+            }
+
             var indexes = entity.GetIndexes().OrderBy(i => i.GetDatabaseName(), StringComparer.Ordinal).ToList();
             if (indexes.Count > 0)
             {
@@ -176,11 +186,35 @@ internal static partial class EntityModels
         return sb.ToString();
     }
 
+    // An owned type mapped with ToJson reports its owner's table name but is stored in one of the owner's columns (B-12).
+    // Leaving it out also drops the ownership foreign key, which would draw the owner's table related to itself.
     private static IEnumerable<IEntityType> Tables(IModel model) =>
-        model.GetEntityTypes().Where(e => e.GetTableName() is not null).OrderBy(e => e.GetTableName(), StringComparer.Ordinal);
+        model.GetEntityTypes()
+            .Where(e => e.GetTableName() is not null && !e.IsMappedToJson())
+            .OrderBy(e => e.GetTableName(), StringComparer.Ordinal);
 
     private static IEnumerable<IProperty> Columns(IEntityType entity) =>
         entity.GetProperties().OrderBy(p => p.IsPrimaryKey() ? 0 : 1).ThenBy(p => p.GetColumnName(), StringComparer.Ordinal);
+
+    /// <summary>The JSON container columns of <paramref name="entity"/>'s table, with the owned type each one stores.</summary>
+    private static IEnumerable<(IColumn Column, IEntityType Target)> JsonColumns(IEntityType entity)
+    {
+        var table = entity.GetTableMappings().First().Table;
+        return entity.GetNavigations()
+            .Where(n => !n.IsOnDependent && n.ForeignKey.IsOwnership && n.TargetEntityType.IsMappedToJson())
+            .Select(n => (Column: table.FindColumn(n.TargetEntityType.GetContainerColumnName()!)!, Target: n.TargetEntityType))
+            .OrderBy(json => json.Column.Name, StringComparer.Ordinal);
+    }
+
+    // The JSON property names EF writes, without the key it synthesizes for the collection; a nested JSON type by name only.
+    private static string JsonNote(IEntityType target)
+    {
+        var members = target.GetProperties()
+            .Where(p => !p.IsKey() && !p.IsForeignKey())
+            .Select(p => p.GetJsonPropertyName() ?? p.Name)
+            .Concat(target.GetNavigations().Where(n => !n.IsOnDependent).Select(n => n.Name));
+        return $"JSON: {target.ClrType.Name} ({string.Join(", ", members)})";
+    }
 
     // A CLR default (Guid.Empty, 0) is not a database default: show only values that were configured.
     private static string DefaultText(IProperty property)
