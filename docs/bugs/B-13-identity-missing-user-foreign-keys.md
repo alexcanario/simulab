@@ -68,8 +68,8 @@ stay without a foreign key: see `## Decisions`.
 
 ## Regression test
 - `IdentitySchemaTests.Migration_CreatesForeignKeyForEveryUserAndRoleColumn` — `Simulab.Identity.Tests`: reads
-  `information_schema.referential_constraints` / `key_column_usage` for the schema and expects the nine rows of the table
-  above with their delete rule. Fails today (zero rows), seen failing before the fix.
+  `pg_constraint` for the schema and expects exactly the nine rows of the table above plus the existing
+  `role_permissions.role_id`, with their delete rule. Seen failing before the fix (only `role_permissions` found).
 - `IdentitySchemaTests.UserRole_WithUnknownUser_IsRefused` — `Simulab.Identity.Tests`: an insert into `user_roles` with a
   random `user_id` throws `PostgresException` with `ForeignKeyViolation`. Fails today (the insert passes).
 
