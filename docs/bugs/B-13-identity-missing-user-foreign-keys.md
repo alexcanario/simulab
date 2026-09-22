@@ -1,7 +1,7 @@
 ---
 bug: B-13
 feature: F-6
-status: validating
+status: done
 board: 745
 severity: medium
 ---
@@ -139,5 +139,11 @@ stay without a foreign key: see `## Decisions`.
    `user_tokens`; `roles` to `role_claims`, `user_roles` and `role_permissions`.
 
 ## Delivery
-- Branch: bug/B-13
+- Branch: bug/B-13, rebuilt from `main` before the merge. The first branch also received the F-25 merge
+  (`dd1c678`, 2026-09-22 14:14), made in the shared checkout while it was on `bug/B-13`; the owner authorized the merge
+  of the B-13 commits only, so they were cherry-picked onto a new branch and the old one kept as `bug/B-13-with-f25`.
+  The regenerated `docs/architecture/` is identical without F-25.
+- Validated by the owner on screen, 2026-09-22.
+- Full check (`gate.js ship`): build 24 s, 0 warnings; 695 tests, 0 failed, 56 s; `agile gate GREEN`.
+- App manual: unchanged (no visible behavior). `docs/infra.md`: measured times.
 - Merge: -
