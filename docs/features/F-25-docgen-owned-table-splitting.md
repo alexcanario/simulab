@@ -1,7 +1,7 @@
 ---
 feature: F-25
 epic: Foundation and identity
-status: building
+status: validating
 board: 743
 version: 1
 ---
@@ -104,6 +104,32 @@ the first time a module uses table splitting or a complex type.
   connection, and are not in the assemblies next to the tool (Claude). Reason: `EntityModels.Load()` scans only the tool
   folder, so they never reach `docs/architecture/`.
 - 2026-09-22 — No new packages (Claude). Reason: the tool and the tests already reference EF Core relational and Npgsql.
+- 2026-09-22 (build) — The header keeps the backticks of the existing `Entity:` line: `Entities: `Order`, `OrderSummary``
+  (Claude). Reason: one format for one and several entities; AC4 is checked with the backticks.
+- 2026-09-22 (build) — Relations come from the table's foreign key constraints (`ITable.ForeignKeyConstraints`), not from
+  every foreign key of the entity types (Claude). Reason: the key-to-key link between types sharing a table is not a
+  constraint in the relational model, so BR8 needs no special rule and a real self-reference stays.
+- 2026-09-22 (build) — In the test model, `OrderSummary.total` is `not null`: the relational model makes a table-split entity
+  with a required property a required dependent, and the migration would do the same (Claude). Reason: BR2 takes nullability
+  from the column; the nullable case is covered by the optional owned `Address` (`address_street`, required property,
+  nullable column).
+
+## Coverage
+All in `tests/Simulab.ArchitectureTests/DocGen/EntityModelsTests.cs`, over the test model in `DocGen/SharedTables/`
+(AC1-AC8) or the real models (AC9). Six new tests were seen failing before the change (`Failed: 6, Passed: 12`); AC6 and
+AC8 passed by accident before it (the index happened to fall in the duplicated `Address` section, which no longer exists).
+
+| Criterion | Test |
+|---|---|
+| AC1 | `RenderDictionary_ListsOwnedColumnsInTheOwnerTableOnce` |
+| AC2 | `RenderDictionary_ListsOwnedColumnsAfterTheOwnerColumns` |
+| AC3 | `Render_ListsComplexColumnsInTheOwnerTable` |
+| AC4 | `RenderDictionary_ListsEntitiesSharingATableInOneSection` |
+| AC5 | `RenderEntities_DrawsOneBoxPerTableWithoutSplittingSelfRelations` |
+| AC6 | `RenderEntities_KeepsARealSelfReference` |
+| AC7 | `RenderDictionary_ListsComplexJsonAsOneColumn` |
+| AC8 | `RenderDictionary_ListsAnOwnedTypeIndexInTheOwnerTableOnce` |
+| AC9 | `DocGen --check` (`docs/architecture is up to date`, no diff against `main`); B-12/F-15 tests over the real models: `RenderDictionary_ListsJsonColumnsInTheOwnerTableOnce`, `RenderEntities_DrawsJsonColumnsInTheOwnerBoxWithoutSelfRelation`, `Render_ListsEachTableOnce`, `RenderDictionary_ListsEveryIdentityTableInSnakeCase` |
 
 ## Out of scope
 - `OwnsMany` without `ToJson`: it has its own table and is already rendered as its own section.
@@ -116,7 +142,18 @@ the first time a module uses table splitting or a complex type.
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+No app host needed: this is a docs tool. Folder: `D:\dev\_icontrol\wt\simulab\feature-25` (branch `feature/F-25`). The
+commands are the same in Git Bash and PowerShell 7; each one only reads and can be repeated.
+1. Check the committed docs: `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`,
+   exit code 0.
+2. Confirm today's docs did not change: `git diff --stat main -- docs/architecture` → no output.
+3. Run the DocGen entity tests: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~EntityModelsTests"`
+   → `Passed!  - Failed:     0, Passed:    18`.
+4. Open `tests/Simulab.ArchitectureTests/DocGen/SharedTables/SharedTableDbContext.cs` → the four mappings (owned `Address`,
+   complex `Money` and JSON `Dimensions`, `Order` + `OrderSummary` on `orders`, `Category.Parent`).
+5. Open `tests/Simulab.ArchitectureTests/DocGen/EntityModelsTests.cs`, from `SharedTableModel()` down → the expected rows
+   match BR2-BR9 (for example `| address_street | character varying(200) | yes |  |  | Owned: Address; max 200 |` and
+   `Entities: `Order`, `OrderSummary``).
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
