@@ -68,6 +68,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | 0.0.41 (`6c854ea`) |
 | ✅ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | 0.0.41 (`6c854ea`) |
 | ✅ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
+| ⏳ | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | |
+| ⏳ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -514,3 +516,9 @@ From 0.0.40 to 0.0.41, run with `/agile:sync` on `main`.
 - Left alone: `docs/agile/profile.md` (edited here, unchanged upstream since the last sync). Build files did not change upstream.
 - The plugin reported no missing capability: this project already has DocGen (F-15). Its `tools/Simulab.DocGen` is the project's own; the plugin template is never copied over it.
 - No build: no build file and no rule changed.
+
+## 2026-09-23 — F-17 Theme palette contrast test
+Shipped in `92ac5fe`. Built in a worktree; 16 palette pairs fixed, every theme colour has a declared role.
+- Project rule: `.claude/rules/agile/project.md`, the line on reading a rendered colour after the theme transition now adds that with the browser pane hidden transitions never finish, so `* { transition: none !important }` is injected before measuring (F-17: the field border read the previous theme's colour for over 2 s).
+- `plugin` `[generic]` worktrees.md, Work: `preview_start` reads only the main checkout's `.claude/launch.json`; to preview an app host from a worktree, add a temporary configuration with the absolute `--project` path there and restore the file right after, saying so in the report (F-17).
+- `plugin` `[stack: .NET]` worktrees.md, Ship steps 3-4: before `git worktree remove`, run `dotnet build-server shutdown` and ask the owner to close Visual Studio; on Windows the removal failed halfway (`Invalid argument`) and left a folder without `.git`, held by `.vs` (F-17).
