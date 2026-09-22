@@ -64,10 +64,10 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | 0.0.39 (`a8b2ded`) |
 | ✅ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | 0.0.39 (`a8b2ded`) |
 | ✅ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | 0.0.39 (`a8b2ded`) |
-| ⏳ | `[generic]` Refinement never switches a shared checkout or one on another item's branch: `git branch <item> main` and a worktree, or ask | B-13 | — |
-| ⏳ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | — |
-| ⏳ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | — |
-| ⏳ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | — |
+| ✅ | `[generic]` Refinement never switches a shared checkout or one on another item's branch: `git branch <item> main` and a worktree, or ask | B-13 | 0.0.41 (`6c854ea`) |
+| ✅ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | 0.0.41 (`6c854ea`) |
+| ✅ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | 0.0.41 (`6c854ea`) |
+| ✅ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
