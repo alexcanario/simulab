@@ -64,6 +64,10 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | 0.0.39 (`a8b2ded`) |
 | ✅ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | 0.0.39 (`a8b2ded`) |
 | ✅ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | 0.0.39 (`a8b2ded`) |
+| ⏳ | `[generic]` Refinement never switches a shared checkout or one on another item's branch: `git branch <item> main` and a worktree, or ask | B-13 | — |
+| ⏳ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | — |
+| ⏳ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | — |
+| ⏳ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | — |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -493,3 +497,13 @@ From 0.0.38 to 0.0.39, run with `/agile:sync` on `main`.
 From 0.0.39 to 0.0.40, run with `/agile:sync` on `main`.
 - Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.39 → 0.0.40: the sync names what only `/agile:bootstrap` installs and the project lacks, and offers to capture a feature for it).
 - Left alone: `docs/agile/profile.md` (edited here, unchanged upstream). Build files did not change upstream. `missingCapabilities` empty. No build: no build file and no rule changed.
+
+## 2026-09-22 — B-13 Identity tables missing user foreign keys
+Two lessons approved by the owner at the B-13 retro, recorded now that this file is free of another session's changes.
+- `plugin` `[generic]` feature-refinement step 11: never switch a checkout that is on another item's branch or shared with another session; create the branch with `git branch <item> main` and commit the item file from a worktree, or ask (B-13: an F-25 merge landed on `bug/B-13`).
+- `plugin` `[generic]` feature-ship steps 9-10: before merging, check `git branch --show-current` is the main branch, and list `git log <main>..<branch>`; stop when a commit carries another item's id (B-13).
+
+## 2026-09-22 — F-26 Readable entity diagrams
+Shipped in `814f79e`. Built in a worktree; the format changed during validation (change note v2: Mermaid with ELK → DBML).
+- `plugin` `[generic]` feature-refinement: a feature whose output is visual (a diagram, a generated page) is prototyped and rendered at real size in the target viewer before approval, with its size measured against the viewer's width (F-26: the approved Mermaid ELK diagram was 6016 px wide in a fixed-width Markdown preview, and the format changed to DBML during validation).
+- `plugin` `[stack: DocGen]` Entity diagrams as a DBML schema per module (`<Module>/schema.dbml`: short types, not null, keys, standard columns counted in the table note, one `Ref` per foreign key, a `TableGroup` per set of linked tables, indexes over shown columns), linked in the index with the dbdiagram VS Code extension, in place of the Mermaid `entities.md` (F-26).
