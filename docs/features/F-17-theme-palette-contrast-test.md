@@ -1,7 +1,7 @@
 ---
 feature: F-17
 epic: Foundation and identity
-status: validating
+status: done
 board: 730
 version: 1
 ---
@@ -117,7 +117,7 @@ Validated by the owner on 2026-09-23 ("validado, passou").
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-17`, built in the worktree `D:\dev\_icontrol\wt\simulab\feature-17`
+- Merge: recorded after the merge
+- Tests: 798 passed, 0 failed, suite 40 s, full build 14 s, 0 warnings (`gate.js ship`, 2026-09-23); `DocGen --check` up to date
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/getting-around.md` (light and dark mode)
