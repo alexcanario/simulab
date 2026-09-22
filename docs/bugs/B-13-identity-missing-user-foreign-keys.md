@@ -1,7 +1,7 @@
 ---
 bug: B-13
 feature: F-6
-status: building
+status: validating
 board: 745
 severity: medium
 ---
@@ -104,11 +104,16 @@ stay without a foreign key: see `## Decisions`.
   Reason: the Identity store entity types are ASP.NET Identity's own classes and no code needs to navigate.
 - D6 (Claude, 2026-09-22) — `users` and `roles` carry query filters and the dependents do not, which EF reports as
   `PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning` for required relationships. `role_permissions`
-  already has this shape. Whether the warning is logged without navigations: not verified; the build checks it, and a
-  new log warning is handled in the build (it is a runtime log, not a compiler warning), not by adding filters to the
-  dependents.
+  already has this shape. Build result (2026-09-22): `dotnet ef migrations add` and
+  `dotnet ef migrations has-pending-model-changes --verbose` build the model and print no query filter warning; no
+  filter was added to the dependents. Whether the running Api logs it: step 2 of the validation script.
 - D7 (Claude, 2026-09-22) — The regression tests go in `IdentitySchemaTests` (real PostgreSQL through
-  `Simulab.Testing.PostgresServer`), next to the existing schema checks. No new package.
+  `Simulab.Testing.PostgresServer`), next to the existing schema checks. The migration test
+  (`AddIdentityForeignKeysMigrationTests`) migrates a fresh database to `AddRoleChanges`, inserts kept and orphan rows
+  (the kept user soft deleted) and then applies the rest. No new package.
+- D8 (Claude, 2026-09-22) — No app-host check by Claude: the item wires nothing through the app host, and starting it
+  applies the migration (and its orphan clean-up) to the owner's local database, which only the owner may change
+  (`workflow.md`, `project.md`). The owner applies it in the validation script.
 
 ## Out of scope
 - Changing soft delete, or adding a hard delete of accounts or roles.
@@ -120,11 +125,18 @@ stay without a foreign key: see `## Decisions`.
 - (none)
 
 ## Validation script
-1. Start the app host (`dotnet run --project src/Hosts/Simulab.AppHost`) on your local database → the Api starts; the
-   migration `AddIdentityForeignKeys` is applied (Api log).
-2. Sign in, open your account and the roles page → everything works as before.
-3. Open `docs/architecture/Identity/entities.md` in the VS Code Markdown preview → `users` and `roles` are linked to the
-   tables of the Fix table.
+1. Close any app host that is running. In Git Bash or PowerShell 7 (same command in both), from the repository root:
+   `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard opens; `api` and `web` reach `Running`.
+   To repeat: stop with Ctrl+C and run it again (the migration is applied only once).
+2. Dashboard → `api` → Console logs → a line `Applying migration '20260922132717_AddIdentityForeignKeys'` and no
+   `warn` line mentioning "global query filter".
+3. Open the Web, sign in with your own account → the home page opens.
+4. Open your account page, switch the language to pt-PT and back to pt-BR → the page reloads in each language, no error.
+5. With your admin account, open Roles, open one role and its holders using only the keyboard (Tab / Enter) → the lists
+   show as before.
+6. Open `docs/architecture/Identity/entities.md` in the VS Code Markdown preview → `users` has lines to
+   `consent_records`, `email_verification_tokens`, `password_reset_tokens`, `user_claims`, `user_logins`, `user_roles`,
+   `user_tokens`; `roles` to `role_claims`, `user_roles` and `role_permissions`.
 
 ## Delivery
 - Branch: bug/B-13
