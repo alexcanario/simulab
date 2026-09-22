@@ -118,6 +118,6 @@ Validated by the owner on 2026-09-23 ("validado, passou").
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: `feature/F-17`, built in the worktree `D:\dev\_icontrol\wt\simulab\feature-17`
-- Merge: recorded after the merge
+- Merge: `92ac5fe` on `main` (2026-09-23, authorized by the owner)
 - Tests: 798 passed, 0 failed, suite 40 s, full build 14 s, 0 warnings (`gate.js ship`, 2026-09-23); `DocGen --check` up to date
 - Manual pages: `docs/manual/{en,pt-BR,pt-PT}/getting-around.md` (light and dark mode)
