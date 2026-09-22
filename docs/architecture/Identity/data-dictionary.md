@@ -215,34 +215,14 @@ Entity: `RoleChange`
 | tenant_id | uuid | yes |  |  |  |
 | updated_at | timestamp with time zone | yes |  |  |  |
 | updated_by | uuid | yes |  |  |  |
+| added | jsonb | yes |  |  | JSON: RoleChangeItem (Key, Name) |
+| removed | jsonb | yes |  |  | JSON: RoleChangeItem (Key, Name) |
 
 Indexes:
 - `ix_role_changes_created_at` on created_at
 - `ix_role_changes_created_by` on created_by
 - `ix_role_changes_role_ids` on role_ids
 - `ix_role_changes_target_user_id` on target_user_id
-
-## role_changes
-
-Entity: `RoleChangeItem`
-
-| Column | Type | Null | Key | Default | Notes |
-|---|---|---|---|---|---|
-| RoleChangeId | uuid | no | PK |  |  |
-| __synthesizedOrdinal | integer | no | PK |  |  |
-| Key | text | no |  |  |  |
-| Name | text | no |  |  |  |
-
-## role_changes
-
-Entity: `RoleChangeItem`
-
-| Column | Type | Null | Key | Default | Notes |
-|---|---|---|---|---|---|
-| RoleChangeId | uuid | no | PK |  |  |
-| __synthesizedOrdinal | integer | no | PK |  |  |
-| Key | text | no |  |  |  |
-| Name | text | no |  |  |  |
 
 ## role_claims
 

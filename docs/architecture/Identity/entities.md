@@ -139,18 +139,8 @@ erDiagram
         uuid tenant_id
         timestamp_with_time_zone updated_at
         uuid updated_by
-    }
-    role_changes {
-        uuid RoleChangeId PK
-        integer __synthesizedOrdinal PK
-        text Key
-        text Name
-    }
-    role_changes {
-        uuid RoleChangeId PK
-        integer __synthesizedOrdinal PK
-        text Key
-        text Name
+        jsonb added
+        jsonb removed
     }
     role_claims {
         integer id PK
@@ -235,6 +225,5 @@ erDiagram
     openiddict_applications ||--}o openiddict_tokens : "fk_openiddict_tokens_openiddict_applications_application_id"
     openiddict_authorizations ||--}o openiddict_tokens : "fk_openiddict_tokens_openiddict_authorizations_authorization_id"
     permissions ||--}o role_permissions : "fk_role_permissions_permissions_permission_name"
-    role_changes ||--}o role_changes : "fk_role_changes_role_changes_role_change_id"
     roles ||--}o role_permissions : "fk_role_permissions_roles_role_id"
 ```
