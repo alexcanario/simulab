@@ -69,7 +69,7 @@ Entity: `Job`
 | type | character varying(100) | no |  |  | max 100 |
 
 Indexes:
-- `ix_jobs_status_run_after_created_at` on status, run_after, created_at
+- `ix_jobs_active_created_at` on created_at
 
 ## openiddict_applications
 
