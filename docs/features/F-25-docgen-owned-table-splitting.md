@@ -157,7 +157,7 @@ commands are the same in Git Bash and PowerShell 7; each one only reads and can 
 
 ## Delivery
 - Branch: feature/F-25 (worktree `wt/simulab/feature-25`)
-- Merge: see the `merge(F-25)` commit on `main`
+- Merge: d08ea5b
 - Validated by the owner (2026-09-22).
 - Full check (`gate.js ship`), after bringing the branch up to date with B-13: build 22 s, 0 warnings, baseline stays
   empty; suite 703 tests, 0 failed, 51 s (ArchitectureTests 59, including the 8 new F-25 tests; 6 seen failing first:
