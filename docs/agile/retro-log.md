@@ -488,3 +488,8 @@ From 0.0.38 to 0.0.39, run with `/agile:sync` on `main`.
 - Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.38 → 0.0.39: `gate.js stop` run by hand now takes the changed files from git, a screen behind sign-in, flaky tests proven by a loop, generated output counted, ideas through `idea-capture`, and the test sweep in the retro).
 - Merged: `docs/agile/profile.md`, no conflict — the bUnit line now covers anything that follows a click and the tests written today.
 - Build files did not change upstream. No build: no build file and no rule changed; the rest of 0.0.39 (`gate.js` and the skill steps) comes from the plugin itself.
+
+## 2026-09-22 — Sync with agile@canary 0.0.40
+From 0.0.39 to 0.0.40, run with `/agile:sync` on `main`.
+- Copied (untouched copies): `workflow.md` and `workflow.pt-BR.md` (0.0.39 → 0.0.40: the sync names what only `/agile:bootstrap` installs and the project lacks, and offers to capture a feature for it).
+- Left alone: `docs/agile/profile.md` (edited here, unchanged upstream). Build files did not change upstream. `missingCapabilities` empty. No build: no build file and no rule changed.
