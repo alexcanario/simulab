@@ -1,7 +1,7 @@
 ---
 feature: F-18
 epic: Foundation and identity
-status: approved
+status: building
 board: 731
 version: 1
 ---
