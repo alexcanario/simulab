@@ -1,7 +1,7 @@
 ---
 feature: F-26
 epic: Foundation and identity
-status: refining
+status: approved
 board: 744
 version: 1
 ---
@@ -67,6 +67,7 @@ No screen and no endpoint. The output is `docs/architecture/<Module>/entities.md
 - 2026-09-22 — No new package: ELK lives in the viewer, not in the repository (Claude).
 - 2026-09-22 — F-26 is built after F-25 merges — both change `EntityModels.cs`, and F-25 is building in its worktree (Claude).
 - 2026-09-22 — The missing foreign keys between `users` and the other Identity tables, found while reading the diagram, are a separate bug (B-13), not this feature — it is data integrity, not documentation (owner).
+- 2026-09-22 — Approved ("aprovo F-26"). Built in the worktree `D:\dev\_icontrol\wt\simulab\feature-26` so the shared main checkout stays on `main` (owner).
 
 ## Out of scope
 - The module map (`modules.md`) and the data dictionary.
