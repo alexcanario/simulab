@@ -1,7 +1,7 @@
 ---
 bug: B-12
 feature: F-15
-status: approved
+status: building
 board: 742
 severity: low
 ---
