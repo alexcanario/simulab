@@ -1,7 +1,7 @@
 ---
 feature: F-16
 epic: Foundation and identity
-status: validating
+status: done
 board: 729
 version: 2
 ---
@@ -117,6 +117,17 @@ App-host check (2026-09-22, app host started and stopped by Claude): the route i
 6. Open Mailpit (the `mailpit` link on the dashboard): one email "Seus dados foram baixados — Simulab" in your account's language, with the time in UTC.
 7. Switch the language to **English** in the app bar, reopen the dialog: the card, the dialog and the button read "Your data", "Download my data", "Download".
 8. Keyboard only: Tab to **Download my data**, Enter, type the password, Enter. The file downloads as in step 4.
+
+Validated by the owner, 2026-09-22.
+
+## Delivery
+- Branch: `feature/F-16`, merged into `main` with `--no-ff` (AB#729).
+- Tests: full suite 689 passed, 0 failed, 30 s; build 11 s, 0 warnings (`gate.js ship`, 2026-09-22).
+  New: `DataExportTests` (7) and `DataExportPageTests` (6).
+- Api: `POST /api/v1/identity/data-exports`, error code `data_export.current_password_invalid`; contracts `DataExport*`, `IdentityDataResponse` and friends.
+- Web: the Your data card and `DownloadDataDialog` on `/account`, `simulabShell.downloadFile` in `shell.js`, texts in pt-BR, pt-PT and en.
+- Technical docs: `docs/api/Simulab.Api.json` and `docs/architecture/Identity/routes.md` regenerated; `DocGen --check` up to date.
+- App manual: `my-account.md` and `index.md` in the three languages.
 
 ## Change notes
 
