@@ -159,7 +159,11 @@ commands are the same in Git Bash and PowerShell 7; each one only reads and can 
 - Branch: feature/F-25 (worktree `wt/simulab/feature-25`)
 - Merge: see the `merge(F-25)` commit on `main`
 - Validated by the owner (2026-09-22).
-- Full check (`gate.js ship`): build 16 s, 0 warnings, baseline stays empty; suite 700 tests, 0 failed, 45 s
-  (ArchitectureTests 59, including the 8 new F-25 tests; 6 seen failing first: `Failed: 6, Passed: 12`).
-- `DocGen --check`: `docs/architecture is up to date` (no change to the generated docs).
+- Full check (`gate.js ship`), after bringing the branch up to date with B-13: build 22 s, 0 warnings, baseline stays
+  empty; suite 703 tests, 0 failed, 51 s (ArchitectureTests 59, including the 8 new F-25 tests; 6 seen failing first:
+  `Failed: 6, Passed: 12`).
+- `DocGen --check`: `docs/architecture is up to date`, also with the foreign keys B-13 added (no change to the generated docs).
+- Incident: the first merge (`dd1c678`) landed on `bug/B-13`, because the shared checkout had been switched to that branch
+  and the branch was not checked right before the merge. The B-13 session rebuilt its branch without it (the old one is
+  kept as `bug/B-13-with-f25`, never pushed); `main` was never touched.
 - App manual: unchanged (no user-visible behavior). `docs/infra.md`: measured times.
