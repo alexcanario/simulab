@@ -121,7 +121,7 @@ App-host check (2026-09-22, app host started and stopped by Claude): the route i
 Validated by the owner, 2026-09-22.
 
 ## Delivery
-- Branch: `feature/F-16`, merged into `main` with `--no-ff` (AB#729).
+- Branch: `feature/F-16`, merged into `main` with `--no-ff` in `7f0335d` (AB#729).
 - Tests: full suite 689 passed, 0 failed, 30 s; build 11 s, 0 warnings (`gate.js ship`, 2026-09-22).
   New: `DataExportTests` (7) and `DataExportPageTests` (6).
 - Api: `POST /api/v1/identity/data-exports`, error code `data_export.current_password_invalid`; contracts `DataExport*`, `IdentityDataResponse` and friends.
