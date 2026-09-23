@@ -37,6 +37,13 @@ public sealed class IdentityApiFactory : WebApplicationFactory<Program>
         _redisConnectionString = await RedisServer.ConnectionStringAsync();
     }
 
+    /// <summary>Points this host at a database another host already used, as a second start of the app would (F-19).</summary>
+    public async Task PrepareExistingAsync(string connectionString)
+    {
+        _connectionString = connectionString;
+        _redisConnectionString = await RedisServer.ConnectionStringAsync();
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
