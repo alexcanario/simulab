@@ -5,4 +5,13 @@ namespace Simulab.Identity.Application.GoogleSignIn;
 /// <param name="Email">The Google address.</param>
 /// <param name="EmailVerified">Whether Google marks the address as verified (<c>email_verified</c>).</param>
 /// <param name="Name">The name on the Google account, when it has one.</param>
-public sealed record GoogleIdentity(string Subject, string Email, bool EmailVerified, string? Name);
+/// <param name="HostedDomain">The Workspace domain (<c>hd</c>), when the account belongs to one.</param>
+public sealed record GoogleIdentity(string Subject, string Email, bool EmailVerified, string? Name, string? HostedDomain = null)
+{
+    /// <summary>
+    /// F-20 BR4 (change note v3): Google vouches for the address only for Gmail and for Workspace accounts. Only then
+    /// may the address reach an account that already exists.
+    /// </summary>
+    public bool IsAuthoritative =>
+        Email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrWhiteSpace(HostedDomain);
+}

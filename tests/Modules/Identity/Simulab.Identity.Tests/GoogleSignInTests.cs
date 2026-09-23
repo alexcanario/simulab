@@ -171,10 +171,10 @@ public sealed class GoogleSignInTests : IdentityApiTests
 
     // AC7.
     [Fact]
-    public async Task Grant_ActivePasswordAccountWithTheSameAddress_LinksItAndKeepsThePassword()
+    public async Task Grant_ActivePasswordAccountWithTheSameGmailAddress_LinksItAndKeepsThePassword()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Factory);
+        var email = await ActiveUser.CreateAsync(client, Factory, NewEmail());
         var subject = GoogleTokens.NewSubject();
 
         var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
@@ -189,7 +189,7 @@ public sealed class GoogleSignInTests : IdentityApiTests
     public async Task Grant_AccountLockedByWrongPasswords_SignsInAndClearsTheLockout()
     {
         var client = Client();
-        var email = await ActiveUser.CreateAsync(client, Factory);
+        var email = await ActiveUser.CreateAsync(client, Factory, NewEmail());
         for (var attempt = 0; attempt < 5; attempt++)
         {
             await TokenClient.SignInAsync(client, email, "Wrong#Password1");
@@ -206,27 +206,87 @@ public sealed class GoogleSignInTests : IdentityApiTests
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).AccessToken.Should().NotBeNull();
     }
 
-    // AC9.
+    // AC9, change note v3: the grant sends a pending account to the confirmation, which takes it over.
     [Fact]
-    public async Task Grant_PendingAccountWithTheSameAddress_ActivatesItAndRemovesThePassword()
+    public async Task Grant_PendingGmailAccount_AsksForTheConfirmationWhichTakesTheAccountOver()
     {
         var client = Client();
         var email = NewEmail();
-        await PostAsync(client, "/api/v1/identity/registrations", SignUpForm.Valid(email), HttpStatusCode.Accepted);
+        await PostAsync(client, "/api/v1/identity/registrations", SignUpForm.Valid(email) with { FullName = "Someone Else" }, HttpStatusCode.Accepted);
         var before = (await UserAsync(email))!;
         before.Status.Should().Be(AccountStatus.Pending);
         var subject = GoogleTokens.NewSubject();
+        var token = GoogleTokens.Issue(subject, email);
 
-        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
+        var grant = await GoogleTokens.GrantAsync(client, token);
 
-        grant.AccessToken.Should().NotBeNull(grant.Error);
+        grant.Error.Should().Be(IdentityErrorCodes.GoogleSignUpRequired);
+        var untouched = (await UserAsync(email))!;
+        untouched.Status.Should().Be(AccountStatus.Pending);
+        untouched.PasswordHash.Should().Be(before.PasswordHash);
+        (await GoogleKeysAsync(before.Id)).Should().BeEmpty();
+
+        await PostAsync(client, RegistrationRoute, GoogleTokens.Registration(token, fullName: "Ana Google"), HttpStatusCode.Created);
+
         var after = (await UserAsync(email))!;
+        after.Id.Should().Be(before.Id, "the pending account is taken over, never duplicated");
         after.Status.Should().Be(AccountStatus.Active);
         after.PasswordHash.Should().BeNull();
         after.SecurityStamp.Should().NotBe(before.SecurityStamp);
+        after.FullName.Should().Be("Ana Google");
+        after.IsAdultDeclared.Should().BeTrue();
         (await GoogleKeysAsync(after.Id)).Should().Equal(subject);
+        (await QueryAsync(context => context.ConsentRecords.CountAsync(record => record.UserId == after.Id))).Should().Be(2);
+        (await QueryAsync(context => context.Users.CountAsync(user => user.Email == email))).Should().Be(1);
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).Error
             .Should().Be(IdentityErrorCodes.InvalidCredentials, "whoever set that password never proved the address");
+        (await GoogleTokens.GrantAsync(client, token)).AccessToken.Should().NotBeNull();
+    }
+
+    // AC19.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Grant_AddressGoogleDoesNotVouchFor_DoesNotReachTheAccount(bool active)
+    {
+        var client = Client();
+        var email = $"ana.{Guid.CreateVersion7():N}@exemplo.com";
+        if (active)
+        {
+            await ActiveUser.CreateAsync(client, Factory, email);
+        }
+        else
+        {
+            await PostAsync(client, "/api/v1/identity/registrations", SignUpForm.Valid(email), HttpStatusCode.Accepted);
+        }
+
+        var before = (await UserAsync(email))!;
+        var token = GoogleTokens.Issue(GoogleTokens.NewSubject(), email);
+
+        var grant = await GoogleTokens.GrantAsync(client, token);
+        var registration = await PostAsync(client, RegistrationRoute, GoogleTokens.Registration(token), HttpStatusCode.Conflict);
+
+        grant.Error.Should().Be(IdentityErrorCodes.GoogleAccountExists);
+        grant.AccessToken.Should().BeNull();
+        CodeOf(registration).Should().Be(IdentityErrorCodes.GoogleAccountExists);
+        var after = (await UserAsync(email))!;
+        after.Status.Should().Be(before.Status);
+        after.PasswordHash.Should().Be(before.PasswordHash);
+        (await GoogleKeysAsync(after.Id)).Should().BeEmpty();
+    }
+
+    // AC19: a Workspace account (hd) is vouched for, whatever its domain.
+    [Fact]
+    public async Task Grant_WorkspaceAccountWithTheSameAddress_LinksIt()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Factory, $"ana.{Guid.CreateVersion7():N}@exemplo.com");
+        var subject = GoogleTokens.NewSubject();
+
+        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email, hostedDomain: "exemplo.com"));
+
+        grant.AccessToken.Should().NotBeNull(grant.Error);
+        (await GoogleKeysAsync((await UserAsync(email))!.Id)).Should().Equal(subject);
     }
 
     // AC11.
@@ -244,13 +304,13 @@ public sealed class GoogleSignInTests : IdentityApiTests
 
     // AC12.
     [Fact]
-    public async Task Register_AccountCreatedBeforeTheConfirmation_AnswersAccountExistsAndCreatesNoSecondOne()
+    public async Task Register_ActiveAccountCreatedBeforeTheConfirmation_AnswersAccountExistsAndCreatesNoSecondOne()
     {
         var client = Client();
         var email = NewEmail();
         var token = GoogleTokens.Issue(GoogleTokens.NewSubject(), email);
         (await GoogleTokens.GrantAsync(client, token)).Error.Should().Be(IdentityErrorCodes.GoogleSignUpRequired);
-        await PostAsync(client, "/api/v1/identity/registrations", SignUpForm.Valid(email), HttpStatusCode.Accepted);
+        await ActiveUser.CreateAsync(client, Factory, email);
 
         var body = await PostAsync(client, RegistrationRoute, GoogleTokens.Registration(token), HttpStatusCode.Conflict);
 

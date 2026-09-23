@@ -65,7 +65,7 @@ public sealed class GoogleIdTokenValidator(
         var verified = result.Claims.TryGetValue("email_verified", out var value)
             && (value is true || string.Equals(value?.ToString(), "true", StringComparison.OrdinalIgnoreCase));
 
-        return new GoogleIdentity(subject, email, verified, Claim(result, "name"));
+        return new GoogleIdentity(subject, email, verified, Claim(result, "name"), Claim(result, "hd"));
     }
 
     private async Task<TokenValidationResult> ValidateAgainstKeysAsync(string idToken, CancellationToken cancellationToken)

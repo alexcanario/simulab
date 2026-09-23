@@ -26,7 +26,7 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
     /// <summary>An active password account with two-factor on, and its authenticator secret.</summary>
     private async Task<(string Email, string Secret)> EnrolledAsync(HttpClient client)
     {
-        var email = await ActiveUser.CreateAsync(client, Factory);
+        var email = await ActiveUser.CreateAsync(client, Factory, $"ana.{Guid.CreateVersion7():N}@gmail.com");
         var session = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
         var enrolment = await TotpApi.StartAsync(client, session.AccessToken!);
         using (await TotpApi.ConfirmAsync(client, session.AccessToken!, TotpApi.CodeAt(enrolment.Secret, Now)))

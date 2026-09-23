@@ -63,9 +63,9 @@ public static class GoogleTokens
         string audience = ClientId,
         string issuer = Issuer,
         DateTimeOffset? expires = null,
-        bool foreignKey = false)
+        bool foreignKey = false,
+        string? hostedDomain = null)
     {
-        var now = DateTimeOffset.UtcNow;
         var claims = new Dictionary<string, object>
         {
             ["sub"] = subject,
@@ -77,7 +77,12 @@ public static class GoogleTokens
             claims["name"] = name;
         }
 
-        var end = expires ?? now.AddMinutes(30);
+        if (hostedDomain is not null)
+        {
+            claims["hd"] = hostedDomain;
+        }
+
+        var end = expires ?? DateTimeOffset.UtcNow.AddMinutes(30);
         return new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
         {
             Issuer = issuer,
