@@ -72,6 +72,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | |
 | ⏳ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | |
 | ⏳ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | |
+| ⏳ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -530,3 +531,8 @@ Shipped in `2ce7ec8`. Built in a worktree; change note v2 after the premise was 
 - `plugin` `[generic]` feature-refinement: a premise about query performance is measured before approval, with a throwaway `EXPLAIN` on the test container over a realistic row count; "not measured" does not go to approval (F-18: the review's "PostgreSQL cannot use the index for the OR" reached the build, where the old index turned out to use a BitmapOr with no sequential scan).
 - Project rule: `.claude/rules/agile/project.md` (Data): a change to the job table's model adds the Jobs migration and an empty migration in every module context that maps it (`AddJobQueue`), or EF reports pending model changes at startup (F-18: `JobsActiveIndexSnapshot` in Identity).
 - Item F-28 (board 747): the DocGen data dictionary shows a partial index without its filter; `plugin` `[stack: DocGen]` note for the plugin's DocGen template too (F-18: `ix_jobs_active_created_at on created_at`, no `WHERE status IN (0, 1)`).
+
+## 2026-09-23 — F-19 Quiet the first-migration log
+Shipped in `b7c7863`. Built in a worktree; no change note.
+- Project rule: `.claude/rules/agile/project.md` (Sessions and retro): before `git worktree remove`, `dotnet build-server shutdown` and the owner confirms Visual Studio is closed on that folder (F-19: the removal failed halfway with `Invalid argument` and left the folder held by `.vs`, the second time after F-17).
+- `plugin` `[generic]` feature-refinement: when reading a library's source does not pin a premise about its behavior, reproduce it in a scratch project outside the repository against a test container, with logging on, before asking the owner; read the source as the raw file, not a summary (F-19: the EF and Npgsql source did not show which command failed on an empty database; a scratch console showed the exact `SELECT` in minutes).
