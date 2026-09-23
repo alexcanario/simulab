@@ -1,9 +1,9 @@
 ---
 feature: F-33
 epic: Assessment catalog
-status: building
+status: validating
 board: 752
-version: 1
+version: 2
 ---
 # Catalog module and organizers back office
 
@@ -110,13 +110,45 @@ Premises of the epic that the code corrected:
 - (none)
 
 ## Change notes
-<!-- Added by /agile:change during build. Increase `version` in the header. -->
+
+### v2 — 2026-09-23
+- What: BR14 said the texts live in "a `CatalogResources` set in the Web host". They live in `SharedResources` instead, with the rest of the back office.
+- Why: `ErrorText`, which turns an API error code into the message a screen shows, reads `SharedResources` and nothing else. A separate set would have needed `ErrorText` changed to consult several sets, for no gain: every admin screen (Roles, Users, Role history, Account events) already keeps its keys there, and `ResourceParityTests` covers that set in the three languages.
+- Affected: BR14 only; AC15 is unchanged and green (the three languages and the missing-key test).
+- Re-approved: pending.
+
+### v2 — 2026-09-23 (second note)
+- What: the shared Api test host went to a **new** project, `tests/Simulab.Testing.ApiHost`, instead of into `tests/Simulab.Testing`.
+- Why: the owner chose to share rather than duplicate (question of 2026-09-23). Putting it inside `Simulab.Testing` dragged the Api host into every test project that references it: `Simulab.Web.Tests` got two top-level `Program` types (28 build errors) and `Jobs.Tests`/`Persistence.Tests` got an EF Core version-conflict warning (MSB3277), which the gate treats as new warnings.
+- Affected: no BR or AC; it is where the shared helpers live. Recorded in `docs/agile/profile.md`, as the project rules require for a new shared test project.
+- Re-approved: pending.
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+
+Start the app host from this worktree and sign in as an Admin. Claude opened `/admin/organizers` through the
+app host but could not sign in (its rules forbid entering credentials), so steps 2 to 7 are yours.
+
+Git Bash and PowerShell 7, from `D:/dev/_icontrol/wt/simulab/f-33` (same command in both):
+
+```bash
+dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-33\src\Hosts\Simulab.AppHost` and
+`Now listening on: https://localhost:17162`. The Web is at `https://localhost:7125`. Ctrl+C stops it.
+
+1. Open `https://localhost:7125/admin/organizers` signed out → the sign-in page. Sign in as an Admin and open it again → the Organizers page, empty, offering **Add**. The **Content** section with **Organizers** is in the side menu.
+2. **Add**: name `Centro Brasileiro de Pesquisa em Avaliação`, acronym `cebraspe`, kind *Exam board*, website `cebraspe.org.br` → the website field refuses it. Change it to `https://www.cebraspe.org.br` and save → the row appears, acronym shown as `CEBRASPE`.
+3. Add a second one: name `Fundacao Getulio Vargas`, acronym `FGV`, kind *University*. Then try a third with the name `FUNDAÇÃO GETÚLIO VARGAS` → refused on the name field, "Another organizer already has this name". Try acronym `fgv` with a different name → refused on the acronym field.
+4. Type `cebraspe` in the search box → only the first row. Type `avaliacao` (no accent) → the same row. Clear it and click the **Name** and **Kind** column headers → the order changes.
+5. **Edit** the FGV row: change the kind to *Certifying body* and save → the row shows the new kind. Reopen it → the fields come back filled.
+6. **Delete** the FGV row and confirm → it disappears. Add a new organizer named `Fundacao Getulio Vargas` → refused, the name is still taken.
+7. Switch the language in the header to pt-PT and then to English → the title, the columns, the kinds and the messages change; the organizers' own names do not.
+8. Keyboard only, with Tab and Enter: reach **Add**, fill the dialog, save, then reach the row's **Edit** and **Delete**. Esc on a dialog with unsaved changes asks before closing.
+9. Sign in as a Student (or remove `catalog.manage` from Admin on `/admin/roles` first) and open `/admin/organizers` → Not Found, and no **Content** section in the menu.
 
 ## Delivery
 - Branch: feature/F-33
 - Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Tests: 969 passed, 0 failed, full suite; Catalog 51 (31 s), Identity 310 (47 s), Web 457 (4 s), architecture 90 (0.9 s)
+- Manual pages: `docs/manual/en/organizers.md`, `docs/manual/pt-BR/organizers.md`, `docs/manual/pt-PT/organizers.md`
