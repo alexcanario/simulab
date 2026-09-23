@@ -62,6 +62,12 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>What POST /registrations answers. Null means 202.</summary>
         public (HttpStatusCode Status, string Code)? RegisterFailure { get; set; }
 
+        /// <summary>F-20: what POST /google-registrations answers. Null means 201.</summary>
+        public (HttpStatusCode Status, string Code)? GoogleRegisterFailure { get; set; }
+
+        /// <summary>F-20: the bodies POST /google-registrations received, in order.</summary>
+        public List<GoogleRegistrationRequest> GoogleRegistrations { get; } = [];
+
         public (HttpStatusCode Status, string Code)? VerifyFailure { get; set; }
 
         public VerificationOutcome VerifyOutcome { get; set; } = VerificationOutcome.Verified;
@@ -145,6 +151,13 @@ public abstract class IdentityPageTestContext : KitTestContext
             if (path.EndsWith("/legal-documents/privacy", StringComparison.Ordinal))
             {
                 return Json(Privacy);
+            }
+
+            // F-20.
+            if (path.EndsWith("/google-registrations", StringComparison.Ordinal))
+            {
+                GoogleRegistrations.Add((await request.Content!.ReadFromJsonAsync<GoogleRegistrationRequest>(AppJson.Options, cancellationToken))!);
+                return GoogleRegisterFailure is { } googleFailure ? Problem(googleFailure) : new HttpResponseMessage(HttpStatusCode.Created);
             }
 
             if (path.EndsWith("/registrations", StringComparison.Ordinal))

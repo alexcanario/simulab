@@ -217,6 +217,24 @@ public sealed class SecurityPageTests : IdentityPageTestContext
         page.Markup.Should().Contain("The current password is not correct.");
     }
 
+    // F-20 AC16: turning two-factor off asks for the password too.
+    [Fact]
+    public void Disable_AccountWithoutPassword_ShowsHowToCreateOne()
+    {
+        Api.TotpStatus = new TotpStatusResponse(true, null, 10);
+        Api.TotpFailure = (HttpStatusCode.UnprocessableEntity, IdentityErrorCodes.PasswordNotSet);
+        var page = RenderSignedIn();
+        page.Find("button.app-security-disable").Click();
+        page.Find("#security-disable-password").Change("anything");
+        page.Find("#security-disable-code").Change("123456");
+
+        page.Find("button.app-security-disable-confirm").Click();
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Your account was created with Google and has no password yet."));
+        page.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
+        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+    }
+
     [Fact]
     public void Locked_ShowsTheTimeLeftAndDisablesTheAction()
     {
