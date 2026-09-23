@@ -5,7 +5,7 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 | Order | Epic | Slug | Board id | Status |
 |---|---|---|---|---|
 | 1 | Foundation and identity | `foundation-and-identity` | 690 | agreed (F-1 to F-11) |
-| 2 | Assessment catalog | `assessment-catalog` | 691 | idea |
+| 2 | Assessment catalog | `assessment-catalog` | 691 | draft (F-33 to F-37) |
 | 3 | Subject taxonomy | `subject-taxonomy` | 692 | idea |
 | 4 | Question bank | `question-bank` | 693 | idea |
 | 5 | Question Bank Simulator | `question-bank-simulator` | 694 | idea |
