@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
@@ -15,6 +16,7 @@ public sealed class TotpAccountHandler(
     ITotpSecretProtector protector,
     RecoveryCodes recoveryCodes,
     SecondFactor secondFactor,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
     public async Task<TotpStatusResponse?> GetStatusAsync(Guid userId)
@@ -83,7 +85,11 @@ public sealed class TotpAccountHandler(
         user.EnableTotp(timeProvider.GetUtcNow());
         await userManager.UpdateAsync(user);
 
-        return Result.Success(new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user)));
+        var codes = new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user));
+
+        // F-21 BR1: two-factor is on from here.
+        await accountEvents.RecordAsync(user.Id, AccountEventType.TwoFactorEnabled);
+        return Result.Success(codes);
     }
 
     /// <summary>BR7: a valid code or recovery code, then ten new codes; the previous ones stop working at once.</summary>
@@ -96,9 +102,16 @@ public sealed class TotpAccountHandler(
         }
 
         var verified = await secondFactor.VerifyAsync(user.Value!, code);
-        return verified.IsFailure
-            ? Result.Failure<RecoveryCodesResponse>(verified.Error!)
-            : Result.Success(new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user.Value!)));
+        if (verified.IsFailure)
+        {
+            return Result.Failure<RecoveryCodesResponse>(verified.Error!);
+        }
+
+        var codes = new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user.Value!));
+
+        // F-21 BR1: the previous codes stopped working here.
+        await accountEvents.RecordAsync(user.Value!.Id, AccountEventType.RecoveryCodesRegenerated);
+        return Result.Success(codes);
     }
 
     /// <summary>
@@ -129,9 +142,14 @@ public sealed class TotpAccountHandler(
         if (string.IsNullOrEmpty(currentPassword) || !await userManager.CheckPasswordAsync(user, currentPassword))
         {
             await userManager.AccessFailedAsync(user);
-            return await userManager.IsLockedOutAsync(user)
-                ? await secondFactor.LockedAsync(user)
-                : Result.Failure(new Error(IdentityErrorCodes.TotpCurrentPasswordInvalid, ErrorKind.BusinessRule));
+            if (!await userManager.IsLockedOutAsync(user))
+            {
+                return Result.Failure(new Error(IdentityErrorCodes.TotpCurrentPasswordInvalid, ErrorKind.BusinessRule));
+            }
+
+            // F-21 BR5: the refused attempt is not an event of its own, but the lockout it just caused is.
+            await accountEvents.AccountLockedAsync(user.Id);
+            return await secondFactor.LockedAsync(user);
         }
 
         var verified = await secondFactor.VerifyAsync(user, code);
@@ -143,6 +161,9 @@ public sealed class TotpAccountHandler(
         user.DisableTotp();
         await userManager.UpdateAsync(user);
         await recoveryCodes.RemoveAsync(user);
+
+        // F-21 BR1: the account lost its second factor; the most worth noticing of the account events.
+        await accountEvents.RecordAsync(user.Id, AccountEventType.TwoFactorDisabled);
         return Result.Success();
     }
 

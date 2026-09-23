@@ -38,7 +38,38 @@ public static class RoleAdministrationEndpoints
         roleChanges.MapGet(string.Empty, ListRoleChangesAsync).WithName("ListRoleChanges");
         roleChanges.MapGet("/filters", RoleChangeFiltersAsync).WithName("RoleChangeFilters");
 
+        // F-21, BR11: the account event trail is read with the same permission.
+        var accountEvents = group.MapGroup("/account-events").RequireAuthorization(policy);
+        accountEvents.MapGet(string.Empty, ListAccountEventsAsync).WithName("ListAccountEvents");
+
         return group;
+    }
+
+    /// <summary>F-21, UC2: one page of the account event trail, newest first.</summary>
+    private static async Task<IResult> ListAccountEventsAsync(
+        IAccountEventQueries queries,
+        CancellationToken cancellationToken,
+        int page = 0,
+        int pageSize = 25,
+        Guid? user = null,
+        string? @event = null,
+        string? ip = null,
+        string? search = null,
+        int? days = null,
+        bool ascending = false)
+    {
+        if (days is { } value && !AccountEventListQuery.Periods.Contains(value))
+        {
+            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.AccountEventPeriodInvalid, ErrorKind.Validation));
+        }
+
+        if (!string.IsNullOrWhiteSpace(@event) && !AccountEventTypes.All.Contains(@event))
+        {
+            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.AccountEventTypeInvalid, ErrorKind.Validation));
+        }
+
+        var query = new AccountEventListQuery(page, pageSize, user, @event, ip, search, days, ascending);
+        return Results.Ok(await queries.ListAsync(query, cancellationToken));
     }
 
     private static async Task<IResult> ListRoleChangesAsync(

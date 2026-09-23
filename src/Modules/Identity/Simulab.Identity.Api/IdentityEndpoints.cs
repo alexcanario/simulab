@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
+using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Application.Passwords;
@@ -16,6 +17,7 @@ using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Application.Verification;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Serialization;
 
@@ -158,13 +160,23 @@ public static class IdentityEndpoints
         Guid.TryParse(user.FindFirstValue(OpenIddictConstants.Claims.Subject), out userId);
 
     /// <summary>BR6: drops the caller's own session and revokes its access token, regardless of whether either call finds anything to act on.</summary>
-    private static async Task<IResult> SignOutAsync(ClaimsPrincipal user, IRefreshSessionStore sessions, CancellationToken cancellationToken)
+    private static async Task<IResult> SignOutAsync(
+        ClaimsPrincipal user,
+        IRefreshSessionStore sessions,
+        IAccountEventLog accountEvents,
+        CancellationToken cancellationToken)
     {
         var sessionJti = user.FindFirstValue(SessionClaims.SessionJti);
         if (!string.IsNullOrEmpty(sessionJti))
         {
             await sessions.RemoveAsync(sessionJti, cancellationToken);
             await sessions.RevokeAccessTokenAsync(sessionJti, TokenLifetimes.AccessToken, cancellationToken);
+        }
+
+        // F-21 BR1: after the session is really gone. An anonymous caller never reaches here (RequireAuthorization).
+        if (TryGetUserId(user, out var userId))
+        {
+            await accountEvents.RecordAsync(userId, AccountEventType.SignedOut, cancellationToken);
         }
 
         return Results.NoContent();
