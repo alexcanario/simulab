@@ -1,7 +1,7 @@
 ---
 feature: F-33
 epic: Assessment catalog
-status: approved
+status: building
 board: 752
 version: 1
 ---

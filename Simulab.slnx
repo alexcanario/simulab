@@ -19,6 +19,13 @@
     <Project Path="src/Hosts/Simulab.Web/Simulab.Web.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Catalog/">
+    <Project Path="src/Modules/Catalog/Simulab.Catalog.Api/Simulab.Catalog.Api.csproj" />
+    <Project Path="src/Modules/Catalog/Simulab.Catalog.Application/Simulab.Catalog.Application.csproj" />
+    <Project Path="src/Modules/Catalog/Simulab.Catalog.Contracts/Simulab.Catalog.Contracts.csproj" />
+    <Project Path="src/Modules/Catalog/Simulab.Catalog.Domain/Simulab.Catalog.Domain.csproj" />
+    <Project Path="src/Modules/Catalog/Simulab.Catalog.Infrastructure/Simulab.Catalog.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Simulab.Identity.Api/Simulab.Identity.Api.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Application/Simulab.Identity.Application.csproj" />
@@ -42,6 +49,9 @@
     <Project Path="tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Catalog/">
+    <Project Path="tests/Modules/Catalog/Simulab.Catalog.Tests/Simulab.Catalog.Tests.csproj" />
+  </Folder>
   <Folder Name="/tests/Modules/Identity/">
     <Project Path="tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />
   </Folder>
