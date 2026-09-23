@@ -73,6 +73,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | |
 | ⏳ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | |
 | ⏳ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | |
+| ⏳ | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | |
+| ⏳ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -536,3 +538,9 @@ Shipped in `2ce7ec8`. Built in a worktree; change note v2 after the premise was 
 Shipped in `b7c7863`. Built in a worktree; no change note.
 - Project rule: `.claude/rules/agile/project.md` (Sessions and retro): before `git worktree remove`, `dotnet build-server shutdown` and the owner confirms Visual Studio is closed on that folder (F-19: the removal failed halfway with `Invalid argument` and left the folder held by `.vs`, the second time after F-17).
 - `plugin` `[generic]` feature-refinement: when reading a library's source does not pin a premise about its behavior, reproduce it in a scratch project outside the repository against a test container, with logging on, before asking the owner; read the source as the raw file, not a summary (F-19: the EF and Npgsql source did not show which command failed on an empty database; a scratch console showed the exact `SELECT` in minutes).
+
+## 2026-09-23 — F-20 Google sign-in
+Shipped in `644f24b`. Built in a worktree; change notes v2 (build start) and v3 (after the independent review).
+- `plugin` `[generic]` feature-refinement: an item that touches authentication or account linking gets the independent review (`change-review`) on the refined item file before approval, not only on the code (F-20: the lockout/two-factor interplay and the rule for when Google's `email_verified` may link by email reached the build and became change notes v2 and v3).
+- `plugin` `[stack: Blazor Server]` profile: a page that reads a single-use ticket from its query peeks it in `OnInitialized` (prerender runs it twice) and spends it only when the action succeeds; a ticket carried in a URL is also bound to the browser with an HttpOnly cookie (F-20: the code-step and confirmation tickets; review finding 1).
+- Nothing: Visual Studio recreated the merged `feature/F-19` and put it in the F-20 worktree; `git.md` already warns that an IDE can switch the branch behind the session, and the branch check before each commit held.
