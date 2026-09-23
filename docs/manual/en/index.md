@@ -1,7 +1,7 @@
 ---
 page: index
 locale: en
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33]
 updated: 2026-09-23
 ---
 # Simulab
@@ -20,6 +20,7 @@ Pages are added here as each feature is released.
 
 | Area | What it is for | Status |
 |---|---|---|
+| Assessment catalog | Register the organizers, exams and editions everything else hangs on (Admins) | Organizers available ([Organizers](organizers.md)); exams and editions coming soon |
 | Exam Simulator | Take a real past exam with the same questions, order, time limit and scoring rules | Coming soon |
 | Question Bank Simulator | Build your own practice by subject, organizer, year or difficulty | Coming soon |
 | Performance | See your results over time, by subject and topic, and how far you are from the cut-off score | Coming soon |
@@ -43,3 +44,4 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Users](users.md): find an account and change its roles (Admins)
 - [Role history](role-history.md): who changed which role or whose roles, and when (Admins)
 - [Account events](account-events.md): sign-ins, failed sign-ins, lockouts and account changes (Admins)
+- [Organizers](organizers.md): the exam boards, certifying bodies and universities of the catalog (Admins)

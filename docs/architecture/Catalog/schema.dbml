@@ -1,0 +1,16 @@
+// Catalog — schema. Generated from the EF model. Do not edit.
+// To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
+// Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
+
+Table organizers {
+  id uuid [pk]
+  acronym varchar(20) [not null]
+  description varchar(500)
+  kind varchar(40) [not null]
+  name varchar(150) [not null]
+  normalized_acronym varchar(20) [not null]
+  normalized_name varchar(150) [not null]
+  website varchar(300)
+
+  Note: 'Entity: Organizer - standard columns: 8 (see data dictionary)'
+}

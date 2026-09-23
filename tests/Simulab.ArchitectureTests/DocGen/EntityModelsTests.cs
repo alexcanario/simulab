@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Simulab.ArchitectureTests.DocGen.SharedTables;
 using Simulab.DocGen;
+using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Jobs.Persistence;
 
@@ -15,7 +16,8 @@ public class EntityModelsTests
         .. EntityModels.Load(
         [
             .. typeof(IdentityModuleDbContext).Assembly.GetTypes(),
-            .. typeof(JobsDbContext).Assembly.GetTypes()
+            .. typeof(JobsDbContext).Assembly.GetTypes(),
+            .. typeof(CatalogModuleDbContext).Assembly.GetTypes()
         ])
     ];
 
@@ -28,7 +30,7 @@ public class EntityModelsTests
 
     [Fact]
     public void Load_NamesTheRealModulesIdentityAndJobs() =>
-        RealModels().Select(m => m.Module).Should().Equal("Identity", "Jobs");
+        RealModels().Select(m => m.Module).Should().Equal("Catalog", "Identity", "Jobs");
 
     [Fact]
     public void RenderDictionary_ListsEveryIdentityTableInSnakeCase()
