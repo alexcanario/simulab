@@ -1,4 +1,4 @@
-namespace Simulab.Catalog.Domain.Entities;
+namespace Simulab.Catalog.Contracts;
 
 /// <summary>What an organizer is (F-33, BR7). The three kinds the brief names; it travels as a string.</summary>
 public enum OrganizerKind

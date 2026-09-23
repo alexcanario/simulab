@@ -8,6 +8,8 @@
     <ProjectReference Include="..\Simulab.Catalog.Application\Simulab.Catalog.Application.csproj" />
     <!-- Infrastructure is referenced for composition only (AddCatalogModule), per the profile. -->
     <ProjectReference Include="..\Simulab.Catalog.Infrastructure\Simulab.Catalog.Infrastructure.csproj" />
+    <!-- Contracts only, for the "Permission:" policy name every module's endpoints are guarded by (F-6, BR3). -->
+    <ProjectReference Include="..\..\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
