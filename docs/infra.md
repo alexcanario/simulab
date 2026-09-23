@@ -57,7 +57,9 @@ Names only. None exists yet; each arrives with the feature that needs it.
 ## Google sign-in locally (F-20)
 Off unless the app host finds an OAuth client in its user secrets. To turn it on:
 1. In the Google Cloud console, open *APIs & Services → OAuth consent screen*: user type *External*, publishing status *Testing*, and add the Google accounts that will sign in as *Test users* (only they can, while the app is in testing).
-2. *APIs & Services → Credentials → Create credentials → OAuth client ID*: type *Web application*; *Authorized redirect URIs*: `https://localhost:7125/signin-google` (the Web's https port from its `launchSettings.json`; the path is `GoogleSignInSettings.CallbackPath`). No JavaScript origin is needed.
+2. *APIs & Services → Credentials → Create credentials → OAuth client ID*: type *Web application*. Under *Authorized redirect URIs*, paste exactly `https://localhost:7125/signin-google` — no trailing slash; Google compares it letter by letter and answers `redirect_uri_mismatch` otherwise. Leave *Authorized JavaScript origins* empty.
+   - `https://localhost:7125` is the Web's local address (the https port fixed in `src/Hosts/Simulab.Web/Properties/launchSettings.json`).
+   - `/signin-google` is where Google sends the visitor back after the sign-in (`GoogleSignInSettings.CallbackPath` in the code).
 3. Keep the client id and secret in the app host's user secrets (never in a file of the repository):
    ```
    dotnet user-secrets set "Google:ClientId" "<client id>" --project src/Hosts/Simulab.AppHost
