@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Account;
+using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -86,6 +87,12 @@ public static class IdentityEndpoints
         if (endpoints.ServiceProvider.GetRequiredService<IOptions<TotpOptions>>().Value.TotpEnabled)
         {
             group.MapTotpEndpoints();
+        }
+
+        // F-20 BR1: the Google confirmation route exists only while the feature is on.
+        if (endpoints.ServiceProvider.GetRequiredService<IOptions<GoogleSignInOptions>>().Value.GoogleSignInEnabled)
+        {
+            group.MapGoogleSignInEndpoints();
         }
 
         return endpoints;

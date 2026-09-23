@@ -25,7 +25,7 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e tópico, e a distância até à nota mínima | Brevemente |
 | Recomendações de estudo | Ver que tópicos estudar a seguir | Brevemente |
 | Coach de IA | Perguntar porque é que uma resposta está certa ou errada e receber um plano de estudo para a sua prova-alvo | Brevemente |
-| Conta | Registar-se, iniciar sessão, mudar o idioma e gerir os seus dados | Registo, início de sessão, palavra-passe e A minha conta disponíveis ([Criar uma conta](create-account.md), [Iniciar e terminar sessão](sign-in-and-sign-out.md), [Palavra-passe](password.md), [A minha conta](my-account.md), [Eliminar a sua conta](erase-account.md), [Verificação em dois passos](two-factor.md) onde estiver disponível); o resto brevemente |
+| Conta | Registar-se, iniciar sessão, mudar o idioma e gerir os seus dados | Registo, início de sessão, palavra-passe e A minha conta disponíveis ([Criar uma conta](create-account.md), [Iniciar e terminar sessão](sign-in-and-sign-out.md), [Palavra-passe](password.md), [A minha conta](my-account.md), [Eliminar a sua conta](erase-account.md), [Verificação em dois passos](two-factor.md) e [Iniciar sessão com o Google](google-sign-in.md) onde estiverem disponíveis); o resto brevemente |
 
 ## Idiomas
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Escolhe o idioma no seu perfil. As questões das provas são sempre apresentadas no idioma original.
@@ -38,6 +38,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [A minha conta](my-account.md): nome de apresentação, idioma preferido e transferir os seus dados
 - [Eliminar a sua conta](erase-account.md): eliminar a conta e o que fica guardado
 - [Verificação em dois passos](two-factor.md): um código do telemóvel depois da palavra-passe, e códigos de recuperação
+- [Iniciar sessão com o Google](google-sign-in.md): criar uma conta ou iniciar sessão com a sua conta Google
 - [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um perfil
 - [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis (Administradores)
 - [Histórico de perfis](role-history.md): quem alterou que perfil ou os perfis de quem, e quando (Administradores)

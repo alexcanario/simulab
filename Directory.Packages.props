@@ -78,6 +78,12 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
   </ItemGroup>
 
+  <!-- Google sign-in (F-20): the Web host's round trip, and the Api's own check of the ID token (BR2). -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.23.0" />
+  </ItemGroup>
+
   <!-- Two-factor sign-in (F-11): RFC 6238 codes and the enrolment QR code, both MIT -->
   <ItemGroup>
     <PackageVersion Include="Otp.NET" Version="1.4.1" />

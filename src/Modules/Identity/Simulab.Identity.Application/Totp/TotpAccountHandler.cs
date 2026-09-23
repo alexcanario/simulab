@@ -114,6 +114,13 @@ public sealed class TotpAccountHandler(
         }
 
         var user = found.Value!;
+
+        // F-20 BR11: an account created with Google has no current password to prove; it sets one through the reset.
+        if (!await userManager.HasPasswordAsync(user))
+        {
+            return Result.Failure(new Error(IdentityErrorCodes.PasswordNotSet, ErrorKind.BusinessRule));
+        }
+
         if (await userManager.IsLockedOutAsync(user))
         {
             return await secondFactor.LockedAsync(user);

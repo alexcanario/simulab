@@ -18,7 +18,7 @@ public sealed class RegisterUserHandler(
     IUserDirectory userDirectory,
     IEmailVerificationTokenStore tokenStore,
     IConsentRecordStore consentStore,
-    ILegalDocumentProvider legalDocuments,
+    RegistrationTerms terms,
     IVerificationMailer mailer,
     TimeProvider timeProvider,
     ILogger<RegisterUserHandler> logger)
@@ -37,30 +37,18 @@ public sealed class RegisterUserHandler(
             return Failure(IdentityErrorCodes.EmailInvalid, ErrorKind.Validation);
         }
 
-        // B-7 BR1, BR3: refused before the account lookup below, so the answer is the same for a registered address.
-        var fullName = string.IsNullOrWhiteSpace(command.FullName) ? null : command.FullName.Trim();
-        if (fullName?.Length > AccountLimits.FullNameMaxLength)
+        // B-7 BR1, BR3 and BR1, BR5: the name, the three acceptances and the versions are checked before the
+        // account lookup below and before anything is written. The endpoint validates them too; this is the
+        // barrier for any other caller of the handler.
+        var termsCheck = await terms.CheckAsync(
+            command.FullName, command.DeclaresAdult, command.AcceptsTerms, command.AcceptsPrivacy,
+            command.TermsVersion, command.PrivacyVersion, command.Locale, cancellationToken);
+        if (termsCheck.IsFailure)
         {
-            return Failure(IdentityErrorCodes.RegistrationFullNameTooLong, ErrorKind.Validation);
+            return termsCheck;
         }
 
-        // BR1: the three acceptances are checked before anything is written. The endpoint validates them
-        // too; this is the barrier for any other caller of the handler.
-        if (!command.DeclaresAdult)
-        {
-            return Failure(IdentityErrorCodes.AgeDeclarationRequired, ErrorKind.Validation);
-        }
-
-        if (!command.AcceptsTerms || !command.AcceptsPrivacy)
-        {
-            return Failure(IdentityErrorCodes.ConsentRequired, ErrorKind.Validation);
-        }
-
-        var versionCheck = await CheckDocumentVersionsAsync(command, cancellationToken);
-        if (versionCheck.IsFailure)
-        {
-            return versionCheck;
-        }
+        var fullName = RegistrationTerms.NormalizeFullName(command.FullName);
 
         var existing = await userDirectory.FindByEmailIgnoringTenantAsync(command.Email, cancellationToken);
         if (existing is not null)
@@ -119,24 +107,6 @@ public sealed class RegisterUserHandler(
             cancellationToken);
 
         return Result.Success();
-    }
-
-    /// <summary>
-    /// BR5: the form carries the versions the page showed. A document the server cannot read at all is a
-    /// server-side problem, not the visitor's, so the check is skipped rather than blocking sign-up.
-    /// </summary>
-    private async Task<Result> CheckDocumentVersionsAsync(RegisterUserCommand command, CancellationToken cancellationToken)
-    {
-        var terms = await legalDocuments.GetCurrentAsync(LegalTopic.Terms, command.Locale, cancellationToken);
-        var privacy = await legalDocuments.GetCurrentAsync(LegalTopic.Privacy, command.Locale, cancellationToken);
-
-        var outdated =
-            (terms is not null && !string.Equals(terms.Version, command.TermsVersion, StringComparison.Ordinal))
-            || (privacy is not null && !string.Equals(privacy.Version, command.PrivacyVersion, StringComparison.Ordinal));
-
-        return outdated
-            ? Failure(IdentityErrorCodes.TermsVersionOutdated, ErrorKind.Conflict)
-            : Result.Success();
     }
 
     /// <summary>

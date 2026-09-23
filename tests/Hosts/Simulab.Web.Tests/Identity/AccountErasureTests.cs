@@ -102,6 +102,21 @@ public sealed class AccountErasureTests : IdentityPageTestContext
         dialogs.FindAll("#erase-account-password").Should().ContainSingle();
     }
 
+    // F-20 AC16.
+    [Fact]
+    public void Dialog_AccountWithoutPassword_ShowsHowToCreateOne()
+    {
+        Api.EraseFailure = (HttpStatusCode.UnprocessableEntity, IdentityErrorCodes.PasswordNotSet);
+        var (_, dialogs) = OpenDialog();
+
+        Type(dialogs, "anything");
+        Confirm(dialogs);
+
+        dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Your account was created with Google and has no password yet."));
+        dialogs.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
+        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+    }
+
     [Fact]
     public void Dialog_LockedOut_ShowsTheWait()
     {

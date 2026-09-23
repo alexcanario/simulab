@@ -63,6 +63,7 @@
   <data name="Gallery.Section.Confirm" xml:space="preserve"><value>Diálogo de confirmação</value></data>
   <data name="Gallery.Section.Form" xml:space="preserve"><value>Ações de formulário</value></data>
   <data name="Gallery.Section.Errors" xml:space="preserve"><value>Mensagens de erro</value></data>
+  <data name="Gallery.Section.SignIn" xml:space="preserve"><value>Outras formas de entrar</value></data>
   <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Notificação rápida (snackbar)</value></data>
   <data name="Gallery.Section.Icons" xml:space="preserve"><value>Ícones</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Fonte de dados</value></data>
@@ -231,4 +232,10 @@
   <data name="totp.already_enabled" xml:space="preserve"><value>A verificação em duas etapas já está ativa.</value></data>
   <data name="totp.not_enabled" xml:space="preserve"><value>A verificação em duas etapas não está ativa.</value></data>
   <data name="totp.current_password_invalid" xml:space="preserve"><value>A senha atual não está correta.</value></data>
+  <data name="identity.password_not_set" xml:space="preserve"><value>Sua conta foi criada com o Google e ainda não tem senha. Crie uma para confirmar esta ação.</value></data>
+  <data name="google_sign_in.invalid_token" xml:space="preserve"><value>Não foi possível confirmar a resposta do Google. Tente novamente.</value></data>
+  <data name="google_sign_in.email_not_verified" xml:space="preserve"><value>O Google ainda não verificou este endereço de e-mail. Verifique-o no Google e tente novamente.</value></data>
+  <data name="google_sign_in.sign_up_required" xml:space="preserve"><value>Ainda não existe uma conta para esta conta Google.</value></data>
+  <data name="google_sign_in.account_exists" xml:space="preserve"><value>Já existe uma conta com este e-mail. Entre nela.</value></data>
+  <data name="google_sign_in.expired" xml:space="preserve"><value>A entrada com o Google demorou demais ou foi interrompida. Comece de novo.</value></data>
 </root>

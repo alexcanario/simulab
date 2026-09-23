@@ -1,0 +1,245 @@
+@page "/sign-up/google"
+@layout AuthLayout
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services.Auth
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject AuthClient Auth
+@inject SignInHandOff HandOff
+@inject GoogleSignUpTickets Tickets
+@inject GoogleSignInSettings Google
+@inject ErrorText Errors
+@inject VisitorContext Visitor
+@inject NavigationManager Navigation
+
+<PageTitle>@I["GoogleSignUp.Title"] — @L["App.Name"]</PageTitle>
+
+<div class="app-auth-card">
+    <h1 class="app-auth-title">@I["GoogleSignUp.Title"]</h1>
+    <p class="app-auth-subtitle">@I["GoogleSignUp.Subtitle", _email]</p>
+
+    @if (_accountExists)
+    {
+        @* BR9: an account appeared before the confirmation; signing in with Google again reaches it. *@
+        <AppAlert Severity="Severity.Info"
+                  Text="@L[IdentityErrorCodes.GoogleAccountExists]"
+                  ActionText="@I["Auth.ContinueWithGoogle"]"
+                  OnAction="StartOver" />
+    }
+    else if (_serverError is not null)
+    {
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(_serverError)" />
+    }
+    else if (_documentsFailed)
+    {
+        <AppAlert Severity="Severity.Error"
+                  Text="@I["SignUp.LegalUnavailable"]"
+                  ActionText="@L["Common.TryAgain"]"
+                  OnAction="LoadDocumentsAsync" />
+    }
+
+    <AppTextField TValue="string"
+                  Id="google-sign-up-full-name"
+                  Label="@I["SignUp.FullName.Label"]"
+                  Autocomplete="name"
+                  MaxLength="AccountLimits.FullNameMaxLength"
+                  Disabled="Busy"
+                  Value="@_fullName"
+                  ValueChanged="@(value => _fullName = value)" />
+
+    <div class="app-sign-up-consents">
+        <AppCheckbox Id="google-sign-up-adult" Required="true" Disabled="Busy" Error="@_adultError"
+                     Value="@_declaresAdult" ValueChanged="@(value => { _declaresAdult = value; _adultError = null; })">
+            @I["SignUp.Adult.Label"]
+        </AppCheckbox>
+
+        <AppCheckbox Id="google-sign-up-terms" Required="true" Disabled="Busy" Error="@_consentError"
+                     Value="@_acceptsTerms" ValueChanged="@(value => { _acceptsTerms = value; _consentError = null; })">
+            <LegalConsentLabel LabelKey="SignUp.Terms.Label" DocumentKey="Auth.Legal.Terms" Href="/terms" />
+        </AppCheckbox>
+
+        <AppCheckbox Id="google-sign-up-privacy" Required="true" Disabled="Busy"
+                     Value="@_acceptsPrivacy" ValueChanged="@(value => { _acceptsPrivacy = value; _consentError = null; })">
+            <LegalConsentLabel LabelKey="SignUp.Privacy.Label" DocumentKey="Auth.Legal.Privacy" Href="/privacy" />
+        </AppCheckbox>
+    </div>
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               FullWidth="true"
+               Size="Size.Large"
+               Disabled="@(Busy || _documentsFailed || _accountExists)"
+               OnClick="SubmitAsync"
+               Class="app-google-sign-up-submit">
+        @if (_submitting)
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            <span role="status">@I["SignUp.Submitting"]</span>
+        }
+        else
+        {
+            @I["GoogleSignUp.Submit"]
+        }
+    </MudButton>
+
+    <MudButton Variant="Variant.Text" FullWidth="true" Disabled="_submitting" OnClick="Cancel" Class="app-google-sign-up-cancel mt-2">
+        @L["Common.Cancel"]
+    </MudButton>
+</div>
+
+@code {
+    /// <summary>The waiting-confirmation ticket the Web host's Google step issued (BR8). Only its id travels here.</summary>
+    [SupplyParameterFromQuery] public string? Ticket { get; set; }
+
+    private string _email = string.Empty;
+    private string? _fullName;
+    private bool _declaresAdult;
+    private bool _acceptsTerms;
+    private bool _acceptsPrivacy;
+
+    private string? _adultError;
+    private string? _consentError;
+    private string? _serverError;
+    private bool _accountExists;
+
+    private LegalDocumentResponse? _terms;
+    private LegalDocumentResponse? _privacy;
+    private bool _loadingDocuments = true;
+    private bool _documentsFailed;
+    private bool _submitting;
+
+    private bool Busy => _loadingDocuments || _submitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // BR1: off, the page does not exist.
+        if (!Google.Enabled)
+        {
+            Navigation.NavigateTo("/not-found");
+            return;
+        }
+
+        // Read, not spent: the page initializes twice (prerender, then the circuit). BR8: expired, or held by another
+        // browser → back to sign-in, the same answer either way.
+        if (!TryHeldTicket(out var ticket))
+        {
+            Navigation.NavigateTo(ExpiredPath, forceLoad: true);
+            return;
+        }
+
+        _email = ticket.Email;
+        _fullName = ticket.Name;
+        await LoadDocumentsAsync();
+    }
+
+    private static string ExpiredPath => $"/sign-in?error={IdentityErrorCodes.GoogleSignInExpired}";
+
+    /// <summary>The waiting ticket, only when it has not expired and this browser holds its secret (BR8).</summary>
+    private bool TryHeldTicket(out GoogleSignUpTicket ticket) =>
+        Tickets.TryPeek(Ticket, out ticket) && ticket.IsHeldBy(Visitor.GoogleSignUpBinding);
+
+    /// <summary>The versions shown are the versions accepted, as on the password sign-up (F-4 BR5).</summary>
+    private async Task LoadDocumentsAsync()
+    {
+        _loadingDocuments = true;
+        _documentsFailed = false;
+
+        var terms = await Api.GetLegalDocumentAsync(LegalTopic.Terms);
+        var privacy = await Api.GetLegalDocumentAsync(LegalTopic.Privacy);
+
+        _terms = terms.Value;
+        _privacy = privacy.Value;
+        _documentsFailed = _terms is null || _privacy is null;
+        _loadingDocuments = false;
+    }
+
+    private async Task SubmitAsync()
+    {
+        _serverError = null;
+        if (!Validate())
+        {
+            return;
+        }
+
+        if (!TryHeldTicket(out var ticket))
+        {
+            Navigation.NavigateTo(ExpiredPath, forceLoad: true);
+            return;
+        }
+
+        _submitting = true;
+        var registered = await Api.RegisterWithGoogleAsync(new GoogleRegistrationRequest(
+            ticket.IdToken,
+            _declaresAdult,
+            _acceptsTerms,
+            _acceptsPrivacy,
+            _terms!.Version,
+            _privacy!.Version,
+            string.IsNullOrWhiteSpace(_fullName) ? null : _fullName.Trim()));
+
+        if (!registered.IsSuccess)
+        {
+            _submitting = false;
+            await ShowFailureAsync(registered.ErrorCode!);
+            return;
+        }
+
+        // The account exists now: the ticket is spent, and the same ID token signs it in (BR7).
+        Tickets.TryConsume(Ticket, out _);
+        var tokens = await Auth.SignInWithGoogleAsync(ticket.IdToken);
+        var completion = tokens.IsSuccess ? await HandOff.CompletionPathAsync(tokens) : null;
+        _submitting = false;
+
+        if (completion is null)
+        {
+            _serverError = tokens.ErrorCode ?? ErrorText.UnexpectedCode;
+            return;
+        }
+
+        Navigation.NavigateTo(completion, forceLoad: true);
+    }
+
+    private async Task ShowFailureAsync(string code)
+    {
+        switch (code)
+        {
+            case IdentityErrorCodes.GoogleAccountExists:
+                Tickets.TryConsume(Ticket, out _);
+                _accountExists = true;
+                break;
+            case IdentityErrorCodes.GoogleTokenInvalid or IdentityErrorCodes.GoogleEmailNotVerified:
+                // This Google answer can never succeed; the visitor starts again.
+                Tickets.TryConsume(Ticket, out _);
+                _serverError = code;
+                break;
+            case IdentityErrorCodes.TermsVersionOutdated:
+                // The texts changed while the page was open: load the new ones and ask for the acceptances again.
+                _acceptsTerms = false;
+                _acceptsPrivacy = false;
+                await LoadDocumentsAsync();
+                _serverError = code;
+                break;
+            default:
+                _serverError = code;
+                break;
+        }
+    }
+
+    /// <summary>Comfort only: the API is the authority on every one of these rules (rule: ui).</summary>
+    private bool Validate()
+    {
+        _adultError = _declaresAdult ? null : L[IdentityErrorCodes.AgeDeclarationRequired].Value;
+        _consentError = _acceptsTerms && _acceptsPrivacy ? null : L[IdentityErrorCodes.ConsentRequired].Value;
+        return _adultError is null && _consentError is null;
+    }
+
+    private void StartOver() => Navigation.NavigateTo(GoogleAccountEndpoints.StartPath, forceLoad: true);
+
+    /// <summary>The ticket is spent, so nothing waits for this visitor any more.</summary>
+    private void Cancel()
+    {
+        Tickets.TryConsume(Ticket, out _);
+        Navigation.NavigateTo("/sign-in");
+    }
+}

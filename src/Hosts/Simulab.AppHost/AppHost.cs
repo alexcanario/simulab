@@ -57,4 +57,19 @@ api.WithEnvironment(context =>
         ReferenceExpression.Create($"{web.GetEndpoint("https")}/sign-up");
 });
 
+// F-20: Google sign-in is on locally only when the OAuth client is in this host's user secrets (Google:ClientId,
+// Google:ClientSecret; docs/infra.md). Both hosts read the same switch; only the Web gets the secret.
+var googleClientId = builder.Configuration["Google:ClientId"];
+var googleClientSecret = builder.Configuration["Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    // A secret parameter, so the dashboard masks it like the database password.
+    var googleSecret = builder.AddParameter("google-client-secret", googleClientSecret, secret: true);
+    api.WithEnvironment("Identity__GoogleSignInEnabled", "true")
+        .WithEnvironment("Authentication__Google__ClientId", googleClientId);
+    web.WithEnvironment("Identity__GoogleSignInEnabled", "true")
+        .WithEnvironment("Authentication__Google__ClientId", googleClientId)
+        .WithEnvironment("Authentication__Google__ClientSecret", googleSecret);
+}
+
 builder.Build().Run();

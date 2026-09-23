@@ -39,6 +39,10 @@ else
                 <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockout.Announced)]" />
             </div>
         }
+        else if (_error == IdentityErrorCodes.PasswordNotSet)
+        {
+            <PasswordNotSetAlert />
+        }
         else if (_error is not null)
         {
             <AppAlert Severity="Severity.Error" Text="@Errors.For(_error)" />

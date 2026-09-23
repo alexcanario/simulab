@@ -34,6 +34,12 @@ public abstract class IdentityPageTestContext : KitTestContext
         Services.AddScoped<SignUpFlow>();
         Services.AddSingleton(TimeProvider.System);
 
+        // F-20: off, as in v1, unless a test class turns it on (the last registration wins).
+        Services.AddSingleton(new GoogleSignInSettings());
+        Services.AddSingleton<GoogleSignUpTickets>();
+        Services.AddSingleton<CodeStepTickets>();
+        Services.AddScoped<SignInHandOff>();
+
         // Both documents are there unless a test says otherwise.
         Api.Terms = Document(LegalTopic.Terms);
         Api.Privacy = Document(LegalTopic.Privacy);
@@ -55,6 +61,12 @@ public abstract class IdentityPageTestContext : KitTestContext
 
         /// <summary>What POST /registrations answers. Null means 202.</summary>
         public (HttpStatusCode Status, string Code)? RegisterFailure { get; set; }
+
+        /// <summary>F-20: what POST /google-registrations answers. Null means 201.</summary>
+        public (HttpStatusCode Status, string Code)? GoogleRegisterFailure { get; set; }
+
+        /// <summary>F-20: the bodies POST /google-registrations received, in order.</summary>
+        public List<GoogleRegistrationRequest> GoogleRegistrations { get; } = [];
 
         public (HttpStatusCode Status, string Code)? VerifyFailure { get; set; }
 
@@ -139,6 +151,13 @@ public abstract class IdentityPageTestContext : KitTestContext
             if (path.EndsWith("/legal-documents/privacy", StringComparison.Ordinal))
             {
                 return Json(Privacy);
+            }
+
+            // F-20.
+            if (path.EndsWith("/google-registrations", StringComparison.Ordinal))
+            {
+                GoogleRegistrations.Add((await request.Content!.ReadFromJsonAsync<GoogleRegistrationRequest>(AppJson.Options, cancellationToken))!);
+                return GoogleRegisterFailure is { } googleFailure ? Problem(googleFailure) : new HttpResponseMessage(HttpStatusCode.Created);
             }
 
             if (path.EndsWith("/registrations", StringComparison.Ordinal))

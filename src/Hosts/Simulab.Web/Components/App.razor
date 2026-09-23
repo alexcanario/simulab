@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" Preferences="_preferences" VisitorAddress="@_visitorAddress" />
+    <Routes @rendermode="InteractiveServer" Preferences="_preferences" VisitorAddress="@_visitorAddress" GoogleSignUpBinding="@_googleSignUpBinding" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
@@ -32,6 +32,9 @@
     // framework protects in the page, so the browser cannot change it.
     private string? _visitorAddress;
 
+    // F-20 BR8: the HttpOnly cookie that ties a waiting Google sign-up to this browser, carried the same way.
+    private string? _googleSignUpBinding;
+
     protected override void OnInitialized()
     {
         if (HttpContext is not null)
@@ -40,6 +43,7 @@
                 HttpContext.Request.Cookies[PreferenceCookies.Theme],
                 HttpContext.Request.Cookies[PreferenceCookies.Navigation]);
             _visitorAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            _googleSignUpBinding = HttpContext.Request.Cookies[Simulab.Web.Services.Auth.GoogleSignUpTicket.BindingCookie];
         }
     }
 }

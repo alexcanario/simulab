@@ -76,6 +76,21 @@ public sealed class ChangePasswordTests : IdentityPageTestContext
         Api.CountOf("/password-changes").Should().Be(0);
     }
 
+    // F-20 AC16: an account created with Google has no password to change; the page says how to create one.
+    [Fact]
+    public void Save_AccountWithoutPassword_ShowsHowToCreateOne()
+    {
+        Api.ChangeFailure = (HttpStatusCode.UnprocessableEntity, IdentityErrorCodes.PasswordNotSet);
+        var page = RenderSignedIn();
+        Fill(page);
+
+        Save(page);
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Your account was created with Google and has no password yet."));
+        page.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
+        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+    }
+
     [Fact]
     public void Save_WrongCurrentPassword_ShowsItOnTheCurrentField()
     {

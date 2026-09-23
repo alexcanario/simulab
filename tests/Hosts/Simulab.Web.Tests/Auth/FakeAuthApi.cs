@@ -61,11 +61,30 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-11: the form bodies the <c>totp</c> grant received, in order.</summary>
     public List<string> TotpForms { get; } = [];
 
+    /// <summary>F-20: the error body the <c>google</c> grant answers with (an anonymous object); null issues a token pair.</summary>
+    public object? GoogleError { get; set; }
+
+    /// <summary>F-20: the form bodies the <c>google</c> grant received, in order.</summary>
+    public List<string> GoogleForms { get; } = [];
+
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var path = request.RequestUri!.AbsolutePath;
+
+        if (path == "/connect/token")
+        {
+            // F-20: the Google step.
+            var form = await request.Content!.ReadAsStringAsync(cancellationToken);
+            if (form.Contains($"grant_type={GoogleSignInProtocol.GrantType}", StringComparison.Ordinal))
+            {
+                GoogleForms.Add(form);
+                return GoogleError is null
+                    ? Json(new { access_token = "access-google", refresh_token = "refresh-google", expires_in = 900 })
+                    : Json(GoogleError, HttpStatusCode.BadRequest);
+            }
+        }
 
         if (path == "/connect/token" && (RequireTotp || TotpForms.Count > 0))
         {

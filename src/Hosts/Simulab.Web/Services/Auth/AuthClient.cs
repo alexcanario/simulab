@@ -14,12 +14,17 @@ public sealed record TokenResult(
     int? ExpiresInSeconds,
     string? ErrorCode,
     string? ErrorDescription,
-    string? Challenge = null)
+    string? Challenge = null,
+    string? GoogleEmail = null,
+    string? GoogleName = null)
 {
     public static TokenResult Failed(string code, string? description, string? challenge = null) => new(false, null, null, null, code, description, challenge);
 
     /// <summary>F-11 BR9: the password was right and the account asks for a code; <see cref="Challenge"/> carries the attempt on.</summary>
     public bool NeedsTotpCode => ErrorCode == IdentityErrorCodes.TotpRequired && !string.IsNullOrEmpty(Challenge);
+
+    /// <summary>F-20 BR7: Google knows this person and Simulab does not yet; the confirmation page takes over.</summary>
+    public bool NeedsGoogleSignUp => ErrorCode == IdentityErrorCodes.GoogleSignUpRequired && !string.IsNullOrEmpty(GoogleEmail);
 
     /// <summary>
     /// The token endpoint refused this refresh token itself (B-3, BR3): only then does a web session end.
@@ -35,7 +40,9 @@ file sealed record TokenResponseBody(
     [property: JsonPropertyName("expires_in")] int? ExpiresIn,
     [property: JsonPropertyName("error")] string? Error,
     [property: JsonPropertyName("error_description")] string? ErrorDescription,
-    [property: JsonPropertyName("challenge")] string? Challenge);
+    [property: JsonPropertyName("challenge")] string? Challenge,
+    [property: JsonPropertyName(GoogleSignInProtocol.EmailParameter)] string? Email,
+    [property: JsonPropertyName(GoogleSignInProtocol.NameParameter)] string? Name);
 
 /// <summary>
 /// Talks to the Api's OpenIddict token endpoint the way BR1 describes it: form-encoded, with the
@@ -61,6 +68,16 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ["grant_type"] = "totp",
                 ["challenge"] = challenge,
                 ["code"] = code,
+            },
+            cancellationToken);
+
+    /// <summary>F-20: the Google step, the custom <c>google</c> grant. The Api checks the ID token itself (BR2).</summary>
+    public Task<TokenResult> SignInWithGoogleAsync(string idToken, CancellationToken cancellationToken = default) =>
+        RequestAsync(
+            new Dictionary<string, string>
+            {
+                ["grant_type"] = GoogleSignInProtocol.GrantType,
+                [GoogleSignInProtocol.IdTokenParameter] = idToken,
             },
             cancellationToken);
 
@@ -135,7 +152,7 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
 
             if (body?.Error is not null)
             {
-                return TokenResult.Failed(body.Error, body.ErrorDescription, body.Challenge);
+                return TokenResult.Failed(body.Error, body.ErrorDescription, body.Challenge) with { GoogleEmail = body.Email, GoogleName = body.Name };
             }
 
             // A 5xx comes back as problem details with no OAuth "error": that is no answer, not a token pair.

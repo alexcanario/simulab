@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MudBlazor;
@@ -108,6 +109,21 @@ public sealed class DataExportPageTests : IdentityPageTestContext
         dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("The current password is not correct."));
         dialogs.FindAll("#download-data-password").Should().ContainSingle("the dialog stays open on a failure");
         JSInterop.Invocations.Should().NotContain(i => i.Identifier == Account.DownloadFunction);
+    }
+
+    // F-20 AC16.
+    [Fact]
+    public void Dialog_AccountWithoutPassword_ShowsHowToCreateOne()
+    {
+        Api.ExportFailure = (HttpStatusCode.UnprocessableEntity, IdentityErrorCodes.PasswordNotSet);
+        var (_, dialogs) = OpenDialog();
+
+        Type(dialogs, "anything");
+        Confirm(dialogs);
+
+        dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Your account was created with Google and has no password yet."));
+        dialogs.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
+        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
     }
 
     [Fact]

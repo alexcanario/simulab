@@ -168,4 +168,10 @@
   <data name="Security.Off.Action" xml:space="preserve"><value>Desativar a verificação em duas etapas</value></data>
   <data name="Security.Off.Done" xml:space="preserve"><value>A verificação em duas etapas foi desativada.</value></data>
   <data name="Security.Disable.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
+  <data name="Auth.Or" xml:space="preserve"><value>ou</value></data>
+  <data name="Auth.ContinueWithGoogle" xml:space="preserve"><value>Continuar com o Google</value></data>
+  <data name="GoogleSignUp.Title" xml:space="preserve"><value>Crie sua conta</value></data>
+  <data name="GoogleSignUp.Subtitle" xml:space="preserve"><value>Você está se cadastrando com a conta Google {0}.</value></data>
+  <data name="GoogleSignUp.Submit" xml:space="preserve"><value>Criar conta</value></data>
+  <data name="PasswordNotSet.CreatePassword" xml:space="preserve"><value>Criar uma senha</value></data>
 </root>

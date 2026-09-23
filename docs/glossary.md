@@ -80,6 +80,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Verificação em duas etapas | Verificação em dois passos | `TwoFactor` / `Totp` | The second barrier at sign-in: a six-digit code from an authenticator app (F-11) |
 | Código de recuperação | Código de recuperação | `RecoveryCode` | One of the ten single-use codes that replace the authenticator when the phone is gone (F-11) |
 | Desafio de segunda etapa | Desafio de segundo passo | `TotpChallenge` | The single-use token the password step returns when the account asks for a code (F-11) |
+| Entrar com o Google | Iniciar sessão com o Google | `GoogleSignIn` | Signing up or in with a Google account; the Api checks Google's ID token itself (F-20) |
+| Vínculo com o Google | Ligação ao Google | `user_logins` row (provider `Google`) | The link between an account and a Google account's subject (`sub`), made on the first Google sign-in (F-20) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.

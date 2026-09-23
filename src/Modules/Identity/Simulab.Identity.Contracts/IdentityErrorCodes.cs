@@ -72,4 +72,25 @@ public static class IdentityErrorCodes
     public const string TotpAlreadyEnabled = "totp.already_enabled";
     public const string TotpNotEnabled = "totp.not_enabled";
     public const string TotpCurrentPasswordInvalid = "totp.current_password_invalid";
+
+    /// <summary>F-20 BR11: the action asks for the current password and the account has none (created with Google).</summary>
+    public const string PasswordNotSet = "identity.password_not_set";
+
+    /// <summary>F-20 BR2: the Google ID token failed a check (issuer, audience, signature, lifetime).</summary>
+    public const string GoogleTokenInvalid = "google_sign_in.invalid_token";
+
+    /// <summary>F-20 BR2: Google did not mark the address as verified.</summary>
+    public const string GoogleEmailNotVerified = "google_sign_in.email_not_verified";
+
+    /// <summary>
+    /// F-20 BR7: no account for this Google identity. An OAuth <c>error</c> of the token endpoint, not a failure the
+    /// user reads: the Web host moves to the confirmation page.
+    /// </summary>
+    public const string GoogleSignUpRequired = "google_sign_in.sign_up_required";
+
+    /// <summary>F-20 BR9: an account for this address or Google subject appeared before the confirmation.</summary>
+    public const string GoogleAccountExists = "google_sign_in.account_exists";
+
+    /// <summary>F-20 BR8: the Web host's waiting-confirmation ticket expired or was already used.</summary>
+    public const string GoogleSignInExpired = "google_sign_in.expired";
 }

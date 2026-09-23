@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Contracts;
@@ -60,7 +61,60 @@ public static class TokenEndpoints
             return await HandleTotpGrantAsync(context, request, sessions, timeProvider, cancellationToken);
         }
 
+        if (request.GrantType == GoogleSignInProtocol.GrantType && GoogleSignInEnabled(context))
+        {
+            return await HandleGoogleGrantAsync(context, request, sessions, timeProvider, cancellationToken);
+        }
+
         return Forbid(Errors.UnsupportedGrantType);
+    }
+
+    /// <summary>F-20 BR1: read per request from the options, the same switch that registers the grant.</summary>
+    private static bool GoogleSignInEnabled(HttpContext context) =>
+        context.RequestServices.GetRequiredService<IOptions<GoogleSignInOptions>>().Value.GoogleSignInEnabled;
+
+    /// <summary>
+    /// F-20: the Google step. No account → the confirmation page (BR7). Two-factor on → the same challenge as after a
+    /// password, with the failure count untouched (BR4, change note v2). Otherwise Google is the last step: the count
+    /// and any lockout are cleared and the tokens issued.
+    /// </summary>
+    private static async Task<IResult> HandleGoogleGrantAsync(
+        HttpContext context,
+        OpenIddictRequest request,
+        IRefreshSessionStore sessions,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        // Resolved here, not as a parameter: it exists only while the feature is on.
+        var handler = context.RequestServices.GetRequiredService<GoogleSignInHandler>();
+        var result = await handler.SignInAsync((string?)request[GoogleSignInProtocol.IdTokenParameter], cancellationToken);
+        if (result.IsFailure)
+        {
+            return Forbid(result.Error!.Code);
+        }
+
+        if (result.Value.SignUpRequired is { } google)
+        {
+            return Forbid(IdentityErrorCodes.GoogleSignUpRequired, parameters: new Dictionary<string, object?>
+            {
+                [GoogleSignInProtocol.EmailParameter] = google.Email,
+                [GoogleSignInProtocol.NameParameter] = google.Name,
+            });
+        }
+
+        var user = result.Value.User!;
+        if (user.TwoFactorEnabled && TotpEnabled(context))
+        {
+            var challenge = await context.RequestServices.GetRequiredService<TotpSignInHandler>().IssueChallengeAsync(user, cancellationToken);
+            return Forbid(IdentityErrorCodes.TotpRequired, parameters: new Dictionary<string, object?>
+            {
+                [TotpChallengeParameter] = challenge,
+                [Parameters.ExpiresIn] = (long)TotpSignInHandler.ChallengeLifetime.TotalSeconds,
+            });
+        }
+
+        await handler.ClearFailuresAsync(user);
+        return await IssueTokensAsync(user, sessions, timeProvider, cancellationToken);
     }
 
     /// <summary>F-11 BR12: read per request from the options, the same switch that maps the routes.</summary>
