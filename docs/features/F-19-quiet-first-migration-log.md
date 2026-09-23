@@ -88,6 +88,6 @@ Validated by the owner on 2026-09-23: the script passed.
 
 ## Delivery
 - Branch: `feature/F-19`, built in the worktree `D:\dev\_icontrol\wt\simulab\F-19`
-- Merge: recorded after the merge on `main` (2026-09-23, authorized by the owner)
+- Merge: `b7c7863` on `main` (2026-09-23, authorized by the owner)
 - Tests: 804 passed, 0 failed, suite 46 s, full build 21 s, 0 warnings (`gate.js ship`, 2026-09-23)
 - Manual pages: none (no visible behaviour changed). `docs/infra.md` updated (first-start note, measured times); `DocGen --check` up to date
