@@ -40,6 +40,9 @@ public sealed class ErasureLastManagerTests : IdentityApiTests
         await RunJobsAsync();
         Emails.Messages.Should().NotContain(message => message.To == admin.Email && message.Subject.Contains("erased", StringComparison.OrdinalIgnoreCase));
 
+        // F-21 AC7, BR7: the erasure event is staged on the transaction, so the rollback took it too.
+        (await ErasedEventsAsync(admin.Id)).Should().Be(0);
+
         // With a second active manager, the same call goes through.
         await Accounts.CreateAsync(Factory.Services, roles: IdentityRoles.Admin);
         using var allowed = await EraseAsync(client, session, SignUpForm.ValidPassword);
@@ -47,7 +50,14 @@ public sealed class ErasureLastManagerTests : IdentityApiTests
         allowed.StatusCode.Should().Be(HttpStatusCode.NoContent, await allowed.Content.ReadAsStringAsync());
         (await QueryAsync(context => context.Users.IgnoreQueryFilters().SingleAsync(user => user.Id == admin.Id))).Status
             .Should().Be(AccountStatus.Erased);
+
+        // F-21 AC6: and now that it really happened, it is in the trail exactly once.
+        (await ErasedEventsAsync(admin.Id)).Should().Be(1);
     }
+
+    private Task<int> ErasedEventsAsync(Guid userId) =>
+        QueryAsync(context => context.AccountEvents
+            .CountAsync(accountEvent => accountEvent.UserId == userId && accountEvent.Type == AccountEventType.AccountErased));
 
     private static async Task<HttpResponseMessage> EraseAsync(HttpClient client, TokenResponse session, string password)
     {

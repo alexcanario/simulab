@@ -1,7 +1,7 @@
 ---
 feature: F-21
 epic: Foundation and identity
-status: building
+status: validating
 board: 736
 version: 1
 ---
@@ -145,6 +145,14 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 - 2026-09-23 — Claude: writing an event never fails the request (BR7); the log records its own failure through `ILogger` and returns. An audit row is worth less than the sign-in it would break.
 - 2026-09-23 — Claude: no mockup (`/agile:screen`): one list page made only of existing kit parts, following `/admin/role-history`.
 - 2026-09-23 — Approved by the owner ("Aprovo f-21").
+- 2026-09-23 — Claude (build): `AccountEvent` inherits `TenantEntity` like `RoleChange`, so `created_at` is "when"; `user_id` is the subject and `created_by` is never read (a failed sign-in has no signed-in author). Table `identity.account_events` with `type`, `method`, `reason` as text and four indexes (`created_at`, `user_id`, `type`, `ip_address`). Migration `AddAccountEvents` carries the table and nothing else.
+- 2026-09-23 — Claude (build): `ICallerAddress` is in `SharedKernel/Security` next to `ICurrentUser` and implemented in the Api host over `ClientAddress` (B-4); the module registers `NoCallerAddress` with `TryAdd` for a host that knows no address (the job worker, a handler called directly). The host registers the real one **before** `AddIdentityModule`, as it already does for `ICurrentUser`.
+- 2026-09-23 — Claude (build): the two-factor step records its own events inside `TotpSignInHandler`, not at the token endpoint: the challenge is spent by the time the endpoint sees the answer, so only the handler still knows which account a failed step belonged to. `SecondFactor.VerifyAsync` now returns which code it accepted (`SecondFactorMethod`), which is what BR2's "way" needs.
+- 2026-09-23 — Claude (build): the erasure event is staged with **no** address. The same transaction clears the address of that account's other events with one `ExecuteUpdate`, and a row inserted by the later `SaveChanges` would not be seen by that statement — the trail would keep the one address the erasure exists to remove.
+- 2026-09-23 — Claude (build): of the Google step's three refusals, only the two token checks (`invalid_token`, `email_not_verified`) are recorded as failed sign-ins, which is what BR4 says. `sign_up_required` sends the visitor to the confirmation page and `account_exists` tells them to use the password; neither names an account, and neither is an attempt on one.
+- 2026-09-23 — Claude (build): no filters endpoint (F-14 has one). The events are a fixed list the screen translates, and the account chip is named by a third field on the page response, so an account with no event yet still reads by name.
+- 2026-09-23 — Claude (build): the lockout is recorded at all six places that call `AccessFailedAsync` — sign-in, the code check, password change, erasure, data export and turning two-factor off — because the limit can be crossed from any of them. The failed attempt itself is recorded only for sign-in (out of scope, as agreed).
+- 2026-09-23 — Claude (build): Web → API wiring checked through the app host, started from Git Bash and from PowerShell 7: migration `AddAccountEvents` applied on the local database (14 columns read back with `psql`), `/openapi/v1.json` 200 listing `/api/v1/identity/account-events`, the route 401 without a token, and `/admin/account-events` redirecting an anonymous visitor to sign-in. **Not verified by Claude:** the signed-in page itself — signing in needs a password, which Claude does not type; it is step 2 of the validation script.
 
 ## Out of scope
 - A "recent activity" list for the user on `/account/security` — F-31 (AB#750).
@@ -164,7 +172,34 @@ Existing keys reused: `Nav.Section.Administration`, `Common.*` (table, states, `
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+You need your Admin account and a second, ordinary account (as in F-9), used in a private window.
+
+1. Start the app host — Git Bash and PowerShell 7, same command: `dotnet run --project src/Hosts/Simulab.AppHost` → the Aspire dashboard URL is printed and the Web answers at https://localhost:7125. Sign in as Admin → Administration shows "Roles", "Users", "Role history" and "Account events".
+2. Open "Account events" → your sign-in is the newest row: your email, "Signed in", "with the password", and the address you came from; the time is your local time.
+3. Sign out, then try to sign in with a wrong password twice, then sign in properly. Back on "Account events" → "Signed out" and two "Sign-in failed / wrong password" rows, newest first. Now try a sign-in with an address that has no account (`ninguem@exemplo.com`) → a row with "Unknown account".
+4. Change your password on `/account/password` → a "Password changed" row. On `/account/security`, turn two-factor on → "Two-factor turned on" (leave it on or off as you prefer; turning it off adds its own row).
+5. Filters: pick Event = "Sign-in failed" and Period = "Last 7 days" → only those rows. Click the address of any row → a chip "From: <address>" appears and the list shows every event from it, whatever the account. Remove both chips with their ×. Reload the page → the filters that are still set stay (they are in the address).
+6. On "Users", use the row action **Security events** on the second account → the page opens with a chip "Account: <email>" instead of the search box, listing only that account's events.
+7. Switch to pt-BR, then pt-PT → "Sessão iniciada" / "com a senha" and "com a palavra-passe"; toggle dark mode → table, filters, chips and the address button legible in both themes.
+8. Permission check and keyboard: in the private window, signed in with the second account → no "Account events" item, and `/admin/account-events` shows "Page not found". Back as Admin, Tab through the search box, the two filters (arrow keys pick a value), an address button (Enter filters by it) and the pager, each with a visible focus ring.
 
 ## Delivery
 - Branch: feature/F-21
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `AccountEventTrailTests.SignIn_WithThePassword_RecordsTheAccountTheTimeTheWayAndTheAddress`; `AccountEventGoogleTests.SignIn_WithGoogle_RecordsThatMethod`; `AccountEventTwoFactorTests.SignIn_ThroughTheAppCode_RecordsOneSignInWithThatMethodAndNoneForThePasswordStep`, `SignIn_WithARecoveryCode_RecordsThatMethod` |
+| AC2 | `AccountEventTrailTests.RefreshGrant_RecordsNothing` |
+| AC3 | `AccountEventTrailTests.SignIn_WrongPasswordAndUnverifiedAccount_RecordTheirReasons`, `SignIn_TheFailureThatCrossesTheLimit_…` (locked-out attempt); `AccountEventTwoFactorTests.CodeStep_WrongCodeAndSpentChallenge_RecordTheirReasons`; `AccountEventGoogleTests.Grant_WithARefusedToken_RecordsAFailedSignInWithNoAccount` |
+| AC4 | `AccountEventTrailTests.SignIn_WithAUserNameThatMatchesNoAccount_RecordsTheAttemptWithoutTheName`; `AccountEventGoogleTests.Grant_WithARefusedToken_…` |
+| AC5 | `AccountEventTrailTests.SignIn_TheFailureThatCrossesTheLimit_RecordsOneLockoutAndTheNextAttemptIsAFailure` |
+| AC6 | `AccountEventTrailTests.SignOutPasswordChangeAndReset_EachRecordTheirOwnEvent`, `PasswordResetRequested_ForAnAddressWithNoAccount_RecordsNothing`, `AccountErasure_RecordsItselfAndClearsTheAddressOfThatAccountsEventsOnly`; `AccountEventTwoFactorTests.RecoveryCodesRegeneratedAndTwoFactorTurnedOff_EachRecordTheirOwnEvent`; `ErasureLastManagerTests.Erase_ByTheLastActiveManager_…` (recorded once it really happens) |
+| AC7 | `AccountEventTrailTests.RefusedPasswordChange_RecordsNoPasswordEvent`; `ErasureLastManagerTests.Erase_ByTheLastActiveManager_IsRefusedAndRollsBack_UntilASecondManagerExists` (the rollback takes the event) |
+| AC8 | `AccountEventTrailTests.List_FiltersCombineNewestFirst_AndRefusesAnUnknownPeriodOrEvent`; `AccountEventsPageTests.FiltersInTheAddress_AreSentAndShownOnTheFilters` |
+| AC9 | `AccountEventTrailTests.AccountErasure_RecordsItselfAndClearsTheAddressOfThatAccountsEventsOnly`; `AccountEventsPageTests.Load_ShowsWhenAccountEventDetailsAndAddress` (erased and unknown accounts) |
+| AC10 | `AccountEventTrailTests.Trail_HasNoWriteRouteAndHoldsNoPersonalData` |
+| AC11 | `RoleAdministrationTests.EveryEndpoint_WithoutRolesManage_IsForbidden` (the new route); `NavigationItemsTests.All_AdministrationItems_AreRolesUsersAndRoleHistoryBehindRolesManage`; `AdminPagesAuthorizationTests.EveryAdminPage_RequiresRolesManage`; Not Found page on screen: validation script step 8 |
+| AC12 | `AccountEventsPageTests.Load_ShowsWhenAccountEventDetailsAndAddress`, `Empty_WithoutFilters_SaysNothingWasRecorded_WithAFilter_SaysNothingMatches`, `Load_ApiFails_ShowsTheErrorStateWithTryAgain`, `AccountInTheAddress_ShowsARemovableChipInsteadOfTheSearch`, `ClickingAnAddress_FiltersByItAndShowsARemovableChip`, `FilterChanged_OnALaterPage_ReloadsFromTheFirstPageWithTheFilter`, `SecurityEventsAction_OnUsers_OpensTheTrailFilteredToTheRow`, `AddressButton_HasAnAccessibleName`; loading state: `AppDataTableTests` (kit) |
+| AC13 | `Simulab.ArchitectureTests` (83, green) |
+| AC14 | `AccountEventResourcesTests.EveryEventMethodReasonAndErrorCode_HasAText`; `ResourceParityTests`; `AccountEventsPageTests.Load_InPortuguesePortugal_TranslatesTitleEventsAndAccounts`; `AccountEventNamesTests` (the three name lists pinned to the domain enums) |
