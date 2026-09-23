@@ -145,4 +145,6 @@ Needs a Google account listed as a test user of your OAuth client, and no Simula
 6. Open "My account" → "Download my data", type anything as the password and confirm → the message says the account was created with Google and has no password, with "Create a password"; that button opens `/forgot-password`.
 7. Stop the app host (Ctrl+C). To turn Google sign-in off again: `dotnet user-secrets remove "Google:ClientId" --project src/Hosts/Simulab.AppHost`, then start again → `/sign-in` shows no Google button.
 
+Validated by the owner on 2026-09-23 ("aprovado"): the script passed.
+
 ## Delivery
