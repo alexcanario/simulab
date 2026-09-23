@@ -4,9 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Account;
+using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -19,6 +22,7 @@ using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Authorization;
 using Simulab.Identity.Infrastructure.Content;
 using Simulab.Identity.Infrastructure.Email;
+using Simulab.Identity.Infrastructure.GoogleSignIn;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Sessions;
 using Simulab.Identity.Infrastructure.Totp;
@@ -99,6 +103,7 @@ public static class IdentityModule
         // The verification email is written from this module's own resources.
         services.AddLocalization();
 
+        services.AddScoped<RegistrationTerms>();
         services.AddScoped<RegisterUserHandler>();
         services.AddScoped<VerifyEmailHandler>();
         services.AddScoped<ResendVerificationHandler>();
@@ -150,6 +155,28 @@ public static class IdentityModule
             services.AddScoped<TotpSignInHandler>();
         }
 
+        // F-20 BR1: Google sign-in is registered only while it is on; the client id is checked when the host starts.
+        var google = configuration.GetSection(GoogleSignInOptions.SectionName).Get<GoogleSignInOptions>() ?? new GoogleSignInOptions();
+        var googleClient = configuration.GetSection(GoogleClientOptions.SectionName).Get<GoogleClientOptions>() ?? new GoogleClientOptions();
+        services.AddOptions<GoogleSignInOptions>().Bind(configuration.GetSection(GoogleSignInOptions.SectionName));
+        services.AddOptions<GoogleClientOptions>()
+            .Bind(configuration.GetSection(GoogleClientOptions.SectionName))
+            .Validate(options => options.Problem(google.GoogleSignInEnabled) is null, googleClient.Problem(google.GoogleSignInEnabled) ?? "Authentication:Google is not valid.")
+            .ValidateOnStart();
+
+        if (google.GoogleSignInEnabled)
+        {
+            // BR2: Google's keys, from its discovery document, cached and refreshed by the library.
+            services.AddSingleton<IConfigurationManager<OpenIdConnectConfiguration>>(_ =>
+                new ConfigurationManager<OpenIdConnectConfiguration>(
+                    GoogleIdTokenValidator.DiscoveryDocument,
+                    new OpenIdConnectConfigurationRetriever(),
+                    new HttpDocumentRetriever { RequireHttps = true }));
+            services.AddSingleton<IGoogleIdTokenValidator, GoogleIdTokenValidator>();
+            services.AddScoped<GoogleSignInHandler>();
+            services.AddScoped<RegisterGoogleUserHandler>();
+        }
+
         services.AddOpenIddict()
             .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityModuleDbContext>())
             .AddServer(options =>
@@ -164,6 +191,12 @@ public static class IdentityModule
                 if (totp.TotpEnabled)
                 {
                     options.AllowCustomFlow(TotpGrantType);
+                }
+
+                // F-20: the Google step of a sign-in, only while the feature is on (BR1).
+                if (google.GoogleSignInEnabled)
+                {
+                    options.AllowCustomFlow(GoogleSignInProtocol.GrantType);
                 }
 
                 options.SetAccessTokenLifetime(TokenLifetimes.AccessToken);
@@ -216,13 +249,14 @@ public static class IdentityModule
         var existing = await manager.FindByClientIdAsync(WebClientId, cancellationToken);
         if (existing is not null)
         {
-            // F-11: a client registered before the totp grant existed gains its permission on the next start.
+            // F-11, F-20: a client registered before a custom grant existed gains its permission on the next start.
             var permissions = await manager.GetPermissionsAsync(existing, cancellationToken);
-            if (!permissions.Contains(TotpGrantPermission))
+            var missing = CustomGrantPermissions.Where(permission => !permissions.Contains(permission)).ToList();
+            if (missing.Count > 0)
             {
                 var descriptor = new OpenIddictApplicationDescriptor();
                 await manager.PopulateAsync(descriptor, existing, cancellationToken);
-                descriptor.Permissions.Add(TotpGrantPermission);
+                descriptor.Permissions.UnionWith(missing);
                 await manager.UpdateAsync(existing, descriptor, cancellationToken);
             }
 
@@ -242,7 +276,8 @@ public static class IdentityModule
                 Permissions.Endpoints.Token,
                 Permissions.GrantTypes.Password,
                 Permissions.GrantTypes.RefreshToken,
-                TotpGrantPermission
+                TotpGrantPermission,
+                GoogleGrantPermission
             }
         }, cancellationToken);
     }
@@ -252,6 +287,11 @@ public static class IdentityModule
     /// accepts the grant while <c>Identity:TotpEnabled</c> is true (BR12), and turning it on needs no data change.
     /// </summary>
     private const string TotpGrantPermission = Permissions.Prefixes.GrantType + TotpGrantType;
+
+    /// <summary>F-20 BR1: granted on or off for the same reason as <see cref="TotpGrantPermission"/>.</summary>
+    private const string GoogleGrantPermission = Permissions.Prefixes.GrantType + GoogleSignInProtocol.GrantType;
+
+    private static readonly string[] CustomGrantPermissions = [TotpGrantPermission, GoogleGrantPermission];
 
     /// <summary>
     /// Creates the seed roles (F-6, BR1) and the one seed permission (BR8), granted to Admin, if they do

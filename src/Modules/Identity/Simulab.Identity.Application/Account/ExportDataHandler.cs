@@ -31,6 +31,12 @@ public sealed partial class ExportDataHandler(
             return Failure(IdentityErrorCodes.DataExportCurrentPasswordInvalid);
         }
 
+        // F-20 BR11: an account created with Google has no current password to prove; it sets one through the reset.
+        if (!await userManager.HasPasswordAsync(user))
+        {
+            return Failure(IdentityErrorCodes.PasswordNotSet);
+        }
+
         // BR2: while locked, even the right current password is refused, as on sign-in.
         if (await userManager.IsLockedOutAsync(user))
         {

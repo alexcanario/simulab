@@ -22,4 +22,17 @@ public sealed class UserDirectory(IdentityModuleDbContext context, ILookupNormal
             .IgnoreQueryFilters([ModuleDbContext.TenantFilter])
             .SingleOrDefaultAsync(user => user.NormalizedEmail == normalized, cancellationToken);
     }
+
+    public Task<User?> FindByLoginIgnoringTenantAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default) =>
+        context.Users
+            .IgnoreQueryFilters([ModuleDbContext.TenantFilter])
+            .Where(user => context.UserLogins.Any(login =>
+                login.UserId == user.Id && login.LoginProvider == loginProvider && login.ProviderKey == providerKey))
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public Task<string?> FindLoginKeyAsync(Guid userId, string loginProvider, CancellationToken cancellationToken = default) =>
+        context.UserLogins
+            .Where(login => login.UserId == userId && login.LoginProvider == loginProvider)
+            .Select(login => login.ProviderKey)
+            .FirstOrDefaultAsync(cancellationToken);
 }

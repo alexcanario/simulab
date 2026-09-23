@@ -10,4 +10,10 @@ namespace Simulab.Identity.Application.Abstractions;
 public interface IUserDirectory
 {
     Task<User?> FindByEmailIgnoringTenantAsync(string email, CancellationToken cancellationToken = default);
+
+    /// <summary>The account an external login is linked to (F-20 BR3: the Google subject), with the same tenant rule.</summary>
+    Task<User?> FindByLoginIgnoringTenantAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default);
+
+    /// <summary>The key of the account's link to <paramref name="loginProvider"/>, or null when it has none (F-20 BR3).</summary>
+    Task<string?> FindLoginKeyAsync(Guid userId, string loginProvider, CancellationToken cancellationToken = default);
 }
