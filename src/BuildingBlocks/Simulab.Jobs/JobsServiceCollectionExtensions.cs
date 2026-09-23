@@ -50,12 +50,6 @@ public static class JobsServiceCollectionExtensions
     }
 
     /// <summary>Applies the queue's migration. Development only; a release applies it from the pipeline.</summary>
-    public static async Task MigrateJobsAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-
-        await using var scope = services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<JobsDbContext>();
-        await context.Database.MigrateAsync(cancellationToken);
-    }
+    public static Task MigrateJobsAsync(this IServiceProvider services, CancellationToken cancellationToken = default) =>
+        services.MigrateModuleAsync<JobsDbContext>(cancellationToken);
 }

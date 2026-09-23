@@ -195,14 +195,8 @@ public static class IdentityModule
     }
 
     /// <summary>Applies the module's migrations. Development only; a release applies them from the pipeline.</summary>
-    public static async Task MigrateIdentityModuleAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-
-        await using var scope = services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>();
-        await context.Database.MigrateAsync(cancellationToken);
-    }
+    public static Task MigrateIdentityModuleAsync(this IServiceProvider services, CancellationToken cancellationToken = default) =>
+        services.MigrateModuleAsync<IdentityModuleDbContext>(cancellationToken);
 
     /// <summary>
     /// Registers the one first-party client (F-5, decision 2) if it does not exist yet. Its secret is
