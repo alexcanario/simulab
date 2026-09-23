@@ -2,14 +2,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Simulab.Identity.Domain.Entities;
 
-namespace Simulab.Identity.Tests;
+namespace Simulab.Testing.ApiHost;
 
 /// <summary>
 /// Creates accounts straight through <see cref="UserManager{TUser}"/>, for tests that need many of them:
-/// sign-up through HTTP is limited to 10 per client per hour (F-4), and these tests are not about sign-up.
+/// sign-up through HTTP is limited to 10 per client per hour (F-4), and those tests are not about sign-up.
+/// Shared by every module's tests since F-33: an account belongs to the host, not to Identity.
 /// </summary>
-public static class Accounts
+public static class TestAccounts
 {
+    /// <summary>A password that satisfies the policy (12 characters, uppercase, digit, symbol).</summary>
+    public const string ValidPassword = "Estudar#2026!";
+
     public static async Task<User> CreateAsync(
         IServiceProvider services,
         string? email = null,
@@ -29,7 +33,7 @@ public static class Accounts
             user.VerifyEmail(DateTimeOffset.UtcNow);
         }
 
-        var created = await users.CreateAsync(user, SignUpForm.ValidPassword);
+        var created = await users.CreateAsync(user, ValidPassword);
         created.Succeeded.Should().BeTrue(string.Join(", ", created.Errors.Select(error => error.Code)));
 
         foreach (var role in roles)
@@ -45,7 +49,7 @@ public static class Accounts
     {
         ArgumentNullException.ThrowIfNull(client);
 
-        var token = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
+        var token = await TokenClient.SignInAsync(client, email, ValidPassword);
         token.AccessToken.Should().NotBeNull(token.ErrorDescription);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
         return client;

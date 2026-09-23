@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Jobs.Persistence;
 using Simulab.Testing;
@@ -27,6 +28,7 @@ public sealed class FirstStartLogTests
         Errors(logs).Should().BeEmpty();
         await AssertEveryMigrationAppliedAsync<JobsDbContext>(factory);
         await AssertEveryMigrationAppliedAsync<IdentityModuleDbContext>(factory);
+        await AssertEveryMigrationAppliedAsync<CatalogModuleDbContext>(factory);
     }
 
     [Fact]
@@ -48,8 +50,9 @@ public sealed class FirstStartLogTests
 
         Errors(logs).Should().BeEmpty();
         logs.Entries.Should().NotContain(entry => entry.EventId.Id == RelationalEventId.MigrationApplying.Id);
+        // F-33 added the catalog context to the three the host migrates on start.
         logs.Entries.Count(entry => entry.EventId.Id == RelationalEventId.MigrationsNotApplied.Id)
-            .Should().Be(2, "both contexts report that the database is already up to date");
+            .Should().Be(3, "the jobs, identity and catalog contexts each report the database is already up to date");
     }
 
     private static IdentityApiFactory CreateFactory(RecordingLoggerProvider logs) =>

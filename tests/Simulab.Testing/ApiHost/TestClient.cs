@@ -1,4 +1,4 @@
-namespace Simulab.Identity.Tests;
+namespace Simulab.Testing.ApiHost;
 
 /// <summary>The confidential client every test's token request authenticates as (F-5, decision 2).</summary>
 public static class TestClient

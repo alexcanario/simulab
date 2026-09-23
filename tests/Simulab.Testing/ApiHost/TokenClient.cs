@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
-namespace Simulab.Identity.Tests;
+namespace Simulab.Testing.ApiHost;
 
 public sealed record TokenResponse(
     [property: JsonPropertyName("access_token")] string? AccessToken,

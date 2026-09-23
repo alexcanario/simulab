@@ -7,15 +7,15 @@ using Microsoft.Extensions.Time.Testing;
 using Npgsql;
 using Simulab.Email;
 using Simulab.Jobs;
-using Simulab.Testing;
 
-namespace Simulab.Identity.Tests;
+
+namespace Simulab.Testing.ApiHost;
 
 /// <summary>
 /// The whole Api with a database of its own, a recorded email sender and a clock the test moves. The
 /// migrations run on start, so every test also proves the module's schema applies.
 /// </summary>
-public sealed class IdentityApiFactory : WebApplicationFactory<Program>
+public class SimulabApiFactory : WebApplicationFactory<Program>
 {
     private string _connectionString = string.Empty;
 
