@@ -1,7 +1,7 @@
 ---
 feature: F-19
 epic: Foundation and identity
-status: building
+status: validating
 board: 732
 version: 1
 ---
@@ -58,6 +58,9 @@ Checked in the same scratch run: calling the public `IHistoryRepository.CreateIf
 - 2026-09-23 — Owner: create the history table before migrating (not a log filter) — no filter, and a real failure stays `fail`; already checked in the scratch run.
 - 2026-09-23 — Owner: the Information-level SQL echo on start stays as it is — it helps debugging, and the request was only the false `fail`.
 - 2026-09-23 — `docs/infra.md` loses the "it is noise" note about the first start — the note describes behavior this item removes.
+- 2026-09-23 — Build: the shared helper is `ModuleMigrationExtensions.MigrateModuleAsync<TContext>` in `Simulab.Persistence`; it calls EF's public `IHistoryRepository.CreateIfNotExistsAsync` before `MigrateAsync` — the same call EF makes itself, only earlier.
+- 2026-09-23 — Build: AC1/AC2 start the real Api (`IdentityApiFactory`, migrations on start) with a recording logger, so they go through `Program.cs` and both module helpers; that also covers AC4 by its effect. Seen failing without the fix (`Failed: 1, Passed: 1`).
+- 2026-09-23 — Build: the app-host check (empty volume) is in the validation script, not run by Claude — deleting the local volume is the owner's data (workflow rule: never reset a volume outside the test containers).
 
 ## Out of scope
 - The Information-level echo of every SQL command on start (`Database.Command[20101]`) — owner, 2026-09-23.
@@ -69,5 +72,16 @@ Checked in the same scratch run: calling the public `IHistoryRepository.CreateIf
 ## Change notes
 
 ## Validation script
+Step 2 erases every local account and datum in the PostgreSQL volume. No screen, so no language, permission or keyboard step.
+
+1. Stop any running app host (Ctrl+C) → no `simulab` container is running: `docker ps --filter name=postgres` (Git Bash and PowerShell 7) prints only the header line (`CONTAINER ID   IMAGE ...`).
+2. Delete the database volume: `docker volume rm simulab-postgres-data` (Git Bash and PowerShell 7) → prints `simulab-postgres-data`. If it says "volume is in use", repeat step 1.
+3. Start the app host from the F-19 worktree.
+   - Git Bash: `cd /d/dev/_icontrol/wt/simulab/F-19 && dotnet run --project src/Hosts/Simulab.AppHost`
+   - PowerShell 7: `cd D:\dev\_icontrol\wt\simulab\F-19; dotnet run --project src/Hosts/Simulab.AppHost`
+4. In the Aspire dashboard, open the `api` resource's console log → `Applying migration '20260920152540_InitialJobs'` and the Identity migrations appear, and there is no `fail` line (no `Database.Command[20102]`).
+5. Open the `web` URL from the dashboard → the home page loads.
+6. Stop the app host (Ctrl+C) and start it again as in step 3 → the `api` log shows `No migrations were applied. The database is already up to date.` twice, and no `fail` line.
+7. Stop the app host (Ctrl+C) before `/agile:ship`.
 
 ## Delivery

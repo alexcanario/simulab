@@ -17,6 +17,7 @@ public sealed class ModuleMigrationTests
         var logs = new RecordingLoggerProvider();
         var services = new ServiceCollection();
         services.AddLogging(logging => logging.AddProvider(logs));
+        services.AddModulePersistence();
         services.AddDbContext<FailingMigrationContext>(options => options.UseNpgsql(
             connectionString,
             npgsql => npgsql.UseModuleHistoryTable(FailingMigrationContext.SchemaName)));
