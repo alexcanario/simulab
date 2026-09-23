@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Simulab.Identity.Contracts;
@@ -19,26 +18,26 @@ public sealed class RoleResourcesTests : KitTestContext
 
     [Theory]
     [MemberData(nameof(Cultures))]
-    public void EveryPermissionSystemRoleAndErrorCode_HasAText(string culture)
+    public void EveryPermissionSystemRoleAndActionName_HasAText(string culture)
     {
         CultureInfo.CurrentUICulture = new CultureInfo(culture);
         var l = Services.GetRequiredService<IStringLocalizer<SharedResources>>();
 
-        var keys = IdentityPermissions.All.SelectMany(permission => new[]
+        Keys().Where(key => l[key].ResourceNotFound).Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// The named keys this test owns. F-22 took the error codes away from here: they are checked by reflection,
+    /// over every module, by <c>ErrorCodeTextTests</c>, and a list kept by hand was what let F-14 ship a code
+    /// with no text at all.
+    /// </summary>
+    public static IEnumerable<string> Keys() =>
+        IdentityPermissions.All.SelectMany(permission => new[]
             {
                 $"Permission.{permission}.Name",
                 $"Permission.{permission}.Description",
                 $"PermissionGroup.{IdentityPermissions.GroupOf(permission)}"
             })
             .Concat(IdentityRoles.All.Select(role => $"Role.System.{role}"))
-            .Concat(typeof(IdentityErrorCodes).GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Select(field => (string)field.GetValue(null)!)
-                .Where(code => code.StartsWith("role.", StringComparison.Ordinal)
-                    || code.StartsWith("role_assignment.", StringComparison.Ordinal)
-                    || code.StartsWith("user.", StringComparison.Ordinal)
-                    || code.StartsWith("role_change.", StringComparison.Ordinal)))
             .Concat(RoleChangeActions.All.Select(action => $"RoleHistory.Action.{action}"));
-
-        keys.Where(key => l[key].ResourceNotFound).Should().BeEmpty();
-    }
 }

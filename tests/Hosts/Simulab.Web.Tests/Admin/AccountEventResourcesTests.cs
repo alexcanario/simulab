@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Simulab.Identity.Contracts;
@@ -18,12 +17,20 @@ public sealed class AccountEventResourcesTests : KitTestContext
 
     [Theory]
     [MemberData(nameof(Cultures))]
-    public void EveryEventMethodReasonAndErrorCode_HasAText(string culture)
+    public void EveryEventMethodAndReasonLabel_HasAText(string culture)
     {
         CultureInfo.CurrentUICulture = new CultureInfo(culture);
         var l = Services.GetRequiredService<IStringLocalizer<SharedResources>>();
 
-        var keys = AccountEventTypes.All.Select(name => $"AccountEvents.Event.{name}")
+        Keys().Where(key => l[key].ResourceNotFound).Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// The named keys this test owns. F-22 took the error codes away from here: they are checked by reflection,
+    /// over every module, by <c>ErrorCodeTextTests</c>.
+    /// </summary>
+    public static IEnumerable<string> Keys() =>
+        AccountEventTypes.All.Select(name => $"AccountEvents.Event.{name}")
             .Concat(AccountEventMethods.All.Select(name => $"AccountEvents.Method.{name}"))
             .Concat(AccountEventReasons.All.Select(name => $"AccountEvents.Reason.{name}"))
             .Concat(
@@ -49,11 +56,5 @@ public sealed class AccountEventResourcesTests : KitTestContext
                 "AccountEvents.NoMatch",
                 "AccountEvents.Action.SecurityEvents"
             ])
-            .Concat(AccountEventListQuery.Periods.Select(days => $"AccountEvents.Filter.Period.Days{days}"))
-            .Concat(typeof(IdentityErrorCodes).GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Select(field => (string)field.GetValue(null)!)
-                .Where(code => code.StartsWith("account_event.", StringComparison.Ordinal)));
-
-        keys.Where(key => l[key].ResourceNotFound).Should().BeEmpty();
-    }
+            .Concat(AccountEventListQuery.Periods.Select(days => $"AccountEvents.Filter.Period.Days{days}"));
 }
