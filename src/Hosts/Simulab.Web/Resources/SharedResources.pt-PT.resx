@@ -131,6 +131,9 @@
   <data name="PermissionGroup.identity" xml:space="preserve"><value>Identidade e acesso</value></data>
   <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Gerir perfis e atribuições</value></data>
   <data name="Permission.identity.roles.manage.Description" xml:space="preserve"><value>Criar, editar e eliminar perfis, escolher as suas permissões e atribuir perfis a utilizadores.</value></data>
+  <data name="PermissionGroup.catalog" xml:space="preserve"><value>Catálogo</value></data>
+  <data name="Permission.catalog.manage.Name" xml:space="preserve"><value>Gerir o catálogo</value></data>
+  <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Criar, editar e eliminar entidades organizadoras e tudo o resto do catálogo de provas.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Estado</value></data>

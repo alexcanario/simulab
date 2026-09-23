@@ -30,7 +30,7 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         OrganizerKind kind = OrganizerKind.ExamBoard,
         string? description = null,
         string? website = null) =>
-        new(name ?? Unique("Banca"), acronym ?? UniqueAcronym(), kind, description, website);
+        new(name ?? Unique("Banca"), acronym ?? UniqueAcronym(), kind.ToString(), description, website);
 
     private static async Task<OrganizerResponse> CreateAsync(HttpClient admin, SaveOrganizerRequest request)
     {
@@ -138,7 +138,7 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
 
         var response = await admin.PutAsJsonAsync(
             $"{Organizers}/{organizer.Id}",
-            new SaveOrganizerRequest(organizer.Name.ToUpperInvariant(), organizer.Acronym, OrganizerKind.CertifyingBody, null, null),
+            new SaveOrganizerRequest(organizer.Name.ToUpperInvariant(), organizer.Acronym, nameof(OrganizerKind.CertifyingBody), null, null),
             AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -157,7 +157,7 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
 
         var response = await admin.PutAsJsonAsync(
             $"{Organizers}/{organizer.Id}",
-            new SaveOrganizerRequest(renamed, organizer.Acronym, organizer.Kind, null, null),
+            new SaveOrganizerRequest(renamed, organizer.Acronym, organizer.Kind.ToString(), null, null),
             AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -245,9 +245,42 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         var admin = await AdminAsync();
         var existing = await CreateAsync(admin, Valid());
 
-        var response = await admin.PostAsJsonAsync(Organizers, new SaveOrganizerRequest(" ", existing.Acronym, OrganizerKind.ExamBoard), AppJson.Options);
+        var response = await admin.PostAsJsonAsync(Organizers, new SaveOrganizerRequest(" ", existing.Acronym, nameof(OrganizerKind.ExamBoard)), AppJson.Options);
 
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerNameRequired);
+    }
+
+    // BR7: a kind that is not one of the three names is a coded 400, not a deserialization failure.
+    [Theory]
+    [InlineData("Ministry")]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task Create_KindThatIsNotOneOfTheThreeNames_IsRefusedWithKindInvalid(string? kind)
+    {
+        var admin = await AdminAsync();
+
+        var response = await admin.PostAsJsonAsync(
+            Organizers,
+            new SaveOrganizerRequest(Unique("Banca"), UniqueAcronym(), kind),
+            AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerKindInvalid);
+    }
+
+    // AC3, BR12: with no sort asked for, the server answers by name ascending.
+    [Fact]
+    public async Task List_WithoutASort_ComesBackByNameAscending()
+    {
+        var admin = await AdminAsync();
+        var marker = UniqueAcronym();
+        await CreateAsync(admin, Valid(name: $"{marker} Charlie"));
+        await CreateAsync(admin, Valid(name: $"{marker} Alfa"));
+        await CreateAsync(admin, Valid(name: $"{marker} Bravo"));
+
+        var listed = await ListAsync(admin, $"?search={marker}");
+
+        listed.Items.Select(item => item.Name).Should().Equal($"{marker} Alfa", $"{marker} Bravo", $"{marker} Charlie");
     }
 
     // AC12: the search ignores accents, in both directions.

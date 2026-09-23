@@ -163,7 +163,7 @@
         var result = await Save(new SaveOrganizerRequest(
             Trimmed(_name),
             Trimmed(_acronym),
-            _kind,
+            _kind.ToString(),
             Trimmed(_description).Length == 0 ? null : Trimmed(_description),
             Trimmed(_website).Length == 0 ? null : Trimmed(_website)));
 

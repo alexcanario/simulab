@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Pages.Admin;
+using Simulab.Web.Services;
 
 namespace Simulab.Web.Tests.Admin;
 
@@ -36,5 +38,20 @@ public sealed class AdminPagesAuthorizationTests
             page.GetCustomAttributes<AuthorizeAttribute>().Select(attribute => attribute.Policy)
                 .Should().Equal([PermissionPolicy.Prefix + Expected[page.Name]], page.Name);
         }
+    }
+
+    /// <summary>
+    /// F-33, BR2: the Web builds one policy per name in <see cref="WebPermissions.All"/>. A page or a menu
+    /// item asking for a permission that is not in that list has no policy to resolve and throws when it is
+    /// opened, while the Api still answers - a failure that lands far from its cause.
+    /// </summary>
+    [Fact]
+    public void EveryPermissionAPageOrMenuItemAsksFor_HasAPolicyInTheWeb()
+    {
+        var asked = Expected.Values
+            .Concat(NavigationItems.All.Select(item => item.RequiredPermission).OfType<string>())
+            .Distinct(StringComparer.Ordinal);
+
+        asked.Should().BeSubsetOf(WebPermissions.All);
     }
 }

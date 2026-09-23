@@ -131,6 +131,9 @@
   <data name="PermissionGroup.identity" xml:space="preserve"><value>Identity and access</value></data>
   <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Manage roles and user roles</value></data>
   <data name="Permission.identity.roles.manage.Description" xml:space="preserve"><value>Create, edit and delete roles, choose their permissions and give roles to users.</value></data>
+  <data name="PermissionGroup.catalog" xml:space="preserve"><value>Catalog</value></data>
+  <data name="Permission.catalog.manage.Name" xml:space="preserve"><value>Manage the catalog</value></data>
+  <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Create, edit and delete organizers and everything else in the exam catalog.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>

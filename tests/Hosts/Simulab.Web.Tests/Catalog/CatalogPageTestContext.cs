@@ -114,7 +114,7 @@ public abstract class CatalogPageTestContext : KitTestContext
         }
 
         private static OrganizerResponse Saved(Guid id, SaveOrganizerRequest request) =>
-            new(id, request.Name!, request.Acronym!.ToUpperInvariant(), request.Kind, request.Description, request.Website);
+            new(id, request.Name!, request.Acronym!.ToUpperInvariant(), request.ParseKind()!.Value, request.Description, request.Website);
 
         public static T Read<T>(string? body) => System.Text.Json.JsonSerializer.Deserialize<T>(body!, AppJson.Options)!;
 

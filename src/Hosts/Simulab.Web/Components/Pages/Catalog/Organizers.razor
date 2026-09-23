@@ -36,7 +36,10 @@
               OnEmptyAction="AddAsync">
     <Columns>
         @* The column's property name is what reaches AppTableQuery.SortBy; SortColumn maps it to the API's. *@
-        <PropertyColumn T="OrganizerResponse" TProperty="string" Property="row => row.Name" Title="@L["Organizers.Column.Name"]" />
+        @* A name is up to 150 characters, so the cell truncates and the full name is the tooltip (rule: ui-project). *@
+        <PropertyColumn T="OrganizerResponse" TProperty="string" Property="row => row.Name" Title="@L["Organizers.Column.Name"]">
+            <CellTemplate><AppTruncatedText Text="@context.Item.Name" MaxWidth="24rem" /></CellTemplate>
+        </PropertyColumn>
         <PropertyColumn T="OrganizerResponse" TProperty="string" Property="row => row.Acronym" Title="@L["Organizers.Column.Acronym"]" />
         <PropertyColumn T="OrganizerResponse" TProperty="OrganizerKind" Property="row => row.Kind" Title="@L["Organizers.Column.Kind"]">
             <CellTemplate>@OrganizerText.KindName(L, context.Item.Kind)</CellTemplate>

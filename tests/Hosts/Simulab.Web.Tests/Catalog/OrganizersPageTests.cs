@@ -88,7 +88,7 @@ public sealed class OrganizersPageTests : CatalogPageTestContext
             var sent = FakeCatalogApi.Read<SaveOrganizerRequest>(created.Body);
             sent.Name.Should().Be("Vunesp", "the dialog trims before it sends");
             sent.Acronym.Should().Be("vnsp");
-            sent.Kind.Should().Be(OrganizerKind.ExamBoard, "the first kind is the default");
+            sent.Kind.Should().Be(nameof(OrganizerKind.ExamBoard), "the kind travels as its name and the first one is the default");
             sent.Website.Should().Be("https://vunesp.com.br");
             sent.Description.Should().BeNull("a blank optional field is sent as nothing");
         });

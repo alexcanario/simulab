@@ -1094,14 +1094,6 @@
         },
         "description": "A signed-in user erases their own account (F-10 UC2). The account is the token subject (BR1), so the\r\nbody carries only the proof that the person at the keyboard owns it (BR2)."
       },
-      "OrganizerKind": {
-        "enum": [
-          "ExamBoard",
-          "CertifyingBody",
-          "University"
-        ],
-        "description": "What an organizer is (F-33, BR7). The three kinds the brief names; it travels as a string."
-      },
       "PasswordResetTokenCheckRequest": {
         "required": [
           "token"
@@ -1243,31 +1235,39 @@
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The organizer's full name, 2 to 150 characters (BR8)."
           },
           "acronym": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The short name, 2 to 20 characters, stored uppercase (BR8)."
           },
           "kind": {
-            "$ref": "#/components/schemas/OrganizerKind"
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of ExamBoard, CertifyingBody or University, by name and ignoring case (BR7)."
           },
           "description": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "Free text, optional."
           },
           "website": {
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "An absolute http or https address, optional (BR10)."
           }
         },
-        "description": "What the add and the edit dialog send (F-33, UC2 and UC3)."
+        "description": "What the add and the edit dialog send (F-33, UC2 and UC3). The kind travels as text, not as the enum,\r\nso a caller that sends an unknown kind gets 400 `organizer.kind_invalid` (BR7) instead of an\r\nuncoded deserialization failure."
       },
       "SaveRoleRequest": {
         "required": [

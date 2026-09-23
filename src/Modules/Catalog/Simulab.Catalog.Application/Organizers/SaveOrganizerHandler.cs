@@ -26,7 +26,10 @@ public sealed class SaveOrganizerHandler(IOrganizerStore store)
         }
 
         // Shape first, so a blank name is answered as a blank name even when the acronym is also taken.
-        var candidate = Organizer.Create(request.Name, request.Acronym, request.Kind, request.Description, request.Website);
+        // A kind that is not one of the three names stays undefined and the entity answers with
+        // organizer.kind_invalid (BR7), the same code a caller gets for any other unreadable kind.
+        var kind = request.ParseKind() ?? default;
+        var candidate = Organizer.Create(request.Name, request.Acronym, kind, request.Description, request.Website);
         if (candidate.IsFailure)
         {
             return Result.Failure<OrganizerResponse>(candidate.Error!);
@@ -46,7 +49,7 @@ public sealed class SaveOrganizerHandler(IOrganizerStore store)
         else
         {
             // The same validation ran on the candidate a moment ago, so this one cannot fail.
-            organizer.Update(request.Name, request.Acronym, request.Kind, request.Description, request.Website);
+            organizer.Update(request.Name, request.Acronym, kind, request.Description, request.Website);
         }
 
         await store.SaveChangesAsync(cancellationToken);
