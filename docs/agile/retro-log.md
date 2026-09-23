@@ -70,6 +70,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
 | ⏳ | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | |
 | ⏳ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | |
+| ⏳ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | |
+| ⏳ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -522,3 +524,9 @@ Shipped in `92ac5fe`. Built in a worktree; 16 palette pairs fixed, every theme c
 - Project rule: `.claude/rules/agile/project.md`, the line on reading a rendered colour after the theme transition now adds that with the browser pane hidden transitions never finish, so `* { transition: none !important }` is injected before measuring (F-17: the field border read the previous theme's colour for over 2 s).
 - `plugin` `[generic]` worktrees.md, Work: `preview_start` reads only the main checkout's `.claude/launch.json`; to preview an app host from a worktree, add a temporary configuration with the absolute `--project` path there and restore the file right after, saying so in the report (F-17).
 - `plugin` `[stack: .NET]` worktrees.md, Ship steps 3-4: before `git worktree remove`, run `dotnet build-server shutdown` and ask the owner to close Visual Studio; on Windows the removal failed halfway (`Invalid argument`) and left a folder without `.git`, held by `.vs` (F-17).
+
+## 2026-09-23 — F-18 Job claim index for stale rows
+Shipped in `2ce7ec8`. Built in a worktree; change note v2 after the premise was measured false during build.
+- `plugin` `[generic]` feature-refinement: a premise about query performance is measured before approval, with a throwaway `EXPLAIN` on the test container over a realistic row count; "not measured" does not go to approval (F-18: the review's "PostgreSQL cannot use the index for the OR" reached the build, where the old index turned out to use a BitmapOr with no sequential scan).
+- Project rule: `.claude/rules/agile/project.md` (Data): a change to the job table's model adds the Jobs migration and an empty migration in every module context that maps it (`AddJobQueue`), or EF reports pending model changes at startup (F-18: `JobsActiveIndexSnapshot` in Identity).
+- Item F-28 (board 747): the DocGen data dictionary shows a partial index without its filter; `plugin` `[stack: DocGen]` note for the plugin's DocGen template too (F-18: `ix_jobs_active_created_at on created_at`, no `WHERE status IN (0, 1)`).

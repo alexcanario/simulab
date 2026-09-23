@@ -18,6 +18,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - One schema and one `DbContext` per module. A module never reads another module's tables.
 - A query filter that depends on the current tenant or user reads it from the context instance, never from a value captured when the model was built: EF caches the compiled model and the first request would freeze its tenant.
 - A new building block or shared test project is listed in `docs/agile/profile.md` in the same item that creates it.
+- A change to the job table's model adds the Jobs migration and an empty migration in every module context that maps it (`AddJobQueue`), or EF reports pending model changes at startup (F-18).
 
 ## Access and entitlements
 - Pages, menus and endpoints check permissions, never role names.
