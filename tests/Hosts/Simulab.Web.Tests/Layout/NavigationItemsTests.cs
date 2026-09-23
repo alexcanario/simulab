@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Routing;
+using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Ui;
@@ -67,6 +68,24 @@ public class NavigationItemsTests
                 ("/admin/users", IdentityPermissions.RolesManage),
                 ("/admin/role-history", IdentityPermissions.RolesManage),
                 ("/admin/account-events", IdentityPermissions.RolesManage));
+    }
+
+    [Fact]
+    public void All_ContentItems_AreOrganizersBehindCatalogManage()
+    {
+        // F-33, BR4: the Content section holds the catalog screens, each behind the one permission of its module.
+        NavigationItems.All.Where(item => item.Section == NavigationSection.Content)
+            .Select(item => (item.Route, item.RequiredPermission))
+            .Should().Equal(("/admin/organizers", CatalogPermissions.Manage));
+    }
+
+    [Fact]
+    public void Visible_WithoutCatalogManage_HidesTheContentSection()
+    {
+        // F-33, AC4: a Student has no catalog permission, so the section never appears in their menu.
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, NoPermissions);
+
+        NavigationItems.Sections(visible).Select(section => section.Key).Should().NotContain(NavigationSection.Content);
     }
 
     [Fact]
