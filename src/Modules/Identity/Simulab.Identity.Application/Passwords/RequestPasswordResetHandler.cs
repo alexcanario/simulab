@@ -12,6 +12,7 @@ public sealed class RequestPasswordResetHandler(
     IUserDirectory userDirectory,
     IPasswordResetTokenStore tokenStore,
     IPasswordMailer mailer,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
     public async Task HandleAsync(string? email, CancellationToken cancellationToken = default)
@@ -53,6 +54,10 @@ public sealed class RequestPasswordResetHandler(
                 ExpiresAt = now.Add(PasswordResetPolicy.Lifetime)
             },
             cancellationToken);
+
+        // F-21 BR6: only a known address leaves an event. Written after the link exists, and it changes
+        // nothing the caller can observe: the answer is the same on every path (F-7 BR1).
+        await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordResetRequested, cancellationToken);
     }
 
     /// <summary>BR3, per account and silent: one email a minute, five an hour, counted from the token rows.</summary>

@@ -2,6 +2,23 @@
 // To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
 // Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
 
+Table account_events {
+  id uuid [pk]
+  ip_address varchar(45)
+  method varchar(40)
+  reason varchar(40)
+  type varchar(40) [not null]
+  user_id uuid
+
+  indexes {
+    ip_address [name: 'ix_account_events_ip_address']
+    type [name: 'ix_account_events_type']
+    user_id [name: 'ix_account_events_user_id']
+  }
+
+  Note: 'Entity: AccountEvent - standard columns: 8 (see data dictionary)'
+}
+
 Table consent_records {
   id uuid [pk]
   accepted_at timestamptz [not null]

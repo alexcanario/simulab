@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Totp;
@@ -40,6 +41,7 @@ public static class TokenEndpoints
         HttpContext context,
         UserManager<User> userManager,
         IRefreshSessionStore sessions,
+        IAccountEventLog accountEvents,
         TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
@@ -48,7 +50,7 @@ public static class TokenEndpoints
 
         if (request.IsPasswordGrantType())
         {
-            return await HandlePasswordGrantAsync(context, request, userManager, sessions, timeProvider, cancellationToken);
+            return await HandlePasswordGrantAsync(context, request, userManager, sessions, accountEvents, timeProvider, cancellationToken);
         }
 
         if (request.IsRefreshTokenGrantType())
@@ -63,7 +65,7 @@ public static class TokenEndpoints
 
         if (request.GrantType == GoogleSignInProtocol.GrantType && GoogleSignInEnabled(context))
         {
-            return await HandleGoogleGrantAsync(context, request, sessions, timeProvider, cancellationToken);
+            return await HandleGoogleGrantAsync(context, request, sessions, accountEvents, timeProvider, cancellationToken);
         }
 
         return Forbid(Errors.UnsupportedGrantType);
@@ -82,6 +84,7 @@ public static class TokenEndpoints
         HttpContext context,
         OpenIddictRequest request,
         IRefreshSessionStore sessions,
+        IAccountEventLog accountEvents,
         TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
@@ -90,6 +93,14 @@ public static class TokenEndpoints
         var result = await handler.SignInAsync((string?)request[GoogleSignInProtocol.IdTokenParameter], cancellationToken);
         if (result.IsFailure)
         {
+            // F-21 BR4: a token Google's own checks refused. The other two answers of this step are not failed
+            // sign-ins — one sends the visitor to the confirmation page, the other tells them to use the
+            // password — and no account was ever named by them.
+            if (result.Error!.Code is IdentityErrorCodes.GoogleTokenInvalid or IdentityErrorCodes.GoogleEmailNotVerified)
+            {
+                await accountEvents.SignInFailedAsync(null, AccountEventReason.GoogleTokenRefused, cancellationToken);
+            }
+
             return Forbid(result.Error!.Code);
         }
 
@@ -114,6 +125,9 @@ public static class TokenEndpoints
         }
 
         await handler.ClearFailuresAsync(user);
+
+        // F-21 BR3: Google was the last step.
+        await accountEvents.SignInSucceededAsync(user.Id, AccountEventMethod.Google, cancellationToken);
         return await IssueTokensAsync(user, sessions, timeProvider, cancellationToken);
     }
 
@@ -134,11 +148,14 @@ public static class TokenEndpoints
     {
         // Resolved here, not as a parameter: it exists only while the feature is on.
         var handler = context.RequestServices.GetRequiredService<TotpSignInHandler>();
+
+        // F-21 BR3, BR4: the handler records this step's event — only it knows which account the spent
+        // challenge belonged to, and which of the two codes was accepted.
         var result = await handler.CompleteAsync((string?)request[TotpChallengeParameter], (string?)request[TotpCodeParameter], cancellationToken);
 
         if (result.IsSuccess)
         {
-            return await IssueTokensAsync(result.Value, sessions, timeProvider, cancellationToken);
+            return await IssueTokensAsync(result.Value.User, sessions, timeProvider, cancellationToken);
         }
 
         return Forbid(result.Error!.Code, result.Error.Code == IdentityErrorCodes.AccountLocked ? result.Error.Detail : null);
@@ -150,17 +167,21 @@ public static class TokenEndpoints
         OpenIddictRequest request,
         UserManager<User> userManager,
         IRefreshSessionStore sessions,
+        IAccountEventLog accountEvents,
         TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         var user = string.IsNullOrWhiteSpace(request.Username) ? null : await userManager.FindByNameAsync(request.Username);
         if (user is null)
         {
+            // F-21 BR4: the attempt is recorded, the typed name is not.
+            await accountEvents.SignInFailedAsync(null, AccountEventReason.UnknownAccount, cancellationToken);
             return Forbid(IdentityErrorCodes.InvalidCredentials);
         }
 
         if (await userManager.IsLockedOutAsync(user))
         {
+            await accountEvents.SignInFailedAsync(user.Id, AccountEventReason.LockedOut, cancellationToken);
             var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
             var remaining = lockoutEnd.HasValue ? lockoutEnd.Value - timeProvider.GetUtcNow() : TimeSpan.Zero;
             return Forbid(IdentityErrorCodes.AccountLocked, SecondsOf(remaining));
@@ -169,11 +190,20 @@ public static class TokenEndpoints
         if (!await userManager.CheckPasswordAsync(user, request.Password ?? string.Empty))
         {
             await userManager.AccessFailedAsync(user);
+            await accountEvents.SignInFailedAsync(user.Id, AccountEventReason.WrongPassword, cancellationToken);
+
+            // F-21 BR5: this failure is what crossed the limit; the attempts that follow are failures, not lockouts.
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                await accountEvents.AccountLockedAsync(user.Id, cancellationToken);
+            }
+
             return Forbid(IdentityErrorCodes.InvalidCredentials);
         }
 
         if (user.Status != AccountStatus.Active)
         {
+            await accountEvents.SignInFailedAsync(user.Id, AccountEventReason.EmailNotVerified, cancellationToken);
             return Forbid(IdentityErrorCodes.EmailNotVerified);
         }
 
@@ -192,6 +222,9 @@ public static class TokenEndpoints
         }
 
         await userManager.ResetAccessFailedCountAsync(user);
+
+        // F-21 BR3: the password was the last step, so this is the sign-in.
+        await accountEvents.SignInSucceededAsync(user.Id, AccountEventMethod.Password, cancellationToken);
         return await IssueTokensAsync(user, sessions, timeProvider, cancellationToken);
     }
 

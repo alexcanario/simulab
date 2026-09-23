@@ -19,7 +19,7 @@ public sealed class AdminPagesAuthorizationTests
             .Where(type => type.GetCustomAttributes<RouteAttribute>().Any(route => route.Template.StartsWith("/admin/", StringComparison.Ordinal)))
             .ToList();
 
-        pages.Select(page => page.Name).Should().BeEquivalentTo("Roles", "Users", "RoleHistory");
+        pages.Select(page => page.Name).Should().BeEquivalentTo("Roles", "Users", "RoleHistory", "AccountEvents");
         pages.Should().OnlyContain(page => page.GetCustomAttributes<AuthorizeAttribute>()
             .Any(attribute => attribute.Policy == PermissionPolicy.Prefix + IdentityPermissions.RolesManage));
     }

@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14]
-updated: 2026-09-21
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21]
+updated: 2026-09-23
 ---
 # Simulab
 
@@ -42,3 +42,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um perfil
 - [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis (Administradores)
 - [Histórico de perfis](role-history.md): quem alterou que perfil ou os perfis de quem, e quando (Administradores)
+- [Eventos de conta](account-events.md): inícios de sessão, falhas, bloqueios e alterações de conta (Administradores)

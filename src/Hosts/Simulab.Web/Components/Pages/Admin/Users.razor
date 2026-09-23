@@ -71,7 +71,7 @@
     </Columns>
     <RowActions>
         <AppRowActions ItemName="@context.Email"
-                       MoreActions="@([new AppRowAction(L["Users.EditRoles.Action"], AppIcons.Edit, () => EditRolesAsync(context)), HistoryAction(context)])" />
+                       MoreActions="@([new AppRowAction(L["Users.EditRoles.Action"], AppIcons.Edit, () => EditRolesAsync(context)), HistoryAction(context), SecurityEventsAction(context)])" />
     </RowActions>
 </AppDataTable>
 
@@ -138,6 +138,14 @@
         new(L["RoleHistory.Action.History"], AppIcons.History, () =>
         {
             Navigation.NavigateTo($"/admin/role-history?user={user.Id}");
+            return Task.CompletedTask;
+        });
+
+    // F-21, UC3: the account event trail, already filtered to this account.
+    private AppRowAction SecurityEventsAction(UserSummaryResponse user) =>
+        new(L["AccountEvents.Action.SecurityEvents"], AppIcons.Security, () =>
+        {
+            Navigation.NavigateTo($"/admin/account-events?user={user.Id}");
             return Task.CompletedTask;
         });
 

@@ -2,6 +2,33 @@
 
 Generated from the EF model. Do not edit. Schema: `identity`.
 
+## account_events
+
+Entity: `AccountEvent`
+
+| Column | Type | Null | Key | Default | Notes |
+|---|---|---|---|---|---|
+| id | uuid | no | PK |  |  |
+| created_at | timestamp with time zone | no |  |  |  |
+| created_by | uuid | yes |  |  |  |
+| deleted_at | timestamp with time zone | yes |  |  |  |
+| deleted_by | uuid | yes |  |  |  |
+| ip_address | character varying(45) | yes |  |  | max 45 |
+| is_deleted | boolean | no |  |  |  |
+| method | character varying(40) | yes |  |  | max 40 |
+| reason | character varying(40) | yes |  |  | max 40 |
+| tenant_id | uuid | yes |  |  |  |
+| type | character varying(40) | no |  |  | max 40 |
+| updated_at | timestamp with time zone | yes |  |  |  |
+| updated_by | uuid | yes |  |  |  |
+| user_id | uuid | yes |  |  |  |
+
+Indexes:
+- `ix_account_events_created_at` on created_at
+- `ix_account_events_ip_address` on ip_address
+- `ix_account_events_type` on type
+- `ix_account_events_user_id` on user_id
+
 ## consent_records
 
 Entity: `ConsentRecord`

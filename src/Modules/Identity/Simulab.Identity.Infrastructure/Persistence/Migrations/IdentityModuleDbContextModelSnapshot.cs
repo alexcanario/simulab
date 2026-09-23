@@ -423,6 +423,88 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                     b.ToTable("openiddict_tokens", "identity");
                 });
 
+            modelBuilder.Entity("Simulab.Identity.Domain.Entities.AccountEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)")
+                        .HasColumnName("ip_address");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Method")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("method");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_account_events");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_account_events_created_at");
+
+                    b.HasIndex("IpAddress")
+                        .HasDatabaseName("ix_account_events_ip_address");
+
+                    b.HasIndex("Type")
+                        .HasDatabaseName("ix_account_events_type");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_account_events_user_id");
+
+                    b.ToTable("account_events", "identity");
+                });
+
             modelBuilder.Entity("Simulab.Identity.Domain.Entities.ConsentRecord", b =>
                 {
                     b.Property<Guid>("Id")

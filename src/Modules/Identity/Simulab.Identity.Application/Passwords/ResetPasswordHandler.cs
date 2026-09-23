@@ -20,6 +20,7 @@ public sealed class ResetPasswordHandler(
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
     IIdentityUnitOfWork unitOfWork,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(string? rawToken, string? newPassword, CancellationToken cancellationToken = default)
@@ -88,6 +89,9 @@ public sealed class ResetPasswordHandler(
         await sessions.RevokeAllAsync(user.Id, exceptSessionJti: null, cancellationToken);
 
         await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, now, cancellationToken);
+
+        // F-21 BR1, BR7: after the password is really set.
+        await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordResetCompleted, cancellationToken);
         return Result.Success();
     }
 
