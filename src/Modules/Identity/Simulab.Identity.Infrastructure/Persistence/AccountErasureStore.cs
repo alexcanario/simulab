@@ -64,6 +64,16 @@ public sealed class AccountErasureStore(IdentityModuleDbContext context, ILookup
     /// BR9: one statement, because the record has no other reason to be loaded and is written once
     /// everywhere else. The soft-delete filter is ignored so no consent evidence keeps an address.
     /// </summary>
+    /// <summary>
+    /// F-21 BR9: the trail keeps the events of the erased account — the user id is already the pseudonym —
+    /// and loses the one personal field they carry. One statement, as the consent records above: the events
+    /// have no other reason to be loaded, and nothing else ever updates them.
+    /// </summary>
+    public Task ClearAccountEventAddressesAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        context.AccountEvents
+            .Where(accountEvent => accountEvent.UserId == userId && accountEvent.IpAddress != null)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(accountEvent => accountEvent.IpAddress, (string?)null), cancellationToken);
+
     public Task ClearConsentAddressesAsync(Guid userId, CancellationToken cancellationToken = default) =>
         context.ConsentRecords
             .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])

@@ -28,6 +28,7 @@ using Simulab.Identity.Infrastructure.Sessions;
 using Simulab.Identity.Infrastructure.Totp;
 using Simulab.Jobs;
 using Simulab.Persistence;
+using Simulab.SharedKernel.Security;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Simulab.Identity.Infrastructure;
@@ -123,6 +124,13 @@ public static class IdentityModule
         // F-10: erasing the own account reuses the role-administration transaction (BR11).
         services.AddScoped<IAccountErasureStore, AccountErasureStore>();
         services.AddScoped<EraseAccountHandler>();
+
+        // F-21: the account event trail. The log is used by almost every handler above, and by the token
+        // endpoint; the queries serve the back office page. A host that does not know the caller's address
+        // (a worker, a test that calls a handler directly) gets the null one.
+        services.TryAddScoped<ICallerAddress, NoCallerAddress>();
+        services.AddScoped<IAccountEventLog, AccountEventLog>();
+        services.AddScoped<IAccountEventQueries, AccountEventQueries>();
 
         // F-16: the user downloads their own data, confirmed with the password as an erasure is.
         services.AddScoped<IDataExportQueries, DataExportQueries>();

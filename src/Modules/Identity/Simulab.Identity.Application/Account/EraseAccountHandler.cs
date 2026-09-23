@@ -21,6 +21,7 @@ public sealed class EraseAccountHandler(
     IRefreshSessionStore sessions,
     IErasureMailer mailer,
     IIntegrationEventPublisher events,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(Guid userId, string? currentPassword, CancellationToken cancellationToken = default)
@@ -47,9 +48,14 @@ public sealed class EraseAccountHandler(
         if (string.IsNullOrEmpty(currentPassword) || !await userManager.CheckPasswordAsync(user, currentPassword))
         {
             await userManager.AccessFailedAsync(user);
-            return await userManager.IsLockedOutAsync(user)
-                ? await LockedAsync(user)
-                : Failure(IdentityErrorCodes.AccountErasureCurrentPasswordInvalid, ErrorKind.BusinessRule);
+            if (!await userManager.IsLockedOutAsync(user))
+            {
+                return Failure(IdentityErrorCodes.AccountErasureCurrentPasswordInvalid, ErrorKind.BusinessRule);
+            }
+
+            // F-21 BR5: the refused attempt is not an event of its own, but the lockout it just caused is.
+            await accountEvents.AccountLockedAsync(user.Id, cancellationToken);
+            return await LockedAsync(user);
         }
 
         // BR12: read before the tombstone replaces them.
@@ -93,6 +99,11 @@ public sealed class EraseAccountHandler(
 
         await store.RemoveAccountDataAsync(userId, cancellationToken);
         await store.ClearConsentAddressesAsync(userId, cancellationToken);
+
+        // F-21 BR9: the account's events stay, without the address they carried. BR7: the erasure event is
+        // staged on this transaction, so a rollback below takes it along.
+        await store.ClearAccountEventAddressesAsync(userId, cancellationToken);
+        accountEvents.StageAccountErased(userId);
 
         var tombstone = user.Erase();
         store.ApplyErasure(user, tombstone);

@@ -6,6 +6,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 |---|---|---|---|
 | `DELETE` | `/api/v1/identity/roles/{id}` | DeleteRole | 200 |
 | `DELETE` | `/api/v1/identity/totp` | DisableTotp | 200 |
+| `GET` | `/api/v1/identity/account-events` | ListAccountEvents | 200 |
 | `GET` | `/api/v1/identity/legal-documents/{topic}` | GetLegalDocument | 200 |
 | `GET` | `/api/v1/identity/permissions` | ListPermissions | 200 |
 | `GET` | `/api/v1/identity/profile` | GetProfile | 200 |

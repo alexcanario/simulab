@@ -19,6 +19,7 @@ public sealed partial class ExportDataHandler(
     IRefreshSessionStore sessions,
     IDataExportMailer mailer,
     IIdentityUnitOfWork unitOfWork,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider,
     ILogger<ExportDataHandler> logger)
 {
@@ -46,9 +47,14 @@ public sealed partial class ExportDataHandler(
         if (string.IsNullOrEmpty(currentPassword) || !await userManager.CheckPasswordAsync(user, currentPassword))
         {
             await userManager.AccessFailedAsync(user);
-            return await userManager.IsLockedOutAsync(user)
-                ? await LockedAsync(user)
-                : Failure(IdentityErrorCodes.DataExportCurrentPasswordInvalid);
+            if (!await userManager.IsLockedOutAsync(user))
+            {
+                return Failure(IdentityErrorCodes.DataExportCurrentPasswordInvalid);
+            }
+
+            // F-21 BR5: the export is not an event of its own, but the lockout it just caused is.
+            await accountEvents.AccountLockedAsync(user.Id, cancellationToken);
+            return await LockedAsync(user);
         }
 
         await userManager.ResetAccessFailedCountAsync(user);

@@ -61,6 +61,12 @@ public static class IdentityErrorCodes
     /// <summary>F-14, BR6: the history's period is 7, 30 or 90 days, or absent for all time.</summary>
     public const string RoleChangePeriodInvalid = "role_change.period_invalid";
 
+    /// <summary>F-21, BR10: the trail's period is 7, 30 or 90 days, or absent for all time.</summary>
+    public const string AccountEventPeriodInvalid = "account_event.period_invalid";
+
+    /// <summary>F-21, BR10: the event filter is one of <see cref="AccountEventTypes.All"/>.</summary>
+    public const string AccountEventTypeInvalid = "account_event.event_invalid";
+
     /// <summary>
     /// F-11 BR9: the password was right and the account has two-factor on. An OAuth <c>error</c> of the token
     /// endpoint, not a failure the user reads: the sign-in page moves to the code step.

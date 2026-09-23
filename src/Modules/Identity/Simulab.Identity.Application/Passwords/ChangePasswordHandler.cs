@@ -17,6 +17,7 @@ public sealed class ChangePasswordHandler(
     IRefreshSessionStore sessions,
     IPasswordMailer mailer,
     IIdentityUnitOfWork unitOfWork,
+    IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(
@@ -47,9 +48,14 @@ public sealed class ChangePasswordHandler(
         if (string.IsNullOrEmpty(currentPassword) || !await userManager.CheckPasswordAsync(user, currentPassword))
         {
             await userManager.AccessFailedAsync(user);
-            return await userManager.IsLockedOutAsync(user)
-                ? await LockedAsync(user)
-                : Failure(IdentityErrorCodes.PasswordChangeCurrentInvalid, ErrorKind.BusinessRule);
+            if (!await userManager.IsLockedOutAsync(user))
+            {
+                return Failure(IdentityErrorCodes.PasswordChangeCurrentInvalid, ErrorKind.BusinessRule);
+            }
+
+            // F-21 BR5: the attempt itself is not a recorded event, but the lockout it just caused is.
+            await accountEvents.AccountLockedAsync(user.Id, cancellationToken);
+            return await LockedAsync(user);
         }
 
         var refusal = await PasswordRules.CheckNewPasswordAsync(
@@ -76,6 +82,9 @@ public sealed class ChangePasswordHandler(
         }
 
         await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, timeProvider.GetUtcNow(), cancellationToken);
+
+        // F-21 BR1, BR7: after the new password is really in place.
+        await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordChanged, cancellationToken);
         return Result.Success();
     }
 

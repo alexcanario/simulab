@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14]
-updated: 2026-09-21
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21]
+updated: 2026-09-23
 ---
 # Simulab
 
@@ -42,3 +42,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um papel
 - [Usuários](users.md): achar uma conta e mudar os papéis dela (Administradores)
 - [Histórico de papéis](role-history.md): quem mudou qual papel ou os papéis de quem, e quando (Administradores)
+- [Eventos de conta](account-events.md): entradas, falhas ao entrar, bloqueios e mudanças de conta (Administradores)

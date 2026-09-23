@@ -38,6 +38,10 @@ builder.Services.AddJobs(
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, ClaimsPrincipalCurrentUser>();
 
+// F-21 BR2: the address the account event trail records, read exactly as the rate limiter reads it.
+// Registered before AddIdentityModule's fallback, as the caller above is.
+builder.Services.AddScoped<ICallerAddress, HttpContextCallerAddress>();
+
 // Refresh-token sessions and the access-token revocation set (F-5). The Aspire client integration (not
 // a plain ConnectionMultiplexer.Connect) is what trusts the local Redis container's TLS certificate.
 builder.AddRedisClient("redis");

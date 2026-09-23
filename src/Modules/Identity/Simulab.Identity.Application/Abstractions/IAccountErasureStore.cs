@@ -25,5 +25,8 @@ public interface IAccountErasureStore
     /// <summary>BR9: keeps the consent records and clears their IP address.</summary>
     Task ClearConsentAddressesAsync(Guid userId, CancellationToken cancellationToken = default);
 
+    /// <summary>F-21 BR9: keeps this account's events and clears their client address, the same way.</summary>
+    Task ClearAccountEventAddressesAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
