@@ -132,6 +132,15 @@
     <AppAlert Severity="Severity.Success" Text="@I["CheckEmail.Resend.Sent"]" />
 </section>
 
+<section id="gallery-sign-in" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.SignIn"]</MudText>
+    <MudPaper Class="pa-4" Elevation="0" Outlined="true" Style="max-width: 420px">
+        <AppDivider Text="@I["Auth.Or"]" />
+        @* Here the button only reloads the gallery: the round trip is F-20's, behind its switch. *@
+        <AppGoogleButton Text="@I["Auth.ContinueWithGoogle"]" StartPath="/dev/ui" />
+    </MudPaper>
+</section>
+
 <section id="gallery-errors" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Errors"]</MudText>
     <AppAlert Severity="Severity.Error" Class="mb-2" Text="@($"{L["Gallery.Errors.Known"]}: {ErrorText.For("common.not_found")}")" />

@@ -37,7 +37,7 @@ builder.Services.AddSingleton<SessionRefreshGate>();
 builder.Services.AddScoped<WebSessionTokenAccessor>();
 builder.Services.AddScoped<AuthenticationStateProvider, SessionRevalidatingStateProvider>();
 builder.Services.AddOptions<OpenIddictClientOptions>().Bind(builder.Configuration.GetSection(OpenIddictClientOptions.SectionName));
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+var authentication = builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "simulab.auth";
@@ -49,6 +49,52 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/sign-in";
         options.Events = new SessionCookieEvents();
     });
+builder.Services.AddScoped<SignInHandOff>();
+
+// F-20 BR1: Google sign-in exists only while it is on. This host owns the round trip because it is the only one the
+// browser reaches; the Api still checks the ID token itself (BR2).
+var google = GoogleSignInSettings.From(builder.Configuration);
+builder.Services.AddSingleton(google);
+if (google.Enabled)
+{
+    authentication
+        .AddCookie(GoogleSignInSettings.ExternalScheme, options =>
+        {
+            // Holds Google's answer only between the callback and /account/google/complete, which clears it.
+            options.Cookie.Name = "simulab.google";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+        })
+        .AddOpenIdConnect(GoogleSignInSettings.Scheme, options =>
+        {
+            options.Authority = GoogleSignInSettings.Authority;
+            options.ClientId = google.ClientId;
+            options.ClientSecret = google.ClientSecret;
+            options.ResponseType = "code";
+            options.CallbackPath = GoogleSignInSettings.CallbackPath;
+            options.SignInScheme = GoogleSignInSettings.ExternalScheme;
+            options.SaveTokens = true;
+            options.MapInboundClaims = false;
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("email");
+            options.Scope.Add("profile");
+            options.Events.OnRemoteFailure = context =>
+            {
+                // The visitor said no at Google, or the round trip broke: back to sign-in, never an error page.
+                var denied = context.Request.Query["error"] == "access_denied";
+                context.Response.Redirect(denied ? "/sign-in" : $"/sign-in?error={IdentityErrorCodes.GoogleSignInExpired}");
+                context.HandleResponse();
+                return Task.CompletedTask;
+            };
+        });
+}
+
+// Always registered: the pages that read them decide by the switch, and an empty store costs nothing.
+builder.Services.AddSingleton<GoogleSignUpTickets>();
+builder.Services.AddSingleton<CodeStepTickets>();
 // F-6, BR5-BR7: a policy per permission claim. UI comfort only - the Api still enforces every call.
 builder.Services.AddAuthorization(options =>
 {
@@ -115,6 +161,10 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
+if (google.Enabled)
+{
+    app.MapGoogleAccountEndpoints();
+}
 
 // Language switch: stores the culture in a cookie and returns to a page inside the app only.
 // F-8 BR6: a signed-in user's choice is also saved as the preferred language (best effort), but only when

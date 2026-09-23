@@ -1,0 +1,25 @@
+@* The label of a legal consent checkbox, with the document's name as a link that opens in a new tab (F-4, F-20).
+   One place for both sign-up pages, so the two never read differently. *@
+@inject IStringLocalizer<IdentityResources> I
+
+@_before<a href="@Href" target="_blank" rel="noopener" aria-label="@($"{I[DocumentKey]}, {I["SignUp.LinkOpensNewTab"]}")">@I[DocumentKey]</a>@_after
+
+@code {
+    /// <summary>The sentence, with <c>{0}</c> where the document's name goes (whole sentences, rule: i18n).</summary>
+    [Parameter, EditorRequired] public string LabelKey { get; set; } = string.Empty;
+
+    /// <summary>The document's name.</summary>
+    [Parameter, EditorRequired] public string DocumentKey { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Href { get; set; } = string.Empty;
+
+    private string _before = string.Empty;
+    private string _after = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        var parts = I[LabelKey].Value.Split("{0}");
+        _before = parts[0];
+        _after = parts.Length > 1 ? parts[1] : string.Empty;
+    }
+}

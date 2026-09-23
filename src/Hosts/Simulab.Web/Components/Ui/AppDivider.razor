@@ -1,0 +1,10 @@
+@* A horizontal rule with a word in the middle, such as "or" between two ways to sign in (F-20). *@
+
+<div class="app-divider" role="separator" aria-label="@Text">
+    <span aria-hidden="true">@Text</span>
+</div>
+
+@code {
+    /// <summary>The word, already translated.</summary>
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+}

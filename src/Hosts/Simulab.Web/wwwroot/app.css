@@ -329,6 +329,33 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     text-align: center;
 }
 
+/* F-20: "Continue with Google". Google's mark keeps its own colours; the label follows the theme's text colour. */
+.app-google-button .mud-button-label {
+    gap: 12px;
+    color: var(--mud-palette-text-primary);
+}
+
+.app-google-mark {
+    flex: none;
+}
+
+/* A rule with a word in the middle ("or"), in the secondary text colour. */
+.app-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    font-size: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-divider::before,
+.app-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
 .app-auth-footer {
     display: flex;
     gap: 16px;

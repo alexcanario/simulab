@@ -63,6 +63,7 @@
   <data name="Gallery.Section.Confirm" xml:space="preserve"><value>Caixa de diálogo de confirmação</value></data>
   <data name="Gallery.Section.Form" xml:space="preserve"><value>Ações de formulário</value></data>
   <data name="Gallery.Section.Errors" xml:space="preserve"><value>Mensagens de erro</value></data>
+  <data name="Gallery.Section.SignIn" xml:space="preserve"><value>Outras formas de iniciar sessão</value></data>
   <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Notificação rápida (snackbar)</value></data>
   <data name="Gallery.Section.Icons" xml:space="preserve"><value>Ícones</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Fonte de dados</value></data>
@@ -231,4 +232,10 @@
   <data name="totp.already_enabled" xml:space="preserve"><value>A verificação em dois passos já está ativa.</value></data>
   <data name="totp.not_enabled" xml:space="preserve"><value>A verificação em dois passos não está ativa.</value></data>
   <data name="totp.current_password_invalid" xml:space="preserve"><value>A palavra-passe atual não está correta.</value></data>
+  <data name="identity.password_not_set" xml:space="preserve"><value>A sua conta foi criada com o Google e ainda não tem palavra-passe. Crie uma para confirmar esta ação.</value></data>
+  <data name="google_sign_in.invalid_token" xml:space="preserve"><value>Não foi possível confirmar a resposta do Google. Tente novamente.</value></data>
+  <data name="google_sign_in.email_not_verified" xml:space="preserve"><value>O Google ainda não verificou este endereço de e-mail. Verifique-o no Google e tente novamente.</value></data>
+  <data name="google_sign_in.sign_up_required" xml:space="preserve"><value>Ainda não existe uma conta para esta conta Google.</value></data>
+  <data name="google_sign_in.account_exists" xml:space="preserve"><value>Já existe uma conta com este e-mail. Inicie sessão nela.</value></data>
+  <data name="google_sign_in.expired" xml:space="preserve"><value>O início de sessão com o Google demorou demasiado ou foi interrompido. Comece de novo.</value></data>
 </root>

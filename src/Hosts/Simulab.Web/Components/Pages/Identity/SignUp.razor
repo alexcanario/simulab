@@ -6,6 +6,7 @@
 @inject ErrorText Errors
 @inject SignUpFlow Flow
 @inject NavigationManager Navigation
+@inject Simulab.Web.Services.Auth.GoogleSignInSettings Google
 
 <PageTitle>@I["SignUp.Title"] — @L["App.Name"]</PageTitle>
 
@@ -84,12 +85,12 @@
 
         <AppCheckbox Id="sign-up-terms" Required="true" Disabled="Busy" Error="@_consentError"
                      Value="@_acceptsTerms" ValueChanged="@(value => { _acceptsTerms = value; _consentError = null; })">
-            @LegalLabel("SignUp.Terms.Label", "Auth.Legal.Terms", "/terms")
+            <LegalConsentLabel LabelKey="SignUp.Terms.Label" DocumentKey="Auth.Legal.Terms" Href="/terms" />
         </AppCheckbox>
 
         <AppCheckbox Id="sign-up-privacy" Required="true" Disabled="Busy"
                      Value="@_acceptsPrivacy" ValueChanged="@(value => { _acceptsPrivacy = value; _consentError = null; })">
-            @LegalLabel("SignUp.Privacy.Label", "Auth.Legal.Privacy", "/privacy")
+            <LegalConsentLabel LabelKey="SignUp.Privacy.Label" DocumentKey="Auth.Legal.Privacy" Href="/privacy" />
         </AppCheckbox>
     </div>
 
@@ -115,6 +116,13 @@
             @I["SignUp.Submit"]
         }
     </MudButton>
+
+    @if (Google.Enabled)
+    {
+        @* F-20 UC1: the consents are asked after Google, on the confirmation page. *@
+        <AppDivider Text="@I["Auth.Or"]" />
+        <AppGoogleButton Text="@I["Auth.ContinueWithGoogle"]" StartPath="@Simulab.Web.Services.Auth.GoogleAccountEndpoints.StartPath" Disabled="_submitting" />
+    }
 </div>
 
 @code {
@@ -226,21 +234,4 @@
 
     private string StrengthText(PasswordStrength strength) =>
         I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
-
-    private RenderFragment LegalLabel(string labelKey, string documentKey, string href) => builder =>
-    {
-        var parts = I[labelKey].Value.Split("{0}");
-        builder.AddContent(0, parts[0]);
-        builder.OpenElement(1, "a");
-        builder.AddAttribute(2, "href", href);
-        builder.AddAttribute(3, "target", "_blank");
-        builder.AddAttribute(4, "rel", "noopener");
-        builder.AddAttribute(5, "aria-label", $"{I[documentKey]}, {I["SignUp.LinkOpensNewTab"]}");
-        builder.AddContent(6, I[documentKey].Value);
-        builder.CloseElement();
-        if (parts.Length > 1)
-        {
-            builder.AddContent(7, parts[1]);
-        }
-    };
 }

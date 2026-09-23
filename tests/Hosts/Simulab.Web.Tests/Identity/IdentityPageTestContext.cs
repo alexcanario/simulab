@@ -34,6 +34,12 @@ public abstract class IdentityPageTestContext : KitTestContext
         Services.AddScoped<SignUpFlow>();
         Services.AddSingleton(TimeProvider.System);
 
+        // F-20: off, as in v1, unless a test class turns it on (the last registration wins).
+        Services.AddSingleton(new GoogleSignInSettings());
+        Services.AddSingleton<GoogleSignUpTickets>();
+        Services.AddSingleton<CodeStepTickets>();
+        Services.AddScoped<SignInHandOff>();
+
         // Both documents are there unless a test says otherwise.
         Api.Terms = Document(LegalTopic.Terms);
         Api.Privacy = Document(LegalTopic.Privacy);

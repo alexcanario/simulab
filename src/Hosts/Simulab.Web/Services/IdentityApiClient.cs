@@ -49,6 +49,10 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
     public Task<ApiResult<bool>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default) =>
         PostAsync<RegisterRequest, bool>($"{Base}/registrations", request, cancellationToken);
 
+    /// <summary>F-20 BR7: the confirmation page of a first Google sign-in. It carries the visitor's address, as a sign-up does (BR10).</summary>
+    public Task<ApiResult<bool>> RegisterWithGoogleAsync(GoogleRegistrationRequest request, CancellationToken cancellationToken = default) =>
+        PostAsync<GoogleRegistrationRequest, bool>($"{Base}/google-registrations", request, cancellationToken);
+
     public Task<ApiResult<VerifyEmailResponse>> VerifyEmailAsync(string token, CancellationToken cancellationToken = default) =>
         PostAsync<VerifyEmailRequest, VerifyEmailResponse>($"{Base}/email-verifications", new VerifyEmailRequest(token), cancellationToken);
 

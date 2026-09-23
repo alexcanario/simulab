@@ -16,6 +16,10 @@
                     <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockedSeconds.Value)]" Class="mb-4" />
                 </div>
             }
+            else if (_passwordNotSet)
+            {
+                <PasswordNotSetAlert Class="mb-4" />
+            }
             else if (_error is not null)
             {
                 <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
@@ -60,6 +64,7 @@
     private string? _passwordError;
     private string? _error;
     private int? _lockedSeconds;
+    private bool _passwordNotSet;
     private bool _erasing;
 
     private async Task EraseAsync()
@@ -90,6 +95,9 @@
                 break;
             case IdentityErrorCodes.AccountLocked:
                 _lockedSeconds = result.RetryAfterSeconds ?? 0;
+                break;
+            case IdentityErrorCodes.PasswordNotSet:
+                _passwordNotSet = true;
                 break;
             default:
                 _error = Errors.For(result.ErrorCode!);
