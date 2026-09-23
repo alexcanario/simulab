@@ -97,6 +97,13 @@ Premises of the epic that the code corrected:
 - 2026-09-23 — `tools/Simulab.DocGen` gets a project reference to `Simulab.Catalog.Infrastructure` in this feature, and the generated docs are regenerated with it — DocGen only sees the contexts whose assemblies sit next to it.
 - 2026-09-23 — No new package: everything the module and its tests need is already in `Directory.Packages.props` (rule `build-config`, one list, no additions).
 
+### From the independent review (2026-09-23)
+- `catalog.manage` has its name, description and group text in the three languages, and `RoleResourcesTests` now reads `WebPermissions.All` instead of `IdentityPermissions.All` — the roles screen lists every permission Identity seeds, so a module that adds one without its text was showing the raw identifier there.
+- `SaveOrganizerRequest.Kind` is `string?`, parsed by `ParseKind()` — with the enum in the contract an unknown kind failed inside deserialization and returned a 400 with no `code`, while BR7 promises `organizer.kind_invalid`. The OpenAPI document now names the three values in the property's description.
+- The name column truncates with a tooltip (rule `ui-project`); a name is up to 150 characters.
+- New guard: every permission a page or a menu item asks for is in `WebPermissions.All`, so a module whose permission is forgotten there fails in the tests and not when the page is opened.
+- Accepted, captured as ideas: two concurrent creates of the same name give a 500 instead of 409 (the unique index refuses it, the handler does not translate the violation back); sorting by kind orders by the stored English name, not by the translated label; `Problem`/`StatusFor` is duplicated between `CatalogEndpoints` and `IdentityEndpoints`.
+
 ## Out of scope
 - Exams, editions and anything that hangs off an organizer: F-34 and F-35.
 - Blocking the deletion of an organizer that has exams, and the active/inactive status: F-34, when there is something to protect.
@@ -123,6 +130,27 @@ Premises of the epic that the code corrected:
 - Affected: no BR or AC; it is where the shared helpers live. Recorded in `docs/agile/profile.md`, as the project rules require for a new shared test project.
 - Re-approved: pending.
 
+## Coverage
+
+| Criterion | Test |
+|---|---|
+| AC1 five projects, `catalog` schema, boundary rules | `ModuleBoundaryTests` (every check, run over Identity and Catalog), `SolutionLayoutTests` |
+| AC2 schema, table, permission, Admin grant, idempotent | `OrganizerEndpointTests.Start_CreatesTheCatalogSchemaAndSeedsTheManagePermissionForAdmin`, `.Seeding_RunAgainOnASeededDatabase_ChangesNothing`; also checked in the running app host |
+| AC3 the list, sorted by name | `OrganizerEndpointTests.List_WithoutASort_ComesBackByNameAscending`, `OrganizersPageTests.Load_ShowsNameAcronymAndTheKindTranslated` |
+| AC4 a Student is refused everywhere | `OrganizerEndpointTests.EveryRoute_WithoutTheManagePermission_IsForbidden`, `AdminPagesAuthorizationTests.EveryAdminPage_RequiresItsModulesPermission`, `NavigationItemsTests.All_ContentItems_AreOrganizersBehindCatalogManage`, `.Visible_WithoutCatalogManage_HidesTheContentSection` (the Not Found page itself is step 9 of the script) |
+| AC5 create, acronym uppercased | `OrganizerEndpointTests.Create_ValidData_StoresTheAcronymUppercasedAndListsIt`, `OrganizerTests.Create_ValidData_TrimsAndUppercasesTheAcronym`, `OrganizersPageTests.Add_ValidData_SendsItAndShowsTheSnackbar` |
+| AC6 the name is taken, ignoring case and accents | `OrganizerEndpointTests.Create_NameTakenIgnoringCaseAndAccents_IsRefusedWithNameTaken`, `OrganizersPageTests.Save_NameTaken_ShowsTheMessageOnTheNameField` |
+| AC7 the acronym is taken, in any case | `OrganizerEndpointTests.Create_AcronymTakenInAnyCase_IsRefusedWithAcronymTaken`, `OrganizersPageTests.Save_AcronymTaken_ShowsTheMessageOnTheAcronymField` |
+| AC8 PostgreSQL refuses two global rows with the same key | `OrganizerUniqueIndexTests.TwoGlobalRowsWithTheSameKey_AreRejectedByPostgres`, `.TheTwoIndexesAreUniqueAndTreatNullTenantsAsEqual` |
+| AC9 edit keeps the id | `OrganizerEndpointTests.Update_NewName_ShowsOnTheListUnderTheSameId`, `.Update_ItsOwnNameAndAcronym_IsNotATakenConflict`, `OrganizersPageTests.Edit_OpensFilledAndSendsAPutOnThatOrganizer` |
+| AC10 soft delete keeps the row and the name | `OrganizerEndpointTests.Delete_ExistingOrganizer_HidesItKeepsTheRowAndKeepsItsNameTaken` |
+| AC11 the website must be an absolute web address | `OrganizerEndpointTests.Create_WebsiteThatIsNotAnAbsoluteWebAddress_IsRefusedAndNothingIsWritten`, `OrganizerTests.Create_WebsiteThatIsNotAnAbsoluteWebAddress_FailsWithWebsiteInvalid`, `OrganizersPageTests.Save_WebsiteThatIsNotAnAbsoluteAddress_IsRefusedWithoutCallingTheApi` |
+| AC12 the search ignores case and accents | `OrganizerEndpointTests.List_SearchWithoutAccents_FindsAccentedNames`, `.List_SearchByAcronym_FindsTheOrganizer`, `OrganizersPageTests.Search_SendsTheTermToTheServer` |
+| AC13 paging, with the full total | `OrganizerEndpointTests.List_MoreRowsThanOnePage_ReturnsThePageAndTheFullTotal`, `.List_PageSizeOverTheCap_IsBroughtBackToTheCap`, `OrganizersPageTests.Load_AsksTheServerForTheFirstPage` |
+| AC14 the domain answers with a `Result` and never throws | `OrganizerTests.Create_BlankOrTooShortName_FailsWithNameRequired` (and the other twelve `OrganizerTests`), `OrganizerEndpointTests.Create_BlankName_IsRefusedWithItsOwnCode` |
+| AC15 every text in the three languages | `ResourceParityTests.Every_key_exists_in_every_language`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (now over `WebPermissions.All` and `CatalogErrorCodes`) |
+| BR7 an unknown kind is a coded 400 | `OrganizerEndpointTests.Create_KindThatIsNotOneOfTheThreeNames_IsRefusedWithKindInvalid` |
+
 ## Validation script
 
 Start the app host from this worktree and sign in as an Admin. Claude opened `/admin/organizers` through the
@@ -143,12 +171,12 @@ Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-33\src\H
 4. Type `cebraspe` in the search box → only the first row. Type `avaliacao` (no accent) → the same row. Clear it and click the **Name** and **Kind** column headers → the order changes.
 5. **Edit** the FGV row: change the kind to *Certifying body* and save → the row shows the new kind. Reopen it → the fields come back filled.
 6. **Delete** the FGV row and confirm → it disappears. Add a new organizer named `Fundacao Getulio Vargas` → refused, the name is still taken.
-7. Switch the language in the header to pt-PT and then to English → the title, the columns, the kinds and the messages change; the organizers' own names do not.
+7. Switch the language in the header to pt-PT and then to English → the title, the columns, the kinds and the messages change; the organizers' own names do not. On `/admin/roles`, open the **Admin** role → a **Catalog** group holding **Manage the catalog** / *Gerir o catálogo*, ticked, with its description; nothing there reads `catalog.manage` as its name.
 8. Keyboard only, with Tab and Enter: reach **Add**, fill the dialog, save, then reach the row's **Edit** and **Delete**. Esc on a dialog with unsaved changes asks before closing.
 9. Sign in as a Student (or remove `catalog.manage` from Admin on `/admin/roles` first) and open `/admin/organizers` → Not Found, and no **Content** section in the menu.
 
 ## Delivery
 - Branch: feature/F-33
 - Merge: <commit>
-- Tests: 969 passed, 0 failed, full suite; Catalog 51 (31 s), Identity 310 (47 s), Web 457 (4 s), architecture 90 (0.9 s)
+- Tests: affected projects after the review fixes — Catalog 56 (18 s), Web 460 (3 s), architecture 90 (1 s), Api 9 (23 s), Identity 310 (32 s); 0 failed, 0 skipped. Build: 0 warnings, 0 errors (`--no-incremental`). The full suite runs at ship.
 - Manual pages: `docs/manual/en/organizers.md`, `docs/manual/pt-BR/organizers.md`, `docs/manual/pt-PT/organizers.md`

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Infrastructure;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Serialization;
 
@@ -58,6 +59,26 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         // The Admin who just signed in can call a route the permission guards, which is the grant in use.
         (await admin.GetAsync(Organizers)).StatusCode.Should().Be(HttpStatusCode.OK);
     }
+
+    // AC2, second half: the start-up seed runs again on a database that already has the permission and
+    // changes nothing - one row before, one row after, and the Admin still holds it.
+    [Fact]
+    public async Task Seeding_RunAgainOnASeededDatabase_ChangesNothing()
+    {
+        var admin = await AdminAsync();
+
+        var before = await CatalogManageCountAsync(admin);
+        await Factory.Services.EnsureRolesAndPermissionsAsync();
+        var after = await CatalogManageCountAsync(admin);
+
+        before.Should().Be(1);
+        after.Should().Be(1);
+        (await admin.GetAsync(Organizers)).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    private static async Task<int> CatalogManageCountAsync(HttpClient admin) =>
+        (await admin.GetFromJsonAsync<List<PermissionName>>("/api/v1/identity/permissions", AppJson.Options))!
+            .Count(permission => permission.Name == CatalogPermissions.Manage);
 
     // AC4: without the permission the whole module is closed.
     [Fact]
