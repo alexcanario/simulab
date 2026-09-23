@@ -1,7 +1,7 @@
 ---
 feature: F-22
 epic: Foundation and identity
-status: building
+status: validating
 board: 738
 version: 1
 ---
@@ -82,12 +82,29 @@ No screen, no route, no new error code: this item is a test. It reads `src/Hosts
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+This item has no screen: what you are validating is that the guard catches what it promises. Every step runs from
+`D:\dev\_icontrol\wt\simulab\f-22`; the command is the same in Git Bash and in PowerShell 7, and both were run here.
+
+1. The check is green as it stands: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --filter "FullyQualifiedName~Localization"` → `Passed! - Failed: 0, Passed: 23`.
+2. Take a text away: delete the line `<data name="account_event.period_invalid" ...>` from `src/Hosts/Simulab.Web/Resources/SharedResources.pt-PT.resx` and run step 1 again → it fails, naming the code, the language (`has no text in pt-PT`), the file to edit and the exempt list. Put the line back and run step 1 → green.
+3. Add a code with no text: in `src/Modules/Identity/Simulab.Identity.Contracts/IdentityErrorCodes.cs`, add `public const string TryMe = "try_me.no_text";` and run step 1 → it fails naming `try_me.no_text` in the three languages. Remove the line and run step 1 → green.
+4. Leave a text behind: add `<data name="role.renamed_away" xml:space="preserve"><value>x</value></data>` before `</root>` in the three `SharedResources*.resx` files and run step 1 → it fails, listing `role.renamed_away` once per language, each saying the text answers to no error code. Remove the three lines and run step 1 → green.
+5. Read the exempt list at the top of `tests/Hosts/Simulab.Web.Tests/Localization/ErrorCodeTextTests.cs`: two codes, each with the reason the app never shows it. Decide whether you agree with both reasons — that list is the only way out of the rule.
+6. Nothing else changed: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj` → `Passed! - Failed: 0, Passed: 469`.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: feature/F-22
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `ErrorCodeTextTests.EveryErrorCode_HasATextInEveryLanguage_AndEveryCodeShapedTextAnswersToACode` (the real solution); `ErrorCodeTextCheckTests.EveryCodeWithItsTexts_Passes` |
+| AC2 | `ErrorCodeTextCheckTests.CodeMissingInOneCultureOnly_FailsNamingThatCulture` |
+| AC3 | `ErrorCodeTextCheckTests.CodeMissingEverywhereAndNotExempt_FailsNamingTheThreeCultures` |
+| AC4 | `ErrorCodeTextCheckTests.ExemptCode_Passes_AndAnExemptionWithNoReason_Fails`, `ExemptionForACodeThatNoLongerExists_Fails`; `ErrorCodeTextTests.EveryExemption_NamesACodeAndGivesAReason` |
+| AC5 | `ErrorCodeTextCheckTests.OrphanText_Fails_AndTheWebsOwnPrefix_DoesNot`, `KeyThatIsNotCodeShaped_IsNotAnOrphan`, `CodeShape_IsSnakeCaseWordsSeparatedByDots` |
+| AC6 | `ErrorCodeTextTests.TheScan_FindsTheCodesOfEveryContractsAssembly` (scans `Simulab.*.Contracts.dll`, asserts it found `IdentityErrorCodes` and its codes — the rule of presence, so an empty scan fails) |
+| AC7 | `ErrorCodeTextCheckTests.MissingTextFailure_NamesTheResourceFileAndTheExemptList` |
+| AC8 | `NamedKeyTestsOwnNoErrorCodeTests.NoHandKeptList_HoldsAnErrorCode`, `EveryHandKeptList_StillCoversItsOwnKeys`; `RoleResourcesTests.EveryPermissionSystemRoleAndActionName_HasAText` and `AccountEventResourcesTests.EveryEventMethodAndReasonLabel_HasAText` still green |
+| AC9 | No new UI text in this item; `ErrorCodeTextTests.TheTexts_AreReadForTheThreeLanguages` pins that the check reads all three, and `ResourceParityTests` still covers parity |
