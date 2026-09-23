@@ -59,7 +59,10 @@ public sealed class AccountEventQueries(IdentityModuleDbContext context, TimePro
         var page = Math.Max(query.Page, 0);
         var rows = await events.Skip(page * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
-        var emails = await EmailsAsync([.. rows.Select(row => row.UserId).OfType<Guid>().Distinct()], cancellationToken);
+        var wanted = rows.Select(row => row.UserId).OfType<Guid>();
+        var emails = await EmailsAsync(
+            [.. (query.UserId is { } asked ? wanted.Append(asked) : wanted).Distinct()],
+            cancellationToken);
 
         var items = rows
             .Select(row => new AccountEventResponse(
@@ -72,7 +75,10 @@ public sealed class AccountEventQueries(IdentityModuleDbContext context, TimePro
                 row.IpAddress))
             .ToList();
 
-        return new AccountEventPageResponse(items, total);
+        return new AccountEventPageResponse(
+            items,
+            total,
+            query.UserId is { } account ? new AccountEventAccountResponse(account, emails.GetValueOrDefault(account)) : null);
     }
 
     /// <summary>BR12: emails read at display time; an erased (soft-deleted) or unknown account has none.</summary>

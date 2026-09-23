@@ -59,13 +59,14 @@ public class NavigationItemsTests
     [Fact]
     public void All_AdministrationItems_AreRolesUsersAndRoleHistoryBehindRolesManage()
     {
-        // F-9, BR10; F-14, BR7: the back office screens share the one permission that gates them in the Api.
+        // F-9, BR10; F-14, BR7; F-21, BR11: the back office screens share the one permission that gates them in the Api.
         NavigationItems.All.Where(item => item.Section == NavigationSection.Administration)
             .Select(item => (item.Route, item.RequiredPermission))
             .Should().Equal(
                 ("/admin/roles", IdentityPermissions.RolesManage),
                 ("/admin/users", IdentityPermissions.RolesManage),
-                ("/admin/role-history", IdentityPermissions.RolesManage));
+                ("/admin/role-history", IdentityPermissions.RolesManage),
+                ("/admin/account-events", IdentityPermissions.RolesManage));
     }
 
     [Fact]

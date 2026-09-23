@@ -13,6 +13,7 @@ public static class NavigationItems
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),
+        new(NavigationSection.Administration, "/admin/account-events", AppIcons.Security, "Nav.AccountEvents", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Development, "/dev/ui", AppIcons.Build, "Nav.Dev.UiKit", DevelopmentOnly: true),
     ];
 

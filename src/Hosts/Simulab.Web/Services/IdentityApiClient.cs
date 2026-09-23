@@ -252,6 +252,40 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         return SendAsync<RoleChangeFiltersResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
 
+    /// <summary>F-21, UC2: one page of the account event trail, filtered on the server.</summary>
+    public Task<ApiResult<AccountEventPageResponse>> ListAccountEventsAsync(string accessToken, AccountEventListQuery query, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/account-events?page={query.Page}&pageSize={query.PageSize}&ascending={(query.Ascending ? "true" : "false")}";
+        if (query.UserId is { } userId)
+        {
+            route += $"&user={userId}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Event))
+        {
+            route += $"&event={Uri.EscapeDataString(query.Event)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.IpAddress))
+        {
+            route += $"&ip={Uri.EscapeDataString(query.IpAddress)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (query.Days is { } days)
+        {
+            route += $"&days={days.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        return SendAsync<AccountEventPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
     /// <summary>F-9, UC5: one page of users, searched and filtered on the server.</summary>
     public Task<ApiResult<UserPageResponse>> ListUsersAsync(string accessToken, UserListQuery query, CancellationToken cancellationToken = default)
     {

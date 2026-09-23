@@ -1,0 +1,194 @@
+@page "/admin/account-events"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + IdentityPermissions.RolesManage)]
+@layout MainLayout
+@inject IdentityApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+@inject UserTimeZone TimeZone
+
+@* F-21, UC2-UC5: the account event trail, newest first, filtered on the server; every filter lives in the address. *@
+<AppPageHeader Title="@L["AccountEvents.Title"]" Breadcrumbs="_breadcrumbs" />
+
+<AppDataTable @ref="_table"
+              TItem="AccountEventResponse"
+              LoadAsync="LoadAsync"
+              Searchable="@(UserFilter is null)"
+              SearchPlaceholder="@L["AccountEvents.Search.Placeholder"]"
+              EmptyMessage="@EmptyText"
+              EmptySearchMessage="@(_ => L["AccountEvents.NoMatch"])">
+    <ToolBarContent>
+        @if (UserFilter is not null)
+        {
+            <div class="app-table-filter">
+                <AppFilterChip Text="@L["AccountEvents.Filter.User", _accountText ?? string.Empty]" OnRemove="RemoveUserFilterAsync" />
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(AddressFilter))
+        {
+            <div class="app-table-filter">
+                <AppFilterChip Text="@L["AccountEvents.Filter.Address", AddressFilter]" OnRemove="RemoveAddressFilterAsync" />
+            </div>
+        }
+        <div class="app-table-filter">
+            <AppSelectField TValue="string"
+                            Id="account-events-type-filter"
+                            Label="@L["AccountEvents.Filter.Event"]"
+                            Options="_eventOptions"
+                            Value="EventFilter"
+                            ValueChanged="@((string value) => FilterChangedAsync("event", value, () => EventFilter = value))" />
+        </div>
+        <div class="app-table-filter">
+            <AppSelectField TValue="int?"
+                            Id="account-events-period-filter"
+                            Label="@L["AccountEvents.Filter.Period"]"
+                            Options="_periodOptions"
+                            Value="DaysFilter"
+                            ValueChanged="@((int? value) => FilterChangedAsync("days", value, () => DaysFilter = value))" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        <AppDateColumn TItem="AccountEventResponse"
+                       TProperty="DateTimeOffset"
+                       Property="accountEvent => TimeZone.ToLocal(accountEvent.OccurredAt)"
+                       Format="g"
+                       Title="@L["AccountEvents.Column.When"]" />
+        <TemplateColumn T="AccountEventResponse" Title="@L["AccountEvents.Column.Account"]" Sortable="false">
+            <CellTemplate>@AccountText(context.Item.Account)</CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="AccountEventResponse" Title="@L["AccountEvents.Column.Event"]" Sortable="false">
+            <CellTemplate>@L[$"AccountEvents.Event.{context.Item.Event}"]</CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="AccountEventResponse" Title="@L["AccountEvents.Column.Details"]" Sortable="false">
+            <CellTemplate>@DetailsText(context.Item)</CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="AccountEventResponse" Title="@L["AccountEvents.Column.Address"]" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.IpAddress is { } address)
+                {
+                    @* UC4: every event from one address, whatever the account. *@
+                    <MudButton Variant="Variant.Text"
+                               Size="Size.Small"
+                               aria-label="@L["AccountEvents.FilterByAddress", address]"
+                               OnClick="@(() => FilterByAddressAsync(address))">@address</MudButton>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The account filter (<c>?user=</c>), set by the users page's action and shown as a chip.</summary>
+    [SupplyParameterFromQuery(Name = "user")] public Guid? UserFilter { get; set; }
+
+    [SupplyParameterFromQuery(Name = "event")] public string? EventFilter { get; set; }
+
+    /// <summary>The address filter (<c>?ip=</c>), set by clicking an address in the table (UC4).</summary>
+    [SupplyParameterFromQuery(Name = "ip")] public string? AddressFilter { get; set; }
+
+    [SupplyParameterFromQuery(Name = "days")] public int? DaysFilter { get; set; }
+
+    private AppDataTable<AccountEventResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AppSelectOption<string>> _eventOptions = [];
+    private IReadOnlyList<AppSelectOption<int?>> _periodOptions = [];
+    private string? _accountText;
+
+    private bool HasFilters =>
+        UserFilter is not null || !string.IsNullOrEmpty(EventFilter) || !string.IsNullOrEmpty(AddressFilter) || DaysFilter is not null;
+
+    private string EmptyText => HasFilters ? L["AccountEvents.NoMatch"] : L["AccountEvents.Empty"];
+
+    protected override void OnInitialized()
+    {
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Administration"], href: null, disabled: true),
+            new BreadcrumbItem(L["AccountEvents.Title"], href: null, disabled: true)
+        ];
+
+        // BR10: a fixed set the screen translates, so no filters endpoint (F-14 needed one for its roles).
+        _eventOptions =
+        [
+            new AppSelectOption<string>(string.Empty, L["AccountEvents.Filter.AllEvents"]),
+            .. AccountEventTypes.All.Select(name => new AppSelectOption<string>(name, L[$"AccountEvents.Event.{name}"]))
+        ];
+
+        _periodOptions =
+        [
+            new AppSelectOption<int?>(null, L["AccountEvents.Filter.Period.All"]),
+            .. AccountEventListQuery.Periods.Select(days => new AppSelectOption<int?>(days, L[$"AccountEvents.Filter.Period.Days{days}"]))
+        ];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Times are shown where the user is; the browser answers only once the page is interactive.
+        if (firstRender && TimeZone.Current == TimeZoneInfo.Utc && await TimeZone.ResolveAsync() != TimeZoneInfo.Utc)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task<AppTablePage<AccountEventResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var ascending = query.SortBy is not null && !query.Descending;
+
+        var result = await Api.ListAccountEventsAsync(
+            token,
+            new AccountEventListQuery(query.Page, query.PageSize, UserFilter, EventFilter, AddressFilter, query.Search, DaysFilter, ascending),
+            cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Account events failed to load: {result.ErrorCode}.");
+        }
+
+        // BR12: the chip names the account even when it has no event yet.
+        _accountText = result.Value!.Account is { } account ? AccountText(account) : null;
+
+        return new AppTablePage<AccountEventResponse>(result.Value.Items, result.Value.Total);
+    }
+
+    private async Task FilterChangedAsync<T>(string name, T value, Action apply)
+    {
+        apply();
+        var text = value?.ToString();
+        Navigation.NavigateTo(
+            Navigation.GetUriWithQueryParameter(name, string.IsNullOrEmpty(text) ? null : text),
+            replace: true);
+        await _table.ReloadFromFirstPageAsync();
+    }
+
+    private Task FilterByAddressAsync(string address) => FilterChangedAsync("ip", address, () => AddressFilter = address);
+
+    private Task RemoveUserFilterAsync() => FilterChangedAsync<Guid?>("user", null, () =>
+    {
+        UserFilter = null;
+        _accountText = null;
+    });
+
+    private Task RemoveAddressFilterAsync() => FilterChangedAsync<string?>("ip", null, () => AddressFilter = null);
+
+    /// <summary>BR12: an erased account has no email left to read; an attempt matched no account at all.</summary>
+    private string AccountText(AccountEventAccountResponse? account) =>
+        account is null ? L["AccountEvents.UnknownAccount"] : account.Email ?? L["AccountEvents.ErasedAccount"];
+
+    /// <summary>BR2: the way it was passed, or why it failed; both are translated, and an event may have neither.</summary>
+    private string DetailsText(AccountEventResponse accountEvent) =>
+        accountEvent switch
+        {
+            { Method: { } method } => L[$"AccountEvents.Method.{method}"],
+            { Reason: { } reason } => L[$"AccountEvents.Reason.{reason}"],
+            _ => string.Empty
+        };
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

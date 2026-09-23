@@ -92,6 +92,15 @@ public abstract class AdminPageTestContext : KitTestContext
             [new(Guid.Parse("0198f0a2-0000-7000-8000-0000000000a1"), "ana.souza@exemplo.com.br"), new(Guid.Parse("0198f0a2-0000-7000-8000-0000000000e1"), null)],
             null);
 
+        /// <summary>F-21: what the account event trail answers, whatever the filters (the Api filters; the page only sends them).</summary>
+        public List<AccountEventResponse> AccountEvents { get; set; } = [];
+
+        /// <summary>F-21: the account the trail names on its chip when the address carries one.</summary>
+        public AccountEventAccountResponse? AccountEventsAccount { get; set; }
+
+        /// <summary>When true, the account event trail answers a server error.</summary>
+        public bool AccountEventsFail { get; set; }
+
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
 
@@ -119,6 +128,17 @@ public abstract class AdminPageTestContext : KitTestContext
                 return RoleChangesFail
                     ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
                     : Json(new RoleChangePageResponse(RoleChanges, RoleChanges.Count));
+            }
+
+            if (path.EndsWith("/account-events", StringComparison.Ordinal))
+            {
+                var user = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query)["user"];
+                return AccountEventsFail
+                    ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    : Json(new AccountEventPageResponse(
+                        AccountEvents,
+                        AccountEvents.Count,
+                        user is null ? null : AccountEventsAccount ?? new AccountEventAccountResponse(Guid.Parse(user), "bruno.lima@exemplo.com.br")));
             }
 
             if (path.EndsWith("/permissions", StringComparison.Ordinal))

@@ -238,4 +238,51 @@
   <data name="google_sign_in.sign_up_required" xml:space="preserve"><value>Ainda não existe uma conta para esta conta Google.</value></data>
   <data name="google_sign_in.account_exists" xml:space="preserve"><value>Já existe uma conta com este e-mail. Entre nela.</value></data>
   <data name="google_sign_in.expired" xml:space="preserve"><value>A entrada com o Google demorou demais ou foi interrompida. Comece de novo.</value></data>
+  <data name="Nav.AccountEvents" xml:space="preserve"><value>Eventos de conta</value></data>
+  <data name="AccountEvents.Title" xml:space="preserve"><value>Eventos de conta</value></data>
+  <data name="AccountEvents.Column.When" xml:space="preserve"><value>Quando</value></data>
+  <data name="AccountEvents.Column.Account" xml:space="preserve"><value>Conta</value></data>
+  <data name="AccountEvents.Column.Event" xml:space="preserve"><value>Evento</value></data>
+  <data name="AccountEvents.Column.Details" xml:space="preserve"><value>Detalhes</value></data>
+  <data name="AccountEvents.Column.Address" xml:space="preserve"><value>De</value></data>
+  <data name="AccountEvents.Event.SignInSucceeded" xml:space="preserve"><value>Sessão iniciada</value></data>
+  <data name="AccountEvents.Event.SignInFailed" xml:space="preserve"><value>Falha ao entrar</value></data>
+  <data name="AccountEvents.Event.AccountLocked" xml:space="preserve"><value>Conta bloqueada</value></data>
+  <data name="AccountEvents.Event.SignedOut" xml:space="preserve"><value>Sessão encerrada</value></data>
+  <data name="AccountEvents.Event.PasswordChanged" xml:space="preserve"><value>Senha alterada</value></data>
+  <data name="AccountEvents.Event.PasswordResetRequested" xml:space="preserve"><value>Redefinição de senha solicitada</value></data>
+  <data name="AccountEvents.Event.PasswordResetCompleted" xml:space="preserve"><value>Senha redefinida</value></data>
+  <data name="AccountEvents.Event.TwoFactorEnabled" xml:space="preserve"><value>Verificação em duas etapas ativada</value></data>
+  <data name="AccountEvents.Event.TwoFactorDisabled" xml:space="preserve"><value>Verificação em duas etapas desativada</value></data>
+  <data name="AccountEvents.Event.RecoveryCodesRegenerated" xml:space="preserve"><value>Códigos de recuperação gerados de novo</value></data>
+  <data name="AccountEvents.Event.AccountErased" xml:space="preserve"><value>Conta excluída</value></data>
+  <data name="AccountEvents.Method.Password" xml:space="preserve"><value>com a senha</value></data>
+  <data name="AccountEvents.Method.Google" xml:space="preserve"><value>com o Google</value></data>
+  <data name="AccountEvents.Method.TotpCode" xml:space="preserve"><value>com o código do aplicativo</value></data>
+  <data name="AccountEvents.Method.RecoveryCode" xml:space="preserve"><value>com um código de recuperação</value></data>
+  <data name="AccountEvents.Reason.UnknownAccount" xml:space="preserve"><value>conta desconhecida</value></data>
+  <data name="AccountEvents.Reason.WrongPassword" xml:space="preserve"><value>senha incorreta</value></data>
+  <data name="AccountEvents.Reason.LockedOut" xml:space="preserve"><value>conta bloqueada</value></data>
+  <data name="AccountEvents.Reason.WrongCode" xml:space="preserve"><value>código incorreto</value></data>
+  <data name="AccountEvents.Reason.ChallengeInvalid" xml:space="preserve"><value>desafio expirado ou inválido</value></data>
+  <data name="AccountEvents.Reason.EmailNotVerified" xml:space="preserve"><value>e-mail não verificado</value></data>
+  <data name="AccountEvents.Reason.GoogleTokenRefused" xml:space="preserve"><value>token do Google recusado</value></data>
+  <data name="AccountEvents.Filter.Event" xml:space="preserve"><value>Evento</value></data>
+  <data name="AccountEvents.Filter.AllEvents" xml:space="preserve"><value>Todos os eventos</value></data>
+  <data name="AccountEvents.Filter.Period" xml:space="preserve"><value>Período</value></data>
+  <data name="AccountEvents.Filter.Period.Days7" xml:space="preserve"><value>Últimos 7 dias</value></data>
+  <data name="AccountEvents.Filter.Period.Days30" xml:space="preserve"><value>Últimos 30 dias</value></data>
+  <data name="AccountEvents.Filter.Period.Days90" xml:space="preserve"><value>Últimos 90 dias</value></data>
+  <data name="AccountEvents.Filter.Period.All" xml:space="preserve"><value>Todo o período</value></data>
+  <data name="AccountEvents.Filter.User" xml:space="preserve"><value>Conta: {0}</value></data>
+  <data name="AccountEvents.Filter.Address" xml:space="preserve"><value>De: {0}</value></data>
+  <data name="AccountEvents.FilterByAddress" xml:space="preserve"><value>Mostrar todos os eventos de {0}</value></data>
+  <data name="AccountEvents.Search.Placeholder" xml:space="preserve"><value>Pesquisar a conta por e-mail ou nome</value></data>
+  <data name="AccountEvents.ErasedAccount" xml:space="preserve"><value>Conta excluída</value></data>
+  <data name="AccountEvents.UnknownAccount" xml:space="preserve"><value>Conta desconhecida</value></data>
+  <data name="AccountEvents.Empty" xml:space="preserve"><value>Nenhum evento de conta registrado ainda.</value></data>
+  <data name="AccountEvents.NoMatch" xml:space="preserve"><value>Nenhum evento corresponde a esses filtros.</value></data>
+  <data name="AccountEvents.Action.SecurityEvents" xml:space="preserve"><value>Eventos de segurança</value></data>
+  <data name="account_event.period_invalid" xml:space="preserve"><value>Escolha os últimos 7, 30 ou 90 dias, ou todo o período.</value></data>
+  <data name="account_event.event_invalid" xml:space="preserve"><value>Escolha um dos eventos da lista.</value></data>
 </root>
