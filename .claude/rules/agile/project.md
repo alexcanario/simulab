@@ -60,6 +60,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Do not import migrations. Each module has one fresh initial migration.
 
 ## UI tests
+- An item whose product is a guard (a test that exists to catch a mistake) is seen failing on that very mistake before it ships, and that step goes into the validation script (F-22).
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
 - After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
