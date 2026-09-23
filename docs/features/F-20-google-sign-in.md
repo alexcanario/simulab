@@ -1,7 +1,7 @@
 ---
 feature: F-20
 epic: Foundation and identity
-status: validating
+status: done
 board: 733
 version: 3
 ---
@@ -148,3 +148,9 @@ Needs a Google account listed as a test user of your OAuth client, and no Simula
 Validated by the owner on 2026-09-23 ("aprovado"): the script passed.
 
 ## Delivery
+- Branch: `feature/F-20`, built in the worktree `D:\dev\_icontrol\wt\simulab\F-20`
+- Merge: recorded after the merge on `main` (2026-09-23, authorized by the owner)
+- Tests: 866 passed, 0 failed, suite 49 s, full build 22 s, 0 warnings (`gate.js ship`, 2026-09-23)
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/google-sign-in.md`, linked from each `index.md`. `docs/infra.md`: "Google sign-in locally", the new secrets and the one-instance note. `docs/architecture` unchanged (no new context or table; `DocGen --check` up to date; the project has no hand-written overview page)
+- Packages added: `Microsoft.AspNetCore.Authentication.OpenIdConnect` 10.0.12, `Microsoft.IdentityModel.Protocols.OpenIdConnect` 8.23.0
+- Items captured: F-29 (AB#748) link and unlink Google on the account page; F-30 (AB#749) sign-up in one transaction
