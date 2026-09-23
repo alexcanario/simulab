@@ -1,7 +1,7 @@
 ---
 feature: F-22
 epic: Foundation and identity
-status: validating
+status: done
 board: 738
 version: 1
 ---
@@ -93,8 +93,11 @@ This item has no screen: what you are validating is that the guard catches what 
 6. Nothing else changed: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj` → `Passed! - Failed: 0, Passed: 469`.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: feature/F-22
+- Branch: `feature/F-22` (merged with `--no-ff` into `main`, AB#738, and deleted; it was never pushed, so there was no remote branch to delete)
+- Merge: `e1df7eb`
+- Tests: 923, 50 s (full suite, architecture tests included); full build 13 s, 0 warnings, baseline still empty
+- Manual pages: none — the item changes no visible behavior; only `docs/infra.md` (measured times) was touched
+- Validated by the owner on 2026-09-23.
 
 ## Coverage
 | Criterion | Test(s) |
