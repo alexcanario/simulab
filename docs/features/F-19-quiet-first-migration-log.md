@@ -84,4 +84,6 @@ Step 2 erases every local account and datum in the PostgreSQL volume. No screen,
 6. Stop the app host (Ctrl+C) and start it again as in step 3 → the `api` log shows `No migrations were applied. The database is already up to date.` twice, and no `fail` line.
 7. Stop the app host (Ctrl+C) before `/agile:ship`.
 
+Validated by the owner on 2026-09-23: the script passed.
+
 ## Delivery
