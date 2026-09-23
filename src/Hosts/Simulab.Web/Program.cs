@@ -19,6 +19,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 // First typed client (F-4). The base address comes from service discovery: no host or port in the code.
 builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
+// F-33: the Catalog module's own typed client, same base address from service discovery.
+builder.Services.AddHttpClient<CatalogApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 builder.Services.AddScoped<ProfileLanguageSaver>();
 builder.Services.AddScoped<VisitorContext>();
 builder.Services.AddScoped<UserTimeZone>();
@@ -98,7 +100,8 @@ builder.Services.AddSingleton<CodeStepTickets>();
 // F-6, BR5-BR7: a policy per permission claim. UI comfort only - the Api still enforces every call.
 builder.Services.AddAuthorization(options =>
 {
-    foreach (var permission in IdentityPermissions.All)
+    // F-33 BR2: one policy per permission every module declares, not only Identity's.
+    foreach (var permission in WebPermissions.All)
     {
         options.AddPolicy(PermissionPolicy.NameFor(permission), policy => policy.RequireClaim(WebAuthClaims.Permission, permission));
     }

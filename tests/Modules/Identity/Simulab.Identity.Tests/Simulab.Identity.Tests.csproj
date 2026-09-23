@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\..\..\src\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
     <ProjectReference Include="..\..\..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\..\..\Simulab.Testing\Simulab.Testing.csproj" />
+    <ProjectReference Include="..\..\..\Simulab.Testing.ApiHost\Simulab.Testing.ApiHost.csproj" />
   </ItemGroup>
 
 </Project>

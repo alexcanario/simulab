@@ -9,16 +9,10 @@
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Testcontainers.Redis" />
-    <!-- F-33: the Api host every module's integration tests run against, with a clock they can move. -->
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
-    <!-- The host under test, and the user type an account is created with. -->
-    <ProjectReference Include="..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Domain\Simulab.Identity.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\..\..\src\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\..\..\Simulab.Testing\Simulab.Testing.csproj" />
+    <ProjectReference Include="..\..\..\Simulab.Testing.ApiHost\Simulab.Testing.ApiHost.csproj" />
   </ItemGroup>
 
 </Project>

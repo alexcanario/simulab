@@ -36,6 +36,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />
+    <Project Path="tests/Simulab.Testing.ApiHost/Simulab.Testing.ApiHost.csproj" />
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />

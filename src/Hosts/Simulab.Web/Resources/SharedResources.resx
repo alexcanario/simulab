@@ -285,4 +285,38 @@
   <data name="AccountEvents.Action.SecurityEvents" xml:space="preserve"><value>Security events</value></data>
   <data name="account_event.period_invalid" xml:space="preserve"><value>Choose the last 7, 30 or 90 days, or all time.</value></data>
   <data name="account_event.event_invalid" xml:space="preserve"><value>Choose one of the events on the list.</value></data>
+  <data name="Nav.Organizers" xml:space="preserve"><value>Organizers</value></data>
+  <data name="Organizers.Title" xml:space="preserve"><value>Organizers</value></data>
+  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Search by name or acronym</value></data>
+  <data name="Organizers.Empty" xml:space="preserve"><value>No organizer has been registered yet.</value></data>
+  <data name="Organizers.Empty.Search" xml:space="preserve"><value>No organizer matches "{0}".</value></data>
+  <data name="Organizers.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Organizers.Column.Acronym" xml:space="preserve"><value>Acronym</value></data>
+  <data name="Organizers.Column.Kind" xml:space="preserve"><value>Kind</value></data>
+  <data name="Organizers.Kind.ExamBoard" xml:space="preserve"><value>Exam board</value></data>
+  <data name="Organizers.Kind.CertifyingBody" xml:space="preserve"><value>Certifying body</value></data>
+  <data name="Organizers.Kind.University" xml:space="preserve"><value>University</value></data>
+  <data name="Organizers.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Organizers.Field.Name.Help" xml:space="preserve"><value>As the organizer signs its notices.</value></data>
+  <data name="Organizers.Field.Acronym" xml:space="preserve"><value>Acronym</value></data>
+  <data name="Organizers.Field.Acronym.Help" xml:space="preserve"><value>Saved in capitals, and unique across the catalog.</value></data>
+  <data name="Organizers.Field.Kind" xml:space="preserve"><value>Kind</value></data>
+  <data name="Organizers.Field.Website" xml:space="preserve"><value>Official website</value></data>
+  <data name="Organizers.Field.Website.Help" xml:space="preserve"><value>The full address, starting with https://</value></data>
+  <data name="Organizers.Field.Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Organizers.Dialog.AddTitle" xml:space="preserve"><value>Add organizer</value></data>
+  <data name="Organizers.Dialog.EditTitle" xml:space="preserve"><value>Edit organizer</value></data>
+  <data name="Organizers.Saved" xml:space="preserve"><value>Organizer saved.</value></data>
+  <data name="Organizers.Deleted" xml:space="preserve"><value>Organizer deleted.</value></data>
+  <data name="Organizers.Delete.Message" xml:space="preserve"><value>{0} leaves the catalog and stops appearing anywhere in the app.</value></data>
+  <data name="organizer.not_found" xml:space="preserve"><value>This organizer no longer exists. Refresh the list.</value></data>
+  <data name="organizer.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="organizer.name_too_long" xml:space="preserve"><value>The name is too long: at most 150 characters.</value></data>
+  <data name="organizer.name_taken" xml:space="preserve"><value>Another organizer already has this name.</value></data>
+  <data name="organizer.acronym_required" xml:space="preserve"><value>Type an acronym with at least 2 characters.</value></data>
+  <data name="organizer.acronym_too_long" xml:space="preserve"><value>The acronym is too long: at most 20 characters.</value></data>
+  <data name="organizer.acronym_taken" xml:space="preserve"><value>Another organizer already has this acronym.</value></data>
+  <data name="organizer.kind_invalid" xml:space="preserve"><value>Choose one of the kinds on the list.</value></data>
+  <data name="organizer.description_too_long" xml:space="preserve"><value>The description is too long: at most 500 characters.</value></data>
+  <data name="organizer.website_invalid" xml:space="preserve"><value>Type a full address, starting with http:// or https://</value></data>
 </root>

@@ -17,6 +17,7 @@
                   Variant="Variant.Outlined"
                   Margin="Margin.Dense"
                   MaxLength="@(MaxLength ?? 524288)"
+                  Lines="@Lines"
                   Immediate="false"
                   Disabled="Disabled"
                   ReadOnly="ReadOnly"
@@ -64,6 +65,9 @@
     [Parameter] public bool ReadOnly { get; set; }
 
     [Parameter] public int? MaxLength { get; set; }
+
+    /// <summary>Rows of the input. Above 1 it becomes a text area that grows with its content (F-33).</summary>
+    [Parameter] public int Lines { get; set; } = 1;
 
     [Parameter] public string? Autocomplete { get; set; }
 
