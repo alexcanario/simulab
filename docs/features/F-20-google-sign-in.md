@@ -1,7 +1,7 @@
 ---
 feature: F-20
 epic: Foundation and identity
-status: building
+status: validating
 board: 733
 version: 3
 ---
@@ -97,6 +97,19 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - 2026-09-23 — The Google identity reaches the Api as a custom OpenIddict grant (`google`) next to `totp` — the Web host already speaks the token endpoint and the ticket hand-over (F-5, B-3), so the rest of sign-in is reused.
 - 2026-09-23 — The link lives in the existing `user_logins` table (provider `Google`, key = the Google `sub`); no new entity and no migration — the table is mapped and erasure already clears it.
 - 2026-09-23 — The Api reads Google's keys through the discovery document with the library's cached configuration manager; the tests replace the authority with keys they generate — no call to Google in any test.
+- 2026-09-23 — Build: `RegistrationTerms` holds the name, 18+, consent and version checks for both sign-ups; `RegisterUserHandler` now calls it — one place, so the two sign-ups cannot drift apart (profile: structure on the second use).
+- 2026-09-23 — Build: `SignInHandOff` ends every sign-in (password, code step, Google step, Google confirmation) and `LegalConsentLabel` renders the consent labels of both sign-up pages — second uses of code that lived in one page.
+- 2026-09-23 — Build: the app host turns the feature on only when `Google:ClientId` and `Google:ClientSecret` are in its user secrets, and passes the secret to the Web as a masked parameter (`docs/infra.md`, "Google sign-in locally").
+- 2026-09-23 — Build: the pages read the code-step and confirmation tickets without spending them, because a page initializes twice (prerender, then the circuit); the Api spends the challenge itself, and the confirmation spends its ticket once the account exists.
+- 2026-09-23 — Build: the Web's OpenID Connect handler uses the authorization code flow with PKCE and `form_post`, its defaults; checked on screen through the app host with a placeholder client (Google answered `invalid_client`, as expected).
+- 2026-09-23 — Review 1 (major, confirmed, fixed): the confirmation ticket was a bearer in the URL for 10 minutes; it now opens only in the browser that holds a secret in an HttpOnly cookie scoped to `/sign-up/google`, carried to the circuit like the visitor's address.
+- 2026-09-23 — Review 2 (minor, accepted): the code-step ticket is also in the URL; the challenge is single-use at the Api and still needs the code and the TOTP lockout.
+- 2026-09-23 — Review 3 (minor, fixed by v3): the pending path activated before linking; the take-over now links first.
+- 2026-09-23 — Review 4 (minor, new item): both sign-ups save in several steps without a transaction, as F-4 always has — F-30 (AB#749).
+- 2026-09-23 — Review 5 (minor, accepted, not verified): the retry after a key rotation may still see the old keys; Google publishes new keys before using them and the library refreshes them on its own.
+- 2026-09-23 — Review 6 and 7 (minor, owner's choice): change note v3.
+- 2026-09-23 — Review 8 (minor, fixed): `SignInTicketStore` now uses `SingleUseTickets<T>`; the one-instance assumption is in `docs/infra.md`.
+- 2026-09-23 — Review 9 (minor, fixed): a test proves `/account/google/complete` clears the external cookie.
 
 ## Out of scope
 - Linking or unlinking Google from the account page — F-29 (AB#748).
@@ -122,5 +135,14 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - Re-approved: 2026-09-23
 
 ## Validation script
+Needs a Google account listed as a test user of your OAuth client, and no Simulab account for its address yet (a `@gmail.com` address).
+
+1. Create the OAuth client and put it in the app host's user secrets: `docs/infra.md`, "Google sign-in locally", steps 1-3. The two `dotnet user-secrets set` commands are the same in Git Bash and PowerShell 7, run from `D:\dev\_icontrol\wt\simulab\F-20`; each prints `Successfully saved Google:ClientId = … to the secret store.` Check with `dotnet user-secrets list --project src/Hosts/Simulab.AppHost` → both `Google:` keys listed.
+2. Start the app host from the F-20 worktree (Git Bash: `cd /d/dev/_icontrol/wt/simulab/F-20 && dotnet run --project src/Hosts/Simulab.AppHost`; PowerShell 7: `cd D:\dev\_icontrol\wt\simulab\F-20; dotnet run --project src/Hosts/Simulab.AppHost`) → in the dashboard, `api` and `web` show `Identity__GoogleSignInEnabled = true`.
+3. Open `/sign-up` → under the form, "ou" and "Continuar com o Google". Click it, choose the test Google account → the confirmation page "Crie sua conta" shows that Gmail address and your Google name.
+4. Switch the language to English on that page → the texts change ("Create your account", "Create account"). Tick the 18+, terms and privacy boxes and press "Create account" → you land signed in on the home page, and no verification email arrives in Mailpit.
+5. Sign out, open `/sign-in`, and using only the keyboard press Tab until "Continue with Google" has the focus ring, then Enter → Google, then signed in again straight away (no confirmation page this time).
+6. Open "My account" → "Download my data", type anything as the password and confirm → the message says the account was created with Google and has no password, with "Create a password"; that button opens `/forgot-password`.
+7. Stop the app host (Ctrl+C). To turn Google sign-in off again: `dotnet user-secrets remove "Google:ClientId" --project src/Hosts/Simulab.AppHost`, then start again → `/sign-in` shows no Google button.
 
 ## Delivery

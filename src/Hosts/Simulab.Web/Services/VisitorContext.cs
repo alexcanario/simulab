@@ -9,4 +9,10 @@ public sealed class VisitorContext
 {
     /// <summary>Null outside a page (plain endpoints), where the Api falls back to the connection's address.</summary>
     public string? Address { get; set; }
+
+    /// <summary>
+    /// F-20 BR8: the secret this browser holds for its waiting Google sign-up, from the cookie the first request
+    /// carried. Null when there is none.
+    /// </summary>
+    public string? GoogleSignUpBinding { get; set; }
 }

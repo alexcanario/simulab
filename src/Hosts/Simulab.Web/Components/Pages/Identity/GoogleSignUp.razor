@@ -10,6 +10,7 @@
 @inject GoogleSignUpTickets Tickets
 @inject GoogleSignInSettings Google
 @inject ErrorText Errors
+@inject VisitorContext Visitor
 @inject NavigationManager Navigation
 
 <PageTitle>@I["GoogleSignUp.Title"] — @L["App.Name"]</PageTitle>
@@ -119,8 +120,9 @@
             return;
         }
 
-        // Read, not spent: the page initializes twice (prerender, then the circuit). BR8: expired → back to sign-in.
-        if (!Tickets.TryPeek(Ticket, out var ticket))
+        // Read, not spent: the page initializes twice (prerender, then the circuit). BR8: expired, or held by another
+        // browser → back to sign-in, the same answer either way.
+        if (!TryHeldTicket(out var ticket))
         {
             Navigation.NavigateTo(ExpiredPath, forceLoad: true);
             return;
@@ -132,6 +134,10 @@
     }
 
     private static string ExpiredPath => $"/sign-in?error={IdentityErrorCodes.GoogleSignInExpired}";
+
+    /// <summary>The waiting ticket, only when it has not expired and this browser holds its secret (BR8).</summary>
+    private bool TryHeldTicket(out GoogleSignUpTicket ticket) =>
+        Tickets.TryPeek(Ticket, out ticket) && ticket.IsHeldBy(Visitor.GoogleSignUpBinding);
 
     /// <summary>The versions shown are the versions accepted, as on the password sign-up (F-4 BR5).</summary>
     private async Task LoadDocumentsAsync()
@@ -156,7 +162,7 @@
             return;
         }
 
-        if (!Tickets.TryPeek(Ticket, out var ticket))
+        if (!TryHeldTicket(out var ticket))
         {
             Navigation.NavigateTo(ExpiredPath, forceLoad: true);
             return;

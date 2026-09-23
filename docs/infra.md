@@ -67,6 +67,8 @@ Off unless the app host finds an OAuth client in its user secrets. To turn it on
 
 To turn it off again: `dotnet user-secrets remove "Google:ClientId" --project src/Hosts/Simulab.AppHost`. The public address's redirect URI and the production client are release work (F-20, out of scope).
 
+The Web keeps its short-lived sign-in tickets in memory (`SignInTicketStore`, `GoogleSignUpTickets`, `CodeStepTickets`, all on `SingleUseTickets<T>`): it runs as **one instance**. A second Web instance needs them moved to Redis first, or a sign-in that lands on the other instance finds no ticket.
+
 ## The first Admin (F-9, BR11)
 Every new account gets `Student` automatically (F-6), and roles are given on the back office screen `/admin/users` (F-9) by someone who already manages roles. The very first Admin of an installation has nobody to give it, so it is inserted directly against the module's database, once:
 ```sql

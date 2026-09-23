@@ -21,5 +21,12 @@
     /// <summary>B-4: the visitor's address, read by App at the first request, for the Api's per-client limits.</summary>
     [Parameter] public string? VisitorAddress { get; set; }
 
-    protected override void OnParametersSet() => Visitor.Address = VisitorAddress;
+    /// <summary>F-20 BR8: the secret of this browser's waiting Google sign-up, read by App at the first request.</summary>
+    [Parameter] public string? GoogleSignUpBinding { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Visitor.Address = VisitorAddress;
+        Visitor.GoogleSignUpBinding = GoogleSignUpBinding;
+    }
 }

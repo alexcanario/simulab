@@ -31,10 +31,18 @@ public sealed class GoogleSignUpPageTests : IdentityPageTestContext
         Services.AddSingleton(new GoogleSignInSettings { Enabled = true, ClientId = "client", ClientSecret = "secret" });
     }
 
-    /// <summary>The page as the Web host's Google step leaves the visitor on it.</summary>
+    /// <summary>A waiting ticket and the secret its browser holds, as the Web host's Google step issues them.</summary>
+    private (string Ticket, string Secret) Issue(string? name = "Ana Google")
+    {
+        var (secret, hash) = GoogleSignUpTicket.NewBinding();
+        return (Tickets.Issue(new GoogleSignUpTicket("google-id-token", "ana@gmail.com", name, hash)), secret);
+    }
+
+    /// <summary>The page as the Web host's Google step leaves the visitor on it, in the browser that holds the secret.</summary>
     private (IRenderedComponent<GoogleSignUp> Page, string Ticket) Open(string? name = "Ana Google")
     {
-        var ticket = Tickets.Issue(new GoogleSignUpTicket("google-id-token", "ana@gmail.com", name));
+        var (ticket, secret) = Issue(name);
+        Visitor.GoogleSignUpBinding = secret;
         Navigation.NavigateTo($"{GoogleAccountEndpoints.SignUpPath}?ticket={ticket}");
         var page = Render<GoogleSignUp>();
         page.WaitForAssertion(() => page.Find("button.app-google-sign-up-submit").HasAttribute("disabled").Should().BeFalse());
@@ -64,7 +72,8 @@ public sealed class GoogleSignUpPageTests : IdentityPageTestContext
     [Fact]
     public void Open_TicketOlderThanTenMinutes_GoesBackToSignInAsExpired()
     {
-        var ticket = Tickets.Issue(new GoogleSignUpTicket("google-id-token", "ana@gmail.com", null));
+        var (ticket, secret) = Issue();
+        Visitor.GoogleSignUpBinding = secret;
         _clock.Advance(GoogleSignUpTickets.Lifetime + TimeSpan.FromSeconds(1));
         Navigation.NavigateTo($"{GoogleAccountEndpoints.SignUpPath}?ticket={ticket}");
 
@@ -77,13 +86,31 @@ public sealed class GoogleSignUpPageTests : IdentityPageTestContext
     [Fact]
     public void Open_SpentTicket_GoesBackToSignInAsExpired()
     {
-        var ticket = Tickets.Issue(new GoogleSignUpTicket("google-id-token", "ana@gmail.com", null));
+        var (ticket, secret) = Issue();
+        Visitor.GoogleSignUpBinding = secret;
         Tickets.TryConsume(ticket, out _);
         Navigation.NavigateTo($"{GoogleAccountEndpoints.SignUpPath}?ticket={ticket}");
 
         Render<GoogleSignUp>();
 
         Navigation.Uri.Should().EndWith($"/sign-in?error={IdentityErrorCodes.GoogleSignInExpired}");
+    }
+
+    // BR8, the review's finding 1: the ticket id alone (a URL read from a history or a log) opens nothing.
+    [Theory]
+    [InlineData(null)]
+    [InlineData("another-browsers-secret")]
+    public void Open_TicketFromAnotherBrowser_GoesBackToSignInAsExpired(string? binding)
+    {
+        var (ticket, _) = Issue();
+        Visitor.GoogleSignUpBinding = binding;
+        Navigation.NavigateTo($"{GoogleAccountEndpoints.SignUpPath}?ticket={ticket}");
+
+        var page = Render<GoogleSignUp>();
+
+        Navigation.Uri.Should().EndWith($"/sign-in?error={IdentityErrorCodes.GoogleSignInExpired}");
+        page.Markup.Should().NotContain("ana@gmail.com");
+        Tickets.TryPeek(ticket, out _).Should().BeTrue("the rightful browser can still use it");
     }
 
     // AC1: off, the page does not exist.

@@ -69,7 +69,17 @@ public static class GoogleAccountEndpoints
 
         if (result.NeedsGoogleSignUp)
         {
-            var ticket = signUps.Issue(new GoogleSignUpTicket(idToken, result.GoogleEmail!, result.GoogleName));
+            // BR8 and the independent review: the ticket opens only in this browser, which keeps the secret in a cookie.
+            var (secret, hash) = GoogleSignUpTicket.NewBinding();
+            var ticket = signUps.Issue(new GoogleSignUpTicket(idToken, result.GoogleEmail!, result.GoogleName, hash));
+            context.Response.Cookies.Append(GoogleSignUpTicket.BindingCookie, secret, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Path = SignUpPath,
+                MaxAge = GoogleSignUpTickets.Lifetime,
+            });
             return Results.LocalRedirect($"{SignUpPath}?ticket={ticket}");
         }
 

@@ -92,14 +92,37 @@ public sealed class GoogleAccountEndpointTests(WebApplicationFactory<Program> fa
     {
         _api.GoogleError = new { error = IdentityErrorCodes.GoogleSignUpRequired, email = "ana@gmail.com", name = "Ana Google" };
         await using var host = GoogleOn(idToken: "google-id-token");
+        var client = host.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
-        var location = await CompleteAsync(host);
+        using var response = await client.GetAsync(GoogleAccountEndpoints.CompletePath);
 
+        var location = response.Headers.Location!.ToString();
         location.Should().StartWith($"{GoogleAccountEndpoints.SignUpPath}?ticket=");
         location.Should().NotContain("google-id-token").And.NotContain("ana%40gmail.com");
         var ticket = location[(location.IndexOf('=', StringComparison.Ordinal) + 1)..];
         host.Services.GetRequiredService<GoogleSignUpTickets>().TryPeek(ticket, out var waiting).Should().BeTrue();
-        waiting.Should().Be(new GoogleSignUpTicket("google-id-token", "ana@gmail.com", "Ana Google"));
+        waiting.IdToken.Should().Be("google-id-token");
+        waiting.Email.Should().Be("ana@gmail.com");
+        waiting.Name.Should().Be("Ana Google");
+
+        // The review's finding 1: the ticket belongs to this browser, which keeps the secret in an HttpOnly cookie.
+        var cookie = response.Headers.GetValues("Set-Cookie").Single(value => value.StartsWith(GoogleSignUpTicket.BindingCookie + "=", StringComparison.Ordinal));
+        cookie.Should().Contain("httponly").And.Contain("secure").And.Contain($"path={GoogleAccountEndpoints.SignUpPath}");
+        var secret = cookie[(GoogleSignUpTicket.BindingCookie.Length + 1)..cookie.IndexOf(';', StringComparison.Ordinal)];
+        waiting.IsHeldBy(secret).Should().BeTrue();
+        waiting.IsHeldBy(ticket).Should().BeFalse("the id in the URL is not the secret");
+        waiting.BindingHash.Should().NotBe(secret, "only the hash stays on the server");
+    }
+
+    // The review's finding 9: Google's answer is read once; the external cookie is cleared.
+    [Fact]
+    public async Task Complete_ClearsTheExternalCookie()
+    {
+        await using var host = GoogleOn(idToken: "google-id-token");
+
+        await CompleteAsync(host);
+
+        host.Services.GetRequiredService<StandInGoogleAnswer>().SignOuts.Should().Be(1);
     }
 
     // AC14: any refusal → sign-in with the reason.
@@ -163,7 +186,17 @@ public sealed class GoogleAccountEndpointTests(WebApplicationFactory<Program> fa
 
     public void Dispose() => _api.Dispose();
 
-    private sealed record StandInGoogleAnswer(string? IdToken);
+    /// <summary>Google's saved answer, and how many times the endpoint cleared it.</summary>
+    private sealed class StandInGoogleAnswer(string? idToken)
+    {
+        private int _signOuts;
+
+        public string? IdToken => idToken;
+
+        public int SignOuts => _signOuts;
+
+        public void SignedOut() => Interlocked.Increment(ref _signOuts);
+    }
 
     /// <summary>What the external cookie holds after Google's callback: the saved ID token, or nothing.</summary>
     private sealed class StandInExternalHandler(
@@ -186,6 +219,10 @@ public sealed class GoogleAccountEndpointTests(WebApplicationFactory<Program> fa
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, properties, Scheme.Name)));
         }
 
-        protected override Task HandleSignOutAsync(AuthenticationProperties? properties) => Task.CompletedTask;
+        protected override Task HandleSignOutAsync(AuthenticationProperties? properties)
+        {
+            answer.SignedOut();
+            return Task.CompletedTask;
+        }
     }
 }
