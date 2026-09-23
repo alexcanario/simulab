@@ -3,7 +3,7 @@ feature: F-20
 epic: Foundation and identity
 status: building
 board: 733
-version: 1
+version: 2
 ---
 # Google sign-in
 
@@ -39,7 +39,7 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - BR1 Everything in this item exists only while `Identity:GoogleSignInEnabled` is true, read on both hosts: the button, the Web endpoints, the `google` grant and the registration route. Off (the v1 default, ADR-0001 #13), the screens look as today and the routes answer 404 / `unsupported_grant_type`.
 - BR2 The Api accepts a Google identity only as a Google ID token it validates itself: issuer `https://accounts.google.com`, audience the configured client id, signature from Google's published keys, not expired, and `email_verified` true. It trusts no claim relayed by the Web host. A token that fails any check is refused with `google_sign_in.invalid_token`; one without a verified email with `google_sign_in.email_not_verified`.
 - BR3 The account is found by the Google subject (`sub`) in `user_logins` (provider `Google`) first, then by email. The Google email is never used to find an account whose link to Google holds a different subject.
-- BR4 A linked account, or an active account found by email: link it if not linked yet, clear the failed-attempt count and any lockout (a sign-in with Google is allowed while the password is locked out), then continue as a password sign-in does after the password check (BR6). The password, if any, is kept.
+- BR4 A linked account, or an active account found by email: link it if not linked yet. With two-factor off (or TOTP switched off), Google is the last step: clear the failed-attempt count and any lockout and issue tokens (a sign-in with Google is allowed while the password is locked out). With two-factor on, continue to BR6 without touching the count or the lockout: the code step keeps its own lockout rule (F-11 BR10), and only a right code clears the count. The password, if any, is kept.
 - BR5 A pending account found by email: it becomes active (the email is proven by Google), its password is removed and its security stamp renewed, the Google account is linked, and it continues as in BR4. Whoever set that password never proved the address.
 - BR6 An account with two-factor on (and TOTP switched on) gets the existing TOTP challenge instead of tokens, whichever way it signed in.
 - BR7 No account found: no account is created at the token endpoint. The visitor is sent to the confirmation page, which shows the Google email and name and asks for the 18+ declaration and the acceptance of terms and privacy with the versions it showed, under the same rules and error codes as the password sign-up (F-4). The new account starts active, with no password, the Google account linked, the full name from Google (editable on the page), the preferred language of the current UI culture, and a consent record as F-4 writes one. No verification email is sent.
@@ -67,9 +67,9 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - AC5 Given the registration without the 18+ declaration, without a consent, or with an outdated version, then it answers the F-4 code and creates nothing. (BR7)
 - AC6 Given an account linked to the token's subject, when the grant runs, then it issues tokens, even if the account's email has since changed. (UC2, BR3)
 - AC7 Given an active password account with the token's email and no link, when the grant runs, then the link is added, tokens are issued, and the password still signs in. (UC3, BR4)
-- AC8 Given an active account locked out by failed passwords, when the grant runs, then tokens are issued and the failed count and lockout are cleared. (BR4)
+- AC8 Given an active account with two-factor off locked out by failed passwords, when the grant runs, then tokens are issued and the failed count and lockout are cleared. (BR4)
 - AC9 Given a pending account with the token's email, when the grant runs, then the account is active, has no password, its security stamp changed, the link is added, tokens are issued, and the old password no longer signs in. (UC4, BR5)
-- AC10 Given an account with two-factor on and TOTP switched on, when the grant runs, then it answers `mfa_required` with a challenge, and the existing code step completes the sign-in. (UC5, BR6)
+- AC10 Given an account with two-factor on and TOTP switched on, when the grant runs, then it answers `mfa_required` with a challenge, and the existing code step completes the sign-in; the Google step leaves the failed count and the lockout as they were, and a locked account's code step answers `identity.account_locked`. (UC5, BR4, BR6)
 - AC11 Given an account linked to a different Google subject, when a token with another subject and the same email is sent, then the grant does not sign in to that account. (BR3)
 - AC12 Given an account created by a password sign-up between the Google step and the confirmation, when the registration runs, then it answers `google_sign_in.account_exists` and no second account exists. (BR9)
 - AC13 Given 10 registrations (password or Google) from one client address in an hour, when an 11th Google registration arrives, then it answers `registration.rate_limited`. (BR10)
@@ -107,6 +107,12 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - (none)
 
 ## Change notes
+
+### v2 — 2026-09-23
+- What: Google clears the failed-attempt count and the lockout only when it is the last step (two-factor off). With two-factor on, the Google step issues the TOTP challenge and leaves the count and the lockout as they were; the code step keeps its own lockout rule.
+- Why: the failed count is shared by wrong passwords and wrong codes (`SecondFactor.cs`), so clearing it on every Google step would give unlimited code tries to whoever holds the victim's Google session; `profile.md`: a multi-step sign-in clears the count only in its last step. Found at the start of the build.
+- Affected: BR4, AC8, AC10; other rules and criteria unchanged.
+- Re-approved: 2026-09-23
 
 ## Validation script
 
