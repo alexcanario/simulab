@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-34 Exams back office - mockup</title>
+<style>
+  :root {
+    --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD;
+    --background: #F2F5FB; --surface: #FFFFFF;
+    --appbar: #0F3266; --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.92);
+    --text: #19243E; --text-2: #4A5A7A; --divider: #D0D8EA; --lines: #7E8AA1; --row-hover: #F5F8FD;
+    --error: #BE3737; --error-bg: #FBEAEA; --error-text: #7A1818;
+    --success: #1A9E8C; --success-bg: #E3F4F1;
+    --warning: #D98B1A; --warning-bg: #FCF1E1;
+    --chip: #E6EDF8; --focus: #216DB5;
+  }
+  .dark {
+    --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540;
+    --background: #0E1828; --surface: #172035;
+    --appbar: #091422; --drawer: #091422; --drawer-text: rgba(255,255,255,0.5);
+    --text: #E0E8F8; --text-2: #7A8EB0; --divider: #263352; --lines: #61718F; --row-hover: #1C2840;
+    --error: #E06C6C; --error-bg: #3A1C22; --error-text: #F2B8B8;
+    --success-bg: #12302E; --warning-bg: #3A2C14;
+    --chip: #22304D; --focus: #64A2E3;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #d9dee8; color: #19243E; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #ccd; font-size: 13px; position: sticky; top: 0; z-index: 50; }
+  .controls label { font-weight: 600; margin-right: 4px; }
+  .controls select, .controls button { font: inherit; padding: 4px 8px; }
+  .note { padding: 8px 16px; font-size: 12px; color: #4A5A7A; }
+  .stage { display: flex; justify-content: center; padding: 16px; }
+  .frame { background: var(--background); color: var(--text); border: 1px solid #99a; border-radius: 8px; overflow: hidden; position: relative; width: 1180px; max-width: 100%; height: 720px; display: flex; flex-direction: column; }
+  .appbar { height: 56px; background: var(--appbar); color: #fff; display: flex; align-items: center; padding: 0 16px; flex: none; font-weight: 700; font-size: 1.125rem; gap: 12px; }
+  .appbar .spacer { flex: 1; }
+  .appbar .who { font-size: 13px; font-weight: 400; opacity: .85; }
+  .body { flex: 1; display: flex; min-height: 0; position: relative; }
+  .drawer { background: var(--drawer); color: var(--drawer-text); width: 230px; flex: none; padding: 8px 0; }
+  .section { padding: 16px 16px 4px; font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+  .navlink { display: flex; align-items: center; gap: 14px; height: 44px; padding: 0 16px; margin: 2px 8px; border-radius: 8px; color: inherit; text-decoration: none; cursor: pointer; position: relative; }
+  .navlink:hover { background: rgba(255,255,255,.08); }
+  .navlink[aria-current="page"] { background: rgba(255,255,255,.14); font-weight: 600; }
+  .navlink[aria-current="page"]::before { content: ""; position: absolute; left: -8px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: #6fb2ee; }
+  main { flex: 1; overflow: auto; padding: 24px; position: relative; }
+  .pagehead { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
+  .pagehead .titles { flex: 1; }
+  .crumbs { font-size: .8125rem; color: var(--text-2); margin-bottom: 4px; }
+  .crumbs a { color: var(--primary); text-decoration: underline; cursor: pointer; }
+  h1 { font-size: 1.75rem; margin: 0; font-weight: 600; }
+  .btn { font: inherit; font-size: .875rem; font-weight: 600; border-radius: 10px; padding: 8px 16px; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+  .btn:focus-visible, .iconbtn:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .btn.filled { background: var(--primary); color: #fff; }
+  .dark .btn.filled { color: #19243E; }
+  .btn.filled:hover { background: var(--primary-darken); }
+  .btn.filled.danger { background: var(--error); color: #fff; }
+  .dark .btn.filled.danger { color: #19243E; }
+  .btn.text { background: transparent; color: var(--primary); }
+  .btn.text:hover { background: var(--primary-lighten); }
+  .btn[disabled] { opacity: .6; cursor: default; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+  .spinner.big { width: 36px; height: 36px; border-width: 3px; border-color: var(--divider); border-top-color: var(--primary); }
+  .spinner.small { width: 14px; height: 14px; border-color: var(--divider); border-top-color: var(--primary); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .card { background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; overflow: hidden; }
+  .form { max-width: 44rem; }
+  .form .content { padding: 20px 24px 4px; }
+  .form .actions { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 24px 20px; }
+  .toolbar { display: flex; align-items: flex-end; padding: 12px 16px; gap: 12px; border-bottom: 1px solid var(--divider); flex-wrap: wrap; }
+  .search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--lines); border-radius: 10px; padding: 6px 10px; width: 220px; background: var(--surface); color: var(--text-2); height: 38px; }
+  .search input { border: 0; background: transparent; color: var(--text); font: inherit; flex: 1; outline: none; min-width: 0; }
+  .filter { display: flex; flex-direction: column; font-size: .75rem; color: var(--text-2); gap: 3px; }
+  .filter > span { font-weight: 600; }
+  .filter select, .filter .lookupbox { font: inherit; font-size: .875rem; padding: 0 10px; height: 38px; border: 1px solid var(--lines); border-radius: 10px; background: var(--surface); color: var(--text); width: 175px; min-width: 0; display: flex; align-items: center; gap: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  th { text-align: left; font-weight: 600; color: var(--text-2); padding: 10px 16px; border-bottom: 1px solid var(--divider); white-space: nowrap; }
+  th.sortable { cursor: pointer; }
+  th .sort { font-size: 11px; opacity: .7; margin-left: 4px; }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--divider); vertical-align: middle; }
+  tbody tr:hover { background: var(--row-hover); }
+  td.actions, th.actions { text-align: right; width: 110px; white-space: nowrap; }
+  .trunc { display: block; max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trunc.org { max-width: 14rem; }
+  .sub { font-size: .75rem; color: var(--text-2); }
+  .iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--text-2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+  .iconbtn:hover { background: var(--primary-lighten); color: var(--primary); }
+  .iconbtn.danger:hover { color: var(--error); background: var(--error-bg); }
+  .iconbtn[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: 40px; right: 0; white-space: nowrap; background: #333; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 4px; z-index: 40; font-weight: 400; }
+  .chip { display: inline-block; font-size: .75rem; padding: 3px 10px; border-radius: 12px; background: var(--chip); }
+  .muted { color: var(--text-2); }
+  .footer { display: flex; justify-content: flex-end; align-items: center; gap: 24px; padding: 8px 16px; font-size: .8125rem; color: var(--text-2); }
+  .state { padding: 48px 16px; text-align: center; color: var(--text-2); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .state svg { width: 40px; height: 40px; opacity: .7; }
+  .alert { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: .875rem; border-left: 4px solid; }
+  .alert.error { background: var(--error-bg); color: var(--error-text); border-color: var(--error); }
+  .alert.info { background: var(--primary-lighten); color: var(--text); border-color: var(--primary); }
+  .overlay { position: absolute; inset: 0; background: rgba(8,16,32,.5); display: flex; align-items: center; justify-content: center; z-index: 30; }
+  .dialog { background: var(--surface); color: var(--text); border-radius: 12px; width: 460px; max-width: calc(100% - 32px); display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+  .dialog h2 { font-size: 1.25rem; margin: 0; padding: 20px 24px 8px; font-weight: 600; }
+  .dialog .content { padding: 8px 24px; }
+  .dialog .actions { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px 20px; }
+  .field { margin-bottom: 18px; position: relative; }
+  .field label.lbl { display: block; font-size: .8125rem; font-weight: 600; margin-bottom: 6px; }
+  .field label.lbl .req { color: var(--error); margin-left: 2px; }
+  .input { width: 100%; font: inherit; padding: 9px 12px; border: 1px solid var(--lines); border-radius: 10px; background: var(--surface); color: var(--text); height: 40px; }
+  select.input { height: 40px; }
+  .input.invalid { border-color: var(--error); border-width: 2px; }
+  .help { font-size: .75rem; color: var(--text-2); margin-top: 4px; display: flex; justify-content: space-between; gap: 12px; }
+  .help.err { color: var(--error); font-weight: 600; }
+  .lookup { display: flex; align-items: center; gap: 8px; width: 100%; font: inherit; padding: 0 8px 0 12px; border: 1px solid var(--lines); border-radius: 10px; background: var(--surface); color: var(--text); height: 40px; }
+  .lookup.invalid { border-color: var(--error); border-width: 2px; }
+  .lookup .val { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lookup .val.ph { color: var(--text-2); }
+  .menu { position: absolute; left: 0; right: 0; top: calc(100% - 14px); background: var(--surface); border: 1px solid var(--divider); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); z-index: 20; max-height: 232px; overflow: auto; }
+  .opt { padding: 8px 12px; cursor: pointer; }
+  .opt:hover, .opt[aria-selected="true"] { background: var(--primary-lighten); }
+  .opt .t { font-size: .875rem; }
+  .opt .s { font-size: .75rem; color: var(--text-2); }
+  .menu .msg { padding: 14px 12px; font-size: .8125rem; color: var(--text-2); display: flex; align-items: center; gap: 10px; }
+  .snackbar { position: absolute; right: 24px; bottom: 24px; background: #1f2a3f; color: #fff; padding: 12px 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.3); font-size: .875rem; z-index: 40; display: flex; gap: 10px; align-items: center; }
+  .snackbar::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #5fd3c1; }
+  .notfound { text-align: center; padding: 80px 16px; }
+  .notfound h1 { font-size: 2rem; margin-bottom: 8px; }
+  svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  .drawer svg { width: 22px; height: 22px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span><label for="state">State</label>
+    <select id="state">
+      <optgroup label="/admin/exams (list)">
+        <option value="list-loading">List - loading</option>
+        <option value="list-ready" selected>List - ready</option>
+        <option value="list-empty">List - empty (no exam yet)</option>
+        <option value="list-search">List - search with results</option>
+        <option value="list-nomatch">List - search without results</option>
+        <option value="list-filtered">List - three filters applied</option>
+        <option value="list-filters-nomatch">List - filters without results</option>
+        <option value="list-error">List - server error</option>
+        <option value="list-delete">Delete - confirmation</option>
+        <option value="list-deleted">List - deleted (snackbar)</option>
+        <option value="list-gone">List - delete refused: already gone</option>
+              </optgroup>
+      <optgroup label="/admin/exams/new and /{id} (form)">
+        <option value="form-loading">Form - loading (editing)</option>
+        <option value="form-add">Form - add, empty</option>
+        <option value="form-edit">Form - edit, filled (Municipal)</option>
+        <option value="form-national">Form - scope National (no detail field)</option>
+        <option value="form-lookup-min">Lookup - below the minimum characters</option>
+        <option value="form-lookup-searching">Lookup - searching</option>
+        <option value="form-lookup-results">Lookup - results open</option>
+        <option value="form-lookup-none">Lookup - no result</option>
+        <option value="form-lookup-error">Lookup - search failed</option>
+        <option value="form-lookup-chosen">Lookup - chosen, with the clear button</option>
+        <option value="form-invalid">Form - validation errors (name, detail)</option>
+        <option value="form-taken">Form - server error: name taken</option>
+        <option value="form-org-gone">Form - server error: issuing authority gone</option>
+        <option value="form-saving">Form - saving</option>
+        <option value="form-notfound">Form - exam not found</option>
+        <option value="form-saved">Form - saved (stays on the page, now editing)</option>
+        <option value="form-discard">Form - leaving with unsaved changes</option>
+      </optgroup>
+      <optgroup label="/admin/organizers (what changes)">
+        <option value="org-ready">Organizers - the fourth kind in the list</option>
+        <option value="org-dialog">Organizer dialog - the fourth kind offered</option>
+        <option value="org-has-exams">Organizers - delete refused: it has exams</option>
+      </optgroup>
+      <optgroup label="Permission denied">
+        <option value="denied">Student opens /admin/exams</option>
+      </optgroup>
+    </select></span>
+  <span><label for="lang">Language</label>
+    <select id="lang"><option value="0">en</option><option value="1" selected>pt-BR</option><option value="2">pt-PT</option></select></span>
+  <span><label>Theme</label><button id="themeCtl" type="button">light / dark</button></span>
+</div>
+<div class="note">
+  The controls above are not part of the app. Sample data: 6 organizers (one of the new kind <em>public body</em>) and 7 exams.
+  F-35 adds the editions section below the form card, on the same page; it is not drawn here on purpose.
+</div>
+
+<div class="stage">
+  <div class="frame" id="frame">
+    <header class="appbar"><span>Simulab</span><span class="spacer"></span><span class="who" id="who"></span></header>
+    <div class="body">
+      <nav class="drawer" id="drawer"></nav>
+      <main id="main"></main>
+    </div>
+  </div>
+</div>
+
+<script>
+// [en, pt-BR, pt-PT]
+const T = {
+  "Nav.Home": ["Home", "Início", "Início"],
+  "Nav.Section.Content": ["Content", "Conteúdo", "Conteúdo"],
+  "Nav.Section.Administration": ["Administration", "Administração", "Administração"],
+  "Nav.Organizers": ["Organizers", "Organizadoras", "Entidades organizadoras"],
+  "Nav.Exams": ["Exams", "Exames", "Exames"],
+  "Nav.Roles": ["Roles", "Papéis", "Perfis"],
+  "Nav.Users": ["Users", "Usuários", "Utilizadores"],
+
+  "Common.Add": ["Add", "Adicionar", "Adicionar"],
+  "Common.Edit": ["Edit", "Editar", "Editar"],
+  "Common.Delete": ["Delete", "Excluir", "Eliminar"],
+  "Common.Save": ["Save", "Salvar", "Guardar"],
+  "Common.Saving": ["Saving...", "Salvando...", "A guardar..."],
+  "Common.Cancel": ["Cancel", "Cancelar", "Cancelar"],
+  "Common.Search": ["Search", "Pesquisar", "Pesquisar"],
+  "Common.TryAgain": ["Try again", "Tentar novamente", "Tentar novamente"],
+  "Common.LoadFailed": ["We could not load this list.", "Não foi possível carregar esta lista.", "Não foi possível carregar esta lista."],
+  "Common.Loading": ["Loading...", "Carregando...", "A carregar..."],
+  "Common.Actions": ["Actions", "Ações", "Ações"],
+  "Common.Filter.All": ["All", "Todos", "Todos"],
+  "Common.Table.RowsPerPage": ["Rows per page:", "Linhas por página:", "Linhas por página:"],
+  "Common.Table.PageInfo": ["{0}-{1} of {2}", "{0}-{1} de {2}", "{0}-{1} de {2}"],
+  "Common.Delete.Title": ["Delete item?", "Excluir item?", "Eliminar item?"],
+  "Common.Delete.Confirm": ["Delete {0}", "Excluir {0}", "Eliminar {0}"],
+  "Common.Discard.Title": ["Leave without saving?", "Sair sem salvar?", "Sair sem guardar?"],
+  "Common.Discard.Message": ["The changes on this form will be lost.", "As alterações deste formulário serão perdidas.", "As alterações deste formulário serão perdidas."],
+  "Common.Discard.Confirm": ["Leave", "Sair", "Sair"],
+  "Common.Clear": ["Clear", "Limpar", "Limpar"],
+
+  "Exams.Title": ["Exams", "Exames", "Exames"],
+  "Exams.Search.Placeholder": ["Search by name", "Pesquisar pelo nome", "Pesquisar pelo nome"],
+  "Exams.Empty": ["No exam in the catalog yet.", "Nenhum exame no catálogo ainda.", "Ainda não há exames no catálogo."],
+  "Exams.Empty.Search": ['No exam matches "{0}".', 'Nenhum exame corresponde a "{0}".', 'Nenhum exame corresponde a "{0}".'],
+  "Exams.Empty.Filters": ["No exam matches the chosen filters.", "Nenhum exame corresponde aos filtros escolhidos.", "Nenhum exame corresponde aos filtros escolhidos."],
+  "Exams.Column.Name": ["Name", "Nome", "Nome"],
+  "Exams.Column.IssuingAuthority": ["Issuing authority", "Órgão contratante", "Entidade contratante"],
+  "Exams.Column.AssessmentType": ["Assessment type", "Tipo de avaliação", "Tipo de avaliação"],
+  "Exams.Column.Scope": ["Scope", "Abrangência", "Abrangência"],
+  "Exams.Filter.IssuingAuthority": ["Issuing authority", "Órgão contratante", "Entidade contratante"],
+  "Exams.Filter.AssessmentType": ["Assessment type", "Tipo de avaliação", "Tipo de avaliação"],
+  "Exams.Filter.Scope": ["Scope", "Abrangência", "Abrangência"],
+  "Exams.Form.AddTitle": ["Add exam", "Adicionar exame", "Adicionar exame"],
+  "Exams.Form.EditTitle": ["Edit exam", "Editar exame", "Editar exame"],
+  "Exams.Field.IssuingAuthority": ["Issuing authority", "Órgão contratante", "Entidade contratante"],
+  "Exams.Field.IssuingAuthority.Hint": [
+    "The body that publishes the notice and sets the rules. The board that applies each paper belongs to the edition.",
+    "O órgão que publica o edital e define as regras. A banca que aplica cada prova pertence à edição.",
+    "A entidade que publica o aviso e define as regras. A entidade que aplica cada prova pertence à edição."],
+  "Exams.Field.IssuingAuthority.Placeholder": ["Name or acronym", "Nome ou sigla", "Nome ou sigla"],
+  "Exams.Field.Name": ["Name", "Nome", "Nome"],
+  "Exams.Field.Name.Hint": ["2 to 200 characters", "De 2 a 200 caracteres", "Entre 2 e 200 caracteres"],
+  "Exams.Field.AssessmentType": ["Assessment type", "Tipo de avaliação", "Tipo de avaliação"],
+  "Exams.Field.Scope": ["Scope", "Abrangência", "Abrangência"],
+  "Exams.Field.State": ["State", "Estado", "Estado"],
+  "Exams.Field.Municipality": ["Municipality", "Município", "Município"],
+  "Exams.Field.ScopeDetail.Hint": ["Where this exam applies.", "Onde este exame se aplica.", "Onde este exame se aplica."],
+  "Exams.Field.ContentLanguage": ["Content language", "Idioma do conteúdo", "Idioma do conteúdo"],
+  "Exams.Field.ContentLanguage.Hint": [
+    "The language the exam and its questions are written in. Content is never translated.",
+    "O idioma em que o exame e suas questões estão escritos. O conteúdo nunca é traduzido.",
+    "O idioma em que o exame e as suas questões estão escritos. O conteúdo nunca é traduzido."],
+  "Exams.Saved": ["Exam saved.", "Exame salvo.", "Exame guardado."],
+  "Exams.Deleted": ["Exam deleted.", "Exame excluído.", "Exame eliminado."],
+  "Exams.Delete.Message": [
+    "The exam {0} leaves the catalog. Its name stays reserved inside {1}.",
+    "O exame {0} sai do catálogo. O nome continua reservado dentro de {1}.",
+    "O exame {0} sai do catálogo. O nome continua reservado dentro de {1}."],
+  "Exams.BackToList": ["Back to the exams", "Voltar para os exames", "Voltar para os exames"],
+  "Exams.Choose": ["Choose", "Escolher", "Escolher"],
+
+  "AssessmentType.PublicServiceExam": ["Public service exam", "Concurso público", "Concurso público"],
+  "AssessmentType.Certification": ["Certification", "Certificação", "Certificação"],
+  "AssessmentType.UniversityEntranceExam": ["University entrance exam", "Vestibular", "Exame de acesso"],
+  "AssessmentType.Enem": ["ENEM", "ENEM", "ENEM"],
+  "ExamScope.National": ["National", "Nacional", "Nacional"],
+  "ExamScope.State": ["State", "Estadual", "Estadual"],
+  "ExamScope.Municipal": ["Municipal", "Municipal", "Municipal"],
+
+  "Lookup.Hint.MinChars": ["Type at least {0} characters", "Digite ao menos {0} caracteres", "Escreva pelo menos {0} caracteres"],
+  "Lookup.Searching": ["Searching...", "Pesquisando...", "A pesquisar..."],
+  "Lookup.NoResults": ['Nothing found for "{0}".', 'Nada encontrado para "{0}".', 'Nada encontrado para "{0}".'],
+  "Lookup.LoadFailed": ["The search failed.", "A pesquisa falhou.", "A pesquisa falhou."],
+  "Lookup.Clear": ["Clear the selection", "Limpar a seleção", "Limpar a seleção"],
+
+  "Organizers.Title": ["Organizers", "Organizadoras", "Entidades organizadoras"],
+  "Organizers.Column.Name": ["Name", "Nome", "Nome"],
+  "Organizers.Column.Acronym": ["Acronym", "Sigla", "Sigla"],
+  "Organizers.Column.Kind": ["Kind", "Tipo", "Tipo"],
+  "Organizers.Search.Placeholder": ["Search by name or acronym", "Pesquisar por nome ou sigla", "Pesquisar por nome ou sigla"],
+  "Organizers.Dialog.EditTitle": ["Edit organizer", "Editar organizadora", "Editar entidade organizadora"],
+  "Organizers.Field.Name": ["Name", "Nome", "Nome"],
+  "Organizers.Field.Acronym": ["Acronym", "Sigla", "Sigla"],
+  "Organizers.Field.Kind": ["Kind", "Tipo", "Tipo"],
+  "Organizers.Field.Website": ["Official website", "Site oficial", "Sítio oficial"],
+  "OrganizerKind.ExamBoard": ["Exam board", "Banca examinadora", "Entidade examinadora"],
+  "OrganizerKind.CertifyingBody": ["Certifying body", "Entidade certificadora", "Entidade certificadora"],
+  "OrganizerKind.University": ["University", "Universidade", "Universidade"],
+  "OrganizerKind.PublicBody": ["Public body", "Órgão público", "Organismo público"],
+
+  "exam.not_found": ["This exam no longer exists.", "Este exame não existe mais.", "Este exame já não existe."],
+  "exam.name_required": ["Enter a name with at least 2 characters.", "Informe um nome com ao menos 2 caracteres.", "Indique um nome com pelo menos 2 caracteres."],
+  "exam.name_too_long": ["The name may have at most 200 characters.", "O nome pode ter no máximo 200 caracteres.", "O nome pode ter no máximo 200 caracteres."],
+  "exam.name_taken": ["This issuing authority already has an exam with this name.", "Este órgão já tem um exame com este nome.", "Esta entidade já tem um exame com este nome."],
+  "exam.issuing_authority_required": ["Choose the issuing authority.", "Escolha o órgão contratante.", "Escolha a entidade contratante."],
+  "exam.scope_detail_required": ["Say where this exam applies.", "Informe onde este exame se aplica.", "Indique onde este exame se aplica."],
+  "organizer.not_found": ["This organizer no longer exists.", "Esta organizadora não existe mais.", "Esta entidade organizadora já não existe."],
+  "organizer.has_exams": [
+    "This organizer is the issuing authority of exams in the catalog. Delete those exams first, on the Exams page.",
+    "Esta organização é o órgão contratante de exames no catálogo. Exclua esses exames primeiro, na página Exames.",
+    "Esta organização é a entidade contratante de exames no catálogo. Elimine esses exames primeiro, na página Exames."],
+
+  "NotFound.Title": ["Page not found", "Página não encontrada", "Página não encontrada"],
+  "NotFound.Message": ["Check the address or go back to the home page.", "Confira o endereço ou volte para a página inicial.", "Verifique o endereço ou volte à página inicial."],
+  "Who": ["Signed in as ana@simulab.test (Admin)", "Conectado como ana@simulab.test (Administrador)", "Sessão iniciada como ana@simulab.test (Administrador)"]
+};
+
+let lang = 1, dark = false;
+const LANGS = ["en", "pt-BR", "pt-PT"];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function t(key, ...args) {
+  const row = T[key];
+  let s = row ? row[lang] : key;
+  args.forEach((a, i) => s = s.split("{" + i + "}").join(a));
+  return s;
+}
+
+const I = {
+  add: '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>',
+  search: '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1114 9.5 4.5 4.5 0 019.5 14z"/></svg>',
+  edit: '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>',
+  del: '<svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>',
+  close: '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+  error: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>',
+  empty: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm2 18H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>',
+  home: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>',
+  org: '<svg viewBox="0 0 24 24"><path d="M12 3L2 8v2h20V8L12 3zM4 12v7H2v2h20v-2h-2v-7h-2v7h-3v-7h-2v7h-2v-7H9v7H6v-7H4z"/></svg>',
+  exam: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 13h8v2H8v-2zm0 4h5v2H8v-2z"/></svg>',
+  roles: '<svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-8 2-8 4.5V21h16v-2.5C20 16 16 14 12 14z"/></svg>',
+  chev: '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>'
+};
+
+const orgs = [
+  { id: 1, name: "Centro Brasileiro de Pesquisa em Avaliação", acr: "CEBRASPE", kind: "ExamBoard" },
+  { id: 2, name: "Fundação Getulio Vargas", acr: "FGV", kind: "ExamBoard" },
+  { id: 3, name: "Polícia Federal", acr: "PF", kind: "PublicBody" },
+  { id: 4, name: "Prefeitura Municipal de Guarulhos", acr: "PMG", kind: "PublicBody" },
+  { id: 5, name: "Universidade de São Paulo", acr: "USP", kind: "University" },
+  { id: 6, name: "Amazon Web Services", acr: "AWS", kind: "CertifyingBody" }
+];
+const orgById = id => orgs.find(o => o.id === id);
+
+// type: assessment type key suffix; scope: scope key suffix
+const exams = [
+  { id: 1, name: "Agente de Polícia Federal", org: 3, type: "PublicServiceExam", scope: "National", detail: null, langv: "pt-BR" },
+  { id: 2, name: "Escrivão de Polícia Federal", org: 3, type: "PublicServiceExam", scope: "National", detail: null, langv: "pt-BR" },
+  { id: 3, name: "Guarda Municipal de Guarulhos", org: 4, type: "PublicServiceExam", scope: "Municipal", detail: "Guarulhos (SP)", langv: "pt-BR" },
+  { id: 4, name: "Agente de Trânsito de Guarulhos", org: 4, type: "PublicServiceExam", scope: "Municipal", detail: "Guarulhos (SP)", langv: "pt-BR" },
+  { id: 5, name: "FUVEST", org: 5, type: "UniversityEntranceExam", scope: "State", detail: "São Paulo", langv: "pt-BR" },
+  { id: 6, name: "Exame Nacional do Ensino Médio", org: 3, type: "Enem", scope: "National", detail: null, langv: "pt-BR" },
+  { id: 7, name: "AWS Certified Solutions Architect - Associate", org: 6, type: "Certification", scope: "National", detail: null, langv: "en" }
+];
+const LANG_NATIVE = { "pt-BR": "Português (Brasil)", "pt-PT": "Português (Portugal)", "en": "English" };
+const TYPES = ["PublicServiceExam", "Certification", "UniversityEntranceExam", "Enem"];
+const SCOPES = ["National", "State", "Municipal"];
+const KINDS = ["ExamBoard", "CertifyingBody", "University", "PublicBody"];
+
+function drawer(page) {
+  const item = (icon, key, active) =>
+    `<a class="navlink" ${active ? 'aria-current="page"' : ""} href="#">${icon}<span>${t(key)}</span></a>`;
+  document.getElementById("drawer").innerHTML =
+    item(I.home, "Nav.Home", page === "home") +
+    `<div class="section">${t("Nav.Section.Content")}</div>` +
+    item(I.org, "Nav.Organizers", page === "organizers") +
+    item(I.exam, "Nav.Exams", page === "exams") +
+    `<div class="section">${t("Nav.Section.Administration")}</div>` +
+    item(I.roles, "Nav.Roles", false);
+  document.getElementById("who").textContent = t("Who");
+}
+
+function deniedDrawer() {
+  document.getElementById("drawer").innerHTML =
+    `<a class="navlink" aria-current="page" href="#">${I.home}<span>${t("Nav.Home")}</span></a>`;
+  document.getElementById("who").textContent = LANGS[lang] === "en" ? "Signed in as leo@simulab.test (Student)"
+    : (LANGS[lang] === "pt-BR" ? "Conectado como leo@simulab.test (Estudante)" : "Sessão iniciada como leo@simulab.test (Estudante)");
+}
+
+const pagehead = (titleKey, crumbs, action) => `
+  <div class="pagehead"><div class="titles">
+    <div class="crumbs">${crumbs}</div><h1>${esc(typeof titleKey === "string" ? t(titleKey) : titleKey)}</h1>
+  </div>${action || ""}</div>`;
+
+const crumb = parts => parts.map(p => p.href ? `<a href="#">${esc(p.text)}</a>` : esc(p.text)).join(" › ");
+
+function filters(sel) {
+  sel = sel || {};
+  const orgText = sel.org ? `${orgById(sel.org).name} (${orgById(sel.org).acr})` : t("Common.Filter.All");
+  const opts = (list, prefix, chosen) =>
+    [`<option>${esc(t("Common.Filter.All"))}</option>`]
+      .concat(list.map(v => `<option ${chosen === v ? "selected" : ""}>${esc(t(prefix + "." + v))}</option>`)).join("");
+  return `<div class="toolbar">
+    <div class="search">${I.search}<input type="search" aria-label="${esc(t("Common.Search"))}"
+      placeholder="${esc(t("Exams.Search.Placeholder"))}" value="${esc(sel.term || "")}"></div>
+    <label class="filter"><span>${esc(t("Exams.Filter.IssuingAuthority"))}</span>
+      <span class="lookupbox"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${sel.org ? "" : "color:var(--text-2)"}">${esc(orgText)}</span>${I.chev}</span></label>
+    <label class="filter"><span>${esc(t("Exams.Filter.AssessmentType"))}</span>
+      <select>${opts(TYPES, "AssessmentType", sel.type)}</select></label>
+    <label class="filter"><span>${esc(t("Exams.Filter.Scope"))}</span>
+      <select>${opts(SCOPES, "ExamScope", sel.scope)}</select></label>
+  </div>`;
+}
+
+function rows(list) {
+  return list.map(e => {
+    const o = orgById(e.org);
+    return `<tr>
+      <td><span class="trunc" title="${esc(e.name)}">${esc(e.name)}</span></td>
+      <td><span class="trunc org" title="${esc(o.name)}">${esc(o.name)}</span><span class="sub">${esc(o.acr)}</span></td>
+      <td>${esc(t("AssessmentType." + e.type))}</td>
+      <td>${esc(t("ExamScope." + e.scope))}${e.detail ? `<div class="sub">${esc(e.detail)}</div>` : ""}</td>
+      <td class="actions">
+        <button class="iconbtn" data-tip="${esc(t("Common.Edit"))}" aria-label="${esc(t("Common.Edit"))}: ${esc(e.name)}">${I.edit}</button>
+        <button class="iconbtn danger" data-tip="${esc(t("Common.Delete"))}" aria-label="${esc(t("Common.Delete"))}: ${esc(e.name)}">${I.del}</button>
+      </td></tr>`;
+  }).join("");
+}
+
+function emptyState(msg, withAction) {
+  return `<div class="state">${I.empty}<div>${esc(msg)}</div>${withAction
+    ? `<button class="btn filled" type="button">${I.add}${esc(t("Common.Add"))}</button>` : ""}</div>`;
+}
+
+function listPage(opts) {
+  opts = opts || {};
+  const head = pagehead("Exams.Title",
+    crumb([{ text: t("Nav.Section.Content") }, { text: t("Exams.Title") }]),
+    `<button class="btn filled" type="button">${I.add}${esc(t("Common.Add"))}</button>`);
+  const alert = opts.alert ? `<div class="alert error" role="alert">${I.error}<span>${esc(t(opts.alert))}</span></div>` : "";
+  let inner;
+  if (opts.mode === "loading") {
+    inner = `<div class="state"><div class="spinner big"></div><div>${esc(t("Common.Loading"))}</div></div>`;
+  } else if (opts.mode === "error") {
+    inner = `<div class="state">${I.error}<div>${esc(t("Common.LoadFailed"))}</div>
+      <button class="btn text" type="button">${esc(t("Common.TryAgain"))}</button></div>`;
+  } else if (opts.mode === "empty") {
+    inner = emptyState(t("Exams.Empty"), true);
+  } else if (opts.mode === "nomatch") {
+    inner = emptyState(t("Exams.Empty.Search", opts.term), false);
+  } else if (opts.mode === "filters-nomatch") {
+    inner = emptyState(t("Exams.Empty.Filters"), false);
+  } else {
+    const list = opts.list || exams;
+    const th = (key, sorted) => `<th class="sortable" ${sorted ? 'aria-sort="ascending"' : ""}>${esc(t(key))}${sorted ? '<span class="sort">▲</span>' : ""}</th>`;
+    inner = `<table><thead><tr>${th("Exams.Column.Name", true)}${th("Exams.Column.IssuingAuthority")}${th("Exams.Column.AssessmentType")}${th("Exams.Column.Scope")}
+      <th class="actions">${esc(t("Common.Actions"))}</th></tr></thead><tbody>${rows(list)}</tbody></table>
+      <div class="footer"><span>${esc(t("Common.Table.RowsPerPage"))} 25</span>
+        <span>${esc(t("Common.Table.PageInfo", 1, list.length, list.length))}</span></div>`;
+  }
+  return head + alert + `<div class="card">${filters(opts)}${inner}</div>`;
+}
+
+function field(o) {
+  const err = o.error ? `<div class="help err" role="alert">${esc(o.error)}</div>`
+    : (o.hint ? `<div class="help"><span>${esc(o.hint)}</span>${o.counter ? `<span>${o.counter}</span>` : ""}</div>` : "");
+  return `<div class="field">
+    <label class="lbl" for="${o.id}">${esc(o.label)}${o.required ? '<span class="req" aria-hidden="true">*</span>' : ""}</label>
+    ${o.control}${err}</div>`;
+}
+
+function textInput(o) {
+  return field(Object.assign({}, o, {
+    control: `<input class="input ${o.error ? "invalid" : ""}" id="${o.id}" type="text" value="${esc(o.value || "")}"
+      ${o.required ? 'aria-required="true"' : ""} ${o.error ? 'aria-invalid="true"' : ""}>`
+  }));
+}
+
+function selectInput(o) {
+  const body = (o.options || []).map(v =>
+    `<option ${o.value === v.v ? "selected" : ""}>${esc(v.text)}</option>`).join("");
+  const placeholder = o.value === null || o.value === undefined
+    ? `<option selected disabled value="">${esc(t("Exams.Choose"))}</option>` : "";
+  return field(Object.assign({}, o, {
+    control: `<select class="input ${o.error ? "invalid" : ""}" id="${o.id}" ${o.required ? 'aria-required="true"' : ""}>${placeholder}${body}</select>`
+  }));
+}
+
+function lookupField(o) {
+  const chosen = o.chosen ? orgById(o.chosen) : null;
+  const value = chosen ? `${chosen.name} (${chosen.acr})` : (o.typed || "");
+  const menu = o.menu ? `<div class="menu" role="listbox">${o.menu}</div>` : "";
+  return `<div class="field">
+    <label class="lbl" for="lk-org">${esc(t("Exams.Field.IssuingAuthority"))}<span class="req" aria-hidden="true">*</span></label>
+    <div class="lookup ${o.error ? "invalid" : ""}" role="combobox" aria-expanded="${o.menu ? "true" : "false"}"
+         aria-controls="lk-list" aria-required="true">
+      ${I.search}
+      <span class="val ${value ? "" : "ph"}" id="lk-org">${esc(value || t("Exams.Field.IssuingAuthority.Placeholder"))}</span>
+      ${o.searching ? '<span class="spinner small"></span>' : ""}
+      ${chosen ? `<button class="iconbtn" aria-label="${esc(t("Lookup.Clear"))}" data-tip="${esc(t("Lookup.Clear"))}">${I.close}</button>` : ""}
+    </div>${menu}
+    ${o.error ? `<div class="help err" role="alert">${esc(o.error)}</div>`
+      : `<div class="help"><span>${esc(o.hint || t("Exams.Field.IssuingAuthority.Hint"))}</span></div>`}
+    <span class="sr" aria-live="polite">${esc(o.live || "")}</span></div>`;
+}
+
+const lookupOptions = term => orgs
+  .filter(o => (o.name + " " + o.acr).toLowerCase().includes(term.toLowerCase()))
+  .map(o => `<div class="opt" role="option" aria-selected="false">
+      <div class="t">${esc(o.name)} (${esc(o.acr)})</div><div class="s">${esc(t("OrganizerKind." + o.kind))}</div></div>`).join("");
+
+function formPage(o) {
+  o = o || {};
+  const editing = !!o.exam;
+  const title = editing ? t("Exams.Form.EditTitle") : t("Exams.Form.AddTitle");
+  const head = pagehead(title, crumb([
+    { text: t("Nav.Section.Content") },
+    { text: t("Exams.Title"), href: true },
+    { text: editing ? o.exam.name : t("Exams.Form.AddTitle") }]));
+
+  if (o.mode === "loading") {
+    return head + `<div class="card form"><div class="state"><div class="spinner big"></div>
+      <div>${esc(t("Common.Loading"))}</div></div></div>`;
+  }
+  if (o.mode === "notfound") {
+    return pagehead(t("Exams.Form.EditTitle"), crumb([{ text: t("Nav.Section.Content") }, { text: t("Exams.Title"), href: true }]))
+      + `<div class="card form"><div class="content">
+        <div class="alert error" role="alert">${I.error}<span>${esc(t("exam.not_found"))}</span></div>
+        <p><a href="#">${esc(t("Exams.BackToList"))}</a></p></div></div>`;
+  }
+
+  const e = o.exam || {};
+  const scope = o.scope !== undefined ? o.scope : (e.scope || null);
+  const alert = o.alert ? `<div class="alert error" role="alert">${I.error}<span>${esc(t(o.alert))}</span></div>` : "";
+
+  const detail = (scope === "State" || scope === "Municipal") ? textInput({
+    id: "f-detail",
+    label: scope === "State" ? t("Exams.Field.State") : t("Exams.Field.Municipality"),
+    required: true,
+    value: o.detail !== undefined ? o.detail : (e.detail || ""),
+    hint: t("Exams.Field.ScopeDetail.Hint"),
+    error: o.detailError ? t("exam.scope_detail_required") : null
+  }) : "";
+
+  const name = o.name !== undefined ? o.name : (e.name || "");
+  return head + `<div class="card form"><div class="content">${alert}
+    ${lookupField({
+      chosen: o.chosen !== undefined ? o.chosen : e.org,
+      typed: o.typed, menu: o.menu, searching: o.searching,
+      error: o.orgError ? t("exam.issuing_authority_required") : null,
+      hint: o.lookupHint, live: o.live
+    })}
+    ${textInput({
+      id: "f-name", label: t("Exams.Field.Name"), required: true, value: name,
+      hint: t("Exams.Field.Name.Hint"), counter: name.length + "/200",
+      error: o.nameError ? t(o.nameError) : null
+    })}
+    ${selectInput({
+      id: "f-type", label: t("Exams.Field.AssessmentType"), required: true,
+      value: o.type !== undefined ? o.type : (e.type || null),
+      options: TYPES.map(v => ({ v: v, text: t("AssessmentType." + v) }))
+    })}
+    ${selectInput({
+      id: "f-scope", label: t("Exams.Field.Scope"), required: true, value: scope,
+      options: SCOPES.map(v => ({ v: v, text: t("ExamScope." + v) }))
+    })}
+    ${detail}
+    ${selectInput({
+      id: "f-lang", label: t("Exams.Field.ContentLanguage"), required: true,
+      value: o.langv !== undefined ? o.langv : (e.langv || "pt-BR"),
+      options: ["pt-BR", "pt-PT", "en"].map(v => ({ v: v, text: LANG_NATIVE[v] })),
+      hint: t("Exams.Field.ContentLanguage.Hint")
+    })}
+    </div><div class="actions">
+      <button class="btn text" type="button" ${o.saving ? "disabled" : ""}>${esc(t("Common.Cancel"))}</button>
+      <button class="btn filled" type="button" ${o.saving ? "disabled" : ""}>${o.saving
+        ? `<span class="spinner"></span>${esc(t("Common.Saving"))}` : esc(t("Common.Save"))}</button>
+    </div></div>`;
+}
+
+function organizersPage(alert) {
+  const head = pagehead("Organizers.Title",
+    crumb([{ text: t("Nav.Section.Content") }, { text: t("Organizers.Title") }]),
+    `<button class="btn filled" type="button">${I.add}${esc(t("Common.Add"))}</button>`);
+  const al = alert ? `<div class="alert error" role="alert">${I.error}<span>${esc(t(alert))}</span></div>` : "";
+  const body = orgs.map(o => `<tr>
+    <td><span class="trunc" title="${esc(o.name)}">${esc(o.name)}</span></td>
+    <td>${esc(o.acr)}</td>
+    <td>${esc(t("OrganizerKind." + o.kind))}</td>
+    <td class="actions">
+      <button class="iconbtn" data-tip="${esc(t("Common.Edit"))}" aria-label="${esc(t("Common.Edit"))}: ${esc(o.name)}">${I.edit}</button>
+      <button class="iconbtn danger" data-tip="${esc(t("Common.Delete"))}" aria-label="${esc(t("Common.Delete"))}: ${esc(o.name)}">${I.del}</button>
+    </td></tr>`).join("");
+  return head + al + `<div class="card">
+    <div class="toolbar"><div class="search">${I.search}<input type="search" aria-label="${esc(t("Common.Search"))}"
+      placeholder="${esc(t("Organizers.Search.Placeholder"))}"></div></div>
+    <table><thead><tr><th class="sortable" aria-sort="ascending">${esc(t("Organizers.Column.Name"))}<span class="sort">▲</span></th>
+      <th class="sortable">${esc(t("Organizers.Column.Acronym"))}</th><th class="sortable">${esc(t("Organizers.Column.Kind"))}</th>
+      <th class="actions">${esc(t("Common.Actions"))}</th></tr></thead><tbody>${body}</tbody></table>
+    <div class="footer"><span>${esc(t("Common.Table.RowsPerPage"))} 25</span>
+      <span>${esc(t("Common.Table.PageInfo", 1, orgs.length, orgs.length))}</span></div></div>`;
+}
+
+function organizerDialog() {
+  const o = orgs[3];
+  return `<div class="overlay"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="odlg">
+    <h2 id="odlg">${esc(t("Organizers.Dialog.EditTitle"))}</h2>
+    <div class="content">
+      ${textInput({ id: "o-name", label: t("Organizers.Field.Name"), required: true, value: o.name })}
+      ${textInput({ id: "o-acr", label: t("Organizers.Field.Acronym"), required: true, value: o.acr })}
+      ${selectInput({
+        id: "o-kind", label: t("Organizers.Field.Kind"), required: true, value: o.kind,
+        options: KINDS.map(k => ({ v: k, text: t("OrganizerKind." + k) })),
+        hint: LANGS[lang] === "en" ? "The fourth kind arrives with F-34."
+          : (LANGS[lang] === "pt-BR" ? "O quarto tipo chega com F-34." : "O quarto tipo chega com F-34.")
+      })}
+    </div>
+    <div class="actions"><button class="btn text" type="button">${esc(t("Common.Cancel"))}</button>
+      <button class="btn filled" type="button">${esc(t("Common.Save"))}</button></div></div></div>`;
+}
+
+function deleteDialog(e) {
+  const o = orgById(e.org);
+  return `<div class="overlay"><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="del-t" aria-describedby="del-m">
+    <h2 id="del-t">${esc(t("Common.Delete.Title"))}</h2>
+    <div class="content"><p id="del-m">${esc(t("Exams.Delete.Message", e.name, o.name + " (" + o.acr + ")"))}</p></div>
+    <div class="actions"><button class="btn text" type="button">${esc(t("Common.Cancel"))}</button>
+      <button class="btn filled danger" type="button">${esc(t("Common.Delete.Confirm", e.name))}</button></div></div></div>`;
+}
+
+function discardDialog() {
+  return `<div class="overlay"><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dc-t" aria-describedby="dc-m">
+    <h2 id="dc-t">${esc(t("Common.Discard.Title"))}</h2>
+    <div class="content"><p id="dc-m">${esc(t("Common.Discard.Message"))}</p></div>
+    <div class="actions"><button class="btn text" type="button">${esc(t("Common.Cancel"))}</button>
+      <button class="btn filled danger" type="button">${esc(t("Common.Discard.Confirm"))}</button></div></div></div>`;
+}
+
+const snack = msg => `<div class="snackbar" role="status">${esc(msg)}</div>`;
+
+function render() {
+  document.documentElement.lang = LANGS[lang];
+  document.getElementById("frame").classList.toggle("dark", dark);
+  const s = document.getElementById("state").value;
+  const main = document.getElementById("main");
+
+  if (s === "denied") { deniedDrawer(); }
+  else if (s.startsWith("org")) { drawer("organizers"); }
+  else { drawer("exams"); }
+
+  let h = "";
+  switch (s) {
+    case "list-loading": h = listPage({ mode: "loading" }); break;
+    case "list-ready": h = listPage(); break;
+    case "list-empty": h = listPage({ mode: "empty" }); break;
+    case "list-search": h = listPage({ term: "guarulhos", list: exams.filter(e => /Guarulhos/.test(e.name)) }); break;
+    case "list-nomatch": h = listPage({ mode: "nomatch", term: "enfermeiro" }); break;
+    case "list-filtered": h = listPage({ org: 4, type: "PublicServiceExam", scope: "Municipal", list: exams.filter(e => e.org === 4) }); break;
+    case "list-filters-nomatch": h = listPage({ mode: "filters-nomatch", org: 6, type: "PublicServiceExam", scope: "Municipal" }); break;
+    case "list-error": h = listPage({ mode: "error" }); break;
+    case "list-delete": h = listPage() + deleteDialog(exams[2]); break;
+    case "list-deleted": h = listPage({ list: exams.filter(e => e.id !== 3) }) + snack(t("Exams.Deleted")); break;
+    case "list-gone": h = listPage({ alert: "exam.not_found", list: exams.filter(e => e.id !== 3) }); break;
+
+    case "form-loading": h = formPage({ exam: exams[2], mode: "loading" }); break;
+    case "form-add": h = formPage({ chosen: null }); break;
+    case "form-edit": h = formPage({ exam: exams[2] }); break;
+    case "form-national": h = formPage({ exam: exams[0] }); break;
+    case "form-lookup-min": h = formPage({ chosen: null, typed: "g", lookupHint: t("Lookup.Hint.MinChars", 2) }); break;
+    case "form-lookup-searching": h = formPage({ chosen: null, typed: "guar", searching: true, live: t("Lookup.Searching") }); break;
+    case "form-lookup-results": h = formPage({ chosen: null, typed: "fe", menu: lookupOptions("fe"), live: "2" }); break;
+    case "form-lookup-none": h = formPage({
+      chosen: null, typed: "inep",
+      menu: `<div class="msg">${I.info}<span>${esc(t("Lookup.NoResults", "inep"))}</span></div>`, live: t("Lookup.NoResults", "inep") }); break;
+    case "form-lookup-error": h = formPage({
+      chosen: null, typed: "pref",
+      menu: `<div class="msg">${I.error}<span>${esc(t("Lookup.LoadFailed"))}</span>
+        <button class="btn text" type="button">${esc(t("Common.TryAgain"))}</button></div>` }); break;
+    case "form-lookup-chosen": h = formPage({ chosen: 4, name: "Guarda Municipal de Guarulhos", type: "PublicServiceExam", scope: "Municipal", detail: "Guarulhos (SP)" }); break;
+    case "form-invalid": h = formPage({
+      chosen: 4, name: "G", nameError: "exam.name_required", scope: "Municipal", detail: "", detailError: true,
+      type: "PublicServiceExam" }); break;
+    case "form-taken": h = formPage({
+      chosen: 4, name: "Guarda Municipal de Guarulhos", type: "PublicServiceExam", scope: "Municipal",
+      detail: "Guarulhos (SP)", alert: "exam.name_taken", nameError: "exam.name_taken" }); break;
+    case "form-org-gone": h = formPage({
+      chosen: null, orgError: true, name: "Guarda Municipal de Guarulhos", type: "PublicServiceExam",
+      scope: "Municipal", detail: "Guarulhos (SP)", alert: "organizer.not_found" }); break;
+    case "form-saving": h = formPage({
+      chosen: 4, name: "Guarda Municipal de Guarulhos", type: "PublicServiceExam", scope: "Municipal",
+      detail: "Guarulhos (SP)", saving: true }); break;
+    case "form-saved": h = formPage({ exam: exams[2] }) + snack(t("Exams.Saved")); break;
+    case "form-notfound": h = formPage({ mode: "notfound" }); break;
+    case "form-discard": h = formPage({ chosen: 4, name: "Guarda Municipal", type: "PublicServiceExam", scope: "Municipal", detail: "Guarulhos (SP)" }) + discardDialog(); break;
+
+    case "org-ready": h = organizersPage(); break;
+    case "org-dialog": h = organizersPage() + organizerDialog(); break;
+    case "org-has-exams": h = organizersPage("organizer.has_exams"); break;
+
+    case "denied": h = `<div class="notfound"><h1>${esc(t("NotFound.Title"))}</h1>
+      <p class="muted">${esc(t("NotFound.Message"))}</p></div>`; break;
+  }
+  main.innerHTML = h;
+}
+
+document.getElementById("state").addEventListener("change", render);
+document.getElementById("lang").addEventListener("change", e => { lang = +e.target.value; render(); });
+document.getElementById("themeCtl").addEventListener("click", () => { dark = !dark; render(); });
+render();
+</script>
+</body>
+</html>
