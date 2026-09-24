@@ -72,4 +72,13 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         .WithEnvironment("Authentication__Google__ClientSecret", googleSecret);
 }
 
+// F-41: the gateway's key lives in this host's user secrets (Ai:ApiKey; docs/infra.md) and reaches only
+// the Api, as a secret parameter so the dashboard masks it. Without it the app starts normally and every
+// call fails with ai.not_configured (BR4), which is what a session that does not need the model wants.
+var aiApiKey = builder.Configuration["Ai:ApiKey"];
+if (!string.IsNullOrWhiteSpace(aiApiKey))
+{
+    api.WithEnvironment("Ai__ApiKey", builder.AddParameter("ai-api-key", aiApiKey, secret: true));
+}
+
 builder.Build().Run();

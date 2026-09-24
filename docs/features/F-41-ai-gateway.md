@@ -100,7 +100,19 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 - Re-approved: 2026-09-24
 
 ## Validation script
-<!-- Written at the end of build. -->
+Run from the worktree `D:\dev\_icontrol\wt\simulab\feature-41`, with no other app host running.
+
+1. Put your Claude API key in the app host's user secrets, then start the app host. Expected: the Aspire dashboard opens and `api` and `web` reach Running.
+   - Git Bash: `dotnet user-secrets --project src/Hosts/Simulab.AppHost set "Ai:ApiKey" "<your key>"` then `dotnet run --project src/Hosts/Simulab.AppHost`
+   - PowerShell 7: `dotnet user-secrets --project src\Hosts\Simulab.AppHost set "Ai:ApiKey" "<your key>"` then `dotnet run --project src\Hosts\Simulab.AppHost`
+2. Sign in as an Admin, then open **Development → Gateway de IA** in the side menu. Expected: the page `/dev/ai` opens with a prompt box and a Send button. (AC9, BR9)
+3. Write `Responde apenas: ok` and press Send. Expected: the answer appears, with the model `claude-opus-5`, the input and output tokens, the cost in US dollars and the duration in milliseconds. (AC1, UC2)
+4. Switch the language to **English** and then to **pt-PT** with the language switch, and look at the same page. Expected: every label changes and no key is shown raw. (AC11)
+5. Reach Send with the keyboard only: Tab into the prompt box, type, Tab to Send, press Enter. Expected: the call goes out and the answer appears, as in step 3.
+6. Read the row the call wrote. Expected: one row, with your user id, the purpose `diagnostics`, the tokens, the prices `5.000000` and `25.000000`, and `cost_usd` equal to the tokens times those prices. (AC7, BR5, BR6)
+   - Git Bash and PowerShell 7: `docker exec -i $(docker ps --filter "name=postgres" --format "{{.Names}}" | head -1) psql -U postgres -d simulab -c "SELECT user_id, purpose, model, input_tokens, output_tokens, input_price_per_million, output_price_per_million, cost_usd, succeeded, error_code FROM ai.ai_calls ORDER BY started_at DESC LIMIT 5;"`
+7. Stop the app host, remove the key (`dotnet user-secrets --project src/Hosts/Simulab.AppHost remove "Ai:ApiKey"`), start it again and press Send on `/dev/ai`. Expected: the app starts normally and the page shows "Nenhuma chave de API está configurada..."; the SQL of step 6 shows no new row. (AC5, BR4)
+8. Sign out and open `/dev/ai` directly. Expected: the app sends you to the sign-in page; nothing is charged to nobody. (BR2)
 
 ## Delivery
 - Branch: feature/F-41
