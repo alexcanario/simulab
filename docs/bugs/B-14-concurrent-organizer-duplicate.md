@@ -1,7 +1,7 @@
 ---
 bug: B-14
 feature: F-33
-status: validating
+status: done
 board: 758
 severity: low
 ---
@@ -102,7 +102,6 @@ or in PowerShell 7 (same command):
    list keeps one organizer with that name.
 
 ## Delivery
-- Branch: `bug/B-14` (worktree `D:\dev\_icontrol\wt\simulab\b-14`), from `main` after the F-33 merge.
+- Branch: `bug/B-14`, merged into `main` with `--no-ff` (message "Merge bug/B-14 ... AB#758"; find it with `git log --merges --grep=B-14`). Validated by the owner on 2026-09-24.
 - Commits: `fix(B-14)` on top of the approval; no schema change, no new package, no new text.
-- Tests: Catalog 67 passed (57 before, 10 new), architecture 90 passed, Web localization/resources 31 passed;
-  `--no-incremental` build of the Catalog infrastructure: 0 warnings, 0 errors. The Stop gate: `agile gate GREEN`.
+- Tests (full suite, `gate.js ship`): 1011 passed, 0 failed, 52 s; full build 16 s, 0 warnings. Catalog 67 (57 before, 10 new), architecture 90.
