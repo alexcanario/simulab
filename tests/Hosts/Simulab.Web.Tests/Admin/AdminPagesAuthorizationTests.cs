@@ -22,7 +22,10 @@ public sealed class AdminPagesAuthorizationTests
         ["Users"] = IdentityPermissions.RolesManage,
         ["RoleHistory"] = IdentityPermissions.RolesManage,
         ["AccountEvents"] = IdentityPermissions.RolesManage,
-        ["Organizers"] = CatalogPermissions.Manage
+        ["Organizers"] = CatalogPermissions.Manage,
+        // F-34: the list and the form page are two routes of the same screen, so both carry the gate.
+        ["Exams"] = CatalogPermissions.Manage,
+        ["ExamForm"] = CatalogPermissions.Manage
     };
 
     [Fact]

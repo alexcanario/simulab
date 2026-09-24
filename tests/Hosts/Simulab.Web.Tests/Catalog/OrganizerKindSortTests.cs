@@ -11,9 +11,10 @@ namespace Simulab.Web.Tests.Catalog;
 public sealed class OrganizerKindSortTests : CatalogPageTestContext
 {
     [Theory]
-    [InlineData("en", "CertifyingBody,ExamBoard,University")] // Certifying body, Exam board, University
-    [InlineData("pt-BR", "ExamBoard,CertifyingBody,University")] // Banca examinadora, Certificadora, Universidade
-    [InlineData("pt-PT", "CertifyingBody,ExamBoard,University")] // Entidade certificadora, Júri de exame, Universidade
+    // F-34 AC17: the fourth kind takes its alphabetical place in each culture, like any other.
+    [InlineData("en", "CertifyingBody,ExamBoard,PublicBody,University")] // Certifying body, Exam board, Public body, University
+    [InlineData("pt-BR", "ExamBoard,CertifyingBody,PublicBody,University")] // Banca examinadora, Certificadora, Órgão público, Universidade
+    [InlineData("pt-PT", "CertifyingBody,ExamBoard,PublicBody,University")] // Entidade certificadora, Júri de exame, Organismo público, Universidade
     public void SortByKind_SendsTheReadersAlphabeticalOrderForTheirCulture(string culture, string expectedOrder)
     {
         CultureInfo.CurrentUICulture = new CultureInfo(culture);

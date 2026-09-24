@@ -45,5 +45,8 @@ public static class AppIcons
 
     /// <summary>F-33: the organizers of the assessment catalog.</summary>
     public const string Organizers = Icons.Material.Outlined.AccountBalance;
+
+    /// <summary>F-34: the exams of the assessment catalog.</summary>
+    public const string Exams = Icons.Material.Outlined.Description;
     public const string Security = Icons.Material.Outlined.Security;
 }

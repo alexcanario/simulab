@@ -1,0 +1,171 @@
+@* One searchable picker everywhere (F-34, BR16): the reader types, the server answers, nothing is cached.
+   Same anatomy as AppTextField and AppSelectField - label above, required marker, hint or error below. *@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-field @(HasError ? "app-field-error" : null)">
+    <label class="app-field-label" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <MudAutocomplete T="AppLookupOption"
+                     Value="Value"
+                     ValueChanged="OnValueChanged"
+                     SearchFunc="SearchOptionsAsync"
+                     ToStringFunc="TextOf"
+                     Placeholder="@Placeholder"
+                     Variant="Variant.Outlined"
+                     Margin="Margin.Dense"
+                     MinCharacters="MinChars"
+                     DebounceInterval="DebounceMilliseconds"
+                     MaxItems="MaxCandidates"
+                     Clearable="Clearable"
+                     ClearIcon="@AppIcons.Close"
+                     Disabled="Disabled"
+                     Error="HasError"
+                     ResetValueOnEmptyText="true"
+                     CoerceText="true"
+                     AdornmentIcon="@AppIcons.Search"
+                     Adornment="Adornment.Start"
+                     AdornmentAriaLabel="@L["Common.Search"]"
+                     UserAttributes="@Attributes">
+        <ItemTemplate>
+            <div class="app-lookup-option">
+                <span class="app-lookup-option-text">@context.Text</span>
+                @if (!string.IsNullOrEmpty(context.Secondary))
+                {
+                    <span class="app-lookup-option-secondary">@context.Secondary</span>
+                }
+            </div>
+        </ItemTemplate>
+        <NoItemsTemplate>
+            <div class="app-lookup-message">@L["Lookup.NoResults", _lastTerm]</div>
+        </NoItemsTemplate>
+    </MudAutocomplete>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (_searchFailed)
+        {
+            @* The search broke, not the value: the reader is told and offered another go (rule: ui). *@
+            <span class="app-field-error-text">
+                @L["Lookup.LoadFailed"]
+                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="RetryAsync" Class="app-lookup-retry">@L["Common.TryAgain"]</MudButton>
+            </span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+        else
+        {
+            <span class="app-field-hint">@L["Lookup.Hint.MinChars", MinChars]</span>
+        }
+    </span>
+    <span class="app-visually-hidden" aria-live="polite">@_announcement</span>
+</div>
+
+@code {
+    /// <summary>How long the field waits after a keystroke before asking the server.</summary>
+    public const int DebounceMilliseconds = 300;
+
+    /// <summary>How many candidates one search brings back; the reader narrows the term instead of scrolling.</summary>
+    public const int MaxCandidates = 20;
+
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// What to search and how. It has no default because only the page knows what it is picking (rule: ui):
+    /// a page that forgets it fails the build.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<string, CancellationToken, Task<IReadOnlyList<AppLookupOption>>> SearchAsync { get; set; } = default!;
+
+    /// <summary>What the empty field invites the reader to type; it names the thing, so it has no default.</summary>
+    [Parameter, EditorRequired] public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter] public AppLookupOption? Value { get; set; }
+
+    [Parameter] public EventCallback<AppLookupOption?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool Clearable { get; set; } = true;
+
+    /// <summary>How many characters before the first call: fewer would ask the server on every keystroke.</summary>
+    [Parameter] public int MinChars { get; set; } = 2;
+
+    private string _lastTerm = string.Empty;
+    private bool _searchFailed;
+    private string _announcement = string.Empty;
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string DescriptionId => $"{Id}-description";
+
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["id"] = Id,
+        ["aria-describedby"] = DescriptionId,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-required"] = Required ? "true" : null,
+        ["autocomplete"] = "off"
+    };
+
+    private static string TextOf(AppLookupOption? option) => option?.Text ?? string.Empty;
+
+    // A broken call is not "no results": the description says so and offers another go, and the list stays
+    // empty instead of pretending the catalog has nothing.
+    private async Task<IEnumerable<AppLookupOption>> SearchOptionsAsync(string? term, CancellationToken cancellationToken)
+    {
+        _lastTerm = term ?? string.Empty;
+        _searchFailed = false;
+
+        try
+        {
+            var options = await SearchAsync(_lastTerm, cancellationToken);
+            _announcement = options.Count == 0
+                ? L["Lookup.NoResults", _lastTerm]
+                : L["Lookup.Results", options.Count];
+
+            return options;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or InvalidOperationException)
+        {
+            _searchFailed = true;
+            _announcement = L["Lookup.LoadFailed"];
+
+            return [];
+        }
+    }
+
+    private Task RetryAsync()
+    {
+        _searchFailed = false;
+        _announcement = string.Empty;
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnValueChanged(AppLookupOption? value)
+    {
+        Value = value;
+        _searchFailed = false;
+
+        return ValueChanged.InvokeAsync(value);
+    }
+}

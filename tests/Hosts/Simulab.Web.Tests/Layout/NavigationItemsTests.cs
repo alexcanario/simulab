@@ -71,12 +71,15 @@ public class NavigationItemsTests
     }
 
     [Fact]
-    public void All_ContentItems_AreOrganizersBehindCatalogManage()
+    public void All_ContentItems_AreTheCatalogScreensBehindCatalogManage()
     {
-        // F-33, BR4: the Content section holds the catalog screens, each behind the one permission of its module.
+        // F-33, BR4; F-34: the Content section holds the catalog screens, each behind the one permission of
+        // its module. Only the exam list is in the menu; its form page is reached from the list.
         NavigationItems.All.Where(item => item.Section == NavigationSection.Content)
             .Select(item => (item.Route, item.RequiredPermission))
-            .Should().Equal(("/admin/organizers", CatalogPermissions.Manage));
+            .Should().Equal(
+                ("/admin/organizers", CatalogPermissions.Manage),
+                ("/admin/exams", CatalogPermissions.Manage));
     }
 
     [Fact]

@@ -122,6 +122,28 @@
     </MudPaper>
 </section>
 
+<section id="gallery-lookup" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Lookup"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Exams.Field.IssuingAuthority.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        @* F-34 BR16: idle, below the minimum, searching, results, no result, chosen and failed, all here. *@
+        <AppLookupField Id="gallery-lookup" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                        SearchAsync="GalleryLookupAsync" Value="@_lookupValue"
+                        ValueChanged="@(value => _lookupValue = value)" />
+
+        <AppLookupField Id="gallery-lookup-error" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                        Error="@L["exam.issuing_authority_required"].Value"
+                        SearchAsync="GalleryLookupAsync" />
+
+        @* The search itself fails: the description says so and offers another go, and nothing is picked. *@
+        <AppLookupField Id="gallery-lookup-failing" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                        SearchAsync="GalleryFailingLookupAsync" />
+    </MudPaper>
+</section>
+
 <section id="gallery-alerts" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Alerts"]</MudText>
     <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Alerts.Hint"]</MudText>
@@ -176,6 +198,25 @@
 
     private string GalleryStrengthText(PasswordStrength strength) =>
         I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
+
+    private AppLookupOption? _lookupValue;
+
+    // F-34: the gallery needs no server, so the candidates are sample rows filtered in memory. Every real
+    // AppLookupField asks the Api instead (BR16).
+    private static readonly IReadOnlyList<AppLookupOption> GalleryLookupOptions =
+    [
+        new(Guid.Parse("00000000-0000-0000-0000-000000000001"), "Centro Brasileiro de Pesquisa em Avaliacao (CEBRASPE)", "Exam board"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000002"), "Fundacao Getulio Vargas (FGV)", "Exam board"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000003"), "Prefeitura Municipal de Guarulhos (PMG)", "Public body"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000004"), "Universidade de Sao Paulo (USP)", "University")
+    ];
+
+    private static Task<IReadOnlyList<AppLookupOption>> GalleryLookupAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>(
+            [.. GalleryLookupOptions.Where(option => option.Text.Contains(term, StringComparison.OrdinalIgnoreCase))]);
+
+    private static Task<IReadOnlyList<AppLookupOption>> GalleryFailingLookupAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromException<IReadOnlyList<AppLookupOption>>(new HttpRequestException("gallery: the search failed on purpose"));
 
     private static readonly DateTimeOffset SampleBaseDate = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
 

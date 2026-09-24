@@ -661,3 +661,33 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     justify-content: flex-end;
     margin-top: 16px;
 }
+
+/* ---------------------------------------------------------------------------
+   Lookup field (F-34): the searchable parent picker of the kit.
+   --------------------------------------------------------------------------- */
+.app-lookup-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px 0;
+}
+
+.app-lookup-option-text {
+    font-size: 0.875rem;
+}
+
+.app-lookup-option-secondary {
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-lookup-message {
+    padding: 12px 16px;
+    font-size: 0.8125rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-lookup-retry {
+    margin-left: 8px;
+    min-width: 0;
+}
