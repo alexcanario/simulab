@@ -79,6 +79,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | 0.0.52 (`181120c`) |
 | ✅ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
 | ✅ 0.0.57 (`19e1f95`) | `[generic]` feature-ship: after `gate.js ship`, `git status` on the item worktree must show no tracked file changed outside bin/obj; a generated file the test run rewrote (for example `docs/api/Simulab.Api.json`) is committed with the item before the merge is requested, not found when the worktree removal refuses | B-15 | |
+| ⏳ | `[stack: DocGen]` feature-ship step 7b says a new module or external system "updates `docs/architecture/overview.md` by hand", but DocGen reports stale and deletes every file under `docs/architecture/` it does not generate (`GeneratedDocs.StaleFiles`/`Write`); a hand-written overview lives outside that folder (Simulab: `docs/architecture-overview.md`, guarded by `ArchitectureOverviewTests`) | F-23 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -572,3 +573,9 @@ Shipped in `fe1ac6c`. Built in a worktree; no change notes. The gate passed on i
 - ✅ `plugin` `[generic]` feature-ship: the Api host tests regenerated `docs/api/Simulab.Api.json` during `gate.js ship`, and the change stayed uncommitted in the worktree until `git worktree remove` refused it; the OpenAPI document reached `main` in a separate commit (`5951aad`) after the merge. Step 4 of the skill should check the worktree for tracked files changed by the run and commit them before the merge is requested.
 - Project rule (`project.md`, Sessions and retro): after stopping an app host started by hand, confirm with `netstat` that its ports are free; a `Simulab.AppHost.exe` outlived the process tree that was killed and locked the build output of the ship gate.
 - Nothing: `preview_start` runs the app host from the main checkout, not from the worktree; here it was noticed from the log line "Application host directory" and the check was redone from the worktree. One-off, and the log line gives it away.
+
+## 2026-09-24 — F-23 C4 architecture overview
+Shipped in `1cacd3d` under `/agile:autopilot --worktree`, two stops, nothing assumed. One false premise found in refinement: the page could not sit inside `docs/architecture/`. Full suite 1033 tests, 46 s; build 16 s, 0 warnings.
+- ⏳ `plugin` `[stack: DocGen]` feature-ship step 7b points a hand-written overview at `docs/architecture/overview.md`, a folder where DocGen deletes every file it does not generate; the overview belongs outside it (here `docs/architecture-overview.md`, with a drift guard against the app host).
+- Nothing: an AwesomeAssertions `BeEmpty()` on a collection printed only the first problem ("found at least one item"); joining the problems into one string showed them all. One-off.
+- Nothing: an empty leftover folder `wt/simulab/f-33` from an earlier ship; delete it by hand.
