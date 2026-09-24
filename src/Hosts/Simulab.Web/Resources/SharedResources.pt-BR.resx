@@ -131,6 +131,9 @@
   <data name="PermissionGroup.identity" xml:space="preserve"><value>Identidade e acesso</value></data>
   <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Gerenciar papéis e atribuições</value></data>
   <data name="Permission.identity.roles.manage.Description" xml:space="preserve"><value>Criar, editar e excluir papéis, escolher suas permissões e atribuir papéis a usuários.</value></data>
+  <data name="PermissionGroup.catalog" xml:space="preserve"><value>Catálogo</value></data>
+  <data name="Permission.catalog.manage.Name" xml:space="preserve"><value>Gerenciar o catálogo</value></data>
+  <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Criar, editar e excluir organizadoras e todo o resto do catálogo de provas.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Situação</value></data>
@@ -285,4 +288,38 @@
   <data name="AccountEvents.Action.SecurityEvents" xml:space="preserve"><value>Eventos de segurança</value></data>
   <data name="account_event.period_invalid" xml:space="preserve"><value>Escolha os últimos 7, 30 ou 90 dias, ou todo o período.</value></data>
   <data name="account_event.event_invalid" xml:space="preserve"><value>Escolha um dos eventos da lista.</value></data>
+  <data name="Nav.Organizers" xml:space="preserve"><value>Organizadoras</value></data>
+  <data name="Organizers.Title" xml:space="preserve"><value>Organizadoras</value></data>
+  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Buscar por nome ou sigla</value></data>
+  <data name="Organizers.Empty" xml:space="preserve"><value>Nenhuma organizadora cadastrada ainda.</value></data>
+  <data name="Organizers.Empty.Search" xml:space="preserve"><value>Nenhuma organizadora corresponde a "{0}".</value></data>
+  <data name="Organizers.Column.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Organizers.Column.Acronym" xml:space="preserve"><value>Sigla</value></data>
+  <data name="Organizers.Column.Kind" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Organizers.Kind.ExamBoard" xml:space="preserve"><value>Banca examinadora</value></data>
+  <data name="Organizers.Kind.CertifyingBody" xml:space="preserve"><value>Certificadora</value></data>
+  <data name="Organizers.Kind.University" xml:space="preserve"><value>Universidade</value></data>
+  <data name="Organizers.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Organizers.Field.Name.Help" xml:space="preserve"><value>Como a organizadora assina seus editais.</value></data>
+  <data name="Organizers.Field.Acronym" xml:space="preserve"><value>Sigla</value></data>
+  <data name="Organizers.Field.Acronym.Help" xml:space="preserve"><value>Salva em maiúsculas e única no catálogo.</value></data>
+  <data name="Organizers.Field.Kind" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Organizers.Field.Website" xml:space="preserve"><value>Site oficial</value></data>
+  <data name="Organizers.Field.Website.Help" xml:space="preserve"><value>O endereço completo, começando com https://</value></data>
+  <data name="Organizers.Field.Description" xml:space="preserve"><value>Descrição</value></data>
+  <data name="Organizers.Dialog.AddTitle" xml:space="preserve"><value>Adicionar organizadora</value></data>
+  <data name="Organizers.Dialog.EditTitle" xml:space="preserve"><value>Editar organizadora</value></data>
+  <data name="Organizers.Saved" xml:space="preserve"><value>Organizadora salva.</value></data>
+  <data name="Organizers.Deleted" xml:space="preserve"><value>Organizadora excluída.</value></data>
+  <data name="Organizers.Delete.Message" xml:space="preserve"><value>{0} sai do catálogo e deixa de aparecer em qualquer lugar do app.</value></data>
+  <data name="organizer.not_found" xml:space="preserve"><value>Esta organizadora não existe mais. Atualize a lista.</value></data>
+  <data name="organizer.name_required" xml:space="preserve"><value>Digite um nome com pelo menos 2 caracteres.</value></data>
+  <data name="organizer.name_too_long" xml:space="preserve"><value>O nome é longo demais: no máximo 150 caracteres.</value></data>
+  <data name="organizer.name_taken" xml:space="preserve"><value>Outra organizadora já tem esse nome.</value></data>
+  <data name="organizer.acronym_required" xml:space="preserve"><value>Digite uma sigla com pelo menos 2 caracteres.</value></data>
+  <data name="organizer.acronym_too_long" xml:space="preserve"><value>A sigla é longa demais: no máximo 20 caracteres.</value></data>
+  <data name="organizer.acronym_taken" xml:space="preserve"><value>Outra organizadora já tem essa sigla.</value></data>
+  <data name="organizer.kind_invalid" xml:space="preserve"><value>Escolha um dos tipos da lista.</value></data>
+  <data name="organizer.description_too_long" xml:space="preserve"><value>A descrição é longa demais: no máximo 500 caracteres.</value></data>
+  <data name="organizer.website_invalid" xml:space="preserve"><value>Digite o endereço completo, começando com http:// ou https://</value></data>
 </root>

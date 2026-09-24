@@ -81,6 +81,10 @@ public static class IdentityModule
             // this provider only issues the key that API needs, in the same call (ResetPasswordHandler).
             .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
+        // F-33 BR2: this module's own permission names, seeded together with every other module's by
+        // EnsureRolesAndPermissionsAsync. The `permissions` table is Identity's; the names are not.
+        services.AddSingleton(new PermissionCatalog("identity", IdentityPermissions.All));
+
         // BR3: the 10s cache mirrors Simulae's pattern - a revoked permission takes effect almost
         // immediately without the Api ever trusting a token claim. It reads the same TimeProvider as the
         // rest of the host, so a test can move the clock instead of sleeping 10 real seconds.
@@ -302,8 +306,8 @@ public static class IdentityModule
     private static readonly string[] CustomGrantPermissions = [TotpGrantPermission, GoogleGrantPermission];
 
     /// <summary>
-    /// Creates the seed roles (F-6, BR1) and the one seed permission (BR8), granted to Admin, if they do
-    /// not exist yet. Idempotent, like <see cref="EnsureIdentityClientAsync"/>.
+    /// Creates the seed roles (F-6, BR1) and every permission the registered modules declare (F-33, BR2),
+    /// each granted to Admin (BR3), if they do not exist yet. Idempotent, like <see cref="EnsureIdentityClientAsync"/>.
     /// </summary>
     public static async Task EnsureRolesAndPermissionsAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
     {
@@ -312,6 +316,7 @@ public static class IdentityModule
         await using var scope = services.CreateAsyncScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
         var context = scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>();
+        var catalogs = scope.ServiceProvider.GetServices<PermissionCatalog>();
 
         // F-9, BR1: the seed roles are system roles; one created before F-9 is marked on the next start.
         foreach (var name in IdentityRoles.All)
@@ -328,18 +333,28 @@ public static class IdentityModule
             }
         }
 
-        if (await context.Permissions.FindAsync([IdentityPermissions.RolesManage], cancellationToken) is null)
-        {
-            context.Permissions.Add(new Permission { Name = IdentityPermissions.RolesManage });
-        }
+        // F-33 BR2: the union of what every registered module declares, in a stable order so two starts
+        // write the same rows. A module that is not registered contributes nothing and loses nothing.
+        var declared = catalogs
+            .SelectMany(catalog => catalog.Permissions)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToList();
 
         var adminRole = await roleManager.FindByNameAsync(IdentityRoles.Admin);
-        if (adminRole is not null)
+
+        foreach (var name in declared)
         {
-            var granted = await context.RolePermissions.FindAsync([adminRole.Id, IdentityPermissions.RolesManage], cancellationToken);
-            if (granted is null)
+            if (await context.Permissions.FindAsync([name], cancellationToken) is null)
             {
-                context.RolePermissions.Add(new RolePermission { RoleId = adminRole.Id, PermissionName = IdentityPermissions.RolesManage });
+                context.Permissions.Add(new Permission { Name = name });
+            }
+
+            // BR3: Admin holds every permission there is; the other seed roles get theirs from the back office.
+            if (adminRole is not null
+                && await context.RolePermissions.FindAsync([adminRole.Id, name], cancellationToken) is null)
+            {
+                context.RolePermissions.Add(new RolePermission { RoleId = adminRole.Id, PermissionName = name });
             }
         }
 

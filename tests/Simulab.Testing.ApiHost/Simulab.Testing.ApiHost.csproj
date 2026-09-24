@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    F-33: the Api host every module's integration tests run against, with its database, its recorded
+    email sender, its clock and a signed-in account. Its own project and not part of Simulab.Testing,
+    which stays lean: a project that only needs a container (Jobs.Tests, Persistence.Tests) or that
+    hosts the Web (Web.Tests, whose own top-level `Program` would clash) must not drag the Api in.
+  -->
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Testing\Simulab.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Domain\Simulab.Identity.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

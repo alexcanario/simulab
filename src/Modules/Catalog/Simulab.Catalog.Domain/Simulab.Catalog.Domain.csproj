@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- The entities validate against the module's own limits and answer with its own error codes
+         (F-33, BR13). Contracts holds both and references nothing but SharedKernel, so this is acyclic. -->
+    <ProjectReference Include="..\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

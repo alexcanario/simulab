@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- Design-time only: the migrations of this module are created from this project. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.Catalog.Application\Simulab.Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

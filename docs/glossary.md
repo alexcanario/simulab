@@ -14,6 +14,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam |
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
 | Organizadora / Banca | Entidade organizadora (?) | `Organizer` | Exam board, certifying body or university that runs an exam |
+| Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
+| Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33) |
 | Prova / Concurso | Prova | `Exam` | An assessment run by an organizer |
 | Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) |
 | Edital | Aviso de abertura (?) | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |

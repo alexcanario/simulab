@@ -18,6 +18,8 @@ public class ForbiddenReferencesTests
             "Simulab.SharedKernel", "Simulab.Persistence", "Simulab.Email", "Simulab.Jobs", "Simulab.Api", "Simulab.Web", "Simulab.ServiceDefaults",
             "Simulab.Identity.Domain", "Simulab.Identity.Contracts", "Simulab.Identity.Application",
             "Simulab.Identity.Infrastructure", "Simulab.Identity.Api",
+            "Simulab.Catalog.Domain", "Simulab.Catalog.Contracts", "Simulab.Catalog.Application", // F-33
+            "Simulab.Catalog.Infrastructure", "Simulab.Catalog.Api",
             "Simulab.DocGen"); // F-15: a tool, never deployed, but held to the same vocabulary and references
     }
 

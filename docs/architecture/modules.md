@@ -16,6 +16,13 @@ flowchart LR
         Simulab_ServiceDefaults["Simulab.ServiceDefaults"]
         Simulab_Web["Simulab.Web"]
     end
+    subgraph Modules_Catalog["Modules/Catalog"]
+        Simulab_Catalog_Api["Simulab.Catalog.Api"]
+        Simulab_Catalog_Application["Simulab.Catalog.Application"]
+        Simulab_Catalog_Contracts["Simulab.Catalog.Contracts"]
+        Simulab_Catalog_Domain["Simulab.Catalog.Domain"]
+        Simulab_Catalog_Infrastructure["Simulab.Catalog.Infrastructure"]
+    end
     subgraph Modules_Identity["Modules/Identity"]
         Simulab_Identity_Api["Simulab.Identity.Api"]
         Simulab_Identity_Application["Simulab.Identity.Application"]
@@ -23,6 +30,7 @@ flowchart LR
         Simulab_Identity_Domain["Simulab.Identity.Domain"]
         Simulab_Identity_Infrastructure["Simulab.Identity.Infrastructure"]
     end
+    Simulab_Api --> Simulab_Catalog_Api
     Simulab_Api --> Simulab_Email
     Simulab_Api --> Simulab_Identity_Api
     Simulab_Api --> Simulab_Persistence
@@ -30,6 +38,16 @@ flowchart LR
     Simulab_Api --> Simulab_SharedKernel
     Simulab_AppHost --> Simulab_Api
     Simulab_AppHost --> Simulab_Web
+    Simulab_Catalog_Api --> Simulab_Catalog_Application
+    Simulab_Catalog_Api --> Simulab_Catalog_Infrastructure
+    Simulab_Catalog_Api --> Simulab_Identity_Contracts
+    Simulab_Catalog_Application --> Simulab_Catalog_Contracts
+    Simulab_Catalog_Application --> Simulab_Catalog_Domain
+    Simulab_Catalog_Contracts --> Simulab_SharedKernel
+    Simulab_Catalog_Domain --> Simulab_Catalog_Contracts
+    Simulab_Catalog_Domain --> Simulab_SharedKernel
+    Simulab_Catalog_Infrastructure --> Simulab_Catalog_Application
+    Simulab_Catalog_Infrastructure --> Simulab_Persistence
     Simulab_Identity_Api --> Simulab_Identity_Application
     Simulab_Identity_Api --> Simulab_Identity_Infrastructure
     Simulab_Identity_Application --> Simulab_Identity_Contracts
@@ -43,6 +61,7 @@ flowchart LR
     Simulab_Jobs --> Simulab_Email
     Simulab_Jobs --> Simulab_Persistence
     Simulab_Persistence --> Simulab_SharedKernel
+    Simulab_Web --> Simulab_Catalog_Contracts
     Simulab_Web --> Simulab_Identity_Contracts
     Simulab_Web --> Simulab_ServiceDefaults
 ```

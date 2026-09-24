@@ -15,6 +15,7 @@ public class DocSetTests
         var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
 
         generated.Keys.Should().Equal(
+            "Catalog/data-dictionary.md", "Catalog/routes.md", "Catalog/schema.dbml",
             "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
             "Jobs/data-dictionary.md", "Jobs/schema.dbml",
             "README.md", "System/routes.md", "modules.md");
