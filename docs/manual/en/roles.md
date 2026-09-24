@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: en
-features: [F-6, F-9, F-14]
-updated: 2026-09-21
+features: [F-6, F-9, F-14, F-33]
+updated: 2026-09-24
 ---
 # Roles and permissions
 
@@ -25,7 +25,7 @@ Everyone has a role. Only an account with the permission "Manage roles and user 
 ### Add or change a role
 1. Choose **Add**, or **Edit** on the role's line.
 2. Type a name of 2 to 50 characters. A system role keeps its name, so the field is read-only for it.
-3. Tick the permissions the role carries. Each one shows what it allows.
+3. Tick the permissions the role carries. Each one shows what it allows. They are grouped by area: "Identity and access" for roles and accounts, "Catalog" for the exam catalog.
 4. Choose **Save**. The people who hold that role get the new permissions within seconds; their menu changes the next time they open a page.
 
 ### Delete a role
