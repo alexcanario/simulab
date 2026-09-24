@@ -1,7 +1,7 @@
 ---
 feature: F-34
 epic: Assessment catalog
-status: refining
+status: approved
 board: 753
 version: 1
 ---
@@ -20,8 +20,8 @@ none imported. Needs /agile:screen.
 ## Start
 - Depends on: F-33 (`done`, merged as 756e505) — the `Catalog` module, the `organizers` table and
   `catalog.manage` are all in `main`. Nothing blocks the build.
-- Waits on: nothing external. `/agile:screen` runs first, on this file, and the owner approves the
-  mockup before any code (decision of question 12).
+- Waits on: nothing. `/agile:screen` ran on 2026-09-24 and the owner approved the mockup together
+  with the feature, so the build starts from an approved screen.
 - Suggested path: the glossary rows and `OrganizerKind.PublicBody` with its three texts; then `Exam`
   in the domain with its `Result` rules and its migration; then the endpoints; then `AppLookupField`
   in the kit with its gallery entry; then the two pages; last the organizer delete block (BR12).
