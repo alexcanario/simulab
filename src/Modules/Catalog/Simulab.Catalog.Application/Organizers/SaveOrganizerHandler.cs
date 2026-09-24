@@ -52,7 +52,13 @@ public sealed class SaveOrganizerHandler(IOrganizerStore store)
             organizer.Update(request.Name, request.Acronym, kind, request.Description, request.Website);
         }
 
-        await store.SaveChangesAsync(cancellationToken);
+        // Another writer may have committed the same name or acronym since the check above; the unique
+        // index then refuses this row, and the answer is the same 409 (B-14).
+        var refused = await store.TrySaveChangesAsync(cancellationToken);
+        if (refused is not null)
+        {
+            return Result.Failure<OrganizerResponse>(refused);
+        }
 
         return Result.Success(new OrganizerResponse(
             organizer.Id,
