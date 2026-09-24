@@ -68,16 +68,16 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | 0.0.41 (`6c854ea`) |
 | ✅ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | 0.0.41 (`6c854ea`) |
 | ✅ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
-| ⏳ | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | |
-| ⏳ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | |
-| ⏳ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | |
-| ⏳ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | |
-| ⏳ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | |
-| ⏳ | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | |
-| ⏳ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | |
-| ⏳ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | |
-| ⏳ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | |
-| ⏳ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | |
+| ✅ | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | 0.0.52 (`181120c`) |
+| ✅ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | 0.0.52 (`181120c`) |
+| ✅ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | 0.0.52 (`181120c`) |
+| ✅ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | 0.0.52 (`181120c`) |
+| ✅ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -528,40 +528,40 @@ From 0.0.40 to 0.0.41, run with `/agile:sync` on `main`.
 ## 2026-09-23 — F-17 Theme palette contrast test
 Shipped in `92ac5fe`. Built in a worktree; 16 palette pairs fixed, every theme colour has a declared role.
 - Project rule: `.claude/rules/agile/project.md`, the line on reading a rendered colour after the theme transition now adds that with the browser pane hidden transitions never finish, so `* { transition: none !important }` is injected before measuring (F-17: the field border read the previous theme's colour for over 2 s).
-- `plugin` `[generic]` worktrees.md, Work: `preview_start` reads only the main checkout's `.claude/launch.json`; to preview an app host from a worktree, add a temporary configuration with the absolute `--project` path there and restore the file right after, saying so in the report (F-17).
-- `plugin` `[stack: .NET]` worktrees.md, Ship steps 3-4: before `git worktree remove`, run `dotnet build-server shutdown` and ask the owner to close Visual Studio; on Windows the removal failed halfway (`Invalid argument`) and left a folder without `.git`, held by `.vs` (F-17).
+- ✅ `plugin` `[generic]` worktrees.md, Work: `preview_start` reads only the main checkout's `.claude/launch.json`; to preview an app host from a worktree, add a temporary configuration with the absolute `--project` path there and restore the file right after, saying so in the report (F-17).
+- ✅ `plugin` `[stack: .NET]` worktrees.md, Ship steps 3-4: before `git worktree remove`, run `dotnet build-server shutdown` and ask the owner to close Visual Studio; on Windows the removal failed halfway (`Invalid argument`) and left a folder without `.git`, held by `.vs` (F-17).
 
 ## 2026-09-23 — F-18 Job claim index for stale rows
 Shipped in `2ce7ec8`. Built in a worktree; change note v2 after the premise was measured false during build.
-- `plugin` `[generic]` feature-refinement: a premise about query performance is measured before approval, with a throwaway `EXPLAIN` on the test container over a realistic row count; "not measured" does not go to approval (F-18: the review's "PostgreSQL cannot use the index for the OR" reached the build, where the old index turned out to use a BitmapOr with no sequential scan).
+- ✅ `plugin` `[generic]` feature-refinement: a premise about query performance is measured before approval, with a throwaway `EXPLAIN` on the test container over a realistic row count; "not measured" does not go to approval (F-18: the review's "PostgreSQL cannot use the index for the OR" reached the build, where the old index turned out to use a BitmapOr with no sequential scan).
 - Project rule: `.claude/rules/agile/project.md` (Data): a change to the job table's model adds the Jobs migration and an empty migration in every module context that maps it (`AddJobQueue`), or EF reports pending model changes at startup (F-18: `JobsActiveIndexSnapshot` in Identity).
 - Item F-28 (board 747): the DocGen data dictionary shows a partial index without its filter; `plugin` `[stack: DocGen]` note for the plugin's DocGen template too (F-18: `ix_jobs_active_created_at on created_at`, no `WHERE status IN (0, 1)`).
 
 ## 2026-09-23 — F-19 Quiet the first-migration log
 Shipped in `b7c7863`. Built in a worktree; no change note.
 - Project rule: `.claude/rules/agile/project.md` (Sessions and retro): before `git worktree remove`, `dotnet build-server shutdown` and the owner confirms Visual Studio is closed on that folder (F-19: the removal failed halfway with `Invalid argument` and left the folder held by `.vs`, the second time after F-17).
-- `plugin` `[generic]` feature-refinement: when reading a library's source does not pin a premise about its behavior, reproduce it in a scratch project outside the repository against a test container, with logging on, before asking the owner; read the source as the raw file, not a summary (F-19: the EF and Npgsql source did not show which command failed on an empty database; a scratch console showed the exact `SELECT` in minutes).
+- ✅ `plugin` `[generic]` feature-refinement: when reading a library's source does not pin a premise about its behavior, reproduce it in a scratch project outside the repository against a test container, with logging on, before asking the owner; read the source as the raw file, not a summary (F-19: the EF and Npgsql source did not show which command failed on an empty database; a scratch console showed the exact `SELECT` in minutes).
 
 ## 2026-09-23 — F-20 Google sign-in
 Shipped in `644f24b`. Built in a worktree; change notes v2 (build start) and v3 (after the independent review).
-- `plugin` `[generic]` feature-refinement: an item that touches authentication or account linking gets the independent review (`change-review`) on the refined item file before approval, not only on the code (F-20: the lockout/two-factor interplay and the rule for when Google's `email_verified` may link by email reached the build and became change notes v2 and v3).
-- `plugin` `[stack: Blazor Server]` profile: a page that reads a single-use ticket from its query peeks it in `OnInitialized` (prerender runs it twice) and spends it only when the action succeeds; a ticket carried in a URL is also bound to the browser with an HttpOnly cookie (F-20: the code-step and confirmation tickets; review finding 1).
+- ✅ `plugin` `[generic]` feature-refinement: an item that touches authentication or account linking gets the independent review (`change-review`) on the refined item file before approval, not only on the code (F-20: the lockout/two-factor interplay and the rule for when Google's `email_verified` may link by email reached the build and became change notes v2 and v3).
+- ✅ `plugin` `[stack: Blazor Server]` profile: a page that reads a single-use ticket from its query peeks it in `OnInitialized` (prerender runs it twice) and spends it only when the action succeeds; a ticket carried in a URL is also bound to the browser with an HttpOnly cookie (F-20: the code-step and confirmation tickets; review finding 1).
 - Nothing: Visual Studio recreated the merged `feature/F-19` and put it in the F-20 worktree; `git.md` already warns that an IDE can switch the branch behind the session, and the branch check before each commit held.
 
 ## 2026-09-23 — F-21 Account event audit trail
 Shipped in `3ee01a5`. Built in a worktree; no change notes (the file held from approval to ship).
 - Item: `/connect/token` has no per-client rate limit — only the per-account lockout — so spraying accounts or insisting on unknown addresses is not slowed down, and since this item each attempt also writes a trail row. Captured as F-38 (AB#757), not as a rule: it needs code.
-- `plugin` `[generic]` feature-ship: the confirmation that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, not a recommendation. Here the removal ran with Visual Studio holding `.vs/Simulab.slnx/solutionOpened`, failed halfway, and left the worktree unregistered in git with its folder still on disk — a state neither "removed" nor "usable". The project rule already said to ask (F-17, F-19); the skill lets the step pass without it.
+- ✅ `plugin` `[generic]` feature-ship: the confirmation that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, not a recommendation. Here the removal ran with Visual Studio holding `.vs/Simulab.slnx/solutionOpened`, failed halfway, and left the worktree unregistered in git with its folder still on disk — a state neither "removed" nor "usable". The project rule already said to ask (F-17, F-19); the skill lets the step pass without it.
 - Nothing: a two-factor action right after a code sign-in needs the next step's code in tests (`Clock.Advance(Step)`). It cost one red test, and F-11 BR4 already documents that a step is spent once.
 
 ## 2026-09-23 — F-22 Every error code has a text
 Shipped in `e1df7eb`. Built in a worktree; no change notes. The check passed over the real solution on its first run: 55 codes, 53 with texts, 2 exempt with a reason.
 - Project rule (`project.md`, UI tests): an item whose product is a guard is seen failing on the mistake it catches before it ships, and that step goes into the validation script. Here the guard was broken three ways — a text removed, a code with no text, a text left behind by a rename — and only the third of those proved the failure message names the file to edit and the exempt list.
-- `plugin` `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove it. F-21 added `AccountEventResourcesTests` with a code prefix typed by hand while F-22 — the item that exists to delete exactly that — sat one position ahead in the backlog; two hours later this item removed it again.
+- ✅ `plugin` `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove it. F-21 added `AccountEventResourcesTests` with a code prefix typed by hand while F-22 — the item that exists to delete exactly that — sat one position ahead in the backlog; two hours later this item removed it again.
 - Nothing: the two codes with no text (`identity.forbidden`, `mfa_required`) are not gaps, so the item shipped with an exempt list of two rather than two texts nobody would read.
 
 ## 2026-09-24 — B-14 A concurrent duplicate organizer answers 409 instead of 500
 Shipped in `151fcda`. Built in a worktree; no change notes. The regression test was seen failing first (5 red, `DbUpdateException` 23505), then green; full suite 1011 tests, 52 s.
 - Project rule (`project.md`, Sessions and retro): every item lives in its own worktree and the main checkout stays on `main`. The checkout was found on `bug/B-14` behind the session (the branch then could not be used by a worktree until it went back to `main`), the second time after B-13.
-- `plugin` `[generic]` feature-refinement: a bug whose cause is found in code that exists only on an unmerged branch says so in `## Cause`, and the build waits for that merge (here F-33 merged while the item was being refined).
+- ✅ `plugin` `[generic]` feature-refinement: a bug whose cause is found in code that exists only on an unmerged branch says so in `## Cause`, and the build waits for that merge (here F-33 merged while the item was being refined).
 - Nothing: forcing a race with a store wrapper that always answers "free" made the database the only arbiter and the test deterministic; a one-off pattern.
