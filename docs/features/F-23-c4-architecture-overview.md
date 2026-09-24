@@ -1,11 +1,11 @@
 ---
 feature: F-23
 epic: Foundation and identity
-status: building
+status: validating
 board: 740
 version: 1
 ---
-Autopilot: approved
+Autopilot: stop 2
 
 # C4 architecture overview
 
@@ -74,8 +74,34 @@ Anyone opening the repository sees in one page who uses Simulab, what it talks t
 
 ## Change notes
 
+## Build notes
+- Files: `docs/architecture-overview.md` (new), `tests/Simulab.ArchitectureTests/ArchitectureOverviewTests.cs` (new, 9 tests), links in `CLAUDE.md` and `docs/infra.md`, three rows in the glossary's technical terms.
+- Google is dotted in the context diagram through its own `optional` class (BR3), not the grey `external` class of the prototype.
+- The guard's failure joins every problem into one string: a collection assertion printed only the first ("found at least one item"), seen when the guard was broken on purpose.
+- Seen failing on the real mistake before shipping (rule `project`, UI tests): `mailpit` renamed and `postgres` marked planned → `app host resource 'mailpit' is not a node of the containers diagram` and `node 'postgres' is marked planned, but the app host starts it`.
+- Measured with Mermaid 11 from the real file at an 800 px column: context 585 px, containers 745 px (AC6: at most 775 px).
+- Gate: `agile gate GREEN` (1 code file changed, ArchitectureTests built in 6 s). ArchitectureTests: 99 passed, 1 s. `DocGen --check`: `docs/architecture is up to date`. No `.resx` or manual file changed.
+- Not risky (docs and one architecture test; no auth, data, contract or schema): no independent review.
+
+### Criterion → test
+| Criterion | Test / check |
+|---|---|
+| AC1 | `Overview_LivesOutsideTheGeneratedFolder_AndIsLinkedFromClaudeMdAndInfra`; `DocGen --check` green |
+| AC2 | `Overview_ContextDiagram_ShowsRolesSystemAndExternals`, `Overview_Sections_AppearOnceEachWithTwoDiagrams`; rendering in validation step 1 |
+| AC3 | `Overview_ContainersDiagram_ShowsContainersAndPlannedPieces`, `Overview_Sections_AppearOnceEachWithTwoDiagrams`; rendering in validation step 2 |
+| AC4 | `Overview_ContainersDiagram_MatchesTheAppHost`, `DriftProblems_ResourceMissingFromTheDiagram_NamesTheResource`, `AppHostResources_TheRealAppHost_FindsEveryStartedResource`, `AppHostResources_ParametersAndDatabases_AreNotResources`; validation step 5 |
+| AC5 | `Overview_ContainersDiagram_MatchesTheAppHost`, `DriftProblems_PlannedNodeThatIsBuilt_NamesTheNode` |
+| AC6 | On screen: measured 585 px and 745 px; validation step 2 |
+| AC7 | `git diff main --stat -- '*.resx' docs/manual` is empty |
+
 ## Validation script
-<!-- Written at the end of build. -->
+No screen, so no language switch, permission or keyboard step (AC7). Run from the worktree `D:\dev\_icontrol\wt\simulab\f-23`.
+1. Open `docs/architecture-overview.md` in the IDE's Markdown preview (as in F-15) → two diagrams render. Context: Student, Curator, Admin (dark blue) → Simulab; Email provider in grey; Claude API dashed white "planned"; Google dotted grey "optional, off".
+2. Scroll to "2. Containers" with the preview beside the editor → Web, Redis, Api, PostgreSQL in blue inside the "Simulab" box, File storage dashed "planned"; Email provider and Claude API below. The text reads at normal size and there is no horizontal scroll bar.
+3. Click the `docs/architecture/modules.md` link in section 3 → the generated module diagram opens. In `CLAUDE.md` (Architecture) and `docs/infra.md` (Technical docs) the new line points at the overview.
+4. Guard passes — Git Bash and PowerShell 7, same command: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~ArchitectureOverviewTests"` → `Passed!  - Failed:     0, Passed:     9, Skipped:     0, Total:     9`.
+5. Guard fails on the mistake it exists for. Git Bash: `sed -i 's/^    mailpit\[/    smtp[/' docs/architecture-overview.md`; PowerShell 7: `(Get-Content docs/architecture-overview.md) -replace '^    mailpit\[', '    smtp[' | Set-Content docs/architecture-overview.md`. Run step 4 again → `Failed:     2, Passed:     7` and the message `app host resource 'mailpit' is not a node of the containers diagram`. Undo in both shells: `git checkout -- docs/architecture-overview.md` (then `git status --short` shows nothing).
+6. Generated docs untouched, both shells: `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
