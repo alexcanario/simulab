@@ -1,7 +1,7 @@
 ---
 feature: F-21
 epic: Foundation and identity
-status: validating
+status: done
 board: 736
 version: 1
 ---
@@ -184,7 +184,11 @@ You need your Admin account and a second, ordinary account (as in F-9), used in 
 8. Permission check and keyboard: in the private window, signed in with the second account → no "Account events" item, and `/admin/account-events` shows "Page not found". Back as Admin, Tab through the search box, the two filters (arrow keys pick a value), an address button (Enter filters by it) and the pager, each with a visible focus ring.
 
 ## Delivery
-- Branch: feature/F-21
+- Branch: `feature/F-21` (merged with `--no-ff` into `main`, AB#736, and deleted; it was never pushed, so there was no remote branch to delete)
+- Merge: `3ee01a5`
+- Tests: 900, 37 s (full suite, architecture tests included); full build 15 s, 0 warnings, baseline still empty
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/account-events.md` (new), linked from each locale's `index.md` and `users.md`
+- Validated on screen by the owner on 2026-09-23.
 
 ## Coverage
 | Criterion | Test(s) |

@@ -75,6 +75,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | |
 | ⏳ | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | |
 | ⏳ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | |
+| ⏳ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | |
+| ⏳ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -544,3 +546,15 @@ Shipped in `644f24b`. Built in a worktree; change notes v2 (build start) and v3 
 - `plugin` `[generic]` feature-refinement: an item that touches authentication or account linking gets the independent review (`change-review`) on the refined item file before approval, not only on the code (F-20: the lockout/two-factor interplay and the rule for when Google's `email_verified` may link by email reached the build and became change notes v2 and v3).
 - `plugin` `[stack: Blazor Server]` profile: a page that reads a single-use ticket from its query peeks it in `OnInitialized` (prerender runs it twice) and spends it only when the action succeeds; a ticket carried in a URL is also bound to the browser with an HttpOnly cookie (F-20: the code-step and confirmation tickets; review finding 1).
 - Nothing: Visual Studio recreated the merged `feature/F-19` and put it in the F-20 worktree; `git.md` already warns that an IDE can switch the branch behind the session, and the branch check before each commit held.
+
+## 2026-09-23 — F-21 Account event audit trail
+Shipped in `3ee01a5`. Built in a worktree; no change notes (the file held from approval to ship).
+- Item: `/connect/token` has no per-client rate limit — only the per-account lockout — so spraying accounts or insisting on unknown addresses is not slowed down, and since this item each attempt also writes a trail row. Captured as F-38 (AB#757), not as a rule: it needs code.
+- `plugin` `[generic]` feature-ship: the confirmation that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, not a recommendation. Here the removal ran with Visual Studio holding `.vs/Simulab.slnx/solutionOpened`, failed halfway, and left the worktree unregistered in git with its folder still on disk — a state neither "removed" nor "usable". The project rule already said to ask (F-17, F-19); the skill lets the step pass without it.
+- Nothing: a two-factor action right after a code sign-in needs the next step's code in tests (`Clock.Advance(Step)`). It cost one red test, and F-11 BR4 already documents that a step is spent once.
+
+## 2026-09-23 — F-22 Every error code has a text
+Shipped in `e1df7eb`. Built in a worktree; no change notes. The check passed over the real solution on its first run: 55 codes, 53 with texts, 2 exempt with a reason.
+- Project rule (`project.md`, UI tests): an item whose product is a guard is seen failing on the mistake it catches before it ships, and that step goes into the validation script. Here the guard was broken three ways — a text removed, a code with no text, a text left behind by a rename — and only the third of those proved the failure message names the file to edit and the exempt list.
+- `plugin` `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove it. F-21 added `AccountEventResourcesTests` with a code prefix typed by hand while F-22 — the item that exists to delete exactly that — sat one position ahead in the backlog; two hours later this item removed it again.
+- Nothing: the two codes with no text (`identity.forbidden`, `mfa_required`) are not gaps, so the item shipped with an exempt list of two rather than two texts nobody would read.
