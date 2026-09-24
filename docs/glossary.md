@@ -13,11 +13,10 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Certificação | Certificação | `Certification` | Assessment type: professional certification |
 | Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam |
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
-| Organizadora / Banca | Entidade organizadora (?) | `Organizer` | An institution in the catalog: an exam board, a certifying body, a university or a public body. The role it plays belongs to the relationship, not to the row: as an exam’s `IssuingAuthority` it contracts, as an edition’s `ExamBoard` it elaborates and applies (F-34) |
+| Banca | Entidade organizadora (?) | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
 | Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
 | Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33) |
-| Contratante / Órgão | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a certifying body). It is an `Organizer` row, and the exam belongs to it (F-34) |
-| Órgão público | Organismo público (?) | `OrganizerKind.PublicBody` | Organizer kind: a city hall, a state or federal government body, a ministry, an agency or a public foundation (F-34) |
+| Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper |
 | Abrangência | Abrangência | `ExamScope` | How far an exam reaches: `National`, `State` or `Municipal`. The state or the municipality is the `ScopeDetail` (F-34) |
 | Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) |
 | Prova / Concurso | Prova | `Exam` | An assessment its `IssuingAuthority` contracts and publishes a notice for; the board that applies each paper is on the edition (F-34) |

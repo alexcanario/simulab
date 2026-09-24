@@ -1,19 +1,19 @@
 ---
 feature: F-34
 epic: Assessment catalog
-status: validating
+status: building
 board: 753
-version: 1
+version: 2
 ---
 # Exams back office
 
 ## Summary
 Admin screens to create, edit and remove an exam under the body that runs it: the issuing authority
-(a required link to an organizer), the name, the assessment type (public service exam, certification,
+(a required link to an `IssuingAuthority`, v2), the name, the assessment type (public service exam, certification,
 university entrance exam, ENEM), the scope with its state or municipality, and the language of its
 content (ADR-0001 #27). The exam board that applies a paper is not here — it belongs to the edition
 (F-35), because the same exam changes board between editions. Brings `AppLookupField`, the parent
-picker the kit does not have, and the `PublicBody` organizer kind a city hall or a ministry needs.
+picker the kit does not have, and the issuing-authority back office the exam hangs on (v2).
 Source in Simulae: `Exam`, `ContestListPage`, `RegisterExamPage`, `ExamBoardSelect` — all rewritten,
 none imported. Needs /agile:screen.
 
@@ -57,28 +57,30 @@ screen needs, which the kit does not have in any form.
 - UC2 An Admin adds an exam on its own page: it picks the issuing authority by typing part of its name or acronym, then fills the name, the assessment type, the scope (and the state or municipality when the scope asks for it) and the language of the content.
 - UC3 An Admin opens an existing exam on the same page, changes it and saves; the list shows the change.
 - UC4 An Admin deletes an exam after confirming; it disappears from the catalog.
-- UC5 An Admin tries to delete an organizer that is the issuing authority of at least one exam and is refused, with the number of exams in the message.
-- UC6 An Admin registers an organizer of the new kind "public body" (a city hall, a state government, a ministry, a public foundation) and uses it as the issuing authority of an exam.
+- UC5 An Admin tries to delete an issuing authority that has at least one exam and is refused. (v2)
+- UC6 An Admin registers an issuing authority (a city hall, a state government, a ministry, a university, a company) at `/admin/issuing-authorities` and uses it as the parent of an exam. (v2)
 - UC7 A Student or Curator never sees the Exams menu item and gets the ordinary Not Found page on `/admin/exams`; the Api answers 403 `identity.forbidden`.
 
 ## Business rules
 - BR1 `Exam : TenantEntity` lives in `Simulab.Catalog.Domain/Entities/`, mapped to `catalog.exams`. It is global data: `TenantId` is null and every unique index that includes it is `NULLS NOT DISTINCT` (F-33 BR5, ADR-0001 #8). Deleting is a soft delete.
-- BR2 An exam belongs to its **issuing authority**: the body that publishes the notice and defines the positions, the syllabus and the rules of the exam (a city hall, a state government, a ministry, a university, a certifying body). `Exam.IssuingAuthorityId` is a required foreign key to `catalog.organizers`. The **exam board** that elaborates, applies and marks one paper is not here: it belongs to the edition (F-35), because the same exam changes board between editions.
-- BR3 The organizer's kind is not checked against the role it plays: any organizer may be an exam's issuing authority. The same institution really does hold both roles (FGV is a board for a public service exam and the issuing authority of its own certifications; USP is the issuing authority of the exam FUVEST runs).
-- BR4 `OrganizerKind` gains a fourth value, `PublicBody`, for a city hall, a state or federal government body, a ministry, an agency or a public foundation. It has its name in the three languages, it appears in `/admin/organizers` (list, filter and dialog) and in `OrganizerKindOrder` (B-15), and it supersedes F-33 BR7's list of three.
+- BR2 An exam belongs to its **issuing authority**: the body that publishes the notice and defines the positions, the syllabus and the rules of the exam (a city hall, a state government, a ministry, a university, a company). `Exam.IssuingAuthorityId` is a required foreign key to `catalog.issuing_authorities` (BR18). The **exam board** that elaborates, applies and marks one paper is not here: it is the `Organizer` of F-33, and it belongs to the edition (F-35), because the same exam changes board between editions. (v2)
+- BR3 *(withdrawn in v2: the two roles are two tables now, so there is no kind to check against a role.)*
+- BR4 *(withdrawn in v2: `OrganizerKind` keeps F-33 BR7's three values. `PublicBody` existed only to let a city hall be an organizer, which is what BR18 replaced.)*
 - BR5 An exam has `Name` (required), `IssuingAuthorityId` (required), `AssessmentType` (required), `Scope` (required), `ScopeDetail` (conditional, BR8) and `ContentLanguage` (required). Every length is a constant in `Simulab.Catalog.Contracts.CatalogLimits`: name 200, scope detail 120.
 - BR6 `AssessmentType` is one of `PublicServiceExam`, `Certification`, `UniversityEntranceExam`, `Enem` (glossary). It travels as a string; an unknown value is refused with `exam.assessment_type_invalid` (400), the way F-33 handles `OrganizerKind` after its review.
 - BR7 `ExamScope` is one of `National`, `State`, `Municipal`. It travels as a string; an unknown value is `exam.scope_invalid` (400).
 - BR8 `ScopeDetail` is required when the scope is `State` or `Municipal` — the state or the municipality — and is refused with `exam.scope_detail_required`. When the scope is `National` it is stored as null whatever the request sent. Longer than 120 characters is `exam.scope_detail_too_long`.
 - BR9 `ContentLanguage` is one of `SupportedLanguages.All` (`en`, `pt-BR`, `pt-PT`), canonicalized by `SupportedLanguages.Canonical` so `PT-br` is stored as `pt-BR`; anything else is `exam.content_language_invalid`. It is the language of the exam's content and is never translated (ADR-0001 #27). The form offers `pt-BR` selected.
 - BR10 The name is trimmed and 2 to 200 characters (`exam.name_required`, `exam.name_too_long`). It is unique **within its issuing authority**, ignoring case and accents, soft-deleted rows included: a unique index over a stored normalized column (`CatalogText.Normalize`, the F-33 technique) covering `TenantId`, `IssuingAuthorityId` and `NormalizedName`, with `NULLS NOT DISTINCT`. A duplicate is refused with `exam.name_taken` (409). Moving an exam to another issuing authority whose exams already hold that name is the same conflict.
-- BR11 An `IssuingAuthorityId` that matches no organizer — or a soft-deleted one — is refused with 404 `organizer.not_found`, the code F-33 already defines and translates.
-- BR12 Deleting an organizer that is the issuing authority of at least one exam, deleted exams excluded, is refused with 409 `organizer.has_exams`; the message says the exams must be deleted first, on the Exams page. It carries no count: `ErrorText.For` maps a code to a text and takes no argument, and giving the shared helper one for a single message is not worth it (the Admin sees them by filtering `/admin/exams` by that body). Deleting an organizer with no exam still works as it did.
+- BR11 An `IssuingAuthorityId` that matches no issuing authority — or a soft-deleted one — is refused with 404 `issuing_authority.not_found`. (v2)
+- BR12 Deleting an issuing authority that has at least one exam, deleted exams excluded, is refused with 409 `issuing_authority.has_exams`; the message says the exams must be deleted first, on the Exams page. It carries no count: `ErrorText.For` maps a code to a text and takes no argument, and giving the shared helper one for a single message is not worth it (the Admin sees them by filtering `/admin/exams` by that body). Deleting one with no exam works normally. `DeleteOrganizerHandler` goes back to what F-33 built: nothing points at an organizer until F-35. (v2)
 - BR13 The exam has no publication state of its own: it is published through its editions (F-35), and a student sees an exam that has at least one published edition (F-36). Nothing blocks deleting an exam in F-34, because nothing points at it yet; F-35 adds that block when editions exist.
-- BR14 The list is paged (`page`, `pageSize`, cap 100) and returns `{ items, total }`. Search matches the normalized name. The filters are issuing authority (by id), assessment type and scope, combined with AND, offered as three fields in the table's `ToolBarContent`. Sorting is by name, issuing authority, assessment type or scope; the default is name ascending. Sorting by a translated label follows the caller's order, as `OrganizerKindOrder` does for the kind (B-15).
+- BR14 The list is paged (`page`, `pageSize`, cap 100) and returns `{ items, total }`. Search matches the normalized name. The filters are issuing authority (by id), assessment type and scope, combined with AND, offered as three fields in the table's `ToolBarContent`; the toolbar wraps and grows when they no longer fit beside the search box. Sorting is by name, issuing authority, assessment type or scope; the default is name ascending. Sorting by a translated label follows the caller's order, as `OrganizerKindOrder` does for the kind (B-15).
 - BR15 Domain rules return `Result`, never exceptions: `Exam.Create` and `Exam.Update` validate BR8 to BR10 and give back an `Error` with its code.
-- BR16 `AppLookupField` is a new UI kit component: a searchable field that asks the server for a page of candidates as the user types, shows one line per candidate, keeps the chosen one's id, and has `Id`, `Label` and the search callback as `[EditorRequired]` (rule `ui`). It is shown on `/dev/ui` with its loading, no-result and error states, and it is the only way any screen picks a parent record from now on. For the issuing authority it calls the organizer list with `search`, showing `Name (ACRONYM)`.
-- BR17 Every UI text of the two screens, the new kit component and every new error code exists in pt-BR, pt-PT and en, in `SharedResources` in the Web host (F-33 v2).
+- BR16 `AppLookupField` is a new UI kit component: a searchable field that asks the server for a page of candidates as the user types, shows one line per candidate, keeps the chosen one's id, and has `Id`, `Label` and the search callback as `[EditorRequired]` (rule `ui`). It is shown on `/dev/ui` with its loading, no-result and error states, and it is the only way any screen picks a parent record from now on. For the issuing authority it calls the issuing-authority list with `search`, showing `Name (ACRONYM)`. (v2)
+- BR17 Every UI text of the three screens, the new kit component and every new error code exists in pt-BR, pt-PT and en, in `SharedResources` in the Web host (F-33 v2).
+- BR18 `IssuingAuthority : TenantEntity` is a new entity of the Catalog module, mapped to `catalog.issuing_authorities`: the body that publishes a notice. It has `Name` (required, 2 to 150), `Acronym` (required, 2 to 20, uppercased), `Description` and `Website` (both optional), plus the stored normalized columns the unique indexes and the search read — the same shape as `Organizer` in F-33, without a kind (nothing filters or groups by one yet). Name and acronym are each unique, ignoring case and accents, deleted rows included, with `NULLS NOT DISTINCT`. Its rules answer with a `Result` and never throw. Its back office is `/admin/issuing-authorities`, the list-plus-dialog pattern of `/admin/organizers`, behind `catalog.manage`. (v2)
+- BR19 `Organizer` is the **exam board** and nothing else: F-33's three kinds, unchanged. Its pt-BR texts change from "Organizadora" to "Banca", which is what Brazil calls it; pt-PT and en keep their wording. Nothing else about F-33's screen moves. (v2)
 
 ## Screens and API
 
@@ -134,10 +136,15 @@ adds the editions section, below the card.
 - Its own states, all in the gallery: idle (nothing chosen), below the minimum characters (hint `Lookup.Hint.MinChars`), searching (the field's progress), results open, no result (`Lookup.NoResults`), search failed (`Lookup.LoadFailed` with `Common.TryAgain`), chosen (the text with a clear button, `Lookup.Clear`).
 - It debounces by 300 ms and asks the server for one page of at most 20 candidates; it never caches a list in memory (which is exactly what `ExamBoardSelect` did wrong).
 
-### `/admin/organizers` — what changes (BR4, BR12)
-- The kind `AppSelectField` in `OrganizerDialog`, the kind column and the kind order (B-15) gain `OrganizerKind.PublicBody`; nothing else on that screen moves.
-- Deleting an organizer that is an issuing authority is refused: the confirmation is accepted, the Api answers 409, and the existing `_error` alert at the top of the list shows `organizer.has_exams`. The organizer stays in the list.
-- The delete confirmation text itself does not change: it still says the organizer leaves the catalog. It does not promise anything about exams, because the refusal is what tells the Admin.
+### `/admin/issuing-authorities` — the new back office (BR18, v2)
+- The list-plus-dialog pattern of `/admin/organizers`, behind the same `catalog.manage`: `AppPageHeader` with **Add**, a searchable `AppDataTable` with the columns name and acronym, `AppRowActions` with edit and delete, and `IssuingAuthorityDialog` with name, acronym, description and website. No kind column: the entity has none.
+- Menu: `NavigationSection.Content`, key `Nav.IssuingAuthorities`, `AppIcons.IssuingAuthorities`, between Organizers and Exams.
+- Deleting one that has exams is refused: the confirmation is accepted, the Api answers 409, and the `_error` alert at the top of the list shows `issuing_authority.has_exams`. It stays in the list.
+
+### `/admin/organizers` — what changes (BR19, v2)
+- Only its pt-BR texts: "Organizadora" becomes "Banca", in the menu, the title, the breadcrumb, the search placeholder, the empty states, the dialog titles and the messages. pt-PT and en are unchanged.
+- `OrganizerKind` keeps F-33's three values; `PublicBody`, its texts and its place in the kind order are removed again.
+- `DeleteOrganizerHandler` goes back to F-33's: nothing points at an organizer until F-35's editions.
 
 ### API
 - `GET /api/v1/catalog/exams?page=&pageSize=&search=&issuingAuthorityId=&assessmentType=&scope=&sortBy=&descending=&assessmentTypeOrder=&scopeOrder=` — one page: `{ items, total }`. Each item is `ExamResponse(Id, Name, IssuingAuthorityId, IssuingAuthorityName, IssuingAuthorityAcronym, AssessmentType, Scope, ScopeDetail, ContentLanguage)`.
@@ -145,8 +152,9 @@ adds the editions section, below the card.
 - `POST /api/v1/catalog/exams` — `SaveExamRequest(IssuingAuthorityId, Name, AssessmentType, Scope, ScopeDetail, ContentLanguage)`; 201 with the `ExamResponse`. `AssessmentType`, `Scope` and `ContentLanguage` are `string?` in the contract and parsed by the handler, so an unknown value returns its own code instead of failing inside deserialization (the lesson F-33's review left).
 - `PUT /api/v1/catalog/exams/{id:guid}` — the same request; 200.
 - `DELETE /api/v1/catalog/exams/{id:guid}` — 204.
-- The organizer routes do not change their shape; `DELETE /api/v1/catalog/organizers/{id}` gains the 409.
-- Error codes: as listed in BR5 to BR12. Every one of them has a text in the three languages (BR17).
+- `GET /api/v1/catalog/issuing-authorities?page=&pageSize=&search=&sortBy=&descending=` — one page of `IssuingAuthorityResponse(Id, Name, Acronym, Description, Website)`; `POST`, `PUT /{id:guid}` and `DELETE /{id:guid}` complete the CRUD, all behind `catalog.manage` (BR18, v2).
+- The organizer routes do not change at all (v2).
+- Error codes: as listed in BR5 to BR12, plus `issuing_authority.not_found` (404), `issuing_authority.name_required`, `issuing_authority.name_too_long`, `issuing_authority.acronym_required`, `issuing_authority.acronym_too_long`, `issuing_authority.website_invalid`, `issuing_authority.description_too_long` (400), `issuing_authority.name_taken`, `issuing_authority.acronym_taken`, `issuing_authority.has_exams` (409). Every one of them has a text in the three languages (BR17).
 
 ### States
 | State | What the screen shows |
@@ -263,21 +271,22 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 - AC6 Given an exam of an issuing authority, when the Admin saves another one for the same authority whose name differs only in case or accents, then the Api answers 409 `exam.name_taken` and the message shows on the name field. (BR10)
 - AC7 Given two issuing authorities, when each gets an exam with the same name, then both are created. (BR10)
 - AC8 Given two rows inserted directly with `TenantId` null, the same issuing authority and the same normalized name, when the second is saved, then PostgreSQL rejects it. (BR1, BR10)
-- AC9 Given a request whose `issuingAuthorityId` matches no organizer, or matches a deleted one, when it is sent, then the Api answers 404 `organizer.not_found` and nothing is written. (BR11)
+- AC9 Given a request whose `issuingAuthorityId` matches no issuing authority, or matches a deleted one, when it is sent, then the Api answers 404 `issuing_authority.not_found` and nothing is written. (BR11, v2)
 - AC10 Given an assessment type, a scope or a content language that is not one of the allowed names, when the request is sent, then the Api answers 400 with `exam.assessment_type_invalid`, `exam.scope_invalid` or `exam.content_language_invalid`, and the OpenAPI document names the allowed values. (BR6, BR7, BR9)
 - AC11 Given `pt-br` as the content language, when the exam is saved, then it is stored as `pt-BR`. (BR9)
 - AC12 Given an existing exam, when the Admin opens `/admin/exams/{id}`, changes the name and the scope and saves, then the list shows the change and the row keeps its id. (UC3)
 - AC12b Given the add form filled, when the Admin saves, then the page stays open with the title `Exams.Form.EditTitle`, the route `/admin/exams/{id}` of the new exam and the snackbar `Exams.Saved`; going back to the list shows it. (UC2)
 - AC13 Given an exam, when the Admin confirms the deletion, then it disappears from the list and from `GET /api/v1/catalog/exams`, the row is still in the table with `IsDeleted` true, and creating a new exam with that name under the same issuing authority is refused with `exam.name_taken`. (UC4, BR1, BR10)
-- AC14 Given an organizer that is the issuing authority of two exams, when the Admin confirms its deletion, then the Api answers 409 `organizer.has_exams`, the organizer is still listed, and the screen shows the translated message. (UC5, BR12)
-- AC15 Given an organizer whose only exam was deleted, when the Admin deletes the organizer, then it is deleted. (BR12)
+- AC14 Given an issuing authority with two exams, when the Admin confirms its deletion, then the Api answers 409 `issuing_authority.has_exams`, it is still listed, and the screen shows the translated message. (UC5, BR12, v2)
+- AC15 Given an issuing authority whose only exam was deleted, when the Admin deletes it, then it is deleted; and deleting an organizer is unaffected, because nothing points at one yet. (BR12, v2)
 - AC16 Given exams whose names differ only by accents, when the Admin searches without accents, then all of them are listed; and given the three filters set together, then only the exams matching all three come back, with `total` counting them. (BR14)
-- AC17 Given the new kind, when the Admin opens `/admin/organizers`, then "public body" is offered in the dialog, shown in the list, available in the kind filter and placed in the caller's kind order; and an exam can be created under an organizer of that kind. (UC6, BR4)
+- AC17 Given a signed-in Admin, when they open `/admin/issuing-authorities`, then they see the list with name and acronym sorted by name, can add one in the dialog with the acronym uppercased, are refused a name or acronym another one already holds (ignoring case and accents), and see it offered by the exam form's picker. A Student gets Not Found there and 403 `identity.forbidden` from the Api. (UC6, BR18, v2)
 - AC18 Given `AppLookupField` on `/dev/ui` and on the form page, when the Admin types two letters, then the server is asked with that term and the matching organizers are offered as `Name (ACRONYM)`; with no match the no-result state shows; when the call fails the error state offers "try again"; and the whole field is reachable and choosable by keyboard alone. (BR16)
 - AC18b Given the form with the scope `Municipal` and a municipality typed, when the Admin changes the scope to `National`, then the field disappears, what was typed is dropped, and saving stores `ScopeDetail` null. (BR8)
 - AC18c Given `/admin/exams/{id}` for an id that is not an exam, or one that was deleted, then the page shows `exam.not_found` with a link back to the list and no fields. (BR5)
 - AC19 Given `Exam.Create` with a blank name, when it runs, then it returns a failed `Result` with `exam.name_required` and throws nothing. (BR15)
 - AC20 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green. (BR17)
+- AC21 Given the organizer screen, when it is read in pt-BR, then it says "Banca" everywhere it said "Organizadora"; pt-PT and en are unchanged, and `OrganizerKind` still has exactly F-33's three values. (BR19, v2)
 
 ## Decisions
 - 2026-09-24 — An exam belongs to its **issuing authority** (the body that publishes the notice), and the **exam board** belongs to the edition (BR2) — the owner separated the three actors of a public service exam: the contracting body defines the positions, the syllabus and the rules; the board elaborates, applies and marks with its own criteria, and changes between editions of the same exam; the author of practice content is a third actor. Tying the exam to the board would duplicate the same exam at every change of board. The epic's wording "exams under an organizer" is kept, with the organizer being the issuing authority (owner, question 1, revised after the owner's correction).
@@ -340,7 +349,30 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 - (none)
 
 ## Change notes
-<!-- Added by /agile:change during build. Increase `version` in the header. -->
+
+### v2 — 2026-09-24
+- **What:** the exam board and the issuing authority become two records. `Organizer` goes back to being only
+  the board (F-33's three kinds, `PublicBody` removed) and its pt-BR texts become "Banca"; a new
+  `IssuingAuthority` entity, with its own table and back office at `/admin/issuing-authorities`, is what an
+  exam hangs on. The English identifier `Organizer` stays: only the translation changes, which is what was
+  asked, and renaming the entity would drag F-33's table, migrations and tests along for no gain.
+- **Why:** found on validation. The exam `Guarda Municipal de Manaus` was linked to `Ibam Concursos2 (IBAM)`,
+  a board, in a field that asks for the body that publishes the notice — the picker offered it and the Api
+  accepted it, because one table held both roles. Calling that table "Banca" in pt-BR, as asked, would have
+  made the contradiction plain instead of fixing it (owner, 2026-09-24).
+- **Affected:** BR2, BR11, BR12, BR14 (the toolbar wrap), BR16; BR3 and BR4 withdrawn; BR18 and BR19 added.
+  AC9, AC14, AC15 reworded; AC17 replaced; AC21 added. UC5 and UC6 reworded. The screens and API sections,
+  the glossary and the mockup follow. Every other criterion is unchanged and stays green.
+- **Not affected:** AC1 (except the foreign key's target), AC2, AC3, AC5, AC6, AC8, AC10, AC11, AC12, AC12b,
+  AC13, AC16, AC18, AC18b, AC18c, AC19, AC20 — the exam itself, `AppLookupField`, the filters, the form page
+  and the content language are all as built.
+- **Data:** the exam rows created while validating point at organizers; the migration retargets the foreign
+  key, so they do not survive. Two rows, and F-37 brings the real data (owner, 2026-09-24).
+- **Also decided:** the issuing authority carries no kind for now — nothing filters or groups by one, and it
+  arrives when F-36 shows the student needs it (owner, 2026-09-24).
+- **Re-approved:** 2026-09-24 (owner).
+- Status goes back to `building`: the file should say where the work really is, and the item returns to
+  `validating` when the new screen is ready for the owner.
 
 ## Coverage
 
