@@ -46,6 +46,11 @@
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.12" />
   </ItemGroup>
 
+  <!-- AI gateway (F-41): the official .NET library for the Claude API (ADR-0001, decision 22). -->
+  <ItemGroup>
+    <PackageVersion Include="Anthropic" Version="12.50.0" />
+  </ItemGroup>
+
   <!-- Data (F-3) -->
   <ItemGroup>
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
