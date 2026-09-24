@@ -6,6 +6,8 @@ namespace Simulab.Ai.Tests;
 /// <summary>F-41: the gateway's rules, through the path a production call takes.</summary>
 public class AnthropicAiGatewayTests
 {
+    private static readonly string[] RequiredProperties = ["name"];
+
     private static AiRequest Ask(string prompt = "Say ok") => new(AiPurposes.Diagnostics, prompt);
 
     [Fact]
@@ -40,7 +42,7 @@ public class AnthropicAiGatewayTests
         {
             ["type"] = JsonSerializer.SerializeToElement("object"),
             ["properties"] = JsonSerializer.SerializeToElement(new { name = new { type = "string" } }),
-            ["required"] = JsonSerializer.SerializeToElement(new[] { "name" })
+            ["required"] = JsonSerializer.SerializeToElement(RequiredProperties)
         };
 
         var result = await host.Gateway.CompleteAsync(
