@@ -1,7 +1,7 @@
 ---
 bug: B-15
 feature: F-33
-status: validating
+status: done
 board: 759
 severity: low
 ---
@@ -144,3 +144,10 @@ src/Hosts/Simulab.AppHost`, Web at `https://localhost:7125`, sign in per `docs/i
    board, University (en) or Entidade certificadora, Júri de exame, Universidade (pt-PT).
 3. With two organizers of the same kind, confirm they stay ordered by name inside that kind, in both sort
    directions.
+
+## Delivery
+- Branch: `bug/B-15`, merged into `main` with `--no-ff` in `fe1ac6c` (message "Merge bug/B-15 ... AB#759"). Validated by the owner on 2026-09-24.
+- Generated file: the OpenAPI document `docs/api/Simulab.Api.json` (new `kindOrder` query parameter) was rewritten by the Api host test during the ship gate and was left uncommitted in the worktree; it reached `main` in `5951aad`, after the merge. The retro records it as a plugin note.
+- Tests (full suite, `gate.js ship`): 1024 passed, 0 failed, 46 s; full build 17 s, 0 warnings. Catalog 77 (10 new), Web 486 (3 new), architecture 90. One unrelated red in the first full run (`AppRowActionsTests.Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu`, the B-11 flaky): 5 of 5 green in isolation, then green in the suite.
+- Manual: no change; `docs/manual/<locale>/organizers.md` says only that a column title sorts the list, which stays true.
+- Board: AB#759 closed with an evidence comment.
