@@ -579,3 +579,9 @@ Shipped in `1cacd3d` under `/agile:autopilot --worktree`, two stops, nothing ass
 - ⏳ `plugin` `[stack: DocGen]` feature-ship step 7b points a hand-written overview at `docs/architecture/overview.md`, a folder where DocGen deletes every file it does not generate; the overview belongs outside it (here `docs/architecture-overview.md`, with a drift guard against the app host).
 - Nothing: an AwesomeAssertions `BeEmpty()` on a collection printed only the first problem ("found at least one item"); joining the problems into one string showed them all. One-off.
 - Nothing: an empty leftover folder `wt/simulab/f-33` from an earlier ship; delete it by hand.
+
+## 2026-09-24 — Sync with agile@canary 0.0.41 → 0.0.57
+- Copied: rules `definition-of-done`, `workflow`; templates `bug`, `epic`, `feature`, `project-claude`; `docs/agile/workflow.md` and `workflow.pt-BR.md` (autopilot, `## Start` section, execution plan in epics).
+- Merged: `docs/agile/profile.md` (Blazor prerender and single-use tickets; xUnit 2.x vs v3 note), no conflicts, project sections kept.
+- Left alone: build files (no upstream change).
+- Declined: the Evals line in `CLAUDE.md` until an eval suite exists; captured as an idea instead.

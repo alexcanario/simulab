@@ -31,6 +31,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Build: `<build command>`
 - Affected tests: `<command or hook>` (budget: unit < 30 s, integration < 2 min)
 - Full suite (ship only): `<test command>` (budget: < 5 min)
+- Evals (ship and on demand, never in the turn gate; only when a feature calls a model, quiz 30b): `<evals command>` — pass-rate baseline `<file>`, cost ceiling `<amount>` per run. Delete this line otherwise.
 - Run locally: `<app host command>`
 
 ## Models

@@ -3,11 +3,12 @@
 - The chat is where ideas mature; the disk is the source of truth. Every decision that matters ends in a file with a `status:` header.
 - Status flow: `idea → refining → approved → building → validating → done`. Never skip a status.
 - No production code before the item is `approved`. Reading code to refine is fine; writing it is not.
-- Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not.
+- Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not. In `/agile:autopilot` it is the "Aprovo <id>" answer at stop 1, or the `--assume` flag for that item: assumed answers are recorded in `## Decisions` and shown at validation.
+- Every epic, feature and bug says how it starts (`## Start`): what it depends on, what it waits on and who provides it, the suggested path, what can run beside it. Unknown is written as unknown, never guessed.
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
 - WIP limit: one item in `building` or `validating` per checkout. A new request during a build becomes an `idea`, not work; a second item in parallel needs the owner's `/agile:build <id> --worktree`.
 - Confirm the item at the start of the session. Other items only get registered, never executed.
-- Three human gates: approved → validated on screen → merge authorized. An approval never carries over to the next gate.
+- Three human gates: approved → validated on screen → merge authorized. An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`.
 - Verify premises in the code before asking. Never ask what the code already answers.
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.

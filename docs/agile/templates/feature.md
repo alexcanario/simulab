@@ -8,7 +8,7 @@ version: 1
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
 Status flow: idea -> refining -> approved -> building -> validating -> done
-- idea: title and summary only (/agile:idea).
+- idea: title, summary and start only (/agile:idea, /agile:epic).
 - refining: sections below filled during /agile:refine.
 - approved: set only after the product owner says "approve F-<number>" and Open questions is empty or deferred.
 - building / validating / done: set by /agile:build and /agile:ship.
@@ -18,6 +18,13 @@ Remove these comments when the file leaves `idea`.
 
 ## Summary
 <!-- 2-3 lines captured from the chat. -->
+
+## Start
+<!-- What this item needs before it can start, and how to run it. Filled when the item is created, confirmed at refinement. -->
+- Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository — or "nothing">
+- Waits on: <what is not an item: an owner decision, a person or team, an access, an environment — who provides it — or "nothing">
+- Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (small and clear) | `/agile:discuss` first (open direction) | `/agile:screen` during refinement>
+- Parallel with: <ids that can run at the same time in a worktree — or "none">
 
 ## Goal
 <!-- Why this feature exists, in one or two sentences. -->

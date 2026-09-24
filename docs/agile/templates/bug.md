@@ -15,6 +15,13 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 <!-- Observed behavior, with the steps to reproduce. -->
 1. <Step>
 
+## Start
+<!-- What this bug needs before it can be fixed, and how to run it. Filled when the bug is created, confirmed at refinement. -->
+- Depends on: <items that must be done first — or "nothing">
+- Waits on: <an owner decision, a person or team, access to data or an environment to reproduce it — who provides it — or "nothing">
+- Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (cause clear, fix small)>
+- Parallel with: <ids that can run at the same time in a worktree — or "none">
+
 ## Expected
 <!-- Correct behavior. If this is a product decision, it goes to the owner. -->
 
