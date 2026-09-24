@@ -1,6 +1,8 @@
 using System.Reflection;
 using OpenIddict.Validation.AspNetCore;
+using Simulab.Ai;
 using Simulab.Api;
+using Simulab.Api.Features.Ai;
 using Simulab.Api.Features.System;
 using Simulab.Catalog.Api;
 using Simulab.Catalog.Infrastructure;
@@ -27,6 +29,13 @@ builder.Services.AddAppDatabase(builder.Configuration.GetConnectionString("simul
 builder.Services.AddModulePersistence();
 builder.Services.AddEmailSender(builder.Configuration, builder.Configuration.GetConnectionString("mailpit"));
 builder.Services.AddIntegrationEvents();
+
+// The one door to a model (F-41, BR1). Without a key the host still starts and every call fails with
+// ai.not_configured (BR4), so nobody needs a key to work on the rest of the app.
+builder.Services.AddAiGateway(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("simulab")
+        ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 
 // The job table and its worker (F-13, ADR-0001 #20). Every identity email leaves through it, so no
 // request ever waits for the mail server.
@@ -92,6 +101,13 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
 v1.MapIdentityEndpoints();
 v1.MapCatalogEndpoints();
 
+// F-41 (v2), AC9b: the diagnostics route exists only in Development. Outside it the route is never
+// mapped, so it answers 404 rather than being merely hidden.
+if (app.Environment.IsDevelopment())
+{
+    v1.MapAiDiagnosticsEndpoints();
+}
+
 // OpenIddict's own protocol path (F-5, decision 1): outside /api/v1, its own error shape.
 app.MapTokenEndpoints();
 
@@ -99,6 +115,7 @@ app.MapTokenEndpoints();
 // A test host that does not need a database turns it off with Database:ApplyMigrationsOnStart.
 if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environment.IsDevelopment()))
 {
+    await app.Services.MigrateAiAsync();
     await app.Services.MigrateJobsAsync();
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.MigrateCatalogModuleAsync();

@@ -103,6 +103,23 @@
   <data name="Nav.Section.Administration" xml:space="preserve"><value>Administração</value></data>
   <data name="Nav.Section.Development" xml:space="preserve"><value>Desenvolvimento</value></data>
   <data name="Nav.Dev.UiKit" xml:space="preserve"><value>Kit de interface</value></data>
+  <data name="Nav.Dev.Ai" xml:space="preserve"><value>Gateway de IA</value></data>
+  <data name="AiDiagnostics.Title" xml:space="preserve"><value>Gateway de IA</value></data>
+  <data name="AiDiagnostics.Intro" xml:space="preserve"><value>Envia uma chamada real pelo gateway e mostra quanto custou. Apenas em desenvolvimento.</value></data>
+  <data name="AiDiagnostics.Prompt.Label" xml:space="preserve"><value>Prompt</value></data>
+  <data name="AiDiagnostics.Prompt.Hint" xml:space="preserve"><value>O que perguntar ao modelo.</value></data>
+  <data name="AiDiagnostics.Send" xml:space="preserve"><value>Enviar</value></data>
+  <data name="AiDiagnostics.Sending" xml:space="preserve"><value>A enviar…</value></data>
+  <data name="AiDiagnostics.Answer" xml:space="preserve"><value>Resposta</value></data>
+  <data name="AiDiagnostics.Model" xml:space="preserve"><value>Modelo: {0}</value></data>
+  <data name="AiDiagnostics.Tokens" xml:space="preserve"><value>Tokens: {0} de entrada, {1} de saída</value></data>
+  <data name="AiDiagnostics.Cost" xml:space="preserve"><value>Custo: US$ {0}</value></data>
+  <data name="AiDiagnostics.Duration" xml:space="preserve"><value>Duração: {0} ms</value></data>
+  <data name="ai.not_configured" xml:space="preserve"><value>Não há chave de API configurada, por isso o gateway não consegue chamar o modelo.</value></data>
+  <data name="ai.no_user" xml:space="preserve"><value>Inicie sessão primeiro: cada chamada é cobrada a um utilizador.</value></data>
+  <data name="ai.quota_exceeded" xml:space="preserve"><value>O seu plano não permite mais chamadas de IA este mês.</value></data>
+  <data name="ai.call_failed" xml:space="preserve"><value>O modelo não conseguiu responder. Tente novamente dentro de momentos.</value></data>
+  <data name="ai.prompt_required" xml:space="preserve"><value>Escreva um prompt primeiro.</value></data>
   <data name="Nav.Roles" xml:space="preserve"><value>Perfis</value></data>
   <data name="Roles.Title" xml:space="preserve"><value>Perfis</value></data>
   <data name="Nav.Users" xml:space="preserve"><value>Utilizadores</value></data>
