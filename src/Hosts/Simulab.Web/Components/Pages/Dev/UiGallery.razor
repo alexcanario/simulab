@@ -122,7 +122,9 @@
     </MudPaper>
 </section>
 
-<section id="gallery-lookup" class="gallery-section">
+@* The section id never repeats a field id below it: two nodes with one id break every label and
+   aria-describedby that points at it (found on screen, F-34). *@
+<section id="gallery-lookups" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Lookup"]</MudText>
     <MudText Typo="Typo.body2" Class="mb-2">@L["Exams.Field.IssuingAuthority.Hint"]</MudText>
     <MudPaper Outlined="true" Class="pa-4 gallery-form">

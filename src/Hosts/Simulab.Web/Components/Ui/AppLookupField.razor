@@ -27,6 +27,7 @@
                      Error="HasError"
                      ResetValueOnEmptyText="true"
                      CoerceText="true"
+                     OpenChanged="OnOpenChanged"
                      AdornmentIcon="@AppIcons.Search"
                      Adornment="Adornment.Start"
                      AdornmentAriaLabel="@L["Common.Search"]"
@@ -111,20 +112,35 @@
 
     private string _lastTerm = string.Empty;
     private bool _searchFailed;
+    private bool _open;
     private string _announcement = string.Empty;
 
     private bool HasError => !string.IsNullOrEmpty(Error);
 
     private string DescriptionId => $"{Id}-description";
 
+    // MudBlazor 9.9 renders a plain text input for the autocomplete: no combobox role, no aria-expanded.
+    // Found by opening /dev/ui and reading the DOM, not by a test. The pattern is written here, once, so
+    // every picker of the app announces itself the same way (rule: ui).
     private Dictionary<string, object?> Attributes => new()
     {
         ["id"] = Id,
+        ["role"] = "combobox",
+        ["aria-expanded"] = _open ? "true" : "false",
+        ["aria-autocomplete"] = "list",
+        ["aria-haspopup"] = "listbox",
         ["aria-describedby"] = DescriptionId,
         ["aria-invalid"] = HasError ? "true" : null,
         ["aria-required"] = Required ? "true" : null,
         ["autocomplete"] = "off"
     };
+
+    private Task OnOpenChanged(bool open)
+    {
+        _open = open;
+
+        return Task.CompletedTask;
+    }
 
     private static string TextOf(AppLookupOption? option) => option?.Text ?? string.Empty;
 
