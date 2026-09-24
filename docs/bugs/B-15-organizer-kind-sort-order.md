@@ -1,7 +1,7 @@
 ---
 bug: B-15
 feature: F-33
-status: building
+status: validating
 board: 759
 severity: low
 ---
@@ -99,3 +99,48 @@ users list (Identity), which sorts by names, not by a translated enum, and the U
 
 ## Open questions
 None.
+
+## Built as
+- `OrganizerKindOrder.Parse` (Contracts): parses `kindOrder` into `IReadOnlyList<OrganizerKind>?`, null unless it
+  is exactly the three known kinds, each once.
+- `OrganizerListQuery.KindOrder`, read by the endpoint from the new `kindOrder` query parameter.
+- `OrganizerQueries.KindSort`: with an order, a nested conditional ranks the three kinds 0/1/2 (EF Core translates
+  it to a SQL `CASE WHEN`); without one, the pre-fix stored-name order. The name tie-break inside a kind (BR16)
+  is unconditional in both branches.
+- `OrganizerText.KindOrder` (Web): the three kinds ordered by their label in `CultureInfo.CurrentUICulture` — the
+  culture the rest of the Web project already keys its Api calls by (`CatalogApiClient`, `IdentityApiClient`).
+- `Organizers.razor`: computes and sends `kindOrder` only when the kind column is the one being sorted.
+
+## Regression test
+- `OrganizerKindOrderTests` (`Simulab.Catalog.Tests`): parsing — blank, one unknown name, a repeat, fewer than
+  three, and the valid case ignoring case and spacing.
+- `OrganizerEndpointTests`, three new tests: no order falls back to the stored name; a given order is honored in
+  both directions with the name tie-break inside each kind; an invalid order (one unknown name) falls back.
+- `OrganizerKindSortTests` (`Simulab.Web.Tests`), one theory over the three cultures: clicking the Tipo/Kind header
+  sends the `kindOrder` alphabetical for that culture — en: CertifyingBody, ExamBoard, University; pt-BR: ExamBoard,
+  CertifyingBody, University; pt-PT: CertifyingBody, ExamBoard, University (matches the table in `## Cause`).
+
+## Acceptance criteria coverage
+| Criterion | Test |
+|---|---|
+| AC1 (pt-BR order) | `OrganizerKindSortTests.SortByKind_...("pt-BR", ...)`, and the ordering itself proven server-side by `List_SortedByKindWithAnOrder_...` |
+| AC2 (pt-PT order) | `OrganizerKindSortTests.SortByKind_...("pt-PT", ...)` |
+| AC3 (en order) | `OrganizerKindSortTests.SortByKind_...("en", ...)` |
+| AC4 (name tie-break) | `List_SortedByKindWithAnOrder_FollowsThatOrderAndKeepsNameAscendingWithinEachKind` |
+| AC5 (fallback) | `List_SortedByKindWithNoOrder_UsesTheStoredName`, `List_SortedByKindWithAnInvalidOrder_FallsBackToTheStoredName`, `OrganizerKindOrderTests` |
+| AC6 (no new text) | No resource file touched; full Web suite (486 tests, including the missing-key checks) stays green |
+
+## Validation script
+The item added no text and no visible field, only how the Tipo/Kind column sorts, behind sign-in. The screen itself
+could not be opened signed in (these rules forbid entering credentials), so only the redirect to sign-in was
+checked (`GET /admin/organizers` while anonymous → the sign-in page). Sorting itself is proven by the tests above;
+this script is for you to see it on screen.
+
+From `D:\dev\_icontrol\wt\simulab\b-15`, start the app host and sign in as an Admin (`dotnet run --project
+src/Hosts/Simulab.AppHost`, Web at `https://localhost:7125`, sign in per `docs/infra.md`):
+1. Open `/admin/organizers` in pt-BR, click the **Tipo** header. Expected order: Banca examinadora,
+   Certificadora, Universidade (ascending); click again for the reverse.
+2. Switch the language to English (or pt-PT) and click **Kind**/**Tipo** again. Expected: Certifying body, Exam
+   board, University (en) or Entidade certificadora, Júri de exame, Universidade (pt-PT).
+3. With two organizers of the same kind, confirm they stay ordered by name inside that kind, in both sort
+   directions.
