@@ -300,7 +300,7 @@
   <data name="Organizers.Kind.CertifyingBody" xml:space="preserve"><value>Certificadora</value></data>
   <data name="Organizers.Kind.University" xml:space="preserve"><value>Universidade</value></data>
   <data name="Organizers.Field.Name" xml:space="preserve"><value>Nome</value></data>
-  <data name="Organizers.Field.Name.Help" xml:space="preserve"><value>Como a organizadora assina seus editais.</value></data>
+  <data name="Organizers.Field.Name.Help" xml:space="preserve"><value>Como a banca assina as provas que aplica.</value></data>
   <data name="Organizers.Field.Acronym" xml:space="preserve"><value>Sigla</value></data>
   <data name="Organizers.Field.Acronym.Help" xml:space="preserve"><value>Salva em maiúsculas e única no catálogo.</value></data>
   <data name="Organizers.Field.Kind" xml:space="preserve"><value>Tipo</value></data>

@@ -211,7 +211,7 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
 
         var found = await ListAsync(admin, $"?search={Uri.EscapeDataString("educacao")}");
 
-        found.Items.Should().Contain(item => item.Acronym == marker.ToUpperInvariant());
+        found.Items.Select(item => item.Acronym).Should().Contain(marker.ToUpperInvariant());
     }
 
     [Fact]
