@@ -95,3 +95,4 @@ The Web picks up the change on the next page load, at most a minute after its la
 - Regenerate: `dotnet run --project tools/Simulab.DocGen`
 - Check (exit 1 when stale, used by `/agile:ship`): `dotnet run --project tools/Simulab.DocGen -- --check`
 - Entity diagrams are DBML (`<Module>/schema.dbml`, F-26): open them with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
+- The hand-written C4 overview (context and containers, F-23) lives outside that folder, because DocGen deletes every file it does not generate: [`docs/architecture-overview.md`](architecture-overview.md). `ArchitectureOverviewTests` fails when an app host resource is missing from the containers diagram, or when a node still marked `planned` has been built.

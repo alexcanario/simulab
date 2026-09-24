@@ -12,6 +12,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 ## Architecture
 - Profile: `modular-monolith` — see `docs/agile/profile.md` (two module shapes; read it before adding a module).
 - Decisions: `docs/decisions/` (start with ADR-0001).
+- Overview: `docs/architecture-overview.md` (C4 context and containers, hand-written; `ArchitectureOverviewTests` checks it against the app host).
 - Keep code simple: add structure only where the profile asks for it.
 
 ## Stack
