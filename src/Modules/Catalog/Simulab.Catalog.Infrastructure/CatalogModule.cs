@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Contracts;
 using Simulab.Catalog.Infrastructure.Persistence;
@@ -27,6 +28,11 @@ public static class CatalogModule
         services.AddScoped<IOrganizerQueries, OrganizerQueries>();
         services.AddScoped<SaveOrganizerHandler>();
         services.AddScoped<DeleteOrganizerHandler>();
+
+        services.AddScoped<IExamStore, ExamStore>();
+        services.AddScoped<IExamQueries, ExamQueries>();
+        services.AddScoped<SaveExamHandler>();
+        services.AddScoped<DeleteExamHandler>();
 
         return services;
     }

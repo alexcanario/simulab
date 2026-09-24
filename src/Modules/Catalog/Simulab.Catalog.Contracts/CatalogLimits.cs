@@ -18,6 +18,12 @@ public static class CatalogLimits
     /// <summary>The organizer's official site, an absolute http or https address.</summary>
     public const int OrganizerWebsiteMaxLength = 300;
 
+    /// <summary>The exam's name, inside its issuing authority (F-34, BR10). Notice titles are long.</summary>
+    public const int ExamNameMaxLength = 200;
+
+    /// <summary>Which state or which municipality an exam applies to (F-34, BR8).</summary>
+    public const int ExamScopeDetailMaxLength = 120;
+
     /// <summary>The shortest a name or an acronym may be (BR8).</summary>
     public const int NameMinLength = 2;
 }
