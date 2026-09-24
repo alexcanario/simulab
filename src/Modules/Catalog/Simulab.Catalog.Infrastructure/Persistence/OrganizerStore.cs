@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Domain.Entities;
 using Simulab.Persistence;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.Catalog.Infrastructure.Persistence;
 
@@ -27,6 +28,23 @@ public sealed class OrganizerStore(CatalogModuleDbContext context) : IOrganizerS
     public void Remove(Organizer organizer) => context.Organizers.Remove(organizer);
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) => context.SaveChangesAsync(cancellationToken);
+
+    public async Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+
+            return null;
+        }
+        catch (DbUpdateException exception) when (OrganizerUniqueViolations.Translate(exception) is not null)
+        {
+            // The refused row is still tracked as added; drop it so a later save on this context does not retry it.
+            context.ChangeTracker.Clear();
+
+            return OrganizerUniqueViolations.Translate(exception);
+        }
+    }
 
     // Every organizer but the one being edited, deleted ones included. The exclusion is added as its own
     // Where instead of `Id != exceptId`: a null parameter in a comparison is SQL's three-valued logic,

@@ -151,6 +151,23 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerAcronymTaken);
     }
 
+    // B-14: two identical creates sent together end as one 201 and one 409, whichever of the handler's
+    // check and the unique index refuses the second; never a 500.
+    [Fact]
+    public async Task Create_TwoIdenticalRequestsAtOnce_AnswerOneCreatedAndOneConflict()
+    {
+        var admin = await AdminAsync();
+        var request = Valid();
+
+        var responses = await Task.WhenAll(
+            admin.PostAsJsonAsync(Organizers, request, AppJson.Options),
+            admin.PostAsJsonAsync(Organizers, request, AppJson.Options));
+
+        responses.Select(response => response.StatusCode).Should().BeEquivalentTo([HttpStatusCode.Created, HttpStatusCode.Conflict]);
+        var refused = responses.Single(response => response.StatusCode == HttpStatusCode.Conflict);
+        CodeOf(await refused.Content.ReadAsStringAsync()).Should().BeOneOf(CatalogErrorCodes.OrganizerNameTaken, CatalogErrorCodes.OrganizerAcronymTaken);
+    }
+
     [Fact]
     public async Task Update_ItsOwnNameAndAcronym_IsNotATakenConflict()
     {

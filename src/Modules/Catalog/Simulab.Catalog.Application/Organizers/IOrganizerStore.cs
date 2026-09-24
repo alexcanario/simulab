@@ -1,4 +1,5 @@
 using Simulab.Catalog.Domain.Entities;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.Catalog.Application.Organizers;
 
@@ -26,4 +27,10 @@ public interface IOrganizerStore
     void Remove(Organizer organizer);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves, and answers with the 409 for a duplicate name or acronym when the unique index refuses the
+    /// row after the "is taken" checks passed: another writer committed in between (B-14). Null when saved.
+    /// </summary>
+    Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken);
 }
