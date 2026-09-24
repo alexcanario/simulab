@@ -116,6 +116,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-table-search {
     max-width: 22rem;
+    /* F-34: with filters beside it the toolbar would squeeze the search to a few pixels. */
+    min-width: 14rem;
 }
 
 .app-truncate {
@@ -690,4 +692,42 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-lookup-retry {
     margin-left: 8px;
     min-width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Table filters (F-34): the fields a list offers beside its search box, inside
+   the data table's toolbar. The toolbar is a flex row, so the fields lay out as
+   one and drop their bottom margin; a kit field is a block by default and would
+   otherwise stack and spill out of the card.
+   --------------------------------------------------------------------------- */
+.app-table-filters {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+    /* The toolbar's spacer grows, so the wrapper has to refuse to shrink: with `min-width: 0` the
+       spacer took every pixel and the three fields collapsed to zero width (found on screen). */
+    flex: 0 0 auto;
+}
+
+.app-table-filters .app-field {
+    margin-bottom: 0;
+    flex: 0 0 12rem;
+}
+
+/* The toolbar holds the search and the filters; when they no longer fit on one line it wraps instead
+   of squeezing the search (found on screen at 800 px). The library gives it a fixed height, so it also
+   has to grow with its rows - otherwise the wrapped line lands on top of the table header. */
+.app-data-table .mud-toolbar {
+    flex-wrap: wrap;
+    row-gap: 12px;
+    height: auto;
+    min-height: 64px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.app-table-filters .app-field-label {
+    white-space: nowrap;
 }
