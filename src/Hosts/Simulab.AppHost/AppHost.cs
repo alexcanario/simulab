@@ -9,7 +9,10 @@ var postgres = builder.AddPostgres("postgres", password: postgresPassword)
     .WithDataVolume("simulab-postgres-data")
     .WithHostPort(5432);
 
-var database = postgres.AddDatabase("simulab");
+// The resource keeps its name, so every connection string stays "simulab"; only the physical database
+// changes. A worktree sets Database:Name (or Database__Name) so an item's migration never lands in the
+// shared local database while it is still being built (rule: worktrees).
+var database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
 
 // Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
 var mailpit = builder.AddMailPit("mailpit");

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Simulab.Ai.Contracts;
 
 namespace Simulab.Ai;
 
