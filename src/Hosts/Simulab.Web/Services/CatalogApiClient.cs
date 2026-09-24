@@ -36,6 +36,11 @@ public sealed class CatalogApiClient(HttpClient http)
             route += $"&sortBy={Uri.EscapeDataString(query.SortBy)}";
         }
 
+        if (query.KindOrder is { Count: > 0 } order)
+        {
+            route += $"&kindOrder={Uri.EscapeDataString(string.Join(',', order))}";
+        }
+
         return SendAsync<OrganizerPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
 

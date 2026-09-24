@@ -397,6 +397,57 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         ascending.Items[0].Acronym.Should().Be($"A{marker}".ToUpperInvariant());
     }
 
+    // B-15 AC5: no kindOrder is the pre-fix behavior - the stored English name.
+    [Fact]
+    public async Task List_SortedByKindWithNoOrder_UsesTheStoredName()
+    {
+        var admin = await AdminAsync();
+        var marker = UniqueAcronym();
+        await CreateAsync(admin, Valid(name: $"Org U {marker}", acronym: $"u{marker}", kind: OrganizerKind.University));
+        await CreateAsync(admin, Valid(name: $"Org E {marker}", acronym: $"e{marker}", kind: OrganizerKind.ExamBoard));
+        await CreateAsync(admin, Valid(name: $"Org C {marker}", acronym: $"c{marker}", kind: OrganizerKind.CertifyingBody));
+
+        var page = await ListAsync(admin, $"?search={marker}&sortBy=kind");
+
+        page.Items.Select(item => item.Kind).Should().Equal(OrganizerKind.CertifyingBody, OrganizerKind.ExamBoard, OrganizerKind.University);
+    }
+
+    // B-15 AC1-AC3, AC4: a kindOrder is honored, both directions, and ties within a kind still sort by name.
+    [Fact]
+    public async Task List_SortedByKindWithAnOrder_FollowsThatOrderAndKeepsNameAscendingWithinEachKind()
+    {
+        var admin = await AdminAsync();
+        var marker = UniqueAcronym();
+        await CreateAsync(admin, Valid(name: $"Org U {marker}", acronym: $"u{marker}", kind: OrganizerKind.University));
+        await CreateAsync(admin, Valid(name: $"Org E-B {marker}", acronym: $"eb{marker}", kind: OrganizerKind.ExamBoard));
+        await CreateAsync(admin, Valid(name: $"Org E-A {marker}", acronym: $"ea{marker}", kind: OrganizerKind.ExamBoard));
+        await CreateAsync(admin, Valid(name: $"Org C {marker}", acronym: $"c{marker}", kind: OrganizerKind.CertifyingBody));
+
+        var ascending = await ListAsync(admin, $"?search={marker}&sortBy=kind&kindOrder=ExamBoard,CertifyingBody,University");
+        var descending = await ListAsync(admin, $"?search={marker}&sortBy=kind&descending=true&kindOrder=ExamBoard,CertifyingBody,University");
+
+        ascending.Items.Select(item => item.Kind).Should().Equal(
+            OrganizerKind.ExamBoard, OrganizerKind.ExamBoard, OrganizerKind.CertifyingBody, OrganizerKind.University);
+        ascending.Items.Select(item => item.Name).Take(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
+        descending.Items.Select(item => item.Kind).Should().Equal(
+            OrganizerKind.University, OrganizerKind.CertifyingBody, OrganizerKind.ExamBoard, OrganizerKind.ExamBoard);
+        descending.Items.Select(item => item.Name).Skip(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
+    }
+
+    // B-15 AC5: an unknown or incomplete kindOrder degrades to the pre-fix order instead of failing the request.
+    [Fact]
+    public async Task List_SortedByKindWithAnInvalidOrder_FallsBackToTheStoredName()
+    {
+        var admin = await AdminAsync();
+        var marker = UniqueAcronym();
+        await CreateAsync(admin, Valid(name: $"Org U {marker}", acronym: $"u{marker}", kind: OrganizerKind.University));
+        await CreateAsync(admin, Valid(name: $"Org E {marker}", acronym: $"e{marker}", kind: OrganizerKind.ExamBoard));
+
+        var page = await ListAsync(admin, $"?search={marker}&sortBy=kind&kindOrder=ExamBoard,NotAKind,University");
+
+        page.Items.Select(item => item.Kind).Should().Equal(OrganizerKind.ExamBoard, OrganizerKind.University);
+    }
+
     /// <summary>Just the name of a permission, so this module does not depend on Identity's response type.</summary>
     private sealed record PermissionName(string Name);
 }

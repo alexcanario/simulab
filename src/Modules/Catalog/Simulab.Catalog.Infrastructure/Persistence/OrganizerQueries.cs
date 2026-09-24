@@ -51,9 +51,32 @@ public sealed class OrganizerQueries(CatalogModuleDbContext context) : IOrganize
         {
             (OrganizerSort.Acronym, false) => organizers.OrderBy(organizer => organizer.NormalizedAcronym),
             (OrganizerSort.Acronym, true) => organizers.OrderByDescending(organizer => organizer.NormalizedAcronym),
-            (OrganizerSort.Kind, false) => organizers.OrderBy(organizer => organizer.Kind).ThenBy(organizer => organizer.NormalizedName),
-            (OrganizerSort.Kind, true) => organizers.OrderByDescending(organizer => organizer.Kind).ThenBy(organizer => organizer.NormalizedName),
+            (OrganizerSort.Kind, false) => KindSort(organizers, query.KindOrder, descending: false),
+            (OrganizerSort.Kind, true) => KindSort(organizers, query.KindOrder, descending: true),
             (_, true) => organizers.OrderByDescending(organizer => organizer.NormalizedName),
             _ => organizers.OrderBy(organizer => organizer.NormalizedName)
         };
+
+    // Without an order (B-15), the stored name is the only thing left to sort by - the pre-fix behavior.
+    // With one, the three kinds are ranked 0/1/2 by the caller's order; a nested conditional is what EF
+    // Core can translate to a SQL CASE WHEN, unlike a dictionary lookup, which would run in memory.
+    // The name tie-break inside a kind always stays ascending (BR16), whichever way the kind sort runs.
+    private static IQueryable<Organizer> KindSort(IQueryable<Organizer> organizers, IReadOnlyList<OrganizerKind>? order, bool descending)
+    {
+        if (order is not { Count: 3 } ranked)
+        {
+            return (descending
+                ? organizers.OrderByDescending(organizer => organizer.Kind)
+                : organizers.OrderBy(organizer => organizer.Kind))
+                .ThenBy(organizer => organizer.NormalizedName);
+        }
+
+        var first = ranked[0];
+        var second = ranked[1];
+
+        return (descending
+            ? organizers.OrderByDescending(organizer => organizer.Kind == first ? 0 : organizer.Kind == second ? 1 : 2)
+            : organizers.OrderBy(organizer => organizer.Kind == first ? 0 : organizer.Kind == second ? 1 : 2))
+            .ThenBy(organizer => organizer.NormalizedName);
+    }
 }

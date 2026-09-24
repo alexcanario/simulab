@@ -36,8 +36,11 @@ public static class OrganizerEndpoints
         int pageSize = OrganizerListQuery.DefaultPageSize,
         string? search = null,
         string? sortBy = null,
-        bool descending = false) =>
-        Results.Ok(await queries.ListAsync(new OrganizerListQuery(page, pageSize, search, sortBy, descending), cancellationToken));
+        bool descending = false,
+        string? kindOrder = null) =>
+        Results.Ok(await queries.ListAsync(
+            new OrganizerListQuery(page, pageSize, search, sortBy, descending, OrganizerKindOrder.Parse(kindOrder)),
+            cancellationToken));
 
     private static async Task<IResult> CreateAsync(
         SaveOrganizerRequest request,
