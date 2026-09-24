@@ -78,6 +78,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | 0.0.52 (`181120c`) |
 | ✅ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | 0.0.52 (`181120c`) |
 | ✅ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
+| ⏳ | `[generic]` feature-ship: after `gate.js ship`, `git status` on the item worktree must show no tracked file changed outside bin/obj; a generated file the test run rewrote (for example `docs/api/Simulab.Api.json`) is committed with the item before the merge is requested, not found when the worktree removal refuses | B-15 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -565,3 +566,9 @@ Shipped in `151fcda`. Built in a worktree; no change notes. The regression test 
 - Project rule (`project.md`, Sessions and retro): every item lives in its own worktree and the main checkout stays on `main`. The checkout was found on `bug/B-14` behind the session (the branch then could not be used by a worktree until it went back to `main`), the second time after B-13.
 - ✅ `plugin` `[generic]` feature-refinement: a bug whose cause is found in code that exists only on an unmerged branch says so in `## Cause`, and the build waits for that merge (here F-33 merged while the item was being refined).
 - Nothing: forcing a race with a store wrapper that always answers "free" made the database the only arbiter and the test deterministic; a one-off pattern.
+
+## 2026-09-24 — B-15 Sorting organizers by kind uses the English name, not the label on screen
+Shipped in `fe1ac6c`. Built in a worktree; no change notes. The gate passed on its third run: the first was blocked by a leftover app host, the second by one red `AppRowActionsTests` test (green in isolation five times, then in the suite; the B-11 flaky, not the item). Full suite 1024 tests, 46 s.
+- `plugin` `[generic]` feature-ship: the Api host tests regenerated `docs/api/Simulab.Api.json` during `gate.js ship`, and the change stayed uncommitted in the worktree until `git worktree remove` refused it; the OpenAPI document reached `main` in a separate commit (`5951aad`) after the merge. Step 4 of the skill should check the worktree for tracked files changed by the run and commit them before the merge is requested.
+- Project rule (`project.md`, Sessions and retro): after stopping an app host started by hand, confirm with `netstat` that its ports are free; a `Simulab.AppHost.exe` outlived the process tree that was killed and locked the build output of the ship gate.
+- Nothing: `preview_start` runs the app host from the main checkout, not from the worktree; here it was noticed from the log line "Application host directory" and the check was redone from the worktree. One-off, and the log line gives it away.
