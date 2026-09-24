@@ -3,7 +3,7 @@ feature: F-41
 epic: Foundation and identity
 status: building
 board: 762
-version: 1
+version: 2
 ---
 # AI gateway
 
@@ -47,7 +47,7 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 
 ## Screens and API
 - `/dev/ai` — development-only diagnostics page: prompt box, purpose selector, Send; result panel with the answer, model, input and output tokens, cost and duration; the failure code when it fails. Menu entry `Nav.Dev.Ai` under the Development section, `DevelopmentOnly: true`.
-- No `/api/v1/` endpoint: the page is Blazor Interactive Server and calls `IAiGateway` in process.
+- `POST /api/v1/ai/diagnostics` — Development only, and absent outside it: takes the purpose and the prompt, returns the answer, the model, the tokens, the cost and the duration, or a problem document with the `ai.*` error code. The page reaches it through a typed client, as every other page does.
 - Error codes: `ai.not_configured`, `ai.no_user`, `ai.quota_exceeded`, `ai.call_failed`.
 - Schema `ai`, table `ai_calls`: `id`, `user_id`, `tenant_id` (nullable), `purpose`, `model`, `input_tokens`, `output_tokens`, `input_price_per_million`, `output_price_per_million`, `cost_usd`, `duration_ms`, `succeeded`, `error_code` (nullable), `started_at`. Index on (`user_id`, `started_at`) for the monthly count of BR3.
 
@@ -61,6 +61,7 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 - AC7 Given a recorded call, when the row is read, then `cost_usd` equals the tokens multiplied by the prices stored on the row.
 - AC8 Given a purpose with its own model in configuration, when the gateway is called for that purpose, then the call and the row use that model; any other purpose uses `claude-opus-5`.
 - AC9 Given the app runs outside Development, when `/dev/ai` is opened, then the page renders nothing and the menu entry is absent.
+- AC9b Given the app runs outside Development, when `POST /api/v1/ai/diagnostics` is called, then it answers 404: the endpoint is not mapped.
 - AC10 Given any code outside the `Ai` building block, when the architecture tests run, then no reference to the `Anthropic` package is found.
 - AC11 All new texts appear in pt-BR, pt-PT and en.
 
@@ -91,6 +92,12 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 - (none)
 
 ## Change notes
+
+### v2 — 2026-09-24
+- What: the diagnostics page reaches the gateway through a new Development-only `POST /api/v1/ai/diagnostics` in the Api host and a typed client, instead of calling `IAiGateway` in process.
+- Why: the premise was false. `Simulab.Web` has no database and references no module (`Simulab.Web.csproj`: only `Catalog.Contracts`, `Identity.Contracts` and `ServiceDefaults`); every page goes through a typed client, and the `ai_calls` table lives in the Api host, which runs the migrations. Option B (giving the Web its own database) contradicts the profile ("Web: no business rules").
+- Affected: `## Screens and API` (the "no endpoint" line becomes the endpoint), new AC9b. The gateway, its rules BR1 to BR8 and BR10, the schema and AC1 to AC9, AC10 and AC11 are unchanged.
+- Re-approved: 2026-09-24
 
 ## Validation script
 <!-- Written at the end of build. -->
