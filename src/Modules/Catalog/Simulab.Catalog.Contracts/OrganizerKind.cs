@@ -1,9 +1,9 @@
 namespace Simulab.Catalog.Contracts;
 
 /// <summary>
-/// What an organizer is (F-33 BR7, F-34 BR4). The three kinds the brief names plus the public body F-34
-/// added, when the exam gained its issuing authority; it travels as a string. The kind says what the
-/// institution is, never which role it plays: the same one contracts an exam and runs another (F-34 BR3).
+/// What an organizer is (F-33 BR7). The three kinds the brief names; it travels as a string. An organizer
+/// is the board that elaborates, applies and marks a paper, and nothing else: the body that publishes the
+/// notice is <c>IssuingAuthority</c>, its own entity since F-34 v2.
 /// </summary>
 public enum OrganizerKind
 {
@@ -14,8 +14,5 @@ public enum OrganizerKind
     CertifyingBody = 2,
 
     /// <summary>A university running its own entrance exam.</summary>
-    University = 3,
-
-    /// <summary>A city hall, a state or federal government body, a ministry, an agency or a public foundation (F-34).</summary>
-    PublicBody = 4
+    University = 3
 }

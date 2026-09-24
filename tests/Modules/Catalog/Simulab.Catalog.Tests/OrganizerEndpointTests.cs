@@ -413,8 +413,7 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
     }
 
     // B-15 AC1-AC3, AC4: a kindOrder is honored, both directions, and ties within a kind still sort by name.
-    // F-34 AC17: the fourth kind takes its place in that order like any other. The order has to name every
-    // kind of the enum, so this test grew a PublicBody row when F-34 added the value.
+    // The order has to name every kind of the enum, whatever their number.
     [Fact]
     public async Task List_SortedByKindWithAnOrder_FollowsThatOrderAndKeepsNameAscendingWithinEachKind()
     {
@@ -424,9 +423,8 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         await CreateAsync(admin, Valid(name: $"Org E-B {marker}", acronym: $"eb{marker}", kind: OrganizerKind.ExamBoard));
         await CreateAsync(admin, Valid(name: $"Org E-A {marker}", acronym: $"ea{marker}", kind: OrganizerKind.ExamBoard));
         await CreateAsync(admin, Valid(name: $"Org C {marker}", acronym: $"c{marker}", kind: OrganizerKind.CertifyingBody));
-        await CreateAsync(admin, Valid(name: $"Org P {marker}", acronym: $"p{marker}", kind: OrganizerKind.PublicBody));
 
-        const string order = "ExamBoard,CertifyingBody,University,PublicBody";
+        const string order = "ExamBoard,CertifyingBody,University";
         var ascending = await ListAsync(admin, $"?search={marker}&sortBy=kind&kindOrder={order}");
         var descending = await ListAsync(admin, $"?search={marker}&sortBy=kind&descending=true&kindOrder={order}");
 
@@ -434,16 +432,14 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
             OrganizerKind.ExamBoard,
             OrganizerKind.ExamBoard,
             OrganizerKind.CertifyingBody,
-            OrganizerKind.University,
-            OrganizerKind.PublicBody);
+            OrganizerKind.University);
         ascending.Items.Select(item => item.Name).Take(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
         descending.Items.Select(item => item.Kind).Should().Equal(
-            OrganizerKind.PublicBody,
             OrganizerKind.University,
             OrganizerKind.CertifyingBody,
             OrganizerKind.ExamBoard,
             OrganizerKind.ExamBoard);
-        descending.Items.Select(item => item.Name).Skip(3).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
+        descending.Items.Select(item => item.Name).Skip(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
     }
 
     // B-15 AC5: an unknown or incomplete kindOrder degrades to the pre-fix order instead of failing the request.

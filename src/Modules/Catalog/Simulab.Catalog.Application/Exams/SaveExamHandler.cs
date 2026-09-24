@@ -43,11 +43,10 @@ public sealed class SaveExamHandler(IExamStore store, IExamQueries queries)
             return Result.Failure<ExamResponse>(candidate.Error!);
         }
 
-        // BR11: a parent that is not in the catalog is the organizer's own 404, the code F-33 already
-        // defines and every language already translates.
+        // BR11 (v2): a parent that is not in the catalog is the issuing authority's own 404.
         if (!await store.IssuingAuthorityExistsAsync(candidate.Value.IssuingAuthorityId, cancellationToken))
         {
-            return Result.Failure<ExamResponse>(new Error(CatalogErrorCodes.OrganizerNotFound, ErrorKind.NotFound));
+            return Result.Failure<ExamResponse>(new Error(CatalogErrorCodes.IssuingAuthorityNotFound, ErrorKind.NotFound));
         }
 
         var taken = await store.NameIsTakenAsync(

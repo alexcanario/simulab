@@ -17,7 +17,7 @@ public sealed class ExamStore(CatalogModuleDbContext context) : IExamStore
         context.Exams.FirstOrDefaultAsync(exam => exam.Id == id, cancellationToken);
 
     public Task<bool> IssuingAuthorityExistsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken) =>
-        context.Organizers.AnyAsync(organizer => organizer.Id == issuingAuthorityId, cancellationToken);
+        context.IssuingAuthorities.AnyAsync(authority => authority.Id == issuingAuthorityId, cancellationToken);
 
     public Task<bool> NameIsTakenAsync(
         Guid issuingAuthorityId,
@@ -28,8 +28,8 @@ public sealed class ExamStore(CatalogModuleDbContext context) : IExamStore
             exam => exam.IssuingAuthorityId == issuingAuthorityId && exam.NormalizedName == normalizedName,
             cancellationToken);
 
-    /// <summary>BR12: only exams that are still in the catalog hold their organizer back.</summary>
-    public Task<bool> OrganizerHasExamsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken) =>
+    /// <summary>BR12 (v2): only exams that are still in the catalog hold their issuing authority back.</summary>
+    public Task<bool> IssuingAuthorityHasExamsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken) =>
         context.Exams.AnyAsync(exam => exam.IssuingAuthorityId == issuingAuthorityId, cancellationToken);
 
     public void Add(Exam exam) => context.Exams.Add(exam);

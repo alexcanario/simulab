@@ -59,7 +59,8 @@ public sealed class ExamUniqueIndexTests : CatalogApiTests
         indexes[0].Should().Contain("NULLS NOT DISTINCT", Exactly.Once());
     }
 
-    // BR12, at the database level: the foreign key refuses to leave an exam without its authority.
+    // BR12 (v2), at the database level: the foreign key refuses to leave an exam without its authority,
+    // and it points at the issuing authorities, never at the boards.
     [Fact]
     public async Task TheForeignKeyToTheIssuingAuthority_IsRestricted()
     {
@@ -72,24 +73,32 @@ public sealed class ExamUniqueIndexTests : CatalogApiTests
             .ToListAsync());
 
         rule.Should().ContainSingle();
-        rule[0].Should().Be("RESTRICT", "the database refuses to delete an organizer an exam points at");
+        rule[0].Should().Be("RESTRICT", "the database refuses to delete an issuing authority an exam points at");
+
+        var parent = await QueryAsync(context => context.Database
+            .SqlQuery<string>($"""
+                SELECT ccu.table_name AS "Value"
+                FROM information_schema.constraint_column_usage ccu
+                WHERE ccu.constraint_name = 'fk_exams_issuing_authority'
+                """)
+            .ToListAsync());
+        parent.Should().AllBe("issuing_authorities");
     }
 
     private async Task<Guid> AddAuthorityAsync()
     {
-        var organizer = Organizer.Create(
+        var authority = IssuingAuthority.Create(
             $"Orgao {Guid.CreateVersion7():N}"[..30],
             Guid.CreateVersion7().ToString("N")[..12],
-            OrganizerKind.PublicBody,
             null,
             null).Value;
 
         await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<CatalogModuleDbContext>();
-        context.Organizers.Add(organizer);
+        context.IssuingAuthorities.Add(authority);
         await context.SaveChangesAsync();
 
-        return organizer.Id;
+        return authority.Id;
     }
 
     private async Task AddAsync(Guid authority, string name)

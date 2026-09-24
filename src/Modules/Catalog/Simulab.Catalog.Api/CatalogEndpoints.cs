@@ -18,6 +18,7 @@ public static class CatalogEndpoints
         var group = endpoints.MapGroup("/catalog").WithTags("Catalog");
 
         group.MapOrganizerEndpoints();
+        group.MapIssuingAuthorityEndpoints();
         group.MapExamEndpoints();
 
         return endpoints;

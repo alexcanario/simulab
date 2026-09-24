@@ -13,7 +13,7 @@ public interface IExamStore
     /// <summary>The exam with this id, or null when it does not exist or was deleted.</summary>
     Task<Exam?> FindAsync(Guid id, CancellationToken cancellationToken);
 
-    /// <summary>True when an organizer with this id exists and was not deleted (BR11).</summary>
+    /// <summary>True when an issuing authority with this id exists and was not deleted (BR11, v2).</summary>
     Task<bool> IssuingAuthorityExistsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -22,8 +22,8 @@ public interface IExamStore
     /// </summary>
     Task<bool> NameIsTakenAsync(Guid issuingAuthorityId, string normalizedName, Guid? exceptId, CancellationToken cancellationToken);
 
-    /// <summary>True when the organizer is the issuing authority of at least one exam that was not deleted (BR12).</summary>
-    Task<bool> OrganizerHasExamsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken);
+    /// <summary>True when the issuing authority has at least one exam that was not deleted (BR12, v2).</summary>
+    Task<bool> IssuingAuthorityHasExamsAsync(Guid issuingAuthorityId, CancellationToken cancellationToken);
 
     void Add(Exam exam);
 

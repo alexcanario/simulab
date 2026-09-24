@@ -50,9 +50,10 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
             .HasMaxLength(CatalogLimits.ExamNameMaxLength)
             .IsRequired();
 
-        // BR12: the organizer cannot be deleted while an exam points at it, and the handler answers that
-        // with a 409. Restrict is the database saying the same thing, in case anything ever bypasses it.
-        builder.HasOne<Organizer>()
+        // BR12 (v2): the issuing authority cannot be deleted while an exam points at it, and the handler
+        // answers that with a 409. Restrict is the database saying the same thing, in case anything ever
+        // bypasses it.
+        builder.HasOne<IssuingAuthority>()
             .WithMany()
             .HasForeignKey(exam => exam.IssuingAuthorityId)
             .HasConstraintName("fk_exams_issuing_authority")

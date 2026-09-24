@@ -59,13 +59,13 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
     // page fills its picker with them, so a second round trip would buy nothing.
     private IQueryable<ExamResponse> Select(IQueryable<Exam> exams) =>
         from exam in exams
-        join organizer in context.Organizers on exam.IssuingAuthorityId equals organizer.Id
+        join authority in context.IssuingAuthorities on exam.IssuingAuthorityId equals authority.Id
         select new ExamResponse(
             exam.Id,
             exam.Name,
             exam.IssuingAuthorityId,
-            organizer.Name,
-            organizer.Acronym,
+            authority.Name,
+            authority.Acronym,
             exam.AssessmentType,
             exam.Scope,
             exam.ScopeDetail,
@@ -87,8 +87,8 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
     {
         var withAuthority =
             from exam in exams
-            join organizer in context.Organizers on exam.IssuingAuthorityId equals organizer.Id
-            select new { Exam = exam, organizer.NormalizedName };
+            join authority in context.IssuingAuthorities on exam.IssuingAuthorityId equals authority.Id
+            select new { Exam = exam, authority.NormalizedName };
 
         return (descending
                 ? withAuthority.OrderByDescending(row => row.NormalizedName)

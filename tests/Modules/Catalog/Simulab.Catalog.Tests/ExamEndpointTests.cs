@@ -15,7 +15,7 @@ namespace Simulab.Catalog.Tests;
 public sealed class ExamEndpointTests : CatalogApiTests
 {
     private const string Exams = "/api/v1/catalog/exams";
-    private const string Organizers = "/api/v1/catalog/organizers";
+    private const string Authorities = "/api/v1/catalog/issuing-authorities";
 
     private static string Unique(string name)
     {
@@ -32,18 +32,15 @@ public sealed class ExamEndpointTests : CatalogApiTests
         string? contentLanguage = "pt-BR") =>
         new(authority, name ?? Unique("Exame"), assessmentType.ToString(), scope.ToString(), scopeDetail, contentLanguage);
 
-    /// <summary>A fresh organizer, so each test owns the namespace its exam names live in (BR10).</summary>
-    private static async Task<OrganizerResponse> AuthorityAsync(HttpClient admin, OrganizerKind kind = OrganizerKind.PublicBody)
+    /// <summary>A fresh issuing authority, so each test owns the namespace its exam names live in (BR10).</summary>
+    private static async Task<IssuingAuthorityResponse> AuthorityAsync(HttpClient admin)
     {
-        var request = new SaveOrganizerRequest(
-            Unique("Orgao"),
-            Guid.CreateVersion7().ToString("N")[..12],
-            kind.ToString());
+        var request = new SaveIssuingAuthorityRequest(Unique("Orgao"), Guid.CreateVersion7().ToString("N")[..12]);
 
-        var response = await admin.PostAsJsonAsync(Organizers, request, AppJson.Options);
+        var response = await admin.PostAsJsonAsync(Authorities, request, AppJson.Options);
         response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
 
-        return (await response.Content.ReadFromJsonAsync<OrganizerResponse>(AppJson.Options))!;
+        return (await response.Content.ReadFromJsonAsync<IssuingAuthorityResponse>(AppJson.Options))!;
     }
 
     private static async Task<ExamResponse> CreateAsync(HttpClient admin, SaveExamRequest request)
@@ -164,29 +161,29 @@ public sealed class ExamEndpointTests : CatalogApiTests
         one.IssuingAuthorityId.Should().NotBe(other.IssuingAuthorityId);
     }
 
-    // AC9: a parent that is not in the catalog, or one that was deleted, is the organizer's own 404.
+    // AC9: a parent that is not in the catalog, or one that was deleted, is the issuing authority's 404.
     [Fact]
-    public async Task Create_IssuingAuthorityThatDoesNotExist_IsRefusedWithOrganizerNotFound()
+    public async Task Create_IssuingAuthorityThatDoesNotExist_IsRefusedWithIssuingAuthorityNotFound()
     {
         var admin = await AdminAsync();
 
         var response = await admin.PostAsJsonAsync(Exams, Valid(Guid.CreateVersion7()), AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerNotFound);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityNotFound);
     }
 
     [Fact]
-    public async Task Create_IssuingAuthorityThatWasDeleted_IsRefusedWithOrganizerNotFound()
+    public async Task Create_IssuingAuthorityThatWasDeleted_IsRefusedWithIssuingAuthorityNotFound()
     {
         var admin = await AdminAsync();
         var authority = await AuthorityAsync(admin);
-        (await admin.DeleteAsync($"{Organizers}/{authority.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await admin.DeleteAsync($"{Authorities}/{authority.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var response = await admin.PostAsJsonAsync(Exams, Valid(authority.Id), AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerNotFound);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityNotFound);
     }
 
     // AC10: an unknown enum name is that field's own 400, never an uncoded deserialization failure.
@@ -326,29 +323,29 @@ public sealed class ExamEndpointTests : CatalogApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.ExamNotFound);
     }
 
-    // AC14: an organizer that is an issuing authority does not leave the catalog.
+    // AC14: an issuing authority with exams does not leave the catalog.
     [Fact]
-    public async Task DeleteOrganizer_ThatIsAnIssuingAuthority_IsRefusedAndTheOrganizerStays()
+    public async Task DeleteIssuingAuthority_ThatHasExams_IsRefusedAndItStays()
     {
         var admin = await AdminAsync();
         var authority = await AuthorityAsync(admin);
         await CreateAsync(admin, Valid(authority.Id));
         await CreateAsync(admin, Valid(authority.Id));
 
-        var response = await admin.DeleteAsync($"{Organizers}/{authority.Id}");
+        var response = await admin.DeleteAsync($"{Authorities}/{authority.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.OrganizerHasExams);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityHasExams);
 
-        var organizers = await admin.GetFromJsonAsync<OrganizerPageResponse>(
-            $"{Organizers}?search={Uri.EscapeDataString(authority.Acronym)}",
+        var listed = await admin.GetFromJsonAsync<IssuingAuthorityPageResponse>(
+            $"{Authorities}?search={Uri.EscapeDataString(authority.Acronym)}",
             AppJson.Options);
-        organizers!.Items.Should().ContainSingle(item => item.Id == authority.Id);
+        listed!.Items.Should().ContainSingle(item => item.Id == authority.Id);
     }
 
-    // AC15: once the exams are gone, the organizer goes too.
+    // AC15: once the exams are gone, the issuing authority goes too.
     [Fact]
-    public async Task DeleteOrganizer_WhoseOnlyExamWasDeleted_Succeeds()
+    public async Task DeleteIssuingAuthority_WhoseOnlyExamWasDeleted_Succeeds()
     {
         var admin = await AdminAsync();
         var authority = await AuthorityAsync(admin);
@@ -356,7 +353,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
 
         (await admin.DeleteAsync($"{Exams}/{exam.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        (await admin.DeleteAsync($"{Organizers}/{authority.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await admin.DeleteAsync($"{Authorities}/{authority.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     // AC16: the search ignores accents, and the three filters combine with AND.
@@ -488,15 +485,20 @@ public sealed class ExamEndpointTests : CatalogApiTests
         names.Should().Equal([.. names.OrderBy(name => name, StringComparer.Ordinal)]);
     }
 
-    // AC17: an exam can hang off an organizer of the kind F-34 added.
+    // BR2 (v2): an organizer is not a parent an exam can hang on - only an issuing authority is.
     [Fact]
-    public async Task Create_UnderAPublicBody_IsAccepted()
+    public async Task Create_UnderAnOrganizerId_IsRefused()
     {
         var admin = await AdminAsync();
-        var authority = await AuthorityAsync(admin, OrganizerKind.PublicBody);
+        var organizer = await admin.PostAsJsonAsync(
+            "/api/v1/catalog/organizers",
+            new SaveOrganizerRequest(Unique("Banca"), Guid.CreateVersion7().ToString("N")[..12], OrganizerKind.ExamBoard.ToString()),
+            AppJson.Options);
+        var board = (await organizer.Content.ReadFromJsonAsync<OrganizerResponse>(AppJson.Options))!;
 
-        var exam = await CreateAsync(admin, Valid(authority.Id));
+        var response = await admin.PostAsJsonAsync(Exams, Valid(board.Id), AppJson.Options);
 
-        exam.IssuingAuthorityId.Should().Be(authority.Id);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityNotFound);
     }
 }

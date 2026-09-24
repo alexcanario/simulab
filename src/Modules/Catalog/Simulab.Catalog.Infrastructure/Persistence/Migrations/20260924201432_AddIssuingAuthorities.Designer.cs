@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Simulab.Catalog.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Simulab.Catalog.Infrastructure.Persistence;
 namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogModuleDbContext))]
-    partial class CatalogModuleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260924201432_AddIssuingAuthorities")]
+    partial class AddIssuingAuthorities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
