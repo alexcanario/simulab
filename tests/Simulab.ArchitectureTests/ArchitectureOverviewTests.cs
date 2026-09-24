@@ -74,7 +74,8 @@ public class ArchitectureOverviewTests
     [Fact]
     public void Overview_ContainersDiagram_MatchesTheAppHost()
     {
-        DriftProblems(AppHost(), ContainersDiagram()).Should().BeEmpty(
+        // Joined, so the failure lists every problem; a collection assertion shows only the first one.
+        string.Join("\n", DriftProblems(AppHost(), ContainersDiagram())).Should().BeEmpty(
             "every app host resource is a container node, and a built piece is no longer marked planned (F-23 BR4, BR5)");
     }
 
