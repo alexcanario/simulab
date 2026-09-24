@@ -916,6 +916,13 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "kindOrder",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
