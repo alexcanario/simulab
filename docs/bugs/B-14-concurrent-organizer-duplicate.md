@@ -1,7 +1,7 @@
 ---
 bug: B-14
 feature: F-33
-status: building
+status: validating
 board: 758
 severity: low
 ---
@@ -51,11 +51,17 @@ Duplicates (the same check-then-write rule implemented again):
 returns (`organizer.name_taken` / `organizer.acronym_taken`, `ErrorKind.Conflict`), and the handler returns it as a
 failure. Any other exception, or a 23505 on another constraint, is not swallowed and still propagates.
 
+Built as: `OrganizerUniqueViolations.Translate` (Infrastructure) does the mapping; `IOrganizerStore.TrySaveChangesAsync`
+returns the `Error?`; `OrganizerStore` also clears the change tracker on a refusal so the rejected row is not
+retried by a later save on the same context; `SaveOrganizerHandler` uses `TrySaveChangesAsync`. `SaveChangesAsync`
+stays for `DeleteOrganizerHandler`, which cannot violate a unique index.
+
 ## Regression test
-An integration test in `Simulab.Catalog.Tests` that lets the database be the arbiter: the "is taken" checks are
-forced to answer "free" (a store wrapper), a first organizer is saved, then a second one with the same normalized
-name (and another test with the same acronym) is saved through `SaveOrganizerHandler`. Before the fix it throws
-`DbUpdateException`; after, it returns the 409 codes. It must be seen failing before the fix.
+- `ConcurrentOrganizerDuplicateTests` (`Simulab.Catalog.Tests`): the "is taken" checks are forced to answer "free"
+  (a store wrapper), so the database is the only arbiter. Seen failing before the fix: 5 failed, 0 passed, all
+  `DbUpdateException` with 23505 on the organizer index. After the fix: green.
+- `OrganizerEndpointTests.Create_TwoIdenticalRequestsAtOnce_AnswerOneCreatedAndOneConflict`: two real parallel
+  `POST`s end as one 201 and one 409.
 
 ## Acceptance criteria
 - AC1. Given the handler's check passed for a name that another request has just committed, when the organizer is
@@ -87,10 +93,16 @@ name (and another test with the same acronym) is saved through `SaveOrganizerHan
 None.
 
 ## Validation script
-1. With the host running, send two `POST /api/v1/catalog/organizers` with the same name at the same time (for
-   example two terminals, or a script sending both in parallel). Expected: one 201 and one 409
-   `organizer.name_taken`, never a 500.
-2. Repeat with the same acronym and different names: 409 `organizer.acronym_taken`.
+The race cannot be triggered by hand on screen, so the proof is the tests. From the worktree
+`D:\dev\_icontrol\wt\simulab\b-14`, with Docker running (the tests start their own PostgreSQL container), in Git Bash
+or in PowerShell 7 (same command):
+1. `dotnet test tests/Modules/Catalog/Simulab.Catalog.Tests --filter "FullyQualifiedName~ConcurrentOrganizerDuplicate|FullyQualifiedName~TwoIdenticalRequestsAtOnce"`
+   → expected: `Passed!  - Failed: 0, Passed: 6, Skipped: 0, Total: 6`. Repeat it a few times: the answer never changes.
+2. Duplicate name on the organizers screen (the path that did not change) → the same error text as before, and the
+   list keeps one organizer with that name.
 
 ## Delivery
-Pending.
+- Branch: `bug/B-14` (worktree `D:\dev\_icontrol\wt\simulab\b-14`), from `main` after the F-33 merge.
+- Commits: `fix(B-14)` on top of the approval; no schema change, no new package, no new text.
+- Tests: Catalog 67 passed (57 before, 10 new), architecture 90 passed, Web localization/resources 31 passed;
+  `--no-incremental` build of the Catalog infrastructure: 0 warnings, 0 errors. The Stop gate: `agile gate GREEN`.
