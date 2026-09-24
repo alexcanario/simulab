@@ -45,6 +45,8 @@ public static class AiServiceCollectionExtensions
         });
 
         services.TryAddSingleton(TimeProvider.System);
+        // BR10: the counters need a meter factory. A host that already called AddMetrics keeps its own.
+        services.AddMetrics();
         services.AddSingleton<AiMetrics>();
         services.TryAddScoped<IEntitlementService, ConfigurationEntitlementService>();
         services.AddScoped<IAiGateway, AnthropicAiGateway>();

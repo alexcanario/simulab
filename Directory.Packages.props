@@ -49,6 +49,8 @@
   <!-- AI gateway (F-41): the official .NET library for the Claude API (ADR-0001, decision 22). -->
   <ItemGroup>
     <PackageVersion Include="Anthropic" Version="12.50.0" />
+    <!-- AddMetrics(): the meter factory behind the tokens and cost counters (ADR-0001, decision 31). -->
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics" Version="10.0.12" />
   </ItemGroup>
 
   <!-- Data (F-3) -->
