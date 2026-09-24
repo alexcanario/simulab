@@ -77,6 +77,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | |
 | ⏳ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | |
 | ⏳ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | |
+| ⏳ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -558,3 +559,9 @@ Shipped in `e1df7eb`. Built in a worktree; no change notes. The check passed ove
 - Project rule (`project.md`, UI tests): an item whose product is a guard is seen failing on the mistake it catches before it ships, and that step goes into the validation script. Here the guard was broken three ways — a text removed, a code with no text, a text left behind by a rename — and only the third of those proved the failure message names the file to edit and the exempt list.
 - `plugin` `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove it. F-21 added `AccountEventResourcesTests` with a code prefix typed by hand while F-22 — the item that exists to delete exactly that — sat one position ahead in the backlog; two hours later this item removed it again.
 - Nothing: the two codes with no text (`identity.forbidden`, `mfa_required`) are not gaps, so the item shipped with an exempt list of two rather than two texts nobody would read.
+
+## 2026-09-24 — B-14 A concurrent duplicate organizer answers 409 instead of 500
+Shipped in `151fcda`. Built in a worktree; no change notes. The regression test was seen failing first (5 red, `DbUpdateException` 23505), then green; full suite 1011 tests, 52 s.
+- Project rule (`project.md`, Sessions and retro): every item lives in its own worktree and the main checkout stays on `main`. The checkout was found on `bug/B-14` behind the session (the branch then could not be used by a worktree until it went back to `main`), the second time after B-13.
+- `plugin` `[generic]` feature-refinement: a bug whose cause is found in code that exists only on an unmerged branch says so in `## Cause`, and the build waits for that merge (here F-33 merged while the item was being refined).
+- Nothing: forcing a race with a store wrapper that always answers "free" made the database the only arbiter and the test deterministic; a one-off pattern.

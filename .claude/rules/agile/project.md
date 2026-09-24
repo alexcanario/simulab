@@ -87,3 +87,4 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
 - Never change state (sign-ups, requests that count, data) in an app host Claude did not start; ask first, or use data no one else uses and say which (B-4).
 - Before `git worktree remove`: `dotnet build-server shutdown`, and the owner confirms Visual Studio is closed on that folder (open `.vs` files fail the removal halfway, F-17 and F-19).
+- Every item lives in its own worktree (`wt/simulab/<type>-<n>`); the main checkout stays on `main` and is used only to merge (B-13, B-14).
