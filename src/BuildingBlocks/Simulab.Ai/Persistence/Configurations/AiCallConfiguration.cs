@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Simulab.Ai.Contracts;
 
 namespace Simulab.Ai.Persistence.Configurations;
 

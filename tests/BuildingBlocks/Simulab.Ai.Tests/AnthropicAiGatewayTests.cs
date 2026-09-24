@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Simulab.Ai.Contracts;
 
 namespace Simulab.Ai.Tests;
 

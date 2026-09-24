@@ -36,7 +36,7 @@ public class NavMenuTests : ShellTestContext
     {
         var menu = RenderMenu();
 
-        Labels(menu).Should().Equal("Home", "UI kit");
+        Labels(menu).Should().Equal("Home", "UI kit", "AI gateway");
         Headers(menu).Should().Equal("Development");
     }
 
@@ -108,7 +108,7 @@ public class NavMenuTests : ShellTestContext
 
         var menu = RenderMenu();
 
-        Labels(menu).Should().Equal("Início", "Kit de interface");
+        Labels(menu).Should().Equal("Início", "Kit de interface", "Gateway de IA");
         Headers(menu).Should().Equal("Desenvolvimento");
     }
 }

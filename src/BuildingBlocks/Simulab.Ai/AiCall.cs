@@ -1,3 +1,4 @@
+using Simulab.Ai.Contracts;
 using Simulab.SharedKernel.Entities;
 
 namespace Simulab.Ai;

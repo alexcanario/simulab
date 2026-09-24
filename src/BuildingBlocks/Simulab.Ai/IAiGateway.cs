@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Simulab.Ai.Contracts;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.Ai;

@@ -3,6 +3,7 @@ using Anthropic.Models.Messages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Simulab.Ai.Contracts;
 using Simulab.Ai.Persistence;
 using Simulab.Plans.Contracts;
 using Simulab.SharedKernel.Results;

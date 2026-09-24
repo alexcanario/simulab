@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Npgsql;
+using Simulab.Ai.Contracts;
 using Simulab.Ai.Persistence;
 using Simulab.Persistence;
 using Simulab.Plans.Contracts;

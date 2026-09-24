@@ -68,20 +68,6 @@ public sealed class AiApiClient(HttpClient http)
     private sealed record AiDiagnosticsBody(string Purpose, string Prompt);
 }
 
-/// <summary>
-/// What the Web needs to know about the gateway's vocabulary. The names are repeated here rather than
-/// referenced: the Web never references a building block that carries EF Core and the Claude SDK.
-/// The codes are also the resource keys the page shows (rule: ui).
-/// </summary>
-public static class AiCodes
-{
-    /// <summary>The purpose the diagnostics page sends.</summary>
-    public const string DiagnosticsPurpose = "diagnostics";
-
-    /// <summary>Nobody is signed in; the page stops before the call.</summary>
-    public const string NoUser = "ai.no_user";
-}
-
 /// <summary>What the model answered, and what the call cost (F-41, v2).</summary>
 public sealed record AiDiagnosticsAnswer(
     string Text,

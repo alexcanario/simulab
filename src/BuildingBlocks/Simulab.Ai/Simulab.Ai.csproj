@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Plans\Simulab.Plans.Contracts\Simulab.Plans.Contracts.csproj" />
+    <ProjectReference Include="..\Simulab.Ai.Contracts\Simulab.Ai.Contracts.csproj" />
     <ProjectReference Include="..\Simulab.Persistence\Simulab.Persistence.csproj" />
   </ItemGroup>
 

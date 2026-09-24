@@ -23,6 +23,18 @@ public class DevPagesHostTests(WebApplicationFactory<Program> factory) : IClassF
         (await response.Content.ReadAsStringAsync()).Should().NotContain("gallery-table");
     }
 
+    /// <summary>F-41 AC9: the diagnostics page is not reachable outside Development either.</summary>
+    [Theory]
+    [InlineData("Production")]
+    [InlineData("Staging")]
+    public async Task Get_AiDiagnosticsOutsideDevelopment_Returns404(string environment)
+    {
+        var response = await ClientFor(environment).GetAsync("/dev/ai");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await response.Content.ReadAsStringAsync()).Should().NotContain("ai-prompt");
+    }
+
     [Fact]
     public async Task Get_GalleryInDevelopment_RendersEverySection()
     {

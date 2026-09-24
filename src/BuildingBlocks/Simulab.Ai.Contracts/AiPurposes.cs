@@ -1,4 +1,4 @@
-namespace Simulab.Ai;
+namespace Simulab.Ai.Contracts;
 
 /// <summary>
 /// What a call is for. It is recorded on every row and it is the key a model override is configured

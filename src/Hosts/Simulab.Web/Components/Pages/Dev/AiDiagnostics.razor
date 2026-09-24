@@ -1,5 +1,6 @@
 @page "/dev/ai"
 @layout MainLayout
+@using Simulab.Ai.Contracts
 @using Simulab.Web.Services
 @inject AiApiClient Api
 @inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
@@ -33,7 +34,7 @@
               Required="true"
               Disabled="@_sending" />
 
-<AppFormActions>
+<div class="app-form-actions">
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
                StartIcon="@AppIcons.Send"
@@ -41,7 +42,7 @@
                OnClick="SendAsync">
         @(_sending ? L["AiDiagnostics.Sending"] : L["AiDiagnostics.Send"])
     </MudButton>
-</AppFormActions>
+</div>
 
 @if (_answer is not null)
 {
@@ -95,11 +96,11 @@
             if (token is null)
             {
                 // BR2: a call is always charged to a user, so an anonymous visitor never reaches the gateway.
-                _error = Errors.For(AiCodes.NoUser);
+                _error = Errors.For(AiErrorCodes.NoUser);
                 return;
             }
 
-            var result = await Api.SendAsync(token, AiCodes.DiagnosticsPurpose, _prompt);
+            var result = await Api.SendAsync(token, AiPurposes.Diagnostics, _prompt);
             if (result.Value is { } answer)
             {
                 _answer = answer;

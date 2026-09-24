@@ -11,6 +11,9 @@ internal static class SolutionAssemblies
         typeof(Simulab.Persistence.ModuleDbContext).Assembly,
         typeof(Simulab.Email.IEmailSender).Assembly,
         typeof(Simulab.Jobs.IJobQueue).Assembly,
+        typeof(Simulab.Ai.IAiGateway).Assembly, // F-41
+        typeof(Simulab.Ai.Contracts.AiErrorCodes).Assembly, // F-41
+        typeof(Simulab.Plans.Contracts.IEntitlementService).Assembly, // F-41
         typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
         typeof(Simulab.Identity.Domain.Entities.User).Assembly,
         typeof(Simulab.Identity.Contracts.IdentityErrorCodes).Assembly,

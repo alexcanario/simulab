@@ -43,6 +43,29 @@
         }
       }
     },
+    "/api/v1/ai/diagnostics": {
+      "post": {
+        "tags": [
+          "Ai"
+        ],
+        "operationId": "SendAiDiagnostics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiDiagnosticsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/identity/registrations": {
       "post": {
         "tags": [
@@ -1012,6 +1035,24 @@
   },
   "components": {
     "schemas": {
+      "AiDiagnosticsRequest": {
+        "required": [
+          "purpose",
+          "prompt"
+        ],
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "description": "One of the gateway's purposes; the page sends `diagnostics`."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The message to send to the model."
+          }
+        },
+        "description": "What the diagnostics page asks the gateway for (F-41, v2)."
+      },
       "ChangePasswordRequest": {
         "required": [
           "currentPassword",
@@ -1396,6 +1437,9 @@
     },
     {
       "name": "Simulab.Api"
+    },
+    {
+      "name": "Ai"
     },
     {
       "name": "Identity"

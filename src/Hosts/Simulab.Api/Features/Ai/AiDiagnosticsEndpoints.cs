@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Simulab.Ai;
+using Simulab.Ai.Contracts;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.Api.Features.Ai;
@@ -28,7 +29,7 @@ public static class AiDiagnosticsEndpoints
     {
         if (string.IsNullOrWhiteSpace(request.Prompt))
         {
-            return Problem(new Error("ai.prompt_required", ErrorKind.Validation, "The prompt is empty."));
+            return Problem(new Error(AiErrorCodes.PromptRequired, ErrorKind.Validation, "The prompt is empty."));
         }
 
         var purpose = string.IsNullOrWhiteSpace(request.Purpose) ? AiPurposes.Diagnostics : request.Purpose;

@@ -11,11 +11,11 @@ public class NavigationItemsTests
     private static bool NoPermissions(string permission) => false;
 
     [Fact]
-    public void Visible_Development_ShowsHomeAndUiKit()
+    public void Visible_Development_ShowsHomeAndTheDevelopmentPages()
     {
         var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: true, NoPermissions);
 
-        visible.Select(i => i.Route).Should().Equal("/", "/dev/ui");
+        visible.Select(i => i.Route).Should().Equal("/", "/dev/ui", "/dev/ai");
         NavigationItems.Sections(visible).Select(s => s.Key).Should().Equal(NavigationSection.Development);
     }
 

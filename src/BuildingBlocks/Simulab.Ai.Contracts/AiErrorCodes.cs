@@ -1,6 +1,6 @@
-namespace Simulab.Ai;
+namespace Simulab.Ai.Contracts;
 
-/// <summary>The stable codes a caller of <see cref="IAiGateway"/> can act on (F-41).</summary>
+/// <summary>The stable codes a caller of the gateway can act on (F-41).</summary>
 public static class AiErrorCodes
 {
     /// <summary>No API key is configured; nothing was called and nothing was recorded (BR4).</summary>
@@ -14,4 +14,7 @@ public static class AiErrorCodes
 
     /// <summary>The model answered with an error, or could not be reached (BR8).</summary>
     public const string CallFailed = "ai.call_failed";
+
+    /// <summary>The request carried no prompt, so nothing was called.</summary>
+    public const string PromptRequired = "ai.prompt_required";
 }

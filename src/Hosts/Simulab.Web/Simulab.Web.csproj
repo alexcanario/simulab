@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Simulab.Ai.Contracts\Simulab.Ai.Contracts.csproj" />
     <ProjectReference Include="..\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
   </ItemGroup>
 

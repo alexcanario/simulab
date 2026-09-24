@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Simulab.Ai.Contracts;
 using Simulab.Ai.Persistence;
 using Simulab.Persistence;
 using Simulab.Plans.Contracts;
