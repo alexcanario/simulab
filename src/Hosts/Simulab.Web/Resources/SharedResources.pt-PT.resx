@@ -326,7 +326,7 @@
   <data name="Common.Filter.All" xml:space="preserve"><value>Todos</value></data>
   <data name="Organizers.Kind.PublicBody" xml:space="preserve"><value>Organismo público</value></data>
   <data name="Lookup.Hint.MinChars" xml:space="preserve"><value>Escreva pelo menos {0} caracteres</value></data>
-  <data name="Lookup.Results" xml:space="preserve"><value>{0} resultados</value></data>
+  <data name="Lookup.Results" xml:space="preserve"><value>Resultados: {0}</value></data>
   <data name="Lookup.NoResults" xml:space="preserve"><value>Nada encontrado para "{0}".</value></data>
   <data name="Lookup.LoadFailed" xml:space="preserve"><value>A pesquisa falhou.</value></data>
   <data name="Lookup.Clear" xml:space="preserve"><value>Limpar a seleção</value></data>

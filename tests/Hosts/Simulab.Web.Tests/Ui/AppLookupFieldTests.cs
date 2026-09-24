@@ -110,6 +110,7 @@ public sealed class AppLookupFieldTests : KitTestContext
 
         field.Find("#lookup").Input("ceb");
 
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("1 results"));
+        // "Results: 1", not "1 results": the count is read aloud, and no language here has one plural form.
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
 }

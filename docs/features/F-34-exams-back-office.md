@@ -1,7 +1,7 @@
 ---
 feature: F-34
 epic: Assessment catalog
-status: building
+status: validating
 board: 753
 version: 1
 ---
@@ -314,6 +314,16 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 - No new colour in either screen: every surface, text and border is an existing `SimulabTheme` token already covered by `ThemeContrastTests` and `ThemePaletteTests`, so no contrast number had to be computed for this feature.
 - `organizer.has_exams` carries no count (BR12) — `ErrorText.For` takes a code and no argument.
 
+### From the build (2026-09-24)
+- The resource keys for the two enums are `Exams.AssessmentType.<value>` and `Exams.Scope.<value>`, not the bare `AssessmentType.<value>` the text table above listed — `Organizers.Kind.<value>` is the convention already in the file, and one prefix per screen keeps the 375 keys readable.
+- The form's content language defaults to `pt-BR` through `ExamForm.DefaultContentLanguage`, not `SupportedLanguages.Default`: that constant is the app's fallback **UI** language (`en`), the wrong guess for a catalog whose first market is Brazil. Caught by the test that read what the form sends.
+- `AppLookupField` renders the combobox pattern itself: MudBlazor 9.9 gives its autocomplete a plain text input, with no `role="combobox"` and no `aria-expanded`. Found by opening `/dev/ui` through the app host and reading the DOM, not by a test. The field now sets `role`, `aria-expanded` (through `OpenChanged`), `aria-autocomplete` and `aria-haspopup`; `aria-controls` is **not** set, because the popover's id belongs to the library — the accessibility section above claimed it and was wrong.
+- `Lookup.Results` announces "Results: 1", not "1 results": the count is read aloud, and none of the three languages has a single plural form.
+- `OrganizerQueries.KindSort` and `OrganizerKindOrder` were written for exactly three kinds (`Count: 3`, a nested conditional with two branches). The fourth made the whole caller order fall back silently. Both are now written over the enum, and their tests read `Enum.GetValues` instead of counting to three; `EnumOrder.Parse<T>` is the shared parser the exam list's two ordered columns use as well.
+- The gallery gained a test that fails when any id appears twice: the section id `gallery-lookup` repeated the field id below it, which breaks every `label for` and `aria-describedby` pointing at it. Found on screen.
+- `Simulab.Catalog.Domain` gained a project reference to `Simulab.Identity.Contracts` for `SupportedLanguages` (BR9). `ModuleBoundaryTests` allows it (a module reaches another through its contracts) and forbids the same reference on `Catalog.Contracts`, which is why it sits on the domain project.
+- Found and **not** fixed here: the hint under every kit field reads 1.90:1 in dark and 2.64:1 in light, against the 4.5:1 of ADR-0001 #29. It is F-4's `.app-field-hint`, shared by every form in the app, so it is B-16 and not this item.
+
 ## Out of scope
 - Editions, and the exam board that applied a paper: F-35. Blocking the deletion of an exam that has editions arrives with them.
 - Students browsing and filtering the catalog: F-36.
@@ -332,9 +342,84 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
 
+## Coverage
+
+| Criterion | Test |
+|---|---|
+| AC1 the table, its foreign key and the unique index over the normalized name | `ExamEndpointTests.Start_CreatesTheExamsTableInTheCatalogSchema`, `ExamUniqueIndexTests.TheIndexIsUniqueAndTreatsNullTenantsAsEqual`, `.TheForeignKeyToTheIssuingAuthority_IsRestricted` |
+| AC2 the list, four columns, sorted by name | `ExamEndpointTests.List_WithoutASort_ComesBackByNameAscending`, `ExamsPageTests.Load_ShowsTheNameTheAuthorityAndTheTranslatedColumns`, `.Load_AsksTheServerForTheFirstPage` |
+| AC3 a Student is refused everywhere | `ExamEndpointTests.EveryRoute_WithoutTheManagePermission_IsForbidden`, `.List_Anonymous_IsUnauthorized`, `AdminPagesAuthorizationTests.EveryAdminPage_RequiresItsModulesPermission`, `NavigationItemsTests.All_ContentItems_AreTheCatalogScreensBehindCatalogManage`, `.Visible_WithoutCatalogManage_HidesTheContentSection` (the Not Found page itself is step 8 of the script) |
+| AC4 a national exam is created without a detail | `ExamEndpointTests.Create_NationalExam_StoresItWithoutADetailAndCarriesTheAuthorityName`, `ExamTests.Create_NationalWithADetail_DropsIt`, `ExamFormTests.Add_NationalExam_SendsItWithoutADetail` |
+| AC5 the scope detail is required for State and Municipal | `ExamEndpointTests.Create_ScopeThatNeedsADetailWithoutOne_IsRefusedAndNothingIsWritten`, `ExamTests.Create_StateOrMunicipalWithoutItsDetail_FailsWithScopeDetailRequired`, `ExamFormTests.Save_MunicipalWithoutItsDetail_ShowsTheMessageAndCallsNothing` |
+| AC6 the name is taken inside the authority, ignoring case and accents | `ExamEndpointTests.Create_NameTakenInTheSameAuthorityIgnoringCaseAndAccents_IsRefused`, `ExamFormTests.Save_NameTaken_ShowsTheMessageOnTheNameField` |
+| AC7 the same name under two authorities | `ExamEndpointTests.Create_SameNameUnderTwoAuthorities_CreatesBoth`, `ExamUniqueIndexTests.TheSameNameUnderAnotherAuthority_IsAccepted` |
+| AC8 PostgreSQL refuses two global rows with the same key | `ExamUniqueIndexTests.TwoGlobalRowsWithTheSameAuthorityAndName_AreRejectedByPostgres` |
+| AC9 an issuing authority that is not in the catalog | `ExamEndpointTests.Create_IssuingAuthorityThatDoesNotExist_IsRefusedWithOrganizerNotFound`, `.Create_IssuingAuthorityThatWasDeleted_IsRefusedWithOrganizerNotFound` |
+| AC10 an unknown assessment type, scope or language is that field's own 400 | `ExamEndpointTests.Create_ValueThatIsNotOneOfTheNames_IsRefusedWithThatFieldsCode`, `ExamTests.Create_AssessmentTypeThatIsNotOneOfTheFour_FailsWithAssessmentTypeInvalid`, `.Create_ScopeThatIsNotOneOfTheThree_FailsWithScopeInvalid`, `.Create_ALanguageTheAppDoesNotShipIn_FailsWithContentLanguageInvalid` |
+| AC11 the language is stored canonically | `ExamEndpointTests.Create_LanguageInAnyCase_IsStoredCanonically`, `ExamTests.Create_ALanguageOfTheApp_StoresItCanonically` |
+| AC12 editing keeps the id and shows the change | `ExamEndpointTests.Update_NewNameAndScope_KeepsTheIdAndShowsTheChange`, `.Update_ItsOwnName_IsNotATakenConflict`, `ExamFormTests.Edit_OpensFilledAndSendsAPutOnThatExam` |
+| AC12b saving keeps the Admin on the page, now editing | `ExamFormTests.Add_Saved_StaysOnThePageAsTheEditForm` |
+| AC13 the soft delete keeps the row and the name | `ExamEndpointTests.Delete_ExistingExam_HidesItKeepsTheRowAndKeepsItsNameTaken`, `ExamsPageTests.Delete_Confirmed_SendsTheDeleteAndShowsTheSnackbar`, `.Delete_Cancelled_SendsNothing` |
+| AC14 an organizer with exams does not leave the catalog | `ExamEndpointTests.DeleteOrganizer_ThatIsAnIssuingAuthority_IsRefusedAndTheOrganizerStays` |
+| AC15 once its exams are gone, the organizer goes too | `ExamEndpointTests.DeleteOrganizer_WhoseOnlyExamWasDeleted_Succeeds` |
+| AC16 the search ignores accents; the three filters combine | `ExamEndpointTests.List_SearchWithoutAccents_FindsAccentedNames`, `.List_TheThreeFiltersTogether_ReturnsOnlyWhatMatchesAllOfThem`, `.List_FilterValueThatIsNotOneOfTheNames_IsIgnored`, `ExamsPageTests.Search_SendsTheTermToTheServer`, `.Filter_ByAssessmentType_ReloadsTheListWithThatFilter` |
+| AC17 the fourth organizer kind, everywhere it shows | `OrganizerKindOrderTests.Parse_EveryKindIgnoringCaseAndSpacing_IsTheOrderGiven`, `.Parse_EveryKindOfTheEnum_IsAccepted`, `OrganizerEndpointTests.List_SortedByKindWithAnOrder_FollowsThatOrderAndKeepsNameAscendingWithinEachKind`, `OrganizerKindSortTests.SortByKind_SendsTheReadersAlphabeticalOrderForTheirCulture` (three cultures), `ExamEndpointTests.Create_UnderAPublicBody_IsAccepted`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` |
+| AC18 `AppLookupField` and its states | `AppLookupFieldTests` (seven: the closed combobox, the minimum-characters hint, the error, nothing found, the failed search, try again, the announced count), `ExamFormTests.Authority_Typing_AsksTheOrganizerListWithTheTerm`, `ExamsPageTests.AuthorityFilter_Typing_AsksTheOrganizerListWithTheTerm`, `UiGalleryTests.Render_Development_ShowsHeaderAndEverySection`, `.Render_Development_EveryIdOnThePageIsUnique` (keyboard only is step 7 of the script) |
+| AC18b the conditional field follows the scope and drops what it held | `ExamFormTests.Scope_Municipal_ShowsTheMunicipalityFieldAndStateShowsTheStateOne`, `.Scope_BackToNational_DropsTheDetailAndSendsItNull`, `ExamTests.Create_NationalWithADetail_DropsIt` |
+| AC18c an id that is not an exam | `ExamEndpointTests.Find_AnIdThatIsNotAnExam_IsNotFound`, `ExamFormTests.Edit_AnIdThatIsNotAnExam_ShowsNotFoundAndALinkBack` |
+| AC19 the domain answers with a `Result` and never throws | `ExamTests` (the 30 cases: every code, `Update_Refused_ChangesNothing` included) |
+| AC20 every text in the three languages | `ResourceParityTests.Every_key_exists_in_every_language`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (over `CatalogErrorCodes`, which now holds the ten exam codes and `organizer.has_exams`) |
+| BR2, BR11 the picker names the parent, and the exam carries its authority's name | `ExamEndpointTests.Find_AnExistingExam_ComesBackFilledForTheForm`, `ExamFormTests.Save_IssuingAuthorityGone_ClearsThePickerAndAsksForAnother` |
+| BR9 the content language is offered in its own name, pt-BR first | `ExamFormTests.ContentLanguage_IsOfferedInItsOwnName`, `.Add_NationalExam_SendsItWithoutADetail` |
+| BR14 sorting a translated column sends the reader's order | `ExamEndpointTests.List_SortedByScopeWithTheCallersOrder_FollowsIt`, `.List_SortedByIssuingAuthority_OrdersByTheAuthorityName`, `ExamsPageTests.SortByScope_SendsTheReadersOrderForThatColumn` |
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+
+Start the app host **from this worktree** and sign in as an Admin. Claude opened `/dev/ui` and `/admin/exams`
+through the app host but could not sign in (its rules forbid entering credentials), so steps 2 to 8 are yours.
+Close any IDE or app host running from another checkout first: two hosts fight for port 17162.
+
+Git Bash and PowerShell 7, from `D:/dev/_icontrol/wt/simulab/f-34` (same command in both):
+
+```bash
+dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-34\src\Hosts\Simulab.AppHost` and
+`Now listening on: https://localhost:17162`. The Web is at `https://localhost:7125`. Ctrl+C stops it.
+
+1. Open `https://localhost:7125/admin/exams` signed out → the sign-in page. Sign in as an Admin and open it
+   again → the Exams page, empty, offering **Add**. **Exams** sits under **Organizers** in the **Content**
+   section of the side menu.
+2. On `/admin/organizers`, add `Prefeitura Municipal de Guarulhos`, acronym `pmg`, kind **Public body** (the
+   kind is new) and `Polícia Federal`, acronym `pf`, kind **Public body**. Both appear, acronyms uppercased.
+3. **Add** an exam: type `guar` in **Issuing authority** → the list offers `Prefeitura Municipal de Guarulhos
+   (PMG)` with **Public body** under it; pick it. Name `Guarda Municipal de Guarulhos`, type **Public service
+   exam**, scope **National** → no place field. Change the scope to **Municipal** → a **Municipality** field
+   appears; change it to **State** → the label becomes **State**. Back to **Municipal**, type `Guarulhos (SP)`,
+   leave the language on **Português (Brasil)** and **Save** → the snackbar says it was saved, the title
+   becomes **Edit exam**, and the address bar now ends in the exam's id.
+4. Go back to the list → the row shows the name, `Prefeitura Municipal de Guarulhos / PMG`, `Public service
+   exam` and `Municipal / Guarulhos (SP)`. **Add** a second exam with the same name under the same body →
+   refused on the name field, "This issuing authority already has an exam with this name". Change the issuing
+   authority to `Polícia Federal` and save → it is accepted.
+5. In the search box type `guarda` → one row; type `avaliacao` → none. Clear it. Set **Issuing authority** to
+   `Polícia Federal`, **Assessment type** to **Public service exam** and **Scope** to **National** → only the
+   second exam. Clear the three filters. Click the **Scope** and **Assessment type** headers → the order
+   changes and follows the words on screen, not the English names.
+6. **Delete** one exam and confirm → the message names the exam and its issuing authority; it disappears.
+   Now on `/admin/organizers` try to delete `Polícia Federal` → refused, with "This organizer is the issuing
+   authority of exams in the catalog. Delete those exams first, on the Exams page". Delete its remaining exam,
+   then delete the organizer → it goes.
+7. Keyboard only, with Tab, the arrow keys and Enter: from the list reach **Add**, then on the form reach the
+   issuing authority, type two letters, pick an option from the list with the arrows and Enter, fill the rest
+   and reach **Save**. Then press Esc on the form with unsaved changes and use the browser's Back → it asks
+   before leaving.
+8. Switch the language in the header to pt-PT and then to English → the title, the columns, the filters, the
+   kinds, the assessment types and the scopes change; the exams' own names and their issuing authorities do
+   not, and the content language stays written in its own language. Sign in as a Student (or remove
+   `catalog.manage` from Admin on `/admin/roles` first) and open `/admin/exams` → Not Found, and no **Content**
+   section in the menu.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
