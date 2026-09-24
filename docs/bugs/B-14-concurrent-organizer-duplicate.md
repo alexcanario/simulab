@@ -1,7 +1,7 @@
 ---
 bug: B-14
 feature: F-33
-status: refining
+status: approved
 board: 758
 severity: low
 ---
