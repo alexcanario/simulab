@@ -263,20 +263,20 @@ else
     private async Task<IReadOnlyList<AppLookupOption>> SearchAuthoritiesAsync(string term, CancellationToken cancellationToken)
     {
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
-        var result = await Api.ListOrganizersAsync(
+        var result = await Api.ListIssuingAuthoritiesAsync(
             token,
-            new OrganizerListQuery(0, AppLookupField.MaxCandidates, term),
+            new IssuingAuthorityListQuery(0, AppLookupField.MaxCandidates, term),
             cancellationToken);
 
         if (!result.IsSuccess)
         {
-            throw new InvalidOperationException($"Organizers failed to load: {result.ErrorCode}.");
+            throw new InvalidOperationException($"Issuing authorities failed to load: {result.ErrorCode}.");
         }
 
-        return [.. result.Value!.Items.Select(organizer => new AppLookupOption(
-            organizer.Id,
-            $"{organizer.Name} ({organizer.Acronym})",
-            OrganizerText.KindName(L, organizer.Kind)))];
+        // v2: only bodies that publish notices are offered. A board is never a parent of an exam (BR2).
+        return [.. result.Value!.Items.Select(authority => new AppLookupOption(
+            authority.Id,
+            $"{authority.Name} ({authority.Acronym})"))];
     }
 
     private async Task SaveAsync()
@@ -343,9 +343,9 @@ else
             case CatalogErrorCodes.ExamScopeDetailTooLong:
                 _scopeDetailError = Errors.For(result.ErrorCode);
                 break;
-            case CatalogErrorCodes.OrganizerNotFound:
+            case CatalogErrorCodes.IssuingAuthorityNotFound:
             case CatalogErrorCodes.ExamIssuingAuthorityRequired:
-                // The organizer left the catalog since it was picked: clear it and make the reader choose again.
+                // The body left the catalog since it was picked: clear it and make the reader choose again.
                 _authority = null;
                 _authorityError = Errors.For(CatalogErrorCodes.ExamIssuingAuthorityRequired);
                 _error = Errors.For(result.ErrorCode);

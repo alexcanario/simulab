@@ -31,15 +31,29 @@ public abstract class CatalogPageTestContext : KitTestContext
     protected static readonly OrganizerResponse Iso =
         new(Guid.Parse("0198f0a3-0000-7000-8000-000000000003"), "International Organization for Standardization", "ISO", OrganizerKind.CertifyingBody, null, null);
 
-    /// <summary>The organizers the fake knows about, so a saved exam can carry its authority's name (F-34).</summary>
-    protected static readonly IReadOnlyList<OrganizerResponse> Sample = [Cebraspe, Fgv, Iso];
+    protected static readonly IssuingAuthorityResponse Guarulhos = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-000000000011"),
+        "Prefeitura Municipal de Guarulhos",
+        "PMG",
+        null,
+        null);
+
+    protected static readonly IssuingAuthorityResponse PoliciaFederal = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-000000000012"),
+        "Policia Federal",
+        "PF",
+        null,
+        null);
+
+    /// <summary>The bodies the fake knows about, so a saved exam can carry its authority's name (F-34 v2).</summary>
+    protected static readonly IReadOnlyList<IssuingAuthorityResponse> Sample = [Guarulhos, PoliciaFederal];
 
     protected static readonly ExamResponse AgentePf = new(
         Guid.Parse("0198f0a3-0000-7000-8000-00000000000a"),
         "Agente de Policia Federal",
-        Cebraspe.Id,
-        Cebraspe.Name,
-        Cebraspe.Acronym,
+        PoliciaFederal.Id,
+        PoliciaFederal.Name,
+        PoliciaFederal.Acronym,
         AssessmentType.PublicServiceExam,
         ExamScope.National,
         null,
@@ -48,9 +62,9 @@ public abstract class CatalogPageTestContext : KitTestContext
     protected static readonly ExamResponse Fuvest = new(
         Guid.Parse("0198f0a3-0000-7000-8000-00000000000b"),
         "FUVEST",
-        Fgv.Id,
-        Fgv.Name,
-        Fgv.Acronym,
+        Guarulhos.Id,
+        Guarulhos.Name,
+        Guarulhos.Acronym,
         AssessmentType.UniversityEntranceExam,
         ExamScope.State,
         "Sao Paulo",
@@ -91,6 +105,9 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>What the exam list returns (F-34); null makes it answer a server error.</summary>
         public List<ExamResponse>? Exams { get; set; } = [AgentePf, Fuvest];
 
+        /// <summary>What the issuing-authority list returns (F-34 v2); null makes it answer a server error.</summary>
+        public List<IssuingAuthorityResponse>? IssuingAuthorities { get; set; } = [.. Sample];
+
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
 
@@ -108,6 +125,38 @@ public abstract class CatalogPageTestContext : KitTestContext
             if (request.Method != HttpMethod.Get && WriteFailure is { } failure)
             {
                 return Problem(failure);
+            }
+
+            if (path.EndsWith("/issuing-authorities", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                if (IssuingAuthorities is null)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                }
+
+                var authorityQuery = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+                var authoritySize = int.Parse(authorityQuery["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+                var authorityPage = int.Parse(authorityQuery["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+                return Json(new IssuingAuthorityPageResponse(
+                    [.. IssuingAuthorities.Skip(authorityPage * authoritySize).Take(authoritySize)],
+                    IssuingAuthorities.Count));
+            }
+
+            if (path.EndsWith("/issuing-authorities", StringComparison.Ordinal) && request.Method == HttpMethod.Post)
+            {
+                var saved = Read<SaveIssuingAuthorityRequest>(body);
+                return Json(SavedAuthority(Guid.CreateVersion7(), saved), HttpStatusCode.Created);
+            }
+
+            if (path.Contains("/issuing-authorities/", StringComparison.Ordinal) && request.Method == HttpMethod.Put)
+            {
+                var saved = Read<SaveIssuingAuthorityRequest>(body);
+                return Json(SavedAuthority(Guid.Parse(path[(path.LastIndexOf('/') + 1)..]), saved));
+            }
+
+            if (path.Contains("/issuing-authorities/", StringComparison.Ordinal) && request.Method == HttpMethod.Delete)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             if (path.EndsWith("/exams", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
@@ -183,10 +232,13 @@ public abstract class CatalogPageTestContext : KitTestContext
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
+        private static IssuingAuthorityResponse SavedAuthority(Guid id, SaveIssuingAuthorityRequest request) =>
+            new(id, request.Name!, request.Acronym!.ToUpperInvariant(), request.Description, request.Website);
+
         // The Api joins the issuing authority's name; the fake looks it up in the same sample rows.
         private static ExamResponse SavedExam(Guid id, SaveExamRequest request)
         {
-            var authority = Sample.FirstOrDefault(organizer => organizer.Id == request.IssuingAuthorityId) ?? Cebraspe;
+            var authority = Sample.FirstOrDefault(body => body.Id == request.IssuingAuthorityId) ?? Guarulhos;
 
             return new ExamResponse(
                 id,

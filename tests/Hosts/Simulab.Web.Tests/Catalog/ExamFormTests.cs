@@ -25,11 +25,11 @@ public sealed class ExamFormTests : CatalogPageTestContext
         page.InvokeAsync(() => field.Instance.ValueChanged.InvokeAsync(value)).GetAwaiter().GetResult();
     }
 
-    private static void PickAuthority(IRenderedComponent<ExamForm> page, OrganizerResponse organizer)
+    private static void PickAuthority(IRenderedComponent<ExamForm> page, IssuingAuthorityResponse authority)
     {
         var lookup = page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == "exam-authority");
         page.InvokeAsync(() => lookup.Instance.ValueChanged.InvokeAsync(
-            new AppLookupOption(organizer.Id, $"{organizer.Name} ({organizer.Acronym})"))).GetAwaiter().GetResult();
+            new AppLookupOption(authority.Id, $"{authority.Name} ({authority.Acronym})"))).GetAwaiter().GetResult();
     }
 
     // AC4: a national exam is sent without a detail, and the page says "Add exam" until it is saved.
@@ -39,7 +39,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
         var page = RenderAdd();
         page.Markup.Should().Contain("Add exam");
 
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Agente de Policia Federal");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.National);
@@ -47,7 +47,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Post));
         var sent = SentBody(Api, HttpMethod.Post);
-        sent.IssuingAuthorityId.Should().Be(Cebraspe.Id);
+        sent.IssuingAuthorityId.Should().Be(PoliciaFederal.Id);
         sent.Name.Should().Be("Agente de Policia Federal");
         sent.ScopeDetail.Should().BeNull();
         // BR9: the form offers pt-BR, the language of the catalog's first market, until the reader changes it.
@@ -75,7 +75,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     public void Scope_BackToNational_DropsTheDetailAndSendsItNull()
     {
         var page = RenderAdd();
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Guarda Municipal");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.Municipal);
@@ -94,7 +94,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     public void Save_MunicipalWithoutItsDetail_ShowsTheMessageAndCallsNothing()
     {
         var page = RenderAdd();
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Guarda Municipal");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.Municipal);
@@ -125,7 +125,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     {
         var providers = RenderProviders();
         var page = RenderAdd();
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Agente de Policia Federal");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.National);
@@ -160,7 +160,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     {
         Api.WriteFailure = (HttpStatusCode.Conflict, CatalogErrorCodes.ExamNameTaken);
         var page = RenderAdd();
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Agente de Policia Federal");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.National);
@@ -175,9 +175,9 @@ public sealed class ExamFormTests : CatalogPageTestContext
     [Fact]
     public void Save_IssuingAuthorityGone_ClearsThePickerAndAsksForAnother()
     {
-        Api.WriteFailure = (HttpStatusCode.NotFound, CatalogErrorCodes.OrganizerNotFound);
+        Api.WriteFailure = (HttpStatusCode.NotFound, CatalogErrorCodes.IssuingAuthorityNotFound);
         var page = RenderAdd();
-        PickAuthority(page, Cebraspe);
+        PickAuthority(page, PoliciaFederal);
         page.Find("#exam-name").Change("Agente");
         Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
         Set<ExamScope?>(page, "exam-scope", ExamScope.National);
@@ -185,7 +185,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
         page.Find(".app-form-save").Click();
 
         page.WaitForAssertion(() => page.Markup.Should().Contain("Choose the issuing authority."));
-        page.Markup.Should().Contain("This organizer no longer exists.");
+        page.Markup.Should().Contain("This issuing authority no longer exists. Refresh the list.");
     }
 
     // AC18c: an id that is not an exam shows the message and a way back, and no fields.
@@ -201,18 +201,19 @@ public sealed class ExamFormTests : CatalogPageTestContext
         page.FindAll("#exam-name").Should().BeEmpty();
     }
 
-    // AC18: the picker asks the server for the organizers, with the term the reader typed.
+    // AC18 (v2): the picker asks for the bodies that publish notices, never for the boards.
     [Fact]
-    public void Authority_Typing_AsksTheOrganizerListWithTheTerm()
+    public void Authority_Typing_AsksTheIssuingAuthorityListWithTheTerm()
     {
         var page = RenderAdd();
 
-        page.Find("#exam-authority").Input("fgv");
+        page.Find("#exam-authority").Input("gua");
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
-            call.Path == "/api/v1/catalog/organizers"
-            && call.Query!.Contains("search=fgv", StringComparison.Ordinal)
+            call.Path == "/api/v1/catalog/issuing-authorities"
+            && call.Query!.Contains("search=gua", StringComparison.Ordinal)
             && call.Query.Contains($"pageSize={AppLookupField.MaxCandidates}", StringComparison.Ordinal)));
+        Api.Received.Should().NotContain(call => call.Path == "/api/v1/catalog/organizers");
     }
 
     // BR9: the content language is offered in its own name, so it does not depend on the UI language.

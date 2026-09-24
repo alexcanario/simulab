@@ -63,6 +63,58 @@ public sealed class CatalogApiClient(HttpClient http)
     public Task<ApiResult<bool>> DeleteOrganizerAsync(string accessToken, Guid organizerId, CancellationToken cancellationToken = default) =>
         SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/organizers/{organizerId}"), accessToken), cancellationToken);
 
+    /// <summary>F-34 v2: one page of issuing authorities. It is also what the exam form's picker calls.</summary>
+    public Task<ApiResult<IssuingAuthorityPageResponse>> ListIssuingAuthoritiesAsync(
+        string accessToken,
+        IssuingAuthorityListQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/issuing-authorities?page={query.Page}&pageSize={query.PageSize}&descending={(query.Descending ? "true" : "false")}";
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            route += $"&sortBy={Uri.EscapeDataString(query.SortBy)}";
+        }
+
+        return SendAsync<IssuingAuthorityPageResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken),
+            cancellationToken);
+    }
+
+    /// <summary>F-34 v2.</summary>
+    public Task<ApiResult<IssuingAuthorityResponse>> CreateIssuingAuthorityAsync(
+        string accessToken,
+        SaveIssuingAuthorityRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IssuingAuthorityResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, $"{Base}/issuing-authorities", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-34 v2.</summary>
+    public Task<ApiResult<IssuingAuthorityResponse>> UpdateIssuingAuthorityAsync(
+        string accessToken,
+        Guid authorityId,
+        SaveIssuingAuthorityRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IssuingAuthorityResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/issuing-authorities/{authorityId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-34 v2: a soft delete on the server, refused with a 409 when the body still has exams.</summary>
+    public Task<ApiResult<bool>> DeleteIssuingAuthorityAsync(
+        string accessToken,
+        Guid authorityId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/issuing-authorities/{authorityId}"), accessToken),
+            cancellationToken);
+
     /// <summary>F-34 UC1: one page of exams, searched, filtered and sorted on the server.</summary>
     public Task<ApiResult<ExamPageResponse>> ListExamsAsync(
         string accessToken,

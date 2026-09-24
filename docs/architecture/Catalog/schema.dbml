@@ -19,6 +19,18 @@ Table exams {
   Note: 'Entity: Exam - standard columns: 8 (see data dictionary)'
 }
 
+Table issuing_authorities {
+  id uuid [pk]
+  acronym varchar(20) [not null]
+  description varchar(500)
+  name varchar(150) [not null]
+  normalized_acronym varchar(20) [not null]
+  normalized_name varchar(150) [not null]
+  website varchar(300)
+
+  Note: 'Entity: IssuingAuthority - standard columns: 8 (see data dictionary)'
+}
+
 Table organizers {
   id uuid [pk]
   acronym varchar(20) [not null]
@@ -32,9 +44,9 @@ Table organizers {
   Note: 'Entity: Organizer - standard columns: 8 (see data dictionary)'
 }
 
-Ref: exams.issuing_authority_id > organizers.id
+Ref: exams.issuing_authority_id > issuing_authorities.id
 
-TableGroup organizers_group {
+TableGroup issuing_authorities_group {
   exams
-  organizers
+  issuing_authorities
 }

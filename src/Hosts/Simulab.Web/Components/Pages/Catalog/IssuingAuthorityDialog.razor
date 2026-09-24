@@ -1,0 +1,201 @@
+@* F-34 v2: add or edit an issuing authority. Four fields, so a dialog (rule: ui-project). *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog>
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppTextField TValue="string"
+                          Id="issuing-authority-name"
+                          Label="@L["IssuingAuthorities.Field.Name"]"
+                          Value="@_name"
+                          ValueChanged="@((string? value) => OnNameChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.IssuingAuthorityNameMaxLength"
+                          Autocomplete="organization"
+                          Hint="@L["IssuingAuthorities.Field.Name.Help"]"
+                          Error="@_nameError" />
+
+            <AppTextField TValue="string"
+                          Id="issuing-authority-acronym"
+                          Label="@L["IssuingAuthorities.Field.Acronym"]"
+                          Value="@_acronym"
+                          ValueChanged="@((string? value) => OnAcronymChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.IssuingAuthorityAcronymMaxLength"
+                          Autocomplete="off"
+                          Hint="@L["IssuingAuthorities.Field.Acronym.Help"]"
+                          Error="@_acronymError" />
+
+            <AppTextField TValue="string"
+                          Id="issuing-authority-website"
+                          Label="@L["IssuingAuthorities.Field.Website"]"
+                          Value="@_website"
+                          ValueChanged="@((string? value) => OnWebsiteChanged(value))"
+                          MaxLength="CatalogLimits.IssuingAuthorityWebsiteMaxLength"
+                          Autocomplete="url"
+                          Hint="@L["IssuingAuthorities.Field.Website.Help"]"
+                          Error="@_websiteError" />
+
+            <AppTextField TValue="string"
+                          Id="issuing-authority-description"
+                          Label="@L["IssuingAuthorities.Field.Description"]"
+                          Value="@_description"
+                          ValueChanged="@((string? value) => _description = value)"
+                          MaxLength="CatalogLimits.IssuingAuthorityDescriptionMaxLength"
+                          Autocomplete="off"
+                          Lines="3" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The body being edited; null to add one.</summary>
+    [Parameter] public IssuingAuthorityResponse? Authority { get; set; }
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired]
+    public Func<SaveIssuingAuthorityRequest, Task<ApiResult<IssuingAuthorityResponse>>> Save { get; set; } = default!;
+
+    private string? _name;
+    private string? _acronym;
+    private string? _description;
+    private string? _website;
+    private string? _nameError;
+    private string? _acronymError;
+    private string? _websiteError;
+    private string? _error;
+    private bool _saving;
+
+    private bool HasChanges =>
+        Trimmed(_name) != (Authority?.Name ?? string.Empty)
+        || Trimmed(_acronym).ToUpperInvariant() != (Authority?.Acronym ?? string.Empty)
+        || Trimmed(_description) != (Authority?.Description ?? string.Empty)
+        || Trimmed(_website) != (Authority?.Website ?? string.Empty);
+
+    protected override void OnInitialized()
+    {
+        _name = Authority?.Name ?? string.Empty;
+        _acronym = Authority?.Acronym ?? string.Empty;
+        _description = Authority?.Description ?? string.Empty;
+        _website = Authority?.Website ?? string.Empty;
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError(value);
+    }
+
+    private void OnAcronymChanged(string? value)
+    {
+        _acronym = value;
+        _acronymError = AcronymError(value);
+    }
+
+    private void OnWebsiteChanged(string? value)
+    {
+        _website = value;
+        _websiteError = WebsiteError(value);
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? NameError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength
+            ? Errors.For(CatalogErrorCodes.IssuingAuthorityNameRequired)
+            : null;
+
+    private string? AcronymError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength
+            ? Errors.For(CatalogErrorCodes.IssuingAuthorityAcronymRequired)
+            : null;
+
+    private string? WebsiteError(string? value)
+    {
+        var trimmed = Trimmed(value);
+        if (trimmed.Length == 0)
+        {
+            return null;
+        }
+
+        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? null
+            : Errors.For(CatalogErrorCodes.IssuingAuthorityWebsiteInvalid);
+    }
+
+    private async Task SaveAsync()
+    {
+        _nameError = NameError(_name);
+        _acronymError = AcronymError(_acronym);
+        _websiteError = WebsiteError(_website);
+        if (_nameError is not null || _acronymError is not null || _websiteError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        var result = await Save(new SaveIssuingAuthorityRequest(
+            Trimmed(_name),
+            Trimmed(_acronym),
+            Trimmed(_description).Length == 0 ? null : Trimmed(_description),
+            Trimmed(_website).Length == 0 ? null : Trimmed(_website)));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        // A conflict belongs to the field that caused it, so the reader sees where to change something.
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.IssuingAuthorityNameTaken:
+            case CatalogErrorCodes.IssuingAuthorityNameRequired:
+            case CatalogErrorCodes.IssuingAuthorityNameTooLong:
+                _nameError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.IssuingAuthorityAcronymTaken:
+            case CatalogErrorCodes.IssuingAuthorityAcronymRequired:
+            case CatalogErrorCodes.IssuingAuthorityAcronymTooLong:
+                _acronymError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.IssuingAuthorityWebsiteInvalid:
+                _websiteError = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

@@ -1,0 +1,166 @@
+@page "/admin/issuing-authorities"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+
+@* F-34 v2, UC6: the body that publishes a notice. The list-plus-dialog pattern of /admin/organizers. *@
+<AppPageHeader Title="@L["IssuingAuthorities.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="IssuingAuthorityResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["IssuingAuthorities.Search.Placeholder"]"
+              EmptyMessage="@L["IssuingAuthorities.Empty"]"
+              EmptySearchMessage="@(term => L["IssuingAuthorities.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <Columns>
+        @* A name is up to 150 characters, so the cell truncates and the full name is the tooltip. *@
+        <PropertyColumn T="IssuingAuthorityResponse" TProperty="string" Property="row => row.Name" Title="@L["IssuingAuthorities.Column.Name"]">
+            <CellTemplate><AppTruncatedText Text="@context.Item.Name" MaxWidth="26rem" /></CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="IssuingAuthorityResponse" TProperty="string" Property="row => row.Acronym" Title="@L["IssuingAuthorities.Column.Acronym"]" />
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@context.Name"
+                       OnEdit="@(() => EditAsync(context))"
+                       OnDelete="@(() => DeleteAsync(context))" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<IssuingAuthorityResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private string? _error;
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["IssuingAuthorities.Title"], href: null, disabled: true)
+        ];
+
+    private async Task<AppTablePage<IssuingAuthorityResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListIssuingAuthoritiesAsync(
+            token,
+            new IssuingAuthorityListQuery(query.Page, query.PageSize, query.Search, SortColumn(query.SortBy), query.Descending),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Issuing authorities failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<IssuingAuthorityResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // The table names a column by its property; the Api names it by its own constant.
+    private static string? SortColumn(string? column) => column switch
+    {
+        nameof(IssuingAuthorityResponse.Name) => IssuingAuthoritySort.Name,
+        nameof(IssuingAuthorityResponse.Acronym) => IssuingAuthoritySort.Acronym,
+        _ => null
+    };
+
+    private Task AddAsync() => OpenAsync(null);
+
+    private Task EditAsync(IssuingAuthorityResponse authority) => OpenAsync(authority);
+
+    private async Task OpenAsync(IssuingAuthorityResponse? authority)
+    {
+        _error = null;
+        if (await TokenAsync() is null)
+        {
+            _error = Errors.For(ErrorText.UnexpectedCode);
+            return;
+        }
+
+        var parameters = new DialogParameters<IssuingAuthorityDialog>
+        {
+            { dialog => dialog.Authority, authority },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<IssuingAuthorityResponse>(ErrorText.UnexpectedCode)
+                    : authority is null
+                        ? await Api.CreateIssuingAuthorityAsync(fresh, request)
+                        : await Api.UpdateIssuingAuthorityAsync(fresh, authority.Id, request)
+            }
+        };
+
+        var title = authority is null
+            ? L["IssuingAuthorities.Dialog.AddTitle"]
+            : L["IssuingAuthorities.Dialog.EditTitle"];
+
+        var dialog = await Dialogs.ShowAsync<IssuingAuthorityDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add(L["IssuingAuthorities.Saved"], Severity.Success);
+            await _table.ReloadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(IssuingAuthorityResponse authority)
+    {
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, authority.Name, L["IssuingAuthorities.Delete.Message", authority.Name]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteIssuingAuthorityAsync(token, authority.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["IssuingAuthorities.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // It still has exams (BR12), or another Admin deleted it since the list was loaded.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        await _table.ReloadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

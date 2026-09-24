@@ -21,7 +21,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
 
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
         CellsOf(page, 0).Should().Equal("Agente de Policia Federal", "FUVEST");
-        CellsOf(page, 1).Should().Contain(cell => cell.Contains("CEBRASPE", StringComparison.Ordinal));
+        CellsOf(page, 1).Should().Contain(cell => cell.Contains("PF", StringComparison.Ordinal));
         CellsOf(page, 2).Should().Equal("Public service exam", "University entrance exam");
         // The scope cell carries its detail under the label when the scope has one (BR8).
         CellsOf(page, 3)[0].Should().Be("National");
@@ -114,7 +114,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         page.FindAll("tbody tr")[0].QuerySelectorAll("button")[1].Click();
 
         providers.Dialogs.WaitForAssertion(() =>
-            providers.Dialogs.Markup.Should().Contain("Agente de Policia Federal").And.Contain("CEBRASPE"));
+            providers.Dialogs.Markup.Should().Contain("Agente de Policia Federal").And.Contain("PF"));
         providers.Dialogs.FindAll("button").Last(button => button.TextContent.Contains("Delete", StringComparison.Ordinal)).Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
@@ -136,16 +136,17 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         Api.Received.Should().NotContain(call => call.Method == HttpMethod.Delete);
     }
 
-    // BR16: the authority filter asks the organizer list, with the term and the lookup's own page size.
+    // BR16 (v2): the authority filter asks the issuing-authority list, never the boards.
     [Fact]
-    public void AuthorityFilter_Typing_AsksTheOrganizerListWithTheTerm()
+    public void AuthorityFilter_Typing_AsksTheIssuingAuthorityListWithTheTerm()
     {
         var page = RenderPage();
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
 
-        page.Find("#exams-filter-authority").Input("ceb");
+        page.Find("#exams-filter-authority").Input("gua");
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
-            call.Path == "/api/v1/catalog/organizers" && call.Query!.Contains("search=ceb", StringComparison.Ordinal)));
+            call.Path == "/api/v1/catalog/issuing-authorities" && call.Query!.Contains("search=gua", StringComparison.Ordinal)));
+        Api.Received.Should().NotContain(call => call.Path == "/api/v1/catalog/organizers");
     }
 }

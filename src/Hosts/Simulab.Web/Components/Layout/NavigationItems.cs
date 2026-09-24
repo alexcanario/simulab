@@ -12,6 +12,7 @@ public static class NavigationItems
     [
         new(null, "/", AppIcons.Home, "Nav.Home", NavLinkMatch.All),
         new(NavigationSection.Content, "/admin/organizers", AppIcons.Organizers, "Nav.Organizers", RequiredPermission: CatalogPermissions.Manage),
+        new(NavigationSection.Content, "/admin/issuing-authorities", AppIcons.IssuingAuthorities, "Nav.IssuingAuthorities", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/exams", AppIcons.Exams, "Nav.Exams", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),

@@ -79,6 +79,7 @@ public class NavigationItemsTests
             .Select(item => (item.Route, item.RequiredPermission))
             .Should().Equal(
                 ("/admin/organizers", CatalogPermissions.Manage),
+                ("/admin/issuing-authorities", CatalogPermissions.Manage),
                 ("/admin/exams", CatalogPermissions.Manage));
     }
 
