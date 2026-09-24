@@ -1,11 +1,11 @@
 ---
 feature: F-23
 epic: Foundation and identity
-status: validating
+status: done
 board: 740
 version: 1
 ---
-Autopilot: stop 2
+Autopilot: shipping
 
 # C4 architecture overview
 
@@ -57,7 +57,7 @@ Anyone opening the repository sees in one page who uses Simulab, what it talks t
 - 2026-09-24 — Context and containers only; the component level links to the generated `modules.md` — owner: a hand-drawn copy would drift at every new module.
 - 2026-09-24 — Mermaid `flowchart` with the C4 colours, not the experimental `C4Context` syntax — owner: renders in VS Code, Rider and Azure DevOps, and was measured in the prototype.
 - 2026-09-24 — A drift guard, `ArchitectureOverviewTests`, compares the containers diagram with the app host — owner: a hand-written diagram ages silently; the definition of done asks for a test per criterion.
-- 2026-09-24 — B-15's file still says `validating` although it is merged and its board item is closed; it is finished later by `/agile:ship B-15` in another session, not in this run — owner.
+- 2026-09-24 — B-15's file still says `validating` although it is merged and its board item is closed; it is finished later by `/agile:ship B-15` in another session, not in this run — owner. Done by the other session before this ship (`cc10b81`).
 - 2026-09-24 — Approved by the owner ("Aprovo F-23") at autopilot stop 1.
 - 2026-09-24 — Google appears only in the context diagram; the containers diagram leaves it out — decided by Claude: it is optional and off by default, and one more node on the bottom rank pushed the diagram past the preview width (measured 973 px before, 745 px after).
 - 2026-09-24 — The containers diagram hangs the external systems one rank below the stores (`--->`) — decided by Claude: with five nodes on one rank the diagram measured 973 px; with the extra rank, 745 px.
@@ -104,4 +104,7 @@ No screen, so no language switch, permission or keyboard step (AC7). Run from th
 6. Generated docs untouched, both shells: `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-23` (worktree `wt/simulab/f-23`), brought up to date with `main` before the full check, merged into `main` with `--no-ff` by the merge commit "Merge feature/F-23: hand-written C4 overview with a drift guard (AB#740)", which also carries this file. Validated and the merge authorized by the owner on 2026-09-24.
+- Tests (full suite, `gate.js ship`): 1033 passed, 0 failed, 46 s; full build 16 s, 0 warnings, baseline stays empty. Architecture tests 99 (9 new). `DocGen --check`: up to date.
+- Manual: no change (a developer page, no visible behavior; AC7). `docs/infra.md`: link to the overview and the measured times.
+- Board: AB#740 closed with an evidence comment.
