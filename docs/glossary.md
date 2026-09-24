@@ -133,3 +133,6 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | HMAC | hash com chave | A hash computed with a secret key (F-11: the recovery codes); without the key, a copy of the database cannot be used to guess the codes. |
 | grant (OAuth2) | grant (tipo de concessão) | The kind of exchange the token endpoint performs: password, refresh token, and the `totp` one F-11 adds for the second step. |
 | UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |
+| C4 model | modelo C4 | A way to draw architecture in zoom levels: system context (who uses the system and what it talks to), containers, components, code (F-23). |
+| container (C4) | contêiner | In the C4 model, a process or store that runs on its own (the Web, the Api, PostgreSQL, Redis); not necessarily a Docker container. |
+| drift guard | teste contra divergência | A test that fails when a hand-written document no longer matches the code it describes (F-23: the overview against the app host). |
