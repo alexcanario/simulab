@@ -31,6 +31,31 @@ public abstract class CatalogPageTestContext : KitTestContext
     protected static readonly OrganizerResponse Iso =
         new(Guid.Parse("0198f0a3-0000-7000-8000-000000000003"), "International Organization for Standardization", "ISO", OrganizerKind.CertifyingBody, null, null);
 
+    /// <summary>The organizers the fake knows about, so a saved exam can carry its authority's name (F-34).</summary>
+    protected static readonly IReadOnlyList<OrganizerResponse> Sample = [Cebraspe, Fgv, Iso];
+
+    protected static readonly ExamResponse AgentePf = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-00000000000a"),
+        "Agente de Policia Federal",
+        Cebraspe.Id,
+        Cebraspe.Name,
+        Cebraspe.Acronym,
+        AssessmentType.PublicServiceExam,
+        ExamScope.National,
+        null,
+        "pt-BR");
+
+    protected static readonly ExamResponse Fuvest = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-00000000000b"),
+        "FUVEST",
+        Fgv.Id,
+        Fgv.Name,
+        Fgv.Acronym,
+        AssessmentType.UniversityEntranceExam,
+        ExamScope.State,
+        "Sao Paulo",
+        "pt-BR");
+
     protected FakeCatalogApi Api { get; } = new();
 
     protected CatalogPageTestContext()
@@ -63,8 +88,14 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>What the list returns; null makes it answer a server error.</summary>
         public List<OrganizerResponse>? Organizers { get; set; } = [Cebraspe, Fgv, Iso];
 
+        /// <summary>What the exam list returns (F-34); null makes it answer a server error.</summary>
+        public List<ExamResponse>? Exams { get; set; } = [AgentePf, Fuvest];
+
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
+
+        /// <summary>When set, reading one exam answers this problem (F-34: the form page's not-found state).</summary>
+        public (HttpStatusCode Status, string Code)? FindExamFailure { get; set; }
 
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
@@ -77,6 +108,45 @@ public abstract class CatalogPageTestContext : KitTestContext
             if (request.Method != HttpMethod.Get && WriteFailure is { } failure)
             {
                 return Problem(failure);
+            }
+
+            if (path.EndsWith("/exams", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                if (Exams is null)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                }
+
+                var examQuery = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+                var examSize = int.Parse(examQuery["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+                var examPage = int.Parse(examQuery["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+                return Json(new ExamPageResponse([.. Exams.Skip(examPage * examSize).Take(examSize)], Exams.Count));
+            }
+
+            if (path.Contains("/exams/", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                if (FindExamFailure is { } refused)
+                {
+                    return Problem(refused);
+                }
+
+                var exam = Exams?.Find(candidate => candidate.Id == Guid.Parse(path[(path.LastIndexOf('/') + 1)..]));
+                return exam is null ? Problem((HttpStatusCode.NotFound, CatalogErrorCodes.ExamNotFound)) : Json(exam);
+            }
+
+            if (path.EndsWith("/exams", StringComparison.Ordinal) && request.Method == HttpMethod.Post)
+            {
+                return Json(SavedExam(Guid.CreateVersion7(), Read<SaveExamRequest>(body)), HttpStatusCode.Created);
+            }
+
+            if (path.Contains("/exams/", StringComparison.Ordinal) && request.Method == HttpMethod.Put)
+            {
+                return Json(SavedExam(Guid.Parse(path[(path.LastIndexOf('/') + 1)..]), Read<SaveExamRequest>(body)));
+            }
+
+            if (path.Contains("/exams/", StringComparison.Ordinal) && request.Method == HttpMethod.Delete)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             if (path.EndsWith("/organizers", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
@@ -111,6 +181,23 @@ public abstract class CatalogPageTestContext : KitTestContext
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        // The Api joins the issuing authority's name; the fake looks it up in the same sample rows.
+        private static ExamResponse SavedExam(Guid id, SaveExamRequest request)
+        {
+            var authority = Sample.FirstOrDefault(organizer => organizer.Id == request.IssuingAuthorityId) ?? Cebraspe;
+
+            return new ExamResponse(
+                id,
+                request.Name!,
+                authority.Id,
+                authority.Name,
+                authority.Acronym,
+                request.ParseAssessmentType() ?? AssessmentType.PublicServiceExam,
+                request.ParseScope() ?? ExamScope.National,
+                request.ScopeDetail,
+                request.ContentLanguage ?? "pt-BR");
         }
 
         private static OrganizerResponse Saved(Guid id, SaveOrganizerRequest request) =>

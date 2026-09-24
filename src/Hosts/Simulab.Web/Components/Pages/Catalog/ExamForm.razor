@@ -105,6 +105,13 @@ else
 }
 
 @code {
+    /// <summary>
+    /// What the form offers before the reader chooses (BR9). It is the screen's default, not the Api's: the
+    /// Api asks for the language explicitly, and `SupportedLanguages.Default` is the app's fallback UI
+    /// language (en), which is the wrong guess for a catalog whose first market is Brazil.
+    /// </summary>
+    public const string DefaultContentLanguage = "pt-BR";
+
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
     /// <summary>The exam being edited; absent on /admin/exams/new.</summary>
@@ -117,7 +124,7 @@ else
     private AssessmentType? _assessmentType;
     private ExamScope? _scope;
     private string? _scopeDetail;
-    private string? _contentLanguage = SupportedLanguages.Default;
+    private string? _contentLanguage = DefaultContentLanguage;
     private string? _authorityError;
     private string? _nameError;
     private string? _assessmentTypeError;
@@ -157,7 +164,7 @@ else
         || _assessmentType != _saved?.AssessmentType
         || _scope != _saved?.Scope
         || Trimmed(_scopeDetail) != (_saved?.ScopeDetail ?? string.Empty)
-        || _contentLanguage != (_saved?.ContentLanguage ?? SupportedLanguages.Default);
+        || _contentLanguage != (_saved?.ContentLanguage ?? DefaultContentLanguage);
 
     protected override async Task OnParametersSetAsync()
     {
