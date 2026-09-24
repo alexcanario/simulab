@@ -1,7 +1,7 @@
 ---
 bug: B-15
 feature: F-33
-status: refining
+status: approved
 board: 759
 severity: low
 ---
