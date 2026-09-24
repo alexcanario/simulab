@@ -96,6 +96,7 @@ Premises of the epic that the code corrected:
 - 2026-09-23 — `IdentityModuleBoundaryTests` is generalized to run over both modules instead of copied — Catalog is the second module, which is when the shared shape is due.
 - 2026-09-23 — `tools/Simulab.DocGen` gets a project reference to `Simulab.Catalog.Infrastructure` in this feature, and the generated docs are regenerated with it — DocGen only sees the contexts whose assemblies sit next to it.
 - 2026-09-23 — No new package: everything the module and its tests need is already in `Directory.Packages.props` (rule `build-config`, one list, no additions).
+- 2026-09-23 — The shared Api test host went to a new project, `tests/Simulab.Testing.ApiHost`, instead of into `tests/Simulab.Testing` — the owner chose to share rather than duplicate, and putting it inside `Simulab.Testing` dragged the Api host into every test project that references it: `Simulab.Web.Tests` got two top-level `Program` types (28 build errors) and `Jobs.Tests`/`Persistence.Tests` got an EF Core version-conflict warning (MSB3277), which the gate treats as new warnings. No BR or AC changes; recorded in `docs/agile/profile.md`, as the project rules require for a new shared test project.
 
 ### From the independent review (2026-09-23)
 - `catalog.manage` has its name, description and group text in the three languages, and `RoleResourcesTests` now reads `WebPermissions.All` instead of `IdentityPermissions.All` — the roles screen lists every permission Identity seeds, so a module that adds one without its text was showing the raw identifier there.
@@ -123,12 +124,6 @@ Premises of the epic that the code corrected:
 - Why: `ErrorText`, which turns an API error code into the message a screen shows, reads `SharedResources` and nothing else. A separate set would have needed `ErrorText` changed to consult several sets, for no gain: every admin screen (Roles, Users, Role history, Account events) already keeps its keys there, and `ResourceParityTests` covers that set in the three languages.
 - Affected: BR14 only; AC15 is unchanged and green (the three languages and the missing-key test).
 - Re-approved: 2026-09-24 (owner).
-
-### v2 — 2026-09-23 (second note)
-- What: the shared Api test host went to a **new** project, `tests/Simulab.Testing.ApiHost`, instead of into `tests/Simulab.Testing`.
-- Why: the owner chose to share rather than duplicate (question of 2026-09-23). Putting it inside `Simulab.Testing` dragged the Api host into every test project that references it: `Simulab.Web.Tests` got two top-level `Program` types (28 build errors) and `Jobs.Tests`/`Persistence.Tests` got an EF Core version-conflict warning (MSB3277), which the gate treats as new warnings.
-- Affected: no BR or AC; it is where the shared helpers live. Recorded in `docs/agile/profile.md`, as the project rules require for a new shared test project.
-- Re-approved: pending.
 
 ## Coverage
 
