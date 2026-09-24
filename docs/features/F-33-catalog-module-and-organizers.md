@@ -1,7 +1,7 @@
 ---
 feature: F-33
 epic: Assessment catalog
-status: validating
+status: done
 board: 752
 version: 2
 ---
@@ -171,7 +171,7 @@ Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-33\src\H
 9. Sign in as a Student (or remove `catalog.manage` from Admin on `/admin/roles` first) and open `/admin/organizers` → Not Found, and no **Content** section in the menu.
 
 ## Delivery
-- Branch: feature/F-33
-- Merge: <commit>
-- Tests: affected projects after the review fixes — Catalog 56 (18 s), Web 460 (3 s), architecture 90 (1 s), Api 9 (23 s), Identity 310 (32 s); 0 failed, 0 skipped. Build: 0 warnings, 0 errors (`--no-incremental`). The full suite runs at ship.
-- Manual pages: `docs/manual/en/organizers.md`, `docs/manual/pt-BR/organizers.md`, `docs/manual/pt-PT/organizers.md`
+- Branch: feature/F-33 (merged and deleted; it never existed on the remote)
+- Merge: 756e505 — `Merge feature/F-33: Catalog module and organizers back office (AB#752)`, 101 files, +3882 -236
+- Tests: ship gate GREEN on 2026-09-24 — full suite 1000 passed, 0 failed, 0 skipped, 44 s (budget < 5 min); full build 19 s, 0 warnings, baseline stays empty. Per project: Identity 310, Web 483, Catalog 56, architecture 90, Api 9, Jobs 15, Persistence 15, SharedKernel 12, AppHost 8, Email 2.
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/organizers.md` (new) and `.../roles.md` (permissions are now grouped by area, Catalog being the second group)
