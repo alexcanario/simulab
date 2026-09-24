@@ -1,11 +1,11 @@
 ---
 feature: F-23
 epic: Foundation and identity
-status: refining
+status: approved
 board: 740
 version: 1
 ---
-Autopilot: stop 1
+Autopilot: approved
 
 # C4 architecture overview
 
@@ -52,7 +52,13 @@ Anyone opening the repository sees in one page who uses Simulab, what it talks t
 - AC7 (localization) No UI text changes: no resource file is touched, and the app manual is unchanged (a developer page, no visible behavior).
 
 ## Decisions
-- 2026-09-24 — Location, planned elements, levels, syntax and the guard: see the recommended options at stop 1 (to be confirmed by the owner's answers).
+- 2026-09-24 — The page is `docs/architecture-overview.md`, linked from `CLAUDE.md` and `docs/infra.md` — owner: DocGen deletes hand-written files inside `docs/architecture/`; changing DocGen would touch the plugin template and F-15's contract.
+- 2026-09-24 — Claude API and file storage are drawn dashed and labelled `planned` — owner: shows what ADR-0001 decided without pretending it exists; the guard removes the mark when they are built.
+- 2026-09-24 — Context and containers only; the component level links to the generated `modules.md` — owner: a hand-drawn copy would drift at every new module.
+- 2026-09-24 — Mermaid `flowchart` with the C4 colours, not the experimental `C4Context` syntax — owner: renders in VS Code, Rider and Azure DevOps, and was measured in the prototype.
+- 2026-09-24 — A drift guard, `ArchitectureOverviewTests`, compares the containers diagram with the app host — owner: a hand-written diagram ages silently; the definition of done asks for a test per criterion.
+- 2026-09-24 — B-15's file still says `validating` although it is merged and its board item is closed; it is finished later by `/agile:ship B-15` in another session, not in this run — owner.
+- 2026-09-24 — Approved by the owner ("Aprovo F-23") at autopilot stop 1.
 - 2026-09-24 — Google appears only in the context diagram; the containers diagram leaves it out — decided by Claude: it is optional and off by default, and one more node on the bottom rank pushed the diagram past the preview width (measured 973 px before, 745 px after).
 - 2026-09-24 — The containers diagram hangs the external systems one rank below the stores (`--->`) — decided by Claude: with five nodes on one rank the diagram measured 973 px; with the extra rank, 745 px.
 - 2026-09-24 — No new package: Mermaid is rendered by the viewer (IDE preview, Azure DevOps); the test uses the existing xUnit and AwesomeAssertions — decided by Claude.
