@@ -50,7 +50,7 @@ users list (Identity), which sorts by names, not by a translated enum, and the U
 
 ## Business rules
 - BR15 (amends F-33 BR12): sorting the kind column follows the order of the reader's own labels, alphabetically in
-  the reader's culture (`CultureInfo.CurrentCulture`, the same culture the page already renders in). The Web
+  the reader's culture (`CultureInfo.CurrentUICulture`, the same culture `CatalogApiClient` and `IdentityApiClient` already key their Api calls by). The Web
   computes that order once (there are only three kinds) and sends it to the Api as `kindOrder`, a comma-separated
   list of the three `OrganizerKind` names, from first to last. The Api sorts by that order when given; when
   `kindOrder` is missing, not exactly the three known kinds, or has a repeat, it falls back to today's behavior
