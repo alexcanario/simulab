@@ -51,7 +51,7 @@ Premises of the epic that the code corrected:
 - BR11 Deleting is a soft delete. A deleted organizer disappears from every list and lookup, and its name and acronym stay taken (BR9). The confirmation says the organizer leaves the catalog; it says nothing about exams, which do not exist until F-34.
 - BR12 The list is paged (`page`, `pageSize`, cap 100) and returns `{ items, total }`. Search matches the normalized name or the normalized acronym, so it ignores case and accents. Sorting is by name, acronym or kind; the default is name ascending.
 - BR13 Domain rules return `Result`, never exceptions: `Organizer.Create` and `Organizer.Update` validate BR8 and BR10 and give back an `Error` with its code.
-- BR14 Every UI text of the screen and every error code of the module exists in pt-BR, pt-PT and en, in a `CatalogResources` set in the Web host next to `IdentityResources`.
+- BR14 Every UI text of the screen and every error code of the module exists in pt-BR, pt-PT and en, in `SharedResources` in the Web host, where the rest of the back office keeps its keys (see the change note of v2; the original wording asked for a separate `CatalogResources` set).
 
 ## Screens and API
 - `/admin/organizers` — the list. Gated by `[Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]`, `MainLayout`, `AppPageHeader` with the primary action "Add", a searchable `AppDataTable` with the columns name, acronym and kind, `AppRowActions` with edit and delete.
@@ -122,7 +122,7 @@ Premises of the epic that the code corrected:
 - What: BR14 said the texts live in "a `CatalogResources` set in the Web host". They live in `SharedResources` instead, with the rest of the back office.
 - Why: `ErrorText`, which turns an API error code into the message a screen shows, reads `SharedResources` and nothing else. A separate set would have needed `ErrorText` changed to consult several sets, for no gain: every admin screen (Roles, Users, Role history, Account events) already keeps its keys there, and `ResourceParityTests` covers that set in the three languages.
 - Affected: BR14 only; AC15 is unchanged and green (the three languages and the missing-key test).
-- Re-approved: pending.
+- Re-approved: 2026-09-24 (owner).
 
 ### v2 — 2026-09-23 (second note)
 - What: the shared Api test host went to a **new** project, `tests/Simulab.Testing.ApiHost`, instead of into `tests/Simulab.Testing`.
