@@ -70,9 +70,11 @@
     private async Task<AppTablePage<OrganizerResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
     {
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var sortBy = SortColumn(query.SortBy);
+        var kindOrder = sortBy == OrganizerSort.Kind ? OrganizerText.KindOrder(L) : null;
         var result = await Api.ListOrganizersAsync(
             token,
-            new OrganizerListQuery(query.Page, query.PageSize, query.Search, SortColumn(query.SortBy), query.Descending),
+            new OrganizerListQuery(query.Page, query.PageSize, query.Search, sortBy, query.Descending, kindOrder),
             cancellationToken);
 
         if (!result.IsSuccess)
