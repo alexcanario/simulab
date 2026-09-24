@@ -7,9 +7,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- F-33 BR2: the permission catalog is the union of every module's, so this module's tests name Catalog's. -->
+    <ProjectReference Include="..\..\..\..\src\Modules\Catalog\Simulab.Catalog.Infrastructure\Simulab.Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\..\src\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
     <ProjectReference Include="..\..\..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\..\..\Simulab.Testing\Simulab.Testing.csproj" />
+    <ProjectReference Include="..\..\..\Simulab.Testing.ApiHost\Simulab.Testing.ApiHost.csproj" />
   </ItemGroup>
 
 </Project>

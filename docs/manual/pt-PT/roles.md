@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: pt-PT
-features: [F-6, F-9, F-14]
-updated: 2026-09-21
+features: [F-6, F-9, F-14, F-33]
+updated: 2026-09-24
 ---
 # Perfis e permissões
 
@@ -25,7 +25,7 @@ Toda a conta tem um perfil. Só uma conta com a permissão "Gerir perfis e atrib
 ### Adicionar ou alterar um perfil
 1. Escolha **Adicionar** ou **Editar** na linha do perfil.
 2. Escreva um nome com 2 a 50 caracteres. Um perfil de sistema mantém o nome, por isso o campo fica só de leitura.
-3. Assinale as permissões do perfil. Cada uma explica o que permite.
+3. Assinale as permissões do perfil. Cada uma explica o que permite. Estão agrupadas por área: "Identidade e acesso" para perfis e contas, "Catálogo" para o catálogo de provas.
 4. Escolha **Guardar**. Quem tem esse perfil recebe as novas permissões em segundos; o menu dessas pessoas muda no carregamento de página seguinte.
 
 ### Eliminar um perfil

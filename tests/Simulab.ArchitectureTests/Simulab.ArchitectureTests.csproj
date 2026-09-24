@@ -3,6 +3,7 @@
   <!-- Every production assembly is referenced so the rules see it. Add each new module project here. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />

@@ -861,6 +861,146 @@
           }
         }
       }
+    },
+    "/api/v1/catalog/organizers": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListOrganizers",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CreateOrganizer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveOrganizerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/organizers/{id}": {
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "UpdateOrganizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveOrganizerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "DeleteOrganizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1083,6 +1223,52 @@
         },
         "description": "Chooses a new password with the token from the reset email (F-7 UC2)."
       },
+      "SaveOrganizerRequest": {
+        "required": [
+          "name",
+          "acronym",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The organizer's full name, 2 to 150 characters (BR8)."
+          },
+          "acronym": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The short name, 2 to 20 characters, stored uppercase (BR8)."
+          },
+          "kind": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of ExamBoard, CertifyingBody or University, by name and ignoring case (BR7)."
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Free text, optional."
+          },
+          "website": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "An absolute http or https address, optional (BR10)."
+          }
+        },
+        "description": "What the add and the edit dialog send (F-33, UC2 and UC3). The kind travels as text, not as the enum,\r\nso a caller that sends an unknown kind gets 400 `organizer.kind_invalid` (BR7) instead of an\r\nuncoded deserialization failure."
+      },
       "SaveRoleRequest": {
         "required": [
           "name",
@@ -1206,6 +1392,9 @@
     },
     {
       "name": "Identity"
+    },
+    {
+      "name": "Catalog"
     }
   ]
 }

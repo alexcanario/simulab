@@ -1,0 +1,170 @@
+@page "/admin/organizers"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+
+@* F-33, UC1-UC4: every organizer, searched and paged on the server; add, edit and delete in dialogs. *@
+<AppPageHeader Title="@L["Organizers.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="OrganizerResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["Organizers.Search.Placeholder"]"
+              EmptyMessage="@L["Organizers.Empty"]"
+              EmptySearchMessage="@(term => L["Organizers.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <Columns>
+        @* The column's property name is what reaches AppTableQuery.SortBy; SortColumn maps it to the API's. *@
+        @* A name is up to 150 characters, so the cell truncates and the full name is the tooltip (rule: ui-project). *@
+        <PropertyColumn T="OrganizerResponse" TProperty="string" Property="row => row.Name" Title="@L["Organizers.Column.Name"]">
+            <CellTemplate><AppTruncatedText Text="@context.Item.Name" MaxWidth="24rem" /></CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="OrganizerResponse" TProperty="string" Property="row => row.Acronym" Title="@L["Organizers.Column.Acronym"]" />
+        <PropertyColumn T="OrganizerResponse" TProperty="OrganizerKind" Property="row => row.Kind" Title="@L["Organizers.Column.Kind"]">
+            <CellTemplate>@OrganizerText.KindName(L, context.Item.Kind)</CellTemplate>
+        </PropertyColumn>
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@context.Name"
+                       OnEdit="@(() => EditAsync(context))"
+                       OnDelete="@(() => DeleteAsync(context))" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<OrganizerResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private string? _error;
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Organizers.Title"], href: null, disabled: true)
+        ];
+
+    /// <summary>The list is searched, sorted and paged by the server (BR12): the catalog grows past one page.</summary>
+    private async Task<AppTablePage<OrganizerResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListOrganizersAsync(
+            token,
+            new OrganizerListQuery(query.Page, query.PageSize, query.Search, SortColumn(query.SortBy), query.Descending),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Organizers failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<OrganizerResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // The table names a column by its property; the Api names it by its own constant. An unknown one
+    // is left null, and the Api falls back to the name (BR12).
+    private static string? SortColumn(string? column) => column switch
+    {
+        nameof(OrganizerResponse.Name) => OrganizerSort.Name,
+        nameof(OrganizerResponse.Acronym) => OrganizerSort.Acronym,
+        nameof(OrganizerResponse.Kind) => OrganizerSort.Kind,
+        _ => null
+    };
+
+    private Task AddAsync() => OpenAsync(null);
+
+    private Task EditAsync(OrganizerResponse organizer) => OpenAsync(organizer);
+
+    private async Task OpenAsync(OrganizerResponse? organizer)
+    {
+        _error = null;
+        if (await TokenAsync() is null)
+        {
+            _error = Errors.For(ErrorText.UnexpectedCode);
+            return;
+        }
+
+        var parameters = new DialogParameters<OrganizerDialog>
+        {
+            { dialog => dialog.Organizer, organizer },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<OrganizerResponse>(ErrorText.UnexpectedCode)
+                    : organizer is null
+                        ? await Api.CreateOrganizerAsync(fresh, request)
+                        : await Api.UpdateOrganizerAsync(fresh, organizer.Id, request)
+            }
+        };
+
+        var title = organizer is null ? L["Organizers.Dialog.AddTitle"] : L["Organizers.Dialog.EditTitle"];
+        var dialog = await Dialogs.ShowAsync<OrganizerDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add(L["Organizers.Saved"], Severity.Success);
+            await _table.ReloadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(OrganizerResponse organizer)
+    {
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, organizer.Name, L["Organizers.Delete.Message", organizer.Name]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteOrganizerAsync(token, organizer.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["Organizers.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // Another Admin may have deleted it since the list was loaded.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        await _table.ReloadAsync();
+    }
+
+    // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

@@ -42,5 +42,8 @@ public static class AppIcons
     public const string Password = Icons.Material.Outlined.Password;
     public const string Roles = Icons.Material.Outlined.AdminPanelSettings;
     public const string Users = Icons.Material.Outlined.Group;
+
+    /// <summary>F-33: the organizers of the assessment catalog.</summary>
+    public const string Organizers = Icons.Material.Outlined.AccountBalance;
     public const string Security = Icons.Material.Outlined.Security;
 }

@@ -16,7 +16,8 @@ public class SolutionLayoutTests
         "tools/" // F-15: developer tools that never ship (DocGen)
     ];
 
-    private static readonly string[] TestsRootProjects = ["Simulab.ArchitectureTests", "Simulab.Testing"];
+    // F-33: Simulab.Testing.ApiHost joins them — helpers every module's tests share, not one module's tests.
+    private static readonly string[] TestsRootProjects = ["Simulab.ArchitectureTests", "Simulab.Testing", "Simulab.Testing.ApiHost"];
 
     private static readonly string[] RootFolders = ["src", "tests", "tools"];
 

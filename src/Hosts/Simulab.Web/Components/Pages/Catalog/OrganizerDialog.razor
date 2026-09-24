@@ -1,0 +1,211 @@
+@* F-33, UC2-UC3: add or edit an organizer. A simple entity, so a dialog (rule: ui-project). *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog Class="app-organizer-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppTextField TValue="string"
+                          Id="organizer-name"
+                          Label="@L["Organizers.Field.Name"]"
+                          Value="@_name"
+                          ValueChanged="@((string? value) => OnNameChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.OrganizerNameMaxLength"
+                          Autocomplete="organization"
+                          Hint="@L["Organizers.Field.Name.Help"]"
+                          Error="@_nameError" />
+
+            <AppTextField TValue="string"
+                          Id="organizer-acronym"
+                          Label="@L["Organizers.Field.Acronym"]"
+                          Value="@_acronym"
+                          ValueChanged="@((string? value) => OnAcronymChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.OrganizerAcronymMaxLength"
+                          Autocomplete="off"
+                          Hint="@L["Organizers.Field.Acronym.Help"]"
+                          Error="@_acronymError" />
+
+            <AppSelectField TValue="OrganizerKind"
+                            Id="organizer-kind"
+                            Label="@L["Organizers.Field.Kind"]"
+                            Value="_kind"
+                            ValueChanged="@((OrganizerKind value) => _kind = value)"
+                            Options="Kinds"
+                            Required="true" />
+
+            <AppTextField TValue="string"
+                          Id="organizer-website"
+                          Label="@L["Organizers.Field.Website"]"
+                          Value="@_website"
+                          ValueChanged="@((string? value) => OnWebsiteChanged(value))"
+                          MaxLength="CatalogLimits.OrganizerWebsiteMaxLength"
+                          Autocomplete="url"
+                          Hint="@L["Organizers.Field.Website.Help"]"
+                          Error="@_websiteError" />
+
+            <AppTextField TValue="string"
+                          Id="organizer-description"
+                          Label="@L["Organizers.Field.Description"]"
+                          Value="@_description"
+                          ValueChanged="@((string? value) => _description = value)"
+                          MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
+                          Autocomplete="off"
+                          Lines="3" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The organizer being edited; null to add one.</summary>
+    [Parameter] public OrganizerResponse? Organizer { get; set; }
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired] public Func<SaveOrganizerRequest, Task<ApiResult<OrganizerResponse>>> Save { get; set; } = default!;
+
+    private string? _name;
+    private string? _acronym;
+    private OrganizerKind _kind = OrganizerKind.ExamBoard;
+    private string? _description;
+    private string? _website;
+    private string? _nameError;
+    private string? _acronymError;
+    private string? _websiteError;
+    private string? _error;
+    private bool _saving;
+
+    private IReadOnlyList<AppSelectOption<OrganizerKind>> Kinds =>
+        [.. Enum.GetValues<OrganizerKind>().Select(kind => new AppSelectOption<OrganizerKind>(kind, OrganizerText.KindName(L, kind)))];
+
+    private bool HasChanges =>
+        Trimmed(_name) != (Organizer?.Name ?? string.Empty)
+        || Trimmed(_acronym).ToUpperInvariant() != (Organizer?.Acronym ?? string.Empty)
+        || _kind != (Organizer?.Kind ?? OrganizerKind.ExamBoard)
+        || Trimmed(_description) != (Organizer?.Description ?? string.Empty)
+        || Trimmed(_website) != (Organizer?.Website ?? string.Empty);
+
+    protected override void OnInitialized()
+    {
+        _name = Organizer?.Name ?? string.Empty;
+        _acronym = Organizer?.Acronym ?? string.Empty;
+        _kind = Organizer?.Kind ?? OrganizerKind.ExamBoard;
+        _description = Organizer?.Description ?? string.Empty;
+        _website = Organizer?.Website ?? string.Empty;
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError(value);
+    }
+
+    private void OnAcronymChanged(string? value)
+    {
+        _acronym = value;
+        _acronymError = AcronymError(value);
+    }
+
+    private void OnWebsiteChanged(string? value)
+    {
+        _website = value;
+        _websiteError = WebsiteError(value);
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? NameError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength ? Errors.For(CatalogErrorCodes.OrganizerNameRequired) : null;
+
+    private string? AcronymError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength ? Errors.For(CatalogErrorCodes.OrganizerAcronymRequired) : null;
+
+    private string? WebsiteError(string? value)
+    {
+        var trimmed = Trimmed(value);
+        if (trimmed.Length == 0)
+        {
+            return null;
+        }
+
+        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? null
+            : Errors.For(CatalogErrorCodes.OrganizerWebsiteInvalid);
+    }
+
+    private async Task SaveAsync()
+    {
+        _nameError = NameError(_name);
+        _acronymError = AcronymError(_acronym);
+        _websiteError = WebsiteError(_website);
+        if (_nameError is not null || _acronymError is not null || _websiteError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        var result = await Save(new SaveOrganizerRequest(
+            Trimmed(_name),
+            Trimmed(_acronym),
+            _kind.ToString(),
+            Trimmed(_description).Length == 0 ? null : Trimmed(_description),
+            Trimmed(_website).Length == 0 ? null : Trimmed(_website)));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        // A conflict belongs to the field that caused it, so the reader sees where to change something.
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.OrganizerNameTaken:
+            case CatalogErrorCodes.OrganizerNameRequired:
+            case CatalogErrorCodes.OrganizerNameTooLong:
+                _nameError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.OrganizerAcronymTaken:
+            case CatalogErrorCodes.OrganizerAcronymRequired:
+            case CatalogErrorCodes.OrganizerAcronymTooLong:
+                _acronymError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.OrganizerWebsiteInvalid:
+                _websiteError = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

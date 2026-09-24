@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Simulab.Catalog.Infrastructure\Simulab.Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Infrastructure\Simulab.Identity.Infrastructure.csproj" />
   </ItemGroup>
 

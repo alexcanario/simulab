@@ -17,6 +17,11 @@ internal static class SolutionAssemblies
         typeof(Simulab.Identity.Application.Registration.RegisterUserHandler).Assembly,
         typeof(Simulab.Identity.Infrastructure.IdentityModule).Assembly,
         typeof(Simulab.Identity.Api.IdentityEndpoints).Assembly,
+        typeof(Simulab.Catalog.Domain.Entities.Organizer).Assembly,
+        typeof(Simulab.Catalog.Contracts.CatalogErrorCodes).Assembly,
+        typeof(Simulab.Catalog.Application.Organizers.SaveOrganizerHandler).Assembly,
+        typeof(Simulab.Catalog.Infrastructure.CatalogModule).Assembly,
+        typeof(Simulab.Catalog.Api.CatalogEndpoints).Assembly,
         typeof(Simulab.Web.Resources.SharedResources).Assembly,
         typeof(Microsoft.Extensions.Hosting.Extensions).Assembly, // Simulab.ServiceDefaults
         typeof(Simulab.DocGen.DocSet).Assembly

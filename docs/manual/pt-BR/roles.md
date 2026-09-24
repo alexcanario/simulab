@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: pt-BR
-features: [F-6, F-9, F-14]
-updated: 2026-09-21
+features: [F-6, F-9, F-14, F-33]
+updated: 2026-09-24
 ---
 # Papéis e permissões
 
@@ -25,7 +25,7 @@ Toda conta tem um papel. Só uma conta com a permissão "Gerenciar papéis e atr
 ### Adicionar ou alterar um papel
 1. Escolha **Adicionar** ou **Editar** na linha do papel.
 2. Digite um nome de 2 a 50 caracteres. Um papel de sistema mantém o nome, então o campo fica só para leitura.
-3. Marque as permissões do papel. Cada uma explica o que libera.
+3. Marque as permissões do papel. Cada uma explica o que libera. Elas vêm agrupadas por área: "Identidade e acesso" para papéis e contas, "Catálogo" para o catálogo de provas.
 4. Escolha **Salvar**. Quem tem esse papel recebe as novas permissões em segundos; o menu dessas pessoas muda no próximo carregamento de página.
 
 ### Excluir um papel

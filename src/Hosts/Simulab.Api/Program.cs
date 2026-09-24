@@ -2,6 +2,8 @@ using System.Reflection;
 using OpenIddict.Validation.AspNetCore;
 using Simulab.Api;
 using Simulab.Api.Features.System;
+using Simulab.Catalog.Api;
+using Simulab.Catalog.Infrastructure;
 using Simulab.Email;
 using Simulab.Identity.Api;
 using Simulab.Identity.Api.Authorization;
@@ -51,6 +53,11 @@ builder.Services.AddIdentityModule(
     builder.Configuration,
     builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."),
     builder.Environment.IsDevelopment());
+// F-33: the Catalog module. Registered after Identity so the permission catalogs are both in the
+// container before EnsureRolesAndPermissionsAsync reads them (F-33, BR2).
+builder.Services.AddCatalogModule(
+    builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
+
 builder.Services.AddSingleton<ClientRateLimiter>();
 builder.Services.AddSingleton<ClientAddress>();
 builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
@@ -83,6 +90,7 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
     .WithName("GetSystemInfo");
 
 v1.MapIdentityEndpoints();
+v1.MapCatalogEndpoints();
 
 // OpenIddict's own protocol path (F-5, decision 1): outside /api/v1, its own error shape.
 app.MapTokenEndpoints();
@@ -93,6 +101,7 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
 {
     await app.Services.MigrateJobsAsync();
     await app.Services.MigrateIdentityModuleAsync();
+    await app.Services.MigrateCatalogModuleAsync();
     await app.Services.EnsureIdentityClientAsync(app.Configuration);
     await app.Services.EnsureRolesAndPermissionsAsync();
 }

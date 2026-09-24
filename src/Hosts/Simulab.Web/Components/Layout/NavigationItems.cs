@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Routing;
+using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Web.Components.Ui;
 
@@ -10,6 +11,7 @@ public static class NavigationItems
     public static readonly IReadOnlyList<NavigationItem> All =
     [
         new(null, "/", AppIcons.Home, "Nav.Home", NavLinkMatch.All),
+        new(NavigationSection.Content, "/admin/organizers", AppIcons.Organizers, "Nav.Organizers", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),

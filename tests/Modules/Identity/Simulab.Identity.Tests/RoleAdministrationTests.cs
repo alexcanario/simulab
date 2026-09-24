@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Serialization;
@@ -50,14 +51,18 @@ public sealed class RoleAdministrationTests : IdentityApiTests
         roles.Should().NotContain(role => role.Id == gone.Id);
     }
 
+    // F-33 BR2: the catalog is the union of every module's names, not this module's list. The back
+    // office shows them all, so a Catalog permission has to be assignable to a role from here.
     [Fact]
-    public async Task ListPermissions_AsAdmin_ReturnsTheCatalog()
+    public async Task ListPermissions_AsAdmin_ReturnsEveryModulesPermissions()
     {
         var admin = await AdminAsync();
 
         var permissions = await admin.GetFromJsonAsync<List<PermissionResponse>>("/api/v1/identity/permissions", AppJson.Options);
 
-        permissions!.Select(permission => permission.Name).Should().BeEquivalentTo(IdentityPermissions.All);
+        var names = permissions!.Select(permission => permission.Name).ToList();
+        names.Should().Contain(IdentityPermissions.All);
+        names.Should().Contain(CatalogPermissions.All);
     }
 
     [Fact]
@@ -206,7 +211,9 @@ public sealed class RoleAdministrationTests : IdentityApiTests
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(IdentityErrorCodes.RoleAdminPermissionRequired);
-        (await RoleNamedAsync(admin, IdentityRoles.Admin)).Permissions.Should().Equal(IdentityPermissions.RolesManage);
+        // The refusal changes nothing: Admin keeps the seeded set, which is every module's (F-33 BR3).
+        (await RoleNamedAsync(admin, IdentityRoles.Admin)).Permissions
+            .Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All]);
     }
 
     [Fact]
