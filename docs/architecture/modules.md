@@ -45,6 +45,7 @@ flowchart LR
     Simulab_Catalog_Application --> Simulab_Catalog_Domain
     Simulab_Catalog_Contracts --> Simulab_SharedKernel
     Simulab_Catalog_Domain --> Simulab_Catalog_Contracts
+    Simulab_Catalog_Domain --> Simulab_Identity_Contracts
     Simulab_Catalog_Domain --> Simulab_SharedKernel
     Simulab_Catalog_Infrastructure --> Simulab_Catalog_Application
     Simulab_Catalog_Infrastructure --> Simulab_Persistence
