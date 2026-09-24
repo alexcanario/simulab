@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>F-23 C4 overview prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --border: #d1d9e0; }
+  body { margin: 0; background: #f6f8fa; color: var(--fg); font: 14px/1.5 -apple-system, "Segoe UI", sans-serif; }
+  .note { max-width: 860px; margin: 16px auto 0; padding: 0 16px; color: var(--muted); }
+  /* The column has the width of a Markdown preview beside the editor (VS Code / Rider, about 800 px). */
+  .preview { box-sizing: border-box; width: 800px; max-width: calc(100% - 32px); margin: 12px auto 32px; padding: 24px 32px;
+             background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+  h1 { font-size: 26px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h2 { font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-top: 28px; }
+  code { background: #eff1f3; padding: 1px 4px; border-radius: 4px; }
+  .mermaid { margin: 12px 0; }
+  #width { font-weight: 600; }
+</style>
+</head>
+<body>
+<p class="note">Prototype of <code>docs/architecture-overview.md</code> (F-23), rendered at the width of an IDE Markdown preview (800 px).
+Measured diagram widths: <span id="width">…</span></p>
+
+<div class="preview">
+<h1>Simulab — architecture overview</h1>
+<p>Hand-written. The generated docs (modules, entities, routes) are in <code>docs/architecture/</code>.
+Dashed = planned, not built yet. Dotted = optional, off by default.</p>
+
+<h2>1. System context</h2>
+<pre class="mermaid">
+%%{init: {"flowchart": {"nodeSpacing": 24, "rankSpacing": 40}}}%%
+flowchart TB
+    student["<b>Student</b><br/>[Person]<br/>Practises exams,<br/>follows progress"]
+    curator["<b>Curator</b><br/>[Person]<br/>Imports and<br/>reviews content"]
+    admin["<b>Admin</b><br/>[Person]<br/>Catalog, users,<br/>roles, plans"]
+    simulab["<b>Simulab</b><br/>[Software system]<br/>Practice exams<br/>and a study coach"]
+    email["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    claude["<b>Claude API</b><br/>[planned]<br/>Extraction, coach"]
+    google["<b>Google</b><br/>[optional, off]<br/>Sign-in"]
+    student -- "HTTPS" --> simulab
+    curator -- "HTTPS" --> simulab
+    admin -- "HTTPS" --> simulab
+    simulab -- "Emails" --> email
+    simulab -. "AI calls" .-> claude
+    simulab -. "OAuth" .-> google
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef system fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef external fill:#999999,stroke:#6b6b6b,color:#fff
+    classDef planned fill:#fff,stroke:#6b6b6b,color:#1f2328,stroke-dasharray:6 4
+    class student,curator,admin person
+    class simulab system
+    class email,google external
+    class claude planned
+</pre>
+
+<h2>2. Containers</h2>
+<pre class="mermaid">
+%%{init: {"flowchart": {"nodeSpacing": 24, "rankSpacing": 40}}}%%
+flowchart TB
+    people["<b>Student, Curator,<br/>Admin</b><br/>[Person]"]
+    subgraph simulab["Simulab"]
+        web["<b>Web</b><br/>[Blazor Server,<br/>MudBlazor]<br/>Every screen"]
+        redis[("<b>Redis</b><br/>[Cache]<br/>Sessions,<br/>revoked tokens")]
+        api["<b>Api</b><br/>[ASP.NET Core]<br/>/api/v1, modules,<br/>job worker"]
+        postgres[("<b>PostgreSQL</b><br/>[Database]<br/>One schema<br/>per module")]
+        blob[("<b>File storage</b><br/>[Blob, planned]<br/>Azurite locally")]
+    end
+    mailpit["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    claude["<b>Claude API</b><br/>[planned]"]
+    people -- "HTTPS" --> web
+    web -- "JSON, tokens" --> api
+    web -- "Sessions" --> redis
+    api -- "Tokens" --> redis
+    api -- "EF Core" --> postgres
+    api -. "IFileStorage" .-> blob
+    api -- "Emails" ---> mailpit
+    api -. "IAiGateway" ..-> claude
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef container fill:#438dd5,stroke:#2e6295,color:#fff
+    classDef external fill:#999999,stroke:#6b6b6b,color:#fff
+    classDef planned fill:#fff,stroke:#6b6b6b,color:#1f2328,stroke-dasharray:6 4
+    class people person
+    class web,api,postgres,redis container
+    class mailpit external
+    class claude,blob planned
+</pre>
+
+<h2>3. Inside the Api</h2>
+<p>The modules and their references: <code>docs/architecture/modules.md</code> (generated).</p>
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
+  await mermaid.run();
+  const widths = [...document.querySelectorAll(".mermaid svg")]
+    .map(svg => Math.round(svg.getBoundingClientRect().width) + " px (natural " + Math.round(svg.viewBox.baseVal.width) + " px)");
+  document.getElementById("width").textContent = widths.join(", ") + " in a 736 px content column";
+</script>
+</body>
+</html>
