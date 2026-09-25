@@ -1,7 +1,7 @@
 ---
 feature: F-24
 epic: Foundation and identity
-status: refining
+status: approved
 board: 741
 version: 1
 ---
