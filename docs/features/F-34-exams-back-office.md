@@ -1,7 +1,7 @@
 ---
 feature: F-34
 epic: Assessment catalog
-status: validating
+status: done
 board: 753
 version: 2
 ---
@@ -290,13 +290,13 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 
 ## Decisions
 - 2026-09-24 — An exam belongs to its **issuing authority** (the body that publishes the notice), and the **exam board** belongs to the edition (BR2) — the owner separated the three actors of a public service exam: the contracting body defines the positions, the syllabus and the rules; the board elaborates, applies and marks with its own criteria, and changes between editions of the same exam; the author of practice content is a third actor. Tying the exam to the board would duplicate the same exam at every change of board. The epic's wording "exams under an organizer" is kept, with the organizer being the issuing authority (owner, question 1, revised after the owner's correction).
-- 2026-09-24 — One `organizers` table for both roles, with no check of kind against role (BR3) — the same institution holds both roles for real (FGV, USP, AWS), so the role belongs to the relationship, not to the row; a rule per kind would refuse correct data (owner, follow-up question 3).
-- 2026-09-24 — `OrganizerKind` gains `PublicBody` (BR4) — a city hall, a ministry or a public foundation is none of the three kinds F-33 named, and it is the commonest issuing authority in Brazil. `PrivateCompany` was offered and left out: no use for it yet (owner, follow-up question 2).
+- 2026-09-24 — *(superseded in v2: the two roles became two tables, so there is no shared table and no kind to check.)* One `organizers` table for both roles, with no check of kind against role (BR3) — the same institution holds both roles for real (FGV, USP, AWS), so the role belongs to the relationship, not to the row; a rule per kind would refuse correct data (owner, follow-up question 3).
+- 2026-09-24 — *(superseded in v2: `PublicBody` was removed; a city hall is an `IssuingAuthority`, which has no kind.)* `OrganizerKind` gains `PublicBody` (BR4) — a city hall, a ministry or a public foundation is none of the three kinds F-33 named, and it is the commonest issuing authority in Brazil. `PrivateCompany` was offered and left out: no use for it yet (owner, follow-up question 2).
 - 2026-09-24 — The issuing authority is a required link, not free text — "Prefeitura de Guarulhos" and "PREF. GUARULHOS" would live side by side in a text column, and F-36's filter by body needs the id (owner, follow-up question 1).
 - 2026-09-24 — `ExamScope` is `National` / `State` / `Municipal`, always required, with the detail required for the last two (BR7, BR8) — one rule instead of a validation conditional on the assessment type; ENEM and certifications are `National` (owner, question 3).
 - 2026-09-24 — The content language reuses `SupportedLanguages.All` from `Simulab.Identity.Contracts` (BR9) — one list, no drift; F-33 BR1 allows a module to reference another module's `Contracts`. If a content language ever needs to exist without a UI in that language, a `CatalogLanguages` list of its own is the change to make then (owner, question 4).
 - 2026-09-24 — The exam name is unique within its issuing authority, not across the catalog (BR10) — "Agente" may exist in two different bodies, and a catalog-wide rule would force the body into the name it is already linked to (owner, question 5).
-- 2026-09-24 — Deleting an organizer that has exams is refused with 409 `organizer.has_exams` (BR12) — cascade would let one click remove a whole catalog, and leaving the exams orphaned contradicts the required link (owner, question 6).
+- 2026-09-24 — Deleting a body that has exams is refused with 409 (BR12; the code is `issuing_authority.has_exams` since v2, and `DeleteOrganizerHandler` went back to F-33) — cascade would let one click remove a whole catalog, and leaving the exams orphaned contradicts the required link (owner, question 6).
 - 2026-09-24 — The organizer never gets an active/inactive status — a simulation reproduces something that already happened, so a catalog record is historical and is never "retired"; the refusal to delete is the only protection needed. This closes what F-33 deferred here, with no idea captured (owner, question 7).
 - 2026-09-24 — The exam has no publication state; publication lives on the edition (BR13) — two states can disagree (a draft exam holding a published edition), and F-36 only needs one place to decide visibility (owner, question 8).
 - 2026-09-24 — List plus a form on its own page (`/admin/exams`, `/admin/exams/new`, `/admin/exams/{id}`) — rule `ui-project` names the exam among the complex entities, and it is where F-35 adds the editions section without redoing the screen (owner, question 9).
@@ -307,7 +307,7 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 - 2026-09-24 — Simulae's `Exam` is not imported, it is rewritten — it throws `ContentCatalogDomainException` instead of answering with a `Result`, its messages are pt-BR strings inside the domain, it has no assessment type and no content language, and its `IssuingAuthority` is free text. What carries over is the field set and the idea of a scope with a detail.
 - 2026-09-24 — `ExamBoardSelect` is not converted either: it is a `MudSelect` that loads every board into memory, with hardcoded pt-BR text and a Filled icon. `AppLookupField` is written fresh against the kit's rules; what carries over is the `Name (ACRONYM)` display.
 - 2026-09-24 — No seed rows: F-37 brings the real exams, remapped and tested (the same decision F-33 took).
-- 2026-09-24 — The glossary gains the rows for `IssuingAuthority`, `OrganizerKind.PublicBody`, `ExamScope` and `ContentLanguage` before the first use in code (rule `naming`).
+- 2026-09-24 — The glossary gains the rows for `IssuingAuthority`, `ExamScope` and `ContentLanguage` before the first use in code (rule `naming`). (v2 dropped the `OrganizerKind.PublicBody` row with the value itself.)
 - 2026-09-24 — The generated technical docs are regenerated with the new table: `tools/Simulab.DocGen` already references `Simulab.Catalog.Infrastructure`, so no project reference changes.
 
 ### From the screen design (2026-09-24)
@@ -401,7 +401,7 @@ not states, and epic 704 revisits it when Portuguese exams arrive.
 | AC18b the conditional field follows the scope and drops what it held | `ExamFormTests.Scope_Municipal_ShowsTheMunicipalityFieldAndStateShowsTheStateOne`, `.Scope_BackToNational_DropsTheDetailAndSendsItNull`, `ExamTests.Create_NationalWithADetail_DropsIt` |
 | AC18c an id that is not an exam | `ExamEndpointTests.Find_AnIdThatIsNotAnExam_IsNotFound`, `ExamFormTests.Edit_AnIdThatIsNotAnExam_ShowsNotFoundAndALinkBack` |
 | AC19 the domain answers with a `Result` and never throws | `ExamTests` (the 30 cases: every code, `Update_Refused_ChangesNothing` included), `IssuingAuthorityTests` (13, the same shape for the new entity) |
-| AC20 every text in the three languages | `ResourceParityTests.Every_key_exists_in_every_language`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (over `CatalogErrorCodes`, which now holds the ten exam codes and `organizer.has_exams`) |
+| AC20 every text in the three languages | `ResourceParityTests.Every_key_exists_in_every_language`, `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` (over `CatalogErrorCodes`, which now holds the ten exam codes and `issuing_authority.has_exams`) |
 | BR2, BR11 the picker names the parent, and the exam carries its authority's name | `ExamEndpointTests.Find_AnExistingExam_ComesBackFilledForTheForm`, `ExamFormTests.Save_IssuingAuthorityGone_ClearsThePickerAndAsksForAnother` |
 | BR9 the content language is offered in its own name, pt-BR first | `ExamFormTests.ContentLanguage_IsOfferedInItsOwnName`, `.Add_NationalExam_SendsItWithoutADetail` |
 | BR14 sorting a translated column sends the reader's order | `ExamEndpointTests.List_SortedByScopeWithTheCallersOrder_FollowsIt`, `.List_SortedByIssuingAuthority_OrdersByTheAuthorityName`, `ExamsPageTests.SortByScope_SendsTheReadersOrderForThatColumn` |
@@ -456,8 +456,10 @@ Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-34\src\H
    → Not Found, and no **Conteúdo** section in the menu.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
 - Branch: feature/F-34
 - Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Tests: 1191 passed, 0 failed, 56 s (full suite, 2026-09-25); full build 23 s, 0 new warnings
+- Manual pages: `docs/manual/{pt-BR,pt-PT,en}/exams.md`, `.../issuing-authorities.md`, `.../organizers.md` (updated),
+  `.../index.md` (updated)
+- Validated on screen by the owner on 2026-09-25, on behaviour only: the look of the screens was rejected and
+  became F-43 (D-2), which restyles them with the kit patterns this feature's screens still lack.
