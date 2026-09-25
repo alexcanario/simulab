@@ -19,30 +19,37 @@ public sealed class IssuingAuthorityConfiguration : IEntityTypeConfiguration<Iss
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("issuing_authorities");
+        builder.ToTable("issuing_authorities", table => table.HasComment(
+            "The body that publishes a notice and contracts an organizer to run the exam: a ministry, a court, a city hall."));
         builder.HasKey(authority => authority.Id);
 
         builder.Property(authority => authority.Name)
             .HasMaxLength(CatalogLimits.IssuingAuthorityNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("Full name, as the notice writes it.");
 
         builder.Property(authority => authority.Acronym)
             .HasMaxLength(CatalogLimits.IssuingAuthorityAcronymMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("Short name people search by, such as TRF1 or INSS.");
 
         builder.Property(authority => authority.Description)
-            .HasMaxLength(CatalogLimits.IssuingAuthorityDescriptionMaxLength);
+            .HasMaxLength(CatalogLimits.IssuingAuthorityDescriptionMaxLength)
+            .HasComment("Free notes about the body, shown to whoever curates the catalog.");
 
         builder.Property(authority => authority.Website)
-            .HasMaxLength(CatalogLimits.IssuingAuthorityWebsiteMaxLength);
+            .HasMaxLength(CatalogLimits.IssuingAuthorityWebsiteMaxLength)
+            .HasComment("The body's own address, where its notices are published.");
 
         builder.Property(authority => authority.NormalizedName)
             .HasMaxLength(CatalogLimits.IssuingAuthorityNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The name without case or accents, which is what the unique index compares.");
 
         builder.Property(authority => authority.NormalizedAcronym)
             .HasMaxLength(CatalogLimits.IssuingAuthorityAcronymMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The acronym without case or accents, which is what the unique index compares.");
 
         builder.HasIndex(authority => new { authority.TenantId, authority.NormalizedName })
             .HasDatabaseName("ux_issuing_authorities_tenant_normalized_name")
