@@ -1,0 +1,25 @@
+// Ai — schema. Generated from the EF model. Do not edit.
+// To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
+// Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
+
+Table ai_calls {
+  id uuid [pk]
+  cost_usd numeric(18,6) [not null]
+  duration_ms integer [not null]
+  error_code varchar(100)
+  input_price_per_million numeric(18,6) [not null]
+  input_tokens integer [not null]
+  model varchar(100) [not null]
+  output_price_per_million numeric(18,6) [not null]
+  output_tokens integer [not null]
+  purpose varchar(50) [not null]
+  started_at timestamptz [not null]
+  succeeded boolean [not null]
+  user_id uuid [not null]
+
+  indexes {
+    (user_id, started_at) [name: 'ix_ai_calls_user_started_at']
+  }
+
+  Note: 'Entity: AiCall - standard columns: 8 (see data dictionary)'
+}

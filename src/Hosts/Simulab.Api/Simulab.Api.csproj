@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Simulab.Ai\Simulab.Ai.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />

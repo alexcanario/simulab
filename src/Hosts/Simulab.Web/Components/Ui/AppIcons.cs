@@ -52,4 +52,8 @@ public static class AppIcons
     /// <summary>F-34: the exams of the assessment catalog.</summary>
     public const string Exams = Icons.Material.Outlined.Description;
     public const string Security = Icons.Material.Outlined.Security;
+
+    /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>
+    public const string Ai = Icons.Material.Outlined.AutoAwesome;
+    public const string Send = Icons.Material.Outlined.Send;
 }

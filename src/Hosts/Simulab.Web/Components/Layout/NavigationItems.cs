@@ -19,6 +19,7 @@ public static class NavigationItems
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/account-events", AppIcons.Security, "Nav.AccountEvents", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Development, "/dev/ui", AppIcons.Build, "Nav.Dev.UiKit", DevelopmentOnly: true),
+        new(NavigationSection.Development, "/dev/ai", AppIcons.Ai, "Nav.Dev.Ai", DevelopmentOnly: true),
     ];
 
     /// <summary>Items the current user may see (F-6, BR6): a permission-gated item needs <paramref name="hasPermission"/> to say yes.</summary>

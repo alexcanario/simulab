@@ -103,6 +103,23 @@
   <data name="Nav.Section.Administration" xml:space="preserve"><value>Administration</value></data>
   <data name="Nav.Section.Development" xml:space="preserve"><value>Development</value></data>
   <data name="Nav.Dev.UiKit" xml:space="preserve"><value>UI kit</value></data>
+  <data name="Nav.Dev.Ai" xml:space="preserve"><value>AI gateway</value></data>
+  <data name="AiDiagnostics.Title" xml:space="preserve"><value>AI gateway</value></data>
+  <data name="AiDiagnostics.Intro" xml:space="preserve"><value>Sends one real call through the gateway and shows what it cost. Development only.</value></data>
+  <data name="AiDiagnostics.Prompt.Label" xml:space="preserve"><value>Prompt</value></data>
+  <data name="AiDiagnostics.Prompt.Hint" xml:space="preserve"><value>What to ask the model.</value></data>
+  <data name="AiDiagnostics.Send" xml:space="preserve"><value>Send</value></data>
+  <data name="AiDiagnostics.Sending" xml:space="preserve"><value>Sending…</value></data>
+  <data name="AiDiagnostics.Answer" xml:space="preserve"><value>Answer</value></data>
+  <data name="AiDiagnostics.Model" xml:space="preserve"><value>Model: {0}</value></data>
+  <data name="AiDiagnostics.Tokens" xml:space="preserve"><value>Tokens: {0} in, {1} out</value></data>
+  <data name="AiDiagnostics.Cost" xml:space="preserve"><value>Cost: US$ {0}</value></data>
+  <data name="AiDiagnostics.Duration" xml:space="preserve"><value>Duration: {0} ms</value></data>
+  <data name="ai.not_configured" xml:space="preserve"><value>No API key is configured, so the gateway cannot call the model.</value></data>
+  <data name="ai.no_user" xml:space="preserve"><value>Sign in first: every call is charged to a user.</value></data>
+  <data name="ai.quota_exceeded" xml:space="preserve"><value>Your plan allows no more AI calls this month.</value></data>
+  <data name="ai.call_failed" xml:space="preserve"><value>The model could not answer. Try again in a moment.</value></data>
+  <data name="ai.prompt_required" xml:space="preserve"><value>Write a prompt first.</value></data>
   <data name="Nav.Roles" xml:space="preserve"><value>Roles</value></data>
   <data name="Roles.Title" xml:space="preserve"><value>Roles</value></data>
   <data name="Nav.Users" xml:space="preserve"><value>Users</value></data>
