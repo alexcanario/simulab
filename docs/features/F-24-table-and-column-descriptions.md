@@ -1,7 +1,7 @@
 ---
 feature: F-24
 epic: Foundation and identity
-status: building
+status: validating
 board: 741
 version: 2
 ---
@@ -70,6 +70,8 @@ Make the database explain itself. Today the generated dictionary gives the type,
 - 2026-09-25 — The owner reviews the text in the generated dictionary at validation, not as a list before the code — owner — the four `data-dictionary.md` files are where the descriptions read together, and a correction there is one line of code.
 - 2026-09-25 — One migration per context that owns tables under BR1 (`Identity`, `Catalog`, `Jobs`, `Ai`) — Claude, technical — each context owns its own migrations (profile), and the borrowed `jobs` mapping is `ExcludeFromMigrations()`, so no context emits another's comments.
 - 2026-09-25 — No new package, in production or in tests — owner.
+- 2026-09-25 — The design pass and the architect pass ran before the code (schema change). Accepted: the finalizing convention over a loop in `OnModelCreating`, because Identity adds entity types after calling the base; the SharedKernel interfaces as the key; `SolutionAssemblies.All` as the ownership signal in the test, which the repository already uses; one migration per context with Identity generated last. Dropped: keying `id` on "a single Guid key named Id", which would reach a library entity — it keys on `Entity` or `IAuditableEntity` instead — Claude, technical.
+- 2026-09-25 — `EntityModelsTests.RealModels()` gains `AiDbContext` — Claude, technical — DocGen has been generating `docs/architecture/Ai/` since F-41 while every test built on that list was blind to `ai_calls`, so the new rule would have passed without ever looking at it.
 
 ## Out of scope
 - The ASP.NET Identity plumbing tables and the OpenIddict tables.
@@ -90,7 +92,21 @@ Make the database explain itself. Today the generated dictionary gives the type,
 - Re-approved: 2026-09-25
 
 ## Validation script
-<!-- Written at the end of build. -->
+The descriptions are the deliverable, so most of this is reading them. Run from the worktree `D:\dev\_icontrol\wt\simulab\feature-24`.
+
+1. Read the four generated dictionaries and say whether the words are right. This is the review agreed at refinement; a correction is one line of code.
+   - `docs/architecture/Identity/data-dictionary.md`, `docs/architecture/Catalog/data-dictionary.md`, `docs/architecture/Jobs/data-dictionary.md`, `docs/architecture/Ai/data-dictionary.md`
+2. Look at `users` in the Identity dictionary. Expected: all 31 columns described, including the ASP.NET Identity ones — `password_hash`, `security_stamp`, `lockout_end`, `access_failed_count` (v2).
+3. Look at `role_changes` in the same file. Expected: every column described except `added` and `removed`, which keep `JSON: RoleChangeItem (Key, Name)` — they are JSON containers and can carry no comment (v2, AC1b).
+4. Look at `jobs.status` in the Jobs dictionary. Expected: the sentence lists the values — 0 waiting, 1 running, 2 failed — and says there is no value for success.
+5. Start the app host and let it apply the migrations, then read the descriptions back from PostgreSQL itself. Expected: 14 tables, and 196 of 198 columns described; the two without are the JSON containers of step 3.
+   - Git Bash: `Database__Name=simulab_f24 dotnet run --project src/Hosts/Simulab.AppHost`, then the query below in another shell.
+   - PowerShell 7: `$env:Database__Name='simulab_f24'; dotnet run --project src\Hosts\Simulab.AppHost`, then the query below in another shell.
+   - The query, the same in both shells:
+     `docker exec -i -e PGPASSWORD=postgres $(docker ps --filter "name=postgres" --format "{{.Names}}" | head -1) psql -U postgres -d simulab_f24 -c "SELECT n.nspname||'.'||c.relname AS table, count(*) FILTER (WHERE col_description(c.oid,a.attnum) IS NOT NULL) AS described, count(*) AS columns FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped WHERE c.relkind='r' AND n.nspname IN ('identity','catalog','jobs','ai') AND obj_description(c.oid) IS NOT NULL GROUP BY 1 ORDER BY 1;"`
+6. Open that database in DataGrip and hover a column of `catalog.organizers`. Expected: the description shows in the tooltip, because it is a real `COMMENT ON` and not only a file in the repository.
+7. To see the guard work: delete one `.HasComment(...)` from any configuration and run `dotnet test tests/Simulab.ArchitectureTests`. Expected: `EveryColumnWeDefine_HasADescription` fails and names the table and the column. Put the line back.
+8. Stop the app host.
 
 ## Delivery
 - Branch: `feature/F-24`
