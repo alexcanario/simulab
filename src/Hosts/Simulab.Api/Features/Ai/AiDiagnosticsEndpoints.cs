@@ -17,7 +17,10 @@ public static class AiDiagnosticsEndpoints
 
         endpoints.MapPost("/ai/diagnostics", SendAsync)
             .WithName("SendAiDiagnostics")
-            .WithTags("Ai");
+            .WithTags("Ai")
+            // The committed OpenAPI document describes the API production serves; this route exists only
+            // in Development, so documenting it would promise callers an endpoint they will never reach.
+            .ExcludeFromDescription();
 
         return endpoints;
     }
