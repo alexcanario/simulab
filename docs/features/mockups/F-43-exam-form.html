@@ -493,7 +493,7 @@ a { color: inherit; }
                 <div class="app-field-input">
                   <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
                   <input type="text" id="exam-name" maxlength="200" autocomplete="off" aria-required="true"
-                         aria-describedby="exam-name-description">
+                         aria-describedby="exam-name-description" data-ph="Exams.Field.Name.Placeholder">
                 </div>
                 <span id="exam-name-description">
                   <span class="app-field-hint" data-i18n="Exams.Field.Name.Hint"></span>
@@ -519,7 +519,7 @@ a { color: inherit; }
                 <div class="app-field-input">
                   <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4 7.5 12h9L12 4zM3 21h8v-8H3v8zm14.5-8a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
                   <select id="exam-assessment-type" aria-required="true" aria-describedby="exam-assessment-type-description">
-                    <option value=""></option>
+                    <option value="" data-i18n="Exams.Field.AssessmentType.Placeholder"></option>
                     <option value="PublicServiceExam" data-i18n="Exams.AssessmentType.PublicServiceExam"></option>
                     <option value="Certification" data-i18n="Exams.AssessmentType.Certification"></option>
                     <option value="UniversityEntranceExam" data-i18n="Exams.AssessmentType.UniversityEntranceExam"></option>
@@ -691,10 +691,14 @@ const TEXTS = {
     "Exams.Field.IssuingAuthority.Placeholder": "Name or acronym",
     "Exams.Field.Name": "Name",
     "Exams.Field.Name.Hint": "2 to 200 characters",
+    "Exams.Field.Name.Placeholder": "E.g.: PMF 2026 Municipal Guard",
     "Exams.Field.AssessmentType": "Assessment type",
+    "Exams.Field.AssessmentType.Placeholder": "Select the assessment type",
     "Exams.Field.Scope": "Scope",
     "Exams.Field.State": "State",
+    "Exams.Field.State.Placeholder": "E.g.: Ceará",
     "Exams.Field.Municipality": "Municipality",
+    "Exams.Field.Municipality.Placeholder": "E.g.: Fortaleza/CE",
     "Exams.Field.ScopeDetail.Hint": "Where this exam applies.",
     "Exams.Field.ContentLanguage": "Content language",
     "Exams.Field.ContentLanguage.Hint": "The language the exam and its questions are written in. Content is never translated.",
@@ -755,10 +759,14 @@ const TEXTS = {
     "Exams.Field.IssuingAuthority.Placeholder": "Nome ou sigla",
     "Exams.Field.Name": "Nome",
     "Exams.Field.Name.Hint": "De 2 a 200 caracteres",
+    "Exams.Field.Name.Placeholder": "Ex.: Concurso PMF 2026 — Guarda Municipal",
     "Exams.Field.AssessmentType": "Tipo de avaliação",
+    "Exams.Field.AssessmentType.Placeholder": "Selecione o tipo de avaliação",
     "Exams.Field.Scope": "Abrangência",
     "Exams.Field.State": "Estado",
+    "Exams.Field.State.Placeholder": "Ex.: Ceará",
     "Exams.Field.Municipality": "Município",
+    "Exams.Field.Municipality.Placeholder": "Ex.: Fortaleza/CE",
     "Exams.Field.ScopeDetail.Hint": "Onde este exame se aplica.",
     "Exams.Field.ContentLanguage": "Idioma do conteúdo",
     "Exams.Field.ContentLanguage.Hint": "O idioma em que o exame e suas questões estão escritos. O conteúdo nunca é traduzido.",
@@ -819,10 +827,14 @@ const TEXTS = {
     "Exams.Field.IssuingAuthority.Placeholder": "Nome ou sigla",
     "Exams.Field.Name": "Nome",
     "Exams.Field.Name.Hint": "Entre 2 e 200 caracteres",
+    "Exams.Field.Name.Placeholder": "Ex.: Concurso CM Lisboa 2026 — Polícia Municipal",
     "Exams.Field.AssessmentType": "Tipo de avaliação",
+    "Exams.Field.AssessmentType.Placeholder": "Selecione o tipo de avaliação",
     "Exams.Field.Scope": "Abrangência",
     "Exams.Field.State": "Estado",
+    "Exams.Field.State.Placeholder": "Ex.: Ceará",
     "Exams.Field.Municipality": "Município",
+    "Exams.Field.Municipality.Placeholder": "Ex.: Fortaleza/CE",
     "Exams.Field.ScopeDetail.Hint": "Onde este exame se aplica.",
     "Exams.Field.ContentLanguage": "Idioma do conteúdo",
     "Exams.Field.ContentLanguage.Hint": "O idioma em que o exame e as suas questões estão escritos. O conteúdo nunca é traduzido.",
@@ -892,6 +904,8 @@ function applyLanguage() {
   $("page-title").textContent = state === "new" || state === "validation"
     ? t("Exams.Form.AddTitle") : t("Exams.Form.EditTitle");
   $("scope-detail-label").textContent = scope === "Municipal" ? t("Exams.Field.Municipality") : t("Exams.Field.State");
+  $("exam-scope-detail").placeholder = scope === "Municipal"
+    ? t("Exams.Field.Municipality.Placeholder") : t("Exams.Field.State.Placeholder");
   refreshAside();
   /* the error summary lists field labels, so it follows the language too */
   if (!$("error-summary").hidden) {
@@ -915,6 +929,8 @@ function setScope(value, announce) {
   $("scope-detail-wrap").hidden = !needsDetail;
   if (needsDetail) {
     $("scope-detail-label").textContent = value === "Municipal" ? t("Exams.Field.Municipality") : t("Exams.Field.State");
+    $("exam-scope-detail").placeholder = value === "Municipal"
+      ? t("Exams.Field.Municipality.Placeholder") : t("Exams.Field.State.Placeholder");
     if (announce) {
       $("live").textContent = t("Exams.ScopeDetail.Shown").replace("{0}", $("scope-detail-label").textContent);
     }

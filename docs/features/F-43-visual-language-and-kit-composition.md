@@ -139,14 +139,18 @@ after the form in the DOM, so the keyboard reaches the actions before it.
 
 #### Fields
 
-| Field | Component | Type / limits | Required | Leading icon |
-|---|---|---|---|---|
-| Issuing authority | `AppLookupField` `Id="exam-authority"` | server search, min 2 chars, max 20 candidates | yes | `AppIcons.IssuingAuthorities` |
-| Name | `AppTextField TValue="string"` `Id="exam-name"` | text, 2–200 (`CatalogLimits.ExamNameMaxLength`), `Autocomplete="off"` | yes | `AppIcons.Exams` |
-| Assessment type | `AppSelectField TValue="AssessmentType?"` `Id="exam-assessment-type"` | 4 options in `ExamText.AssessmentTypeOrder` | yes | `AppIcons.AssessmentType` (new) |
-| Content language | `AppSelectField TValue="string"` `Id="exam-content-language"` | `SupportedCultures.All`, each in its own name with `lang`; default `pt-BR` | yes | `AppIcons.Language` |
-| Scope | `AppRadioCards TValue="ExamScope?"` `Id="exam-scope"` | National / State / Municipal, each with a one-line description | yes | card icons: `AppIcons.Scope` (new), `AppIcons.Place` (new), `AppIcons.Place` |
-| State / Municipality | `AppTextField` `Id="exam-scope-detail"` inside `AppConditionalField` | text, max 120 (`CatalogLimits.ExamScopeDetailMaxLength`) | yes, only while visible | `AppIcons.Place` (new) |
+| Field | Component | Type / limits | Required | Leading icon | Placeholder |
+|---|---|---|---|---|---|
+| Issuing authority | `AppLookupField` `Id="exam-authority"` | server search, min 2 chars, max 20 candidates | yes | `AppIcons.IssuingAuthorities` | `Exams.Field.IssuingAuthority.Placeholder` (already exists, reused unchanged) |
+| Name | `AppTextField TValue="string"` `Id="exam-name"` | text, 2–200 (`CatalogLimits.ExamNameMaxLength`), `Autocomplete="off"` | yes | `AppIcons.Exams` | `Exams.Field.Name.Placeholder` (new) |
+| Assessment type | `AppSelectField TValue="AssessmentType?"` `Id="exam-assessment-type"` | 4 options in `ExamText.AssessmentTypeOrder` | yes | `AppIcons.AssessmentType` (new) | `Exams.Field.AssessmentType.Placeholder` (new) — the text of the empty option, as the reference does for its own select |
+| Content language | `AppSelectField TValue="string"` `Id="exam-content-language"` | `SupportedCultures.All`, each in its own name with `lang`; default `pt-BR` | yes | `AppIcons.Language` | none: the field always carries a value (F-34's `DefaultContentLanguage`), so it has no empty option to hold one |
+| Scope | `AppRadioCards TValue="ExamScope?"` `Id="exam-scope"` | National / State / Municipal, each with a one-line description | yes | card icons: `AppIcons.Scope` (new), `AppIcons.Place` (new), `AppIcons.Place` | none: radio cards have no input; the three cards and their descriptions are the example |
+| State / Municipality | `AppTextField` `Id="exam-scope-detail"` inside `AppConditionalField` | text, max 120 (`CatalogLimits.ExamScopeDetailMaxLength`) | yes, only while visible | `AppIcons.Place` (new) | `Exams.Field.State.Placeholder` or `Exams.Field.Municipality.Placeholder` (new), following the label |
+
+A placeholder is a worked example (`Ex.: ...`), in the style of the Simulae reference: it never replaces the
+label, which stays above the field, and it never carries a rule — the limits and the format live in the hint,
+so no required format exists only inside a placeholder that disappears as soon as the Admin types.
 
 Behaviour is unchanged from F-34: leaving `State` or `Municipal` hides the detail and clears its value and
 its message (AC4); the label is `Exams.Field.State` or `Exams.Field.Municipality`; validation runs on blur
@@ -260,6 +264,10 @@ New (BR10, AC13):
 | `Exams.Scope.State.Description` | Asks for the state. | Pede o estado. | Pede o estado. |
 | `Exams.Scope.Municipal.Description` | Asks for the municipality. | Pede o município. | Pede o município. |
 | `Exams.ScopeDetail.Shown` | {0} is now required. | {0} agora é obrigatório. | {0} passou a ser obrigatório. |
+| `Exams.Field.Name.Placeholder` | E.g.: PMF 2026 Municipal Guard | Ex.: Concurso PMF 2026 — Guarda Municipal | Ex.: Concurso CM Lisboa 2026 — Polícia Municipal |
+| `Exams.Field.AssessmentType.Placeholder` | Select the assessment type | Selecione o tipo de avaliação | Selecione o tipo de avaliação |
+| `Exams.Field.State.Placeholder` | E.g.: Ceará | Ex.: Ceará | Ex.: Ceará |
+| `Exams.Field.Municipality.Placeholder` | E.g.: Fortaleza/CE | Ex.: Fortaleza/CE | Ex.: Fortaleza/CE |
 | `Exams.Form.Aside.Title` | Summary | Resumo | Resumo |
 | `Exams.Form.Aside.Checklist` | Before saving | Antes de salvar | Antes de guardar |
 | `Common.Summary.NotFilled` | Not filled | Não preenchido | Por preencher |
