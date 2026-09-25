@@ -39,6 +39,9 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The coach answers from the app's data through tool calls. If the data is missing, it says so; it never states exam facts from model memory.
 - Tests use a fake gateway. No real AI call in unit, integration or CI runs.
 
+## API
+- A route mapped only in Development is excluded from the OpenAPI document (`.ExcludeFromDescription()`): the committed `docs/api/` describes what production serves, and the DocGen route map reads it (F-41).
+
 ## Integration
 - Cross-module events use the in-process integration events abstraction. Never reference MassTransit or RabbitMQ.
 - Long work (import, OCR, extraction) is a job in the job table, run by the worker in the `Api` host. Never inside a request or a Blazor circuit.

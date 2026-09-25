@@ -82,6 +82,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[stack: DocGen]` feature-ship step 7b says a new module or external system "updates `docs/architecture/overview.md` by hand", but DocGen reports stale and deletes every file under `docs/architecture/` it does not generate (`GeneratedDocs.StaleFiles`/`Write`); a hand-written overview lives outside that folder (Simulab: `docs/architecture-overview.md`, guarded by `ArchitectureOverviewTests`) | F-23 | |
 | ⏳ | `[generic]` feature-refinement: when two business actors would share one table, the refinement asks who owns what before reusing it — a screen will offer the wrong one and the Api will accept it | F-34 | |
 | ⏳ | `[stack: MudBlazor]` screen-design: an accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file — `MudAutocomplete` 9.9 renders a plain text input, with no `role="combobox"` and no `aria-expanded` | F-34 | |
+| ⏳ | `[generic]` The Stop gate can print GREEN while a new warning sits in a project its incremental build skipped: a warning count is trustworthy only from a non-incremental build. Also, a test that rewrites a committed file (an OpenAPI document, a snapshot) has its output swept in by `git add -A` — the build skill should say to read `git status` before committing, not stage blindly | F-41 | |
+| ⏳ | `[profile: modular-monolith]` feature-refinement: before writing `## Screens and API`, confirm which host owns the screen's data and how that host reaches it. In a modular monolith the UI and the API are different hosts, so "the page calls the service in process" is a premise, not a given | F-41 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -602,3 +604,9 @@ Shipped in `3386b40` from the worktree `f-34`, version 2. Validated on screen on
 - `missingCapabilities`: none.
 - Noted: the session loaded its skills from the 0.0.59 cache while the installed plugin was 0.0.61; the sync ran with the 0.0.61 scripts. Worth watching if it repeats.
 
+## 2026-09-25 — F-41 AI gateway
+Shipped in `28356db` from the worktree `feature-41`, version 2. Full suite 1214 tests, 61 s; build 20 s, 0 warnings. Validated on screen by the owner; Claude had opened the app host against its own database `simulab_f41` first.
+- Project rule (`project.md`, new section API): a route mapped only in Development is excluded from the OpenAPI document. The diagnostics route had reached `docs/api/Simulab.Api.json` through the host test that rewrites it, and the DocGen route map then documented an endpoint production never serves.
+- ⏳ `plugin` `[generic]`: the Stop gate reported GREEN with a new `CS1574` in `Simulab.Ai`, which its incremental build had skipped; only `--no-incremental` showed it. The same commit also carried a file a test had rewritten, staged by `git add -A`.
+- ⏳ `plugin` `[profile: modular-monolith]`: `## Screens and API` claimed the page would call `IAiGateway` in process. The Web host has no database and references no module, so the build stopped for a change note (v2) that added the Development-only endpoint and the typed client.
+- Nothing: the two contrast defects found during the screen check belong to components this item only passed through (B-16 field hints, B-17 selected menu item); they are bugs, not rules.
