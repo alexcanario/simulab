@@ -90,11 +90,196 @@ are short, with colour carrying meaning — instead of a single column of plain 
 
 ## Screens and API
 No endpoint, no route and no schema change: this item rewrites how the existing screens are composed. The
-routes of BR8 stay exactly as they are, and `/dev/ui` gains nine sections.
+routes of BR8 stay exactly as they are, and `/dev/ui` gains nine sections. The exam form keeps the API it
+already calls (`GET/POST/PUT /api/v1/catalog/exams`, `GET /api/v1/catalog/issuing-authorities`) and its
+error codes; no request or response field changes.
 
-The detailed screen section and the mockup come from `/agile:screen` on `/admin/exams/{id}` (the exam form),
-the reference screen: it is the only page that uses a section card, a form grid, radio cards, a conditional
-field, a leading icon and the aside at once.
+Mockup: `docs/features/mockups/F-43-exam-form.html` (state, language and theme switchers; sample data of a
+municipal exam of Prefeitura Municipal de Fortaleza, PMF).
+
+### Reference screen — exam form (`/admin/exams/new`, `/admin/exams/{id:guid}`)
+
+Permission: `catalog.manage`, checked by the route attribute that is already there
+(`[Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]`), by the menu item and by the
+`Add` / `Edit` actions on `/admin/exams`. A visitor without it gets `NotFoundContent`, as F-2 BR7 decided:
+a page whose permission is missing looks exactly like one that does not exist. Only the Admin role carries
+the permission today; the check is by permission, never by role name.
+
+#### Layout
+
+Page header (`AppPageHeader`, unchanged): breadcrumb `Content / Exams / <name or Add exam>`, `h1` with
+`Exams.Form.AddTitle` or `Exams.Form.EditTitle`, no primary action at the top right (the form owns the only
+primary button).
+
+Below it, `.app-form-layout`: a two-column grid, `minmax(0, 1fr)` for the form and `20rem` for the aside,
+gap `--app-space-4`, `align-items: start`. At `max-width: 1279.98px` it becomes one column and the aside
+stacks **below** the form (never hidden: it is the only place that lists what is still missing). At
+`max-width: 599.98px` every form grid row also collapses to one column (AC3).
+
+Column 1 — the form card (`MudPaper.app-form-card`, `Elevation="0"`, the surface the page already uses),
+in this order:
+
+| Order | Block | Contents |
+|---|---|---|
+| 1 | `AppErrorSummary` | Only after a failed save. Lists every offending field as a link to it (UC3, AC5). |
+| 2 | `AppAlert Severity="Error"` | Only for a server/business refusal that belongs to no single field. |
+| 3 | `AppSectionCard` **Identification** | `AppFormGrid Columns="2"`: issuing authority, name. |
+| 4 | `AppSectionCard` **Classification** | `AppFormGrid Columns="2"`: assessment type, content language. |
+| 5 | `AppSectionCard` **Where the exam applies** | `AppRadioCards` for the scope (3 cards, one row), then `AppConditionalField` with the state/municipality field. |
+| 6 | `AppFormActions` | Bottom right of the form card: `Cancel` (text) then `Save` (filled primary). BR4. |
+
+A section card is a bordered region **inside** the form card — the same shape `.app-permission-group`
+already has on `/admin/roles` (1 px `divider` border, radius, own padding), not a second elevated paper.
+That keeps one surface per page, keeps `AppFormActions` at the bottom right of the card the rule asks for,
+and still reads as the reference's sectioned blocks.
+
+Column 2 — `AppFormAside` (`MudPaper.app-form-aside`, `position: sticky; top: var(--app-space-4)`), read-only,
+no button (BR4, AC7): summary rows for the six values, then a checklist of what is still missing. It comes
+after the form in the DOM, so the keyboard reaches the actions before it.
+
+#### Fields
+
+| Field | Component | Type / limits | Required | Leading icon |
+|---|---|---|---|---|
+| Issuing authority | `AppLookupField` `Id="exam-authority"` | server search, min 2 chars, max 20 candidates | yes | `AppIcons.IssuingAuthorities` |
+| Name | `AppTextField TValue="string"` `Id="exam-name"` | text, 2–200 (`CatalogLimits.ExamNameMaxLength`), `Autocomplete="off"` | yes | `AppIcons.Exams` |
+| Assessment type | `AppSelectField TValue="AssessmentType?"` `Id="exam-assessment-type"` | 4 options in `ExamText.AssessmentTypeOrder` | yes | `AppIcons.AssessmentType` (new) |
+| Content language | `AppSelectField TValue="string"` `Id="exam-content-language"` | `SupportedCultures.All`, each in its own name with `lang`; default `pt-BR` | yes | `AppIcons.Language` |
+| Scope | `AppRadioCards TValue="ExamScope?"` `Id="exam-scope"` | National / State / Municipal, each with a one-line description | yes | card icons: `AppIcons.Scope` (new), `AppIcons.Place` (new), `AppIcons.Place` |
+| State / Municipality | `AppTextField` `Id="exam-scope-detail"` inside `AppConditionalField` | text, max 120 (`CatalogLimits.ExamScopeDetailMaxLength`) | yes, only while visible | `AppIcons.Place` (new) |
+
+Behaviour is unchanged from F-34: leaving `State` or `Municipal` hides the detail and clears its value and
+its message (AC4); the label is `Exams.Field.State` or `Exams.Field.Municipality`; validation runs on blur
+and on submit; the API stays the authority and its refusals land on the field that caused them.
+
+#### The nine kit components used here
+
+| Component | Parameters (`*` = `[EditorRequired]`) | On this screen |
+|---|---|---|
+| `AppSectionCard` | `Title*`, `Icon*`, `Subtitle`, `Id`, `ChildContent*` | three of them; `Icon` is an `AppIcons` constant, the only accent icon in content (BR3) |
+| `AppFormGrid` | `Columns*` (1, 2 or 3), `ChildContent*` | two of them, `Columns="2"` |
+| `AppRadioCards<TValue>` | `Id*`, `Label*`, `Options*` (`AppRadioCardOption<TValue>(Value, Text, Description, Icon)`), `Value`, `ValueChanged`, `Columns`, `Required`, `Error` | the scope (UC2) |
+| `AppConditionalField` | `Visible*`, `ChildContent*`, `OnHidden` | the state/municipality field; `OnHidden` is what clears the value |
+| leading icon on fields | `LeadingIcon`, on `AppTextField`, `AppSelectField`, `AppLookupField` | five fields; the icon is decorative (`aria-hidden="true"`), never the only carrier of meaning |
+| `AppStatusChip` | `Text*`, `Status*` (`Neutral`/`Success`/`Warning`/`Error`/`Info`) | **not used here** — the exam has no status field. See open question 1 |
+| `AppErrorSummary` | `Title*`, `Items*` (`AppErrorSummaryItem(FieldId, Label)`), `Visible` | after a failed save |
+| `AppFormAside` | `Title*`, `Rows*` (`AppAsideRow(Label, Value)`), `ChecklistTitle*`, `Checklist*` (`AppChecklistItem(Label, Done)`) | the summary column; no action slot at all |
+| `AppItemRows` | `Items*`, `RowTemplate*`, `Actions`, `EmptyMessage*` | **not used here** — the editions arrive with F-35. See open question 1 |
+
+`AppFormActions`, `AppPageHeader`, `AppAlert`, `AppLoadingState` and the three field components are used as
+they are today; only the leading-icon parameter is added to the fields.
+
+#### States
+
+| # | State | What the screen shows |
+|---|---|---|
+| S1 | Loading (edit route only) | `AppLoadingState` replaces the whole two-column layout; `role="status"`, `Common.Loading`. |
+| S2 | Empty / new | Every field blank except content language (`pt-BR`) and no scope chosen; the conditional field is absent; the aside shows `Common.Summary.NotFilled` on every row and five pending checklist items. This is the form's empty state. |
+| S3 | Ready (edit) | Values loaded, breadcrumb carries the exam name, `Save` disabled until something changes (`HasChanges`), aside filled, checklist all done. |
+| S4 | Saving | `Save` disabled, spinner plus `Common.Saving` inside it, `Cancel` disabled, fields stay enabled but the form is not resubmittable. |
+| S5 | Success | Snackbar `Exams.Saved` (kit position and duration); on add, the route is replaced by `/admin/exams/{id}` and the title becomes `Exams.Form.EditTitle`; the page stays open. |
+| S6 | Validation error | `AppErrorSummary` at the top of the card with one link per offending field, each field also shows its own message, focus moves to the summary, nothing is sent. |
+| S7 | Server / business error | Field-owned refusals (`exam.name_taken`, `exam.scope_detail_too_long`, `exam.issuing_authority_required`) go to the field; anything else is `AppAlert Severity="Error"` at the top of the card with the text of the code through `ErrorText`. |
+| S8 | Not found | The card holds `AppAlert` with `exam.not_found` and the `Exams.BackToList` link — today's behaviour, now inside the form card. |
+| S9 | Permission denied | `NotFoundContent` (`NotFound.Title`, `NotFound.Message`): the route is indistinguishable from one that does not exist (F-2 BR7). |
+| S10 | Conditional hidden | Scope `National`: no detail field, its value and message cleared, the aside row reads `Common.Summary.NotFilled` and the checklist item for it disappears. |
+| S11 | Conditional shown — state | Scope `State`: the field appears labelled `Exams.Field.State`, required, empty. |
+| S12 | Conditional shown — municipal | Scope `Municipal`: the same field labelled `Exams.Field.Municipality`. |
+| S13 | Unsaved changes | Leaving the page asks `Common.Discard.*` through `AppFormActions`'s `NavigationLock` — unchanged. |
+
+#### Accessibility (WCAG 2.2 AA)
+
+- `h1` is the page title and takes focus on navigation (`FocusOnNavigate`). Each `AppSectionCard` is a
+  `<section aria-labelledby="...-title">` whose title is an `h2`; its subtitle is inside the section, read
+  after the heading. The card's icon is `aria-hidden="true"`.
+- `AppFormGrid` only sets `grid-template-columns`, so the DOM order is the reading and tab order:
+  issuing authority → name → assessment type → content language → scope group → detail field (when
+  visible) → Cancel → Save → aside. The aside is last and contains no focusable element.
+- `AppRadioCards` is a `role="radiogroup"` labelled by its own label, with roving `tabindex`: one tab stop,
+  arrow keys move and select, Space selects. Each card is `role="radio"` with `aria-checked`, and its
+  description is bound with `aria-describedby`, so the reader hears "National, valid across the country,
+  radio button, 1 of 3, selected". Cards are at least 44 px tall.
+- `AppConditionalField` is a `<div role="group">`. When it appears, a polite live region announces
+  `Exams.ScopeDetail.Shown` with the label ("State is now required."); focus is not moved, so the keyboard
+  does not lose its place inside the radio group.
+- `AppErrorSummary` is `role="alert"`, `tabindex="-1"` and receives focus when a save fails; each item is a
+  real link to `#<field-id>`. In-page links need the `wwwroot/js/shell.js` handling the skip link already
+  has (rule `ui-project`), otherwise `<base href="/">` navigates away.
+- Fields keep the kit's contract: label above with `for`, `aria-describedby` pointing at the hint or the
+  error, `aria-invalid`, `aria-required`; the `*` marker is `aria-hidden`. The hint is a hint until the
+  field errs, then it is the message — never both.
+- The aside is a `<aside aria-labelledby="exam-summary-title">` with no live region: it changes on every
+  keystroke and would flood the reader. Each checklist item carries its state as text
+  (`Common.Checklist.Done` / `Common.Checklist.Pending`) in an `app-visually-hidden` span, so the tick is
+  never the only carrier.
+- `Save` announces its progress with `role="status"` and `Common.Saving`; the snackbar is the kit's, polite.
+- Every clickable target is at least 24 px, has a pointer cursor and the focus ring already defined in
+  `app.css` (2 px `--mud-palette-primary`, offset 2 px) — the fourth and last place the accent appears (BR3).
+
+#### Colour, and where the accent appears (BR3, BR6)
+
+Only `SimulabTheme` tokens; no new hue. Ratios not already pinned by `ThemeContrastTests`, computed from the
+tokens in both themes:
+
+| Pair | Light | Dark | Needs |
+|---|---|---|---|
+| Field hint `text-secondary` on `surface` (BR6 fix: today `text-disabled`) | 6.92:1 | 4.89:1 | 4.5:1 |
+| Field hint `text-secondary` on `background` | 6.34:1 | 5.36:1 | 4.5:1 |
+| Selected radio card: `text-primary` on `primary-lighten` | 13.75:1 | 12.44:1 | 4.5:1 |
+| Selected radio card description: `text-secondary` on `primary-lighten` | 6.33:1 | 4.60:1 | 4.5:1 |
+| Selected radio card border: `primary` on `primary-lighten` | 4.45:1 | 5.69:1 | 3:1 |
+| Checklist done mark: `success` on `surface` | 3.32:1 | 4.89:1 | 3:1 |
+| Section card icon: `primary` on `surface` (already pinned by B-8) | 5.36:1 | 6.04:1 | 3:1 |
+
+The section card's 1 px `divider` border is decorative (1.43:1 light): the section is also named by its
+heading and separated by spacing, so no information depends on that line. The error summary is the kit's
+filled `AppAlert` (its ink is pinned by F-10 and B-9); no card, panel or alert gets a tinted background of
+its own (BR3, AC12).
+
+#### Resource keys
+
+Reused, unchanged: `Exams.Form.AddTitle`, `Exams.Form.EditTitle`, `Exams.Field.IssuingAuthority(.Hint,
+.Placeholder)`, `Exams.Field.Name(.Hint)`, `Exams.Field.AssessmentType`, `Exams.Field.Scope`,
+`Exams.Field.State`, `Exams.Field.Municipality`, `Exams.Field.ScopeDetail.Hint`,
+`Exams.Field.ContentLanguage(.Hint)`, `Exams.Scope.*`, `Exams.AssessmentType.*`, `Exams.Saved`,
+`Exams.BackToList`, `Exams.Title`, `Nav.Section.Content`, `Common.Save`, `Common.Saving`, `Common.Cancel`,
+`Common.Loading`, `Common.TryAgain`, `Common.Discard.*`, `NotFound.Title`, `NotFound.Message`, and the
+`exam.*` error codes.
+
+New (BR10, AC13):
+
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `Exams.Section.Identification` | Identification | Identificação | Identificação |
+| `Exams.Section.Identification.Subtitle` | Who publishes the exam and how it is named in the catalog. | Quem publica o exame e como ele é chamado no catálogo. | Quem publica o exame e como é designado no catálogo. |
+| `Exams.Section.Classification` | Classification | Classificação | Classificação |
+| `Exams.Section.Classification.Subtitle` | The kind of assessment and the language its content is written in. | O tipo de avaliação e o idioma em que o conteúdo é escrito. | O tipo de avaliação e o idioma em que o conteúdo está escrito. |
+| `Exams.Section.Scope` | Where the exam applies | Onde o exame se aplica | Onde o exame se aplica |
+| `Exams.Section.Scope.Subtitle` | The territory the exam covers. A state or municipal exam also names the place. | O território que o exame cobre. Exame estadual ou municipal também informa o local. | O território que o exame abrange. Exame estadual ou municipal também indica o local. |
+| `Exams.Scope.National.Description` | Valid across the country. | Vale em todo o país. | Válido em todo o país. |
+| `Exams.Scope.State.Description` | Asks for the state. | Pede o estado. | Pede o estado. |
+| `Exams.Scope.Municipal.Description` | Asks for the municipality. | Pede o município. | Pede o município. |
+| `Exams.ScopeDetail.Shown` | {0} is now required. | {0} agora é obrigatório. | {0} passou a ser obrigatório. |
+| `Exams.Form.Aside.Title` | Summary | Resumo | Resumo |
+| `Exams.Form.Aside.Checklist` | Before saving | Antes de salvar | Antes de guardar |
+| `Common.Summary.NotFilled` | Not filled | Não preenchido | Por preencher |
+| `Common.Checklist.Done` | Done | Concluído | Concluído |
+| `Common.Checklist.Pending` | Pending | Pendente | Pendente |
+| `Common.ErrorSummary.Title` | This form cannot be saved yet | Ainda não é possível salvar este formulário | Ainda não é possível guardar este formulário |
+| `Common.ErrorSummary.Intro` | Fill in these fields: | Preencha estes campos: | Preencha estes campos: |
+| `Gallery.Section.SectionCard` | Section card | Cartão de seção | Cartão de secção |
+| `Gallery.Section.FormGrid` | Form grid | Grade do formulário | Grelha do formulário |
+| `Gallery.Section.RadioCards` | Radio cards | Cartões de opção | Cartões de opção |
+| `Gallery.Section.ConditionalField` | Conditional field | Campo condicional | Campo condicional |
+| `Gallery.Section.FieldIcon` | Field with a leading icon | Campo com ícone inicial | Campo com ícone inicial |
+| `Gallery.Section.StatusChip` | Status chip | Etiqueta de estado | Etiqueta de estado |
+| `Gallery.Section.ErrorSummary` | Error summary | Resumo de erros | Resumo de erros |
+| `Gallery.Section.FormAside` | Form aside | Resumo lateral | Resumo lateral |
+| `Gallery.Section.ItemRows` | Item rows | Linhas de itens | Linhas de itens |
+
+New `AppIcons` constants (Material Outlined, rule `ui-project`): `AssessmentType = Category`,
+`Scope = Public`, `Place = Place`, `Pending = RadioButtonUnchecked`. `Verified` (CheckCircle) is reused for
+the checklist's done mark.
 
 ## Acceptance criteria
 - AC1 Given the gallery, when it is opened in Development, then it renders a section for each of the nine
@@ -151,6 +336,10 @@ field, a leading icon and the aside at once.
   `build-config`).
 - 2026-09-25 — Density changes inside the cards only (BR9) — a global density change would move every screen,
   including the ones this item does not touch.
+- 2026-09-25 — The mockup's drawer is chrome copied from the app as it is today, selected item included
+  (`rgba(255,255,255,.14)` behind unchanged text). It does **not** show BR7's fix, so the owner will not see
+  B-17 resolved in the mockup; the fix and its `ThemeContrastTests` pair are still part of this item. Checked
+  in the mockup file, not reported by the design pass.
 
 ## Out of scope
 - A new brand: palette, logo and identity of Simulab's own (D-2 option C, parked).
@@ -159,7 +348,16 @@ field, a leading icon and the aside at once.
 - Any behaviour change on the twelve screens: this item changes how they are composed, not what they do.
 
 ## Open questions
-- (none)
+- Q1 (screen design, 2026-09-25) Two of the nine patterns have no place on the reference screen: the exam
+  carries no status field, and its editions only arrive with F-35. Where do `AppStatusChip` and
+  `AppItemRows` get their first real use, so AC6 has a screen to check? Recommendation: the chip on the
+  `Users` list, which already renders `AccountStatus.Active` / `AccountStatus.Pending` through
+  `.app-status`, and `AppItemRows` only in the gallery until F-35 — the mockup shows the chip in a strip
+  marked as demo so its look can be approved now.
+- Q2 (screen design, 2026-09-25) Below 1280 px the aside stacks under the form. The item does not say
+  whether it should stay or disappear on a phone. Recommendation: keep it stacked — it is the only place
+  that lists what is still missing, and hiding it would lose that on the smallest screen where it matters
+  most.
 
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->

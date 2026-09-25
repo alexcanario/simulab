@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-43 - Exam form (reference screen)</title>
+<style>
+/* ===========================================================================
+   F-43 mockup - /admin/exams/new and /admin/exams/{id}
+   Every colour is a SimulabTheme token (src/Hosts/Simulab.Web/Theme/SimulabTheme.cs).
+   The scale tokens below are the ones BR5 puts on :root in app.css.
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  /* Type scale */
+  --app-font-xs: 0.75rem;
+  --app-font-sm: 0.8125rem;
+  --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem;
+  --app-font-xl: 1.25rem;
+  --app-font-xxl: 1.75rem;
+  /* Spacing scale */
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 24px;
+  --app-space-6: 32px;
+  /* Radius scale */
+  --app-radius-sm: 6px;
+  --app-radius-md: 10px;
+  --app-radius-lg: 14px;
+
+  /* PaletteLight */
+  --primary: #216DB5;
+  --primary-darken: #1858A0;
+  --primary-lighten: #EBF3FD;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --error: #BE3737;
+  --error-contrast: #FFFFFF;
+  --background: #F2F5FB;
+  --surface: #FFFFFF;
+  --drawer: #0F3266;
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #0F3266;
+  --appbar-text: #FFFFFF;
+  --text-primary: #19243E;
+  --text-secondary: #4A5A7A;
+  --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1;
+  --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  /* PaletteDark */
+  --primary: #64A2E3;
+  --primary-darken: #5096DC;
+  --primary-lighten: #162540;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --error: #E06C6C;
+  --error-contrast: #19243E;
+  --background: #0E1828;
+  --surface: #172035;
+  --drawer: #091422;
+  /* BR7 fixes the drawer's dim text; the mockup shows the readable value. */
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #091422;
+  --appbar-text: #FFFFFF;
+  --text-primary: #E0E8F8;
+  --text-secondary: #7A8EB0;
+  --action-default: #7A8EB0;
+  --lines-inputs: #61718F;
+  --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md);
+  line-height: 1.65;
+  background: var(--background);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+svg { display: block; flex-shrink: 0; }
+a { color: inherit; }
+:is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.app-visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2);
+  padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider);
+}
+.demo-label {
+  font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1);
+}
+.demo button {
+  font: inherit; font-size: var(--app-font-xs); font-weight: 600;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary);
+}
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--surface); }
+[data-theme="dark"] .demo button[aria-pressed="true"] { color: #19243E; }
+
+/* ---- app shell ---- */
+.appbar {
+  height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2);
+  padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text);
+}
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--success);
+  color: var(--success-contrast); display: flex; align-items: center; justify-content: center;
+  font-size: var(--app-font-xs); font-weight: 700;
+}
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer {
+  width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text);
+  padding: var(--app-space-3) var(--app-space-2); overflow-y: auto;
+}
+.nav-section {
+  display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1);
+  font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7;
+}
+.nav-link {
+  display: flex; align-items: center; gap: var(--app-space-3);
+  padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent;
+  border-radius: var(--app-radius-sm); font-size: var(--app-font-sm); cursor: pointer;
+}
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] {
+  background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600;
+}
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-breadcrumbs a { text-decoration: underline; text-underline-offset: 2px; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+
+/* ---- page layout: form + read-only aside (BR4) ---- */
+.app-form-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: var(--app-space-4); align-items: start;
+}
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.app-form-card {
+  background: var(--surface); border: 1px solid var(--divider);
+  border-radius: var(--app-radius-md); padding: var(--app-space-5);
+}
+
+/* ---- AppSectionCard: same shape as the existing .app-permission-group ---- */
+.app-section-card {
+  border: 1px solid var(--divider); border-radius: var(--app-radius-md);
+  padding: var(--app-space-4) var(--app-space-4) var(--app-space-3);
+  margin-bottom: var(--app-space-4);
+}
+.app-section-card-title {
+  display: flex; align-items: center; gap: var(--app-space-2);
+  font-size: var(--app-font-lg); font-weight: 600; color: var(--text-primary);
+}
+/* BR3, place 1 of 4: the section card's icon and title carry the accent. */
+.app-section-card-icon { color: var(--primary); }
+.app-section-card-subtitle {
+  font-size: var(--app-font-xs); color: var(--text-secondary);
+  margin: var(--app-space-1) 0 var(--app-space-4);
+}
+
+/* ---- AppFormGrid ---- */
+.app-form-grid { display: grid; gap: var(--app-space-3) var(--app-space-4); }
+.app-form-grid-1 { grid-template-columns: minmax(0, 1fr); }
+.app-form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.app-form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 599.98px) {
+  .app-form-grid-2, .app-form-grid-3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- fields ---- */
+.app-field { margin-bottom: var(--app-space-4); }
+.app-form-grid .app-field { margin-bottom: 0; }
+.app-field-label {
+  display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1);
+}
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input {
+  display: flex; align-items: center; gap: var(--app-space-2);
+  height: 42px; padding: 0 var(--app-space-3);
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm);
+  background: var(--surface); color: var(--text-primary);
+}
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.app-field-input input, .app-field-input select {
+  flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent;
+  color: var(--text-primary); font: inherit; font-size: var(--app-font-md);
+}
+.app-field-input select { cursor: pointer; }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+/* BR3, place 3 of 4: the field's leading icon. */
+.app-field-icon { color: var(--primary); }
+.app-field-error .app-field-input { border-color: var(--error); }
+/* BR6: the hint reads in text-secondary (6.92:1 light, 4.89:1 dark on the surface). */
+.app-field-hint, .app-field-error-text {
+  display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1);
+}
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+
+/* ---- AppRadioCards ---- */
+.app-radio-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--app-space-3); }
+@media (max-width: 899.98px) { .app-radio-cards { grid-template-columns: minmax(0, 1fr); } }
+.app-radio-card {
+  display: flex; align-items: flex-start; gap: var(--app-space-2);
+  min-height: 56px; padding: var(--app-space-3);
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm);
+  background: var(--surface); color: var(--text-primary); text-align: left; cursor: pointer; font: inherit;
+}
+.app-radio-card[aria-checked="true"] { border-color: var(--primary); background: var(--primary-lighten); }
+.app-radio-dot {
+  width: 18px; height: 18px; margin-top: 2px; border-radius: 50%;
+  border: 2px solid var(--lines-inputs); display: flex; align-items: center; justify-content: center;
+}
+.app-radio-card[aria-checked="true"] .app-radio-dot { border-color: var(--primary); }
+.app-radio-card[aria-checked="true"] .app-radio-dot::after {
+  content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--primary);
+}
+.app-radio-card-text { font-size: var(--app-font-sm); font-weight: 600; }
+.app-radio-card-description { font-size: var(--app-font-xs); color: var(--text-secondary); line-height: 1.4; }
+
+/* ---- AppConditionalField ---- */
+.app-conditional-field { margin-top: var(--app-space-4); max-width: 22rem; }
+.app-conditional-field[hidden] { display: none; }
+
+/* ---- AppErrorSummary / AppAlert (filled, kit) ---- */
+.app-alert {
+  display: flex; gap: var(--app-space-3); align-items: flex-start;
+  padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm);
+  background: var(--error); color: var(--error-contrast); margin-bottom: var(--app-space-4);
+  font-size: var(--app-font-sm);
+}
+.app-alert[hidden] { display: none; }
+.app-alert-title { font-weight: 700; }
+.app-error-summary-list { margin: var(--app-space-1) 0 0; padding-left: var(--app-space-5); }
+.app-error-summary-list a { color: inherit; }
+
+/* ---- AppFormActions (BR4: bottom right of the form card) ---- */
+.app-form-actions {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: var(--app-space-2); margin-top: var(--app-space-5);
+}
+.app-button {
+  font: inherit; font-size: var(--app-font-md); font-weight: 600; cursor: pointer;
+  min-height: 40px; padding: 0 var(--app-space-5); border-radius: var(--app-radius-sm);
+  display: inline-flex; align-items: center; gap: var(--app-space-2);
+}
+.app-button-text { border: 0; background: transparent; color: var(--text-primary); }
+.app-button-filled { border: 0; background: var(--primary); color: var(--surface); }
+[data-theme="dark"] .app-button-filled { color: #19243E; }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppFormAside (read-only, no button) ---- */
+.app-form-aside {
+  position: sticky; top: var(--app-space-4);
+  background: var(--surface); border: 1px solid var(--divider);
+  border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3);
+}
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-aside-row {
+  display: flex; justify-content: space-between; gap: var(--app-space-3);
+  padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm);
+}
+.app-aside-row:last-of-type { border-bottom: 0; }
+.app-aside-row-label { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-aside-row-value { text-align: right; }
+.app-aside-row-value.empty { color: var(--text-secondary); font-style: italic; }
+.app-checklist-title {
+  font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-secondary); margin: var(--app-space-4) 0 var(--app-space-2);
+}
+.app-checklist { list-style: none; display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-checklist li { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-sm); }
+.app-check-done { color: var(--success); }
+.app-check-pending { color: var(--text-secondary); }
+
+/* ---- states ---- */
+.app-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md);
+  color: var(--text-secondary);
+}
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-link { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---- snackbar ---- */
+.app-snackbar {
+  position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 50;
+  display: flex; align-items: center; gap: var(--app-space-2);
+  padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm);
+  background: var(--success); color: var(--success-contrast); font-weight: 600;
+  font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25);
+}
+.app-snackbar[hidden] { display: none; }
+
+/* ---- AppStatusChip: not used by this screen; shown in the demo strip (open question 1) ---- */
+.kit-strip {
+  margin-top: var(--app-space-5); padding: var(--app-space-3) var(--app-space-4);
+  border: 1px dashed var(--divider); border-radius: var(--app-radius-md);
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--app-space-3);
+  font-size: var(--app-font-xs); color: var(--text-secondary);
+}
+/* BR3, place 2 of 4: the status chip. Text is text-primary on the surface; the dot carries the state
+   colour, so the chip is never colour alone. */
+.app-status-chip {
+  display: inline-flex; align-items: center; gap: var(--app-space-2);
+  padding: 2px 10px; border: 1px solid var(--divider); border-radius: 20px;
+  background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600;
+}
+.app-status-chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip.is-success::before { background: var(--success); }
+.app-status-chip.is-warning::before { background: var(--warning); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <span class="demo-label">Demo &middot; state</span>
+  <button type="button" data-state="loading">Loading</button>
+  <button type="button" data-state="new" aria-pressed="true">New (empty)</button>
+  <button type="button" data-state="ready">Ready (edit)</button>
+  <button type="button" data-state="saving">Saving</button>
+  <button type="button" data-state="success">Success</button>
+  <button type="button" data-state="validation">Validation error</button>
+  <button type="button" data-state="server">Server error</button>
+  <button type="button" data-state="notfound">Not found</button>
+  <button type="button" data-state="denied">Permission denied</button>
+  <span class="demo-label">Demo &middot; language</span>
+  <button type="button" data-lang="pt-BR" aria-pressed="true">pt-BR</button>
+  <button type="button" data-lang="pt-PT">pt-PT</button>
+  <button type="button" data-lang="en">en</button>
+  <span class="demo-label">Demo &middot; theme</span>
+  <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+  <button type="button" data-theme-btn="dark">Dark</button>
+</div>
+
+<header class="appbar">
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main">
+    <span class="nav-section" data-i18n="Nav.Section.Content"></span>
+    <span class="nav-link" aria-current="page">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/></svg>
+      <span data-i18n="Exams.Title"></span>
+    </span>
+    <span class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z"/></svg>
+      <span data-i18n="IssuingAuthorities.Title"></span>
+    </span>
+    <span class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 8v2h20V8L12 3zM6 12v6h2v-6H6zm5 0v6h2v-6h-2zm5 0v6h2v-6h-2zM2 20v2h20v-2H2z"/></svg>
+      <span data-i18n="Organizers.Title"></span>
+    </span>
+    <span class="nav-section" data-i18n="Nav.Section.Administration"></span>
+    <span class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-6a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 8c-3.3 0-8 1.7-8 4v2h16v-2c0-2.3-4.7-4-8-4zm-6 4c.2-.7 3.1-2 6-2s5.8 1.3 6 2H6z"/></svg>
+      <span data-i18n="Users.Title"></span>
+    </span>
+    <span class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm6 9c0 4-2.6 7.8-6 8.9C8.6 18.8 6 15 6 11V6.3l6-2.2 6 2.2V11z"/></svg>
+      <span data-i18n="Roles.Title"></span>
+    </span>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- S9 permission denied: exactly the page that does not exist (F-2 BR7) -->
+    <div id="block-denied" hidden>
+      <div class="app-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>
+        <h1 class="app-state-title" data-i18n="NotFound.Title"></h1>
+        <p data-i18n="NotFound.Message"></p>
+      </div>
+    </div>
+
+    <div id="block-page">
+      <div class="app-page-header">
+        <div class="app-breadcrumbs">
+          <span data-i18n="Nav.Section.Content"></span>
+          <span aria-hidden="true"> / </span>
+          <a href="#" data-i18n="Exams.Title"></a>
+          <span aria-hidden="true"> / </span>
+          <span id="crumb-current"></span>
+        </div>
+        <h1 class="app-page-title" id="page-title"></h1>
+      </div>
+
+      <!-- S1 loading -->
+      <div id="block-loading" hidden>
+        <div class="app-state" role="status">
+          <span class="app-spinner" style="color:var(--primary)" aria-hidden="true"></span>
+          <span data-i18n="Common.Loading"></span>
+        </div>
+      </div>
+
+      <!-- S8 not found -->
+      <div id="block-notfound" hidden>
+        <div class="app-form-card">
+          <div class="app-alert" role="alert">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/></svg>
+            <span data-i18n="exam.not_found"></span>
+          </div>
+          <a class="app-link" href="#" data-i18n="Exams.BackToList"></a>
+        </div>
+      </div>
+
+      <!-- the screen -->
+      <div class="app-form-layout" id="block-form">
+        <form class="app-form-card" id="exam-form" novalidate>
+
+          <!-- AppErrorSummary (UC3, AC5) -->
+          <div class="app-alert" id="error-summary" role="alert" tabindex="-1" hidden>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            <div>
+              <div class="app-alert-title" data-i18n="Common.ErrorSummary.Title"></div>
+              <div data-i18n="Common.ErrorSummary.Intro"></div>
+              <ul class="app-error-summary-list" id="error-summary-list"></ul>
+            </div>
+          </div>
+
+          <!-- AppAlert: a refusal that belongs to no single field -->
+          <div class="app-alert" id="server-alert" role="alert" hidden>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/></svg>
+            <span data-i18n="common.unexpected_error"></span>
+          </div>
+
+          <!-- ===== AppSectionCard 1: identification ===== -->
+          <section class="app-section-card" aria-labelledby="section-identification-title">
+            <h2 class="app-section-card-title" id="section-identification-title">
+              <svg class="app-section-card-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/></svg>
+              <span data-i18n="Exams.Section.Identification"></span>
+            </h2>
+            <p class="app-section-card-subtitle" data-i18n="Exams.Section.Identification.Subtitle"></p>
+
+            <div class="app-form-grid app-form-grid-2">
+              <div class="app-field" id="field-authority">
+                <label class="app-field-label" for="exam-authority">
+                  <span data-i18n="Exams.Field.IssuingAuthority"></span><span class="app-field-required" aria-hidden="true">*</span>
+                </label>
+                <div class="app-field-input">
+                  <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z"/></svg>
+                  <input type="text" id="exam-authority" aria-required="true"
+                         aria-describedby="exam-authority-description" data-ph="Exams.Field.IssuingAuthority.Placeholder">
+                </div>
+                <span id="exam-authority-description">
+                  <span class="app-field-hint" data-i18n="Exams.Field.IssuingAuthority.Hint"></span>
+                  <span class="app-field-error-text" hidden data-i18n="exam.issuing_authority_required"></span>
+                </span>
+              </div>
+
+              <div class="app-field" id="field-name">
+                <label class="app-field-label" for="exam-name">
+                  <span data-i18n="Exams.Field.Name"></span><span class="app-field-required" aria-hidden="true">*</span>
+                </label>
+                <div class="app-field-input">
+                  <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+                  <input type="text" id="exam-name" maxlength="200" autocomplete="off" aria-required="true"
+                         aria-describedby="exam-name-description">
+                </div>
+                <span id="exam-name-description">
+                  <span class="app-field-hint" data-i18n="Exams.Field.Name.Hint"></span>
+                  <span class="app-field-error-text" hidden data-i18n="exam.name_required"></span>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== AppSectionCard 2: classification ===== -->
+          <section class="app-section-card" aria-labelledby="section-classification-title">
+            <h2 class="app-section-card-title" id="section-classification-title">
+              <svg class="app-section-card-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4 7.5 12h9L12 4zm0 3.9 1.1 2.1h-2.2L12 7.9zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm12.5-2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm0 7a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+              <span data-i18n="Exams.Section.Classification"></span>
+            </h2>
+            <p class="app-section-card-subtitle" data-i18n="Exams.Section.Classification.Subtitle"></p>
+
+            <div class="app-form-grid app-form-grid-2">
+              <div class="app-field" id="field-type">
+                <label class="app-field-label" for="exam-assessment-type">
+                  <span data-i18n="Exams.Field.AssessmentType"></span><span class="app-field-required" aria-hidden="true">*</span>
+                </label>
+                <div class="app-field-input">
+                  <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4 7.5 12h9L12 4zM3 21h8v-8H3v8zm14.5-8a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>
+                  <select id="exam-assessment-type" aria-required="true" aria-describedby="exam-assessment-type-description">
+                    <option value=""></option>
+                    <option value="PublicServiceExam" data-i18n="Exams.AssessmentType.PublicServiceExam"></option>
+                    <option value="Certification" data-i18n="Exams.AssessmentType.Certification"></option>
+                    <option value="UniversityEntranceExam" data-i18n="Exams.AssessmentType.UniversityEntranceExam"></option>
+                    <option value="Enem" data-i18n="Exams.AssessmentType.Enem"></option>
+                  </select>
+                </div>
+                <span id="exam-assessment-type-description">
+                  <span class="app-field-error-text" hidden data-i18n="exam.assessment_type_invalid"></span>
+                </span>
+              </div>
+
+              <div class="app-field" id="field-language">
+                <label class="app-field-label" for="exam-content-language">
+                  <span data-i18n="Exams.Field.ContentLanguage"></span><span class="app-field-required" aria-hidden="true">*</span>
+                </label>
+                <div class="app-field-input">
+                  <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15 15 0 0 0-1.3-3.4A8 8 0 0 1 18.9 8zM12 4.1c.6.9 1.2 2.2 1.6 3.9h-3.2c.4-1.7 1-3 1.6-3.9zM4.3 14A8 8 0 0 1 4 12c0-.7.1-1.4.3-2h3.3a17 17 0 0 0 0 4H4.3zm.8 2H8c.3 1.3.8 2.5 1.3 3.4A8 8 0 0 1 5.1 16zm2.9-8H5.1a8 8 0 0 1 4.2-3.4C8.8 5.5 8.3 6.7 8 8zm4 11.9c-.6-.9-1.2-2.2-1.6-3.9h3.2c-.4 1.7-1 3-1.6 3.9zm2-5.9H10a15 15 0 0 1 0-4h4a15 15 0 0 1 0 4zm.7 5.4c.5-.9 1-2.1 1.3-3.4h2.9a8 8 0 0 1-4.2 3.4zm1.7-5.4a17 17 0 0 0 0-4h3.3c.2.6.3 1.3.3 2s-.1 1.4-.3 2h-3.3z"/></svg>
+                  <select id="exam-content-language" aria-required="true">
+                    <option value="pt-BR" lang="pt-BR">Portugu&ecirc;s (Brasil)</option>
+                    <option value="pt-PT" lang="pt-PT">Portugu&ecirc;s (Portugal)</option>
+                    <option value="en" lang="en">English</option>
+                  </select>
+                </div>
+                <span class="app-field-hint" data-i18n="Exams.Field.ContentLanguage.Hint"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== AppSectionCard 3: scope + AppRadioCards + AppConditionalField ===== -->
+          <section class="app-section-card" aria-labelledby="section-scope-title">
+            <h2 class="app-section-card-title" id="section-scope-title">
+              <svg class="app-section-card-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 17.9A8 8 0 0 1 4 12c0-.6.1-1.2.2-1.7L9 15v1a2 2 0 0 0 2 2v1.9zm6.9-2.5c-.3-.8-1-1.4-1.9-1.4h-1v-3a1 1 0 0 0-1-1H8v-2h2a1 1 0 0 0 1-1V7h2a2 2 0 0 0 2-2v-.4A8 8 0 0 1 17.9 17.4z"/></svg>
+              <span data-i18n="Exams.Section.Scope"></span>
+            </h2>
+            <p class="app-section-card-subtitle" data-i18n="Exams.Section.Scope.Subtitle"></p>
+
+            <div class="app-field" id="field-scope">
+              <span class="app-field-label" id="exam-scope-label">
+                <span data-i18n="Exams.Field.Scope"></span><span class="app-field-required" aria-hidden="true">*</span>
+              </span>
+              <div class="app-radio-cards" role="radiogroup" aria-labelledby="exam-scope-label" id="exam-scope">
+                <button type="button" class="app-radio-card" role="radio" aria-checked="false" tabindex="0"
+                        data-scope="National" aria-describedby="scope-national-description">
+                  <span class="app-radio-dot" aria-hidden="true"></span>
+                  <span>
+                    <span class="app-radio-card-text" data-i18n="Exams.Scope.National"></span>
+                    <span class="app-radio-card-description" id="scope-national-description" data-i18n="Exams.Scope.National.Description"></span>
+                  </span>
+                </button>
+                <button type="button" class="app-radio-card" role="radio" aria-checked="false" tabindex="-1"
+                        data-scope="State" aria-describedby="scope-state-description">
+                  <span class="app-radio-dot" aria-hidden="true"></span>
+                  <span>
+                    <span class="app-radio-card-text" data-i18n="Exams.Scope.State"></span>
+                    <span class="app-radio-card-description" id="scope-state-description" data-i18n="Exams.Scope.State.Description"></span>
+                  </span>
+                </button>
+                <button type="button" class="app-radio-card" role="radio" aria-checked="false" tabindex="-1"
+                        data-scope="Municipal" aria-describedby="scope-municipal-description">
+                  <span class="app-radio-dot" aria-hidden="true"></span>
+                  <span>
+                    <span class="app-radio-card-text" data-i18n="Exams.Scope.Municipal"></span>
+                    <span class="app-radio-card-description" id="scope-municipal-description" data-i18n="Exams.Scope.Municipal.Description"></span>
+                  </span>
+                </button>
+              </div>
+              <span class="app-field-error-text" id="scope-error" hidden data-i18n="exam.scope_invalid"></span>
+            </div>
+
+            <div class="app-conditional-field" id="scope-detail-wrap" role="group" hidden>
+              <div class="app-field" id="field-scope-detail" style="margin-bottom:0">
+                <label class="app-field-label" for="exam-scope-detail">
+                  <span id="scope-detail-label"></span><span class="app-field-required" aria-hidden="true">*</span>
+                </label>
+                <div class="app-field-input">
+                  <svg class="app-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 18.2C9.8 17.5 7 13.3 7 9a5 5 0 0 1 10 0c0 4.3-2.8 8.5-5 11.2zM12 6.5A2.5 2.5 0 1 0 12 11.5a2.5 2.5 0 0 0 0-5z"/></svg>
+                  <input type="text" id="exam-scope-detail" maxlength="120" autocomplete="off" aria-required="true"
+                         aria-describedby="exam-scope-detail-description">
+                </div>
+                <span id="exam-scope-detail-description">
+                  <span class="app-field-hint" data-i18n="Exams.Field.ScopeDetail.Hint"></span>
+                  <span class="app-field-error-text" hidden data-i18n="exam.scope_detail_required"></span>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- AppFormActions: bottom right of the form card (BR4) -->
+          <div class="app-form-actions">
+            <button type="button" class="app-button app-button-text" id="btn-cancel" data-i18n="Common.Cancel"></button>
+            <button type="button" class="app-button app-button-filled" id="btn-save">
+              <span class="app-spinner" id="save-spinner" hidden aria-hidden="true"></span>
+              <span id="save-label"></span>
+            </button>
+          </div>
+        </form>
+
+        <!-- AppFormAside: read-only, no button (BR4, AC7) -->
+        <aside class="app-form-aside" aria-labelledby="exam-summary-title">
+          <h2 class="app-form-aside-title" id="exam-summary-title" data-i18n="Exams.Form.Aside.Title"></h2>
+
+          <div class="app-aside-row">
+            <span class="app-aside-row-label" data-i18n="Exams.Field.IssuingAuthority"></span>
+            <span class="app-aside-row-value" id="sum-authority"></span>
+          </div>
+          <div class="app-aside-row">
+            <span class="app-aside-row-label" data-i18n="Exams.Field.Name"></span>
+            <span class="app-aside-row-value" id="sum-name"></span>
+          </div>
+          <div class="app-aside-row">
+            <span class="app-aside-row-label" data-i18n="Exams.Field.AssessmentType"></span>
+            <span class="app-aside-row-value" id="sum-type"></span>
+          </div>
+          <div class="app-aside-row">
+            <span class="app-aside-row-label" data-i18n="Exams.Field.Scope"></span>
+            <span class="app-aside-row-value" id="sum-scope"></span>
+          </div>
+          <div class="app-aside-row">
+            <span class="app-aside-row-label" data-i18n="Exams.Field.ContentLanguage"></span>
+            <span class="app-aside-row-value" id="sum-language"></span>
+          </div>
+
+          <div class="app-checklist-title" data-i18n="Exams.Form.Aside.Checklist"></div>
+          <ul class="app-checklist" id="checklist"></ul>
+        </aside>
+      </div>
+
+      <!-- demo only: the two kit patterns this screen does not use (open question 1) -->
+      <div class="kit-strip">
+        <span class="demo-label">Demo &middot; AppStatusChip (not on this screen)</span>
+        <span class="app-status-chip is-success" data-i18n="AccountStatus.Active"></span>
+        <span class="app-status-chip is-warning" data-i18n="AccountStatus.Pending"></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="app-snackbar" id="snackbar" role="status" hidden>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+  <span data-i18n="Exams.Saved"></span>
+</div>
+
+<div class="app-visually-hidden" id="live" aria-live="polite"></div>
+
+<script>
+/* ===========================================================================
+   Texts: the resource keys of SharedResources, in the three UI locales.
+   Keys marked NEW arrive with F-43.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content",
+    "Nav.Section.Administration": "Administration",
+    "Exams.Title": "Exams",
+    "IssuingAuthorities.Title": "Issuing authorities",
+    "Organizers.Title": "Organizers",
+    "Users.Title": "Users",
+    "Roles.Title": "Roles",
+    "Exams.Form.AddTitle": "Add exam",
+    "Exams.Form.EditTitle": "Edit exam",
+    "Exams.Section.Identification": "Identification",
+    "Exams.Section.Identification.Subtitle": "Who publishes the exam and how it is named in the catalog.",
+    "Exams.Section.Classification": "Classification",
+    "Exams.Section.Classification.Subtitle": "The kind of assessment and the language its content is written in.",
+    "Exams.Section.Scope": "Where the exam applies",
+    "Exams.Section.Scope.Subtitle": "The territory the exam covers. A state or municipal exam also names the place.",
+    "Exams.Field.IssuingAuthority": "Issuing authority",
+    "Exams.Field.IssuingAuthority.Hint": "The body that publishes the notice and sets the rules. The board that applies each paper belongs to the edition.",
+    "Exams.Field.IssuingAuthority.Placeholder": "Name or acronym",
+    "Exams.Field.Name": "Name",
+    "Exams.Field.Name.Hint": "2 to 200 characters",
+    "Exams.Field.AssessmentType": "Assessment type",
+    "Exams.Field.Scope": "Scope",
+    "Exams.Field.State": "State",
+    "Exams.Field.Municipality": "Municipality",
+    "Exams.Field.ScopeDetail.Hint": "Where this exam applies.",
+    "Exams.Field.ContentLanguage": "Content language",
+    "Exams.Field.ContentLanguage.Hint": "The language the exam and its questions are written in. Content is never translated.",
+    "Exams.AssessmentType.PublicServiceExam": "Public service exam",
+    "Exams.AssessmentType.Certification": "Certification",
+    "Exams.AssessmentType.UniversityEntranceExam": "University entrance exam",
+    "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "National",
+    "Exams.Scope.State": "State",
+    "Exams.Scope.Municipal": "Municipal",
+    "Exams.Scope.National.Description": "Valid across the country.",
+    "Exams.Scope.State.Description": "Asks for the state.",
+    "Exams.Scope.Municipal.Description": "Asks for the municipality.",
+    "Exams.ScopeDetail.Shown": "{0} is now required.",
+    "Exams.Form.Aside.Title": "Summary",
+    "Exams.Form.Aside.Checklist": "Before saving",
+    "Exams.Saved": "Exam saved.",
+    "Exams.BackToList": "Back to the exams",
+    "Common.Summary.NotFilled": "Not filled",
+    "Common.Checklist.Done": "Done",
+    "Common.Checklist.Pending": "Pending",
+    "Common.ErrorSummary.Title": "This form cannot be saved yet",
+    "Common.ErrorSummary.Intro": "Fill in these fields:",
+    "Common.Save": "Save",
+    "Common.Saving": "Saving...",
+    "Common.Cancel": "Cancel",
+    "Common.Loading": "Loading...",
+    "NotFound.Title": "Page not found",
+    "NotFound.Message": "The page you are looking for does not exist.",
+    "AccountStatus.Active": "Active",
+    "AccountStatus.Pending": "Pending",
+    "common.unexpected_error": "Something went wrong. Please try again.",
+    "exam.not_found": "This exam no longer exists.",
+    "exam.name_required": "Enter a name with at least 2 characters.",
+    "exam.issuing_authority_required": "Choose the issuing authority.",
+    "exam.assessment_type_invalid": "Choose an assessment type.",
+    "exam.scope_invalid": "Choose a scope.",
+    "exam.scope_detail_required": "Say where this exam applies."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo",
+    "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames",
+    "IssuingAuthorities.Title": "Órgãos contratantes",
+    "Organizers.Title": "Bancas",
+    "Users.Title": "Usuários",
+    "Roles.Title": "Papéis",
+    "Exams.Form.AddTitle": "Adicionar exame",
+    "Exams.Form.EditTitle": "Editar exame",
+    "Exams.Section.Identification": "Identificação",
+    "Exams.Section.Identification.Subtitle": "Quem publica o exame e como ele é chamado no catálogo.",
+    "Exams.Section.Classification": "Classificação",
+    "Exams.Section.Classification.Subtitle": "O tipo de avaliação e o idioma em que o conteúdo é escrito.",
+    "Exams.Section.Scope": "Onde o exame se aplica",
+    "Exams.Section.Scope.Subtitle": "O território que o exame cobre. Exame estadual ou municipal também informa o local.",
+    "Exams.Field.IssuingAuthority": "Órgão contratante",
+    "Exams.Field.IssuingAuthority.Hint": "O órgão que publica o edital e define as regras. A banca que aplica cada prova pertence à edição.",
+    "Exams.Field.IssuingAuthority.Placeholder": "Nome ou sigla",
+    "Exams.Field.Name": "Nome",
+    "Exams.Field.Name.Hint": "De 2 a 200 caracteres",
+    "Exams.Field.AssessmentType": "Tipo de avaliação",
+    "Exams.Field.Scope": "Abrangência",
+    "Exams.Field.State": "Estado",
+    "Exams.Field.Municipality": "Município",
+    "Exams.Field.ScopeDetail.Hint": "Onde este exame se aplica.",
+    "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Field.ContentLanguage.Hint": "O idioma em que o exame e suas questões estão escritos. O conteúdo nunca é traduzido.",
+    "Exams.AssessmentType.PublicServiceExam": "Concurso público",
+    "Exams.AssessmentType.Certification": "Certificação",
+    "Exams.AssessmentType.UniversityEntranceExam": "Vestibular",
+    "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "Nacional",
+    "Exams.Scope.State": "Estadual",
+    "Exams.Scope.Municipal": "Municipal",
+    "Exams.Scope.National.Description": "Vale em todo o país.",
+    "Exams.Scope.State.Description": "Pede o estado.",
+    "Exams.Scope.Municipal.Description": "Pede o município.",
+    "Exams.ScopeDetail.Shown": "{0} agora é obrigatório.",
+    "Exams.Form.Aside.Title": "Resumo",
+    "Exams.Form.Aside.Checklist": "Antes de salvar",
+    "Exams.Saved": "Exame salvo.",
+    "Exams.BackToList": "Voltar para os exames",
+    "Common.Summary.NotFilled": "Não preenchido",
+    "Common.Checklist.Done": "Concluído",
+    "Common.Checklist.Pending": "Pendente",
+    "Common.ErrorSummary.Title": "Ainda não é possível salvar este formulário",
+    "Common.ErrorSummary.Intro": "Preencha estes campos:",
+    "Common.Save": "Salvar",
+    "Common.Saving": "Salvando...",
+    "Common.Cancel": "Cancelar",
+    "Common.Loading": "Carregando...",
+    "NotFound.Title": "Página não encontrada",
+    "NotFound.Message": "A página que você procura não existe.",
+    "AccountStatus.Active": "Ativa",
+    "AccountStatus.Pending": "Pendente",
+    "common.unexpected_error": "Algo deu errado. Tente novamente.",
+    "exam.not_found": "Este exame não existe mais.",
+    "exam.name_required": "Informe um nome com ao menos 2 caracteres.",
+    "exam.issuing_authority_required": "Escolha o órgão contratante.",
+    "exam.assessment_type_invalid": "Escolha um tipo de avaliação.",
+    "exam.scope_invalid": "Escolha a abrangência.",
+    "exam.scope_detail_required": "Informe onde este exame se aplica."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo",
+    "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames",
+    "IssuingAuthorities.Title": "Entidades contratantes",
+    "Organizers.Title": "Entidades organizadoras",
+    "Users.Title": "Utilizadores",
+    "Roles.Title": "Perfis",
+    "Exams.Form.AddTitle": "Adicionar exame",
+    "Exams.Form.EditTitle": "Editar exame",
+    "Exams.Section.Identification": "Identificação",
+    "Exams.Section.Identification.Subtitle": "Quem publica o exame e como é designado no catálogo.",
+    "Exams.Section.Classification": "Classificação",
+    "Exams.Section.Classification.Subtitle": "O tipo de avaliação e o idioma em que o conteúdo está escrito.",
+    "Exams.Section.Scope": "Onde o exame se aplica",
+    "Exams.Section.Scope.Subtitle": "O território que o exame abrange. Exame estadual ou municipal também indica o local.",
+    "Exams.Field.IssuingAuthority": "Entidade contratante",
+    "Exams.Field.IssuingAuthority.Hint": "A entidade que publica o aviso e define as regras. A entidade que aplica cada prova pertence à edição.",
+    "Exams.Field.IssuingAuthority.Placeholder": "Nome ou sigla",
+    "Exams.Field.Name": "Nome",
+    "Exams.Field.Name.Hint": "Entre 2 e 200 caracteres",
+    "Exams.Field.AssessmentType": "Tipo de avaliação",
+    "Exams.Field.Scope": "Abrangência",
+    "Exams.Field.State": "Estado",
+    "Exams.Field.Municipality": "Município",
+    "Exams.Field.ScopeDetail.Hint": "Onde este exame se aplica.",
+    "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Field.ContentLanguage.Hint": "O idioma em que o exame e as suas questões estão escritos. O conteúdo nunca é traduzido.",
+    "Exams.AssessmentType.PublicServiceExam": "Concurso público",
+    "Exams.AssessmentType.Certification": "Certificação",
+    "Exams.AssessmentType.UniversityEntranceExam": "Exame de acesso",
+    "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "Nacional",
+    "Exams.Scope.State": "Estadual",
+    "Exams.Scope.Municipal": "Municipal",
+    "Exams.Scope.National.Description": "Válido em todo o país.",
+    "Exams.Scope.State.Description": "Pede o estado.",
+    "Exams.Scope.Municipal.Description": "Pede o município.",
+    "Exams.ScopeDetail.Shown": "{0} passou a ser obrigatório.",
+    "Exams.Form.Aside.Title": "Resumo",
+    "Exams.Form.Aside.Checklist": "Antes de guardar",
+    "Exams.Saved": "Exame guardado.",
+    "Exams.BackToList": "Voltar para os exames",
+    "Common.Summary.NotFilled": "Por preencher",
+    "Common.Checklist.Done": "Concluído",
+    "Common.Checklist.Pending": "Pendente",
+    "Common.ErrorSummary.Title": "Ainda não é possível guardar este formulário",
+    "Common.ErrorSummary.Intro": "Preencha estes campos:",
+    "Common.Save": "Guardar",
+    "Common.Saving": "A guardar...",
+    "Common.Cancel": "Cancelar",
+    "Common.Loading": "A carregar...",
+    "NotFound.Title": "Página não encontrada",
+    "NotFound.Message": "A página que procura não existe.",
+    "AccountStatus.Active": "Ativa",
+    "AccountStatus.Pending": "Pendente",
+    "common.unexpected_error": "Ocorreu um erro. Tente novamente.",
+    "exam.not_found": "Este exame já não existe.",
+    "exam.name_required": "Indique um nome com pelo menos 2 caracteres.",
+    "exam.issuing_authority_required": "Escolha a entidade contratante.",
+    "exam.assessment_type_invalid": "Escolha um tipo de avaliação.",
+    "exam.scope_invalid": "Escolha a abrangência.",
+    "exam.scope_detail_required": "Indique onde este exame se aplica."
+  }
+};
+
+/* Sample data: a municipal exam of Prefeitura Municipal de Fortaleza. */
+const SAMPLE = {
+  authority: "Prefeitura Municipal de Fortaleza (PMF)",
+  name: "Concurso Público PMF 2026 - Guarda Municipal",
+  type: "PublicServiceExam",
+  scope: "Municipal",
+  scopeDetail: "Fortaleza/CE",
+  language: "pt-BR"
+};
+
+let lang = "pt-BR";
+let state = "new";
+let scope = null;
+
+const $ = (id) => document.getElementById(id);
+const t = (key) => (TEXTS[lang] && TEXTS[lang][key]) || key;
+
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-ph]").forEach(el => { el.placeholder = t(el.dataset.ph); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  $("save-label").textContent = state === "saving" ? t("Common.Saving") : t("Common.Save");
+  $("crumb-current").textContent = state === "new" || state === "validation"
+    ? t("Exams.Form.AddTitle") : SAMPLE.name;
+  $("page-title").textContent = state === "new" || state === "validation"
+    ? t("Exams.Form.AddTitle") : t("Exams.Form.EditTitle");
+  $("scope-detail-label").textContent = scope === "Municipal" ? t("Exams.Field.Municipality") : t("Exams.Field.State");
+  refreshAside();
+  /* the error summary lists field labels, so it follows the language too */
+  if (!$("error-summary").hidden) {
+    $("error-summary-list").innerHTML = validate()
+      .map(([id, label]) => `<li><a href="#${id}">${label}</a></li>`).join("");
+  }
+}
+
+/* ---- AppRadioCards + AppConditionalField ---- */
+function setScope(value, announce) {
+  scope = value;
+  document.querySelectorAll("#exam-scope .app-radio-card").forEach(card => {
+    const selected = card.dataset.scope === value;
+    card.setAttribute("aria-checked", String(selected));
+    card.tabIndex = selected ? 0 : -1;
+  });
+  if (!document.querySelector('#exam-scope .app-radio-card[aria-checked="true"]')) {
+    document.querySelector("#exam-scope .app-radio-card").tabIndex = 0;
+  }
+  const needsDetail = value === "State" || value === "Municipal";
+  $("scope-detail-wrap").hidden = !needsDetail;
+  if (needsDetail) {
+    $("scope-detail-label").textContent = value === "Municipal" ? t("Exams.Field.Municipality") : t("Exams.Field.State");
+    if (announce) {
+      $("live").textContent = t("Exams.ScopeDetail.Shown").replace("{0}", $("scope-detail-label").textContent);
+    }
+  } else {
+    /* Leaving State or Municipal clears the detail and its message (AC4). */
+    $("exam-scope-detail").value = "";
+    setFieldError("field-scope-detail", false);
+  }
+  if (value) { $("scope-error").hidden = true; }
+  refreshAside();
+}
+
+document.querySelectorAll("#exam-scope .app-radio-card").forEach((card, index, all) => {
+  card.addEventListener("click", () => setScope(card.dataset.scope, true));
+  card.addEventListener("keydown", (e) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1
+               : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (!step) { return; }
+    e.preventDefault();
+    const next = all[(index + step + all.length) % all.length];
+    setScope(next.dataset.scope, true);
+    next.focus();
+  });
+});
+
+/* ---- fields -> aside ---- */
+function typeLabel(value) {
+  return value ? t("Exams.AssessmentType." + value) : "";
+}
+function languageLabel(value) {
+  const option = $("exam-content-language").querySelector('option[value="' + value + '"]');
+  return option ? option.textContent : "";
+}
+function scopeLabel() {
+  if (!scope) { return ""; }
+  const detail = $("exam-scope-detail").value.trim();
+  return t("Exams.Scope." + scope) + (detail ? " · " + detail : "");
+}
+function asideValue(node, value) {
+  node.textContent = value || t("Common.Summary.NotFilled");
+  node.classList.toggle("empty", !value);
+}
+function refreshAside() {
+  asideValue($("sum-authority"), $("exam-authority").value.trim());
+  asideValue($("sum-name"), $("exam-name").value.trim());
+  asideValue($("sum-type"), typeLabel($("exam-assessment-type").value));
+  asideValue($("sum-scope"), scopeLabel());
+  asideValue($("sum-language"), languageLabel($("exam-content-language").value));
+
+  const items = [
+    ["Exams.Field.IssuingAuthority", !!$("exam-authority").value.trim()],
+    ["Exams.Field.Name", $("exam-name").value.trim().length >= 2],
+    ["Exams.Field.AssessmentType", !!$("exam-assessment-type").value],
+    ["Exams.Field.Scope", !!scope],
+    ["Exams.Field.ContentLanguage", !!$("exam-content-language").value]
+  ];
+  if (scope === "State" || scope === "Municipal") {
+    items.splice(4, 0, [scope === "Municipal" ? "Exams.Field.Municipality" : "Exams.Field.State",
+                        !!$("exam-scope-detail").value.trim()]);
+  }
+  $("checklist").innerHTML = items.map(([key, done]) => `
+    <li>
+      <span class="${done ? "app-check-done" : "app-check-pending"}" aria-hidden="true">
+        ${done
+          ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1.3-5.5L7.9 11.7l-1.4 1.4 4.2 4.2 7-7-1.4-1.4-5.6 5.6z"/></svg>'
+          : '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>'}
+      </span>
+      <span>${t(key)}</span>
+      <span class="app-visually-hidden">${done ? t("Common.Checklist.Done") : t("Common.Checklist.Pending")}</span>
+    </li>`).join("");
+}
+
+["exam-authority", "exam-name", "exam-scope-detail"].forEach(id => {
+  $(id).addEventListener("input", refreshAside);
+});
+["exam-assessment-type", "exam-content-language"].forEach(id => {
+  $(id).addEventListener("change", refreshAside);
+});
+
+/* ---- validation ---- */
+function setFieldError(fieldId, on) {
+  const field = $(fieldId);
+  field.classList.toggle("app-field-error", on);
+  const hint = field.querySelector(".app-field-hint");
+  const error = field.querySelector(".app-field-error-text");
+  if (hint) { hint.hidden = on; }
+  if (error) { error.hidden = !on; }
+  const input = field.querySelector("input, select");
+  if (input) { input.setAttribute("aria-invalid", on ? "true" : "false"); }
+}
+
+function validate() {
+  const missing = [];
+  const checks = [
+    ["field-authority", "exam-authority", !$("exam-authority").value.trim(), "Exams.Field.IssuingAuthority"],
+    ["field-name", "exam-name", $("exam-name").value.trim().length < 2, "Exams.Field.Name"],
+    ["field-type", "exam-assessment-type", !$("exam-assessment-type").value, "Exams.Field.AssessmentType"]
+  ];
+  checks.forEach(([fieldId, inputId, bad, labelKey]) => {
+    setFieldError(fieldId, bad);
+    if (bad) { missing.push([inputId, t(labelKey)]); }
+  });
+
+  const scopeBad = !scope;
+  $("scope-error").hidden = !scopeBad;
+  if (scopeBad) { missing.push(["exam-scope", t("Exams.Field.Scope")]); }
+
+  if (scope === "State" || scope === "Municipal") {
+    const bad = !$("exam-scope-detail").value.trim();
+    setFieldError("field-scope-detail", bad);
+    if (bad) {
+      missing.push(["exam-scope-detail", scope === "Municipal" ? t("Exams.Field.Municipality") : t("Exams.Field.State")]);
+    }
+  }
+  return missing;
+}
+
+function showErrorSummary(missing) {
+  $("error-summary-list").innerHTML = missing
+    .map(([id, label]) => `<li><a href="#${id}">${label}</a></li>`).join("");
+  $("error-summary").hidden = missing.length === 0;
+  if (missing.length) { $("error-summary").focus(); }
+}
+
+$("error-summary-list").addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (!link) { return; }
+  e.preventDefault();
+  const target = document.querySelector(link.getAttribute("href"));
+  if (target) { target.focus(); }
+});
+
+$("btn-save").addEventListener("click", () => {
+  const missing = validate();
+  showErrorSummary(missing);
+  if (missing.length) { return; }
+  setState("saving");
+  setTimeout(() => setState("success"), 1200);
+});
+
+/* ---- states ---- */
+function fill(data) {
+  $("exam-authority").value = data ? data.authority : "";
+  $("exam-name").value = data ? data.name : "";
+  $("exam-assessment-type").value = data ? data.type : "";
+  $("exam-content-language").value = data ? data.language : "pt-BR";
+  setScope(data ? data.scope : null, false);
+  if (data) { $("exam-scope-detail").value = data.scopeDetail; }
+  ["field-authority", "field-name", "field-type", "field-scope-detail"].forEach(id => setFieldError(id, false));
+  $("scope-error").hidden = true;
+  $("error-summary").hidden = true;
+  $("server-alert").hidden = true;
+  refreshAside();
+}
+
+function setState(next) {
+  state = next;
+  document.querySelectorAll("[data-state]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.state === next)));
+
+  $("block-denied").hidden = next !== "denied";
+  $("block-page").hidden = next === "denied";
+  $("block-loading").hidden = next !== "loading";
+  $("block-notfound").hidden = next !== "notfound";
+  $("block-form").hidden = next === "loading" || next === "notfound";
+  $("snackbar").hidden = next !== "success";
+
+  const saving = next === "saving";
+  $("save-spinner").hidden = !saving;
+  $("btn-save").disabled = saving;
+  $("btn-cancel").disabled = saving;
+
+  if (next === "new" || next === "validation") {
+    fill(null);
+  } else if (next === "ready" || next === "saving" || next === "success" || next === "server") {
+    fill(SAMPLE);
+  }
+
+  if (next === "validation") {
+    /* a half-filled form the Admin tried to save: name missing, scope State without its detail */
+    $("exam-authority").value = SAMPLE.authority;
+    $("exam-assessment-type").value = SAMPLE.type;
+    setScope("State", false);
+    refreshAside();
+    showErrorSummary(validate());
+  }
+  if (next === "server") { $("server-alert").hidden = false; }
+  if (next === "success") { setTimeout(() => { if (state === "success") { $("snackbar").hidden = true; } }, 4000); }
+
+  applyLanguage();
+}
+
+document.querySelectorAll("[data-state]").forEach(b => b.addEventListener("click", () => setState(b.dataset.state)));
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; applyLanguage(); }));
+document.querySelectorAll("[data-theme-btn]").forEach(b => b.addEventListener("click", () => {
+  document.documentElement.setAttribute("data-theme", b.dataset.themeBtn);
+  document.querySelectorAll("[data-theme-btn]").forEach(o => o.setAttribute("aria-pressed", String(o === b)));
+}));
+
+setState("new");
+</script>
+</body>
+</html>
