@@ -1,7 +1,7 @@
 ---
 feature: F-43
 epic: Foundation and identity
-status: idea
+status: refining
 board: 765
 version: 1
 ---
