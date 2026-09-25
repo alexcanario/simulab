@@ -36,6 +36,33 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+/* ---- Visual language (F-43, BR5) ----
+   The three scales every .app-* rule reads instead of a length of its own. A literal that one of these covers
+   fails AppCssScaleTests. The steps are the values the kit already used, rounded onto one ladder; a rule that
+   genuinely needs something else says so in a comment on the same line.
+   Type: 0.75 / 0.8125 / 0.875 / 0.9375 (body) / 1 / 1.375rem.
+   Space: 0.25 / 0.5 / 0.75 / 1 / 1.5 / 2 / 2.5rem.
+   Radius: 6 / 10 (the theme's default) / 16px, and a pill. */
+:root {
+    --app-font-xs: 0.75rem;
+    --app-font-sm: 0.8125rem;
+    --app-font-md: 0.875rem;
+    --app-font-base: 0.9375rem;
+    --app-font-lg: 1rem;
+    --app-font-xl: 1.375rem;
+    --app-space-1: 0.25rem;
+    --app-space-2: 0.5rem;
+    --app-space-3: 0.75rem;
+    --app-space-4: 1rem;
+    --app-space-5: 1.5rem;
+    --app-space-6: 2rem;
+    --app-space-7: 2.5rem;
+    --app-radius-sm: 6px;
+    --app-radius-md: 10px;
+    --app-radius-lg: 16px;
+    --app-radius-pill: 999px;
+}
+
 /* ---- UI kit (F-1). Interaction states live here and in SimulabTheme, never on a page. ---- */
 
 a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-button, .mud-radio, .mud-checkbox, .mud-link, .mud-nav-link, .mud-table-sort-label {
