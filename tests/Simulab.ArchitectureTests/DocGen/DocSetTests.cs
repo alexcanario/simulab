@@ -15,6 +15,9 @@ public class DocSetTests
         var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
 
         generated.Keys.Should().Equal(
+            // F-24: Ai joined the list when its context was added to RealModels; DocGen itself had been
+            // generating docs/architecture/Ai/ since F-41, so only this expectation was behind.
+            "Ai/data-dictionary.md", "Ai/schema.dbml",
             "Catalog/data-dictionary.md", "Catalog/routes.md", "Catalog/schema.dbml",
             "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
             "Jobs/data-dictionary.md", "Jobs/schema.dbml",

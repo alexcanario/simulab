@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Simulab.Persistence.Conventions;
 using Simulab.SharedKernel.Entities;
 using Simulab.SharedKernel.Security;
 
@@ -24,6 +25,19 @@ public abstract class ModuleDbContext(DbContextOptions options, ICurrentTenant c
 
     /// <summary>The tenant of the current request; null means global and B2C data only (v1).</summary>
     protected Guid? CurrentTenantId => currentTenant.TenantId;
+
+    /// <summary>
+    /// The second thing every module repeats, beside the filters below: the descriptions of the audit,
+    /// tenant and soft-delete columns (F-24, BR3). A convention and not a loop in
+    /// <see cref="OnModelCreating"/> because a module can add entity types after calling the base, and
+    /// the same table would then be described in one context and not in another.
+    /// </summary>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(configurationBuilder);
+        base.ConfigureConventions(configurationBuilder);
+        configurationBuilder.Conventions.Add(_ => new StandardColumnCommentConvention());
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

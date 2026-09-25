@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Simulab.Jobs.Persistence;
@@ -11,9 +12,11 @@ using Simulab.Jobs.Persistence;
 namespace Simulab.Jobs.Persistence.Migrations
 {
     [DbContext(typeof(JobsDbContext))]
-    partial class JobsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260925171632_AddColumnDescriptions")]
+    partial class AddColumnDescriptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
