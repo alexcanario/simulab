@@ -10,12 +10,16 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("roles");
+        builder.ToTable("roles", table => table.HasComment(
+            "A named set of permissions given to people, such as Student, Curator or Admin. A deleted role keeps its name taken."));
         builder.HasKey(role => role.Id);
 
-        builder.Property(role => role.Name).HasMaxLength(256);
-        builder.Property(role => role.NormalizedName).HasMaxLength(256);
-        builder.Property(role => role.ConcurrencyStamp).IsConcurrencyToken();
+        builder.Property(role => role.Name).HasMaxLength(256)
+            .HasComment("The role's name, as it is shown and as permissions are granted to it.");
+        builder.Property(role => role.NormalizedName).HasMaxLength(256)
+            .HasComment("The name upper-cased, which is what the unique index compares.");
+        builder.Property(role => role.ConcurrencyStamp).IsConcurrencyToken()
+            .HasComment("Changes on every save, so two admins editing the same role at once cannot overwrite each other silently.");
 
         // F-9, BR3: not filtered by IsDeleted on purpose - a deleted role's name stays taken.
         builder.HasIndex(role => role.NormalizedName).HasDatabaseName("ux_roles_normalized_name").IsUnique();

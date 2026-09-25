@@ -10,8 +10,14 @@ public sealed class RolePermissionConfiguration : IEntityTypeConfiguration<RoleP
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("role_permissions");
+        builder.ToTable("role_permissions", table => table.HasComment(
+            "Which permissions a role has. A row is the grant itself; removing it takes the permission away."));
         builder.HasKey(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionName });
+
+        builder.Property(rolePermission => rolePermission.RoleId)
+            .HasComment("The role the permission is granted to.");
+        builder.Property(rolePermission => rolePermission.PermissionName)
+            .HasComment("The permission that is granted.");
 
         builder.HasOne(rolePermission => rolePermission.Role)
             .WithMany()
