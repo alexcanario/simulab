@@ -1,0 +1,240 @@
+@page "/admin/exams"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-34, UC1 and UC4: every exam, searched, filtered and paged on the server. Add and edit are a page of
+   their own, not a dialog: the exam is a complex entity (rule: ui-project). *@
+<AppPageHeader Title="@L["Exams.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="ExamResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["Exams.Search.Placeholder"]"
+              EmptyMessage="@EmptyMessage"
+              EmptySearchMessage="@(term => L["Exams.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <ToolBarContent>
+        <div class="app-table-filters">
+            <AppLookupField Id="exams-filter-authority"
+                            Label="@L["Exams.Filter.IssuingAuthority"]"
+                            Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                            SearchAsync="SearchAuthoritiesAsync"
+                            Value="_authority"
+                            ValueChanged="OnAuthorityFilterChangedAsync" />
+
+            <AppSelectField TValue="AssessmentType?"
+                            Id="exams-filter-type"
+                            Label="@L["Exams.Filter.AssessmentType"]"
+                            Value="_assessmentType"
+                            ValueChanged="OnAssessmentTypeFilterChangedAsync"
+                            Options="AssessmentTypeFilterOptions" />
+
+            <AppSelectField TValue="ExamScope?"
+                            Id="exams-filter-scope"
+                            Label="@L["Exams.Filter.Scope"]"
+                            Value="_scope"
+                            ValueChanged="OnScopeFilterChangedAsync"
+                            Options="ScopeFilterOptions" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        @* The column's property name is what reaches AppTableQuery.SortBy; SortColumn maps it to the API's.
+           A name is up to 200 characters, so the cell truncates and the full name is the tooltip. *@
+        <PropertyColumn T="ExamResponse" TProperty="string" Property="row => row.Name" Title="@L["Exams.Column.Name"]">
+            <CellTemplate><AppTruncatedText Text="@context.Item.Name" MaxWidth="26rem" /></CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="ExamResponse" TProperty="string" Property="row => row.IssuingAuthorityName" Title="@L["Exams.Column.IssuingAuthority"]">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.IssuingAuthorityName" MaxWidth="14rem" />
+                <span class="app-cell-secondary">@context.Item.IssuingAuthorityAcronym</span>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="ExamResponse" TProperty="AssessmentType" Property="row => row.AssessmentType" Title="@L["Exams.Column.AssessmentType"]">
+            <CellTemplate>@ExamText.AssessmentTypeName(L, context.Item.AssessmentType)</CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="ExamResponse" TProperty="ExamScope" Property="row => row.Scope" Title="@L["Exams.Column.Scope"]">
+            <CellTemplate>
+                @ExamText.ScopeName(L, context.Item.Scope)
+                @if (!string.IsNullOrEmpty(context.Item.ScopeDetail))
+                {
+                    <span class="app-cell-secondary">@context.Item.ScopeDetail</span>
+                }
+            </CellTemplate>
+        </PropertyColumn>
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@context.Name"
+                       OnEdit="@(() => Edit(context))"
+                       OnDelete="@(() => DeleteAsync(context))" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<ExamResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private AppLookupOption? _authority;
+    private AssessmentType? _assessmentType;
+    private ExamScope? _scope;
+    private string? _error;
+
+    private bool HasFilters => _authority is not null || _assessmentType is not null || _scope is not null;
+
+    // The empty state says which emptiness it is: nothing in the catalog, or nothing matching the filters.
+    private string EmptyMessage => HasFilters ? L["Exams.Empty.Filters"] : L["Exams.Empty"];
+
+    private IReadOnlyList<AppSelectOption<AssessmentType?>> AssessmentTypeFilterOptions =>
+        [
+            new(null, L["Common.Filter.All"]),
+            .. ExamText.AssessmentTypeOrder(L).Select(value =>
+                new AppSelectOption<AssessmentType?>(value, ExamText.AssessmentTypeName(L, value)))
+        ];
+
+    private IReadOnlyList<AppSelectOption<ExamScope?>> ScopeFilterOptions =>
+        [
+            new(null, L["Common.Filter.All"]),
+            .. ExamText.ScopeOrder(L).Select(value => new AppSelectOption<ExamScope?>(value, ExamText.ScopeName(L, value)))
+        ];
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Exams.Title"], href: null, disabled: true)
+        ];
+
+    /// <summary>The list is searched, filtered, sorted and paged by the server (BR14).</summary>
+    private async Task<AppTablePage<ExamResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var sortBy = SortColumn(query.SortBy);
+        var result = await Api.ListExamsAsync(
+            token,
+            new ExamListQuery(
+                query.Page,
+                query.PageSize,
+                query.Search,
+                _authority?.Id,
+                _assessmentType,
+                _scope,
+                sortBy,
+                query.Descending,
+                sortBy == ExamSort.AssessmentType ? ExamText.AssessmentTypeOrder(L) : null,
+                sortBy == ExamSort.Scope ? ExamText.ScopeOrder(L) : null),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Exams failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<ExamResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // The table names a column by its property; the Api names it by its own constant. An unknown one is
+    // left null, and the Api falls back to the name (BR14).
+    private static string? SortColumn(string? column) => column switch
+    {
+        nameof(ExamResponse.Name) => ExamSort.Name,
+        nameof(ExamResponse.IssuingAuthorityName) => ExamSort.IssuingAuthority,
+        nameof(ExamResponse.AssessmentType) => ExamSort.AssessmentType,
+        nameof(ExamResponse.Scope) => ExamSort.Scope,
+        _ => null
+    };
+
+    /// <summary>The filter's own picker: the same organizer list the form page searches (BR16).</summary>
+    private async Task<IReadOnlyList<AppLookupOption>> SearchAuthoritiesAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListIssuingAuthoritiesAsync(
+            token,
+            new IssuingAuthorityListQuery(0, AppLookupField.MaxCandidates, term),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Issuing authorities failed to load: {result.ErrorCode}.");
+        }
+
+        // v2: only bodies that publish notices are offered. A board is never a parent of an exam (BR2).
+        return [.. result.Value!.Items.Select(authority => new AppLookupOption(
+            authority.Id,
+            $"{authority.Name} ({authority.Acronym})"))];
+    }
+
+    private Task OnAuthorityFilterChangedAsync(AppLookupOption? value)
+    {
+        _authority = value;
+        return _table.ReloadAsync();
+    }
+
+    private Task OnAssessmentTypeFilterChangedAsync(AssessmentType? value)
+    {
+        _assessmentType = value;
+        return _table.ReloadAsync();
+    }
+
+    private Task OnScopeFilterChangedAsync(ExamScope? value)
+    {
+        _scope = value;
+        return _table.ReloadAsync();
+    }
+
+    private void AddAsync() => Navigation.NavigateTo("/admin/exams/new");
+
+    private void Edit(ExamResponse exam) => Navigation.NavigateTo($"/admin/exams/{exam.Id}");
+
+    private async Task DeleteAsync(ExamResponse exam)
+    {
+        _error = null;
+        var authority = $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})";
+        if (!await Confirm.ConfirmDeleteAsync(L, exam.Name, L["Exams.Delete.Message", exam.Name, authority]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteExamAsync(token, exam.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["Exams.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // Another Admin may have deleted it since the list was loaded.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        await _table.ReloadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

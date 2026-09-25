@@ -33,6 +33,22 @@
                   EmptyMessage="@L["Gallery.States.EmptyMessage"]"
                   EmptyActionText="@L["Common.Add"]"
                   OnEmptyAction="@(() => Done(L["Common.Add"]))">
+        @* F-34: the filters a list offers beside its search box. They lay out as one row and keep the
+           card's width; the wrapper is what gives them that, so it belongs in the gallery. *@
+        <ToolBarContent>
+            <div class="app-table-filters">
+                <AppLookupField Id="gallery-filter-lookup" Label="@L["Exams.Filter.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                                SearchAsync="GalleryLookupAsync" Value="@_filterLookup"
+                                ValueChanged="@(value => _filterLookup = value)" />
+                <AppSelectField TValue="string" Id="gallery-filter-one" Label="@L["Exams.Filter.AssessmentType"]"
+                                Options="@_filterOptions" Value="@_filterValue"
+                                ValueChanged="@(value => _filterValue = value)" />
+                <AppSelectField TValue="string" Id="gallery-filter-two" Label="@L["Exams.Filter.Scope"]"
+                                Options="@_filterOptions" Value="@_filterValue"
+                                ValueChanged="@(value => _filterValue = value)" />
+            </div>
+        </ToolBarContent>
         <Columns>
             <PropertyColumn T="GallerySample" TProperty="string" Property="x => x.Name" Title="@L["Gallery.Table.Name"]" Sortable="false" />
             <TemplateColumn T="GallerySample" Title="@L["Gallery.Table.Description"]" Sortable="false">
@@ -122,6 +138,30 @@
     </MudPaper>
 </section>
 
+@* The section id never repeats a field id below it: two nodes with one id break every label and
+   aria-describedby that points at it (found on screen, F-34). *@
+<section id="gallery-lookups" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Lookup"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Exams.Field.IssuingAuthority.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        @* F-34 BR16: idle, below the minimum, searching, results, no result, chosen and failed, all here. *@
+        <AppLookupField Id="gallery-lookup" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                        SearchAsync="GalleryLookupAsync" Value="@_lookupValue"
+                        ValueChanged="@(value => _lookupValue = value)" />
+
+        <AppLookupField Id="gallery-lookup-error" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                        Error="@L["exam.issuing_authority_required"].Value"
+                        SearchAsync="GalleryLookupAsync" />
+
+        @* The search itself fails: the description says so and offers another go, and nothing is picked. *@
+        <AppLookupField Id="gallery-lookup-failing" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                        SearchAsync="GalleryFailingLookupAsync" />
+    </MudPaper>
+</section>
+
 <section id="gallery-alerts" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Alerts"]</MudText>
     <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Alerts.Hint"]</MudText>
@@ -176,6 +216,30 @@
 
     private string GalleryStrengthText(PasswordStrength strength) =>
         I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
+
+    private AppLookupOption? _lookupValue;
+    private AppLookupOption? _filterLookup;
+    private string? _filterValue;
+
+    private IReadOnlyList<AppSelectOption<string>> _filterOptions =>
+        [new(string.Empty, L["Common.Filter.All"]), new("a", SampleName(1)), new("b", SampleName(2))];
+
+    // F-34: the gallery needs no server, so the candidates are sample rows filtered in memory. Every real
+    // AppLookupField asks the Api instead (BR16).
+    private static readonly IReadOnlyList<AppLookupOption> GalleryLookupOptions =
+    [
+        new(Guid.Parse("00000000-0000-0000-0000-000000000001"), "Centro Brasileiro de Pesquisa em Avaliacao (CEBRASPE)", "Exam board"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000002"), "Fundacao Getulio Vargas (FGV)", "Exam board"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000003"), "Prefeitura Municipal de Guarulhos (PMG)", "Public body"),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000004"), "Universidade de Sao Paulo (USP)", "University")
+    ];
+
+    private static Task<IReadOnlyList<AppLookupOption>> GalleryLookupAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>(
+            [.. GalleryLookupOptions.Where(option => option.Text.Contains(term, StringComparison.OrdinalIgnoreCase))]);
+
+    private static Task<IReadOnlyList<AppLookupOption>> GalleryFailingLookupAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromException<IReadOnlyList<AppLookupOption>>(new HttpRequestException("gallery: the search failed on purpose"));
 
     private static readonly DateTimeOffset SampleBaseDate = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
 

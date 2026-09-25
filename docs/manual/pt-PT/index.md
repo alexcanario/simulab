@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33]
-updated: 2026-09-23
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33, F-34]
+updated: 2026-09-25
 ---
 # Simulab
 
@@ -20,7 +20,7 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 
 | Área | Para que serve | Estado |
 |---|---|---|
-| Catálogo de avaliações | Registar as entidades organizadoras, provas e edições em que tudo o resto assenta (Administradores) | Entidades organizadoras disponíveis ([Entidades organizadoras](organizers.md)); provas e edições brevemente |
+| Catálogo de avaliações | Registar as entidades contratantes, as entidades organizadoras, os exames e as edições em que tudo o resto assenta (Administradores) | Entidades contratantes, entidades organizadoras e exames disponíveis ([Entidades contratantes](issuing-authorities.md), [Entidades organizadoras](organizers.md), [Exames](exams.md)); edições brevemente |
 | Simulação de prova | Fazer uma prova anterior real, com as mesmas questões, ordem, tempo e regras de pontuação | Brevemente |
 | Simulação personalizada | Criar o seu treino por disciplina, entidade organizadora, ano ou dificuldade | Brevemente |
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e tópico, e a distância até à nota mínima | Brevemente |
@@ -44,4 +44,6 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis (Administradores)
 - [Histórico de perfis](role-history.md): quem alterou que perfil ou os perfis de quem, e quando (Administradores)
 - [Eventos de conta](account-events.md): inícios de sessão, falhas, bloqueios e alterações de conta (Administradores)
-- [Entidades organizadoras](organizers.md): os júris, entidades certificadoras e universidades do catálogo (Administradores)
+- [Entidades contratantes](issuing-authorities.md): quem publica o aviso de cada exame (Administradores)
+- [Entidades organizadoras](organizers.md): os júris, entidades certificadoras e universidades que aplicam as provas (Administradores)
+- [Exames](exams.md): os exames do catálogo, com tipo, abrangência e idioma (Administradores)

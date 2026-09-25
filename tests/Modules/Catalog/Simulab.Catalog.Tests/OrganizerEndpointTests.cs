@@ -413,6 +413,7 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
     }
 
     // B-15 AC1-AC3, AC4: a kindOrder is honored, both directions, and ties within a kind still sort by name.
+    // The order has to name every kind of the enum, whatever their number.
     [Fact]
     public async Task List_SortedByKindWithAnOrder_FollowsThatOrderAndKeepsNameAscendingWithinEachKind()
     {
@@ -423,14 +424,21 @@ public sealed class OrganizerEndpointTests : CatalogApiTests
         await CreateAsync(admin, Valid(name: $"Org E-A {marker}", acronym: $"ea{marker}", kind: OrganizerKind.ExamBoard));
         await CreateAsync(admin, Valid(name: $"Org C {marker}", acronym: $"c{marker}", kind: OrganizerKind.CertifyingBody));
 
-        var ascending = await ListAsync(admin, $"?search={marker}&sortBy=kind&kindOrder=ExamBoard,CertifyingBody,University");
-        var descending = await ListAsync(admin, $"?search={marker}&sortBy=kind&descending=true&kindOrder=ExamBoard,CertifyingBody,University");
+        const string order = "ExamBoard,CertifyingBody,University";
+        var ascending = await ListAsync(admin, $"?search={marker}&sortBy=kind&kindOrder={order}");
+        var descending = await ListAsync(admin, $"?search={marker}&sortBy=kind&descending=true&kindOrder={order}");
 
         ascending.Items.Select(item => item.Kind).Should().Equal(
-            OrganizerKind.ExamBoard, OrganizerKind.ExamBoard, OrganizerKind.CertifyingBody, OrganizerKind.University);
+            OrganizerKind.ExamBoard,
+            OrganizerKind.ExamBoard,
+            OrganizerKind.CertifyingBody,
+            OrganizerKind.University);
         ascending.Items.Select(item => item.Name).Take(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
         descending.Items.Select(item => item.Kind).Should().Equal(
-            OrganizerKind.University, OrganizerKind.CertifyingBody, OrganizerKind.ExamBoard, OrganizerKind.ExamBoard);
+            OrganizerKind.University,
+            OrganizerKind.CertifyingBody,
+            OrganizerKind.ExamBoard,
+            OrganizerKind.ExamBoard);
         descending.Items.Select(item => item.Name).Skip(2).Should().Equal($"Org E-A {marker}", $"Org E-B {marker}");
     }
 

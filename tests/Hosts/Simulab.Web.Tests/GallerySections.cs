@@ -6,6 +6,7 @@ internal static class GallerySections
     public static readonly string[] All =
     [
         "gallery-table", "gallery-row-actions", "gallery-states", "gallery-confirm",
-        "gallery-form", "gallery-fields", "gallery-alerts", "gallery-errors", "gallery-feedback", "gallery-icons",
+        "gallery-form", "gallery-fields", "gallery-lookups", "gallery-alerts", "gallery-errors",
+        "gallery-feedback", "gallery-icons",
     ];
 }

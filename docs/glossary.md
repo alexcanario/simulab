@@ -13,10 +13,13 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Certificação | Certificação | `Certification` | Assessment type: professional certification |
 | Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam |
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
-| Organizadora / Banca | Entidade organizadora (?) | `Organizer` | Exam board, certifying body or university that runs an exam |
+| Banca | Entidade organizadora (?) | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
 | Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
 | Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33) |
-| Prova / Concurso | Prova | `Exam` | An assessment run by an organizer |
+| Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper |
+| Abrangência | Abrangência | `ExamScope` | How far an exam reaches: `National`, `State` or `Municipal`. The state or the municipality is the `ScopeDetail` (F-34) |
+| Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) |
+| Prova / Concurso | Prova | `Exam` | An assessment its `IssuingAuthority` contracts and publishes a notice for; the board that applies each paper is on the edition (F-34) |
 | Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) |
 | Edital | Aviso de abertura (?) | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |
 | Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) |

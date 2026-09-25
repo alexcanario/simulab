@@ -8,7 +8,7 @@ namespace Simulab.Catalog.Infrastructure.Persistence;
 
 /// <summary>
 /// The Catalog module's context: its own schema, its own migrations (ADR-0001, decision 6). It holds
-/// the assessment catalog — organizers today (F-33), exams and editions next.
+/// the assessment catalog — organizers (F-33) and exams (F-34); editions next.
 /// </summary>
 public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbContext> options, ICurrentTenant currentTenant)
     : ModuleDbContext(options, currentTenant)
@@ -17,8 +17,14 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
 
     protected override string Schema => SchemaName;
 
-    /// <summary>F-33: who runs an exam.</summary>
+    /// <summary>F-33: the board that elaborates, applies and marks a paper.</summary>
     public DbSet<Organizer> Organizers => Set<Organizer>();
+
+    /// <summary>F-34 v2: the body that publishes a notice, and that every exam hangs on.</summary>
+    public DbSet<IssuingAuthority> IssuingAuthorities => Set<IssuingAuthority>();
+
+    /// <summary>F-34: the exams, each under the body that publishes its notice.</summary>
+    public DbSet<Exam> Exams => Set<Exam>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,5 +32,7 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new OrganizerConfiguration());
+        modelBuilder.ApplyConfiguration(new IssuingAuthorityConfiguration());
+        modelBuilder.ApplyConfiguration(new ExamConfiguration());
     }
 }

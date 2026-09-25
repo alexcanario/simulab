@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33]
-updated: 2026-09-23
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33, F-34]
+updated: 2026-09-25
 ---
 # Simulab
 
@@ -20,7 +20,7 @@ As páginas entram aqui à medida que cada funcionalidade é lançada.
 
 | Área | Para que serve | Situação |
 |---|---|---|
-| Catálogo de avaliações | Cadastrar as organizadoras, provas e edições em que tudo o mais se apoia (Administradores) | Organizadoras disponíveis ([Organizadoras](organizers.md)); provas e edições em breve |
+| Catálogo de avaliações | Cadastrar os órgãos contratantes, as bancas, os exames e as edições em que tudo o mais se apoia (Administradores) | Órgãos contratantes, bancas e exames disponíveis ([Órgãos contratantes](issuing-authorities.md), [Bancas](organizers.md), [Exames](exams.md)); edições em breve |
 | Simulado de prova | Fazer uma prova anterior real, com as mesmas questões, ordem, tempo e regras de pontuação | Em breve |
 | Simulado personalizado | Montar o seu treino por disciplina, organizadora, ano ou dificuldade | Em breve |
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e assunto, e a distância até a nota de corte | Em breve |
@@ -44,4 +44,6 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Usuários](users.md): achar uma conta e mudar os papéis dela (Administradores)
 - [Histórico de papéis](role-history.md): quem mudou qual papel ou os papéis de quem, e quando (Administradores)
 - [Eventos de conta](account-events.md): entradas, falhas ao entrar, bloqueios e mudanças de conta (Administradores)
-- [Organizadoras](organizers.md): as bancas, certificadoras e universidades do catálogo (Administradores)
+- [Órgãos contratantes](issuing-authorities.md): quem publica o edital de cada exame (Administradores)
+- [Bancas](organizers.md): quem elabora e aplica as provas — bancas, certificadoras e universidades (Administradores)
+- [Exames](exams.md): os exames do catálogo, com tipo, abrangência e idioma (Administradores)

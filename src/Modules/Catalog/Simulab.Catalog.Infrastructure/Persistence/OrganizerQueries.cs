@@ -58,12 +58,14 @@ public sealed class OrganizerQueries(CatalogModuleDbContext context) : IOrganize
         };
 
     // Without an order (B-15), the stored name is the only thing left to sort by - the pre-fix behavior.
-    // With one, the three kinds are ranked 0/1/2 by the caller's order; a nested conditional is what EF
-    // Core can translate to a SQL CASE WHEN, unlike a dictionary lookup, which would run in memory.
+    // With one, the kinds are ranked by the caller's order as a chain of "is it this one?" terms, first to
+    // last: PostgreSQL gets one CASE per ORDER BY term, unlike a dictionary lookup, which would run in
+    // memory. Descending is the same chain over the reversed order. F-34 replaced a nested conditional
+    // written for exactly three kinds: the fourth (PublicBody) made the whole order fall back silently.
     // The name tie-break inside a kind always stays ascending (BR16), whichever way the kind sort runs.
     private static IQueryable<Organizer> KindSort(IQueryable<Organizer> organizers, IReadOnlyList<OrganizerKind>? order, bool descending)
     {
-        if (order is not { Count: 3 } ranked)
+        if (order is not { Count: > 0 })
         {
             return (descending
                 ? organizers.OrderByDescending(organizer => organizer.Kind)
@@ -71,12 +73,15 @@ public sealed class OrganizerQueries(CatalogModuleDbContext context) : IOrganize
                 .ThenBy(organizer => organizer.NormalizedName);
         }
 
+        var ranked = descending ? [.. order.Reverse()] : order;
         var first = ranked[0];
-        var second = ranked[1];
+        var ordered = organizers.OrderBy(organizer => organizer.Kind == first ? 0 : 1);
+        for (var index = 1; index < ranked.Count; index++)
+        {
+            var next = ranked[index];
+            ordered = ordered.ThenBy(organizer => organizer.Kind == next ? 0 : 1);
+        }
 
-        return (descending
-            ? organizers.OrderByDescending(organizer => organizer.Kind == first ? 0 : organizer.Kind == second ? 1 : 2)
-            : organizers.OrderBy(organizer => organizer.Kind == first ? 0 : organizer.Kind == second ? 1 : 2))
-            .ThenBy(organizer => organizer.NormalizedName);
+        return ordered.ThenBy(organizer => organizer.NormalizedName);
     }
 }

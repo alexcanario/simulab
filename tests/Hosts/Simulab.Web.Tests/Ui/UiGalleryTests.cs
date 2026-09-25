@@ -31,6 +31,26 @@ public class UiGalleryTests : KitTestContext
         gallery.Markup.Should().Contain("AppIcons.Edit");
     }
 
+    /// <summary>
+    /// F-34: an id that appears twice breaks every label and aria-describedby that points at it, and the
+    /// browser silently resolves to the first one. Found on screen, when a section id repeated a field id.
+    /// </summary>
+    [Fact]
+    public void Render_Development_EveryIdOnThePageIsUnique()
+    {
+        var gallery = RenderGallery(Environments.Development);
+
+        var duplicates = gallery.FindAll("[id]")
+            .Select(element => element.Id)
+            .Where(id => !string.IsNullOrEmpty(id))
+            .GroupBy(id => id!, StringComparer.Ordinal)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToList();
+
+        duplicates.Should().BeEmpty();
+    }
+
     [Fact]
     public void Render_Production_RendersNothingAndSignalsNotFound()
     {
