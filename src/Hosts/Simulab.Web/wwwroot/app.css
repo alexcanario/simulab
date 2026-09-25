@@ -218,11 +218,14 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* B-17: the selected item lightens its background and used to keep the drawer's translucent text, so the entry
+   the user is looking at read worse (4.37:1 dark) than the ones around it. Full white on the composited surface
+   reads 12.5:1 dark and 9.4:1 light. ThemeContrastTests computes both from the stylesheet. */
 .app-drawer .mud-navmenu .mud-nav-link.active:not(.mud-nav-link-disabled),
 .app-drawer .mud-navmenu .mud-nav-link[aria-current="page"] {
     background-color: rgba(255, 255, 255, 0.14);
     border-left-color: var(--mud-palette-primary);
-    color: inherit;
+    color: var(--mud-palette-white);
     font-weight: 600;
 }
 
@@ -422,10 +425,13 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-left: 3px;
 }
 
+/* B-16: this was text-disabled, a translucent MudBlazor default nobody had measured - 1.90:1 dark, 2.64:1 light.
+   text-secondary reads 6.92:1 light and 4.89:1 dark on the card. It is the label's colour too, but the label is
+   uppercase, 600 and letter-spaced, so the two never read as the same thing. ThemeContrastTests holds the numbers. */
 .app-field-hint {
     display: block;
     font-size: 0.75rem;
-    color: var(--mud-palette-text-disabled);
+    color: var(--mud-palette-text-secondary);
     margin-top: 5px;
     line-height: 1.45;
 }
