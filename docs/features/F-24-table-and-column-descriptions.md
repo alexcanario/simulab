@@ -1,7 +1,7 @@
 ---
 feature: F-24
 epic: Foundation and identity
-status: idea
+status: refining
 board: 741
 version: 1
 ---
