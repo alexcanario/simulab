@@ -1,7 +1,7 @@
 ---
 feature: F-41
 epic: Foundation and identity
-status: building
+status: validating
 board: 762
 version: 2
 ---
@@ -80,6 +80,10 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 - 2026-09-24 — Adaptive thinking (`thinking: {type: "adaptive"}`), non-streaming, `max_tokens` 16000, SDK default timeout and retries — Claude, technical — `budget_tokens` is rejected by `claude-opus-5`.
 - 2026-09-24 — Page texts go in `SharedResources` with `AiDiagnostics.*` keys and the menu key `Nav.Dev.Ai`, as `/dev/ui` does with `Gallery.*` — Claude, technical — a development page does not justify a resource file of its own.
 - 2026-09-24 — `ai_calls` carries a nullable `tenant_id`, dormant like every other table (ADR-0001 #7) — Claude, technical.
+- 2026-09-24 — The error codes and the purposes live in a new `Simulab.Ai.Contracts`, which carries no dependency — Claude, technical — the Web must not reference a building block that brings EF Core and the Claude SDK, and F-22's error-code check only finds codes in a `*.Contracts` assembly.
+- 2026-09-24 — The third copy of `Problem`/`StatusFor` goes in the Api host and is recorded as debt on F-39 instead of extracting the helper now — owner — extracting it would touch Catalog and Identity, outside this item.
+- 2026-09-24 — Package `Microsoft.Extensions.Diagnostics` 10.0.12 added for `AddMetrics()`, which the tokens and cost counters need — owner — same version as the other `Microsoft.Extensions.*` the project uses.
+- 2026-09-25 — The app host reads `Database:Name` and only the physical database changes; every connection string stays `simulab` — Claude, technical — a worktree's migration must not land in the shared local database (rule `worktrees`). This item's screen check ran against `simulab_f41`.
 
 ## Out of scope
 - PDF and image input, streaming, tool calls, prompt caching and the Batches API.
@@ -87,6 +91,15 @@ Give Simulab one door to the Claude API that no feature can go around: it knows 
 - A back-office screen for usage and cost per user and period.
 - AI-assisted exam import and the AI coach.
 - The eval suite and its pass-rate baseline: that is F-40.
+- Contrast defects of components this item only passed through: the field hint (B-16) and the selected menu item in dark mode (B-17, raised by this item's screen check). Both measured, both registered, neither is this entry's doing.
+
+## Screen check (2026-09-25)
+Opened through the app host from the worktree, against its own database `simulab_f41`.
+- The `ai` schema and `ai_calls` were created by the real host, with the columns and the index of `## Screens and API`.
+- `/dev/ai` renders with its menu entry under Development, in pt-BR, and the language switch turns it into English (`AI gateway`, `Sends one real call…`, `SEND`) and pt-PT.
+- Sending a prompt while signed out shows "Entre na sua conta primeiro: toda chamada é cobrada de um usuário." and `SELECT count(*) FROM ai.ai_calls` stays `0`: BR2 refuses before the call and BR5 writes no row.
+- Contrast measured with every alpha layer composited, in both themes: title, intro, field label, input and the Send button pass AA (light 14.11 / 6.34 / 14.11 / 5.36; dark 14.46 / 5.36 / 14.46 / 5.74). The two that fail belong to components this item did not write — see `## Out of scope`.
+- A real model call needs the owner's API key, which Claude does not handle: it is step 3 of the validation script.
 
 ## Open questions
 - (none)
