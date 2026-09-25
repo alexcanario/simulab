@@ -457,7 +457,7 @@ Expected: `Application host directory is: D:\dev\_icontrol\wt\simulab\f-34\src\H
 
 ## Delivery
 - Branch: feature/F-34
-- Merge: <commit>
+- Merge: 3386b40 (`Merge feature/F-34: exams back office (AB#753)`)
 - Tests: 1191 passed, 0 failed, 56 s (full suite, 2026-09-25); full build 23 s, 0 new warnings
 - Manual pages: `docs/manual/{pt-BR,pt-PT,en}/exams.md`, `.../issuing-authorities.md`, `.../organizers.md` (updated),
   `.../index.md` (updated)
