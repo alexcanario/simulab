@@ -339,4 +339,88 @@
   <data name="organizer.kind_invalid" xml:space="preserve"><value>Choose one of the kinds on the list.</value></data>
   <data name="organizer.description_too_long" xml:space="preserve"><value>The description is too long: at most 500 characters.</value></data>
   <data name="organizer.website_invalid" xml:space="preserve"><value>Type a full address, starting with http:// or https://</value></data>
+  <data name="Nav.Exams" xml:space="preserve"><value>Exams</value></data>
+  <data name="Common.Filter.All" xml:space="preserve"><value>All</value></data>
+  <data name="Lookup.Hint.MinChars" xml:space="preserve"><value>Type at least {0} characters</value></data>
+  <data name="Lookup.Results" xml:space="preserve"><value>Results: {0}</value></data>
+  <data name="Lookup.NoResults" xml:space="preserve"><value>Nothing found for "{0}".</value></data>
+  <data name="Lookup.LoadFailed" xml:space="preserve"><value>The search failed.</value></data>
+  <data name="Lookup.Clear" xml:space="preserve"><value>Clear the selection</value></data>
+  <data name="Exams.Title" xml:space="preserve"><value>Exams</value></data>
+  <data name="Exams.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
+  <data name="Exams.Empty" xml:space="preserve"><value>No exam in the catalog yet.</value></data>
+  <data name="Exams.Empty.Search" xml:space="preserve"><value>No exam matches "{0}".</value></data>
+  <data name="Exams.Empty.Filters" xml:space="preserve"><value>No exam matches the chosen filters.</value></data>
+  <data name="Exams.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Exams.Column.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
+  <data name="Exams.Column.AssessmentType" xml:space="preserve"><value>Assessment type</value></data>
+  <data name="Exams.Column.Scope" xml:space="preserve"><value>Scope</value></data>
+  <data name="Exams.Filter.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
+  <data name="Exams.Filter.AssessmentType" xml:space="preserve"><value>Assessment type</value></data>
+  <data name="Exams.Filter.Scope" xml:space="preserve"><value>Scope</value></data>
+  <data name="Exams.Form.AddTitle" xml:space="preserve"><value>Add exam</value></data>
+  <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Edit exam</value></data>
+  <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
+  <data name="Exams.Field.IssuingAuthority.Hint" xml:space="preserve"><value>The body that publishes the notice and sets the rules. The board that applies each paper belongs to the edition.</value></data>
+  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Name or acronym</value></data>
+  <data name="Exams.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>2 to 200 characters</value></data>
+  <data name="Exams.Field.AssessmentType" xml:space="preserve"><value>Assessment type</value></data>
+  <data name="Exams.Field.Scope" xml:space="preserve"><value>Scope</value></data>
+  <data name="Exams.Field.State" xml:space="preserve"><value>State</value></data>
+  <data name="Exams.Field.Municipality" xml:space="preserve"><value>Municipality</value></data>
+  <data name="Exams.Field.ScopeDetail.Hint" xml:space="preserve"><value>Where this exam applies.</value></data>
+  <data name="Exams.Field.ContentLanguage" xml:space="preserve"><value>Content language</value></data>
+  <data name="Exams.Field.ContentLanguage.Hint" xml:space="preserve"><value>The language the exam and its questions are written in. Content is never translated.</value></data>
+  <data name="Exams.Saved" xml:space="preserve"><value>Exam saved.</value></data>
+  <data name="Exams.Deleted" xml:space="preserve"><value>Exam deleted.</value></data>
+  <data name="Exams.Delete.Message" xml:space="preserve"><value>The exam {0} leaves the catalog. Its name stays reserved inside {1}.</value></data>
+  <data name="Exams.BackToList" xml:space="preserve"><value>Back to the exams</value></data>
+  <data name="Exams.AssessmentType.PublicServiceExam" xml:space="preserve"><value>Public service exam</value></data>
+  <data name="Exams.AssessmentType.Certification" xml:space="preserve"><value>Certification</value></data>
+  <data name="Exams.AssessmentType.UniversityEntranceExam" xml:space="preserve"><value>University entrance exam</value></data>
+  <data name="Exams.AssessmentType.Enem" xml:space="preserve"><value>ENEM</value></data>
+  <data name="Exams.Scope.National" xml:space="preserve"><value>National</value></data>
+  <data name="Exams.Scope.State" xml:space="preserve"><value>State</value></data>
+  <data name="Exams.Scope.Municipal" xml:space="preserve"><value>Municipal</value></data>
+  <data name="Gallery.Section.Lookup" xml:space="preserve"><value>Lookup field</value></data>
+  <data name="exam.not_found" xml:space="preserve"><value>This exam no longer exists.</value></data>
+  <data name="exam.name_required" xml:space="preserve"><value>Enter a name with at least 2 characters.</value></data>
+  <data name="exam.name_too_long" xml:space="preserve"><value>The name is too long: at most 200 characters.</value></data>
+  <data name="exam.name_taken" xml:space="preserve"><value>This issuing authority already has an exam with this name.</value></data>
+  <data name="exam.issuing_authority_required" xml:space="preserve"><value>Choose the issuing authority.</value></data>
+  <data name="exam.assessment_type_invalid" xml:space="preserve"><value>Choose an assessment type.</value></data>
+  <data name="exam.scope_invalid" xml:space="preserve"><value>Choose a scope.</value></data>
+  <data name="exam.scope_detail_required" xml:space="preserve"><value>Say where this exam applies.</value></data>
+  <data name="exam.scope_detail_too_long" xml:space="preserve"><value>This field is too long: at most 120 characters.</value></data>
+  <data name="exam.content_language_invalid" xml:space="preserve"><value>Choose the language of the content.</value></data>
+  <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Issuing authorities</value></data>
+  <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Issuing authorities</value></data>
+  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Search by name or acronym</value></data>
+  <data name="IssuingAuthorities.Empty" xml:space="preserve"><value>No issuing authority yet.</value></data>
+  <data name="IssuingAuthorities.Empty.Search" xml:space="preserve"><value>No issuing authority matches "{0}".</value></data>
+  <data name="IssuingAuthorities.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="IssuingAuthorities.Column.Acronym" xml:space="preserve"><value>Acronym</value></data>
+  <data name="IssuingAuthorities.Dialog.AddTitle" xml:space="preserve"><value>Add issuing authority</value></data>
+  <data name="IssuingAuthorities.Dialog.EditTitle" xml:space="preserve"><value>Edit issuing authority</value></data>
+  <data name="IssuingAuthorities.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="IssuingAuthorities.Field.Name.Help" xml:space="preserve"><value>2 to 150 characters</value></data>
+  <data name="IssuingAuthorities.Field.Acronym" xml:space="preserve"><value>Acronym</value></data>
+  <data name="IssuingAuthorities.Field.Acronym.Help" xml:space="preserve"><value>2 to 20 characters, stored in capitals</value></data>
+  <data name="IssuingAuthorities.Field.Website" xml:space="preserve"><value>Official website</value></data>
+  <data name="IssuingAuthorities.Field.Website.Help" xml:space="preserve"><value>A full address, starting with http:// or https://</value></data>
+  <data name="IssuingAuthorities.Field.Description" xml:space="preserve"><value>Description</value></data>
+  <data name="IssuingAuthorities.Saved" xml:space="preserve"><value>Issuing authority saved.</value></data>
+  <data name="IssuingAuthorities.Deleted" xml:space="preserve"><value>Issuing authority deleted.</value></data>
+  <data name="IssuingAuthorities.Delete.Message" xml:space="preserve"><value>{0} leaves the catalog and stops appearing anywhere in the app.</value></data>
+  <data name="issuing_authority.not_found" xml:space="preserve"><value>This issuing authority no longer exists. Refresh the list.</value></data>
+  <data name="issuing_authority.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="issuing_authority.name_too_long" xml:space="preserve"><value>The name is too long: at most 150 characters.</value></data>
+  <data name="issuing_authority.name_taken" xml:space="preserve"><value>Another issuing authority already has this name.</value></data>
+  <data name="issuing_authority.acronym_required" xml:space="preserve"><value>Type an acronym with at least 2 characters.</value></data>
+  <data name="issuing_authority.acronym_too_long" xml:space="preserve"><value>The acronym is too long: at most 20 characters.</value></data>
+  <data name="issuing_authority.acronym_taken" xml:space="preserve"><value>Another issuing authority already has this acronym.</value></data>
+  <data name="issuing_authority.description_too_long" xml:space="preserve"><value>The description is too long: at most 500 characters.</value></data>
+  <data name="issuing_authority.website_invalid" xml:space="preserve"><value>Type a full address, starting with http:// or https://</value></data>
+  <data name="issuing_authority.has_exams" xml:space="preserve"><value>This issuing authority has exams in the catalog. Delete those exams first, on the Exams page.</value></data>
 </root>

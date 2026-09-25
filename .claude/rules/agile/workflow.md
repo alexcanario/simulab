@@ -6,7 +6,8 @@
 - Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not. In `/agile:autopilot` it is the "Aprovo <id>" answer at stop 1, or the `--assume` flag for that item: assumed answers are recorded in `## Decisions` and shown at validation.
 - Every epic, feature and bug says how it starts (`## Start`): what it depends on, what it waits on and who provides it, the suggested path, what can run beside it. Unknown is written as unknown, never guessed.
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
-- WIP limit: one item in `building` or `validating` per checkout. A new request during a build becomes an `idea`, not work; a second item in parallel needs the owner's `/agile:build <id> --worktree`.
+- WIP limit: one item in `building` or `validating` per checkout. A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
+- `/agile:refine` creates the item's branch and worktree before writing anything; every document of that item (file, cause, mockup) is written there, never in another item's checkout.
 - Confirm the item at the start of the session. Other items only get registered, never executed.
 - Three human gates: approved → validated on screen → merge authorized. An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`.
 - Verify premises in the code before asking. Never ask what the code already answers.
@@ -16,7 +17,7 @@
 - Stay inside the item's scope. Anything extra you notice becomes an `idea` and is reported, not built.
 - When a solution has several moving parts, also offer the simpler version with its trade-off. The owner decides.
 - Show the first artifact of a repeated pattern before replicating it.
-- The main session does the work. Subagents are for a fresh-context review or for parallel work on different files, each in its own worktree.
+- The main session owns the conversation: a subagent never asks the owner, shows a mockup or takes an approval. A subagent is a fresh-context review, a read-only pass before the code (`system-design` proposes, `architect` reviews it, only when the item creates a project, a contract, a message between modules or a schema change), a producing role (`ux-designer` designs a screen, `frontend` implements an approved mockup), or parallel work on different files; one writer at a time in a worktree, and the session runs the gate after a producing agent.
 - Verify what a subagent reports against the files and `git log`. A report is not evidence.
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.

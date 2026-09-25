@@ -1,0 +1,367 @@
+@page "/admin/exams/new"
+@page "/admin/exams/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Localization
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-34, UC2 and UC3: the exam is edited on a page of its own (rule: ui-project), which is also where
+   F-35 adds the editions. The only primary button of the page is Save, at the bottom of the form. *@
+<AppPageHeader Title="@Title" Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_notFound)
+{
+    <MudPaper Class="app-form-card pa-6" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.ExamNotFound)" Class="mb-4" />
+        <AppLink Href="/admin/exams">@L["Exams.BackToList"]</AppLink>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Class="app-form-card pa-6" Elevation="0">
+        @if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+        }
+
+        <AppLookupField Id="exam-authority"
+                        Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                        SearchAsync="SearchAuthoritiesAsync"
+                        Value="_authority"
+                        ValueChanged="OnAuthorityChanged"
+                        Required="true"
+                        Hint="@L["Exams.Field.IssuingAuthority.Hint"]"
+                        Error="@_authorityError" />
+
+        <AppTextField TValue="string"
+                      Id="exam-name"
+                      Label="@L["Exams.Field.Name"]"
+                      Value="@_name"
+                      ValueChanged="@((string? value) => OnNameChanged(value))"
+                      Required="true"
+                      MaxLength="CatalogLimits.ExamNameMaxLength"
+                      Autocomplete="off"
+                      Hint="@L["Exams.Field.Name.Hint"]"
+                      Error="@_nameError" />
+
+        <AppSelectField TValue="AssessmentType?"
+                        Id="exam-assessment-type"
+                        Label="@L["Exams.Field.AssessmentType"]"
+                        Value="_assessmentType"
+                        ValueChanged="@((AssessmentType? value) => OnAssessmentTypeChanged(value))"
+                        Options="AssessmentTypeOptions"
+                        Required="true"
+                        Error="@_assessmentTypeError" />
+
+        <AppSelectField TValue="ExamScope?"
+                        Id="exam-scope"
+                        Label="@L["Exams.Field.Scope"]"
+                        Value="_scope"
+                        ValueChanged="@((ExamScope? value) => OnScopeChanged(value))"
+                        Options="ScopeOptions"
+                        Required="true"
+                        Error="@_scopeError" />
+
+        @* BR8: the detail exists only for the two scopes that need it, and its label says which one. *@
+        @if (NeedsScopeDetail)
+        {
+            <AppTextField TValue="string"
+                          Id="exam-scope-detail"
+                          Label="@ScopeDetailLabel"
+                          Value="@_scopeDetail"
+                          ValueChanged="@((string? value) => OnScopeDetailChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.ExamScopeDetailMaxLength"
+                          Autocomplete="off"
+                          Hint="@L["Exams.Field.ScopeDetail.Hint"]"
+                          Error="@_scopeDetailError" />
+        }
+
+        <AppSelectField TValue="string"
+                        Id="exam-content-language"
+                        Label="@L["Exams.Field.ContentLanguage"]"
+                        Value="_contentLanguage"
+                        ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
+                        Options="LanguageOptions"
+                        Required="true"
+                        Hint="@L["Exams.Field.ContentLanguage.Hint"]"
+                        Error="@_contentLanguageError" />
+
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+    </MudPaper>
+}
+
+@code {
+    /// <summary>
+    /// What the form offers before the reader chooses (BR9). It is the screen's default, not the Api's: the
+    /// Api asks for the language explicitly, and `SupportedLanguages.Default` is the app's fallback UI
+    /// language (en), which is the wrong guess for a catalog whose first market is Brazil.
+    /// </summary>
+    public const string DefaultContentLanguage = "pt-BR";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The exam being edited; absent on /admin/exams/new.</summary>
+    [Parameter] public Guid? Id { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private ExamResponse? _saved;
+    private AppLookupOption? _authority;
+    private string? _name;
+    private AssessmentType? _assessmentType;
+    private ExamScope? _scope;
+    private string? _scopeDetail;
+    private string? _contentLanguage = DefaultContentLanguage;
+    private string? _authorityError;
+    private string? _nameError;
+    private string? _assessmentTypeError;
+    private string? _scopeError;
+    private string? _scopeDetailError;
+    private string? _contentLanguageError;
+    private string? _error;
+    private bool _loading;
+    private bool _notFound;
+    private bool _saving;
+
+    private bool IsEdit => _saved is not null;
+
+    private string Title => IsEdit ? L["Exams.Form.EditTitle"] : L["Exams.Form.AddTitle"];
+
+    private bool NeedsScopeDetail => _scope is ExamScope.State or ExamScope.Municipal;
+
+    private string ScopeDetailLabel =>
+        _scope == ExamScope.Municipal ? L["Exams.Field.Municipality"] : L["Exams.Field.State"];
+
+    private IReadOnlyList<AppSelectOption<AssessmentType?>> AssessmentTypeOptions =>
+        [.. ExamText.AssessmentTypeOrder(L).Select(value =>
+            new AppSelectOption<AssessmentType?>(value, ExamText.AssessmentTypeName(L, value)))];
+
+    private IReadOnlyList<AppSelectOption<ExamScope?>> ScopeOptions =>
+        [.. ExamText.ScopeOrder(L).Select(value => new AppSelectOption<ExamScope?>(value, ExamText.ScopeName(L, value)))];
+
+    // A language is shown in its own name (BR9): it does not depend on the reader's UI language, so it
+    // needs no resource key. Lang marks it as written in that language, for a screen reader.
+    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
+        [.. SupportedCultures.All.Select(culture =>
+            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    private bool HasChanges =>
+        _authority?.Id != _saved?.IssuingAuthorityId
+        || Trimmed(_name) != (_saved?.Name ?? string.Empty)
+        || _assessmentType != _saved?.AssessmentType
+        || _scope != _saved?.Scope
+        || Trimmed(_scopeDetail) != (_saved?.ScopeDetail ?? string.Empty)
+        || _contentLanguage != (_saved?.ContentLanguage ?? DefaultContentLanguage);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BuildBreadcrumbs();
+        if (Id is not { } id || _saved?.Id == id)
+        {
+            return;
+        }
+
+        _loading = true;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindExamAsync(token, id);
+        _loading = false;
+
+        if (result is not { IsSuccess: true, Value: { } exam })
+        {
+            _notFound = true;
+            return;
+        }
+
+        _saved = exam;
+        _authority = new AppLookupOption(exam.IssuingAuthorityId, $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})");
+        _name = exam.Name;
+        _assessmentType = exam.AssessmentType;
+        _scope = exam.Scope;
+        _scopeDetail = exam.ScopeDetail ?? string.Empty;
+        _contentLanguage = exam.ContentLanguage;
+        BuildBreadcrumbs();
+    }
+
+    private void BuildBreadcrumbs() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Exams.Title"], href: "/admin/exams"),
+            new BreadcrumbItem(_saved?.Name ?? L["Exams.Form.AddTitle"].Value, href: null, disabled: true)
+        ];
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private void OnAuthorityChanged(AppLookupOption? value)
+    {
+        _authority = value;
+        _authorityError = AuthorityError();
+    }
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError();
+    }
+
+    private void OnAssessmentTypeChanged(AssessmentType? value)
+    {
+        _assessmentType = value;
+        _assessmentTypeError = null;
+    }
+
+    // BR8: leaving the two scopes that need a place drops what was typed, so a national exam never carries
+    // a stale municipality into the request.
+    private void OnScopeChanged(ExamScope? value)
+    {
+        _scope = value;
+        _scopeError = null;
+        if (!NeedsScopeDetail)
+        {
+            _scopeDetail = string.Empty;
+            _scopeDetailError = null;
+        }
+    }
+
+    private void OnScopeDetailChanged(string? value)
+    {
+        _scopeDetail = value;
+        _scopeDetailError = ScopeDetailError();
+    }
+
+    private void OnContentLanguageChanged(string? value)
+    {
+        _contentLanguage = value;
+        _contentLanguageError = null;
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? AuthorityError() =>
+        _authority is null ? Errors.For(CatalogErrorCodes.ExamIssuingAuthorityRequired) : null;
+
+    private string? NameError() =>
+        Trimmed(_name).Length < CatalogLimits.NameMinLength ? Errors.For(CatalogErrorCodes.ExamNameRequired) : null;
+
+    private string? ScopeDetailError() =>
+        NeedsScopeDetail && Trimmed(_scopeDetail).Length == 0
+            ? Errors.For(CatalogErrorCodes.ExamScopeDetailRequired)
+            : null;
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchAuthoritiesAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListIssuingAuthoritiesAsync(
+            token,
+            new IssuingAuthorityListQuery(0, AppLookupField.MaxCandidates, term),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Issuing authorities failed to load: {result.ErrorCode}.");
+        }
+
+        // v2: only bodies that publish notices are offered. A board is never a parent of an exam (BR2).
+        return [.. result.Value!.Items.Select(authority => new AppLookupOption(
+            authority.Id,
+            $"{authority.Name} ({authority.Acronym})"))];
+    }
+
+    private async Task SaveAsync()
+    {
+        _authorityError = AuthorityError();
+        _nameError = NameError();
+        _assessmentTypeError = _assessmentType is null ? Errors.For(CatalogErrorCodes.ExamAssessmentTypeInvalid) : null;
+        _scopeError = _scope is null ? Errors.For(CatalogErrorCodes.ExamScopeInvalid) : null;
+        _scopeDetailError = ScopeDetailError();
+        _contentLanguageError = _contentLanguage is null ? Errors.For(CatalogErrorCodes.ExamContentLanguageInvalid) : null;
+
+        if (_authorityError is not null || _nameError is not null || _assessmentTypeError is not null
+            || _scopeError is not null || _scopeDetailError is not null || _contentLanguageError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        var token = await TokenAsync();
+        var request = new SaveExamRequest(
+            _authority!.Id,
+            Trimmed(_name),
+            _assessmentType!.Value.ToString(),
+            _scope!.Value.ToString(),
+            NeedsScopeDetail ? Trimmed(_scopeDetail) : null,
+            _contentLanguage);
+
+        var result = token is null
+            ? ApiResult.Failed<ExamResponse>(ErrorText.UnexpectedCode)
+            : IsEdit
+                ? await Api.UpdateExamAsync(token, _saved!.Id, request)
+                : await Api.CreateExamAsync(token, request);
+
+        _saving = false;
+        if (result is { IsSuccess: true, Value: { } exam })
+        {
+            // The page stays open as the edit form of the exam that was just saved: adding its first
+            // edition is the usual next step, and in F-35 that section is on this very page.
+            var wasAdd = !IsEdit;
+            _saved = exam;
+            _scopeDetail = exam.ScopeDetail ?? string.Empty;
+            BuildBreadcrumbs();
+            Snackbar.Add(L["Exams.Saved"], Severity.Success);
+            if (wasAdd)
+            {
+                Navigation.NavigateTo($"/admin/exams/{exam.Id}", replace: true);
+            }
+
+            return;
+        }
+
+        // A refusal belongs to the field that caused it, so the reader sees where to change something.
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.ExamNameTaken:
+            case CatalogErrorCodes.ExamNameRequired:
+            case CatalogErrorCodes.ExamNameTooLong:
+                _nameError = Errors.For(result.ErrorCode);
+                _error = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.ExamScopeDetailRequired:
+            case CatalogErrorCodes.ExamScopeDetailTooLong:
+                _scopeDetailError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.IssuingAuthorityNotFound:
+            case CatalogErrorCodes.ExamIssuingAuthorityRequired:
+                // The body left the catalog since it was picked: clear it and make the reader choose again.
+                _authority = null;
+                _authorityError = Errors.For(CatalogErrorCodes.ExamIssuingAuthorityRequired);
+                _error = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private void Cancel() => Navigation.NavigateTo("/admin/exams");
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

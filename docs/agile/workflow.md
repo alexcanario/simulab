@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.57 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.61 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -41,9 +41,9 @@ Contents
 | Validate each feature on screen | Implements, tests and hands over a validation script |
 | Authorize merges | Merges, updates the board and the app manual, runs the retro |
 
-Subagents are the exception: a fresh-context reviewer for risky changes, or parallel work that does not touch the same files. There is no chain of roles per feature.
+Subagents are the exception: a fresh-context reviewer for risky changes, two read-only passes before the code of a heavier item (`system-design` proposes the slice, the contracts and the data; `architect` reviews that proposal), two producing roles for screens (`ux-designer` designs one, `frontend` implements the mockup you approved), or parallel work that does not touch the same files. They are named jobs, not a chain of roles per feature, and none of them talks to you: the conversation is always with Claude, which reads what an agent wrote or proposed before following it. One writer at a time in a folder, and the two passes write nothing at all.
 
-**Models.** The model is chosen per activity, on purpose: the independent review runs on the strongest model, code searches on the smallest, bulk mechanical work that the tests verify on a mid model, and the main session on the model you pick. The `reviewer` agent declares its default model; your project overrides it in the "Models" section of `CLAUDE.md` (quiz question 34), never by editing the plugin.
+**Models.** The model is chosen per activity, on purpose: the independent review, the design and architecture passes and the screen design run on the strongest model, code searches on the smallest, screen implementation and bulk mechanical work that the tests verify on a mid model, and the main session on the model you pick. Each agent (`reviewer`, `system-design`, `architect`, `ux-designer`, `frontend`) declares its default model; your project overrides it in the "Models" section of `CLAUDE.md` (quiz question 34), never by editing the plugin.
 
 ## 3. Setting up a project
 
@@ -107,9 +107,9 @@ stateDiagram-v2
 | Status | What happens | Who moves it |
 |---|---|---|
 | `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. | Claude |
-| `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number): Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. The feature file is written, on its own branch — a checkout that is on another item's branch is never switched. | Claude |
+| `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: branch, code, tests for what changed. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
+| `building` | `/agile:build`: it continues in the worktree the refinement created — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree; Claude then reads every file it names, runs the gate and quotes the real counts, and answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, merge after your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 
@@ -158,7 +158,7 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 |---|---|---|
 | `/agile:discuss` | An idea with several possible directions, or doubts only you can answer | `docs/discussions/D-<n>-<slug>.md` (options, decisions, parked points) and the items captured as `idea` |
 | `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea` |
-| `/agile:screen` | A feature in `refining` with a new or complex screen | Detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), approved together with the feature |
+| `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
 
 ## 6. Changing your mind
@@ -385,7 +385,9 @@ Claude writes every file (code, tests, docs) with its editing tools, never throu
 - End: a short note (where we stopped, what is next, who decides).
 - Before merging from a worktree: Claude asks, as a blocking question, whether you have closed any IDE or app host running from that folder — a removal that fails halfway unregisters the worktree and leaves the folder on disk, worse than not removing it. On .NET it also runs `dotnet build-server shutdown` first, since a build server holds a lock the IDE closing does not release.
 
-**Two items in parallel.** The default is one item at a time. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work; Claude never creates a worktree by itself. It first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. Then it creates the branch in a separate folder outside the repository (`Worktrees:` in `CLAUDE.md`, default `<repository parent>/wt/<repository>/<type>-<n>`, kept short because of Windows path limits) and works only there: one writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. Previewing the app host from a worktree points the launch configuration at its absolute path temporarily, restored to the main checkout's path once the preview ends. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
+**One folder per item.** Every item gets its own worktree — a separate folder outside the repository (`Worktrees:` in `CLAUDE.md`, default `<repository parent>/wt/<repository>/<type>-<n>`, kept short because of Windows path limits) — created by `/agile:refine` before it writes anything and used until the merge. That is what keeps an item's documents on its own branch: a session working in another item's folder used to write the feature file and the mockup there, and they ended up on an unrelated branch. The build reuses that folder and never makes a second one.
+
+**Two items in parallel.** The default is still one item at a time in `building`. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work: it lifts the one-at-a-time limit (and, for an item approved before this existed, creates the missing folder). Claude first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. One writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. Previewing the app host from a worktree points the launch configuration at its absolute path temporarily, restored to the main checkout's path once the preview ends. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
 
 ## 14. Worked examples
 
@@ -472,7 +474,9 @@ Status: idea. Nothing else is done until we refine it.
 ```
 
 ```
-Claude: I checked the code: the Catalog module exists but has no entities yet.
+Claude: Folder for this item: D:/dev/wt/examprep/feature-3 [feature/F-3] — created now,
+outside the repository; the file moved in and everything about F-3 is written there.
+I checked the code: the Catalog module exists but has no entities yet.
 The user and role model from bootstrap has Curator and Admin.
 ```
 
@@ -787,13 +791,18 @@ During the refinement of F-13:
 
 ```
 > /agile:screen F-13
-Claude: Mockup sent: docs/features/mockups/F-13-practice-test-by-level.html
-States: loading, no questions for the level, ready, answering, time over, finished, error.
+Claude: Design delegated to the ux-designer agent, alone in the item's worktree.
+It wrote the screen section and the mockup; I read both files before showing them:
+7 states, every text in the three languages, only kit patterns,
+new colour 4.8:1 on the card and 5.1:1 on the page.
+Mockup sent: docs/features/mockups/F-13-practice-test-by-level.html
 Decisions: one question per page (mobile-friendly); timer visible only when the test has a limit.
-1. Can the student go back to a previous question? → Recommendation: yes, until finishing.
+Its open point — 1. Can the student go back to a previous question? → Recommendation: yes, until finishing.
 > yes
 > approve F-13
 ```
+
+The agent never talks to you. It designs; Claude reads the two files it wrote, asks its open points as its own questions and collects your approval. In the build of the same feature a second agent, `frontend`, implements that approved mockup and the tests of that screen, alone in the worktree; Claude then reads what it wrote, runs the gate and quotes the real counts. Domain, API and migrations stay with Claude, and a feature with no approved mockup is built exactly as before, with no agent. Both models are yours, in the "Models" section of `CLAUDE.md`.
 
 At the end of the build of F-14 (it writes results and changes the students' data):
 
@@ -813,11 +822,11 @@ F-6 is a long build in one session. A bug appears and the owner wants it fixed m
 
 ```
 > /agile:build B-2 --worktree
-Claude: F-6 is building in this checkout (feature/F-6). B-2 touches Identity/Login only;
+Claude: F-6 is building in its own worktree (feature/F-6). B-2 touches Identity/Login only;
 F-6 touches Catalog. No shared schema or screen: they can run in parallel.
-Worktree: D:\dev\wt\examprep\bug-2 (outside the repository). Create it?
+B-2 already has the worktree from its refinement: D:\dev\wt\examprep\bug-2. Continue there?
 > yes
-Claude: Created bug/B-2 in D:\dev\wt\examprep\bug-2, status building (on that branch).
+Claude: B-2 in D:\dev\wt\examprep\bug-2, status building (on that branch).
 Only one app host at a time: stop the one from the main checkout before I open the screen here.
 ```
 
@@ -1118,6 +1127,26 @@ Claude: 30b. Evals → Recommendation: a test level of their own. 40 wrong answe
 
 Round 8 then asks question 38 — the system prompt as a versioned file, reviewed like code — and, if the tutor gets tools, question 37 for the tool catalogue.
 
+### 14.15 The two passes before the code
+
+F-21 adds an endpoint other modules consume and one new table, so the build runs both read-only passes before planning:
+
+```
+> /agile:build F-21
+Claude: This item creates a contract and a table, so the two passes ran before the plan.
+system-design proposed: Catalog.Api takes POST /api/v1/exams (error codes exam.duplicate,
+exam.invalid-board), the ExamPublished message owned by Catalog, and the Exams table with a
+unique index on (BoardId, Year). Risk: 312 rows already duplicate that pair.
+architect (blocker): the unique index over existing duplicates fails the migration → clean the
+rows in the same migration, or add the index after the cleanup item. Keep as proposed: the slice
+and the contract. Checks this project really has: tests/Architecture, no layout test.
+I checked both against the code: the 312 rows are real (verified with a count), the message has no
+consumer yet. Accepted the blocker, dropped the second index nothing queries — both in ## Decisions.
+Plan (6 steps): 1. migration with cleanup, 2. Exam entity, ...
+```
+
+Nothing was written by the two agents: they read and proposed, Claude checked, decided, and only then started. An item with none of those four triggers — a thin CRUD, a text change — skips both passes entirely.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -1128,9 +1157,9 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:discuss "<idea>"` | Explore an idea: options, decisions, items captured |
 | `/agile:epic "<name>"` | Break an epic into prioritized features |
 | `/agile:idea "<text>"` | Capture an epic, feature or bug, unrefined |
-| `/agile:refine <feature>` | Refinement round → feature file for approval |
-| `/agile:screen <feature>` | Screen details and HTML mockup during refinement |
-| `/agile:build <feature> [--worktree]` | Implement an approved feature (one at a time; `--worktree` for a second one in parallel) |
+| `/agile:refine <feature>` | Creates the item's branch and worktree, then the refinement round → feature file for approval |
+| `/agile:screen <feature>` | Screen details and HTML mockup during refinement, by the `ux-designer` agent |
+| `/agile:build <feature> [--worktree]` | Implement an approved feature in the worktree the refinement created (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
 | `/agile:ship <feature>` | Full suite, merge, board, app manual |
@@ -1202,7 +1231,8 @@ flowchart TD
 ### /agile:refine
 ```mermaid
 flowchart TD
-    A["Item in idea or refining"] --> B["status: refining; read brief, profile, code it touches"]
+    A["Item in idea or refining"] --> A1["Branch and worktree of the item, before any writing;<br/>an uncommitted item file is moved in"]
+    A1 --> B["status: refining in the worktree; read brief, profile, code it touches"]
     B --> C["Check every premise in the code"]
     C -->|a premise is false| C1["Say so first"]
     C1 --> D
@@ -1223,10 +1253,11 @@ flowchart TD
 ### /agile:screen
 ```mermaid
 flowchart TD
-    A["Feature in refining with a new or complex screen"] --> B["Read the feature file, the UI kit and the gallery"]
-    B --> C["Screen section: layout, states, actions, messages, permissions"]
-    C --> D["Standalone HTML mockup: every state,<br/>three languages, kit patterns only"]
-    D --> E{"Your questions and changes"}
+    A["Feature in refining with a new or complex screen"] --> B["Delegate to the ux-designer agent: paths only,<br/>alone in the item's worktree"]
+    B --> C["It writes the screen section: layout, states, actions, messages, permissions"]
+    C --> D["and the standalone HTML mockup: every state,<br/>three languages, kit patterns only"]
+    D --> D1["Claude reads both files and says what it verified"]
+    D1 --> E{"Its open points, then your questions and changes"}
     E -->|change| C
     E -->|fine| F(["Approved together with the feature"])
 ```
@@ -1240,10 +1271,17 @@ flowchart TD
     A -->|yes| B["Another item building or validating?"]
     B -->|yes, no --worktree| B1(["Stop and name it"])
     B -->|yes, --worktree| B2{"Can the two collide? Confirm parallel work"}
-    B2 -->|yes| C2["Worktree outside the repository; work only there"]
-    B -->|no| C["Branch feature/F-n; status: building; plan in 8 steps"]
+    B2 -->|yes| C2["The item's worktree, from the refinement; work only there"]
+    B -->|no| C["The item's worktree; status: building; plan in 8 steps"]
     C2 --> D
-    C --> D["Code by the profile and rules; tests per criterion;<br/>a bug: one regression test per occurrence fixed;<br/>affected tests only; small commits, branch checked first"]
+    C --> P0{"Creates a project, a contract,<br/>a message between modules or a schema change?"}
+    P0 -->|yes| P1["system-design proposes slice, contracts, data, risks;<br/>architect reviews it; both read-only, nothing written"]
+    P1 --> P2["Claude verifies both, writes the plan from them,<br/>records what it accepted in ## Decisions"]
+    P2 --> C3
+    P0 -->|no| C3{"Mockup approved with the item?"}
+    C3 -->|yes| C4["The frontend agent implements that screen and its tests,<br/>alone in the worktree; Claude reads it, runs the gate, answers its stops"]
+    C4 --> D
+    C3 -->|no| D["Code by the profile and rules; tests per criterion;<br/>a bug: one regression test per occurrence fixed;<br/>affected tests only; small commits, branch checked first"]
     D --> E{"False premise or impossible criterion?"}
     E -->|yes| E1["Options A/B → /agile:change"]
     E1 --> D

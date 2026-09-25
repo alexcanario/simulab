@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.57 (rascunho). English: [en](workflow.md).
+> Versão 0.0.61 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -41,9 +41,9 @@ Sumário
 | Valida cada feature na tela | Implementa, testa e entrega um roteiro de validação |
 | Autoriza os merges | Faz o merge, atualiza o board e o manual da app, conduz a retro |
 
-Subagentes são exceção: um revisor com contexto limpo para mudanças arriscadas, ou trabalho paralelo que não mexe nos mesmos arquivos. Não existe cadeia de papéis por feature.
+Subagentes são exceção: um revisor com contexto limpo para mudanças arriscadas, duas passagens somente leitura antes do código de um item mais pesado (`system-design` propõe o corte, os contratos e os dados; `architect` revisa essa proposta), dois papéis que produzem telas (`ux-designer` desenha, `frontend` implementa o mockup que você aprovou), ou trabalho paralelo que não mexe nos mesmos arquivos. São funções com nome, não uma cadeia de papéis por feature, e nenhuma delas fala com você: a conversa é sempre com o Claude, que lê o que o agente escreveu ou propôs antes de seguir. Um escritor por vez em cada pasta, e as duas passagens não escrevem nada.
 
-**Modelos.** O modelo é escolhido por atividade, de propósito: a revisão independente roda no modelo mais forte, as buscas no código no menor, o trabalho mecânico em volume que os testes conferem num modelo intermediário, e a sessão principal no modelo que você escolher. O agente `reviewer` declara o seu modelo padrão; o seu projeto troca esse modelo na seção "Models" do `CLAUDE.md` (pergunta 34 do quiz), nunca editando o plugin.
+**Modelos.** O modelo é escolhido por atividade, de propósito: a revisão independente, as passagens de desenho e arquitetura e o desenho de tela rodam no modelo mais forte, as buscas no código no menor, a implementação da tela e o trabalho mecânico em volume que os testes conferem num modelo intermediário, e a sessão principal no modelo que você escolher. Cada agente (`reviewer`, `system-design`, `architect`, `ux-designer`, `frontend`) declara o seu modelo padrão; o seu projeto troca esse modelo na seção "Models" do `CLAUDE.md` (pergunta 34 do quiz), nunca editando o plugin.
 
 ## 3. Preparando um projeto
 
@@ -107,9 +107,9 @@ stateDiagram-v2
 | Status | O que acontece | Quem muda |
 |---|---|---|
 | `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. | Claude |
-| `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número): o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. O arquivo da feature é escrito, na branch do item — um checkout que está na branch de outro item nunca é trocado. | Claude |
+| `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
-| `building` | `/agile:build`: branch, código e testes do que mudou. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
+| `building` | `/agile:build`: continua na worktree criada no refinamento — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
 | `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. **Portão 2.** | Você |
 | `done` | `/agile:ship`: suíte completa, merge com o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
 
@@ -158,7 +158,7 @@ A execução mantém uma linha `Autopilot:` no arquivo do item (`refined`, `stop
 |---|---|---|
 | `/agile:discuss` | Uma ideia com vários caminhos possíveis, ou dúvidas que só você responde | `docs/discussions/D-<n>-<slug>.md` (opções, decisões, pontos adiados) e os itens registrados como `idea` |
 | `/agile:epic` | Um épico novo para planejar | `docs/epics/<slug>.md` com features priorizadas, cada uma cabendo numa sessão, do que cada uma depende e pelo que espera, um plano de execução (ordem, caminho sugerido, o que roda em paralelo) e o que o épico espera de fora; cada feature registrada como `idea` |
-| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | Seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), aprovados junto com a feature |
+| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela |
 | `/agile:review` | Uma mudança arriscada (autenticação, permissões, isolamento por tenant, dados, contratos, dinheiro, ou mais de ~400 linhas), antes da validação | Achados por gravidade de um revisor só de leitura e com contexto limpo; os bloqueadores confirmados são corrigidos antes de você validar |
 
 ## 6. Mudando de ideia
@@ -387,7 +387,9 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 - **Fim:** uma nota curta (onde paramos, o que vem a seguir, quem decide).
 - **Antes do merge a partir de uma worktree:** o Claude pergunta, como uma pergunta bloqueante, se você já fechou a IDE e o app host que estiverem rodando daquela pasta — uma remoção que falha no meio desregistra a worktree e deixa a pasta no disco, pior do que não remover. No .NET ele também roda `dotnet build-server shutdown` antes, porque um build server segura um lock que fechar a IDE não libera.
 
-**Dois itens em paralelo.** O padrão é um item por vez. Quando você quiser mesmo um segundo item andando — uma feature longa numa sessão e um bug em outra — digite `/agile:build <id> --worktree`. A flag é o seu pedido de trabalho em paralelo; o Claude nunca cria uma worktree por conta própria. Antes, ele diz se os dois itens podem colidir (mesmo schema de módulo, mesma tela, mesmo contrato) e recomenda fazer em sequência quando colidem. Depois cria a branch numa pasta separada, fora do repositório (`Worktrees:` no `CLAUDE.md`; padrão `<pasta pai do repositório>/wt/<repositório>/<tipo>-<n>`, curta por causa do limite de caminho do Windows) e trabalha só ali: um escritor por worktree. O status do item fica nessa worktree até o merge, e o `/agile:status` e o início de sessão leem todas as worktrees. Só um app host roda por vez (as portas colidem); arquivos locais ignorados pelo git não vêm junto. Uma pré-visualização do app host a partir de uma worktree aponta a configuração de execução para o caminho absoluto dela temporariamente, restaurada para o caminho do checkout principal ao fim da pré-visualização. No ship, a checagem completa roda na worktree e o merge no checkout principal; depois do merge a worktree e a branch são removidas, nunca com `--force` sem perguntar, e o outro item em andamento é atualizado com a branch principal. Limite recomendado: dois itens — você valida cada um na tela, e esse é o gargalo de verdade.
+**Uma pasta por item.** Cada item ganha a própria worktree — uma pasta separada, fora do repositório (`Worktrees:` no `CLAUDE.md`; padrão `<pasta pai do repositório>/wt/<repositório>/<tipo>-<n>`, curta por causa do limite de caminho do Windows) — criada pelo `/agile:refine` antes de ele escrever qualquer coisa e usada até o merge. É isso que mantém os documentos de um item na branch dele: uma sessão trabalhando na pasta de outro item escrevia ali o arquivo da feature e o mockup, e eles acabavam numa branch que não era a deles. O build reaproveita essa pasta e nunca cria uma segunda.
+
+**Dois itens em paralelo.** O padrão continua sendo um item por vez em `building`. Quando você quiser mesmo um segundo item andando — uma feature longa numa sessão e um bug em outra — digite `/agile:build <id> --worktree`. A flag é o seu pedido de trabalho em paralelo: ela libera o limite de um por vez (e, para um item aprovado antes desta mudança, cria a pasta que falta). Antes, o Claude diz se os dois itens podem colidir (mesmo schema de módulo, mesma tela, mesmo contrato) e recomenda fazer em sequência quando colidem. Um escritor por worktree. O status do item fica nessa worktree até o merge, e o `/agile:status` e o início de sessão leem todas as worktrees. Só um app host roda por vez (as portas colidem); arquivos locais ignorados pelo git não vêm junto. Uma pré-visualização do app host a partir de uma worktree aponta a configuração de execução para o caminho absoluto dela temporariamente, restaurada para o caminho do checkout principal ao fim da pré-visualização. No ship, a checagem completa roda na worktree e o merge no checkout principal; depois do merge a worktree e a branch são removidas, nunca com `--force` sem perguntar, e o outro item em andamento é atualizado com a branch principal. Limite recomendado: dois itens — você valida cada um na tela, e esse é o gargalo de verdade.
 
 ## 14. Exemplos de workflow
 
@@ -474,7 +476,9 @@ Status: idea. Nada mais acontece até a refinarmos.
 ```
 
 ```
-Claude: Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
+Claude: Pasta deste item: D:/dev/wt/examprep/feature-3 [feature/F-3] — criada agora,
+fora do repositório; o arquivo foi movido para lá e tudo da F-3 é escrito ali.
+Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
 O modelo de usuários e papéis do bootstrap tem Curator e Admin.
 ```
 
@@ -791,13 +795,18 @@ Durante o refinamento da F-13:
 
 ```
 > /agile:screen F-13
-Claude: Mockup enviado: docs/features/mockups/F-13-practice-test-by-level.html
-Estados: carregando, sem questões no nível, pronto, respondendo, tempo esgotado, concluído, erro.
+Claude: Desenho delegado ao agente ux-designer, sozinho na worktree do item.
+Ele escreveu a seção de tela e o mockup; eu li os dois arquivos antes de te mostrar:
+7 estados, cada texto nos três idiomas, só padrões do kit,
+cor nova com 4,8:1 no card e 5,1:1 na página.
+Mockup enviado: docs/features/mockups/F-13-practice-test-by-level.html
 Decisões: uma questão por página (bom no celular); cronômetro só quando o simulado tem limite.
-1. O aluno pode voltar a uma questão anterior? → Recomendação: sim, até concluir.
+Ponto aberto dele — 1. O aluno pode voltar a uma questão anterior? → Recomendação: sim, até concluir.
 > sim
 > aprovo F-13
 ```
+
+O agente não fala com você. Ele desenha; o Claude lê os dois arquivos que ele escreveu, faz como suas as perguntas abertas dele e recolhe a sua aprovação. No build da mesma feature, um segundo agente, o `frontend`, implementa esse mockup aprovado e os testes daquela tela, sozinho na worktree; depois o Claude lê o que ele escreveu, roda o gate e cita os números reais. Domínio, API e migrações continuam com o Claude, e uma feature sem mockup aprovado é construída exatamente como antes, sem agente. Os dois modelos são sua escolha, na seção "Models" do `CLAUDE.md`.
 
 No fim do build da F-14 (ela grava resultados e mexe nos dados dos alunos):
 
@@ -817,11 +826,11 @@ A F-6 é um build longo numa sessão. Aparece um bug, e o dono quer corrigi-lo e
 
 ```
 > /agile:build B-2 --worktree
-Claude: A F-6 está em build neste checkout (feature/F-6). O B-2 mexe só em Identity/Login;
+Claude: A F-6 está em build na worktree dela (feature/F-6). O B-2 mexe só em Identity/Login;
 a F-6 mexe em Catalog. Sem schema nem tela em comum: podem andar em paralelo.
-Worktree: D:\dev\wt\examprep\bug-2 (fora do repositório). Posso criar?
+O B-2 já tem a worktree do refinamento: D:\dev\wt\examprep\bug-2. Sigo nela?
 > sim
-Claude: Criada bug/B-2 em D:\dev\wt\examprep\bug-2, status building (nessa branch).
+Claude: B-2 em D:\dev\wt\examprep\bug-2, status building (nessa branch).
 Só um app host por vez: pare o do checkout principal antes de eu abrir a tela aqui.
 ```
 
@@ -1123,6 +1132,26 @@ Claude: 30b. Evals → Recomendação: um nível de teste próprio. 40 respostas
 
 A rodada 8 então faz a pergunta 38 — o prompt de sistema como arquivo versionado, revisado como código — e, se o tutor ganhar tools, a pergunta 37, do catálogo de tools.
 
+### 14.15 As duas passagens antes do código
+
+A F-21 cria um endpoint que outros módulos consomem e uma tabela nova, então o build roda as duas passagens somente leitura antes de planejar:
+
+```
+> /agile:build F-21
+Claude: Este item cria contrato e tabela, então as duas passagens rodaram antes do plano.
+system-design propôs: Catalog.Api recebe POST /api/v1/exams (códigos de erro exam.duplicate,
+exam.invalid-board), a mensagem ExamPublished pertencente ao Catalog, e a tabela Exams com índice
+único em (BoardId, Year). Risco: 312 linhas já duplicam esse par.
+architect (bloqueador): o índice único sobre duplicatas existentes derruba a migração → limpar as
+linhas na mesma migração, ou criar o índice depois do item de limpeza. Manter como proposto: o corte
+e o contrato. Conferências que este projeto realmente tem: tests/Architecture, sem teste de layout.
+Conferi as duas no código: as 312 linhas existem (contei), e a mensagem ainda não tem consumidor.
+Aceitei o bloqueador e descartei o segundo índice, que nenhuma consulta usa — os dois em ## Decisions.
+Plano (6 passos): 1. migração com limpeza, 2. entidade Exam, ...
+```
+
+Nada foi escrito pelos dois agentes: eles leram e propuseram, o Claude conferiu, decidiu e só então começou. Um item sem nenhum dos quatro gatilhos — um CRUD fino, uma mudança de texto — não passa por nenhuma das duas.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -1133,9 +1162,9 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:discuss "<ideia>"` | Explora uma ideia: opções, decisões, itens registrados |
 | `/agile:epic "<nome>"` | Quebra um épico em features priorizadas |
 | `/agile:idea "<texto>"` | Registra um épico, feature ou bug, sem refinamento |
-| `/agile:refine <feature>` | Rodada de refinamento → arquivo da feature para aprovação |
-| `/agile:screen <feature>` | Detalhe de tela e mockup HTML durante o refinamento |
-| `/agile:build <feature> [--worktree]` | Implementa uma feature aprovada (uma por vez; `--worktree` para uma segunda em paralelo) |
+| `/agile:refine <feature>` | Cria a branch e a worktree do item e faz a rodada de refinamento → arquivo da feature para aprovação |
+| `/agile:screen <feature>` | Detalhe de tela e mockup HTML durante o refinamento, pelo agente `ux-designer` |
+| `/agile:build <feature> [--worktree]` | Implementa uma feature aprovada na worktree criada no refinamento (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
 | `/agile:ship <feature>` | Suíte completa, merge, board e manual da app |
@@ -1207,7 +1236,8 @@ flowchart TD
 ### /agile:refine
 ```mermaid
 flowchart TD
-    A["Item em idea ou refining"] --> B["status: refining; ler brief, perfil, código que toca"]
+    A["Item em idea ou refining"] --> A1["Branch e worktree do item, antes de escrever;<br/>arquivo do item ainda não commitado é movido para lá"]
+    A1 --> B["status: refining na worktree; ler brief, perfil, código que toca"]
     B --> C["Conferir cada premissa no código"]
     C -->|premissa falsa| C1["Dizer isso primeiro"]
     C1 --> D
@@ -1228,10 +1258,11 @@ flowchart TD
 ### /agile:screen
 ```mermaid
 flowchart TD
-    A["Feature em refining com tela nova ou complexa"] --> B["Ler o arquivo da feature, o kit de UI e a galeria"]
-    B --> C["Seção de tela: layout, estados, ações, mensagens, permissões"]
-    C --> D["Mockup HTML autônomo: todos os estados,<br/>três idiomas, só padrões do kit"]
-    D --> E{"Suas perguntas e mudanças"}
+    A["Feature em refining com tela nova ou complexa"] --> B["Delegar ao agente ux-designer: só caminhos,<br/>sozinho na worktree do item"]
+    B --> C["Ele escreve a seção de tela: layout, estados, ações, mensagens, permissões"]
+    C --> D["e o mockup HTML autônomo: todos os estados,<br/>três idiomas, só padrões do kit"]
+    D --> D1["O Claude lê os dois arquivos e diz o que conferiu"]
+    D1 --> E{"Os pontos abertos dele, depois suas perguntas e mudanças"}
     E -->|mudar| C
     E -->|ok| F(["Aprovado junto com a feature"])
 ```
@@ -1245,10 +1276,17 @@ flowchart TD
     A -->|sim| B["Outro item em building ou validating?"]
     B -->|sim, sem --worktree| B1(["Parar e dizer qual"])
     B -->|sim, com --worktree| B2{"Os dois podem colidir? Confirmar o paralelo"}
-    B2 -->|sim| C2["Worktree fora do repositório; trabalhar só lá"]
-    B -->|não| C["Branch feature/F-n; status: building; plano em 8 passos"]
+    B2 -->|sim| C2["A worktree do item, criada no refinamento; trabalhar só lá"]
+    B -->|não| C["A worktree do item; status: building; plano em 8 passos"]
     C2 --> D
-    C --> D["Código pelo perfil e pelas regras; testes por critério;<br/>um bug: um teste de regressão por ocorrência corrigida;<br/>só testes afetados; commits pequenos, branch conferida antes"]
+    C --> P0{"Cria projeto, contrato,<br/>mensagem entre módulos ou mudança de schema?"}
+    P0 -->|sim| P1["system-design propõe corte, contratos, dados, riscos;<br/>architect revisa; as duas somente leitura, nada escrito"]
+    P1 --> P2["O Claude confere as duas, escreve o plano a partir delas,<br/>registra o que aceitou em ## Decisions"]
+    P2 --> C3
+    P0 -->|não| C3{"Mockup aprovado junto com o item?"}
+    C3 -->|sim| C4["O agente frontend implementa aquela tela e os testes dela,<br/>sozinho na worktree; o Claude lê, roda o gate, responde as paradas dele"]
+    C4 --> D
+    C3 -->|não| D["Código pelo perfil e pelas regras; testes por critério;<br/>um bug: um teste de regressão por ocorrência corrigida;<br/>só testes afetados; commits pequenos, branch conferida antes"]
     D --> E{"Premissa falsa ou critério impossível?"}
     E -->|sim| E1["Opções A/B → /agile:change"]
     E1 --> D

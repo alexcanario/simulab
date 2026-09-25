@@ -45,6 +45,12 @@ public static class AppIcons
 
     /// <summary>F-33: the organizers of the assessment catalog.</summary>
     public const string Organizers = Icons.Material.Outlined.AccountBalance;
+
+    /// <summary>F-34 v2: the bodies that publish a notice.</summary>
+    public const string IssuingAuthorities = Icons.Material.Outlined.Gavel;
+
+    /// <summary>F-34: the exams of the assessment catalog.</summary>
+    public const string Exams = Icons.Material.Outlined.Description;
     public const string Security = Icons.Material.Outlined.Security;
 
     /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>

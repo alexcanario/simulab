@@ -1,0 +1,42 @@
+using System.Globalization;
+using Microsoft.Extensions.Localization;
+using Simulab.Catalog.Contracts;
+using Simulab.Web.Resources;
+
+namespace Simulab.Web.Components.Pages.Catalog;
+
+/// <summary>
+/// The reader's words for an exam's assessment type and scope (F-34, BR6 and BR7). The enum name never
+/// reaches a screen: it is a key, and the three languages give it their own text (rule: i18n). The orders
+/// are what the API's `assessmentTypeOrder` and `scopeOrder` expect, first to last (B-15): a column whose
+/// label is translated is sorted in the reader's culture, which only the Web knows.
+/// </summary>
+public static class ExamText
+{
+    public static string AssessmentTypeName(IStringLocalizer<SharedResources> l, AssessmentType assessmentType)
+    {
+        ArgumentNullException.ThrowIfNull(l);
+
+        return l[$"Exams.AssessmentType.{assessmentType}"];
+    }
+
+    public static string ScopeName(IStringLocalizer<SharedResources> l, ExamScope scope)
+    {
+        ArgumentNullException.ThrowIfNull(l);
+
+        return l[$"Exams.Scope.{scope}"];
+    }
+
+    public static IReadOnlyList<AssessmentType> AssessmentTypeOrder(IStringLocalizer<SharedResources> l) =>
+        Ordered(Enum.GetValues<AssessmentType>(), value => AssessmentTypeName(l, value));
+
+    public static IReadOnlyList<ExamScope> ScopeOrder(IStringLocalizer<SharedResources> l) =>
+        Ordered(Enum.GetValues<ExamScope>(), value => ScopeName(l, value));
+
+    private static IReadOnlyList<TEnum> Ordered<TEnum>(TEnum[] values, Func<TEnum, string> name)
+    {
+        var culture = CultureInfo.CurrentUICulture;
+
+        return [.. values.OrderBy(name, StringComparer.Create(culture, ignoreCase: false))];
+    }
+}

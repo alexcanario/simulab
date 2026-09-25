@@ -1,12 +1,14 @@
 ---
 page: organizers
 locale: en
-features: [F-33]
-updated: 2026-09-23
+features: [F-33, F-34]
+updated: 2026-09-25
 ---
 # Organizers
 
-An organizer is who runs an exam: an exam board hired for a public service exam, a body that issues certifications, or a university with its own entrance exam. Every exam in the catalog hangs on one of them.
+An organizer is who writes, applies and marks a paper: an exam board hired for a public service exam, a body that issues certifications, or a university with its own entrance exam. It is chosen on each edition of an exam, and it can change from one edition to the next.
+
+Who publishes the notice and sets the exam's rules is the [issuing authority](issuing-authorities.md), not the organizer.
 
 ## Who can use it
 Only an account with the permission "Manage the catalog" — the Admin role has it — can open the Organizers page. Everyone else gets Page not found.
@@ -53,6 +55,8 @@ Only an account with the permission "Manage the catalog" — the Admin role has 
 | Page not found | Your account does not manage the catalog. | Ask an Admin if you believe you should. |
 
 ## Related pages
+- [Issuing authorities](issuing-authorities.md): who publishes each exam's notice (Admins)
+- [Exams](exams.md): the exams in the catalog (Admins)
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Roles and permissions](roles.md): who may manage the catalog
 - [Simulab](index.md)

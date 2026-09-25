@@ -7,6 +7,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
 - Ask before: pushing or merging to `main`, touching shared databases, deleting data, anything outside this repository.
+- Worktrees: `D:\dev\_icontrol\wt\simulab` — one folder per item (`<type>-<n>`), created by `/agile:refine`.
 - Simulae (`D:\dev\_icontrol\simulae`) is a read-only source. Never edit it.
 
 ## Architecture
@@ -33,6 +34,9 @@ A study coach that runs realistic practice exams (public service exams, certific
 
 ## Models
 - Independent review (`/agile:review`): strongest available model, passed on the call.
+- Design and architecture passes (`/agile:build`, agents `system-design` and `architect`): strongest available model, passed on the call.
+- Screen design (`/agile:screen`, agent `ux-designer`): strongest available model, passed on the call.
+- Screen implementation (`/agile:build`, agent `frontend`): Sonnet, passed on the call.
 - Main session (quiz, refinement, build): the session model, chosen by the owner.
 - Code searches and sweeps (Explore): Haiku. Mechanical import and rename from Simulae: Sonnet; the tests verify it.
 

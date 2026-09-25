@@ -1031,6 +1031,344 @@
           }
         }
       }
+    },
+    "/api/v1/catalog/issuing-authorities": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListIssuingAuthorities",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CreateIssuingAuthority",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveIssuingAuthorityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/issuing-authorities/{id}": {
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "UpdateIssuingAuthority",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveIssuingAuthorityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "DeleteIssuingAuthority",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListExams",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "issuingAuthorityId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "assessmentType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "assessmentTypeOrder",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeOrder",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CreateExam",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams/{id}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "FindExam",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "UpdateExam",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "DeleteExam",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1270,6 +1608,99 @@
           }
         },
         "description": "Chooses a new password with the token from the reset email (F-7 UC2)."
+      },
+      "SaveExamRequest": {
+        "required": [
+          "issuingAuthorityId",
+          "name",
+          "assessmentType",
+          "scope"
+        ],
+        "type": "object",
+        "properties": {
+          "issuingAuthorityId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The organizer that publishes the notice and sets the rules (BR2). Required.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The exam's name, 2 to 200 characters, unique inside its issuing authority (BR10)."
+          },
+          "assessmentType": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of PublicServiceExam, Certification, UniversityEntranceExam or Enem, by name, ignoring case (BR6)."
+          },
+          "scope": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of National, State or Municipal, by name, ignoring case (BR7)."
+          },
+          "scopeDetail": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Which state or which municipality; required for State and Municipal, dropped for National (BR8)."
+          },
+          "contentLanguage": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of the app's languages, canonicalized (BR9)."
+          }
+        },
+        "description": "What the exam form sends (F-34, UC2 and UC3). The assessment type, the scope and the content language\r\ntravel as text, not as enums, so a caller that sends an unknown value gets its own 400 code (BR6, BR7,\r\nBR9) instead of an uncoded deserialization failure — the lesson F-33's review left on the organizer."
+      },
+      "SaveIssuingAuthorityRequest": {
+        "required": [
+          "name",
+          "acronym"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The body's full name, 2 to 150 characters."
+          },
+          "acronym": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The short name, 2 to 20 characters, stored uppercase."
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Free text, optional."
+          },
+          "website": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "An absolute http or https address, optional."
+          }
+        },
+        "description": "What the add and the edit dialog send (F-34 BR18, v2). The issuing authority has no kind: nothing\r\nfilters or groups by one yet, and it arrives when a screen needs it."
       },
       "SaveOrganizerRequest": {
         "required": [

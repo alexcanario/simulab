@@ -53,6 +53,9 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## Content language
 - Question content is never translated. Exams and questions carry a language. Only UI text, emails and the manual are localized.
 
+## Enums
+- Code that orders or maps an enum is written over `Enum.GetValues`, never over a number of values, and its test reads the values instead of counting: `OrganizerKindOrder` and `KindSort` were written for exactly three kinds and the fourth made the whole caller order fall back in silence (F-34).
+
 ## Importing from Simulae
 - Simulae is read-only. Import per feature, never in bulk.
 - On the way in: English identifiers and file names, the Simulab layout, UI text moved to resources in three languages, comments in English.
@@ -70,6 +73,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Measuring a rendered colour whose background has alpha: composite it over the first opaque ancestor before computing the ratio; the raw `rgba` reads as a false failure (B-9).
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
 - A kit CSS rule that overrides a MudBlazor class carries that class too (`.mud-tooltip-root.app-nav-tooltip`): MudBlazor's one-class rules load later and win; pin it with a test that reads `app.css` (F-14).
+- An accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file; the library does not grant it — `MudAutocomplete` renders a plain text input (F-34).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.

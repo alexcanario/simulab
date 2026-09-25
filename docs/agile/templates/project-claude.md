@@ -12,7 +12,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
 - Ask before: pushing or merging to `<main branch>`, touching shared databases, deleting data, anything outside this repository.
-- Worktrees: `<short root outside the repository, e.g. D:\wt\<app>>` — only with `/agile:build <id> --worktree`.
+- Worktrees: `<short root outside the repository, e.g. D:\wt\<app>>` — one folder per item, created by `/agile:refine`.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.
@@ -36,6 +36,9 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 
 ## Models
 - Independent review (`/agile:review`): <strongest available model>, passed on the call.
+- Design and architecture passes (`/agile:build`, agents `system-design` and `architect`): <strongest available model>, passed on the call.
+- Screen design (`/agile:screen`, agent `ux-designer`): <strongest available model>, passed on the call.
+- Screen implementation (`/agile:build`, agent `frontend`): <mid model>, passed on the call.
 - Main session (quiz, refinement, build): the session model, chosen by the owner.
 - Code searches and sweeps: <small fast model>. Bulk mechanical work verified by tests: <mid model>.
 

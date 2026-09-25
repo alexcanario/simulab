@@ -2,6 +2,35 @@
 // To see the diagram, open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side").
 // Tenant, audit and soft-delete columns are counted in each table note; the data dictionary lists them.
 
+Table exams {
+  id uuid [pk]
+  assessment_type varchar(40) [not null]
+  content_language varchar(16) [not null]
+  issuing_authority_id uuid [not null]
+  name varchar(200) [not null]
+  normalized_name varchar(200) [not null]
+  scope varchar(40) [not null]
+  scope_detail varchar(120)
+
+  indexes {
+    issuing_authority_id [name: 'ix_exams_issuing_authority']
+  }
+
+  Note: 'Entity: Exam - standard columns: 8 (see data dictionary)'
+}
+
+Table issuing_authorities {
+  id uuid [pk]
+  acronym varchar(20) [not null]
+  description varchar(500)
+  name varchar(150) [not null]
+  normalized_acronym varchar(20) [not null]
+  normalized_name varchar(150) [not null]
+  website varchar(300)
+
+  Note: 'Entity: IssuingAuthority - standard columns: 8 (see data dictionary)'
+}
+
 Table organizers {
   id uuid [pk]
   acronym varchar(20) [not null]
@@ -13,4 +42,11 @@ Table organizers {
   website varchar(300)
 
   Note: 'Entity: Organizer - standard columns: 8 (see data dictionary)'
+}
+
+Ref: exams.issuing_authority_id > issuing_authorities.id
+
+TableGroup issuing_authorities_group {
+  exams
+  issuing_authorities
 }
