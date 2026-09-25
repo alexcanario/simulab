@@ -1,12 +1,14 @@
 ---
 page: organizers
 locale: pt-PT
-features: [F-33]
-updated: 2026-09-23
+features: [F-33, F-34]
+updated: 2026-09-25
 ---
 # Entidades organizadoras
 
-Uma entidade organizadora é quem aplica a prova: o júri contratado para um concurso público, a entidade que emite certificações ou a universidade com exame de acesso próprio. Todas as provas do catálogo ficam ligadas a uma delas.
+Uma entidade organizadora é quem elabora, aplica e corrige a prova: o júri contratado para um concurso público, a entidade que emite certificações ou a universidade com exame de acesso próprio. É escolhida em cada edição de um exame, e pode mudar de uma edição para a outra.
+
+Quem publica o aviso e define as regras do exame é a [entidade contratante](issuing-authorities.md), não a entidade organizadora.
 
 ## Quem pode utilizar
 Só uma conta com a permissão "Gerir o catálogo" — o perfil Administrador tem essa permissão — consegue abrir o ecrã Entidades organizadoras. Para as restantes, a página não é encontrada.
@@ -53,6 +55,8 @@ Só uma conta com a permissão "Gerir o catálogo" — o perfil Administrador te
 | Página não encontrada | A sua conta não gere o catálogo. | Fale com um administrador se acha que devia gerir. |
 
 ## Páginas relacionadas
+- [Entidades contratantes](issuing-authorities.md): quem publica o aviso de cada exame (Administradores)
+- [Exames](exams.md): os exames do catálogo (Administradores)
 - [Navegar na aplicação](getting-around.md): menu, tema claro e escuro, idioma e teclado
 - [Perfis e permissões](roles.md): quem pode gerir o catálogo
 - [Simulab](index.md)
