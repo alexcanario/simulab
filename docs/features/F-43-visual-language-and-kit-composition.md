@@ -1,7 +1,7 @@
 ---
 feature: F-43
 epic: Foundation and identity
-status: refining
+status: approved
 board: 765
 version: 1
 ---
@@ -344,6 +344,12 @@ the checklist's done mark.
   `build-config`).
 - 2026-09-25 — Density changes inside the cards only (BR9) — a global density change would move every screen,
   including the ones this item does not touch.
+- 2026-09-26 — `AppStatusChip` gets its first real use on the `Users` list, which already paints
+  `AccountStatus.Active` / `AccountStatus.Pending` through `.app-status`, and `AppItemRows` lives only in the
+  gallery until F-35 brings the editions — the exam has no status field, so AC6 needs another screen to be
+  checked on (owner, screen question 1).
+- 2026-09-26 — Below 1280 px the form aside stacks under the form and is never hidden — it is the only place
+  that lists what is still missing, and a phone is where that matters most (owner, screen question 2).
 - 2026-09-25 — The mockup's drawer is chrome copied from the app as it is today, selected item included
   (`rgba(255,255,255,.14)` behind unchanged text). It does **not** show BR7's fix, so the owner will not see
   B-17 resolved in the mockup; the fix and its `ThemeContrastTests` pair are still part of this item. Checked
@@ -356,16 +362,7 @@ the checklist's done mark.
 - Any behaviour change on the twelve screens: this item changes how they are composed, not what they do.
 
 ## Open questions
-- Q1 (screen design, 2026-09-25) Two of the nine patterns have no place on the reference screen: the exam
-  carries no status field, and its editions only arrive with F-35. Where do `AppStatusChip` and
-  `AppItemRows` get their first real use, so AC6 has a screen to check? Recommendation: the chip on the
-  `Users` list, which already renders `AccountStatus.Active` / `AccountStatus.Pending` through
-  `.app-status`, and `AppItemRows` only in the gallery until F-35 — the mockup shows the chip in a strip
-  marked as demo so its look can be approved now.
-- Q2 (screen design, 2026-09-25) Below 1280 px the aside stacks under the form. The item does not say
-  whether it should stay or disappear on a phone. Recommendation: keep it stacked — it is the only place
-  that lists what is still missing, and hiding it would lose that on the smallest screen where it matters
-  most.
+- (none)
 
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
