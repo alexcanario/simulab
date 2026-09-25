@@ -5,6 +5,8 @@ Generated from the project references under `src/`. Do not edit.
 ```mermaid
 flowchart LR
     subgraph BuildingBlocks["BuildingBlocks"]
+        Simulab_Ai["Simulab.Ai"]
+        Simulab_Ai_Contracts["Simulab.Ai.Contracts"]
         Simulab_Email["Simulab.Email"]
         Simulab_Jobs["Simulab.Jobs"]
         Simulab_Persistence["Simulab.Persistence"]
@@ -30,6 +32,13 @@ flowchart LR
         Simulab_Identity_Domain["Simulab.Identity.Domain"]
         Simulab_Identity_Infrastructure["Simulab.Identity.Infrastructure"]
     end
+    subgraph Modules_Plans["Modules/Plans"]
+        Simulab_Plans_Contracts["Simulab.Plans.Contracts"]
+    end
+    Simulab_Ai --> Simulab_Ai_Contracts
+    Simulab_Ai --> Simulab_Persistence
+    Simulab_Ai --> Simulab_Plans_Contracts
+    Simulab_Api --> Simulab_Ai
     Simulab_Api --> Simulab_Catalog_Api
     Simulab_Api --> Simulab_Email
     Simulab_Api --> Simulab_Identity_Api
@@ -62,6 +71,8 @@ flowchart LR
     Simulab_Jobs --> Simulab_Email
     Simulab_Jobs --> Simulab_Persistence
     Simulab_Persistence --> Simulab_SharedKernel
+    Simulab_Plans_Contracts --> Simulab_SharedKernel
+    Simulab_Web --> Simulab_Ai_Contracts
     Simulab_Web --> Simulab_Catalog_Contracts
     Simulab_Web --> Simulab_Identity_Contracts
     Simulab_Web --> Simulab_ServiceDefaults

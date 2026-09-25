@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    What the rest of the app may know about the gateway: the error codes it answers with and the
+    purposes a call can have. It carries no dependency, so the Web can reference it without pulling
+    in EF Core or the Claude SDK, and F-22's error-code text check finds the codes here.
+  -->
+
+</Project>

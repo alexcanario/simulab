@@ -15,13 +15,20 @@ public sealed class AccountEventConfiguration : IEntityTypeConfiguration<Account
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("account_events");
+        builder.ToTable("account_events", table => table.HasComment(
+            "What happened to an account: sign-ins, password changes, two-factor enrolments. A person reads their own recent activity from it, and it is kept when the account is erased, without naming anyone."));
         builder.HasKey(accountEvent => accountEvent.Id);
 
-        builder.Property(accountEvent => accountEvent.Type).HasConversion<string>().HasMaxLength(40).IsRequired();
-        builder.Property(accountEvent => accountEvent.Method).HasConversion<string>().HasMaxLength(40);
-        builder.Property(accountEvent => accountEvent.Reason).HasConversion<string>().HasMaxLength(40);
-        builder.Property(accountEvent => accountEvent.IpAddress).HasMaxLength(45);
+        builder.Property(accountEvent => accountEvent.UserId)
+            .HasComment("Whose account it happened to. Null when the attempt named no existing account.");
+        builder.Property(accountEvent => accountEvent.Type).HasConversion<string>().HasMaxLength(40).IsRequired()
+            .HasComment("What happened, such as SignInSucceeded, PasswordChanged or TwoFactorEnabled.");
+        builder.Property(accountEvent => accountEvent.Method).HasConversion<string>().HasMaxLength(40)
+            .HasComment("How it was done, such as Password or Google. Null when the event has no method.");
+        builder.Property(accountEvent => accountEvent.Reason).HasConversion<string>().HasMaxLength(40)
+            .HasComment("Why it failed, such as InvalidCredentials or LockedOut. Null when nothing failed.");
+        builder.Property(accountEvent => accountEvent.IpAddress).HasMaxLength(45)
+            .HasComment("The address the request came from, long enough for IPv6. Null when it could not be read.");
 
         builder.HasIndex(accountEvent => accountEvent.CreatedAt).HasDatabaseName("ix_account_events_created_at");
         builder.HasIndex(accountEvent => accountEvent.UserId).HasDatabaseName("ix_account_events_user_id");

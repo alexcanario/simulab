@@ -50,9 +50,9 @@ public sealed class FirstStartLogTests
 
         Errors(logs).Should().BeEmpty();
         logs.Entries.Should().NotContain(entry => entry.EventId.Id == RelationalEventId.MigrationApplying.Id);
-        // F-33 added the catalog context to the three the host migrates on start.
+        // F-33 added the catalog context, F-41 the ai one, to the contexts the host migrates on start.
         logs.Entries.Count(entry => entry.EventId.Id == RelationalEventId.MigrationsNotApplied.Id)
-            .Should().Be(3, "the jobs, identity and catalog contexts each report the database is already up to date");
+            .Should().Be(4, "the ai, jobs, identity and catalog contexts each report the database is already up to date");
     }
 
     private static IdentityApiFactory CreateFactory(RecordingLoggerProvider logs) =>

@@ -10,10 +10,18 @@ public sealed class EmailVerificationTokenConfiguration : IEntityTypeConfigurati
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("email_verification_tokens");
+        builder.ToTable("email_verification_tokens", table => table.HasComment(
+            "The single-use link that proves an address belongs to the person who signed up. It is spent on the first success and never replayed."));
         builder.HasKey(token => token.Id);
 
-        builder.Property(token => token.TokenHash).HasMaxLength(64).IsRequired();
+        builder.Property(token => token.UserId)
+            .HasComment("Whose account the link belongs to.");
+        builder.Property(token => token.TokenHash).HasMaxLength(64).IsRequired()
+            .HasComment("The hash of the token that travelled in the link. The token itself is never stored, so a copy of this table does not let anyone in.");
+        builder.Property(token => token.ExpiresAt)
+            .HasComment("When the link stops working, in UTC.");
+        builder.Property(token => token.ConsumedAt)
+            .HasComment("When the link was spent, in UTC. Null while it is still usable; set once, so it cannot be used twice.");
 
         // The hash is what a verification looks up, and two users never share one.
         builder.HasIndex(token => token.TokenHash).HasDatabaseName("ux_email_verification_tokens_hash").IsUnique();

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Simulab.ArchitectureTests.DocGen.SharedTables;
 using Simulab.DocGen;
+using Simulab.Ai.Persistence;
 using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Jobs.Persistence;
@@ -17,7 +18,10 @@ public class EntityModelsTests
         [
             .. typeof(IdentityModuleDbContext).Assembly.GetTypes(),
             .. typeof(JobsDbContext).Assembly.GetTypes(),
-            .. typeof(CatalogModuleDbContext).Assembly.GetTypes()
+            .. typeof(CatalogModuleDbContext).Assembly.GetTypes(),
+            // F-24: the Ai context was missing here although DocGen generates docs/architecture/Ai/,
+            // so ai_calls was invisible to every test built on this list.
+            .. typeof(AiDbContext).Assembly.GetTypes()
         ])
     ];
 
@@ -29,8 +33,8 @@ public class EntityModelsTests
         EntityModels.ModuleName(typeName).Should().Be(expected);
 
     [Fact]
-    public void Load_NamesTheRealModulesIdentityAndJobs() =>
-        RealModels().Select(m => m.Module).Should().Equal("Catalog", "Identity", "Jobs");
+    public void Load_NamesEveryRealModule() =>
+        RealModels().Select(m => m.Module).Should().Equal("Ai", "Catalog", "Identity", "Jobs");
 
     [Fact]
     public void RenderDictionary_ListsEveryIdentityTableInSnakeCase()
@@ -67,7 +71,8 @@ public class EntityModelsTests
 
         var text = EntityModels.RenderSchema(module, model);
 
-        text.Should().Contain("Table jobs {\n").And.Contain("  id uuid [pk]\n");
+        // Since F-24 every column carries its description, so the brackets no longer close after the key.
+        text.Should().Contain("Table jobs {\n").And.Contain("  id uuid [pk, note: '");
     }
 
     // F-26 AC2: the schema says it is generated and which viewer draws it.
@@ -115,9 +120,11 @@ public class EntityModelsTests
 
         var text = EntityModels.RenderSchema(module, model);
 
-        text.Should().Contain("  ip_address varchar(45)\n")
-            .And.Contain("  accepted_at timestamptz [not null]\n")
-            .And.Contain("  role_ids \"uuid[]\" [not null]\n")
+        // Since F-24 the description follows the type inside the brackets; the short type name is what
+        // this checks, and the NotContain pair below is what proves it is short.
+        text.Should().Contain("  ip_address varchar(45) [note: '")
+            .And.Contain("  accepted_at timestamptz [not null, note: '")
+            .And.Contain("  role_ids \"uuid[]\" [not null, note: '")
             .And.NotContain("character varying")
             .And.NotContain("with time zone");
         Block(text, "Table role_permissions").Should().Contain("    (role_id, permission_name) [pk]\n", "the key columns in the key's order");

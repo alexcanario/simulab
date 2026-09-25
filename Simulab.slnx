@@ -7,6 +7,8 @@
 
   <Folder Name="/src/" />
   <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Simulab.Ai/Simulab.Ai.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.Ai.Contracts/Simulab.Ai.Contracts.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
@@ -33,12 +35,16 @@
     <Project Path="src/Modules/Identity/Simulab.Identity.Domain/Simulab.Identity.Domain.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Plans/">
+    <Project Path="src/Modules/Plans/Simulab.Plans.Contracts/Simulab.Plans.Contracts.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />
     <Project Path="tests/Simulab.Testing.ApiHost/Simulab.Testing.ApiHost.csproj" />
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
+    <Project Path="tests/BuildingBlocks/Simulab.Ai.Tests/Simulab.Ai.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />

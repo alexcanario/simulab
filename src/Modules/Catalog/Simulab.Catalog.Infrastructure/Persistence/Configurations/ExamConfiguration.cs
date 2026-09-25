@@ -19,36 +19,45 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("exams");
+        builder.ToTable("exams", table => table.HasComment(
+            "A recurring assessment an issuing authority runs, such as a competitive exam for a job or a certification. Its editions are the papers actually applied."));
         builder.HasKey(exam => exam.Id);
 
-        builder.Property(exam => exam.IssuingAuthorityId).IsRequired();
+        builder.Property(exam => exam.IssuingAuthorityId)
+            .IsRequired()
+            .HasComment("The body that publishes this exam's notices.");
 
         builder.Property(exam => exam.Name)
             .HasMaxLength(CatalogLimits.ExamNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The exam's name, unique inside its issuing authority.");
 
         builder.Property(exam => exam.AssessmentType)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("What kind of assessment it is: PublicServiceExam, Certification, UniversityEntranceExam or Enem.");
 
         builder.Property(exam => exam.Scope)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("How far the exam reaches: Federal, State, Municipal, National or International.");
 
         builder.Property(exam => exam.ScopeDetail)
-            .HasMaxLength(CatalogLimits.ExamScopeDetailMaxLength);
+            .HasMaxLength(CatalogLimits.ExamScopeDetailMaxLength)
+            .HasComment("Which state or city the scope means, when it is not national.");
 
         // The language code, as SupportedLanguages writes it ("pt-BR"); never a culture object (BR9).
         builder.Property(exam => exam.ContentLanguage)
             .HasMaxLength(16)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The language the questions are written in, such as pt-BR. Exam content is never translated.");
 
         builder.Property(exam => exam.NormalizedName)
             .HasMaxLength(CatalogLimits.ExamNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The name without case or accents, which is what the unique index compares.");
 
         // BR12 (v2): the issuing authority cannot be deleted while an exam points at it, and the handler
         // answers that with a 409. Restrict is the database saying the same thing, in case anything ever

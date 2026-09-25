@@ -18,35 +18,43 @@ public sealed class OrganizerConfiguration : IEntityTypeConfiguration<Organizer>
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("organizers");
+        builder.ToTable("organizers", table => table.HasComment(
+            "Who runs an assessment: an exam board, a certifying body or a university. An exam belongs to one of them."));
         builder.HasKey(organizer => organizer.Id);
 
         builder.Property(organizer => organizer.Name)
             .HasMaxLength(CatalogLimits.OrganizerNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("Full name, as the organizer writes it.");
 
         builder.Property(organizer => organizer.Acronym)
             .HasMaxLength(CatalogLimits.OrganizerAcronymMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("Short name people search by, such as CEBRASPE or FGV.");
 
         builder.Property(organizer => organizer.Kind)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("What kind of organizer it is: ExamBoard, CertifyingBody or University.");
 
         builder.Property(organizer => organizer.Description)
-            .HasMaxLength(CatalogLimits.OrganizerDescriptionMaxLength);
+            .HasMaxLength(CatalogLimits.OrganizerDescriptionMaxLength)
+            .HasComment("Free notes about the organizer, shown to whoever curates the catalog.");
 
         builder.Property(organizer => organizer.Website)
-            .HasMaxLength(CatalogLimits.OrganizerWebsiteMaxLength);
+            .HasMaxLength(CatalogLimits.OrganizerWebsiteMaxLength)
+            .HasComment("The organizer's own address, where its notices are published.");
 
         builder.Property(organizer => organizer.NormalizedName)
             .HasMaxLength(CatalogLimits.OrganizerNameMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The name without case or accents, which is what the unique index compares.");
 
         builder.Property(organizer => organizer.NormalizedAcronym)
             .HasMaxLength(CatalogLimits.OrganizerAcronymMaxLength)
-            .IsRequired();
+            .IsRequired()
+            .HasComment("The acronym without case or accents, which is what the unique index compares.");
 
         // BR9: a deleted row keeps its name taken, so the indexes cover deleted rows too.
         builder.HasIndex(organizer => new { organizer.TenantId, organizer.NormalizedName })

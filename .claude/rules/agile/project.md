@@ -39,6 +39,9 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The coach answers from the app's data through tool calls. If the data is missing, it says so; it never states exam facts from model memory.
 - Tests use a fake gateway. No real AI call in unit, integration or CI runs.
 
+## API
+- A route mapped only in Development is excluded from the OpenAPI document (`.ExcludeFromDescription()`): the committed `docs/api/` describes what production serves, and the DocGen route map reads it (F-41).
+
 ## Integration
 - Cross-module events use the in-process integration events abstraction. Never reference MassTransit or RabbitMQ.
 - Long work (import, OCR, extraction) is a job in the job table, run by the worker in the `Api` host. Never inside a request or a Blazor circuit.
@@ -74,6 +77,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
 - A kit CSS rule that overrides a MudBlazor class carries that class too (`.mud-tooltip-root.app-nav-tooltip`): MudBlazor's one-class rules load later and win; pin it with a test that reads `app.css` (F-14).
 - An accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file; the library does not grant it — `MudAutocomplete` renders a plain text input (F-34).
+- An assertion over a generated document pins the part it is about, not the whole line: an item that adds an annotation to every column must not break a test that is about types (F-24).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.

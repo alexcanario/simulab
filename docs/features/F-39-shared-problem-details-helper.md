@@ -22,3 +22,7 @@ Remove these comments when the file leaves `idea`.
 when the profile says to extract the shape. Move it to a small API building block both modules call, so the answer
 a caller gets does not depend on which module wrote the endpoint, and a third module inherits it. Raised by the
 independent review of F-33 (2026-09-23).
+
+There are now three copies: `AiDiagnosticsEndpoints.Problem`/`StatusFor` in the Api host joined them in F-41
+(2026-09-24). The owner chose to record the new copy here rather than extract the helper inside F-41, which
+would have touched two modules outside that item's scope. The extraction converts all three.

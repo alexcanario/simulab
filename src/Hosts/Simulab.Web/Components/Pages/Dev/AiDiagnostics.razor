@@ -1,0 +1,125 @@
+@page "/dev/ai"
+@layout MainLayout
+@using Simulab.Ai.Contracts
+@using Simulab.Web.Services
+@inject AiApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IHostEnvironment Environment
+@inject NavigationManager Navigation
+@inject ErrorText Errors
+
+@* F-41 UC2: one real call through IAiGateway, with what it cost. Development only (BR9). *@
+@if (!_allowed)
+{
+    return;
+}
+
+<AppPageHeader Title="@L["AiDiagnostics.Title"]" Breadcrumbs="_breadcrumbs" />
+
+<MudText Typo="Typo.body2" Class="mb-4">@L["AiDiagnostics.Intro"]</MudText>
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppTextField TValue="string"
+              Id="ai-prompt"
+              Label="@L["AiDiagnostics.Prompt.Label"]"
+              Hint="@L["AiDiagnostics.Prompt.Hint"]"
+              Value="@_prompt"
+              ValueChanged="@((string? value) => _prompt = value ?? string.Empty)"
+              Lines="5"
+              Required="true"
+              Disabled="@_sending" />
+
+<div class="app-form-actions">
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@AppIcons.Send"
+               Disabled="@(_sending || string.IsNullOrWhiteSpace(_prompt))"
+               OnClick="SendAsync">
+        @(_sending ? L["AiDiagnostics.Sending"] : L["AiDiagnostics.Send"])
+    </MudButton>
+</div>
+
+@if (_answer is not null)
+{
+    <MudPaper Class="pa-4 mt-4" Elevation="0" Outlined="true">
+        <MudText Typo="Typo.subtitle1" Class="mb-2">@L["AiDiagnostics.Answer"]</MudText>
+        <MudText Typo="Typo.body1" Class="mb-4" Style="white-space: pre-wrap;">@_answer.Text</MudText>
+        <MudDivider Class="mb-3" />
+        <MudText Typo="Typo.body2">@L["AiDiagnostics.Model", _answer.Model]</MudText>
+        <MudText Typo="Typo.body2">@L["AiDiagnostics.Tokens", _answer.InputTokens, _answer.OutputTokens]</MudText>
+        <MudText Typo="Typo.body2">@L["AiDiagnostics.Cost", _answer.CostUsd.ToString("0.000000", CultureInfo.InvariantCulture)]</MudText>
+        <MudText Typo="Typo.body2">@L["AiDiagnostics.Duration", _answer.DurationMs]</MudText>
+    </MudPaper>
+}
+
+@code {
+    private bool _allowed;
+    private bool _sending;
+    private string _prompt = string.Empty;
+    private string? _error;
+    private AiDiagnosticsAnswer? _answer;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _allowed = Environment.IsDevelopment();
+        if (!_allowed)
+        {
+            // Reached by in-app navigation outside Development: the request middleware never saw it.
+            Navigation.NotFound();
+            return;
+        }
+
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Gallery.Breadcrumb.Dev"], href: null, disabled: true),
+            new BreadcrumbItem(L["AiDiagnostics.Title"], href: null, disabled: true)
+        ];
+    }
+
+    private async Task SendAsync()
+    {
+        _error = null;
+        _answer = null;
+        _sending = true;
+
+        try
+        {
+            var token = await TokenAsync();
+            if (token is null)
+            {
+                // BR2: a call is always charged to a user, so an anonymous visitor never reaches the gateway.
+                _error = Errors.For(AiErrorCodes.NoUser);
+                return;
+            }
+
+            var result = await Api.SendAsync(token, AiPurposes.Diagnostics, _prompt);
+            if (result.Value is { } answer)
+            {
+                _answer = answer;
+            }
+            else
+            {
+                _error = Errors.For(result.ErrorCode);
+            }
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+
+    // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user?.Identity?.IsAuthenticated == true ? await Tokens.GetAccessTokenAsync(user) : null;
+    }
+}
