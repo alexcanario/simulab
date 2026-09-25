@@ -1,7 +1,7 @@
 ---
 feature: F-24
 epic: Foundation and identity
-status: validating
+status: done
 board: 741
 version: 2
 ---
@@ -110,6 +110,7 @@ The descriptions are the deliverable, so most of this is reading them. Run from 
 
 ## Delivery
 - Branch: `feature/F-24`
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: see the merge commit on `main` (AB#741)
+- Tests: full suite 1229 passed, 0 failed, 68 s; full build 22 s, 0 warnings (2026-09-25)
+- Manual pages: none. Nothing changes for someone using the app: the descriptions live in the database and in `docs/architecture/*/data-dictionary.md`. `docs/infra.md` says where they come from and which test guards them.
+- Measured in the database the app host built from scratch (`simulab_f24`): 14 tables described, and 196 of 198 columns; the two without are the JSON containers of AC1b.
