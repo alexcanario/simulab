@@ -594,3 +594,11 @@ Shipped in `3386b40` from the worktree `f-34`, version 2. Validated on screen on
 - Project rule (`project.md`, new section Enums): code that orders or maps an enum is written over `Enum.GetValues`, and its test reads the values instead of counting — `OrganizerKindOrder` was written for exactly three kinds and the fourth broke the caller order in silence.
 - ⏳ `plugin` `[generic]` feature-refinement: two business actors sharing one table reached validation as a real defect — the picker offered a board where the contracting body was required, and the Api accepted it. The refinement should ask who owns what before reusing a table.
 - Nothing: the palette the owner rejected is already Simulae's (ADR-0001 #30); the gap was composition, not hues. That is F-43, not a rule.
+
+## 2026-09-25 — Sync with agile@canary 0.0.57 -> 0.0.61
+- Copied: rules `git`, `workflow` (every item gets its worktree at `/agile:refine`; the subagent line now names `system-design`, `architect`, `ux-designer` and `frontend`, with the main session still owning the conversation); template `project-claude`; `docs/agile/workflow.md` and `workflow.pt-BR.md`.
+- Edited by hand: `CLAUDE.md` — a `Worktrees:` line in Working agreement, and three Models lines for the new agents (60 lines, at the limit).
+- Left alone: `docs/agile/profile.md` (`upstreamChanged: false`); the six build files (no upstream change).
+- `missingCapabilities`: none.
+- Noted: the session loaded its skills from the 0.0.59 cache while the installed plugin was 0.0.61; the sync ran with the 0.0.61 scripts. Worth watching if it repeats.
+
