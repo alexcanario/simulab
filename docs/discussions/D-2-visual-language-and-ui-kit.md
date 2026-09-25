@@ -67,6 +67,12 @@ decision the project has not taken.
 - 2026-09-25 — F-34 is not reworked. It is validated on behaviour only and merges as it is; its screens are
   restyled by the new feature — holding the branch for a full restyle would block it and grow the merge conflict.
 
+- 2026-09-25 — The agile plugin updated to 0.0.61 mid-discussion and gained the `ux-designer` and `frontend`
+  agents, which did not exist when F-34's screens were designed. F-34 is still not redesigned: `ui.md` lets a
+  mockup use only patterns that are in the kit and on the gallery, and the nine missing patterns are exactly what
+  F-43 creates — a redesign of F-34 now would either put markup in the page, against the rule, or absorb F-43.
+  F-43 is the first item to use the `ux-designer` agent.
+
 ## Parked
 - Own brand (option C) — waits on a brand decision by the owner; ADR-0001 already lists it under "Revisit when".
 - Whether the exam session screens (the declared distraction-free exception in `ui-project.md`) follow the new
