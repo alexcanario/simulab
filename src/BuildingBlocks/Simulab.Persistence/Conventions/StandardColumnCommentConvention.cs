@@ -32,7 +32,10 @@ public sealed class StandardColumnCommentConvention : IModelFinalizingConvention
                 Describe(entityType, nameof(Entity.Id), StandardColumnComments.Id);
             }
 
-            if (clrType.IsAssignableTo(typeof(TenantEntity)))
+            // TenantEntity carries it, and so does User, which repeats the fields instead of inheriting
+            // them (the known exception in the architecture tests). Describe leaves an entity without
+            // the property alone, so roles, which has no tenant, is not touched.
+            if (clrType.IsAssignableTo(typeof(TenantEntity)) || clrType.IsAssignableTo(typeof(IAuditableEntity)))
             {
                 Describe(entityType, nameof(TenantEntity.TenantId), StandardColumnComments.TenantId);
             }
