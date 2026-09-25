@@ -80,6 +80,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ✅ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
 | ✅ 0.0.57 (`19e1f95`) | `[generic]` feature-ship: after `gate.js ship`, `git status` on the item worktree must show no tracked file changed outside bin/obj; a generated file the test run rewrote (for example `docs/api/Simulab.Api.json`) is committed with the item before the merge is requested, not found when the worktree removal refuses | B-15 | |
 | ⏳ | `[stack: DocGen]` feature-ship step 7b says a new module or external system "updates `docs/architecture/overview.md` by hand", but DocGen reports stale and deletes every file under `docs/architecture/` it does not generate (`GeneratedDocs.StaleFiles`/`Write`); a hand-written overview lives outside that folder (Simulab: `docs/architecture-overview.md`, guarded by `ArchitectureOverviewTests`) | F-23 | |
+| ⏳ | `[generic]` feature-refinement: when two business actors would share one table, the refinement asks who owns what before reusing it — a screen will offer the wrong one and the Api will accept it | F-34 | |
+| ⏳ | `[stack: MudBlazor]` screen-design: an accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file — `MudAutocomplete` 9.9 renders a plain text input, with no `role="combobox"` and no `aria-expanded` | F-34 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -585,3 +587,10 @@ Shipped in `1cacd3d` under `/agile:autopilot --worktree`, two stops, nothing ass
 - Merged: `docs/agile/profile.md` (Blazor prerender and single-use tickets; xUnit 2.x vs v3 note), no conflicts, project sections kept.
 - Left alone: build files (no upstream change).
 - Declined: the Evals line in `CLAUDE.md` until an eval suite exists; captured as an idea instead.
+
+## 2026-09-25 — F-34 Exams back office
+Shipped in `3386b40` from the worktree `f-34`, version 2. Validated on screen on behaviour only: the owner rejected the look of the screens, which became F-43 (D-2). Full suite 1191 tests, 56 s; build 23 s, 0 new warnings.
+- Project rule (`project.md`, UI tests): an accessibility claim about a library component is verified in the gallery's DOM before it enters the item file; also a `plugin` note, `[stack: MudBlazor]`.
+- Project rule (`project.md`, new section Enums): code that orders or maps an enum is written over `Enum.GetValues`, and its test reads the values instead of counting — `OrganizerKindOrder` was written for exactly three kinds and the fourth broke the caller order in silence.
+- ⏳ `plugin` `[generic]` feature-refinement: two business actors sharing one table reached validation as a real defect — the picker offered a board where the contracting body was required, and the Api accepted it. The refinement should ask who owns what before reusing a table.
+- Nothing: the palette the owner rejected is already Simulae's (ADR-0001 #30); the gap was composition, not hues. That is F-43, not a rule.
