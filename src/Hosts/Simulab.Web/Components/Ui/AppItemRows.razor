@@ -1,0 +1,41 @@
+@* Child items of the record being edited, with their own actions per row (F-43, BR1) — an edition under an
+   exam, an attachment under a notice. A short list that belongs to a form, where a data table would be too
+   much furniture. *@
+@typeparam TItem
+
+<div class="@($"app-item-rows {Class}")">
+    @if (Items.Count == 0)
+    {
+        <p class="app-item-rows-empty">@EmptyMessage</p>
+    }
+    else
+    {
+        <ul class="app-item-rows-list">
+            @foreach (var item in Items)
+            {
+                <li class="app-item-row">
+                    <div class="app-item-row-content">@RowTemplate(item)</div>
+                    @if (Actions is not null)
+                    {
+                        <div class="app-item-row-actions">@Actions(item)</div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
+
+    /// <summary>How one item reads. What a row shows depends on what the items are.</summary>
+    [Parameter, EditorRequired] public RenderFragment<TItem> RowTemplate { get; set; } = default!;
+
+    /// <summary>What an empty list says, already translated. "No items" is never the right sentence twice.</summary>
+    [Parameter, EditorRequired] public string EmptyMessage { get; set; } = string.Empty;
+
+    /// <summary>The row's actions, usually an <see cref="AppRowActions"/>. Omitted for a list that is read-only.</summary>
+    [Parameter] public RenderFragment<TItem>? Actions { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+}

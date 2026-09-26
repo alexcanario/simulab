@@ -1,0 +1,120 @@
+@* A choice that changes the rest of the form, shown as cards with a one-line explanation (F-43, BR1, UC2).
+   A real radiogroup: one tab stop, arrows move between the cards, Space and Enter select. *@
+@typeparam TValue
+
+<div class="app-field @(HasError ? "app-field-error" : null)">
+    <span class="app-field-label" id="@LabelId">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </span>
+    @* The group carries the field's id: the label points at it, and the error summary jumps to it (BR1). *@
+    <div class="@($"app-radio-cards app-radio-cards-{Columns}")"
+         id="@Id"
+         role="radiogroup"
+         aria-labelledby="@LabelId"
+         aria-describedby="@DescriptionId"
+         aria-required="@(Required ? "true" : null)"
+         aria-invalid="@(HasError ? "true" : null)">
+        @foreach (var option in Options)
+        {
+            var selected = EqualityComparer<TValue>.Default.Equals(option.Value, Value);
+            <div class="@($"app-radio-card {(selected ? "app-radio-card-selected" : null)}")"
+                 role="radio"
+                 id="@CardId(option)"
+                 aria-checked="@(selected ? "true" : "false")"
+                 tabindex="@(TabIndexOf(option, selected))"
+                 @onclick="() => Select(option)"
+                 @onkeydown="args => OnKeyDown(args, option)">
+                @if (option.Icon is not null)
+                {
+                    <MudIcon Icon="@option.Icon" Size="Size.Small" Color="@(selected ? Color.Primary : Color.Default)"
+                             aria-hidden="true" Class="app-radio-card-icon" />
+                }
+                <span class="app-radio-card-text">
+                    <span class="app-radio-card-title">@option.Text</span>
+                    <span class="app-radio-card-description">@option.Description</span>
+                </span>
+            </div>
+        }
+    </div>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>The cards, in the order the reader should see them. What they mean belongs to the page.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppRadioCardOption<TValue>> Options { get; set; } = [];
+
+    [Parameter] public TValue? Value { get; set; }
+
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+    [Parameter] public int Columns { get; set; } = 3;
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private string CardId(AppRadioCardOption<TValue> option) => $"{Id}-{option.Value}";
+
+    /// <summary>One tab stop for the whole group: the chosen card, or the first one while nothing is chosen.</summary>
+    private string TabIndexOf(AppRadioCardOption<TValue> option, bool selected)
+    {
+        var nothingChosen = Options.All(candidate => !EqualityComparer<TValue>.Default.Equals(candidate.Value, Value));
+        var isFirst = ReferenceEquals(option, Options[0]);
+        return selected || (nothingChosen && isFirst) ? "0" : "-1";
+    }
+
+    private Task Select(AppRadioCardOption<TValue> option)
+    {
+        Value = option.Value;
+        return ValueChanged.InvokeAsync(option.Value);
+    }
+
+    private Task OnKeyDown(KeyboardEventArgs args, AppRadioCardOption<TValue> option)
+    {
+        switch (args.Key)
+        {
+            case " ":
+            case "Enter":
+                return Select(option);
+            case "ArrowRight":
+            case "ArrowDown":
+                return Select(Neighbour(option, 1));
+            case "ArrowLeft":
+            case "ArrowUp":
+                return Select(Neighbour(option, -1));
+            default:
+                return Task.CompletedTask;
+        }
+    }
+
+    private AppRadioCardOption<TValue> Neighbour(AppRadioCardOption<TValue> option, int step)
+    {
+        var index = Options.ToList().FindIndex(candidate => ReferenceEquals(candidate, option));
+        return Options[((index + step) % Options.Count + Options.Count) % Options.Count];
+    }
+}

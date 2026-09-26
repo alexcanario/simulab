@@ -1,0 +1,57 @@
+@* The read-only summary beside a long form (F-43, BR1, UC5): what is filled, and what is still missing.
+   It carries no button — the only primary action on the page is Save, at the bottom right of the form (BR4).
+   It is not a live region: the error summary is what announces a failed save, and an aside that spoke on every
+   keystroke would talk over the reader. *@
+
+<aside class="@($"app-form-aside {Class}")" aria-labelledby="@TitleId">
+    <h2 class="app-form-aside-title" id="@TitleId">@Title</h2>
+    <dl class="app-form-aside-rows">
+        @foreach (var row in Rows)
+        {
+            <div class="app-form-aside-row">
+                <dt class="app-form-aside-row-label">@row.Label</dt>
+                <dd class="app-form-aside-row-value @(row.Value is null ? "app-form-aside-row-empty" : null)">
+                    @(row.Value ?? EmptyText)
+                </dd>
+            </div>
+        }
+    </dl>
+    @if (Checklist.Count > 0)
+    {
+        <p class="app-form-aside-checklist-title">@ChecklistTitle</p>
+        <ul class="app-form-aside-checklist">
+            @foreach (var item in Checklist)
+            {
+                <li class="@(item.Done ? "app-checklist-done" : "app-checklist-pending")">
+                    <MudIcon Icon="@(item.Done ? AppIcons.Verified : AppIcons.Pending)" Size="Size.Small"
+                             Color="@(item.Done ? Color.Success : Color.Default)" aria-hidden="true" />
+                    <span>@item.Label</span>
+                    <span class="app-visually-hidden">@(item.Done ? DoneText : PendingText)</span>
+                </li>
+            }
+        </ul>
+    }
+</aside>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+
+    /// <summary>What the form holds, one row per field. Which fields are worth summarising is the page's choice.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppAsideRow> Rows { get; set; } = [];
+
+    /// <summary>The text of an empty row, already translated (for example "Not filled").</summary>
+    [Parameter, EditorRequired] public string EmptyText { get; set; } = string.Empty;
+
+    [Parameter] public string? ChecklistTitle { get; set; }
+
+    [Parameter] public IReadOnlyList<AppChecklistItem> Checklist { get; set; } = [];
+
+    /// <summary>What a screen reader hears for a done item; the tick alone is not a word.</summary>
+    [Parameter] public string? DoneText { get; set; }
+
+    [Parameter] public string? PendingText { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private string TitleId => "app-form-aside-title";
+}

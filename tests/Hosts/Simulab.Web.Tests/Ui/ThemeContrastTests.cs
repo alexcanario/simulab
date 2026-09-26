@@ -145,5 +145,58 @@ public sealed class ThemeContrastTests
         Contrast(foreground, background).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"an action icon must be visible ({what})");
     }
 
+    public static TheoryData<string, bool> BothPalettes() => new() { { "light", true }, { "dark", false } };
+
+    /// <summary>
+    /// B-16: the hint under every kit field is painted by <c>.app-field-hint</c>, and the colour it names is read
+    /// from the stylesheet instead of repeated here — the bug was that nobody had measured the token the CSS
+    /// chose. It sat at 1.90:1 on the dark card and 2.64:1 on the light one, against the 4.5:1 of ADR-0001 #29.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BothPalettes))]
+    public void FieldHint_ReadsAtAaOnItsSurfaces(string what, bool light)
+    {
+        var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
+        var hint = AppCssColours.Resolve(AppCssColours.Declaration(".app-field-hint", "color"), palette);
+
+        Contrast(hint, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForText, $"a field hint must be AA readable on the card ({what})");
+        Contrast(hint, palette.Background.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForText, $"a field hint must be AA readable on the page ({what})");
+    }
+
+    /// <summary>
+    /// B-17: the selected navigation item lightens its background and keeps the drawer's text colour, so the entry
+    /// the user is looking at read worse than the ones around it — 4.37:1 in dark. Both colours come from the
+    /// stylesheet, and the translucent background is composited over the drawer first.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BothPalettes))]
+    public void SelectedNavigationItem_ReadsAtAaOnItsOwnBackground(string what, bool light)
+    {
+        var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
+        const string selected = ".app-drawer .mud-navmenu .mud-nav-link[aria-current=\"page\"]";
+        var drawer = palette.DrawerBackground.ToString();
+        var surface = AppCssColours.Over(AppCssColours.Declaration(selected, "background-color"), drawer);
+        var text = AppCssColours.Resolve(
+            AppCssColours.Declaration(selected, "color"),
+            palette,
+            AppCssColours.Resolve("var(--mud-palette-drawer-text)", palette));
+
+        Contrast(text, surface).Should().BeGreaterThanOrEqualTo(MinimumForText, $"the selected menu item must be AA readable on its own background ({what})");
+    }
+
+    /// <summary>
+    /// F-43: the status chip's outline is what makes it a pill instead of loose text, so it needs the 3:1 of a
+    /// UI boundary. Found on screen: with the divider colour it read 1.42:1 on the dark card and disappeared.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BothPalettes))]
+    public void StatusChipBorder_ReadsAtTheNonTextMinimum(string what, bool light)
+    {
+        var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
+        var border = AppCssColours.Resolve(AppCssColours.Declaration(".app-status-chip", "border"), palette);
+
+        Contrast(border, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"a chip must read as a pill ({what})");
+    }
+
     private static double Contrast(string foreground, string background) => ColourContrast.Ratio(foreground, background);
 }

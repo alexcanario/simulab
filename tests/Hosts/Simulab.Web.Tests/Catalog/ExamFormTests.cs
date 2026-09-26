@@ -19,10 +19,22 @@ public sealed class ExamFormTests : CatalogPageTestContext
     private static SaveExamRequest SentBody(FakeCatalogApi api, HttpMethod method) =>
         FakeCatalogApi.Read<SaveExamRequest>(api.Received.Last(call => call.Method == method).Body);
 
+    /// <summary>
+    /// Sets a field by its id, whichever kit component holds it. F-43 turned the scope into
+    /// <see cref="AppRadioCards{TValue}"/>; the tests below say what the form does with a value, not which
+    /// control carries it, so the helper looks for both and their assertions are unchanged.
+    /// </summary>
     private static void Set<T>(IRenderedComponent<ExamForm> page, string id, T value)
     {
-        var field = page.FindComponents<AppSelectField<T>>().Single(component => component.Instance.Id == id);
-        page.InvokeAsync(() => field.Instance.ValueChanged.InvokeAsync(value)).GetAwaiter().GetResult();
+        var selects = page.FindComponents<AppSelectField<T>>()
+            .Where(component => component.Instance.Id == id)
+            .Select(component => component.Instance.ValueChanged);
+        var cards = page.FindComponents<AppRadioCards<T>>()
+            .Where(component => component.Instance.Id == id)
+            .Select(component => component.Instance.ValueChanged);
+
+        var changed = selects.Concat(cards).Single();
+        page.InvokeAsync(() => changed.InvokeAsync(value)).GetAwaiter().GetResult();
     }
 
     private static void PickAuthority(IRenderedComponent<ExamForm> page, IssuingAuthorityResponse authority)
@@ -225,5 +237,90 @@ public sealed class ExamFormTests : CatalogPageTestContext
         var field = page.FindComponents<AppSelectField<string>>().Single(component => component.Instance.Id == "exam-content-language");
         field.Instance.Options.Select(option => option.Text).Should().Contain("Português (Brasil)");
         field.Instance.Options.Select(option => option.Value).Should().Contain("pt-BR").And.Contain("pt-PT").And.Contain("en");
+    }
+
+    // F-43, AC3, BR1: the fields sit inside titled sections instead of on one plain column.
+    [Fact]
+    public void Render_TheFieldsAreGroupedInsideTitledSectionCards()
+    {
+        var page = RenderAdd();
+
+        var sections = page.FindComponents<AppSectionCard>();
+        sections.Select(section => section.Instance.Title).Should().Equal(
+            "Identification", "Classification", "Where the exam applies");
+
+        var identification = page.Find("section[aria-labelledby='exam-section-identification-title']");
+        identification.QuerySelectorAll("#exam-authority").Should().ContainSingle();
+        identification.QuerySelectorAll("#exam-name").Should().ContainSingle();
+
+        var classification = page.Find("section[aria-labelledby='exam-section-classification-title']");
+        classification.QuerySelectorAll("#exam-assessment-type").Should().ContainSingle();
+        classification.QuerySelectorAll("#exam-content-language").Should().ContainSingle();
+
+        var scope = page.Find("section[aria-labelledby='exam-section-scope-title']");
+        scope.QuerySelectorAll("#exam-scope").Should().ContainSingle();
+    }
+
+    // F-43, AC5, UC3: one panel at the top lists every missing field, besides the message beside each field.
+    [Fact]
+    public void Save_AnIncompleteForm_ListsEveryMissingFieldAtTheTopOfTheCard()
+    {
+        var page = RenderAdd();
+
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() =>
+        {
+            var summary = page.Find("#exam-error-summary");
+            summary.GetAttribute("role").Should().Be("alert");
+            var links = summary.QuerySelectorAll(".app-error-summary-list a");
+            links.Select(link => link.GetAttribute("href")).Should().Equal(
+                "#exam-authority", "#exam-name", "#exam-assessment-type", "#exam-scope");
+        });
+        // The field beside it still carries its own message (BR1, UC3).
+        page.Markup.Should().Contain("Choose the issuing authority.");
+    }
+
+    // F-43, AC5: fixing a field on the form takes its line out of the summary without another save.
+    [Fact]
+    public void Save_ThenFixOneField_RemovesItFromTheSummary()
+    {
+        var page = RenderAdd();
+        page.Find(".app-form-save").Click();
+        page.WaitForAssertion(() => page.Find("#exam-error-summary").QuerySelectorAll(".app-error-summary-list a")
+            .Select(link => link.GetAttribute("href")).Should().Contain("#exam-name"));
+
+        page.Find("#exam-name").Change("Agente de Policia Federal");
+
+        page.WaitForAssertion(() => page.Find("#exam-error-summary").QuerySelectorAll(".app-error-summary-list a")
+            .Select(link => link.GetAttribute("href")).Should().NotContain("#exam-name"));
+    }
+
+    // F-43, AC7, BR4: the read-only aside shows what is filled and what is missing, and carries no button.
+    [Fact]
+    public void Render_TheAsideShowsWhatIsFilledAndCarriesNoButton()
+    {
+        var page = RenderAdd();
+
+        var aside = page.Find(".app-form-aside");
+        aside.QuerySelectorAll("button").Should().BeEmpty("the aside is read-only (BR4)");
+        aside.TextContent.Should().Contain("Not filled");
+
+        PickAuthority(page, PoliciaFederal);
+        page.Find("#exam-name").Change("Agente de Policia Federal");
+
+        page.WaitForAssertion(() => page.Find(".app-form-aside").TextContent.Should().Contain("Policia Federal"));
+        page.Find(".app-form-aside").TextContent.Should().Contain("Agente de Policia Federal");
+    }
+
+    // F-43: the state/municipality summary in the aside follows the scope that is picked.
+    [Fact]
+    public void Aside_ScopeMunicipal_ShowsTheScopeAndItsPlaceTogether()
+    {
+        var page = RenderAdd();
+        Set<ExamScope?>(page, "exam-scope", ExamScope.Municipal);
+        page.Find("#exam-scope-detail").Change("Fortaleza/CE");
+
+        page.WaitForAssertion(() => page.Find(".app-form-aside").TextContent.Should().Contain("Fortaleza/CE"));
     }
 }

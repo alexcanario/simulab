@@ -1,0 +1,17 @@
+@* A record's state, read at a glance in a list (F-43, BR1, UC4). The dot carries no meaning on its own: the
+   text beside it is always there, so the state never depends on telling two colours apart. *@
+
+<span class="@($"app-status-chip app-status-chip-{Tone.ToString().ToLowerInvariant()} {Class}")">
+    <span class="app-status-chip-dot" aria-hidden="true"></span>
+    @Text
+</span>
+
+@code {
+    /// <summary>The state, already translated. What it says depends on the page (rule: ui).</summary>
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+
+    /// <summary>What the state means. Which meaning a value carries is the page's to know.</summary>
+    [Parameter, EditorRequired] public AppStatusTone Tone { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+}

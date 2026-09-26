@@ -13,6 +13,20 @@ window.simulabShell = {
   timeZone: function () {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   },
+  // F-43: the error summary's links. With <base href="/">, following "#exam-name" would leave the page
+  // (rule: ui-project), so the jump is done here, the way the skip link below does it.
+  focusElement: function (id) {
+    var element = document.getElementById(id);
+    if (!element) {
+      return;
+    }
+    // A radio group is the field's id but is not focusable itself: move to the card that holds the tab stop.
+    var target = element.matches("input, select, textarea, button, a[href], [tabindex]")
+      ? element
+      : element.querySelector("[tabindex='0'], input, select, textarea, button") || element;
+    target.focus();
+    target.scrollIntoView({ block: "center" });
+  },
   // F-16: saves a file the circuit streamed (DotNetStreamReference); nothing is stored on the server.
   downloadFile: async function (fileName, contentType, streamReference) {
     var buffer = await streamReference.arrayBuffer();

@@ -66,6 +66,49 @@
   <data name="Gallery.Section.SignIn" xml:space="preserve"><value>Outras formas de iniciar sessão</value></data>
   <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Notificação rápida (snackbar)</value></data>
   <data name="Gallery.Section.Icons" xml:space="preserve"><value>Ícones</value></data>
+  <data name="Gallery.Section.SectionCard" xml:space="preserve"><value>Cartão de secção</value></data>
+  <data name="Gallery.SectionCard.Hint" xml:space="preserve"><value>Um bloco de formulário com título. O ícone e o título são um dos quatro sítios em que a cor de acento aparece no conteúdo.</value></data>
+  <data name="Gallery.SectionCard.Title" xml:space="preserve"><value>Identificação</value></data>
+  <data name="Gallery.SectionCard.Subtitle" xml:space="preserve"><value>Como o exame se chama e quem o publica</value></data>
+  <data name="Gallery.SectionCard.Body" xml:space="preserve"><value>Os campos desta secção entram aqui.</value></data>
+  <data name="Gallery.Section.FormGrid" xml:space="preserve"><value>Grelha de formulário</value></data>
+  <data name="Gallery.FormGrid.Hint" xml:space="preserve"><value>Dois ou três campos curtos na mesma linha; uma só coluna no telemóvel.</value></data>
+  <data name="Gallery.FormGrid.Title" xml:space="preserve"><value>Classificação</value></data>
+  <data name="Gallery.FormGrid.First" xml:space="preserve"><value>Primeiro campo</value></data>
+  <data name="Gallery.FormGrid.Second" xml:space="preserve"><value>Segundo campo</value></data>
+  <data name="Gallery.FormGrid.Third" xml:space="preserve"><value>Terceiro campo</value></data>
+  <data name="Gallery.Section.RadioCards" xml:space="preserve"><value>Cartões de escolha</value></data>
+  <data name="Gallery.RadioCards.Hint" xml:space="preserve"><value>Uma escolha que muda o resto do formulário, com uma linha a explicar cada opção. Uma paragem de tabulação; as setas percorrem os cartões.</value></data>
+  <data name="Gallery.RadioCards.National" xml:space="preserve"><value>O país inteiro</value></data>
+  <data name="Gallery.RadioCards.State" xml:space="preserve"><value>Um estado</value></data>
+  <data name="Gallery.RadioCards.Municipal" xml:space="preserve"><value>Um município</value></data>
+  <data name="Gallery.Section.ConditionalField" xml:space="preserve"><value>Campo condicional</value></data>
+  <data name="Gallery.ConditionalField.Hint" xml:space="preserve"><value>Revelado pelos cartões acima. Ao ser escondido, descarta o que guardava: um valor que ninguém vê nunca é enviado.</value></data>
+  <data name="Gallery.ConditionalField.Hidden" xml:space="preserve"><value>Escolha Estadual ou Municipal acima para revelar o campo.</value></data>
+  <data name="Gallery.Section.LeadingIcons" xml:space="preserve"><value>Ícone no campo</value></data>
+  <data name="Gallery.LeadingIcons.Hint" xml:space="preserve"><value>Decorativo: quem nomeia o campo é a etiqueta. Nunca substitui um adorno que a página já definiu.</value></data>
+  <data name="Gallery.Section.StatusChips" xml:space="preserve"><value>Etiquetas de estado</value></data>
+  <data name="Gallery.StatusChips.Hint" xml:space="preserve"><value>O texto está sempre lá: o ponto sozinho nunca carrega o estado.</value></data>
+  <data name="Gallery.StatusChips.Neutral" xml:space="preserve"><value>Rascunho</value></data>
+  <data name="Gallery.StatusChips.Success" xml:space="preserve"><value>Ativo</value></data>
+  <data name="Gallery.StatusChips.Warning" xml:space="preserve"><value>Pendente</value></data>
+  <data name="Gallery.StatusChips.Error" xml:space="preserve"><value>Bloqueado</value></data>
+  <data name="Gallery.StatusChips.Info" xml:space="preserve"><value>Agendado</value></data>
+  <data name="Gallery.Section.ErrorSummary" xml:space="preserve"><value>Resumo de erros</value></data>
+  <data name="Gallery.ErrorSummary.Hint" xml:space="preserve"><value>Tudo o que uma gravação recusou, de uma vez, no topo do cartão. Cada linha leva o foco ao seu campo.</value></data>
+  <data name="Gallery.Section.FormAside" xml:space="preserve"><value>Coluna-resumo</value></data>
+  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>Só leitura: o que está preenchido e o que falta. Não tem botão.</value></data>
+  <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Linhas de item</value></data>
+  <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Itens filhos do registo em edição, com ações próprias. O estado vazio vem abaixo.</value></data>
+  <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>Ainda não há edições.</value></data>
+  <data name="Common.ErrorSummary.Title" xml:space="preserve"><value>Ainda não é possível guardar este formulário</value></data>
+  <data name="Common.Summary.Title" xml:space="preserve"><value>Resumo</value></data>
+  <data name="Common.Summary.NotFilled" xml:space="preserve"><value>Não preenchido</value></data>
+  <data name="Common.Summary.Checklist" xml:space="preserve"><value>Antes de guardar</value></data>
+  <data name="Common.Summary.Done" xml:space="preserve"><value>preenchido</value></data>
+  <data name="Common.Summary.Pending" xml:space="preserve"><value>ainda falta</value></data>
+  <data name="Common.Checklist.Done" xml:space="preserve"><value>Concluído</value></data>
+  <data name="Common.Checklist.Pending" xml:space="preserve"><value>Pendente</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Fonte de dados</value></data>
   <data name="Gallery.Table.Mode.Normal" xml:space="preserve"><value>60 itens</value></data>
   <data name="Gallery.Table.Mode.Empty" xml:space="preserve"><value>Vazia</value></data>
@@ -365,10 +408,14 @@
   <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
   <data name="Exams.Field.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>Entre 2 e 200 caracteres</value></data>
+  <data name="Exams.Field.Name.Placeholder" xml:space="preserve"><value>Ex.: Concurso CM Lisboa 2026 — Polícia Municipal</value></data>
   <data name="Exams.Field.AssessmentType" xml:space="preserve"><value>Tipo de avaliação</value></data>
+  <data name="Exams.Field.AssessmentType.Placeholder" xml:space="preserve"><value>Selecione o tipo de avaliação</value></data>
   <data name="Exams.Field.Scope" xml:space="preserve"><value>Abrangência</value></data>
   <data name="Exams.Field.State" xml:space="preserve"><value>Estado</value></data>
+  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>Ex.: Ceará</value></data>
   <data name="Exams.Field.Municipality" xml:space="preserve"><value>Município</value></data>
+  <data name="Exams.Field.Municipality.Placeholder" xml:space="preserve"><value>Ex.: Fortaleza/CE</value></data>
   <data name="Exams.Field.ScopeDetail.Hint" xml:space="preserve"><value>Onde este exame se aplica.</value></data>
   <data name="Exams.Field.ContentLanguage" xml:space="preserve"><value>Idioma do conteúdo</value></data>
   <data name="Exams.Field.ContentLanguage.Hint" xml:space="preserve"><value>O idioma em que o exame e as suas questões estão escritos. O conteúdo nunca é traduzido.</value></data>
@@ -383,6 +430,17 @@
   <data name="Exams.Scope.National" xml:space="preserve"><value>Nacional</value></data>
   <data name="Exams.Scope.State" xml:space="preserve"><value>Estadual</value></data>
   <data name="Exams.Scope.Municipal" xml:space="preserve"><value>Municipal</value></data>
+  <data name="Exams.Scope.National.Description" xml:space="preserve"><value>Válido em todo o país.</value></data>
+  <data name="Exams.Scope.State.Description" xml:space="preserve"><value>Pede o estado.</value></data>
+  <data name="Exams.Scope.Municipal.Description" xml:space="preserve"><value>Pede o município.</value></data>
+  <data name="Exams.Section.Identification" xml:space="preserve"><value>Identificação</value></data>
+  <data name="Exams.Section.Identification.Subtitle" xml:space="preserve"><value>Quem publica o exame e como é designado no catálogo.</value></data>
+  <data name="Exams.Section.Classification" xml:space="preserve"><value>Classificação</value></data>
+  <data name="Exams.Section.Classification.Subtitle" xml:space="preserve"><value>O tipo de avaliação e o idioma em que o conteúdo está escrito.</value></data>
+  <data name="Exams.Section.Scope" xml:space="preserve"><value>Onde o exame se aplica</value></data>
+  <data name="Exams.Section.Scope.Subtitle" xml:space="preserve"><value>O território que o exame abrange. Exame estadual ou municipal também indica o local.</value></data>
+  <data name="Exams.Form.Aside.Title" xml:space="preserve"><value>Resumo</value></data>
+  <data name="Exams.Form.Aside.Checklist" xml:space="preserve"><value>Antes de guardar</value></data>
   <data name="Gallery.Section.Lookup" xml:space="preserve"><value>Campo de pesquisa</value></data>
   <data name="exam.not_found" xml:space="preserve"><value>Este exame já não existe.</value></data>
   <data name="exam.name_required" xml:space="preserve"><value>Indique um nome com pelo menos 2 caracteres.</value></data>

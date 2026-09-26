@@ -1,0 +1,38 @@
+@* A titled block of a form or a page (F-43, BR1). The only place in content where the accent colour appears
+   besides a chip, a field's leading icon and the focus ring (BR3). Pages never draw this by hand. *@
+
+<section class="@($"app-section-card {Class}")" aria-labelledby="@TitleId">
+    <header class="app-section-card-head">
+        <MudIcon Icon="@Icon" Size="Size.Small" Color="Color.Primary" aria-hidden="true" Class="app-section-card-icon" />
+        <div class="app-section-card-heading">
+            <h2 class="app-section-card-title" id="@TitleId">@Title</h2>
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <p class="app-section-card-subtitle">@Subtitle</p>
+            }
+        </div>
+    </header>
+    <div class="app-section-card-body">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    /// <summary>The section's heading, already translated. What the block is depends on the page (rule: ui).</summary>
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+
+    /// <summary>An <see cref="AppIcons"/> constant. Which icon says what the section holds, so the page must choose it.</summary>
+    [Parameter, EditorRequired] public string Icon { get; set; } = string.Empty;
+
+    /// <summary>One line under the title, when the section needs it.</summary>
+    [Parameter] public string? Subtitle { get; set; }
+
+    /// <summary>The id the heading carries, so the section is announced by its own name.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter] public string? Class { get; set; }
+
+    private string TitleId => $"{Id}-title";
+}

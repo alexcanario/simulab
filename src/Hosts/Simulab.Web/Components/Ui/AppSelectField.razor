@@ -18,6 +18,8 @@
                Disabled="Disabled"
                Error="HasError"
                ToStringFunc="TextOf"
+               Adornment="@(LeadingIcon is null ? Adornment.None : Adornment.Start)"
+               AdornmentIcon="@LeadingIcon"
                UserAttributes="@Attributes">
         @foreach (var option in Options)
         {
@@ -56,6 +58,10 @@
     [Parameter] public bool Required { get; set; }
 
     [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>F-43 BR1: a decorative <see cref="AppIcons"/> constant at the start of the field. It never carries
+    /// meaning of its own; the label does.</summary>
+    [Parameter] public string? LeadingIcon { get; set; }
 
     private bool HasError => !string.IsNullOrEmpty(Error);
 

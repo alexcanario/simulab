@@ -13,27 +13,31 @@
                 <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
             }
 
-            <AppTextField TValue="string"
-                          Id="organizer-name"
-                          Label="@L["Organizers.Field.Name"]"
-                          Value="@_name"
-                          ValueChanged="@((string? value) => OnNameChanged(value))"
-                          Required="true"
-                          MaxLength="CatalogLimits.OrganizerNameMaxLength"
-                          Autocomplete="organization"
-                          Hint="@L["Organizers.Field.Name.Help"]"
-                          Error="@_nameError" />
+            @* F-43 BR1: the name sits with its acronym, and the kind with them on a wide dialog. *@
+            <AppFormGrid Columns="2">
+                <AppTextField TValue="string"
+                              Id="organizer-name"
+                              Label="@L["Organizers.Field.Name"]"
+                              Value="@_name"
+                              ValueChanged="@((string? value) => OnNameChanged(value))"
+                              Required="true"
+                              MaxLength="CatalogLimits.OrganizerNameMaxLength"
+                              Autocomplete="organization"
+                              LeadingIcon="@AppIcons.Organizers"
+                              Hint="@L["Organizers.Field.Name.Help"]"
+                              Error="@_nameError" />
 
-            <AppTextField TValue="string"
-                          Id="organizer-acronym"
-                          Label="@L["Organizers.Field.Acronym"]"
-                          Value="@_acronym"
-                          ValueChanged="@((string? value) => OnAcronymChanged(value))"
-                          Required="true"
-                          MaxLength="CatalogLimits.OrganizerAcronymMaxLength"
-                          Autocomplete="off"
-                          Hint="@L["Organizers.Field.Acronym.Help"]"
-                          Error="@_acronymError" />
+                <AppTextField TValue="string"
+                              Id="organizer-acronym"
+                              Label="@L["Organizers.Field.Acronym"]"
+                              Value="@_acronym"
+                              ValueChanged="@((string? value) => OnAcronymChanged(value))"
+                              Required="true"
+                              MaxLength="CatalogLimits.OrganizerAcronymMaxLength"
+                              Autocomplete="off"
+                              Hint="@L["Organizers.Field.Acronym.Help"]"
+                              Error="@_acronymError" />
+            </AppFormGrid>
 
             <AppSelectField TValue="OrganizerKind"
                             Id="organizer-kind"
@@ -41,6 +45,7 @@
                             Value="_kind"
                             ValueChanged="@((OrganizerKind value) => _kind = value)"
                             Options="Kinds"
+                            LeadingIcon="@AppIcons.AssessmentType"
                             Required="true" />
 
             <AppTextField TValue="string"

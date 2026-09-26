@@ -1,0 +1,31 @@
+@* A field another choice reveals (F-43, BR1). Hiding it clears what it held, so a value the reader can no
+   longer see is never sent, and the change is announced politely without stealing focus. *@
+
+<div class="app-conditional-field" aria-live="polite">
+    @if (Visible)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    /// <summary>Whether the field is on screen. What makes it appear depends on the page.</summary>
+    [Parameter, EditorRequired] public bool Visible { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    /// <summary>Called once each time the field goes away, so the page drops the value it held.</summary>
+    [Parameter] public EventCallback OnHidden { get; set; }
+
+    private bool wasVisible;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (wasVisible && !Visible)
+        {
+            await OnHidden.InvokeAsync();
+        }
+
+        wasVisible = Visible;
+    }
+}

@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: en
-features: [F-34]
-updated: 2026-09-25
+features: [F-34, F-43]
+updated: 2026-09-26
 ---
 # Exams
 
@@ -28,12 +28,17 @@ Everyone else gets Page not found.
 2. In **Issuing authority**, type two letters of the name or the acronym and pick from the list. If the body is
    not there yet, add it first on [Issuing authorities](issuing-authorities.md).
 3. Type the exam's **name**, as it appears in the notice.
-4. Choose the **assessment type** and the **scope**.
+4. Choose the **assessment type**. Choose the **scope** from the three cards — each one explains in a line
+   what it means.
 5. If the scope is State or Municipal, one more field appears, for **where** the exam applies. Setting the scope
    back to National hides it and drops what you typed.
 6. Choose the **content language**. It starts at Portuguese (Brazil). This is the language the exam and its
    questions are written in; content is never translated.
 7. Choose **Save**. You stay on the page, now editing the exam you just created.
+
+The form is read in three titled blocks — identification, classification and where the exam applies — and the
+column on the right shows what is already filled and what is still missing. If you save with something missing,
+a notice at the top of the card lists every missing field; clicking one takes you straight to it.
 
 ### Change an exam
 1. Choose **Edit** on its row.
