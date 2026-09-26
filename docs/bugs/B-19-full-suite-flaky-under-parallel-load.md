@@ -1,7 +1,7 @@
 ---
 bug: B-19
 feature: F-27
-status: refining
+status: approved
 board: 772
 severity: high
 ---
