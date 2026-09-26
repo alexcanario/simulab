@@ -1,7 +1,7 @@
 ---
 feature: F-28
 epic: Foundation and identity
-status: validating
+status: done
 board: 747
 version: 1
 ---
@@ -166,8 +166,16 @@ No screen: the item changes a generator and two generated lines.
    naming the two dictionaries and the two shared-model lines; `git stash pop` and rerun → green.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-28`, worktree `wt/simulab/feature-28`.
+- Merge: `8f6be36` (`--no-ff`, AB#747).
+- Ship gate: `agile gate GREEN` — full build 46 s, 0 warnings, baseline still 0 entries; full suite 1349 passed,
+  0 failed, 121 s, inside the < 5 min budget. Architecture tests 135, six more than before this item.
+- Changed: `tools/Simulab.DocGen/EntityModels.cs` (+37), its tests (+63, plus a shared-table context for the
+  F-25 test model), and the two generated dictionary lines this was all about.
+- `DocGen --check` → `docs/architecture is up to date`. `gate.js docs` → SKIPPED, no docs command declared.
+- Manual pages: none. The data dictionary is a generated technical document, not a screen; `docs/manual/` does
+  not mention it in any locale.
+- `docs/infra.md` "Measured times" updated with this run's numbers.
+- Note on the road here: the merge was held from 2026-09-26 until B-19 shipped. This item's ship gate went red
+  twice on `JobWorkerTests`, a test in another project that F-28 does not touch; B-19 found the cause (the test,
+  not the product) and the first gate run after it went green. Nothing in F-28 changed because of it.
