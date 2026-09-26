@@ -3,7 +3,7 @@ feature: F-39
 epic: Foundation and identity
 status: building
 board: 760
-version: 1
+version: 2
 ---
 # One problem-details helper for every module's API
 
@@ -23,7 +23,8 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - Three copies, verified today: `CatalogEndpoints.cs:32` and `:45`, `IdentityEndpoints.cs:459` and `:478`, `AiDiagnosticsEndpoints.cs:60` and `:69`.
 - The three `StatusFor` are identical: NotFound → 404, Conflict → 409, BusinessRule → 422, Forbidden → 403, anything else → 400.
 - The three `Problem` are not. Identity's takes an optional status override and `params (string Name, object Value)[] extensions`; Catalog's and the Ai one take the `Error` alone.
-- Callers: 33 in `Simulab.Identity.Api`, 11 in `Simulab.Catalog.Api`, 3 in `Simulab.Api`. Four pass the rich form: `IdentityEndpoints.cs:366`, `:399`, `:435` and `TotpEndpoints.cs:100`, all `423 Locked` with `retryAfterSeconds`.
+- Callers: 33 in `Simulab.Identity.Api`, 11 in `Simulab.Catalog.Api`, 3 in `Simulab.Api`. Five pass the rich form: `IdentityEndpoints.cs:366`, `:399`, `:435` and `TotpEndpoints.cs:100` are `423 Locked` with `retryAfterSeconds`; `GoogleSignInEndpoints.cs:40` passes a `429 Too Many Requests` override with no extension.
+- `TotpEndpoints.Failure` (`:89-91`) turns `ErrorKind.NotFound` into `401` instead of the usual `404`, so the TOTP endpoints do not reveal whether an account exists. It is a deliberate per-endpoint decision, not a copy of the mapping.
 - `IdentityApiClient` reads `retryAfterSeconds` out of the problem details in four places (`:98`, `:137`, `:180`, `:416`), so that extension is a shipped contract.
 - No building block references ASP.NET today, and `SharedKernel` may not: `BuildingBlockBoundaryTests.SharedKernel_DoesNotDependOnEfCoreOrAspNet`.
 - `TokenEndpoints.cs:27` says the OpenIddict routes answer with the protocol's own shape (`error` / `error_description`), not problem details.
@@ -40,7 +41,7 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - BR3 The answer keeps the shape it has today: RFC 9457 problem details with `Status`, `Title` = the code, `Detail`, and the `code` extension the UI localizes by.
 - BR4 One method, with optional parameters: the status override and the extensions of the Identity copy. A caller that passes neither gets exactly what it got before.
 - BR5 The `retryAfterSeconds` extension of the `423 Locked` answers survives unchanged: it is a shipped contract the Web reads.
-- BR6 No type outside `Simulab.ApiResults` declares a status mapping for `ErrorKind` or builds a `ProblemDetails` from an `Error`. The architecture test fails the build and names the file.
+- BR6 No file outside `Simulab.ApiResults` carries the general mapping this feature exists to remove: a table from `ErrorKind` to a status, or a `ProblemDetails` built from an `Error`. A single endpoint's own decision about one kind is allowed — the TOTP `401` of `TotpEndpoints.Failure` is one — but it is named in the test with its reason, so a new one is a deliberate act and not a quiet fourth copy. The architecture test fails the build and names the file and the line.
 - BR7 The building block references the ASP.NET framework and `SharedKernel`, and nothing else. It is listed in `docs/agile/profile.md` in this item, as the rule requires for a new building block.
 - BR8 The OpenIddict token endpoints keep the protocol's own error shape (ADR-0001 #1) and are not touched.
 
@@ -54,7 +55,8 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - AC3 Given a caller that passes a status override and extensions, when the helper builds the answer, then the override wins and every extension is present.
 - AC4 Given the sign-in of a locked account, when it answers through the real HTTP pipeline, then it is still `423` with `retryAfterSeconds`.
 - AC5 Given the Catalog, Identity and Ai endpoints after the move, when their existing tests run, then every one passes unchanged: no test of an endpoint's answer is edited in this item.
-- AC6 Given a type outside `Simulab.ApiResults` that maps `ErrorKind` to a status or builds a `ProblemDetails` from an `Error`, when the architecture test runs, then it fails and names that type; and the test fails too if it finds nothing to check.
+- AC6 Given a file outside `Simulab.ApiResults` that carries the general mapping, when the architecture test runs, then it fails and names the file and the matched line; and the test fails too if it scanned nothing or if its own positive control stops matching.
+- AC6b Given the named exceptions (`TotpEndpoints.Failure`, `RevocationCheckMiddleware`, `PermissionForbiddenResultHandler`), when the architecture test runs, then it passes, and it fails if that list is empty or names a file that no longer exists.
 - AC7 Given `docs/agile/profile.md`, when the item is done, then `Simulab.ApiResults` is in its list of building blocks.
 - AC8 No new UI text: the codes, their meanings and their resource keys are unchanged.
 
@@ -64,6 +66,11 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - 2026-09-26 — An architecture test refuses a fourth copy — owner — this debt grew twice (F-33 made the second, F-41 the third); only a build failure stops the fourth.
 - 2026-09-26 — Out: the OpenIddict token endpoints, the Web side, and per-field validation problem details — owner — the first has the protocol's shape by ADR-0001 #1, the second reads `code` and does not change, and the third has no code producing it today.
 - 2026-09-26 — No new NuGet package: the building block reaches ASP.NET through `<FrameworkReference Include="Microsoft.AspNetCore.App" />` — Claude, technical — that is how a class library uses `Results` and `ProblemDetails` without a package.
+- 2026-09-26 — The guard is one file scan over `src/**/*.cs`, not reflection over the assemblies — Claude, technical, from the architect pass — a reflection guard reads `SolutionAssemblies.All`, a hand-kept list that F-24 caught drifting; a file scan sees a fourth module's file the day it is written. It flags a file carrying the whole word `ErrorKind` together with `new ProblemDetails` or `StatusCodes.Status`, keeps a named allowlist with a reason per entry, and carries its own positive control so a scan that matches nothing fails.
+- 2026-09-26 — `ArgumentNullException.ThrowIfNull(error)` is added to the moved method for consistency with `CatalogEndpoints.cs:34`, not because an analyzer asks: `.editorconfig:147` sets `CA1062` to `none` — Claude, technical — the design pass gave the analyser as the reason and it was wrong.
+- 2026-09-26 — Each calling file gets `using static Simulab.ApiResults.ApiProblem;` so all 47 call sites keep reading `Problem(error)` — Claude, technical — that is what makes AC5 ("no endpoint test edited") a real check of behaviour rather than of churn.
+- 2026-09-26 — The type is `ApiProblem`, not `ApiResults` — Claude, technical — a type with its namespace's name trips CA1724, and a type named `Results` would collide with `Microsoft.AspNetCore.Http.Results` at every call site.
+- 2026-09-26 — `Simulab.ApiResults` is added to `ModuleBoundaryTests.IsEfCoreOrAspNetCore` (`:44-51`) — Claude, technical — this item creates the first building block that carries ASP.NET, and without that line a `Domain` or `Application` project could reference it and smuggle ASP.NET past the rule that exists to stop exactly that.
 - 2026-09-26 — The move is mechanical and its proof is that no endpoint test changes (AC5) — Claude, technical — the answers are a shipped contract, so a test that had to be edited would mean the behaviour moved.
 
 ## Out of scope
@@ -76,6 +83,12 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - (none)
 
 ## Change notes
+
+### v2 — 2026-09-26
+- What: BR6 forbids the general mapping, not every per-endpoint decision about one `ErrorKind`; the exceptions are named in the test with their reason. New AC6b. `## What already exists` corrected: five rich callers, not four, and one of them is a `429`, not a `423`.
+- Why: found by the design passes and verified in the files. `TotpEndpoints.Failure` (`:89-91`) already turns `ErrorKind.NotFound` into `401` so the TOTP endpoints do not reveal whether an account exists — a deliberate decision documented in its own summary. BR6 as written forbade it while BR2 forbade changing it, so the pair was impossible. `GoogleSignInEndpoints.cs:40` is a fifth rich caller the file had missed.
+- Affected: BR6, AC6; added AC6b; two lines of `## What already exists`. Every other rule and criterion unchanged.
+- Re-approved: 2026-09-26
 
 ## Validation script
 <!-- Written at the end of build. -->
