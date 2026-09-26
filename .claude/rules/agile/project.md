@@ -85,6 +85,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The injected defect is chosen so that only the new guard goes red: a tone that also breaks a neighbouring pair proves the suite reacts, not that this test is about this pair (B-18).
 - A contrast ratio written into an item is re-measured from the committed tokens at refinement: the number captured with the bug is a note, not evidence (B-18).
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
+- A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
+- A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
