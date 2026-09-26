@@ -10,39 +10,52 @@ version: 1
 ## Summary
 A section on the Security page to link a Google account to an existing account, and to unlink it while keeping at least one way to sign in. Left out of F-20 by the owner on 2026-09-23: in F-20 the link happens only on the first Google sign-in whose verified email matches an account.
 
+Refined on 2026-09-26. The independent review found the first draft's link flow unsafe; the rules below are the corrected ones, and `## Decisions` keeps what was wrong and why.
+
 ## Start
-- Depends on: nothing. F-20 (`done`) built the Google round trip, the link on first sign-in, the switch and
-  `PasswordNotSetAlert`; F-11 (`done`) built the Security page this section joins. Both are on `main`.
-- Waits on: nothing. The three answers were given by the owner on 2026-09-26.
-- Suggested path: `/agile:refine` → `/agile:build`. It touches authentication, so the independent review runs
-  on this file before approval and again on the diff before validation.
-- Parallel with: anything outside `Simulab.Identity` and the Security page. B-18 is in its own worktree and
-  touches only a theme test.
+- Depends on: nothing. F-20 (`done`) built the Google round trip, the implicit link, the switch and
+  `PasswordNotSetAlert`; F-11 (`done`) built the Security page; F-21 (`done`) built the account events. All on
+  `main`.
+- Waits on: nothing. Six answers were given by the owner on 2026-09-26, in two rounds.
+- Suggested path: `/agile:refine` → `/agile:build`. It touches authentication: the independent review already
+  ran on this file and runs again on the diff before validation.
+- Parallel with: anything outside `Simulab.Identity` and the Security page. It **changes a rule of F-20 and one
+  of F-11**, so neither may be in flight at the same time; both are `done`.
 
 ## What exists
-- **Linking happens today in exactly one place**: `GoogleSignInHandler.SignInAsync` calls
-  `userManager.AddLoginAsync` when a checked Google identity's verified address matches an **active** account
-  that is not already linked to another Google subject (F-20 BR4). There is nowhere a signed-in user can link
-  or unlink by choice — which is what this feature adds.
-- The Google round trip belongs to the Web host: `GoogleAccountEndpoints` at `/account/google/start` and
-  `/account/google/complete`, because a Blazor circuit can neither redirect to Google nor read the answer.
-  They are mapped only while the feature is on.
+- **Linking happens today in exactly one place**: `GoogleSignInHandler.SignInAsync:62` calls
+  `userManager.AddLoginAsync` when a checked Google identity's address matches an **active** account not
+  already linked to another subject. The address must also be *authoritative* —
+  `GoogleIdentity.IsAuthoritative:15` requires `@gmail.com` or a hosted domain, not merely `email_verified`.
+- The round trip belongs to the Web host: `GoogleAccountEndpoints.StartPath` (`/account/google/start`) and
+  `CompletePath` (`/account/google/complete`). **`Start()` is an unauthenticated GET that carries no intent and
+  no per-session state** (`GoogleAccountEndpoints.cs:33`), and `CompleteAsync` always calls
+  `SignInWithGoogleAsync` (`:56`). This is the fact the first draft got wrong; BR2 below is written against it.
+- F-20 already has the pattern this feature needs: `GoogleSignUpTickets`, a one-time ticket handed to the
+  confirmation page in the query (`GoogleAccountEndpoints.cs:72-82`).
 - The switch is `Identity:GoogleSignInEnabled`, read once at start on both hosts (`GoogleSignInSettings`).
-  `CLAUDE.md` says Google is off in v1, so this section is invisible by default.
-- The link row is `user_logins`, provider `GoogleSignInProtocol.LoginProvider`, key = Google's subject
-  (`GoogleSignInHandler.Login`). `IUserDirectory.FindLoginKeyAsync(userId, provider)` already answers whether
-  an account is linked — nothing new is needed to read the state.
-- **An account may have no password**: `UserManager.HasPasswordAsync` is what `EraseAccountHandler` checks
-  before asking for one, answering `identity.password_not_set`. `PasswordNotSetAlert` is the shared component
-  that says so and points at `/forgot-password`, which gives a first password.
-- `/account/security` (F-11) is one card with the two-factor block and a danger zone. It already renders
-  `PasswordNotSetAlert` for `identity.password_not_set` and a lockout alert, so this section inherits both.
-- The Api's Google surface today is one route: `POST /api/v1/identity/google-registrations`. There is no
-  endpoint for linking or unlinking; both are new.
+  `CLAUDE.md` says Google is off in v1.
+- The link row is `user_logins`: provider `GoogleSignInProtocol.LoginProvider`, key = Google's subject,
+  display name currently the literal `"Google"` (`GoogleSignInHandler.Login:104`). **The Google address is
+  stored nowhere**, which is why BR12 below has to store it.
+- **An account may have no password**: `UserManager.HasPasswordAsync`, which `EraseAccountHandler.cs:37`
+  checks before asking for one, answering `identity.password_not_set`.
+- Every password-confirmed action counts failures and locks out: `EraseAccountHandler.cs:43-59`. The codes are
+  per action — `account_erasure.current_password_invalid`, `data_export.current_password_invalid`,
+  `totp.current_password_invalid` (`IdentityErrorCodes.cs:40,43,80`). **There is no
+  `identity.incorrect_password`.**
+- **`/account/security` does not exist while TOTP is off**: `Security.razor:261` calls `Navigation.NotFound()`
+  on the TOTP switched-off code (F-11 BR12). The danger zone renders only while two-factor is on
+  (`Security.razor:151`), and the `PasswordNotSetAlert` slot sits inside the two-factor card (`:42`).
+- Account events are **F-21**: `AccountEventTypes` (`AccountEventTypes.cs:10-34`) with `All` pinned to the
+  domain enum by a test, and a resource key per value.
+- The Api's Google surface is one route today: `POST /api/v1/identity/google-registrations`.
+  Password-confirmed actions are `POST /<plural noun>`: `account-erasures`, `data-exports`,
+  `password-changes` (`IdentityEndpoints.cs:56,70,75`).
 
 ## Goal
 Let someone who already has an account decide for themselves whether Google is a way into it — and never let
-that decision lock them out.
+that decision lock them out, nor let anyone else make it for them.
 
 ## Users and use cases
 - UC1 A signed-in user with no Google link sees the section on the Security page, chooses "Connect Google",
@@ -52,105 +65,153 @@ that decision lock them out.
   create a password first.
 - UC4 A user tries to link a Google account that already belongs to another Simulab account and is told, with
   nothing changed on either account.
+- UC5 A user who disconnected signs in with Google again and is told the account exists and that Google is
+  connected in the settings — the disconnection holds.
 
 ## Business rules
-- BR1 The section appears on `/account/security` only while `Identity:GoogleSignInEnabled` is on, the same
-  switch that maps the round trip. Off, the section is absent and both new endpoints answer 404 — a switched
-  off feature is not reachable by URL either.
-- BR2 Linking reuses the F-20 round trip: the page navigates to `/account/google/start` with a full load, and
-  the callback finishes on `/account/google/complete`, which knows it is a link because the caller is already
-  signed in. The ID token is checked by the same `GoogleSignInHandler.CheckTokenAsync` — issuer, audience,
-  signature, lifetime and `email_verified`.
-- BR3 **The Google address does not have to be the account's address.** The user is already authenticated, and
-  proving control of a Google account is what the link means. The address is stored nowhere new: it is shown
-  from the token at link time and read from Google on later sign-ins.
-- BR4 Linking is refused when that Google subject is already a login of another account, with
-  `google_sign_in.account_exists` — the code F-20 already uses for the same situation. Nothing changes on
-  either account.
-- BR5 Linking this account to the subject it is already linked to succeeds and changes nothing: coming back
-  from Google twice must not turn into an error.
-- BR6 Linking when this account is already linked to a **different** subject replaces nothing: it is refused
-  with `google_sign_in.already_linked`, and the user disconnects first. One account has at most one Google
-  link.
-- BR7 Unlinking asks for the current password, as erasing the account and downloading the data already do, and
-  is refused with `identity.incorrect_password` when it is wrong.
-- BR8 **Unlinking is refused when the account has no password**, with `identity.password_not_set`: there was
-  at least one way to sign in before and this would leave none. Written as a before-and-after, so it never
-  blocks a case where there was nothing to lose. The screen shows `PasswordNotSetAlert`, whose action already
-  leads to `/forgot-password`.
-- BR9 Unlinking an account that has no Google link succeeds and changes nothing, so a second tab does not turn
-  a finished action into an error.
-- BR10 Both actions are recorded as account events (F-14), as the other security actions are, so
-  `/admin/account-events` shows who linked or unlinked and when.
-- BR11 Every new text exists in pt-BR, pt-PT and en, the new error code included.
+- BR1 The section appears on `/account/security` only while `Identity:GoogleSignInEnabled` is on. Off, the
+  section is absent and every new endpoint answers 404.
+- BR2 **The link is an intent, carried and proved, never inferred.** `/account/google/start` takes an explicit
+  `intent=link`, requires an authenticated caller and antiforgery, and mints a one-time ticket bound to that
+  user's id — the `GoogleSignUpTickets` pattern. `/account/google/complete` links only when it has that ticket
+  and the session that finishes the round trip is still the user the ticket names; otherwise it refuses with
+  `google_link.session_changed` and links nothing. Without the ticket the callback behaves exactly as F-20
+  does today. *Inferring the intent from "a session exists" would link the Google identity of whoever finishes
+  the round trip to whatever account is signed in on that browser.*
+- BR3 The ID token is checked by the same `GoogleSignInHandler.CheckTokenAsync`: issuer, audience, signature,
+  lifetime and `email_verified`.
+- BR4 **The Google address does not have to be the account's address**, and it does not have to be
+  authoritative in the F-20 sense either: the user is already authenticated, so nothing is being inferred from
+  the address.
+- BR5 Linking is refused when that subject is already a login of another account, with
+  `google_sign_in.account_exists`. Nothing changes on either account.
+- BR6 Linking this account to the subject it is already linked to succeeds and changes nothing.
+- BR7 Linking when this account is already linked to a **different** subject is refused with
+  `google_link.already_linked`. One account has at most one Google link.
+- BR8 Unlinking asks for the current password and is refused with `google_link.current_password_invalid`. A
+  wrong password counts as a failed attempt and can lock the account, exactly as
+  `EraseAccountHandler.cs:43-59` does; a locked account is refused with `identity.account_locked` (423).
+- BR9 **Unlinking is refused when the account has no password**, with `identity.password_not_set`: there was
+  at least one way to sign in before and this would leave none. It never blocks a case where there was nothing
+  to lose, because of BR10's order.
+- BR10 The checks run in this order: no link → 204, nothing else is read; no password → `password_not_set`;
+  locked → `account_locked`; wrong password → `current_password_invalid`; otherwise the row goes.
+- BR11 **F-20's implicit link is switched off** (supersedes F-20 BR4): a Google sign-in whose address matches
+  an active account that is not linked no longer links it, and answers `google_sign_in.account_exists` with
+  the text telling the reader to connect Google in the account settings. One door, one decision, and
+  disconnecting means what it says.
+- BR12 The Google address is stored with the link, in the `user_logins` row's display name, which today holds
+  the literal `"Google"`. No migration: the column exists. Erasing the account already removes the row, so the
+  address goes with it.
+- BR13 Linking and unlinking are account events (F-21): two values added to the domain enum and to
+  `AccountEventTypes.All`, with their resource key in the three languages, so the pinning test stays green and
+  `/admin/account-events` shows who did it and when.
+- BR14 `/account/security` exists while **either** TOTP or Google is on (supersedes F-11 BR12); each block
+  appears by its own switch. With both off, the page is still Not Found.
+- BR15 Every new text exists in pt-BR, pt-PT and en, the three new error codes and the two event types
+  included.
 
 ## Screens and API
-- `/account/security` — a new card section, **after** two-factor and **before** the danger zone: the title, one
-  line of explanation, the state, and one action.
-  - Not linked: the button `Security.Google.Connect` navigates to `/account/google/start` with a full load.
-  - Linked: the Google address, and `Security.Google.Disconnect`, which opens the kit confirmation dialog with
-    the current-password field, the shape `EraseAccountDialog` already uses.
-  - Linked with no password: `PasswordNotSetAlert` in place of the password field, and the disconnect button
-    disabled with a tooltip saying why.
-- `POST /api/v1/identity/google-links` — links the signed-in caller to the Google identity of the ID token in
-  the body. 204 on success. Errors: `google_sign_in.invalid_token` (400),
-  `google_sign_in.email_not_verified` (422), `google_sign_in.account_exists` (409),
-  `google_sign_in.already_linked` (409).
-- `DELETE /api/v1/identity/google-links` — unlinks the signed-in caller, with the current password in the body.
-  204 on success, and on an account that had no link. Errors: `identity.incorrect_password` (422),
-  `identity.password_not_set` (422).
-- Both require an authenticated caller and act only on that caller's own account: neither takes a user id.
-- Error codes: `google_sign_in.already_linked` is new; the other three exist since F-20.
+- `/account/security` — a new card, after the two-factor card and before the danger zone; when two-factor is
+  off, it follows the two-factor card's "off" state, which stays on the page (BR14).
+  - Not linked: the explanation and `Security.Google.Connect`, which posts to `/account/google/start` with the
+    antiforgery token and `intent=link` (a form post, not a link: BR2 needs antiforgery).
+  - Linked: the stored Google address and `Security.Google.Disconnect`, opening the kit confirmation dialog
+    with the current-password field, the shape `EraseAccountDialog` uses.
+  - Linked with no password: `PasswordNotSetAlert` in the card, and the disconnect button disabled with a
+    tooltip that says why.
+- `GET /api/v1/identity/google-link` — the state for the screen: `{ linked, email }`, `email` null when not
+  linked. 200 always for an authenticated caller.
+- `POST /api/v1/identity/google-links` — links the caller to the identity of the ID token in the body. 204.
+  Errors: `google_sign_in.invalid_token` (400), `google_sign_in.email_not_verified` (422),
+  `google_sign_in.account_exists` (409), `google_link.already_linked` (409),
+  `google_link.session_changed` (409).
+- `POST /api/v1/identity/google-link-removals` — unlinks the caller, current password in the body. 204, and
+  204 when there was no link. Errors: `identity.password_not_set` (422),
+  `google_link.current_password_invalid` (422), `identity.account_locked` (423). A POST and not a DELETE: it
+  carries a password, and the module's password-confirmed actions are all `POST /<plural noun>`.
+- All three require an authenticated caller and act only on that caller's own account; none takes a user id.
+- New error codes: `google_link.already_linked`, `google_link.session_changed`,
+  `google_link.current_password_invalid`.
 
 ## Acceptance criteria
-- AC1 Given a signed-in user with no link, when the Google round trip comes back with a checked identity, then
-  `user_logins` has one Google row for that account and the section shows the address.
-- AC2 Given the account is already linked to that same subject, when the link runs again, then it succeeds and
+- AC1 Given a signed-in user with no link, when the round trip comes back with a checked identity and a valid
+  ticket, then `user_logins` has one Google row and `GET google-link` answers `linked` with the address.
+- AC2 Given the account is already linked to that subject, when the link runs again, then it succeeds and
   there is still exactly one row.
-- AC3 Given the account is linked to a different subject, when a link is attempted, then it is refused with
-  `google_sign_in.already_linked` and the existing row is untouched.
-- AC4 Given the subject belongs to another account, when a link is attempted, then it is refused with
+- AC3 Given the account is linked to a different subject, when a link is attempted, then
+  `google_link.already_linked` and the existing row is untouched.
+- AC4 Given the subject belongs to another account, when a link is attempted, then
   `google_sign_in.account_exists` and neither account changes.
-- AC5 Given a Google identity whose address differs from the account's, when it is linked, then it is accepted.
-- AC6 Given a token Google does not vouch for (`email_verified` false), when a link is attempted, then it is
-  refused with `google_sign_in.email_not_verified`.
-- AC7 Given a linked account with a password, when the user disconnects with the right password, then the row
+- AC5 Given a Google address that differs from the account's, when it is linked, then it is accepted (BR4).
+- AC6 Given `email_verified` false, when a link is attempted, then `google_sign_in.email_not_verified`.
+- AC7 **Given the callback arrives with no link ticket, when it completes, then nothing is linked** — it
+  behaves as an F-20 sign-in (BR2).
+- AC8 **Given the callback arrives with a ticket minted for another user, when it completes, then
+  `google_link.session_changed` and nothing is linked** (BR2).
+- AC9 **Given a link ticket already used once, when it is presented again, then it is refused and nothing is
+  linked** (BR2).
+- AC10 Given a request to `/account/google/start` with `intent=link` and no antiforgery token, when it is
+  posted, then it is refused before Google is reached (BR2).
+- AC11 Given an anonymous caller, when `/account/google/start` is posted with `intent=link`, then it is
+  refused (BR2).
+- AC12 Given a linked account with a password, when the user disconnects with the right password, then the row
   is gone and the account still signs in with the password.
-- AC8 Given a linked account with a password, when the password is wrong, then it is refused with
-  `identity.incorrect_password` and the row stays.
-- AC9 Given a linked account **with no password**, when a disconnect is attempted, then it is refused with
+- AC13 Given a wrong password, when a disconnect is attempted, then
+  `google_link.current_password_invalid`, the row stays, **and the failed-attempt count grew by one**; and
+  after the limit the next attempt is `identity.account_locked` (BR8).
+- AC14 Given a linked account **with no password**, when a disconnect is attempted, then
   `identity.password_not_set` and the row stays.
-- AC10 Given an account with no Google link, when a disconnect is attempted, then it succeeds and nothing
-  changes.
-- AC11 Given the switch is off, when the Security page is opened, then the section is absent; and when either
-  endpoint is called, then it answers 404.
-- AC12 Given an anonymous caller, when either endpoint is called, then it answers 401.
-- AC13 Given a link or an unlink succeeded, when the account events are read, then the action is there with
-  its instant.
-- AC14 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green.
+- AC15 Given an account with **no link and no password**, when a disconnect is attempted, then it answers 204
+  and nothing is read (BR10's order).
+- AC16 Given an account that disconnected, when it signs in with Google at the same address, then it is
+  refused with `google_sign_in.account_exists` and nothing is linked (BR11).
+- AC17 Given the Google switch is off, when the page is opened and when each of the three endpoints is called,
+  then the section is absent and each endpoint answers 404.
+- AC18 Given TOTP off and Google on, when `/account/security` is opened, then the page loads with the Google
+  card and without the two-factor block (BR14).
+- AC19 Given both switches off, when `/account/security` is opened, then it is Not Found (BR14).
+- AC20 Given an anonymous caller, when any of the three endpoints is called, then 401.
+- AC21 Given a link or an unlink succeeded, when the account events are read, then the action is there with
+  its instant and the account it belongs to (BR13).
+- AC22 Given the event types, when the pinning test runs, then `AccountEventTypes.All` still matches the
+  domain enum and every value has a text in the three languages.
+- AC23 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green.
 
 ## Decisions
-- 2026-09-26 — The Google address does not have to match the account's (BR3) — the user is already
-  authenticated, and the personal Gmail is often not the address they signed up with. The consequence, written
-  so it is not rediscovered: a later Google sign-in finds the account by the link, which is the branch F-20
-  already tries first, and no longer by the address (owner, question 1).
-- 2026-09-26 — Unlinking asks for the current password and is refused outright when there is none (BR7, BR8) —
-  the same door the other two sensitive actions of this page use, and the refusal is what keeps the account
-  reachable (owner, question 2).
-- 2026-09-26 — A subject already linked elsewhere is refused, never moved (BR4) — moving it would silently
-  take a way in from another account, and leave one with no password locked out (owner, question 3).
-- 2026-09-26 — One Google link per account (BR6) — decided here: `user_logins` allows several rows per
-  provider, but a second one means nothing to the user and doubles every message on this screen.
-- 2026-09-26 — The link goes through the Web host's existing round trip rather than a new one (BR2) — decided
-  here: a Blazor circuit cannot redirect to Google, which is why `GoogleAccountEndpoints` exists at all.
-- 2026-09-26 — No new package: two endpoints, one screen section and their tests (rule `build-config`).
+- 2026-09-26 — The Google address does not have to match the account's (BR4) — the user is already
+  authenticated, and the personal Gmail is often not the address they signed up with (owner, round 1 Q1).
+- 2026-09-26 — Unlinking asks for the current password, counts failures and is refused outright when there is
+  no password (BR8, BR9) — the same door the other sensitive actions of this page use (owner, round 1 Q2).
+- 2026-09-26 — A subject already linked elsewhere is refused, never moved (BR5) — moving it would silently
+  take a way in from another account (owner, round 1 Q3).
+- 2026-09-26 — **F-20's implicit link is switched off** (BR11) — with an explicit link in the product, an
+  implicit one would silently undo a disconnection at the next sign-in. It changes a rule of a shipped
+  feature, so F-20 gets a change note pointing here (owner, round 2 Q1).
+- 2026-09-26 — `/account/security` exists while either switch is on (BR14) — otherwise, in v1's own
+  configuration (Google on, TOTP off), the whole feature would be unreachable. F-11 gets a change note
+  (owner, round 2 Q2).
+- 2026-09-26 — The Google address is stored and shown (BR12) — without it the disconnect button is blind for
+  anyone with two Google accounts. It goes in the existing display-name column, so there is no migration and
+  no new place for personal data to outlive the account (owner, round 2 Q3).
+- 2026-09-26 — **The first draft's BR2 was wrong and unsafe**, and is replaced: it said the callback could
+  infer a link from the caller being signed in. `GoogleAccountEndpoints.cs:33` shows `Start()` is an
+  unauthenticated GET with no state, so that inference would link whoever finishes the round trip to whatever
+  account is signed in on that browser, and leaves the classic account-linking CSRF open. Found by the
+  independent review before approval, which is why this item runs one.
+- 2026-09-26 — Unlink is `POST /google-link-removals`, not `DELETE /google-links` — it carries a password, and
+  every password-confirmed action in this module is `POST /<plural noun>` (`IdentityEndpoints.cs:56,70,75`).
+- 2026-09-26 — One Google link per account (BR7) — `user_logins` allows several rows per provider, but a
+  second one means nothing to the user and doubles every message on this screen.
+- 2026-09-26 — No new package: three endpoints, one screen section and their tests (rule `build-config`).
 
 ## Out of scope
 - Any provider other than Google.
 - More than one Google account per Simulab account.
 - Changing the account's e-mail to the Google one, or the other way round.
-- Signing in with Google, which is F-20 and already shipped.
 - An admin unlinking somebody else's Google account.
+- Re-opening how a **first** Google sign-in creates an account (F-20 BR7); only the implicit link of an
+  existing account changes here.
 
 ## Open questions
 - (none)
