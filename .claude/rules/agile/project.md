@@ -98,6 +98,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
 - Run the gate with its whole output saved to a file (scratchpad) and quote from that file; never pipe it through a filter that can drop the failure (B-7).
 - A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
+- After filling an item file from the template, check `grep "^## "` on it: a replacement over a range leaves the template's later sections behind, duplicated and empty (F-27).
 - Never change state (sign-ups, requests that count, data) in an app host Claude did not start; ask first, or use data no one else uses and say which (B-4).
 - Before `git worktree remove`: `dotnet build-server shutdown`, and the owner confirms Visual Studio is closed on that folder (open `.vs` files fail the removal halfway, F-17 and F-19).
 - Every item lives in its own worktree (`wt/simulab/<type>-<n>`); the main checkout stays on `main` and is used only to merge (B-13, B-14).
