@@ -688,3 +688,17 @@ After: 5 consecutive clean-build full runs green, 1343 tests each. Ship gate GRE
 - Not a lesson, a live gap: C3 (`MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie`) was deferred
   by the owner, never reproduced, and did not fail in any of the 8 full runs of this item. If it returns it needs
   its own repro.
+
+## 2026-09-26 — F-28 Partial index filter in the data dictionary
+Shipped in `8f6be36` from the worktree `feature-28`. `EntityModels.cs` (+37) and its tests (+63, with a
+shared-table context for the F-25 test model); the visible result is two generated lines, now
+``- `ix_jobs_active_created_at` on created_at (where status IN (0, 1))``. Ship gate GREEN on the first attempt:
+build 46 s 0 warnings, suite 1349 passed 0 failed in 121 s, architecture tests 135 (six more than before).
+- **No new rule.** This item's lessons were already harvested by B-19, which it paid for: F-28's ship gate went
+  red twice on `JobWorkerTests`, a test in another project it does not touch, and that is what turned the flaky
+  suite into an item instead of a shrug. Adding a rule here would duplicate the two B-19 lines above.
+- Worth recording, no lesson: the item sat at `validating` from 2026-09-26 until B-19 shipped, on the owner's
+  decision to hold the merge rather than re-run the gate until it happened to be green. The first gate run after
+  B-19 was green, so the hold cost one afternoon and bought a suite whose red means something.
+- Process note, no action: three items were open in parallel (F-28, F-29, F-30) against a recommended limit of
+  two, and the one that blocked all three was a test defect in none of them.
