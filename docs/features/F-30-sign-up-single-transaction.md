@@ -1,7 +1,7 @@
 ---
 feature: F-30
 epic: Foundation and identity
-status: refining
+status: approved
 board: 749
 version: 1
 ---
