@@ -1,10 +1,10 @@
 ---
 feature: F-27
 epic: Foundation and identity
-status: approved
+status: building
 board: 746
 version: 1
-Autopilot: approved
+Autopilot: built
 ---
 # Retention of failed jobs
 
