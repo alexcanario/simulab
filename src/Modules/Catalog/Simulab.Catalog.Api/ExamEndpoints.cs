@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Catalog.Api;
 
@@ -64,7 +65,7 @@ public static class ExamEndpoints
         var exam = await queries.FindAsync(id, cancellationToken);
 
         return exam is null
-            ? CatalogEndpoints.Problem(new SharedKernel.Results.Error(CatalogErrorCodes.ExamNotFound, SharedKernel.Results.ErrorKind.NotFound))
+            ? Problem(new SharedKernel.Results.Error(CatalogErrorCodes.ExamNotFound, SharedKernel.Results.ErrorKind.NotFound))
             : Results.Ok(exam);
     }
 
@@ -77,7 +78,7 @@ public static class ExamEndpoints
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/catalog/exams/{result.Value.Id}", result.Value)
-            : CatalogEndpoints.Problem(result.Error!);
+            : Problem(result.Error!);
     }
 
     private static async Task<IResult> UpdateAsync(
@@ -88,14 +89,14 @@ public static class ExamEndpoints
     {
         var result = await handler.HandleAsync(id, request, cancellationToken);
 
-        return result.IsSuccess ? Results.Ok(result.Value) : CatalogEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
 
     private static async Task<IResult> DeleteAsync(Guid id, DeleteExamHandler handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(id, cancellationToken);
 
-        return result.IsSuccess ? Results.NoContent() : CatalogEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.NoContent() : Problem(result.Error!);
     }
 
     private static TEnum? ParseFilter<TEnum>(string? value)

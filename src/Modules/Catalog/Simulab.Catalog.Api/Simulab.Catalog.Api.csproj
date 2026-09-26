@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
     <ProjectReference Include="..\Simulab.Catalog.Application\Simulab.Catalog.Application.csproj" />
     <!-- Infrastructure is referenced for composition only (AddCatalogModule), per the profile. -->
     <ProjectReference Include="..\Simulab.Catalog.Infrastructure\Simulab.Catalog.Infrastructure.csproj" />

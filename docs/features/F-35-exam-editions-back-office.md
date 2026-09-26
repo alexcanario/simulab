@@ -19,6 +19,13 @@ Remove these comments when the file leaves `idea`.
 ## Summary
 Admin screens to manage the editions of an exam. An edition is one paper actually applied: the year, the job it selects for (named in the edition itself), the application date, the official link to its notice, and whether it is a draft or published. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20). The closest Simulae source is `ExamNotice` and `ExamNoticeFormDialog`, but the model is new work. Needs /agile:screen.
 
+The edition is also **where the exam board lives** — a required link to `Organizer`, not a field on the exam (owner, 2026-09-26). Two reasons, both checked:
+
+- The Manaus municipal guard edital (`Edital nº 01, de 23 de março de 2026`, read 2026-09-26) names the contracting body on its cover ("A PREFEITURA DE MANAUS, por meio da SEMAD, torna pública…") and the board in item 1.1 ("sendo sua execução de responsabilidade do Instituto Consulplan"). The board is declared inside the edital, and the edital is the edition.
+- The simulator needs it there. The owner's use case: *"select 20 Mathematics questions from board Consulplan, from the editais of 2021 to 2026"* — a student practising a board's style (epic Exam Simulator, 695). That query walks question → paper → edition → board, and only works if each edition carries its own board: the same exam changes board between years, so a board on the exam would return the wrong questions for every year it changed.
+
+So the edition carries the board and the notice year, and both have to be filterable. Recorded here because the data has to exist before the engine can ask for it.
+
 ## Goal
 <!-- Why this feature exists, in one or two sentences. -->
 

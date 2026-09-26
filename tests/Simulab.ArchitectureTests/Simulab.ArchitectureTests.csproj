@@ -6,6 +6,7 @@
     <ProjectReference Include="..\..\src\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Ai\Simulab.Ai.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />

@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,6 +19,7 @@ using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Serialization;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Identity.Api;
 
@@ -455,32 +455,4 @@ public static class IdentityEndpoints
 
     private static bool TryParseTopic(string topic, out LegalTopic parsed) =>
         Enum.TryParse(topic, ignoreCase: true, out parsed) && Enum.IsDefined(parsed);
-
-    /// <summary>RFC 9457 problem details plus the stable code the UI turns into text (rule: api-contracts).</summary>
-    internal static IResult Problem(Error error, int? status = null, params (string Name, object Value)[] extensions)
-    {
-        var problem = new ProblemDetails
-        {
-            Status = status ?? StatusFor(error.Kind),
-            Title = error.Code,
-            Detail = error.Detail,
-            Extensions = { ["code"] = error.Code }
-        };
-
-        foreach (var (name, value) in extensions)
-        {
-            problem.Extensions[name] = value;
-        }
-
-        return Results.Problem(problem);
-    }
-
-    private static int StatusFor(ErrorKind kind) => kind switch
-    {
-        ErrorKind.NotFound => StatusCodes.Status404NotFound,
-        ErrorKind.Conflict => StatusCodes.Status409Conflict,
-        ErrorKind.BusinessRule => StatusCodes.Status422UnprocessableEntity,
-        ErrorKind.Forbidden => StatusCodes.Status403Forbidden,
-        _ => StatusCodes.Status400BadRequest
-    };
 }

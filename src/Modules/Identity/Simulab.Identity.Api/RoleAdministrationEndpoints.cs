@@ -5,6 +5,7 @@ using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Roles;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Identity.Api;
 
@@ -60,12 +61,12 @@ public static class RoleAdministrationEndpoints
     {
         if (days is { } value && !AccountEventListQuery.Periods.Contains(value))
         {
-            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.AccountEventPeriodInvalid, ErrorKind.Validation));
+            return Problem(new Error(IdentityErrorCodes.AccountEventPeriodInvalid, ErrorKind.Validation));
         }
 
         if (!string.IsNullOrWhiteSpace(@event) && !AccountEventTypes.All.Contains(@event))
         {
-            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.AccountEventTypeInvalid, ErrorKind.Validation));
+            return Problem(new Error(IdentityErrorCodes.AccountEventTypeInvalid, ErrorKind.Validation));
         }
 
         var query = new AccountEventListQuery(page, pageSize, user, @event, ip, search, days, ascending);
@@ -86,7 +87,7 @@ public static class RoleAdministrationEndpoints
     {
         if (days is { } value && !RoleChangeListQuery.Periods.Contains(value))
         {
-            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.RoleChangePeriodInvalid, ErrorKind.Validation));
+            return Problem(new Error(IdentityErrorCodes.RoleChangePeriodInvalid, ErrorKind.Validation));
         }
 
         var query = new RoleChangeListQuery(page, pageSize, roleId, userId, authorId, search, days, ascending);
@@ -112,7 +113,7 @@ public static class RoleAdministrationEndpoints
         var result = await handler.CreateAsync(request, cancellationToken);
         return result.IsSuccess
             ? Results.Created($"/api/v1/identity/roles/{result.Value.Id}", result.Value)
-            : IdentityEndpoints.Problem(result.Error!);
+            : Problem(result.Error!);
     }
 
     private static async Task<IResult> UpdateRoleAsync(Guid id, SaveRoleRequest request, SaveRoleHandler handler, CancellationToken cancellationToken)
@@ -124,7 +125,7 @@ public static class RoleAdministrationEndpoints
     private static async Task<IResult> DeleteRoleAsync(Guid id, DeleteRoleHandler handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(id, cancellationToken);
-        return result.IsSuccess ? Results.NoContent() : IdentityEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.NoContent() : Problem(result.Error!);
     }
 
     private static async Task<IResult> ListUsersAsync(
@@ -145,5 +146,5 @@ public static class RoleAdministrationEndpoints
     }
 
     private static IResult Answer<T>(Result<T> result) =>
-        result.IsSuccess ? Results.Ok(result.Value) : IdentityEndpoints.Problem(result.Error!);
+        result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
 }

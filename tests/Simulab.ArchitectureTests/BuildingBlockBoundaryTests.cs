@@ -33,6 +33,16 @@ public class BuildingBlockBoundaryTests
         solutionReferences.Should().Equal("Simulab.SharedKernel");
     }
 
+    /// <summary>F-39 BR7: the new block carries ASP.NET, so its solution references stay at SharedKernel.</summary>
+    [Fact]
+    public void ApiResults_ReferencesOnlySharedKernelAmongSolutionProjects()
+    {
+        var solutionReferences = References(typeof(Simulab.ApiResults.ApiProblem).Assembly)
+            .Where(name => name.StartsWith("Simulab.", StringComparison.Ordinal));
+
+        solutionReferences.Should().Equal("Simulab.SharedKernel");
+    }
+
     [Fact]
     public void ModuleContexts_EachDeclareTheirOwnSchema()
     {
@@ -77,5 +87,6 @@ public class BuildingBlockBoundaryTests
         listed.Should().Contain("src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj");
         listed.Should().Contain("src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj");
         listed.Should().Contain("src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj");
+        listed.Should().Contain("src/BuildingBlocks/Simulab.ApiResults/Simulab.ApiResults.csproj"); // F-39
     }
 }

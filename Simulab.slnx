@@ -9,6 +9,7 @@
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Simulab.Ai/Simulab.Ai.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Ai.Contracts/Simulab.Ai.Contracts.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.ApiResults/Simulab.ApiResults.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
@@ -45,6 +46,7 @@
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Simulab.Ai.Tests/Simulab.Ai.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.ApiResults.Tests/Simulab.ApiResults.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
