@@ -97,6 +97,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
+- A command that writes to the main checkout (`/agile:sync`, `/agile:retro`, a merge) starts by proving no other session is writing there: `git status` twice, a few seconds apart, and `git log -1`. A working tree that changes between the two reads, or a commit that appeared without this session making it, stops the command and goes to the owner (sync 0.0.63).
 - A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
 - Run the gate with its whole output saved to a file (scratchpad) and quote from that file; never pipe it through a filter that can drop the failure (B-7).
 - A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
