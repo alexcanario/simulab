@@ -1,7 +1,7 @@
 ---
 feature: F-39
 epic: Foundation and identity
-status: validating
+status: done
 board: 760
 version: 3
 ---
@@ -131,6 +131,7 @@ Nothing changes on screen: the same requests get the same answers. What is worth
 
 ## Delivery
 - Branch: `feature/F-39`
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: see the merge commit on `main` (AB#760)
+- Tests: full suite 1247 passed, 0 failed, 58 s; full build 24 s, 0 warnings (2026-09-26). The block's own unit tests are 13, in 85 ms.
+- Manual pages: none. Nothing changes for someone using the app: the same requests get the same answers, and that is what AC5 proves.
+- The guard was seen failing on a fourth copy planted in `OrganizerEndpoints` and then reverted: `OnlyTheBuildingBlock_CarriesTheMapping` named the file, and `TheDeletedCopies_AreGone` failed beside it. Step 6 of the validation script repeats it.
