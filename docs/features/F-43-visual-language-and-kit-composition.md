@@ -1,7 +1,7 @@
 ---
 feature: F-43
 epic: Foundation and identity
-status: validating
+status: done
 board: 765
 version: 1
 ---
@@ -426,8 +426,12 @@ Both were run before this script was handed over; the Web answers at `https://lo
    the form instead of disappearing. *(AC6)*
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
 - Branch: feature/F-43
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: 7c771d4 (`Merge feature/F-43: visual language and kit composition (AB#765)`), 49 files, +4098/-253
+- Tests: 1317 passed, 0 failed, 54 s (full suite, 2026-09-26); full build 19 s, 0 new warnings
+- Manual pages: `docs/manual/{pt-BR,pt-PT,en}/exams.md` (updated)
+- Absorbed and closed with this item: B-16 (AB#764) and B-17 (AB#766), each seen failing at its measured ratio
+  before the fix and then measured again on screen
+- Found on screen during the build, not by a test, and fixed here: the status chip's outline at 1.42:1 on the
+  dark card, and `AppRadioCards` rendering no id for the field, which left the error summary's link nowhere to
+  jump to. Both are pinned by tests now.

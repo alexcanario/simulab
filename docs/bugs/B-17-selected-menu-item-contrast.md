@@ -1,7 +1,7 @@
 ---
 bug: B-17
 feature: F-2
-status: idea
+status: done
 board: 766
 severity: low
 ---
@@ -35,3 +35,8 @@ the ones that were already there, so this is the component, not F-41.
 - Suggested path: `/agile:autopilot B-17` — small and measured, but the owner should see the new tone on screen.
 - Parallel with: B-16 (field hint contrast) touches the same theme tokens; doing them together would avoid
   two passes over the same decision.
+
+## Delivery
+- Fixed inside F-43 (merge `7c771d4`, 2026-09-26): the selected item keeps its lighter background and paints
+  its label white. Seen failing first at 4.37:1 dark, then measured on screen at 18.51. The pair is held by
+  `ThemeContrastTests.SelectedNavigationItem_ReadsAtAaOnItsOwnBackground`.

@@ -1,7 +1,7 @@
 ---
 bug: B-16
 feature: F-4
-status: idea
+status: done
 board: 764
 severity: medium
 ---
@@ -63,3 +63,9 @@ build holds it from then on.
 ## Delivery
 - Branch: bug/B-16
 - Merge: <commit>
+
+## Delivery
+- Fixed inside F-43 (merge `7c771d4`, 2026-09-26): `.app-field-hint` left MudBlazor's `text-disabled`
+  for `text-secondary`. Seen failing first at 2.65:1 light and 1.90:1 dark, then measured on screen at 6.92
+  and 4.89. The pair is held by `ThemeContrastTests.FieldHint_ReadsAtAaOnItsSurfaces`, which now reads the
+  colour from `app.css` itself — the gap that let this through.
