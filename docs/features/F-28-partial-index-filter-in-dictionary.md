@@ -99,6 +99,12 @@ documents it writes under `docs/architecture/`.
 - 2026-09-26 — the filter is read through `index.MappedIndexes` and EF's own relational `GetFilter()`, the way the
   line already reads `GetAreNullsDistinct()` — no new abstraction.
 - 2026-09-26 — no new package.
+- 2026-09-26 — the merge stopped at the ship gate, twice, on a test this item does not touch:
+  `Simulab.Jobs.Tests.JobWorkerTests.Start_WorkerDisabled_RunsNeitherTheJobsNorTheCleanup` (F-27). It passes 3/3
+  alone and 3/3 with its whole project, and a clean `main` worktree failed once in three full runs on a different
+  test (`MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie`), so the suite is not reliably green
+  under parallel load and the cause is not here. Captured as `docs/bugs/B-19-full-suite-flaky-under-parallel-load.md`
+  (AB#772). The item stays at `validating` until the owner decides; nothing was merged.
 
 ## Out of scope
 - Index method, sort order, included columns, or any other index fact (BR6).
