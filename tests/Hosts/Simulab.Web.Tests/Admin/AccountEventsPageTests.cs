@@ -88,7 +88,9 @@ public sealed class AccountEventsPageTests : AdminPageTestContext
             .Should().Equal(
                 "All events", "Signed in", "Sign-in failed", "Account locked", "Signed out", "Password changed",
                 "Password reset requested", "Password reset", "Two-factor turned on", "Two-factor turned off",
-                "Recovery codes regenerated", "Account erased");
+                "Recovery codes regenerated", "Account erased",
+                // F-29 AC21: linking and unlinking Google are account events, so they are offered here too.
+                "Google connected", "Google disconnected");
         page.Find("#account-events-type-filter").GetAttribute("value").Should().Be("Sign-in failed");
         page.Find("#account-events-period-filter").GetAttribute("value").Should().Be("Last 30 days");
     }

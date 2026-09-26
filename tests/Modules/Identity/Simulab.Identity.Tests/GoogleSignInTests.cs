@@ -219,13 +219,7 @@ public sealed class GoogleSignInTests : IdentityApiTests
         var user = (await UserAsync(email))!;
         await QueryAsync(async context =>
         {
-            context.UserLogins.Add(new Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>
-            {
-                UserId = user.Id,
-                LoginProvider = GoogleSignInProtocol.LoginProvider,
-                ProviderKey = subject,
-                ProviderDisplayName = email
-            });
+            GoogleTokens.Link(context, user.Id, subject, email);
             return await context.SaveChangesAsync();
         });
     }

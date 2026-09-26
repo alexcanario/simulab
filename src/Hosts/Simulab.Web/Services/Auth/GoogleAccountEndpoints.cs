@@ -87,9 +87,7 @@ public static class GoogleAccountEndpoints
         SignInHandOff handOff,
         GoogleSignUpTickets signUps,
         CodeStepTickets codeSteps,
-        GoogleLinkTickets tickets,
-        IdentityApiClient api,
-        WebSessionTokenAccessor tokens)
+        GoogleLinkTickets tickets)
     {
         var external = await context.AuthenticateAsync(GoogleSignInSettings.ExternalScheme);
         await context.SignOutAsync(GoogleSignInSettings.ExternalScheme);
@@ -100,7 +98,18 @@ public static class GoogleAccountEndpoints
         var items = external.Properties?.Items;
         if (items is not null && items.TryGetValue(LinkIntentItem, out var intent) && intent == LinkIntent)
         {
-            return await CompleteLinkAsync(context, api, tokens, tickets, items, idToken);
+            // F-29: the two services only the link branch needs are resolved here, not taken as endpoint
+            // parameters. A parameter is built on every request, and `WebSessionTokenAccessor` reaches the
+            // Redis-backed session store — which turned every F-20 sign-in through this callback into a 500
+            // wherever Redis is not configured, the Web test host included.
+            var services = context.RequestServices;
+            return await CompleteLinkAsync(
+                context,
+                services.GetRequiredService<IdentityApiClient>(),
+                services.GetRequiredService<WebSessionTokenAccessor>(),
+                tickets,
+                items,
+                idToken);
         }
 
         if (string.IsNullOrEmpty(idToken))

@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Infrastructure.Persistence;
 
 namespace Simulab.Identity.Tests;
 
@@ -128,6 +130,24 @@ public static class GoogleTokens
         TermsVersion: SignUpForm.CurrentVersion,
         PrivacyVersion: SignUpForm.CurrentVersion,
         FullName: fullName);
+
+    /// <summary>
+    /// F-29: the link an account gets on the Security page, written straight into the table. Since F-29 an
+    /// address no longer links anything on the way in (BR11), so a test that needs a Google sign-in to reach
+    /// an existing account has to give it its link first.
+    /// </summary>
+    public static void Link(IdentityModuleDbContext context, Guid userId, string subject, string displayName)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        context.UserLogins.Add(new IdentityUserLogin<Guid>
+        {
+            UserId = userId,
+            LoginProvider = GoogleSignInProtocol.LoginProvider,
+            ProviderKey = subject,
+            ProviderDisplayName = displayName,
+        });
+    }
 
     private static RsaSecurityKey NewKey(string keyId) => new(RSA.Create(2048)) { KeyId = keyId };
 }

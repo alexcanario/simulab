@@ -23,8 +23,12 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
     private Task<User> UserAsync(string email) =>
         QueryAsync(context => context.Users.AsNoTracking().SingleAsync(user => user.Email == email));
 
-    /// <summary>An active password account with two-factor on, and its authenticator secret.</summary>
-    private async Task<(string Email, string Secret)> EnrolledAsync(HttpClient client)
+    /// <summary>
+    /// An active password account with two-factor on, its Google link and its authenticator secret. Since
+    /// F-29 BR11 a Google sign-in no longer reaches an account by its address, so the account has to carry
+    /// the link the Security page would have given it for the Google step to be about two-factor at all.
+    /// </summary>
+    private async Task<(string Email, string Subject, string Secret)> EnrolledAsync(HttpClient client)
     {
         var email = await ActiveUser.CreateAsync(client, Factory, $"ana.{Guid.CreateVersion7():N}@gmail.com");
         var session = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
@@ -33,8 +37,16 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
         {
         }
 
+        var subject = GoogleTokens.NewSubject();
+        var user = await UserAsync(email);
+        await QueryAsync(async context =>
+        {
+            GoogleTokens.Link(context, user.Id, subject, email);
+            return await context.SaveChangesAsync();
+        });
+
         Factory.Clock.Advance(Step);
-        return (email, enrolment.Secret);
+        return (email, subject, enrolment.Secret);
     }
 
     // AC10.
@@ -42,9 +54,9 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
     public async Task Grant_AccountWithTwoFactor_AsksForTheCodeAndTheCodeStepSignsIn()
     {
         var client = Client();
-        var (email, secret) = await EnrolledAsync(client);
+        var (email, subject, secret) = await EnrolledAsync(client);
 
-        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(GoogleTokens.NewSubject(), email));
+        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
 
         grant.Error.Should().Be(IdentityErrorCodes.TotpRequired);
         grant.AccessToken.Should().BeNull();
@@ -58,7 +70,7 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
     public async Task Grant_LockedAccountWithTwoFactor_LeavesTheLockoutAndTheCodeStepRefuses()
     {
         var client = Client();
-        var (email, secret) = await EnrolledAsync(client);
+        var (email, subject, secret) = await EnrolledAsync(client);
         for (var attempt = 0; attempt < 5; attempt++)
         {
             await TokenClient.SignInAsync(client, email, "Wrong#Password1");
@@ -67,7 +79,7 @@ public sealed class GoogleSignInTwoFactorTests : IdentityApiTests
         var locked = await UserAsync(email);
         locked.LockoutEnd.Should().NotBeNull();
 
-        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(GoogleTokens.NewSubject(), email));
+        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
 
         grant.Error.Should().Be(IdentityErrorCodes.TotpRequired);
         var after = await UserAsync(email);
