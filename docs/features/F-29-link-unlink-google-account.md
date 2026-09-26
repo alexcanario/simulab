@@ -1,9 +1,10 @@
 ---
 feature: F-29
 epic: Foundation and identity
-status: refining
+status: approved
 board: 748
 version: 1
+Autopilot: approved
 ---
 # Link and unlink Google on the account page
 
