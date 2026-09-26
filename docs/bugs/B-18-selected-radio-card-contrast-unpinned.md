@@ -1,7 +1,7 @@
 ---
 bug: B-18
 feature: F-43
-status: refining
+status: approved
 board: 769
 severity: low
 ---
