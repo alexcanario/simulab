@@ -31,6 +31,8 @@ public static class JobsServiceCollectionExtensions
 
         services.AddScoped<IJobHandler, SendEmailJobHandler>();
         services.AddSingleton<JobRunner>();
+        // F-27: a singleton, because it is the one that remembers when the cleanup last ran.
+        services.AddSingleton<JobCleanup>();
         services.AddHostedService<JobWorker>();
         return services;
     }
