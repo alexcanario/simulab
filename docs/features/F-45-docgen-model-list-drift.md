@@ -1,10 +1,10 @@
 ---
 feature: F-45
 epic: Foundation and identity
-status: validating
+status: done
 board: 768
 version: 1
-Autopilot: built
+Autopilot: shipping
 ---
 # The DocGen tests see every context DocGen documents
 
@@ -52,11 +52,12 @@ None. No route, no endpoint, no UI text: the item only touches `tests/Simulab.Ar
 - AC6 No new UI text: the localization criterion does not apply, and the missing-key test stays green.
 
 ## Decisions
-- 2026-09-26 — the truth for "what DocGen documents" is the committed `docs/architecture/` folder set, not DocGen's bin folder — the bins on disk can be stale (today's `tools/Simulab.DocGen/bin` has no `Simulab.Ai.dll`), while `DocGen --check` in the gate keeps the committed docs in step with the code.
+- 2026-09-26 — the truth for "what DocGen documents" is the committed `docs/architecture/` folder set, not DocGen's bin folder — the bins on disk can be stale (when this was written, the `tools/Simulab.DocGen/bin` of the main checkout held no `Simulab.Ai.dll`, four features after the reference was added), while `DocGen --check` in the gate keeps the committed docs in step with the code.
 - 2026-09-26 — the derived list walks DocGen's project references transitively — DocGen's output folder also holds transitively referenced assemblies, so a context arriving through one of them would be documented; only the closure matches what the tool really sees.
 - 2026-09-26 — a `System` folder (routes only) is not a module folder — the comparison counts a folder as a module only when it holds `schema.dbml` or `data-dictionary.md`.
 - 2026-09-26 — the derived list resolves each referenced project against `SolutionAssemblies.All`, and an unresolved one throws `InvalidOperationException` naming the project and the tests `.csproj` — skipping it would put the tests back to being blind, quietly (BR3).
 - 2026-09-26 — no independent review (`/agile:review`): the change is test-only, about 280 lines, and touches no authentication, data, contract or money — outside the `change-review` list.
+- 2026-09-26 — the same drift one level up (`SolutionAssemblies.All`, a hand list pinned by a second hand list) was captured as `docs/features/F-46-derive-solution-assembly-list.md` (AB#770) and left out of this item — it reaches every architecture rule, not only DocGen.
 - 2026-09-26 — the comparison logic is a pure function over (documented modules, loaded modules) and over (referenced projects, resolvable assemblies), so AC3 and AC4 are tested without touching the repository or breaking the build.
 
 ## Out of scope
@@ -98,4 +99,7 @@ No screen, no app host: the item lives in the architecture tests. Two commands, 
 5. Read `tests/Simulab.ArchitectureTests/DocGen/EntityModelsTests.cs` → `RealModels()` names no assembly by hand any more.
 
 ## Delivery
-- Branch: feature/F-45
+- Branch: `feature/F-45` (worktree `D:\dev\_icontrol\wt\simulab\feature-45`, removed at the merge)
+- Merge: see the `--no-ff` merge of `feature/F-45` on `main` (AB#768)
+- Tests: full suite green — 1331 tests, 0 failed, build 20 s, tests 68 s (`agile gate GREEN`, 0 warnings, baseline still 0 entries). The architecture project: 129 passed, of which 14 are new.
+- Manual pages: none. Nothing a student or an administrator sees changed; the item lives in the architecture tests. `docs/infra.md` carries the new guard under "Technical docs" and the measured times.
