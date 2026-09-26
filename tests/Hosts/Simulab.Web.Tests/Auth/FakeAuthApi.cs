@@ -67,6 +67,12 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-20: the form bodies the <c>google</c> grant received, in order.</summary>
     public List<string> GoogleForms { get; } = [];
 
+    /// <summary>F-29: the ID tokens <c>POST google-links</c> received, in order. Empty means the Api was never asked.</summary>
+    public List<string?> LinkCalls { get; } = [];
+
+    /// <summary>F-29: the problem body <c>POST google-links</c> answers with; null links successfully.</summary>
+    public object? LinkError { get; set; }
+
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -149,6 +155,15 @@ public sealed class FakeAuthApi : HttpMessageHandler
             return Json(
                 new SessionInfoResponse(Guid.Empty.ToString(), "ana@example.com", $"jti-of-{token}", Permissions, SessionFullName, SessionPreferredLanguage),
                 options: AppJson.Options);
+        }
+
+        if (path == "/api/v1/identity/google-links" && request.Method == HttpMethod.Post)
+        {
+            var body = await request.Content!.ReadFromJsonAsync<GoogleLinkRequest>(AppJson.Options, cancellationToken);
+            LinkCalls.Add(body!.IdToken);
+            return LinkError is null
+                ? new HttpResponseMessage(HttpStatusCode.NoContent)
+                : Json(LinkError, HttpStatusCode.Conflict);
         }
 
         if (path == "/api/v1/identity/profile" && request.Method == HttpMethod.Get)
