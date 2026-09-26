@@ -39,6 +39,13 @@ public sealed class AppRadioCardsTests : KitTestContext
         cards.FindAll("[role=\"radio\"]").Should().HaveCount(3);
     }
 
+    /// <summary>The group is the field: the error summary's link jumps to this id, like any other field's.</summary>
+    [Fact]
+    public void Render_TheGroupCarriesTheFieldsOwnId()
+    {
+        Render().Find("[role=\"radiogroup\"]").Id.Should().Be("exam-scope");
+    }
+
     [Fact]
     public void Render_EachCardCarriesItsOwnExplanation()
     {

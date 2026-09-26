@@ -101,12 +101,14 @@
   <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Item rows</value></data>
   <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Child items of the record being edited, with their own actions. Empty state below.</value></data>
   <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>No edition yet.</value></data>
-  <data name="Common.ErrorSummary.Title" xml:space="preserve"><value>Fix these fields before saving:</value></data>
+  <data name="Common.ErrorSummary.Title" xml:space="preserve"><value>This form cannot be saved yet</value></data>
   <data name="Common.Summary.Title" xml:space="preserve"><value>Summary</value></data>
   <data name="Common.Summary.NotFilled" xml:space="preserve"><value>Not filled</value></data>
   <data name="Common.Summary.Checklist" xml:space="preserve"><value>Before saving</value></data>
   <data name="Common.Summary.Done" xml:space="preserve"><value>filled in</value></data>
   <data name="Common.Summary.Pending" xml:space="preserve"><value>still missing</value></data>
+  <data name="Common.Checklist.Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Common.Checklist.Pending" xml:space="preserve"><value>Pending</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Data source</value></data>
   <data name="Gallery.Table.Mode.Normal" xml:space="preserve"><value>60 items</value></data>
   <data name="Gallery.Table.Mode.Empty" xml:space="preserve"><value>Empty</value></data>
@@ -406,10 +408,14 @@
   <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Name or acronym</value></data>
   <data name="Exams.Field.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>2 to 200 characters</value></data>
+  <data name="Exams.Field.Name.Placeholder" xml:space="preserve"><value>E.g.: PMF 2026 Municipal Guard</value></data>
   <data name="Exams.Field.AssessmentType" xml:space="preserve"><value>Assessment type</value></data>
+  <data name="Exams.Field.AssessmentType.Placeholder" xml:space="preserve"><value>Select the assessment type</value></data>
   <data name="Exams.Field.Scope" xml:space="preserve"><value>Scope</value></data>
   <data name="Exams.Field.State" xml:space="preserve"><value>State</value></data>
+  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>E.g.: Ceará</value></data>
   <data name="Exams.Field.Municipality" xml:space="preserve"><value>Municipality</value></data>
+  <data name="Exams.Field.Municipality.Placeholder" xml:space="preserve"><value>E.g.: Fortaleza/CE</value></data>
   <data name="Exams.Field.ScopeDetail.Hint" xml:space="preserve"><value>Where this exam applies.</value></data>
   <data name="Exams.Field.ContentLanguage" xml:space="preserve"><value>Content language</value></data>
   <data name="Exams.Field.ContentLanguage.Hint" xml:space="preserve"><value>The language the exam and its questions are written in. Content is never translated.</value></data>
@@ -424,6 +430,17 @@
   <data name="Exams.Scope.National" xml:space="preserve"><value>National</value></data>
   <data name="Exams.Scope.State" xml:space="preserve"><value>State</value></data>
   <data name="Exams.Scope.Municipal" xml:space="preserve"><value>Municipal</value></data>
+  <data name="Exams.Scope.National.Description" xml:space="preserve"><value>Valid across the country.</value></data>
+  <data name="Exams.Scope.State.Description" xml:space="preserve"><value>Asks for the state.</value></data>
+  <data name="Exams.Scope.Municipal.Description" xml:space="preserve"><value>Asks for the municipality.</value></data>
+  <data name="Exams.Section.Identification" xml:space="preserve"><value>Identification</value></data>
+  <data name="Exams.Section.Identification.Subtitle" xml:space="preserve"><value>Who publishes the exam and how it is named in the catalog.</value></data>
+  <data name="Exams.Section.Classification" xml:space="preserve"><value>Classification</value></data>
+  <data name="Exams.Section.Classification.Subtitle" xml:space="preserve"><value>The kind of assessment and the language its content is written in.</value></data>
+  <data name="Exams.Section.Scope" xml:space="preserve"><value>Where the exam applies</value></data>
+  <data name="Exams.Section.Scope.Subtitle" xml:space="preserve"><value>The territory the exam covers. A state or municipal exam also names the place.</value></data>
+  <data name="Exams.Form.Aside.Title" xml:space="preserve"><value>Summary</value></data>
+  <data name="Exams.Form.Aside.Checklist" xml:space="preserve"><value>Before saving</value></data>
   <data name="Gallery.Section.Lookup" xml:space="preserve"><value>Lookup field</value></data>
   <data name="exam.not_found" xml:space="preserve"><value>This exam no longer exists.</value></data>
   <data name="exam.name_required" xml:space="preserve"><value>Enter a name with at least 2 characters.</value></data>

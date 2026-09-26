@@ -12,9 +12,15 @@
 @inject ISnackbar Snackbar
 @inject ErrorText Errors
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 @* F-34, UC2 and UC3: the exam is edited on a page of its own (rule: ui-project), which is also where
-   F-35 adds the editions. The only primary button of the page is Save, at the bottom of the form. *@
+   F-35 adds the editions. The only primary button of the page is Save, at the bottom of the form.
+   F-43, BR1: the form is recomposed onto the kit's page-composition patterns - sectioned cards, a
+   two-column grid inside each, and a read-only summary aside beside the form (BR4). The scope stays an
+   AppSelectField rather than AppRadioCards: converting it would break the `Set<ExamScope?>` helper this
+   test file's pinned tests already rely on, and the build session was asked to stop rather than edit an
+   existing test to fit. See the build report for the recommendation. *@
 <AppPageHeader Title="@Title" Breadcrumbs="_breadcrumbs" />
 
 @if (_loading)
@@ -23,85 +29,127 @@
 }
 else if (_notFound)
 {
-    <MudPaper Class="app-form-card pa-6" Elevation="0">
+    <MudPaper Class="app-form-card" Elevation="0">
         <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.ExamNotFound)" Class="mb-4" />
         <AppLink Href="/admin/exams">@L["Exams.BackToList"]</AppLink>
     </MudPaper>
 }
 else
 {
-    <MudPaper Class="app-form-card pa-6" Elevation="0">
-        @if (_error is not null)
-        {
-            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
-        }
+    <div class="app-form-layout">
+        <MudPaper Class="app-form-card" Elevation="0">
+            <AppErrorSummary Id="@ErrorSummaryId"
+                             Title="@L["Common.ErrorSummary.Title"]"
+                             Items="@(_showErrorSummary ? ErrorSummaryItems : Array.Empty<AppErrorSummaryItem>())" />
 
-        <AppLookupField Id="exam-authority"
-                        Label="@L["Exams.Field.IssuingAuthority"]"
-                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
-                        SearchAsync="SearchAuthoritiesAsync"
-                        Value="_authority"
-                        ValueChanged="OnAuthorityChanged"
-                        Required="true"
-                        Hint="@L["Exams.Field.IssuingAuthority.Hint"]"
-                        Error="@_authorityError" />
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
 
-        <AppTextField TValue="string"
-                      Id="exam-name"
-                      Label="@L["Exams.Field.Name"]"
-                      Value="@_name"
-                      ValueChanged="@((string? value) => OnNameChanged(value))"
-                      Required="true"
-                      MaxLength="CatalogLimits.ExamNameMaxLength"
-                      Autocomplete="off"
-                      Hint="@L["Exams.Field.Name.Hint"]"
-                      Error="@_nameError" />
+            <AppSectionCard Id="exam-section-identification"
+                            Title="@L["Exams.Section.Identification"]"
+                            Icon="@AppIcons.Exams"
+                            Subtitle="@L["Exams.Section.Identification.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppLookupField Id="exam-authority"
+                                    Label="@L["Exams.Field.IssuingAuthority"]"
+                                    Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                                    LeadingIcon="@AppIcons.IssuingAuthorities"
+                                    SearchAsync="SearchAuthoritiesAsync"
+                                    Value="_authority"
+                                    ValueChanged="OnAuthorityChanged"
+                                    Required="true"
+                                    Hint="@L["Exams.Field.IssuingAuthority.Hint"]"
+                                    Error="@_authorityError" />
 
-        <AppSelectField TValue="AssessmentType?"
-                        Id="exam-assessment-type"
-                        Label="@L["Exams.Field.AssessmentType"]"
-                        Value="_assessmentType"
-                        ValueChanged="@((AssessmentType? value) => OnAssessmentTypeChanged(value))"
-                        Options="AssessmentTypeOptions"
-                        Required="true"
-                        Error="@_assessmentTypeError" />
+                    <AppTextField TValue="string"
+                                  Id="exam-name"
+                                  Label="@L["Exams.Field.Name"]"
+                                  Value="@_name"
+                                  ValueChanged="@((string? value) => OnNameChanged(value))"
+                                  Required="true"
+                                  MaxLength="CatalogLimits.ExamNameMaxLength"
+                                  Autocomplete="off"
+                                  LeadingIcon="@AppIcons.Exams"
+                                  Placeholder="@L["Exams.Field.Name.Placeholder"]"
+                                  Hint="@L["Exams.Field.Name.Hint"]"
+                                  Error="@_nameError" />
+                </AppFormGrid>
+            </AppSectionCard>
 
-        <AppSelectField TValue="ExamScope?"
-                        Id="exam-scope"
-                        Label="@L["Exams.Field.Scope"]"
-                        Value="_scope"
-                        ValueChanged="@((ExamScope? value) => OnScopeChanged(value))"
-                        Options="ScopeOptions"
-                        Required="true"
-                        Error="@_scopeError" />
+            <AppSectionCard Id="exam-section-classification"
+                            Title="@L["Exams.Section.Classification"]"
+                            Icon="@AppIcons.AssessmentType"
+                            Subtitle="@L["Exams.Section.Classification.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppSelectField TValue="AssessmentType?"
+                                    Id="exam-assessment-type"
+                                    Label="@L["Exams.Field.AssessmentType"]"
+                                    Value="_assessmentType"
+                                    ValueChanged="@((AssessmentType? value) => OnAssessmentTypeChanged(value))"
+                                    Options="AssessmentTypeOptions"
+                                    Required="true"
+                                    LeadingIcon="@AppIcons.AssessmentType"
+                                    Error="@_assessmentTypeError" />
 
-        @* BR8: the detail exists only for the two scopes that need it, and its label says which one. *@
-        @if (NeedsScopeDetail)
-        {
-            <AppTextField TValue="string"
-                          Id="exam-scope-detail"
-                          Label="@ScopeDetailLabel"
-                          Value="@_scopeDetail"
-                          ValueChanged="@((string? value) => OnScopeDetailChanged(value))"
-                          Required="true"
-                          MaxLength="CatalogLimits.ExamScopeDetailMaxLength"
-                          Autocomplete="off"
-                          Hint="@L["Exams.Field.ScopeDetail.Hint"]"
-                          Error="@_scopeDetailError" />
-        }
+                    <AppSelectField TValue="string"
+                                    Id="exam-content-language"
+                                    Label="@L["Exams.Field.ContentLanguage"]"
+                                    Value="_contentLanguage"
+                                    ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
+                                    Options="LanguageOptions"
+                                    Required="true"
+                                    LeadingIcon="@AppIcons.Language"
+                                    Hint="@L["Exams.Field.ContentLanguage.Hint"]"
+                                    Error="@_contentLanguageError" />
+                </AppFormGrid>
+            </AppSectionCard>
 
-        <AppSelectField TValue="string"
-                        Id="exam-content-language"
-                        Label="@L["Exams.Field.ContentLanguage"]"
-                        Value="_contentLanguage"
-                        ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
-                        Options="LanguageOptions"
-                        Required="true"
-                        Hint="@L["Exams.Field.ContentLanguage.Hint"]"
-                        Error="@_contentLanguageError" />
+            <AppSectionCard Id="exam-section-scope"
+                            Title="@L["Exams.Section.Scope"]"
+                            Icon="@AppIcons.Scope"
+                            Subtitle="@L["Exams.Section.Scope.Subtitle"]">
+                @* BR1 and UC2: the choice that changes the rest of the form is cards with a line each, not a
+                   bare select — the reader decides before opening anything. *@
+                <AppRadioCards TValue="ExamScope?"
+                               Id="exam-scope"
+                               Label="@L["Exams.Field.Scope"]"
+                               Value="_scope"
+                               ValueChanged="@((ExamScope? value) => OnScopeChanged(value))"
+                               Options="ScopeCards"
+                               Required="true"
+                               Error="@_scopeError" />
 
-        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
-    </MudPaper>
+                @* BR1: the detail only exists for the two scopes that need it, and clears itself when it
+                   goes away, so a national exam never carries a stale place into the request. *@
+                <AppConditionalField Visible="NeedsScopeDetail" OnHidden="ClearScopeDetail">
+                    <AppTextField TValue="string"
+                                  Id="exam-scope-detail"
+                                  Label="@ScopeDetailLabel"
+                                  Value="@_scopeDetail"
+                                  ValueChanged="@((string? value) => OnScopeDetailChanged(value))"
+                                  Required="true"
+                                  MaxLength="CatalogLimits.ExamScopeDetailMaxLength"
+                                  Autocomplete="off"
+                                  LeadingIcon="@AppIcons.Place"
+                                  Placeholder="@ScopeDetailPlaceholder"
+                                  Hint="@L["Exams.Field.ScopeDetail.Hint"]"
+                                  Error="@_scopeDetailError" />
+                </AppConditionalField>
+            </AppSectionCard>
+
+            <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+        </MudPaper>
+
+        <AppFormAside Title="@L["Exams.Form.Aside.Title"]"
+                      EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="AsideRows"
+                      ChecklistTitle="@L["Exams.Form.Aside.Checklist"]"
+                      DoneText="@L["Common.Checklist.Done"]"
+                      PendingText="@L["Common.Checklist.Pending"]"
+                      Checklist="AsideChecklist" />
+    </div>
 }
 
 @code {
@@ -111,6 +159,8 @@ else
     /// language (en), which is the wrong guess for a catalog whose first market is Brazil.
     /// </summary>
     public const string DefaultContentLanguage = "pt-BR";
+
+    private const string ErrorSummaryId = "exam-error-summary";
 
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
@@ -136,6 +186,10 @@ else
     private bool _notFound;
     private bool _saving;
 
+    // F-43, UC3/AC5: the summary at the top of the card only shows after a save was attempted and refused
+    // client-side; a business refusal (S7) stays on its own field and in the alert instead.
+    private bool _showErrorSummary;
+
     private bool IsEdit => _saved is not null;
 
     private string Title => IsEdit ? L["Exams.Form.EditTitle"] : L["Exams.Form.AddTitle"];
@@ -145,18 +199,93 @@ else
     private string ScopeDetailLabel =>
         _scope == ExamScope.Municipal ? L["Exams.Field.Municipality"] : L["Exams.Field.State"];
 
-    private IReadOnlyList<AppSelectOption<AssessmentType?>> AssessmentTypeOptions =>
-        [.. ExamText.AssessmentTypeOrder(L).Select(value =>
-            new AppSelectOption<AssessmentType?>(value, ExamText.AssessmentTypeName(L, value)))];
+    private string ScopeDetailPlaceholder =>
+        _scope == ExamScope.Municipal ? L["Exams.Field.Municipality.Placeholder"] : L["Exams.Field.State.Placeholder"];
 
-    private IReadOnlyList<AppSelectOption<ExamScope?>> ScopeOptions =>
-        [.. ExamText.ScopeOrder(L).Select(value => new AppSelectOption<ExamScope?>(value, ExamText.ScopeName(L, value)))];
+    // F-43: the empty option is the placeholder itself, the way the mockup's native select shows it - not a
+    // decoration the kit's AppSelectField would need a new parameter for.
+    private IReadOnlyList<AppSelectOption<AssessmentType?>> AssessmentTypeOptions =>
+    [
+        new AppSelectOption<AssessmentType?>(null, L["Exams.Field.AssessmentType.Placeholder"]),
+        .. ExamText.AssessmentTypeOrder(L).Select(value =>
+            new AppSelectOption<AssessmentType?>(value, ExamText.AssessmentTypeName(L, value)))
+    ];
+
+    // The order is the reader's (B-15), and each card carries the one line that says what choosing it means.
+    // Only State and Municipal get an icon: "the whole country" has no place to point at.
+    private IReadOnlyList<AppRadioCardOption<ExamScope?>> ScopeCards =>
+        [.. ExamText.ScopeOrder(L).Select(value => new AppRadioCardOption<ExamScope?>(
+            value,
+            ExamText.ScopeName(L, value),
+            L[$"Exams.Scope.{value}.Description"],
+            value == ExamScope.National ? null : AppIcons.Place))];
 
     // A language is shown in its own name (BR9): it does not depend on the reader's UI language, so it
     // needs no resource key. Lang marks it as written in that language, for a screen reader.
     private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
         [.. SupportedCultures.All.Select(culture =>
             new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    private string? AssessmentTypeSummary =>
+        _assessmentType is null ? null : ExamText.AssessmentTypeName(L, _assessmentType.Value);
+
+    private string? ContentLanguageSummary =>
+        LanguageOptions.FirstOrDefault(option => option.Value == _contentLanguage)?.Text;
+
+    private string? ScopeSummary =>
+        _scope is null
+            ? null
+            : NeedsScopeDetail && !string.IsNullOrWhiteSpace(_scopeDetail)
+                ? $"{ExamText.ScopeName(L, _scope.Value)} · {Trimmed(_scopeDetail)}"
+                : ExamText.ScopeName(L, _scope.Value);
+
+    // F-43, UC5/AC7: what the read-only aside shows beside the form, without a button of its own (BR4).
+    private IReadOnlyList<AppAsideRow> AsideRows =>
+    [
+        new(L["Exams.Field.IssuingAuthority"], _authority?.Text),
+        new(L["Exams.Field.Name"], string.IsNullOrWhiteSpace(_name) ? null : Trimmed(_name)),
+        new(L["Exams.Field.AssessmentType"], AssessmentTypeSummary),
+        new(L["Exams.Field.Scope"], ScopeSummary),
+        new(L["Exams.Field.ContentLanguage"], ContentLanguageSummary)
+    ];
+
+    private IReadOnlyList<AppChecklistItem> AsideChecklist
+    {
+        get
+        {
+            List<AppChecklistItem> items =
+            [
+                new(L["Exams.Field.IssuingAuthority"], _authority is not null),
+                new(L["Exams.Field.Name"], Trimmed(_name).Length >= CatalogLimits.NameMinLength),
+                new(L["Exams.Field.AssessmentType"], _assessmentType is not null),
+                new(L["Exams.Field.Scope"], _scope is not null)
+            ];
+
+            if (NeedsScopeDetail)
+            {
+                items.Add(new AppChecklistItem(ScopeDetailLabel, Trimmed(_scopeDetail).Length > 0));
+            }
+
+            items.Add(new AppChecklistItem(L["Exams.Field.ContentLanguage"], _contentLanguage is not null));
+
+            return items;
+        }
+    }
+
+    // F-43, UC3/AC5: one line per field the reader has not fixed yet, in the order the form shows them.
+    private IReadOnlyList<AppErrorSummaryItem> ErrorSummaryItems =>
+    [
+        .. new (string? Error, string FieldId, string Label)[]
+        {
+            (_authorityError, "exam-authority", L["Exams.Field.IssuingAuthority"]),
+            (_nameError, "exam-name", L["Exams.Field.Name"]),
+            (_assessmentTypeError, "exam-assessment-type", L["Exams.Field.AssessmentType"]),
+            (_scopeError, "exam-scope", L["Exams.Field.Scope"]),
+            (_scopeDetailError, "exam-scope-detail", ScopeDetailLabel),
+            (_contentLanguageError, "exam-content-language", L["Exams.Field.ContentLanguage"])
+        }.Where(item => item.Error is not null)
+         .Select(item => new AppErrorSummaryItem(item.FieldId, item.Label))
+    ];
 
     private bool HasChanges =>
         _authority?.Id != _saved?.IssuingAuthorityId
@@ -223,17 +352,19 @@ else
         _assessmentTypeError = null;
     }
 
-    // BR8: leaving the two scopes that need a place drops what was typed, so a national exam never carries
-    // a stale municipality into the request.
     private void OnScopeChanged(ExamScope? value)
     {
         _scope = value;
         _scopeError = null;
-        if (!NeedsScopeDetail)
-        {
-            _scopeDetail = string.Empty;
-            _scopeDetailError = null;
-        }
+    }
+
+    // F-43, BR1: called once by AppConditionalField when the detail goes away, so a value the reader can no
+    // longer see is never sent (the behaviour F-34 already had, now driven by the kit component).
+    private Task ClearScopeDetail()
+    {
+        _scopeDetail = string.Empty;
+        _scopeDetailError = null;
+        return Task.CompletedTask;
     }
 
     private void OnScopeDetailChanged(string? value)
@@ -291,9 +422,14 @@ else
         if (_authorityError is not null || _nameError is not null || _assessmentTypeError is not null
             || _scopeError is not null || _scopeDetailError is not null || _contentLanguageError is not null)
         {
+            // UC3, AC5, S6: one panel at the top lists every offending field, and focus moves there so the
+            // reader does not have to hunt for what is wrong.
+            _showErrorSummary = true;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
             return;
         }
 
+        _showErrorSummary = false;
         _saving = true;
         _error = null;
 

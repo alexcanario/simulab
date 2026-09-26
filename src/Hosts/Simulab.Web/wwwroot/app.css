@@ -353,6 +353,9 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     border: 1px solid var(--mud-palette-divider);
     border-radius: var(--app-radius-md);
     padding: var(--app-space-4);
+    /* F-43, BR4: the aside stays visible while the reader scrolls a long form. */
+    position: sticky;
+    top: var(--app-space-4);
 }
 
 .app-form-aside-title {
@@ -440,6 +443,29 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     padding: var(--app-space-3);
     font-size: var(--app-font-sm);
     color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Form + read-only aside layout (F-43, BR1, BR4): the reference screen's two-column page. ---- */
+
+.app-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: var(--app-space-4);
+    align-items: start;
+}
+
+/* Below 1280px the aside stacks under the form instead of beside it: it is the only place that lists what
+   is still missing, so it is never hidden, only moved (owner, screen question 2). */
+@media (max-width: 1279.98px) {
+    .app-form-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.app-form-card {
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-5);
 }
 
 /* ---- App shell (F-2) ---- */

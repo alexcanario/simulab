@@ -20,8 +20,12 @@ window.simulabShell = {
     if (!element) {
       return;
     }
-    element.focus();
-    element.scrollIntoView({ block: "center" });
+    // A radio group is the field's id but is not focusable itself: move to the card that holds the tab stop.
+    var target = element.matches("input, select, textarea, button, a[href], [tabindex]")
+      ? element
+      : element.querySelector("[tabindex='0'], input, select, textarea, button") || element;
+    target.focus();
+    target.scrollIntoView({ block: "center" });
   },
   // F-16: saves a file the circuit streamed (DotNetStreamReference); nothing is stored on the server.
   downloadFile: async function (fileName, contentType, streamReference) {

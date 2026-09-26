@@ -10,7 +10,9 @@
             <span class="app-field-required" aria-hidden="true">*</span>
         }
     </span>
+    @* The group carries the field's id: the label points at it, and the error summary jumps to it (BR1). *@
     <div class="@($"app-radio-cards app-radio-cards-{Columns}")"
+         id="@Id"
          role="radiogroup"
          aria-labelledby="@LabelId"
          aria-describedby="@DescriptionId"
