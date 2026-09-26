@@ -81,6 +81,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A kit field component renders the id it is given on the element the label and the error summary point at; for a group (a radiogroup) the id belongs to the group, and a test pins it (F-43).
 - An assertion over a generated document pins the part it is about, not the whole line: an item that adds an annotation to every column must not break a test that is about types (F-24).
 - A guard looks for the shape of what it forbids, not for two names near each other: the arm `ErrorKind.X => StatusCodes.StatusY`, never "mentions both" — the callers using the API properly mention both (F-39).
+- The injected defect that proves a guard is verified in the file before the run: an edit that silently did not apply (a grep pattern that matched nothing) gives a green run indistinguishable from a working guard (F-45).
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 
 ## Packages
