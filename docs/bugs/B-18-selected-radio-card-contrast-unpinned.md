@@ -62,19 +62,75 @@ F-43 merge `7c771d4`):
   `ThemePaletteTests` as a non-text colour over the pages.
 
 ## Fix
-<!-- What changes. Keep it minimal. -->
-<!-- If duplicates were listed above: which are fixed here, which are deferred and why. -->
+One `Theory` in `ThemeContrastTests`, over both palettes, and nothing else. No CSS, no palette token, no
+component changes: the screen is correct today and stays byte for byte as it is.
+
+- BR1 The description of a selected radio card reads at AA (4.5:1, ADR-0001 #29) over the background that card
+  paints, in the light and in the dark palette.
+- BR2 Both colours are read from `app.css` through `AppCssColours` — `color` from `.app-radio-card-description`
+  and `background-color` from `.app-radio-card-selected` — and resolved against the palette. Neither is repeated
+  by hand, so what fails is the colour the CSS chose (`project.md`, UI tests, from B-16 and B-17).
+- BR3 The threshold is the shared `MinimumForText`, never a number invented for this pair: the dark value stands
+  at 4.61:1 and the guard holds it at 4.5:1, so the test passes today and goes red the day a tone takes it under.
+- BR4 The unselected card keeps no guard of its own: its description sits on `Surface` and `Background`, which
+  `FieldHint_ReadsAtAaOnItsSurfaces` already measures for the same token.
 
 ## Regression test
-<!-- The test that fails before the fix and passes after it. One per occurrence fixed. -->
-- <Test name> — <project>
+- `ThemeContrastTests.SelectedRadioCardDescription_ReadsAtAaOnItsOwnBackground` — `tests/Hosts/Simulab.Web.Tests`
+  (a `Theory` over `BothPalettes`, one case per palette).
+- Seen failing before it ships (`project.md`, UI tests, F-22): the injected mistake is a tone change to
+  `PrimaryLighten` or `TextSecondary` in `SimulabTheme` that takes the dark pair under 4.5:1. The injected diff is
+  shown before the run, so a green run cannot be an edit that never applied (`project.md`, from F-45).
+
+## Acceptance criteria
+- AC1 Given today's palette, when the guard runs, then the selected card's description measures at least 4.5:1 in
+  both palettes (6.19:1 light, 4.61:1 dark) and the test passes.
+- AC2 Given a `TextSecondary` or `PrimaryLighten` tone that takes the dark pair under 4.5:1, when the suite runs,
+  then this test fails and names the palette and the measured ratio.
+- AC3 Given the pair, when the test reads it, then both colours come from `app.css` through `AppCssColours`: a
+  rename of either class, or a `color` dropped from the description rule, fails the test instead of silently
+  measuring nothing.
+- AC4 No new UI text and no rendered output changes: the localization criterion does not apply, and `app.css`,
+  `SimulabTheme` and every component are untouched by this item.
+
+## Decisions
+- 2026-09-26 — the guard covers only the declared pair (owner) — it is the only pair at risk (4.61:1 dark) and the
+  rule from B-16/B-17 asks for the pair the stylesheet declares; the title declares no colour and sits above 12:1.
+- 2026-09-26 — the threshold stays the shared 4.5:1 and no palette tone changes (owner) — nothing is wrong on
+  screen, and `text-secondary` is used across the whole app, so widening its margin in a low-severity bug would
+  reopen every pair `ThemePaletteTests` holds.
+- 2026-09-26 — the injected mistake for the "seen failing" step is dark `TextSecondary` `#758AAB` — measured at
+  4.36:1 on `primary-lighten` while the field hint keeps 4.62:1 on the card and 5.07:1 on the page, so exactly
+  this test goes red and no other. `#6E819F` was rejected for taking the field hint down with it (4.10:1).
+- 2026-09-26 — the light ratio recorded when the bug was captured (6.33:1) does not reproduce; the committed
+  tokens give 6.19:1 — recorded in `## Cause` and the conclusion is unchanged.
+- 2026-09-26 — no new package.
+
+## Out of scope
+- Any change to `app.css`, to a palette token or to `AppRadioCards`.
+- Declaring the title's inherited colour so it too could be read from the stylesheet (13.77:1 light, 12.43:1 dark
+  — no risk).
+- A sweep test that would refuse any future `.app-*` rule painting text on `primary-lighten` without a measured
+  pair.
 
 ## Open questions
 - (none)
 
 ## Validation script
-1. <Step> → <expected result>
+No screen change to look at: the item is one test. Both commands are run by Claude in both shells at the end of
+the build, before this script is handed over.
+
+1. In the worktree `D:\dev\_icontrol\wt\simulab\bug-18`, run the theme tests.
+   Git Bash: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --nologo -v q --filter "FullyQualifiedName~ThemeContrastTests"`
+   PowerShell 7: `dotnet test tests\Hosts\Simulab.Web.Tests\Simulab.Web.Tests.csproj --nologo -v q --filter "FullyQualifiedName~ThemeContrastTests"`
+   → `Passed!` with two more cases than before, both named `SelectedRadioCardDescription_ReadsAtAaOnItsOwnBackground`.
+2. See it bite: in `src/Hosts/Simulab.Web/Theme/SimulabTheme.cs`, change the dark `TextSecondary` from `#7A8EB0`
+   to `#758AAB` and rerun step 1 → only the dark case of this test fails, naming the ratio (4.36:1). That tone was
+   chosen so nothing else goes red: the field hint keeps 4.62:1 on the card and 5.07:1 on the page. Then
+   `git checkout src/Hosts/Simulab.Web/Theme/SimulabTheme.cs`, confirm `git diff` is empty, and rerun → green again.
+3. Open `/dev/ui` in dark mode, pick a radio card, and read the line under the chosen option → unchanged from
+   today; this item paints nothing.
 
 ## Delivery
-- Branch: <bug/B-<number>>
+- Branch: `bug/B-18`
 - Merge: <commit>
