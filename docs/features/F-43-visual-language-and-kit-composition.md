@@ -1,7 +1,7 @@
 ---
 feature: F-43
 epic: Foundation and identity
-status: building
+status: validating
 board: 765
 version: 1
 ---
@@ -367,9 +367,63 @@ the checklist's done mark.
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
 
+## Coverage
+
+| Criterion | Test |
+|---|---|
+| AC1 the gallery shows a section per pattern, with its states | `UiGalleryTests.Render_Development_ShowsHeaderAndEverySection` over `GallerySections.All` (20 ids, the nine new ones included), `.Render_Development_EveryIdOnThePageIsUnique` |
+| AC2 a page that draws a pattern by hand fails the architecture tests | `UiKitBoundaryTests.Web_OutsideKit_DoesNotDrawACompositionPatternByHand`, `.FindPatternClassesOutsideKit_APageSpellingOutAPattern_NamesTheFileAndTheClass` (the guard's own test), `.Web_OutsideKit_UsesNoRawTableOrIconConstant` (now also `<MudChip`, `<MudList`) |
+| AC3 the form is read in titled sections, short fields sharing a row, one column on a phone | `ExamFormTests.Render_TheFieldsAreGroupedInsideTitledSectionCards`, `AppSectionCardTests` (5), `AppFormGridTests` (6: the three column counts, and a count the CSS has no rule for refused) |
+| AC4 the scope reveals the detail and clears it on the way back | `ExamFormTests.Scope_Municipal_ShowsTheMunicipalityFieldAndStateShowsTheStateOne`, `.Scope_BackToNational_DropsTheDetailAndSendsItNull` (both from F-34, now through the kit), `AppConditionalFieldTests` (5, including that a field hidden from the start clears nothing) |
+| AC5 a failed save lists every missing field at the top, and each field keeps its own message | `ExamFormTests.Save_AnIncompleteForm_ListsEveryMissingFieldAtTheTopOfTheCard`, `.Save_ThenFixOneField_RemovesItFromTheSummary`, `AppErrorSummaryTests` (5, including that the link moves focus through the shell instead of leaving the page) |
+| AC6 a state is a chip, the same on every screen | `UsersPageTests.Load_EachStatusIsTheKitChipWithTheToneOfItsMeaning`, `.Load_ShowsEmailNameStatusAndRoleChips`, `AppStatusChipTests` (4, including that every tone has a rule in `app.css` and that the dot is decorative) |
+| AC7 the aside shows what is filled and carries no button | `ExamFormTests.Render_TheAsideShowsWhatIsFilledAndCarriesNoButton`, `.Aside_ScopeMunicipal_ShowsTheScopeAndItsPlaceTogether`, `AppFormAsideTests` (4, including that each checklist item says its state in words) |
+| AC8 a length literal a scale covers fails the build | `AppCssScaleTests.AppRules_UseTheScalesInsteadOfALengthTheyCover`, `.FindLiterals_ARuleWithALiteralTheScaleCovers_NamesTheRuleAndTheValue`, `.Root_DeclaresEveryScaleStep` |
+| AC9 the field hint reads at 4.5:1 in both themes (B-16) | `ThemeContrastTests.FieldHint_ReadsAtAaOnItsSurfaces` — seen failing first at 2.65:1 light and 1.90:1 dark, then measured on screen at 6.92 and 4.89 |
+| AC10 the selected menu item reads at 4.5:1 in both themes (B-17) | `ThemeContrastTests.SelectedNavigationItem_ReadsAtAaOnItsOwnBackground` — seen failing first at 4.37:1 dark, then measured on screen at 18.51 |
+| AC11 the twelve screens render through the kit with no behaviour change | The suites that already pinned them, unchanged and green: `ExamFormTests` (17), `ExamsPageTests`, `UsersPageTests`, `RolesPageTests`, `RoleHistoryPageTests`, `AccountEventsPageTests`, `OrganizersPageTests`, `IssuingAuthoritiesPageTests`. Seven of the twelve gained no pattern, and why is in `## Decisions` |
+| AC12 the accent appears only in the four named places | **No test.** Nothing here computes a rendered colour from markup, and a sweep over class names would pass on a page that paints the accent another way. Step 5 of the validation script, and the ratios of every accent surface were measured on screen (section title 4.91 light / 6.63 dark) |
+| AC13 every new text in pt-BR, pt-PT and en | `ResourceParityTests.Every_key_exists_in_every_language` over the 41 new keys; `RoleResourcesTests.EveryPermissionSystemRoleAndErrorCode_HasAText` |
+
+Also pinned, beyond the criteria: `ThemeContrastTests.StatusChipBorder_ReadsAtTheNonTextMinimum`, added after the
+chip's outline was found at 1.42:1 on the dark card — on screen, not by a test.
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+Start the app host from this worktree, and stop any other one first (they share port 17162):
+
+```bash
+cd D:/dev/_icontrol/wt/simulab/feature-43 && dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+```powershell
+Set-Location D:/dev/_icontrol/wt/simulab/feature-43; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Both were run before this script was handed over; the Web answers at `https://localhost:7125`.
+
+1. Open `/dev/ui` and scroll to the nine new sections → each pattern is there with its states: two section cards
+   (one with a subtitle), grids of two and three columns, the scope cards (normal and refused), the conditional
+   field, the three fields with a leading icon, the five chips, the error summary, the aside and the item rows.
+2. In the radio cards section, choose **State** → the conditional field appears below, labelled State. Choose
+   **Municipal** → the label becomes Municipality. Choose **National** → the field disappears and what you typed
+   is gone. *(AC4)*
+3. Switch to dark mode, top right, and read the same sections → every text is comfortably readable, the chips
+   keep a visible outline, and the selected menu item on the left is the clearest entry, not the dimmest. Switch
+   back to light. *(AC9, AC10)*
+4. Switch the language to pt-PT and then to en → every new text changes, none stays in Portuguese by accident.
+   *(AC13)*
+5. Look for colour in the content of any screen → the accent appears only on a section card's icon and title, a
+   status chip, a field's leading icon and the focus ring. Nowhere else: no tinted card, no coloured alert
+   surface. *(AC12 — the one criterion with no test)*
+6. Sign in as an Admin, open `/admin/exams/new` → three titled sections, the issuing authority and the name
+   sharing a row, the scope as cards, and the summary column on the right with what is filled and what is
+   missing. Save with the form empty → one panel at the top lists every missing field, and each field also
+   shows its own message; click a line in the panel → focus lands on that field. *(AC3, AC5, AC7)*
+7. On the same form, reach every field with **Tab** alone, and the scope with the **arrow keys** → the group is
+   one tab stop, the arrows move between the three cards and wrap, Space or Enter chooses.
+8. Open `/admin/users` → the status is a chip: Active reads as success, Pending as waiting. Then narrow the
+   window to phone width on `/admin/exams/new` → the grid collapses to one column and the summary stacks under
+   the form instead of disappearing. *(AC6)*
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
