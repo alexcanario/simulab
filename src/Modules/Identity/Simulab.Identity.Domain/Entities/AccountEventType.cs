@@ -13,5 +13,9 @@ public enum AccountEventType
     TwoFactorEnabled,
     TwoFactorDisabled,
     RecoveryCodesRegenerated,
-    AccountErased
+    AccountErased,
+
+    // F-29: the account's owner connected or disconnected Google on the Security page.
+    GoogleLinked,
+    GoogleUnlinked
 }

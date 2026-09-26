@@ -260,8 +260,8 @@ that decision lock them out, nor let anyone else make it for them.
   down; 3 is a gap the review found — as written, an expired attempt read to the user as a security refusal.
 - **Affected:** BR2, BR14, `## Screens and API`, AC7; AC7b, AC18b and AC18c added. Every other rule and
   criterion is unchanged.
-- **Re-approved:** pending — the owner authorized corrections 2 and 4 on 2026-09-26; 1 and 3 came from the
-  architect pass afterwards and are reported with this note.
+- **Re-approved:** 2026-09-26 (owner), for BR2, BR14, AC7, AC7b, AC18b and AC18c — the only criteria this
+  note touches.
 
 
 ## Validation script
