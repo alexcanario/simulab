@@ -376,6 +376,52 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         }
     }
 
+    /// <summary>
+    /// F-29 BR1: the same marker idea as <see cref="TotpSwitchedOffCode"/> — the Google routes answer 404
+    /// while the feature is off, and the page reads that as "show nothing of it". Never shown to anyone.
+    /// </summary>
+    public const string GoogleSwitchedOffCode = "google_link.switched_off";
+
+    /// <summary>F-29 BR12: whether the caller's account has a Google link, and which address it is.</summary>
+    public async Task<ApiResult<GoogleLinkResponse>> GetGoogleLinkAsync(string accessToken, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/google-links"), accessToken);
+            request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+            AddVisitor(request);
+
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return ApiResult.Failed<GoogleLinkResponse>(GoogleSwitchedOffCode);
+            }
+
+            return response.IsSuccessStatusCode
+                ? ApiResult.Ok(await response.Content.ReadFromJsonAsync<GoogleLinkResponse>(AppJson.Options, cancellationToken))
+                : ApiResult.Failed<GoogleLinkResponse>(await ReadCodeAsync(response, cancellationToken));
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or TaskCanceledException)
+        {
+            return ApiResult.Failed<GoogleLinkResponse>(Components.Ui.ErrorText.UnexpectedCode);
+        }
+    }
+
+    /// <summary>F-29 BR2: links the caller's account to the identity of a checked Google ID token.</summary>
+    public Task<ApiResult<bool>> LinkGoogleAsync(string accessToken, string idToken, CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(
+                new HttpRequestMessage(HttpMethod.Post, $"{Base}/google-links")
+                {
+                    Content = JsonContent.Create(new GoogleLinkRequest(idToken), options: AppJson.Options)
+                },
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-29 BR8: removes the caller's link, confirmed with the current password; a lockout is 423.</summary>
+    public Task<LockableResult<bool>> RemoveGoogleLinkAsync(string accessToken, string? currentPassword, CancellationToken cancellationToken = default) =>
+        SendLockableAsync<bool>(HttpMethod.Post, $"{Base}/google-link-removals", new GoogleLinkRemovalRequest(currentPassword), accessToken, cancellationToken);
+
     /// <summary>F-11 UC1: a new secret and its QR code; two-factor stays off until confirmed.</summary>
     public Task<ApiResult<TotpEnrolmentResponse>> StartTotpEnrolmentAsync(string accessToken, CancellationToken cancellationToken = default) =>
         SendAsync<TotpEnrolmentResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Post, $"{Base}/totp/enrolments"), accessToken), cancellationToken);
