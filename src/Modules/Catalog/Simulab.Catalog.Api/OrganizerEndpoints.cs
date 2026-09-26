@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Catalog.Api;
 
@@ -51,7 +52,7 @@ public static class OrganizerEndpoints
 
         return result.IsSuccess
             ? Results.Created($"/api/v1/catalog/organizers/{result.Value.Id}", result.Value)
-            : CatalogEndpoints.Problem(result.Error!);
+            : Problem(result.Error!);
     }
 
     private static async Task<IResult> UpdateAsync(
@@ -62,13 +63,13 @@ public static class OrganizerEndpoints
     {
         var result = await handler.HandleAsync(id, request, cancellationToken);
 
-        return result.IsSuccess ? Results.Ok(result.Value) : CatalogEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
 
     private static async Task<IResult> DeleteAsync(Guid id, DeleteOrganizerHandler handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(id, cancellationToken);
 
-        return result.IsSuccess ? Results.NoContent() : CatalogEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.NoContent() : Problem(result.Error!);
     }
 }
