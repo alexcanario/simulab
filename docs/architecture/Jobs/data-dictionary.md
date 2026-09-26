@@ -19,4 +19,4 @@ Entity: `Job` — Work that must happen but must not make a request wait, such a
 | type | character varying(100) | no |  |  | max 100; Which handler runs the job. The worker matches it against the handlers registered in the host. |
 
 Indexes:
-- `ix_jobs_active_created_at` on created_at
+- `ix_jobs_active_created_at` on created_at (where status IN (0, 1))

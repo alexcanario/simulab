@@ -1,7 +1,7 @@
 ---
 feature: F-28
 epic: Foundation and identity
-status: approved
+status: validating
 board: 747
 version: 1
 ---
@@ -119,9 +119,40 @@ documents it writes under `docs/architecture/`.
 - Re-approved: <YYYY-MM-DD>
 -->
 
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `EntityModelsTests.RenderDictionary_SaysWhichRowsAPartialIndexCovers` — a case per module, `Jobs` and `Identity`, over the real models |
+| AC2 | `EntityModelsTests.RenderDictionary_AddsNothingToAnIndexWithoutAFilter` — a plain index, a tenant-unique one, and no empty `where` anywhere |
+| AC3 | `EntityModelsTests.RenderDictionary_PutsUniqueNullsAndTheFilterInOneBracket` — `(unique, NULLS NOT DISTINCT, where ...)`, brackets balanced |
+| AC4 | the same test: the filter `ParentId  Is Not NULL` comes out with its own double space and casing |
+| AC5 | `EntityModelsTests.RenderSchema_NotesTheFilterOfAPartialIndexItShows` (shown index, both single and composite) and `RenderSchema_LeavesOutAPartialIndexOverAColumnItDoesNotShow` (dropped index stays dropped) |
+| AC6 | `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`, run in both shells; the ship gate runs it again |
+| AC7 | no UI text was added; the missing-key test is untouched and green in the full suite |
+
+Seen failing first: with the renderer reverted to `main`'s version (`git stash push -- tools/Simulab.DocGen/EntityModels.cs`,
+`git diff main` on that file empty), the run gave `Failed! - Failed: 4, Passed: 68, Total: 72` — the two AC1 cases,
+AC3/AC4 and the AC5 note. The two that stayed green are the ones that assert today's behaviour (AC2 and the dropped
+index), which is what they are for. Restored, then 135 of 135 green in the whole architecture project.
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+No screen: the item changes a generator and two generated lines.
+
+1. Read the changed lines: `git diff main -- docs/architecture` in the worktree
+   `D:\dev\_icontrol\wt\simulab\feature-28` → exactly two lines change, one in `Jobs/data-dictionary.md` and one in
+   `Identity/data-dictionary.md`, both from ``- `ix_jobs_active_created_at` on created_at`` to
+   ``- `ix_jobs_active_created_at` on created_at (where status IN (0, 1))``.
+2. Run the DocGen tests.
+   Git Bash: `dotnet test tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj --nologo -v q --filter "FullyQualifiedName~DocGen"`
+   PowerShell 7: `dotnet test tests\Simulab.ArchitectureTests\Simulab.ArchitectureTests.csproj --nologo -v q --filter "FullyQualifiedName~DocGen"`
+   → `Passed! - Failed: 0, Passed: 72`. Both were run here and gave that.
+3. Confirm the documents are in step with the code: `dotnet run --project tools/Simulab.DocGen -- --check` →
+   `docs/architecture is up to date`.
+4. Check the diagram is untouched: `git diff main -- docs/architecture/Jobs/schema.dbml` → empty, because that index
+   covers `created_at`, which F-26 leaves out of the diagram. The DBML half of the change is held by a test over the
+   F-25 test model instead.
+5. See it bite, if you want: `git stash push -- tools/Simulab.DocGen/EntityModels.cs`, rerun step 2 → 4 failures
+   naming the two dictionaries and the two shared-model lines; `git stash pop` and rerun → green.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
