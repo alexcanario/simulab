@@ -23,6 +23,22 @@ public sealed class UsersPageTests : AdminPageTestContext
     private static AngleSharp.Dom.IElement RowOf(IRenderedComponent<Users> page, string email) =>
         page.FindAll("tbody tr").Single(row => row.TextContent.Contains(email, StringComparison.Ordinal));
 
+    /// <summary>
+    /// F-43 AC6: the first real use of the kit's status chip. Each state carries the tone that says what it
+    /// means, and the same state reads the same on every screen from here on.
+    /// </summary>
+    [Fact]
+    public void Load_EachStatusIsTheKitChipWithTheToneOfItsMeaning()
+    {
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(3));
+        RowOf(page, "diego.alves").QuerySelector(".app-status-chip")!.ClassList
+            .Should().Contain("app-status-chip-warning", "a pending account is waiting, not healthy");
+        RowOf(page, "ana.souza").QuerySelector(".app-status-chip")!.ClassList
+            .Should().Contain("app-status-chip-success");
+    }
+
     [Fact]
     public void Load_ShowsEmailNameStatusAndRoleChips()
     {
@@ -31,7 +47,8 @@ public sealed class UsersPageTests : AdminPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(3));
         RowOf(page, "bruno.lima").QuerySelectorAll(".app-chip").Select(chip => chip.TextContent.Trim())
             .Should().Equal("Curator", "Content reviewer");
-        RowOf(page, "diego.alves").QuerySelector(".app-status")!.TextContent.Trim().Should().Be("Pending");
+        // F-43 AC6: the status is the kit's chip now. The assertion is the same — the state is read as words.
+        RowOf(page, "diego.alves").QuerySelector(".app-status-chip")!.TextContent.Trim().Should().Be("Pending");
         RowOf(page, "diego.alves").TextContent.Should().Contain("No roles").And.Contain("—");
         RowOf(page, "ana.souza").QuerySelector("button.app-row-action")!.GetAttribute("aria-label")
             .Should().Be("Edit roles: ana.souza@exemplo.com.br");

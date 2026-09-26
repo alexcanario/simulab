@@ -13,27 +13,31 @@
                 <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
             }
 
-            <AppTextField TValue="string"
-                          Id="issuing-authority-name"
-                          Label="@L["IssuingAuthorities.Field.Name"]"
-                          Value="@_name"
-                          ValueChanged="@((string? value) => OnNameChanged(value))"
-                          Required="true"
-                          MaxLength="CatalogLimits.IssuingAuthorityNameMaxLength"
-                          Autocomplete="organization"
-                          Hint="@L["IssuingAuthorities.Field.Name.Help"]"
-                          Error="@_nameError" />
+            @* F-43 BR1: the name and its acronym are short and belong together, so they share a row. *@
+            <AppFormGrid Columns="2">
+                <AppTextField TValue="string"
+                              Id="issuing-authority-name"
+                              Label="@L["IssuingAuthorities.Field.Name"]"
+                              Value="@_name"
+                              ValueChanged="@((string? value) => OnNameChanged(value))"
+                              Required="true"
+                              MaxLength="CatalogLimits.IssuingAuthorityNameMaxLength"
+                              Autocomplete="organization"
+                              LeadingIcon="@AppIcons.IssuingAuthorities"
+                              Hint="@L["IssuingAuthorities.Field.Name.Help"]"
+                              Error="@_nameError" />
 
-            <AppTextField TValue="string"
-                          Id="issuing-authority-acronym"
-                          Label="@L["IssuingAuthorities.Field.Acronym"]"
-                          Value="@_acronym"
-                          ValueChanged="@((string? value) => OnAcronymChanged(value))"
-                          Required="true"
-                          MaxLength="CatalogLimits.IssuingAuthorityAcronymMaxLength"
-                          Autocomplete="off"
-                          Hint="@L["IssuingAuthorities.Field.Acronym.Help"]"
-                          Error="@_acronymError" />
+                <AppTextField TValue="string"
+                              Id="issuing-authority-acronym"
+                              Label="@L["IssuingAuthorities.Field.Acronym"]"
+                              Value="@_acronym"
+                              ValueChanged="@((string? value) => OnAcronymChanged(value))"
+                              Required="true"
+                              MaxLength="CatalogLimits.IssuingAuthorityAcronymMaxLength"
+                              Autocomplete="off"
+                              Hint="@L["IssuingAuthorities.Field.Acronym.Help"]"
+                              Error="@_acronymError" />
+            </AppFormGrid>
 
             <AppTextField TValue="string"
                           Id="issuing-authority-website"
