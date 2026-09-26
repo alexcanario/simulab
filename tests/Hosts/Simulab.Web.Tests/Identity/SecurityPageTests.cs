@@ -50,16 +50,18 @@ public sealed class SecurityPageTests : IdentityPageTestContext
         Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/sign-in");
     }
 
-    // AC13: the page does not exist while the feature is off.
+    // AC13, re-founded by F-29 BR14: two-factor off takes the two-factor block away, and that is all this
+    // test is about. Whether the page itself still exists now depends on the Google switch too — both off is
+    // AC19, in SecurityGooglePageTests.
     [Fact]
-    public void FeatureOff_ShowsNothingOfTheFeature()
+    public void TwoFactorOff_ShowsNothingOfTwoFactor()
     {
         Api.TotpStatus = null;
 
         var page = RenderSignedIn();
 
-        page.FindAll(".app-security-card").Should().BeEmpty();
         page.Markup.Should().NotContain("Two-factor sign-in");
+        page.FindAll("button.app-security-turn-on").Should().BeEmpty();
     }
 
     [Fact]

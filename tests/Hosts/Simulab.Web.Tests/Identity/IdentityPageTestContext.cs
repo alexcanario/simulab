@@ -119,6 +119,15 @@ public abstract class IdentityPageTestContext : KitTestContext
         /// <summary>F-11: when true, GET /totp answers 500 — a failure, not the switch.</summary>
         public bool TotpStatusFails { get; set; }
 
+        /// <summary>F-29: what GET /google-links answers. Null means 404, the answer while the feature is off.</summary>
+        public GoogleLinkResponse? GoogleLink { get; set; } = new(false, null, HasPassword: true);
+
+        /// <summary>F-29: the bodies POST /google-link-removals received, in order.</summary>
+        public List<string> GoogleRemovalBodies { get; } = [];
+
+        /// <summary>F-29: a failure the disconnect answers with. Null means it succeeds.</summary>
+        public (HttpStatusCode Status, string Code)? GoogleRemovalFailure { get; set; }
+
         /// <summary>F-11: what POST /totp/enrolments answers.</summary>
         public TotpEnrolmentResponse TotpEnrolment { get; set; } = new("JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP", "otpauth://totp/Simulab%3Aana", "data:image/png;base64,iVBORw0KGgo=");
 
@@ -249,6 +258,21 @@ public abstract class IdentityPageTestContext : KitTestContext
                 var file = new StringContent(ExportFile, System.Text.Encoding.UTF8, "application/json");
                 file.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment") { FileName = "simulab-my-data-2026-09-21.json" };
                 return new HttpResponseMessage(HttpStatusCode.OK) { Content = file };
+            }
+
+            // F-29: the Security page's Google card. Null is the feature switched off, which the Api
+            // answers as a 404 of the whole group, exactly as it does for two-factor.
+            if (path.EndsWith("/google-links", StringComparison.Ordinal) && request.Method == HttpMethod.Get)
+            {
+                return GoogleLink is null ? new HttpResponseMessage(HttpStatusCode.NotFound) : Json(GoogleLink);
+            }
+
+            if (path.EndsWith("/google-link-removals", StringComparison.Ordinal))
+            {
+                GoogleRemovalBodies.Add(await request.Content!.ReadAsStringAsync(cancellationToken));
+                return GoogleRemovalFailure is { } removalFailure
+                    ? Problem(removalFailure)
+                    : new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             // F-11.

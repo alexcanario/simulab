@@ -175,12 +175,20 @@ else
                     @(_googleLink.Email ?? I["Security.Google.ConnectedWithoutAddress"].Value)
                 </MudText>
 
-                <MudTooltip Text="@(CanDisconnect ? null : I["Security.Google.Disconnect.NeedsPassword"].Value)" Disabled="CanDisconnect">
-                    <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="!CanDisconnect || _googleBusy"
-                               OnClick="DisconnectGoogleAsync" Class="app-security-google-disconnect">
-                        @I["Security.Google.Disconnect"]
-                    </MudButton>
-                </MudTooltip>
+                @* BR9: the reason is visible text, not only a tooltip. MudTooltip renders its text into a
+                   popover that is not in the DOM until it is shown, and a disabled button never shows one,
+                   so a keyboard or screen-reader user would meet a dead button with no explanation. *@
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="!CanDisconnect || _googleBusy"
+                           OnClick="DisconnectGoogleAsync" Class="app-security-google-disconnect"
+                           aria-describedby="@(CanDisconnect ? null : "security-google-needs-password")">
+                    @I["Security.Google.Disconnect"]
+                </MudButton>
+                @if (!CanDisconnect)
+                {
+                    <MudText id="security-google-needs-password" Typo="Typo.body2" Class="mt-2 app-security-google-needs-password">
+                        @I["Security.Google.Disconnect.NeedsPassword"]
+                    </MudText>
+                }
             }
             else
             {
@@ -269,6 +277,13 @@ else
     private bool _googleOff;
     private GoogleLinkResponse? _googleLink;
     private string? _googleError;
+
+    // F-29 BR2: the callback is a full page load, so its outcome can only reach this page in the address.
+    // Without these two the Web host would produce google_link.expired and google_link.session_changed and
+    // nobody would ever see them, and a link that worked would land on a silent page.
+    [SupplyParameterFromQuery(Name = "error")] public string? LinkError { get; set; }
+
+    [SupplyParameterFromQuery(Name = "linked")] public string? LinkedOutcome { get; set; }
     private bool _googleBusy;
     private TotpEnrolmentResponse? _enrolment;
     private IReadOnlyList<string> _codes = [];
@@ -306,7 +321,22 @@ else
             return;
         }
 
+        // F-29 BR2: read the callback's outcome before the load, so the card renders with it already set.
+        _googleError = string.IsNullOrEmpty(LinkError) ? null : LinkError;
+        var linked = LinkedOutcome == "1";
+
         await LoadAsync();
+
+        if (linked)
+        {
+            Snackbar.Add(I["Security.Google.Connected"], Severity.Success);
+        }
+
+        if (_googleError is not null || linked)
+        {
+            // The outcome is read once: a refresh must not replay it, and the address must not keep it.
+            Navigation.NavigateTo(GoogleAccountEndpoints.SecurityPath, replace: true);
+        }
     }
 
     private async Task LoadAsync()
