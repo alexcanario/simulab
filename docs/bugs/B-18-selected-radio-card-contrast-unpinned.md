@@ -1,10 +1,10 @@
 ---
 bug: B-18
 feature: F-43
-status: validating
+status: done
 board: 769
 severity: low
-Autopilot: built
+Autopilot: shipping
 ---
 # The selected radio card's description is not pinned by a contrast test
 
@@ -149,5 +149,9 @@ handed over: Git Bash and PowerShell 7 each gave `Passed! - Failed: 0, Passed: 3
    today; this item paints nothing.
 
 ## Delivery
-- Branch: `bug/B-18`
-- Merge: <commit>
+- Branch: `bug/B-18` (worktree `bug-18`, removed at the merge)
+- Merge: the `--no-ff` merge of `bug/B-18` on `main` (AB#769)
+- Tests: full suite green — 1343 tests, 0 failed, build 32 s, tests 93 s, `agile gate GREEN`, 0 warnings,
+  baseline still 0 entries. `Simulab.Web.Tests`: 616, two of them this guard.
+- Manual pages: none. Nothing on screen changed — the item adds a test and paints nothing. `docs/infra.md` carries
+  the measured times.
