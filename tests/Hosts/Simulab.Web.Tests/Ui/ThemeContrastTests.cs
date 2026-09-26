@@ -184,5 +184,19 @@ public sealed class ThemeContrastTests
         Contrast(text, surface).Should().BeGreaterThanOrEqualTo(MinimumForText, $"the selected menu item must be AA readable on its own background ({what})");
     }
 
+    /// <summary>
+    /// F-43: the status chip's outline is what makes it a pill instead of loose text, so it needs the 3:1 of a
+    /// UI boundary. Found on screen: with the divider colour it read 1.42:1 on the dark card and disappeared.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BothPalettes))]
+    public void StatusChipBorder_ReadsAtTheNonTextMinimum(string what, bool light)
+    {
+        var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
+        var border = AppCssColours.Resolve(AppCssColours.Declaration(".app-status-chip", "border"), palette);
+
+        Contrast(border, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"a chip must read as a pill ({what})");
+    }
+
     private static double Contrast(string foreground, string background) => ColourContrast.Ratio(foreground, background);
 }
