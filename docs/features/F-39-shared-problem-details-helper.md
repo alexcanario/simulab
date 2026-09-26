@@ -109,12 +109,23 @@ Nothing changes on screen: the same requests get the same answers. What is worth
 3. Start the app host and sign in as an Admin, then open **Administração → Papéis**, open the same role in two tabs, delete it in one and then delete it in the other. Expected: the second tab shows the "not found" message, not a raw code — the 404 still carries its `code`.
 4. On the sign-in page, get an account locked (five wrong passwords) and try once more. Expected: the message says how many seconds to wait. That is the `423` with `retryAfterSeconds`, the answer shape this item had to preserve exactly.
 5. Switch the language to **English** and repeat step 4. Expected: the same message in English, because the page still localizes by `code`.
-6. See the guard refuse a fourth copy: paste these lines into any endpoint file of a module (and `using Simulab.SharedKernel.Results;` if it is missing), then run the test.
-   ```
-   private static int StatusFor(ErrorKind kind) => kind switch { ErrorKind.NotFound => StatusCodes.Status404NotFound, _ => StatusCodes.Status400BadRequest };
-   ```
-   - Both shells: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~ProblemDetailsBoundaryTests"`
-   - Expected: `OnlyTheBuildingBlock_CarriesTheMapping` fails and names the file you pasted it into. Remove the lines afterwards.
+6. See the guard refuse a fourth copy. **Stop the app host first** (step 8), and close the solution in the IDE if it has it open: a running `Simulab.Api` locks `bin/` and the build fails with `MSB3027 ... file is locked by: "Simulab.Api"` before any test runs.
+   1. Open `src/Modules/Catalog/Simulab.Catalog.Api/OrganizerEndpoints.cs`.
+   2. Add this line to the block of `using` at the top (the file does not have it, because after this item it no longer needs `ErrorKind`):
+      ```
+      using Simulab.SharedKernel.Results;
+      ```
+   3. Paste these five lines immediately **before the last `}` of the file** — that closing brace ends the class, and the method has to be inside it:
+      ```
+      private static int StatusFor(ErrorKind kind) => kind switch
+      {
+          ErrorKind.NotFound => StatusCodes.Status404NotFound,
+          _ => StatusCodes.Status400BadRequest
+      };
+      ```
+   4. Run, in either shell: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~ProblemDetailsBoundaryTests"`
+   5. Expected: `Failed: 2, Passed: 2`. `OnlyTheBuildingBlock_CarriesTheMapping` fails with `Found in: Modules/Catalog/Simulab.Catalog.Api/OrganizerEndpoints.cs`, and `TheDeletedCopies_AreGone` fails too. Two failures is the right answer: one test sees the table, the other sees the method name come back.
+   6. Undo it with git, not by hand: `git checkout -- src/Modules/Catalog/Simulab.Catalog.Api/OrganizerEndpoints.cs`, then `git status --short` and expect no line for that file.
 7. Reach step 4's sign-in with the keyboard only: Tab into the address, type, Tab to the password, type, Tab to the button, Enter. Expected: the same locked message.
 8. Stop the app host.
 
