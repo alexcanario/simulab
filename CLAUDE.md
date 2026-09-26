@@ -7,7 +7,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
 - Ask before: pushing or merging to `main`, touching shared databases, deleting data, anything outside this repository.
-- Worktrees: `D:\dev\_icontrol\wt\simulab` — one folder per item (`<type>-<n>`), created by `/agile:refine`.
+- Worktrees: `D:\dev\_icontrol\wt\simulab` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
 - Simulae (`D:\dev\_icontrol\simulae`) is a read-only source. Never edit it.
 
 ## Architecture

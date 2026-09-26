@@ -85,6 +85,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The injected defect is chosen so that only the new guard goes red: a tone that also breaks a neighbouring pair proves the suite reacts, not that this test is about this pair (B-18).
 - A contrast ratio written into an item is re-measured from the committed tokens at refinement: the number captured with the bug is a note, not evidence (B-18).
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
+- A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
+- A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
@@ -97,11 +99,12 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
+- A command that writes to the main checkout (`/agile:sync`, `/agile:retro`, a merge) starts by proving no other session is writing there: `git status` twice, a few seconds apart, and `git log -1`. A working tree that changes between the two reads, or a commit that appeared without this session making it, stops the command and goes to the owner (sync 0.0.63).
 - A retro changes rules, docs and settings only. A lesson that needs code or tests becomes an item (feature or bug) and goes through build.
 - Run the gate with its whole output saved to a file (scratchpad) and quote from that file; never pipe it through a filter that can drop the failure (B-7).
 - A new item found during another item's work is captured with `/agile:idea` from the template, never written by hand (B-7).
 - After filling an item file from the template, check `grep "^## "` on it: a replacement over a range leaves the template's later sections behind, duplicated and empty (F-27).
 - Never change state (sign-ups, requests that count, data) in an app host Claude did not start; ask first, or use data no one else uses and say which (B-4).
 - Before `git worktree remove`: `dotnet build-server shutdown`, and the owner confirms Visual Studio is closed on that folder (open `.vs` files fail the removal halfway, F-17 and F-19).
-- Every item lives in its own worktree (`wt/simulab/<type>-<n>`); the main checkout stays on `main` and is used only to merge (B-13, B-14).
+- Every item lives in its own worktree (`wt/simulab/f-<n>-<desc>`, `wt/simulab/b-<n>-<desc>`, `<desc>` being up to 20 characters of the slug cut at a hyphen); a worktree created before sync 0.0.63 keeps its `<type>-<n>` name until its merge. The main checkout stays on `main` and is used only to merge (B-13, B-14).
 - After stopping an app host started by hand (outside `preview_start`), confirm with `netstat -ano` that its ports are free: a `Simulab.AppHost.exe` can outlive the killed process tree and lock the build output of the ship gate (B-15).
