@@ -1,29 +1,42 @@
+﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Simulab.ArchitectureTests.DocGen.SharedTables;
 using Simulab.DocGen;
-using Simulab.Ai.Persistence;
-using Simulab.Catalog.Infrastructure.Persistence;
-using Simulab.Identity.Infrastructure.Persistence;
-using Simulab.Jobs.Persistence;
 
 namespace Simulab.ArchitectureTests.DocGen;
 
 /// <summary>F-15: entity diagrams and data dictionaries from the real EF models (AC2, AC3).</summary>
 public class EntityModelsTests
 {
+    /// <summary>
+    /// F-45: the models DocGen sees, derived from the closure of its own project references — never a list by
+    /// hand. F-24 found the hand list four weeks behind the generator (<c>AiDbContext</c> documented and loaded
+    /// by no test); <see cref="DocGenModelDriftTests"/> compares this with what the generator really wrote.
+    /// </summary>
     internal static IReadOnlyList<(string Module, IModel Model)> RealModels() =>
-    [
-        .. EntityModels.Load(
-        [
-            .. typeof(IdentityModuleDbContext).Assembly.GetTypes(),
-            .. typeof(JobsDbContext).Assembly.GetTypes(),
-            .. typeof(CatalogModuleDbContext).Assembly.GetTypes(),
-            // F-24: the Ai context was missing here although DocGen generates docs/architecture/Ai/,
-            // so ai_calls was invisible to every test built on this list.
-            .. typeof(AiDbContext).Assembly.GetTypes()
-        ])
-    ];
+        [.. EntityModels.Load([.. DocGenAssemblies().SelectMany(assembly => assembly.GetTypes())])];
+
+    /// <summary>The projects DocGen references, directly or through another project.</summary>
+    internal static IReadOnlyList<string> DocGenProjects() =>
+        DocGenProjectReferences.Closure(
+            Path.Combine(SolutionAssemblies.RepositoryRoot(), "tools", "Simulab.DocGen", "Simulab.DocGen.csproj"));
+
+    /// <summary>
+    /// The loaded assemblies of those projects. A project the tests cannot resolve stops them with the file to
+    /// edit: skipping it silently is how a documented module goes untested (BR3).
+    /// </summary>
+    internal static IReadOnlyList<Assembly> DocGenAssemblies()
+    {
+        var projects = DocGenProjects();
+        var unresolved = DocGenProjectReferences.Unresolved(projects, SolutionAssemblies.All.Select(a => a.GetName().Name!));
+        if (unresolved.Count > 0)
+        {
+            throw new InvalidOperationException(DocGenProjectReferences.UnresolvedMessage(unresolved));
+        }
+
+        return [.. SolutionAssemblies.All.Where(assembly => projects.Contains(assembly.GetName().Name!))];
+    }
 
     [Theory]
     [InlineData("IdentityModuleDbContext", "Identity")]

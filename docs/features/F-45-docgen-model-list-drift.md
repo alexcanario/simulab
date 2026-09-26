@@ -1,10 +1,10 @@
 ---
 feature: F-45
 epic: Foundation and identity
-status: refining
+status: validating
 board: 768
 version: 1
-Autopilot: refined
+Autopilot: built
 ---
 # The DocGen tests see every context DocGen documents
 
@@ -55,6 +55,8 @@ None. No route, no endpoint, no UI text: the item only touches `tests/Simulab.Ar
 - 2026-09-26 — the truth for "what DocGen documents" is the committed `docs/architecture/` folder set, not DocGen's bin folder — the bins on disk can be stale (today's `tools/Simulab.DocGen/bin` has no `Simulab.Ai.dll`), while `DocGen --check` in the gate keeps the committed docs in step with the code.
 - 2026-09-26 — the derived list walks DocGen's project references transitively — DocGen's output folder also holds transitively referenced assemblies, so a context arriving through one of them would be documented; only the closure matches what the tool really sees.
 - 2026-09-26 — a `System` folder (routes only) is not a module folder — the comparison counts a folder as a module only when it holds `schema.dbml` or `data-dictionary.md`.
+- 2026-09-26 — the derived list resolves each referenced project against `SolutionAssemblies.All`, and an unresolved one throws `InvalidOperationException` naming the project and the tests `.csproj` — skipping it would put the tests back to being blind, quietly (BR3).
+- 2026-09-26 — no independent review (`/agile:review`): the change is test-only, about 280 lines, and touches no authentication, data, contract or money — outside the `change-review` list.
 - 2026-09-26 — the comparison logic is a pure function over (documented modules, loaded modules) and over (referenced projects, resolvable assemblies), so AC3 and AC4 are tested without touching the repository or breaking the build.
 
 ## Out of scope
@@ -63,13 +65,37 @@ None. No route, no endpoint, no UI text: the item only touches `tests/Simulab.Ar
 - Adding any module or table.
 
 ## Open questions
-- Q1 The shape of the check (see the cards).
-- Q2 Whether to capture the `SolutionAssemblies.All` hand list as a separate idea.
+- (none)
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `DocGenModelDriftTests.TheDerivedList_NamesEveryModuleDocGenReferences`, `DocGenModelDriftTests.TheDerivedList_LeavesOutTheContextsDocGenNeverSees`, `EntityModelsTests.Load_NamesEveryRealModule` (and the 22 other tests that read `RealModels()`) |
+| AC2 | `DocGenModelDriftTests.TheModulesOnDisk_AreTheModulesTheTestsLoad`, `DocGenModelDriftTests.TheModulesOnDisk_AreTheFoldersWithASchemaOrADictionary` |
+| AC3 | `DocGenModelDriftTests.Drift_NamesADocumentedModuleNoTestLoads`, `DocGenModelDriftTests.Drift_NamesALoadedModuleWithNoGeneratedFolder`, `DocGenModelDriftTests.Drift_OnTheSameModules_IsEmpty` |
+| AC4 | `DocGenModelDriftTests.Unresolved_NamesTheProjectAndTheFileToEdit`, `DocGenModelDriftTests.Unresolved_OnAClosureEveryAssemblyAnswersFor_IsEmpty`, `DocGenModelDriftTests.Closure_FollowsReferencesThroughAnotherProjectWithoutRepeating` |
+| AC5 | `DocGenModelDriftTests.WithEntitiesAndTheDictionaryOff_NoModuleFolderIsExpected`, `DocGenModelDriftTests.WithEitherDocumentOn_TheModulesAreRead`, `DocGenModelDriftTests.TheCommittedOptions_KeepTheComparisonOn` |
+| AC6 | No UI text was added; the missing-key test is unchanged and green in the full suite. |
+
+The drift was seen failing against the real repository, not only through the pure function: with the
+`Simulab.Ai` reference removed from `tools/Simulab.DocGen/Simulab.DocGen.csproj`,
+`TheModulesOnDisk_AreTheModulesTheTestsLoad` failed with
+`Ai: DocGen documents docs/architecture/Ai/ and no test loads its model — ... add the project to tools/Simulab.DocGen/Simulab.DocGen.csproj`,
+while every other rule built on `RealModels()` stayed green — which is exactly how F-24's four weeks of blindness passed unnoticed. The reference was restored (`git diff tools/` is empty).
 
 ## Change notes
 
 ## Validation script
-1. (written at the end of build)
+No screen, no app host: the item lives in the architecture tests. Two commands, both already run here.
+
+1. In the item's worktree `D:\dev\_icontrol\wt\simulab\feature-45`, run the DocGen tests.
+   Git Bash: `dotnet test tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj --nologo -v q --filter "FullyQualifiedName~DocGen"`
+   PowerShell 7: `dotnet test tests\Simulab.ArchitectureTests\Simulab.ArchitectureTests.csproj --nologo -v q --filter "FullyQualifiedName~DocGen"`
+   → `Passed! - Failed: 0, Passed: 66`.
+2. Run the whole architecture project the same way without the filter → `Passed! - Failed: 0, Passed: 129`.
+3. Confirm the generator agrees with the committed documents: `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date`.
+4. Reproduce the guard if you want to see it bite: delete the `Simulab.Ai` line from `tools/Simulab.DocGen/Simulab.DocGen.csproj`, rerun step 1 → 2 failures naming `Ai` and the file to edit; restore the line with `git checkout tools/Simulab.DocGen/Simulab.DocGen.csproj` and rerun → green again.
+5. Read `tests/Simulab.ArchitectureTests/DocGen/EntityModelsTests.cs` → `RealModels()` names no assembly by hand any more.
 
 ## Delivery
 - Branch: feature/F-45
