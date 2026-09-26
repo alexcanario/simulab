@@ -77,6 +77,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Driving a Blazor Server dialog from the browser pane: do the whole flow (open, fill, confirm) in one call - the pane recreates the circuit between calls and the dialog is gone (F-10).
 - A kit CSS rule that overrides a MudBlazor class carries that class too (`.mud-tooltip-root.app-nav-tooltip`): MudBlazor's one-class rules load later and win; pin it with a test that reads `app.css` (F-14).
 - An accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file; the library does not grant it — `MudAutocomplete` renders a plain text input (F-34).
+- A contrast pair is read from the stylesheet and resolved against the palette (`AppCssColours`), never repeated by hand in the test: what fails is the colour the CSS chose, not the one the theme declares (B-16, B-17).
+- A kit field component renders the id it is given on the element the label and the error summary point at; for a group (a radiogroup) the id belongs to the group, and a test pins it (F-43).
 - An assertion over a generated document pins the part it is about, not the whole line: an item that adds an annotation to every column must not break a test that is about types (F-24).
 - A guard looks for the shape of what it forbids, not for two names near each other: the arm `ErrorKind.X => StatusCodes.StatusY`, never "mentions both" — the callers using the API properly mention both (F-39).
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
