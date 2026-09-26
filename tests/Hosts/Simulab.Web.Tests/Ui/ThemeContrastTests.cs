@@ -198,5 +198,29 @@ public sealed class ThemeContrastTests
         Contrast(border, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(MinimumForNonText, $"a chip must read as a pill ({what})");
     }
 
+    /// <summary>
+    /// B-18: a selected radio card paints its own background (<c>primary-lighten</c>) and the description keeps the
+    /// secondary text colour, a pair the F-43 sweep found held by no test. Nothing was wrong on screen — 6.19:1 light
+    /// and 4.61:1 dark, the dark one 0.11 above the minimum — so what this pins is the margin: a tone change to
+    /// either token now fails the build instead of reaching the screen, which is how B-16 and B-17 got through.
+    /// Both colours are read from the stylesheet, never repeated here.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BothPalettes))]
+    public void SelectedRadioCardDescription_ReadsAtAaOnItsOwnBackground(string what, bool light)
+    {
+        var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
+        var surface = AppCssColours.Resolve(
+            AppCssColours.Declaration(".app-radio-card-selected", "background-color"),
+            palette);
+        var description = AppCssColours.Resolve(
+            AppCssColours.Declaration(".app-radio-card-description", "color"),
+            palette);
+
+        Contrast(description, surface).Should().BeGreaterThanOrEqualTo(
+            MinimumForText,
+            $"the description of a selected radio card must be AA readable on the background that card paints ({what})");
+    }
+
     private static double Contrast(string foreground, string background) => ColourContrast.Ratio(foreground, background);
 }
