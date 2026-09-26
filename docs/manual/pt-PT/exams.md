@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: pt-PT
-features: [F-34]
-updated: 2026-09-25
+features: [F-34, F-43]
+updated: 2026-09-26
 ---
 # Exames
 
@@ -30,12 +30,17 @@ ecrã Exames. Para as restantes, a página não é encontrada.
 2. Em **Entidade contratante**, escreva duas letras do nome ou da sigla e escolha na lista. Se a entidade ainda
    não existe, registe-a antes em [Entidades contratantes](issuing-authorities.md).
 3. Escreva o **nome** do exame, tal como aparece no aviso.
-4. Escolha o **tipo de avaliação** e a **abrangência**.
+4. Escolha o **tipo de avaliação**. Escolha a **abrangência** entre os três cartões — cada um explica numa
+   linha o que significa.
 5. Se a abrangência for Estadual ou Municipal, aparece mais um campo para dizer **onde** o exame se aplica.
    Voltar a abrangência para Nacional esconde o campo e descarta o que escreveu.
 6. Escolha o **idioma do conteúdo**. Começa em Português (Brasil). É o idioma em que o exame e as suas questões
    estão escritos; o conteúdo nunca é traduzido.
 7. Escolha **Guardar**. Fica na página, agora a editar o exame que acabou de criar.
+
+O formulário é lido em três blocos com título — identificação, classificação e onde o exame se aplica — e a
+coluna da direita mostra o que já está preenchido e o que ainda falta. Se guardar com algo em falta, um aviso no
+topo do cartão lista todos os campos em falta; clicar num deles leva-o diretamente ao campo.
 
 ### Alterar um exame
 1. Escolha **Editar** na linha dele.

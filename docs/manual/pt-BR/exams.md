@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: pt-BR
-features: [F-34]
-updated: 2026-09-25
+features: [F-34, F-43]
+updated: 2026-09-26
 ---
 # Exames
 
@@ -28,12 +28,17 @@ a tela Exames. Para as demais, a página não é encontrada.
 2. Em **Órgão contratante**, digite duas letras do nome ou da sigla e escolha na lista. Se o órgão ainda não
    existe, cadastre-o antes em [Órgãos contratantes](issuing-authorities.md).
 3. Digite o **nome** do exame, como ele aparece no edital.
-4. Escolha o **tipo de avaliação** e a **abrangência**.
+4. Escolha o **tipo de avaliação**. Escolha a **abrangência** entre os três cartões — cada um explica numa
+   linha o que significa.
 5. Se a abrangência for Estadual ou Municipal, aparece um campo a mais para dizer **onde** o exame se aplica.
    Voltar a abrangência para Nacional esconde o campo e descarta o que você digitou.
 6. Escolha o **idioma do conteúdo**. Ele começa em Português (Brasil). Esse é o idioma em que o exame e suas
    questões estão escritos; o conteúdo nunca é traduzido.
 7. Escolha **Salvar**. Você continua na página, agora editando o exame que acabou de criar.
+
+O formulário é lido em três blocos com título — identificação, classificação e onde o exame se aplica — e a
+coluna da direita mostra o que já está preenchido e o que ainda falta. Se salvar com algo em falta, um aviso no
+topo do cartão lista todos os campos que faltam; clicar num deles leva você direto ao campo.
 
 ### Alterar um exame
 1. Escolha **Editar** na linha dele.
