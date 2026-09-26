@@ -3,7 +3,7 @@ feature: F-29
 epic: Foundation and identity
 status: building
 board: 748
-version: 1
+version: 2
 Autopilot: built
 ---
 # Link and unlink Google on the account page
@@ -73,12 +73,22 @@ that decision lock them out, nor let anyone else make it for them.
 - BR1 The section appears on `/account/security` only while `Identity:GoogleSignInEnabled` is on. Off, the
   section is absent and every new endpoint answers 404.
 - BR2 **The link is an intent, carried and proved, never inferred.** `/account/google/start` takes an explicit
-  `intent=link`, requires an authenticated caller and antiforgery, and mints a one-time ticket bound to that
-  user's id — the `GoogleSignUpTickets` pattern. `/account/google/complete` links only when it has that ticket
-  and the session that finishes the round trip is still the user the ticket names; otherwise it refuses with
-  `google_link.session_changed` and links nothing. Without the ticket the callback behaves exactly as F-20
-  does today. *Inferring the intent from "a session exists" would link the Google identity of whoever finishes
-  the round trip to whatever account is signed in on that browser.*
+  `intent=link` **on a new POST of the same path** — `/account/google/start` keeps its GET exactly as it is,
+  because the sign-in and sign-up buttons reach it that way (`AppGoogleButton.razor:29`) — requires an
+  authenticated caller and antiforgery, and mints a one-time ticket bound to that user's id, over the generic
+  `SingleUseTickets<T>`. The ticket id and a `link-intent` marker travel in the challenge's
+  `AuthenticationProperties.Items`, so they come back inside the encrypted external cookie and never appear in
+  a URL a page can read. `/account/google/complete` links only when the marker is there, the ticket is still
+  unused, and the session finishing the round trip is still the user the ticket names. (v2)
+  - No marker → the callback behaves exactly as F-20 does today, and nothing is linked.
+  - Marker, ticket gone or expired → `google_link.expired`, a calm "the attempt expired, try again", not a
+    security refusal: a Web restart empties the in-memory tickets.
+  - Marker, ticket valid, different or anonymous session → `google_link.session_changed`, nothing linked.
+  - **`google_link.session_changed` and `google_link.expired` are refusals of the Web host**, produced in
+    `CompleteAsync` and shown by the page from the query string. The Api cannot produce them: it knows nothing
+    of the ticket and would be called with the current session's own token. (v2)
+  *Inferring the intent from "a session exists" would link the Google identity of whoever finishes the round
+  trip to whatever account is signed in on that browser.*
 - BR3 The ID token is checked by the same `GoogleSignInHandler.CheckTokenAsync`: issuer, audience, signature,
   lifetime and `email_verified`.
 - BR4 **The Google address does not have to be the account's address**, and it does not have to be
@@ -108,7 +118,10 @@ that decision lock them out, nor let anyone else make it for them.
   `AccountEventTypes.All`, with their resource key in the three languages, so the pinning test stays green and
   `/admin/account-events` shows who did it and when.
 - BR14 `/account/security` exists while **either** TOTP or Google is on (supersedes F-11 BR12); each block
-  appears by its own switch. With both off, the page is still Not Found.
+  appears by its own switch. With both off, the page is still Not Found. **The "Security" link on
+  `/account` follows the same either-switch rule** (`Account.razor:145` reads the TOTP status alone today):
+  otherwise, in v1's own configuration, the page exists and nothing leads to it, which is the hole this rule
+  was written to close. (v2)
 - BR15 Every new text exists in pt-BR, pt-PT and en, the three new error codes and the two event types
   included.
 
@@ -121,18 +134,23 @@ that decision lock them out, nor let anyone else make it for them.
     with the current-password field, the shape `EraseAccountDialog` uses.
   - Linked with no password: `PasswordNotSetAlert` in the card, and the disconnect button disabled with a
     tooltip that says why.
-- `GET /api/v1/identity/google-link` — the state for the screen: `{ linked, email }`, `email` null when not
-  linked. 200 always for an authenticated caller.
+- `POST /account/google/start` (Web host) — the link intent. Form-bound `intent=link`, authenticated,
+  antiforgery. The **GET of the same path is untouched**: it is how sign-in and sign-up reach Google. (v2)
+- `GET /api/v1/identity/google-links` — the state for the screen: `{ linked, email }`, `email` null when not
+  linked or when the stored display name is still the literal provider name of the rows F-20 wrote. 200
+  always for an authenticated caller. Plural, as `api-contracts.md` requires. (v2)
 - `POST /api/v1/identity/google-links` — links the caller to the identity of the ID token in the body. 204.
   Errors: `google_sign_in.invalid_token` (400), `google_sign_in.email_not_verified` (422),
-  `google_sign_in.account_exists` (409), `google_link.already_linked` (409),
-  `google_link.session_changed` (409).
+  `google_sign_in.account_exists` (409), `google_link.already_linked` (409). **Four, not five**:
+  `google_link.session_changed` never comes from here (v2, BR2).
 - `POST /api/v1/identity/google-link-removals` — unlinks the caller, current password in the body. 204, and
   204 when there was no link. Errors: `identity.password_not_set` (422),
   `google_link.current_password_invalid` (422), `identity.account_locked` (423). A POST and not a DELETE: it
   carries a password, and the module's password-confirmed actions are all `POST /<plural noun>`.
 - All three require an authenticated caller and act only on that caller's own account; none takes a user id.
-- New error codes: `google_link.already_linked`, `google_link.session_changed`,
+- New error codes (v2 adds `google_link.expired`; all four are constants of `IdentityErrorCodes`, one place
+  per module, even the two the Web host produces): `google_link.expired`, `google_link.already_linked`,
+  `google_link.session_changed`,
   `google_link.current_password_invalid`.
 
 ## Acceptance criteria
@@ -146,8 +164,10 @@ that decision lock them out, nor let anyone else make it for them.
   `google_sign_in.account_exists` and neither account changes.
 - AC5 Given a Google address that differs from the account's, when it is linked, then it is accepted (BR4).
 - AC6 Given `email_verified` false, when a link is attempted, then `google_sign_in.email_not_verified`.
-- AC7 **Given the callback arrives with no link ticket, when it completes, then nothing is linked** — it
-  behaves as an F-20 sign-in (BR2).
+- AC7 **Given the callback arrives with no link marker, when it completes, then nothing is linked** — it
+  behaves as an F-20 sign-in (BR2). (v2: the marker, not the ticket, is what tells the two apart.)
+- AC7b **Given the callback arrives with the marker and a ticket that is gone or expired, when it completes,
+  then `google_link.expired` and nothing is linked** — a Web restart is not a security refusal. (v2)
 - AC8 **Given the callback arrives with a ticket minted for another user, when it completes, then
   `google_link.session_changed` and nothing is linked** (BR2).
 - AC9 **Given a link ticket already used once, when it is presented again, then it is refused and nothing is
@@ -171,6 +191,9 @@ that decision lock them out, nor let anyone else make it for them.
   then the section is absent and each endpoint answers 404.
 - AC18 Given TOTP off and Google on, when `/account/security` is opened, then the page loads with the Google
   card and without the two-factor block (BR14).
+- AC18b Given TOTP off and Google on, when `/account` is opened, then the "Security" link is there (BR14, v2).
+- AC18c Given Google off and TOTP on, when `/account/security` is opened, then the page loads without the
+  Google card (BR1, v2).
 - AC19 Given both switches off, when `/account/security` is opened, then it is Not Found (BR14).
 - AC20 Given an anonymous caller, when any of the three endpoints is called, then 401.
 - AC21 Given a link or an unlink succeeded, when the account events are read, then the action is there with
@@ -218,7 +241,28 @@ that decision lock them out, nor let anyone else make it for them.
 - (none)
 
 ## Change notes
-<!-- Added by /agile:change during build. Increase `version` in the header. -->
+
+### v2 — 2026-09-26
+- **What:** four corrections, all found by the two design passes before any code was written.
+  1. `/account/google/start` **keeps its GET**; the link intent is a new POST on the same path, form-bound so
+     the antiforgery middleware actually validates it. The first version said "the start becomes a POST",
+     which would have broken three shipped callers (`SignIn.razor:155`, `SignUp.razor:124`, the gallery) and
+     two shipped tests with 405.
+  2. `google_link.session_changed` is a **Web-host** refusal, not an Api error: the Api knows nothing of the
+     ticket and would be called with the current session's own token, so it physically cannot produce it. The
+     link route lists four errors, not five.
+  3. A new code `google_link.expired` separates "the attempt expired" (a Web restart empties the in-memory
+     tickets) from "the session changed", which is a security refusal. The `link-intent` marker in
+     `AuthenticationProperties.Items`, not the ticket's presence, is what tells a link from a sign-in.
+  4. BR14 also covers the "Security" link on `/account` (`Account.razor:145` reads the TOTP status alone), and
+     `GET /google-link` becomes `/google-links` — plural, as `api-contracts.md` requires.
+- **Why:** 1, 2 and 4 are false premises of the approved file, each verified in the code before being written
+  down; 3 is a gap the review found — as written, an expired attempt read to the user as a security refusal.
+- **Affected:** BR2, BR14, `## Screens and API`, AC7; AC7b, AC18b and AC18c added. Every other rule and
+  criterion is unchanged.
+- **Re-approved:** pending — the owner authorized corrections 2 and 4 on 2026-09-26; 1 and 3 came from the
+  architect pass afterwards and are reported with this note.
+
 
 ## Validation script
 <!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
