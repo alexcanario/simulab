@@ -105,6 +105,11 @@ documents it writes under `docs/architecture/`.
   test (`MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie`), so the suite is not reliably green
   under parallel load and the cause is not here. Captured as `docs/bugs/B-19-full-suite-flaky-under-parallel-load.md`
   (AB#772). The item stays at `validating` until the owner decides; nothing was merged.
+- 2026-09-26 — the owner followed the validation script and it passed: the two changed lines read as written, the
+  DocGen filter gave `Passed! - Failed: 0, Passed: 72, Total: 72, Duration: 3 s`, `DocGen --check` gave
+  `docs/architecture is up to date`, and `git diff main -- docs/architecture/Jobs/schema.dbml` was empty.
+  Gate 2 is done; the merge is **not** authorized. The owner holds it until B-19 makes the full suite reliably
+  green. The item stays at `validating` on `feature/F-28`; the worktree stays.
 
 ## Out of scope
 - Index method, sort order, included columns, or any other index fact (BR6).
