@@ -28,9 +28,10 @@ public sealed class GoogleLinkHandler(
         }
 
         var login = await FindGoogleLoginAsync(user);
+        var hasPassword = await userManager.HasPasswordAsync(user);
         return Result.Success(login is null
-            ? new GoogleLinkResponse(false)
-            : new GoogleLinkResponse(true, AddressOf(login)));
+            ? new GoogleLinkResponse(false, null, hasPassword)
+            : new GoogleLinkResponse(true, AddressOf(login), hasPassword));
     }
 
     /// <summary>

@@ -134,6 +134,16 @@
   <data name="Security.Title" xml:space="preserve"><value>Security</value></data>
   <data name="Security.LoadFailed" xml:space="preserve"><value>We could not load your security settings.</value></data>
   <data name="Security.TwoFactor.Title" xml:space="preserve"><value>Two-factor sign-in</value></data>
+  <data name="Security.Google.Title" xml:space="preserve"><value>Google</value></data>
+  <data name="Security.Google.Explanation" xml:space="preserve"><value>Connect a Google account to sign in with it, besides your password. It does not have to be the address you signed up with.</value></data>
+  <data name="Security.Google.Connect" xml:space="preserve"><value>Connect Google</value></data>
+  <data name="Security.Google.Disconnect" xml:space="preserve"><value>Disconnect Google</value></data>
+  <data name="Security.Google.Disconnect.Explanation" xml:space="preserve"><value>You will stop being able to sign in with Google. Your password still works.</value></data>
+  <data name="Security.Google.Disconnect.Password.Label" xml:space="preserve"><value>Current password</value></data>
+  <data name="Security.Google.Disconnect.NeedsPassword" xml:space="preserve"><value>Create a password first: Google is the only way into this account.</value></data>
+  <data name="Security.Google.Disconnected" xml:space="preserve"><value>Google disconnected.</value></data>
+  <data name="Security.Google.ConnectedWithoutAddress" xml:space="preserve"><value>Connected. The address was not recorded.</value></data>
+  <data name="Security.Google.Connected" xml:space="preserve"><value>Google connected.</value></data>
   <data name="Security.Off.Explanation" xml:space="preserve"><value>Two-factor sign-in asks for a code from an authenticator app on your phone after your password. Someone who learns your password still cannot sign in without your phone.</value></data>
   <data name="Security.Off.TurnOn" xml:space="preserve"><value>Turn on two-factor sign-in</value></data>
   <data name="Security.Enrol.Step.Install" xml:space="preserve"><value>Install an authenticator app on your phone, such as Google Authenticator, Microsoft Authenticator or 2FAS.</value></data>

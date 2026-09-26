@@ -299,7 +299,11 @@
   <data name="google_sign_in.invalid_token" xml:space="preserve"><value>Google's answer could not be confirmed. Try again.</value></data>
   <data name="google_sign_in.email_not_verified" xml:space="preserve"><value>Google has not verified this email address. Verify it with Google, then try again.</value></data>
   <data name="google_sign_in.sign_up_required" xml:space="preserve"><value>There is no account for this Google account yet.</value></data>
-  <data name="google_sign_in.account_exists" xml:space="preserve"><value>An account with this email address already exists. Sign in to it instead.</value></data>
+  <data name="google_sign_in.account_exists" xml:space="preserve"><value>An account with this email address already exists. Sign in with your password, then connect Google in the account settings.</value></data>
+  <data name="google_link.already_linked" xml:space="preserve"><value>This account is already connected to a different Google account. Disconnect that one first.</value></data>
+  <data name="google_link.session_changed" xml:space="preserve"><value>The account signed in here changed while you were at Google. Nothing was connected; try again.</value></data>
+  <data name="google_link.expired" xml:space="preserve"><value>The attempt took too long. Nothing was connected; try again.</value></data>
+  <data name="google_link.current_password_invalid" xml:space="preserve"><value>Wrong password.</value></data>
   <data name="google_sign_in.expired" xml:space="preserve"><value>The sign-in with Google took too long or was interrupted. Start again.</value></data>
   <data name="Nav.AccountEvents" xml:space="preserve"><value>Account events</value></data>
   <data name="AccountEvents.Title" xml:space="preserve"><value>Account events</value></data>
@@ -319,6 +323,8 @@
   <data name="AccountEvents.Event.TwoFactorDisabled" xml:space="preserve"><value>Two-factor turned off</value></data>
   <data name="AccountEvents.Event.RecoveryCodesRegenerated" xml:space="preserve"><value>Recovery codes regenerated</value></data>
   <data name="AccountEvents.Event.AccountErased" xml:space="preserve"><value>Account erased</value></data>
+  <data name="AccountEvents.Event.GoogleLinked" xml:space="preserve"><value>Google connected</value></data>
+  <data name="AccountEvents.Event.GoogleUnlinked" xml:space="preserve"><value>Google disconnected</value></data>
   <data name="AccountEvents.Method.Password" xml:space="preserve"><value>with the password</value></data>
   <data name="AccountEvents.Method.Google" xml:space="preserve"><value>with Google</value></data>
   <data name="AccountEvents.Method.TotpCode" xml:space="preserve"><value>with the app code</value></data>
