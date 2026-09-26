@@ -104,5 +104,5 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - After filling an item file from the template, check `grep "^## "` on it: a replacement over a range leaves the template's later sections behind, duplicated and empty (F-27).
 - Never change state (sign-ups, requests that count, data) in an app host Claude did not start; ask first, or use data no one else uses and say which (B-4).
 - Before `git worktree remove`: `dotnet build-server shutdown`, and the owner confirms Visual Studio is closed on that folder (open `.vs` files fail the removal halfway, F-17 and F-19).
-- Every item lives in its own worktree (`wt/simulab/<type>-<n>`); the main checkout stays on `main` and is used only to merge (B-13, B-14).
+- Every item lives in its own worktree (`wt/simulab/f-<n>-<desc>`, `wt/simulab/b-<n>-<desc>`, `<desc>` being up to 20 characters of the slug cut at a hyphen); a worktree created before sync 0.0.63 keeps its `<type>-<n>` name until its merge. The main checkout stays on `main` and is used only to merge (B-13, B-14).
 - After stopping an app host started by hand (outside `preview_start`), confirm with `netstat -ano` that its ports are free: a `Simulab.AppHost.exe` can outlive the killed process tree and lock the build output of the ship gate (B-15).
