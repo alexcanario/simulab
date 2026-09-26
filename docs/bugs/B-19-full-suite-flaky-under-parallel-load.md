@@ -1,7 +1,7 @@
 ---
 bug: B-19
 feature: F-27
-status: building
+status: validating
 board: 772
 severity: high
 ---
@@ -157,6 +157,37 @@ F-28 is sitting at `validating` because of this.
 - C2: `ExamsPageTests.Search_SendsTheTermToTheServer` is the regression test; it failed in 2 of 3 baseline runs.
 - Both: the 5 consecutive green full-suite runs of AC1, against the recorded baseline of 2 red in 3.
 
+**Seen failing first, deterministically (C1).** The race was forced instead of waited for, with a temporary
+diagnostic (`ThreadPoolDelayDiagnosticTests`, deleted before the fix commit, the way B-11 did): every pool thread
+busy for 1.5 s, released from a dedicated thread, so the work item `StartAsync` queues is not dequeued before
+`StopAsync` cancels it. Two cases, one run of
+`dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj`:
+
+```
+Simulab.Jobs.Tests.ThreadPoolDelayDiagnosticTests.Old_TheWorkerIsStoppedBeforeThePoolRunsIt [FAIL]
+  ... to have an item matching entry.Item2.Contains("switched off", OrdinalIgnoreCase).
+Failed!  - Failed: 1, Passed: 1, Skipped: 0, Total: 2, Duration: 9 s - Simulab.Jobs.Tests.dll (net10.0)
+```
+
+`Old` is today's body and went red with exactly the message the loaded machine produces; `Fixed` is the body with
+the wait and went green in the same run. That is the cause proven, not inferred.
+
+**Proof loop (AC1).** `dotnet build Simulab.slnx --no-incremental` then `dotnet test Simulab.slnx` (`--no-build`),
+5 times in a row in the worktree, at `07b00ac`:
+
+| Run | Build | Tests | Warnings |
+|---|---|---|---|
+| 1 | ok | 1343 passed, 0 failed | 0 |
+| 2 | ok | 1343 passed, 0 failed | 0 |
+| 3 | ok | 1343 passed, 0 failed | 0 |
+| 4 | ok | 1343 passed, 0 failed | 0 |
+| 5 | ok | 1343 passed, 0 failed | 0 |
+
+5 of 5 green, against the baseline of 2 red in 3 on the same machine and the same worktree.
+
+**AC5.** `Simulab.Web.Tests` in those five runs: 13 s, 12 s, 12 s, 11 s, 11 s — the baseline runs were 12 s. The
+raised timeout costs nothing on a green run, as expected of a maximum.
+
 ## Decisions
 - 2026-09-26 — C2 is fixed for the whole family with one knob (the shared bUnit default wait timeout), not per
   test (owner) — the family is every test behind a 300 ms debounce, and a per-test timeout leaves the rest at the
@@ -180,15 +211,42 @@ F-28 is sitting at `validating` because of this.
   this bug; if it appears later on its own, it becomes its own bug with a fresh repro.
 
 ## Validation script
-No screen: the item changes test code only.
+No screen: the item changes test code only. Everything below runs in the worktree
+`D:\dev\_icontrol\wt\simulab\b-19-full-suite-flaky`. Every command was run here before the script was handed over,
+in both shells, and gave the output quoted.
 
-1. Read the diff: `git diff main --stat` in `D:\dev\_icontrol\wt\simulab\b-19-full-suite-flaky` → only files under
-   `tests/` (AC6).
-2. The two regression tests, each seen red before and green after, quoted in `## Delivery` with real counts.
-3. The proof loop: 5 consecutive `dotnet test Simulab.slnx` with a clean build before each, all green, quoted with
-   counts and durations, against the recorded baseline of 2 red in 3 (AC1).
-4. `Simulab.Web.Tests` duration in those 5 runs stays in its current range (12 s in the baseline runs), so the
-   raised timeout costs nothing on a green run (AC5).
+1. The whole change is two test files and nothing else (AC6).
+   Git Bash: `cd /d/dev/_icontrol/wt/simulab/b-19-full-suite-flaky && git diff main --stat`
+   PowerShell 7: `cd D:\dev\_icontrol\wt\simulab\b-19-full-suite-flaky; git diff main --stat`
+   → three files: this bug file, `tests/BuildingBlocks/Simulab.Jobs.Tests/JobWorkerTests.cs | 9 +` and
+   `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs | 6 +`. The only code is those two test files, 15 lines
+   added and none removed; nothing under `src/`.
+   (The branch was brought up to date with `main` first. `main` had gained one commit since the branch started,
+   `32d4e0a`, the F-48 idea file — docs only, no code and no test, so the proof loop below still stands.)
+
+2. Read the two changes and see that they say why (AC2, AC4):
+   `JobWorkerTests.cs` now waits for the worker's own log line before `StopAsync`; `KitTestContext.cs` sets
+   `DefaultWaitTimeout = TimeSpan.FromSeconds(5)`. Nothing under `src/`.
+
+3. The C1 regression test, green (AC2).
+   Git Bash: `dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj --nologo`
+   PowerShell 7: `dotnet test tests\BuildingBlocks\Simulab.Jobs.Tests\Simulab.Jobs.Tests.csproj --nologo`
+   → `Passed! - Failed: 0, Passed: 25, Skipped: 0, Total: 25`.
+
+4. The C2 regression test and its family, green (AC4, AC7 — the missing-key test is in this project).
+   Git Bash: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --nologo`
+   PowerShell 7: `dotnet test tests\Hosts\Simulab.Web.Tests\Simulab.Web.Tests.csproj --nologo`
+   → `Passed! - Failed: 0, Passed: 616, Skipped: 0, Total: 616`, in about 12 s (AC5: the baseline was also 12 s).
+
+5. The thing the bug is actually about (AC1). One run is not the proof — the baseline was green 1 time in 3, so a
+   single green run proves nothing. The 5-run loop is recorded above in `## Regression test`; to repeat it:
+   Git Bash: `for i in 1 2 3 4 5; do dotnet build Simulab.slnx --no-incremental && dotnet test Simulab.slnx --nologo --no-build; done`
+   PowerShell 7: `1..5 | ForEach-Object { dotnet build Simulab.slnx --no-incremental; dotnet test Simulab.slnx --nologo --no-build }`
+   → 5 runs, each `1343 passed, 0 failed`, each build `0 Warning(s)`. Takes about 25 minutes.
+
+6. What is deliberately still open: `MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie` (C3) was
+   never reproduced and is deferred — see `## Open questions`. It did not fail in any of the 8 full-suite runs of
+   this item (3 baseline + 5 proof).
 
 ## Precedent
 B-11 (`docs/bugs/B-11-flaky-overflow-menu-test.md`, done) was the same shape: a Web test that asserted on the line
