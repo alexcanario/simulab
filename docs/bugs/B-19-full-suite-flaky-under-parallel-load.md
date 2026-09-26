@@ -1,7 +1,7 @@
 ---
 bug: B-19
 feature: F-27
-status: validating
+status: done
 board: 772
 severity: high
 ---
@@ -257,8 +257,15 @@ and a wait that is written correctly but is given a budget too small for a real 
 Whether either deserves a rule of its own is for the retro, not for this file.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: bug/B-19
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: none (no visible behavior changed)
+- Branch: `bug/B-19`, worktree `wt/simulab/b-19-full-suite-flaky`.
+- Merge: `18170d8` (`--no-ff`, AB#772).
+- Ship gate: `agile gate GREEN` — full build 43 s, 0 warnings, baseline still 0 entries; full suite
+  1343 passed, 0 failed, 126 s, inside the < 5 min budget. Architecture tests 129 of those.
+- Proof: 5 consecutive clean-build full runs green before the merge, against a baseline of 2 red in 3.
+- Code changed: two test files, 15 lines added, nothing under `src/`.
+- Manual pages: none — no visible behavior changed. `docs/infra.md` "Measured times" updated with the new numbers
+  and a line saying a red full run is now a real failure.
+- Technical docs: `DocGen --check` → `docs/architecture is up to date`. `gate.js docs` → SKIPPED, the project
+  declares no docs command.
+- Still open on purpose: C3 (`MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie`), deferred by
+  the owner on 2026-09-26; it did not fail in any of the 8 full runs this item made.
