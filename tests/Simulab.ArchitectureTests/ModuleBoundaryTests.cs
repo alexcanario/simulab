@@ -48,7 +48,10 @@ public class ModuleBoundaryTests
         // F-5, AC8: OpenIddict and the Redis client are Infrastructure/Api concerns; the session store is
         // only an interface (Simulab.Identity.Application.Sessions.IRefreshSessionStore) in Application.
         || name.StartsWith("OpenIddict", StringComparison.Ordinal)
-        || name.StartsWith("StackExchange.Redis", StringComparison.Ordinal);
+        || name.StartsWith("StackExchange.Redis", StringComparison.Ordinal)
+        // F-39: the first building block that carries ASP.NET. Without this line a Domain or an
+        // Application project could reference it and bring ASP.NET in past the rule above.
+        || name.Equals("Simulab.ApiResults", StringComparison.Ordinal);
 
     [Theory]
     [MemberData(nameof(Modules))]

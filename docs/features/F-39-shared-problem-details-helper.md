@@ -3,7 +3,7 @@ feature: F-39
 epic: Foundation and identity
 status: building
 board: 760
-version: 2
+version: 3
 ---
 # One problem-details helper for every module's API
 
@@ -56,7 +56,7 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - AC4 Given the sign-in of a locked account, when it answers through the real HTTP pipeline, then it is still `423` with `retryAfterSeconds`.
 - AC5 Given the Catalog, Identity and Ai endpoints after the move, when their existing tests run, then every one passes unchanged: no test of an endpoint's answer is edited in this item.
 - AC6 Given a file outside `Simulab.ApiResults` that carries the general mapping, when the architecture test runs, then it fails and names the file and the matched line; and the test fails too if it scanned nothing or if its own positive control stops matching.
-- AC6b Given the named exceptions (`TotpEndpoints.Failure`, `RevocationCheckMiddleware`, `PermissionForbiddenResultHandler`), when the architecture test runs, then it passes, and it fails if that list is empty or names a file that no longer exists.
+- AC6b Given the three files that decide a status for one kind on purpose (`TotpEndpoints`, `RevocationCheckMiddleware`, `PermissionForbiddenResultHandler`), when the architecture test runs, then it asserts the detector does **not** flag them, naming each with its reason; and it fails if that list is empty or names a file that no longer exists.
 - AC7 Given `docs/agile/profile.md`, when the item is done, then `Simulab.ApiResults` is in its list of building blocks.
 - AC8 No new UI text: the codes, their meanings and their resource keys are unchanged.
 
@@ -88,6 +88,12 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - What: BR6 forbids the general mapping, not every per-endpoint decision about one `ErrorKind`; the exceptions are named in the test with their reason. New AC6b. `## What already exists` corrected: five rich callers, not four, and one of them is a `429`, not a `423`.
 - Why: found by the design passes and verified in the files. `TotpEndpoints.Failure` (`:89-91`) already turns `ErrorKind.NotFound` into `401` so the TOTP endpoints do not reveal whether an account exists — a deliberate decision documented in its own summary. BR6 as written forbade it while BR2 forbade changing it, so the pair was impossible. `GoogleSignInEndpoints.cs:40` is a fifth rich caller the file had missed.
 - Affected: BR6, AC6; added AC6b; two lines of `## What already exists`. Every other rule and criterion unchanged.
+- Re-approved: 2026-09-26
+
+### v3 — 2026-09-26
+- What: AC6b becomes a negative control instead of an exemption list. The test names the three per-endpoint decisions and asserts the detector leaves them alone, rather than exempting them from it.
+- Why: with the detector keyed on the table itself (`ErrorKind.X => StatusCodes.StatusY`, `case ErrorKind.`, or a `ProblemDetails` built from an `error`), none of the three is flagged — verified by running the detector's own regexes against `TotpEndpoints.cs`. An exemption list that never fires is dead weight that tells the next reader those files carry a copy of the mapping, which they do not. The protection is the same: a laxer detector turns the control red.
+- Affected: AC6b only. BR6 and every other rule and criterion unchanged.
 - Re-approved: 2026-09-26
 
 ## Validation script

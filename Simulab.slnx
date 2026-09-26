@@ -46,6 +46,7 @@
   </Folder>
   <Folder Name="/tests/BuildingBlocks/">
     <Project Path="tests/BuildingBlocks/Simulab.Ai.Tests/Simulab.Ai.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.ApiResults.Tests/Simulab.ApiResults.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Email.Tests/Simulab.Email.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
