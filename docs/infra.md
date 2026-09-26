@@ -92,8 +92,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 43 s, 0 warnings; baseline stays empty (2026-09-26, B-19) |
-| Full test suite | < 5 min | 1343 tests, 126 s (2026-09-26, B-19) |
+| Full build | | 46 s, 0 warnings; baseline stays empty (2026-09-26, F-28) |
+| Full test suite | < 5 min | 1349 tests, 121 s (2026-09-26, F-28) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".
