@@ -1,10 +1,10 @@
 ---
 feature: F-27
 epic: Foundation and identity
-status: building
+status: validating
 board: 746
 version: 1
-Autopilot: built
+Autopilot: stop 2
 ---
 # Retention of failed jobs
 
@@ -119,9 +119,64 @@ not change either — no column, no index, no migration.
 - Re-approved: <YYYY-MM-DD>
 -->
 
+## Coverage
+
+| Criterion | Test |
+|---|---|
+| AC1 a row past the retention goes, a younger one stays | `JobCleanupTests.Run_AFailedRowPastTheRetention_IsRemovedAndAYoungerOneStays` (91 and 89 days) |
+| AC2 `Pending` and `Running` are never deleted | `JobCleanupTests.Run_PendingAndRunningRows_AreNeverTouchedHoweverOldTheyAre` (both a year old) |
+| AC3 not due inside the hour | `JobCleanupTests.RunIfDue_LessThanAnHourAfterTheLastRun_DoesNothing` (one second short) |
+| AC4 due again after the hour | `JobCleanupTests.RunIfDue_AnHourAfterTheLastRun_RunsAgain` |
+| AC5 the first poll of a process cleans | `JobCleanupTests.RunIfDue_TheFirstCall_Runs` |
+| AC6 one line with the count, silence when nothing went | `JobCleanupTests.Run_RowsRemoved_LogsOneLineWithTheCount`, `.Run_NothingToRemove_LogsNothing` |
+| AC7 a cleanup that throws is logged and the jobs still run | `JobWorkerTests.Poll_TheCleanupThrows_ItIsLoggedAndTheJobsStillRun` — the real runner and queue, with a scope factory that cannot open a scope |
+| AC8 switched off runs neither | `JobWorkerTests.Start_WorkerDisabled_RunsNeitherTheJobsNorTheCleanup` |
+| BR2 age counts from `created_at` | `JobCleanupTests.Run_AgeIsCountedFromCreatedAt` |
+| BR9 no new UI text | Nothing to check: the feature has no screen and adds no resource key. `docs/infra.md` carries the retention instead |
+
+All ten run against a real PostgreSQL container, like the rest of the queue's tests: the deletion is a statement,
+not a loop in memory.
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+This feature has no screen. There is nothing to look at, so the check is the tests and, if you want to see it
+happen for real, one row in the local database. Steps 1 and 2 were both run before this script was handed over.
+
+1. Run the cleanup's tests. Git Bash:
+
+   ```bash
+   cd D:/dev/_icontrol/wt/simulab/feature-27 && dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj --nologo --filter "FullyQualifiedName~JobCleanupTests|FullyQualifiedName~JobWorkerTests"
+   ```
+
+   PowerShell 7:
+
+   ```powershell
+   Set-Location D:/dev/_icontrol/wt/simulab/feature-27; dotnet test tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj --nologo --filter "FullyQualifiedName~JobCleanupTests|FullyQualifiedName~JobWorkerTests"
+   ```
+
+   → `Passed! - Failed: 0, Passed: 10, Skipped: 0, Total: 10`.
+
+2. Read the ten test names in that output against the table above → each criterion is named by a test that says
+   what it checks, including the two halves of AC6 and the broken cleanup of AC7.
+3. Open `src/BuildingBlocks/Simulab.Jobs/JobPolicy.cs` → `FailedRetention` is 90 days and `CleanupInterval` is
+   one hour, beside `MaxAttempts` and `StaleAfter`. Changing the retention is a code change, not a setting.
+4. Open `docs/infra.md` → the retention, where it runs and what it never deletes are written under the
+   background-work line.
+
+Optional, to watch it happen on the dev database (it changes one row of your local `jobs.jobs`):
+
+5. With the app host stopped, connect to the local jobs database and insert one expired row:
+
+   ```sql
+   insert into jobs.jobs (id, type, payload, status, attempts, created_at, run_after, last_error)
+   values (gen_random_uuid(), 'test.retention', '', 2, 5, now() - interval '91 days', now(), 'seeded by hand');
+   ```
+
+6. Start the app host and read the `Simulab.Api` log in the Aspire dashboard → within five seconds,
+   `Removed 1 failed job(s) older than 90 days.`
+7. Run `select count(*) from jobs.jobs where type = 'test.retention';` → `0`. Any other `Failed` row younger
+   than 90 days is still there.
+8. Sign up with an address you do not use elsewhere → the verification e-mail still arrives in Mailpit: the
+   cleanup did not disturb the queue it shares a poll with.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
