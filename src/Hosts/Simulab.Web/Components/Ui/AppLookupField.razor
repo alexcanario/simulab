@@ -28,7 +28,7 @@
                      ResetValueOnEmptyText="true"
                      CoerceText="true"
                      OpenChanged="OnOpenChanged"
-                     AdornmentIcon="@AppIcons.Search"
+                     AdornmentIcon="@(LeadingIcon ?? AppIcons.Search)"
                      Adornment="Adornment.Start"
                      AdornmentAriaLabel="@L["Common.Search"]"
                      UserAttributes="@Attributes">
@@ -109,6 +109,10 @@
 
     /// <summary>How many characters before the first call: fewer would ask the server on every keystroke.</summary>
     [Parameter] public int MinChars { get; set; } = 2;
+
+    /// <summary>F-43 BR1: a decorative <see cref="AppIcons"/> constant in place of the magnifier, when what the
+    /// field looks for is worth naming. It never carries meaning of its own; the label does.</summary>
+    [Parameter] public string? LeadingIcon { get; set; }
 
     private string _lastTerm = string.Empty;
     private bool _searchFailed;

@@ -23,8 +23,8 @@
                   ReadOnly="ReadOnly"
                   Error="HasError"
                   UserAttributes="@Attributes"
-                  Adornment="@(Adornment)"
-                  AdornmentIcon="@AdornmentIcon"
+                  Adornment="@(EffectiveAdornment)"
+                  AdornmentIcon="@(EffectiveAdornmentIcon)"
                   AdornmentAriaLabel="@AdornmentAriaLabel"
                   OnAdornmentClick="OnAdornmentClick" />
     <span id="@DescriptionId" class="app-field-description">
@@ -73,6 +73,10 @@
 
     [Parameter] public Adornment Adornment { get; set; } = Adornment.None;
 
+    /// <summary>F-43 BR1: a decorative <see cref="AppIcons"/> constant at the start of the field. It never carries
+    /// meaning of its own; the label does. Ignored when the page already set its own adornment.</summary>
+    [Parameter] public string? LeadingIcon { get; set; }
+
     [Parameter] public string? AdornmentIcon { get; set; }
 
     [Parameter] public string? AdornmentAriaLabel { get; set; }
@@ -80,6 +84,12 @@
     [Parameter] public EventCallback<MouseEventArgs> OnAdornmentClick { get; set; }
 
     private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private bool ShowsLeadingIcon => LeadingIcon is not null && Adornment == Adornment.None;
+
+    private Adornment EffectiveAdornment => ShowsLeadingIcon ? Adornment.Start : Adornment;
+
+    private string? EffectiveAdornmentIcon => ShowsLeadingIcon ? LeadingIcon : AdornmentIcon;
 
     private string DescriptionId => $"{Id}-description";
 

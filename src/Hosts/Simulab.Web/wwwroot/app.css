@@ -290,6 +290,158 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: none;
 }
 
+.app-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    padding: var(--app-space-1) var(--app-space-3);
+    border-radius: var(--app-radius-pill);
+    border: 1px solid var(--mud-palette-divider);
+    font-size: var(--app-font-xs);
+    white-space: nowrap;
+}
+
+/* The dot is never the only sign of the state: the text is always beside it (WCAG 2.2 1.4.1). */
+.app-status-chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mud-palette-text-secondary);
+}
+
+.app-status-chip-success .app-status-chip-dot {
+    background: var(--mud-palette-success);
+}
+
+.app-status-chip-warning .app-status-chip-dot {
+    background: var(--mud-palette-warning);
+}
+
+.app-status-chip-error .app-status-chip-dot {
+    background: var(--mud-palette-error);
+}
+
+.app-status-chip-info .app-status-chip-dot {
+    background: var(--mud-palette-info);
+}
+
+.app-error-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    padding: var(--app-space-3) var(--app-space-4);
+    margin-bottom: var(--app-space-4);
+    border: 1px solid var(--mud-palette-error);
+    border-radius: var(--app-radius-md);
+}
+
+.app-error-summary-icon {
+    color: var(--mud-palette-error);
+}
+
+.app-error-summary-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.app-error-summary-list {
+    margin: var(--app-space-2) 0 0 0;
+    padding-left: var(--app-space-4);
+}
+
+.app-form-aside {
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+    padding: var(--app-space-4);
+}
+
+.app-form-aside-title {
+    margin: 0 0 var(--app-space-3) 0;
+    font-size: var(--app-font-md);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-form-aside-rows {
+    margin: 0;
+}
+
+.app-form-aside-row + .app-form-aside-row {
+    margin-top: var(--app-space-3);
+}
+
+.app-form-aside-row-label {
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-form-aside-row-value {
+    margin: 0;
+    font-size: var(--app-font-sm);
+    overflow-wrap: anywhere;
+}
+
+.app-form-aside-row-empty {
+    color: var(--mud-palette-text-secondary);
+    font-style: italic;
+}
+
+.app-form-aside-checklist-title {
+    margin: var(--app-space-4) 0 var(--app-space-2) 0;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-form-aside-checklist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-form-aside-checklist li {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    font-size: var(--app-font-sm);
+}
+
+.app-form-aside-checklist li + li {
+    margin-top: var(--app-space-1);
+}
+
+.app-item-rows-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    padding: var(--app-space-3);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+}
+
+.app-item-row + .app-item-row {
+    margin-top: var(--app-space-2);
+}
+
+.app-item-row-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-item-rows-empty {
+    margin: 0;
+    padding: var(--app-space-3);
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
 /* ---- App shell (F-2) ---- */
 
 .app-skip-link {

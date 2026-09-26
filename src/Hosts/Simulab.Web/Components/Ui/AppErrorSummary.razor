@@ -1,0 +1,38 @@
+@* Everything a failed save refused, once, at the top of the card (F-43, BR1, UC3). It does not replace the
+   message beside each field: a reader who is not looking at the top still needs it there. *@
+
+@if (Items.Count > 0)
+{
+    <div class="app-error-summary" role="alert" tabindex="-1" id="@Id">
+        <MudIcon Icon="@AppIcons.Error" Size="Size.Small" aria-hidden="true" Class="app-error-summary-icon" />
+        <div class="app-error-summary-content">
+            <p class="app-error-summary-title">@Title</p>
+            <ul class="app-error-summary-list">
+                @foreach (var item in Items)
+                {
+                    <li><a href="@($"#{item.FieldId}")" @onclick:preventDefault @onclick="() => Focus(item)">@item.Label</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    /// <summary>The line above the list, already translated. How it is phrased belongs to the page.</summary>
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+
+    /// <summary>The refused fields, in the order they appear on the form. Empty renders nothing.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppErrorSummaryItem> Items { get; set; } = [];
+
+    /// <summary>The summary's own id, so the page can move focus here after a failed save.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// An in-page link leaves the page because of <c>&lt;base href="/"&gt;</c> (rule: ui-project), so the jump is
+    /// done here, the way the skip link does it.
+    /// </summary>
+    private async Task Focus(AppErrorSummaryItem item) =>
+        await JS.InvokeVoidAsync("simulabShell.focusElement", item.FieldId);
+}

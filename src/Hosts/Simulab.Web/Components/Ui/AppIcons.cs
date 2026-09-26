@@ -56,4 +56,16 @@ public static class AppIcons
     /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>
     public const string Ai = Icons.Material.Outlined.AutoAwesome;
     public const string Send = Icons.Material.Outlined.Send;
+
+    /// <summary>F-43: what kind of assessment an exam is.</summary>
+    public const string AssessmentType = Icons.Material.Outlined.Category;
+
+    /// <summary>F-43: how far an exam reaches.</summary>
+    public const string Scope = Icons.Material.Outlined.Public;
+
+    /// <summary>F-43: a state or a municipality — where something applies.</summary>
+    public const string Place = Icons.Material.Outlined.Place;
+
+    /// <summary>F-43: an item of a checklist that is still missing.</summary>
+    public const string Pending = Icons.Material.Outlined.RadioButtonUnchecked;
 }
