@@ -66,6 +66,47 @@
   <data name="Gallery.Section.SignIn" xml:space="preserve"><value>Outras formas de iniciar sessão</value></data>
   <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Notificação rápida (snackbar)</value></data>
   <data name="Gallery.Section.Icons" xml:space="preserve"><value>Ícones</value></data>
+  <data name="Gallery.Section.SectionCard" xml:space="preserve"><value>Cartão de secção</value></data>
+  <data name="Gallery.SectionCard.Hint" xml:space="preserve"><value>Um bloco de formulário com título. O ícone e o título são um dos quatro sítios em que a cor de acento aparece no conteúdo.</value></data>
+  <data name="Gallery.SectionCard.Title" xml:space="preserve"><value>Identificação</value></data>
+  <data name="Gallery.SectionCard.Subtitle" xml:space="preserve"><value>Como o exame se chama e quem o publica</value></data>
+  <data name="Gallery.SectionCard.Body" xml:space="preserve"><value>Os campos desta secção entram aqui.</value></data>
+  <data name="Gallery.Section.FormGrid" xml:space="preserve"><value>Grelha de formulário</value></data>
+  <data name="Gallery.FormGrid.Hint" xml:space="preserve"><value>Dois ou três campos curtos na mesma linha; uma só coluna no telemóvel.</value></data>
+  <data name="Gallery.FormGrid.Title" xml:space="preserve"><value>Classificação</value></data>
+  <data name="Gallery.FormGrid.First" xml:space="preserve"><value>Primeiro campo</value></data>
+  <data name="Gallery.FormGrid.Second" xml:space="preserve"><value>Segundo campo</value></data>
+  <data name="Gallery.FormGrid.Third" xml:space="preserve"><value>Terceiro campo</value></data>
+  <data name="Gallery.Section.RadioCards" xml:space="preserve"><value>Cartões de escolha</value></data>
+  <data name="Gallery.RadioCards.Hint" xml:space="preserve"><value>Uma escolha que muda o resto do formulário, com uma linha a explicar cada opção. Uma paragem de tabulação; as setas percorrem os cartões.</value></data>
+  <data name="Gallery.RadioCards.National" xml:space="preserve"><value>O país inteiro</value></data>
+  <data name="Gallery.RadioCards.State" xml:space="preserve"><value>Um estado</value></data>
+  <data name="Gallery.RadioCards.Municipal" xml:space="preserve"><value>Um município</value></data>
+  <data name="Gallery.Section.ConditionalField" xml:space="preserve"><value>Campo condicional</value></data>
+  <data name="Gallery.ConditionalField.Hint" xml:space="preserve"><value>Revelado pelos cartões acima. Ao ser escondido, descarta o que guardava: um valor que ninguém vê nunca é enviado.</value></data>
+  <data name="Gallery.ConditionalField.Hidden" xml:space="preserve"><value>Escolha Estadual ou Municipal acima para revelar o campo.</value></data>
+  <data name="Gallery.Section.LeadingIcons" xml:space="preserve"><value>Ícone no campo</value></data>
+  <data name="Gallery.LeadingIcons.Hint" xml:space="preserve"><value>Decorativo: quem nomeia o campo é a etiqueta. Nunca substitui um adorno que a página já definiu.</value></data>
+  <data name="Gallery.Section.StatusChips" xml:space="preserve"><value>Etiquetas de estado</value></data>
+  <data name="Gallery.StatusChips.Hint" xml:space="preserve"><value>O texto está sempre lá: o ponto sozinho nunca carrega o estado.</value></data>
+  <data name="Gallery.StatusChips.Neutral" xml:space="preserve"><value>Rascunho</value></data>
+  <data name="Gallery.StatusChips.Success" xml:space="preserve"><value>Ativo</value></data>
+  <data name="Gallery.StatusChips.Warning" xml:space="preserve"><value>Pendente</value></data>
+  <data name="Gallery.StatusChips.Error" xml:space="preserve"><value>Bloqueado</value></data>
+  <data name="Gallery.StatusChips.Info" xml:space="preserve"><value>Agendado</value></data>
+  <data name="Gallery.Section.ErrorSummary" xml:space="preserve"><value>Resumo de erros</value></data>
+  <data name="Gallery.ErrorSummary.Hint" xml:space="preserve"><value>Tudo o que uma gravação recusou, de uma vez, no topo do cartão. Cada linha leva o foco ao seu campo.</value></data>
+  <data name="Gallery.Section.FormAside" xml:space="preserve"><value>Coluna-resumo</value></data>
+  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>Só leitura: o que está preenchido e o que falta. Não tem botão.</value></data>
+  <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Linhas de item</value></data>
+  <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Itens filhos do registo em edição, com ações próprias. O estado vazio vem abaixo.</value></data>
+  <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>Ainda não há edições.</value></data>
+  <data name="Common.ErrorSummary.Title" xml:space="preserve"><value>Corrija estes campos antes de guardar:</value></data>
+  <data name="Common.Summary.Title" xml:space="preserve"><value>Resumo</value></data>
+  <data name="Common.Summary.NotFilled" xml:space="preserve"><value>Não preenchido</value></data>
+  <data name="Common.Summary.Checklist" xml:space="preserve"><value>Antes de guardar</value></data>
+  <data name="Common.Summary.Done" xml:space="preserve"><value>preenchido</value></data>
+  <data name="Common.Summary.Pending" xml:space="preserve"><value>ainda falta</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Fonte de dados</value></data>
   <data name="Gallery.Table.Mode.Normal" xml:space="preserve"><value>60 itens</value></data>
   <data name="Gallery.Table.Mode.Empty" xml:space="preserve"><value>Vazia</value></data>

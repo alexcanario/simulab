@@ -8,7 +8,72 @@ public class UiKitBoundaryTests
 {
     // B-9: a raw MudAlert renders the text variant, whose ink fails AA in the dark theme (2.70:1 on the home
     // page, 4.12:1 in the gallery). AppAlert is filled and readable in both themes.
-    private static readonly string[] ForbiddenOutsideKit = ["<MudTable", "<MudDataGrid", "<MudAlert", "Icons.Material"];
+    // F-43 BR2: the building blocks of the composition patterns. A page reaching for these is hand-rolling a
+    // pattern the kit already owns (a chip for AppStatusChip, a list for AppItemRows).
+    private static readonly string[] ForbiddenOutsideKit =
+        ["<MudTable", "<MudDataGrid", "<MudAlert", "Icons.Material", "<MudChip", "<MudList"];
+
+    /// <summary>
+    /// F-43 BR2: the CSS classes of the nine composition patterns. They are written in the kit and styled in
+    /// <c>app.css</c>; a page that spells one out is drawing the pattern by hand, which is what the rule `ui`
+    /// forbids — the look would then live in two places and drift.
+    /// </summary>
+    private static readonly string[] PatternClasses =
+    [
+        "app-section-card", "app-form-grid", "app-radio-card", "app-conditional-field",
+        "app-status-chip", "app-error-summary", "app-form-aside", "app-checklist", "app-item-row"
+    ];
+
+    internal static IReadOnlyList<string> FindPatternClassesOutsideKit(string webRoot)
+    {
+        var kit = Path.Combine(webRoot, "Components", "Ui") + Path.DirectorySeparatorChar;
+        var stylesheet = Path.Combine(webRoot, "wwwroot", "app.css");
+        var generated = new[] { $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}" };
+
+        return
+        [
+            .. Directory.EnumerateFiles(webRoot, "*.*", SearchOption.AllDirectories)
+                .Where(path => path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase)
+                    || path.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+                .Where(path => !path.StartsWith(kit, StringComparison.OrdinalIgnoreCase))
+                .Where(path => !path.Equals(stylesheet, StringComparison.OrdinalIgnoreCase))
+                .Where(path => !generated.Any(segment => path.Contains(segment, StringComparison.OrdinalIgnoreCase)))
+                .SelectMany(path => PatternClasses
+                    .Where(pattern => File.ReadAllText(path).Contains(pattern, StringComparison.Ordinal))
+                    .Select(pattern => $"{Path.GetRelativePath(webRoot, path)} spells out {pattern}"))
+        ];
+    }
+
+    [Fact]
+    public void Web_OutsideKit_DoesNotDrawACompositionPatternByHand()
+    {
+        var webRoot = Path.Combine(SolutionAssemblies.RepositoryRoot(), "src", "Hosts", "Simulab.Web");
+
+        FindPatternClassesOutsideKit(webRoot).Should()
+            .BeEmpty("pages compose with AppSectionCard, AppFormGrid, AppRadioCards and the rest, never with their classes");
+    }
+
+    [Fact]
+    public void FindPatternClassesOutsideKit_APageSpellingOutAPattern_NamesTheFileAndTheClass()
+    {
+        var root = Directory.CreateTempSubdirectory("simulab-pattern-class-");
+        try
+        {
+            var pages = root.CreateSubdirectory("Components").CreateSubdirectory("Pages");
+            var kit = Path.Combine(root.FullName, "Components", "Ui");
+            Directory.CreateDirectory(kit);
+            File.WriteAllText(Path.Combine(pages.FullName, "Bad.razor"), "<div class=\"app-section-card\">by hand</div>");
+            File.WriteAllText(Path.Combine(pages.FullName, "Good.razor"), "<AppSectionCard Id=\"a\" Title=\"A\" Icon=\"@AppIcons.Exams\" />");
+            File.WriteAllText(Path.Combine(kit, "AppSectionCard.razor"), "<section class=\"app-section-card\"></section>");
+
+            FindPatternClassesOutsideKit(root.FullName).Should().ContainSingle()
+                .Which.Should().Be(Path.Combine("Components", "Pages", "Bad.razor") + " spells out app-section-card");
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
+    }
 
     internal static IReadOnlyList<string> FindViolations(string webRoot)
     {

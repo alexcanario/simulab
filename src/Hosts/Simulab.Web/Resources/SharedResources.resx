@@ -66,6 +66,47 @@
   <data name="Gallery.Section.SignIn" xml:space="preserve"><value>Other ways to sign in</value></data>
   <data name="Gallery.Section.Feedback" xml:space="preserve"><value>Snackbar</value></data>
   <data name="Gallery.Section.Icons" xml:space="preserve"><value>Icons</value></data>
+  <data name="Gallery.Section.SectionCard" xml:space="preserve"><value>Section card</value></data>
+  <data name="Gallery.SectionCard.Hint" xml:space="preserve"><value>A titled block of a form. Its icon and title are one of the four places the accent colour appears in content.</value></data>
+  <data name="Gallery.SectionCard.Title" xml:space="preserve"><value>Identification</value></data>
+  <data name="Gallery.SectionCard.Subtitle" xml:space="preserve"><value>What the exam is called and who publishes it</value></data>
+  <data name="Gallery.SectionCard.Body" xml:space="preserve"><value>The fields of this section go here.</value></data>
+  <data name="Gallery.Section.FormGrid" xml:space="preserve"><value>Form grid</value></data>
+  <data name="Gallery.FormGrid.Hint" xml:space="preserve"><value>Two or three short fields on a row, one column on a phone.</value></data>
+  <data name="Gallery.FormGrid.Title" xml:space="preserve"><value>Classification</value></data>
+  <data name="Gallery.FormGrid.First" xml:space="preserve"><value>First field</value></data>
+  <data name="Gallery.FormGrid.Second" xml:space="preserve"><value>Second field</value></data>
+  <data name="Gallery.FormGrid.Third" xml:space="preserve"><value>Third field</value></data>
+  <data name="Gallery.Section.RadioCards" xml:space="preserve"><value>Radio cards</value></data>
+  <data name="Gallery.RadioCards.Hint" xml:space="preserve"><value>A choice that changes the rest of the form, with a line explaining each option. One tab stop; arrows move between the cards.</value></data>
+  <data name="Gallery.RadioCards.National" xml:space="preserve"><value>The whole country</value></data>
+  <data name="Gallery.RadioCards.State" xml:space="preserve"><value>One state</value></data>
+  <data name="Gallery.RadioCards.Municipal" xml:space="preserve"><value>One municipality</value></data>
+  <data name="Gallery.Section.ConditionalField" xml:space="preserve"><value>Conditional field</value></data>
+  <data name="Gallery.ConditionalField.Hint" xml:space="preserve"><value>Revealed by the cards above. Hiding it drops what it held, so a value nobody can see is never sent.</value></data>
+  <data name="Gallery.ConditionalField.Hidden" xml:space="preserve"><value>Choose State or Municipal above to reveal the field.</value></data>
+  <data name="Gallery.Section.LeadingIcons" xml:space="preserve"><value>Leading icons</value></data>
+  <data name="Gallery.LeadingIcons.Hint" xml:space="preserve"><value>Decorative: the label names the field. It never replaces an adornment the page already set.</value></data>
+  <data name="Gallery.Section.StatusChips" xml:space="preserve"><value>Status chips</value></data>
+  <data name="Gallery.StatusChips.Hint" xml:space="preserve"><value>The text is always there: the dot alone never carries the state.</value></data>
+  <data name="Gallery.StatusChips.Neutral" xml:space="preserve"><value>Draft</value></data>
+  <data name="Gallery.StatusChips.Success" xml:space="preserve"><value>Active</value></data>
+  <data name="Gallery.StatusChips.Warning" xml:space="preserve"><value>Pending</value></data>
+  <data name="Gallery.StatusChips.Error" xml:space="preserve"><value>Locked</value></data>
+  <data name="Gallery.StatusChips.Info" xml:space="preserve"><value>Scheduled</value></data>
+  <data name="Gallery.Section.ErrorSummary" xml:space="preserve"><value>Error summary</value></data>
+  <data name="Gallery.ErrorSummary.Hint" xml:space="preserve"><value>Everything a failed save refused, once, at the top of the card. Each line moves focus to its field.</value></data>
+  <data name="Gallery.Section.FormAside" xml:space="preserve"><value>Form aside</value></data>
+  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>Read-only: what is filled and what is missing. It carries no button.</value></data>
+  <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Item rows</value></data>
+  <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Child items of the record being edited, with their own actions. Empty state below.</value></data>
+  <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>No edition yet.</value></data>
+  <data name="Common.ErrorSummary.Title" xml:space="preserve"><value>Fix these fields before saving:</value></data>
+  <data name="Common.Summary.Title" xml:space="preserve"><value>Summary</value></data>
+  <data name="Common.Summary.NotFilled" xml:space="preserve"><value>Not filled</value></data>
+  <data name="Common.Summary.Checklist" xml:space="preserve"><value>Before saving</value></data>
+  <data name="Common.Summary.Done" xml:space="preserve"><value>filled in</value></data>
+  <data name="Common.Summary.Pending" xml:space="preserve"><value>still missing</value></data>
   <data name="Gallery.Table.Mode" xml:space="preserve"><value>Data source</value></data>
   <data name="Gallery.Table.Mode.Normal" xml:space="preserve"><value>60 items</value></data>
   <data name="Gallery.Table.Mode.Empty" xml:space="preserve"><value>Empty</value></data>

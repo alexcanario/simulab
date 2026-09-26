@@ -162,6 +162,133 @@
     </MudPaper>
 </section>
 
+@* ---- Composition patterns (F-43, BR1). A screen mockup may use only what is shown here (rule: ui). ---- *@
+
+<section id="gallery-section-card" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.SectionCard"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.SectionCard.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppSectionCard Id="gallery-card-plain" Title="@L["Gallery.SectionCard.Title"]" Icon="@AppIcons.Exams">
+            <MudText Typo="Typo.body2">@L["Gallery.SectionCard.Body"]</MudText>
+        </AppSectionCard>
+        <AppSectionCard Id="gallery-card-subtitled" Title="@L["Gallery.SectionCard.Title"]"
+                        Icon="@AppIcons.IssuingAuthorities" Subtitle="@L["Gallery.SectionCard.Subtitle"]">
+            <MudText Typo="Typo.body2">@L["Gallery.SectionCard.Body"]</MudText>
+        </AppSectionCard>
+    </div>
+</section>
+
+<section id="gallery-form-grid" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.FormGrid"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.FormGrid.Hint"]</MudText>
+    <AppSectionCard Id="gallery-grid-card" Title="@L["Gallery.FormGrid.Title"]" Icon="@AppIcons.Exams">
+        <AppFormGrid Columns="2">
+            <AppTextField TValue="string" Id="gallery-grid-one" Label="@L["Gallery.FormGrid.First"]" Autocomplete="off" />
+            <AppTextField TValue="string" Id="gallery-grid-two" Label="@L["Gallery.FormGrid.Second"]" Autocomplete="off" />
+        </AppFormGrid>
+        <AppFormGrid Columns="3" Class="mt-4">
+            <AppTextField TValue="string" Id="gallery-grid-three" Label="@L["Gallery.FormGrid.First"]" Autocomplete="off" />
+            <AppTextField TValue="string" Id="gallery-grid-four" Label="@L["Gallery.FormGrid.Second"]" Autocomplete="off" />
+            <AppTextField TValue="string" Id="gallery-grid-five" Label="@L["Gallery.FormGrid.Third"]" Autocomplete="off" />
+        </AppFormGrid>
+    </AppSectionCard>
+</section>
+
+<section id="gallery-radio-cards" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.RadioCards"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.RadioCards.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppRadioCards TValue="string" Id="gallery-scope" Label="@L["Exams.Field.Scope"]" Required="true"
+                       Options="@ScopeCards" Value="@_scope" ValueChanged="@OnScopeChanged" />
+        <AppRadioCards TValue="string" Id="gallery-scope-error" Label="@L["Exams.Field.Scope"]" Required="true"
+                       Options="@ScopeCards" Error="@L["exam.scope_invalid"].Value" />
+    </div>
+</section>
+
+<section id="gallery-conditional-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.ConditionalField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.ConditionalField.Hint"]</MudText>
+    <div class="gallery-form">
+        @* Driven by the radio cards above: choosing State or Municipal reveals the detail, National clears it. *@
+        <AppConditionalField Visible="@(_scope is "State" or "Municipal")" OnHidden="@(() => _scopeDetail = null)">
+            <AppTextField TValue="string" Id="gallery-scope-detail"
+                          Label="@(_scope == "Municipal" ? L["Exams.Field.Municipality"] : L["Exams.Field.State"])"
+                          Hint="@L["Exams.Field.ScopeDetail.Hint"]" LeadingIcon="@AppIcons.Place"
+                          Value="@_scopeDetail" ValueChanged="@(value => _scopeDetail = value)"
+                          Required="true" Autocomplete="off" />
+        </AppConditionalField>
+        @if (_scope is not ("State" or "Municipal"))
+        {
+            <MudText Typo="Typo.body2">@L["Gallery.ConditionalField.Hidden"]</MudText>
+        }
+    </div>
+</section>
+
+<section id="gallery-leading-icons" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.LeadingIcons"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.LeadingIcons.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppTextField TValue="string" Id="gallery-leading-text" Label="@L["Exams.Field.Name"]"
+                      LeadingIcon="@AppIcons.Exams" Hint="@L["Exams.Field.Name.Hint"]" Autocomplete="off" />
+        <AppSelectField TValue="string" Id="gallery-leading-select" Label="@L["Exams.Field.ContentLanguage"]"
+                        LeadingIcon="@AppIcons.Language" Options="@_selectOptions" Value="@_selectValue"
+                        ValueChanged="@(value => _selectValue = value)" />
+        <AppLookupField Id="gallery-leading-lookup" Label="@L["Exams.Field.IssuingAuthority"]"
+                        Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                        LeadingIcon="@AppIcons.IssuingAuthorities" SearchAsync="GalleryLookupAsync" />
+    </div>
+</section>
+
+<section id="gallery-status-chips" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.StatusChips"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.StatusChips.Hint"]</MudText>
+    <div class="gallery-icons">
+        @foreach (var tone in Enum.GetValues<AppStatusTone>())
+        {
+            <div class="gallery-icon">
+                <AppStatusChip Text="@L[$"Gallery.StatusChips.{tone}"]" Tone="tone" />
+                <code>@($"AppStatusTone.{tone}")</code>
+            </div>
+        }
+    </div>
+</section>
+
+<section id="gallery-error-summary" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.ErrorSummary"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.ErrorSummary.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppErrorSummary Id="gallery-error-summary-sample" Title="@L["Common.ErrorSummary.Title"]"
+                         Items="@SummaryItems" />
+    </div>
+</section>
+
+<section id="gallery-form-aside" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.FormAside"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.FormAside.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppFormAside Title="@L["Common.Summary.Title"]" EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="@AsideRows" ChecklistTitle="@L["Common.Summary.Checklist"]"
+                      DoneText="@L["Common.Summary.Done"]" PendingText="@L["Common.Summary.Pending"]"
+                      Checklist="@AsideChecklist" />
+    </div>
+</section>
+
+<section id="gallery-item-rows" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.ItemRows"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.ItemRows.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppItemRows TItem="string" Items="@_editions" EmptyMessage="@L["Gallery.ItemRows.Empty"]">
+            <RowTemplate>@context</RowTemplate>
+            <Actions>
+                <AppRowActions ItemName="@context" OnEdit="@(() => Done(L["Common.Edit"]))" />
+            </Actions>
+        </AppItemRows>
+        <AppItemRows TItem="string" Items="@(Array.Empty<string>())" EmptyMessage="@L["Gallery.ItemRows.Empty"]">
+            <RowTemplate>@context</RowTemplate>
+        </AppItemRows>
+    </div>
+</section>
+
 <section id="gallery-alerts" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Alerts"]</MudText>
     <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Alerts.Hint"]</MudText>
@@ -216,6 +343,39 @@
 
     private string GalleryStrengthText(PasswordStrength strength) =>
         I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
+
+    // F-43: the composition patterns. The scope drives both the radio cards and the conditional field below.
+    private string? _scope;
+    private string? _scopeDetail;
+
+    private static readonly IReadOnlyList<string> _editions = ["Edital 01/2026", "Edital 02/2023"];
+
+    private IReadOnlyList<AppRadioCardOption<string>> ScopeCards =>
+    [
+        new("National", L["Exams.Scope.National"], L["Gallery.RadioCards.National"]),
+        new("State", L["Exams.Scope.State"], L["Gallery.RadioCards.State"], AppIcons.Place),
+        new("Municipal", L["Exams.Scope.Municipal"], L["Gallery.RadioCards.Municipal"], AppIcons.Place)
+    ];
+
+    private void OnScopeChanged(string? value) => _scope = value;
+
+    private IReadOnlyList<AppErrorSummaryItem> SummaryItems =>
+    [
+        new("gallery-leading-text", L["Exams.Field.Name"]),
+        new("gallery-scope", L["Exams.Field.Scope"])
+    ];
+
+    private IReadOnlyList<AppAsideRow> AsideRows =>
+    [
+        new(L["Exams.Field.IssuingAuthority"], "Prefeitura de Manaus"),
+        new(L["Exams.Field.Name"], null)
+    ];
+
+    private IReadOnlyList<AppChecklistItem> AsideChecklist =>
+    [
+        new(L["Exams.Field.IssuingAuthority"], true),
+        new(L["Exams.Field.Name"], false)
+    ];
 
     private AppLookupOption? _lookupValue;
     private AppLookupOption? _filterLookup;
