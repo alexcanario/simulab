@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.61 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.63 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -68,7 +68,7 @@ Before anything is written, Claude checks that the skill it loaded and the insta
 | 3. Access | Authentication, RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage, and — when a feature calls a model — the LLM provider and where it runs, its cost ceiling and how it is faked in tests |
 | 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, icon family, how an item is edited, UI kit and gallery — or, for a conversational UI, the language it answers in, how a proposal is corrected and a states gallery |
-| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, and the house conventions when the code lives beside an existing system |
+| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
 | 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity, and evals when a feature calls a model |
 | 8. Documentation | Technical docs generated from the code (entity diagrams, data dictionary, route map, module diagram, and a tool catalogue when the app exposes tools to a model), the system prompt as a versioned file, and a hand-written architecture overview |
 
@@ -219,7 +219,7 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | **Every commit** | A guard refuses a `git commit` on the main branch in two cases: an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session — or the commit carries an item file that is not `done` (refining, approved, building, validating), which belongs on the item branch. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Builds the changed projects and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
-| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them (a pass-rate drop fails the ship). |
+| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them (a pass-rate drop fails the ship). After the app manual, `gate.js docs` runs the docs command the repository declares, when it declares one (below). |
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
@@ -227,6 +227,7 @@ Details:
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
 - **An adopted repository.** A code base that existed before the workflow (its `CLAUDE.md` says `Profile: adopted`, written by hand or by another plugin, such as legacy-lens's adoption) records how it is really built in `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` or `none`), `solution` (a path from the root), `scope` (the projects worth building when the whole solution is not), `testCommand` and `notes`. The gate reads `solution`, so a solution deep in the tree is still built, and `engine: none` turns it off with the reason in `notes`; `scope` and `testCommand` are for people and are not read yet. `/agile:sync` refreshes rules, templates and the workflow of such a repository but leaves its profile alone: there is no plugin profile to refresh it from.
+- **A declared docs command.** `build.json` may also carry `"docs": { "command": "...", "check": "...", "paths": ["docs/legacy/inventory"] }`, written by whoever prepared the repository (legacy-lens's adoption declares its inventory map there), so a living code map is refreshed with every item. At ship, after the app manual, `gate.js docs` runs `command` and then `check` (optional) through the shell, from the root of the item's worktree, whatever the `engine`. `command` and `paths` are required. It ends with `agile docs GREEN: <n> file(s) changed under <paths>`, and those files go into the item's docs commit. `agile docs SKIPPED: no docs command declared` means there is no `docs` block, and the ship goes on as before. `agile docs RED: <what failed>` stops the ship like a red gate: a command or check that failed, is not installed, or ran longer than 600 seconds (`AGILE_DOCS_TIMEOUT`), a field that is missing, or a file changed outside `paths`. Such a file is listed and never committed.
 - **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
 - **Honest counts.** Claude quotes a warning count only from the gate or a `--no-incremental` build (an incremental build skips unchanged projects and hides their warnings), and builds again after `git stash` or a branch switch before running tests: `--no-build` would run the other tree's binaries.
 - **Hung tests.** A test that runs for more than 120 seconds (`AGILE_GATE_HANG_TIMEOUT`) counts as hung: the run fails with its name instead of blocking the turn for minutes.
@@ -373,7 +374,7 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 Claude writes every file (code, tests, docs) with its editing tools, never through the text of a script: escapes such as `\t` or `\b` turn into control characters, and a test can pass while checking nothing.
 
-**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) and `CLAUDE.md` are never touched. If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back.
+**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) are never touched, and `CLAUDE.md` only gets what you approve: a section the template gained, or a `Worktrees:` line when it has none (the bootstrap recommendation, `D:\wt\<repository>` or `C:\`; existing worktrees keep their names). If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back.
 
 `output-style` sets how Claude talks to you: in pt-BR, answer first, step reports of at most 10 lines, details in the file instead of the chat, one recommendation with its reason, no narration of the work, "not verified" said in those words, and bad news first. Long answers only when a gate failed, a question needs context, or you ask.
 
@@ -385,7 +386,7 @@ Claude writes every file (code, tests, docs) with its editing tools, never throu
 - End: a short note (where we stopped, what is next, who decides).
 - Before merging from a worktree: Claude asks, as a blocking question, whether you have closed any IDE or app host running from that folder — a removal that fails halfway unregisters the worktree and leaves the folder on disk, worse than not removing it. On .NET it also runs `dotnet build-server shutdown` first, since a build server holds a lock the IDE closing does not release.
 
-**One folder per item.** Every item gets its own worktree — a separate folder outside the repository (`Worktrees:` in `CLAUDE.md`, default `<repository parent>/wt/<repository>/<type>-<n>`, kept short because of Windows path limits) — created by `/agile:refine` before it writes anything and used until the merge. That is what keeps an item's documents on its own branch: a session working in another item's folder used to write the feature file and the mockup there, and they ended up on an unrelated branch. The build reuses that folder and never makes a second one.
+**One folder per item.** Every item gets its own worktree — a separate folder outside the repository (the root is the `Worktrees:` line of `CLAUDE.md`, asked at bootstrap — recommended `D:\wt\<repository>`, or `C:\wt\<repository>` without a D: drive; without the line, `<repository parent>/wt/<repository>/`, and `/agile:sync` offers the line. The folder is `f-<n>-<desc>` or `b-<n>-<desc>`, `<desc>` being up to 20 characters of the slug, cut at a hyphen: `f-3-exam-board`. Kept short because of Windows path limits; a worktree created before this keeps its `<type>-<n>` name until the merge) — created by `/agile:refine` before it writes anything and used until the merge. That is what keeps an item's documents on its own branch: a session working in another item's folder used to write the feature file and the mockup there, and they ended up on an unrelated branch. The build reuses that folder and never makes a second one.
 
 **Two items in parallel.** The default is still one item at a time in `building`. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work: it lifts the one-at-a-time limit (and, for an item approved before this existed, creates the missing folder). Claude first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. One writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. Previewing the app host from a worktree points the launch configuration at its absolute path temporarily, restored to the main checkout's path once the preview ends. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
 
@@ -436,6 +437,15 @@ Round 2 of 7 — Data.
 ...
 ```
 
+Round 6 always carries one question the brief cannot answer — where the item folders live:
+
+```
+Claude: 28c. Worktree root → Recommendation: D:\wt\examprep (this machine has a D: drive;
+    without one it would be C:\wt\examprep). Outside the repository; each item gets a
+    folder such as f-3-exam-board — the id and at most 20 characters of its slug.
+> ok
+```
+
 After round 7, Claude asks the closing question, settles what it raises, shows a summary of every decision and asks for confirmation. Then it creates:
 
 ```
@@ -474,7 +484,7 @@ Status: idea. Nothing else is done until we refine it.
 ```
 
 ```
-Claude: Folder for this item: D:/dev/wt/examprep/feature-3 [feature/F-3] — created now,
+Claude: Folder for this item: D:/wt/examprep/f-3-exam-board [feature/F-3] — created now,
 outside the repository; the file moved in and everything about F-3 is written there.
 I checked the code: the Catalog module exists but has no entities yet.
 The user and role model from bootstrap has Curator and Admin.
@@ -824,9 +834,9 @@ F-6 is a long build in one session. A bug appears and the owner wants it fixed m
 > /agile:build B-2 --worktree
 Claude: F-6 is building in its own worktree (feature/F-6). B-2 touches Identity/Login only;
 F-6 touches Catalog. No shared schema or screen: they can run in parallel.
-B-2 already has the worktree from its refinement: D:\dev\wt\examprep\bug-2. Continue there?
+B-2 already has the worktree from its refinement: D:\wt\examprep\b-2-exam-board-search. Continue there?
 > yes
-Claude: B-2 in D:\dev\wt\examprep\bug-2, status building (on that branch).
+Claude: B-2 in D:\wt\examprep\b-2-exam-board-search, status building (on that branch).
 Only one app host at a time: stop the one from the main checkout before I open the screen here.
 ```
 
@@ -835,7 +845,7 @@ At the start of any session, the status shows both:
 ```
 [agile] branch feature/F-6
 In progress: F-6 Practice test by level — building (docs/features/F-6-...)
-In progress in a worktree: B-2 — building [bug/B-2] D:/dev/wt/examprep/bug-2
+In progress in a worktree: B-2 — building [bug/B-2] D:/wt/examprep/b-2-exam-board-search
 ```
 
 Shipping the bug: the full check runs in the worktree, the merge in the main checkout.
@@ -843,7 +853,7 @@ Shipping the bug: the full check runs in the worktree, the merge in the main che
 ```
 > /agile:ship B-2
 Claude: Before I remove the worktree: have you closed any IDE or app host running from
-D:\dev\wt\examprep\bug-2? A removal that fails halfway leaves the folder on disk. Say "closed" once done.
+D:\wt\examprep\b-2-exam-board-search? A removal that fails halfway leaves the folder on disk. Say "closed" once done.
 > closed
 Claude: Shutting down the .NET build server, then running the full suite in the worktree.
 Full suite green (212 tests, 1 min 58 s). Ready to merge bug/B-2 into main. Authorize?
@@ -891,7 +901,8 @@ Claude: agile@canary 0.0.10 → 0.0.13.
 | docs/agile/workflow.md                 | update | copy: manual 0.0.13                                   |
 | docs/agile/profile.md                  | edited | merge: two new test lines; your Simulab section stays |
 | .editorconfig                          | manual | one line differs: CA1716 = none. Add it?              |
-Nothing else changed. Your project.md, ui-project.md and CLAUDE.md are not touched.
+| CLAUDE.md                              | manual | no Worktrees: line. Add "Worktrees: D:\wt\examprep"?  |
+Nothing else changed. Your project.md and ui-project.md are not touched; existing worktrees keep their names.
 > ok
 Claude: Copied 2, merged 1 (no conflicts), .editorconfig edited. Build 0 warnings; 252 tests green (9 s).
 The plugin also ships DocGen (technical docs from the code, since 0.0.21), which bootstrap installs and this project does not have. Capture it as a feature?
@@ -949,6 +960,28 @@ Claude: Creating feature/F-8 from main and committing there.
 ```
 
 When a commit really belongs on main while an item is open (a retro note, for instance), Claude asks, and with your yes repeats the command ending with `# agile:main-ok`. A retro commit carries only rules, `CLAUDE.md`, templates and the retro log; a lesson that needs code becomes an item, so the code goes through the gate on its own branch.
+
+**The docs command touched a file it does not own.** In an adopted repository whose `.claude/agile/build.json` declares a code map, the ship step `gate.js docs` runs it after the green full check:
+
+```
+ran docs.command (48 s): lens-map --out docs/legacy/inventory
+changed outside docs.paths (not committed):
+  src/Billing/Billing.csproj
+agile docs RED: 1 file(s) changed outside docs/legacy/inventory: src/Billing/Billing.csproj
+Claude: The map command rewrote a project file, which is outside docs.paths. I did not commit it and
+restored it with git restore. This belongs to the tool that writes the command (legacy-lens), so I
+logged it as a plugin note in the retro log. Merge on hold: ship it without the map this time, or wait?
+```
+
+A green run lists the files it changed under `docs.paths`, and they go into the `docs(F-<n>)` commit with the manual:
+
+```
+ran docs.command (47 s): lens-map --out docs/legacy/inventory
+ran docs.check (3 s): lens-map --check
+to commit with the item:
+  docs/legacy/inventory/entry-points.md
+agile docs GREEN: 1 file(s) changed under docs/legacy/inventory
+```
 
 ### 14.12 The closing question of the quiz
 
@@ -1162,7 +1195,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build <feature> [--worktree]` | Implement an approved feature in the worktree the refinement created (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
-| `/agile:ship <feature>` | Full suite, merge, board, app manual |
+| `/agile:ship <feature>` | Full suite, merge, board, app manual, and the declared docs command |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
@@ -1325,7 +1358,7 @@ flowchart TD
     B --> C["gate.js ship: full rebuild, full suite, architecture tests;<br/>output saved whole, last line GREEN or RED: what failed"]
     C -->|red| C1["Fix on the branch"]
     C1 --> C
-    C -->|green| D["App manual in pt-BR, pt-PT, en; technical docs regenerated; infra.md; baseline"]
+    C -->|green| D["App manual in pt-BR, pt-PT, en; technical docs regenerated;<br/>gate.js docs: declared docs command, RED stops like the gate; infra.md; baseline"]
     D --> E{"Authorize the merge into main?"}
     E -->|no| E1(["Wait"])
     E -->|yes| E2["Current branch is main; read main..branch:<br/>stop when a commit carries another item's id"]
@@ -1381,7 +1414,7 @@ flowchart TD
     B -->|all same| B1(["Nothing to do"])
     B --> C["Table: new, update, edited, manual; a proposal per file"]
     C --> D{"Approve per file"}
-    D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit; never touch project rules"]
+    D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit (a missing Worktrees: line too);<br/>never touch project rules"]
     E --> E2["Something only bootstrap installs and this project lacks:<br/>name it and offer to capture a feature"]
     E2 --> F{"Build files or checked rules changed?"}
     F -->|yes| G["Build, full suite, fix findings, baseline"]

@@ -12,7 +12,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
 - Ask before: pushing or merging to `<main branch>`, touching shared databases, deleting data, anything outside this repository.
-- Worktrees: `<short root outside the repository, e.g. D:\wt\<app>>` — one folder per item, created by `/agile:refine`.
+- Worktrees: `<root from quiz 28c, e.g. D:\wt\<repo>>` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.

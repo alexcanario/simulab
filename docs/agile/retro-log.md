@@ -89,6 +89,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | `[generic]` autopilot step 5: the approval card says "with the criteria below", but a card round is a single tool call, so anything written after it reaches the owner only once they have already answered. The criteria have to be in the message that precedes the cards | F-27 | |
 | ⏳ | `[generic]` retro-lessons step 6: an `idea` a retro raises says what the finding item already fixed and what is left, so the next refinement does not read a closed gap as a live one. F-45's summary described `AiDbContext` as never loaded, while F-24 had added it in the same item that raised the idea | F-45 | |
 | ⏳ | `[generic]` A plugin note becomes ✅ only when an executable scenario proves the behavior changed: each note gets a minimal fixture repository, a prompt and a check; the scenario fails before the plugin change and passes after it. Start with the simple version (scenarios run by hand in the plugin session before marking ✅); a principles check by the `reviewer`, scheduled harvesting of notes into issues and pruning rules whose scenario passes without them come later, only if the first step pays off | Owner session 2026-09-26 | |
+| ⏳ | `[generic]` `gate.js ship`: when the red tests are all outside the item's diff, say so in the last line. The gate already knows both. On F-28 it went red twice on a test in another project before anyone suspected the suite itself, and the flake had been sitting on `main` | B-19 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -658,3 +659,46 @@ Shipped in `5fd91c3` from the worktree `bug-18`. One `Theory` in `ThemeContrastT
 - Project rule (`project.md`, UI tests): a contrast ratio written into an item is re-measured from the committed tokens at refinement. The file carried 6.33:1 for light from the F-43 sweep; the committed tokens give 6.19:1. The conclusion did not change, but the criterion had been written over a number that does not reproduce.
 - Worth recording: the guard was the whole product of the item, so the only evidence that it works is the failing run. Both directions were exercised in the same turn — red with the diff shown first, then green with `git diff src/` empty — which is now what the two rules above ask for together.
 - Observation, no lesson: the worktree root `D:\dev\_icontrol\wt\simulab` still holds `f-33` and `feature-39`, folders git no longer registers, plus two loose `identity.dbml`/`identity.dbdiagram` files. Left untouched by the owner's decision (2026-09-26).
+
+## 2026-09-26 — sync agile@canary 0.0.61 → 0.0.63
+One subject: the item worktree folder is now named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: up to 20 characters of the slug, cut at a hyphen) instead of `<type>-<n>`. Copied: `.claude/rules/agile/git.md`, `.claude/rules/agile/naming.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`. Merged: nothing. Left alone: `docs/agile/profile.md` (`edited`, upstream unchanged) and the six `manual` build files (all upstream unchanged). No build file changed, so no build, no suite and no baseline refresh. Proposed and approved: the `Worktrees:` line of `CLAUDE.md` now names the new folder pattern. The three open worktrees (`feature-28`, `feature-29`, `feature-30`) keep their names until their merges, as the upstream text allows. `missingCapabilities` empty.
+- Owner decision: the sync ran with three items open (F-28 validating, F-29 building, F-30 approved) because all four checkouts were clean and nothing in the diff touches code or build files.
+- ⏳ `plugin` `[generic]`: `sync.js record` died with `Error: UNKNOWN: unknown error, open '.claude/agile/sync.json'` (errno -4094) and left the file at the previous version; the identical retry succeeded. A transient Windows lock on a file the script opens for write ends a sync half-applied — the five files were already copied — with no hint that a retry is all it needs. Proposal: `record` retries the write a few times before failing, and its error names the file and says the copies already happened.
+- Also seen, outside the sync: `0.0.63` ships a ship-time `gate.js docs` driven by a `docs` block in `.claude/agile/build.json`. Simulab has no `.claude/agile/build.json`, so the ship is unchanged; recorded only so the next reader knows the door exists.
+- Project rule (`project.md`, Sessions and retro): two sessions ran `/agile:sync` on the main checkout at the same time. One of them copied the five files, wrote `CLAUDE.md`, `sync.json` and the retro entry and committed `f4c414e`; the other's `apply` reported `same` for all five and then read a working tree that went from eight modified files to clean between two commands. Nothing was lost — the plan was identical and the script is idempotent — but the two sessions shared one git index, and the second one could have committed the first one's half-written state. "One Claude session per checkout" already existed; what was missing is that a command writing to the main checkout has to check for the other writer before it starts, not trust the rule. Proposal: the rule below.
+
+## 2026-09-26 — B-19 The full suite is not reliably green under parallel load
+Shipped in `18170d8` from the worktree `b-19-full-suite-flaky`. Two test-side fixes, 15 lines across two test
+files, nothing under `src/`. Baseline before the fix, measured in the item's own worktree: 3 full runs, 2 red.
+After: 5 consecutive clean-build full runs green, 1343 tests each. Ship gate GREEN, build 43 s 0 warnings, suite
+126 s (the suite grew from 93 s at B-18, still well inside the < 5 min budget).
+- Project rule (`project.md`, UI tests): a test that starts a `BackgroundService` waits for its effect before
+  `StopAsync`. `StartAsync` is `Task.Run(() => ExecuteAsync(stoppingCts.Token), stoppingCts.Token)`, and
+  `Task.Run` never runs a work item whose token was cancelled before the pool dequeued it, so an immediate
+  `StopAsync` can drop the body entirely. Sweep done: `grep "\.StartAsync("` over `tests/` found one other call,
+  already correct.
+- Project rule (`project.md`, UI tests): a test whose subject is "nothing happened" carries one assertion that
+  proves the code ran at all. This one asserted no job was handled and no row was removed, and both held most
+  firmly when the worker had never started — it passed for the exact reason it should have failed.
+- ⏳ `plugin` `[generic]`: `gate.js ship` should say when every red test is outside the item's diff. See the row
+  in "Plugin notes — status".
+- Worth recording, no lesson: the bug's own report named two tests and the wrong `RecordingLoggerProvider` (two
+  classes share that name). The refinement's three baseline runs found a third test, the most frequent one, which
+  the report had never seen. A bug written from two observations is a starting point, not an inventory.
+- Not a lesson, a live gap: C3 (`MainLayoutTests.MenuButton_Desktop_TogglesCollapsedAndWritesCookie`) was deferred
+  by the owner, never reproduced, and did not fail in any of the 8 full runs of this item. If it returns it needs
+  its own repro.
+
+## 2026-09-26 — F-28 Partial index filter in the data dictionary
+Shipped in `8f6be36` from the worktree `feature-28`. `EntityModels.cs` (+37) and its tests (+63, with a
+shared-table context for the F-25 test model); the visible result is two generated lines, now
+``- `ix_jobs_active_created_at` on created_at (where status IN (0, 1))``. Ship gate GREEN on the first attempt:
+build 46 s 0 warnings, suite 1349 passed 0 failed in 121 s, architecture tests 135 (six more than before).
+- **No new rule.** This item's lessons were already harvested by B-19, which it paid for: F-28's ship gate went
+  red twice on `JobWorkerTests`, a test in another project it does not touch, and that is what turned the flaky
+  suite into an item instead of a shrug. Adding a rule here would duplicate the two B-19 lines above.
+- Worth recording, no lesson: the item sat at `validating` from 2026-09-26 until B-19 shipped, on the owner's
+  decision to hold the merge rather than re-run the gate until it happened to be green. The first gate run after
+  B-19 was green, so the hold cost one afternoon and bought a suite whose red means something.
+- Process note, no action: three items were open in parallel (F-28, F-29, F-30) against a recommended limit of
+  two, and the one that blocked all three was a test defect in none of them.

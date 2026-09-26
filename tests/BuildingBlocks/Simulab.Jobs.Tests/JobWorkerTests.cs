@@ -53,6 +53,15 @@ public sealed class JobWorkerTests : IAsyncLifetime
         var worker = Worker(_host.Cleanup, enabled: false);
 
         await worker.StartAsync(CancellationToken.None);
+
+        // B-19: StartAsync only queues the body — `Task.Run(() => ExecuteAsync(stoppingCts.Token), stoppingCts.Token)`
+        // — and StopAsync cancels that very token. A work item the thread pool has not dequeued yet is then
+        // dropped without ever running, which under the load of the whole solution made this test pass its first
+        // two assertions for the wrong reason: nothing had run at all. Wait for the worker to reach its decision,
+        // so what follows is about a worker that ran and chose to do nothing.
+        await WaitUntil(() => _host.Logs.Entries.Any(entry =>
+            entry.Message.Contains("switched off", StringComparison.OrdinalIgnoreCase)));
+
         _host.Clock.Advance(JobPolicy.CleanupInterval);
         await worker.StopAsync(CancellationToken.None);
 

@@ -10,7 +10,7 @@
 - Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work before anything else.
 - If git and the board or the files disagree, stop and ask.
 - Every item has its own worktree, created by `/agile:refine` before it writes anything and reused by the build. No checkout is ever switched; one writer per worktree, and two writers never share one (the index races).
-- Worktrees live in a short folder named `<type>-<n>` under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
+- Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen) under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
 - Before merging or removing a worktree, ask the owner to close any IDE or app host running from it.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.
