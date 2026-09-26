@@ -78,6 +78,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A kit CSS rule that overrides a MudBlazor class carries that class too (`.mud-tooltip-root.app-nav-tooltip`): MudBlazor's one-class rules load later and win; pin it with a test that reads `app.css` (F-14).
 - An accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file; the library does not grant it — `MudAutocomplete` renders a plain text input (F-34).
 - An assertion over a generated document pins the part it is about, not the whole line: an item that adds an annotation to every column must not break a test that is about types (F-24).
+- A guard looks for the shape of what it forbids, not for two names near each other: the arm `ErrorKind.X => StatusCodes.StatusY`, never "mentions both" — the callers using the API properly mention both (F-39).
+- An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
