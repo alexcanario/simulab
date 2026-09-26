@@ -9,6 +9,7 @@ internal static class SolutionAssemblies
     [
         typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
         typeof(Simulab.Persistence.ModuleDbContext).Assembly,
+        typeof(Simulab.ApiResults.ApiProblem).Assembly, // F-39
         typeof(Simulab.Email.IEmailSender).Assembly,
         typeof(Simulab.Jobs.IJobQueue).Assembly,
         typeof(Simulab.Ai.IAiGateway).Assembly, // F-41

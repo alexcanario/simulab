@@ -8,6 +8,7 @@ using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Identity.Api;
 
@@ -93,11 +94,11 @@ public static class TotpEndpoints
 
         if (error.Code != IdentityErrorCodes.AccountLocked)
         {
-            return IdentityEndpoints.Problem(error);
+            return Problem(error);
         }
 
         var seconds = int.TryParse(error.Detail, CultureInfo.InvariantCulture, out var parsed) ? parsed : 0;
-        return IdentityEndpoints.Problem(error with { Detail = null }, StatusCodes.Status423Locked, ("retryAfterSeconds", seconds));
+        return Problem(error with { Detail = null }, StatusCodes.Status423Locked, ("retryAfterSeconds", seconds));
     }
 
     private static bool TryGetUserId(ClaimsPrincipal user, out Guid userId) =>

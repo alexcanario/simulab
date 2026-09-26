@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Pure unit tests: no container and no Simulab.Testing, because there is nothing to start. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

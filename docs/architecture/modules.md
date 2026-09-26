@@ -7,6 +7,7 @@ flowchart LR
     subgraph BuildingBlocks["BuildingBlocks"]
         Simulab_Ai["Simulab.Ai"]
         Simulab_Ai_Contracts["Simulab.Ai.Contracts"]
+        Simulab_ApiResults["Simulab.ApiResults"]
         Simulab_Email["Simulab.Email"]
         Simulab_Jobs["Simulab.Jobs"]
         Simulab_Persistence["Simulab.Persistence"]
@@ -39,14 +40,17 @@ flowchart LR
     Simulab_Ai --> Simulab_Persistence
     Simulab_Ai --> Simulab_Plans_Contracts
     Simulab_Api --> Simulab_Ai
+    Simulab_Api --> Simulab_ApiResults
     Simulab_Api --> Simulab_Catalog_Api
     Simulab_Api --> Simulab_Email
     Simulab_Api --> Simulab_Identity_Api
     Simulab_Api --> Simulab_Persistence
     Simulab_Api --> Simulab_ServiceDefaults
     Simulab_Api --> Simulab_SharedKernel
+    Simulab_ApiResults --> Simulab_SharedKernel
     Simulab_AppHost --> Simulab_Api
     Simulab_AppHost --> Simulab_Web
+    Simulab_Catalog_Api --> Simulab_ApiResults
     Simulab_Catalog_Api --> Simulab_Catalog_Application
     Simulab_Catalog_Api --> Simulab_Catalog_Infrastructure
     Simulab_Catalog_Api --> Simulab_Identity_Contracts
@@ -58,6 +62,7 @@ flowchart LR
     Simulab_Catalog_Domain --> Simulab_SharedKernel
     Simulab_Catalog_Infrastructure --> Simulab_Catalog_Application
     Simulab_Catalog_Infrastructure --> Simulab_Persistence
+    Simulab_Identity_Api --> Simulab_ApiResults
     Simulab_Identity_Api --> Simulab_Identity_Application
     Simulab_Identity_Api --> Simulab_Identity_Infrastructure
     Simulab_Identity_Application --> Simulab_Identity_Contracts

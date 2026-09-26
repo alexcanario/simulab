@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Simulab.Identity.Application.GoogleSignIn;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Identity.Api;
 
@@ -37,7 +38,7 @@ public static class GoogleSignInEndpoints
         // BR10: the same per-client-address budget as the password sign-up; both count on it.
         if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
         {
-            return IdentityEndpoints.Problem(new Error(IdentityErrorCodes.RegistrationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
+            return Problem(new Error(IdentityErrorCodes.RegistrationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
 
         var command = new RegisterGoogleUserCommand(
@@ -53,6 +54,6 @@ public static class GoogleSignInEndpoints
 
         var result = await handler.HandleAsync(command, cancellationToken);
 
-        return result.IsSuccess ? Results.StatusCode(StatusCodes.Status201Created) : IdentityEndpoints.Problem(result.Error!);
+        return result.IsSuccess ? Results.StatusCode(StatusCodes.Status201Created) : Problem(result.Error!);
     }
 }

@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using Simulab.Ai;
 using Simulab.Ai.Contracts;
 using Simulab.SharedKernel.Results;
+using static Simulab.ApiResults.ApiProblem;
 
 namespace Simulab.Api.Features.Ai;
 
@@ -55,23 +55,4 @@ public static class AiDiagnosticsEndpoints
             (int)completion.Duration.TotalMilliseconds));
     }
 
-    // The third copy of this mapping (Catalog and Identity have their own). F-39 exists to replace all
-    // three with one helper; this one is recorded there as debt (owner, 2026-09-24).
-    private static IResult Problem(Error error) =>
-        Results.Problem(new ProblemDetails
-        {
-            Status = StatusFor(error.Kind),
-            Title = error.Code,
-            Detail = error.Detail,
-            Extensions = { ["code"] = error.Code }
-        });
-
-    private static int StatusFor(ErrorKind kind) => kind switch
-    {
-        ErrorKind.NotFound => StatusCodes.Status404NotFound,
-        ErrorKind.Conflict => StatusCodes.Status409Conflict,
-        ErrorKind.BusinessRule => StatusCodes.Status422UnprocessableEntity,
-        ErrorKind.Forbidden => StatusCodes.Status403Forbidden,
-        _ => StatusCodes.Status400BadRequest
-    };
 }
