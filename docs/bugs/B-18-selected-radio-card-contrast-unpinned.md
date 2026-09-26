@@ -1,9 +1,10 @@
 ---
 bug: B-18
 feature: F-43
-status: approved
+status: validating
 board: 769
 severity: low
+Autopilot: built
 ---
 # The selected radio card's description is not pinned by a contrast test
 
@@ -81,6 +82,23 @@ component changes: the screen is correct today and stays byte for byte as it is.
   `PrimaryLighten` or `TextSecondary` in `SimulabTheme` that takes the dark pair under 4.5:1. The injected diff is
   shown before the run, so a green run cannot be an edit that never applied (`project.md`, from F-45).
 
+Done on 2026-09-26. With dark `TextSecondary` set to `#758AAB` (the diff shown first, one line in the dark
+palette), the run over `ThemeContrastTests` and `ThemePaletteTests` gave
+`Failed! - Failed: 1, Passed: 98, Total: 99`, the one failure being
+`SelectedRadioCardDescription_ReadsAtAaOnItsOwnBackground(what: "dark", light: False)`:
+`Expected Contrast(description, surface) to be greater than or equal to 4.5 ... but found 4.356015052748283`.
+No other test moved, so the guard is about this pair and nothing else. After `git checkout` of the theme
+(`git diff src/` empty), the whole Web project: `Passed! - Failed: 0, Passed: 616, Total: 616, Duration: 6 s`
+— two cases more than the 614 on `main`.
+
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `ThemeContrastTests.SelectedRadioCardDescription_ReadsAtAaOnItsOwnBackground` — both cases green today (light and dark) |
+| AC2 | the same test, seen failing at 4.356:1 with dark `TextSecondary` `#758AAB`, and green again once restored |
+| AC3 | the same test: both colours come from `AppCssColours.Declaration`, which asserts that exactly one rule for the selector exists and that it still declares the property — a rename or a dropped `color` fails it |
+| AC4 | `git diff` against `main` touches one file, `tests/Hosts/Simulab.Web.Tests/Ui/ThemeContrastTests.cs`; no UI text, no `app.css`, no palette, no component |
+
 ## Acceptance criteria
 - AC1 Given today's palette, when the guard runs, then the selected card's description measures at least 4.5:1 in
   both palettes (6.19:1 light, 4.61:1 dark) and the test passes.
@@ -116,8 +134,8 @@ component changes: the screen is correct today and stays byte for byte as it is.
 - (none)
 
 ## Validation script
-No screen change to look at: the item is one test. Both commands are run by Claude in both shells at the end of
-the build, before this script is handed over.
+No screen change to look at: the item is one test. Step 1 was run by Claude in both shells before this script was
+handed over: Git Bash and PowerShell 7 each gave `Passed! - Failed: 0, Passed: 32` over `ThemeContrastTests`.
 
 1. In the worktree `D:\dev\_icontrol\wt\simulab\bug-18`, run the theme tests.
    Git Bash: `dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --nologo -v q --filter "FullyQualifiedName~ThemeContrastTests"`
