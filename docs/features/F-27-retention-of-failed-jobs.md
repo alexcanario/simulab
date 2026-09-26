@@ -1,10 +1,10 @@
 ---
 feature: F-27
 epic: Foundation and identity
-status: validating
+status: done
 board: 746
 version: 1
-Autopilot: stop 2
+Autopilot: shipped
 ---
 # Retention of failed jobs
 
@@ -98,13 +98,6 @@ not change either — no column, no index, no migration.
 - Retention for anything other than `jobs.jobs`.
 - Making the retention configurable per environment (offered at refinement and left out).
 
-## Decisions
-<!-- date — decision — reason. Technical decisions made by Claude are recorded here too. -->
-- <YYYY-MM-DD> — <decision> — <reason>
-
-## Out of scope
-- <Item>
-
 ## Open questions
 <!-- Approval is blocked while any line here is not answered or marked "deferred (owner, YYYY-MM-DD)". -->
 - (none)
@@ -179,8 +172,12 @@ Optional, to watch it happen on the dev database (it changes one row of your loc
    cleanup did not disturb the queue it shares a poll with.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: feature/F-27
+- Merge: 9a4e8e6 (`Merge feature/F-27: retention of failed jobs (AB#746)`), 10 files, +525/-23
+- Tests: 1327 passed, 0 failed, 92 s (full suite, 2026-09-26); full build 24 s, 0 new warnings
+- Manual pages: none. The feature has no screen and changes nothing an end user sees, so `docs/manual/` is
+  untouched; the retention is documented in `docs/infra.md`, where the queue already was.
+- Ran under `/agile:autopilot`: stop 1 took the three recommended answers, stop 2 the validation and the merge.
+- Fixed during the build, not hidden: a new `CA1873` warning on the log call (two boxed ints) became a
+  source-generated `[LoggerMessage]`, the pattern `ExportDataHandler` already uses. Confirmed with a
+  `--no-incremental` build at `0 Warning(s)`.
