@@ -27,11 +27,17 @@ public sealed class JobTestHost : IAsyncDisposable
 
     public RecordingEmailSender Emails { get; } = new();
 
+    /// <summary>F-27 AC6: what the code logged, so a test can read it instead of assuming it.</summary>
+    public RecordingLoggerProvider Logs { get; } = new();
+
     /// <summary>
     /// The runner, as a worker holds it. Calling it from several tasks at once is what a second Api
     /// instance does: every attempt opens its own scope and its own database connection (BR8).
     /// </summary>
     public JobRunner Runner => _services.GetRequiredService<JobRunner>();
+
+    /// <summary>F-27: the cleanup, as the worker holds it — one instance, so it remembers its last run.</summary>
+    public JobCleanup Cleanup => _services.GetRequiredService<JobCleanup>();
 
     public static async Task<JobTestHost> StartAsync(string name)
     {
@@ -84,6 +90,29 @@ public sealed class JobTestHost : IAsyncDisposable
         await using var scope = _services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<JobsDbContext>();
         return await context.Jobs.CountAsync();
+    }
+
+    /// <summary>
+    /// F-27: one row in the state and at the age the test needs. `created_at` is what the retention counts
+    /// from (BR2), so the test writes it directly instead of moving the clock by three months.
+    /// </summary>
+    public async Task<Guid> SeedAsync(JobStatus status, DateTimeOffset createdAt, string payload = "")
+    {
+        var id = Guid.CreateVersion7();
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var insert = new NpgsqlCommand(
+            $"""
+            INSERT INTO {JobsDbContext.QualifiedTableName} (id, type, payload, status, attempts, created_at, run_after, last_error)
+            VALUES ($1, 'test.seeded', $2, $3, 5, $4, $4, 'System.Exception')
+            """,
+            connection);
+        insert.Parameters.Add(new NpgsqlParameter { Value = id });
+        insert.Parameters.Add(new NpgsqlParameter { Value = payload });
+        insert.Parameters.Add(new NpgsqlParameter { Value = (int)status });
+        insert.Parameters.Add(new NpgsqlParameter { Value = createdAt });
+        await insert.ExecuteNonQueryAsync();
+        return id;
     }
 
     /// <summary>
@@ -161,7 +190,8 @@ public sealed class JobTestHost : IAsyncDisposable
     {
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(Clock);
-        services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Warning));
+        // F-27: Information, because the cleanup's one line is an acceptance criterion.
+        services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Information).AddProvider(Logs));
         services.AddModulePersistence();
         services.AddSingleton<IEmailSender>(Emails);
         services.AddJobs(new ConfigurationBuilder().Build(), connectionString);

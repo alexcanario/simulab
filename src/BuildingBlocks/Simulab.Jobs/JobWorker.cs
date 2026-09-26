@@ -11,6 +11,7 @@ namespace Simulab.Jobs;
 /// </summary>
 public sealed class JobWorker(
     JobRunner runner,
+    JobCleanup cleanup,
     IOptions<JobOptions> options,
     TimeProvider timeProvider,
     ILogger<JobWorker> logger) : BackgroundService
@@ -26,6 +27,17 @@ public sealed class JobWorker(
         using var timer = new PeriodicTimer(JobPolicy.PollInterval, timeProvider);
         while (!stoppingToken.IsCancellationRequested)
         {
+            // F-27 BR5: the cleanup goes first and in its own try, so a cleanup that throws never keeps the
+            // jobs of this poll from running. It decides for itself whether an hour has passed.
+            try
+            {
+                await cleanup.RunIfDueAsync(stoppingToken);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                logger.LogError(exception, "The failed-job cleanup failed.");
+            }
+
             try
             {
                 await runner.RunPendingAsync(stoppingToken);
