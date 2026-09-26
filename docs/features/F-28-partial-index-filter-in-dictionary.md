@@ -1,7 +1,7 @@
 ---
 feature: F-28
 epic: Foundation and identity
-status: refining
+status: approved
 board: 747
 version: 1
 ---
