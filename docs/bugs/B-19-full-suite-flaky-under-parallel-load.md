@@ -1,7 +1,7 @@
 ---
 bug: B-19
 feature: F-27
-status: approved
+status: building
 board: 772
 severity: high
 ---
