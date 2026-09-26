@@ -80,18 +80,18 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-page-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--app-space-5);
 }
 
 .app-breadcrumbs {
-    padding: 0 0 0.25rem 0;
+    padding: 0 0 var(--app-space-1) 0;
 }
 
 .app-page-header-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--app-space-4);
 }
 
 .app-page-title {
@@ -103,8 +103,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 2.5rem 1rem;
+    gap: var(--app-space-3);
+    padding: var(--app-space-7) var(--app-space-4);
     text-align: center;
 }
 
@@ -112,13 +112,14 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
+    gap: var(--app-space-2);
+    margin-top: var(--app-space-5);
 }
 
 .app-row-actions {
     display: inline-flex;
     align-items: center;
+    /* Tighter than space-1: icon buttons already carry their own 24px target (rule: ui). */
     gap: 0.125rem;
 }
 
@@ -472,11 +473,11 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-skip-link {
     position: fixed;
-    left: 0.5rem;
-    top: 0.5rem;
+    left: var(--app-space-2);
+    top: var(--app-space-2);
     z-index: 2000;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    padding: var(--app-space-2) var(--app-space-3);
+    border-radius: var(--app-radius-sm);
     background: var(--mud-palette-surface);
     color: var(--mud-palette-primary);
     font-weight: 600;
@@ -489,7 +490,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-name.mud-link {
     font-weight: 600;
-    margin-left: 0.25rem;
+    margin-left: var(--app-space-1);
 }
 
 .app-user-menu:empty {
@@ -501,17 +502,17 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-nav-menu {
-    padding: 0.5rem 0;
+    padding: var(--app-space-2) 0;
 }
 
 .app-nav-section.mud-typography {
     display: block;
-    padding: 1rem 1rem 0.25rem 1rem;
+    padding: var(--app-space-4) var(--app-space-4) var(--app-space-1) var(--app-space-4);
     opacity: 0.7;
 }
 
 .app-nav-divider.mud-divider {
-    margin: 0.5rem 0;
+    margin: var(--app-space-2) 0;
     border-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -571,11 +572,11 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-auth-bar {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--app-space-1);
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: 12px 16px;
+    padding: var(--app-space-3) var(--app-space-4);
 }
 
 .app-auth-name {
@@ -588,13 +589,14 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 16px 40px;
+    padding: var(--app-space-2) var(--app-space-4) var(--app-space-7);
     outline: none;
 }
 
 .app-auth-card {
     width: 100%;
     max-width: 440px;
+    /* The auth card's own breathing room, wider than the scale's top step (F-4). */
     padding: 28px 26px;
     border: 1px solid var(--mud-palette-divider);
     border-radius: var(--mud-default-borderradius);
@@ -639,20 +641,20 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-sign-in-forgot {
-    margin: -4px 0 16px;
-    font-size: 0.875rem;
+    margin: -4px 0 var(--app-space-4);
+    font-size: var(--app-font-md);
     text-align: right;
 }
 
 .app-auth-footer-line {
-    margin-top: 16px;
-    font-size: 0.875rem;
+    margin-top: var(--app-space-4);
+    font-size: var(--app-font-md);
     text-align: center;
 }
 
 /* F-20: "Continue with Google". Google's mark keeps its own colours; the label follows the theme's text colour. */
 .app-google-button .mud-button-label {
-    gap: 12px;
+    gap: var(--app-space-3);
     color: var(--mud-palette-text-primary);
 }
 
@@ -664,9 +666,9 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-divider {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 16px 0;
-    font-size: 0.875rem;
+    gap: var(--app-space-3);
+    margin: var(--app-space-4) 0;
+    font-size: var(--app-font-md);
     color: var(--mud-palette-text-secondary);
 }
 
@@ -679,20 +681,20 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-auth-footer {
     display: flex;
-    gap: 16px;
+    gap: var(--app-space-4);
     margin-top: 20px;
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
 }
 
 .app-auth-title {
-    font-size: 1.375rem;
+    font-size: var(--app-font-xl);
     font-weight: 700;
     line-height: 1.25;
     margin: 0 0 6px;
 }
 
 .app-auth-subtitle {
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
     color: var(--mud-palette-text-secondary);
     margin: 0 0 22px;
 }
@@ -713,7 +715,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-auth-result p {
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
     color: var(--mud-palette-text-secondary);
     line-height: 1.6;
     margin: 0 0 14px;
@@ -723,12 +725,12 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    Form fields (F-4 kit additions).
    --------------------------------------------------------------------------- */
 .app-field {
-    margin-bottom: 16px;
+    margin-bottom: var(--app-space-4);
 }
 
 .app-field-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -746,7 +748,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    uppercase, 600 and letter-spaced, so the two never read as the same thing. ThemeContrastTests holds the numbers. */
 .app-field-hint {
     display: block;
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     color: var(--mud-palette-text-secondary);
     margin-top: 5px;
     line-height: 1.45;
@@ -754,7 +756,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-field-error-text {
     display: block;
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     font-weight: 600;
     color: var(--mud-palette-error);
     margin-top: 5px;
@@ -763,8 +765,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-password-strength {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 8px;
+    gap: var(--app-space-2);
+    margin-top: var(--app-space-2);
 }
 
 .app-password-strength-bar {
@@ -773,17 +775,17 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-password-strength-text {
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     color: var(--mud-palette-text-secondary);
     white-space: nowrap;
 }
 
 .app-checkbox {
-    margin-bottom: 4px;
+    margin-bottom: var(--app-space-1);
 }
 
 .app-checkbox-label {
-    font-size: 0.8125rem;
+    font-size: var(--app-font-sm);
     color: var(--mud-palette-text-secondary);
     line-height: 1.5;
 }
@@ -802,10 +804,10 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    in both themes (the primary blue on its lighten tone is 4.3:1 in the light theme). */
 .app-badge {
     display: inline-block;
-    margin-left: 8px;
-    padding: 1px 8px;
+    margin-left: var(--app-space-2);
+    padding: 1px var(--app-space-2);
     border: 1px solid var(--mud-palette-primary);
-    border-radius: 10px;
+    border-radius: var(--app-radius-md);
     background: var(--mud-palette-primary-lighten);
     color: var(--mud-palette-text-primary);
     font-size: 0.6875rem;
@@ -816,12 +818,12 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-chip {
     display: inline-block;
-    margin: 2px 4px 2px 0;
+    margin: 2px var(--app-space-1) 2px 0;
     padding: 2px 10px;
     border: 1px solid var(--mud-palette-divider);
     border-radius: 12px;
     color: var(--mud-palette-text-primary);
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
 }
 
 .app-muted {
@@ -853,7 +855,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-table-filter {
     min-width: 220px;
-    margin-left: 16px;
+    margin-left: var(--app-space-4);
 }
 
 /* F-14: an active filter with its remove button, next to the table's other filters. */
@@ -861,11 +863,11 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    padding: 0 2px 0 12px;
+    padding: 0 2px 0 var(--app-space-3);
     border: 1px solid var(--mud-palette-divider);
-    border-radius: 16px;
+    border-radius: var(--app-radius-lg);
     color: var(--mud-palette-text-primary);
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
 }
 
 .app-history-changes {
@@ -875,19 +877,19 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-permission-group {
-    margin: 0 0 12px;
-    padding: 4px 14px 8px;
+    margin: 0 0 var(--app-space-3);
+    padding: var(--app-space-1) 14px var(--app-space-2);
     border: 1px solid var(--mud-palette-divider);
-    border-radius: 10px;
+    border-radius: var(--app-radius-md);
 }
 
 .app-permission-group-head {
     display: flex;
-    gap: 16px;
+    gap: var(--app-space-4);
     justify-content: space-between;
-    padding: 0 4px;
+    padding: 0 var(--app-space-1);
     color: var(--mud-palette-text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -901,7 +903,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-permission-name {
     color: var(--mud-palette-text-primary);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
 }
 
 .app-permission-description {
@@ -911,7 +913,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-permission-technical {
     color: var(--mud-palette-text-secondary);
     font-family: Consolas, "Courier New", monospace;
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
 }
 
 /* F-10: the danger zone on /account, set apart from the profile card by its border, not by colour alone. */
@@ -920,39 +922,39 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-danger-zone-title {
-    margin: 0 0 8px;
-    font-size: 1rem;
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-lg);
     font-weight: 700;
     color: var(--mud-palette-error);
 }
 
 /* F-16: the "Your data" card on /account, same heading size as the danger zone in the ordinary text colour. */
 .app-data-title {
-    margin: 0 0 8px;
-    font-size: 1rem;
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-lg);
     font-weight: 700;
 }
 
 /* F-11: the two-factor card on /account/security. */
 .app-security-title {
-    margin: 0 0 12px;
-    font-size: 1rem;
+    margin: 0 0 var(--app-space-3);
+    font-size: var(--app-font-lg);
     font-weight: 700;
 }
 
 .app-security-steps {
-    margin: 0 0 16px;
+    margin: 0 0 var(--app-space-4);
     padding-left: 20px;
 }
 
 .app-security-steps li {
-    margin-bottom: 8px;
+    margin-bottom: var(--app-space-2);
 }
 
 .app-security-qr {
     /* A QR code needs a light quiet zone to scan, in both themes. */
     background: #ffffff;
-    padding: 8px;
+    padding: var(--app-space-2);
     border-radius: 4px;
     image-rendering: pixelated;
 }
@@ -968,8 +970,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-security-codes {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 24px;
-    margin: 0 0 16px;
+    gap: var(--app-space-2) var(--app-space-5);
+    margin: 0 0 var(--app-space-4);
     padding: 0;
     list-style: none;
 }
@@ -978,12 +980,12 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-security-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--app-space-2);
 }
 
 .app-security-actions {
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: var(--app-space-4);
 }
 
 /* ---------------------------------------------------------------------------
@@ -997,22 +999,22 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-lookup-option-text {
-    font-size: 0.875rem;
+    font-size: var(--app-font-md);
 }
 
 .app-lookup-option-secondary {
-    font-size: 0.75rem;
+    font-size: var(--app-font-xs);
     color: var(--mud-palette-text-secondary);
 }
 
 .app-lookup-message {
-    padding: 12px 16px;
-    font-size: 0.8125rem;
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: var(--app-font-sm);
     color: var(--mud-palette-text-secondary);
 }
 
 .app-lookup-retry {
-    margin-left: 8px;
+    margin-left: var(--app-space-2);
     min-width: 0;
 }
 
@@ -1027,7 +1029,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     align-items: flex-start;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 12px;
+    gap: var(--app-space-3);
     /* The toolbar's spacer grows, so the wrapper has to refuse to shrink: with `min-width: 0` the
        spacer took every pixel and the three fields collapsed to zero width (found on screen). */
     flex: 0 0 auto;
@@ -1043,11 +1045,11 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    has to grow with its rows - otherwise the wrapped line lands on top of the table header. */
 .app-data-table .mud-toolbar {
     flex-wrap: wrap;
-    row-gap: 12px;
+    row-gap: var(--app-space-3);
     height: auto;
     min-height: 64px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: var(--app-space-2);
+    padding-bottom: var(--app-space-2);
 }
 
 .app-table-filters .app-field-label {
