@@ -1,7 +1,7 @@
 ---
 feature: F-39
 epic: Foundation and identity
-status: building
+status: validating
 board: 760
 version: 3
 ---
@@ -97,7 +97,26 @@ One answer shape for the whole API. Today three copies of the same mapping drift
 - Re-approved: 2026-09-26
 
 ## Validation script
-<!-- Written at the end of build. -->
+Nothing changes on screen: the same requests get the same answers. What is worth checking is that the answers really did not move, and that the guard works. Run from the worktree `D:\dev\_icontrol\wt\simulab\feature-39`.
+
+1. Confirm the three copies are gone and one remains.
+   - Git Bash: `grep -rn "int StatusFor(" src/ --include=*.cs | grep -v obj`
+   - PowerShell 7: `Get-ChildItem src -Recurse -Filter *.cs | Where-Object { $_.FullName -notlike '*\obj\*' } | Select-String 'int StatusFor\('`
+   - Expected: one line, in `src/BuildingBlocks/Simulab.ApiResults/ApiProblem.cs`.
+2. Confirm no endpoint test was edited to make it pass — that is the proof the behaviour did not move (AC5).
+   - Both shells: `git diff --stat main...HEAD -- tests/Modules tests/Hosts/Simulab.Api.Tests`
+   - Expected: no output.
+3. Start the app host and sign in as an Admin, then open **Administração → Papéis**, open the same role in two tabs, delete it in one and then delete it in the other. Expected: the second tab shows the "not found" message, not a raw code — the 404 still carries its `code`.
+4. On the sign-in page, get an account locked (five wrong passwords) and try once more. Expected: the message says how many seconds to wait. That is the `423` with `retryAfterSeconds`, the answer shape this item had to preserve exactly.
+5. Switch the language to **English** and repeat step 4. Expected: the same message in English, because the page still localizes by `code`.
+6. See the guard refuse a fourth copy: paste these lines into any endpoint file of a module (and `using Simulab.SharedKernel.Results;` if it is missing), then run the test.
+   ```
+   private static int StatusFor(ErrorKind kind) => kind switch { ErrorKind.NotFound => StatusCodes.Status404NotFound, _ => StatusCodes.Status400BadRequest };
+   ```
+   - Both shells: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~ProblemDetailsBoundaryTests"`
+   - Expected: `OnlyTheBuildingBlock_CarriesTheMapping` fails and names the file you pasted it into. Remove the lines afterwards.
+7. Reach step 4's sign-in with the keyboard only: Tab into the address, type, Tab to the password, type, Tab to the button, Enter. Expected: the same locked message.
+8. Stop the app host.
 
 ## Delivery
 - Branch: `feature/F-39`
