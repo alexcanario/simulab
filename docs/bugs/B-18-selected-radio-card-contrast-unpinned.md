@@ -21,7 +21,6 @@ under without a single test going red, which is exactly how B-16 and B-17 happen
 2. Read the line under the chosen option's title. It is legible today; nothing holds it there.
 
 ## Start
-<!-- What this bug needs before it can be fixed, and how to run it. Filled when the bug is created, confirmed at refinement. -->
 - Depends on: nothing. F-43 (`done`, merged as `7c771d4`) brought both the component and the helper the test
   needs.
 - Waits on: nothing.
