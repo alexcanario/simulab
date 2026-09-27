@@ -1,7 +1,7 @@
 ---
 feature: F-31
 epic: Foundation and identity
-status: refining
+status: approved
 board: 750
 version: 1
 ---
@@ -73,6 +73,7 @@ Let a Student, Curator or Admin answer "did someone get into my account, and fro
 - 2026-09-27 — Claude: the Web calls it through a new `IdentityApiClient.GetMyAccountEventsAsync(accessToken, cancellationToken)`, following the same `Authorized(...)`/`SendAsync<T>` pattern as `ListAccountEventsAsync`, with no query-string parameters to build.
 - 2026-09-27 — Claude: card texts (`Security.Activity.Title`, `Security.Activity.Empty`) go in `IdentityResources` next to the page's other `Security.*` keys; the event/method/reason values keep using the existing `AccountEvents.Event.*`/`Method.*`/`Reason.*` keys already in `SharedResources`, both already injected on this page.
 - 2026-09-27 — Claude: no mockup (`/agile:screen`) — one small read-only card made of existing kit parts (`AppLoadingState`, `AppErrorState`, the page's own `MudPaper` card style), no new visual pattern.
+- 2026-09-27 — Approved by the owner ("aprovo f-31").
 
 ## Out of scope
 - Filters, search or any pagination beyond the fixed last 20 events — that stays on `/admin/account-events`.
