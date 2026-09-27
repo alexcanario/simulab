@@ -99,4 +99,23 @@ public static class IdentityErrorCodes
 
     /// <summary>F-20 BR8: the Web host's waiting-confirmation ticket expired or was already used.</summary>
     public const string GoogleSignInExpired = "google_sign_in.expired";
+
+    /// <summary>F-29 BR7: this account is already linked to a different Google account.</summary>
+    public const string GoogleLinkAlreadyLinked = "google_link.already_linked";
+
+    /// <summary>
+    /// F-29 BR2: the session that finished the round trip is not the one that asked to link. A refusal of the
+    /// Web host, never of the Api: the Api knows nothing of the link ticket. The constant lives here because
+    /// error codes are one place per module (rule `api-contracts`).
+    /// </summary>
+    public const string GoogleLinkSessionChanged = "google_link.session_changed";
+
+    /// <summary>
+    /// F-29 BR2: the link attempt expired or its ticket was already used — a Web restart empties them. Not a
+    /// security refusal, and told apart from one on purpose. Also produced by the Web host only.
+    /// </summary>
+    public const string GoogleLinkExpired = "google_link.expired";
+
+    /// <summary>F-29 BR8: the current password given to disconnect Google is wrong.</summary>
+    public const string GoogleLinkCurrentPasswordInvalid = "google_link.current_password_invalid";
 }

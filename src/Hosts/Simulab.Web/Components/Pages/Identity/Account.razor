@@ -141,8 +141,11 @@ else
 
         _profile = result.Value;
 
-        // F-11 BR12: the Security link exists only while the Api has the feature on. Any failure hides it.
-        _securityAvailable = (await Api.GetTotpStatusAsync(accessToken!)).IsSuccess;
+        // F-29 BR14 (supersedes F-11 BR12): the Security page exists while either two-factor or Google is on,
+        // so the link follows the same rule. Gated on two-factor alone, v1's own configuration — Google on,
+        // two-factor off — would ship a page with nothing leading to it.
+        _securityAvailable = (await Api.GetTotpStatusAsync(accessToken!)).IsSuccess
+            || (await Api.GetGoogleLinkAsync(accessToken!)).IsSuccess;
         Cancel();
     }
 

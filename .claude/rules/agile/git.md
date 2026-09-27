@@ -10,11 +10,11 @@
 - Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work before anything else.
 - If git and the board or the files disagree, stop and ask.
 - Every item has its own worktree, created by `/agile:refine` before it writes anything and reused by the build. No checkout is ever switched; one writer per worktree, and two writers never share one (the index races).
-- Worktrees live in a short folder named `<type>-<n>` under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
+- Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen) under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
 - Before merging or removing a worktree, ask the owner to close any IDE or app host running from it.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.
-- After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and remotely, that item's worktree folder is gone.
+- After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
 - Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables.
 - `.claude/agile/warnings-baseline.json` is committed; build output, `bin/`, `obj/` and IDE folders are not.

@@ -99,6 +99,8 @@ if (google.Enabled)
 
 // Always registered: the pages that read them decide by the switch, and an empty store costs nothing.
 builder.Services.AddSingleton<GoogleSignUpTickets>();
+// F-29 BR2: the link attempts in flight on this host.
+builder.Services.AddSingleton<GoogleLinkTickets>();
 builder.Services.AddSingleton<CodeStepTickets>();
 // F-6, BR5-BR7: a policy per permission claim. UI comfort only - the Api still enforces every call.
 builder.Services.AddAuthorization(options =>

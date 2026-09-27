@@ -25,6 +25,12 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         Services.AddUiKit();
         JSInterop.Mode = JSRuntimeMode.Loose;
 
+        // B-19: the kit's search and lookup fields debounce for 300 ms on MudBlazor's own real timer
+        // (AppDataTable, AppLookupField), so a WaitFor behind one of them has only 700 ms left of bUnit's
+        // 1-second default. Under the whole solution running in parallel that budget runs out and the test
+        // fails for the machine's load, not for the code. A timeout is a maximum: a green run does not wait.
+        DefaultWaitTimeout = TimeSpan.FromSeconds(5);
+
         Authorization = AddAuthorization().SetNotAuthorized();
     }
 

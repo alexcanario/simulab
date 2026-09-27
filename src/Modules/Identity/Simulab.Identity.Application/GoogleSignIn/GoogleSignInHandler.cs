@@ -55,17 +55,11 @@ public sealed class GoogleSignInHandler(
             return Result.Success(GoogleSignInOutcome.SignUp(google));
         }
 
-        if (byEmail.Status != AccountStatus.Active)
-        {
-            return AccountExists();
-        }
-
-        // UC3, BR4: an active account at an address Google vouches for gets the link; its password stays.
-        var added = await userManager.AddLoginAsync(byEmail, Login(google));
-        return added.Succeeded
-            ? Result.Success(GoogleSignInOutcome.Continue(byEmail))
-            // The same subject was linked to another account a moment ago (two tabs): nothing to sign in to here.
-            : AccountExists();
+        // F-29 BR11 (supersedes F-20 BR4): an active account found by its address is **not** linked here any
+        // more. With an explicit link on the Security page, linking on the way in would silently undo a
+        // disconnection at the next sign-in, and "disconnect" would not mean what it says. The reader is told
+        // the account exists; the text points at the account settings.
+        return AccountExists();
     }
 
     /// <summary>

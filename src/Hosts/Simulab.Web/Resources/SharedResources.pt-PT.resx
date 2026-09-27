@@ -299,7 +299,11 @@
   <data name="google_sign_in.invalid_token" xml:space="preserve"><value>Não foi possível confirmar a resposta do Google. Tente novamente.</value></data>
   <data name="google_sign_in.email_not_verified" xml:space="preserve"><value>O Google ainda não verificou este endereço de e-mail. Verifique-o no Google e tente novamente.</value></data>
   <data name="google_sign_in.sign_up_required" xml:space="preserve"><value>Ainda não existe uma conta para esta conta Google.</value></data>
-  <data name="google_sign_in.account_exists" xml:space="preserve"><value>Já existe uma conta com este e-mail. Inicie sessão nela.</value></data>
+  <data name="google_sign_in.account_exists" xml:space="preserve"><value>Já existe uma conta com este e-mail. Inicie sessão com a sua palavra-passe e ligue o Google nas definições da conta.</value></data>
+  <data name="google_link.already_linked" xml:space="preserve"><value>Esta conta já está ligada a outra conta Google. Desligue essa primeiro.</value></data>
+  <data name="google_link.session_changed" xml:space="preserve"><value>A conta com sessão iniciada aqui mudou enquanto esteve no Google. Nada foi ligado; tente de novo.</value></data>
+  <data name="google_link.expired" xml:space="preserve"><value>A tentativa demorou demasiado. Nada foi ligado; tente de novo.</value></data>
+  <data name="google_link.current_password_invalid" xml:space="preserve"><value>Palavra-passe incorreta.</value></data>
   <data name="google_sign_in.expired" xml:space="preserve"><value>O início de sessão com o Google demorou demasiado ou foi interrompido. Comece de novo.</value></data>
   <data name="Nav.AccountEvents" xml:space="preserve"><value>Eventos de conta</value></data>
   <data name="AccountEvents.Title" xml:space="preserve"><value>Eventos de conta</value></data>
@@ -319,6 +323,8 @@
   <data name="AccountEvents.Event.TwoFactorDisabled" xml:space="preserve"><value>Verificação em duas etapas desativada</value></data>
   <data name="AccountEvents.Event.RecoveryCodesRegenerated" xml:space="preserve"><value>Códigos de recuperação gerados de novo</value></data>
   <data name="AccountEvents.Event.AccountErased" xml:space="preserve"><value>Conta eliminada</value></data>
+  <data name="AccountEvents.Event.GoogleLinked" xml:space="preserve"><value>Google ligado</value></data>
+  <data name="AccountEvents.Event.GoogleUnlinked" xml:space="preserve"><value>Google desligado</value></data>
   <data name="AccountEvents.Method.Password" xml:space="preserve"><value>com a palavra-passe</value></data>
   <data name="AccountEvents.Method.Google" xml:space="preserve"><value>com a Google</value></data>
   <data name="AccountEvents.Method.TotpCode" xml:space="preserve"><value>com o código da aplicação</value></data>

@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.61 (rascunho). English: [en](workflow.md).
+> Versão 0.0.71 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -68,7 +68,7 @@ Antes de escrever qualquer coisa, o Claude confere se a skill que carregou e o p
 | 3. Acesso | Autenticação, RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
 | 4. Integração | Mensageria (nenhuma, em processo, broker), serviços externos, armazenamento de arquivos e — quando alguma feature chama um modelo — o provedor do LLM e onde ele roda, o teto de custo e como ele é falsificado nos testes |
 | 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, família de ícones, como um item é editado, kit de UI e galeria — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados |
-| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes e as convenções da casa quando o código vive ao lado de um sistema existente |
+| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
 | 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo |
 | 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos e um catálogo de tools quando o app expõe ferramentas a um modelo), o prompt de sistema como arquivo versionado, e uma visão geral da arquitetura escrita à mão |
 
@@ -84,7 +84,7 @@ Saídas, todas em inglês:
 - `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. Um termo técnico novo ganha uma linha na primeira vez que aparece.
 - `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
-- `docs/architecture/` — quando a rodada 8 escolheu algum documento: o `tools/<App>.DocGen` gera, por módulo, um schema DBML lido num visualizador dbdiagram (`entities: "mermaid"` no `docgen.json` dá um diagrama ER, que renderiza no board mas fica ilegível a partir de uma dúzia de tabelas) e um dicionário de dados (do modelo EF), mapa de rotas por área (do documento OpenAPI que o teste de integração de `/openapi/v1.json` grava em `docs/api/`) e diagrama de módulos (das referências entre projetos, em Mermaid); um contexto com fábrica de design-time é montado por ela, então os nomes seguem o banco (snake_case, por exemplo); o `/agile:ship` regenera e o `--check` reprova quando estão desatualizados. Opcionalmente uma visão geral de uma página escrita à mão (C4 contexto e containers).
+- `docs/architecture/` — quando a rodada 8 escolheu algum documento: o `tools/<App>.DocGen` gera, por módulo, um schema DBML lido num visualizador dbdiagram (`entities: "mermaid"` no `docgen.json` dá um diagrama ER, que renderiza no board mas fica ilegível a partir de uma dúzia de tabelas) e um dicionário de dados (do modelo EF), mapa de rotas por área (do documento OpenAPI que o teste de integração de `/openapi/v1.json` grava em `docs/api/`) e diagrama de módulos (das referências entre projetos, em Mermaid); um contexto com fábrica de design-time é montado por ela, então os nomes seguem o banco (snake_case, por exemplo); quando a rodada 8 também escolheu o catálogo de ferramentas (pergunta 37), o `tools.md` lista cada ferramenta que o app oferece a um modelo — a descrição que o modelo recebe, o schema de entrada, o que ela alcança, as permissões que exige, se escreve e se pergunta antes — e o `--check` reprova quando uma ferramenta está sem descrição, sem permissões ou sem alcances, ou quando duas chegariam ao modelo com o mesmo nome. O `/agile:ship` regenera e o `--check` reprova quando estão desatualizados. Opcionalmente uma visão geral de uma página escrita à mão (C4 contexto e containers), na qual o gerador nunca mexe: só arquivos que carregam a marca `Do not edit` dele são reescritos ou apagados.
 - Os primeiros épicos no board, se o brief já os citar.
 
 ## 5. Ciclo de vida de uma feature
@@ -106,7 +106,7 @@ stateDiagram-v2
 
 | Status | O que acontece | Quem muda |
 |---|---|---|
-| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. | Claude |
+| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. | Claude |
 | `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
 | `building` | `/agile:build`: continua na worktree criada no refinamento — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
@@ -220,25 +220,36 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | **Início da sessão** | Mostra a branch, o item em andamento, o topo do backlog, os arquivos aprovados com perguntas em aberto e o trabalho sem commit em **todas** as worktrees. |
 | **A cada commit** | Uma guarda recusa um `git commit` na branch principal em dois casos: uma branch de item (`feature/F-<n>`, `bug/B-<n>`) está sem merge e não está aberta em nenhum lugar — o sinal de que uma IDE trocou a branch por trás da sessão — ou o commit carrega o arquivo de um item que não está `done` (refining, approved, building, validating), que pertence à branch do item. O Claude avisa você e volta para a branch certa; se o commit for mesmo da branch principal, você confirma e o Claude repete o comando terminando com o comentário `# agile:main-ok`. |
 | **A cada edição** | Nada é compilado. O arquivo editado só é anotado, sob a raiz git a que pertence — assim, uma edição dentro de uma worktree é verificada naquela worktree, e não na pasta onde a sessão começou. |
-| **Fim do turno** (só se houve mudança de código) | Compila os projetos alterados e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
-| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem (uma queda na taxa de acerto reprova o ship). |
+| **Fim do turno** (só se houve mudança de código) | Recompila os projetos alterados (`--no-incremental`) e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
+| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem (uma queda na taxa de acerto reprova o ship). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara, quando declara um (abaixo). |
 
 Detalhes:
 - **Só avisos novos.** Os avisos são comparados com `.claude/agile/warnings-baseline.json`, um arquivo versionado. Avisos que já existiam não reprovam o gate; um aviso novo, sim, listado com arquivo, linha e mensagem. A baseline só é reescrita por um ship verde (ou por `gate.js baseline`, com o seu sim).
-- **O veredito é a última linha.** Todo relatório termina com `agile gate GREEN`, `agile gate RED: <o que falhou>` (os avisos novos, os testes que falharam, o build bloqueado) ou `agile gate SKIPPED: <por quê>` (nada foi editado, não há solução, não é um repositório git — quando não acha a solução, diz para nomeá-la como `solution` no `.claude/agile/build.json`), ou `agile gate OFF: <por quê>` num repositório cujo `build.json` diz `engine: none`. Como hook, um turno sem mudança de código fica em silêncio. Rodado à mão, o `stop` não enxerga as marcações do hook (elas pertencem à sessão), então pergunta ao git quais arquivos de código mudaram desde a main — commitados, não commitados e novos —, compila e testa esses, e sempre imprime o veredito. O Claude grava a saída inteira num arquivo e cita dali, sem nunca filtrá-la com `grep`, `head` ou `tail`: uma vez, uma saída filtrada escondeu a única lista de avisos novos.
+- **O veredito é a última linha.** Todo relatório termina com `agile gate GREEN`, `agile gate RED: <o que falhou>` (os avisos novos, os testes que falharam, o build bloqueado) ou `agile gate SKIPPED: <por quê>` (nada foi editado, não há solução, não é um repositório git — quando não acha a solução, diz para nomeá-la como `solution` no `.claude/agile/build.json`), ou `agile gate OFF: <por quê>` num repositório cujo `build.json` diz `engine: none`. Como hook, um turno sem mudança de código fica em silêncio. Rodado à mão, o `stop` não enxerga as marcações do hook (elas pertencem à sessão), então pergunta ao git quais arquivos de código mudaram desde a main — commitados, não commitados e novos —, compila e testa esses, e sempre imprime o veredito. Ele nunca lê a entrada padrão: só o hook de Stop, chamado como `gate.js stop --hook`, lê o evento do hook. Antes da 0.0.68, um stop à mão esperava para sempre por uma entrada padrão deixada aberta, como no Bash tool do Claude. O Claude grava a saída inteira num arquivo e cita dali, sem nunca filtrá-la com `grep`, `head` ou `tail`: uma vez, uma saída filtrada escondeu a única lista de avisos novos.
 - **Mudanças amplas.** Se uma mudança alcança mais de 6 projetos de teste, rodam só os que a referenciam diretamente; o resto fica para o ship (`AGILE_GATE_MAX_TESTS`). Uma mudança em `.props`, `.targets` ou na solução compila a solução inteira e deixa os testes para o ship.
 - **Busca da solução.** A solução é procurada na raiz git e uma pasta abaixo (`repo/App.slnx`, `src/App.sln`).
-- **Um repositório adotado.** Uma base de código que existia antes do workflow (o `CLAUDE.md` dela diz `Profile: adopted`, escrito à mão ou por outro plugin, como a adoção do legacy-lens) registra como ela é compilada de verdade em `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` ou `none`), `solution` (caminho a partir da raiz), `scope` (os projetos que vale compilar quando a solução inteira não dá), `testCommand` e `notes`. O gate lê `solution`, então uma solução funda na árvore ainda é compilada, e `engine: none` o desliga com o motivo em `notes`; `scope` e `testCommand` são para pessoas e ainda não são lidos. O `/agile:sync` atualiza regras, templates e o workflow de um repositório assim, mas não toca no perfil dele: não há perfil do plugin de onde atualizá-lo.
+- **O SDK da solução.** Toda chamada ao `dotnet` roda a partir da pasta da solução (a raiz git quando não há solução), então o `global.json` ao lado da solução escolhe o SDK e o runner de testes, exatamente como para quem compila naquela pasta. Todo relatório abre com `sdk <versão> (<pasta>)`; `sdk unknown` quer dizer que `dotnet --version` falhou ali (um SDK fixado que não está instalado), e a falha de build que vem em seguida diz o porquê. O baseline registra o SDK com que foi tirado (`"#sdk"`). Quando um build posterior usa outro, o relatório acrescenta `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. Essa linha é informação, não falha: tirar o baseline de novo é decisão sua. Com o runner Microsoft.Testing.Platform, o relatório cita os totais dele (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`).
+- **Um repositório adotado.** Uma base de código que existia antes do workflow (o `CLAUDE.md` dela diz `Profile: adopted`, escrito à mão ou por outro plugin, como a adoção do legacy-lens) registra como ela é compilada de verdade em `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` ou `none`), `solution` (caminho a partir da raiz), `scope` (os projetos que vale compilar quando a solução inteira não dá), `testCommand`, `notes` e, sob `msbuild`, os opcionais `msbuildPath` e `restoreCommand`. O gate lê `solution`, então uma solução funda na árvore ainda é compilada, e `engine: none` o desliga com o motivo em `notes`; `scope` é para pessoas e não é lido. O engine é lido sem espaços nas pontas e sem diferenciar maiúsculas, e um valor fora dos três é RED (`agile gate RED: unknown engine "MSBuild2" in .claude/agile/build.json (legal: dotnet, msbuild, none)`) em vez de se comportar calado como `dotnet` — que foi justamente como o `msbuild` ficou sem ser honrado até a 0.0.69. O `/agile:sync` atualiza regras, templates e o workflow de um repositório assim, mas não toca no perfil dele: não há perfil do plugin de onde atualizá-lo.
+- **`engine: msbuild`.** Para uma solução que o SDK do .NET não compila — tipicamente um tipo de projeto antigo cujos targets só o Visual Studio traz, como uma aplicação web ASP.NET que importa `$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets`, onde o `dotnet build` para com `error MSB4019`. O gate então usa o MSBuild.exe no lugar da CLI do `dotnet`; o parser de avisos, o baseline, a dica de saída travada e o veredito RED/GREEN são os mesmos. O que muda:
+  - **Achar o MSBuild:** `msbuildPath` do `build.json` (absoluto, ou a partir da raiz do repositório) quando o arquivo está lá, depois `msbuild` no PATH (um Developer Command Prompt o coloca lá), depois o `vswhere.exe` no caminho fixo dele sob `Program Files (x86)`, que vem com toda instalação do Visual Studio. Um `msbuildPath` declarado que existe é usado como está: o gate nunca cai para um MSBuild diferente do que você nomeou. Quando nenhum funciona, `agile gate RED: MSBuild not found`, listando cada lugar onde procurou. O `vswhere` só existe no Windows, então fora dele são dois lugares, não três.
+  - **A abertura do relatório** é `msbuild 18.10.1.42706 (.)` em vez de `sdk <versão> (<pasta>)`, e o baseline guarda isso na mesma chave `#sdk`, como `msbuild 18.10.1.42706`. Um baseline de `dotnet` continua guardando a versão do SDK pura, então nenhum baseline escrito antes da 0.0.69 precisa ser refeito.
+  - **Restore**, só no `ship` e no `baseline`: o build leva `-restore`, a não ser que `restoreCommand` esteja declarado, e aí é ele que roda antes — `msbuild -restore` não faz nada por `packages.config`, que é o que um repositório legado costuma ter. Um `restoreCommand` que falha é `agile gate RED: restore failed (<comando>)`, e nada é compilado.
+  - **Testes** são o `testCommand`, a suíte inteira pelo shell, só no `ship`: o `dotnet test` não alcança um assembly de teste .NET Framework, e a detecção de projeto de teste do gate não reconhece um projeto MSTest ou NUnit com `packages.config`. O gate de turno compila os projetos afetados e diz `tests skipped: engine msbuild runs the whole suite at ship`; o `baseline` nunca rodou testes. Sem `testCommand`, o ship diz `tests skipped: no testCommand in .claude/agile/build.json` e só o build decide o veredito — falta de suíte é dívida que a adoção registrou, não um gate que ninguém consegue apagar. Um `testCommand` que falha é RED; um que passa de 1800 segundos (`AGILE_TESTCMD_TIMEOUT`) é RED por timeout.
+  - Desde a 0.0.69 o `testCommand` é **executado**, não só documentação: ele precisa rodar sozinho, sem abrir IDE nem esperar tecla.
+- **Um comando de docs declarado.** O `build.json` também pode trazer `"docs": { "command": "...", "check": "...", "paths": ["docs/legacy/inventory"] }`, escrito por quem preparou o repositório (a adoção do legacy-lens declara ali o mapa de inventário dele), para que um mapa vivo do código seja atualizado a cada item. No ship, depois do manual da app, `gate.js docs` roda `command` e depois `check` (opcional) pelo shell, a partir da raiz da worktree do item, qualquer que seja o `engine`. `command` e `paths` são obrigatórios. Termina com `agile docs GREEN: <n> file(s) changed under <paths>`, e esses arquivos entram no commit de docs do item. `agile docs SKIPPED: no docs command declared` quer dizer que não há bloco `docs`, e o ship segue como antes. `agile docs RED: <o que falhou>` para o ship como um gate vermelho: um comando ou check que falhou, não está instalado ou passou de 600 segundos (`AGILE_DOCS_TIMEOUT`), um campo que falta, ou um arquivo alterado fora de `paths`. Um arquivo assim é listado e nunca commitado.
 - **Saída de build travada.** Um app host, preview ou depurador rodando mantém as DLLs abertas. O gate então informa "build blocked" e o nome do processo, em vez de uma falha de build genérica; o Claude encerra o que ele mesmo iniciou antes do fim do turno e pede que você feche o seu.
-- **Contagens honestas.** O Claude só cita uma contagem de avisos da saída do gate ou de um build com `--no-incremental` (um build incremental pula os projetos que não mudaram e esconde os avisos deles), e compila de novo depois de um `git stash` ou de trocar de branch antes de rodar os testes: o `--no-build` rodaria os binários da outra árvore.
+- **Contagens honestas.** Um build incremental pula a compilação de um projeto que não mudou, e o MSBuild não repete os avisos de uma compilação pulada. Por isso todo build do gate é uma recompilação `--no-incremental` do que ele mede, no turno e no ship. Antes da 0.0.67, um aviso novo encontrado num turno sumia no seguinte, e o gate ficava GREEN sem nada corrigido. A recompilação custa alguns segundos por turno: foi medida em +0,6 s e +2,2 s em duas soluções pequenas, e cada linha `built` mostra esse tempo. O Claude só cita uma contagem de avisos da saída do gate ou de um build com `--no-incremental`, e compila de novo depois de um `git stash` ou de trocar de branch antes de rodar os testes: o `--no-build` rodaria os binários da outra árvore.
 - **Testes pendurados.** Um teste que roda por mais de 120 segundos (`AGILE_GATE_HANG_TIMEOUT`) conta como pendurado: a execução falha com o nome dele, em vez de travar o turno por minutos.
 - **Sem loops.** Depois de 3 gates vermelhos seguidos, o turno termina e você vê a falha; a verificação pendente fica para o próximo turno.
 - **Limite conhecido.** Só as edições feitas com as ferramentas de edição são rastreadas. Mudanças feitas por comando de shell (`dotnet format`, um merge) são pegas no ship.
 - `AGILE_HOOKS=off` desliga os hooks em uma sessão.
+- `AGILE_TESTCMD_TIMEOUT` (1800 s) limita o `testCommand` de um repositório com `engine: msbuild`, como o `AGILE_DOCS_TIMEOUT` limita o comando de docs.
 
 ## 10. Board
 
 O `CLAUDE.md` tem uma linha `Board:`: GitHub Issues + Projects (`gh`), Azure Boards (`az boards`) ou nenhum (nesse caso, usa `docs/agile/backlog.md`). Mapeamento: épico → feature. Sem Tasks por papel. O arquivo da feature guarda o id do board, e o merge fecha o work item.
+
+O corpo de um issue só é substituído inteiro. `gh issue edit --body` troca o corpo todo pelo que recebe, então um texto parcial ali apaga em silêncio o resto do item (aconteceu no B-1 do legacy-lens). O Claude grava o texto completo do item num arquivo, envia com `gh issue edit <id> --body-file <arquivo>` e lê o corpo de volta para comparar. Uma descrição no Azure Boards também vai sempre inteira, de um arquivo.
 
 ## 11. Idiomas e o manual da app
 
@@ -375,7 +386,7 @@ As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agil
 
 O Claude escreve todo arquivo (código, testes, docs) com as suas ferramentas de edição, nunca pelo texto de um script: escapes como `\t` ou `\b` viram caracteres de controle, e um teste pode passar sem conferir nada.
 
-**Mantendo um projeto atualizado.** O bootstrap copia arquivos do plugin para dentro do projeto (regras, templates, este workflow, o perfil, os arquivos de build), então uma atualização do plugin não chega a eles sozinha. Atualize o plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, sessão nova) e rode `/agile:sync` no projeto. O Claude mostra uma tabela do que mudou e só copia o que você aprovar: uma cópia que você nunca editou é substituída; um arquivo que você editou (normalmente o perfil) é mesclado à mão, mantendo as suas seções; os arquivos de build (`Directory.Build.props`, `.editorconfig`, `global.json`...) nunca são copiados por cima — cada diferença é proposta como uma edição; as suas regras próprias (`project.md`, `*-project.md`) e o `CLAUDE.md` nunca são tocados. Se arquivos de build ou regras conferidas pelo build mudaram, o Claude compila, roda a suíte completa e refaz a baseline de avisos. A versão e o que foi copiado ficam registrados em `.claude/agile/sync.json`. Rode entre features, não no meio de uma. O `/agile:version` mostra a versão do plugin em uso na sessão ao lado da versão do projeto, e diz se o próximo passo é um sync ou uma atualização do plugin. O sync também aponta o que só o `/agile:bootstrap` instala e o seu projeto não tem — uma ferramenta própria, como o gerador de documentação técnica — e oferece registrar uma feature para isso; ele nunca instala nada disso por conta.
+**Mantendo um projeto atualizado.** O bootstrap copia arquivos do plugin para dentro do projeto (regras, templates, este workflow, o perfil, os arquivos de build), então uma atualização do plugin não chega a eles sozinha. Atualize o plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, sessão nova) e rode `/agile:sync` no projeto. O Claude mostra uma tabela do que mudou e só copia o que você aprovar: uma cópia que você nunca editou é substituída; um arquivo que você editou (normalmente o perfil) é mesclado à mão, mantendo as suas seções; os arquivos de build (`Directory.Build.props`, `.editorconfig`, `global.json`...) nunca são copiados por cima — cada diferença é proposta como uma edição; as suas regras próprias (`project.md`, `*-project.md`) nunca são tocadas, e o `CLAUDE.md` só recebe o que você aprovar: uma seção que o template ganhou, ou uma linha `Worktrees:` quando ele não tem (a recomendação do bootstrap, `D:\wt\<repositório>` ou `C:\`; as worktrees que já existem mantêm o nome). Se arquivos de build ou regras conferidas pelo build mudaram, o Claude compila, roda a suíte completa e refaz a baseline de avisos. Um projeto sem nenhuma baseline de avisos (um repositório adotado, um bootstrap antigo) ganha uma linha oferecendo tirar a primeira: um rebuild completo, feito só com o seu sim, commitado com o sync. Uma nota de plugin ⏳ no retro log que cita um `agile-canary#N` já entregue pelo plugin também ganha uma linha: com o seu sim, `sync.js notes` a marca com ✅, a versão e o commit do merge. Só a própria sessão do projeto escreve essas marcas; a sessão do plugin nunca escreve no seu repositório. A versão e o que foi copiado ficam registrados em `.claude/agile/sync.json`. Rode entre features, não no meio de uma. O `/agile:version` mostra a versão do plugin em uso na sessão ao lado da versão do projeto, e diz se o próximo passo é um sync ou uma atualização do plugin. O sync também aponta o que só o `/agile:bootstrap` instala e o seu projeto não tem — uma ferramenta própria, como o gerador de documentação técnica — e oferece registrar uma feature para isso; ele nunca instala nada disso por conta.
 
 A `output-style` define como o Claude fala com você: em pt-BR, com a resposta primeiro, relatórios de passo com no máximo 10 linhas, detalhes no arquivo e não no chat, uma recomendação com o motivo, sem narrar o trabalho, "não verificado" dito com essas palavras e a má notícia primeiro. Respostas longas só quando um gate falhou, quando uma pergunta precisa de contexto ou quando você pedir.
 
@@ -387,7 +398,7 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 - **Fim:** uma nota curta (onde paramos, o que vem a seguir, quem decide).
 - **Antes do merge a partir de uma worktree:** o Claude pergunta, como uma pergunta bloqueante, se você já fechou a IDE e o app host que estiverem rodando daquela pasta — uma remoção que falha no meio desregistra a worktree e deixa a pasta no disco, pior do que não remover. No .NET ele também roda `dotnet build-server shutdown` antes, porque um build server segura um lock que fechar a IDE não libera.
 
-**Uma pasta por item.** Cada item ganha a própria worktree — uma pasta separada, fora do repositório (`Worktrees:` no `CLAUDE.md`; padrão `<pasta pai do repositório>/wt/<repositório>/<tipo>-<n>`, curta por causa do limite de caminho do Windows) — criada pelo `/agile:refine` antes de ele escrever qualquer coisa e usada até o merge. É isso que mantém os documentos de um item na branch dele: uma sessão trabalhando na pasta de outro item escrevia ali o arquivo da feature e o mockup, e eles acabavam numa branch que não era a deles. O build reaproveita essa pasta e nunca cria uma segunda.
+**Uma pasta por item.** Cada item ganha a própria worktree — uma pasta separada, fora do repositório (a raiz é a linha `Worktrees:` do `CLAUDE.md`, perguntada no bootstrap — recomendação `D:\wt\<repositório>`, ou `C:\wt\<repositório>` sem drive D:; sem a linha, `<pasta pai do repositório>/wt/<repositório>/`, e o `/agile:sync` propõe a linha. A pasta é `f-<n>-<desc>` ou `b-<n>-<desc>`, com `<desc>` = até 20 caracteres do slug, cortado num hífen: `f-3-exam-board`. Curta por causa do limite de caminho do Windows; uma worktree criada antes mantém o nome `<tipo>-<n>` até o merge) — criada pelo `/agile:refine` antes de ele escrever qualquer coisa e usada até o merge. É isso que mantém os documentos de um item na branch dele: uma sessão trabalhando na pasta de outro item escrevia ali o arquivo da feature e o mockup, e eles acabavam numa branch que não era a deles. O build reaproveita essa pasta e nunca cria uma segunda.
 
 **Dois itens em paralelo.** O padrão continua sendo um item por vez em `building`. Quando você quiser mesmo um segundo item andando — uma feature longa numa sessão e um bug em outra — digite `/agile:build <id> --worktree`. A flag é o seu pedido de trabalho em paralelo: ela libera o limite de um por vez (e, para um item aprovado antes desta mudança, cria a pasta que falta). Antes, o Claude diz se os dois itens podem colidir (mesmo schema de módulo, mesma tela, mesmo contrato) e recomenda fazer em sequência quando colidem. Um escritor por worktree. O status do item fica nessa worktree até o merge, e o `/agile:status` e o início de sessão leem todas as worktrees. Só um app host roda por vez (as portas colidem); arquivos locais ignorados pelo git não vêm junto. Uma pré-visualização do app host a partir de uma worktree aponta a configuração de execução para o caminho absoluto dela temporariamente, restaurada para o caminho do checkout principal ao fim da pré-visualização. No ship, a checagem completa roda na worktree e o merge no checkout principal; depois do merge a worktree e a branch são removidas, nunca com `--force` sem perguntar, e o outro item em andamento é atualizado com a branch principal. Limite recomendado: dois itens — você valida cada um na tela, e esse é o gargalo de verdade.
 
@@ -438,6 +449,15 @@ Rodada 2 de 7 — Dados.
 ...
 ```
 
+A rodada 6 sempre traz uma pergunta que o brief não responde — onde ficam as pastas dos itens:
+
+```
+Claude: 28c. Raiz das worktrees → Recomendação: D:\wt\examprep (esta máquina tem drive D:;
+    sem ele seria C:\wt\examprep). Fora do repositório; cada item ganha uma pasta como
+    f-3-exam-board — o id e no máximo 20 caracteres do slug.
+> ok
+```
+
 Depois da rodada 7, o Claude faz a pergunta de fechamento, resolve o que ela levantar, mostra um resumo de todas as decisões e pede confirmação. Então cria:
 
 ```
@@ -476,7 +496,7 @@ Status: idea. Nada mais acontece até a refinarmos.
 ```
 
 ```
-Claude: Pasta deste item: D:/dev/wt/examprep/feature-3 [feature/F-3] — criada agora,
+Claude: Pasta deste item: D:/wt/examprep/f-3-exam-board [feature/F-3] — criada agora,
 fora do repositório; o arquivo foi movido para lá e tudo da F-3 é escrito ali.
 Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
 O modelo de usuários e papéis do bootstrap tem Curator e Admin.
@@ -828,9 +848,9 @@ A F-6 é um build longo numa sessão. Aparece um bug, e o dono quer corrigi-lo e
 > /agile:build B-2 --worktree
 Claude: A F-6 está em build na worktree dela (feature/F-6). O B-2 mexe só em Identity/Login;
 a F-6 mexe em Catalog. Sem schema nem tela em comum: podem andar em paralelo.
-O B-2 já tem a worktree do refinamento: D:\dev\wt\examprep\bug-2. Sigo nela?
+O B-2 já tem a worktree do refinamento: D:\wt\examprep\b-2-exam-board-search. Sigo nela?
 > sim
-Claude: B-2 em D:\dev\wt\examprep\bug-2, status building (nessa branch).
+Claude: B-2 em D:\wt\examprep\b-2-exam-board-search, status building (nessa branch).
 Só um app host por vez: pare o do checkout principal antes de eu abrir a tela aqui.
 ```
 
@@ -839,7 +859,7 @@ No início de qualquer sessão, o status mostra os dois:
 ```
 [agile] branch feature/F-6
 In progress: F-6 Practice test by level — building (docs/features/F-6-...)
-In progress in a worktree: B-2 — building [bug/B-2] D:/dev/wt/examprep/bug-2
+In progress in a worktree: B-2 — building [bug/B-2] D:/wt/examprep/b-2-exam-board-search
 ```
 
 No ship do bug, a checagem completa roda na worktree e o merge no checkout principal:
@@ -847,28 +867,55 @@ No ship do bug, a checagem completa roda na worktree e o merge no checkout princ
 ```
 > /agile:ship B-2
 Claude: Antes de remover a worktree: você já fechou a IDE e o app host que estiverem rodando de
-D:\dev\wt\examprep\bug-2? Uma remoção que falha no meio deixa a pasta no disco. Diga "fechado" quando terminar.
+D:\wt\examprep\b-2-exam-board-search? Uma remoção que falha no meio deixa a pasta no disco. Diga "fechado" quando terminar.
 > fechado
 Claude: Desligando o build server do .NET, depois rodando a suíte completa na worktree.
 Suíte completa verde (212 testes, 1 min 58 s). Pronto para o merge de bug/B-2 em main. Autoriza?
 > sim
-Claude: Merge feito. Worktree removida, branch apagada, 0 0 contra origin/main. A F-6 ficou 1 commit atrás
-da main: vou atualizá-la antes da próxima rodada de testes.
+Claude: Merge feito. Worktree removida, branch apagada, 0 0 contra origin/main.
+remote branch: never pushed, nothing to delete.
+A F-6 ficou 1 commit atrás da main: vou atualizá-la antes da próxima rodada de testes.
 ```
+
+A branch do item só existe na sua máquina, a menos que alguém tenha feito push dela, então normalmente não há nada a apagar no remoto. O Claude pergunta ao remoto antes (`git ls-remote --exit-code --heads origin bug/B-2`) e só roda `git push origin --delete` quando a branch está lá; antes da 0.0.71 o ship tentava sempre e terminava com `error: unable to delete 'bug/B-2': remote ref does not exist`.
 
 ### 14.10 Atualizando o plugin e o projeto
 
-Uma lição para o plugin nasce na retro de um projeto: vira uma linha ⏳ em "Plugin notes — status" no `docs/agile/retro-log.md`. Na sessão do plugin:
+Uma lição para um plugin nasce na retro de um projeto. O `CLAUDE.md` do projeto lista os plugins que ele usa na linha `Plugins:`: o bootstrap escreve `Plugins: agile`, e a adoção de outro plugin acrescenta o nome curto dele (`Plugins: agile, lens`). Cada nota de plugin diz o plugin ao lado do escopo, e vira uma linha ⏳ em "Plugin notes — status" no `docs/agile/retro-log.md`, com uma coluna Plugin. Num projeto que usa os dois:
+
+```
+Claude: Lições do F-12:
+1. Nota de plugin → plugin: lens [generic] — o mapa de pontos de entrada não viu uma chamada feita
+   por uma classe base genérica de repositório (Orders/OrderService.cs:88).
+2. Regra do projeto → project.md: "Um endpoint novo ganha o teste de autorização no mesmo commit."
+Aprova?
+> aprovo as duas
+Claude: Retro log: linha ⏳ do lens acrescentada. A sessão do legacy-lens a recolhe; o agile não mexe nela.
+```
+
+Uma lição que cita uma causa mostra como a causa foi medida, ou diz que não foi. Um item capturado dela leva a mesma linha:
+
+```
+Claude: Lições do F-6:
+1. Nota de plugin → plugin: agile [stack: dotnet] — o gate compilou com o preview 11.0, não com o SDK
+   que a solução fixa. Evidência: `dotnet build adapters/dotnet/Lens.DotNet.slnx -getProperty:NETCoreSdkVersion`
+   dá 11.0.100-rc.1 a partir da raiz e 10.0.401 a partir de adapters/dotnet.
+2. Item novo → "Limpar os 911 avisos do baseline": causa não verificada (visto: 911 avisos aceitos desde
+   a adoção). O Start dele diz "Cause not verified: measure it at /agile:refine".
+Aprova?
+```
+
+Sem linha `Plugins:`, ou só com `agile`, toda nota é `plugin: agile` e nada é perguntado. Uma tabela antiga sem coluna Plugin ganha a coluna, com `agile` em todas as linhas, na próxima retro que escrever nela. O `/agile:status` conta as notas em espera por plugin ("Plugin notes waiting: 2 agile, 1 lens"). A sessão do plugin agile recolhe só as linhas `agile`, e nunca escreve no repositório do projeto (desde a 0.0.68). Ela comenta no issue que entregou e lista esse issue no `scripts/delivered.json` do plugin. A própria sessão do projeto marca a nota com ✅ no próximo `/agile:sync`. Na sessão do plugin:
 
 ```
 > vamos ajustar o plugin com as recomendações em retro-log.md
-Claude: 2 notas em aberto (F-8). Feito na 0.0.29: espera do bUnit (4 perfis), pool do Npgsql (5 perfis),
-manuais en/pt-BR. Linhas marcadas ✅ no retro-log.md (sem commit).
-1. Push do plugin?  2. Atualizar o plugin instalado?  3. Commit no projeto?
-> pode fazer o push, atualizar o plugin e o commit no simulab
+Claude: 2 notas em aberto (F-8), agile-canary#31 e #32. Feito na 0.0.29: espera do bUnit (4 perfis),
+pool do Npgsql (5 perfis), manuais en/pt-BR. Os dois issues fechados com comentário e listados como entregues.
+1. Push do plugin?  2. Atualizar o plugin instalado?
+> pode fazer o push e atualizar o plugin
 ```
 
-Cada um dos três é pedido separadamente, assim como o push do projeto. O projeto só recebe os arquivos novos pelo `/agile:sync`, entre features.
+Cada um é pedido separadamente. O projeto só recebe os arquivos novos, e as marcas ✅, pelo `/agile:sync`, entre features, rodado pela própria sessão dele.
 
 O plugin passou de 0.0.10 para 0.0.13. Primeiro o plugin em si (terminal, depois uma sessão nova):
 
@@ -895,11 +942,42 @@ Claude: agile@canary 0.0.10 → 0.0.13.
 | docs/agile/workflow.md                 | update | copiar: manual 0.0.13                                      |
 | docs/agile/profile.md                  | edited | mesclar: duas linhas novas de teste; a sua seção Simulab fica |
 | .editorconfig                          | manual | uma linha difere: CA1716 = none. Acrescento?              |
-Nada mais mudou. Seus project.md, ui-project.md e CLAUDE.md não são tocados.
+| CLAUDE.md                              | manual | sem linha Worktrees:. Acrescento "Worktrees: D:\wt\examprep"? |
+| CLAUDE.md                              | manual | sem linha Plugins:. Acrescento "Plugins: agile"?               |
+Nada mais mudou. Seus project.md e ui-project.md não são tocados; as worktrees que já existem mantêm o nome.
 > ok
 Claude: Copiados 2, mesclado 1 (sem conflitos), .editorconfig editado. Build com 0 avisos; 252 testes verdes (9 s).
 O plugin também traz o DocGen (documentação técnica gerada do código, desde a 0.0.21), que o bootstrap instala e este projeto não tem. Registro como feature?
 Registrei 0.0.13 em .claude/agile/sync.json. Commit "chore: sync with agile@canary 0.0.13" na main. Autoriza?
+```
+
+Um projeto sem baseline de avisos, como um repositório legado que o legacy-lens acabou de adotar, recebe a oferta de uma, porque enquanto o arquivo não existe o gate não chama nenhum aviso de novo:
+
+```
+> /agile:sync
+Claude: agile@canary 0.0.64 → 0.0.65.
+| Arquivo                                | Estado  | Proposta                                                         |
+| .claude/rules/agile/git.md             | update  | copiar: uma linha sobre as worktrees dos itens                   |
+| baseline de avisos                     | missing | tirar agora (rebuild completo de src/Billing.sln, pode levar minutos) |
+> ok
+Claude: Copiado 1. Baseline: compilei src/Billing.sln (212 s), 1.847 entradas, agile gate GREEN.
+A partir do próximo item, só os avisos que ele acrescentar são novos. Commit "chore: sync with agile@canary 0.0.65"
+(com a baseline) na main. Autoriza?
+```
+
+Se esse build falhar, ou nenhuma solução for encontrada, o Claude cita a linha RED ou SKIPPED do gate, não grava baseline, termina o resto do sync e registra no retro log que a baseline continua faltando. Uma solução que só o MSBuild compila falha ali, porque o gate roda `dotnet build` (#20).
+
+Uma nota de plugin ⏳ que cita um issue entregue pela versão nova recebe o ✅ no mesmo sync. Uma nota sem `agile-canary#N`, ou que cita um issue ainda aberto, continua ⏳:
+
+```
+> /agile:sync
+Claude: agile@canary 0.0.66 → 0.0.68.
+| Arquivo                                | Estado    | Proposta                                            |
+| docs/agile/workflow.md                 | update    | copiar: manual 0.0.68                               |
+| notas de plugin entregues              | 2 linhas  | marcar ✅: agile-canary#19 (0.0.66), linha e nota    |
+> ok
+Claude: Copiado 1. Notas: marquei a linha 10 (tabela) e a linha 47 (nota), agile@canary 0.0.66 (`6270ad6`).
+Commit "chore: sync with agile@canary 0.0.68" (com o retro log) na main. Autoriza?
 ```
 
 A partir da 0.0.23 o template traz o `.editorconfig` definitivo. Num projeto que ainda tem o básico, a linha do `.editorconfig` lista os novos grupos de regras (chaves, pattern matching, membros com corpo de expressão, formatação) e o Claude propõe um grupo de cada vez; código que quebra uma regra aprovada aparece como aviso no build que vem depois do sync.
@@ -923,6 +1001,17 @@ src/ExamPrep.Web/Pages/Results.razor.cs|RS0030 (0 -> 1)
   src/ExamPrep.Web/Pages/Results.razor.cs(42,19): RS0030 The symbol 'DateTime.Now' is banned in this project: ...
 agile gate RED: 1 new warning(s): RS0030 in src/ExamPrep.Web/Pages/Results.razor.cs
 Claude: Troquei DateTime.Now pelo TimeProvider injetado; ship de novo... agile gate GREEN.
+```
+
+**Um baseline tirado com outro SDK.** A solução fica em `src/`, com seu próprio `global.json`, e o baseline foi tirado antes de o gate compilar a partir dessa pasta:
+
+```
+sdk 10.0.401 (src)
+baseline taken with SDK 11.0.100-rc.1.26425.128, this build used 10.0.401: warning counts may differ; retake it with gate.js baseline after the owner agrees
+built src/ExamPrep.Web/ExamPrep.Web.csproj (6 s)
+agile gate GREEN
+Claude: O baseline veio do preview 11.0, que a raiz do repositório escolhia. Ele aceita avisos que este
+SDK não levanta, e um aviso novo pode se esconder atrás deles. Tiro de novo agora (build completo, alguns minutos)?
 ```
 
 **Um teste pendura.** Em vez de travar o turno por minutos:
@@ -954,6 +1043,74 @@ Claude: Criando a feature/F-8 a partir da main e fazendo o commit lá.
 ```
 
 Quando um commit é mesmo da main com um item aberto (uma nota de retro, por exemplo), o Claude pergunta, e com o seu sim repete o comando terminando com `# agile:main-ok`. Um commit de retro carrega só regras, `CLAUDE.md`, templates e o retro-log; uma lição que precisa de código vira item, para que o código passe pelo gate na branch dele.
+
+**O comando de docs mexeu num arquivo que não é dele.** Num repositório adotado cujo `.claude/agile/build.json` declara um mapa do código, o passo `gate.js docs` do ship o roda depois da verificação completa verde:
+
+```
+ran docs.command (48 s): lens-map --out docs/legacy/inventory
+changed outside docs.paths (not committed):
+  src/Billing/Billing.csproj
+agile docs RED: 1 file(s) changed outside docs/legacy/inventory: src/Billing/Billing.csproj
+Claude: O comando do mapa reescreveu um arquivo de projeto, que está fora de docs.paths. Não commitei
+e o restaurei com git restore. Isso é da ferramenta que escreve o comando (legacy-lens), então anotei
+como nota de plugin no retro log. Merge em espera: faço o ship sem o mapa desta vez, ou esperamos?
+```
+
+Uma execução verde lista os arquivos que mudou dentro de `docs.paths`, e eles entram no commit `docs(F-<n>)` junto com o manual:
+
+```
+ran docs.command (47 s): lens-map --out docs/legacy/inventory
+ran docs.check (3 s): lens-map --check
+to commit with the item:
+  docs/legacy/inventory/entry-points.md
+agile docs GREEN: 1 file(s) changed under docs/legacy/inventory
+```
+
+**Um repositório que só o MSBuild compila.** Um repositório adotado cuja solução tem uma aplicação web ASP.NET. Antes da 0.0.69 todo gate ali falhava no `dotnet build`, mesmo com `engine: msbuild` no `build.json`:
+
+```
+sdk 10.0.401 (.)
+build failed: App.sln
+src\Web\Web.csproj(19,3): error MSB4019: The imported project "...\sdk\11.0.100\Microsoft\VisualStudio\v18.0\WebApplications\Microsoft.WebApplication.targets" was not found.
+agile gate RED: build failed (App.sln)
+```
+
+Da 0.0.69 em diante o mesmo repositório compila. Um turno que mexeu em um projeto:
+
+```
+agile gate (by hand): 1 code file(s) changed since the main branch
+msbuild 18.10.1.42706 (.)
+built src/Lib/Lib.csproj (0 s)
+tests skipped: engine msbuild runs the whole suite at ship
+agile gate GREEN
+```
+
+O ship restaura, recompila a solução e roda a suíte declarada:
+
+```
+msbuild 18.10.1.42706 (.)
+restored (12 s): nuget restore App.sln
+built App.sln (58 s)
+tested (214 s): vstest.console.exe tests\**\bin\Debug\*.Tests.dll
+  Total tests: 312. Passed: 312. Failed: 0.
+warnings baseline: 41 entries -> .claude/agile/warnings-baseline.json
+agile gate GREEN
+```
+
+Duas falhas que vale reconhecer. Um typo no engine, que antes passava calado como `dotnet`:
+
+```
+agile gate RED: unknown engine "MSBuild2" in .claude/agile/build.json (legal: dotnet, msbuild, none)
+```
+
+E uma máquina sem Visual Studio, que diz onde procurou em vez de culpar a solução:
+
+```
+MSBuild not found (engine msbuild in .claude/agile/build.json): tried no msbuildPath in .claude/agile/build.json, msbuild on the PATH, vswhere at C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
+agile gate RED: MSBuild not found
+```
+
+Claude: Esta máquina não tem Visual Studio, então o gate não consegue compilar este repositório. Instale o Build Tools, rode de um Developer Command Prompt, ou nomeie o MSBuild que você quer como `msbuildPath` no `build.json`. Qual deles?
 
 ### 14.12 A pergunta de fechamento do quiz
 
@@ -1132,6 +1289,33 @@ Claude: 30b. Evals → Recomendação: um nível de teste próprio. 40 respostas
 
 A rodada 8 então faz a pergunta 38 — o prompt de sistema como arquivo versionado, revisado como código — e, se o tutor ganhar tools, a pergunta 37, do catálogo de tools.
 
+Com o catálogo escolhido, o bootstrap copia o `ModelToolAttribute.cs` para o projeto que têm as tools. Uma tool passa a ser um método que declara o que o código sozinho não diz:
+
+```csharp
+[ModelTool(Permissions = ["EXAM_READ"], Reaches = ["Catalog.ExamService.GetAnswer"])]
+[Description("Gets the official answer and rationale for a question.")]
+public Task<Answer> GetOfficialAnswerAsync([Description("The question id.")] Guid questionId)
+```
+
+No ship seguinte, o `docs/architecture/tools.md` ganha uma linha por tool e uma seção com o schema de entrada dela. Quando uma tool é adicionada sem dizer quem pode chamá-la, o ship para:
+
+```
+> /agile:ship F-30
+Claude: Verificação completa GREEN (212 testes). Docs técnicos:
+
+tool catalogue: 2 problem(s)
+  ExamPrep.Ai.TutorTools.ExplainAsync: no Permissions. Name them, or say the tool is
+  open with a value of its own (for example ["authenticated"]).
+  ExamPrep.Ai.TutorTools.ResetProgressAsync: no Reaches. Name the systems and
+  operations it reaches.
+
+Duas tools estão sem declaração, então não regenerei o catálogo. A ExplainAsync lê uma
+questão e a resposta do aluno: EXAM_READ, ou "authenticated" se qualquer aluno logado
+pode usar? A ResetProgressAsync escreve — qual serviço ela alcança?
+```
+
+O dono responde, o código muda e o ship segue. Uma tool que escreve sem perguntar antes ao usuário é permitida, e aparece como `⚠ no` na tabela de resumo: a política é do app, a visibilidade é do catálogo.
+
 ### 14.15 As duas passagens antes do código
 
 A F-21 cria um endpoint que outros módulos consomem e uma tabela nova, então o build roda as duas passagens somente leitura antes de planejar:
@@ -1167,7 +1351,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build <feature> [--worktree]` | Implementa uma feature aprovada na worktree criada no refinamento (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
-| `/agile:ship <feature>` | Suíte completa, merge, board e manual da app |
+| `/agile:ship <feature>` | Suíte completa, merge, board, manual da app e o comando de docs declarado |
 | `/agile:retro` | Transforma lições em regras ou skills |
 | `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
 | `/agile:status` | Feature em andamento, topo do backlog, perguntas em aberto, o que está bloqueado e por quem |
@@ -1204,7 +1388,7 @@ flowchart TD
     B --> C["Achar o épico"]
     C -->|nenhum serve| C1{"Propor um épico; concorda?"}
     C1 -->|sim| D
-    C --> D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por, caminho, paralelo — desconhecido se ninguém disse)"]
+    C --> D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por, caminho, paralelo — desconhecido se ninguém disse);<br/>uma causa citada com a evidência, ou 'Cause not verified'"]
     D --> E["Espelhar no board; id do board no cabeçalho"]
     E --> F(["Nada mais até /agile:refine <id>"])
 ```
@@ -1330,11 +1514,11 @@ flowchart TD
     B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura;<br/>saída gravada inteira, última linha GREEN ou RED: o que falhou"]
     C -->|vermelho| C1["Corrigir na branch"]
     C1 --> C
-    C -->|verde| D["Manual da app em pt-BR, pt-PT, en; docs técnicas regeneradas; infra.md; baseline"]
+    C -->|verde| D["Manual da app em pt-BR, pt-PT, en; docs técnicas regeneradas;<br/>gate.js docs: comando de docs declarado, RED para como o gate; infra.md; baseline"]
     D --> E{"Autoriza o merge na main?"}
     E -->|não| E1(["Esperar"])
     E -->|sim| E2["Branch atual é a main; ler main..branch:<br/>parar se algum commit carrega o id de outro item"]
-    E2 --> F["Merge --no-ff; push; verificar 0 0,<br/>branch e worktree removidas"]
+    E2 --> F["Merge --no-ff; push; verificar 0 0, worktree removida,<br/>branch apagada (no origin só se o ls-remote a lista)"]
     F --> G["Decisões que citam arquivo estão nele; ## Delivery; status: done"]
     G --> H["Fechar o item do board com evidência"]
     H --> I["Retro: no máximo 3 lições"]
@@ -1344,13 +1528,13 @@ flowchart TD
 ### /agile:retro
 ```mermaid
 flowchart TD
-    A["Um item shippado, ou uma sessão"] --> B["No máximo 3 lições que mudam o trabalho futuro"]
+    A["Um item shippado, ou uma sessão"] --> B["No máximo 3 lições que mudam o trabalho futuro;<br/>uma causa mostra a evidência, ou diz 'cause not verified'"]
     B --> C["Classificar cada uma: regra do projeto, configuração,<br/>verificação de build, ajuste de template, nota do plugin, nada"]
     C --> D["Mostrar lições com destino e linha exata"]
     D --> E{"Aprovar cada uma"}
     E --> F["Aplicar; CLAUDE.md abaixo de 60 linhas; uma linha por regra"]
     F --> F2["Regra nova sobre um padrão de teste: varrer os testes existentes;<br/>corrigir cada caso ou registrar como bug"]
-    F2 --> G["Entrada no retro-log.md; nota do plugin ganha linha ⏳<br/>na tabela de status, com o escopo"]
+    F2 --> G["Entrada no retro-log.md; nota de plugin (plugin: nome, da linha Plugins:)<br/>ganha linha ⏳ com plugin e escopo; tabela antiga ganha a coluna Plugin;<br/>cita agile-canary#N quando tiver, e recebe o ✅ no /agile:sync"]
     G --> H(["Commit com a sua autorização se for na main"])
 ```
 
@@ -1372,8 +1556,8 @@ flowchart TD
     A["Somente leitura"] --> B["Git: branch, arquivos sem commit,<br/>cada worktree e o status do item dela"]
     B --> C["Arquivos: item em andamento, aprovados com perguntas abertas,<br/>itens cujo Start depende de algo ou espera por algo"]
     C --> D["Board: top 5, divergência com os arquivos"]
-    D --> E["Retro log: notas ⏳ do plugin, contagem"]
-    E --> F(["Relatório curto: em andamento, próximo passo, esperando você, bloqueados e por quem,<br/>trabalho sem commit, topo do backlog (o primeiro que pode começar), divergência do board"])
+    D --> E["Retro log: notas ⏳ de plugin, contagem por plugin"]
+    E --> F(["Relatório curto: em andamento, próximo passo, esperando você, bloqueados e por quem,<br/>trabalho sem commit, topo do backlog (o primeiro que pode começar), divergência do board,<br/>notas de plugin em espera por plugin"])
 ```
 
 ### /agile:sync
@@ -1386,12 +1570,13 @@ flowchart TD
     B -->|tudo igual| B1(["Nada a fazer"])
     B --> C["Tabela: new, update, edited, manual; uma proposta por arquivo"]
     C --> D{"Aprovar por arquivo"}
-    D --> E["Copiar new e update; mesclar edited à mão;<br/>propor cada edição manual; nunca tocar nas regras do projeto"]
+    D --> E["Copiar new e update; mesclar edited à mão;<br/>propor cada edição manual (inclusive a linha Worktrees: ou Plugins: que faltar);<br/>nunca tocar nas regras do projeto; sem baseline de avisos: oferecer a primeira, gate.js baseline com o seu sim"]
     E --> E2["Algo que só o bootstrap instala e o projeto não tem:<br/>apontar e oferecer registrar uma feature"]
     E2 --> F{"Arquivos de build ou regras conferidas mudaram?"}
     F -->|sim| G["Build, suíte completa, corrigir achados, baseline"]
     F -->|não| H
-    G --> H["sync.js record; entrada no retro-log"]
+    G --> G2["Notas de plugin entregues, se aprovado:<br/>sync.js notes as marca com ✅"]
+    G2 --> H["sync.js record; entrada no retro-log"]
     H --> I{"Autoriza o commit na main?"}
     I -->|sim| J(["chore: sync with agile@canary <versão>"])
 ```

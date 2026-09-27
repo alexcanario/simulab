@@ -40,6 +40,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Eliminar a sua conta](erase-account.md): eliminar a conta e o que fica guardado
 - [Verificação em dois passos](two-factor.md): um código do telemóvel depois da palavra-passe, e códigos de recuperação
 - [Iniciar sessão com o Google](google-sign-in.md): criar uma conta ou iniciar sessão com a sua conta Google
+- [Ligar e desligar o Google](security-google.md): usar o Google além da palavra-passe, em **A minha conta → Segurança**
 - [Perfis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um perfil
 - [Utilizadores](users.md): encontrar uma conta e mudar os seus perfis (Administradores)
 - [Histórico de perfis](role-history.md): quem alterou que perfil ou os perfis de quem, e quando (Administradores)

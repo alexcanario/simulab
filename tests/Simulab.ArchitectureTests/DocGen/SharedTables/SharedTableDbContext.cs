@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Simulab.Persistence;
 
 namespace Simulab.ArchitectureTests.DocGen.SharedTables;
 
@@ -47,6 +48,17 @@ public sealed class SharedTableDbContext(DbContextOptions<SharedTableDbContext> 
         {
             category.ToTable("categories");
             category.HasOne(c => c.Parent).WithMany().HasForeignKey(c => c.ParentId);
+
+            // F-28: the two partial-index shapes the real models do not have. The one over `name` is a visible
+            // column, so it reaches the DBML schema too; the filters keep their own spacing and case on purpose,
+            // because DocGen must pass the model's string through untouched.
+            category.HasIndex(c => c.Name)
+                .HasDatabaseName("ix_categories_named")
+                .HasFilter("name IS NOT NULL");
+            category.HasIndex(c => new { c.ParentId, c.Name })
+                .HasDatabaseName("ux_categories_parent_name")
+                .IsUniquePerTenant()
+                .HasFilter("ParentId  Is Not NULL");
         });
     }
 }

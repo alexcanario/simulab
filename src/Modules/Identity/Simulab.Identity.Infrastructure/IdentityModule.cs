@@ -187,6 +187,8 @@ public static class IdentityModule
             services.AddSingleton<IGoogleIdTokenValidator, GoogleIdTokenValidator>();
             services.AddScoped<GoogleSignInHandler>();
             services.AddScoped<RegisterGoogleUserHandler>();
+            // F-29: the account's own link, behind the same switch as the rest of the feature.
+            services.AddScoped<GoogleLinkHandler>();
         }
 
         services.AddOpenIddict()

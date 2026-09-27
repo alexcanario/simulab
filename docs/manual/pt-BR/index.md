@@ -40,6 +40,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Apagar sua conta](erase-account.md): apagar a conta e o que fica guardado
 - [Verificação em duas etapas](two-factor.md): um código do celular depois da senha, e códigos de recuperação
 - [Entrar com o Google](google-sign-in.md): criar uma conta ou entrar com sua conta Google
+- [Conectar e desconectar o Google](security-google.md): usar o Google além da senha, em **Minha conta → Segurança**
 - [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um papel
 - [Usuários](users.md): achar uma conta e mudar os papéis dela (Administradores)
 - [Histórico de papéis](role-history.md): quem mudou qual papel ou os papéis de quem, e quando (Administradores)

@@ -354,6 +354,69 @@ public class EntityModelsTests
         Occurrences(section, "- `ix_customers_address_city` on address_city\n").Should().Be(1);
     }
 
+    // F-28 AC1: the one partial index the solution really has, in both dictionaries that map the jobs table.
+    [Theory]
+    [InlineData("Jobs")]
+    [InlineData("Identity")]
+    public void RenderDictionary_SaysWhichRowsAPartialIndexCovers(string module)
+    {
+        var entry = RealModels().Single(m => m.Module == module);
+
+        EntityModels.RenderDictionary(entry.Module, entry.Model)
+            .Should().Contain("- `ix_jobs_active_created_at` on created_at (where status IN (0, 1))\n");
+    }
+
+    // F-28 AC2: an index that covers every row keeps the line it has today.
+    [Fact]
+    public void RenderDictionary_AddsNothingToAnIndexWithoutAFilter()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Identity");
+
+        var text = EntityModels.RenderDictionary(module, model);
+
+        text.Should().Contain("- `ix_consent_records_user_id` on user_id\n")
+            .And.Contain("- `ux_users_tenant_normalized_email` on tenant_id, normalized_email (unique, NULLS NOT DISTINCT)\n")
+            .And.NotContain("(where )")
+            .And.NotContain(", where )");
+    }
+
+    // F-28 AC3, AC4: one bracket holds all three facts in order, and the filter is the model's own string.
+    [Fact]
+    public void RenderDictionary_PutsUniqueNullsAndTheFilterInOneBracket()
+    {
+        var (module, model) = SharedTableModel();
+
+        var section = Section(EntityModels.RenderDictionary(module, model), "categories");
+
+        section.Should().Contain("- `ix_categories_named` on name (where name IS NOT NULL)\n")
+            .And.Contain("- `ux_categories_parent_name` on parent_id, name (unique, NULLS NOT DISTINCT, where ParentId  Is Not NULL)\n",
+                "the filter is written exactly as the model carries it, spacing and case included");
+        Occurrences(section, "(").Should().Be(Occurrences(section, ")"), "one bracket per index line");
+    }
+
+    // F-28 AC5: a partial index the diagram shows carries the filter as a DBML note on its index line.
+    [Fact]
+    public void RenderSchema_NotesTheFilterOfAPartialIndexItShows()
+    {
+        var (module, model) = SharedTableModel();
+
+        Block(EntityModels.RenderSchema(module, model), "Table categories")
+            .Should().Contain("    name [name: 'ix_categories_named', note: 'where name IS NOT NULL']\n")
+            .And.Contain("    (parent_id, name) [name: 'ux_categories_parent_name', unique, note: 'where ParentId  Is Not NULL']\n");
+    }
+
+    // F-28 AC5, other half: an index the schema drops for a hidden column stays dropped, filter or not.
+    [Fact]
+    public void RenderSchema_LeavesOutAPartialIndexOverAColumnItDoesNotShow()
+    {
+        var (module, model) = RealModels().Single(m => m.Module == "Jobs");
+
+        var text = EntityModels.RenderSchema(module, model);
+
+        text.Should().NotContain("ix_jobs_active_created_at", "the index covers created_at, a standard column the schema leaves out (F-26)")
+            .And.NotContain("status IN (0, 1)");
+    }
+
     private static string Section(string dictionary, string table)
     {
         var start = dictionary.IndexOf($"\n## {table}\n", StringComparison.Ordinal);

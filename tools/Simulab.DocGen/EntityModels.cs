@@ -202,7 +202,10 @@ internal static partial class EntityModels
         indexes.AddRange(table.Table.Indexes
             .Where(i => i.Columns.All(c => shownNames.Contains(c.Name)))
             .OrderBy(i => i.Name, StringComparer.Ordinal)
-            .Select(i => $"    {ColumnList(i.Columns)} [name: {Quoted(i.Name)}{(i.IsUnique ? ", unique" : "")}]"));
+            // F-28: a partial index says which rows it covers; DBML takes it as a note on the index.
+            .Select(i => $"    {ColumnList(i.Columns)} [name: {Quoted(i.Name)}{(i.IsUnique ? ", unique" : "")}"
+                + (Filter(i) is { } filter ? $", note: {Quoted($"where {filter}")}" : "")
+                + "]"));
         if (indexes.Count > 0)
         {
             sb.Append("\n  indexes {\n").Append(string.Join("\n", indexes)).Append("\n  }\n");
@@ -262,6 +265,18 @@ internal static partial class EntityModels
 
     private static string Quoted(string text) => $"'{text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("'", "\\'", StringComparison.Ordinal)}'";
 
+    /// <summary>
+    /// F-28: the filter of a partial index, exactly as the model carries it (the string the migration wrote), or
+    /// null when the index covers every row. A table index maps to one model index per entity type sharing the
+    /// table, and they all carry the same filter, so the first one answers.
+    /// </summary>
+    internal static string? Filter(ITableIndex index)
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        var filter = index.MappedIndexes.First().GetFilter();
+        return string.IsNullOrWhiteSpace(filter) ? null : filter;
+    }
+
     public static string RenderDictionary(string module, IModel model)
     {
         var sb = new StringBuilder();
@@ -287,8 +302,24 @@ internal static partial class EntityModels
                 sb.Append("\nIndexes:\n");
                 foreach (var index in indexes)
                 {
-                    var unique = index.IsUnique ? " (unique" + (index.MappedIndexes.First().GetAreNullsDistinct() == false ? ", NULLS NOT DISTINCT" : "") + ")" : "";
-                    sb.Append(CultureInfo.InvariantCulture, $"- `{index.Name}` on {string.Join(", ", index.Columns.Select(c => c.Name))}{unique}\n");
+                    // F-28: unique, NULLS NOT DISTINCT and the partial filter share one bracket, in that order.
+                    var facts = new List<string>();
+                    if (index.IsUnique)
+                    {
+                        facts.Add("unique");
+                        if (index.MappedIndexes.First().GetAreNullsDistinct() == false)
+                        {
+                            facts.Add("NULLS NOT DISTINCT");
+                        }
+                    }
+
+                    if (Filter(index) is { } filter)
+                    {
+                        facts.Add($"where {filter}");
+                    }
+
+                    var brackets = facts.Count > 0 ? $" ({string.Join(", ", facts)})" : "";
+                    sb.Append(CultureInfo.InvariantCulture, $"- `{index.Name}` on {string.Join(", ", index.Columns.Select(c => c.Name))}{brackets}\n");
                 }
             }
         }

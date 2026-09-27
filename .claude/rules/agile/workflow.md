@@ -20,6 +20,7 @@
 - The main session owns the conversation: a subagent never asks the owner, shows a mockup or takes an approval. A subagent is a fresh-context review, a read-only pass before the code (`system-design` proposes, `architect` reviews it, only when the item creates a project, a contract, a message between modules or a schema change), a producing role (`ux-designer` designs a screen, `frontend` implements an approved mockup), or parallel work on different files; one writer at a time in a worktree, and the session runs the gate after a producing agent.
 - Verify what a subagent reports against the files and `git log`. A report is not evidence.
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
+- An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back; never a partial or inline `--body` (it replaces the whole body).
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
 - End every step with: what changed (files), what is next, who acts next.
 - Quote real command output for builds and tests (counts, duration). Never paraphrase a result.

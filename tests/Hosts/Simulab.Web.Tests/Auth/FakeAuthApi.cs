@@ -67,6 +67,15 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-20: the form bodies the <c>google</c> grant received, in order.</summary>
     public List<string> GoogleForms { get; } = [];
 
+    /// <summary>F-29: the ID tokens <c>POST google-links</c> received, in order. Empty means the Api was never asked.</summary>
+    public List<string?> LinkCalls { get; } = [];
+
+    /// <summary>F-29: the problem body <c>POST google-links</c> answers with; null links successfully.</summary>
+    public object? LinkError { get; set; }
+
+    /// <summary>F-29: what <c>GET google-links</c> answers — the state the Security page renders from.</summary>
+    public GoogleLinkResponse GoogleLinkState { get; set; } = new(false, null, HasPassword: true);
+
     public HttpClient Client() => new(this) { BaseAddress = new Uri("https://api.test") };
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -149,6 +158,27 @@ public sealed class FakeAuthApi : HttpMessageHandler
             return Json(
                 new SessionInfoResponse(Guid.Empty.ToString(), "ana@example.com", $"jti-of-{token}", Permissions, SessionFullName, SessionPreferredLanguage),
                 options: AppJson.Options);
+        }
+
+        // F-29: what the Security page reads when it is rendered by this host. Two-factor answers 404, the
+        // switch's own answer, so the page is carried by the Google card alone — v1's configuration.
+        if (path == "/api/v1/identity/google-links" && request.Method == HttpMethod.Get)
+        {
+            return Json(GoogleLinkState, options: AppJson.Options);
+        }
+
+        if (path == "/api/v1/identity/totp" && request.Method == HttpMethod.Get)
+        {
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        if (path == "/api/v1/identity/google-links" && request.Method == HttpMethod.Post)
+        {
+            var body = await request.Content!.ReadFromJsonAsync<GoogleLinkRequest>(AppJson.Options, cancellationToken);
+            LinkCalls.Add(body!.IdToken);
+            return LinkError is null
+                ? new HttpResponseMessage(HttpStatusCode.NoContent)
+                : Json(LinkError, HttpStatusCode.Conflict);
         }
 
         if (path == "/api/v1/identity/profile" && request.Method == HttpMethod.Get)

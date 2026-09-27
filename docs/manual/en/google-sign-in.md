@@ -1,8 +1,8 @@
 ---
 page: google-sign-in
 locale: en
-features: [F-20]
-updated: 2026-09-23
+features: [F-20, F-29]
+updated: 2026-09-27
 ---
 # Sign in with Google
 
@@ -24,7 +24,7 @@ Anyone with a Google account.
 2. If two-factor sign-in is on for your account, type the code from your authenticator app, as after a password.
 
 ### You already have an account with a password
-If your Simulab account uses a Gmail address, the first **Continue with Google** links your Google account to it. From then on either way works: your password or Google. For other addresses, sign in with your password.
+Signing in with Google does not join itself to an account you already have, whatever address it uses: you are told the account exists and you sign in with your password. To use both, connect Google yourself on **My account → Security**, see [Connect and disconnect Google](security-google.md). Once connected, either way works.
 
 ### You signed up but never confirmed your email
 Select **Continue with Google** with the same Gmail address and confirm the three boxes on **Create your account**. Your account becomes active, and the password chosen at sign-up stops working.
@@ -42,7 +42,7 @@ Erasing your account, downloading your data, turning two-factor sign-in off and 
 ## Messages
 | Message | What it means | What to do |
 |---|---|---|
-| An account with this email address already exists. Sign in to it instead. | Your address already has a Simulab account that Google cannot be linked to automatically | Sign in with your password |
+| An account with this email address already exists. Sign in to it instead. | The address already has a Simulab account, and signing in with Google never joins itself to one | Sign in with your password, then connect Google on **My account → Security** |
 | The sign-in with Google took too long or was interrupted. Start again. | More than 10 minutes passed, or the page was opened from another browser | Select **Continue with Google** again |
 | Google has not verified this email address. Verify it with Google, then try again. | Google has not confirmed that the address is yours | Verify the address in your Google account |
 | Google's answer could not be confirmed. Try again. | The answer from Google was not valid | Try again; if it keeps happening, sign in with your password |
@@ -51,5 +51,6 @@ Erasing your account, downloading your data, turning two-factor sign-in off and 
 ## Related pages
 - [Create an account](create-account.md)
 - [Sign in and sign out](sign-in-and-sign-out.md)
+- [Connect and disconnect Google](security-google.md)
 - [Password](password.md)
 - [Two-factor sign-in](two-factor.md)
