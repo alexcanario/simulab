@@ -1,7 +1,7 @@
 ---
 feature: F-30
 epic: Foundation and identity
-status: approved
+status: validating
 board: 749
 version: 1
 ---
@@ -166,6 +166,20 @@ No screen, no route, no error code changes. The two endpoints keep their contrac
   second connection between the lookup and the insert for AC8 and AC8b. Never by breaking the database, so
   everything runs on the same Postgres container as the rest of the Identity tests.
 - 2026-09-26 — no new package.
+- 2026-09-27 — `IdentityUniqueViolation` and `IIdentityUnitOfWork.TranslateWriteFailure` live in
+  `Simulab.Identity.Application.Abstractions` (Claude) — BR8 forbids the Application project from
+  referencing EF Core; the handlers catch the plain BCL `Exception` and ask the abstraction whether it is
+  one of the two named collisions, and only `IdentityUnitOfWork` in Infrastructure ever touches
+  `DbUpdateException`/`Npgsql`.
+- 2026-09-27 — AC8b is proven directly against `IdentityUniqueViolations.Translate` with a real
+  `pk_user_logins` collision, not through the HTTP pipeline like AC8 (Claude) — unlike `UserManager.CreateAsync`'s
+  email check (gated by `RequireUniqueEmail`, which the AC8 test turns off), `UserManager.AddLoginAsync`
+  always runs its own `FindByLoginAsync` pre-check first, with no switch to disable it; a sequential test can
+  only ever resolve that check before the database ever sees the second write, so the exact race is not
+  reachable this way without genuine concurrency. `RegisterGoogleUserHandler`'s catch block is exercised
+  end-to-end by the AC4 and AC5 tests (same `try`/`catch`, same `unitOfWork.TranslateWriteFailure` call); only
+  the specific branch that maps a `GoogleLogin` violation to `AccountExists()` is proven at the unit level
+  instead of through a live race.
 
 ### Independent review of this file (2026-09-26, before approval)
 The `reviewer` agent read the file against the code; every blocker and major was checked here before being
@@ -212,8 +226,13 @@ accepted, and the findings are folded into the rules and criteria above.
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+No screen changed (BR5): this is validated through the API and the database, not on screen.
+
+1. `cd src/Hosts/Simulab.Api && dotnet run` → the Api starts (`Now listening on: https://localhost:...`).
+2. Sign up: `curl -k -X POST https://localhost:<port>/api/v1/identity/registrations -H "Content-Type: application/json" -d "{\"email\":\"validacao@exemplo.com\",\"password\":\"Senha#Segura2026\",\"declaresAdult\":true,\"acceptsTerms\":true,\"acceptsPrivacy\":true,\"termsVersion\":\"2026-v1\",\"privacyVersion\":\"2026-v1\",\"fullName\":\"Validacao\"}"` (PowerShell: same command with `curl.exe` and escaped quotes) → `202 Accepted`.
+3. Same request again, unchanged → `202 Accepted` again (BR4: same answer, nothing new written — check with the query below that `identity.users` still has exactly one row for that address).
+4. Query the database (`psql` or DataGrip) — `select count(*) from identity.users where email = 'validacao@exemplo.com';`, `select count(*) from identity.consent_records c join identity.users u on u.id = c.user_id where u.email = 'validacao@exemplo.com';`, `select count(*) from identity.email_verification_tokens t join identity.users u on u.id = t.user_id where u.email = 'validacao@exemplo.com';` → all three return `1`: the user, its consent and its token exist together, or not at all.
+5. `dotnet test tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj --filter FullyQualifiedName~SignUpTransactionTests` (same command in PowerShell) → `Passed! - Failed: 0, Passed: 8` (AC1, AC2, AC4, AC5, AC7, AC8, AC8b's translation, AC9).
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
