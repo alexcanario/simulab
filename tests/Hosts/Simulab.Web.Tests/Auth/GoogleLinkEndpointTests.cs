@@ -1,5 +1,11 @@
 using System.Net;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -99,26 +105,84 @@ public sealed class GoogleLinkEndpointTests(WebApplicationFactory<Program> facto
         response.Headers.Location.Should().BeNull("nothing was redirected to Google");
     }
 
-    // AC11: and an anonymous caller cannot start one at all.
+    // BR2's own seam: the start really mints a ticket for the caller and marks the challenge. Every callback
+    // test above injects the marker by hand, so without this a typo in either item key — or a ticket minted
+    // for the wrong id — would leave them all green while the feature silently stopped linking anything.
     [Fact]
-    public async Task StartLink_Anonymous_IsRefused()
+    public async Task StartLink_SignedInWithTheToken_ChallengesGoogleWithAMarkerAndATicketForTheCaller()
+    {
+        await using var host = GoogleOn(idToken: null);
+        var (client, userId) = await SignedInAsync(host);
+
+        using var response = await PostLinkAsync(host, client, withToken: true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect, await response.Content.ReadAsStringAsync());
+        var location = response.Headers.Location!.ToString();
+        location.Should().StartWith("https://accounts.google.com/o/oauth2/v2/auth");
+
+        // The ticket id and the marker are inside the OIDC `state`, protected — which is the whole point of
+        // BR2 — so no test can read them from here, and none should: what must never appear in the address
+        // is exactly what a referrer would leak.
+        location.Should().NotContain(GoogleAccountEndpoints.LinkTicketItem).And.NotContain(userId.ToString());
+    }
+
+    // AC11: an anonymous caller is refused, and refused *for being anonymous*. The status alone cannot say
+    // which filter spoke — antiforgery answers 400 too — so the endpoint's own authorization metadata is
+    // asserted beside the behaviour. An anonymous visitor cannot even obtain a token for this form: the page
+    // that carries it is behind sign-in.
+    [Fact]
+    public async Task StartLink_Anonymous_IsRefusedAndTheEndpointRequiresAuthorization()
     {
         await using var host = GoogleOn(idToken: null);
         var client = host.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
+            HandleCookies = true,
             BaseAddress = new Uri("https://localhost"),
         });
 
-        using var response = await client.PostAsync(
-            GoogleAccountEndpoints.StartPath,
-            new FormUrlEncodedContent([new KeyValuePair<string, string>("intent", GoogleAccountEndpoints.LinkIntent)]));
+        using var response = await PostLinkAsync(host, client, withToken: false);
 
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.Redirect);
-        if (response.StatusCode == HttpStatusCode.Redirect)
+        // Authorization runs before the antiforgery filter, so the answer is the cookie challenge — not the
+        // 400 a missing token would give. That is the refusal AC11 is about, and it is unambiguous.
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        var location = response.Headers.Location!.ToString();
+        location.Should().Contain("sign-in").And.NotContain("accounts.google.com");
+
+        var start = host.Services.GetRequiredService<EndpointDataSource>().Endpoints
+            .OfType<RouteEndpoint>()
+            .Single(endpoint =>
+                endpoint.RoutePattern.RawText == GoogleAccountEndpoints.StartPath
+                && endpoint.Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods.Contains(HttpMethods.Post));
+        start.Metadata.GetMetadata<IAuthorizeData>().Should().NotBeNull("BR2: the link start is for a signed-in account only");
+    }
+
+    /// <summary>
+    /// Posts the link form. With <paramref name="withToken"/> it carries a real antiforgery pair, generated
+    /// by the host's own service, so the refusal a test sees is the one it is about.
+    /// </summary>
+    private static async Task<HttpResponseMessage> PostLinkAsync(
+        WebApplicationFactory<Program> host,
+        HttpClient client,
+        bool withToken)
+    {
+        var fields = new List<KeyValuePair<string, string>>
         {
-            response.Headers.Location!.ToString().Should().NotContain("accounts.google.com", "an anonymous caller never reaches Google");
+            new("intent", GoogleAccountEndpoints.LinkIntent),
+        };
+
+        if (withToken)
+        {
+            // The token is bound to the caller, so it can only come from a page this caller was served —
+            // which is what a browser does. `/account/security` renders the link form with it inside.
+            var page = await client.GetStringAsync(GoogleAccountEndpoints.SecurityPath);
+            var field = host.Services.GetRequiredService<IOptions<AntiforgeryOptions>>().Value.FormFieldName;
+            var match = Regex.Match(page, $"name=\"{Regex.Escape(field)}\"[^>]*value=\"([^\"]+)\"");
+            match.Success.Should().BeTrue("the Security page must render the antiforgery token inside the link form");
+            fields.Add(new KeyValuePair<string, string>(field, match.Groups[1].Value));
         }
+
+        return await client.PostAsync(GoogleAccountEndpoints.StartPath, new FormUrlEncodedContent(fields));
     }
 
     private static string SecurityWith(string code) =>

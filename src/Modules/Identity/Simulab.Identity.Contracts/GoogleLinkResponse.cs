@@ -11,6 +11,7 @@ namespace Simulab.Identity.Contracts;
 /// <param name="HasPassword">
 /// Whether the account can sign in with a password. The screen needs it to disable the disconnect button and
 /// say why (BR9): without it the reader would only learn the refusal by pressing. An optional field added
-/// inside v1 of the API, which `api-contracts` allows.
+/// inside v1 of the API, which `api-contracts` allows — and nullable, as that rule requires of every struct:
+/// `false` and "the server did not say" must not read the same on the screen.
 /// </param>
-public sealed record GoogleLinkResponse(bool Linked, string? Email = null, bool HasPassword = false);
+public sealed record GoogleLinkResponse(bool Linked, string? Email = null, bool? HasPassword = null);

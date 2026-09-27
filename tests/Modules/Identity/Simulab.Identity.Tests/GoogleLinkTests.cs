@@ -219,19 +219,41 @@ public sealed class GoogleLinkTests : IdentityApiTests
         (await GoogleLinkApi.StateAsync(client, session.AccessToken)).HasPassword.Should().BeFalse();
     }
 
-    // AC15, BR10's order: no link is answered before the password is looked at, so an account with neither
-    // is told nothing about itself.
+    // AC15, BR10's order: the account has **neither** a link nor a password. The no-link answer has to come
+    // first, or this account would be told `password_not_set` about a link it does not have. A test on an
+    // account that has a password cannot tell the two orders apart, so this one builds the real case: a
+    // Google-only account whose link is then removed.
     [Fact]
-    public async Task Unlink_NoLinkAndNoPasswordGiven_Answers204AndReadsNothingElse()
+    public async Task Unlink_NoLinkAndNoPassword_Answers204AndReadsNothingElse()
     {
         var client = Client();
-        var (email, token, _) = await SignedInAsync(client);
+        var subject = GoogleTokens.NewSubject();
+        var email = NewEmail();
+        await PostAsync(
+            client,
+            "/api/v1/identity/google-registrations",
+            GoogleTokens.Registration(GoogleTokens.Issue(subject, email)),
+            HttpStatusCode.Created);
+        var session = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
+        session.AccessToken.Should().NotBeNull(session.Error);
+        var userId = (await UserAsync(email))!.Id;
+
+        // The link goes, leaving an account with no link and no password — the state AC15 is about.
+        await QueryAsync(async context =>
+        {
+            var rows = await context.UserLogins
+                .Where(login => login.UserId == userId && login.LoginProvider == GoogleSignInProtocol.LoginProvider)
+                .ToListAsync();
+            context.UserLogins.RemoveRange(rows);
+            return await context.SaveChangesAsync();
+        });
+        (await GoogleKeysAsync(userId)).Should().BeEmpty("the account now has neither");
         var before = (await UserAsync(email))!.AccessFailedCount;
 
-        using var response = await GoogleLinkApi.UnlinkAsync(client, token, currentPassword: null);
+        using var response = await GoogleLinkApi.UnlinkAsync(client, session.AccessToken, currentPassword: null);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, await response.Content.ReadAsStringAsync());
-        (await UserAsync(email))!.AccessFailedCount.Should().Be(before, "a missing password is never checked when there is no link");
+        (await UserAsync(email))!.AccessFailedCount.Should().Be(before, "nothing after the link check is read");
     }
 
     // AC16, BR11: after disconnecting, the address alone does not let Google back in.

@@ -28,6 +28,9 @@ public static class GoogleAccountEndpoints
     /// <summary>F-29 BR2: the marker in the challenge's properties that tells a link from a sign-in.</summary>
     public const string LinkIntentItem = "simulab.link-intent";
 
+    /// <summary>The only value <c>intent</c> takes; anything else is not a link.</summary>
+    public const string LinkIntent = "link";
+
     /// <summary>F-29 BR2: the link ticket's id, beside the marker, inside the same protected properties.</summary>
     public const string LinkTicketItem = "simulab.link-ticket";
 
@@ -73,9 +76,6 @@ public static class GoogleAccountEndpoints
         properties.Items[LinkTicketItem] = tickets.Issue(new GoogleLinkTicket(userId));
         return Results.Challenge(properties, [GoogleSignInSettings.Scheme]);
     }
-
-    /// <summary>The only value <c>intent</c> takes; anything else is not a link.</summary>
-    public const string LinkIntent = "link";
 
     /// <summary>
     /// Google's answer is read once from the external cookie and the cookie cleared; the ID token goes to the Api, which
@@ -182,7 +182,9 @@ public static class GoogleAccountEndpoints
         var accessToken = await tokens.GetAccessTokenAsync(context.User, context.RequestAborted);
         if (accessToken is null)
         {
-            return SecurityWithError(IdentityErrorCodes.GoogleLinkSessionChanged);
+            // The web session expired while the reader was at Google. The account did not change, so this is
+            // "start again" and not the security refusal above — change note v2 separates the two on purpose.
+            return SecurityWithError(IdentityErrorCodes.GoogleLinkExpired);
         }
 
         var linked = await api.LinkGoogleAsync(accessToken, idToken, context.RequestAborted);

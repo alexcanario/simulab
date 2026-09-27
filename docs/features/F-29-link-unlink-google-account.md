@@ -229,6 +229,38 @@ that decision lock them out, nor let anyone else make it for them.
   second one means nothing to the user and doubles every message on this screen.
 - 2026-09-26 — No new package: three endpoints, one screen section and their tests (rule `build-config`).
 
+### Independent review, 2026-09-27 (`/agile:review`, fresh context)
+No blocker. Eleven findings, all verified in the code before acting; every one confirmed.
+- **major, fixed** — `Security.razor` announced and cleared the callback's outcome in `OnInitializedAsync`.
+  `Routes` is `InteractiveServer` with prerendering on, so that first runs in static prerender, where
+  `NavigateTo` becomes a 302: the browser reloaded without the query and the interactive pass saw nothing.
+  AC7b and AC8 would have reached no real user. Moved to `OnAfterRender(firstRender)`, which never runs during
+  prerender. No bUnit test can catch this class of defect — bUnit does not prerender — so it stays a
+  validation-script step on the running app.
+- **major, fixed** — the app manual still described F-20's implicit link, which BR11 removes, and had no page
+  for the Google card. `google-sign-in.md` corrected and `security-google.md` written, in en, pt-BR and pt-PT,
+  with both indexes updated.
+- **major, fixed** — the decisions above promised change notes on F-20 (BR4) and F-11 (BR12); neither existed.
+  Written as F-20 v4 and F-11 v4.
+- **major, fixed** — `GoogleDisconnectDialog` had no test at all, and the fake Api's removal fixtures had no
+  reader. `GoogleDisconnectDialogTests` now drives the three refusals and the cancel through the real page.
+  It found a second defect: `_passwordNotSet` was never reset, so one `password_not_set` kept its alert over
+  every later answer. Fixed and pinned.
+- **major, fixed** — nothing exercised `StartLink`'s happy path; every callback test injected the marker by
+  hand. A test now posts the real form with the antiforgery token scraped from the page the browser gets.
+- **major, fixed** — AC15 ran on an account **with** a password, so it could not tell BR10's order apart. It
+  now builds the real case: a Google-only account whose link is removed first.
+- **minor, fixed** — an expired web session answered `google_link.session_changed`; it is `google_link.expired`,
+  which is the separation change note v2 asked for.
+- **minor, fixed** — `GoogleLinkResponse.HasPassword` was `bool = false`, against `api-contracts.md`: now
+  `bool?`, so "no password" and "the server did not say" stop reading the same.
+- **minor, fixed** — AC11 accepted three statuses and so could not fail for its own reason. It now asserts the
+  cookie challenge (authorization runs before antiforgery) and the endpoint's `IAuthorizeData` metadata.
+- **minor, fixed** — a `PasswordNotSet` branch on the card was unreachable; removed.
+- **minor, fixed** — `LinkIntent` was declared mid-file; moved beside the other two constants.
+- Known limit, accepted: no test reads the issued ticket's id, because it lives protected inside the OIDC
+  `state` — which is the point of BR2. The id-to-account binding is covered from the other side, by AC8.
+
 ## Out of scope
 - Any provider other than Google.
 - More than one Google account per Simulab account.

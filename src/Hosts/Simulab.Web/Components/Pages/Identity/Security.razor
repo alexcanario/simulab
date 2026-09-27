@@ -160,11 +160,9 @@ else
             <h2 class="app-security-title">@I["Security.Google.Title"]</h2>
             <MudText Typo="Typo.body2" Class="mb-4 app-security-explanation">@I["Security.Google.Explanation"]</MudText>
 
-            @if (_googleError == IdentityErrorCodes.PasswordNotSet)
-            {
-                <PasswordNotSetAlert Class="mb-4" />
-            }
-            else if (_googleError is not null)
+            @* Only the callback writes here, and it never produces identity.password_not_set: that one
+               belongs to the disconnect, which the dialog answers with its own PasswordNotSetAlert. *@
+            @if (_googleError is not null)
             {
                 <AppAlert Severity="Severity.Error" Text="@Errors.For(_googleError)" Class="mb-4" />
             }
@@ -323,10 +321,25 @@ else
 
         // F-29 BR2: read the callback's outcome before the load, so the card renders with it already set.
         _googleError = string.IsNullOrEmpty(LinkError) ? null : LinkError;
-        var linked = LinkedOutcome == "1";
 
         await LoadAsync();
+    }
 
+    /// <summary>
+    /// F-29 BR2: the callback's outcome is announced and cleared **only** once this page is interactive.
+    /// `Routes` is `InteractiveServer` with prerendering on (`App.razor`), so `OnInitializedAsync` runs first
+    /// during static prerender, where a `NavigateTo` becomes a 302: the browser would reload the page without
+    /// the query and the interactive pass would see nothing, swallowing google_link.expired and
+    /// google_link.session_changed. `OnAfterRenderAsync` never runs during prerender, so it is the safe place.
+    /// </summary>
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var linked = LinkedOutcome == "1";
         if (linked)
         {
             Snackbar.Add(I["Security.Google.Connected"], Severity.Success);
@@ -334,7 +347,8 @@ else
 
         if (_googleError is not null || linked)
         {
-            // The outcome is read once: a refresh must not replay it, and the address must not keep it.
+            // Read once: a refresh must not replay it, and the address must not keep it. `_googleError` is a
+            // field, so the alert stays on screen after the query is gone.
             Navigation.NavigateTo(GoogleAccountEndpoints.SecurityPath, replace: true);
         }
     }

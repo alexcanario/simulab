@@ -1,8 +1,8 @@
 ---
 page: google-sign-in
 locale: pt-PT
-features: [F-20]
-updated: 2026-09-23
+features: [F-20, F-29]
+updated: 2026-09-27
 ---
 # Iniciar sessão com o Google
 
@@ -24,7 +24,7 @@ Qualquer pessoa com uma conta Google.
 2. Se a verificação em dois passos estiver ativa na sua conta, introduza o código da aplicação de autenticação, como depois da palavra-passe.
 
 ### Já tem uma conta com palavra-passe
-Se a sua conta do Simulab usa um endereço Gmail, o primeiro **Continuar com o Google** liga a sua conta Google a ela. A partir daí, as duas formas funcionam: a palavra-passe ou o Google. Para outros endereços, inicie sessão com a palavra-passe.
+Iniciar sessão com o Google não se liga sozinho a uma conta que já tem, seja qual for o endereço: é avisado de que a conta existe e inicia sessão com a palavra-passe. Para usar as duas formas, ligue o Google na página **A minha conta → Segurança**, veja [Ligar e desligar o Google](security-google.md). Depois de ligado, as duas funcionam.
 
 ### Registou-se mas nunca confirmou o e-mail
 Selecione **Continuar com o Google** com o mesmo endereço Gmail e assinale as três caixas em **Crie a sua conta**. A sua conta fica ativa, e a palavra-passe escolhida no registo deixa de funcionar.
@@ -42,7 +42,7 @@ Eliminar a conta, transferir os seus dados, desativar a verificação em dois pa
 ## Mensagens
 | Mensagem | O que significa | O que fazer |
 |---|---|---|
-| Já existe uma conta com este e-mail. Inicie sessão nela. | O seu endereço já tem uma conta no Simulab que não pode ser ligada ao Google automaticamente | Inicie sessão com a sua palavra-passe |
+| Já existe uma conta com este e-mail. Inicie sessão nela. | O endereço já tem uma conta no Simulab, e iniciar sessão com o Google nunca se liga sozinho a uma | Inicie sessão com a palavra-passe e ligue o Google em **A minha conta → Segurança** |
 | O início de sessão com o Google demorou demasiado ou foi interrompido. Comece de novo. | Passaram mais de 10 minutos, ou a página foi aberta noutro navegador | Selecione **Continuar com o Google** de novo |
 | O Google ainda não verificou este endereço de e-mail. Verifique-o no Google e tente novamente. | O Google não confirmou que o endereço é seu | Verifique o endereço na sua conta Google |
 | Não foi possível confirmar a resposta do Google. Tente novamente. | A resposta do Google não era válida | Tente de novo; se continuar, inicie sessão com a sua palavra-passe |
@@ -51,5 +51,6 @@ Eliminar a conta, transferir os seus dados, desativar a verificação em dois pa
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
 - [Iniciar e terminar sessão](sign-in-and-sign-out.md)
+- [Ligar e desligar o Google](security-google.md)
 - [Palavra-passe](password.md)
 - [Verificação em dois passos](two-factor.md)
