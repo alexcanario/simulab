@@ -1,7 +1,7 @@
 ---
 feature: F-30
 epic: Foundation and identity
-status: validating
+status: done
 board: 749
 version: 1
 ---
@@ -235,8 +235,7 @@ No screen changed (BR5): this is validated through the API and the database, not
 5. `dotnet test tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj --filter FullyQualifiedName~SignUpTransactionTests` (same command in PowerShell) → `Passed! - Failed: 0, Passed: 8` (AC1, AC2, AC4, AC5, AC7, AC8, AC8b's translation, AC9).
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-<number>>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-30`
+- Merge: `7218d2d` (`Merge feature/F-30: sign-up writes in one transaction (AB#749)`)
+- Tests: full suite 799 passed, 0 failed (build 29 s, tests 72 s) — `agile gate GREEN`
+- Manual pages: none (BR5: no screen, no route, no error code changed; nothing user-visible to document)
