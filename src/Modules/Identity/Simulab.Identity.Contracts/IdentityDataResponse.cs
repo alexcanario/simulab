@@ -6,4 +6,5 @@ public sealed record IdentityDataResponse(
     IReadOnlyList<string> Roles,
     IReadOnlyList<ConsentDataResponse> Consents,
     IReadOnlyList<RoleChangeDataResponse> RoleChanges,
-    SessionDataResponse Sessions);
+    SessionDataResponse Sessions,
+    IReadOnlyList<AccountEventDataResponse> AccountEvents);

@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-PT
-features: [F-8, F-10, F-11, F-16]
-updated: 2026-09-22
+features: [F-8, F-10, F-11, F-16, F-32]
+updated: 2026-09-27
 ---
 # A minha conta
 
@@ -40,7 +40,7 @@ Selecione **Segurança**, ao lado de **Alterar palavra-passe**, para ativar a ve
 2. Escreva a sua palavra-passe atual e selecione **Transferir**. A palavra-passe protege o ficheiro: contém dados pessoais.
 3. O navegador guarda `simulab-my-data-<data>.json`, e uma mensagem avisa que a transferência começou.
 
-O ficheiro traz a sua conta (endereço de correio eletrónico, nome de apresentação, telefone, idioma preferido, datas), os perfis que tem, os termos e a política de privacidade que aceitou com o endereço IP a partir do qual aceitou, as alterações feitas aos seus perfis e quantos dispositivos têm sessão iniciada. Nunca traz a sua palavra-passe nem qualquer código de segurança. Nada fica guardado no servidor, e pode transferir as vezes que quiser.
+O ficheiro traz a sua conta (endereço de correio eletrónico, nome de apresentação, telefone, idioma preferido, datas), os perfis que tem, os termos e a política de privacidade que aceitou com o endereço IP a partir do qual aceitou, as alterações feitas aos seus perfis, quantos dispositivos têm sessão iniciada e os eventos de segurança da sua própria conta (inícios de sessão, falhas, bloqueios, alterações de palavra-passe e de verificação em dois passos). Nunca traz a sua palavra-passe nem qualquer código de segurança. Nada fica guardado no servidor, e pode transferir as vezes que quiser.
 
 Cada transferência envia-lhe um e-mail a avisar. Se esse e-mail chegar e não tiver sido o próprio, alguém conhece a sua palavra-passe: altere-a de imediato.
 
