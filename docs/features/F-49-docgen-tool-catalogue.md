@@ -1,7 +1,7 @@
 ---
 feature: F-49
 epic: Foundation and identity
-status: refining
+status: approved
 board: 774
 version: 1
 ---
