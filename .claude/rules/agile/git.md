@@ -14,7 +14,7 @@
 - Before merging or removing a worktree, ask the owner to close any IDE or app host running from it.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.
-- After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and remotely, that item's worktree folder is gone.
+- After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
 - Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables.
 - `.claude/agile/warnings-baseline.json` is committed; build output, `bin/`, `obj/` and IDE folders are not.

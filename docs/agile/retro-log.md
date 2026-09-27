@@ -702,3 +702,24 @@ build 46 s 0 warnings, suite 1349 passed 0 failed in 121 s, architecture tests 1
   B-19 was green, so the hold cost one afternoon and bought a suite whose red means something.
 - Process note, no action: three items were open in parallel (F-28, F-29, F-30) against a recommended limit of
   two, and the one that blocked all three was a test defect in none of them.
+
+## 2026-09-27 — Sync with agile@canary 0.0.71
+From 0.0.63 to 0.0.71. Approved by the owner. Ran after finding F-29 already merged to `main` (`9f532fc`) by
+another session while this one still saw it as `validating`; the stale worktree `feature-29` and the local
+`feature/F-29` branch were removed first (no remote branch, `main` was `0 0` against `origin/main`).
+- Copied: `.claude/rules/agile/git.md` (delete a branch on the remote only when `git ls-remote` lists it; an item
+  branch usually was never pushed), `.claude/rules/agile/workflow.md` (an issue body is edited only whole, via
+  `--body-file`), `docs/agile/templates/project-claude.md` (`Plugins:` line), `docs/agile/workflow.md` and
+  `docs/agile/workflow.pt-BR.md` (manual 0.0.63 → 0.0.71: solution SDK from `global.json`, `engine: msbuild`,
+  the DocGen tool catalogue, plugin notes scoped by `Plugins:`, conditional remote branch delete).
+- Merged by hand: `docs/agile/profile.md`. The only upstream change was one sentence on the DocGen tool
+  catalogue (`ModelToolAttribute`, since 0.0.70); added to the "Technical docs (F-15)" line, marked not yet
+  adopted. The Simulab-specific sections and the customized Layout block are unchanged.
+- Approved: `CLAUDE.md` gained `Plugins: agile`.
+- Captured as an idea, not built: **F-49 DocGen tool catalogue** (board 774) — the capability the plugin ships
+  since 0.0.70 that this project does not use yet.
+- Left alone: the six build files (`.editorconfig`, `Directory.Build.props`, `Directory.Packages.props`,
+  `.gitignore`, `global.json`, `tests/Directory.Build.props`) — only placeholder-vs-`Simulab` wording differs,
+  no functional change.
+- No build file or build-checked rule changed, so the suite was not rerun. Warnings baseline: present, untouched.
+  No ⏳ plugin notes delivered by this version.

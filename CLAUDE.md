@@ -4,6 +4,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 
 ## Working agreement
 - Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
+- Plugins: agile
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
 - Ask before: pushing or merging to `main`, touching shared databases, deleting data, anything outside this repository.
