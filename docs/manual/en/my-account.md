@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: en
-features: [F-8, F-10, F-11, F-16]
-updated: 2026-09-22
+features: [F-8, F-10, F-11, F-16, F-32]
+updated: 2026-09-27
 ---
 # My account
 
@@ -40,7 +40,7 @@ Select **Security**, next to **Change password**, to turn on two-factor sign-in.
 2. Type your current password and select **Download**. The password protects the file: it holds personal data.
 3. The browser saves `simulab-my-data-<date>.json`, and a message says the download started.
 
-The file holds your account (email, display name, phone number, preferred language, dates), the roles you hold, the terms and privacy policy you accepted with the IP address they were accepted from, the changes made to your roles, and how many devices are signed in. It never holds your password or any security code. Nothing is stored on the server, and you can download it as often as you like.
+The file holds your account (email, display name, phone number, preferred language, dates), the roles you hold, the terms and privacy policy you accepted with the IP address they were accepted from, the changes made to your roles, how many devices are signed in, and your account's own security events (sign-ins, failures, lockouts, password and two-factor changes). It never holds your password or any security code. Nothing is stored on the server, and you can download it as often as you like.
 
 Every download sends you an email saying so. If that email arrives and it was not you, someone knows your password: change it at once.
 
