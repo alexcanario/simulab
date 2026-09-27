@@ -11,6 +11,7 @@ namespace Simulab.Identity.Application.GoogleSignIn;
 /// The confirmation of a first Google sign-in (F-20 UC1, UC4, BR5, BR7): creates the account, or takes over a pending
 /// one at an address Google vouches for, with the same terms, privacy and 18+ rules as the password sign-up. Either
 /// way the account ends active, without a password, linked to the Google subject, and no verification email is sent.
+/// Every write commits in one transaction, or none of it does (F-30 BR2).
 /// </summary>
 public sealed class RegisterGoogleUserHandler(
     IGoogleIdTokenValidator validator,
@@ -18,6 +19,7 @@ public sealed class RegisterGoogleUserHandler(
     IUserDirectory userDirectory,
     UserManager<User> userManager,
     IConsentRecordStore consentStore,
+    IIdentityUnitOfWork unitOfWork,
     TimeProvider timeProvider)
 {
     public async Task<Result> HandleAsync(RegisterGoogleUserCommand command, CancellationToken cancellationToken = default)
@@ -33,6 +35,8 @@ public sealed class RegisterGoogleUserHandler(
             return termsCheck;
         }
 
+        // F-30 BR9: the Google step, the one outbound call this handler makes, finishes before the
+        // transaction opens below.
         var identity = await GoogleSignInHandler.CheckTokenAsync(validator, command.IdToken, cancellationToken);
         if (identity.IsFailure)
         {
@@ -49,28 +53,46 @@ public sealed class RegisterGoogleUserHandler(
         }
 
         var existing = await userDirectory.FindByEmailIgnoringTenantAsync(google.Email, cancellationToken);
-        var user = existing is null
-            ? await CreateAsync(google, command, now)
-            : await TakeOverAsync(existing, google, command, now);
-        if (user is null)
+
+        await using var transaction = await unitOfWork.BeginAsync(cancellationToken);
+        try
         {
-            return AccountExists();
-        }
-
-        await consentStore.AddAsync(
-            new ConsentRecord
+            var user = existing is null
+                ? await CreateAsync(google, command, now)
+                : await TakeOverAsync(existing, google, command, now);
+            if (user is null)
             {
-                UserId = user.Id,
-                TermsVersion = command.TermsVersion,
-                PrivacyVersion = command.PrivacyVersion,
-                DeclaresAdult = command.DeclaresAdult,
-                Locale = command.Locale,
-                AcceptedAt = now,
-                IpAddress = command.IpAddress
-            },
-            cancellationToken);
+                return AccountExists();
+            }
 
-        return Result.Success();
+            await consentStore.AddAsync(
+                new ConsentRecord
+                {
+                    UserId = user.Id,
+                    TermsVersion = command.TermsVersion,
+                    PrivacyVersion = command.PrivacyVersion,
+                    DeclaresAdult = command.DeclaresAdult,
+                    Locale = command.Locale,
+                    AcceptedAt = now,
+                    IpAddress = command.IpAddress
+                },
+                cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            return Result.Success();
+        }
+        catch (Exception exception) when (unitOfWork.TranslateWriteFailure(exception) is { } violation)
+        {
+            // F-30 BR6: the transaction is left uncommitted (rolled back on disposal) either way.
+            return violation switch
+            {
+                // The address was taken by another writer between the lookup above and this transaction's
+                // insert: the same answer BR4 gives the password sign-up for a known address.
+                IdentityUniqueViolation.UserEmail => Result.Success(),
+                // The Google subject was linked to another account in that same window.
+                _ => AccountExists(),
+            };
+        }
     }
 
     /// <summary>BR7: a new account, active from the start because Google proved the address.</summary>
@@ -94,8 +116,14 @@ public sealed class RegisterGoogleUserHandler(
             return null;
         }
 
-        // F-4 BR2: every new account starts as a Student; there is no other way to sign up.
-        await userManager.AddToRoleAsync(user, IdentityRoles.Student);
+        // F-4 BR2, F-30 BR4: every new account starts as a Student; there is no other way to sign up. A
+        // missing role makes AddToRoleAsync throw instead of failing, and either way the caller's
+        // transaction is never committed, so no half account is left behind.
+        var addedToRole = await userManager.AddToRoleAsync(user, IdentityRoles.Student);
+        if (!addedToRole.Succeeded)
+        {
+            throw new InvalidOperationException("The Student role could not be attached to a new account.");
+        }
 
         var linked = await userManager.AddLoginAsync(user, GoogleSignInHandler.Login(google));
         return linked.Succeeded
@@ -104,9 +132,10 @@ public sealed class RegisterGoogleUserHandler(
     }
 
     /// <summary>
-    /// BR5 (change note v3): the pending account at an address Google vouches for becomes this visitor's. The link comes
-    /// first, so a race lost here changes nothing; then the password, name and 18+ declaration nobody proved give way to
-    /// what this visitor sent. An active account, or an address Google does not vouch for, is not taken (BR4, BR9).
+    /// BR5 (change note v3): the pending account at an address Google vouches for becomes this visitor's. Since F-30,
+    /// one transaction holds every write here, so nothing this request writes is visible to a concurrent one until it
+    /// commits (BR6b): the link, the password removal and the profile changes below either all land together or none
+    /// does. An active account, or an address Google does not vouch for, is not taken (BR4, BR9).
     /// </summary>
     private async Task<User?> TakeOverAsync(User user, GoogleIdentity google, RegisterGoogleUserCommand command, DateTimeOffset now)
     {
