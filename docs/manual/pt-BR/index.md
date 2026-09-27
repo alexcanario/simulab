@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-33, F-34]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34]
 updated: 2026-09-25
 ---
 # Simulab
@@ -26,7 +26,7 @@ As páginas entram aqui à medida que cada funcionalidade é lançada.
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e assunto, e a distância até a nota de corte | Em breve |
 | Recomendações de estudo | Ver quais assuntos estudar em seguida | Em breve |
 | Coach de IA | Perguntar por que uma resposta está certa ou errada e receber um plano de estudos para a sua prova-alvo | Em breve |
-| Conta | Cadastrar-se, entrar, trocar o idioma e gerenciar os seus dados | Cadastro, login, senha e Minha conta disponíveis ([Criar uma conta](create-account.md), [Entrar e sair](sign-in-and-sign-out.md), [Senha](password.md), [Minha conta](my-account.md), [Apagar sua conta](erase-account.md), [Verificação em duas etapas](two-factor.md) e [Entrar com o Google](google-sign-in.md) onde estiverem disponíveis); o resto em breve |
+| Conta | Cadastrar-se, entrar, trocar o idioma e gerenciar os seus dados | Cadastro, login, senha e Minha conta disponíveis ([Criar uma conta](create-account.md), [Entrar e sair](sign-in-and-sign-out.md), [Senha](password.md), [Minha conta](my-account.md), [Apagar sua conta](erase-account.md), [Verificação em duas etapas](two-factor.md), [Atividade recente](account-activity.md) e [Entrar com o Google](google-sign-in.md) onde estiverem disponíveis); o resto em breve |
 
 ## Idiomas
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Você escolhe o idioma no seu perfil. As questões das provas aparecem sempre no idioma original.
@@ -39,6 +39,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Minha conta](my-account.md): nome de exibição, idioma preferido e baixar seus dados
 - [Apagar sua conta](erase-account.md): apagar a conta e o que fica guardado
 - [Verificação em duas etapas](two-factor.md): um código do celular depois da senha, e códigos de recuperação
+- [Atividade recente](account-activity.md): seus próprios logins, falhas ao entrar e mudanças de conta, em **Minha conta → Segurança**
 - [Entrar com o Google](google-sign-in.md): criar uma conta ou entrar com sua conta Google
 - [Conectar e desconectar o Google](security-google.md): usar o Google além da senha, em **Minha conta → Segurança**
 - [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um papel

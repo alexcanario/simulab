@@ -85,6 +85,11 @@ public static class IdentityEndpoints
         // F-9: the role management back office, every route behind identity.roles.manage (BR10).
         group.MapRoleAdministrationEndpoints();
 
+        // F-31 BR4: the caller's own account events, found by the token subject; no permission is involved.
+        group.MapGet("/account-events/mine", GetMyAccountEventsAsync)
+            .WithName("GetMyAccountEvents")
+            .RequireAuthorization();
+
         // F-11 BR12: two-factor routes exist only while the feature is on.
         if (endpoints.ServiceProvider.GetRequiredService<IOptions<TotpOptions>>().Value.TotpEnabled)
         {
@@ -149,6 +154,18 @@ public static class IdentityEndpoints
         return TryGetUserId(user, out var userId)
             ? ProfileAnswer(await handler.UpdatePreferredLanguageAsync(userId, request.PreferredLanguage))
             : Results.Unauthorized();
+    }
+
+    /// <summary>F-31, UC1-UC3: the caller's own last 20 account events, newest first; no permission is checked.</summary>
+    private static async Task<IResult> GetMyAccountEventsAsync(ClaimsPrincipal user, IAccountEventQueries queries, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var query = new AccountEventListQuery(0, 20, userId);
+        return Results.Ok(await queries.ListAsync(query, cancellationToken));
     }
 
     private static IResult ProfileAnswer(Result result) =>

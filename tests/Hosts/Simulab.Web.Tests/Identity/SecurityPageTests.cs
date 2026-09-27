@@ -264,4 +264,51 @@ public sealed class SecurityPageTests : IdentityPageTestContext
         page.Find("button.app-retry").Click();
         page.WaitForAssertion(() => page.Find("button.app-security-turn-on"));
     }
+
+    // F-31 AC1: newest first, with the method for a sign-in and the address, above the two-factor card.
+    [Fact]
+    public void Activity_WithEvents_ListsThemNewestFirstAboveTwoFactor()
+    {
+        Api.MyAccountEvents = new AccountEventPageResponse(
+        [
+            new AccountEventResponse(Guid.NewGuid(), new DateTimeOffset(2026, 9, 27, 10, 0, 0, TimeSpan.Zero), null, AccountEventTypes.SignInSucceeded, AccountEventMethods.Password, null, "203.0.113.10"),
+            new AccountEventResponse(Guid.NewGuid(), new DateTimeOffset(2026, 9, 26, 9, 0, 0, TimeSpan.Zero), null, AccountEventTypes.SignInFailed, null, "WrongPassword", "203.0.113.10")
+        ], 2);
+
+        var page = RenderSignedIn();
+
+        var items = page.FindAll("li.app-security-activity-item");
+        items.Should().HaveCount(2);
+        items[0].TextContent.Should().Contain("Signed in").And.Contain("with the password").And.Contain("203.0.113.10");
+        items[1].TextContent.Should().Contain("Sign-in failed").And.Contain("wrong password");
+    }
+
+    // F-31 AC2: no events yet shows the empty message, not an empty list.
+    [Fact]
+    public void Activity_WithNoEvents_ShowsTheEmptyMessage()
+    {
+        Api.MyAccountEvents = new AccountEventPageResponse([], 0);
+
+        var page = RenderSignedIn();
+
+        page.Markup.Should().Contain("No activity recorded yet.");
+        page.FindAll("li.app-security-activity-item").Should().BeEmpty();
+    }
+
+    // F-31 AC5: its own error state and its own retry, independent of the two-factor card.
+    [Fact]
+    public void Activity_ApiFails_ShowsItsOwnErrorStateAndRetries()
+    {
+        Api.MyAccountEvents = null;
+
+        var page = RenderSignedIn();
+
+        page.Markup.Should().Contain("We could not load your recent activity.");
+        Api.MyAccountEvents = new AccountEventPageResponse(
+            [new AccountEventResponse(Guid.NewGuid(), DateTimeOffset.UtcNow, null, AccountEventTypes.SignedOut, null, null, null)], 1);
+
+        page.Find("button.app-retry").Click();
+
+        page.WaitForAssertion(() => page.FindAll("li.app-security-activity-item").Should().ContainSingle());
+    }
 }
