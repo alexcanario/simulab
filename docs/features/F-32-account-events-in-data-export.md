@@ -1,7 +1,7 @@
 ---
 feature: F-32
 epic: Foundation and identity
-status: approved
+status: validating
 board: 751
 version: 1
 ---
