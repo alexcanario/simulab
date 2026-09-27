@@ -111,7 +111,7 @@
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Current password</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>The password you sign in with.</value></data>
   <data name="Account.Data.Title" xml:space="preserve"><value>Your data</value></data>
-  <data name="Account.Data.Explanation" xml:space="preserve"><value>Download a copy of everything Simulab holds about you, as one JSON file: your account, your roles, the terms and privacy policy you accepted (with the IP address they were accepted from), the changes made to your roles and the number of devices signed in.</value></data>
+  <data name="Account.Data.Explanation" xml:space="preserve"><value>Download a copy of everything Simulab holds about you, as one JSON file: your account, your roles, the terms and privacy policy you accepted (with the IP address they were accepted from), the changes made to your roles, the number of devices signed in and your account's security events.</value></data>
   <data name="Account.Data.Action" xml:space="preserve"><value>Download my data</value></data>
   <data name="Account.Data.Dialog.Title" xml:space="preserve"><value>Download my data</value></data>
   <data name="Account.Data.Dialog.Explanation" xml:space="preserve"><value>The file holds personal data. Type your current password to confirm that this account is yours; we will email you that it was downloaded.</value></data>

@@ -111,7 +111,7 @@
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A senha com que você entra.</value></data>
   <data name="Account.Data.Title" xml:space="preserve"><value>Seus dados</value></data>
-  <data name="Account.Data.Explanation" xml:space="preserve"><value>Baixe uma cópia de tudo o que o Simulab guarda sobre você, em um arquivo JSON: sua conta, seus papéis, os termos e a política de privacidade que você aceitou (com o endereço IP de onde aceitou), as mudanças feitas nos seus papéis e o número de aparelhos conectados.</value></data>
+  <data name="Account.Data.Explanation" xml:space="preserve"><value>Baixe uma cópia de tudo o que o Simulab guarda sobre você, em um arquivo JSON: sua conta, seus papéis, os termos e a política de privacidade que você aceitou (com o endereço IP de onde aceitou), as mudanças feitas nos seus papéis, o número de aparelhos conectados e os eventos de segurança da sua conta.</value></data>
   <data name="Account.Data.Action" xml:space="preserve"><value>Baixar meus dados</value></data>
   <data name="Account.Data.Dialog.Title" xml:space="preserve"><value>Baixar meus dados</value></data>
   <data name="Account.Data.Dialog.Explanation" xml:space="preserve"><value>O arquivo tem dados pessoais. Digite sua senha atual para confirmar que a conta é sua; vamos avisar por e-mail que os dados foram baixados.</value></data>
