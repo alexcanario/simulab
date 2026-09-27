@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Simulab.Identity.Contracts;
+using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Tests;
@@ -262,5 +263,133 @@ public sealed class DataExportTests : IdentityApiTests
         using var response = await ExportAsync(Client(), accessToken: null, SignUpForm.ValidPassword);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    private HttpClient Visiting()
+    {
+        var client = Client();
+        client.DefaultRequestHeaders.Add(ClientAddressHeaders.Address, ClientIp);
+        client.DefaultRequestHeaders.Add(ClientAddressHeaders.Secret, TestClient.ClientSecret);
+        return client;
+    }
+
+    // F-32 AC1: a successful sign-in, a failed sign-in and a password change, oldest first with their own fields.
+    [Fact]
+    public async Task Export_AccountEvents_ListsThemOldestFirstWithTheirFields()
+    {
+        var client = Visiting();
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        var userId = await UserIdOfAsync(email);
+        var signedIn = await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword);
+        signedIn.AccessToken.Should().NotBeNull(signedIn.ErrorDescription);
+        Factory.Clock.Advance(TimeSpan.FromMinutes(1));
+        await TokenClient.SignInAsync(client, email, "not-the-password");
+        Factory.Clock.Advance(TimeSpan.FromMinutes(1));
+        using var changeRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/identity/password-changes")
+        {
+            Content = JsonContent.Create(new ChangePasswordRequest(SignUpForm.ValidPassword, "Outra-Senha-9876"), options: AppJson.Options)
+        };
+        changeRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", signedIn.AccessToken);
+        using var changed = await client.SendAsync(changeRequest);
+        changed.StatusCode.Should().Be(HttpStatusCode.NoContent, await changed.Content.ReadAsStringAsync());
+
+        using var response = await ExportAsync(client, signedIn.AccessToken, "Outra-Senha-9876");
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        var file = JsonSerializer.Deserialize<DataExportResponse>(await response.Content.ReadAsStringAsync(), AppJson.Options)!;
+
+        var events = file.Identity.AccountEvents;
+        events.Should().HaveCount(3);
+        events[0].Type.Should().Be(nameof(AccountEventType.SignInSucceeded));
+        events[0].Method.Should().Be(nameof(AccountEventMethod.Password));
+        events[0].Reason.Should().BeNull();
+        events[0].IpAddress.Should().Be(ClientIp);
+        events[1].Type.Should().Be(nameof(AccountEventType.SignInFailed));
+        events[1].Method.Should().BeNull();
+        events[1].Reason.Should().Be(nameof(AccountEventReason.WrongPassword));
+        events[1].IpAddress.Should().Be(ClientIp);
+        events[2].Type.Should().Be(nameof(AccountEventType.PasswordChanged));
+        events[0].OccurredAt.Should().BeBefore(events[1].OccurredAt);
+        events[1].OccurredAt.Should().BeBefore(events[2].OccurredAt);
+
+        var stored = await QueryAsync(context => context.AccountEvents.AsNoTracking().Where(e => e.UserId == userId).ToListAsync());
+        stored.Should().HaveCount(3);
+    }
+
+    // F-32 AC2: another account's events never appear.
+    [Fact]
+    public async Task Export_AccountEvents_NeverContainsAnotherUsersEvents()
+    {
+        var client = Visiting();
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        var otherClient = Visiting();
+        var otherEmail = await ActiveUser.CreateAsync(otherClient, Factory);
+        await TokenClient.SignInAsync(otherClient, otherEmail, "not-the-password");
+
+        using var response = await ExportAsync(client, session.AccessToken, SignUpForm.ValidPassword);
+
+        var file = JsonSerializer.Deserialize<DataExportResponse>(await response.Content.ReadAsStringAsync(), AppJson.Options)!;
+        file.Identity.AccountEvents.Should().OnlyContain(e => e.Type == nameof(AccountEventType.SignInSucceeded));
+    }
+
+    // F-32 AC3: no cap and no pagination, past the admin trail's page-size cap (100).
+    [Fact]
+    public async Task Export_AccountEvents_HasNoCapEvenPastTheAdminTrailsPageSize()
+    {
+        const int EventCount = 105;
+        var client = Visiting();
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        var userId = await UserIdOfAsync(email);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        await QueryAsync(async context =>
+        {
+            context.AccountEvents.AddRange(Enumerable.Range(0, EventCount).Select(_ => AccountEvent.For(userId, AccountEventType.SignedOut, null)));
+            await context.SaveChangesAsync();
+            return 0;
+        });
+
+        using var response = await ExportAsync(client, session.AccessToken, SignUpForm.ValidPassword);
+
+        var file = JsonSerializer.Deserialize<DataExportResponse>(await response.Content.ReadAsStringAsync(), AppJson.Options)!;
+        file.Identity.AccountEvents.Should().HaveCount(EventCount + 1);
+    }
+
+    // F-32 AC4: the export only reads the trail.
+    [Fact]
+    public async Task Export_AccountEvents_WritesNoNewEventAndChangesNone()
+    {
+        var client = Visiting();
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        var userId = await UserIdOfAsync(email);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        var before = await QueryAsync(context => context.AccountEvents.AsNoTracking().Where(e => e.UserId == userId).ToListAsync());
+
+        using var response = await ExportAsync(client, session.AccessToken, SignUpForm.ValidPassword);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+
+        var after = await QueryAsync(context => context.AccountEvents.AsNoTracking().Where(e => e.UserId == userId).ToListAsync());
+        after.Should().BeEquivalentTo(before);
+    }
+
+    // F-32 AC6: an account with no recorded event exports an empty list, not missing and not null.
+    [Fact]
+    public async Task Export_AccountEvents_WithNoneRecorded_IsAnEmptyList()
+    {
+        var client = Client();
+        var email = await ActiveUser.CreateAsync(client, Factory);
+        var session = (await SignedInSessions.CreateAsync(client, email, SignUpForm.ValidPassword, 1))[0];
+        var userId = await UserIdOfAsync(email);
+        await QueryAsync(async context =>
+        {
+            await context.AccountEvents.Where(e => e.UserId == userId).ExecuteDeleteAsync();
+            return 0;
+        });
+
+        using var response = await ExportAsync(client, session.AccessToken, SignUpForm.ValidPassword);
+
+        var text = await response.Content.ReadAsStringAsync();
+        var file = JsonSerializer.Deserialize<DataExportResponse>(text, AppJson.Options)!;
+        file.Identity.AccountEvents.Should().NotBeNull().And.BeEmpty();
+        text.Should().Contain("\"accountEvents\":[]");
     }
 }

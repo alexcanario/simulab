@@ -111,7 +111,7 @@
   <data name="Account.Erase.Dialog.Password.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
   <data name="Account.Erase.Dialog.Password.Hint" xml:space="preserve"><value>A palavra-passe com que inicia sessão.</value></data>
   <data name="Account.Data.Title" xml:space="preserve"><value>Os seus dados</value></data>
-  <data name="Account.Data.Explanation" xml:space="preserve"><value>Transfira uma cópia de tudo o que o Simulab guarda sobre si, num ficheiro JSON: a sua conta, os seus perfis, os termos e a política de privacidade que aceitou (com o endereço IP a partir do qual aceitou), as alterações feitas aos seus perfis e o número de dispositivos com sessão iniciada.</value></data>
+  <data name="Account.Data.Explanation" xml:space="preserve"><value>Transfira uma cópia de tudo o que o Simulab guarda sobre si, num ficheiro JSON: a sua conta, os seus perfis, os termos e a política de privacidade que aceitou (com o endereço IP a partir do qual aceitou), as alterações feitas aos seus perfis, o número de dispositivos com sessão iniciada e os eventos de segurança da sua conta.</value></data>
   <data name="Account.Data.Action" xml:space="preserve"><value>Transferir os meus dados</value></data>
   <data name="Account.Data.Dialog.Title" xml:space="preserve"><value>Transferir os meus dados</value></data>
   <data name="Account.Data.Dialog.Explanation" xml:space="preserve"><value>O ficheiro contém dados pessoais. Escreva a sua palavra-passe atual para confirmar que a conta é sua; iremos avisá-lo por correio eletrónico de que os dados foram transferidos.</value></data>

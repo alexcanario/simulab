@@ -63,6 +63,15 @@ public sealed class DataExportQueries(IdentityModuleDbContext context) : IDataEx
                 change.CreatedBy == userId))
             .ToList();
 
-        return new IdentityDataResponse(account, roles, consents, roleChanges, new SessionDataResponse(activeSessions));
+        var eventRows = await context.AccountEvents.AsNoTracking()
+            .Where(accountEvent => accountEvent.UserId == userId)
+            .OrderBy(accountEvent => accountEvent.CreatedAt)
+            .ThenBy(accountEvent => accountEvent.Id)
+            .ToListAsync(cancellationToken);
+        var accountEvents = eventRows
+            .Select(row => new AccountEventDataResponse(row.CreatedAt, row.Type.ToString(), row.Method?.ToString(), row.Reason?.ToString(), row.IpAddress))
+            .ToList();
+
+        return new IdentityDataResponse(account, roles, consents, roleChanges, new SessionDataResponse(activeSessions), accountEvents);
     }
 }
