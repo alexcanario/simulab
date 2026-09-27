@@ -1,7 +1,7 @@
 ---
 feature: F-31
 epic: Foundation and identity
-status: building
+status: validating
 board: 750
 version: 1
 ---
@@ -74,6 +74,9 @@ Let a Student, Curator or Admin answer "did someone get into my account, and fro
 - 2026-09-27 — Claude: card texts (`Security.Activity.Title`, `Security.Activity.Empty`) go in `IdentityResources` next to the page's other `Security.*` keys; the event/method/reason values keep using the existing `AccountEvents.Event.*`/`Method.*`/`Reason.*` keys already in `SharedResources`, both already injected on this page.
 - 2026-09-27 — Claude: no mockup (`/agile:screen`) — one small read-only card made of existing kit parts (`AppLoadingState`, `AppErrorState`, the page's own `MudPaper` card style), no new visual pattern.
 - 2026-09-27 — Approved by the owner ("aprovo f-31").
+- 2026-09-27 — Claude (build): the card's times use `UserTimeZone`/`Clock`, the same `OnAfterRenderAsync` re-resolve-and-`StateHasChanged` pattern as `/admin/account-events` and `/admin/role-history`, so the browser's real zone applies once the circuit is interactive.
+- 2026-09-27 — Claude (build): new CSS (`app-security-activity-*`) added to `app.css` next to the other `app-security-*` rules — the existing classes covered only the two-factor/Google/danger-zone cards, none of them a list.
+- 2026-09-27 — Claude (build): Web → API wiring checked through the app host (Git Bash): `/account/security` redirects an anonymous visitor to `/sign-in` (302); `GET /api/v1/identity/account-events/mine` answers 401 without a token; the route lists in `/openapi/v1.json` (200). **Not verified by Claude:** the signed-in card itself — signing in needs a password, which Claude does not type; covered by `SecurityPageTests` (bUnit, real markup) and left as validation script step 1-3.
 
 ## Out of scope
 - Filters, search or any pagination beyond the fixed last 20 events — that stays on `/admin/account-events`.

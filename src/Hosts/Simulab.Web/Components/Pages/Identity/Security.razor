@@ -15,6 +15,7 @@
 @inject IJSRuntime JS
 @inject TimeProvider Clock
 @inject IDialogService Dialogs
+@inject UserTimeZone TimeZone
 
 <PageTitle>@I["Security.Title"] — @L["App.Name"]</PageTitle>
 
@@ -31,10 +32,52 @@ else if (_view == View.LoadFailed)
 }
 else
 {
+    @* F-31, UC1-UC3: the caller's own recent events, first on the page since it is read-only information. *@
+    <MudPaper Class="app-form-card app-security-card pa-6" Elevation="0" Outlined="true" MaxWidth="560px">
+        <h2 class="app-security-title">@I["Security.Activity.Title"]</h2>
+
+        @if (_activityView == ActivityView.Loading)
+        {
+            <AppLoadingState />
+        }
+        else if (_activityView == ActivityView.Error)
+        {
+            <AppErrorState Message="@I["Security.Activity.LoadFailed"]" OnRetry="LoadActivityAsync" />
+        }
+        else if (_activityItems.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="app-security-activity-empty">@I["Security.Activity.Empty"]</MudText>
+        }
+        else
+        {
+            <ul class="app-security-activity-list">
+                @foreach (var activityItem in _activityItems)
+                {
+                    <li class="app-security-activity-item">
+                        <span class="app-security-activity-when">@TimeZone.ToLocal(activityItem.OccurredAt).ToString("g", CultureInfo.CurrentCulture)</span>
+                        <span class="app-security-activity-event">@L[$"AccountEvents.Event.{activityItem.Event}"]</span>
+                        @if (activityItem.Method is { } method)
+                        {
+                            <span class="app-security-activity-detail">(@L[$"AccountEvents.Method.{method}"])</span>
+                        }
+                        else if (activityItem.Reason is { } reason)
+                        {
+                            <span class="app-security-activity-detail">(@L[$"AccountEvents.Reason.{reason}"])</span>
+                        }
+                        @if (activityItem.IpAddress is { } address)
+                        {
+                            <span class="app-security-activity-address">@address</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </MudPaper>
+
     @* F-29 BR14: with two-factor switched off nothing of it renders, and the Google card carries the page. *@
     @if (!_totpOff)
     {
-    <MudPaper Class="app-form-card app-security-card pa-6" Elevation="0" Outlined="true" MaxWidth="560px">
+    <MudPaper Class="app-form-card app-security-card pa-6 mt-6" Elevation="0" Outlined="true" MaxWidth="560px">
         <h2 class="app-security-title">@I["Security.TwoFactor.Title"]</h2>
 
         @if (_lockout.IsRunning)
@@ -261,6 +304,13 @@ else
         On
     }
 
+    private enum ActivityView
+    {
+        Loading,
+        Ready,
+        Error
+    }
+
     private const string DownloadFileName = "simulab-recovery-codes.txt";
 
     private static readonly Dictionary<string, object> DownloadAttributes = new() { ["download"] = DownloadFileName };
@@ -268,6 +318,8 @@ else
     private Countdown _lockout = default!;
     private View _view = View.Loading;
     private TotpStatusResponse? _status;
+    private ActivityView _activityView = ActivityView.Loading;
+    private IReadOnlyList<AccountEventResponse> _activityItems = [];
 
     // F-29: each feature's own switch, and the link state the Google card shows. The card keeps its own
     // error field: a Google failure must never render inside the two-factor card's alert slot.
@@ -323,6 +375,19 @@ else
         _googleError = string.IsNullOrEmpty(LinkError) ? null : LinkError;
 
         await LoadAsync();
+        await LoadActivityAsync();
+    }
+
+    /// <summary>
+    /// F-31, BR5: the times need the browser's time zone, read only once this page is interactive
+    /// (<see cref="UserTimeZone.ResolveAsync"/>); until then the card shows them in UTC.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TimeZone.Current == TimeZoneInfo.Utc && await TimeZone.ResolveAsync() != TimeZoneInfo.Utc)
+        {
+            StateHasChanged();
+        }
     }
 
     /// <summary>
@@ -387,6 +452,23 @@ else
 
         _status = result!.Value!;
         _view = _status.Enabled ? View.On : View.Off;
+    }
+
+    /// <summary>F-31, UC1-UC3: the caller's own last 20 account events; its own load, own retry, own states (BR5).</summary>
+    private async Task LoadActivityAsync()
+    {
+        _activityView = ActivityView.Loading;
+        var accessToken = await AccessTokenAsync();
+        var result = accessToken is null ? null : await Api.GetMyAccountEventsAsync(accessToken);
+
+        if (result?.Value is null)
+        {
+            _activityView = ActivityView.Error;
+            return;
+        }
+
+        _activityItems = result.Value.Items;
+        _activityView = ActivityView.Ready;
     }
 
     /// <summary>

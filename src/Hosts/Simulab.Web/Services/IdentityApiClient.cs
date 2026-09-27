@@ -286,6 +286,10 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
         return SendAsync<AccountEventPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
 
+    /// <summary>F-31, UC1: the caller's own last 20 account events, newest first.</summary>
+    public Task<ApiResult<AccountEventPageResponse>> GetMyAccountEventsAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<AccountEventPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/account-events/mine"), accessToken), cancellationToken);
+
     /// <summary>F-9, UC5: one page of users, searched and filtered on the server.</summary>
     public Task<ApiResult<UserPageResponse>> ListUsersAsync(string accessToken, UserListQuery query, CancellationToken cancellationToken = default)
     {

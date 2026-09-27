@@ -27,6 +27,7 @@ public abstract class IdentityPageTestContext : KitTestContext
     protected IdentityPageTestContext()
     {
         Services.AddSingleton(Visitor);
+        Services.AddScoped<UserTimeZone>();
         Services.AddSingleton(new IdentityApiClient(
             new HttpClient(Api) { BaseAddress = new Uri("https://api.test") },
             Visitor,
@@ -118,6 +119,9 @@ public abstract class IdentityPageTestContext : KitTestContext
 
         /// <summary>F-11: when true, GET /totp answers 500 — a failure, not the switch.</summary>
         public bool TotpStatusFails { get; set; }
+
+        /// <summary>F-31: what GET /account-events/mine answers. Null means a server error.</summary>
+        public AccountEventPageResponse? MyAccountEvents { get; set; } = new([], 0);
 
         /// <summary>F-29: what GET /google-links answers. Null means 404, the answer while the feature is off.</summary>
         public GoogleLinkResponse? GoogleLink { get; set; } = new(false, null, HasPassword: true);
@@ -258,6 +262,12 @@ public abstract class IdentityPageTestContext : KitTestContext
                 var file = new StringContent(ExportFile, System.Text.Encoding.UTF8, "application/json");
                 file.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment") { FileName = "simulab-my-data-2026-09-21.json" };
                 return new HttpResponseMessage(HttpStatusCode.OK) { Content = file };
+            }
+
+            // F-31: the Security page's own activity card.
+            if (path.EndsWith("/account-events/mine", StringComparison.Ordinal))
+            {
+                return MyAccountEvents is null ? new HttpResponseMessage(HttpStatusCode.InternalServerError) : Json(MyAccountEvents);
             }
 
             // F-29: the Security page's Google card. Null is the feature switched off, which the Api
