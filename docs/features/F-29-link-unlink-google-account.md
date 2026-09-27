@@ -1,7 +1,7 @@
 ---
 feature: F-29
 epic: Foundation and identity
-status: building
+status: validating
 board: 748
 version: 2
 Autopilot: built
@@ -296,13 +296,79 @@ No blocker. Eleven findings, all verified in the code before acting; every one c
   note touches.
 
 
+## Coverage
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `GoogleLinkTests.Link_CheckedTokenAndNoLinkYet_LinksItAndTheStateShowsTheAddress`; on screen, `SecurityGooglePageTests.Linked_ShowsTheAddressAndOffersToDisconnect` |
+| AC2 | `GoogleLinkTests.Link_SameSubjectTwice_SucceedsAndLeavesOneRow` |
+| AC3 | `GoogleLinkTests.Link_AccountLinkedToAnotherSubject_IsRefusedAndKeepsTheFirstLink` |
+| AC4 | `GoogleLinkTests.Link_SubjectOwnedByAnotherAccount_IsRefusedAndNeitherAccountChanges` |
+| AC5 | `GoogleLinkTests.Link_GoogleAddressDiffersFromTheAccountAddress_IsAccepted` |
+| AC6 | `GoogleLinkTests.Link_EmailNotVerified_IsRefusedAndLinksNothing` |
+| AC7 | `GoogleLinkEndpointTests.Complete_NoLinkMarker_SignsInAndLinksNothing` |
+| AC7b | `GoogleLinkEndpointTests.Complete_MarkerWithNoTicket_SaysExpiredAndLinksNothing`; shown to the reader by `SecurityGooglePageTests.RefusalInTheAddress_IsShownOnTheCardAndThenCleared("google_link.expired")`, and on the running app by validation step 3 — see the note below |
+| AC8 | `GoogleLinkEndpointTests.Complete_TicketMintedForAnotherUser_SaysSessionChangedAndLinksNothing`; shown by the same page test with `google_link.session_changed` |
+| AC9 | `GoogleLinkEndpointTests.Complete_TicketPresentedTwice_IsRefusedTheSecondTime` |
+| AC10 | `GoogleLinkEndpointTests.StartLink_WithoutTheAntiforgeryToken_IsRefusedBeforeGoogle`; the form that carries the token is pinned by `SecurityGooglePageTests.NotLinked_OffersAFormPostWithTheIntentAndTheAntiforgeryToken`, and the happy path by `StartLink_SignedInWithTheToken_ChallengesGoogleWithAMarkerAndATicketForTheCaller` |
+| AC11 | `GoogleLinkEndpointTests.StartLink_Anonymous_IsRefusedAndTheEndpointRequiresAuthorization` |
+| AC12 | `GoogleLinkTests.Unlink_RightPassword_RemovesTheRowAndThePasswordStillWorks`; on screen, `GoogleDisconnectDialogTests.RightPassword_ClosesTheDialogAndTheCardOffersToConnectAgain` |
+| AC13 | `GoogleLinkTests.Unlink_WrongPassword_KeepsTheLinkCountsTheAttemptAndLocksAtTheLimit`; on screen, `GoogleDisconnectDialogTests.WrongPassword_ShowsItOnTheFieldAndKeepsTheDialogOpen` and `Locked_ShowsTheCountdownAlert` |
+| AC14 | `GoogleLinkTests.Unlink_AccountWithoutAPassword_AnswersPasswordNotSetAndKeepsTheLink`; on screen, `SecurityGooglePageTests.LinkedWithoutAPassword_DisablesTheDisconnectAndSaysWhy` and `GoogleDisconnectDialogTests.PasswordNotSet_ShowsThatAlertAndThenClearsItOnTheNextAnswer` |
+| AC15 | `GoogleLinkTests.Unlink_NoLinkAndNoPassword_Answers204AndReadsNothingElse` |
+| AC16 | `GoogleLinkTests.SignIn_AfterDisconnecting_IsRefusedAndLinksNothing`, plus the re-founded `GoogleSignInTests.Grant_ActivePasswordAccountWithTheSameGmailAddress_IsRefusedAndLinksNothing` and `Grant_WorkspaceAccountWithTheSameAddress_IsRefusedAndLinksNothing` |
+| AC17 | `GoogleLinkSwitchedOffTests.EveryRoute_SwitchedOff_Is404` (the three routes); the section's absence by `SecurityGooglePageTests.GoogleOffTotpOn_ShowsNoGoogleCard`; the Web start by the existing `GoogleAccountEndpointTests.Start_SwitchedOff_IsNotFound` |
+| AC18 | `SecurityGooglePageTests.TotpOffGoogleOn_ShowsTheGoogleCardAndNoTwoFactorBlock` |
+| AC18b | `AccountPageTests.Load_TwoFactorOffButGoogleOn_StillShowsTheSecurityLink` |
+| AC18c | `SecurityGooglePageTests.GoogleOffTotpOn_ShowsNoGoogleCard` |
+| AC19 | `SecurityGooglePageTests.BothOff_IsNotFound` |
+| AC20 | `GoogleLinkTests.AnyRoute_Anonymous_Is401` (a case per route) |
+| AC21 | `GoogleLinkTests.LinkAndUnlink_AreRecordedAsAccountEventsOfThatAccount` (and that another account's events are not touched) |
+| AC22 | `AccountEventNamesTests` (`AccountEventTypes.All` matches the domain enum) and `AccountEventResourcesTests` (a text per value in the three languages); both already existed and now cover the two new values |
+| AC23 | `ResourceParityTests` — the missing-key test over the new `Security.Google.*` keys in pt-BR, pt-PT and en |
+
+Beyond the criteria: `State_LinkWrittenBeforeThisFeature_IsLinkedWithNoAddress` and
+`SecurityGooglePageTests.LinkedWithoutAnAddress_SaysSoInsteadOfShowingNothing` pin BR12's old rows,
+`LinkedInTheAddress_ConfirmsAndClearsTheAddress` the success message, and
+`GoogleDisconnectDialogTests.Cancel_ClosesTheDialogAndCallsNothing` that walking away calls nothing.
+
+**One criterion no test can hold.** AC7b and AC8 depend on the callback's outcome surviving a full page load.
+bUnit does not prerender, so a bUnit test passes whether or not the page survives the static pass — which is
+exactly how the first attempt shipped a version that worked in tests and for no real user. The guard is
+validation step 3, run on the app host: the request must answer **200** with the alert on the card, never a
+302 to a clean address.
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
-1. <Step> → <expected result>
+Everything runs against the app host. `Google:ClientId` and `Google:ClientSecret` must be in the AppHost's
+user secrets (`docs/infra.md`), otherwise the Google card does not exist and nothing below applies.
+
+1. Start the app: `dotnet run --project src/Hosts/Simulab.AppHost` from
+   `D:\dev\_icontrol\wt\simulab\feature-29`. Close any other app host first — the ports collide.
+2. Sign in and open **My account → Security**. The page shows two cards: **Two-factor sign-in** and
+   **Google**, the second with **Connect Google**. (AC18, AC18b: the **Security** link is on `/account`.)
+3. **The one that only the running app can show.** Open
+   `https://localhost:7125/account/security?error=google_link.expired` directly. The card must show *The
+   attempt took too long. Nothing was connected; try again.* and the address must fall back to
+   `/account/security`. Repeat with `?error=google_link.session_changed` (*The account signed in here changed
+   while you were at Google.*) and with `?linked=1` (a green *Google connected.*). All three were run here on
+   2026-09-27; the request answered 200, not a redirect.
+4. Select **Connect Google**, choose a Google account, allow access. You come back to **Security**, which
+   confirms and shows the Google address (AC1, AC5: it does not have to be your Simulab address).
+5. Press the browser's Back button, then **Connect Google** again with the same Google account. It succeeds
+   and nothing is duplicated (AC2). With a *different* Google account it is refused, and the first link stays
+   (AC3).
+6. Select **Disconnect Google**, type a wrong password: the dialog stays open with *Wrong password.* and the
+   link is still there (AC13). Type the right one: the card goes back to **Connect Google** and your password
+   still signs you in (AC12).
+7. Sign out and select **Continue with Google** with the address you just disconnected: it is refused with
+   *An account with this email address already exists.* and nothing is linked (AC16, BR11).
+8. Keyboard only, from the top of the Security page: Tab to **Connect Google** and press Enter — the Google
+   round trip starts. On a linked account, Tab to **Disconnect Google**, Enter, type the password, Tab to the
+   confirm button, Enter. Switch the language in the app bar and check the card, the dialog and the three
+   messages in pt-BR and pt-PT.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: feature/F-29
 - Merge: <commit>
 - Tests: <count, duration>
-- Manual pages: <paths>
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/security-google.md` (new) and `google-sign-in.md` (corrected)
