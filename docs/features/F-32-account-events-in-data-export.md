@@ -1,7 +1,7 @@
 ---
 feature: F-32
 epic: Foundation and identity
-status: refining
+status: approved
 board: 751
 version: 1
 ---
@@ -51,6 +51,7 @@ Answer a data subject's portability request completely: the account's own securi
 - 2026-09-27 — Claude: new contract `AccountEventDataResponse`, appended as the last field of `IdentityDataResponse` — additive, so the export's `Version` stays 1 (rule `api-contracts`).
 - 2026-09-27 — Claude: no new resource keys — `Account.Data.Explanation`'s existing value changes in the three files together (rule `i18n`: a key changes value, it does not need a new key).
 - 2026-09-27 — Claude: ordering is oldest first, matching `consents` and `roleChanges` (both already ordered ascending by their timestamp) rather than the admin trail's newest-first default, which exists for browsing a live list, not for a portability file.
+- 2026-09-27 — Approved by the owner ("aprovo f-32").
 
 ## Out of scope
 - Filtering, searching or paging the events inside the export (BR2): it is the whole trail or nothing, as the rest of the file.
