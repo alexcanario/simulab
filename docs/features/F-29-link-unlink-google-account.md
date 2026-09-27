@@ -261,6 +261,9 @@ No blocker. Eleven findings, all verified in the code before acting; every one c
 - Known limit, accepted: no test reads the issued ticket's id, because it lives protected inside the OIDC
   `state` — which is the point of BR2. The id-to-account binding is covered from the other side, by AC8.
 
+- 2026-09-27 — the owner followed the validation script and it passed. Gate 2 is done; the merge is **not**
+  authorized ("validado" alone). The item stays at `validating` on `feature/F-29`, and the worktree stays.
+
 ## Out of scope
 - Any provider other than Google.
 - More than one Google account per Simulab account.
