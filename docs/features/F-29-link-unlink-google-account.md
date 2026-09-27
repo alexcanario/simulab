@@ -1,7 +1,7 @@
 ---
 feature: F-29
 epic: Foundation and identity
-status: validating
+status: done
 board: 748
 version: 2
 Autopilot: built
@@ -370,8 +370,19 @@ user secrets (`docs/infra.md`), otherwise the Google card does not exist and not
    messages in pt-BR and pt-PT.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: feature/F-29
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/security-google.md` (new) and `google-sign-in.md` (corrected)
+- Branch: `feature/F-29`, worktree `wt/simulab/feature-29`.
+- Merge: `7965f27` (`--no-ff`, AB#748). 54 files, +2584 / -144.
+- Ship gate: `agile gate GREEN` — full build 22 s, 0 warnings; full suite 1391 passed, 0 failed, 69 s, well
+  inside the < 5 min budget. Architecture tests 135.
+- Tests added by this item: 37 — 20 on the Api (`GoogleLinkTests`, `GoogleLinkSwitchedOffTests`), 7 on the Web
+  endpoints (`GoogleLinkEndpointTests`), 10 on the screen (`SecurityGooglePageTests`) plus 5 on the dialog
+  (`GoogleDisconnectDialogTests`). Six shipped F-20 and F-11 tests were re-founded on the new rules.
+- Checked on the running app (2026-09-27), which is the only place AC7b and AC8 can be proven: the callback's
+  outcome answered **200** with the alert on the card and the address fell back to `/account/security`, for
+  `google_link.expired`, `google_link.session_changed` and `?linked=1`, in both themes.
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/security-google.md` (new), `google-sign-in.md` (the implicit link
+  BR11 removes), and the three `index.md`.
+- Superseded elsewhere: F-20 v4 (BR4's implicit link off) and F-11 v4 (the Security page exists while either
+  switch is on).
+- `docs/infra.md` "Measured times" updated. `DocGen --check` → `docs/architecture is up to date`.
+- Left in the dev database by the screen check: the test account `ana.f29@exemplo.test`. Nothing else touched.
