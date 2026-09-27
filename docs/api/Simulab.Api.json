@@ -299,6 +299,19 @@
         }
       }
     },
+    "/api/v1/identity/account-events/mine": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetMyAccountEvents",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/identity/profile": {
       "get": {
         "tags": [
