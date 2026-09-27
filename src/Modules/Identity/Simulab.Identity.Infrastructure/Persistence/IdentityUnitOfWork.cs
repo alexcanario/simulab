@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Simulab.Identity.Application.Abstractions;
 
 namespace Simulab.Identity.Infrastructure.Persistence;
@@ -7,4 +8,13 @@ public sealed class IdentityUnitOfWork(IdentityModuleDbContext context) : IIdent
 {
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         context.SaveChangesAsync(cancellationToken);
+
+    public async Task<IIdentityTransaction> BeginAsync(CancellationToken cancellationToken = default)
+    {
+        var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        return new IdentityTransaction(transaction, context);
+    }
+
+    public IdentityUniqueViolation? TranslateWriteFailure(Exception exception) =>
+        exception is DbUpdateException dbUpdateException ? IdentityUniqueViolations.Translate(dbUpdateException) : null;
 }
