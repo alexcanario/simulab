@@ -169,9 +169,10 @@ public sealed class GoogleSignInTests : IdentityApiTests
         grant.AccessToken.Should().NotBeNull(grant.Error);
     }
 
-    // AC7.
+    // F-29 AC16 (was F-20 AC7): an active account is no longer linked by its address. With the explicit link
+    // on the Security page, linking on the way in would silently undo a disconnection at the next sign-in.
     [Fact]
-    public async Task Grant_ActivePasswordAccountWithTheSameGmailAddress_LinksItAndKeepsThePassword()
+    public async Task Grant_ActivePasswordAccountWithTheSameGmailAddress_IsRefusedAndLinksNothing()
     {
         var client = Client();
         var email = await ActiveUser.CreateAsync(client, Factory, NewEmail());
@@ -179,17 +180,23 @@ public sealed class GoogleSignInTests : IdentityApiTests
 
         var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
 
-        grant.AccessToken.Should().NotBeNull(grant.Error);
-        (await GoogleKeysAsync((await UserAsync(email))!.Id)).Should().Equal(subject);
+        grant.AccessToken.Should().BeNull();
+        grant.Error.Should().Be(IdentityErrorCodes.GoogleAccountExists);
+        (await GoogleKeysAsync((await UserAsync(email))!.Id)).Should().BeEmpty("F-29 BR11: nothing is linked here");
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).AccessToken.Should().NotBeNull("the password keeps working");
     }
 
-    // AC8.
+    // AC8, re-founded for F-29 BR11: the account reaches the grant through its **link**, not through its
+    // address, because the address no longer links anything. What the criterion says is unchanged: a Google
+    // sign-in clears a lockout the password attempts caused.
     [Fact]
-    public async Task Grant_AccountLockedByWrongPasswords_SignsInAndClearsTheLockout()
+    public async Task Grant_LinkedAccountLockedByWrongPasswords_SignsInAndClearsTheLockout()
     {
         var client = Client();
         var email = await ActiveUser.CreateAsync(client, Factory, NewEmail());
+        var subject = GoogleTokens.NewSubject();
+        await LinkAsync(email, subject);
+
         for (var attempt = 0; attempt < 5; attempt++)
         {
             await TokenClient.SignInAsync(client, email, "Wrong#Password1");
@@ -197,13 +204,24 @@ public sealed class GoogleSignInTests : IdentityApiTests
 
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).Error.Should().Be(IdentityErrorCodes.AccountLocked);
 
-        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(GoogleTokens.NewSubject(), email));
+        var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email));
 
         grant.AccessToken.Should().NotBeNull(grant.Error);
         var user = (await UserAsync(email))!;
         user.AccessFailedCount.Should().Be(0);
         user.LockoutEnd.Should().BeNull();
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).AccessToken.Should().NotBeNull();
+    }
+
+    /// <summary>F-29: the link an account gets on the Security page, written straight into the table.</summary>
+    private async Task LinkAsync(string email, string subject)
+    {
+        var user = (await UserAsync(email))!;
+        await QueryAsync(async context =>
+        {
+            GoogleTokens.Link(context, user.Id, subject, email);
+            return await context.SaveChangesAsync();
+        });
     }
 
     // AC9, change note v3: the grant sends a pending account to the confirmation, which takes it over.
@@ -275,9 +293,10 @@ public sealed class GoogleSignInTests : IdentityApiTests
         (await GoogleKeysAsync(after.Id)).Should().BeEmpty();
     }
 
-    // AC19: a Workspace account (hd) is vouched for, whatever its domain.
+    // F-29 AC16 (was F-20 AC19): a Workspace address is vouched for just the same, and is refused just the
+    // same. Being authoritative decides the pending takeover, never a link into an active account any more.
     [Fact]
-    public async Task Grant_WorkspaceAccountWithTheSameAddress_LinksIt()
+    public async Task Grant_WorkspaceAccountWithTheSameAddress_IsRefusedAndLinksNothing()
     {
         var client = Client();
         var email = await ActiveUser.CreateAsync(client, Factory, $"ana.{Guid.CreateVersion7():N}@exemplo.com");
@@ -285,8 +304,9 @@ public sealed class GoogleSignInTests : IdentityApiTests
 
         var grant = await GoogleTokens.GrantAsync(client, GoogleTokens.Issue(subject, email, hostedDomain: "exemplo.com"));
 
-        grant.AccessToken.Should().NotBeNull(grant.Error);
-        (await GoogleKeysAsync((await UserAsync(email))!.Id)).Should().Equal(subject);
+        grant.AccessToken.Should().BeNull();
+        grant.Error.Should().Be(IdentityErrorCodes.GoogleAccountExists);
+        (await GoogleKeysAsync((await UserAsync(email))!.Id)).Should().BeEmpty();
     }
 
     // AC11.

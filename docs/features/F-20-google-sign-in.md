@@ -3,7 +3,7 @@ feature: F-20
 epic: Foundation and identity
 status: done
 board: 733
-version: 3
+version: 4
 ---
 # Google sign-in
 
@@ -133,6 +133,16 @@ Checked in the code on 2026-09-23 (items that touched it since F-5: F-7, F-8, F-
 - Why: the independent review (findings 6 and 7). Google documents `email_verified` as authoritative only for Gmail and Workspace addresses, so linking other addresses by email leaves a takeover path through a domain that changed hands; and the pending account's consent, 18+ declaration and name were given by someone who never proved the address. Owner's choices, 2026-09-23.
 - Affected: UC4, BR4, BR5, BR9, AC7, AC9, AC12, new AC19; other rules and criteria unchanged.
 - Re-approved: 2026-09-23
+
+### v4 — 2026-09-27, by F-29
+- What: **BR4's implicit link is switched off.** A Google sign-in no longer reaches an existing active account
+  by its address, whether or not Google is authoritative for it: the answer is `google_sign_in.account_exists`
+  and nothing is linked. An account is reached only through a link it already carries.
+- Why: F-29 BR11. With an explicit "Connect Google" on `/account/security`, an implicit link would silently
+  undo a disconnection at the next sign-in — the reader would disconnect and be reconnected without asking.
+- Affected: BR4, BR5, AC7, AC19 of this file; the pending-account takeover of v3 is unchanged, and so is
+  everything about creating an account with Google. See `docs/features/F-29-link-unlink-google-account.md`.
+- Re-approved: 2026-09-26 (owner, F-29 refinement round 2 Q1).
 
 ## Validation script
 Needs a Google account listed as a test user of your OAuth client, and no Simulab account for its address yet (a `@gmail.com` address).

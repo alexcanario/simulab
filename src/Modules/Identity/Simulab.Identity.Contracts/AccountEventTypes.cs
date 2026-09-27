@@ -19,6 +19,11 @@ public static class AccountEventTypes
     public const string RecoveryCodesRegenerated = "RecoveryCodesRegenerated";
     public const string AccountErased = "AccountErased";
 
+    /// <summary>F-29 BR13: the account's owner connected or disconnected Google.</summary>
+    public const string GoogleLinked = "GoogleLinked";
+
+    public const string GoogleUnlinked = "GoogleUnlinked";
+
     public static readonly IReadOnlyList<string> All =
     [
         SignInSucceeded,
@@ -31,6 +36,8 @@ public static class AccountEventTypes
         TwoFactorEnabled,
         TwoFactorDisabled,
         RecoveryCodesRegenerated,
-        AccountErased
+        AccountErased,
+        GoogleLinked,
+        GoogleUnlinked
     ];
 }

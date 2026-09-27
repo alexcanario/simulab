@@ -40,6 +40,7 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Erase your account](erase-account.md): erase your account and what is kept
 - [Two-factor sign-in](two-factor.md): a code from your phone after your password, and recovery codes
 - [Sign in with Google](google-sign-in.md): create an account or sign in with your Google account
+- [Connect and disconnect Google](security-google.md): use Google besides your password, from **My account → Security**
 - [Roles and permissions](roles.md): what Student, Curator and Admin can do, and how an Admin changes a role
 - [Users](users.md): find an account and change its roles (Admins)
 - [Role history](role-history.md): who changed which role or whose roles, and when (Admins)

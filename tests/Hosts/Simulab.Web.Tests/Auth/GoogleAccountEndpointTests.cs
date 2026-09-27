@@ -1,13 +1,9 @@
 using System.Net;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Simulab.Identity.Contracts;
 using Simulab.Web.Services;
@@ -186,43 +182,4 @@ public sealed class GoogleAccountEndpointTests(WebApplicationFactory<Program> fa
 
     public void Dispose() => _api.Dispose();
 
-    /// <summary>Google's saved answer, and how many times the endpoint cleared it.</summary>
-    private sealed class StandInGoogleAnswer(string? idToken)
-    {
-        private int _signOuts;
-
-        public string? IdToken => idToken;
-
-        public int SignOuts => _signOuts;
-
-        public void SignedOut() => Interlocked.Increment(ref _signOuts);
-    }
-
-    /// <summary>What the external cookie holds after Google's callback: the saved ID token, or nothing.</summary>
-    private sealed class StandInExternalHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        StandInGoogleAnswer answer)
-        : SignOutAuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
-    {
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-        {
-            if (answer.IdToken is null)
-            {
-                return Task.FromResult(AuthenticateResult.NoResult());
-            }
-
-            var properties = new AuthenticationProperties();
-            properties.StoreTokens([new AuthenticationToken { Name = "id_token", Value = answer.IdToken }]);
-            var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "google-subject")], Scheme.Name));
-            return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, properties, Scheme.Name)));
-        }
-
-        protected override Task HandleSignOutAsync(AuthenticationProperties? properties)
-        {
-            answer.SignedOut();
-            return Task.CompletedTask;
-        }
-    }
 }

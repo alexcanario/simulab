@@ -14,6 +14,7 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
 @inject TimeProvider Clock
+@inject IDialogService Dialogs
 
 <PageTitle>@I["Security.Title"] — @L["App.Name"]</PageTitle>
 
@@ -30,6 +31,9 @@ else if (_view == View.LoadFailed)
 }
 else
 {
+    @* F-29 BR14: with two-factor switched off nothing of it renders, and the Google card carries the page. *@
+    @if (!_totpOff)
+    {
     <MudPaper Class="app-form-card app-security-card pa-6" Elevation="0" Outlined="true" MaxWidth="560px">
         <h2 class="app-security-title">@I["Security.TwoFactor.Title"]</h2>
 
@@ -147,6 +151,57 @@ else
                 break;
         }
     </MudPaper>
+    }
+
+    @* ---- F-29: connect or disconnect Google. Its own card, after two-factor and before the danger zone. ---- *@
+    @if (!_googleOff)
+    {
+        <MudPaper Class="app-form-card app-security-card pa-6 mt-6" Elevation="0" Outlined="true" MaxWidth="560px">
+            <h2 class="app-security-title">@I["Security.Google.Title"]</h2>
+            <MudText Typo="Typo.body2" Class="mb-4 app-security-explanation">@I["Security.Google.Explanation"]</MudText>
+
+            @* Only the callback writes here, and it never produces identity.password_not_set: that one
+               belongs to the disconnect, which the dialog answers with its own PasswordNotSetAlert. *@
+            @if (_googleError is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@Errors.For(_googleError)" Class="mb-4" />
+            }
+
+            @if (_googleLink?.Linked == true)
+            {
+                <MudText Typo="Typo.body2" Class="mb-4 app-security-google-account">
+                    @(_googleLink.Email ?? I["Security.Google.ConnectedWithoutAddress"].Value)
+                </MudText>
+
+                @* BR9: the reason is visible text, not only a tooltip. MudTooltip renders its text into a
+                   popover that is not in the DOM until it is shown, and a disabled button never shows one,
+                   so a keyboard or screen-reader user would meet a dead button with no explanation. *@
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="!CanDisconnect || _googleBusy"
+                           OnClick="DisconnectGoogleAsync" Class="app-security-google-disconnect"
+                           aria-describedby="@(CanDisconnect ? null : "security-google-needs-password")">
+                    @I["Security.Google.Disconnect"]
+                </MudButton>
+                @if (!CanDisconnect)
+                {
+                    <MudText id="security-google-needs-password" Typo="Typo.body2" Class="mt-2 app-security-google-needs-password">
+                        @I["Security.Google.Disconnect.NeedsPassword"]
+                    </MudText>
+                }
+            }
+            else
+            {
+                @* BR2: a form post, not a link - the form-bound field is what makes antiforgery validate. *@
+                <form method="post" action="@GoogleAccountEndpoints.StartPath">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="intent" value="@GoogleAccountEndpoints.LinkIntent" />
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                               Class="app-security-google-connect">
+                        @I["Security.Google.Connect"]
+                    </MudButton>
+                </form>
+            }
+        </MudPaper>
+    }
 
     @if (_view == View.On)
     {
@@ -213,6 +268,21 @@ else
     private Countdown _lockout = default!;
     private View _view = View.Loading;
     private TotpStatusResponse? _status;
+
+    // F-29: each feature's own switch, and the link state the Google card shows. The card keeps its own
+    // error field: a Google failure must never render inside the two-factor card's alert slot.
+    private bool _totpOff;
+    private bool _googleOff;
+    private GoogleLinkResponse? _googleLink;
+    private string? _googleError;
+
+    // F-29 BR2: the callback is a full page load, so its outcome can only reach this page in the address.
+    // Without these two the Web host would produce google_link.expired and google_link.session_changed and
+    // nobody would ever see them, and a link that worked would land on a silent page.
+    [SupplyParameterFromQuery(Name = "error")] public string? LinkError { get; set; }
+
+    [SupplyParameterFromQuery(Name = "linked")] public string? LinkedOutcome { get; set; }
+    private bool _googleBusy;
     private TotpEnrolmentResponse? _enrolment;
     private IReadOnlyList<string> _codes = [];
     private bool _codesSaved;
@@ -249,7 +319,38 @@ else
             return;
         }
 
+        // F-29 BR2: read the callback's outcome before the load, so the card renders with it already set.
+        _googleError = string.IsNullOrEmpty(LinkError) ? null : LinkError;
+
         await LoadAsync();
+    }
+
+    /// <summary>
+    /// F-29 BR2: the callback's outcome is announced and cleared **only** once this page is interactive.
+    /// `Routes` is `InteractiveServer` with prerendering on (`App.razor`), so `OnInitializedAsync` runs first
+    /// during static prerender, where a `NavigateTo` becomes a 302: the browser would reload the page without
+    /// the query and the interactive pass would see nothing, swallowing google_link.expired and
+    /// google_link.session_changed. `OnAfterRenderAsync` never runs during prerender, so it is the safe place.
+    /// </summary>
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var linked = LinkedOutcome == "1";
+        if (linked)
+        {
+            Snackbar.Add(I["Security.Google.Connected"], Severity.Success);
+        }
+
+        if (_googleError is not null || linked)
+        {
+            // Read once: a refresh must not replay it, and the address must not keep it. `_googleError` is a
+            // field, so the alert stays on screen after the query is gone.
+            Navigation.NavigateTo(GoogleAccountEndpoints.SecurityPath, replace: true);
+        }
     }
 
     private async Task LoadAsync()
@@ -257,22 +358,73 @@ else
         _view = View.Loading;
         var accessToken = await AccessTokenAsync();
         var result = accessToken is null ? null : await Api.GetTotpStatusAsync(accessToken);
+        var link = accessToken is null ? null : await Api.GetGoogleLinkAsync(accessToken);
 
-        if (result?.ErrorCode == IdentityApiClient.TotpSwitchedOffCode)
+        // F-29 BR14 (supersedes F-11 BR12): the page exists while either feature is on. Only when both are
+        // off does it stop existing; each block below appears by its own switch.
+        _totpOff = result?.ErrorCode == IdentityApiClient.TotpSwitchedOffCode;
+        _googleOff = link?.ErrorCode == IdentityApiClient.GoogleSwitchedOffCode;
+        if (_totpOff && _googleOff)
         {
-            // BR12: with the feature off, this page does not exist.
             Navigation.NotFound();
             return;
         }
 
-        if (result?.Value is null)
+        if ((!_totpOff && result?.Value is null) || (!_googleOff && link?.Value is null))
         {
             _view = View.LoadFailed;
             return;
         }
 
-        _status = result.Value;
+        _googleLink = link?.Value;
+        if (_totpOff)
+        {
+            // Nothing of two-factor shows, and the Google card carries the page on its own.
+            _status = null;
+            _view = View.Off;
+            return;
+        }
+
+        _status = result!.Value!;
         _view = _status.Enabled ? View.On : View.Off;
+    }
+
+    /// <summary>
+    /// F-29 BR9: without a password the link is the only way in, so the button is disabled and says why
+    /// instead of letting the reader discover the refusal by pressing it.
+    /// </summary>
+    private bool CanDisconnect => _googleLink?.HasPassword == true;
+
+    /// <summary>F-29 BR8: the password confirms it, in the dialog the erasure already uses the shape of.</summary>
+    private async Task DisconnectGoogleAsync()
+    {
+        _googleError = null;
+        _googleBusy = true;
+
+        var parameters = new DialogParameters<GoogleDisconnectDialog>
+        {
+            { dialog => dialog.Disconnect, DisconnectOnApiAsync }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await Dialogs.ShowAsync<GoogleDisconnectDialog>(I["Security.Google.Disconnect"], parameters, options);
+        var result = await dialog.Result;
+
+        _googleBusy = false;
+        if (result?.Canceled != false)
+        {
+            return;
+        }
+
+        Snackbar.Add(I["Security.Google.Disconnected"], Severity.Success);
+        await LoadAsync();
+    }
+
+    private async Task<LockableResult<bool>> DisconnectOnApiAsync(string password)
+    {
+        var accessToken = await AccessTokenAsync();
+        return accessToken is null
+            ? new LockableResult<bool>(false, ErrorText.UnexpectedCode, null)
+            : await Api.RemoveGoogleLinkAsync(accessToken, password);
     }
 
     private async Task StartAsync()

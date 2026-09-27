@@ -1,0 +1,121 @@
+@* F-29 BR8: disconnecting Google is confirmed with the current password — the shape the erasure already uses. *@
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+<MudDialog Class="app-google-disconnect-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            <MudText Typo="Typo.body1" Class="mb-4">@I["Security.Google.Disconnect.Explanation"]</MudText>
+
+            @if (_lockedSeconds is not null)
+            {
+                <div aria-live="polite">
+                    <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", FormatSeconds(_lockedSeconds.Value)]" Class="mb-4" />
+                </div>
+            }
+            else if (_passwordNotSet)
+            {
+                <PasswordNotSetAlert Class="mb-4" />
+            }
+            else if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppPasswordField Id="google-disconnect-password"
+                              Label="@I["Security.Google.Disconnect.Password.Label"]"
+                              ShowLabel="@I["SignUp.Password.Show"]"
+                              HideLabel="@I["SignUp.Password.Hide"]"
+                              Autocomplete="PasswordAutocomplete.CurrentPassword"
+                              Required="true"
+                              Disabled="_working"
+                              Error="@_passwordError"
+                              Value="@_password"
+                              ValueChanged="@(value => { _password = value; _passwordError = null; _error = null; })" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Disabled="_working" Class="app-google-disconnect-cancel">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Error"
+                   OnClick="DisconnectAsync"
+                   Disabled="@(_working || string.IsNullOrEmpty(_password))"
+                   Class="app-google-disconnect-confirm">
+            @if (_working)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+            }
+            @I["Security.Google.Disconnect"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Sends the removal to the Api; the dialog stays open and shows the failure (Screens).</summary>
+    [Parameter, EditorRequired] public Func<string, Task<LockableResult<bool>>> Disconnect { get; set; } = default!;
+
+    private string? _password;
+    private string? _passwordError;
+    private string? _error;
+    private int? _lockedSeconds;
+    private bool _passwordNotSet;
+    private bool _working;
+
+    private async Task DisconnectAsync()
+    {
+        if (_working || string.IsNullOrEmpty(_password))
+        {
+            return;
+        }
+
+        _working = true;
+        _passwordError = null;
+        _error = null;
+        _lockedSeconds = null;
+        // Every attempt starts from no verdict: without this, one password_not_set kept its alert on screen
+        // over every later answer, including a plain wrong password.
+        _passwordNotSet = false;
+
+        var result = await Disconnect(_password);
+
+        _working = false;
+        if (result.ErrorCode is null)
+        {
+            Dialog.Close(DialogResult.Ok(true));
+            return;
+        }
+
+        switch (result.ErrorCode)
+        {
+            case IdentityErrorCodes.GoogleLinkCurrentPasswordInvalid:
+                _passwordError = Errors.For(result.ErrorCode);
+                break;
+            case IdentityErrorCodes.AccountLocked:
+                _lockedSeconds = result.RetryAfterSeconds ?? 0;
+                break;
+            case IdentityErrorCodes.PasswordNotSet:
+                _passwordNotSet = true;
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await DisconnectAsync();
+        }
+    }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private static string FormatSeconds(int seconds) => TimeSpan.FromSeconds(seconds).ToString(@"mm\:ss");
+}

@@ -134,6 +134,16 @@
   <data name="Security.Title" xml:space="preserve"><value>Segurança</value></data>
   <data name="Security.LoadFailed" xml:space="preserve"><value>Não foi possível carregar as suas definições de segurança.</value></data>
   <data name="Security.TwoFactor.Title" xml:space="preserve"><value>Verificação em dois passos</value></data>
+  <data name="Security.Google.Title" xml:space="preserve"><value>Google</value></data>
+  <data name="Security.Google.Explanation" xml:space="preserve"><value>Ligue uma conta Google para iniciar sessão com ela, além da sua palavra-passe. Não tem de ser o endereço com que se registou.</value></data>
+  <data name="Security.Google.Connect" xml:space="preserve"><value>Ligar o Google</value></data>
+  <data name="Security.Google.Disconnect" xml:space="preserve"><value>Desligar o Google</value></data>
+  <data name="Security.Google.Disconnect.Explanation" xml:space="preserve"><value>Deixará de conseguir iniciar sessão com o Google. A sua palavra-passe continua a funcionar.</value></data>
+  <data name="Security.Google.Disconnect.Password.Label" xml:space="preserve"><value>Palavra-passe atual</value></data>
+  <data name="Security.Google.Disconnect.NeedsPassword" xml:space="preserve"><value>Crie primeiro uma palavra-passe: o Google é a única forma de entrar nesta conta.</value></data>
+  <data name="Security.Google.Disconnected" xml:space="preserve"><value>Google desligado.</value></data>
+  <data name="Security.Google.ConnectedWithoutAddress" xml:space="preserve"><value>Ligado. O endereço não ficou registado.</value></data>
+  <data name="Security.Google.Connected" xml:space="preserve"><value>Google ligado.</value></data>
   <data name="Security.Off.Explanation" xml:space="preserve"><value>A verificação em dois passos pede, depois da palavra-passe, um código de uma aplicação de autenticação no seu telemóvel. Quem descobrir a sua palavra-passe continua a não conseguir entrar sem o seu telemóvel.</value></data>
   <data name="Security.Off.TurnOn" xml:space="preserve"><value>Ativar a verificação em dois passos</value></data>
   <data name="Security.Enrol.Step.Install" xml:space="preserve"><value>Instale uma aplicação de autenticação no telemóvel, como o Google Authenticator, o Microsoft Authenticator ou o 2FAS.</value></data>

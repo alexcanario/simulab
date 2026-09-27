@@ -1,8 +1,8 @@
 ---
 page: google-sign-in
 locale: pt-BR
-features: [F-20]
-updated: 2026-09-23
+features: [F-20, F-29]
+updated: 2026-09-27
 ---
 # Entrar com o Google
 
@@ -24,7 +24,7 @@ Qualquer pessoa com uma conta Google.
 2. Se a verificação em duas etapas estiver ativa na sua conta, digite o código do aplicativo autenticador, como depois da senha.
 
 ### Você já tem uma conta com senha
-Se a sua conta do Simulab usa um endereço Gmail, o primeiro **Continuar com o Google** vincula sua conta Google a ela. Daí em diante as duas formas funcionam: a senha ou o Google. Para outros endereços, entre com a senha.
+Entrar com o Google não se vincula sozinho a uma conta que você já tem, seja qual for o endereço: você é avisado de que a conta existe e entra com a senha. Para usar as duas formas, conecte o Google você mesmo em **Minha conta → Segurança**, veja [Conectar e desconectar o Google](security-google.md). Depois de conectado, as duas funcionam.
 
 ### Você se cadastrou mas nunca confirmou o e-mail
 Selecione **Continuar com o Google** com o mesmo endereço Gmail e marque as três caixas em **Crie sua conta**. Sua conta fica ativa, e a senha escolhida no cadastro deixa de funcionar.
@@ -42,7 +42,7 @@ Apagar a conta, baixar seus dados, desativar a verificação em duas etapas e tr
 ## Mensagens
 | Mensagem | O que significa | O que fazer |
 |---|---|---|
-| Já existe uma conta com este e-mail. Entre nela. | Seu endereço já tem uma conta no Simulab que não pode ser vinculada ao Google automaticamente | Entre com sua senha |
+| Já existe uma conta com este e-mail. Entre nela. | O endereço já tem uma conta no Simulab, e entrar com o Google nunca se vincula sozinho a uma | Entre com sua senha e conecte o Google em **Minha conta → Segurança** |
 | A entrada com o Google demorou demais ou foi interrompida. Comece de novo. | Passaram mais de 10 minutos, ou a página foi aberta em outro navegador | Selecione **Continuar com o Google** de novo |
 | O Google ainda não verificou este endereço de e-mail. Verifique-o no Google e tente novamente. | O Google não confirmou que o endereço é seu | Verifique o endereço na sua conta Google |
 | Não foi possível confirmar a resposta do Google. Tente novamente. | A resposta do Google não era válida | Tente de novo; se continuar, entre com sua senha |
@@ -51,5 +51,6 @@ Apagar a conta, baixar seus dados, desativar a verificação em duas etapas e tr
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
 - [Entrar e sair](sign-in-and-sign-out.md)
+- [Conectar e desconectar o Google](security-google.md)
 - [Senha](password.md)
 - [Verificação em duas etapas](two-factor.md)

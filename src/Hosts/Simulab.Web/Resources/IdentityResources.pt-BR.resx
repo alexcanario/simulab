@@ -134,6 +134,16 @@
   <data name="Security.Title" xml:space="preserve"><value>Segurança</value></data>
   <data name="Security.LoadFailed" xml:space="preserve"><value>Não foi possível carregar suas configurações de segurança.</value></data>
   <data name="Security.TwoFactor.Title" xml:space="preserve"><value>Verificação em duas etapas</value></data>
+  <data name="Security.Google.Title" xml:space="preserve"><value>Google</value></data>
+  <data name="Security.Google.Explanation" xml:space="preserve"><value>Conecte uma conta Google para entrar com ela, além da sua senha. Não precisa ser o endereço com que você se cadastrou.</value></data>
+  <data name="Security.Google.Connect" xml:space="preserve"><value>Conectar o Google</value></data>
+  <data name="Security.Google.Disconnect" xml:space="preserve"><value>Desconectar o Google</value></data>
+  <data name="Security.Google.Disconnect.Explanation" xml:space="preserve"><value>Você deixará de conseguir entrar com o Google. Sua senha continua valendo.</value></data>
+  <data name="Security.Google.Disconnect.Password.Label" xml:space="preserve"><value>Senha atual</value></data>
+  <data name="Security.Google.Disconnect.NeedsPassword" xml:space="preserve"><value>Crie uma senha antes: o Google é a única forma de entrar nesta conta.</value></data>
+  <data name="Security.Google.Disconnected" xml:space="preserve"><value>Google desconectado.</value></data>
+  <data name="Security.Google.ConnectedWithoutAddress" xml:space="preserve"><value>Conectado. O endereço não foi registrado.</value></data>
+  <data name="Security.Google.Connected" xml:space="preserve"><value>Google conectado.</value></data>
   <data name="Security.Off.Explanation" xml:space="preserve"><value>A verificação em duas etapas pede, depois da senha, um código de um aplicativo autenticador no seu celular. Quem descobrir sua senha continua sem conseguir entrar sem o seu celular.</value></data>
   <data name="Security.Off.TurnOn" xml:space="preserve"><value>Ativar a verificação em duas etapas</value></data>
   <data name="Security.Enrol.Step.Install" xml:space="preserve"><value>Instale um aplicativo autenticador no seu celular, como Google Authenticator, Microsoft Authenticator ou 2FAS.</value></data>

@@ -74,16 +74,31 @@ public sealed class AccountPageTests : IdentityPageTestContext
         page.Find("a.app-account-security").ClassList.Should().Contain("app-link");
     }
 
-    // F-11 AC13.
+    // F-11 AC13, re-founded by F-29 BR14: the link follows the Security page, and that page now exists while
+    // *either* feature is on. Only both switches off takes the link away.
     [Fact]
-    public void Load_TwoFactorFeatureOff_HasNoSecurityLink()
+    public void Load_BothSecurityFeaturesOff_HasNoSecurityLink()
     {
         Api.TotpStatus = null;
+        Api.GoogleLink = null;
 
         var page = RenderSignedIn();
 
         page.FindAll("a.app-account-security").Should().BeEmpty();
         page.Find("a.app-account-password").Should().NotBeNull();
+    }
+
+    // F-29 AC18b: v1's own configuration — Google on, two-factor off. Gated on two-factor alone, this would
+    // ship a Security page with nothing leading to it.
+    [Fact]
+    public void Load_TwoFactorOffButGoogleOn_StillShowsTheSecurityLink()
+    {
+        Api.TotpStatus = null;
+        Api.GoogleLink = new GoogleLinkResponse(false, null, HasPassword: true);
+
+        var page = RenderSignedIn();
+
+        page.Find("a.app-account-security").GetAttribute("href").Should().Be("/account/security");
     }
 
     [Fact]
