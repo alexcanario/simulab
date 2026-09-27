@@ -31,6 +31,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - The OpenIddict password flow is for the first-party Web only. Never register a third-party client for it.
 - In a sign-in with more than one step, only the last step clears the failure count: a step that clears it gives unlimited tries to the next one (F-11).
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
+- Testing a race on an Identity unique index: turn off the `UserManager`'s own pre-check (`RequireUniqueEmail` for the email one) or test the translation directly against `DbUpdateException` — a lying `IUserDirectory` alone is not enough, and `AddLoginAsync` has no switch to turn its own check off (F-30).
 
 ## AI
 - Every AI call goes through `IAiGateway`. No direct SDK or HTTP call to a provider anywhere else.

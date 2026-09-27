@@ -723,3 +723,14 @@ another session while this one still saw it as `validating`; the stale worktree 
   no functional change.
 - No build file or build-checked rule changed, so the suite was not rerun. Warnings baseline: present, untouched.
   No ⏳ plugin notes delivered by this version.
+
+## 2026-09-27 — F-30 (sign-up writes in one transaction)
+Merged `feature/F-30` at `7218d2d` (AB#749). Full suite: 799 passed, 0 failed (build 29s, tests 72s).
+- Project rule added to `.claude/rules/agile/project.md` ("Access and entitlements"): testing a race on an
+  Identity unique index needs `UserManager`'s own pre-check turned off (`RequireUniqueEmail` for the email
+  one) or the translation tested directly against `DbUpdateException` — a lying `IUserDirectory` alone never
+  reaches the database, and `AddLoginAsync` has no switch for its own check. Found while writing AC8/AC8b:
+  the first attempt left only one `INSERT INTO identity.users` in the test log, and the Google case threw
+  `InvalidOperationException: The Google login of a new account could not be linked.` instead of hitting
+  `pk_user_logins`. Will recur in F-47, which gives the same guarantee to the module's other multi-write
+  handlers.
