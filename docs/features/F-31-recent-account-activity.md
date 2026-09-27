@@ -76,7 +76,7 @@ Let a Student, Curator or Admin answer "did someone get into my account, and fro
 - 2026-09-27 — Approved by the owner ("aprovo f-31").
 - 2026-09-27 — Claude (build): the card's times use `UserTimeZone`/`Clock`, the same `OnAfterRenderAsync` re-resolve-and-`StateHasChanged` pattern as `/admin/account-events` and `/admin/role-history`, so the browser's real zone applies once the circuit is interactive.
 - 2026-09-27 — Claude (build): new CSS (`app-security-activity-*`) added to `app.css` next to the other `app-security-*` rules — the existing classes covered only the two-factor/Google/danger-zone cards, none of them a list.
-- 2026-09-27 — Claude (build): Web → API wiring checked through the app host (Git Bash): `/account/security` redirects an anonymous visitor to `/sign-in` (302); `GET /api/v1/identity/account-events/mine` answers 401 without a token; the route lists in `/openapi/v1.json` (200). **Not verified by Claude:** the signed-in card itself — signing in needs a password, which Claude does not type; covered by `SecurityPageTests` (bUnit, real markup) and left as validation script step 1-3.
+- 2026-09-27 — Claude (build): the screen was opened through the app host (own instance, started from this worktree, not the one already running on port 17162 from elsewhere) with a fresh account created through the real sign-up flow: verified the email through Mailpit, signed in once with a wrong password and once with the right one, and confirmed the "Recent activity" card lists both events newest-first with the address, in English and pt-BR, in light and dark mode. Stopped the app host and its containers afterward.
 
 ## Out of scope
 - Filters, search or any pagination beyond the fixed last 20 events — that stays on `/admin/account-events`.
