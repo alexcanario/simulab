@@ -1,7 +1,7 @@
 ---
 feature: F-32
 epic: Foundation and identity
-status: idea
+status: refining
 board: 751
 version: 1
 ---
