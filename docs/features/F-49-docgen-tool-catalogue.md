@@ -1,7 +1,7 @@
 ---
 feature: F-49
 epic: Foundation and identity
-status: validating
+status: done
 board: 774
 version: 1
 ---
@@ -129,3 +129,9 @@ No screen changes, no sign-in or language switch. Run from the repository root o
 7. Open `docs/agile/profile.md`: the `tools/` section mentions `ModelToolAttribute` and the tools.md catalogue.
 
 ## Open questions
+
+## Delivery
+- Branch: `feature/F-49`, merged into `main` with `--no-ff` (AB#774).
+- Tests: full suite 1424 passed, 0 failed (`gate.js ship`: build 20 s, tests 63 s); `Simulab.ArchitectureTests` 148, 12 of them new in `ToolCatalogueDocTests`.
+- Technical docs: `docs/architecture/tools.md` (empty catalogue) and index; `DocGen --check` green.
+- App manual: unchanged (no visible behavior).
