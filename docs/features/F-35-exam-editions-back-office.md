@@ -1,7 +1,7 @@
 ---
 feature: F-35
 epic: Assessment catalog
-status: refining
+status: approved
 board: 754
 version: 1
 ---
@@ -19,7 +19,7 @@ So the edition carries the board and the notice year, and both have to be filter
 
 ## Start
 - Depends on: F-34 (`done`, merged as 3386b40) and F-43 (`done`) — `Exam`, `/admin/exams/{id}`, `AppLookupField`, `AppItemRows` and `AppStatusChip` are all in `main`.
-- Waits on (to start): the `/agile:screen` mockup, run inside this refinement and approved by the owner together with the feature (owner, 2026-09-28).
+- Waits on (to start): nothing. The `/agile:screen` mockup was approved together with the feature on 2026-09-28.
 - Needed to validate: the app host started from this worktree and an Admin account signed in by the owner (Claude does not enter credentials).
 - Suggested path: glossary rows; `ExamEdition` in the domain with its `Result` rules and the migration; the endpoints and the two delete guards; `AppDateField` in the kit with its gallery entry; the editions section on the exam page; the edition page.
 - Can run beside it: nothing in the catalog — F-36 and F-37 both depend on it. An item outside `Catalog` and the exam page could, with the owner's `--worktree`.
@@ -339,6 +339,7 @@ New `AppIcons` constants (Material Outlined): `Editions` (`EventNote`), `Notice`
 - 2026-09-28 — The delete action on a published row is disabled with the reason `ExamEditions.Delete.DisabledPublished`; the 409 `exam_edition.published` stays as the Api's guard. AC12 now checks both (owner, screen question 1).
 - 2026-09-28 — pt-PT words: position "Posto de trabalho", notice "Aviso", board "Entidade organizadora"; the glossary gets the `Position` row with them and loses the "(?)" on those two rows (owner, screen question 2).
 - 2026-09-28 — English dates stay month first (`6/14/2026`): the rule is the reader's culture, the app's `en` is neutral, and `AppDateColumn` already writes them so; the field shows the format under it (owner, screen question 3).
+- 2026-09-28 — The Published card keeps "Offered to students in the catalog" although it only becomes true with F-36 — it states what publishing is for, and F-36 is next on this path (owner, approval round).
 - 2026-09-28 — `AppDateField` registers a `MudLocalizer` backed by `SharedResources`, so the picker's own controls are read in the reader's language; the keys MudBlazor 9.9 asks for are listed by the build, beyond the two `DateField.*Month` rows (owner, screen question 4).
 
 ## Out of scope
@@ -352,7 +353,7 @@ New `AppIcons` constants (Material Outlined): `Editions` (`EventNote`), `Notice`
 - Locking a published edition that questions or simulations point at: when those exist (epics 693 and 695).
 
 ## Open questions
-- 1. (screen design) The Published card says "Offered to students in the catalog", which becomes true when F-36 ships. Recommendation: keep the sentence — it states what publishing is for, and F-36 is the next item on this path.
+- (none)
 
 ## Change notes
 
