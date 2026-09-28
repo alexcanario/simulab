@@ -84,8 +84,8 @@ public sealed class SaveExamEditionHandler(IExamEditionStore store, IExamEdition
         }
         else
         {
-            // The same validation ran on the candidate a moment ago, so this one cannot fail.
-            edition.Update(
+            // The same validation ran on the candidate a moment ago; checked anyway, so the two never diverge silently.
+            var updated = edition.Update(
                 request.OrganizerId,
                 request.NoticeYear,
                 request.Position,
@@ -94,6 +94,11 @@ public sealed class SaveExamEditionHandler(IExamEditionStore store, IExamEdition
                 request.AppliedOn,
                 chosenStatus,
                 maxNoticeYear);
+
+            if (updated.IsFailure)
+            {
+                return Result.Failure<ExamEditionResponse>(updated.Error!);
+            }
         }
 
         var refused = await store.TrySaveChangesAsync(cancellationToken);

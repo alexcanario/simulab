@@ -353,6 +353,15 @@ Verified against the files (`system-design` and `architect` reports; `ExamEndpoi
 - Noted, not fixed: a soft delete is an UPDATE, so the `Restrict` foreign keys only bite a hard delete; the handler guards are the real protection, with the same small race window F-34 accepted.
 - Dropped: nothing.
 
+### From the independent review (2026-09-28)
+No blocker, no major. Six minors:
+- Fixed: `SaveExamEditionHandler` checks the `Result` of `Update` instead of discarding it.
+- Accepted: `MaxLength="4"` on the number input is ignored by browsers (the range check and the Api refuse a 5-digit year); the constant is kept for the item's screen table.
+- Accepted: the OpenAPI document names `Draft` and `Published` in the request's description, as it does for the exam's enums; no response schemas exist anywhere in this app's document.
+- Accepted: an edition whose board was soft-deleted through the accepted race would be hidden by the inner join while still blocking the exam's delete; the window is the one F-34 accepted.
+- Accepted: `/editions/{id}` to `/editions/new` inside the same page instance is not reachable from any link today; to be handled by the first item that adds such a link.
+- Accepted: the unique-violation translator runs twice in the `when` filter and the body, the same shape as `ExamStore`.
+
 ## Out of scope
 - The notice document itself: only the official link is stored; the upload arrives with epic 698 (owner, 2026-09-23).
 - Scoring rules, wrong-answer penalty and cut-off: epic 695 (owner, 2026-09-23).
