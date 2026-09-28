@@ -16,7 +16,6 @@
 - Merge with `--no-ff` and a message that references the item and the board id.
 - After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
-- Stage files by name in the main checkout (never `git add -A` or `git add .`): another session may have uncommitted work sitting there, and a broad stage silently sweeps it into your commit.
 - Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables.
 - `.claude/agile/warnings-baseline.json` is committed; build output, `bin/`, `obj/` and IDE folders are not.
 - Generated files (migrations, snapshots, OpenAPI documents) are committed with the change that produced them.

@@ -990,6 +990,49 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-top: var(--app-space-4);
 }
 
+/* F-31: the caller's own recent account events, on the same card shape as the two-factor card above. */
+.app-security-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-security-activity-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--app-space-2);
+    padding: var(--app-space-2) 0;
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.app-security-activity-item:last-child {
+    border-bottom: none;
+}
+
+.app-security-activity-when {
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+    white-space: nowrap;
+}
+
+.app-security-activity-event {
+    font-weight: 600;
+}
+
+.app-security-activity-detail,
+.app-security-activity-address {
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+}
+
+.app-security-activity-empty {
+    color: var(--mud-palette-text-secondary);
+}
+
 /* ---------------------------------------------------------------------------
    Lookup field (F-34): the searchable parent picker of the kit.
    --------------------------------------------------------------------------- */

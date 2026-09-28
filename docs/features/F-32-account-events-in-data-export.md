@@ -1,7 +1,7 @@
 ---
 feature: F-32
 epic: Foundation and identity
-status: validating
+status: done
 board: 751
 version: 1
 ---
@@ -73,4 +73,9 @@ You need a signed-in account with at least one sign-in, one failed sign-in attem
 4. Switch the language to English, reopen the card: the explanation reads in English and still names the security events.
 
 ## Delivery
-- Branch: feature/F-32
+- Branch: feature/F-32 (deleted after merge; never pushed to origin)
+- Merge commit: 795244c30be2ab91e6679c3c639e793f9717e75d ("Merge feature/F-32: account events in the data export (AB#751)"), main and origin/main at `0 0`
+- Ship gate: GREEN — build 22 s, 0 warnings; full suite 1404 tests, 0 failed, ~80 s (`Simulab.Identity.Tests` 342, `Simulab.Web.Tests` 639, `Simulab.ArchitectureTests` 135, plus every other project)
+- DocGen `--check`: `docs/architecture is up to date`
+- App manual updated: `docs/manual/{en,pt-BR,pt-PT}/my-account.md`
+- Board: AB#751 closed

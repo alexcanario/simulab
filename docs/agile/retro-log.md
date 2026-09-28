@@ -5,91 +5,92 @@ One entry per retro: date, item, lessons and where each one went.
 ## Plugin notes — status
 Every note tagged `plugin` in this log, and what happened to it in agile@canary (`D:\dev\agile-canary`). ✅ = implemented in the plugin · ⏳ = still open. A new `plugin` note gets a row here with ⏳.
 
-| Status | Note | From | Plugin version (commit) |
-|---|---|---|---|
-| ✅ | Model per agent and activity | Bootstrap session | 0.0.7 (`97053a3`) |
-| ✅ | UI standards as a core rule, quiz questions, UI kit before the first screen | Bootstrap session | 0.0.7 (`97053a3`) |
-| ✅ | Bootstrap quiz gaps: trials and promo codes, closing question, reading an existing code base | Bootstrap session | 0.0.7 (`97053a3`) |
-| ✅ | PascalCase for constants and `static readonly` in the template `.editorconfig` | Sync to 0.0.7 | 0.0.10 (`b7128e5`) |
-| ✅ | A command to refresh the project copies (`/agile:sync`) | Sync to 0.0.7 | 0.0.8 (`0361053`) |
-| ✅ | Parallel work on request (`/agile:build <id> --worktree`) | Owner question | 0.0.9 (`8ab237e`) |
-| ✅ | App host left running: gate names the locked build output; build and ship stop what Claude started | F-1 | 0.0.10 (`b7128e5`) |
-| ✅ | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
-| ✅ | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
-| ✅ | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | 0.0.11 (`a9babf4`) |
-| ✅ | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | 0.0.11 (`a9babf4`) |
-| ✅ | A building block that reads an app-host connection string is exercised through the app host in the item that creates it, not only against a test container | F-4 | 0.0.15 (`b221360`) |
-| ✅ | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
-| ✅ | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | 0.0.19 (`c48c34e`) |
-| ✅ | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | 0.0.19 (`c48c34e`) |
-| ✅ | Technical terms used with the owner go into a glossary section in the same step | F-8 | 0.0.28 (`6f1a488`) |
-| ✅ | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | 0.0.29 (`afe7431`) |
-| ✅ | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
-| ✅ | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
-| ✅ | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
-| ✅ | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
-| ✅ | A premise about how a library stores or protects data is verified in its source or docs during refinement | F-11 | 0.0.36 (`cfedd49`) |
-| ✅ | In a multi-step sign-in, only the last step clears the failure count | F-11 | 0.0.36 (`cfedd49`) |
-| ✅ | Refinement checks package versions against the registry; build re-checks before adding | F-11 | 0.0.36 (`cfedd49`) |
-| ✅ | A "never leave zero X" rule is judged before and after, not only after | F-10 | 0.0.35 (`7303a61`) |
-| ✅ | A theme's colour tokens get a contrast test over the palette | F-10 | 0.0.35 (`7303a61`) |
-| ✅ | A Blazor Server dialog is driven from the browser pane in one call | F-10 | 0.0.35 (`7303a61`) |
-| ✅ | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
-| ✅ | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
-| ✅ | Kit parameters whose value depends on the page's meaning have no default (`[EditorRequired]`) | B-5 | 0.0.32 (`33dfa1e`) |
-| ✅ | Source and test files are written with the Write/Edit tools, never through a script's string literals | B-6 | 0.0.32 (`33dfa1e`) |
-| ✅ | A colour or contrast bug is checked in both themes and on every surface the component sits on | B-6 | 0.0.32 (`33dfa1e`) |
-| ✅ | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
-| ✅ | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
-| ✅ | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
-| ✅ | Central Package Management's transitive pinning can float a shared package (e.g. `Aspire.Hosting`) to a higher version than a sibling package (`Aspire.Hosting.Testing`) pins, because another package elsewhere in the solution needs the newer one. An obsolete-API investigation must check the resolved version in `obj/project.assets.json`, not the pinned version in `Directory.Packages.props` | B-1 | 0.0.26 (`557c7ff`) |
-| ✅ | `[generic]` A coverage row maps a criterion to a test that goes through the path the user reaches; a method written for a criterion with no caller in production code is a gap, not coverage | B-3 | 0.0.27 (`641d463`) |
-| ✅ | `[stack: aspire]` The ServiceDefaults template disables retries for unsafe HTTP methods (`Retry.DisableForUnsafeHttpMethods()`): a retried POST replays single-use tokens and sends emails twice | B-3 | 0.0.27 (`641d463`) |
-| ✅ | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | 0.0.27 (`641d463`) |
-| ✅ | `[stack: blazor]` A Razor attribute mistake compiles: a string parameter without `@` is literal text, and a wrong generic parameter name only fails at runtime. Every new page gets a bUnit test that renders it | F-9 | 0.0.35 (`7303a61`) |
-| ✅ | `[generic]` A premise taken from an earlier item's file is verified against the code and against the items that touched it since; a bug can have moved the behaviour | F-9 | 0.0.35 (`7303a61`) |
-| ✅ | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | 0.0.36 (`cfedd49`) |
-| ✅ | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
-| ✅ | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
-| ✅ | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | 0.0.37 (`fd68a6c`) |
-| ✅ | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | 0.0.37 (`fd68a6c`) |
-| ✅ | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | 0.0.37 (`fd68a6c`) |
-| ✅ | `[stack: ef-core]` DocGen template: build each model through its design-time factory (snake_case), strip `Module` from the name, drop the `Relational` reference and the `NoWarn`, skip `bin/`/`obj/`, Auth column only with security, orphans are stale | F-15 | 0.0.38 (`836a0c1`) |
-| ✅ | `[profile: modular-monolith]` The route map's OpenAPI document comes from the `/openapi/v1.json` integration test, not from `ApiDescription.Server` at build | F-15 | 0.0.38 (`836a0c1`) |
-| ✅ | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | 0.0.38 (`836a0c1`) |
-| ✅ | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | 0.0.39 (`a8b2ded`) |
-| ✅ | `[generic]` Refinement never switches a shared checkout or one on another item's branch: `git branch <item> main` and a worktree, or ask | B-13 | 0.0.41 (`6c854ea`) |
-| ✅ | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | 0.0.41 (`6c854ea`) |
-| ✅ | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | 0.0.41 (`6c854ea`) |
-| ✅ | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
-| ✅ | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | 0.0.52 (`181120c`) |
-| ✅ | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | 0.0.52 (`181120c`) |
-| ✅ | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | 0.0.52 (`181120c`) |
-| ✅ | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | 0.0.52 (`181120c`) |
-| ✅ | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
-| ✅ 0.0.57 (`19e1f95`) | `[generic]` feature-ship: after `gate.js ship`, `git status` on the item worktree must show no tracked file changed outside bin/obj; a generated file the test run rewrote (for example `docs/api/Simulab.Api.json`) is committed with the item before the merge is requested, not found when the worktree removal refuses | B-15 | |
-| ⏳ | `[stack: DocGen]` feature-ship step 7b says a new module or external system "updates `docs/architecture/overview.md` by hand", but DocGen reports stale and deletes every file under `docs/architecture/` it does not generate (`GeneratedDocs.StaleFiles`/`Write`); a hand-written overview lives outside that folder (Simulab: `docs/architecture-overview.md`, guarded by `ArchitectureOverviewTests`) | F-23 | |
-| ⏳ | `[generic]` feature-refinement: when two business actors would share one table, the refinement asks who owns what before reusing it — a screen will offer the wrong one and the Api will accept it | F-34 | |
-| ⏳ | `[stack: MudBlazor]` screen-design: an accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file — `MudAutocomplete` 9.9 renders a plain text input, with no `role="combobox"` and no `aria-expanded` | F-34 | |
-| ⏳ | `[generic]` The Stop gate can print GREEN while a new warning sits in a project its incremental build skipped: a warning count is trustworthy only from a non-incremental build. Also, a test that rewrites a committed file (an OpenAPI document, a snapshot) has its output swept in by `git add -A` — the build skill should say to read `git status` before committing, not stage blindly | F-41 | |
-| ⏳ | `[profile: modular-monolith]` feature-refinement: before writing `## Screens and API`, confirm which host owns the screen's data and how that host reaches it. In a modular monolith the UI and the API are different hosts, so "the page calls the service in process" is a premise, not a given | F-41 | |
-| ⏳ | `[generic]` feature-build step 17: a validation step that asks the owner to change code names the file, where the lines go and the exact failure to expect, and any step that compiles says to stop the app host first — a running host locks `bin/` and the build dies with MSB3027 before a single test runs | F-39 | |
-| ⏳ | `[generic]` feature-build step 8b: the brief for the `frontend` agent must separate test infrastructure (helpers, contexts, fixtures — changeable) from assertions (fixed). Told only "do not edit existing tests", it left a required conversion undone and reported it as a stop | F-43 | |
-| ⏳ | `[generic]` autopilot step 5: the approval card says "with the criteria below", but a card round is a single tool call, so anything written after it reaches the owner only once they have already answered. The criteria have to be in the message that precedes the cards | F-27 | |
-| ⏳ | `[generic]` retro-lessons step 6: an `idea` a retro raises says what the finding item already fixed and what is left, so the next refinement does not read a closed gap as a live one. F-45's summary described `AiDbContext` as never loaded, while F-24 had added it in the same item that raised the idea | F-45 | |
-| ⏳ | `[generic]` A plugin note becomes ✅ only when an executable scenario proves the behavior changed: each note gets a minimal fixture repository, a prompt and a check; the scenario fails before the plugin change and passes after it. Start with the simple version (scenarios run by hand in the plugin session before marking ✅); a principles check by the `reviewer`, scheduled harvesting of notes into issues and pruning rules whose scenario passes without them come later, only if the first step pays off | Owner session 2026-09-26 | |
-| ⏳ | `[generic]` `gate.js ship`: when the red tests are all outside the item's diff, say so in the last line. The gate already knows both. On F-28 it went red twice on a test in another project before anyone suspected the suite itself, and the flake had been sitting on `main` | B-19 | |
+| Status | Plugin | Note | From | Plugin version (commit) |
+|---|---|---|---|---|
+| ✅ | agile | Model per agent and activity | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | agile | UI standards as a core rule, quiz questions, UI kit before the first screen | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | agile | Bootstrap quiz gaps: trials and promo codes, closing question, reading an existing code base | Bootstrap session | 0.0.7 (`97053a3`) |
+| ✅ | agile | PascalCase for constants and `static readonly` in the template `.editorconfig` | Sync to 0.0.7 | 0.0.10 (`b7128e5`) |
+| ✅ | agile | A command to refresh the project copies (`/agile:sync`) | Sync to 0.0.7 | 0.0.8 (`0361053`) |
+| ✅ | agile | Parallel work on request (`/agile:build <id> --worktree`) | Owner question | 0.0.9 (`8ab237e`) |
+| ✅ | agile | App host left running: gate names the locked build output; build and ship stop what Claude started | F-1 | 0.0.10 (`b7128e5`) |
+| ✅ | agile | Commit on the wrong branch: branch check before each commit and a guard hook on the main branch | F-1 | 0.0.10 (`b7128e5`) |
+| ✅ | agile | Hanging tests: hang timeout in the gate, hung tests reported by name | F-1 | 0.0.10 (`b7128e5`) |
+| ✅ | agile | Screen check before the coverage table: library state styles in both themes; keyboard steps stay in the validation script | F-2 | 0.0.11 (`a9babf4`) |
+| ✅ | agile | The refinement package question must cover the packages the tests need, not only the production ones | F-3 | 0.0.11 (`a9babf4`) |
+| ✅ | agile | A building block that reads an app-host connection string is exercised through the app host in the item that creates it, not only against a test container | F-4 | 0.0.15 (`b221360`) |
+| ✅ | agile | At ship, check that every decision naming a file ("... in X.md") is reflected in that file | F-4 | 0.0.15 (`b221360`) |
+| ✅ | agile | Guard hook: refuse a commit on the main branch that touches the file of an item that is not done | F-12 | 0.0.19 (`c48c34e`) |
+| ✅ | agile | Retro commits carry no code or tests; a code lesson becomes an item | F-12 | 0.0.19 (`c48c34e`) |
+| ✅ | agile | Technical terms used with the owner go into a glossary section in the same step | F-8 | 0.0.28 (`6f1a488`) |
+| ✅ | agile | bUnit: after a click whose handler awaits, assert with `WaitForAssertion` | F-8 | 0.0.29 (`afe7431`) |
+| ✅ | agile | A per-test-class `WebApplicationFactory` clears its Npgsql pool on dispose | F-8 | 0.0.29 (`afe7431`) |
+| ✅ | agile | Gate output is saved whole to a file; the gate prints the new warnings in its last lines | B-7 | 0.0.31 (`b6af246`) |
+| ✅ | agile | Anonymous endpoints check every input limit before the account lookup | B-7 | 0.0.31 (`b6af246`) |
+| ✅ | agile | Validation-script terminal steps in Bash and PowerShell, run before handing over | B-4 | 0.0.31 (`b6af246`) |
+| ✅ | agile | A premise about how a library stores or protects data is verified in its source or docs during refinement | F-11 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | In a multi-step sign-in, only the last step clears the failure count | F-11 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | Refinement checks package versions against the registry; build re-checks before adding | F-11 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | A "never leave zero X" rule is judged before and after, not only after | F-10 | 0.0.35 (`7303a61`) |
+| ✅ | agile | A theme's colour tokens get a contrast test over the palette | F-10 | 0.0.35 (`7303a61`) |
+| ✅ | agile | A Blazor Server dialog is driven from the browser pane in one call | F-10 | 0.0.35 (`7303a61`) |
+| ✅ | agile | Never change state in an app host Claude did not start | B-4 | 0.0.31 (`b6af246`) |
+| ✅ | agile | Blazor Server: request data a circuit needs is read in `App` and passed to the interactive root | B-4 | 0.0.31 (`b6af246`) |
+| ✅ | agile | Kit parameters whose value depends on the page's meaning have no default (`[EditorRequired]`) | B-5 | 0.0.32 (`33dfa1e`) |
+| ✅ | agile | Source and test files are written with the Write/Edit tools, never through a script's string literals | B-6 | 0.0.32 (`33dfa1e`) |
+| ✅ | agile | A colour or contrast bug is checked in both themes and on every surface the component sits on | B-6 | 0.0.32 (`33dfa1e`) |
+| ✅ | agile | ASP.NET Core middleware resolves every `InvokeAsync` parameter on every request, even inside an untaken branch — resolve an optional heavy dependency from `HttpContext.RequestServices` instead | F-5 | 0.0.26 (`557c7ff`) |
+| ✅ | agile | Aspire's `AddRedis()` secures the local container with TLS and a password by default; a plain `ConnectionMultiplexer.Connect` cannot trust its dev certificate and hangs until the socket times out — use the Aspire client integration (`AddRedisClient`) instead | F-5 | 0.0.26 (`557c7ff`) |
+| ✅ | agile | OpenIddict issues an encrypted (JWE) access token once an encryption certificate is registered, not a plain signed JWT; a client should never try to decode its own claims out of the token — ask the resource server for them instead | F-5 | 0.0.26 (`557c7ff`) |
+| ✅ | agile | Central Package Management's transitive pinning can float a shared package (e.g. `Aspire.Hosting`) to a higher version than a sibling package (`Aspire.Hosting.Testing`) pins, because another package elsewhere in the solution needs the newer one. An obsolete-API investigation must check the resolved version in `obj/project.assets.json`, not the pinned version in `Directory.Packages.props` | B-1 | 0.0.26 (`557c7ff`) |
+| ✅ | agile | `[generic]` A coverage row maps a criterion to a test that goes through the path the user reaches; a method written for a criterion with no caller in production code is a gap, not coverage | B-3 | 0.0.27 (`641d463`) |
+| ✅ | agile | `[stack: aspire]` The ServiceDefaults template disables retries for unsafe HTTP methods (`Retry.DisableForUnsafeHttpMethods()`): a retried POST replays single-use tokens and sends emails twice | B-3 | 0.0.27 (`641d463`) |
+| ✅ | agile | `[stack: blazor-server]` State that changes during a session (rotating tokens, permissions) lives in a server-side store keyed by an id in the cookie, never in the cookie: a circuit cannot rewrite it | B-3 | 0.0.27 (`641d463`) |
+| ✅ | agile | `[stack: blazor]` A Razor attribute mistake compiles: a string parameter without `@` is literal text, and a wrong generic parameter name only fails at runtime. Every new page gets a bUnit test that renders it | F-9 | 0.0.35 (`7303a61`) |
+| ✅ | agile | `[generic]` A premise taken from an earlier item's file is verified against the code and against the items that touched it since; a bug can have moved the behaviour | F-9 | 0.0.35 (`7303a61`) |
+| ✅ | agile | `[profile: modular-monolith]` A row a request must not lose is staged on the caller's own `DbContext`; the shared table is mapped into it with `ExcludeFromMigrations()` | F-13 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | `[generic]` When an effect moves out of the request, re-read every test that asserted it: "nothing was sent" passes for free once the effect is deferred | F-13 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | `[stack: ef-core]` A `SaveChanges` that fails after `Remove` leaves the entry `Deleted`; the next save repeats the DELETE instead of writing the error | F-13 | 0.0.36 (`cfedd49`) |
+| ✅ | agile | `[stack: .NET]` A warning count is quoted only from the gate or a `--no-incremental` build; an incremental build hides the warnings of unchanged projects | F-14 | 0.0.37 (`fd68a6c`) |
+| ✅ | agile | `[stack: .NET]` After `git stash` / `stash pop` or a branch switch, rebuild before running tests; `--no-build` runs the other tree's binaries and the counts lie | B-10 | 0.0.37 (`fd68a6c`) |
+| ✅ | agile | `[generic]` Every `gate.js` mode ends with a verdict line; `stop` with nothing marked says so instead of exiting silently | B-10 | 0.0.37 (`fd68a6c`) |
+| ✅ | agile | `[stack: ef-core]` DocGen template: build each model through its design-time factory (snake_case), strip `Module` from the name, drop the `Relational` reference and the `NoWarn`, skip `bin/`/`obj/`, Auth column only with security, orphans are stale | F-15 | 0.0.38 (`836a0c1`) |
+| ✅ | agile | `[profile: modular-monolith]` The route map's OpenAPI document comes from the `/openapi/v1.json` integration test, not from `ApiDescription.Server` at build | F-15 | 0.0.38 (`836a0c1`) |
+| ✅ | agile | `[generic]` A "nothing uses X" premise is verified by the effect (built model, snapshot, output), not by one helper's callers | F-15 | 0.0.38 (`836a0c1`) |
+| ✅ | agile | `[generic]` A new rule about a test pattern comes with a sweep of the existing tests for that pattern | B-11 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[generic]` A flaky test is reproduced with a clean-build loop, and its fix is proven by the same loop (N green in a row) | B-11 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[stack: blazor]` A bUnit assertion about anything that follows a click (snackbar, dialog closing, JS interop) uses `WaitForAssertion`, new tests included | F-16 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[generic]` A screen behind sign-in that Claude may not sign in to: say so, cover the signed-in flow in the validation script, check through the app host what needs no account | F-16 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[generic]` When an owner's answer turns something into an idea, refine and build call `idea-capture` instead of writing the file by hand | B-12 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[generic]` Gate `stop` with nothing marked says how to check the affected projects instead of only skipping | B-12 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[stack: DocGen]` A test of generated output counts each section's occurrences, not only its presence | B-12 | 0.0.39 (`a8b2ded`) |
+| ✅ | agile | `[generic]` Refinement never switches a shared checkout or one on another item's branch: `git branch <item> main` and a worktree, or ask | B-13 | 0.0.41 (`6c854ea`) |
+| ✅ | agile | `[generic]` Ship checks the current branch is main and lists `git log <main>..<branch>` for another item's id before merging | B-13 | 0.0.41 (`6c854ea`) |
+| ✅ | agile | `[generic]` A feature with a visual output is prototyped and measured at real size in the target viewer before approval | F-26 | 0.0.41 (`6c854ea`) |
+| ✅ | agile | `[stack: DocGen]` Entity diagrams as a DBML schema per module in place of the Mermaid entities page | F-26 | 0.0.41 (`6c854ea`) |
+| ✅ | agile | `[generic]` Previewing an app host from a worktree: temporary launch configuration with the absolute project path, restored afterwards | F-17 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[stack: .NET]` Before `git worktree remove`: `dotnet build-server shutdown` and Visual Studio closed | F-17 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` A premise about query performance is measured with an `EXPLAIN` on the test container before approval | F-18 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[stack: DocGen]` The data dictionary shows the filter of a partial index | F-18 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` A library premise that reading its source does not pin is reproduced in a scratch project against a test container before asking; source read raw, not summarized | F-19 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` An authentication or account-linking item gets the independent review on the refined item file before approval, not only on the code | F-20 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[stack: Blazor Server]` A page peeks a single-use ticket in `OnInitialized` (prerender runs it twice) and spends it on success; a ticket in a URL is bound to the browser by an HttpOnly cookie | F-20 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` feature-ship: confirming with the owner that the IDE is closed on the worktree is a blocking question **before** `git worktree remove`, because a removal that fails halfway unregisters the worktree and leaves the folder on disk | F-21 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` feature-build: before copying an existing pattern, look for an open item that exists to remove that pattern; if there is one, say so and let the owner choose between following it now and recording the debt | F-22 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` feature-refinement: when a bug's cause is found in code that exists only on an unmerged branch (its feature is still `validating`), say so in `## Cause` and record that the build waits for that merge; then create the item worktree from the merged `main` | B-14 | 0.0.52 (`181120c`) |
+| ✅ | agile | `[generic]` feature-ship: after `gate.js ship`, `git status` on the item worktree must show no tracked file changed outside bin/obj; a generated file the test run rewrote (for example `docs/api/Simulab.Api.json`) is committed with the item before the merge is requested, not found when the worktree removal refuses | B-15 | 0.0.57 (`19e1f95`) |
+| ⏳ | agile | `[stack: DocGen]` feature-ship step 7b says a new module or external system "updates `docs/architecture/overview.md` by hand", but DocGen reports stale and deletes every file under `docs/architecture/` it does not generate (`GeneratedDocs.StaleFiles`/`Write`); a hand-written overview lives outside that folder (Simulab: `docs/architecture-overview.md`, guarded by `ArchitectureOverviewTests`) | F-23 | |
+| ⏳ | agile | `[generic]` feature-refinement: when two business actors would share one table, the refinement asks who owns what before reusing it — a screen will offer the wrong one and the Api will accept it | F-34 | |
+| ⏳ | agile | `[stack: MudBlazor]` screen-design: an accessibility claim about a library component (an ARIA role, an announced state) is verified in the gallery's DOM before it enters the item file — `MudAutocomplete` 9.9 renders a plain text input, with no `role="combobox"` and no `aria-expanded` | F-34 | |
+| ⏳ | agile | `[generic]` The Stop gate can print GREEN while a new warning sits in a project its incremental build skipped: a warning count is trustworthy only from a non-incremental build. Also, a test that rewrites a committed file (an OpenAPI document, a snapshot) has its output swept in by `git add -A` — the build skill should say to read `git status` before committing, not stage blindly | F-41 | |
+| ⏳ | agile | `[profile: modular-monolith]` feature-refinement: before writing `## Screens and API`, confirm which host owns the screen's data and how that host reaches it. In a modular monolith the UI and the API are different hosts, so "the page calls the service in process" is a premise, not a given | F-41 | |
+| ⏳ | agile | `[generic]` feature-build step 17: a validation step that asks the owner to change code names the file, where the lines go and the exact failure to expect, and any step that compiles says to stop the app host first — a running host locks `bin/` and the build dies with MSB3027 before a single test runs | F-39 | |
+| ⏳ | agile | `[generic]` feature-build step 8b: the brief for the `frontend` agent must separate test infrastructure (helpers, contexts, fixtures — changeable) from assertions (fixed). Told only "do not edit existing tests", it left a required conversion undone and reported it as a stop | F-43 | |
+| ⏳ | agile | `[generic]` autopilot step 5: the approval card says "with the criteria below", but a card round is a single tool call, so anything written after it reaches the owner only once they have already answered. The criteria have to be in the message that precedes the cards | F-27 | |
+| ⏳ | agile | `[generic]` retro-lessons step 6: an `idea` a retro raises says what the finding item already fixed and what is left, so the next refinement does not read a closed gap as a live one. F-45's summary described `AiDbContext` as never loaded, while F-24 had added it in the same item that raised the idea | F-45 | |
+| ⏳ | agile | `[generic]` A plugin note becomes ✅ only when an executable scenario proves the behavior changed: each note gets a minimal fixture repository, a prompt and a check; the scenario fails before the plugin change and passes after it. Start with the simple version (scenarios run by hand in the plugin session before marking ✅); a principles check by the `reviewer`, scheduled harvesting of notes into issues and pruning rules whose scenario passes without them come later, only if the first step pays off | Owner session 2026-09-26 | |
+| ⏳ | agile | `[generic]` `gate.js ship`: when the red tests are all outside the item's diff, say so in the last line. The gate already knows both. On F-28 it went red twice on a test in another project before anyone suspected the suite itself, and the flake had been sitting on `main` | B-19 | |
+| ⏳ | agile | `[stack: Blazor Server]` A `computer` `screenshot` call in the browser pane can time out and disconnect a Blazor Server circuit mid-dialog, losing the dialog's state; prefer `read_page`/`get_page_text` over `screenshot` when driving a Blazor Server dialog | F-32 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -734,3 +735,32 @@ Merged `feature/F-30` at `7218d2d` (AB#749). Full suite: 799 passed, 0 failed (b
   `InvalidOperationException: The Google login of a new account could not be linked.` instead of hitting
   `pk_user_logins`. Will recur in F-47, which gives the same guarantee to the module's other multi-write
   handlers.
+
+## 2026-09-27 — F-32 Account events in the data export
+Merged `feature/F-32` at `795244c` (AB#751). Ship gate GREEN: build 22 s, 0 warnings; full suite 1404 tests, 0
+failed, ~80 s.
+- Project rule added to `.claude/rules/agile/git.md`: stage files by name in the main checkout, never `git add
+  -A`/`git add .`. Closing the item, a broad stage swept up an unrelated deletion another session had left
+  uncommitted in the shared checkout (`docs/features/F-49-docgen-tool-catalogue.md`, mid-setup for its own
+  worktree) straight into the F-32 close commit (`f4a3187`). Fixed in the next commit (`b690449`); evidence:
+  `git show f4a3187 --stat` listed `delete mode 100644 docs/features/F-49-docgen-tool-catalogue.md` alongside
+  the F-32 change. The underlying risk (two sessions, one checkout) was already known; this is it recurring in
+  a new shape, at the ship step rather than mid-build.
+- ⏳ `plugin` `[stack: Blazor Server]`: verifying the "Your data" card and its download dialog through the app
+  host, the browser pane's own `computer` `screenshot` call timed out and the Blazor Server circuit
+  reconnected mid-dialog, losing its state — the console log showed repeated `WebSocket connected to
+  wss://.../_blazor` inside two minutes. `read_page`/`get_page_text` never triggered it. The existing rule
+  (drive a dialog in one call) assumes the calls themselves are cheap; `screenshot` in this pane was not.
+
+## 2026-09-28 — Sync with agile@canary 0.0.78
+From 0.0.71 to 0.0.78, run while F-31 was `validating` (owner re-invoked the sync to continue).
+- Copied: `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`.
+- Merged: nothing. Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); every build file (`manual`, no upstream change).
+- Baseline: present, nothing to take. Plugin notes delivered: none to mark.
+- Docs command: declared now in `.claude/agile/build.json` (`dotnet run --project tools/Simulab.DocGen`).
+- DocGen tool catalogue (since 0.0.70): not installed by a sync; already covered by F-49 (approved, AB#774), so no new idea was captured.
+- Declined: nothing.
+
+## 2026-09-28 — F-31 Recent account activity for the user
+Closed after the fact: `feature/F-31` was merged at `f1d3f28` (2026-09-27) but the item file stayed `validating`, the board item `Active` and the local branch alive until the owner validated on 2026-09-28. Closed now: file `done` with the criterion → test table, AB#750 `Closed`, branch deleted with `git branch -d` (was fully merged; never pushed).
+- Lesson (proposed as nothing for now): a merge done before the ship step finished left git and the item file disagreeing, found only because a sync stopped on the `validating` status. If it recurs, propose a start-of-session check that flags an item file not `done` whose `feature/F-<n>` merge commit is already in `main`.
