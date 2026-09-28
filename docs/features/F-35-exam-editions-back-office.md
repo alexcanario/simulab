@@ -1,7 +1,7 @@
 ---
 feature: F-35
 epic: Assessment catalog
-status: idea
+status: refining
 board: 754
 version: 1
 ---
