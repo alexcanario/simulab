@@ -1,0 +1,9 @@
+{
+  "docs": {
+    "command": "dotnet run --project tools/Simulab.DocGen",
+    "check": "dotnet run --project tools/Simulab.DocGen -- --check",
+    "paths": [
+      "docs/architecture/"
+    ]
+  }
+}

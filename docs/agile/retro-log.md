@@ -751,3 +751,12 @@ failed, ~80 s.
   reconnected mid-dialog, losing its state — the console log showed repeated `WebSocket connected to
   wss://.../_blazor` inside two minutes. `read_page`/`get_page_text` never triggered it. The existing rule
   (drive a dialog in one call) assumes the calls themselves are cheap; `screenshot` in this pane was not.
+
+## 2026-09-28 — Sync with agile@canary 0.0.78
+From 0.0.71 to 0.0.78, run while F-31 was `validating` (owner re-invoked the sync to continue).
+- Copied: `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`.
+- Merged: nothing. Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); every build file (`manual`, no upstream change).
+- Baseline: present, nothing to take. Plugin notes delivered: none to mark.
+- Docs command: declared now in `.claude/agile/build.json` (`dotnet run --project tools/Simulab.DocGen`).
+- DocGen tool catalogue (since 0.0.70): not installed by a sync; already covered by F-49 (approved, AB#774), so no new idea was captured.
+- Declined: nothing.

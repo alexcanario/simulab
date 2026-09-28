@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.71 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.78 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -84,7 +84,7 @@ Outputs, all in English:
 - `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
-- `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates, per module, a DBML schema read in a dbdiagram viewer (`entities: "mermaid"` in `docgen.json` gives an ER diagram instead, which renders on the board but grows unreadable past a dozen tables) and a data dictionary (from the EF model), a route map per area (from the OpenAPI document that the `/openapi/v1.json` integration test writes to `docs/api/`) and a module diagram (from project references, in Mermaid); a context with a design-time factory is built through it, so the names follow the database (snake_case, for example); when round 8 also chose the tool catalogue (question 37), `tools.md` lists every tool the app offers to a model — the description the model receives, the input schema, what it reaches, the permissions it requires, whether it writes and whether it asks first — and `--check` fails when a tool has no description, no permissions or no reaches, or when two tools would reach the model under one name. `/agile:ship` regenerates them and `--check` fails when they are stale. Optionally a one-page hand-written overview (C4 context and containers), which the generator never touches: only files carrying its `Do not edit` marker are rewritten or deleted.
+- `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates, per module, a DBML schema read in a dbdiagram viewer (`entities: "mermaid"` in `docgen.json` gives an ER diagram instead, which renders on the board but grows unreadable past a dozen tables) and a data dictionary (from the EF model), a route map per area (from the OpenAPI document that the `/openapi/v1.json` integration test writes to `docs/api/`) and a module diagram (from project references, in Mermaid); the generator references the app's own EF Core provider (question 5: PostgreSQL, SQL Server or SQLite) and calls it by reflection, so it documents the real column types and default schema (`public`, `dbo`, or none on SQLite) even for a `DbContext` with no design-time factory; a context with a factory is built through it instead, so the names follow the database (snake_case, for example) — the output is the same either way; when round 8 also chose the tool catalogue (question 37), `tools.md` lists every tool the app offers to a model — the description the model receives, the input schema, what it reaches, the permissions it requires, whether it writes and whether it asks first — and `--check` fails when a tool has no description, no permissions or no reaches, or when two tools would reach the model under one name. Bootstrap declares the generator as the project's **docs command** in `.claude/agile/build.json` (`{ "docs": { "command": "dotnet run --project tools/<App>.DocGen", "check": "… -- --check", "paths": ["docs/architecture/"] } }`), so from 0.0.72 `/agile:ship` regenerates and checks them through the one generic step (section 9, "A declared docs command") instead of a step of its own; `--check` fails when they are stale. A project that got DocGen before 0.0.72 declares nothing, and the ship still runs it: the gate finds the single `tools/*.DocGen` and runs it as an **implicit** docs command, saying `implicit DocGen docs command: declare it with /agile:sync` — so no window leaves the code map stale, and `/agile:sync` offers the block once. Optionally a one-page hand-written overview (C4 context and containers), which the generator never touches: only files carrying its `Do not edit` marker are rewritten or deleted; a module or external system a feature adds is written there by hand at ship.
 - The first epics on the board, if the brief already names them.
 
 ## 5. Feature lifecycle
@@ -205,7 +205,7 @@ board: <work item id>
 - [ ] Every UI string localized in pt-BR, pt-PT and en.
 - [ ] Validated on screen by you.
 - [ ] Full test suite green before merge.
-- [ ] Generated technical docs up to date (`DocGen --check`), when the project has them.
+- [ ] Generated technical docs up to date — the docs command and its check, `gate.js docs` (DocGen, declared or implicit), when the project has them.
 - [ ] App manual updated in the three languages.
 - [ ] Board updated; the feature file reflects what was decided.
 
@@ -217,9 +217,10 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 |---|---|
 | **Session start** | Shows the branch, the item in progress, the backlog head, approved files with open questions, and uncommitted work in **every** worktree. |
 | **Every commit** | A guard refuses a `git commit` on the main branch in two cases: an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session — or the commit carries an item file that is not `done` (refining, approved, building, validating), which belongs on the item branch. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
+| **Every shell command** | A second guard warns before a Bash or PowerShell command writes a repository file through the command's own text instead of the Write and Edit tools — a heredoc, `echo`/`printf`, a PowerShell `Set-Content`/`Out-File`/`Add-Content`, a Python `open(..., 'w'/'a')`, a `node -e`/`.js` write whose literal carries a backslash, an escaped quote or an embedded newline, or a `sed -i` on a tracked file — or edits a GitHub issue or PR with an inline `--body`/`-b` instead of a whole one from a file. It exits 2 naming the rule and the file or command; a path outside the repository (temp, the session's scratchpad) and the plugin's own generated files (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) are silent. With your yes, Claude repeats the command ending with the comment `# agile:literal-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Rebuilds the changed projects (`--no-incremental`) and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
-| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them (a pass-rate drop fails the ship). After the app manual, `gate.js docs` runs the docs command the repository declares, when it declares one (below). |
+| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them (a pass-rate drop fails the ship). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). |
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
@@ -234,7 +235,8 @@ Details:
   - **Restore**, on `ship` and `baseline` only: the build carries `-restore`, unless `restoreCommand` is declared, in which case that runs first instead — `msbuild -restore` does nothing for `packages.config`, which is what a legacy repository usually has. A `restoreCommand` that fails is `agile gate RED: restore failed (<command>)`, and nothing is built.
   - **Tests** are the `testCommand`, run whole through the shell, at `ship` only: `dotnet test` cannot reach a .NET Framework test assembly, and the gate's test-project detection does not recognise a `packages.config` MSTest or NUnit project. The turn gate builds the affected projects and says `tests skipped: engine msbuild runs the whole suite at ship`; `baseline` never ran tests. With no `testCommand`, the ship says `tests skipped: no testCommand in .claude/agile/build.json` and the build alone decides the verdict — a missing suite is debt the adoption recorded, not a gate nobody can clear. A `testCommand` that fails is RED; one that runs longer than 1800 seconds (`AGILE_TESTCMD_TIMEOUT`) is RED as a timeout.
   - Since 0.0.69 `testCommand` is **executed**, not just documentation: it has to run unattended, never opening an IDE or waiting for a key.
-- **A declared docs command.** `build.json` may also carry `"docs": { "command": "...", "check": "...", "paths": ["docs/legacy/inventory"] }`, written by whoever prepared the repository (legacy-lens's adoption declares its inventory map there), so a living code map is refreshed with every item. At ship, after the app manual, `gate.js docs` runs `command` and then `check` (optional) through the shell, from the root of the item's worktree, whatever the `engine`. `command` and `paths` are required. It ends with `agile docs GREEN: <n> file(s) changed under <paths>`, and those files go into the item's docs commit. `agile docs SKIPPED: no docs command declared` means there is no `docs` block, and the ship goes on as before. `agile docs RED: <what failed>` stops the ship like a red gate: a command or check that failed, is not installed, or ran longer than 600 seconds (`AGILE_DOCS_TIMEOUT`), a field that is missing, or a file changed outside `paths`. Such a file is listed and never committed.
+- **A declared docs command.** `build.json` may also carry `"docs": { "command": "...", "check": "...", "paths": ["docs/legacy/inventory"] }`, written by whoever prepared the repository (legacy-lens's adoption declares its inventory map there), so a living code map is refreshed with every item. At ship, after the app manual, `gate.js docs` runs `command` and then `check` (optional) through the shell, from the root of the item's worktree, whatever the `engine`. `command` and `paths` are required. It ends with `agile docs GREEN: <n> file(s) changed under <paths>`, and those files go into the item's docs commit. `agile docs SKIPPED: no docs command declared` means there is no `docs` block and no DocGen either, and the ship goes on as before. `agile docs RED: <what failed>` stops the ship like a red gate: a command or check that failed, is not installed, or ran longer than 600 seconds (`AGILE_DOCS_TIMEOUT`), a field that is missing, or a file changed outside `paths`. Such a file is listed and never committed.
+- **The implicit DocGen command** (0.0.72). A project with DocGen has a docs command whether it declared one or not. With no `docs` block, `gate.js docs` looks for `tools/*.DocGen` folders holding a project file: exactly one is run as if it were declared — `dotnet run --project tools/<App>.DocGen`, then `-- --check`, with `paths: ["docs/architecture/"]` — and the run prints `implicit DocGen docs command: declare it with /agile:sync (tools/<App>.DocGen)` just before the verdict. That closes the window between a project getting DocGen and declaring it: before 0.0.72 the ship ran DocGen in a step of its own, and a project with the block ran it twice. **Several** `tools/*.DocGen` and nothing declared is RED naming them (`declare which one in .claude/agile/build.json`): running the wrong one would leave the other stale in silence. A declared `docs` always wins, and DocGen is not run behind it. `/agile:sync` offers the block as a plan row (section "Updating the plugin", example 14.10); until then every ship repeats the line.
 - **Locked build output.** A running app host, preview or debugger keeps the DLLs open. The gate then reports "build blocked" and names the process instead of a plain build failure; Claude stops whatever it started before the turn ends, and asks you to close yours.
 - **Honest counts.** An incremental build skips the compile of a project that did not change, and MSBuild does not repeat the warnings of a skipped compile. So every gate build is a `--no-incremental` rebuild of what it measures, at the turn as at ship. Before 0.0.67, a new warning found in one turn disappeared in the next, and the gate went GREEN with nothing fixed. The rebuild costs a few seconds per turn: it was measured at +0.6 s and +2.2 s on two small solutions, and each `built` line shows it. Claude quotes a warning count only from the gate or a `--no-incremental` build, and builds again after `git stash` or a branch switch before running tests: `--no-build` would run the other tree's binaries.
 - **Hung tests.** A test that runs for more than 120 seconds (`AGILE_GATE_HANG_TIMEOUT`) counts as hung: the run fails with its name instead of blocking the turn for minutes.
@@ -246,6 +248,8 @@ Details:
 ## 10. Board
 
 `CLAUDE.md` has a `Board:` line: GitHub Issues + Projects (`gh`), Azure Boards (`az boards`), or none (then `docs/agile/backlog.md` is used). Mapping: epic → feature. No tasks per role. The feature file keeps the board id; the merge closes the work item.
+
+Closing the issue is not trusted alone: at ship, after closing, Claude also sets the board's Status field to Done explicitly and reads it back, because a project's own automation for that can miss (seen once, cause unknown). A read-back that still shows something else is retried once, then reported with the exact command to fix it by hand; the ship does not stop or undo the merge over it — the file already says `done`. An item not yet on the project board is added first. Azure Boards gets the same read-back on `System.State`.
 
 An issue body is only ever replaced whole. `gh issue edit --body` replaces the entire body with what it is given, so a partial text there silently deletes the rest of the item (it happened in legacy-lens B-1). Claude writes the full item text to a file, sends it with `gh issue edit <id> --body-file <file>`, and reads the body back to compare. An Azure Boards description is likewise always sent whole, from a file.
 
@@ -648,10 +652,18 @@ Claude: Full suite: 212 tests green (2 min 10 s). Architecture tests green.
 The run rewrote docs/api/ExamPrep.Api.json (a new route): committed with F-3.
 Ready to merge feature/F-3 into main. Authorize?
 > yes
-Claude: Merged. Board #12 closed. Manual updated: "Exam boards" page in pt-BR, pt-PT, en.
+Claude: Merged. Board #12 closed, Status Done (read back). Manual updated: "Exam boards" page in pt-BR, pt-PT, en.
 Retro: one lesson — "check every language file when adding a message". Add it as a rule?
 > yes
 Claude: Rule added to core/i18n. Status: done.
+```
+
+When the Status write does not stick — a permission error, or a board with no Done option under that field — the close line names the problem and the exact command instead of silently moving on:
+
+```
+Claude: Merged. Board #12 closed; Status is still "In Progress" after one retry —
+set it by hand: gh project item-edit --id PVTI_xxx --field-id PVTF_xxx --project-id PVT_xxx --single-select-option-id <done>.
+Manual updated: "Exam boards" page in pt-BR, pt-PT, en.
 ```
 
 ### 14.3 Changing your mind during build
@@ -976,6 +988,23 @@ Claude: Copied 1. Notes: marked line 10 (row) and line 47 (note), agile@canary 0
 Commit "chore: sync with agile@canary 0.0.68" (with the retro log) on main. Authorize?
 ```
 
+A project that has DocGen but never declared it as its docs command gets the block offered once (0.0.72). The ship before this sync already ran DocGen, as the implicit command, and said so:
+
+```
+> /agile:sync
+Claude: agile@canary 0.0.71 → 0.0.72.
+| File / item                             | State     | Proposal                                          |
+| docs/agile/workflow.md                  | update    | copy: manual 0.0.72                               |
+| docs command                            | missing   | declare DocGen: dotnet run --project tools/Hutch.DocGen (check with -- --check, paths docs/architecture/) |
+> ok
+Claude: Copied 1. Declared the docs command: updated .claude/agile/build.json
+(docs.command = dotnet run --project tools/Hutch.DocGen). From the next ship, gate.js docs runs it
+as a declared command and the "implicit DocGen" line is gone.
+Commit "chore: sync with agile@canary 0.0.72" (with build.json) on main. Authorize?
+```
+
+A project that already declares another docs command gets one line instead — `docs already declared: lens-map --out docs/legacy/inventory` — and nothing changes: combining two commands is done by hand. Two `tools/*.DocGen` folders are named as well, because `gate.js docs` is RED until you declare one yourself.
+
 From 0.0.23 the template carries the final `.editorconfig`. In a project that still has the basic one, the `.editorconfig` row lists the new groups of rules (braces, pattern matching, expression-bodied members, formatting) and Claude proposes them one group at a time; code that breaks an approved rule shows up as warnings in the build that follows the sync.
 
 ### 14.11 When a gate says no
@@ -1061,6 +1090,26 @@ to commit with the item:
 agile docs GREEN: 1 file(s) changed under docs/legacy/inventory
 ```
 
+**The docs command nobody declared** (0.0.72). A project that got DocGen before the block existed. The ship regenerates the code map anyway, and says who declares it:
+
+```
+ran docs.command (11 s): dotnet run --project tools/Hutch.DocGen
+ran docs.check (4 s): dotnet run --project tools/Hutch.DocGen -- --check
+to commit with the item:
+  docs/architecture/modules.md
+implicit DocGen docs command: declare it with /agile:sync (tools/Hutch.DocGen)
+agile docs GREEN: 1 file(s) changed under docs/architecture/
+Claude: The code map was regenerated and committed with the manual. This project runs DocGen without
+declaring it: run /agile:sync between features and I will write the block into build.json once.
+```
+
+Two `tools/*.DocGen` folders and nothing declared is RED instead, because either choice would leave the other stale without saying so:
+
+```
+agile docs RED: 2 DocGen tools and no docs in .claude/agile/build.json: tools/Hutch.DocGen,
+tools/Hutch.Legacy.DocGen — declare which one in .claude/agile/build.json
+```
+
 **A repository only MSBuild can build.** An adopted repository whose solution holds an ASP.NET web application. Before 0.0.69 every gate here failed on `dotnet build`, even with `engine: msbuild` in `build.json`:
 
 ```
@@ -1106,6 +1155,28 @@ agile gate RED: MSBuild not found
 ```
 
 Claude: This machine has no Visual Studio, so the gate cannot build this repository. Install the Build Tools, run from a Developer Command Prompt, or name the MSBuild you want as `msbuildPath` in `build.json`. Which?
+
+**A blocked heredoc write, and its bypass.** Claude tries to patch the roadmap through a shell heredoc instead of the Edit tool:
+
+```
+Claude: cat > docs/ROADMAP.md <<'EOF'
+...
+EOF
+[agile literal-guard] This command would write `docs/ROADMAP.md` through the command's own text.
+rules/core/workflow.md: "Write files (code, tests, docs) with the Write and Edit tools, never through
+a script's string literals": escapes turn into control characters or stray text, and a test can compile
+and pass while matching nothing.
+If this write really has to happen this way, ask the owner; with a yes, repeat the command ending with
+the comment  # agile:literal-ok
+Claude: Using the Edit tool instead of a heredoc for docs/ROADMAP.md.
+```
+
+A `sed -i` on a tracked file is caught the same way; when the owner really wants the shell form (a one-off rewrite across many lines a script drives), the bypass repeats the exact command with the comment:
+
+```
+Owner: yes, go ahead
+Claude: sed -i 's/0\.0\.74/0.0.75/' docs/ROADMAP.md  # agile:literal-ok
+```
 
 ### 14.12 The closing question of the quiz
 
@@ -1176,7 +1247,7 @@ Claude: STOP 2 — F-17 is in validating (Autopilot: stop 2).
 > validado e autorizo o merge de F-17
 Claude: Shipping F-17 (Autopilot: shipping). Full suite 214 tests green (41 s); manual updated in pt-BR, pt-PT
 and en (question-bank.md); merged --no-ff as 3f9c2e1, pushed; main...origin/main 0 0; branch removed.
-Board #31 closed. F-17 done. Retro: 1 lesson proposed — keep or drop?
+Board #31 closed, Status Done (read back). F-17 done. Retro: 1 lesson proposed — keep or drop?
 ```
 
 Your "validado e autorizo o merge" was the ship's merge authorization: it is not asked again.
@@ -1331,6 +1402,22 @@ Plan (6 steps): 1. migration with cleanup, 2. Exam entity, ...
 
 Nothing was written by the two agents: they read and proposed, Claude checked, decided, and only then started. An item with none of those four triggers — a thin CRUD, a text change — skips both passes entirely.
 
+### 14.16 A feature reproduces its premise before the fix
+
+F-11's Summary states the transcript export crashes today on any exam with more than 2,000 students. The build follows the fixture-reproduction rule before writing the fix, the same way a bug shows its regression test failing first:
+
+```
+> /agile:build F-11
+Claude: Reproducing the premise first. Built ExamStub with 2,500 students and ran the
+transcript export: System.OutOfMemoryException at TranscriptExporter.cs:41 (loads every
+row into memory before writing). Confirmed — the fixture reproduces the stated failure.
+Applying the fix: streaming the rows instead of buffering them.
+Claude: Same fixture, same 2,500-student exam, export now completes: 2,500 rows written,
+1.8s. The fix is proven against the failure it claims to solve.
+```
+
+A feature with no "fails today" premise — a new capability, not a claim that something breaks — skips this step entirely: one test per acceptance criterion, as before.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -1465,7 +1552,7 @@ flowchart TD
     P0 -->|no| C3{"Mockup approved with the item?"}
     C3 -->|yes| C4["The frontend agent implements that screen and its tests,<br/>alone in the worktree; Claude reads it, runs the gate, answers its stops"]
     C4 --> D
-    C3 -->|no| D["Code by the profile and rules; tests per criterion;<br/>a bug: one regression test per occurrence fixed;<br/>affected tests only; small commits, branch checked first"]
+    C3 -->|no| D["Code by the profile and rules; tests per criterion;<br/>a bug: one regression test per occurrence fixed;<br/>a feature that states 'fails today' on a named fixture:<br/>build and run it first, show the failure, then the fix passing;<br/>affected tests only; small commits, branch checked first"]
     D --> E{"False premise or impossible criterion?"}
     E -->|yes| E1["Options A/B → /agile:change"]
     E1 --> D
@@ -1509,13 +1596,13 @@ flowchart TD
     B --> C["gate.js ship: full rebuild, full suite, architecture tests;<br/>output saved whole, last line GREEN or RED: what failed"]
     C -->|red| C1["Fix on the branch"]
     C1 --> C
-    C -->|green| D["App manual in pt-BR, pt-PT, en; technical docs regenerated;<br/>gate.js docs: declared docs command, RED stops like the gate; infra.md; baseline"]
+    C -->|green| D["App manual in pt-BR, pt-PT, en; DocGen references and the hand-written overview;<br/>gate.js docs: the declared docs command, or DocGen implicitly;<br/>RED stops like the gate; infra.md; baseline"]
     D --> E{"Authorize the merge into main?"}
     E -->|no| E1(["Wait"])
     E -->|yes| E2["Current branch is main; read main..branch:<br/>stop when a commit carries another item's id"]
     E2 --> F["Merge --no-ff; push; verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
     F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
-    G --> H["Close the board item with evidence"]
+    G --> H["Close the board item with evidence;<br/>set Status to Done explicitly and read it back;<br/>not stuck after one retry: report the command by hand"]
     H --> I["Retro: at most 3 lessons"]
     I --> J(["Next item at the top of the backlog"])
 ```
@@ -1567,7 +1654,8 @@ flowchart TD
     C --> D{"Approve per file"}
     D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit (a missing Worktrees: or Plugins: line too);<br/>never touch project rules; no warnings baseline: offer the first one, gate.js baseline with your yes"]
     E --> E2["Something only bootstrap installs and this project lacks:<br/>name it and offer to capture a feature"]
-    E2 --> F{"Build files or checked rules changed?"}
+    E2 --> E3["DocGen with no docs command declared:<br/>offer the block, sync.js docs writes it into build.json"]
+    E3 --> F{"Build files or checked rules changed?"}
     F -->|yes| G["Build, full suite, fix findings, baseline"]
     F -->|no| H
     G --> G2["Delivered plugin notes, when approved:<br/>sync.js notes marks them ✅"]
