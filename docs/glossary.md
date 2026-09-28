@@ -13,7 +13,7 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Certificação | Certificação | `Certification` | Assessment type: professional certification |
 | Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam |
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
-| Banca | Entidade organizadora (?) | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
+| Banca | Entidade organizadora | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
 | Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
 | Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33) |
 | Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper |
@@ -21,7 +21,11 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) |
 | Prova / Concurso | Prova | `Exam` | An assessment its `IssuingAuthority` contracts and publishes a notice for; the board that applies each paper is on the edition (F-34) |
 | Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) |
-| Edital | Aviso de abertura (?) | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |
+| Edital | Aviso | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |
+| Cargo | Posto de trabalho | `Position` | The job one edition's paper selects for, as free text on the edition; optional, there is no job entity (F-35) |
+| Número do edital | Referência do aviso | `NoticeReference` | How the notice names itself ("Edital nº 01/2026"); editions cut from the same edital share it (F-35) |
+| Data de aplicação | Data de aplicação | `AppliedOn` | The day the paper of an edition was applied; optional (F-35) |
+| Rascunho / Publicada (edição) | Rascunho / Publicada | `ExamEditionStatus` (`Draft` / `Published`) | Whether students can see an edition; `InReview` joins with the AI import (F-35) |
 | Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) |
 | Matéria / Disciplina | Disciplina | `Subject` | Top level of the canonical taxonomy: what a student studies (Constitutional Law, Portuguese, Logical Reasoning). Simulae's `KnowledgeDomain` becomes this |
 | Assunto / Tópico | Tópico | `Topic` | Second and last level of the canonical taxonomy, inside a subject |

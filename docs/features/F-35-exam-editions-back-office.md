@@ -73,7 +73,7 @@ Give the catalog its lowest level: the paper actually applied, with its board an
 
 ## Screens and API
 
-The mockup and the detailed screen section come from `/agile:screen` (owner, 2026-09-28). What is decided before it:
+Designed by `/agile:screen` on 2026-09-28. Mockup: `docs/features/mockups/F-35-exam-editions-back-office.html` (three screens, every state, light and dark, pt-BR / pt-PT / en). Only kit patterns from `/dev/ui` are used; the one new pattern is `AppDateField` (BR16). Every text below is a `SharedResources` key; error codes are keys of their own and reach the screen only through `ErrorText.For`.
 
 ### Routes
 | Route | Purpose | Gate |
@@ -85,16 +85,188 @@ The mockup and the detailed screen section come from `/agile:screen` (owner, 202
 
 No menu item: an edition is reached through its exam. No global editions list (owner, question 1).
 
-### The editions section on the exam page
-- Only in edit mode. On `/admin/exams/new` the section says the exam must be saved first.
-- `AppItemRows`, one row per edition: `NoticeYear · Position · board acronym`, the `AppStatusChip` (`Draft` neutral, `Published` success) and the application date when there is one. Row actions: edit (to the edition page) and delete (`AppConfirmDialog`). An "Add edition" action opens `/admin/exams/{examId}/editions/new`.
-- Empty state: the exam has no edition yet.
+### Screen 1 — the editions section on the exam page (`ExamForm.razor`)
 
-### The edition page
-- Complex entity by rule `ui-project`: its own page, the F-43 composition (section cards, grid, aside, actions at the bottom right).
-- Breadcrumb `Content › Exams › <exam name> › <Add edition | notice year · position>`.
-- Fields: board (`AppLookupField` over organizers, `Name (ACRONYM)`), notice year, position, notice reference, notice URL, application date (`AppDateField`), status (`Draft` / `Published`).
-- Saving a new edition stays on the page as its edit form, the F-34 pattern; Cancel returns to the exam page.
+**Place.** A second `MudPaper Class="app-form-card"` directly below the `app-form-layout` grid, full width (it spans the form column and the aside column). It is outside the exam form: the exam's `AppFormActions` (the page's only primary button, Save) stays at the bottom of the exam card and never saves an edition. On a narrow screen (< 1280 px) it comes after the aside, like everything else on the page.
+
+**Composition.**
+1. `AppSectionCard Id="exam-section-editions"`, `Icon="AppIcons.Editions"` (new constant, `Icons.Material.Outlined.EventNote`), title `ExamEditions.Section.Title`, subtitle `ExamEditions.Section.Subtitle`.
+2. `AppAlert Severity="Error"` at the top of the card body, only after a refused or failed delete (the section's own business/server alert).
+3. The body by state (table below): `AppLoadingState`, `AppErrorState` with `OnRetry`, or `AppItemRows TItem="ExamEditionResponse"` with `EmptyMessage="ExamEditions.Empty"`.
+4. Row template, in one line that wraps on a phone: **label** `NoticeYear · Position · OrganizerAcronym` (the position part is left out when there is none; the ` · ` separators are `aria-hidden`), then `AppStatusChip` (`Draft` → `AppStatusTone.Neutral`, text `ExamEditions.Status.Draft`; `Published` → `AppStatusTone.Success`, text `ExamEditions.Status.Published`), then, when `AppliedOn` has a value, `ExamEditions.Row.AppliedOn` with the date as a short date in the reader's culture (format `"d"`, the `AppDateColumn` precedent) in `text-secondary`. The row is not a link (rule `ui`: the name links only to a read-only detail page, and there is none).
+5. Row actions: `AppRowActions` with `OnEdit` (navigates to `/admin/exams/{examId}/editions/{id}`) and `OnDelete`, `ItemName` = the label joined with `, ` instead of ` · ` (read as "Edit: 2026, Guarda Municipal de 3ª Classe, CONSULPLAN").
+6. Under the rows (also under the empty message): an outlined `MudButton` with `Href="/admin/exams/{examId}/editions/new"` (so it renders as a link, because it navigates), `StartIcon="AppIcons.Add"`, text `ExamEditions.Form.AddTitle`. It is outlined, not filled: Save of the exam stays the page's only primary button.
+
+**Delete.** `Confirm.ConfirmDeleteAsync(L, objectName, consequence)`: title `Common.Delete.Title`, message `ExamEditions.Delete.Message` with `{0}` the row label and `{1}` the exam name, confirm button `Common.Delete.Confirm` with `{0}` = `ExamEditions.Delete.Object` (error colour, names the action and the edition). Confirmed → `DELETE`; 204 → the row leaves the list, snackbar `ExamEditions.Deleted`; 409 `exam_edition.published` → the section alert with that text, the row stays; 404 `exam_edition.not_found` → the section alert and the list reloads; anything else → the section alert with `common.unexpected_error`. On a published row the delete action is disabled, with `DeleteDisabledReason` = `ExamEditions.Delete.DisabledPublished` as its tooltip; the 409 stays as the Api's guard, reached only when another Admin published the edition meanwhile (owner, screen question 1).
+
+**Add mode** (`/admin/exams/new`): the same card and heading, with only the sentence `ExamEditions.Section.SaveExamFirst` and no add link (AC3). When the first Save turns the page into the edit form, the section loads (it is empty) and the add link appears.
+
+**Order** is the Api's (BR14); the page does not sort.
+
+**Elsewhere.** Deleting an exam on `/admin/exams` and a board on `/admin/organizers` keeps its current refusal path; only the new texts `exam.has_editions` and `organizer.has_editions` arrive (AC13, AC14). No layout change on those pages.
+
+### Screen 2 — the edition page (`ExamEditionForm.razor`, `/admin/exams/{examId}/editions/new` and `/{id}`)
+
+**Page header.** `AppPageHeader`, no primary action at the top (Save is at the bottom, the F-43 rule). Title `ExamEditions.Form.AddTitle` / `ExamEditions.Form.EditTitle`. Breadcrumb: `Nav.Section.Content` (disabled) › `Exams.Title` (link `/admin/exams`) › exam name (link `/admin/exams/{examId}`) › current (disabled): `ExamEditions.Form.AddTitle` while adding, `NoticeYear · Position` (or `NoticeYear` alone) while editing — the saved values, not the ones being typed.
+
+**Layout.** The F-43 composition: `div.app-form-layout` → `MudPaper.app-form-card` (error summary, alert, three section cards, form actions) + `AppFormAside`.
+
+| # | Section card | Id | Icon | Grid | Fields |
+|---|---|---|---|---|---|
+| 1 | `ExamEditions.Section.Paper` + subtitle | `edition-section-paper` | `AppIcons.Exams` | `AppFormGrid Columns="2"`, then `Columns="1"` | Board, Notice year; Position (full width) |
+| 2 | `ExamEditions.Section.Notice` + subtitle | `edition-section-notice` | `AppIcons.Notice` (new, `Article`) | `AppFormGrid Columns="2"`, twice | Notice reference, Notice link; Application date, (empty cell) |
+| 3 | `ExamEditions.Section.Publication` + subtitle | `edition-section-publication` | `AppIcons.View` | — | Status (`AppRadioCards Columns="2"`) |
+
+**Fields.** Client checks are comfort only; the Api runs the same rules (BR3–BR9). Each is checked on leaving the field and on Save.
+
+| Field | Id | Component | Required | Type and limits | Leading icon | Placeholder / hint keys | Client check → text |
+|---|---|---|---|---|---|---|---|
+| Board | `edition-organizer` | `AppLookupField` over `ListOrganizersAsync(term)`, option text `Name (ACRONYM)`, `MinChars` 2 (kit default) | yes | an organizer id | `AppIcons.Organizers` | `ExamEditions.Field.Organizer.Placeholder` / `.Hint` | empty → `exam_edition.organizer_required` |
+| Notice year | `edition-notice-year` | `AppTextField TValue="int?"`, `InputType.Number`, `MaxLength` 4, `Autocomplete="off"` | yes | integer 1990 to current year + 1 (the page reads `TimeProvider`) | none | `ExamEditions.Field.NoticeYear.Placeholder` / `.Hint` (`{0}` = current year + 1) | empty or out of range → `exam_edition.notice_year_invalid` |
+| Position | `edition-position` | `AppTextField TValue="string"`, `MaxLength` 200, `Autocomplete="off"` | no | trimmed text; blank sends null | none | `ExamEditions.Field.Position.Placeholder` / `.Hint` | the max length stops typing; the Api code `exam_edition.position_too_long` is mapped to the field |
+| Notice reference | `edition-notice-reference` | `AppTextField TValue="string"`, `MaxLength` 100 | no | trimmed text; blank sends null | none | `ExamEditions.Field.NoticeReference.Placeholder` / `.Hint` | Api `exam_edition.notice_reference_too_long` mapped to the field |
+| Notice link | `edition-notice-url` | `AppTextField TValue="string"`, `InputType.Url`, `MaxLength` 300, `Autocomplete="off"` | no | absolute `http`/`https` URL | `AppIcons.Link` (new, `Link`) | `ExamEditions.Field.NoticeUrl.Placeholder` / `.Hint` | not absolute http(s) → `exam_edition.notice_url_invalid` |
+| Application date | `edition-applied-on` | `AppDateField` (new) with `Min` = 1 January of the typed notice year when it is valid | no, also to publish | `DateOnly?`, sent as `yyyy-MM-dd` | the kit's calendar button | hint `ExamEditions.Field.AppliedOn.Hint` | not a date → the kit's `DateField.Invalid`; before 1 January of the notice year → `exam_edition.applied_on_before_notice_year` (re-checked when the year changes) |
+| Status | `edition-status` | `AppRadioCards TValue="ExamEditionStatus?"`, two cards, no icon | yes | `Draft` (default on a new edition) or `Published` | none | card texts `ExamEditions.Status.Draft` / `.Published`, descriptions `….Description` | never empty on screen; Api `exam_edition.status_invalid` goes to the field |
+
+**Aside** (`AppFormAside`, read-only, no button): title `Common.Summary.Title`; rows `ExamEditions.Field.Exam` (the exam name), `Exams.Field.ContentLanguage` (the exam's, BR2 — shown so the reader sees which language the paper's content is in), Board, Notice year, Position, Notice reference, Application date (short date), Status; empty text `Common.Summary.NotFilled`. Checklist `Common.Summary.Checklist`: Board, Notice year; `DoneText` / `PendingText` `Common.Checklist.Done` / `Common.Checklist.Pending`.
+
+**Actions.** `AppFormActions` at the bottom right: Cancel (text) → `/admin/exams/{examId}`; Save (filled). `HasChanges` compares with the saved edition (or the empty new form with Status `Draft`); leaving with changes asks `Common.Discard.*`. No delete on this page: an edition is deleted from its row, one way (rule `ui`).
+
+**Save.** Add → `POST`; 201 → snackbar `ExamEditions.Saved`, `NavigateTo("/admin/exams/{examId}/editions/{id}", replace: true)`, the page becomes its edit form (title, breadcrumb) (AC4). Edit → `PUT`; 200 → snackbar, stay. Refusals: a field code goes to its field (table above) and focus goes to the error summary; `organizer.not_found` clears the board, sets `exam_edition.organizer_required` on it and shows the alert; `exam_edition.duplicate` is the alert only (it concerns three fields); `exam.not_found` and `exam_edition.not_found` show the alert with the link back (`Exams.BackToList` or `ExamEditions.BackToExam`); anything else is the alert with `common.unexpected_error`.
+
+### Screen 3 — `AppDateField` (kit) and its `/dev/ui` entry
+
+**Anatomy** — the one of `AppTextField`: label above (`for` the input) with the required marker; the outlined `MudDatePicker` with `Editable="true"` (the reader types), `DateFormat` = the reader culture's short date pattern, `Culture` = `CultureInfo.CurrentCulture` (month and weekday names, first day of the week), `AutoClose="true"`, `Clearable` when not required, the adornment `AppIcons.Calendar` (new, `CalendarToday`) as the calendar button; below, the hint or the error, in `{Id}-description`.
+
+**Parameters.** `Id`, `Label` (`[EditorRequired]`), `Value` (`DateOnly?`), `ValueChanged`, `Hint`, `Error`, `Required`, `Disabled`, `Min` and `Max` (`DateOnly?`: days outside are disabled in the calendar; they do not replace the page's rule text). The kit converts `DateOnly?` ↔ the picker's `DateTime?`, so a page never sees a time or a time zone (AC5: same calendar day).
+
+**Behaviour.** Typing is the full keyboard path. On leaving the input, text that is not a date in the reader's format shows `DateField.Invalid` (with `DateField.Format`) and the value stays `null`; blank is `null`. With no `Hint`, the description shows `DateField.Hint.Format` — the way `AppLookupField` shows its minimum characters.
+
+**Gallery** (`UiGallery.razor`, section `id="gallery-date-field"`, after the lookup field): heading `Gallery.Section.DateField`, hint `Gallery.DateField.Hint`, one `MudPaper Outlined` with four fields labelled `ExamEditions.Field.AppliedOn`: empty (interactive), filled (14 June 2026), error (`DateField.Invalid`), disabled (filled).
+
+### States
+
+**Screen 1 — editions section**
+
+| State | When | What shows | Announced |
+|---|---|---|---|
+| Add mode | `/admin/exams/new` | heading, subtitle, `ExamEditions.Section.SaveExamFirst`; no add link | read with the section |
+| Loading | exam loaded, list requested | `AppLoadingState` inside the card | `role="status"` "Loading..." |
+| Empty | list is `[]` | `ExamEditions.Empty` + add link | — |
+| Ready | one or more editions | rows, newest year first, + add link | — |
+| Load error | list call failed | `AppErrorState` (`Common.LoadFailed`, Try again); no add link | `role="alert"` |
+| Confirm delete | delete clicked | kit confirmation dialog | dialog title |
+| Deleted | 204 | row gone, snackbar `ExamEditions.Deleted`; focus to the next row's edit button, else the add link | snackbar `role="status"` |
+| Delete refused | 409 `exam_edition.published` (another Admin published it after the list loaded; a published row's delete is disabled) | section alert, row stays, the list reloads | `role="alert"` |
+| Delete failed | 404 / other | section alert (`exam_edition.not_found` → list reloads; else `common.unexpected_error`) | `role="alert"` |
+| Permission denied | no `catalog.manage` | the whole route is the ordinary Not Found page (UC7) | page title |
+
+**Screen 2 — edition page**
+
+| State | When | What shows |
+|---|---|---|
+| Loading | exam (and edition) requested | header with a generic title, `AppLoadingState` |
+| New | `/editions/new`, exam found | empty form, Status `Draft`, aside "Not filled", checklist pending |
+| Ready (edit) | edition found | filled form, breadcrumb `2026 · Guarda Municipal de 3ª Classe` |
+| Board search | typing ≥ 2 characters | the kit's lookup states: results, no result (`Lookup.NoResults`), search failed (`Lookup.LoadFailed` + Try again) |
+| Calendar open | calendar button | the picker popover, Esc closes it |
+| Saving | Save clicked, request out | Save disabled with progress and `Common.Saving`; Cancel disabled |
+| Success | 201 / 200 | snackbar `ExamEditions.Saved`; add → becomes the edit form (URL replaced) |
+| Validation error | client checks fail on Save, or a field code from the Api | `AppErrorSummary` (`Common.ErrorSummary.Title`, one link per field) at the top, focused; each field shows its error |
+| Business error | 409 `exam_edition.duplicate`, 404 `organizer.not_found` | `AppAlert` error at the top of the card; board cleared for the second |
+| Server error | anything else | `AppAlert` `common.unexpected_error`; the form keeps what was typed |
+| Exam not found | unknown or deleted `examId` | card with alert `exam.not_found` + link `Exams.BackToList` |
+| Edition not found | unknown id, or an id under another exam | card with alert `exam_edition.not_found` + link `ExamEditions.BackToExam` |
+| Unsaved changes | leaving with changes | `Common.Discard.*` dialog |
+| Permission denied | no `catalog.manage` | Not Found page (UC7, AC16) |
+
+**Screen 3 — `AppDateField`**: empty (format hint), filled, error (`aria-invalid`, error text), disabled (not focusable, no calendar button action), calendar open.
+
+### Permissions
+One permission, `catalog.manage` (BR18): the page attribute `[Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]` on the edition page (as on `ExamForm.razor`), which already guards the exam page and therefore the section; the endpoints use the same policy. No per-action check: whoever sees the page may add, edit and delete. No menu item.
+
+### Accessibility
+- **Section.** `AppSectionCard` is a `<section aria-labelledby>` with an `h2`; the rows are a `<ul>`; the chip's state is its text, the dot is decorative; the date reads "Applied on 14/06/2026". Row buttons are buttons (they act); the add action is a link (it navigates), with a visible focus ring from the kit.
+- **Tab order, exam page:** the exam form, its Cancel and Save, then the section: each row's Edit and Delete, then the add link.
+- **Tab order, edition page:** breadcrumb links → (error summary, when shown) → board → notice year → position → notice reference → notice link → application date input → its calendar button → its clear button (when filled) → status (one tab stop; arrows move) → Cancel → Save.
+- **Screen reader.** Each field announces label, "required" (`aria-required`), and its hint or error through `aria-describedby`; `aria-invalid` on a field in error. The lookup is a `combobox` with `aria-expanded` and a polite result count (kit). The status is a `radiogroup` of two `radio`s with their descriptions. The error summary is `role="alert"`, gets focus, and each line moves focus to its field. Saving is announced by the button's `role="status"` text; success by the snackbar.
+- **Date field.** The input keeps the label, `aria-describedby`, `aria-invalid`, `aria-required`, and `inputmode="numeric"`; the calendar button has the accessible name and tooltip `DateField.OpenCalendar`, the clear button `DateField.Clear`; the popover is MudBlazor's, Esc closes it and focus returns to the button. Typing the date is enough (AC17); the calendar is never the only way.
+- **Targets.** Row action buttons and the calendar button are at least 24 px (kit sizes).
+- **Contrast.** No new colour. Row date and hints use `text-secondary` on `surface` (6.92:1 light, 4.89:1 dark — the F-43 figures); the chip text is `text-primary`.
+
+### UI texts
+New keys, in `SharedResources.resx` / `.pt-BR.resx` / `.pt-PT.resx`. Reused keys are listed after the table.
+
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `ExamEditions.Section.Title` | Editions | Edições | Edições |
+| `ExamEditions.Section.Subtitle` | Each paper actually applied, with its year, position and board. Newest first. | Cada prova efetivamente aplicada, com ano, cargo e banca. As mais recentes primeiro. | Cada prova efetivamente aplicada, com ano, posto de trabalho e entidade organizadora. As mais recentes primeiro. |
+| `ExamEditions.Section.SaveExamFirst` | Save the exam first. Its editions are added here. | Salve o exame primeiro. As edições dele são adicionadas aqui. | Guarde primeiro o exame. As suas edições são adicionadas aqui. |
+| `ExamEditions.Empty` | This exam has no edition yet. | Este exame ainda não tem edições. | Este exame ainda não tem edições. |
+| `ExamEditions.Row.AppliedOn` | Applied on {0} | Aplicada em {0} | Aplicada em {0} |
+| `ExamEditions.Status.Draft` | Draft | Rascunho | Rascunho |
+| `ExamEditions.Status.Published` | Published | Publicada | Publicada |
+| `ExamEditions.Status.Draft.Description` | Kept in the administration. Students do not see it. | Fica só na administração. Os alunos não a veem. | Fica apenas na administração. Os alunos não a veem. |
+| `ExamEditions.Status.Published.Description` | Offered to students in the catalog. Set it back to Draft before deleting it. | Oferecida aos alunos no catálogo. Volte para Rascunho antes de excluí-la. | Disponível para os alunos no catálogo. Volte a Rascunho antes de a eliminar. |
+| `ExamEditions.Delete.Object` | edition {0} | edição {0} | edição {0} |
+| `ExamEditions.Delete.Message` | The edition {0} leaves the exam {1}. The same year, position and board cannot be added to this exam again. | A edição {0} sai do exame {1}. O mesmo ano, cargo e banca não poderão ser adicionados de novo a este exame. | A edição {0} sai do exame {1}. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame. |
+| `ExamEditions.Deleted` | Edition deleted. | Edição excluída. | Edição eliminada. |
+| `ExamEditions.Delete.DisabledPublished` | Set it back to Draft before deleting it. | Volte para Rascunho antes de excluir. | Volte a colocar em Rascunho antes de eliminar. |
+| `ExamEditions.Form.AddTitle` | Add edition | Adicionar edição | Adicionar edição |
+| `ExamEditions.Form.EditTitle` | Edit edition | Editar edição | Editar edição |
+| `ExamEditions.Section.Paper` | Paper | Prova | Prova |
+| `ExamEditions.Section.Paper.Subtitle` | The board that applied it, the notice year and the job it selects for. | A banca que a aplicou, o ano do edital e o cargo a que se destina. | A entidade organizadora que a aplicou, o ano do aviso e o posto de trabalho a que se destina. |
+| `ExamEditions.Section.Notice` | Notice and application | Edital e aplicação | Aviso e aplicação |
+| `ExamEditions.Section.Notice.Subtitle` | How the notice names itself, where it is published and when the paper was applied. All optional. | Como o edital se identifica, onde está publicado e quando a prova foi aplicada. Tudo opcional. | Como o aviso se identifica, onde está publicado e quando a prova foi aplicada. Tudo opcional. |
+| `ExamEditions.Section.Publication` | Publication | Publicação | Publicação |
+| `ExamEditions.Section.Publication.Subtitle` | Who can see this edition. | Quem pode ver esta edição. | Quem pode ver esta edição. |
+| `ExamEditions.Field.Exam` | Exam | Exame | Exame |
+| `ExamEditions.Field.Organizer` | Board | Banca | Entidade organizadora |
+| `ExamEditions.Field.Organizer.Placeholder` | Name or acronym | Nome ou sigla | Nome ou sigla |
+| `ExamEditions.Field.Organizer.Hint` | The board that applied this paper, as the notice names it. | A banca que aplicou esta prova, como o edital a indica. | A entidade organizadora que aplicou esta prova, como o aviso a indica. |
+| `ExamEditions.Field.NoticeYear` | Notice year | Ano do edital | Ano do aviso |
+| `ExamEditions.Field.NoticeYear.Placeholder` | E.g.: 2026 | Ex.: 2026 | Ex.: 2026 |
+| `ExamEditions.Field.NoticeYear.Hint` | From 1990 to {0}. | De 1990 a {0}. | De 1990 a {0}. |
+| `ExamEditions.Field.Position` | Position | Cargo | Posto de trabalho |
+| `ExamEditions.Field.Position.Placeholder` | E.g.: Municipal guard, 3rd class | Ex.: Guarda Municipal de 3ª Classe | Ex.: Agente de Polícia Municipal |
+| `ExamEditions.Field.Position.Hint` | The job this paper selects for. Leave it empty for ENEM, entrance exams and certifications. At most 200 characters. | O cargo que esta prova seleciona. Deixe vazio para ENEM, vestibulares e certificações. Até 200 caracteres. | O posto de trabalho para que esta prova seleciona. Deixe vazio para ENEM, exames de acesso e certificações. No máximo 200 caracteres. |
+| `ExamEditions.Field.NoticeReference` | Notice reference | Identificação do edital | Referência do aviso |
+| `ExamEditions.Field.NoticeReference.Placeholder` | E.g.: Notice no. 01/2026 | Ex.: Edital nº 01/2026 | Ex.: Aviso n.º 1/2026 |
+| `ExamEditions.Field.NoticeReference.Hint` | As the notice names itself. Editions cut from the same notice share it. | Como o edital se identifica. Edições do mesmo edital repetem este texto. | Como o aviso se identifica. Edições do mesmo aviso repetem este texto. |
+| `ExamEditions.Field.NoticeUrl` | Notice link | Link do edital | Ligação do aviso |
+| `ExamEditions.Field.NoticeUrl.Placeholder` | https:// | https:// | https:// |
+| `ExamEditions.Field.NoticeUrl.Hint` | The official address of the notice. At most 300 characters. | O endereço oficial do edital. Até 300 caracteres. | O endereço oficial do aviso. No máximo 300 caracteres. |
+| `ExamEditions.Field.AppliedOn` | Application date | Data de aplicação | Data de aplicação |
+| `ExamEditions.Field.AppliedOn.Hint` | The day the paper was applied. Optional, also to publish. | O dia em que a prova foi aplicada. Opcional, também para publicar. | O dia em que a prova foi aplicada. Opcional, também para publicar. |
+| `ExamEditions.Field.Status` | Status | Situação | Estado |
+| `ExamEditions.Saved` | Edition saved. | Edição salva. | Edição guardada. |
+| `ExamEditions.BackToExam` | Back to the exam | Voltar para o exame | Voltar ao exame |
+| `DateField.OpenCalendar` | Open the calendar | Abrir o calendário | Abrir o calendário |
+| `DateField.Clear` | Clear the date | Limpar a data | Limpar a data |
+| `DateField.PreviousMonth` (screen question 4) | Previous month | Mês anterior | Mês anterior |
+| `DateField.NextMonth` (screen question 4) | Next month | Próximo mês | Mês seguinte |
+| `DateField.Format` | mm/dd/yyyy | dd/mm/aaaa | dd/mm/aaaa |
+| `DateField.Hint.Format` | Format: {0} | Formato: {0} | Formato: {0} |
+| `DateField.Invalid` | This is not a date. Type it as {0}. | Isto não é uma data. Digite no formato {0}. | Isto não é uma data. Escreva no formato {0}. |
+| `Gallery.Section.DateField` | Date field | Campo de data | Campo de data |
+| `Gallery.DateField.Hint` | Type the date in the reader's format or pick it from the calendar. Empty, filled, error and disabled. | Digite a data no formato de quem lê ou escolha no calendário. Vazio, preenchido, com erro e desativado. | Escreva a data no formato de quem lê ou escolha-a no calendário. Vazio, preenchido, com erro e desativado. |
+| `exam_edition.not_found` | This edition no longer exists. | Esta edição não existe mais. | Esta edição já não existe. |
+| `exam_edition.organizer_required` | Choose the board. | Escolha a banca. | Escolha a entidade organizadora. |
+| `exam_edition.notice_year_invalid` | Type a year from 1990 to next year. | Informe um ano entre 1990 e o próximo ano. | Indique um ano entre 1990 e o próximo ano. |
+| `exam_edition.position_too_long` | The position is too long: at most 200 characters. | O cargo é longo demais: no máximo 200 caracteres. | O posto de trabalho é demasiado longo: no máximo 200 caracteres. |
+| `exam_edition.notice_reference_too_long` | The notice reference is too long: at most 100 characters. | A identificação do edital é longa demais: no máximo 100 caracteres. | A referência do aviso é demasiado longa: no máximo 100 caracteres. |
+| `exam_edition.notice_url_invalid` | Type a full address of at most 300 characters, starting with http:// or https:// | Digite o endereço completo, com até 300 caracteres, começando com http:// ou https:// | Escreva o endereço completo, com no máximo 300 caracteres, a começar por http:// ou https:// |
+| `exam_edition.applied_on_before_notice_year` | The application date cannot be before 1 January of the notice year. | A data de aplicação não pode ser anterior a 1º de janeiro do ano do edital. | A data de aplicação não pode ser anterior a 1 de janeiro do ano do aviso. |
+| `exam_edition.status_invalid` | Choose Draft or Published. | Escolha Rascunho ou Publicada. | Escolha Rascunho ou Publicada. |
+| `exam_edition.duplicate` | This exam already has an edition with this year, position and board (a deleted one counts too). | Este exame já tem uma edição com este ano, cargo e banca (uma excluída também conta). | Este exame já tem uma edição com este ano, posto de trabalho e entidade organizadora (uma eliminada também conta). |
+| `exam_edition.published` | This edition is published. Set it back to Draft, save, then delete it. | Esta edição está publicada. Volte-a para Rascunho, salve e depois exclua. | Esta edição está publicada. Volte a colocá-la em Rascunho, guarde e depois elimine-a. |
+| `exam.has_editions` | This exam has editions. Delete its editions first. | Este exame tem edições. Exclua as edições primeiro. | Este exame tem edições. Elimine primeiro as edições. |
+| `organizer.has_editions` | Some editions name this board. Change or delete those editions first. | Há edições que indicam esta banca. Altere ou exclua essas edições primeiro. | Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições. |
+
+Reused, unchanged: `Nav.Section.Content`, `Exams.Title`, `Exams.BackToList`, `Exams.Field.ContentLanguage`, `Common.Delete.Title`, `Common.Delete.Confirm`, `Common.Discard.*`, `Common.Save`, `Common.Saving`, `Common.Cancel`, `Common.Edit`, `Common.Delete`, `Common.Actions`, `Common.ActionOnItem`, `Common.Loading`, `Common.LoadFailed`, `Common.TryAgain`, `Common.ErrorSummary.Title`, `Common.Summary.Title`, `Common.Summary.NotFilled`, `Common.Summary.Checklist`, `Common.Checklist.Done`, `Common.Checklist.Pending`, `Lookup.*`, `Gallery.Title`, `Gallery.Breadcrumb.Dev`, `NotFound.*`, `exam.not_found`, `organizer.not_found`, `common.unexpected_error`.
+
+New `AppIcons` constants (Material Outlined): `Editions` (`EventNote`), `Notice` (`Article`), `Link` (`Link`), `Calendar` (`CalendarToday`).
 
 ### API
 - `GET /api/v1/catalog/exams/{examId:guid}/editions` — the exam's editions, `ExamEditionResponse[]` (BR14); 404 `exam.not_found`.
@@ -118,7 +290,7 @@ No menu item: an edition is reached through its exam. No global editions list (o
 - AC9 Given two rows inserted directly with `TenantId` null, the same exam, year, board and no position, when the second is saved, then PostgreSQL rejects it. (BR1, BR10)
 - AC10 Given a request whose `organizerId` matches no organizer or a deleted one, then 404 `organizer.not_found`; whose exam is unknown or deleted, then 404 `exam.not_found`; and nothing is written. (BR3)
 - AC11 Given a draft edition, when the Admin publishes it, then its chip reads Published; when they set it back to Draft, then it reads Draft. (UC3, BR9)
-- AC12 Given a published edition, when the Admin confirms its deletion, then the Api answers 409 `exam_edition.published` and it stays; given a draft, then it disappears from the section and from the list call, and the row is still in the table with `IsDeleted` true. (UC4, UC5, BR11)
+- AC12 Given a published edition, then its row's delete action is disabled with the reason `ExamEditions.Delete.DisabledPublished`, and a `DELETE` sent to the Api answers 409 `exam_edition.published` and it stays; given a draft, when the Admin confirms its deletion, then it disappears from the section and from the list call, and the row is still in the table with `IsDeleted` true. (UC4, UC5, BR11)
 - AC13 Given an exam with one edition, when the Admin confirms deleting the exam, then 409 `exam.has_editions` and the translated message; once its only edition is deleted, the exam can be deleted. (UC6, BR12)
 - AC14 Given a board that an edition names, when the Admin confirms deleting it on `/admin/organizers`, then 409 `organizer.has_editions` and the translated message; once that edition is deleted, the board can be deleted. (UC6, BR12)
 - AC15 Given a status that is not `Draft` or `Published`, then 400 `exam_edition.status_invalid`, and the OpenAPI document names the two values. (BR9)
@@ -148,6 +320,27 @@ No menu item: an edition is reached through its exam. No global editions list (o
 - 2026-09-28 — Simulae's `ExamNotice` is not imported: it throws with pt-BR messages, its `Open`/`Closed` means something else, and it has no job, notice link or uniqueness. What carries over is the board per edition, the notice year and the optional date.
 - 2026-09-28 — No seed rows: F-37 brings the real editions (the F-33 and F-34 decision).
 
+### From the screen design (2026-09-28)
+- The editions card sits below the whole exam layout, full width, outside the exam form — the exam's Save stays the page's only primary button and never touches an edition; the aside keeps summarising only the exam.
+- "Add edition" is an outlined link under the rows, not a header button — `AppSectionCard` has no action slot and `AppPageHeader`'s primary action would compete with the exam's Save; a link because it navigates.
+- One key, `ExamEditions.Form.AddTitle`, for the add link, the page title and the breadcrumb — one term per action (rule `ui`).
+- Rows are not links; edit and delete are the `AppRowActions` icons — there is no read-only detail page (rule `ui`).
+- The row's accessible name joins its parts with commas, the visible ` · ` separators are hidden from screen readers.
+- The edition page has three section cards (Paper; Notice and application; Publication) — the required fields first, the optional notice data together, the status alone with what each choice means.
+- The status is `AppRadioCards` with two cards and a one-line consequence each — publishing is the choice that decides who sees the paper, so it gets the explanation, not a bare select.
+- No delete on the edition page — an edition is deleted one way, from its row.
+- `exam_edition.duplicate` is shown as the top alert only — it concerns three fields at once; the other field codes go to their own field.
+- The delete confirmation says the same year, position and board cannot be added again — BR10 keeps deleted rows in the unique index, and rule `ui-project` asks the text to say what happens.
+- The aside shows the exam and its content language read-only — the edition has no language of its own (BR2), and the reader sees which one applies.
+- The application date gets `Min` = 1 January of the notice year in the calendar, and the rule's text on leaving the field — the calendar only greys days; the message stays the error code's.
+- `AppDateField` wraps `MudDatePicker` with `Editable="true"` and the culture's short date pattern; typing is the full keyboard path, the calendar is an aid; with no hint it shows the format, the way `AppLookupField` shows its minimum characters.
+- Dates in rows and in the aside use the short date of the reader's culture (`"d"`), the `AppDateColumn` precedent.
+- Four new `AppIcons` constants (`Editions`, `Notice`, `Link`, `Calendar`) — semantic names in the one icon family; no new colour.
+- 2026-09-28 — The delete action on a published row is disabled with the reason `ExamEditions.Delete.DisabledPublished`; the 409 `exam_edition.published` stays as the Api's guard. AC12 now checks both (owner, screen question 1).
+- 2026-09-28 — pt-PT words: position "Posto de trabalho", notice "Aviso", board "Entidade organizadora"; the glossary gets the `Position` row with them and loses the "(?)" on those two rows (owner, screen question 2).
+- 2026-09-28 — English dates stay month first (`6/14/2026`): the rule is the reader's culture, the app's `en` is neutral, and `AppDateColumn` already writes them so; the field shows the format under it (owner, screen question 3).
+- 2026-09-28 — `AppDateField` registers a `MudLocalizer` backed by `SharedResources`, so the picker's own controls are read in the reader's language; the keys MudBlazor 9.9 asks for are listed by the build, beyond the two `DateField.*Month` rows (owner, screen question 4).
+
 ## Out of scope
 - The notice document itself: only the official link is stored; the upload arrives with epic 698 (owner, 2026-09-23).
 - Scoring rules, wrong-answer penalty and cut-off: epic 695 (owner, 2026-09-23).
@@ -159,7 +352,7 @@ No menu item: an edition is reached through its exam. No global editions list (o
 - Locking a published edition that questions or simulations point at: when those exist (epics 693 and 695).
 
 ## Open questions
-- (none)
+- 1. (screen design) The Published card says "Offered to students in the catalog", which becomes true when F-36 ships. Recommendation: keep the sentence — it states what publishing is for, and F-36 is the next item on this path.
 
 ## Change notes
 
