@@ -1,7 +1,7 @@
 ---
 feature: F-35
 epic: Assessment catalog
-status: building
+status: validating
 board: 754
 version: 1
 ---
@@ -378,7 +378,26 @@ No blocker, no major. Six minors:
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+Needed to validate: the app host started from this worktree and an Admin account signed in by the owner. Both are yours: Claude did not start the app host (it starts the shared local PostgreSQL, Redis and Mailpit containers, which needs the owner's yes) and does not enter credentials. Close any app host running from another checkout first: two hosts fight for port 17162. Applying the migration happens at start (Development).
+
+Git Bash and PowerShell 7, from `D:/dev/_icontrol/wt/simulab/f-35-exam-editions-back` (same command in both):
+
+```bash
+dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: the Aspire dashboard URL is printed; Web at https://localhost:7125. To repeat, stop it (Ctrl+C) and run it again.
+
+1. Sign in as an Admin, open **Exams**, and open (or add) an exam. Below the exam form a card **Editions** says the exam has none; "Add edition" is an outlined link, and Save of the exam is still the only filled button. On `/admin/exams/new` the card only says to save the exam first.
+2. Choose **Add edition**. Type `ces` in Board and pick one (add a board in **Organizers** first if none), type a Notice year of `2026`, leave the rest empty and Save. A snackbar says "Edition saved.", the title becomes "Edit edition" and the URL carries the edition id.
+3. Back on the exam (breadcrumb), add a second edition: same board and year, position `Guarda Municipal de 3ª Classe`, notice reference, an `https://` link and an application date typed as `14/06/2026`; choose **Published** and Save. Then add a third for year `2024`. The section lists 2026 rows before 2024, each with the board acronym, a chip (Draft or Published) and "Applied on 14/06/2026" when there is a date.
+4. Try to break the rules: a notice year of `1989` or `2028`, a link `edital.pdf`, an application date `01/01/2025` with year 2026, and a repeated year, board and position (spaces and accents changed). Each shows its message in the error summary or the top alert; nothing is saved.
+5. In the section, the delete icon of the Published row is disabled with the reason as tooltip. Open that edition, set it back to **Draft** and Save; then delete it from its row and confirm. It leaves the list. Try to delete the exam (**Exams**) while an edition remains: it is refused with "This exam has editions". In **Organizers**, deleting the board an edition names is refused the same way.
+6. Language and format: switch the language to English, then Português (Portugal). Labels, hints and errors follow, and the date field shows `mm/dd/yyyy` in English and `dd/mm/aaaa` in the Portuguese ones. Open `/dev/ui` and check the **Date field** section: empty, filled, error and disabled.
+7. Keyboard only, on the edition page: Tab through Board, Notice year, Position, Notice reference, Notice link, Application date (type the date, no mouse), its calendar button, Status (arrows change the card) and Save; Enter on Save saves. Esc closes an open calendar.
+8. Sign in as a Student (or use a private window with a Student account) and open `/admin/exams/{any id}/editions/new`: the ordinary Not Found page.
+
+Known limits (agent report, not seen on screen): the date field's clear button keeps MudBlazor's English "Clear" in every language, and in English the picker's own controls use MudBlazor's built-in English. Say if either bothers you.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
