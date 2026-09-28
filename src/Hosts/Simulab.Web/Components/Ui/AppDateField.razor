@@ -1,0 +1,146 @@
+@* One date input everywhere (F-35, BR16): the anatomy of AppTextField - label above, required marker, hint or
+   error below, both announced. The reader types the date in the format of their culture; the calendar is an
+   aid, never the only way. The value is a calendar day (DateOnly), so a page never sees a time or a zone. *@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-field app-date-field @(HasError ? "app-field-error" : null)">
+    <label class="app-field-label" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <MudDatePicker Date="@ToDateTime(Value)"
+                   DateChanged="OnDateChangedAsync"
+                   TextChanged="OnTextChangedAsync"
+                   InputId="@Id"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Editable="true"
+                   AutoClose="true"
+                   Clearable="@(!Required && !Disabled)"
+                   ClearIcon="@AppIcons.Close"
+                   Disabled="Disabled"
+                   Error="HasError"
+                   Culture="@Culture"
+                   DateFormat="@Pattern"
+                   FirstDayOfWeek="@Culture.DateTimeFormat.FirstDayOfWeek"
+                   MinDate="@ToDateTime(Min)"
+                   MaxDate="@ToDateTime(Max)"
+                   Adornment="Adornment.End"
+                   AdornmentIcon="@AppIcons.Calendar"
+                   AdornmentAriaLabel="@L["DateField.OpenCalendar"]"
+                   PreviousIcon="@AppIcons.ChevronLeft"
+                   NextIcon="@AppIcons.ChevronRight"
+                   UserAttributes="@Attributes" />
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@ErrorMessage</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+        else
+        {
+            @* With no hint of its own the field says how to type, the way AppLookupField says its minimum. *@
+            <span class="app-field-hint">@L["DateField.Hint.Format", FormatText]</span>
+        }
+    </span>
+</div>
+
+@code {
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public DateOnly? Value { get; set; }
+
+    [Parameter] public EventCallback<DateOnly?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>The first day the calendar offers; earlier days are greyed. It does not replace the page's rule text.</summary>
+    [Parameter] public DateOnly? Min { get; set; }
+
+    /// <summary>The last day the calendar offers; later days are greyed. It does not replace the page's rule text.</summary>
+    [Parameter] public DateOnly? Max { get; set; }
+
+    // Typed text that is not a date in the reader's format (BR16): the field says so, and the value is null.
+    private bool _invalid;
+
+    private bool HasError => !string.IsNullOrEmpty(Error) || _invalid;
+
+    private string DescriptionId => $"{Id}-description";
+
+    // The reader's culture, not the page's UI language: month and weekday names and the first day of the week follow it.
+    private CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private string Pattern => Culture.DateTimeFormat.ShortDatePattern;
+
+    private string FormatText => L["DateField.Format"].Value;
+
+    private string ErrorMessage =>
+        !string.IsNullOrEmpty(Error) ? Error : L["DateField.Invalid", FormatText].Value;
+
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["aria-describedby"] = DescriptionId,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-required"] = Required ? "true" : null,
+        // The picker hands these to its inner text field, whose InputMode is an enum, not text.
+        ["inputmode"] = InputMode.numeric
+    };
+
+    protected override void OnParametersSet()
+    {
+        // A day set from outside (a saved edition, a reset) replaces whatever unreadable text was typed.
+        if (Value is not null)
+        {
+            _invalid = false;
+        }
+    }
+
+    private static DateTime? ToDateTime(DateOnly? value) => value?.ToDateTime(TimeOnly.MinValue);
+
+    private async Task OnDateChangedAsync(DateTime? date)
+    {
+        DateOnly? value = date is null ? null : DateOnly.FromDateTime(date.Value);
+        if (value is not null)
+        {
+            _invalid = false;
+        }
+
+        Value = value;
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    // Called when the reader leaves the input (or picks a day): blank is null, a readable date is fine, anything
+    // else is not a date - the value goes to null and the field says how to type it.
+    private async Task OnTextChangedAsync(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)
+            || DateTime.TryParseExact(text.Trim(), Pattern, Culture, DateTimeStyles.None, out _))
+        {
+            _invalid = false;
+            return;
+        }
+
+        _invalid = true;
+        if (Value is not null)
+        {
+            Value = null;
+            await ValueChanged.InvokeAsync(null);
+        }
+    }
+}

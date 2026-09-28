@@ -1,0 +1,598 @@
+@page "/admin/exams/{ExamId:guid}/editions/new"
+@page "/admin/exams/{ExamId:guid}/editions/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Localization
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject TimeProvider Clock
+
+@* F-35, Screen 2, UC2 and UC3: an edition is edited on a page of its own (rule: ui-project - a complex entity),
+   reached from its exam's section. The only primary button is Save, at the bottom of the form. The Api runs
+   every rule (BR3 to BR9); the checks here are for comfort. There is no delete here: an edition is deleted from
+   its row, one way (rule: ui). *@
+<AppPageHeader Title="@Title" Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_examNotFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.ExamNotFound)" Class="mb-4" />
+        <AppLink Href="/admin/exams">@L["Exams.BackToList"]</AppLink>
+    </MudPaper>
+}
+else if (_editionNotFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.ExamEditionNotFound)" Class="mb-4" />
+        <AppLink Href="@ExamHref">@L["ExamEditions.BackToExam"]</AppLink>
+    </MudPaper>
+}
+else
+{
+    <div class="app-form-layout">
+        <MudPaper Class="app-form-card" Elevation="0">
+            <AppErrorSummary Id="@ErrorSummaryId"
+                             Title="@L["Common.ErrorSummary.Title"]"
+                             Items="@(_showErrorSummary ? ErrorSummaryItems : Array.Empty<AppErrorSummaryItem>())" />
+
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+                @if (_backHref is not null)
+                {
+                    <div class="mb-4">
+                        <AppLink Href="@_backHref">@_backText</AppLink>
+                    </div>
+                }
+            }
+
+            <AppSectionCard Id="edition-section-paper"
+                            Title="@L["ExamEditions.Section.Paper"]"
+                            Icon="@AppIcons.Exams"
+                            Subtitle="@L["ExamEditions.Section.Paper.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppLookupField Id="edition-organizer"
+                                    Label="@L["ExamEditions.Field.Organizer"]"
+                                    Placeholder="@L["ExamEditions.Field.Organizer.Placeholder"]"
+                                    LeadingIcon="@AppIcons.Organizers"
+                                    SearchAsync="SearchOrganizersAsync"
+                                    Value="_organizer"
+                                    ValueChanged="OnOrganizerChanged"
+                                    Required="true"
+                                    Hint="@L["ExamEditions.Field.Organizer.Hint"]"
+                                    Error="@_organizerError" />
+
+                    <AppTextField TValue="int?"
+                                  Id="edition-notice-year"
+                                  Label="@L["ExamEditions.Field.NoticeYear"]"
+                                  Value="_noticeYear"
+                                  ValueChanged="@((int? value) => OnNoticeYearChanged(value))"
+                                  InputType="InputType.Number"
+                                  Required="true"
+                                  MaxLength="CatalogLimits.ExamEditionNoticeYearDigits"
+                                  Autocomplete="off"
+                                  Placeholder="@L["ExamEditions.Field.NoticeYear.Placeholder"]"
+                                  Hint="@L["ExamEditions.Field.NoticeYear.Hint", MaxNoticeYear]"
+                                  Error="@_noticeYearError" />
+                </AppFormGrid>
+                <AppFormGrid Columns="1">
+                    <AppTextField TValue="string"
+                                  Id="edition-position"
+                                  Label="@L["ExamEditions.Field.Position"]"
+                                  Value="@_position"
+                                  ValueChanged="@((string? value) => OnPositionChanged(value))"
+                                  MaxLength="CatalogLimits.ExamEditionPositionMaxLength"
+                                  Autocomplete="off"
+                                  Placeholder="@L["ExamEditions.Field.Position.Placeholder"]"
+                                  Hint="@L["ExamEditions.Field.Position.Hint"]"
+                                  Error="@_positionError" />
+                </AppFormGrid>
+            </AppSectionCard>
+
+            <AppSectionCard Id="edition-section-notice"
+                            Title="@L["ExamEditions.Section.Notice"]"
+                            Icon="@AppIcons.Notice"
+                            Subtitle="@L["ExamEditions.Section.Notice.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppTextField TValue="string"
+                                  Id="edition-notice-reference"
+                                  Label="@L["ExamEditions.Field.NoticeReference"]"
+                                  Value="@_noticeReference"
+                                  ValueChanged="@((string? value) => OnNoticeReferenceChanged(value))"
+                                  MaxLength="CatalogLimits.ExamEditionNoticeReferenceMaxLength"
+                                  Autocomplete="off"
+                                  Placeholder="@L["ExamEditions.Field.NoticeReference.Placeholder"]"
+                                  Hint="@L["ExamEditions.Field.NoticeReference.Hint"]"
+                                  Error="@_noticeReferenceError" />
+
+                    <AppTextField TValue="string"
+                                  Id="edition-notice-url"
+                                  Label="@L["ExamEditions.Field.NoticeUrl"]"
+                                  Value="@_noticeUrl"
+                                  ValueChanged="@((string? value) => OnNoticeUrlChanged(value))"
+                                  InputType="InputType.Url"
+                                  MaxLength="CatalogLimits.ExamEditionNoticeUrlMaxLength"
+                                  Autocomplete="off"
+                                  LeadingIcon="@AppIcons.Link"
+                                  Placeholder="@L["ExamEditions.Field.NoticeUrl.Placeholder"]"
+                                  Hint="@L["ExamEditions.Field.NoticeUrl.Hint"]"
+                                  Error="@_noticeUrlError" />
+                </AppFormGrid>
+                <AppFormGrid Columns="2">
+                    <AppDateField Id="edition-applied-on"
+                                  Label="@L["ExamEditions.Field.AppliedOn"]"
+                                  Value="_appliedOn"
+                                  ValueChanged="OnAppliedOnChanged"
+                                  Min="@AppliedOnMin"
+                                  Hint="@L["ExamEditions.Field.AppliedOn.Hint"]"
+                                  Error="@_appliedOnError" />
+                </AppFormGrid>
+            </AppSectionCard>
+
+            <AppSectionCard Id="edition-section-publication"
+                            Title="@L["ExamEditions.Section.Publication"]"
+                            Icon="@AppIcons.View"
+                            Subtitle="@L["ExamEditions.Section.Publication.Subtitle"]">
+                <AppRadioCards TValue="ExamEditionStatus?"
+                               Id="edition-status"
+                               Label="@L["ExamEditions.Field.Status"]"
+                               Columns="2"
+                               Value="_status"
+                               ValueChanged="@((ExamEditionStatus? value) => OnStatusChanged(value))"
+                               Options="StatusCards"
+                               Required="true"
+                               Error="@_statusError" />
+            </AppSectionCard>
+
+            <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+        </MudPaper>
+
+        <AppFormAside Title="@L["Common.Summary.Title"]"
+                      EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="AsideRows"
+                      ChecklistTitle="@L["Common.Summary.Checklist"]"
+                      DoneText="@L["Common.Checklist.Done"]"
+                      PendingText="@L["Common.Checklist.Pending"]"
+                      Checklist="AsideChecklist" />
+    </div>
+}
+
+@code {
+    private const string ErrorSummaryId = "edition-error-summary";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The exam the edition belongs to; fixed at creation, an edition never moves (BR2).</summary>
+    [Parameter] public Guid ExamId { get; set; }
+
+    /// <summary>The edition being edited; absent on the adding route.</summary>
+    [Parameter] public Guid? Id { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private ExamResponse? _exam;
+    private ExamEditionResponse? _saved;
+    private AppLookupOption? _organizer;
+    private int? _noticeYear;
+    private string? _position;
+    private string? _noticeReference;
+    private string? _noticeUrl;
+    private DateOnly? _appliedOn;
+    private ExamEditionStatus? _status = ExamEditionStatus.Draft;
+    private string? _organizerError;
+    private string? _noticeYearError;
+    private string? _positionError;
+    private string? _noticeReferenceError;
+    private string? _noticeUrlError;
+    private string? _appliedOnError;
+    private string? _statusError;
+    private string? _error;
+    private string? _backHref;
+    private string? _backText;
+    private bool _loading;
+    private bool _examNotFound;
+    private bool _editionNotFound;
+    private bool _saving;
+    private bool _showErrorSummary;
+    private bool _focusSummary;
+
+    private bool IsEdit => _saved is not null;
+
+    private string Title => IsEdit || Id is not null ? L["ExamEditions.Form.EditTitle"] : L["ExamEditions.Form.AddTitle"];
+
+    private string ExamHref => $"/admin/exams/{ExamId}";
+
+    /// <summary>BR4: the newest notice year is next year's, and the current year comes from the clock, not the machine.</summary>
+    private int MaxNoticeYear => Clock.GetUtcNow().Year + 1;
+
+    private bool NoticeYearValid =>
+        _noticeYear is { } year && year >= CatalogLimits.ExamEditionNoticeYearMin && year <= MaxNoticeYear;
+
+    // The calendar greys the days before the notice year; the rule's text stays the error code's (BR8).
+    private DateOnly? AppliedOnMin => NoticeYearValid ? new DateOnly(_noticeYear!.Value, 1, 1) : null;
+
+    // The cards carry the one line that says what each choice means: publishing decides who sees the paper.
+    private IReadOnlyList<AppRadioCardOption<ExamEditionStatus?>> StatusCards =>
+        [.. Enum.GetValues<ExamEditionStatus>().Select(status => new AppRadioCardOption<ExamEditionStatus?>(
+            status,
+            ExamEditionText.StatusName(L, status),
+            L[$"ExamEditions.Status.{status}.Description"]))];
+
+    private string? ContentLanguageSummary =>
+        _exam is null
+            ? null
+            : SupportedCultures.All.Where(culture => culture.Name == _exam.ContentLanguage)
+                .Select(SupportedCultures.NativeName)
+                .FirstOrDefault() ?? _exam.ContentLanguage;
+
+    // What the read-only aside shows beside the form, without a button of its own.
+    private IReadOnlyList<AppAsideRow> AsideRows =>
+    [
+        new(L["ExamEditions.Field.Exam"], _exam?.Name),
+        new(L["Exams.Field.ContentLanguage"], ContentLanguageSummary),
+        new(L["ExamEditions.Field.Organizer"], _organizer?.Text),
+        new(L["ExamEditions.Field.NoticeYear"], _noticeYear?.ToString(CultureInfo.InvariantCulture)),
+        new(L["ExamEditions.Field.Position"], NullIfBlank(_position)),
+        new(L["ExamEditions.Field.NoticeReference"], NullIfBlank(_noticeReference)),
+        new(L["ExamEditions.Field.AppliedOn"], _appliedOn?.ToString("d", CultureInfo.CurrentCulture)),
+        new(L["ExamEditions.Field.Status"], _status is { } status ? ExamEditionText.StatusName(L, status) : null)
+    ];
+
+    private IReadOnlyList<AppChecklistItem> AsideChecklist =>
+    [
+        new(L["ExamEditions.Field.Organizer"], _organizer is not null),
+        new(L["ExamEditions.Field.NoticeYear"], NoticeYearValid)
+    ];
+
+    // One line per field the reader has not fixed yet, in the order the form shows them.
+    private IReadOnlyList<AppErrorSummaryItem> ErrorSummaryItems =>
+    [
+        .. new (string? Error, string FieldId, string Label)[]
+        {
+            (_organizerError, "edition-organizer", L["ExamEditions.Field.Organizer"]),
+            (_noticeYearError, "edition-notice-year", L["ExamEditions.Field.NoticeYear"]),
+            (_positionError, "edition-position", L["ExamEditions.Field.Position"]),
+            (_noticeReferenceError, "edition-notice-reference", L["ExamEditions.Field.NoticeReference"]),
+            (_noticeUrlError, "edition-notice-url", L["ExamEditions.Field.NoticeUrl"]),
+            (_appliedOnError, "edition-applied-on", L["ExamEditions.Field.AppliedOn"]),
+            (_statusError, "edition-status", L["ExamEditions.Field.Status"])
+        }.Where(item => item.Error is not null)
+         .Select(item => new AppErrorSummaryItem(item.FieldId, item.Label))
+    ];
+
+    // Against the saved edition, or the empty new form with its Draft status.
+    private bool HasChanges =>
+        _organizer?.Id != _saved?.OrganizerId
+        || _noticeYear != _saved?.NoticeYear
+        || Trimmed(_position) != (_saved?.Position ?? string.Empty)
+        || Trimmed(_noticeReference) != (_saved?.NoticeReference ?? string.Empty)
+        || Trimmed(_noticeUrl) != (_saved?.NoticeUrl ?? string.Empty)
+        || _appliedOn != _saved?.AppliedOn
+        || _status != (_saved?.Status ?? ExamEditionStatus.Draft);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BuildBreadcrumbs();
+
+        var examChanged = _exam?.Id != ExamId;
+        var editionChanged = Id is { } id && _saved?.Id != id;
+        if (!examChanged && !editionChanged)
+        {
+            return;
+        }
+
+        _loading = true;
+        _examNotFound = false;
+        _editionNotFound = false;
+        var token = await TokenAsync();
+
+        if (examChanged)
+        {
+            var exam = token is null ? null : await Api.FindExamAsync(token, ExamId);
+            if (exam is not { IsSuccess: true, Value: { } found })
+            {
+                _loading = false;
+                _examNotFound = true;
+                BuildBreadcrumbs();
+                return;
+            }
+
+            _exam = found;
+        }
+
+        if (Id is { } editionId)
+        {
+            var edition = token is null ? null : await Api.FindExamEditionAsync(token, ExamId, editionId);
+            if (edition is not { IsSuccess: true, Value: { } loaded })
+            {
+                _loading = false;
+                _editionNotFound = true;
+                BuildBreadcrumbs();
+                return;
+            }
+
+            Hydrate(loaded);
+        }
+
+        _loading = false;
+        BuildBreadcrumbs();
+    }
+
+    private void Hydrate(ExamEditionResponse edition)
+    {
+        _saved = edition;
+        _organizer = new AppLookupOption(edition.OrganizerId, $"{edition.OrganizerName} ({edition.OrganizerAcronym})");
+        _noticeYear = edition.NoticeYear;
+        _position = edition.Position ?? string.Empty;
+        _noticeReference = edition.NoticeReference ?? string.Empty;
+        _noticeUrl = edition.NoticeUrl ?? string.Empty;
+        _appliedOn = edition.AppliedOn;
+        _status = edition.Status;
+    }
+
+    // Content › Exams › the exam › the edition. The last crumb shows the saved values, not the ones being typed.
+    private void BuildBreadcrumbs()
+    {
+        List<BreadcrumbItem> crumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Exams.Title"], href: "/admin/exams")
+        ];
+
+        if (_exam is not null)
+        {
+            crumbs.Add(new BreadcrumbItem(_exam.Name, href: ExamHref));
+        }
+
+        crumbs.Add(new BreadcrumbItem(
+            _saved is null ? L["ExamEditions.Form.AddTitle"].Value : ExamEditionText.YearAndPosition(_saved),
+            href: null,
+            disabled: true));
+        _breadcrumbs = crumbs;
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private void OnOrganizerChanged(AppLookupOption? value)
+    {
+        _organizer = value;
+        _organizerError = OrganizerError();
+    }
+
+    private void OnNoticeYearChanged(int? value)
+    {
+        _noticeYear = value;
+        _noticeYearError = NoticeYearError();
+        // The date's rule depends on the year: it is checked again when the year changes.
+        _appliedOnError = AppliedOnError();
+    }
+
+    private void OnPositionChanged(string? value)
+    {
+        _position = value;
+        _positionError = null;
+    }
+
+    private void OnNoticeReferenceChanged(string? value)
+    {
+        _noticeReference = value;
+        _noticeReferenceError = null;
+    }
+
+    private void OnNoticeUrlChanged(string? value)
+    {
+        _noticeUrl = value;
+        _noticeUrlError = NoticeUrlError();
+    }
+
+    private void OnAppliedOnChanged(DateOnly? value)
+    {
+        _appliedOn = value;
+        _appliedOnError = AppliedOnError();
+    }
+
+    private void OnStatusChanged(ExamEditionStatus? value)
+    {
+        _status = value;
+        _statusError = null;
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? OrganizerError() =>
+        _organizer is null ? Errors.For(CatalogErrorCodes.ExamEditionOrganizerRequired) : null;
+
+    private string? NoticeYearError() =>
+        NoticeYearValid ? null : Errors.For(CatalogErrorCodes.ExamEditionNoticeYearInvalid);
+
+    private string? NoticeUrlError()
+    {
+        var url = Trimmed(_noticeUrl);
+        if (url.Length == 0)
+        {
+            return null;
+        }
+
+        var valid = url.Length <= CatalogLimits.ExamEditionNoticeUrlMaxLength
+            && Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+        return valid ? null : Errors.For(CatalogErrorCodes.ExamEditionNoticeUrlInvalid);
+    }
+
+    private string? AppliedOnError() =>
+        _appliedOn is { } day && AppliedOnMin is { } earliest && day < earliest
+            ? Errors.For(CatalogErrorCodes.ExamEditionAppliedOnBeforeNoticeYear)
+            : null;
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchOrganizersAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListOrganizersAsync(
+            token,
+            new OrganizerListQuery(0, AppLookupField.MaxCandidates, term),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Organizers failed to load: {result.ErrorCode}.");
+        }
+
+        return [.. result.Value!.Items.Select(organizer => new AppLookupOption(
+            organizer.Id,
+            $"{organizer.Name} ({organizer.Acronym})"))];
+    }
+
+    private async Task SaveAsync()
+    {
+        _organizerError = OrganizerError();
+        _noticeYearError = NoticeYearError();
+        _noticeUrlError = NoticeUrlError();
+        _appliedOnError = AppliedOnError();
+        _statusError = _status is null ? Errors.For(CatalogErrorCodes.ExamEditionStatusInvalid) : null;
+
+        if (ErrorSummaryItems.Count > 0)
+        {
+            // One panel at the top lists every offending field, and focus moves there.
+            ShowErrorSummary();
+            return;
+        }
+
+        _showErrorSummary = false;
+        _saving = true;
+        _error = null;
+        _backHref = null;
+
+        var token = await TokenAsync();
+        var request = new SaveExamEditionRequest(
+            _organizer!.Id,
+            _noticeYear,
+            NullIfBlank(_position),
+            NullIfBlank(_noticeReference),
+            NullIfBlank(_noticeUrl),
+            _appliedOn,
+            _status!.Value.ToString());
+
+        var result = token is null
+            ? ApiResult.Failed<ExamEditionResponse>(ErrorText.UnexpectedCode)
+            : IsEdit
+                ? await Api.UpdateExamEditionAsync(token, ExamId, _saved!.Id, request)
+                : await Api.CreateExamEditionAsync(token, ExamId, request);
+
+        _saving = false;
+        if (result is { IsSuccess: true, Value: { } edition })
+        {
+            var wasAdd = !IsEdit;
+            Hydrate(edition);
+            BuildBreadcrumbs();
+            Snackbar.Add(L["ExamEditions.Saved"], Severity.Success);
+            if (wasAdd)
+            {
+                // The page becomes the edit form of what was just saved (AC4). The render comes first, so the
+                // form no longer reports unsaved changes when the navigation asks.
+                StateHasChanged();
+                await Task.Yield();
+                Navigation.NavigateTo($"/admin/exams/{ExamId}/editions/{edition.Id}", replace: true);
+            }
+
+            return;
+        }
+
+        ShowRefusal(result.ErrorCode);
+    }
+
+    // A refusal belongs to the field that caused it, so the reader sees where to change something.
+    private void ShowRefusal(string? code)
+    {
+        var text = Errors.For(code);
+        switch (code)
+        {
+            case CatalogErrorCodes.ExamEditionOrganizerRequired:
+                _organizerError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionNoticeYearInvalid:
+                _noticeYearError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionPositionTooLong:
+                _positionError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionNoticeReferenceTooLong:
+                _noticeReferenceError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionNoticeUrlInvalid:
+                _noticeUrlError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionAppliedOnBeforeNoticeYear:
+                _appliedOnError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionStatusInvalid:
+                _statusError = text;
+                break;
+            case CatalogErrorCodes.OrganizerNotFound:
+                // The board left the catalog since it was picked: clear it and make the reader choose again.
+                _organizer = null;
+                _organizerError = Errors.For(CatalogErrorCodes.ExamEditionOrganizerRequired);
+                _error = text;
+                break;
+            case CatalogErrorCodes.ExamNotFound:
+                _error = text;
+                _backHref = "/admin/exams";
+                _backText = L["Exams.BackToList"];
+                break;
+            case CatalogErrorCodes.ExamEditionNotFound:
+                _error = text;
+                _backHref = ExamHref;
+                _backText = L["ExamEditions.BackToExam"];
+                break;
+            default:
+                // exam_edition.duplicate concerns three fields at once: the alert only. Anything else too.
+                _error = text;
+                break;
+        }
+
+        if (ErrorSummaryItems.Count > 0)
+        {
+            ShowErrorSummary();
+        }
+    }
+
+    // The summary is drawn first and focused after that render: a focus call sent before the render batch would
+    // reach the browser while the panel does not exist yet.
+    private void ShowErrorSummary()
+    {
+        _showErrorSummary = true;
+        _focusSummary = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusSummary)
+        {
+            return;
+        }
+
+        _focusSummary = false;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
+    }
+
+    private void Cancel() => Navigation.NavigateTo(ExamHref);
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

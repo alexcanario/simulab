@@ -17,6 +17,9 @@ public static class UiKitServiceCollectionExtensions
             config.SnackbarConfiguration.VisibleStateDuration = SnackbarDurationMs;
             config.SnackbarConfiguration.ShowCloseIcon = true;
         });
+        // F-35: the picker's own controls read their words from SharedResources (a key it does not know keeps
+        // MudBlazor's English).
+        services.AddTransient<MudLocalizer, SharedResourcesMudLocalizer>();
         services.AddScoped<IConfirmService, ConfirmService>();
         services.AddScoped<ErrorText>();
         services.AddScoped<ThemeState>();

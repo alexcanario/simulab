@@ -68,4 +68,16 @@ public static class AppIcons
 
     /// <summary>F-43: an item of a checklist that is still missing.</summary>
     public const string Pending = Icons.Material.Outlined.RadioButtonUnchecked;
+
+    /// <summary>F-35: the editions of an exam, each one a paper actually applied.</summary>
+    public const string Editions = Icons.Material.Outlined.EventNote;
+
+    /// <summary>F-35: the notice (edital) an edition was cut from.</summary>
+    public const string Notice = Icons.Material.Outlined.Article;
+
+    /// <summary>F-35: an address the reader can follow.</summary>
+    public const string Link = Icons.Material.Outlined.Link;
+
+    /// <summary>F-35: the calendar button of the date field.</summary>
+    public const string Calendar = Icons.Material.Outlined.CalendarToday;
 }

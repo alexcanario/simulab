@@ -162,6 +162,25 @@
     </MudPaper>
 </section>
 
+@* F-35 BR16: the only date input of the app. Empty, filled, error and disabled; the calendar opens from its button. *@
+<section id="gallery-date-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.DateField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.DateField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppDateField Id="gallery-date-empty" Label="@L["ExamEditions.Field.AppliedOn"]"
+                      Value="@_dateEmpty" ValueChanged="@(value => _dateEmpty = value)" />
+
+        <AppDateField Id="gallery-date-filled" Label="@L["ExamEditions.Field.AppliedOn"]"
+                      Value="@_dateFilled" ValueChanged="@(value => _dateFilled = value)" />
+
+        <AppDateField Id="gallery-date-error" Label="@L["ExamEditions.Field.AppliedOn"]"
+                      Error="@L["DateField.Invalid", L["DateField.Format"].Value].Value" />
+
+        <AppDateField Id="gallery-date-disabled" Label="@L["ExamEditions.Field.AppliedOn"]"
+                      Value="@_dateDisabled" Disabled="true" />
+    </MudPaper>
+</section>
+
 @* ---- Composition patterns (F-43, BR1). A screen mockup may use only what is shown here (rule: ui). ---- *@
 
 <section id="gallery-section-card" class="gallery-section">
@@ -376,6 +395,11 @@
         new(L["Exams.Field.IssuingAuthority"], true),
         new(L["Exams.Field.Name"], false)
     ];
+
+    // F-35: the date field's four states. A day is a DateOnly, so the sample shows the same day in every zone.
+    private DateOnly? _dateEmpty;
+    private DateOnly? _dateFilled = new DateOnly(2026, 6, 14);
+    private readonly DateOnly? _dateDisabled = new DateOnly(2026, 6, 14);
 
     private AppLookupOption? _lookupValue;
     private AppLookupOption? _filterLookup;

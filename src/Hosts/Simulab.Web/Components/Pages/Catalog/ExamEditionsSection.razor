@@ -1,0 +1,200 @@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject IConfirmService Confirm
+@inject IJSRuntime JS
+
+@* F-35 UC1, UC4, UC5: the editions of the exam on its own page, below the exam form and outside it - the exam's
+   Save (the page's only primary button) never saves an edition. An edition is edited on a page of its own
+   (rule: ui-project); this section lists, deletes and links. The order is the Api's (BR14). *@
+<AppSectionCard Id="exam-section-editions"
+                Title="@L["ExamEditions.Section.Title"]"
+                Icon="@AppIcons.Editions"
+                Subtitle="@L["ExamEditions.Section.Subtitle"]">
+    @if (ExamId is null)
+    {
+        @* AC3: an exam that is not saved has no editions to list and nowhere to add them. *@
+        <MudText Typo="Typo.body2">@L["ExamEditions.Section.SaveExamFirst"]</MudText>
+    }
+    else
+    {
+        @if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+        }
+
+        @if (_loading)
+        {
+            <AppLoadingState />
+        }
+        else if (_loadFailed)
+        {
+            <AppErrorState OnRetry="LoadAsync" />
+        }
+        else
+        {
+            <AppItemRows TItem="ExamEditionResponse" Items="_editions" EmptyMessage="@L["ExamEditions.Empty"]">
+                <RowTemplate Context="edition">
+                    <div class="d-flex flex-wrap align-center gap-3">
+                        <span>
+                            <span>@edition.NoticeYear</span>
+                            @if (!string.IsNullOrWhiteSpace(edition.Position))
+                            {
+                                <span aria-hidden="true">@ExamEditionText.VisibleSeparator</span>
+                                <span>@edition.Position</span>
+                            }
+                            <span aria-hidden="true">@ExamEditionText.VisibleSeparator</span>
+                            <span>@edition.OrganizerAcronym</span>
+                        </span>
+                        <AppStatusChip Text="@ExamEditionText.StatusName(L, edition.Status)"
+                                       Tone="ExamEditionText.StatusTone(edition.Status)" />
+                        @if (edition.AppliedOn is { } appliedOn)
+                        {
+                            <span class="app-muted">@L["ExamEditions.Row.AppliedOn", appliedOn.ToString("d", CultureInfo.CurrentCulture)]</span>
+                        }
+                    </div>
+                </RowTemplate>
+                <Actions Context="edition">
+                    @* The wrapper is what the focus moves to after a delete: it lands on the row's Edit button. *@
+                    <div id="@ActionsId(edition)">
+                        <AppRowActions ItemName="@ExamEditionText.Label(edition, ExamEditionText.SpokenSeparator)"
+                                       OnEdit="@(() => Edit(edition))"
+                                       OnDelete="@(() => DeleteAsync(edition))"
+                                       DeleteDisabledReason="@(edition.Status == ExamEditionStatus.Published ? L["ExamEditions.Delete.DisabledPublished"].Value : null)" />
+                    </div>
+                </Actions>
+            </AppItemRows>
+
+            @* It navigates, so it is a link; outlined, because the exam's Save stays the page's only primary button. *@
+            <MudButton Href="@AddHref"
+                       Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@AppIcons.Add"
+                       Class="mt-3"
+                       id="@AddLinkId">@L["ExamEditions.Form.AddTitle"]</MudButton>
+        }
+    }
+</AppSectionCard>
+
+@code {
+    private const string AddLinkId = "exam-edition-add";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The exam whose editions are listed; null while the exam is not saved yet (AC3).</summary>
+    [Parameter] public Guid? ExamId { get; set; }
+
+    /// <summary>The exam's name, read in the delete confirmation.</summary>
+    [Parameter] public string? ExamName { get; set; }
+
+    private IReadOnlyList<ExamEditionResponse> _editions = [];
+    private Guid? _loadedFor;
+    private string? _error;
+    private string? _pendingFocus;
+    private bool _loading;
+    private bool _loadFailed;
+
+    private string AddHref => $"/admin/exams/{ExamId}/editions/new";
+
+    private static string ActionsId(ExamEditionResponse edition) => $"exam-edition-actions-{edition.Id}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ExamId is not { } examId)
+        {
+            _loadedFor = null;
+            _editions = [];
+            return;
+        }
+
+        // The first save of a new exam turns the page into its edit form: the section loads then (it is empty).
+        if (_loadedFor == examId)
+        {
+            return;
+        }
+
+        _loadedFor = examId;
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+
+    private async Task LoadAsync()
+    {
+        if (ExamId is not { } examId)
+        {
+            return;
+        }
+
+        _loading = true;
+        _loadFailed = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListExamEditionsAsync(token, examId);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } editions })
+        {
+            _editions = editions;
+        }
+        else
+        {
+            _editions = [];
+            _loadFailed = true;
+        }
+    }
+
+    private void Edit(ExamEditionResponse edition) =>
+        Navigation.NavigateTo($"/admin/exams/{edition.ExamId}/editions/{edition.Id}");
+
+    private async Task DeleteAsync(ExamEditionResponse edition)
+    {
+        _error = null;
+        var label = ExamEditionText.Label(edition, ExamEditionText.VisibleSeparator);
+        var confirmed = await Confirm.ConfirmDeleteAsync(
+            L,
+            L["ExamEditions.Delete.Object", label],
+            L["ExamEditions.Delete.Message", label, ExamName ?? string.Empty]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteExamEditionAsync(token, edition.ExamId, edition.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["ExamEditions.Deleted"], Severity.Success);
+            var index = _editions.ToList().FindIndex(candidate => candidate.Id == edition.Id);
+            await LoadAsync();
+            // Focus goes to the next row's Edit button; with no row after it, to the add link.
+            _pendingFocus = index >= 0 && index < _editions.Count ? ActionsId(_editions[index]) : AddLinkId;
+            return;
+        }
+
+        // 409 exam_edition.published (another Admin published it after the list loaded), 404 (it is gone) or a
+        // server error: the alert says which, the row stays where it still exists, and the list is read again.
+        _error = Errors.For(result?.ErrorCode);
+        await LoadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

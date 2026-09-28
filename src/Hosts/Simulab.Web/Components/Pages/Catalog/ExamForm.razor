@@ -150,6 +150,13 @@ else
                       PendingText="@L["Common.Checklist.Pending"]"
                       Checklist="AsideChecklist" />
     </div>
+
+    @* F-35, Screen 1: the editions of the exam, in a card of their own below the whole layout and outside the
+       exam form - the exam's Save never saves an edition, and the aside keeps summarising only the exam. In
+       add mode the section only says to save the exam first (AC3). *@
+    <MudPaper Class="app-form-card mt-4" Elevation="0">
+        <ExamEditionsSection ExamId="@_saved?.Id" ExamName="@_saved?.Name" />
+    </MudPaper>
 }
 
 @code {
