@@ -760,3 +760,7 @@ From 0.0.71 to 0.0.78, run while F-31 was `validating` (owner re-invoked the syn
 - Docs command: declared now in `.claude/agile/build.json` (`dotnet run --project tools/Simulab.DocGen`).
 - DocGen tool catalogue (since 0.0.70): not installed by a sync; already covered by F-49 (approved, AB#774), so no new idea was captured.
 - Declined: nothing.
+
+## 2026-09-28 — F-31 Recent account activity for the user
+Closed after the fact: `feature/F-31` was merged at `f1d3f28` (2026-09-27) but the item file stayed `validating`, the board item `Active` and the local branch alive until the owner validated on 2026-09-28. Closed now: file `done` with the criterion → test table, AB#750 `Closed`, branch deleted with `git branch -d` (was fully merged; never pushed).
+- Lesson (proposed as nothing for now): a merge done before the ship step finished left git and the item file disagreeing, found only because a sync stopped on the `validating` status. If it recurs, propose a start-of-session check that flags an item file not `done` whose `feature/F-<n>` merge commit is already in `main`.

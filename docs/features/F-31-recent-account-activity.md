@@ -1,7 +1,7 @@
 ---
 feature: F-31
 epic: Foundation and identity
-status: validating
+status: done
 board: 750
 version: 1
 ---
@@ -103,4 +103,16 @@ You need a signed-in account with some account history (from F-21's own validati
 7. As a Student or Curator (no `identity.roles.manage`), confirm the card still works normally (it needs no permission) while `/admin/account-events` still shows "Page not found" for that account, unchanged from F-21.
 
 ## Delivery
-- Branch: feature/F-31
+- Branch: feature/F-31, merged into `main` at `f1d3f28` on 2026-09-27 (AB#750). Owner validated on screen on 2026-09-28.
+- Manual: `docs/manual/en/account-activity.md`, `docs/manual/pt-BR/account-activity.md`. OpenAPI document regenerated.
+
+| Criterion | Test |
+|---|---|
+| AC1 | `SecurityPageTests.Activity_WithEvents_ListsThemNewestFirstAboveTwoFactor`, `MyAccountEventsTests.Get_SignedIn_ReturnsOnlyTheCallersOwnEventsNewestFirst`, `MyAccountEventsTests.Get_MoreThanTwentyEvents_ReturnsOnlyTheTwentyMostRecent` |
+| AC2 | `SecurityPageTests.Activity_WithNoEvents_ShowsTheEmptyMessage` |
+| AC3 | `MyAccountEventsTests.Get_IgnoresAnyQueryString_AndStillReturnsOnlyTheCallersOwnAccount` |
+| AC4 | Validation script step 4 (on screen); shared `AccountEvents.*` keys and the missing-key test |
+| AC5 | `SecurityPageTests.Activity_ApiFails_ShowsItsOwnErrorStateAndRetries`, `SecurityPageTests.Activity_WithEvents_ListsThemNewestFirstAboveTwoFactor`, `SecurityPageTests.Activity_WithNoEvents_ShowsTheEmptyMessage` |
+| AC6 | `MyAccountEventsTests.Get_WithoutToken_IsUnauthorized` |
+| AC7 | Architecture tests of the suite (not re-run at close) |
+| AC8 | Missing-key test of the suite (not re-run at close) |
