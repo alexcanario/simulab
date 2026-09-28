@@ -26,6 +26,9 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
     /// <summary>F-34: the exams, each under the body that publishes its notice.</summary>
     public DbSet<Exam> Exams => Set<Exam>();
 
+    /// <summary>F-35: the papers actually applied, each under its exam and naming its board.</summary>
+    public DbSet<ExamEdition> ExamEditions => Set<ExamEdition>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -34,5 +37,6 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         modelBuilder.ApplyConfiguration(new OrganizerConfiguration());
         modelBuilder.ApplyConfiguration(new IssuingAuthorityConfiguration());
         modelBuilder.ApplyConfiguration(new ExamConfiguration());
+        modelBuilder.ApplyConfiguration(new ExamEditionConfiguration());
     }
 }

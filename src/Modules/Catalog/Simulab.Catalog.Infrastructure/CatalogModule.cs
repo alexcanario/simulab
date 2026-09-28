@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Simulab.Catalog.Application.ExamEditions;
 using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Application.IssuingAuthorities;
 using Simulab.Catalog.Application.Organizers;
@@ -39,6 +40,11 @@ public static class CatalogModule
         services.AddScoped<IExamQueries, ExamQueries>();
         services.AddScoped<SaveExamHandler>();
         services.AddScoped<DeleteExamHandler>();
+
+        services.AddScoped<IExamEditionStore, ExamEditionStore>();
+        services.AddScoped<IExamEditionQueries, ExamEditionQueries>();
+        services.AddScoped<SaveExamEditionHandler>();
+        services.AddScoped<DeleteExamEditionHandler>();
 
         return services;
     }

@@ -43,4 +43,21 @@ public static class CatalogErrorCodes
     public const string ExamScopeDetailRequired = "exam.scope_detail_required";
     public const string ExamScopeDetailTooLong = "exam.scope_detail_too_long";
     public const string ExamContentLanguageInvalid = "exam.content_language_invalid";
+
+    /// <summary>F-35 BR12: the exam has editions, so it cannot leave the catalog. Carries no count, like its siblings.</summary>
+    public const string ExamHasEditions = "exam.has_editions";
+
+    /// <summary>F-35 BR12: some edition names this board, so it cannot leave the catalog.</summary>
+    public const string OrganizerHasEditions = "organizer.has_editions";
+
+    public const string ExamEditionNotFound = "exam_edition.not_found";
+    public const string ExamEditionOrganizerRequired = "exam_edition.organizer_required";
+    public const string ExamEditionNoticeYearInvalid = "exam_edition.notice_year_invalid";
+    public const string ExamEditionPositionTooLong = "exam_edition.position_too_long";
+    public const string ExamEditionNoticeReferenceTooLong = "exam_edition.notice_reference_too_long";
+    public const string ExamEditionNoticeUrlInvalid = "exam_edition.notice_url_invalid";
+    public const string ExamEditionAppliedOnBeforeNoticeYear = "exam_edition.applied_on_before_notice_year";
+    public const string ExamEditionStatusInvalid = "exam_edition.status_invalid";
+    public const string ExamEditionDuplicate = "exam_edition.duplicate";
+    public const string ExamEditionPublished = "exam_edition.published";
 }

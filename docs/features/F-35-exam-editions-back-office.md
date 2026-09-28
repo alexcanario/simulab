@@ -1,7 +1,7 @@
 ---
 feature: F-35
 epic: Assessment catalog
-status: approved
+status: building
 board: 754
 version: 1
 ---
@@ -341,6 +341,17 @@ New `AppIcons` constants (Material Outlined): `Editions` (`EventNote`), `Notice`
 - 2026-09-28 — English dates stay month first (`6/14/2026`): the rule is the reader's culture, the app's `en` is neutral, and `AppDateColumn` already writes them so; the field shows the format under it (owner, screen question 3).
 - 2026-09-28 — The Published card keeps "Offered to students in the catalog" although it only becomes true with F-36 — it states what publishing is for, and F-36 is next on this path (owner, approval round).
 - 2026-09-28 — `AppDateField` registers a `MudLocalizer` backed by `SharedResources`, so the picker's own controls are read in the reader's language; the keys MudBlazor 9.9 asks for are listed by the build, beyond the two `DateField.*Month` rows (owner, screen question 4).
+
+### From the build design passes (2026-09-28)
+Verified against the files (`system-design` and `architect` reports; `ExamEndpoints.cs`, `DeleteIssuingAuthorityHandler.cs`, `ExamStore.cs` read).
+- Accepted: the F-34 slice mirrored one-for-one; the current year enters the domain as an `int` ceiling (year + 1 from `TimeProvider` in the handler), so `Simulab.Catalog.Domain` stays clock-free and AC18 calls `Create` with literals.
+- Accepted: the editions routes are mapped inside `MapExamEndpoints` on the `exams` group (the group is a local there), so the `catalog.manage` policy is inherited (AC16).
+- Accepted: `ExamEditionResponse.Status` is the enum and the request carries `string?` with `ParseStatus()`, so the OpenAPI document names `Draft` and `Published` (AC15).
+- Accepted (architect): a blank `Status` is `Draft` only on `POST`; on `PUT` it is `exam_edition.status_invalid`, because a client that omits the field must not silently unpublish a live edition (BR9: the status is required).
+- Accepted: a third index, `ix_exam_editions_exam`, for the list, the delete guard and the duplicate check, none of which the tenant-led unique index can serve (the `ix_exams_issuing_authority` precedent). It adds to AC1 without changing it.
+- Accepted: column comments on `exam_editions` from the start (`TableDescriptionTests`), and the generated docs (`docs/architecture/Catalog/*`, `docs/api/openapi.json`) regenerated with the migration.
+- Noted, not fixed: a soft delete is an UPDATE, so the `Restrict` foreign keys only bite a hard delete; the handler guards are the real protection, with the same small race window F-34 accepted.
+- Dropped: nothing.
 
 ## Out of scope
 - The notice document itself: only the official link is stored; the upload arrives with epic 698 (owner, 2026-09-23).
