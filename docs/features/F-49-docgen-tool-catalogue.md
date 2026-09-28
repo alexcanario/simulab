@@ -1,7 +1,7 @@
 ---
 feature: F-49
 epic: Foundation and identity
-status: approved
+status: validating
 board: 774
 version: 1
 ---
@@ -97,6 +97,18 @@ No screen and no endpoint change. New files only:
   — owner; prevents silent gaps (forgetting a field looks the same as making a choice).
 - 2026-09-27 — No package change. `Anthropic` SDK remains in `Simulab.Ai.csproj` only (imported by F-41) — technical.
 
+- 2026-09-28 — Build finding: the plugin's DocGen template writes no `tools.md` while there is no tool; Simulab's
+  generator (`ToolCatalogueDoc`) writes a header and an empty table instead, as decided above — technical.
+- 2026-09-28 — Build finding: `AIFunctionFactory` (Microsoft.Extensions.AI.Abstractions 10.5.1) keeps the method name
+  as it is, so the derived name of `GetExamAsync` is `GetExamAsync`, not `GetExam`. BR5 and AC6 hold with that name;
+  the catalogue shows what the model really receives — technical.
+- 2026-09-28 — Build finding: the catalogue lists input schema per tool in a section below the table (parameters
+  table plus JSON schema), as the plugin template does, not as a table column — technical.
+- 2026-09-28 — No package added: `Microsoft.Extensions.AI.Abstractions`, which builds the schemas, comes with
+  `Anthropic` through `Simulab.Ai`. BR8 was already enforced by `AiGatewayBoundaryTests` (F-41); not duplicated — technical.
+- 2026-09-28 — `docs/architecture/Identity/routes.md` regenerated in the same run: `main` had it stale since F-32
+  (`GET /api/v1/identity/account-events/mine`) — technical.
+
 ## Out of scope
 - Actual tool implementations (come with the AI coach feature, later).
 - Streaming, documents, vision or other extensions to the Claude API (deferred by F-41, ADR-0001 #22).
@@ -109,8 +121,10 @@ No screen changes, no sign-in or language switch. Run from the repository root o
    `ModelToolAttribute`.
 3. `dotnet run --project tools/Simulab.DocGen -- --check` → `docs/architecture is up to date` (tools.md empty but present),
    exit 0.
-4. Add a test method with `[ModelTool]` but no `Permissions`. Run step 3 → exit 1 with a message about missing permissions.
-5. Fix it. Run step 3 → exit 0.
+4. Create `src/BuildingBlocks/Simulab.Ai/Probe.cs` with `[ModelTool(Reaches = ["X"])]` and `[Description("Probe.")]` on a
+   public static method (no `Permissions`). Run step 3 → exit 1, `Simulab.Ai.Probe.<method>: no Permissions`.
+5. Add `Permissions = ["authenticated"]`. Run step 3 → exit 1 (`tools.md` is stale); run it without `-- --check` →
+   `1 file(s) written`; `--check` again → exit 0. Then delete `Probe.cs`, run without `--check` and `--check` → exit 0.
 6. Open `docs/architecture/tools.md` in the IDE's Markdown preview. It shows a header and an empty table (ready for tools).
 7. Open `docs/agile/profile.md`: the `tools/` section mentions `ModelToolAttribute` and the tools.md catalogue.
 

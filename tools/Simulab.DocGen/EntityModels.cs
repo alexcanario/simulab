@@ -63,7 +63,7 @@ internal static partial class EntityModels
         return (DbContext)constructor.Invoke(arguments);
     }
 
-    private static IEnumerable<Type> LoadTypes(string file)
+    internal static IEnumerable<Type> LoadTypes(string file)
     {
         Assembly assembly;
         try

@@ -7,12 +7,12 @@ public class DocSetTests
 {
     private static readonly string Root = SolutionAssemblies.RepositoryRoot();
 
-    private static readonly DocGenOptions All = new(true, true, true, true);
+    private static readonly DocGenOptions All = new(true, true, true, true, true);
 
     [Fact]
-    public void Generate_ProducesTheFourDocumentsAndAnIndexLinkingThem()
+    public void Generate_ProducesTheFiveDocumentsAndAnIndexLinkingThem()
     {
-        var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
+        var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels(), []);
 
         generated.Keys.Should().Equal(
             // F-24: Ai joined the list when its context was added to RealModels; DocGen itself had been
@@ -21,7 +21,7 @@ public class DocSetTests
             "Catalog/data-dictionary.md", "Catalog/routes.md", "Catalog/schema.dbml",
             "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
             "Jobs/data-dictionary.md", "Jobs/schema.dbml",
-            "README.md", "System/routes.md", "modules.md");
+            "README.md", "System/routes.md", "modules.md", "tools.md");
         foreach (var file in generated.Keys.Where(f => f != "README.md"))
         {
             generated["README.md"].Should().Contain($"- [{file}]({file})");
@@ -34,7 +34,7 @@ public class DocSetTests
     [Fact]
     public void Generate_WritesASchemaPerModuleLinkedWithItsViewer()
     {
-        var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels());
+        var generated = DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels(), []);
 
         generated.Keys.Should().NotContain(k => k.EndsWith("entities.md", StringComparison.Ordinal));
         foreach (var module in new[] { "Identity", "Jobs" })
@@ -46,11 +46,11 @@ public class DocSetTests
 
     [Fact]
     public void Generate_TwiceWithNoCodeChange_GivesTheSameText() =>
-        DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels())
-            .Should().Equal(DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels()));
+        DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels(), [])
+            .Should().Equal(DocSet.Generate(Root, "Simulab", All, EntityModelsTests.RealModels(), []));
 
     [Fact]
     public void Generate_HonoursTheOptions() =>
-        DocSet.Generate(Root, "Simulab", new DocGenOptions(false, false, false, true), EntityModelsTests.RealModels())
+        DocSet.Generate(Root, "Simulab", new DocGenOptions(false, false, false, true, false), EntityModelsTests.RealModels(), [])
             .Keys.Should().Equal("README.md", "modules.md");
 }

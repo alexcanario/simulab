@@ -8,7 +8,27 @@ var outDir = Path.Combine(root, "docs", "architecture");
 var appName = Path.GetFileNameWithoutExtension(Directory.GetFiles(root, "*.slnx").First());
 var options = DocGenOptions.Read(Path.Combine(AppContext.BaseDirectory, "docgen.json"));
 
-var generated = DocSet.Generate(root, appName, options, options.Entities || options.DataDictionary ? EntityModels.Load() : []);
+SortedDictionary<string, string> generated;
+try
+{
+    generated = DocSet.Generate(root, appName, options, options.Entities || options.DataDictionary ? EntityModels.Load() : [], options.Tools ? ToolCatalogueDoc.Load() : []);
+}
+catch (ToolCatalogueException e)
+{
+    Console.Error.WriteLine(e.Message);
+    foreach (var problem in e.Problems)
+    {
+        Console.Error.WriteLine($"  {problem}");
+    }
+
+    return 1;
+}
+catch (InvalidOperationException e)    // tools declared, but the app's Microsoft.Extensions.AI is not reachable
+{
+    Console.Error.WriteLine(e.Message);
+    return 1;
+}
+
 var stale = GeneratedDocs.StaleFiles(outDir, generated);
 if (check)
 {

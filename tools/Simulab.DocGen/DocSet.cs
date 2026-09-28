@@ -9,7 +9,8 @@ internal static class DocSet
         string root,
         string appName,
         DocGenOptions options,
-        IEnumerable<(string Module, IModel Model)> models)
+        IEnumerable<(string Module, IModel Model)> models,
+        IReadOnlyCollection<Type> toolTypes)
     {
         var generated = new SortedDictionary<string, string>(StringComparer.Ordinal);
         if (options.Modules)
@@ -39,6 +40,11 @@ internal static class DocSet
             {
                 generated[$"{area}/routes.md"] = text;
             }
+        }
+
+        if (options.Tools)
+        {
+            generated["tools.md"] = ToolCatalogueDoc.Render(toolTypes);
         }
 
         generated["README.md"] = IndexDoc.Render(appName, generated.Keys);

@@ -9,7 +9,7 @@ namespace Simulab.ArchitectureTests.DocGen;
 /// </summary>
 public class DocGenModelDriftTests
 {
-    private static readonly DocGenOptions All = new(true, true, true, true);
+    private static readonly DocGenOptions All = new(true, true, true, true, true);
 
     private static string ArchitectureDirectory() =>
         Path.Combine(SolutionAssemblies.RepositoryRoot(), "docs", "architecture");
@@ -120,7 +120,7 @@ public class DocGenModelDriftTests
     [Fact]
     public void WithEntitiesAndTheDictionaryOff_NoModuleFolderIsExpected()
     {
-        var options = new DocGenOptions(Entities: false, DataDictionary: false, Routes: true, Modules: true);
+        var options = new DocGenOptions(Entities: false, DataDictionary: false, Routes: true, Modules: true, Tools: true);
 
         DocumentedModules.In(ArchitectureDirectory(), options).Should().BeEmpty();
         DocumentedModules.Drift(DocumentedModules.In(ArchitectureDirectory(), options), []).Should().BeEmpty();
@@ -130,7 +130,7 @@ public class DocGenModelDriftTests
     [InlineData(true, false)]
     [InlineData(false, true)]
     public void WithEitherDocumentOn_TheModulesAreRead(bool entities, bool dataDictionary) =>
-        DocumentedModules.In(ArchitectureDirectory(), new DocGenOptions(entities, dataDictionary, Routes: true, Modules: true))
+        DocumentedModules.In(ArchitectureDirectory(), new DocGenOptions(entities, dataDictionary, Routes: true, Modules: true, Tools: true))
             .Should().Equal("Ai", "Catalog", "Identity", "Jobs");
 
     // AC5: the options the tool really runs with keep the comparison on.
