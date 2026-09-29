@@ -1,7 +1,7 @@
 ---
 feature: F-36
 epic: Assessment catalog
-status: validating
+status: done
 board: 755
 version: 1
 ---
@@ -329,5 +329,5 @@ Needed to validate: the app host started from this worktree (provided by the own
 ## Delivery
 - Branch: feature/F-36
 - Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Tests: full suite 1682 passed, 0 failed, 74 s test + 23 s build (2026-09-29)
+- Manual pages: docs/manual/en/catalog.md, docs/manual/pt-BR/catalog.md, docs/manual/pt-PT/catalog.md (and their index.md)
