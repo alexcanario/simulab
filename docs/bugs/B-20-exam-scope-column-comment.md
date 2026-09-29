@@ -1,7 +1,7 @@
 ---
 bug: B-20
 feature: F-34
-status: validating
+status: done
 board: 775
 severity: low
 ---
@@ -94,4 +94,7 @@ Needed to validate: nothing beyond the test containers (Docker running); no scre
 - Change: the four `HasComment` texts, migration `FixEnumColumnDescriptions` in Catalog and in Identity (comment-only `AlterColumn`), regenerated `docs/architecture/`.
 
 - Branch: bug/B-20
+- Tests: full suite green, 1,605 tests (Identity 349, Web 717, Catalog 262, Architecture 150, others 127); first run had one red, the known B-19 flaky `MenuButton_Desktop_TogglesCollapsedAndWritesCookie`, green 3 of 3 alone and in the second full run.
+- Manual: not changed (no visible behavior); technical docs regenerated (`docs/architecture/`).
+- Version: no `<Version>` in the deployable projects, untouched.
 - Merge: <commit>
