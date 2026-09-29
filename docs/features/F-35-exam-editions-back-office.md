@@ -1,7 +1,7 @@
 ---
 feature: F-35
 epic: Assessment catalog
-status: validating
+status: done
 board: 754
 version: 1
 ---
@@ -402,6 +402,6 @@ Known limits (agent report, not seen on screen): the date field's clear button k
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: feature/F-35
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: see `git log --merges` for "Merge feature/F-35" (AB#754)
+- Tests: full suite 1579 passed, 0 failed, 56 s test + 20 s build (2026-09-29); Catalog 261, Web 717, architecture 148
+- Manual pages: `docs/manual/<pt-BR|pt-PT|en>/exam-editions.md` (new), `exams.md`, `organizers.md`, `index.md`
