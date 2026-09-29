@@ -1,9 +1,9 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
 using Simulab.Catalog.Contracts;
-using Simulab.Catalog.Domain;
 using Simulab.Catalog.Domain.Entities;
 using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Persistence;
@@ -63,7 +63,7 @@ public sealed class SeedMunicipalGuardCatalogTests
             "FCC",
             "Cebraspe");
         boards.Should().OnlyContain(board => board.Kind == OrganizerKind.ExamBoard);
-        boards.Should().OnlyContain(board => board.Acronym == board.Acronym.ToUpperInvariant());
+        boards.Should().OnlyContain(board => board.Acronym.All(letter => !char.IsLower(letter)));
         boards.Count(board => board.Name.Contains("AOCP")).Should().Be(1);
     }
 
@@ -237,7 +237,7 @@ public sealed class SeedMunicipalGuardCatalogTests
         await connection.OpenAsync();
         await using var command = new NpgsqlCommand(sql, connection);
 
-        return Convert.ToInt64(await command.ExecuteScalarAsync());
+        return Convert.ToInt64(await command.ExecuteScalarAsync(), CultureInfo.InvariantCulture);
     }
 
     private sealed class SeededCatalog(CatalogModuleDbContext context, string connectionString) : IAsyncDisposable
