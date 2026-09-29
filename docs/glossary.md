@@ -26,6 +26,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Número do edital | Referência do aviso | `NoticeReference` | How the notice names itself ("Edital nº 01/2026"); editions cut from the same edital share it (F-35) |
 | Data de aplicação | Data de aplicação | `AppliedOn` | The day the paper of an edition was applied; optional (F-35) |
 | Rascunho / Publicada (edição) | Rascunho / Publicada | `ExamEditionStatus` (`Draft` / `Published`) | Whether students can see an edition; `InReview` joins with the AI import (F-35) |
+| Exame publicado | Exame publicado | `PublishedExam` | An exam with at least one `Published` edition (deleted ones excluded); the only kind the student side ever sees, drafts stay in the back office (F-36) |
+| Catálogo (do aluno) | Catálogo | `Catalog` (menu, `catalog.browse`) | The student-facing read side over published exams and their published editions: search, filters, exam page (F-36) |
 | Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) |
 | Matéria / Disciplina | Disciplina | `Subject` | Top level of the canonical taxonomy: what a student studies (Constitutional Law, Portuguese, Logical Reasoning). Simulae's `KnowledgeDomain` becomes this |
 | Assunto / Tópico | Tópico | `Topic` | Second and last level of the canonical taxonomy, inside a subject |

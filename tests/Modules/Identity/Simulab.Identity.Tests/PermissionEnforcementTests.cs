@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 
 namespace Simulab.Identity.Tests;
@@ -93,7 +94,7 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
     }
 
     [Fact]
-    public async Task GetSession_SignedInAsStudent_HasNoPermissions()
+    public async Task GetSession_SignedInAsStudent_HoldsOnlyTheCatalogBrowsePermission()
     {
         var client = Client();
         var email = await ActiveUser.CreateAsync(client, Factory);
@@ -103,7 +104,8 @@ public sealed class PermissionEnforcementTests : IdentityApiTests
         var session = await client.GetFromJsonAsync<SessionInfoResponse>(
             "/api/v1/identity/session", Simulab.SharedKernel.Serialization.AppJson.Options);
 
-        session!.Permissions.Should().BeEmpty();
+        // F-36 AC11: the one permission a student holds from the start is catalog.browse.
+        session!.Permissions.Should().BeEquivalentTo([CatalogPermissions.Browse]);
     }
 
     [Fact]

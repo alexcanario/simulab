@@ -6,6 +6,7 @@ using Simulab.Catalog.Application.IssuingAuthorities;
 using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Contracts;
 using Simulab.Catalog.Infrastructure.Persistence;
+using Simulab.Identity.Contracts;
 using Simulab.Persistence;
 using Simulab.SharedKernel.Security;
 
@@ -24,7 +25,14 @@ public static class CatalogModule
                 .UseModuleConventions(provider));
 
         // BR2: the names this module defines. Identity owns the table and seeds the union it finds here.
-        services.AddSingleton(new PermissionCatalog(CatalogPermissions.ModuleName, CatalogPermissions.All));
+        // F-36 BR10: catalog.browse starts with the students and the curators; Admin gets everything anyway.
+        services.AddSingleton(new PermissionCatalog(
+            CatalogPermissions.ModuleName,
+            CatalogPermissions.All,
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                [CatalogPermissions.Browse] = [IdentityRoles.Student, IdentityRoles.Curator]
+            }));
 
         services.AddScoped<IOrganizerStore, OrganizerStore>();
         services.AddScoped<IOrganizerQueries, OrganizerQueries>();
@@ -40,6 +48,8 @@ public static class CatalogModule
         services.AddScoped<IExamQueries, ExamQueries>();
         services.AddScoped<SaveExamHandler>();
         services.AddScoped<DeleteExamHandler>();
+
+        services.AddScoped<IPublishedExamQueries, PublishedExamQueries>();
 
         services.AddScoped<IExamEditionStore, ExamEditionStore>();
         services.AddScoped<IExamEditionQueries, ExamEditionQueries>();

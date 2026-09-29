@@ -43,6 +43,9 @@ public sealed class Exam : TenantEntity
     /// <summary>The comparable form of <see cref="Name"/>: what the unique index and the search read (BR10, BR14).</summary>
     public string NormalizedName { get; private set; } = string.Empty;
 
+    /// <summary>The comparable form of <see cref="ScopeDetail"/>, empty when there is none: what the student search reads (F-36 BR4).</summary>
+    public string NormalizedScopeDetail { get; private set; } = string.Empty;
+
     public static Result<Exam> Create(
         Guid? issuingAuthorityId,
         string? name,
@@ -131,6 +134,7 @@ public sealed class Exam : TenantEntity
         ScopeDetail = trimmedDetail;
         ContentLanguage = language;
         NormalizedName = CatalogText.Normalize(trimmedName);
+        NormalizedScopeDetail = trimmedDetail is null ? string.Empty : CatalogText.Normalize(trimmedDetail);
 
         return Result.Success();
     }
