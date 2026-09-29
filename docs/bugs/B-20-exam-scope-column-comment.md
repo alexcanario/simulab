@@ -1,7 +1,7 @@
 ---
 bug: B-20
 feature: F-34
-status: refining
+status: approved
 board: 775
 severity: low
 ---
