@@ -76,22 +76,23 @@ No new route, screen or endpoint. The seeded rows appear in the screens and endp
 - 2026-09-29 — Rows carry fixed GUIDs and literal normalized values, with a test tying them to the domain (BR3, BR4) — a migration must not depend on code that evolves — Claude.
 - 2026-09-29 — Authority acronyms are `PM-<CITY>` — the field is required and unique-friendly, and the notice does not give one — Claude.
 - 2026-09-29 — No new package, no new permission, no new screen — Claude.
+- 2026-09-29 — BR12 done in the built-in browser: the sheet changed (Curitiba is `Edital nº 02/2025`, notice year 2025, and its 2026-01-18 date is contradicted; every application date is left empty because no primary source confirmed one). All four editions are `Published` (reference and link confirmed) — Claude.
 - 2026-09-29 — The research runs again at build time in the built-in browser (BR12): the first pass could not open the Curitiba, Salvador and Maceió notices (403, 404, HTML instead of PDF), so their data is provisional until then — Claude.
 
 ## Sources
-Research of 2026-09-29, first pass; every value below is provisional until BR12 is done at build. "Primary" is the notice, the prefeitura or the board's site; anything else is not used for a value.
+Checked in the built-in browser on 2026-09-29 (BR12); a field no primary source confirmed is empty (BR11). "Primary" is the notice, the prefeitura or the board's site; anything else is not used for a value.
 
 | City | Board | Notice year and reference | Position | Application date | Link | Edition state |
 |---|---|---|---|---|---|---|
-| Curitiba | Instituto AOCP | year and reference not verified (secondary sources say Edital 01/2025); the paper was applied 2026-01-18 | `Guarda Municipal` (AOCP news) | 2026-01-18 (AOCP news) | https://www.institutoaocp.org.br/concursos/669 (403 to the tool, to be opened in the browser) | `Draft`, or not seeded if the year stays unconfirmed |
-| Manaus | Instituto Consulplan | 2026, `Edital nº 01, de 23 de março de 2026` (Diário Oficial de Manaus, extra edition 6276, 2026-03-23; also read in F-35, 2026-09-26) | `Técnico Municipal I - Guarda Municipal` | 2026-05-24 (notice item 6.1; a rectification was not checked) | https://dhg1h5j42swfq.cloudfront.net/2026/03/24001950/edital-gcm-manaus-2026.pdf | `Published` |
-| Salvador | Fundação Getulio Vargas (FGV) | 2026, `Edital nº 02/2026` (FGV page, rectified 2026-09-28) | `Guarda Civil Municipal` | empty: only secondary sources give 2027-01-17 | https://conhecimento.fgv.br/concursos/pmsguarda2026 | `Published` |
-| Maceió | Copeve/Ufal | 2026, `Edital nº 01/2026`, 2026-03-04 (Copeve; rectified 2026-04-29 and 2026-08-06, not read) | `Guarda Civil Municipal` | 2026-07-12 only if the rectifications keep it, else empty | https://maceio.al.gov.br/noticias/semsc/prefeitura-de-maceio-publica-edital-de-concurso-para-a-guarda-civil-municipal | `Published` if the reference and link hold, else `Draft` |
+| Curitiba | Instituto AOCP | 2025, `Edital nº 02/2025` (AOCP page: "Edital Normativo n° 2/2025", 2025-10-10; the first pass said 01/2025, wrong) | `Guarda Municipal` (AOCP page title) | empty: the first pass said 2026-01-18, but AOCP published the preliminary answer key on 2026-01-15, so that date is contradicted | https://www.institutoaocp.org.br/concursos/669 | `Published` |
+| Manaus | Instituto Consulplan | 2026, `Edital nº 01, de 23 de março de 2026` (Diário Oficial de Manaus, extra edition 6276, 2026-03-23; also read in F-35, 2026-09-26) | `Técnico Municipal I - Guarda Municipal` | empty: the first pass said 2026-05-24, but a rectification was not checked and the PDF text could not be re-read here (it answers 200 as `application/pdf`) | https://dhg1h5j42swfq.cloudfront.net/2026/03/24001950/edital-gcm-manaus-2026.pdf | `Published` |
+| Salvador | Fundação Getulio Vargas (FGV) | 2026, `Edital nº 02/2026` (FGV page, rectified 2026-09-28) | `Guarda Civil Municipal` | empty: the notice text read gave no paper date; only secondary sources give 2027-01-17 | https://conhecimento.fgv.br/concursos/pmsguarda2026 | `Published` |
+| Maceió | Copeve/Ufal | 2026, `Edital nº 01/2026` (the prefeitura page of 2026-03-05 links the file `Edital 1.2026.pdf` on the Copeve site) | `Guarda Civil Municipal` | empty: the prefeitura says 2026-07-12 was planned and the notice was rectified twice, not read | https://maceio.al.gov.br/noticias/semsc/prefeitura-de-maceio-publica-edital-de-concurso-para-a-guarda-civil-municipal | `Published` |
 | Recife | none | no notice: the prefeitura created the commission on 2026-09-12 | none | none | none | no edition |
 | Goiânia | none | no notice; board not defined | none | none | none | no edition |
 | Rio de Janeiro | not applicable | internal selection, not seeded | not applicable | not applicable | https://www.rio.rj.gov.br/web/portaldeconcursos/exibeconteudo?id=16886382 | not seeded |
 
-Not verified in the first pass: the Curitiba, Salvador and Maceió notices themselves, any rectification of a date, and the exact name of the Curitiba position.
+Not verified: the text of the Curitiba, Manaus and Maceió notice PDFs (the browser pane shows a PDF as an image), every application date and the Maceió rectifications. The four editions therefore carry no application date.
 
 ## Out of scope
 - The subjects and questions of those exams: epics 692 and 693.
