@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-36 - Catalog browsing for students (mockup)</title>
+<style>
+/* ===========================================================================
+   F-36 mockup - two screens and the menu item:
+   1. the catalog search page  /catalog
+   2. the exam page            /catalog/exams/{id}
+   3. the Study > Catalog menu item, shown or hidden by the permission set
+   Visual language of the F-34, F-43 and F-35 mockups. Every colour is a SimulabTheme token; no new colour.
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem;
+  --app-font-sm: 0.8125rem;
+  --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem;
+  --app-font-xl: 1.25rem;
+  --app-font-xxl: 1.75rem;
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 24px;
+  --app-space-6: 32px;
+  --app-radius-sm: 6px;
+  --app-radius-md: 10px;
+
+  /* PaletteLight */
+  --primary: #216DB5;
+  --primary-lighten: #EBF3FD;
+  --primary-contrast: #FFFFFF;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --warning-contrast: #19243E;
+  --error: #BE3737;
+  --error-contrast: #FFFFFF;
+  --background: #F2F5FB;
+  --surface: #FFFFFF;
+  --drawer: #0F3266;
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #0F3266;
+  --appbar-text: #FFFFFF;
+  --text-primary: #19243E;
+  --text-secondary: #4A5A7A;
+  --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1;
+  --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  /* PaletteDark */
+  --primary: #64A2E3;
+  --primary-lighten: #162540;
+  --primary-contrast: #19243E;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --warning-contrast: #19243E;
+  --error: #E06C6C;
+  --error-contrast: #19243E;
+  --background: #0E1828;
+  --surface: #172035;
+  --drawer: #091422;
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #091422;
+  --appbar-text: #FFFFFF;
+  --text-primary: #E0E8F8;
+  --text-secondary: #7A8EB0;
+  --action-default: #7A8EB0;
+  --lines-inputs: #61718F;
+  --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.6;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: block; flex-shrink: 0; }
+a { color: inherit; }
+button, select, input { font: inherit; }
+:is(a, button, input, select, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo {
+  display: flex; flex-direction: column; gap: var(--app-space-1);
+  padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider);
+}
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.demo-label {
+  font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1);
+}
+.demo button {
+  font-size: var(--app-font-xs); font-weight: 600;
+  padding: 3px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary);
+}
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note {
+  display: inline-block; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); border: 1px dashed var(--divider);
+  border-radius: 20px; padding: 0 var(--app-space-2);
+}
+
+/* ---- app shell ---- */
+.skip { position: absolute; left: -999px; top: 0; }
+.skip:focus { left: var(--app-space-2); top: var(--app-space-2); z-index: 99; background: var(--surface); padding: var(--app-space-2); }
+.appbar {
+  height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2);
+  padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text);
+}
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast);
+  display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700;
+}
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); overflow-y: auto; }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.nav-link {
+  display: flex; align-items: center; gap: var(--app-space-3); text-decoration: none;
+  padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent;
+  border-radius: var(--app-radius-sm); font-size: var(--app-font-sm); cursor: pointer;
+}
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.nav-list { list-style: none; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); min-width: 0; }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); display: flex; flex-wrap: wrap; gap: 0 var(--app-space-2); }
+.app-breadcrumbs a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; color: var(--text-primary); }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+
+/* ---- AppDataTable ---- */
+.app-table-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); overflow: hidden; }
+.app-table-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--app-space-3); padding: var(--app-space-3) var(--app-space-4); border-bottom: 1px solid var(--divider); }
+.app-table-search {
+  display: flex; align-items: center; gap: var(--app-space-2); height: 40px; min-width: 14rem; max-width: 22rem; flex: 1 1 16rem;
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); padding: 0 var(--app-space-1) 0 var(--app-space-3);
+  background: var(--surface); color: var(--action-default);
+}
+.app-table-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-table-search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--text-primary); font-size: var(--app-font-md); }
+.app-table-search input::placeholder { color: var(--text-secondary); }
+.app-table-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--app-space-3); }
+.app-table-filters .app-field { width: 11.5rem; margin: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-select {
+  width: 100%; height: 40px; padding: 0 30px 0 var(--app-space-3); appearance: none; cursor: pointer;
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); color: var(--text-primary); font-size: var(--app-font-sm);
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%237E8AA1'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 6px center;
+  text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
+}
+.app-select:disabled { cursor: not-allowed; border-style: dashed; border-color: var(--divider); color: var(--text-secondary); background-color: var(--background); }
+.app-select option { background: var(--surface); color: var(--text-primary); }
+
+table.app-grid { width: 100%; border-collapse: collapse; font-size: var(--app-font-sm); }
+.app-grid-scroll { overflow-x: auto; }
+.app-grid th { text-align: left; font-weight: 600; color: var(--text-secondary); padding: 10px var(--app-space-4); border-bottom: 1px solid var(--divider); white-space: nowrap; }
+.app-grid td { padding: 10px var(--app-space-4); border-bottom: 1px solid var(--divider); vertical-align: top; }
+.app-grid tbody tr:hover { background: var(--background); }
+.app-cell-number { text-align: right !important; font-variant-numeric: tabular-nums; }
+.app-cell-secondary { display: block; font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-truncate { display: inline-block; max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.app-truncate.narrow { max-width: 14rem; }
+.app-link { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-link:hover { text-decoration-thickness: 2px; }
+.app-grid .app-link { font-weight: 600; line-height: 24px; }
+.app-pager { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: var(--app-space-4); padding: var(--app-space-2) var(--app-space-4); font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-pager select { height: 32px; border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); background: var(--surface); color: var(--text-primary); padding: 0 var(--app-space-2); cursor: pointer; }
+.app-icon-button {
+  width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.app-icon-button:hover { background: var(--background); }
+.app-icon-button[disabled] { cursor: not-allowed; opacity: .45; }
+
+/* ---- buttons ---- */
+.app-button {
+  font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; text-decoration: none;
+  min-height: 36px; padding: 0 var(--app-space-3); border-radius: var(--app-radius-sm);
+  display: inline-flex; align-items: center; gap: var(--app-space-2);
+}
+.app-button-text { border: 0; background: transparent; color: var(--primary); }
+.app-button-text:hover { background: var(--primary-lighten); }
+.app-button-outlined { border: 1px solid var(--primary); background: transparent; color: var(--primary); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--divider); border-top-color: var(--primary); animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppAlert (filled) ---- */
+.app-alert {
+  display: flex; gap: var(--app-space-3); align-items: center; flex-wrap: wrap;
+  padding: var(--app-space-2) var(--app-space-4); border-radius: var(--app-radius-sm);
+  margin-bottom: var(--app-space-4); font-size: var(--app-font-sm);
+}
+.app-alert-error { background: var(--error); color: var(--error-contrast); }
+.app-alert-warning { background: var(--warning); color: var(--warning-contrast); }
+.app-alert-text { flex: 1; min-width: 12rem; }
+.app-alert-action { border: 0; background: transparent; color: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; min-height: 32px; padding: 0 var(--app-space-2); border-radius: var(--app-radius-sm); }
+
+/* ---- states ---- */
+.app-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3);
+  padding: var(--app-space-6) var(--app-space-4); text-align: center; color: var(--text-secondary);
+}
+.app-state .is-error { color: var(--error); }
+
+/* ---- layout (F-43) ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); }
+
+/* ---- AppSectionCard ---- */
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-section-card-title { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-lg); font-weight: 600; }
+.app-section-card-icon { color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin: var(--app-space-1) 0 var(--app-space-4); }
+
+/* ---- AppItemRows (read-only: no actions) ---- */
+.app-item-rows-list { list-style: none; border: 1px solid var(--divider); border-radius: var(--app-radius-sm); }
+.app-item-row { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-3); border-bottom: 1px solid var(--divider); }
+.app-item-row:last-child { border-bottom: 0; }
+.app-item-row:hover { background: var(--background); }
+.app-item-row-content { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-1) var(--app-space-3); }
+.app-item-row-label { font-weight: 600; font-size: var(--app-font-sm); flex-basis: 100%; }
+.app-item-row-sep { color: var(--text-secondary); }
+.app-item-row-meta { font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-item-row .app-link { font-size: var(--app-font-xs); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; min-height: 24px; }
+.app-item-rows-empty { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-4); border: 1px dashed var(--divider); border-radius: var(--app-radius-sm); text-align: center; }
+
+/* ---- AppFormAside (read-only summary) ---- */
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-aside-row:last-child { border-bottom: 0; }
+.app-aside-row dt { color: var(--text-secondary); font-weight: 600; flex: none; max-width: 50%; }
+.app-aside-row dd { text-align: right; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; screen</span>
+    <button type="button" data-screen="search">1 &middot; /catalog</button>
+    <button type="button" data-screen="exam">2 &middot; /catalog/exams/{id}</button>
+    <span class="demo-note">No saving, success or validation state: both screens only read</span>
+  </div>
+  <div class="demo-row" id="demo-states"></div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; signed in as</span>
+    <button type="button" data-perm="student">Student (catalog.browse)</button>
+    <button type="button" data-perm="admin">Admin (browse + manage)</button>
+    <button type="button" data-perm="manage">catalog.manage only (browse removed)</button>
+  </div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; language</span>
+    <button type="button" data-lang="pt-BR">pt-BR</button>
+    <button type="button" data-lang="pt-PT">pt-PT</button>
+    <button type="button" data-lang="en">en</button>
+    <span class="demo-label" style="margin-left:12px">Demo &middot; theme</span>
+    <button type="button" data-theme-btn="light">Light</button>
+    <button type="button" data-theme-btn="dark">Dark</button>
+  </div>
+</div>
+
+<a class="skip" href="#main" id="skip"></a>
+<header class="appbar">
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar" id="avatar">AL</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" id="drawer"></nav>
+  <main class="main" id="main" tabindex="-1"></main>
+</div>
+
+<script>
+/* ===========================================================================
+   Texts: SharedResources keys in the three UI locales. Keys new in F-36 are in the item file's
+   "UI texts" table; the rest are existing values copied from the .resx files.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "App.Name": "Simulab", "Layout.SkipToContent": "Skip to main content", "Layout.Menu.Label": "Main menu",
+    "Nav.Home": "Home", "Nav.Section.Study": "Study", "Nav.Section.Content": "Content", "Nav.Section.Administration": "Administration",
+    "Nav.Organizers": "Organizers", "Nav.IssuingAuthorities": "Issuing authorities", "Nav.Exams": "Exams",
+    "Nav.Roles": "Roles", "Nav.Users": "Users", "Nav.RoleHistory": "Role history", "Nav.AccountEvents": "Account events",
+    "Common.Filter.All": "All", "Common.Search": "Search", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "We could not load this list.", "Common.TryAgain": "Try again",
+    "Common.Table.RowsPerPage": "Rows per page:", "Common.Table.PageInfo": "{first_item}-{last_item} of {all_items}",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "exam.not_found": "This exam no longer exists.",
+    "Exams.Filter.AssessmentType": "Assessment type", "Exams.Filter.Scope": "Scope",
+    "Exams.Column.Name": "Name", "Exams.Column.IssuingAuthority": "Issuing authority", "Exams.Column.AssessmentType": "Assessment type", "Exams.Column.Scope": "Scope",
+    "Exams.Field.IssuingAuthority": "Issuing authority", "Exams.Field.AssessmentType": "Assessment type", "Exams.Field.Scope": "Scope",
+    "Exams.Field.State": "State", "Exams.Field.Municipality": "Municipality", "Exams.Field.ContentLanguage": "Content language",
+    "Exams.AssessmentType.PublicServiceExam": "Public service exam", "Exams.AssessmentType.Certification": "Certification",
+    "Exams.AssessmentType.UniversityEntranceExam": "University entrance exam", "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "National", "Exams.Scope.State": "State", "Exams.Scope.Municipal": "Municipal",
+    "ExamEditions.Section.Title": "Editions", "ExamEditions.Row.AppliedOn": "Applied on {0}",
+    /* new in F-36 */
+    "Nav.Catalog": "Catalog", "Catalog.Title": "Catalog",
+    "Catalog.Search.Placeholder": "Exam, authority or place",
+    "Catalog.Filter.Organizer": "Board", "Catalog.Filter.NoticeYear": "Notice year", "Catalog.Filter.Clear": "Clear filters",
+    "Catalog.Filter.OptionsFailed": "We could not load the board and year options. The rest of the search works.",
+    "Catalog.Column.ContentLanguage": "Language", "Catalog.Column.Editions": "Editions", "Catalog.Column.LatestYear": "Latest year",
+    "Catalog.Empty": "No exam is published in the catalog yet.",
+    "Catalog.Empty.Search": "No published exam matches \"{0}\".",
+    "Catalog.Empty.Filters": "No published exam matches the chosen filters.",
+    "Catalog.Exam.Title": "Exam", "Catalog.Exam.About": "About this exam",
+    "Catalog.Exam.PublishedEditions": "Published editions", "Catalog.Exam.LatestNoticeYear": "Latest notice year",
+    "Catalog.Exam.LoadFailed": "We could not load this exam.", "Catalog.BackToCatalog": "Back to the catalog",
+    "Catalog.Editions.Subtitle": "Each paper applied, newest first. The official notice has the full rules.",
+    "Catalog.Editions.Empty": "This exam has no published edition.",
+    "Catalog.Editions.NoticeLink": "Official notice",
+    "Catalog.Editions.NoticeLink.Name": "Official notice, {0}, opens in a new tab"
+  },
+  "pt-BR": {
+    "App.Name": "Simulab", "Layout.SkipToContent": "Pular para o conteúdo", "Layout.Menu.Label": "Menu principal",
+    "Nav.Home": "Início", "Nav.Section.Study": "Estudo", "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Nav.Organizers": "Bancas", "Nav.IssuingAuthorities": "Órgãos contratantes", "Nav.Exams": "Exames",
+    "Nav.Roles": "Papéis", "Nav.Users": "Usuários", "Nav.RoleHistory": "Histórico de papéis", "Nav.AccountEvents": "Eventos de conta",
+    "Common.Filter.All": "Todos", "Common.Search": "Pesquisar", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{first_item}-{last_item} de {all_items}",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "exam.not_found": "Este exame não existe mais.",
+    "Exams.Filter.AssessmentType": "Tipo de avaliação", "Exams.Filter.Scope": "Abrangência",
+    "Exams.Column.Name": "Nome", "Exams.Column.IssuingAuthority": "Órgão contratante", "Exams.Column.AssessmentType": "Tipo de avaliação", "Exams.Column.Scope": "Abrangência",
+    "Exams.Field.IssuingAuthority": "Órgão contratante", "Exams.Field.AssessmentType": "Tipo de avaliação", "Exams.Field.Scope": "Abrangência",
+    "Exams.Field.State": "Estado", "Exams.Field.Municipality": "Município", "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.AssessmentType.PublicServiceExam": "Concurso público", "Exams.AssessmentType.Certification": "Certificação",
+    "Exams.AssessmentType.UniversityEntranceExam": "Vestibular", "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "Nacional", "Exams.Scope.State": "Estadual", "Exams.Scope.Municipal": "Municipal",
+    "ExamEditions.Section.Title": "Edições", "ExamEditions.Row.AppliedOn": "Aplicada em {0}",
+    "Nav.Catalog": "Catálogo", "Catalog.Title": "Catálogo",
+    "Catalog.Search.Placeholder": "Exame, órgão ou local",
+    "Catalog.Filter.Organizer": "Banca", "Catalog.Filter.NoticeYear": "Ano do edital", "Catalog.Filter.Clear": "Limpar filtros",
+    "Catalog.Filter.OptionsFailed": "Não foi possível carregar as opções de banca e ano. O resto da busca funciona.",
+    "Catalog.Column.ContentLanguage": "Idioma", "Catalog.Column.Editions": "Edições", "Catalog.Column.LatestYear": "Último ano",
+    "Catalog.Empty": "Ainda não há exames publicados no catálogo.",
+    "Catalog.Empty.Search": "Nenhum exame publicado corresponde a \"{0}\".",
+    "Catalog.Empty.Filters": "Nenhum exame publicado corresponde aos filtros escolhidos.",
+    "Catalog.Exam.Title": "Exame", "Catalog.Exam.About": "Sobre este exame",
+    "Catalog.Exam.PublishedEditions": "Edições publicadas", "Catalog.Exam.LatestNoticeYear": "Último ano de edital",
+    "Catalog.Exam.LoadFailed": "Não foi possível carregar este exame.", "Catalog.BackToCatalog": "Voltar para o catálogo",
+    "Catalog.Editions.Subtitle": "Cada prova aplicada, da mais recente para a mais antiga. O edital oficial traz as regras completas.",
+    "Catalog.Editions.Empty": "Este exame não tem edições publicadas.",
+    "Catalog.Editions.NoticeLink": "Edital oficial",
+    "Catalog.Editions.NoticeLink.Name": "Edital oficial, {0}, abre em uma nova aba"
+  },
+  "pt-PT": {
+    "App.Name": "Simulab", "Layout.SkipToContent": "Saltar para o conteúdo", "Layout.Menu.Label": "Menu principal",
+    "Nav.Home": "Início", "Nav.Section.Study": "Estudo", "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Nav.Organizers": "Entidades organizadoras", "Nav.IssuingAuthorities": "Entidades contratantes", "Nav.Exams": "Exames",
+    "Nav.Roles": "Perfis", "Nav.Users": "Utilizadores", "Nav.RoleHistory": "Histórico de perfis", "Nav.AccountEvents": "Eventos de conta",
+    "Common.Filter.All": "Todos", "Common.Search": "Pesquisar", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{first_item}-{last_item} de {all_items}",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "exam.not_found": "Este exame já não existe.",
+    "Exams.Filter.AssessmentType": "Tipo de avaliação", "Exams.Filter.Scope": "Abrangência",
+    "Exams.Column.Name": "Nome", "Exams.Column.IssuingAuthority": "Entidade contratante", "Exams.Column.AssessmentType": "Tipo de avaliação", "Exams.Column.Scope": "Abrangência",
+    "Exams.Field.IssuingAuthority": "Entidade contratante", "Exams.Field.AssessmentType": "Tipo de avaliação", "Exams.Field.Scope": "Abrangência",
+    "Exams.Field.State": "Estado", "Exams.Field.Municipality": "Município", "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.AssessmentType.PublicServiceExam": "Concurso público", "Exams.AssessmentType.Certification": "Certificação",
+    "Exams.AssessmentType.UniversityEntranceExam": "Exame de acesso", "Exams.AssessmentType.Enem": "ENEM",
+    "Exams.Scope.National": "Nacional", "Exams.Scope.State": "Estadual", "Exams.Scope.Municipal": "Municipal",
+    "ExamEditions.Section.Title": "Edições", "ExamEditions.Row.AppliedOn": "Aplicada em {0}",
+    "Nav.Catalog": "Catálogo", "Catalog.Title": "Catálogo",
+    "Catalog.Search.Placeholder": "Exame, entidade ou local",
+    "Catalog.Filter.Organizer": "Entidade organizadora", "Catalog.Filter.NoticeYear": "Ano do aviso", "Catalog.Filter.Clear": "Limpar filtros",
+    "Catalog.Filter.OptionsFailed": "Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona.",
+    "Catalog.Column.ContentLanguage": "Idioma", "Catalog.Column.Editions": "Edições", "Catalog.Column.LatestYear": "Último ano",
+    "Catalog.Empty": "Ainda não há exames publicados no catálogo.",
+    "Catalog.Empty.Search": "Nenhum exame publicado corresponde a \"{0}\".",
+    "Catalog.Empty.Filters": "Nenhum exame publicado corresponde aos filtros escolhidos.",
+    "Catalog.Exam.Title": "Exame", "Catalog.Exam.About": "Sobre este exame",
+    "Catalog.Exam.PublishedEditions": "Edições publicadas", "Catalog.Exam.LatestNoticeYear": "Último ano de aviso",
+    "Catalog.Exam.LoadFailed": "Não foi possível carregar este exame.", "Catalog.BackToCatalog": "Voltar ao catálogo",
+    "Catalog.Editions.Subtitle": "Cada prova aplicada, da mais recente para a mais antiga. O aviso oficial contém as regras completas.",
+    "Catalog.Editions.Empty": "Este exame não tem edições publicadas.",
+    "Catalog.Editions.NoticeLink": "Aviso oficial",
+    "Catalog.Editions.NoticeLink.Name": "Aviso oficial, {0}, abre num novo separador"
+  }
+};
+
+/* MudBlazor's own pager labels (its localizer, not SharedResources keys). */
+const PAGER = {
+  "en": { prev: "Previous page", next: "Next page" },
+  "pt-BR": { prev: "Página anterior", next: "Próxima página" },
+  "pt-PT": { prev: "Página anterior", next: "Página seguinte" }
+};
+
+/* ---- icons: Material Outlined paths, named as AppIcons constants ---- */
+const ICONS = {
+  Home: "M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z",
+  Catalog: "M7 9H2V7h5v2zm0 3H2v2h5v-2zm13.59 7-3.83-3.83c-.8.52-1.74.83-2.76.83-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.96-.83 2.75L22 17.59 20.59 19zM17 11c0-1.65-1.35-3-3-3s-3 1.35-3 3 1.35 3 3 3 3-1.35 3-3zM2 19h10v-2H2v2z",
+  Organizers: "M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z",
+  IssuingAuthorities: "M1 21h12v2H1v-2zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83L5.24 8.07zM12.32 1l5.66 5.66-2.83 2.83-5.66-5.66L12.32 1zM3.83 9.48l5.66 5.66-2.83 2.83L1 12.31l2.83-2.83z",
+  Exams: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z",
+  Roles: "M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm6 9c0 4-2.6 7.8-6 8.9C8.6 18.8 6 15 6 11V6.3l6-2.2 6 2.2V11z",
+  Users: "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 1.9 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+  History: "M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z",
+  Search: "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  Close: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  ClearFilters: "M19.79 5.61C20.3 4.95 19.83 4 19 4H6.83l7.97 7.97 4.99-6.36zM2.81 2.81 1.39 4.22 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.17l5.78 5.78 1.41-1.41L2.81 2.81z",
+  OpenInNew: "M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
+  Editions: "M17 10H7v2h10v-2zm2-7h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zm-5-5H7v2h7v-2z",
+  Empty: "M19 3H4.99C3.89 3 3 3.9 3 5l.01 14c0 1.1.89 2 1.99 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z",
+  Error: "M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z",
+  Warning: "M12 5.99 19.53 19H4.47L12 5.99M12 2 1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z",
+  Retry: "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  ChevronLeft: "M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z",
+  ChevronRight: "M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+};
+const icon = (name, size = 20, cls = "") =>
+  `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="${ICONS[name]}"/></svg>`;
+
+/* ===========================================================================
+   Sample data. Drafts are in the data on purpose: the "Api" below drops them (BR1), so a draft
+   edition, a draft-only exam (Goiânia) and a board with only drafts (AOCP) never reach the screen.
+   =========================================================================== */
+const B = {
+  consulplan: { id: "b1", name: "Instituto Consulplan", acr: "CONSULPLAN" },
+  idecan: { id: "b2", name: "Instituto de Desenvolvimento Educacional, Cultural e Assistencial Nacional", acr: "IDECAN" },
+  vunesp: { id: "b3", name: "Fundação para o Vestibular da Universidade Estadual Paulista", acr: "VUNESP" },
+  cebraspe: { id: "b4", name: "Centro Brasileiro de Pesquisa em Avaliação e Seleção e de Promoção de Eventos", acr: "CEBRASPE" },
+  fgv: { id: "b5", name: "Fundação Getulio Vargas", acr: "FGV" },
+  cesgranrio: { id: "b6", name: "Fundação Cesgranrio", acr: "CESGRANRIO" },
+  fuvest: { id: "b7", name: "Fundação Universitária para o Vestibular", acr: "FUVEST" },
+  ibfc: { id: "b8", name: "Instituto Brasileiro de Formação e Capacitação", acr: "IBFC" },
+  ibade: { id: "b9", name: "Instituto Brasileiro de Apoio e Desenvolvimento Executivo", acr: "IBADE" },
+  pearson: { id: "b10", name: "Pearson VUE", acr: "PEARSON VUE" },
+  aocp: { id: "b11", name: "Instituto AOCP", acr: "AOCP" }
+};
+const ed = (year, position, board, status, applied, ref, url) => ({ year, position, board, status, applied, ref, url });
+const EXAMS = [
+  { id: "e1", name: "Concurso Público Prefeitura de Manaus - Guarda Municipal", auth: { name: "Prefeitura Municipal de Manaus", acr: "PMM" },
+    type: "PublicServiceExam", scope: "Municipal", detail: "Manaus/AM", lang: "pt-BR", eds: [
+      ed(2026, "Guarda Municipal de 3ª Classe", B.consulplan, "Published", "2026-06-14", "Edital nº 01/2026", "https://www.institutoconsulplan.org.br/concursos/pmm-guarda-municipal-2026"),
+      ed(2026, "Guarda Municipal Músico", B.consulplan, "Draft", null, "Edital nº 01/2026", ""),
+      ed(2021, "Guarda Municipal de 3ª Classe", B.idecan, "Published", "2021-12-12", "Edital nº 02/2021", "https://www.idecan.org.br/concursos/pmm-2021") ] },
+  { id: "e2", name: "Guarda Civil Metropolitana de São Paulo", auth: { name: "Prefeitura do Município de São Paulo", acr: "PMSP" },
+    type: "PublicServiceExam", scope: "Municipal", detail: "São Paulo/SP", lang: "pt-BR", eds: [
+      ed(2023, "Guarda Civil Metropolitana 3ª Classe", B.vunesp, "Published", "2023-10-15", "Edital nº 01/2023", "https://www.vunesp.com.br/PMSP2301"),
+      ed(2019, "Guarda Civil Metropolitana 3ª Classe", B.vunesp, "Published", null, "Edital nº 02/2019", "") ] },
+  { id: "e3", name: "Polícia Federal - Agente de Polícia", auth: { name: "Polícia Federal", acr: "PF" },
+    type: "PublicServiceExam", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2025, "Agente de Polícia Federal", B.cebraspe, "Published", "2025-07-27", "Edital nº 1 - DGP/PF, de 2025", "https://www.cebraspe.org.br/concursos/pf_25"),
+      ed(2021, "Agente de Polícia Federal", B.cebraspe, "Published", "2021-05-23", "Edital nº 1 - DGP/PF, de 15 de janeiro de 2021", "https://www.cebraspe.org.br/concursos/pf_21") ] },
+  { id: "e4", name: "Receita Federal - Auditor-Fiscal", auth: { name: "Secretaria Especial da Receita Federal do Brasil", acr: "RFB" },
+    type: "PublicServiceExam", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2025, "Auditor-Fiscal da Receita Federal do Brasil", B.cebraspe, "Published", null, "Edital nº 1 - RFB, de 2025", "https://www.cebraspe.org.br/concursos/receita_federal_25"),
+      ed(2022, "Auditor-Fiscal da Receita Federal do Brasil", B.fgv, "Published", "2023-02-26", "Edital nº 1 - RFB, de 2022", "https://conhecimento.fgv.br/concursos/rfb22") ] },
+  { id: "e5", name: "Exame Nacional do Ensino Médio", auth: { name: "Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira", acr: "INEP" },
+    type: "Enem", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2025, "", B.cebraspe, "Published", "2025-11-09", "", ""),
+      ed(2024, "", B.cebraspe, "Published", "2024-11-03", "Edital nº 38/2024", ""),
+      ed(2023, "", B.cebraspe, "Published", "2023-11-05", "Edital nº 30/2023", "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem") ] },
+  { id: "e6", name: "Vestibular FUVEST", auth: { name: "Universidade de São Paulo", acr: "USP" },
+    type: "UniversityEntranceExam", scope: "State", detail: "São Paulo", lang: "pt-BR", eds: [
+      ed(2025, "", B.fuvest, "Published", "2025-11-23", "Manual do Candidato FUVEST 2026", "https://www.fuvest.br/"),
+      ed(2024, "", B.fuvest, "Published", "2024-11-24", "Manual do Candidato FUVEST 2025", "https://www.fuvest.br/") ] },
+  { id: "e7", name: "Tribunal de Justiça de São Paulo - Escrevente Técnico Judiciário", auth: { name: "Tribunal de Justiça do Estado de São Paulo", acr: "TJSP" },
+    type: "PublicServiceExam", scope: "State", detail: "São Paulo", lang: "pt-BR", eds: [
+      ed(2023, "Escrevente Técnico Judiciário", B.vunesp, "Published", "2023-12-10", "Edital nº 01/2023", "https://www.vunesp.com.br/TJSP2301"),
+      ed(2021, "Escrevente Técnico Judiciário", B.vunesp, "Published", "2021-12-05", "Edital nº 01/2021", "") ] },
+  { id: "e8", name: "Polícia Militar de Goiás - Soldado", auth: { name: "Polícia Militar do Estado de Goiás", acr: "PMGO" },
+    type: "PublicServiceExam", scope: "State", detail: "Goiás", lang: "pt-BR", eds: [
+      ed(2022, "Soldado de 2ª Classe", B.ibfc, "Published", "2022-10-09", "Edital nº 01/2022", "https://www.ibfc.org.br/concurso/pmgo2022") ] },
+  { id: "e9", name: "Guarda Civil Municipal de Goiânia", auth: { name: "Prefeitura de Goiânia", acr: "PMG" },
+    type: "PublicServiceExam", scope: "Municipal", detail: "Goiânia/GO", lang: "pt-BR", eds: [
+      ed(2025, "Guarda Civil Municipal", B.aocp, "Draft", null, "Edital nº 01/2025", "") ] },
+  { id: "e10", name: "Banco do Brasil - Escriturário", auth: { name: "Banco do Brasil", acr: "BB" },
+    type: "PublicServiceExam", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2023, "Escriturário - Agente Comercial", B.cesgranrio, "Published", "2023-04-23", "Edital nº 01/2022 - BB", "https://www.cesgranrio.org.br/concursos/bb2023"),
+      ed(2021, "Escriturário", B.cesgranrio, "Published", "2021-09-26", "Edital nº 01/2021 - BB", "") ] },
+  { id: "e11", name: "Guarda Municipal do Rio de Janeiro", auth: { name: "Prefeitura da Cidade do Rio de Janeiro", acr: "PCRJ" },
+    type: "PublicServiceExam", scope: "Municipal", detail: "Rio de Janeiro/RJ", lang: "pt-BR", eds: [
+      ed(2024, "Guarda Municipal", B.ibade, "Published", "2024-09-15", "Edital nº 01/2024", "https://www.ibade.org.br/concursos/gmrio2024") ] },
+  { id: "e12", name: "AWS Certified Cloud Practitioner", auth: { name: "Amazon Web Services", acr: "AWS" },
+    type: "Certification", scope: "National", detail: "", lang: "en", eds: [
+      ed(2024, "", B.pearson, "Published", null, "Exam guide CLF-C02", "https://aws.amazon.com/certification/certified-cloud-practitioner/") ] },
+  { id: "e13", name: "Câmara dos Deputados - Analista Legislativo", auth: { name: "Câmara dos Deputados", acr: "CD" },
+    type: "PublicServiceExam", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2023, "Analista Legislativo - Consultor Legislativo", B.fgv, "Published", "2023-10-22", "Edital nº 1 - CD, de 2023", "https://conhecimento.fgv.br/concursos/camara23") ] },
+  { id: "e14", name: "Concurso Público Nacional Unificado", auth: { name: "Ministério da Gestão e da Inovação em Serviços Públicos", acr: "MGI" },
+    type: "PublicServiceExam", scope: "National", detail: "", lang: "pt-BR", eds: [
+      ed(2025, "Bloco 8 - Nível intermediário", B.cesgranrio, "Published", "2025-10-05", "Edital nº 1/2025", "https://www.gov.br/gestao/pt-br/concursonacional"),
+      ed(2024, "Bloco 8 - Nível intermediário", B.cesgranrio, "Published", "2024-08-18", "Edital nº 8/2024", "") ] }
+];
+const TYPES = ["PublicServiceExam", "Certification", "UniversityEntranceExam", "Enem"];
+const SCOPES = ["National", "State", "Municipal"];
+const LANG_NAMES = { "pt-BR": "Português (Brasil)", "pt-PT": "Português (Portugal)", "en": "English" };  /* SupportedCultures.NativeName */
+
+/* ===========================================================================
+   The "Api": the read side over published content only (BR1, BR2, BR3, BR5, BR7, BR8).
+   =========================================================================== */
+const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().trim();  /* CatalogText.Normalize */
+const cmpName = (a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" });
+const published = (e) => e.eds.filter(x => x.status === "Published");
+function editionOrder(a, b) {  /* F-35 BR14: year desc, then position, then board name */
+  return (b.year - a.year) || cmpName(a.position || "", b.position || "") || cmpName(a.board.name, b.board.name);
+}
+function apiList(q) {
+  const words = norm(q.search).split(/\s+/).filter(Boolean);
+  return EXAMS
+    .filter(e => published(e).length > 0)
+    .filter(e => words.every(w => [norm(e.name), norm(e.auth.name), norm(e.auth.acr), norm(e.detail)].some(f => f.includes(w))))
+    .filter(e => !q.type || e.type === q.type)
+    .filter(e => !q.scope || e.scope === q.scope)
+    .filter(e => (!q.org && !q.year) || published(e).some(x => (!q.org || x.board.id === q.org) && (!q.year || x.year === q.year)))  /* BR5: same edition */
+    .sort((a, b) => cmpName(a.name, b.name) || a.id.localeCompare(b.id));
+}
+function apiFilters() {
+  const boards = new Map(), years = new Set();
+  EXAMS.forEach(e => published(e).forEach(x => { boards.set(x.board.id, x.board); years.add(x.year); }));
+  return {
+    organizers: [...boards.values()].sort((a, b) => cmpName(a.name, b.name)),
+    years: [...years].sort((a, b) => b - a)
+  };
+}
+const latestYear = (e) => Math.max(...published(e).map(x => x.year));
+
+/* ===========================================================================
+   Demo state
+   =========================================================================== */
+const STATES = {
+  search: [["loading", "Loading"], ["ready", "Ready"], ["filtered", "Ready, filtered"], ["empty", "Empty catalog"],
+           ["nomatch-search", "No match (search)"], ["nomatch-filters", "No match (filters)"],
+           ["options-loading", "Options loading"], ["options-failed", "Options failed"], ["error", "Server error"]],
+  exam: [["loading", "Loading"], ["ready", "Ready"], ["sparse", "Ready, sparse (ENEM)"], ["notfound", "Not found (draft-only / deleted / unknown id)"], ["error", "Server error"]]
+};
+const S = {
+  screen: "search", lang: "pt-BR", theme: "light", perm: "student",
+  state: { search: "ready", exam: "ready" },
+  q: { search: "", type: "", scope: "", org: "", year: 0 },
+  page: 0, pageSize: 25, examId: "e1"
+};
+
+const $ = (id) => document.getElementById(id);
+const t = (key, ...args) => {
+  let s = (TEXTS[S.lang] && TEXTS[S.lang][key]) || key;
+  args.forEach((a, i) => { s = s.split(`{${i}}`).join(a); });
+  return s;
+};
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fmtInt = (n) => new Intl.NumberFormat(S.lang).format(n);         /* "N0" */
+const fmtDate = (iso) => {                                              /* "d": short date of the reader's culture */
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(S.lang, { year: "numeric", month: "numeric", day: "numeric" }).format(new Date(y, m - 1, d));
+};
+const canBrowse = () => S.perm === "student" || S.perm === "admin";
+const canManage = () => S.perm === "admin" || S.perm === "manage";
+const hasFilters = () => !!(S.q.type || S.q.scope || S.q.org || S.q.year);
+
+/* ===========================================================================
+   Menu (NavigationItems.All + Visible + Sections)
+   =========================================================================== */
+function drawerHtml() {
+  const link = (ic, key, current) =>
+    `<li><a class="nav-link" ${current ? 'aria-current="page"' : ""} ${key === "Nav.Catalog" ? 'data-go="search"' : ""} tabindex="0">${icon(ic, 20)}<span>${esc(t(key))}</span></a></li>`;
+  let h = `<ul class="nav-list">${link("Home", "Nav.Home", false)}</ul>`;
+  if (canBrowse()) h += `<span class="nav-section">${esc(t("Nav.Section.Study"))}</span><ul class="nav-list">${link("Catalog", "Nav.Catalog", true)}</ul>`;
+  if (canManage()) h += `<span class="nav-section">${esc(t("Nav.Section.Content"))}</span><ul class="nav-list">
+      ${link("Organizers", "Nav.Organizers")}${link("IssuingAuthorities", "Nav.IssuingAuthorities")}${link("Exams", "Nav.Exams")}</ul>`;
+  if (S.perm === "admin") h += `<span class="nav-section">${esc(t("Nav.Section.Administration"))}</span><ul class="nav-list">
+      ${link("Roles", "Nav.Roles")}${link("Users", "Nav.Users")}${link("History", "Nav.RoleHistory")}${link("Roles", "Nav.AccountEvents")}</ul>`;
+  return h;
+}
+
+function notFoundHtml() {
+  return `<div class="app-page-header"><h1 class="app-page-title">${esc(t("NotFound.Title"))}</h1></div>
+    <p>${esc(t("NotFound.Message"))}</p>`;
+}
+
+function header(titleText, crumbs) {
+  const c = crumbs.map(p => p.go
+    ? `<a tabindex="0" data-go="${p.go}">${esc(p.text)}</a>`
+    : `<span ${p.current ? 'aria-current="page"' : ""}>${esc(p.text)}</span>`).join('<span aria-hidden="true">›</span>');
+  return `<div class="app-page-header"><nav class="app-breadcrumbs" aria-label="Breadcrumb">${c}</nav>
+    <h1 class="app-page-title">${esc(titleText)}</h1></div>`;
+}
+
+/* ===========================================================================
+   Screen 1: /catalog
+   =========================================================================== */
+function applySearchState(st) {
+  S.state.search = st; S.page = 0;
+  S.q = { search: "", type: "", scope: "", org: "", year: 0 };
+  if (st === "filtered") { S.q.search = "guarda"; S.q.scope = "Municipal"; }
+  if (st === "nomatch-search") S.q.search = "guarda recife";
+  if (st === "nomatch-filters") { S.q.type = "Certification"; S.q.scope = "Municipal"; }
+}
+
+function selectHtml(id, labelKey, value, options, disabled) {
+  const opts = [`<option value="">${esc(t("Common.Filter.All"))}</option>`]
+    .concat(options.map(o => `<option value="${esc(o.value)}" ${String(value) === String(o.value) ? "selected" : ""}>${esc(o.text)}</option>`)).join("");
+  return `<div class="app-field">
+    <label class="app-field-label" id="${id}-label" for="${id}">${esc(t(labelKey))}</label>
+    <select class="app-select" id="${id}" aria-labelledby="${id}-label" ${disabled ? "disabled" : ""}>${opts}</select>
+  </div>`;
+}
+
+function searchHtml() {
+  const st = S.state.search;
+  const optsOff = st === "options-loading" || st === "options-failed";
+  const f = apiFilters();
+  const alert = st === "options-failed"
+    ? `<div class="app-alert app-alert-warning" role="status">${icon("Warning", 20)}<span class="app-alert-text">${esc(t("Catalog.Filter.OptionsFailed"))}</span>
+         <button type="button" class="app-alert-action" data-action="retry-options">${esc(t("Common.TryAgain"))}</button></div>` : "";
+  return header(t("Catalog.Title"), [{ text: t("Nav.Section.Study") }, { text: t("Catalog.Title"), current: true }]) + alert + `
+  <div class="app-table-card">
+    <div class="app-table-toolbar">
+      <div class="app-table-search">${icon("Search", 20)}
+        <input type="search" id="catalog-search" aria-label="${esc(t("Common.Search"))}" placeholder="${esc(t("Catalog.Search.Placeholder"))}" value="${esc(S.q.search)}" autocomplete="off">
+      </div>
+      <div class="app-table-filters">
+        ${selectHtml("catalog-filter-type", "Exams.Filter.AssessmentType", S.q.type, TYPES.map(v => ({ value: v, text: t("Exams.AssessmentType." + v) })), false)}
+        ${selectHtml("catalog-filter-scope", "Exams.Filter.Scope", S.q.scope, SCOPES.map(v => ({ value: v, text: t("Exams.Scope." + v) })), false)}
+        ${selectHtml("catalog-filter-organizer", "Catalog.Filter.Organizer", S.q.org, optsOff ? [] : f.organizers.map(o => ({ value: o.id, text: `${o.name} (${o.acr})` })), optsOff)}
+        ${selectHtml("catalog-filter-year", "Catalog.Filter.NoticeYear", S.q.year || "", optsOff ? [] : f.years.map(y => ({ value: y, text: String(y) })), optsOff)}
+        <button type="button" class="app-button app-button-text" id="catalog-clear" data-action="clear" ${hasFilters() ? "" : "hidden"}>${icon("ClearFilters", 18)}${esc(t("Catalog.Filter.Clear"))}</button>
+      </div>
+    </div>
+    <div id="catalog-results">${resultsHtml()}</div>
+  </div>`;
+}
+
+function stateBox(inner, role) {
+  return `<div class="app-state" ${role ? `role="${role}"` : ""}>${inner}</div>`;
+}
+
+function resultsHtml() {
+  const st = S.state.search;
+  if (st === "loading") return stateBox(`<span class="app-spinner" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span>`, "status");
+  if (st === "error") return stateBox(`${icon("Error", 40, "is-error")}<p>${esc(t("Common.LoadFailed"))}</p>
+      <button type="button" class="app-button app-button-outlined" data-action="retry-list">${icon("Retry", 18)}${esc(t("Common.TryAgain"))}</button>`, "alert");
+  const all = st === "empty" ? [] : apiList(S.q);
+  if (all.length === 0) {
+    const search = S.q.search.trim();
+    let msg, action = "";
+    if (search) msg = t("Catalog.Empty.Search", search);
+    else if (hasFilters()) {
+      msg = t("Catalog.Empty.Filters");
+      action = `<button type="button" class="app-button app-button-outlined" data-action="clear">${icon("ClearFilters", 18)}${esc(t("Catalog.Filter.Clear"))}</button>`;
+    } else msg = t("Catalog.Empty");
+    return stateBox(`${icon("Empty", 40)}<p>${esc(msg)}</p>${action}`);
+  }
+  const pages = Math.max(1, Math.ceil(all.length / S.pageSize));
+  if (S.page >= pages) S.page = pages - 1;
+  const first = S.page * S.pageSize;
+  const rows = all.slice(first, first + S.pageSize);
+  const th = (key, num) => `<th scope="col" class="${num ? "app-cell-number" : ""}">${esc(t(key))}</th>`;
+  const body = rows.map(e => `<tr>
+      <td><a class="app-link app-truncate" href="#" data-open="${e.id}" title="${esc(e.name)}" lang="${e.lang}">${esc(e.name)}</a></td>
+      <td><span class="app-truncate narrow" title="${esc(e.auth.name)}" tabindex="0">${esc(e.auth.name)}</span><span class="app-cell-secondary">${esc(e.auth.acr)}</span></td>
+      <td>${esc(t("Exams.AssessmentType." + e.type))}</td>
+      <td>${esc(t("Exams.Scope." + e.scope))}${e.detail ? `<span class="app-cell-secondary">${esc(e.detail)}</span>` : ""}</td>
+      <td><span lang="${e.lang}">${esc(LANG_NAMES[e.lang] || e.lang)}</span></td>
+      <td class="app-cell-number">${fmtInt(published(e).length)}</td>
+      <td class="app-cell-number">${latestYear(e)}</td>
+    </tr>`).join("");
+  const info = t("Common.Table.PageInfo").replace("{first_item}", first + 1).replace("{last_item}", first + rows.length).replace("{all_items}", all.length);
+  return `<div class="app-grid-scroll"><table class="app-grid">
+      <thead><tr>${th("Exams.Column.Name")}${th("Exams.Column.IssuingAuthority")}${th("Exams.Column.AssessmentType")}${th("Exams.Column.Scope")}
+        ${th("Catalog.Column.ContentLanguage")}${th("Catalog.Column.Editions", true)}${th("Catalog.Column.LatestYear", true)}</tr></thead>
+      <tbody>${body}</tbody></table></div>
+    <div class="app-pager">
+      <label>${esc(t("Common.Table.RowsPerPage"))}
+        <select id="catalog-page-size">${[10, 25, 50].map(n => `<option ${n === S.pageSize ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <span>${esc(info)}</span>
+      <span>
+        <button type="button" class="app-icon-button" data-action="prev" aria-label="${esc(PAGER[S.lang].prev)}" ${S.page === 0 ? "disabled" : ""}>${icon("ChevronLeft", 22)}</button>
+        <button type="button" class="app-icon-button" data-action="next" aria-label="${esc(PAGER[S.lang].next)}" ${S.page >= pages - 1 ? "disabled" : ""}>${icon("ChevronRight", 22)}</button>
+      </span>
+    </div>`;
+}
+
+function refreshResults() {
+  $("catalog-results").innerHTML = resultsHtml();
+  $("catalog-clear").hidden = !hasFilters();
+}
+
+/* ===========================================================================
+   Screen 2: /catalog/exams/{id}
+   =========================================================================== */
+function examHtml() {
+  const st = S.state.exam;
+  const crumbsBase = [{ text: t("Nav.Section.Study") }, { text: t("Catalog.Title"), go: "search" }];
+  if (st === "loading") return header(t("Catalog.Exam.Title"), crumbsBase) +
+    `<div class="app-form-card">${stateBox(`<span class="app-spinner" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span>`, "status")}</div>`;
+  if (st === "notfound") return header(t("Catalog.Exam.Title"), crumbsBase) + `
+    <div class="app-form-card">
+      <div class="app-alert app-alert-error" role="alert">${icon("Error", 20)}<span class="app-alert-text">${esc(t("exam.not_found"))}</span></div>
+      <a class="app-link" tabindex="0" data-go="search">${esc(t("Catalog.BackToCatalog"))}</a>
+    </div>`;
+  if (st === "error") return header(t("Catalog.Exam.Title"), crumbsBase) + `
+    <div class="app-form-card">${stateBox(`${icon("Error", 40, "is-error")}<p>${esc(t("Catalog.Exam.LoadFailed"))}</p>
+      <button type="button" class="app-button app-button-outlined" data-action="retry-exam">${icon("Retry", 18)}${esc(t("Common.TryAgain"))}</button>`, "alert")}</div>`;
+
+  const e = EXAMS.find(x => x.id === (st === "sparse" ? "e5" : S.examId));
+  const eds = published(e).sort(editionOrder);
+  const parts = (x) => [String(x.year), x.position, `${x.board.name} (${x.board.acr})`].filter(Boolean);
+  const labelHtml = (x) => [
+      `<span>${x.year}</span>`,
+      x.position ? `<span lang="${e.lang}">${esc(x.position)}</span>` : "",
+      `<span>${esc(x.board.name)} (${esc(x.board.acr)})</span>`
+    ].filter(Boolean).join('<span class="app-item-row-sep" aria-hidden="true"> · </span>');
+  const rows = eds.length === 0
+    ? `<p class="app-item-rows-empty">${esc(t("Catalog.Editions.Empty"))}</p>`
+    : `<ul class="app-item-rows-list">${eds.map(x => `
+        <li class="app-item-row"><div class="app-item-row-content">
+          <span class="app-item-row-label">${labelHtml(x)}</span>
+          ${x.ref ? `<span class="app-item-row-meta" lang="${e.lang}">${esc(x.ref)}</span>` : ""}
+          ${x.applied ? `<span class="app-item-row-meta">${esc(t("ExamEditions.Row.AppliedOn", fmtDate(x.applied)))}</span>` : ""}
+          ${x.url ? `<a class="app-link" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"
+                aria-label="${esc(t("Catalog.Editions.NoticeLink.Name", parts(x).join(", ")))}">${esc(t("Catalog.Editions.NoticeLink"))}${icon("OpenInNew", 16)}</a>` : ""}
+        </div></li>`).join("")}</ul>`;
+
+  const row = (k, v, lang) => `<div class="app-aside-row"><dt>${esc(t(k))}</dt><dd ${lang ? `lang="${lang}"` : ""}>${esc(v)}</dd></div>`;
+  const detailKey = e.scope === "State" ? "Exams.Field.State" : "Exams.Field.Municipality";
+  const aside = `
+    <aside class="app-form-aside" aria-labelledby="catalog-exam-about">
+      <h2 class="app-form-aside-title" id="catalog-exam-about">${esc(t("Catalog.Exam.About"))}</h2>
+      <dl>
+        ${row("Exams.Field.IssuingAuthority", `${e.auth.name} (${e.auth.acr})`)}
+        ${row("Exams.Field.AssessmentType", t("Exams.AssessmentType." + e.type))}
+        ${row("Exams.Field.Scope", t("Exams.Scope." + e.scope))}
+        ${e.scope !== "National" && e.detail ? row(detailKey, e.detail) : ""}
+        ${row("Exams.Field.ContentLanguage", LANG_NAMES[e.lang] || e.lang, e.lang)}
+        ${row("Catalog.Exam.PublishedEditions", fmtInt(eds.length))}
+        ${row("Catalog.Exam.LatestNoticeYear", String(latestYear(e)))}
+      </dl>
+    </aside>`;
+
+  return `<div class="app-page-header">
+      <nav class="app-breadcrumbs" aria-label="Breadcrumb">
+        <span>${esc(t("Nav.Section.Study"))}</span><span aria-hidden="true">›</span>
+        <a tabindex="0" data-go="search">${esc(t("Catalog.Title"))}</a><span aria-hidden="true">›</span>
+        <span aria-current="page" lang="${e.lang}">${esc(e.name)}</span>
+      </nav>
+      <h1 class="app-page-title" lang="${e.lang}">${esc(e.name)}</h1>
+    </div>
+    <div class="app-form-layout">
+      <div class="app-form-card">
+        <section class="app-section-card" aria-labelledby="catalog-exam-editions-title">
+          <h2 class="app-section-card-title" id="catalog-exam-editions-title">${icon("Editions", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Title"))}</span></h2>
+          <p class="app-section-card-subtitle">${esc(t("Catalog.Editions.Subtitle"))}</p>
+          ${rows}
+        </section>
+      </div>
+      ${aside}
+    </div>`;
+}
+
+/* ===========================================================================
+   Render and wiring
+   =========================================================================== */
+function renderDemo() {
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", b.dataset.screen === S.screen));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === S.lang));
+  document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", b.dataset.themeBtn === S.theme));
+  document.querySelectorAll("[data-perm]").forEach(b => b.setAttribute("aria-pressed", b.dataset.perm === S.perm));
+  $("demo-states").innerHTML = `<span class="demo-label">Demo &middot; state</span>` +
+    STATES[S.screen].map(([k, label]) => `<button type="button" data-state="${k}" aria-pressed="${S.state[S.screen] === k}">${esc(label)}</button>`).join("") +
+    (canBrowse() ? "" : `<span class="demo-note">Permission denied: no catalog.browse, the route is the ordinary Not Found page</span>`);
+}
+
+function render() {
+  document.documentElement.lang = S.lang;
+  document.documentElement.dataset.theme = S.theme;
+  $("skip").textContent = t("Layout.SkipToContent");
+  $("drawer").setAttribute("aria-label", t("Layout.Menu.Label"));
+  $("drawer").innerHTML = drawerHtml();
+  let html, title;
+  if (!canBrowse()) { html = notFoundHtml(); title = t("NotFound.Title"); }
+  else if (S.screen === "search") { html = searchHtml(); title = t("Catalog.Title"); }
+  else {
+    html = examHtml();
+    const e = EXAMS.find(x => x.id === (S.state.exam === "sparse" ? "e5" : S.examId));
+    title = S.state.exam === "ready" || S.state.exam === "sparse" ? e.name : t("Catalog.Exam.Title");
+  }
+  $("main").innerHTML = html;
+  document.title = `${title} - ${t("App.Name")} (F-36 mockup)`;
+  renderDemo();
+}
+
+document.addEventListener("click", (ev) => {
+  const el = ev.target.closest("button, a");
+  if (!el) return;
+  if (el.dataset.screen) { S.screen = el.dataset.screen; render(); return; }
+  if (el.dataset.lang) { S.lang = el.dataset.lang; render(); return; }
+  if (el.dataset.themeBtn) { S.theme = el.dataset.themeBtn; render(); return; }
+  if (el.dataset.perm) { S.perm = el.dataset.perm; render(); return; }
+  if (el.dataset.state) {
+    if (S.screen === "search") applySearchState(el.dataset.state); else S.state.exam = el.dataset.state;
+    render(); return;
+  }
+  if (el.dataset.open) {                    /* the exam name: a link to the read-only detail page */
+    ev.preventDefault();
+    S.examId = el.dataset.open; S.screen = "exam"; S.state.exam = "ready"; render(); $("main").focus(); return;
+  }
+  if (el.dataset.go === "search") {         /* breadcrumb, back link, menu item: filters are page state, so they start over */
+    ev.preventDefault();
+    S.screen = "search"; applySearchState("ready"); render(); return;
+  }
+  const a = el.dataset.action;
+  if (!a) return;
+  if (a === "clear") { S.q.type = ""; S.q.scope = ""; S.q.org = ""; S.q.year = 0; S.page = 0; S.state.search = "ready"; render(); return; }
+  if (a === "retry-options" || a === "retry-list") { S.state.search = "ready"; render(); return; }
+  if (a === "retry-exam") { S.state.exam = "ready"; render(); return; }
+  if (a === "prev") { S.page = Math.max(0, S.page - 1); refreshResults(); return; }
+  if (a === "next") { S.page += 1; refreshResults(); return; }
+});
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter" && ev.target.matches("a[tabindex]:not([href])")) ev.target.click();
+});
+
+let debounce;
+document.addEventListener("input", (ev) => {
+  if (ev.target.id !== "catalog-search") return;
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {             /* the kit debounces 300 ms, then reloads from page 1 */
+    S.q.search = ev.target.value; S.page = 0;
+    if (S.state.search === "loading" || S.state.search === "error" || S.state.search === "empty") return;
+    S.state.search = "ready"; refreshResults();
+  }, 300);
+});
+
+document.addEventListener("change", (ev) => {
+  const id = ev.target.id, v = ev.target.value;
+  if (id === "catalog-page-size") { S.pageSize = Number(v); S.page = 0; refreshResults(); return; }
+  const map = { "catalog-filter-type": "type", "catalog-filter-scope": "scope", "catalog-filter-organizer": "org", "catalog-filter-year": "year" };
+  if (!map[id]) return;
+  S.q[map[id]] = map[id] === "year" ? Number(v) || 0 : v;
+  S.page = 0;                               /* ReloadFromFirstPageAsync */
+  if (S.state.search === "loading" || S.state.search === "error" || S.state.search === "empty") return;
+  if (S.state.search !== "options-loading" && S.state.search !== "options-failed") S.state.search = "ready";
+  refreshResults();
+});
+
+render();
+</script>
+</body>
+</html>

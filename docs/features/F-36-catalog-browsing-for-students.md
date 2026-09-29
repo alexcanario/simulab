@@ -54,7 +54,8 @@ Let a student find the exam they are preparing for among what the catalog has pu
 - BR12 Every new UI text and error code exists in pt-BR, pt-PT and en in `SharedResources`; the enum labels reuse the back office keys.
 
 ## Screens and API
-Detailed by `/agile:screen` (mockup `docs/features/mockups/F-36-catalog-browsing-for-students.html`) before approval.
+
+Designed by `/agile:screen` on 2026-09-29. Mockup: `docs/features/mockups/F-36-catalog-browsing-for-students.html` (two screens and the menu, every state, light and dark, pt-BR / pt-PT / en, three permission sets). Only kit patterns from `/dev/ui` are used; no new component and no new colour. Three new `AppIcons` constants. Every text below is a `SharedResources` key; error codes reach the screen only through `ErrorText.For`. Both screens are read-only: nothing is written, so there is no saving, success or validation state (BR6: a filter value the Api cannot read is no filter, never an error).
 
 ### Routes
 | Route | Purpose | Gate |
@@ -63,6 +64,159 @@ Detailed by `/agile:screen` (mockup `docs/features/mockups/F-36-catalog-browsing
 | `/catalog/exams/{id:guid}` | the exam and its published editions | `catalog.browse` |
 
 Menu: item "Catalog" (`Nav.Catalog`) in the Study section, `RequiredPermission: CatalogPermissions.Browse`.
+
+### Menu item (`NavigationItems.All`)
+`new(NavigationSection.Study, "/catalog", AppIcons.Catalog, "Nav.Catalog", RequiredPermission: CatalogPermissions.Browse)`, listed before the Content items. The default `NavLinkMatch.Prefix` keeps the item current on `/catalog/exams/{id}` too. The Study section shows only when the item is visible (`NavigationItems.Sections` drops empty sections), so a user without `catalog.browse` sees no Study heading (AC12). `AppIcons.Catalog` is new: `Icons.Material.Outlined.ManageSearch`.
+
+### Screen 1 — the catalog search page (`CatalogSearch.razor`, `/catalog`)
+
+**Page header.** `AppPageHeader Title="Catalog.Title"`, no primary action (a student adds nothing here). Breadcrumb: `Nav.Section.Study` (disabled) › `Catalog.Title` (disabled). `<PageTitle>` comes from the header.
+
+**Composition.** One `AppDataTable TItem="PublishedExamResponse"`, `Searchable="true"`, no `RowActions`:
+1. Search box (the kit's, first in the toolbar): `SearchPlaceholder` = `Catalog.Search.Placeholder`; debounced 300 ms by the kit, sends `search` as typed; the Api normalizes and splits it (BR3).
+2. `ToolBarContent` → `div.app-table-filters` with four `AppSelectField`s, then the clear button (table below).
+3. Columns (below). No column is sortable (`Sortable="false"` on each): the Api has one order, exam name A to Z then id (BR2), and a sort arrow that does nothing would lie.
+4. The kit pager: page sizes `AppDataTable.PageSizes` (10, 25, 50), default 25 (BR2 cap 100 is the Api's).
+5. An `AppAlert Severity="Warning"` above the table, only when the filter options failed to load, with `ActionText="Common.TryAgain"` (reloads the options only).
+
+**Filters.** Each change calls `ReloadFromFirstPageAsync()` (the F-9 path: a new filter starts from page 1).
+
+| Filter | Id | Component | Options | Sends |
+|---|---|---|---|---|
+| Assessment type | `catalog-filter-type` | `AppSelectField TValue="AssessmentType?"`, label `Exams.Filter.AssessmentType` | `Common.Filter.All`, then the four types in `ExamText.AssessmentTypeOrder(L)` with `Exams.AssessmentType.*` (BR12) | `assessmentType` |
+| Scope | `catalog-filter-scope` | `AppSelectField TValue="ExamScope?"`, label `Exams.Filter.Scope` | `Common.Filter.All`, `National`, `State`, `Municipal` with `Exams.Scope.*`; no state or municipality picker (F-42) | `scope` |
+| Exam board | `catalog-filter-organizer` | `AppSelectField TValue="Guid?"`, label `Catalog.Filter.Organizer` | `Common.Filter.All`, then `PublishedExamFiltersResponse.Organizers` in the Api's order (by name, BR7), text `Name (ACRONYM)` | `organizerId` |
+| Notice year | `catalog-filter-year` | `AppSelectField TValue="int?"`, label `Catalog.Filter.NoticeYear` | `Common.Filter.All`, then `NoticeYears` in the Api's order (newest first, BR7), written as plain digits (`2026`, never `2.026`) | `noticeYear` |
+
+- The board and year options come from `GET /published-exam-filters`, requested once when the page opens, beside the first list call. While it runs the two selects are `Disabled`. If it fails, the two selects stay disabled with only `Common.Filter.All`, the warning alert `Catalog.Filter.OptionsFailed` shows with Try again, and the list, the search and the other two filters keep working.
+- Board and year are two independent selects; the rule that they match on the same edition (BR5) is the Api's. The screen never narrows one select by the other.
+- **Clear filters**: a text `MudButton` (`Variant.Text`, `StartIcon="AppIcons.ClearFilters"`, new: `Icons.Material.Outlined.FilterAltOff`), text `Catalog.Filter.Clear`, placed last in `app-table-filters`, shown only while at least one of the four selects is not "All". It sets the four back to "All" and reloads from page 1. It does not clear the search text: the search box keeps its own clear button (the kit's `Clearable`), and `AppDataTable` does not let a page reset its search.
+
+**Columns.**
+
+| # | Column | Title key | Kit | Cell |
+|---|---|---|---|---|
+| 1 | Name | `Exams.Column.Name` | `TemplateColumn` | the exam name as an `AppLink` to `/catalog/exams/{id}`, truncated at 26rem with the full name as tooltip (rule `ui-project`); `lang` = the exam's content language |
+| 2 | Issuing authority | `Exams.Column.IssuingAuthority` | `TemplateColumn` | `AppTruncatedText` name (14rem) and the acronym below in `app-cell-secondary` (the back office cell) |
+| 3 | Assessment type | `Exams.Column.AssessmentType` | `TemplateColumn` | `ExamText.AssessmentTypeName` |
+| 4 | Scope | `Exams.Column.Scope` | `TemplateColumn` | `ExamText.ScopeName`, and the scope detail below in `app-cell-secondary` when there is one |
+| 5 | Content language | `Catalog.Column.ContentLanguage` | `TemplateColumn` | `SupportedCultures.NativeName` of the exam's language, with `lang` set to it (the `ExamEditionForm` aside precedent); the raw tag when it is not a UI culture |
+| 6 | Editions | `Catalog.Column.Editions` | `AppNumberColumn`, `Format="N0"` | number of published editions, right-aligned |
+| 7 | Latest year | `Catalog.Column.LatestYear` | `AppNumberColumn`, `Format="D"` | latest published notice year, right-aligned, no group separator |
+
+The name is the row's only link and the only way to the exam page (rule `ui`: the name links to a read-only detail page). No row action column, no row click.
+
+**Empty messages** (`AppDataTable` picks them): with search text → `EmptySearchMessage` = `Catalog.Empty.Search` with `{0}` the text; else with a filter → `EmptyMessage` = `Catalog.Empty.Filters` and `EmptyActionText` = `Catalog.Filter.Clear`, `EmptyActionIcon` = `AppIcons.ClearFilters`, `OnEmptyAction` = clear filters; else → `Catalog.Empty`, no action (the student has no primary action on this page).
+
+### Screen 2 — the exam page (`CatalogExam.razor`, `/catalog/exams/{id:guid}`)
+
+**Page header.** `AppPageHeader Title` = the exam name (`Catalog.Exam.Title` while loading, not found or failed). No primary action. Breadcrumb: `Nav.Section.Study` (disabled) › `Catalog.Title` (link `/catalog`) › the exam name (disabled; absent while loading, not found or failed).
+
+**Layout.** The F-43 composition, read-only: `div.app-form-layout` → `MudPaper.app-form-card` (the editions section) + `AppFormAside` (the exam). On a screen narrower than 1280 px the aside comes below the editions, as on every page of that layout.
+
+**The editions** — `AppSectionCard Id="catalog-exam-editions"`, `Icon="AppIcons.Editions"`, title `ExamEditions.Section.Title`, subtitle `Catalog.Editions.Subtitle`; body `AppItemRows TItem="PublishedExamEditionResponse"` with no `Actions` (a read-only list), `EmptyMessage="Catalog.Editions.Empty"` (reached only if the last edition is unpublished between the two reads). Order is the Api's (BR8); the page does not sort. Every published edition shows, whatever filters led there (BR8).
+
+Row template, in one line that wraps on a phone:
+1. **Label** `NoticeYear · Position · OrganizerName (OrganizerAcronym)` in `app-item-row-label`; the position part is left out when there is none; the ` · ` separators are `aria-hidden`. The position carries `lang` = the exam's content language (content, never translated, BR9).
+2. `NoticeReference` in `text-secondary`, when there is one, with the same `lang`.
+3. `ExamEditions.Row.AppliedOn` with the date as a short date in the reader's culture (`"d"`), when there is one.
+4. When `NoticeUrl` has a value: an `AppLink Href="@NoticeUrl" target="_blank" rel="noopener noreferrer"` with the visible text `Catalog.Editions.NoticeLink` followed by the `AppIcons.OpenInNew` icon (new: `Icons.Material.Outlined.OpenInNew`, `aria-hidden`, 16 px), and `aria-label` = `Catalog.Editions.NoticeLink.Name` with `{0}` the label parts joined by `, ` (the accessible name starts with the visible text and says it opens in a new tab, BR9, AC10). With no URL, nothing is shown in its place.
+
+**The exam** — `AppFormAside`, `Title="Catalog.Exam.About"`, no checklist, `EmptyText="Common.Summary.NotFilled"` (never reached: rows without a value are left out). Rows, in order:
+
+| Label key | Value |
+|---|---|
+| `Exams.Field.IssuingAuthority` | `Name (ACRONYM)` |
+| `Exams.Field.AssessmentType` | `ExamText.AssessmentTypeName` |
+| `Exams.Field.Scope` | `ExamText.ScopeName` |
+| `Exams.Field.State` or `Exams.Field.Municipality` | the scope detail, only for `State` / `Municipal` with a detail |
+| `Exams.Field.ContentLanguage` | `SupportedCultures.NativeName` of the exam's language |
+| `Catalog.Exam.PublishedEditions` | the number of published editions (`N0`) |
+| `Catalog.Exam.LatestNoticeYear` | the latest published notice year (plain digits) |
+
+**Not found.** A `404 exam.not_found` (unknown id, deleted exam, exam with only drafts — BR8, AC9) shows, inside the page layout, one `app-form-card` with `AppAlert Severity="Error" Text="exam.not_found"` and below it `AppLink Href="/catalog"` `Catalog.BackToCatalog`. The alert does not say why (drafts are never revealed, BR1).
+
+### States
+
+**Screen 1 — catalog search**
+
+| State | When | What shows | Announced |
+|---|---|---|---|
+| Loading | first load, and every search, filter or page change while the call runs | the kit's `AppLoadingState` in the table body; toolbar stays usable | `role="status"` "Loading..." |
+| Options loading | the filter options call has not answered | board and year selects disabled with only "All" | — |
+| Ready | one or more exams | rows by name, pager `1-25 of 132` | — |
+| Ready, filtered | search text and/or a filter | the matching rows; "Clear filters" shown when a select is not "All" | — |
+| Empty catalog | no published exam and no search or filter (AC1 with nothing published) | `AppEmptyState` `Catalog.Empty`, no action | — |
+| No match, search | search text, no row | `Catalog.Empty.Search` with the text | — |
+| No match, filters | a filter, no search text, no row | `Catalog.Empty.Filters` + outlined "Clear filters" | — |
+| Options failed | the filter options call failed | warning alert `Catalog.Filter.OptionsFailed` + Try again; board and year disabled; list unaffected | `role="status"` (the kit's non-error alert) |
+| Server error | the list call failed | the kit's `AppErrorState` (`Common.LoadFailed`, Try again) in the table body | `role="alert"` |
+| Permission denied | no `catalog.browse` (AC12) | no menu item; the route is the ordinary Not Found page | page title |
+
+**Screen 2 — exam page**
+
+| State | When | What shows | Announced |
+|---|---|---|---|
+| Loading | the exam is requested | header `Catalog.Exam.Title`, breadcrumb Study › Catalog, `AppLoadingState` in an `app-form-card` | `role="status"` |
+| Ready | 200 | header with the exam name, the editions, the aside | page title |
+| Ready, sparse | an edition with no position, no reference, no date or no link | only the parts that exist; no placeholder text | — |
+| Not found | 404 `exam.not_found` (AC9) | alert `exam.not_found` + link `Catalog.BackToCatalog` | `role="alert"` |
+| Server error | any other failure | `AppErrorState Message="Catalog.Exam.LoadFailed"` with Try again | `role="alert"` |
+| Permission denied | no `catalog.browse` (AC12) | the ordinary Not Found page | page title |
+
+### Permissions
+One permission, `catalog.browse` (BR10): `[Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Browse)]` on both pages (as `Exams.razor` does with `Manage`), the menu item's `RequiredPermission`, and the same policy on the three endpoints. The pages never check `catalog.manage` nor a role name. No per-action check: both pages only read. An Admin sees exactly what a Student sees (BR1, AC13).
+
+| Who | Menu | `/catalog`, `/catalog/exams/{id}` |
+|---|---|---|
+| Student, Curator, Admin holding `catalog.browse` (seed) | Study › Catalog | open |
+| Any user whose roles lack `catalog.browse` (even with `catalog.manage`) | no Study section | ordinary Not Found page |
+
+### Accessibility
+- **Elements.** The exam name in a row is a link (it navigates); "Clear filters" and Try again are buttons (they act); the breadcrumb "Catalog" and "Back to the catalog" are links; the notice link is a link to another site, opening in a new tab. Each filter is the kit's labelled `AppSelectField` (label above, `aria-labelledby`, `aria-describedby`).
+- **Tab order, search page:** skip link → app bar → menu → the warning alert's Try again (only in "Options failed"; the alert sits above the table) → search box → its clear button (when filled) → Assessment type → Scope → Exam board → Notice year → Clear filters (when shown) → per row: the exam name link, then the issuing authority's `AppTruncatedText` (focusable in the kit so its tooltip can be read) → pager (rows per page, then page buttons).
+- **Tab order, exam page:** breadcrumb "Catalog" → each edition's notice link, newest first → nothing in the aside (read-only). Not found: the back link.
+- **Screen reader.** Headings: `h1` page title; on the exam page `h2` "Editions" (section card) and `h2` "About this exam" (aside). The editions are a `<ul>`; the aside is a `<dl>`. Each notice link reads "Official notice, 2026, Guarda Municipal de 3ª Classe, Instituto Consulplan (CONSULPLAN), opens in a new tab". Content text (exam name, position, notice reference) carries `lang` of the exam, so a reader in `en` hears Portuguese content pronounced as Portuguese. Loading, empty and error states are the kit's (`role="status"` / `role="alert"`).
+- **Targets.** Links in rows and the pager buttons are at least 24 px high (kit line height and button sizes); "Clear filters" is a kit button (36 px).
+- **Contrast.** No new colour. Secondary cell text, row meta and the notice reference use `text-secondary`: on `surface` 6.92:1 light, 4.89:1 dark (F-43 figures, recomputed); on `background` (row hover) 6.33:1 light, 5.36:1 dark. Links are `AppLink` (`text-primary`, underlined, B-6). The warning alert and the icons are existing tokens.
+
+### UI texts
+New keys, in `SharedResources.resx` / `.pt-BR.resx` / `.pt-PT.resx`. Reused keys are listed after the table.
+
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `Nav.Catalog` | Catalog | Catálogo | Catálogo |
+| `Catalog.Title` | Catalog | Catálogo | Catálogo |
+| `Catalog.Search.Placeholder` | Exam, authority or place | Exame, órgão ou local | Exame, entidade ou local |
+| `Catalog.Filter.Organizer` | Board | Banca | Entidade organizadora |
+| `Catalog.Filter.NoticeYear` | Notice year | Ano do edital | Ano do aviso |
+| `Catalog.Filter.Clear` | Clear filters | Limpar filtros | Limpar filtros |
+| `Catalog.Filter.OptionsFailed` | We could not load the board and year options. The rest of the search works. | Não foi possível carregar as opções de banca e ano. O resto da busca funciona. | Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona. |
+| `Catalog.Column.ContentLanguage` | Language | Idioma | Idioma |
+| `Catalog.Column.Editions` | Editions | Edições | Edições |
+| `Catalog.Column.LatestYear` | Latest year | Último ano | Último ano |
+| `Catalog.Empty` | No exam is published in the catalog yet. | Ainda não há exames publicados no catálogo. | Ainda não há exames publicados no catálogo. |
+| `Catalog.Empty.Search` | No published exam matches "{0}". | Nenhum exame publicado corresponde a "{0}". | Nenhum exame publicado corresponde a "{0}". |
+| `Catalog.Empty.Filters` | No published exam matches the chosen filters. | Nenhum exame publicado corresponde aos filtros escolhidos. | Nenhum exame publicado corresponde aos filtros escolhidos. |
+| `Catalog.Exam.Title` | Exam | Exame | Exame |
+| `Catalog.Exam.About` | About this exam | Sobre este exame | Sobre este exame |
+| `Catalog.Exam.PublishedEditions` | Published editions | Edições publicadas | Edições publicadas |
+| `Catalog.Exam.LatestNoticeYear` | Latest notice year | Último ano de edital | Último ano de aviso |
+| `Catalog.Exam.LoadFailed` | We could not load this exam. | Não foi possível carregar este exame. | Não foi possível carregar este exame. |
+| `Catalog.BackToCatalog` | Back to the catalog | Voltar para o catálogo | Voltar ao catálogo |
+| `Catalog.Editions.Subtitle` | Each paper applied, newest first. The official notice has the full rules. | Cada prova aplicada, da mais recente para a mais antiga. O edital oficial traz as regras completas. | Cada prova aplicada, da mais recente para a mais antiga. O aviso oficial contém as regras completas. |
+| `Catalog.Editions.Empty` | This exam has no published edition. | Este exame não tem edições publicadas. | Este exame não tem edições publicadas. |
+| `Catalog.Editions.NoticeLink` | Official notice | Edital oficial | Aviso oficial |
+| `Catalog.Editions.NoticeLink.Name` | Official notice, {0}, opens in a new tab | Edital oficial, {0}, abre em uma nova aba | Aviso oficial, {0}, abre num novo separador |
+
+Reused, unchanged: `Nav.Section.Study`, `Exams.Filter.AssessmentType`, `Exams.Filter.Scope`, `Exams.Column.Name`, `Exams.Column.IssuingAuthority`, `Exams.Column.AssessmentType`, `Exams.Column.Scope`, `Exams.Field.IssuingAuthority`, `Exams.Field.AssessmentType`, `Exams.Field.Scope`, `Exams.Field.State`, `Exams.Field.Municipality`, `Exams.Field.ContentLanguage`, `Exams.AssessmentType.*`, `Exams.Scope.National` / `.State` / `.Municipal`, `ExamEditions.Section.Title`, `ExamEditions.Row.AppliedOn`, `Common.Filter.All`, `Common.Search`, `Common.Loading`, `Common.LoadFailed`, `Common.TryAgain`, `Common.Table.RowsPerPage`, `Common.Table.PageInfo`, `Common.Summary.NotFilled`, `NotFound.*`, `exam.not_found`.
+
+New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `ClearFilters` (`FilterAltOff`), `OpenInNew` (`OpenInNew`). The gallery's icon list shows them by reflection.
+
+### What the screens read
+- List row (BR2): id, name, issuing authority name and acronym, assessment type, scope, scope detail, content language, number of published editions, latest published notice year.
+- Exam page (BR8): the same exam fields, and per edition: notice year, position, board name and acronym, notice reference, notice URL, application date (`yyyy-MM-dd`).
+- Filter options (BR7): organizers (id, name, acronym) and notice years.
 
 ### API
 - `GET /api/v1/catalog/published-exams?page&pageSize&search&assessmentType&scope&organizerId&noticeYear` — `PublishedExamPageResponse(Items, Total)` of `PublishedExamResponse`.
