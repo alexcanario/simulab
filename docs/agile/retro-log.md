@@ -92,6 +92,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `gate.js ship`: when the red tests are all outside the item's diff, say so in the last line. The gate already knows both. On F-28 it went red twice on a test in another project before anyone suspected the suite itself, and the flake had been sitting on `main` | B-19 | |
 | ⏳ | agile | `[stack: Blazor Server]` A `computer` `screenshot` call in the browser pane can time out and disconnect a Blazor Server circuit mid-dialog, losing the dialog's state; prefer `read_page`/`get_page_text` over `screenshot` when driving a Blazor Server dialog | F-32 | |
 | ⏳ | agile | `[stack: Microsoft.Extensions.AI]` The DocGen template's `ModelToolAttribute` comment says an `Async` suffix is dropped from the tool name; `AIFunctionFactory` 10.5.1 keeps it (F-49 test: `two or more tools are called "GetExamAsync"`). Also, with no tool the template writes no `tools.md`; say so in the comment, or write an empty catalogue | F-49 | |
+| ⏳ | agile | `[stack: bUnit + MudBlazor]` A test that freezes the `TimeProvider` (`FakeTimeProvider`) also freezes the debounce of `MudAutocomplete`: the search never fires. Advance the fake clock past the debounce after typing (F-35 test `Organizer_Typing_AsksTheOrganizerListWithTheTerm`: 5 s timeout, only the exam GET in `Api.Received`; passed after `_clock.Advance`) | F-35 | |
+| ⏳ | agile | `[generic]` When the `frontend` agent has no shell, its report says so; the main session then builds and runs the tests before reading the files. On F-35 the first `dotnet test` of its output showed `Failed: 51`, one cause: `inputmode` passed as text to a MudBlazor enum parameter | F-35 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -769,3 +771,9 @@ Closed after the fact: `feature/F-31` was merged at `f1d3f28` (2026-09-27) but t
 ## 2026-09-28 — F-49 DocGen tool catalogue
 - 1 (plugin: agile `[stack: Microsoft.Extensions.AI]`): the template's `ModelToolAttribute` comment says the `Async` suffix is dropped from the tool name; `AIFunctionFactory` 10.5.1 keeps it. Evidence: the test `Render_TwoToolsWithTheSameDerivedName_Fails` failed with `two or more tools are called "GetExamAsync"`. The template also writes no `tools.md` while there is no tool. Note above, row ⏳ in "Plugin notes — status".
 - 2 (nothing): `docs/architecture/Identity/routes.md` was stale on `main` since F-32 (missing `GET /api/v1/identity/account-events/mine`); found when F-49 regenerated the docs. Cause not verified, so no rule.
+
+## 2026-09-29 — F-35 Exam editions back office
+- 1 (plugin: agile `[stack: bUnit + MudBlazor]`): a frozen `TimeProvider` also freezes the `MudAutocomplete` debounce; advance the fake clock. Note above, row pending in "Plugin notes — status".
+- 2 (project rule): after a save that turns the add page into the edit form, `StateHasChanged(); await Task.Yield();` comes before `NavigateTo(..., replace: true)`, or the `NavigationLock` reads a stale `HasChanges`. Evidence: the bUnit URL stayed `http://localhost/` until the `Yield` was added. Added to `.claude/rules/agile/project.md`. `ExamForm.razor` navigates without it and was not checked for the same defect.
+- 3 (plugin: agile `[generic]`): the `frontend` agent had no shell and delivered 51 failing screen tests; the main session builds and tests before trusting the files. Note above, row pending.
+- Declined: nothing.
