@@ -345,11 +345,31 @@ public static class IdentityModule
 
         var adminRole = await roleManager.FindByNameAsync(IdentityRoles.Admin);
 
+        // F-36 BR10: who holds a permission from the start, by name. Read only when the row is created below.
+        var initialGrants = catalogs
+            .Where(catalog => catalog.InitialGrants is not null)
+            .SelectMany(catalog => catalog.InitialGrants!)
+            .ToLookup(grant => grant.Key, grant => grant.Value, StringComparer.Ordinal);
+
         foreach (var name in declared)
         {
             if (await context.Permissions.FindAsync([name], cancellationToken) is null)
             {
                 context.Permissions.Add(new Permission { Name = name });
+
+                // Only in the start that creates the row: a later start must not give back what the roles
+                // back office took away. Admin is left out (it has its own path below).
+                var roleNames = initialGrants[name].SelectMany(roles => roles)
+                    .Where(role => !string.Equals(role, IdentityRoles.Admin, StringComparison.Ordinal))
+                    .Distinct(StringComparer.Ordinal);
+                foreach (var roleName in roleNames)
+                {
+                    var role = await roleManager.FindByNameAsync(roleName);
+                    if (role is not null)
+                    {
+                        context.RolePermissions.Add(new RolePermission { RoleId = role.Id, PermissionName = name });
+                    }
+                }
             }
 
             // BR3: Admin holds every permission there is; the other seed roles get theirs from the back office.

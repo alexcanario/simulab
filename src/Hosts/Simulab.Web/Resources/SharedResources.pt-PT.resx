@@ -194,6 +194,8 @@
   <data name="PermissionGroup.catalog" xml:space="preserve"><value>Catálogo</value></data>
   <data name="Permission.catalog.manage.Name" xml:space="preserve"><value>Gerir o catálogo</value></data>
   <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Criar, editar e eliminar entidades organizadoras e tudo o resto do catálogo de provas.</value></data>
+  <data name="Permission.catalog.browse.Name" xml:space="preserve"><value>Consultar o catálogo</value></data>
+  <data name="Permission.catalog.browse.Description" xml:space="preserve"><value>Pesquisar os exames publicados e ver as edições publicadas no catálogo do estudante.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Estado</value></data>
@@ -552,4 +554,29 @@
   <data name="exam_edition.published" xml:space="preserve"><value>Esta edição está publicada. Volte a colocá-la em Rascunho, guarde e depois elimine-a.</value></data>
   <data name="exam.has_editions" xml:space="preserve"><value>Este exame tem edições. Elimine primeiro as edições.</value></data>
   <data name="organizer.has_editions" xml:space="preserve"><value>Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições.</value></data>
+  <data name="Nav.Catalog" xml:space="preserve"><value>Catálogo</value></data>
+  <data name="Catalog.Title" xml:space="preserve"><value>Catálogo</value></data>
+  <data name="Catalog.Search.Placeholder" xml:space="preserve"><value>Exame, entidade ou local</value></data>
+  <data name="Catalog.Filter.Organizer" xml:space="preserve"><value>Entidade organizadora</value></data>
+  <data name="Catalog.Filter.NoticeYear" xml:space="preserve"><value>Ano do aviso</value></data>
+  <data name="Catalog.Filter.Clear" xml:space="preserve"><value>Limpar filtros</value></data>
+  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona.</value></data>
+  <data name="Catalog.Column.ContentLanguage" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Catalog.Column.Editions" xml:space="preserve"><value>Edições</value></data>
+  <data name="Catalog.Column.LatestYear" xml:space="preserve"><value>Último ano</value></data>
+  <data name="Catalog.Empty" xml:space="preserve"><value>Ainda não há exames publicados no catálogo.</value></data>
+  <data name="Catalog.Empty.Search" xml:space="preserve"><value>Nenhum exame publicado corresponde a "{0}".</value></data>
+  <data name="Catalog.Empty.Filters" xml:space="preserve"><value>Nenhum exame publicado corresponde aos filtros escolhidos.</value></data>
+  <data name="Catalog.Exam.Title" xml:space="preserve"><value>Exame</value></data>
+  <data name="Catalog.Exam.About" xml:space="preserve"><value>Sobre este exame</value></data>
+  <data name="Catalog.Exam.PublishedEditions" xml:space="preserve"><value>Edições publicadas</value></data>
+  <data name="Catalog.Exam.LatestNoticeYear" xml:space="preserve"><value>Último ano de aviso</value></data>
+  <data name="Catalog.Exam.LoadFailed" xml:space="preserve"><value>Não foi possível carregar este exame.</value></data>
+  <data name="Catalog.BackToCatalog" xml:space="preserve"><value>Voltar ao catálogo</value></data>
+  <data name="Catalog.Editions.Subtitle" xml:space="preserve"><value>Cada prova aplicada, da mais recente para a mais antiga. O aviso oficial contém as regras completas.</value></data>
+  <data name="Catalog.Editions.Empty" xml:space="preserve"><value>Este exame não tem edições publicadas.</value></data>
+  <data name="Catalog.Editions.NoticeLink" xml:space="preserve"><value>Aviso oficial</value></data>
+  <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Aviso oficial, {0}, abre num novo separador</value></data>
+  <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parâmetros para uma página que guarda o estado no endereço</value></data>
+  <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>Uma ligação truncada com o idioma, um título de página que é conteúdo e uma tabela que começa de uma pesquisa, uma página e um tamanho de página.</value></data>
 </root>

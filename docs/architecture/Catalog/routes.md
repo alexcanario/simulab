@@ -14,6 +14,9 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/catalog/exams` | ListExams | 200 |
 | `GET` | `/api/v1/catalog/issuing-authorities` | ListIssuingAuthorities | 200 |
 | `GET` | `/api/v1/catalog/organizers` | ListOrganizers | 200 |
+| `GET` | `/api/v1/catalog/published-exam-filters` | GetPublishedExamFilters | 200 |
+| `GET` | `/api/v1/catalog/published-exams/{id}` | FindPublishedExam | 200 |
+| `GET` | `/api/v1/catalog/published-exams` | ListPublishedExams | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions` | CreateExamEdition | 200 |
 | `POST` | `/api/v1/catalog/exams` | CreateExam | 200 |
 | `POST` | `/api/v1/catalog/issuing-authorities` | CreateIssuingAuthority | 200 |

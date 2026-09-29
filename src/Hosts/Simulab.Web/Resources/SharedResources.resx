@@ -194,6 +194,8 @@
   <data name="PermissionGroup.catalog" xml:space="preserve"><value>Catalog</value></data>
   <data name="Permission.catalog.manage.Name" xml:space="preserve"><value>Manage the catalog</value></data>
   <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Create, edit and delete organizers and everything else in the exam catalog.</value></data>
+  <data name="Permission.catalog.browse.Name" xml:space="preserve"><value>Browse the catalog</value></data>
+  <data name="Permission.catalog.browse.Description" xml:space="preserve"><value>Search the published exams and see their published editions in the student catalog.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
@@ -552,4 +554,29 @@
   <data name="exam_edition.published" xml:space="preserve"><value>This edition is published. Set it back to Draft, save, then delete it.</value></data>
   <data name="exam.has_editions" xml:space="preserve"><value>This exam has editions. Delete its editions first.</value></data>
   <data name="organizer.has_editions" xml:space="preserve"><value>Some editions name this board. Change or delete those editions first.</value></data>
+  <data name="Nav.Catalog" xml:space="preserve"><value>Catalog</value></data>
+  <data name="Catalog.Title" xml:space="preserve"><value>Catalog</value></data>
+  <data name="Catalog.Search.Placeholder" xml:space="preserve"><value>Exam, authority or place</value></data>
+  <data name="Catalog.Filter.Organizer" xml:space="preserve"><value>Board</value></data>
+  <data name="Catalog.Filter.NoticeYear" xml:space="preserve"><value>Notice year</value></data>
+  <data name="Catalog.Filter.Clear" xml:space="preserve"><value>Clear filters</value></data>
+  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>We could not load the board and year options. The rest of the search works.</value></data>
+  <data name="Catalog.Column.ContentLanguage" xml:space="preserve"><value>Language</value></data>
+  <data name="Catalog.Column.Editions" xml:space="preserve"><value>Editions</value></data>
+  <data name="Catalog.Column.LatestYear" xml:space="preserve"><value>Latest year</value></data>
+  <data name="Catalog.Empty" xml:space="preserve"><value>No exam is published in the catalog yet.</value></data>
+  <data name="Catalog.Empty.Search" xml:space="preserve"><value>No published exam matches "{0}".</value></data>
+  <data name="Catalog.Empty.Filters" xml:space="preserve"><value>No published exam matches the chosen filters.</value></data>
+  <data name="Catalog.Exam.Title" xml:space="preserve"><value>Exam</value></data>
+  <data name="Catalog.Exam.About" xml:space="preserve"><value>About this exam</value></data>
+  <data name="Catalog.Exam.PublishedEditions" xml:space="preserve"><value>Published editions</value></data>
+  <data name="Catalog.Exam.LatestNoticeYear" xml:space="preserve"><value>Latest notice year</value></data>
+  <data name="Catalog.Exam.LoadFailed" xml:space="preserve"><value>We could not load this exam.</value></data>
+  <data name="Catalog.BackToCatalog" xml:space="preserve"><value>Back to the catalog</value></data>
+  <data name="Catalog.Editions.Subtitle" xml:space="preserve"><value>Each paper applied, newest first. The official notice has the full rules.</value></data>
+  <data name="Catalog.Editions.Empty" xml:space="preserve"><value>This exam has no published edition.</value></data>
+  <data name="Catalog.Editions.NoticeLink" xml:space="preserve"><value>Official notice</value></data>
+  <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Official notice, {0}, opens in a new tab</value></data>
+  <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parameters for a page that keeps its state in the address</value></data>
+  <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>A truncated link with its language, a page title that is content, and a table that starts from a search, a page and a page size.</value></data>
 </root>

@@ -80,4 +80,13 @@ public static class AppIcons
 
     /// <summary>F-35: the calendar button of the date field.</summary>
     public const string Calendar = Icons.Material.Outlined.CalendarToday;
+
+    /// <summary>F-36: the student catalog, where a student searches the published exams.</summary>
+    public const string Catalog = Icons.Material.Outlined.ManageSearch;
+
+    /// <summary>F-36: puts every filter of a list back to "All".</summary>
+    public const string ClearFilters = Icons.Material.Outlined.FilterAltOff;
+
+    /// <summary>F-36: a link that opens another site in a new tab.</summary>
+    public const string OpenInNew = Icons.Material.Outlined.OpenInNew;
 }

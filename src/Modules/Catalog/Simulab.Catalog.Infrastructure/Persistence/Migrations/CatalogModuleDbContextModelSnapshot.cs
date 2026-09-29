@@ -89,6 +89,13 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnName("normalized_name")
                         .HasComment("The name without case or accents, which is what the unique index compares.");
 
+                    b.Property<string>("NormalizedScopeDetail")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("normalized_scope_detail")
+                        .HasComment("The scope detail without case or accents, empty when there is none. The student search reads it.");
+
                     b.Property<string>("Scope")
                         .IsRequired()
                         .HasMaxLength(40)

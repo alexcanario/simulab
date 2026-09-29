@@ -31,6 +31,31 @@ public sealed class AdminPagesAuthorizationTests
         ["ExamEditionForm"] = CatalogPermissions.Manage
     };
 
+    // F-36 BR10 and AC12: the student catalog is behind catalog.browse, never catalog.manage: a back office account
+    // that lacks it gets the ordinary Not Found page on both routes.
+    private static readonly Dictionary<string, string> ExpectedStudentPages = new(StringComparer.Ordinal)
+    {
+        ["CatalogSearch"] = CatalogPermissions.Browse,
+        ["CatalogExam"] = CatalogPermissions.Browse
+    };
+
+    [Fact]
+    public void EveryStudentCatalogPage_RequiresCatalogBrowse()
+    {
+        var pages = typeof(RoleHistory).Assembly.GetTypes()
+            .Where(type => type.GetCustomAttributes<RouteAttribute>().Any(route =>
+                route.Template.Equals("/catalog", StringComparison.Ordinal)
+                || route.Template.StartsWith("/catalog/", StringComparison.Ordinal)))
+            .ToList();
+
+        pages.Select(page => page.Name).Should().BeEquivalentTo(ExpectedStudentPages.Keys);
+        foreach (var page in pages)
+        {
+            page.GetCustomAttributes<AuthorizeAttribute>().Select(attribute => attribute.Policy)
+                .Should().Equal([PermissionPolicy.Prefix + ExpectedStudentPages[page.Name]], page.Name);
+        }
+    }
+
     [Fact]
     public void EveryAdminPage_RequiresItsModulesPermission()
     {
@@ -55,6 +80,7 @@ public sealed class AdminPagesAuthorizationTests
     public void EveryPermissionAPageOrMenuItemAsksFor_HasAPolicyInTheWeb()
     {
         var asked = Expected.Values
+            .Concat(ExpectedStudentPages.Values)
             .Concat(NavigationItems.All.Select(item => item.RequiredPermission).OfType<string>())
             .Distinct(StringComparer.Ordinal);
 

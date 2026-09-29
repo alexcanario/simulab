@@ -59,6 +59,25 @@ public sealed class AppFormAsideTests : KitTestContext
             .Should().Equal("done", "still missing");
     }
 
+    // F-36: the same component is the read-only detail summary of a page (an exam's facts): no checklist, every row a value.
+    [Fact]
+    public void Render_WithoutChecklist_IsATitledListOfLabelAndValuePairs()
+    {
+        var aside = Render<AppFormAside>(parameters => parameters
+            .Add(component => component.Title, "About this exam")
+            .Add(component => component.EmptyText, "Not filled")
+            .Add(component => component.Rows,
+            [
+                new AppAsideRow("Scope", "National"),
+                new AppAsideRow("Published editions", "2")
+            ]));
+
+        aside.Find("h2.app-form-aside-title").TextContent.Should().Be("About this exam");
+        aside.FindAll("dt").Select(term => term.TextContent.Trim()).Should().Equal("Scope", "Published editions");
+        aside.FindAll("dd").Select(value => value.TextContent.Trim()).Should().Equal("National", "2");
+        aside.FindAll(".app-form-aside-checklist, .app-form-aside-checklist-title").Should().BeEmpty();
+    }
+
     [Fact]
     public void Render_TheAsideHasNoButtonAndDoesNotAnnounceItself()
     {

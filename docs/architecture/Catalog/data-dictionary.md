@@ -49,6 +49,7 @@ Entity: `Exam` — A recurring assessment an issuing authority runs, such as a c
 | issuing_authority_id | uuid | no | FK → issuing_authorities |  | The body that publishes this exam's notices. |
 | name | character varying(200) | no |  |  | max 200; The exam's name, unique inside its issuing authority. |
 | normalized_name | character varying(200) | no |  |  | max 200; The name without case or accents, which is what the unique index compares. |
+| normalized_scope_detail | character varying(120) | no |  |  | max 120; The scope detail without case or accents, empty when there is none. The student search reads it. |
 | scope | character varying(40) | no |  |  | max 40; How far the exam reaches: National, State or Municipal. |
 | scope_detail | character varying(120) | yes |  |  | max 120; Which state or city the scope means, when it is not national. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |

@@ -1,5 +1,13 @@
 <MudTooltip Text="@Text" Class="app-truncate-host">
-    <span class="app-truncate" style="max-width: @MaxWidth" tabindex="0">@Text</span>
+    @if (string.IsNullOrEmpty(Href))
+    {
+        <span class="app-truncate" style="max-width: @MaxWidth" tabindex="0" lang="@Lang">@Text</span>
+    }
+    else
+    {
+        @* F-36, BR13: the text is the link, so it is the only tab stop; the tooltip still carries the full text. *@
+        <AppLink Href="@Href" Class="app-truncate" style="@($"max-width: {MaxWidth}")" lang="@Lang">@Text</AppLink>
+    }
 </MudTooltip>
 
 @code {
@@ -7,4 +15,11 @@
 
     /// <summary>CSS width after which the text is cut with an ellipsis.</summary>
     [Parameter] public string MaxWidth { get; set; } = "24rem";
+
+    /// <summary>F-36: with an address, the text is an <see cref="AppLink"/> carrying the truncation, inside the same tooltip.
+    /// The link is then the only tab stop. Without it the text is a plain focusable span, as before.</summary>
+    [Parameter] public string? Href { get; set; }
+
+    /// <summary>F-36: the language of the text when it is content (an exam's name), as a BCP 47 tag.</summary>
+    [Parameter] public string? Lang { get; set; }
 }

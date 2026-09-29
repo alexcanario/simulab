@@ -59,6 +59,11 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
             .IsRequired()
             .HasComment("The name without case or accents, which is what the unique index compares.");
 
+        builder.Property(exam => exam.NormalizedScopeDetail)
+            .HasMaxLength(CatalogLimits.ExamScopeDetailMaxLength)
+            .IsRequired()
+            .HasComment("The scope detail without case or accents, empty when there is none. The student search reads it.");
+
         // BR12 (v2): the issuing authority cannot be deleted while an exam points at it, and the handler
         // answers that with a 409. Restrict is the database saying the same thing, in case anything ever
         // bypasses it.

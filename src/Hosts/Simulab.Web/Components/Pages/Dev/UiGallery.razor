@@ -12,7 +12,9 @@
     return;
 }
 
+@* F-36: TitleLang is for a title that is content (an exam's name); here the title is the app's own, in the reader's language. *@
 <AppPageHeader Title="@L["Gallery.Title"]"
+               TitleLang="@CultureInfo.CurrentUICulture.Name"
                Breadcrumbs="_breadcrumbs"
                PrimaryActionText="@L["Common.Add"]"
                PrimaryActionIcon="@AppIcons.Add"
@@ -306,6 +308,27 @@
             <RowTemplate>@context</RowTemplate>
         </AppItemRows>
     </div>
+</section>
+
+@* F-36 BR13: the optional parameters a page that keeps its state in the address uses. Without them each component
+   renders as before (the sections above). *@
+<section id="gallery-kit-parameters" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.KitParameters"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.KitParameters.Hint"]</MudText>
+    <div class="gallery-form">
+        <AppTruncatedText Text="@L["Gallery.Table.SampleDescription"]" MaxWidth="10rem"
+                          Href="/dev/ui" Lang="@CultureInfo.CurrentUICulture.Name" />
+    </div>
+    <AppDataTable TItem="GallerySample"
+                  LoadAsync="_source.LoadAsync"
+                  InitialSearch="@SampleName(1)"
+                  InitialPage="1"
+                  InitialPageSize="10"
+                  EmptyMessage="@L["Gallery.States.EmptyMessage"]">
+        <Columns>
+            <PropertyColumn T="GallerySample" TProperty="string" Property="x => x.Name" Title="@L["Gallery.Table.Name"]" Sortable="false" />
+        </Columns>
+    </AppDataTable>
 </section>
 
 <section id="gallery-alerts" class="gallery-section">

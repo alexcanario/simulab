@@ -115,6 +115,56 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/issuing-authorities/{authorityId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-36 UC1 to UC3: one page of published exams, searched and filtered on the server.</summary>
+    public Task<ApiResult<PublishedExamPageResponse>> ListPublishedExamsAsync(
+        string accessToken,
+        PublishedExamListQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/published-exams?page={query.Page}&pageSize={query.PageSize}";
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (query.AssessmentType is { } assessmentType)
+        {
+            route += $"&assessmentType={assessmentType}";
+        }
+
+        if (query.Scope is { } scope)
+        {
+            route += $"&scope={scope}";
+        }
+
+        if (query.OrganizerId is { } organizer)
+        {
+            route += $"&organizerId={organizer}";
+        }
+
+        if (query.NoticeYear is { } year)
+        {
+            route += $"&noticeYear={year.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        return SendAsync<PublishedExamPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
+    /// <summary>F-36 UC4: a published exam with its published editions; 404 <c>exam.not_found</c> when there is none.</summary>
+    public Task<ApiResult<PublishedExamDetailResponse>> FindPublishedExamAsync(
+        string accessToken,
+        Guid examId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<PublishedExamDetailResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/published-exams/{examId}"), accessToken), cancellationToken);
+
+    /// <summary>F-36 BR7: the boards and notice years that have something published.</summary>
+    public Task<ApiResult<PublishedExamFiltersResponse>> GetPublishedExamFiltersAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<PublishedExamFiltersResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/published-exam-filters"), accessToken), cancellationToken);
+
     /// <summary>F-34 UC1: one page of exams, searched, filtered and sorted on the server.</summary>
     public Task<ApiResult<ExamPageResponse>> ListExamsAsync(
         string accessToken,

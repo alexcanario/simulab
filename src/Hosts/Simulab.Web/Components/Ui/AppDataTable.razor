@@ -5,7 +5,10 @@
 <MudDataGrid @ref="_grid"
              T="TItem"
              ServerData="LoadServerDataAsync"
-             RowsPerPage="DefaultPageSize"
+             RowsPerPage="_rowsPerPage"
+             RowsPerPageChanged="OnRowsPerPageChanged"
+             CurrentPage="_currentPage"
+             CurrentPageChanged="OnCurrentPageChanged"
              Hover="true"
              SortMode="SortMode.Single"
              Filterable="false"
@@ -67,6 +70,8 @@
     private MudDataGrid<TItem> _grid = default!;
     private string? _search;
     private bool _failed;
+    private int _rowsPerPage = DefaultPageSize;
+    private int _currentPage;
 
     /// <summary>Column definitions (PropertyColumn, TemplateColumn, AppNumberColumn, AppDateColumn).</summary>
     [Parameter, EditorRequired] public RenderFragment Columns { get; set; } = default!;
@@ -95,7 +100,28 @@
 
     [Parameter] public EventCallback OnEmptyAction { get; set; }
 
+    /// <summary>F-36, BR13: the text the search box starts with, and what the first load sends. Blank is none. Read once, when
+    /// the table is created: a page that keeps its state in the address passes what the address said.</summary>
+    [Parameter] public string? InitialSearch { get; set; }
+
+    /// <summary>F-36, BR13: the page the first load asks for, 0-based. A page past the last one falls back to page 0.</summary>
+    [Parameter] public int InitialPage { get; set; }
+
+    /// <summary>F-36, BR13: the rows per page of the first load when it is one of <see cref="PageSizes"/>; otherwise <see cref="DefaultPageSize"/>.</summary>
+    [Parameter] public int? InitialPageSize { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _search = string.IsNullOrWhiteSpace(InitialSearch) ? null : InitialSearch.Trim();
+        _currentPage = Math.Max(InitialPage, 0);
+        _rowsPerPage = InitialPageSize is { } size && PageSizes.Contains(size) ? size : DefaultPageSize;
+    }
+
     public Task ReloadAsync() => _grid.ReloadServerData();
+
+    private void OnRowsPerPageChanged(int size) => _rowsPerPage = size;
+
+    private void OnCurrentPageChanged(int page) => _currentPage = page;
 
     /// <summary>Reloads from the first page: after a filter outside the table changes (F-9: the role filter), as the search box does.</summary>
     public async Task ReloadFromFirstPageAsync()
@@ -114,6 +140,15 @@
         try
         {
             var page = await LoadAsync(query, cancellationToken);
+
+            // F-36, BR13: a page past the last one (a stale address, or rows deleted meanwhile) shows page 0
+            // instead of an empty table that still says there are rows.
+            if (page.Items.Count == 0 && page.TotalItems > 0 && state.Page > 0)
+            {
+                page = await LoadAsync(query with { Page = 0 }, cancellationToken);
+                _ = InvokeAsync(ShowFirstPageAsync);
+            }
+
             return new GridData<TItem> { Items = page.Items, TotalItems = page.TotalItems };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -125,6 +160,25 @@
             Logger.LogWarning(exception, "Table data for {ItemType} failed to load", typeof(TItem).Name);
             _failed = true;
             return new GridData<TItem> { Items = [], TotalItems = 0 };
+        }
+    }
+
+    private async Task ShowFirstPageAsync()
+    {
+        // The grid still counts the page that was past the end; it is told to sit on page 0, where the rows now are.
+        // It runs after the data callback returns (awaiting it there would wait on itself), so a failure is
+        // logged here: nobody observes this task.
+        try
+        {
+            await Task.Yield();
+            if (_grid.CurrentPage != 0)
+            {
+                _grid.NavigateTo(Page.First);
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Table for {ItemType} could not return to its first page", typeof(TItem).Name);
         }
     }
 
