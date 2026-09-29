@@ -1,7 +1,7 @@
 ---
 feature: F-37
 epic: Assessment catalog
-status: refining
+status: approved
 board: 756
 version: 1
 ---
@@ -65,6 +65,7 @@ No new route, screen or endpoint. The seeded rows appear in the screens and endp
 - AC11 The seed adds no UI text; the three UI locales and the missing-key test are unchanged and green.
 
 ## Decisions
+- 2026-09-29 — Approved by the owner ("aprovado", answering the approval request for F-37).
 - 2026-09-29 — The seed contains boards, authorities, exams and editions, not only Simulae's boards — the owner asked for the four levels and to research the missing data (owner, question 1).
 - 2026-09-29 — The owner allowed reading `D:\acanario\downloads\guarda_municipal_concursos.md`, outside the repository, read-only (owner, question 2).
 - 2026-09-29 — A one-time data migration, not a start-up seeder — the seed goes to every environment, an admin's delete must not come back at the next restart, and Simulae used a migration for its first seed (owner, question 3 and follow-up).
