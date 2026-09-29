@@ -1,7 +1,7 @@
 ---
 feature: F-37
 epic: Assessment catalog
-status: building
+status: validating
 board: 756
 version: 1
 ---
@@ -107,7 +107,15 @@ Not verified: the text of the Curitiba, Manaus and Maceió notice PDFs (the brow
 ## Change notes
 
 ## Validation script
-1. <Step> → <expected result>
+Needed to validate: the app host started from this worktree and an Admin account you sign in with (Claude does not enter credentials); Docker running. In place now: the item's own migration ran against a test PostgreSQL; the app host itself was not started by Claude.
+
+1. Close any app host running from another folder, then start this one: `dotnet run --project src/Hosts/Simulab.AppHost` (Git Bash and PowerShell 7, from `D:\dev\_icontrol\wt\simulab\f-37-catalog-seed-from`). The dashboard opens; wait until `api` and `web` are running. On a fresh database the catalog migration runs on start → no error in the `api` log.
+2. Sign in as an Admin and open the exam boards page → 7 boards: Instituto AOCP, Instituto Consulplan, Fundação Getulio Vargas (FGV), Copeve/Ufal, Vunesp, FCC, Cebraspe.
+3. Open the issuing authorities page → 6 authorities, `PM-CURITIBA`, `PM-MANAUS`, `PM-SALVADOR`, `PM-RECIFE`, `PM-GOIANIA`, `PM-MACEIO`; no Rio de Janeiro.
+4. Open the exams page → 6 exams (Salvador and Maceió named `Guarda Civil Municipal`, the others `Guarda Municipal`). Open Curitiba's editions → one edition, 2025, `Edital nº 02/2025`, Published, no application date, and its notice link opens the AOCP page. Recife and Goiânia have no edition.
+5. Sign in as a student and open the catalog → 4 exams (Curitiba, Manaus, Salvador, Maceió); Recife and Goiânia are not listed. Switch the language to English and back to pt-BR → the page keeps working and the seeded names stay as they are (content is not translated).
+6. As Admin, delete the Recife exam (soft delete), stop the app host and start it again → Recife does not come back (BR5).
+7. Keyboard only: on the student catalog, Tab to the search field, type `guarda civil`, Tab to the results → Salvador and Maceió remain, and focus is visible on each card.
 
 ## Delivery
 - Branch: feature/F-37
