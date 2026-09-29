@@ -1,7 +1,7 @@
 ---
 page: catalog
 locale: en
-features: [F-36]
+features: [F-36, F-37]
 updated: 2026-09-29
 ---
 # Catalog
@@ -29,6 +29,11 @@ The address of the page keeps your search, filters and page, so you can bookmark
 4. The **About this exam** card gives the issuing authority, the assessment type, the scope, the language of the exam, and how many editions are published.
 
 Exam content is shown in its own language and is never translated.
+
+## What a new environment already has
+Every environment starts with the municipal guard exams, so the catalog is never empty at the beginning. Four exams appear for students, each with its published edition and the link to the official notice: Guarda Municipal of Curitiba (Instituto AOCP, notice 2025), Guarda Municipal of Manaus (Instituto Consulplan, 2026), Guarda Civil Municipal of Salvador (FGV, 2026) and Guarda Civil Municipal of Maceió (Copeve/Ufal, 2026). The exams of Recife and Goiânia are already registered but have no notice yet, so they stay in the administration until an Admin adds and publishes an edition. The published editions show no application date, because it was not confirmed on the official sites.
+
+These rows are ordinary data: an Admin can edit or delete any of them and the change stays.
 
 ## Fields
 | Field | Meaning | Rules |
