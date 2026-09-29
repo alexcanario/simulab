@@ -1,7 +1,7 @@
 ---
 feature: F-37
 epic: Assessment catalog
-status: validating
+status: done
 board: 756
 version: 1
 ---
@@ -77,7 +77,7 @@ No new route, screen or endpoint. The seeded rows appear in the screens and endp
 - 2026-09-29 — Authority acronyms are `PM-<CITY>` — the field is required and unique-friendly, and the notice does not give one — Claude.
 - 2026-09-29 — No new package, no new permission, no new screen — Claude.
 - 2026-09-29 — BR12 done in the built-in browser: the sheet changed (Curitiba is `Edital nº 02/2025`, notice year 2025, and its 2026-01-18 date is contradicted; every application date is left empty because no primary source confirmed one). All four editions are `Published` (reference and link confirmed) — Claude.
-- 2026-09-29 — The research runs again at build time in the built-in browser (BR12): the first pass could not open the Curitiba, Salvador and Maceió notices (403, 404, HTML instead of PDF), so their data is provisional until then — Claude.
+- 2026-09-29 — The research ran again at build time in the built-in browser (BR12); the first pass could not open the Curitiba, Salvador and Maceió notices (403, 404, HTML instead of PDF), and the line above records what the second pass settled — Claude.
 
 ## Sources
 Checked in the built-in browser on 2026-09-29 (BR12); a field no primary source confirmed is empty (BR11). "Primary" is the notice, the prefeitura or the board's site; anything else is not used for a value.
@@ -119,6 +119,6 @@ Needed to validate: the app host started from this worktree and an Admin account
 
 ## Delivery
 - Branch: feature/F-37
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: a8ab607 (owner validated on screen and authorized the merge with `/agile:ship f-37`, 2026-09-29)
+- Tests: full suite 1692 passed, 0 failed, 75 s test + 26 s build (gate ship GREEN); 10 new in `SeedMunicipalGuardCatalogTests`
+- Manual pages: `docs/manual/{pt-BR,pt-PT,en}/catalog.md` (section "What a new environment already has"). The taxonomy import (BR13) is registered as F-51.
