@@ -1,7 +1,7 @@
 ---
 feature: F-36
 epic: Assessment catalog
-status: idea
+status: refining
 board: 755
 version: 1
 ---
