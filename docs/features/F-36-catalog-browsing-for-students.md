@@ -40,22 +40,23 @@ Let a student find the exam they are preparing for among what the catalog has pu
 - UC7 An Admin removes `catalog.browse` from a role in the roles back office and it stays removed after the app restarts.
 
 ## Business rules
-- BR1 An exam is published when at least one of its editions is `Published` (deleted editions excluded). Only published exams exist for the student side: the list, the exam page, the filter options and `IPublishedExamQueries` never return an unpublished exam or a draft edition, whoever asks (owner, question 8).
+- BR1 An exam is published when at least one of its editions is `Published` (deleted editions excluded). Only published exams exist for the student side: the list, the exam page, the filter options and `IPublishedExamQueries` never return an unpublished exam or a draft edition, whoever asks (owner, question 10).
 - BR2 The list has one row per published exam: name, issuing authority name and acronym, assessment type, scope and scope detail, content language, the number of published editions and the latest published notice year. Ordered by exam name A to Z, then id; paged with the shared rule (default 25, cap 100).
 - BR3 The search text is normalized with `CatalogText.Normalize` and split into words on whitespace; an exam matches when every word appears in at least one of: the exam's normalized name, its issuing authority's normalized name or acronym, its normalized scope detail. "guarda sp" finds "Guarda Municipal" of "Prefeitura de São Paulo (SP)". Blank text is no filter.
 - BR4 `Exam` gains `NormalizedScopeDetail` (`CatalogText.Normalize` of `ScopeDetail`, empty when there is none), kept by `Exam.Create`/`Update`. The migration adds the column and fills it for the existing rows.
 - BR5 Filters: assessment type (one of the four), scope (`National`, `State`, `Municipal`; no state or municipality picker — F-42), exam board (one organizer id) and notice year (one year). They combine with AND, and with the text. The board and the year match on the same published edition: an exam with a 2024 FGV edition and a 2025 CEBRASPE edition does not match "FGV, 2025".
 - BR6 A filter value the Api cannot read (an unknown type, scope, id or year) is no filter, as in the back office list (F-34 BR14): a stale bookmark shows results, not an error.
-- BR7 The filter options come from the published catalog: the boards that name at least one published edition (name and acronym, ordered by name) and the notice years of published editions (newest first). A board or a year with nothing published is not offered.
+- BR7 The filter options come from the published catalog: the boards that name at least one published edition (acronym and name, ordered by acronym, shown as "ACRONYM — Name") and the notice years of published editions (newest first). A board or a year with nothing published is not offered.
 - BR8 The exam page shows the exam (BR2 fields) and every published edition of it — all of them, whatever filters led there — ordered by notice year descending, then position, then board name (F-35 BR14 order). Each edition shows notice year, position, board name and acronym, notice reference, application date and the notice link. An exam that does not exist, is deleted or is not published is 404 `exam.not_found`.
 - BR9 The notice link opens the official page in a new tab (`target="_blank"`, `rel="noopener noreferrer"`) and says so to screen readers. Content is shown as stored, never translated (ADR-0001 #27); the exam's content language is shown.
-- BR10 A new permission `catalog.browse` gates the three endpoints, the menu item and both pages. Identity grants it to Student, Curator and Admin only in the start where the permission row is created; afterwards only the roles back office changes who holds it, and a later start never grants it again (Admin keeps receiving every permission on each start, F-6 BR3). Having `catalog.manage` alone does not open the student catalog (owner, question 7).
+- BR10 A new permission `catalog.browse` gates the three endpoints, the menu item and both pages. Identity grants it to Student, Curator and Admin only in the start where the permission row is created; afterwards only the roles back office changes who holds it, and a later start never grants it again (Admin keeps receiving every permission on each start, F-6 BR3). Having `catalog.manage` alone does not open the student catalog (owner, question 9).
 - BR11 `IPublishedExamQueries` in `Simulab.Catalog.Contracts` is the read side other modules call (list, find with editions, filter options); the endpoints use the same interface.
 - BR12 Every new UI text and error code exists in pt-BR, pt-PT and en in `SharedResources`; the enum labels reuse the back office keys.
+- BR13 `/catalog` keeps its search, filters, page and page size in the query string; opening that address restores them, and the exam page's breadcrumb and back link return to it. An unreadable value is no filter (BR6). Three kit components gain optional parameters for it and for the exam page: `AppDataTable` (`InitialSearch`, `InitialPage`, `InitialPageSize`), `AppTruncatedText` (`Href`, `Lang`) and `AppPageHeader` (`TitleLang`) (owner, screen questions 1, 3 and 4).
 
 ## Screens and API
 
-Designed by `/agile:screen` on 2026-09-29. Mockup: `docs/features/mockups/F-36-catalog-browsing-for-students.html` (two screens and the menu, every state, light and dark, pt-BR / pt-PT / en, three permission sets). Only kit patterns from `/dev/ui` are used; no new component and no new colour. Three new `AppIcons` constants. Every text below is a `SharedResources` key; error codes reach the screen only through `ErrorText.For`. Both screens are read-only: nothing is written, so there is no saving, success or validation state (BR6: a filter value the Api cannot read is no filter, never an error).
+Designed by `/agile:screen` on 2026-09-29. Mockup: `docs/features/mockups/F-36-catalog-browsing-for-students.html` (two screens and the menu, every state, light and dark, pt-BR / pt-PT / en, three permission sets). Only kit patterns from `/dev/ui` are used; no new component and no new colour. Three kit components gain parameters (`AppDataTable`, `AppTruncatedText`, `AppPageHeader` — see "Kit changes") and three `AppIcons` constants are new. Every text below is a `SharedResources` key; error codes reach the screen only through `ErrorText.For`. Both screens are read-only: nothing is written, so there is no saving, success or validation state (BR6: a filter value the Api cannot read is no filter, never an error).
 
 ### Routes
 | Route | Purpose | Gate |
@@ -72,7 +73,7 @@ Menu: item "Catalog" (`Nav.Catalog`) in the Study section, `RequiredPermission: 
 
 **Page header.** `AppPageHeader Title="Catalog.Title"`, no primary action (a student adds nothing here). Breadcrumb: `Nav.Section.Study` (disabled) › `Catalog.Title` (disabled). `<PageTitle>` comes from the header.
 
-**Composition.** One `AppDataTable TItem="PublishedExamResponse"`, `Searchable="true"`, no `RowActions`:
+**Composition.** One `AppDataTable TItem="PublishedExamResponse"`, `Searchable="true"`, no `RowActions`, with `InitialSearch`, `InitialPage` and `InitialPageSize` read from the URL (see "The URL keeps the search"):
 1. Search box (the kit's, first in the toolbar): `SearchPlaceholder` = `Catalog.Search.Placeholder`; debounced 300 ms by the kit, sends `search` as typed; the Api normalizes and splits it (BR3).
 2. `ToolBarContent` → `div.app-table-filters` with four `AppSelectField`s, then the clear button (table below).
 3. Columns (below). No column is sortable (`Sortable="false"` on each): the Api has one order, exam name A to Z then id (BR2), and a sort arrow that does nothing would lie.
@@ -85,18 +86,34 @@ Menu: item "Catalog" (`Nav.Catalog`) in the Study section, `RequiredPermission: 
 |---|---|---|---|---|
 | Assessment type | `catalog-filter-type` | `AppSelectField TValue="AssessmentType?"`, label `Exams.Filter.AssessmentType` | `Common.Filter.All`, then the four types in `ExamText.AssessmentTypeOrder(L)` with `Exams.AssessmentType.*` (BR12) | `assessmentType` |
 | Scope | `catalog-filter-scope` | `AppSelectField TValue="ExamScope?"`, label `Exams.Filter.Scope` | `Common.Filter.All`, `National`, `State`, `Municipal` with `Exams.Scope.*`; no state or municipality picker (F-42) | `scope` |
-| Exam board | `catalog-filter-organizer` | `AppSelectField TValue="Guid?"`, label `Catalog.Filter.Organizer` | `Common.Filter.All`, then `PublishedExamFiltersResponse.Organizers` in the Api's order (by name, BR7), text `Name (ACRONYM)` | `organizerId` |
+| Exam board | `catalog-filter-organizer` | `AppSelectField TValue="Guid?"`, label `Catalog.Filter.Organizer` | `Common.Filter.All`, then `PublishedExamFiltersResponse.Organizers` in the Api's order (by acronym, BR7), text `ACRONYM — Name` | `organizerId` |
 | Notice year | `catalog-filter-year` | `AppSelectField TValue="int?"`, label `Catalog.Filter.NoticeYear` | `Common.Filter.All`, then `NoticeYears` in the Api's order (newest first, BR7), written as plain digits (`2026`, never `2.026`) | `noticeYear` |
 
 - The board and year options come from `GET /published-exam-filters`, requested once when the page opens, beside the first list call. While it runs the two selects are `Disabled`. If it fails, the two selects stay disabled with only `Common.Filter.All`, the warning alert `Catalog.Filter.OptionsFailed` shows with Try again, and the list, the search and the other two filters keep working.
 - Board and year are two independent selects; the rule that they match on the same edition (BR5) is the Api's. The screen never narrows one select by the other.
-- **Clear filters**: a text `MudButton` (`Variant.Text`, `StartIcon="AppIcons.ClearFilters"`, new: `Icons.Material.Outlined.FilterAltOff`), text `Catalog.Filter.Clear`, placed last in `app-table-filters`, shown only while at least one of the four selects is not "All". It sets the four back to "All" and reloads from page 1. It does not clear the search text: the search box keeps its own clear button (the kit's `Clearable`), and `AppDataTable` does not let a page reset its search.
+- **Clear filters**: a text `MudButton` (`Variant.Text`, `StartIcon="AppIcons.ClearFilters"`, new: `Icons.Material.Outlined.FilterAltOff`), text `Catalog.Filter.Clear`, placed last in `app-table-filters`, shown only while at least one of the four selects is not "All". It sets the four back to "All" and reloads from page 1. It does not clear the search text: the search box keeps its own clear button (the kit's `Clearable`).
+
+**The URL keeps the search.** `/catalog` reads and writes its state in the query string, so a bookmark, a shared link, the browser's Back button and the links back from the exam page all bring the same list.
+
+| Query key | Holds | Read from the URL | Unreadable value |
+|---|---|---|---|
+| `search` | the search text as typed | trimmed; blank is none | — |
+| `assessmentType` | an `AssessmentType` name | case-insensitive enum name | no filter (BR6) |
+| `scope` | an `ExamScope` name | case-insensitive enum name | no filter (BR6) |
+| `organizerId` | a board id | a `Guid` | not a `Guid` → no filter; a `Guid` missing from the loaded options → dropped from the URL and the list reloads (BR6) |
+| `noticeYear` | a year | an integer | not an integer, or missing from the loaded options → no filter, as above (BR6) |
+| `page` | the page, 1-based | integer ≥ 1 | page 1; a page past the last one reloads page 1 |
+| `pageSize` | the rows per page | one of `AppDataTable.PageSizes` (10, 25, 50) | 25 |
+
+- **Writing.** After every load the page rewrites the URL from the `AppTableQuery` it received (page, page size, search) plus its four filters, with `NavigationManager.NavigateTo(uri, replace: true)`: typing, filtering and paging never add history entries, so Back from the list leaves the catalog. Keys at their default (blank search, "All", page 1, size 25) are left out: the plain list is just `/catalog`.
+- **Reading.** On open, the page parses the keys (table above), sets its four filters and passes `InitialSearch`, `InitialPage` (0-based for the kit) and `InitialPageSize` to `AppDataTable`. While the filter options load or after they failed, a readable `organizerId` / `noticeYear` from the URL is still sent (the Api decides, BR6) and "Clear filters" shows so the reader can drop it.
+- **To the exam and back.** The exam-name link is `/catalog/exams/{id}` followed by the catalog's current query string (only the seven keys above). The exam page ignores those keys for itself and builds its breadcrumb "Catalog" link and its "Back to the catalog" link as `/catalog` + the same query string, so both restore the list as it was. Opened without them (a bookmark, a new tab), both links go to plain `/catalog`.
 
 **Columns.**
 
 | # | Column | Title key | Kit | Cell |
 |---|---|---|---|---|
-| 1 | Name | `Exams.Column.Name` | `TemplateColumn` | the exam name as an `AppLink` to `/catalog/exams/{id}`, truncated at 26rem with the full name as tooltip (rule `ui-project`); `lang` = the exam's content language |
+| 1 | Name | `Exams.Column.Name` | `TemplateColumn` | `AppTruncatedText Text="@Name" MaxWidth="26rem" Href="/catalog/exams/{id}?{catalog query}" Lang="@ContentLanguage"` (kit change): a truncated link with the full name as tooltip, one tab stop (rule `ui-project`) |
 | 2 | Issuing authority | `Exams.Column.IssuingAuthority` | `TemplateColumn` | `AppTruncatedText` name (14rem) and the acronym below in `app-cell-secondary` (the back office cell) |
 | 3 | Assessment type | `Exams.Column.AssessmentType` | `TemplateColumn` | `ExamText.AssessmentTypeName` |
 | 4 | Scope | `Exams.Column.Scope` | `TemplateColumn` | `ExamText.ScopeName`, and the scope detail below in `app-cell-secondary` when there is one |
@@ -110,7 +127,7 @@ The name is the row's only link and the only way to the exam page (rule `ui`: th
 
 ### Screen 2 — the exam page (`CatalogExam.razor`, `/catalog/exams/{id:guid}`)
 
-**Page header.** `AppPageHeader Title` = the exam name (`Catalog.Exam.Title` while loading, not found or failed). No primary action. Breadcrumb: `Nav.Section.Study` (disabled) › `Catalog.Title` (link `/catalog`) › the exam name (disabled; absent while loading, not found or failed).
+**Page header.** `AppPageHeader Title` = the exam name, `TitleLang` = the exam's content language (kit change); while loading, not found or failed the title is `Catalog.Exam.Title` with no `TitleLang`. No primary action. Breadcrumb: `Nav.Section.Study` (disabled) › `Catalog.Title` (link `/catalog` + the catalog query it came with) › the exam name (disabled; absent while loading, not found or failed).
 
 **Layout.** The F-43 composition, read-only: `div.app-form-layout` → `MudPaper.app-form-card` (the editions section) + `AppFormAside` (the exam). On a screen narrower than 1280 px the aside comes below the editions, as on every page of that layout.
 
@@ -122,7 +139,7 @@ Row template, in one line that wraps on a phone:
 3. `ExamEditions.Row.AppliedOn` with the date as a short date in the reader's culture (`"d"`), when there is one.
 4. When `NoticeUrl` has a value: an `AppLink Href="@NoticeUrl" target="_blank" rel="noopener noreferrer"` with the visible text `Catalog.Editions.NoticeLink` followed by the `AppIcons.OpenInNew` icon (new: `Icons.Material.Outlined.OpenInNew`, `aria-hidden`, 16 px), and `aria-label` = `Catalog.Editions.NoticeLink.Name` with `{0}` the label parts joined by `, ` (the accessible name starts with the visible text and says it opens in a new tab, BR9, AC10). With no URL, nothing is shown in its place.
 
-**The exam** — `AppFormAside`, `Title="Catalog.Exam.About"`, no checklist, `EmptyText="Common.Summary.NotFilled"` (never reached: rows without a value are left out). Rows, in order:
+**The exam** — `AppFormAside` reused as a read-only detail summary (the build widens its doc comment, which today says "beside a long form"), `Title="Catalog.Exam.About"`, no checklist, `EmptyText="Common.Summary.NotFilled"` (never reached: rows without a value are left out). Rows, in order:
 
 | Label key | Value |
 |---|---|
@@ -134,7 +151,19 @@ Row template, in one line that wraps on a phone:
 | `Catalog.Exam.PublishedEditions` | the number of published editions (`N0`) |
 | `Catalog.Exam.LatestNoticeYear` | the latest published notice year (plain digits) |
 
-**Not found.** A `404 exam.not_found` (unknown id, deleted exam, exam with only drafts — BR8, AC9) shows, inside the page layout, one `app-form-card` with `AppAlert Severity="Error" Text="exam.not_found"` and below it `AppLink Href="/catalog"` `Catalog.BackToCatalog`. The alert does not say why (drafts are never revealed, BR1).
+**Not found.** A `404 exam.not_found` (unknown id, deleted exam, exam with only drafts — BR8, AC9) shows, inside the page layout, one `app-form-card` with `AppAlert Severity="Error" Text="exam.not_found"` and below it `AppLink Href="/catalog"` + the catalog query it came with, text `Catalog.BackToCatalog`. The alert does not say why (drafts are never revealed, BR1).
+
+### Kit changes
+Each is a new optional parameter; every existing page keeps its behaviour. Each gets a `/dev/ui` example and a bunit test.
+
+| Component | Parameter | Behaviour |
+|---|---|---|
+| `AppDataTable` | `InitialSearch` (`string?`) | the search box starts with this text and the first load sends it; blank is none |
+| `AppDataTable` | `InitialPage` (`int`, 0-based, default 0) | the first load asks for this page; if the result is empty while `TotalItems` > 0 (past the last page), the table reloads page 0 |
+| `AppDataTable` | `InitialPageSize` (`int?`) | the rows per page of the first load when it is one of `PageSizes`, else `DefaultPageSize` |
+| `AppTruncatedText` | `Href` (`string?`) | with a value, the text renders as an `AppLink` (underlined, the kit's link colour and focus ring) carrying the truncation, inside the same `MudTooltip`; the link is the only tab stop (the span's `tabindex="0"` is dropped). Without it, unchanged |
+| `AppTruncatedText` | `Lang` (`string?`) | the `lang` attribute of the text or link, for content in the exam's language |
+| `AppPageHeader` | `TitleLang` (`string?`) | the `lang` attribute of the `h1`, for a title that is content (the exam name) |
 
 ### States
 
@@ -145,7 +174,8 @@ Row template, in one line that wraps on a phone:
 | Loading | first load, and every search, filter or page change while the call runs | the kit's `AppLoadingState` in the table body; toolbar stays usable | `role="status"` "Loading..." |
 | Options loading | the filter options call has not answered | board and year selects disabled with only "All" | — |
 | Ready | one or more exams | rows by name, pager `1-25 of 132` | — |
-| Ready, filtered | search text and/or a filter | the matching rows; "Clear filters" shown when a select is not "All" | — |
+| Ready, filtered | search text and/or a filter | the matching rows; "Clear filters" shown when a select is not "All"; the URL carries the query | — |
+| Restored from the URL | opened with query keys (bookmark, Back, the exam page's links) | search box, selects and page as the URL says; unreadable keys ignored (BR6) | — |
 | Empty catalog | no published exam and no search or filter (AC1 with nothing published) | `AppEmptyState` `Catalog.Empty`, no action | — |
 | No match, search | search text, no row | `Catalog.Empty.Search` with the text | — |
 | No match, filters | a filter, no search text, no row | `Catalog.Empty.Filters` + outlined "Clear filters" | — |
@@ -174,7 +204,7 @@ One permission, `catalog.browse` (BR10): `[Authorize(Policy = PermissionPolicy.P
 
 ### Accessibility
 - **Elements.** The exam name in a row is a link (it navigates); "Clear filters" and Try again are buttons (they act); the breadcrumb "Catalog" and "Back to the catalog" are links; the notice link is a link to another site, opening in a new tab. Each filter is the kit's labelled `AppSelectField` (label above, `aria-labelledby`, `aria-describedby`).
-- **Tab order, search page:** skip link → app bar → menu → the warning alert's Try again (only in "Options failed"; the alert sits above the table) → search box → its clear button (when filled) → Assessment type → Scope → Exam board → Notice year → Clear filters (when shown) → per row: the exam name link, then the issuing authority's `AppTruncatedText` (focusable in the kit so its tooltip can be read) → pager (rows per page, then page buttons).
+- **Tab order, search page:** skip link → app bar → menu → the warning alert's Try again (only in "Options failed"; the alert sits above the table) → search box → its clear button (when filled) → Assessment type → Scope → Exam board → Notice year → Clear filters (when shown) → per row: the exam name (a truncated link, one tab stop), then the issuing authority's `AppTruncatedText` (focusable in the kit so its tooltip can be read) → pager (rows per page, then page buttons).
 - **Tab order, exam page:** breadcrumb "Catalog" → each edition's notice link, newest first → nothing in the aside (read-only). Not found: the back link.
 - **Screen reader.** Headings: `h1` page title; on the exam page `h2` "Editions" (section card) and `h2` "About this exam" (aside). The editions are a `<ul>`; the aside is a `<dl>`. Each notice link reads "Official notice, 2026, Guarda Municipal de 3ª Classe, Instituto Consulplan (CONSULPLAN), opens in a new tab". Content text (exam name, position, notice reference) carries `lang` of the exam, so a reader in `en` hears Portuguese content pronounced as Portuguese. Loading, empty and error states are the kit's (`role="status"` / `role="alert"`).
 - **Targets.** Links in rows and the pager buttons are at least 24 px high (kit line height and button sizes); "Clear filters" is a kit button (36 px).
@@ -231,15 +261,17 @@ New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `Clear
 - AC4 Given an existing exam saved before the migration with scope detail "Goiânia", when the migration runs, then its `NormalizedScopeDetail` is "GOIANIA"; and saving an exam with a new scope detail updates it. (BR4)
 - AC5 Given a published exam with a 2024 FGV edition and a 2025 CEBRASPE edition, when filtered by FGV and 2025, then it is not listed; by FGV and 2024, it is; by assessment type or scope that differs, it is not. (BR5, UC3)
 - AC6 Given the filters `assessmentType=Foo`, `scope=Bar`, an unknown `organizerId` and `noticeYear=abc`, when the list is requested, then 200 with the unfiltered result. (BR6)
-- AC7 Given a board that names only draft editions and a year with only drafts, when the filter options are requested, then neither is offered; boards come by name and years newest first. (BR7)
+- AC7 Given a board that names only draft editions and a year with only drafts, when the filter options are requested, then neither is offered; boards come ordered by acronym and years newest first. (BR7)
 - AC8 Given a published exam with editions 2023 (published), 2025 (published) and 2024 (draft), when a Student opens its page, then the two published editions show with board, position, notice reference, application date and notice link, 2025 first, and the 2024 draft does not. (BR8, UC4)
-- AC9 Given an exam with only drafts, a deleted exam and a random id, when its page or `GET /published-exams/{id}` is requested, then Not Found / 404 `exam.not_found`. (BR8)
+- AC9 Given an exam with only drafts, a deleted exam and a random id, when its page is opened, then the page shows the `exam.not_found` alert with a link back to the catalog; and `GET /published-exams/{id}` answers 404 `exam.not_found`. (BR8)
 - AC10 Given an edition with a notice URL, when its row renders, then the link has `target="_blank"`, `rel="noopener noreferrer"` and an accessible name that says it opens in a new tab. (BR9)
 - AC11 Given a fresh database, when the app starts, then Student, Curator and Admin hold `catalog.browse`; given the Admin removed it from Student and the app restarts, then Student still lacks it. (BR10, UC7)
 - AC12 Given a user whose roles hold `catalog.manage` but not `catalog.browse`, then the menu shows no Catalog item, `/catalog` and `/catalog/exams/{id}` show Not Found, and the three endpoints answer 403 `identity.forbidden`; with `catalog.browse`, the item shows in the Study section. (BR10, UC6)
 - AC13 Given a signed-in Admin with both permissions, when the catalog is listed, then draft-only exams are not shown. (BR1, UC5)
 - AC14 Given `IPublishedExamQueries` resolved from the container, then it returns the same results as the endpoints for AC1, AC5 and AC8. (BR11)
 - AC15 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green. (BR12)
+- AC16 Given `/catalog?search=guarda&scope=State&page=2`, when it opens, then the search box shows "guarda", the scope filter shows State and page 2 loads; after opening an exam and following its breadcrumb or back link, the same search, filters and page are shown; `scope=Bar` in the address is ignored. (BR13, BR6)
+- AC17 Given the three kit components on `/dev/ui`, then `AppDataTable` starts with `InitialSearch`/`InitialPage`, `AppTruncatedText` with `Href` renders one link with its tooltip and `lang`, and `AppPageHeader` with `TitleLang` sets the `lang` of its `h1`; without the new parameters each renders as before. (BR13)
 
 ## Decisions
 - 2026-09-29 — One row per exam; its editions show on the exam page — the student looks for "the exam", and a row per edition repeats the exam name (owner, question 1).
@@ -257,6 +289,12 @@ New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `Clear
 - 2026-09-29 — `NormalizedScopeDetail` is a stored column, backfilled by the migration — the search stays in the database without a PostgreSQL extension, the F-33 BR9 precedent (Claude, technical). The backfill's accent stripping is checked by AC4.
 - 2026-09-29 — Routes `published-exams` and `published-exam-filters` instead of a `browse` verb — the naming rule wants plural nouns (Claude, technical).
 - 2026-09-29 — A Student with no published exam to show sees the empty state, not an error; the query cost is measured with `EXPLAIN` on the test container during build, not assumed (Claude, technical).
+- 2026-09-29 — `/catalog` keeps search, filters, page and page size in the query string; the exam page's breadcrumb and back link carry it back, and an unreadable value is no filter (BR6); `AppDataTable` gains `InitialSearch`, `InitialPage` and `InitialPageSize` (owner, screen question 1).
+- 2026-09-29 — Board options read "ACRONYM — Name", ordered by acronym — students know boards by acronym and long names were cut in the closed select; BR7 and AC7 changed (owner, screen question 2).
+- 2026-09-29 — The exam name in the list stays truncated with a tooltip and is a link; `AppTruncatedText` gains `Href` (renders an `AppLink`, one tab stop) and `Lang` (owner, screen question 3).
+- 2026-09-29 — `AppPageHeader` gains `TitleLang`; the exam page passes the exam's content language. The search results-count announcement is not in this item (a separate idea) (owner, screen question 4).
+- 2026-09-29 — AC9 reworded: the exam page shows the `exam.not_found` alert with a link back to the catalog, and the Api answers 404 `exam.not_found`; the ordinary Not Found page stays for a missing permission (Claude, technical).
+- 2026-09-29 — The exam facts reuse `AppFormAside` as a read-only summary; the build widens its doc comment instead of adding a detail-list component (Claude, technical).
 
 ## Out of scope
 - Choosing and saving a target exam with a date: that belongs to the AI coach's study plan (epic 701).
@@ -264,6 +302,7 @@ New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `Clear
 - A state or municipality picker in the filters — F-42.
 - Visitors who are not signed in: the catalog is for signed-in users.
 - Changing the Home page.
+- Announcing the search result count to screen readers in every table — F-50.
 
 ## Open questions
 - (none)

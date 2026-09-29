@@ -268,6 +268,11 @@ table.app-grid { width: 100%; border-collapse: collapse; font-size: var(--app-fo
   </div>
   <div class="demo-row" id="demo-states"></div>
   <div class="demo-row">
+    <span class="demo-label">Demo &middot; URL</span>
+    <code id="demo-url" style="font-size:var(--app-font-xs);overflow-wrap:anywhere"></code>
+    <span class="demo-note">Typing, filtering and paging replace the URL (no history entry)</span>
+  </div>
+  <div class="demo-row">
     <span class="demo-label">Demo &middot; signed in as</span>
     <button type="button" data-perm="student">Student (catalog.browse)</button>
     <button type="button" data-perm="admin">Admin (browse + manage)</button>
@@ -539,7 +544,7 @@ function apiFilters() {
   const boards = new Map(), years = new Set();
   EXAMS.forEach(e => published(e).forEach(x => { boards.set(x.board.id, x.board); years.add(x.year); }));
   return {
-    organizers: [...boards.values()].sort((a, b) => cmpName(a.name, b.name)),
+    organizers: [...boards.values()].sort((a, b) => cmpName(a.acr, b.acr)),   /* BR7: by acronym */
     years: [...years].sort((a, b) => b - a)
   };
 }
@@ -549,7 +554,7 @@ const latestYear = (e) => Math.max(...published(e).map(x => x.year));
    Demo state
    =========================================================================== */
 const STATES = {
-  search: [["loading", "Loading"], ["ready", "Ready"], ["filtered", "Ready, filtered"], ["empty", "Empty catalog"],
+  search: [["loading", "Loading"], ["ready", "Ready"], ["filtered", "Ready, filtered"], ["restored", "Restored from URL (with unreadable keys)"], ["empty", "Empty catalog"],
            ["nomatch-search", "No match (search)"], ["nomatch-filters", "No match (filters)"],
            ["options-loading", "Options loading"], ["options-failed", "Options failed"], ["error", "Server error"]],
   exam: [["loading", "Loading"], ["ready", "Ready"], ["sparse", "Ready, sparse (ENEM)"], ["notfound", "Not found (draft-only / deleted / unknown id)"], ["error", "Server error"]]
@@ -558,8 +563,43 @@ const S = {
   screen: "search", lang: "pt-BR", theme: "light", perm: "student",
   state: { search: "ready", exam: "ready" },
   q: { search: "", type: "", scope: "", org: "", year: 0 },
-  page: 0, pageSize: 25, examId: "e1"
+  page: 0, pageSize: 25, examId: "e1",
+  examQs: ""          /* the catalog query the exam page came with; its breadcrumb and back link carry it back */
 };
+
+/* ---- the URL keeps the search: /catalog?search&assessmentType&scope&organizerId&noticeYear&page&pageSize ---- */
+function catalogQuery() {
+  const p = new URLSearchParams();
+  if (S.q.search.trim()) p.set("search", S.q.search.trim());
+  if (S.q.type) p.set("assessmentType", S.q.type);
+  if (S.q.scope) p.set("scope", S.q.scope);
+  if (S.q.org) p.set("organizerId", S.q.org);
+  if (S.q.year) p.set("noticeYear", S.q.year);
+  if (S.page > 0) p.set("page", S.page + 1);          /* 1-based in the URL */
+  if (S.pageSize !== 25) p.set("pageSize", S.pageSize);
+  const s = p.toString();
+  return s ? "?" + s : "";
+}
+function parseCatalogQuery(qs) {                      /* an unreadable value is no filter (BR6) */
+  const p = new URLSearchParams(qs);
+  const f = apiFilters();
+  const pick = (v, list) => list.find(x => x.toLowerCase() === String(v || "").toLowerCase()) || "";
+  const year = Number(p.get("noticeYear"));
+  const page = Number(p.get("page"));
+  const size = Number(p.get("pageSize"));
+  S.q = {
+    search: (p.get("search") || "").trim(),
+    type: pick(p.get("assessmentType"), TYPES),
+    scope: pick(p.get("scope"), SCOPES),
+    org: f.organizers.some(o => o.id === p.get("organizerId")) ? p.get("organizerId") : "",
+    year: Number.isInteger(year) && f.years.includes(year) ? year : 0
+  };
+  S.page = Number.isInteger(page) && page >= 1 ? page - 1 : 0;
+  S.pageSize = [10, 25, 50].includes(size) ? size : 25;
+}
+function showUrl() {
+  $("demo-url").textContent = S.screen === "search" ? "/catalog" + catalogQuery() : `/catalog/exams/${S.examId}${S.examQs}`;
+}
 
 const $ = (id) => document.getElementById(id);
 const t = (key, ...args) => {
@@ -599,7 +639,7 @@ function notFoundHtml() {
 
 function header(titleText, crumbs) {
   const c = crumbs.map(p => p.go
-    ? `<a tabindex="0" data-go="${p.go}">${esc(p.text)}</a>`
+    ? `<a href="/catalog${p.go === "back" ? esc(S.examQs) : ""}" data-go="${p.go}">${esc(p.text)}</a>`
     : `<span ${p.current ? 'aria-current="page"' : ""}>${esc(p.text)}</span>`).join('<span aria-hidden="true">›</span>');
   return `<div class="app-page-header"><nav class="app-breadcrumbs" aria-label="Breadcrumb">${c}</nav>
     <h1 class="app-page-title">${esc(titleText)}</h1></div>`;
@@ -614,6 +654,9 @@ function applySearchState(st) {
   if (st === "filtered") { S.q.search = "guarda"; S.q.scope = "Municipal"; }
   if (st === "nomatch-search") S.q.search = "guarda recife";
   if (st === "nomatch-filters") { S.q.type = "Certification"; S.q.scope = "Municipal"; }
+  if (st === "restored") {  /* a bookmark: scope in lower case (read), board VUNESP (read), year "abc" and page 0 and size 7 (unreadable: ignored) */
+    parseCatalogQuery("search=guarda&scope=municipal&organizerId=b3&noticeYear=abc&page=0&pageSize=7");
+  }
 }
 
 function selectHtml(id, labelKey, value, options, disabled) {
@@ -641,7 +684,7 @@ function searchHtml() {
       <div class="app-table-filters">
         ${selectHtml("catalog-filter-type", "Exams.Filter.AssessmentType", S.q.type, TYPES.map(v => ({ value: v, text: t("Exams.AssessmentType." + v) })), false)}
         ${selectHtml("catalog-filter-scope", "Exams.Filter.Scope", S.q.scope, SCOPES.map(v => ({ value: v, text: t("Exams.Scope." + v) })), false)}
-        ${selectHtml("catalog-filter-organizer", "Catalog.Filter.Organizer", S.q.org, optsOff ? [] : f.organizers.map(o => ({ value: o.id, text: `${o.name} (${o.acr})` })), optsOff)}
+        ${selectHtml("catalog-filter-organizer", "Catalog.Filter.Organizer", S.q.org, optsOff ? [] : f.organizers.map(o => ({ value: o.id, text: `${o.acr} — ${o.name}` })), optsOff)}
         ${selectHtml("catalog-filter-year", "Catalog.Filter.NoticeYear", S.q.year || "", optsOff ? [] : f.years.map(y => ({ value: y, text: String(y) })), optsOff)}
         <button type="button" class="app-button app-button-text" id="catalog-clear" data-action="clear" ${hasFilters() ? "" : "hidden"}>${icon("ClearFilters", 18)}${esc(t("Catalog.Filter.Clear"))}</button>
       </div>
@@ -676,7 +719,7 @@ function resultsHtml() {
   const rows = all.slice(first, first + S.pageSize);
   const th = (key, num) => `<th scope="col" class="${num ? "app-cell-number" : ""}">${esc(t(key))}</th>`;
   const body = rows.map(e => `<tr>
-      <td><a class="app-link app-truncate" href="#" data-open="${e.id}" title="${esc(e.name)}" lang="${e.lang}">${esc(e.name)}</a></td>
+      <td><a class="app-link app-truncate" href="/catalog/exams/${e.id}${esc(catalogQuery())}" data-open="${e.id}" title="${esc(e.name)}" lang="${e.lang}">${esc(e.name)}</a></td>
       <td><span class="app-truncate narrow" title="${esc(e.auth.name)}" tabindex="0">${esc(e.auth.name)}</span><span class="app-cell-secondary">${esc(e.auth.acr)}</span></td>
       <td>${esc(t("Exams.AssessmentType." + e.type))}</td>
       <td>${esc(t("Exams.Scope." + e.scope))}${e.detail ? `<span class="app-cell-secondary">${esc(e.detail)}</span>` : ""}</td>
@@ -703,6 +746,7 @@ function resultsHtml() {
 function refreshResults() {
   $("catalog-results").innerHTML = resultsHtml();
   $("catalog-clear").hidden = !hasFilters();
+  showUrl();
 }
 
 /* ===========================================================================
@@ -710,13 +754,13 @@ function refreshResults() {
    =========================================================================== */
 function examHtml() {
   const st = S.state.exam;
-  const crumbsBase = [{ text: t("Nav.Section.Study") }, { text: t("Catalog.Title"), go: "search" }];
+  const crumbsBase = [{ text: t("Nav.Section.Study") }, { text: t("Catalog.Title"), go: "back" }];
   if (st === "loading") return header(t("Catalog.Exam.Title"), crumbsBase) +
     `<div class="app-form-card">${stateBox(`<span class="app-spinner" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span>`, "status")}</div>`;
   if (st === "notfound") return header(t("Catalog.Exam.Title"), crumbsBase) + `
     <div class="app-form-card">
       <div class="app-alert app-alert-error" role="alert">${icon("Error", 20)}<span class="app-alert-text">${esc(t("exam.not_found"))}</span></div>
-      <a class="app-link" tabindex="0" data-go="search">${esc(t("Catalog.BackToCatalog"))}</a>
+      <a class="app-link" href="/catalog${esc(S.examQs)}" data-go="back">${esc(t("Catalog.BackToCatalog"))}</a>
     </div>`;
   if (st === "error") return header(t("Catalog.Exam.Title"), crumbsBase) + `
     <div class="app-form-card">${stateBox(`${icon("Error", 40, "is-error")}<p>${esc(t("Catalog.Exam.LoadFailed"))}</p>
@@ -760,7 +804,7 @@ function examHtml() {
   return `<div class="app-page-header">
       <nav class="app-breadcrumbs" aria-label="Breadcrumb">
         <span>${esc(t("Nav.Section.Study"))}</span><span aria-hidden="true">›</span>
-        <a tabindex="0" data-go="search">${esc(t("Catalog.Title"))}</a><span aria-hidden="true">›</span>
+        <a href="/catalog${esc(S.examQs)}" data-go="back">${esc(t("Catalog.Title"))}</a><span aria-hidden="true">›</span>
         <span aria-current="page" lang="${e.lang}">${esc(e.name)}</span>
       </nav>
       <h1 class="app-page-title" lang="${e.lang}">${esc(e.name)}</h1>
@@ -807,6 +851,7 @@ function render() {
   $("main").innerHTML = html;
   document.title = `${title} - ${t("App.Name")} (F-36 mockup)`;
   renderDemo();
+  showUrl();
 }
 
 document.addEventListener("click", (ev) => {
@@ -822,11 +867,16 @@ document.addEventListener("click", (ev) => {
   }
   if (el.dataset.open) {                    /* the exam name: a link to the read-only detail page */
     ev.preventDefault();
+    S.examQs = catalogQuery();              /* the link carries the catalog's query string */
     S.examId = el.dataset.open; S.screen = "exam"; S.state.exam = "ready"; render(); $("main").focus(); return;
   }
-  if (el.dataset.go === "search") {         /* breadcrumb, back link, menu item: filters are page state, so they start over */
+  if (el.dataset.go === "back") {           /* breadcrumb and back link: /catalog + the query it came with */
     ev.preventDefault();
-    S.screen = "search"; applySearchState("ready"); render(); return;
+    S.screen = "search"; S.state.search = "ready"; parseCatalogQuery(S.examQs); render(); return;
+  }
+  if (el.dataset.go === "search") {         /* menu item: plain /catalog */
+    ev.preventDefault();
+    S.screen = "search"; S.examQs = ""; applySearchState("ready"); render(); return;
   }
   const a = el.dataset.action;
   if (!a) return;
