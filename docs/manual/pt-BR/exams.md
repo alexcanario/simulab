@@ -1,14 +1,14 @@
 ---
 page: exams
 locale: pt-BR
-features: [F-34, F-43]
-updated: 2026-09-26
+features: [F-34, F-43, F-35]
+updated: 2026-09-29
 ---
 # Exames
 
 Um exame é a avaliação que se repete ao longo dos anos: o concurso da Prefeitura de Fortaleza, o ENEM, uma
 certificação, o vestibular de uma universidade. Cada exame pertence ao **órgão contratante** que publica o
-edital. As edições de cada ano, com a banca que aplica a prova, vêm depois.
+edital. Cada prova efetivamente aplicada é uma [edição](exam-editions.md), gerenciada na página do próprio exame.
 
 ## Quem pode usar
 Só uma conta com a permissão "Gerenciar o catálogo" — o papel Administrador tem essa permissão — consegue abrir
@@ -48,6 +48,7 @@ topo do cartão lista todos os campos que faltam; clicar num deles leva você di
 1. Escolha **Excluir** na linha dele e confirme.
 2. O exame sai do catálogo. O nome continua reservado dentro daquele órgão contratante, para ninguém cadastrar
    um segundo exame com o mesmo nome por engano.
+3. Um exame que ainda tem edições não pode ser excluído: exclua antes as [edições](exam-editions.md) dele.
 
 ## Campos
 | Campo | Significado | Regras |
@@ -73,6 +74,7 @@ topo do cartão lista todos os campos que faltam; clicar num deles leva você di
 | Escolha o idioma do conteúdo. | O idioma não foi escolhido. | Escolha um dos três idiomas. |
 | Este exame não existe mais. | Alguém excluiu o exame enquanto sua tela estava aberta. | Recarregue a página. |
 | Nenhum exame corresponde aos filtros escolhidos. | A combinação de busca e filtros não encontrou nada. | Limpe um filtro e tente de novo. |
+| Este exame tem edições. Exclua as edições primeiro. | O exame ainda tem edições. | Exclua as edições e depois o exame. |
 | Página não encontrada | Sua conta não gerencia o catálogo. | Fale com um administrador se você acha que deveria gerenciar. |
 
 ## Páginas relacionadas

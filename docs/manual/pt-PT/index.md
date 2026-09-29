@@ -20,7 +20,7 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 
 | Área | Para que serve | Estado |
 |---|---|---|
-| Catálogo de avaliações | Registar as entidades contratantes, as entidades organizadoras, os exames e as edições em que tudo o resto assenta (Administradores) | Entidades contratantes, entidades organizadoras e exames disponíveis ([Entidades contratantes](issuing-authorities.md), [Entidades organizadoras](organizers.md), [Exames](exams.md)); edições brevemente |
+| Catálogo de avaliações | Registar as entidades contratantes, as entidades organizadoras, os exames e as edições em que tudo o resto assenta (Administradores) | Entidades contratantes, entidades organizadoras e exames disponíveis ([Entidades contratantes](issuing-authorities.md), [Entidades organizadoras](organizers.md), [Exames](exams.md)) e as edições de cada exame ([Edições de um exame](exam-editions.md)) |
 | Simulação de prova | Fazer uma prova anterior real, com as mesmas questões, ordem, tempo e regras de pontuação | Brevemente |
 | Simulação personalizada | Criar o seu treino por disciplina, entidade organizadora, ano ou dificuldade | Brevemente |
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e tópico, e a distância até à nota mínima | Brevemente |
@@ -49,3 +49,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Entidades contratantes](issuing-authorities.md): quem publica o aviso de cada exame (Administradores)
 - [Entidades organizadoras](organizers.md): os júris, entidades certificadoras e universidades que aplicam as provas (Administradores)
 - [Exames](exams.md): os exames do catálogo, com tipo, abrangência e idioma (Administradores)
+- [Edições de um exame](exam-editions.md): as provas efetivamente aplicadas, com ano, posto de trabalho e entidade (Administradores)

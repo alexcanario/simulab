@@ -1,8 +1,8 @@
 ---
 page: organizers
 locale: en
-features: [F-33, F-34]
-updated: 2026-09-25
+features: [F-33, F-34, F-35]
+updated: 2026-09-29
 ---
 # Organizers
 
@@ -33,6 +33,7 @@ Only an account with the permission "Manage the catalog" — the Admin role has 
 ### Delete an organizer
 1. Choose **Delete** on its line and confirm.
 2. The organizer leaves the catalog and stops appearing anywhere in the app. Its name and acronym stay taken, so nobody registers a second one under the same name by mistake.
+3. A board that some [edition](exam-editions.md) names cannot be deleted: change or delete those editions first.
 
 ## Fields
 | Field | Meaning | Rules |
@@ -52,6 +53,7 @@ Only an account with the permission "Manage the catalog" — the Admin role has 
 | Type an acronym with at least 2 characters. | The acronym is missing or too short. | Type the acronym. |
 | Type a full address, starting with http:// or https:// | The website is not a complete address. | Add `https://` in front, or leave the field empty. |
 | This organizer no longer exists. Refresh the list. | Someone deleted it while your page was open. | Reload the page. |
+| Some editions name this board. Change or delete those editions first. | The board is used by an edition. | Change or delete those editions. |
 | Page not found | Your account does not manage the catalog. | Ask an Admin if you believe you should. |
 
 ## Related pages

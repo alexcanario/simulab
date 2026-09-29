@@ -1,14 +1,14 @@
 ---
 page: exams
 locale: pt-PT
-features: [F-34, F-43]
-updated: 2026-09-26
+features: [F-34, F-43, F-35]
+updated: 2026-09-29
 ---
 # Exames
 
 Um exame é a avaliação que se repete ao longo dos anos: o concurso de uma câmara municipal, o ENEM, uma
 certificação, o exame de acesso de uma universidade. Cada exame pertence à **entidade contratante** que publica
-o aviso. As edições de cada ano, com a entidade que aplica a prova, vêm depois.
+o aviso. Cada prova efetivamente aplicada é uma [edição](exam-editions.md), gerida na página do próprio exame.
 
 ## Quem pode utilizar
 Só uma conta com a permissão "Gerir o catálogo" — o perfil Administrador tem essa permissão — consegue abrir o
@@ -51,6 +51,7 @@ topo do cartão lista todos os campos em falta; clicar num deles leva-o diretame
 1. Escolha **Eliminar** na linha dele e confirme.
 2. O exame sai do catálogo. O nome continua reservado dentro daquela entidade contratante, para ninguém registar
    um segundo exame com o mesmo nome por engano.
+3. Um exame que ainda tem edições não pode ser eliminado: elimine primeiro as [edições](exam-editions.md) dele.
 
 ## Campos
 | Campo | Significado | Regras |
@@ -76,6 +77,7 @@ topo do cartão lista todos os campos em falta; clicar num deles leva-o diretame
 | Escolha o idioma do conteúdo. | O idioma não foi escolhido. | Escolha um dos três idiomas. |
 | Este exame já não existe. | Alguém eliminou o exame enquanto o seu ecrã estava aberto. | Recarregue a página. |
 | Nenhum exame corresponde aos filtros escolhidos. | A pesquisa e os filtros juntos não encontraram nada. | Limpe um filtro e tente de novo. |
+| Este exame tem edições. Elimine primeiro as edições. | O exame ainda tem edições. | Elimine as edições e depois o exame. |
 | Página não encontrada | A sua conta não gere o catálogo. | Fale com um administrador se acha que devia gerir. |
 
 ## Páginas relacionadas

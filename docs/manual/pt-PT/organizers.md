@@ -1,8 +1,8 @@
 ---
 page: organizers
 locale: pt-PT
-features: [F-33, F-34]
-updated: 2026-09-25
+features: [F-33, F-34, F-35]
+updated: 2026-09-29
 ---
 # Entidades organizadoras
 
@@ -33,6 +33,7 @@ Só uma conta com a permissão "Gerir o catálogo" — o perfil Administrador te
 ### Eliminar uma entidade organizadora
 1. Escolha **Eliminar** na respetiva linha e confirme.
 2. A entidade sai do catálogo e deixa de aparecer em qualquer parte da aplicação. O nome e a sigla continuam ocupados, para que ninguém registe uma segunda com o mesmo nome por engano.
+3. Uma entidade que alguma [edição](exam-editions.md) indique não pode ser eliminada: altere ou elimine primeiro essas edições.
 
 ## Campos
 | Campo | Significado | Regras |
@@ -52,6 +53,7 @@ Só uma conta com a permissão "Gerir o catálogo" — o perfil Administrador te
 | Escreva uma sigla com pelo menos 2 caracteres. | A sigla está vazia ou é demasiado curta. | Escreva a sigla. |
 | Escreva o endereço completo, a começar por http:// ou https:// | O sítio não é um endereço completo. | Acrescente `https://` à frente ou deixe o campo vazio. |
 | Esta entidade organizadora já não existe. Atualize a lista. | Alguém a eliminou enquanto o seu ecrã estava aberto. | Recarregue a página. |
+| Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições. | A entidade é usada por uma edição. | Altere ou elimine essas edições. |
 | Página não encontrada | A sua conta não gere o catálogo. | Fale com um administrador se acha que devia gerir. |
 
 ## Páginas relacionadas
