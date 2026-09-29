@@ -26,7 +26,7 @@ public sealed class AccountEventConfiguration : IEntityTypeConfiguration<Account
         builder.Property(accountEvent => accountEvent.Method).HasConversion<string>().HasMaxLength(40)
             .HasComment("How it was done, such as Password or Google. Null when the event has no method.");
         builder.Property(accountEvent => accountEvent.Reason).HasConversion<string>().HasMaxLength(40)
-            .HasComment("Why it failed, such as InvalidCredentials or LockedOut. Null when nothing failed.");
+            .HasComment("Why it failed, such as WrongPassword or LockedOut. Null when nothing failed.");
         builder.Property(accountEvent => accountEvent.IpAddress).HasMaxLength(45)
             .HasComment("The address the request came from, long enough for IPv6. Null when it could not be read.");
 

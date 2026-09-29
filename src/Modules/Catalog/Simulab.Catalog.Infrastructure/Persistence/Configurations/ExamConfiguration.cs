@@ -42,7 +42,7 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How far the exam reaches: Federal, State, Municipal, National or International.");
+            .HasComment("How far the exam reaches: National, State or Municipal.");
 
         builder.Property(exam => exam.ScopeDetail)
             .HasMaxLength(CatalogLimits.ExamScopeDetailMaxLength)

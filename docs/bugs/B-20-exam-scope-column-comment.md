@@ -1,7 +1,7 @@
 ---
 bug: B-20
 feature: F-34
-status: approved
+status: validating
 board: 775
 severity: low
 ---
@@ -82,7 +82,16 @@ Checked and correct: `ExamConfiguration.cs:39` (`AssessmentType`), `OrganizerCon
 - (none)
 
 ## Validation script
+Needed to validate: nothing beyond the test containers (Docker running); no screen.
+
+1. In `D:\dev\_icontrol\wt\simulab\b-20-exam-scope-column`, run the new tests. Expected: `Passed! - Failed: 0` for each.
+   - Git Bash and PowerShell 7: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~EnumColumnCommentTests"`
+   - Git Bash and PowerShell 7: `dotnet test tests/Modules/Identity/Simulab.Identity.Tests --filter "FullyQualifiedName~FixEnumColumn"` (3 tests) and the same with `tests/Modules/Catalog/Simulab.Catalog.Tests` (1 test).
+2. Read `docs/architecture/Catalog/data-dictionary.md` (`scope`) and `docs/architecture/Identity/data-dictionary.md` (`status`, `action`, `reason`): they show the texts of `## Expected`.
+3. Check the generated docs are in sync: `dotnet run --project tools/Simulab.DocGen -- --check`. Expected: exit code 0.
 
 ## Delivery
+- Change: the four `HasComment` texts, migration `FixEnumColumnDescriptions` in Catalog and in Identity (comment-only `AlterColumn`), regenerated `docs/architecture/`.
+
 - Branch: bug/B-20
 - Merge: <commit>
