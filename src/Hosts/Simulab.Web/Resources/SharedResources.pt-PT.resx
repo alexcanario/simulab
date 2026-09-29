@@ -487,4 +487,69 @@
   <data name="issuing_authority.description_too_long" xml:space="preserve"><value>A descrição é demasiado longa: no máximo 500 caracteres.</value></data>
   <data name="issuing_authority.website_invalid" xml:space="preserve"><value>Indique um endereço completo, a começar por http:// ou https://</value></data>
   <data name="issuing_authority.has_exams" xml:space="preserve"><value>Esta entidade contratante tem exames no catálogo. Elimine esses exames primeiro, na página Exames.</value></data>
+  <data name="ExamEditions.Section.Title" xml:space="preserve"><value>Edições</value></data>
+  <data name="ExamEditions.Section.Subtitle" xml:space="preserve"><value>Cada prova efetivamente aplicada, com ano, posto de trabalho e entidade organizadora. As mais recentes primeiro.</value></data>
+  <data name="ExamEditions.Section.SaveExamFirst" xml:space="preserve"><value>Guarde primeiro o exame. As suas edições são adicionadas aqui.</value></data>
+  <data name="ExamEditions.Empty" xml:space="preserve"><value>Este exame ainda não tem edições.</value></data>
+  <data name="ExamEditions.Row.AppliedOn" xml:space="preserve"><value>Aplicada em {0}</value></data>
+  <data name="ExamEditions.Status.Draft" xml:space="preserve"><value>Rascunho</value></data>
+  <data name="ExamEditions.Status.Published" xml:space="preserve"><value>Publicada</value></data>
+  <data name="ExamEditions.Status.Draft.Description" xml:space="preserve"><value>Fica apenas na administração. Os alunos não a veem.</value></data>
+  <data name="ExamEditions.Status.Published.Description" xml:space="preserve"><value>Disponível para os alunos no catálogo. Volte a Rascunho antes de a eliminar.</value></data>
+  <data name="ExamEditions.Delete.Object" xml:space="preserve"><value>edição {0}</value></data>
+  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>A edição {0} sai do exame {1}. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame.</value></data>
+  <data name="ExamEditions.Deleted" xml:space="preserve"><value>Edição eliminada.</value></data>
+  <data name="ExamEditions.Delete.DisabledPublished" xml:space="preserve"><value>Volte a colocar em Rascunho antes de eliminar.</value></data>
+  <data name="ExamEditions.Form.AddTitle" xml:space="preserve"><value>Adicionar edição</value></data>
+  <data name="ExamEditions.Form.EditTitle" xml:space="preserve"><value>Editar edição</value></data>
+  <data name="ExamEditions.Section.Paper" xml:space="preserve"><value>Prova</value></data>
+  <data name="ExamEditions.Section.Paper.Subtitle" xml:space="preserve"><value>A entidade organizadora que a aplicou, o ano do aviso e o posto de trabalho a que se destina.</value></data>
+  <data name="ExamEditions.Section.Notice" xml:space="preserve"><value>Aviso e aplicação</value></data>
+  <data name="ExamEditions.Section.Notice.Subtitle" xml:space="preserve"><value>Como o aviso se identifica, onde está publicado e quando a prova foi aplicada. Tudo opcional.</value></data>
+  <data name="ExamEditions.Section.Publication" xml:space="preserve"><value>Publicação</value></data>
+  <data name="ExamEditions.Section.Publication.Subtitle" xml:space="preserve"><value>Quem pode ver esta edição.</value></data>
+  <data name="ExamEditions.Field.Exam" xml:space="preserve"><value>Exame</value></data>
+  <data name="ExamEditions.Field.Organizer" xml:space="preserve"><value>Entidade organizadora</value></data>
+  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
+  <data name="ExamEditions.Field.Organizer.Hint" xml:space="preserve"><value>A entidade organizadora que aplicou esta prova, como o aviso a indica.</value></data>
+  <data name="ExamEditions.Field.NoticeYear" xml:space="preserve"><value>Ano do aviso</value></data>
+  <data name="ExamEditions.Field.NoticeYear.Placeholder" xml:space="preserve"><value>Ex.: 2026</value></data>
+  <data name="ExamEditions.Field.NoticeYear.Hint" xml:space="preserve"><value>De 1990 a {0}.</value></data>
+  <data name="ExamEditions.Field.Position" xml:space="preserve"><value>Posto de trabalho</value></data>
+  <data name="ExamEditions.Field.Position.Placeholder" xml:space="preserve"><value>Ex.: Agente de Polícia Municipal</value></data>
+  <data name="ExamEditions.Field.Position.Hint" xml:space="preserve"><value>O posto de trabalho para que esta prova seleciona. Deixe vazio para ENEM, exames de acesso e certificações. No máximo 200 caracteres.</value></data>
+  <data name="ExamEditions.Field.NoticeReference" xml:space="preserve"><value>Referência do aviso</value></data>
+  <data name="ExamEditions.Field.NoticeReference.Placeholder" xml:space="preserve"><value>Ex.: Aviso n.º 1/2026</value></data>
+  <data name="ExamEditions.Field.NoticeReference.Hint" xml:space="preserve"><value>Como o aviso se identifica. Edições do mesmo aviso repetem este texto.</value></data>
+  <data name="ExamEditions.Field.NoticeUrl" xml:space="preserve"><value>Ligação do aviso</value></data>
+  <data name="ExamEditions.Field.NoticeUrl.Placeholder" xml:space="preserve"><value>https://</value></data>
+  <data name="ExamEditions.Field.NoticeUrl.Hint" xml:space="preserve"><value>O endereço oficial do aviso. No máximo 300 caracteres.</value></data>
+  <data name="ExamEditions.Field.AppliedOn" xml:space="preserve"><value>Data de aplicação</value></data>
+  <data name="ExamEditions.Field.AppliedOn.Hint" xml:space="preserve"><value>O dia em que a prova foi aplicada. Opcional, também para publicar.</value></data>
+  <data name="ExamEditions.Field.Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="ExamEditions.Saved" xml:space="preserve"><value>Edição guardada.</value></data>
+  <data name="ExamEditions.BackToExam" xml:space="preserve"><value>Voltar ao exame</value></data>
+  <data name="DateField.OpenCalendar" xml:space="preserve"><value>Abrir o calendário</value></data>
+  <data name="DateField.Clear" xml:space="preserve"><value>Limpar a data</value></data>
+  <data name="DateField.PreviousMonth" xml:space="preserve"><value>Mês anterior</value></data>
+  <data name="DateField.NextMonth" xml:space="preserve"><value>Mês seguinte</value></data>
+  <data name="DateField.PreviousYear" xml:space="preserve"><value>Ano anterior</value></data>
+  <data name="DateField.NextYear" xml:space="preserve"><value>Ano seguinte</value></data>
+  <data name="DateField.Format" xml:space="preserve"><value>dd/mm/aaaa</value></data>
+  <data name="DateField.Hint.Format" xml:space="preserve"><value>Formato: {0}</value></data>
+  <data name="DateField.Invalid" xml:space="preserve"><value>Isto não é uma data. Escreva no formato {0}.</value></data>
+  <data name="Gallery.Section.DateField" xml:space="preserve"><value>Campo de data</value></data>
+  <data name="Gallery.DateField.Hint" xml:space="preserve"><value>Escreva a data no formato de quem lê ou escolha-a no calendário. Vazio, preenchido, com erro e desativado.</value></data>
+  <data name="exam_edition.not_found" xml:space="preserve"><value>Esta edição já não existe.</value></data>
+  <data name="exam_edition.organizer_required" xml:space="preserve"><value>Escolha a entidade organizadora.</value></data>
+  <data name="exam_edition.notice_year_invalid" xml:space="preserve"><value>Indique um ano entre 1990 e o próximo ano.</value></data>
+  <data name="exam_edition.position_too_long" xml:space="preserve"><value>O posto de trabalho é demasiado longo: no máximo 200 caracteres.</value></data>
+  <data name="exam_edition.notice_reference_too_long" xml:space="preserve"><value>A referência do aviso é demasiado longa: no máximo 100 caracteres.</value></data>
+  <data name="exam_edition.notice_url_invalid" xml:space="preserve"><value>Escreva o endereço completo, com no máximo 300 caracteres, a começar por http:// ou https://</value></data>
+  <data name="exam_edition.applied_on_before_notice_year" xml:space="preserve"><value>A data de aplicação não pode ser anterior a 1 de janeiro do ano do aviso.</value></data>
+  <data name="exam_edition.status_invalid" xml:space="preserve"><value>Escolha Rascunho ou Publicada.</value></data>
+  <data name="exam_edition.duplicate" xml:space="preserve"><value>Este exame já tem uma edição com este ano, posto de trabalho e entidade organizadora (uma eliminada também conta).</value></data>
+  <data name="exam_edition.published" xml:space="preserve"><value>Esta edição está publicada. Volte a colocá-la em Rascunho, guarde e depois elimine-a.</value></data>
+  <data name="exam.has_editions" xml:space="preserve"><value>Este exame tem edições. Elimine primeiro as edições.</value></data>
+  <data name="organizer.has_editions" xml:space="preserve"><value>Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições.</value></data>
 </root>

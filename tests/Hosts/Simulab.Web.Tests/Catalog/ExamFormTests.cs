@@ -246,8 +246,9 @@ public sealed class ExamFormTests : CatalogPageTestContext
         var page = RenderAdd();
 
         var sections = page.FindComponents<AppSectionCard>();
+        // F-35: the editions section is the fourth card, below the layout and outside the exam form.
         sections.Select(section => section.Instance.Title).Should().Equal(
-            "Identification", "Classification", "Where the exam applies");
+            "Identification", "Classification", "Where the exam applies", "Editions");
 
         var identification = page.Find("section[aria-labelledby='exam-section-identification-title']");
         identification.QuerySelectorAll("#exam-authority").Should().ContainSingle();

@@ -1,3 +1,4 @@
+using Simulab.Catalog.Application.ExamEditions;
 using Simulab.Catalog.Contracts;
 using Simulab.SharedKernel.Results;
 
@@ -5,11 +6,10 @@ namespace Simulab.Catalog.Application.Organizers;
 
 /// <summary>
 /// Removes an organizer from the catalog (F-33 UC4). The removal is a soft delete (F-33 BR11): the row
-/// stays, so its name and acronym stay taken. Nothing points at an organizer yet — F-34 v2 moved the guard
-/// to the issuing authority, which is what an exam hangs on; the board gets its own when F-35's editions
-/// start pointing here.
+/// stays, so its name and acronym stay taken. A board that some edition names does not leave at all
+/// (F-35 BR12): the edition would point at nothing.
 /// </summary>
-public sealed class DeleteOrganizerHandler(IOrganizerStore store)
+public sealed class DeleteOrganizerHandler(IOrganizerStore store, IExamEditionStore editions)
 {
     public async Task<Result> HandleAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -17,6 +17,12 @@ public sealed class DeleteOrganizerHandler(IOrganizerStore store)
         if (organizer is null)
         {
             return Result.Failure(new Error(CatalogErrorCodes.OrganizerNotFound, ErrorKind.NotFound));
+        }
+
+        // Deleted editions do not count: they are gone from the catalog, so nothing is orphaned.
+        if (await editions.OrganizerHasEditionsAsync(id, cancellationToken))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.OrganizerHasEditions, ErrorKind.Conflict));
         }
 
         store.Remove(organizer);

@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-35 - Exam editions back office (mockup)</title>
+<style>
+/* ===========================================================================
+   F-35 mockup - three screens:
+   1. the editions section on /admin/exams/{id}
+   2. the edition page /admin/exams/{examId}/editions/new and /{id}
+   3. AppDateField (new kit component) as its /dev/ui gallery entry
+   Visual language of the F-43 mockup. Every colour is a SimulabTheme token; no new colour.
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem;
+  --app-font-sm: 0.8125rem;
+  --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem;
+  --app-font-xl: 1.25rem;
+  --app-font-xxl: 1.75rem;
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 24px;
+  --app-space-6: 32px;
+  --app-radius-sm: 6px;
+  --app-radius-md: 10px;
+  --app-radius-lg: 14px;
+
+  /* PaletteLight */
+  --primary: #216DB5;
+  --primary-darken: #1858A0;
+  --primary-lighten: #EBF3FD;
+  --primary-contrast: #FFFFFF;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --error: #BE3737;
+  --error-contrast: #FFFFFF;
+  --background: #F2F5FB;
+  --surface: #FFFFFF;
+  --drawer: #0F3266;
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #0F3266;
+  --appbar-text: #FFFFFF;
+  --text-primary: #19243E;
+  --text-secondary: #4A5A7A;
+  --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1;
+  --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  /* PaletteDark */
+  --primary: #64A2E3;
+  --primary-darken: #5096DC;
+  --primary-lighten: #162540;
+  --primary-contrast: #19243E;
+  --success: #1A9E8C;
+  --success-contrast: #19243E;
+  --warning: #D98B1A;
+  --error: #E06C6C;
+  --error-contrast: #19243E;
+  --background: #0E1828;
+  --surface: #172035;
+  --drawer: #091422;
+  --drawer-text: rgba(255,255,255,0.92);
+  --appbar: #091422;
+  --appbar-text: #FFFFFF;
+  --text-primary: #E0E8F8;
+  --text-secondary: #7A8EB0;
+  --action-default: #7A8EB0;
+  --lines-inputs: #61718F;
+  --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: block; flex-shrink: 0; }
+a { color: inherit; }
+button { font: inherit; }
+:is(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo {
+  display: flex; flex-direction: column; gap: var(--app-space-1);
+  padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider);
+}
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.demo-label {
+  font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1);
+}
+.demo button {
+  font-size: var(--app-font-xs); font-weight: 600;
+  padding: 3px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary);
+}
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note {
+  display: inline-block; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); border: 1px dashed var(--divider);
+  border-radius: 20px; padding: 0 var(--app-space-2); margin-bottom: var(--app-space-2);
+}
+
+/* ---- app shell ---- */
+.appbar {
+  height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2);
+  padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text);
+}
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast);
+  display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700;
+}
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); overflow-y: auto; }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.nav-link {
+  display: flex; align-items: center; gap: var(--app-space-3);
+  padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent;
+  border-radius: var(--app-radius-sm); font-size: var(--app-font-sm); cursor: pointer;
+}
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-breadcrumbs a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+.app-page-intro { color: var(--text-secondary); font-size: var(--app-font-sm); margin-top: var(--app-space-2); }
+
+/* ---- layout ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); }
+.app-form-card + .app-form-card, .app-form-layout + .app-form-card { margin-top: var(--app-space-4); }
+
+/* ---- AppSectionCard ---- */
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); margin-bottom: var(--app-space-4); }
+.app-section-card:last-child { margin-bottom: 0; }
+.app-section-card-title { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-lg); font-weight: 600; }
+.app-section-card-icon { color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin: var(--app-space-1) 0 var(--app-space-4); }
+.app-section-note { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-2) 0 var(--app-space-1); }
+
+/* ---- AppFormGrid ---- */
+.app-form-grid { display: grid; gap: var(--app-space-3) var(--app-space-4); }
+.app-form-grid + .app-form-grid { margin-top: var(--app-space-3); }
+.app-form-grid-1 { grid-template-columns: minmax(0, 1fr); }
+.app-form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 599.98px) { .app-form-grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- fields (AppTextField, AppLookupField, AppDateField) ---- */
+.app-field { position: relative; margin-bottom: var(--app-space-4); }
+.app-form-grid .app-field { margin-bottom: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input {
+  display: flex; align-items: center; gap: var(--app-space-2);
+  height: 42px; padding: 0 var(--app-space-1) 0 var(--app-space-3);
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm);
+  background: var(--surface); color: var(--text-primary);
+}
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.app-field-input input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+.app-field-icon { color: var(--primary); }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-disabled .app-field-input { background: var(--background); border-color: var(--divider); border-style: dashed; }
+.app-field-disabled .app-field-input input { color: var(--text-secondary); cursor: not-allowed; }
+.app-field-hint, .app-field-error-text { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+.app-inline-button { border: 0; background: transparent; color: var(--primary); font-weight: 600; font-size: var(--app-font-xs); cursor: pointer; text-decoration: underline; margin-left: var(--app-space-2); min-height: 24px; }
+
+.app-icon-button {
+  width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default);
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.app-icon-button:hover { background: var(--background); }
+.app-icon-button[disabled] { cursor: not-allowed; opacity: .45; }
+.app-icon-button.is-destructive { color: var(--error); }
+
+/* tooltip (MudTooltip) */
+.tip { position: relative; display: inline-flex; }
+.tip::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--text-primary); color: var(--surface); font-size: var(--app-font-xs); line-height: 1.4;
+  padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 30;
+}
+.tip:hover::after, .tip:focus-within::after { opacity: 1; }
+
+/* ---- AppLookupField listbox ---- */
+.app-lookup-list {
+  position: absolute; left: 0; right: 0; top: 70px; z-index: 25; list-style: none;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-sm);
+  box-shadow: 0 6px 20px rgba(20,40,100,.18); max-height: 240px; overflow-y: auto; padding: var(--app-space-1) 0;
+}
+.app-lookup-list li { padding: var(--app-space-2) var(--app-space-3); font-size: var(--app-font-sm); cursor: pointer; }
+.app-lookup-list li:hover, .app-lookup-list li:focus { background: var(--primary-lighten); outline: none; }
+.app-lookup-message { color: var(--text-secondary); cursor: default !important; }
+
+/* ---- AppDateField calendar (MudDatePicker popover) ---- */
+.app-calendar {
+  position: absolute; left: 0; top: 70px; z-index: 25; width: 300px;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md);
+  box-shadow: 0 6px 20px rgba(20,40,100,.18); padding: var(--app-space-3);
+}
+.app-calendar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--app-space-2); }
+.app-calendar-title { font-weight: 700; font-size: var(--app-font-sm); text-transform: capitalize; }
+.app-calendar table { width: 100%; border-collapse: collapse; }
+.app-calendar th { font-size: var(--app-font-xs); color: var(--text-secondary); font-weight: 600; padding-bottom: var(--app-space-1); text-transform: capitalize; }
+.app-calendar td { text-align: center; padding: 1px; }
+.app-day {
+  width: 36px; height: 36px; border-radius: 50%; border: 0; background: transparent; color: var(--text-primary);
+  cursor: pointer; font-size: var(--app-font-sm);
+}
+.app-day:hover { background: var(--primary-lighten); }
+.app-day.is-today { box-shadow: inset 0 0 0 1px var(--primary); }
+.app-day[aria-pressed="true"] { background: var(--primary); color: var(--primary-contrast); font-weight: 700; }
+.app-day[disabled] { color: var(--text-secondary); opacity: .45; cursor: not-allowed; background: transparent; }
+
+/* ---- AppRadioCards ---- */
+.app-radio-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--app-space-3); }
+@media (max-width: 599.98px) { .app-radio-cards { grid-template-columns: minmax(0, 1fr); } }
+.app-radio-card {
+  display: flex; align-items: flex-start; gap: var(--app-space-2); min-height: 56px; padding: var(--app-space-3);
+  border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm);
+  background: var(--surface); color: var(--text-primary); text-align: left; cursor: pointer;
+}
+.app-radio-card[aria-checked="true"] { border-color: var(--primary); background: var(--primary-lighten); }
+.app-radio-dot { width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--lines-inputs); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.app-radio-card[aria-checked="true"] .app-radio-dot { border-color: var(--primary); }
+.app-radio-card[aria-checked="true"] .app-radio-dot::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--primary); }
+.app-radio-card-text { display: block; font-size: var(--app-font-sm); font-weight: 600; }
+.app-radio-card-description { display: block; font-size: var(--app-font-xs); color: var(--text-secondary); line-height: 1.4; }
+
+/* ---- AppAlert / AppErrorSummary ---- */
+.app-alert {
+  display: flex; gap: var(--app-space-3); align-items: flex-start;
+  padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm);
+  background: var(--error); color: var(--error-contrast); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm);
+}
+.app-alert-title { font-weight: 700; }
+.app-error-summary-list { margin: var(--app-space-1) 0 0; padding-left: var(--app-space-5); }
+.app-error-summary-list a { color: inherit; cursor: pointer; }
+
+/* ---- buttons ---- */
+.app-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+.app-button {
+  font-size: var(--app-font-md); font-weight: 600; cursor: pointer; text-decoration: none;
+  min-height: 40px; padding: 0 var(--app-space-5); border-radius: var(--app-radius-sm);
+  display: inline-flex; align-items: center; gap: var(--app-space-2);
+}
+.app-button-text { border: 0; background: transparent; color: var(--text-primary); }
+.app-button-filled { border: 0; background: var(--primary); color: var(--primary-contrast); }
+.app-button-outlined { border: 1px solid var(--primary); background: transparent; color: var(--primary); padding: 0 var(--app-space-4); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-danger { border: 0; background: var(--error); color: var(--error-contrast); }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppFormAside ---- */
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-aside-row:last-of-type { border-bottom: 0; }
+.app-aside-row dt { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-aside-row dd { text-align: right; overflow-wrap: anywhere; }
+.app-aside-row dd.empty { color: var(--text-secondary); font-style: italic; }
+.app-checklist-title { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin: var(--app-space-4) 0 var(--app-space-2); }
+.app-checklist { list-style: none; display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-checklist li { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-sm); }
+.app-check-done { color: var(--success); }
+.app-check-pending { color: var(--text-secondary); }
+
+/* ---- AppItemRows + AppRowActions + AppStatusChip ---- */
+.app-item-rows-list { list-style: none; border: 1px solid var(--divider); border-radius: var(--app-radius-sm); }
+.app-item-row { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-2) var(--app-space-2) var(--app-space-3); border-bottom: 1px solid var(--divider); }
+.app-item-row:last-child { border-bottom: 0; }
+.app-item-row:hover { background: var(--background); }
+.app-item-row-content { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-1) var(--app-space-3); }
+.app-item-row-label { font-weight: 600; font-size: var(--app-font-sm); }
+.app-item-row-sep { color: var(--text-secondary); }
+.app-item-row-meta { font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-item-rows-empty { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-4); border: 1px dashed var(--divider); border-radius: var(--app-radius-sm); text-align: center; }
+.app-row-actions { display: flex; gap: var(--app-space-1); flex-shrink: 0; }
+.app-item-rows-foot { margin-top: var(--app-space-3); }
+.app-status-chip {
+  display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 0 10px; border: 1px solid var(--divider);
+  border-radius: 20px; background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; line-height: 1.8;
+}
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-success .app-status-chip-dot { background: var(--success); }
+
+/* ---- states ---- */
+.app-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3);
+  padding: var(--app-space-6) var(--app-space-4); text-align: center;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); color: var(--text-secondary);
+}
+.app-state-inline { padding: var(--app-space-5) var(--app-space-4); border-style: dashed; }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state .is-error { color: var(--error); }
+.app-link { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+/* ---- stub of the F-43 exam form ---- */
+.stub-field { margin-bottom: var(--app-space-3); }
+.stub-value { height: 42px; display: flex; align-items: center; padding: 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); font-size: var(--app-font-md); }
+.stub-value.empty { color: var(--text-secondary); }
+
+/* ---- dialog (AppConfirmDialog) ---- */
+.app-overlay { position: fixed; inset: 0; background: rgba(9,20,34,.55); display: flex; align-items: center; justify-content: center; z-index: 60; padding: var(--app-space-4); }
+.app-dialog { width: 100%; max-width: 30rem; background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); padding: var(--app-space-5); box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-dialog-message { font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+.app-dialog-actions .app-button { height: auto; min-height: 40px; padding-top: 6px; padding-bottom: 6px; text-align: left; }
+
+/* ---- snackbar ---- */
+.app-snackbar {
+  position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 70;
+  display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm);
+  background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25);
+}
+
+/* ---- gallery ---- */
+.gallery-section { margin-top: var(--app-space-5); }
+.gallery-section h2 { font-size: var(--app-font-xl); font-weight: 700; }
+.gallery-hint { font-size: var(--app-font-sm); color: var(--text-secondary); margin-bottom: var(--app-space-2); }
+.gallery-paper { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4); }
+.gallery-paper .app-form-grid { row-gap: var(--app-space-5); }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; screen</span>
+    <button type="button" data-screen="exam">1 &middot; Exam page: editions section</button>
+    <button type="button" data-screen="edition">2 &middot; Edition page</button>
+    <button type="button" data-screen="gallery">3 &middot; /dev/ui: AppDateField</button>
+  </div>
+  <div class="demo-row" id="demo-states"></div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; language</span>
+    <button type="button" data-lang="pt-BR">pt-BR</button>
+    <button type="button" data-lang="pt-PT">pt-PT</button>
+    <button type="button" data-lang="en">en</button>
+    <span class="demo-label" style="margin-left:12px">Demo &middot; theme</span>
+    <button type="button" data-theme-btn="light">Light</button>
+    <button type="button" data-theme-btn="dark">Dark</button>
+  </div>
+</div>
+
+<header class="appbar">
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main" id="drawer"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="dialog-root"></div>
+<div id="snackbar-root"></div>
+<div class="app-visually-hidden" id="live" aria-live="polite"></div>
+
+<script>
+/* ===========================================================================
+   Texts: SharedResources keys in the three UI locales. Keys that are new in F-35 are marked in the
+   item file's "UI texts" table; the rest are existing values copied from the .resx files.
+   Month and weekday names come from the culture (Intl here, CultureInfo in the app), not from resources.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Section.Administration": "Administration", "Nav.Section.Development": "Development",
+    "Exams.Title": "Exams", "IssuingAuthorities.Title": "Issuing authorities", "Organizers.Title": "Organizers",
+    "Users.Title": "Users", "Roles.Title": "Roles",
+    "Gallery.Title": "UI kit gallery", "Gallery.Breadcrumb.Dev": "Development",
+    "Gallery.Intro": "Every kit pattern, with sample data. Check it in light and dark mode, in each language and with the keyboard only.",
+    "Exams.Form.AddTitle": "Add exam", "Exams.Form.EditTitle": "Edit exam", "Exams.BackToList": "Back to the exams",
+    "Exams.Section.Identification": "Identification",
+    "Exams.Field.IssuingAuthority": "Issuing authority", "Exams.Field.Name": "Name", "Exams.Field.ContentLanguage": "Content language",
+    "Exams.Form.Aside.Title": "Summary",
+    "Common.Save": "Save", "Common.Saving": "Saving...", "Common.Cancel": "Cancel", "Common.Edit": "Edit", "Common.Delete": "Delete",
+    "Common.Actions": "Actions", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "We could not load this list.", "Common.TryAgain": "Try again",
+    "Common.Delete.Title": "Delete item?", "Common.Delete.Confirm": "Delete {0}",
+    "Common.Discard.Title": "Discard changes?", "Common.Discard.Message": "You have unsaved changes. If you leave now, they will be lost.", "Common.Discard.Confirm": "Discard changes",
+    "Common.ErrorSummary.Title": "This form cannot be saved yet",
+    "Common.Summary.Title": "Summary", "Common.Summary.NotFilled": "Not filled", "Common.Summary.Checklist": "Before saving",
+    "Common.Checklist.Done": "Done", "Common.Checklist.Pending": "Pending",
+    "Lookup.Hint.MinChars": "Type at least {0} characters", "Lookup.Results": "Results: {0}", "Lookup.NoResults": "Nothing found for \"{0}\".", "Lookup.LoadFailed": "The search failed.", "Lookup.Clear": "Clear the selection",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "common.unexpected_error": "Something went wrong. Please try again.",
+    "exam.not_found": "This exam no longer exists.",
+    "organizer.not_found": "This organizer no longer exists. Refresh the list.",
+
+    "ExamEditions.Section.Title": "Editions",
+    "ExamEditions.Section.Subtitle": "Each paper actually applied, with its year, position and board. Newest first.",
+    "ExamEditions.Section.SaveExamFirst": "Save the exam first. Its editions are added here.",
+    "ExamEditions.Empty": "This exam has no edition yet.",
+    "ExamEditions.Row.AppliedOn": "Applied on {0}",
+    "ExamEditions.Status.Draft": "Draft", "ExamEditions.Status.Published": "Published",
+    "ExamEditions.Status.Draft.Description": "Kept in the administration. Students do not see it.",
+    "ExamEditions.Status.Published.Description": "Offered to students in the catalog. Set it back to Draft before deleting it.",
+    "ExamEditions.Delete.Object": "edition {0}",
+    "ExamEditions.Delete.Message": "The edition {0} leaves the exam {1}. The same year, position and board cannot be added to this exam again.",
+    "ExamEditions.Deleted": "Edition deleted.",
+    "ExamEditions.Delete.DisabledPublished": "Set it back to Draft before deleting it.",
+    "ExamEditions.Form.AddTitle": "Add edition", "ExamEditions.Form.EditTitle": "Edit edition",
+    "ExamEditions.Section.Paper": "Paper",
+    "ExamEditions.Section.Paper.Subtitle": "The board that applied it, the notice year and the job it selects for.",
+    "ExamEditions.Section.Notice": "Notice and application",
+    "ExamEditions.Section.Notice.Subtitle": "How the notice names itself, where it is published and when the paper was applied. All optional.",
+    "ExamEditions.Section.Publication": "Publication",
+    "ExamEditions.Section.Publication.Subtitle": "Who can see this edition.",
+    "ExamEditions.Field.Exam": "Exam",
+    "ExamEditions.Field.Organizer": "Board", "ExamEditions.Field.Organizer.Placeholder": "Name or acronym",
+    "ExamEditions.Field.Organizer.Hint": "The board that applied this paper, as the notice names it.",
+    "ExamEditions.Field.NoticeYear": "Notice year", "ExamEditions.Field.NoticeYear.Placeholder": "E.g.: 2026", "ExamEditions.Field.NoticeYear.Hint": "From 1990 to {0}.",
+    "ExamEditions.Field.Position": "Position", "ExamEditions.Field.Position.Placeholder": "E.g.: Municipal guard, 3rd class",
+    "ExamEditions.Field.Position.Hint": "The job this paper selects for. Leave it empty for ENEM, entrance exams and certifications. At most 200 characters.",
+    "ExamEditions.Field.NoticeReference": "Notice reference", "ExamEditions.Field.NoticeReference.Placeholder": "E.g.: Notice no. 01/2026",
+    "ExamEditions.Field.NoticeReference.Hint": "As the notice names itself. Editions cut from the same notice share it.",
+    "ExamEditions.Field.NoticeUrl": "Notice link", "ExamEditions.Field.NoticeUrl.Placeholder": "https://",
+    "ExamEditions.Field.NoticeUrl.Hint": "The official address of the notice. At most 300 characters.",
+    "ExamEditions.Field.AppliedOn": "Application date", "ExamEditions.Field.AppliedOn.Hint": "The day the paper was applied. Optional, also to publish.",
+    "ExamEditions.Field.Status": "Status",
+    "ExamEditions.Saved": "Edition saved.", "ExamEditions.BackToExam": "Back to the exam",
+    "DateField.OpenCalendar": "Open the calendar", "DateField.Clear": "Clear the date",
+    "DateField.PreviousMonth": "Previous month", "DateField.NextMonth": "Next month",
+    "DateField.Format": "mm/dd/yyyy", "DateField.Hint.Format": "Format: {0}", "DateField.Invalid": "This is not a date. Type it as {0}.",
+    "Gallery.Section.DateField": "Date field",
+    "Gallery.DateField.Hint": "Type the date in the reader's format or pick it from the calendar. Empty, filled, error and disabled.",
+    "exam_edition.not_found": "This edition no longer exists.",
+    "exam_edition.organizer_required": "Choose the board.",
+    "exam_edition.notice_year_invalid": "Type a year from 1990 to next year.",
+    "exam_edition.position_too_long": "The position is too long: at most 200 characters.",
+    "exam_edition.notice_reference_too_long": "The notice reference is too long: at most 100 characters.",
+    "exam_edition.notice_url_invalid": "Type a full address of at most 300 characters, starting with http:// or https://",
+    "exam_edition.applied_on_before_notice_year": "The application date cannot be before 1 January of the notice year.",
+    "exam_edition.status_invalid": "Choose Draft or Published.",
+    "exam_edition.duplicate": "This exam already has an edition with this year, position and board (a deleted one counts too).",
+    "exam_edition.published": "This edition is published. Set it back to Draft, save, then delete it.",
+    "exam.has_editions": "This exam has editions. Delete its editions first.",
+    "organizer.has_editions": "Some editions name this board. Change or delete those editions first."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração", "Nav.Section.Development": "Desenvolvimento",
+    "Exams.Title": "Exames", "IssuingAuthorities.Title": "Órgãos contratantes", "Organizers.Title": "Bancas",
+    "Users.Title": "Usuários", "Roles.Title": "Papéis",
+    "Gallery.Title": "Galeria do kit de interface", "Gallery.Breadcrumb.Dev": "Desenvolvimento",
+    "Gallery.Intro": "Todos os padrões do kit, com dados de exemplo. Confira no modo claro e no escuro, em cada idioma e usando só o teclado.",
+    "Exams.Form.AddTitle": "Adicionar exame", "Exams.Form.EditTitle": "Editar exame", "Exams.BackToList": "Voltar para os exames",
+    "Exams.Section.Identification": "Identificação",
+    "Exams.Field.IssuingAuthority": "Órgão contratante", "Exams.Field.Name": "Nome", "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Form.Aside.Title": "Resumo",
+    "Common.Save": "Salvar", "Common.Saving": "Salvando...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Excluir",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Delete.Title": "Excluir item?", "Common.Delete.Confirm": "Excluir {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Você tem alterações não salvas. Se sair agora, elas serão perdidas.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.ErrorSummary.Title": "Ainda não é possível salvar este formulário",
+    "Common.Summary.Title": "Resumo", "Common.Summary.NotFilled": "Não preenchido", "Common.Summary.Checklist": "Antes de salvar",
+    "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "Lookup.Hint.MinChars": "Digite ao menos {0} caracteres", "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.LoadFailed": "A pesquisa falhou.", "Lookup.Clear": "Limpar a seleção",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "common.unexpected_error": "Algo deu errado. Tente novamente.",
+    "exam.not_found": "Este exame não existe mais.",
+    "organizer.not_found": "Esta banca não existe mais. Atualize a lista.",
+
+    "ExamEditions.Section.Title": "Edições",
+    "ExamEditions.Section.Subtitle": "Cada prova efetivamente aplicada, com ano, cargo e banca. As mais recentes primeiro.",
+    "ExamEditions.Section.SaveExamFirst": "Salve o exame primeiro. As edições dele são adicionadas aqui.",
+    "ExamEditions.Empty": "Este exame ainda não tem edições.",
+    "ExamEditions.Row.AppliedOn": "Aplicada em {0}",
+    "ExamEditions.Status.Draft": "Rascunho", "ExamEditions.Status.Published": "Publicada",
+    "ExamEditions.Status.Draft.Description": "Fica só na administração. Os alunos não a veem.",
+    "ExamEditions.Status.Published.Description": "Oferecida aos alunos no catálogo. Volte para Rascunho antes de excluí-la.",
+    "ExamEditions.Delete.Object": "edição {0}",
+    "ExamEditions.Delete.Message": "A edição {0} sai do exame {1}. O mesmo ano, cargo e banca não poderão ser adicionados de novo a este exame.",
+    "ExamEditions.Deleted": "Edição excluída.",
+    "ExamEditions.Delete.DisabledPublished": "Volte para Rascunho antes de excluir.",
+    "ExamEditions.Form.AddTitle": "Adicionar edição", "ExamEditions.Form.EditTitle": "Editar edição",
+    "ExamEditions.Section.Paper": "Prova",
+    "ExamEditions.Section.Paper.Subtitle": "A banca que a aplicou, o ano do edital e o cargo a que se destina.",
+    "ExamEditions.Section.Notice": "Edital e aplicação",
+    "ExamEditions.Section.Notice.Subtitle": "Como o edital se identifica, onde está publicado e quando a prova foi aplicada. Tudo opcional.",
+    "ExamEditions.Section.Publication": "Publicação",
+    "ExamEditions.Section.Publication.Subtitle": "Quem pode ver esta edição.",
+    "ExamEditions.Field.Exam": "Exame",
+    "ExamEditions.Field.Organizer": "Banca", "ExamEditions.Field.Organizer.Placeholder": "Nome ou sigla",
+    "ExamEditions.Field.Organizer.Hint": "A banca que aplicou esta prova, como o edital a indica.",
+    "ExamEditions.Field.NoticeYear": "Ano do edital", "ExamEditions.Field.NoticeYear.Placeholder": "Ex.: 2026", "ExamEditions.Field.NoticeYear.Hint": "De 1990 a {0}.",
+    "ExamEditions.Field.Position": "Cargo", "ExamEditions.Field.Position.Placeholder": "Ex.: Guarda Municipal de 3ª Classe",
+    "ExamEditions.Field.Position.Hint": "O cargo que esta prova seleciona. Deixe vazio para ENEM, vestibulares e certificações. Até 200 caracteres.",
+    "ExamEditions.Field.NoticeReference": "Identificação do edital", "ExamEditions.Field.NoticeReference.Placeholder": "Ex.: Edital nº 01/2026",
+    "ExamEditions.Field.NoticeReference.Hint": "Como o edital se identifica. Edições do mesmo edital repetem este texto.",
+    "ExamEditions.Field.NoticeUrl": "Link do edital", "ExamEditions.Field.NoticeUrl.Placeholder": "https://",
+    "ExamEditions.Field.NoticeUrl.Hint": "O endereço oficial do edital. Até 300 caracteres.",
+    "ExamEditions.Field.AppliedOn": "Data de aplicação", "ExamEditions.Field.AppliedOn.Hint": "O dia em que a prova foi aplicada. Opcional, também para publicar.",
+    "ExamEditions.Field.Status": "Situação",
+    "ExamEditions.Saved": "Edição salva.", "ExamEditions.BackToExam": "Voltar para o exame",
+    "DateField.OpenCalendar": "Abrir o calendário", "DateField.Clear": "Limpar a data",
+    "DateField.PreviousMonth": "Mês anterior", "DateField.NextMonth": "Próximo mês",
+    "DateField.Format": "dd/mm/aaaa", "DateField.Hint.Format": "Formato: {0}", "DateField.Invalid": "Isto não é uma data. Digite no formato {0}.",
+    "Gallery.Section.DateField": "Campo de data",
+    "Gallery.DateField.Hint": "Digite a data no formato de quem lê ou escolha no calendário. Vazio, preenchido, com erro e desativado.",
+    "exam_edition.not_found": "Esta edição não existe mais.",
+    "exam_edition.organizer_required": "Escolha a banca.",
+    "exam_edition.notice_year_invalid": "Informe um ano entre 1990 e o próximo ano.",
+    "exam_edition.position_too_long": "O cargo é longo demais: no máximo 200 caracteres.",
+    "exam_edition.notice_reference_too_long": "A identificação do edital é longa demais: no máximo 100 caracteres.",
+    "exam_edition.notice_url_invalid": "Digite o endereço completo, com até 300 caracteres, começando com http:// ou https://",
+    "exam_edition.applied_on_before_notice_year": "A data de aplicação não pode ser anterior a 1º de janeiro do ano do edital.",
+    "exam_edition.status_invalid": "Escolha Rascunho ou Publicada.",
+    "exam_edition.duplicate": "Este exame já tem uma edição com este ano, cargo e banca (uma excluída também conta).",
+    "exam_edition.published": "Esta edição está publicada. Volte-a para Rascunho, salve e depois exclua.",
+    "exam.has_editions": "Este exame tem edições. Exclua as edições primeiro.",
+    "organizer.has_editions": "Há edições que indicam esta banca. Altere ou exclua essas edições primeiro."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração", "Nav.Section.Development": "Desenvolvimento",
+    "Exams.Title": "Exames", "IssuingAuthorities.Title": "Entidades contratantes", "Organizers.Title": "Entidades organizadoras",
+    "Users.Title": "Utilizadores", "Roles.Title": "Perfis",
+    "Gallery.Title": "Galeria do kit de interface", "Gallery.Breadcrumb.Dev": "Desenvolvimento",
+    "Gallery.Intro": "Todos os padrões do kit, com dados de exemplo. Verifique no modo claro e no escuro, em cada idioma e apenas com o teclado.",
+    "Exams.Form.AddTitle": "Adicionar exame", "Exams.Form.EditTitle": "Editar exame", "Exams.BackToList": "Voltar para os exames",
+    "Exams.Section.Identification": "Identificação",
+    "Exams.Field.IssuingAuthority": "Entidade contratante", "Exams.Field.Name": "Nome", "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Form.Aside.Title": "Resumo",
+    "Common.Save": "Guardar", "Common.Saving": "A guardar...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Eliminar",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Delete.Title": "Eliminar item?", "Common.Delete.Confirm": "Eliminar {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Tem alterações por guardar. Se sair agora, vai perdê-las.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.ErrorSummary.Title": "Ainda não é possível guardar este formulário",
+    "Common.Summary.Title": "Resumo", "Common.Summary.NotFilled": "Não preenchido", "Common.Summary.Checklist": "Antes de guardar",
+    "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "Lookup.Hint.MinChars": "Escreva pelo menos {0} caracteres", "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.LoadFailed": "A pesquisa falhou.", "Lookup.Clear": "Limpar a seleção",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "common.unexpected_error": "Ocorreu um erro. Tente novamente.",
+    "exam.not_found": "Este exame já não existe.",
+    "organizer.not_found": "Esta entidade organizadora já não existe. Atualize a lista.",
+
+    "ExamEditions.Section.Title": "Edições",
+    "ExamEditions.Section.Subtitle": "Cada prova efetivamente aplicada, com ano, posto de trabalho e entidade organizadora. As mais recentes primeiro.",
+    "ExamEditions.Section.SaveExamFirst": "Guarde primeiro o exame. As suas edições são adicionadas aqui.",
+    "ExamEditions.Empty": "Este exame ainda não tem edições.",
+    "ExamEditions.Row.AppliedOn": "Aplicada em {0}",
+    "ExamEditions.Status.Draft": "Rascunho", "ExamEditions.Status.Published": "Publicada",
+    "ExamEditions.Status.Draft.Description": "Fica apenas na administração. Os alunos não a veem.",
+    "ExamEditions.Status.Published.Description": "Disponível para os alunos no catálogo. Volte a Rascunho antes de a eliminar.",
+    "ExamEditions.Delete.Object": "edição {0}",
+    "ExamEditions.Delete.Message": "A edição {0} sai do exame {1}. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame.",
+    "ExamEditions.Deleted": "Edição eliminada.",
+    "ExamEditions.Delete.DisabledPublished": "Volte a colocar em Rascunho antes de eliminar.",
+    "ExamEditions.Form.AddTitle": "Adicionar edição", "ExamEditions.Form.EditTitle": "Editar edição",
+    "ExamEditions.Section.Paper": "Prova",
+    "ExamEditions.Section.Paper.Subtitle": "A entidade organizadora que a aplicou, o ano do aviso e o posto de trabalho a que se destina.",
+    "ExamEditions.Section.Notice": "Aviso e aplicação",
+    "ExamEditions.Section.Notice.Subtitle": "Como o aviso se identifica, onde está publicado e quando a prova foi aplicada. Tudo opcional.",
+    "ExamEditions.Section.Publication": "Publicação",
+    "ExamEditions.Section.Publication.Subtitle": "Quem pode ver esta edição.",
+    "ExamEditions.Field.Exam": "Exame",
+    "ExamEditions.Field.Organizer": "Entidade organizadora", "ExamEditions.Field.Organizer.Placeholder": "Nome ou sigla",
+    "ExamEditions.Field.Organizer.Hint": "A entidade organizadora que aplicou esta prova, como o aviso a indica.",
+    "ExamEditions.Field.NoticeYear": "Ano do aviso", "ExamEditions.Field.NoticeYear.Placeholder": "Ex.: 2026", "ExamEditions.Field.NoticeYear.Hint": "De 1990 a {0}.",
+    "ExamEditions.Field.Position": "Posto de trabalho", "ExamEditions.Field.Position.Placeholder": "Ex.: Agente de Polícia Municipal",
+    "ExamEditions.Field.Position.Hint": "O posto de trabalho para que esta prova seleciona. Deixe vazio para ENEM, exames de acesso e certificações. No máximo 200 caracteres.",
+    "ExamEditions.Field.NoticeReference": "Referência do aviso", "ExamEditions.Field.NoticeReference.Placeholder": "Ex.: Aviso n.º 1/2026",
+    "ExamEditions.Field.NoticeReference.Hint": "Como o aviso se identifica. Edições do mesmo aviso repetem este texto.",
+    "ExamEditions.Field.NoticeUrl": "Ligação do aviso", "ExamEditions.Field.NoticeUrl.Placeholder": "https://",
+    "ExamEditions.Field.NoticeUrl.Hint": "O endereço oficial do aviso. No máximo 300 caracteres.",
+    "ExamEditions.Field.AppliedOn": "Data de aplicação", "ExamEditions.Field.AppliedOn.Hint": "O dia em que a prova foi aplicada. Opcional, também para publicar.",
+    "ExamEditions.Field.Status": "Estado",
+    "ExamEditions.Saved": "Edição guardada.", "ExamEditions.BackToExam": "Voltar ao exame",
+    "DateField.OpenCalendar": "Abrir o calendário", "DateField.Clear": "Limpar a data",
+    "DateField.PreviousMonth": "Mês anterior", "DateField.NextMonth": "Mês seguinte",
+    "DateField.Format": "dd/mm/aaaa", "DateField.Hint.Format": "Formato: {0}", "DateField.Invalid": "Isto não é uma data. Escreva no formato {0}.",
+    "Gallery.Section.DateField": "Campo de data",
+    "Gallery.DateField.Hint": "Escreva a data no formato de quem lê ou escolha-a no calendário. Vazio, preenchido, com erro e desativado.",
+    "exam_edition.not_found": "Esta edição já não existe.",
+    "exam_edition.organizer_required": "Escolha a entidade organizadora.",
+    "exam_edition.notice_year_invalid": "Indique um ano entre 1990 e o próximo ano.",
+    "exam_edition.position_too_long": "O posto de trabalho é demasiado longo: no máximo 200 caracteres.",
+    "exam_edition.notice_reference_too_long": "A referência do aviso é demasiado longa: no máximo 100 caracteres.",
+    "exam_edition.notice_url_invalid": "Escreva o endereço completo, com no máximo 300 caracteres, a começar por http:// ou https://",
+    "exam_edition.applied_on_before_notice_year": "A data de aplicação não pode ser anterior a 1 de janeiro do ano do aviso.",
+    "exam_edition.status_invalid": "Escolha Rascunho ou Publicada.",
+    "exam_edition.duplicate": "Este exame já tem uma edição com este ano, posto de trabalho e entidade organizadora (uma eliminada também conta).",
+    "exam_edition.published": "Esta edição está publicada. Volte a colocá-la em Rascunho, guarde e depois elimine-a.",
+    "exam.has_editions": "Este exame tem edições. Elimine primeiro as edições.",
+    "organizer.has_editions": "Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições."
+  }
+};
+
+/* ---- icons: Material Outlined paths, named as AppIcons constants ---- */
+const ICONS = {
+  Exams: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z",
+  IssuingAuthorities: "M1 21h12v2H1v-2zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83L5.24 8.07zM12.32 1l5.66 5.66-2.83 2.83-5.66-5.66L12.32 1zM3.83 9.48l5.66 5.66-2.83 2.83L1 12.31l2.83-2.83z",
+  Organizers: "M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z",
+  Users: "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 1.9 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+  Roles: "M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm6 9c0 4-2.6 7.8-6 8.9C8.6 18.8 6 15 6 11V6.3l6-2.2 6 2.2V11z",
+  Build: "M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z",
+  Editions: "M17 10H7v2h10v-2zm2-7h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zm-5-5H7v2h7v-2z",
+  Notice: "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z",
+  View: "M12 6a9.77 9.77 0 0 1 8.82 5.5A9.77 9.77 0 0 1 12 17a9.77 9.77 0 0 1-8.82-5.5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z",
+  Link: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+  Calendar: "M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V10h16v11zm0-13H4V5h16v3z",
+  Close: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  ChevronLeft: "M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z",
+  ChevronRight: "M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z",
+  Edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83a1 1 0 0 0 0-1.41z",
+  Delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  Add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  Error: "M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z",
+  Warning: "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+  Retry: "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  Verified: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
+  Pending: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  Check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+};
+const icon = (name, size = 20, cls = "") =>
+  `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="${ICONS[name]}"/></svg>`;
+
+/* ---- sample data: the Manaus municipal guard exam (edital read on 2026-09-26) ---- */
+const EXAM = {
+  name: "Concurso Público Prefeitura de Manaus - Guarda Municipal",
+  authority: "Prefeitura Municipal de Manaus (PMM)",
+  language: "Português (Brasil)"
+};
+const BOARDS = [
+  { name: "Instituto Consulplan", acr: "CONSULPLAN" },
+  { name: "Instituto de Desenvolvimento Educacional, Cultural e Assistencial Nacional", acr: "IDECAN" },
+  { name: "Instituto Brasileiro de Apoio e Desenvolvimento Executivo", acr: "IBADE" },
+  { name: "Fundação Getulio Vargas", acr: "FGV" },
+  { name: "Centro Brasileiro de Pesquisa em Avaliação e Seleção e de Promoção de Eventos", acr: "CEBRASPE" },
+  { name: "Fundação Carlos Chagas", acr: "FCC" },
+  { name: "Fundação para o Vestibular da Universidade Estadual Paulista", acr: "VUNESP" }
+];
+const SAMPLE_EDITIONS = [
+  { id: 1, year: 2026, position: "Guarda Municipal de 3ª Classe", board: BOARDS[0], status: "Published", applied: { y: 2026, m: 6, d: 14 },
+    ref: "Edital nº 01/2026", url: "https://www.institutoconsulplan.org.br/concursos/pmm-guarda-municipal-2026" },
+  { id: 2, year: 2026, position: "Guarda Municipal Músico", board: BOARDS[0], status: "Draft", applied: null,
+    ref: "Edital nº 01/2026", url: "" },
+  { id: 3, year: 2021, position: "Guarda Municipal de 3ª Classe", board: BOARDS[1], status: "Published", applied: { y: 2021, m: 12, d: 12 },
+    ref: "Edital nº 02/2021", url: "" },
+  { id: 4, year: 2019, position: "", board: BOARDS[2], status: "Draft", applied: null, ref: "", url: "" }
+];
+const NEW_EDITION = { id: 9, year: 2026, position: "Guarda Municipal Motorista", board: BOARDS[0], status: "Draft", applied: null,
+  ref: "Edital nº 01/2026", url: "" };
+const CURRENT_YEAR = 2026;          /* TimeProvider in the app */
+const MAX_YEAR = CURRENT_YEAR + 1;
+const AO = "edition-applied-on";
+
+/* ---- demo states per screen ---- */
+const STATES = {
+  exam: [["add", "Add mode (new exam)"], ["loading", "Loading"], ["empty", "Empty"], ["ready", "Ready"], ["error", "Load error"],
+         ["confirm", "Confirm delete"], ["deleted", "Deleted"], ["refused", "Delete refused (published meanwhile)"], ["denied", "Permission denied"]],
+  edition: [["loading", "Loading"], ["new", "New"], ["ready", "Ready (edit)"], ["lookup", "Board search"], ["lookupfail", "Board search failed"],
+            ["calendar", "Calendar open"], ["saving", "Saving"], ["success", "Success"], ["validation", "Validation error"],
+            ["duplicate", "Business error (duplicate)"], ["server", "Server error"], ["discard", "Unsaved changes"],
+            ["examnotfound", "Exam not found"], ["editionnotfound", "Edition not found"], ["denied", "Permission denied"]],
+  gallery: [["default", "Four states"], ["calendar", "Calendar open"]]
+};
+
+const S = {
+  screen: "exam", lang: "pt-BR", theme: "light",
+  state: { exam: "ready", edition: "ready", gallery: "default" },
+  editions: [], sectionAlert: null,
+  form: {}, errors: {}, alert: null, summary: false, saving: false, dirty: false, saved: null,
+  lookup: { open: false, failed: false },
+  dates: {}, dialog: null, snack: null
+};
+
+const $ = (id) => document.getElementById(id);
+const t = (key, ...args) => {
+  let s = (TEXTS[S.lang] && TEXTS[S.lang][key]) || key;
+  args.forEach((a, i) => { s = s.split(`{${i}}`).join(a); });
+  return s;
+};
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/* ---- dates: shown in the reader's culture, parsed from what the reader typed ---- */
+const fmtDate = (v) => v ? new Intl.DateTimeFormat(S.lang, { year: "numeric", month: "numeric", day: "numeric" })
+  .format(new Date(v.y, v.m - 1, v.d)) : "";
+const fmtDatePadded = (v) => {
+  if (!v) return "";
+  const p = (n) => String(n).padStart(2, "0");
+  return S.lang === "en" ? `${v.m}/${v.d}/${v.y}` : `${p(v.d)}/${p(v.m)}/${v.y}`;
+};
+function parseDate(text) {
+  const s = (text || "").trim();
+  if (!s) return { value: null, invalid: false };
+  const parts = s.split(/[\/.\-]/).map(x => x.trim());
+  if (parts.length !== 3 || parts.some(x => !/^\d+$/.test(x)) || parts[2].length !== 4) return { value: null, invalid: true };
+  const [a, b, y] = parts.map(Number);
+  const m = S.lang === "en" ? a : b, d = S.lang === "en" ? b : a;
+  const dt = new Date(y, m - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return { value: null, invalid: true };
+  return { value: { y, m, d }, invalid: false };
+}
+const cmpDate = (a, b) => (a.y - b.y) || (a.m - b.m) || (a.d - b.d);
+
+function mkDate(o) {
+  return Object.assign({ labelKey: "ExamEditions.Field.AppliedOn", hintKey: null, required: false, disabled: false,
+    value: null, text: null, invalid: false, errorKey: null, min: null, open: false, view: null }, o);
+}
+
+/* ===================================================================== */
+/* Screen 1: exam page with the editions section                          */
+/* ===================================================================== */
+function setExamState(st) {
+  S.state.exam = st;
+  S.editions = SAMPLE_EDITIONS.map(e => ({ ...e }));
+  S.sectionAlert = null; S.dialog = null; S.snack = null;
+  if (st === "empty") S.editions = [];
+  if (st === "confirm") S.dialog = { kind: "delete", id: 2 };
+  if (st === "deleted") { S.editions = S.editions.filter(e => e.id !== 2); S.snack = "ExamEditions.Deleted"; }
+  if (st === "refused") S.sectionAlert = "exam_edition.published";
+}
+
+const labelParts = (e) => [String(e.year), e.position, e.board.acr].filter(Boolean);
+const rowLabelHtml = (e) => labelParts(e).map(esc).join('<span class="app-item-row-sep" aria-hidden="true"> · </span>');
+const rowItemName = (e) => labelParts(e).join(", ");
+const rowLabelText = (e) => labelParts(e).join(" · ");
+
+function statusChip(status) {
+  const tone = status === "Published" ? "success" : "neutral";
+  return `<span class="app-status-chip app-status-chip-${tone}"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("ExamEditions.Status." + status))}</span>`;
+}
+
+function examHtml() {
+  const st = S.state.exam;
+  if (st === "denied") return deniedHtml();
+  const add = st === "add";
+  const crumbs = `
+    <nav class="app-breadcrumbs" aria-label="Breadcrumb">
+      <span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span>
+      <a tabindex="0">${esc(t("Exams.Title"))}</a><span aria-hidden="true"> / </span>
+      <span aria-current="page">${esc(add ? t("Exams.Form.AddTitle") : EXAM.name)}</span>
+    </nav>`;
+  const stubValue = (v) => `<div class="stub-value ${v ? "" : "empty"}">${esc(v || "")}</div>`;
+  const asideRow = (k, v) => `<div class="app-aside-row"><dt>${esc(t(k))}</dt><dd class="${v ? "" : "empty"}">${esc(v || t("Common.Summary.NotFilled"))}</dd></div>`;
+  return `
+  <div class="app-page-header">${crumbs}<h1 class="app-page-title">${esc(add ? t("Exams.Form.AddTitle") : t("Exams.Form.EditTitle"))}</h1></div>
+  <div class="app-form-layout">
+    <div class="app-form-card">
+      <span class="demo-note">Demo: the F-43 exam form, unchanged (shortened)</span>
+      <section class="app-section-card">
+        <h2 class="app-section-card-title">${icon("Exams", 20, "app-section-card-icon")}<span>${esc(t("Exams.Section.Identification"))}</span></h2>
+        <div class="app-form-grid app-form-grid-2" style="margin-top:12px">
+          <div class="stub-field"><span class="app-field-label">${esc(t("Exams.Field.IssuingAuthority"))}<span class="app-field-required" aria-hidden="true">*</span></span>${stubValue(add ? "" : EXAM.authority)}</div>
+          <div class="stub-field"><span class="app-field-label">${esc(t("Exams.Field.Name"))}<span class="app-field-required" aria-hidden="true">*</span></span>${stubValue(add ? "" : EXAM.name)}</div>
+        </div>
+      </section>
+      <div class="app-form-actions">
+        <button type="button" class="app-button app-button-text">${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-filled">${esc(t("Common.Save"))}</button>
+      </div>
+    </div>
+    <aside class="app-form-aside" aria-labelledby="exam-aside-title">
+      <h2 class="app-form-aside-title" id="exam-aside-title">${esc(t("Exams.Form.Aside.Title"))}</h2>
+      <dl>${asideRow("Exams.Field.IssuingAuthority", add ? "" : EXAM.authority)}${asideRow("Exams.Field.Name", add ? "" : EXAM.name)}${asideRow("Exams.Field.ContentLanguage", EXAM.language)}</dl>
+    </aside>
+  </div>
+
+  <!-- F-35: the editions card, full width below the layout, outside the exam form -->
+  <div class="app-form-card">
+    <section class="app-section-card" id="exam-section-editions" aria-labelledby="exam-section-editions-title">
+      <h2 class="app-section-card-title" id="exam-section-editions-title">${icon("Editions", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Title"))}</span></h2>
+      <p class="app-section-card-subtitle">${esc(t("ExamEditions.Section.Subtitle"))}</p>
+      ${editionsBodyHtml()}
+    </section>
+  </div>`;
+}
+
+function editionsBodyHtml() {
+  const st = S.state.exam;
+  if (st === "add") return `<p class="app-section-note">${esc(t("ExamEditions.Section.SaveExamFirst"))}</p>`;
+  if (st === "loading") return `<div class="app-state app-state-inline" role="status"><span class="app-spinner" style="color:var(--primary)" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+  if (st === "error") return `
+    <div class="app-state app-state-inline" role="alert">
+      ${icon("Error", 36, "is-error")}
+      <p>${esc(t("Common.LoadFailed"))}</p>
+      <button type="button" class="app-button app-button-outlined" data-action="retry-editions">${icon("Retry", 18)}${esc(t("Common.TryAgain"))}</button>
+    </div>`;
+  const alert = S.sectionAlert
+    ? `<div class="app-alert" role="alert">${icon("Error", 20)}<span>${esc(t(S.sectionAlert))}</span></div>` : "";
+  const list = S.editions.length === 0
+    ? `<p class="app-item-rows-empty">${esc(t("ExamEditions.Empty"))}</p>`
+    : `<ul class="app-item-rows-list">${S.editions.map(e => `
+        <li class="app-item-row">
+          <div class="app-item-row-content">
+            <span class="app-item-row-label">${rowLabelHtml(e)}</span>
+            ${statusChip(e.status)}
+            ${e.applied ? `<span class="app-item-row-meta">${esc(t("ExamEditions.Row.AppliedOn", fmtDate(e.applied)))}</span>` : ""}
+          </div>
+          <div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">
+            <span class="tip" data-tip="${esc(t("Common.Edit"))}"><button type="button" class="app-icon-button" data-action="edit-edition" data-id="${e.id}"
+              aria-label="${esc(t("Common.ActionOnItem", t("Common.Edit"), rowItemName(e)))}">${icon("Edit", 18)}</button></span>
+            <span class="tip" data-tip="${esc(e.status === "Published" ? t("ExamEditions.Delete.DisabledPublished") : t("Common.Delete"))}"><button type="button" class="app-icon-button is-destructive" data-action="delete-edition" data-id="${e.id}"
+              ${e.status === "Published" ? "disabled" : ""}
+              aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), rowItemName(e)))}${e.status === "Published" ? ". " + esc(t("ExamEditions.Delete.DisabledPublished")) : ""}">${icon("Delete", 18)}</button></span>
+          </div>
+        </li>`).join("")}</ul>`;
+  return `
+    <div class="app-item-rows">${alert}${list}</div>
+    <div class="app-item-rows-foot">
+      <a class="app-button app-button-outlined" href="#" id="add-edition-link" data-action="add-edition">${icon("Add", 18)}${esc(t("ExamEditions.Form.AddTitle"))}</a>
+    </div>`;
+}
+
+/* ===================================================================== */
+/* Screen 2: the edition page                                             */
+/* ===================================================================== */
+function loadForm(mode, e) {
+  S.form = mode === "new"
+    ? { mode, board: null, boardText: "", year: "", position: "", ref: "", url: "", status: "Draft" }
+    : { mode, id: e.id, board: e.board, boardText: `${e.board.name} (${e.board.acr})`, year: String(e.year),
+        position: e.position, ref: e.ref || "", url: e.url || "", status: e.status };
+  S.saved = mode === "new" ? null : { year: e.year, position: e.position };
+  S.dates[AO] = mkDate({ labelKey: "ExamEditions.Field.AppliedOn", hintKey: "ExamEditions.Field.AppliedOn.Hint",
+    value: e && e.applied ? { ...e.applied } : null });
+  S.errors = {}; S.alert = null; S.summary = false; S.saving = false; S.dirty = false;
+  S.lookup = { open: false, failed: false };
+  syncMin();
+}
+
+function setEditionState(st) {
+  S.state.edition = st;
+  S.dialog = null; S.snack = null;
+  const e0 = SAMPLE_EDITIONS[0];
+  switch (st) {
+    case "new": case "loading": case "examnotfound": case "editionnotfound": case "denied":
+      loadForm("new"); break;
+    case "ready": loadForm("edit", e0); break;
+    case "lookup": loadForm("new"); S.form.boardText = "con"; S.lookup.open = true; break;
+    case "lookupfail": loadForm("new"); S.form.boardText = "con"; S.lookup.failed = true; break;
+    case "calendar": loadForm("edit", e0); S.dates[AO].open = true; S.dates[AO].view = { y: 2026, m: 6 }; break;
+    case "saving": loadForm("new"); Object.assign(S.form, { board: BOARDS[0], boardText: "Instituto Consulplan (CONSULPLAN)",
+      year: "2026", position: NEW_EDITION.position, ref: NEW_EDITION.ref }); S.saving = true; S.dirty = true; break;
+    case "success": loadForm("edit", NEW_EDITION); S.snack = "ExamEditions.Saved"; break;
+    case "validation":
+      loadForm("new");
+      Object.assign(S.form, { year: "2026", position: NEW_EDITION.position, url: "www.manaus.am.gov.br/edital-guarda-2026" });
+      S.dates[AO].value = { y: 2025, m: 12, d: 15 };
+      S.dirty = true; syncMin(); validateAll(); S.summary = true; break;
+    case "duplicate":
+      loadForm("new");
+      Object.assign(S.form, { board: e0.board, boardText: `${e0.board.name} (${e0.board.acr})`, year: "2026",
+        position: "guarda municipal de 3a classe", ref: e0.ref });
+      S.dirty = true; syncMin(); S.alert = "exam_edition.duplicate"; break;
+    case "server": loadForm("edit", e0); S.form.ref = "Edital nº 01/2026 - retificado"; S.dirty = true; S.alert = "common.unexpected_error"; break;
+    case "discard": loadForm("edit", e0); S.form.position = "Guarda Municipal de 2ª Classe"; S.dirty = true; S.dialog = { kind: "discard" }; break;
+  }
+}
+
+function yearValue() {
+  const n = Number(S.form.year);
+  return /^\d{4}$/.test(String(S.form.year).trim()) && n >= 1990 && n <= MAX_YEAR ? n : null;
+}
+function syncMin() { const y = yearValue(); if (S.dates[AO]) S.dates[AO].min = y ? { y, m: 1, d: 1 } : null; }
+
+/* comfort checks only; the Api runs the same rules */
+function checkField(f) {
+  switch (f) {
+    case "board": S.errors.board = S.form.board ? null : "exam_edition.organizer_required"; break;
+    case "year": S.errors.year = yearValue() ? null : "exam_edition.notice_year_invalid"; break;
+    case "url": {
+      const u = S.form.url.trim();
+      S.errors.url = !u || (u.length <= 300 && /^https?:\/\/[^\s\/]+\.[^\s]+$/i.test(u)) ? null : "exam_edition.notice_url_invalid"; break;
+    }
+    case "date": {
+      const d = S.dates[AO];
+      const y = yearValue();
+      d.errorKey = !d.invalid && d.value && y && d.value.y < y ? "exam_edition.applied_on_before_notice_year" : null; break;
+    }
+  }
+}
+function validateAll() { ["board", "year", "url", "date"].forEach(checkField); return errorItems(); }
+function errorItems() {
+  const d = S.dates[AO];
+  return [
+    [S.errors.board, "edition-organizer", "ExamEditions.Field.Organizer"],
+    [S.errors.year, "edition-notice-year", "ExamEditions.Field.NoticeYear"],
+    [S.errors.url, "edition-notice-url", "ExamEditions.Field.NoticeUrl"],
+    [d.invalid || d.errorKey, AO, "ExamEditions.Field.AppliedOn"]
+  ].filter(x => x[0]);
+}
+
+function fieldShell({ id, labelKey, required, inner, description, error, extra = "" }) {
+  return `
+  <div class="app-field ${error ? "app-field-error" : ""}" id="wrap-${id}">
+    <label class="app-field-label" for="${id}">${esc(t(labelKey))}${required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>
+    ${inner}
+    ${extra}
+    <span id="${id}-description" class="app-field-description">${description}</span>
+  </div>`;
+}
+function describe(errorText, hintText) {
+  return errorText ? `<span class="app-field-error-text">${esc(errorText)}</span>`
+                   : (hintText ? `<span class="app-field-hint">${esc(hintText)}</span>` : "");
+}
+
+function textField({ id, field, labelKey, required, placeholderKey, hintKey, hintArg, iconName, maxlength, type = "text", inputmode }) {
+  const errKey = S.errors[field];
+  const inner = `
+    <div class="app-field-input">
+      ${iconName ? icon(iconName, 18, "app-field-icon") : ""}
+      <input type="${type}" id="${id}" data-field="${field}" value="${esc(S.form[field])}" autocomplete="off"
+        ${maxlength ? `maxlength="${maxlength}"` : ""} ${inputmode ? `inputmode="${inputmode}"` : ""}
+        placeholder="${esc(t(placeholderKey))}" aria-describedby="${id}-description"
+        ${required ? 'aria-required="true"' : ""} ${errKey ? 'aria-invalid="true"' : ""}>
+    </div>`;
+  return fieldShell({ id, labelKey, required, inner, error: errKey,
+    description: describe(errKey && t(errKey), hintKey && t(hintKey, hintArg)) });
+}
+
+function lookupField() {
+  const id = "edition-organizer";
+  const errKey = S.errors.board;
+  const term = S.form.boardText.trim().toLowerCase();
+  const results = S.form.board ? [] : BOARDS.filter(b => term.length >= 2 &&
+    (b.name.toLowerCase().includes(term) || b.acr.toLowerCase().includes(term)));
+  const open = S.lookup.open && !S.form.board && term.length >= 2 && !S.lookup.failed;
+  const list = open ? `
+    <ul class="app-lookup-list" role="listbox" id="${id}-list" aria-label="${esc(t("ExamEditions.Field.Organizer"))}">
+      ${results.length ? results.map((b, i) => `<li role="option" tabindex="-1" data-action="pick-board" data-idx="${BOARDS.indexOf(b)}">${esc(b.name)} (${esc(b.acr)})</li>`).join("")
+        : `<li class="app-lookup-message" role="option" aria-disabled="true">${esc(t("Lookup.NoResults", S.form.boardText.trim()))}</li>`}
+    </ul>` : "";
+  let description;
+  if (errKey) description = describe(t(errKey));
+  else if (S.lookup.failed) description = `<span class="app-field-error-text">${esc(t("Lookup.LoadFailed"))}<button type="button" class="app-inline-button" data-action="lookup-retry">${esc(t("Common.TryAgain"))}</button></span>`;
+  else description = describe(null, t("ExamEditions.Field.Organizer.Hint"));
+  const inner = `
+    <div class="app-field-input">
+      ${icon("Organizers", 18, "app-field-icon")}
+      <input type="text" id="${id}" data-field="boardText" value="${esc(S.form.boardText)}" autocomplete="off"
+        role="combobox" aria-expanded="${open}" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="${id}-list"
+        placeholder="${esc(t("ExamEditions.Field.Organizer.Placeholder"))}" aria-describedby="${id}-description"
+        aria-required="true" ${errKey ? 'aria-invalid="true"' : ""}>
+      ${S.form.board ? `<span class="tip" data-tip="${esc(t("Lookup.Clear"))}"><button type="button" class="app-icon-button" data-action="clear-board" aria-label="${esc(t("Lookup.Clear"))}">${icon("Close", 16)}</button></span>` : ""}
+    </div>`;
+  return fieldShell({ id, labelKey: "ExamEditions.Field.Organizer", required: true, inner, error: errKey || S.lookup.failed, extra: list, description });
+}
+
+/* ---- AppDateField ---- */
+function dateFieldHtml(id) {
+  const d = S.dates[id];
+  const errText = d.invalid ? t("DateField.Invalid", t("DateField.Format")) : (d.errorKey ? t(d.errorKey) : null);
+  const hint = d.hintKey ? t(d.hintKey) : t("DateField.Hint.Format", t("DateField.Format"));
+  const text = d.text != null ? d.text : fmtDatePadded(d.value);
+  const inner = `
+    <div class="app-field-input">
+      <input type="text" id="${id}" data-date="${id}" value="${esc(text)}" inputmode="numeric" autocomplete="off"
+        placeholder="${esc(t("DateField.Format"))}" aria-describedby="${id}-description"
+        ${d.required ? 'aria-required="true"' : ""} ${errText ? 'aria-invalid="true"' : ""} ${d.disabled ? "disabled" : ""}>
+      ${d.value && !d.required && !d.disabled ? `<span class="tip" data-tip="${esc(t("DateField.Clear"))}"><button type="button" class="app-icon-button" data-action="date-clear" data-date="${id}" aria-label="${esc(t("DateField.Clear"))}">${icon("Close", 16)}</button></span>` : ""}
+      <span class="tip" data-tip="${esc(t("DateField.OpenCalendar"))}"><button type="button" class="app-icon-button" data-action="cal-toggle" data-date="${id}" id="${id}-calendar-button"
+        aria-label="${esc(t("DateField.OpenCalendar"))}" aria-haspopup="dialog" aria-expanded="${d.open}" ${d.disabled ? "disabled" : ""}>${icon("Calendar", 18)}</button></span>
+    </div>`;
+  return `<div class="app-field ${errText ? "app-field-error" : ""} ${d.disabled ? "app-field-disabled" : ""}" id="wrap-${id}">
+    <label class="app-field-label" for="${id}">${esc(t(d.labelKey))}${d.required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>
+    ${inner}
+    ${d.open ? calendarHtml(id) : ""}
+    <span id="${id}-description" class="app-field-description">${describe(errText, hint)}</span>
+  </div>`;
+}
+
+function calendarHtml(id) {
+  const d = S.dates[id];
+  const view = d.view || (d.value ? { y: d.value.y, m: d.value.m } : { y: CURRENT_YEAR, m: 9 });
+  d.view = view;
+  const title = new Intl.DateTimeFormat(S.lang, { month: "long", year: "numeric" }).format(new Date(view.y, view.m - 1, 1));
+  const firstDow = S.lang === "pt-PT" ? 1 : 0;       /* the culture's first day of the week */
+  const wd = [];
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(2026, 1, 1 + ((i + firstDow) % 7));   /* 1 Feb 2026 is a Sunday */
+    wd.push(`<th scope="col" abbr="${esc(new Intl.DateTimeFormat(S.lang, { weekday: "long" }).format(day))}">${esc(new Intl.DateTimeFormat(S.lang, { weekday: "short" }).format(day).replace(".", ""))}</th>`);
+  }
+  const first = new Date(view.y, view.m - 1, 1);
+  const lead = (first.getDay() - firstDow + 7) % 7;
+  const days = new Date(view.y, view.m, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push("<td></td>");
+  const focusDay = d.value && d.value.y === view.y && d.value.m === view.m ? d.value.d : 1;
+  for (let n = 1; n <= days; n++) {
+    const v = { y: view.y, m: view.m, d: n };
+    const selected = d.value && cmpDate(d.value, v) === 0;
+    const disabled = d.min && cmpDate(v, d.min) < 0;
+    const today = view.y === 2026 && view.m === 9 && n === 28;
+    const label = new Intl.DateTimeFormat(S.lang, { dateStyle: "full" }).format(new Date(view.y, view.m - 1, n));
+    cells.push(`<td><button type="button" class="app-day ${today ? "is-today" : ""}" data-action="cal-pick" data-date="${id}" data-day="${n}"
+      aria-label="${esc(label)}" aria-pressed="${!!selected}" tabindex="${n === focusDay ? 0 : -1}" ${disabled ? "disabled" : ""}>${n}</button></td>`);
+  }
+  while (cells.length % 7) cells.push("<td></td>");
+  const rows = [];
+  for (let i = 0; i < cells.length; i += 7) rows.push(`<tr>${cells.slice(i, i + 7).join("")}</tr>`);
+  return `
+    <div class="app-calendar" role="dialog" aria-label="${esc(t(d.labelKey))}" data-calendar="${id}">
+      <div class="app-calendar-head">
+        <span class="tip" data-tip="${esc(t("DateField.PreviousMonth"))}"><button type="button" class="app-icon-button" data-action="cal-prev" data-date="${id}" aria-label="${esc(t("DateField.PreviousMonth"))}">${icon("ChevronLeft", 20)}</button></span>
+        <span class="app-calendar-title" aria-live="polite">${esc(title)}</span>
+        <span class="tip" data-tip="${esc(t("DateField.NextMonth"))}"><button type="button" class="app-icon-button" data-action="cal-next" data-date="${id}" aria-label="${esc(t("DateField.NextMonth"))}">${icon("ChevronRight", 20)}</button></span>
+      </div>
+      <table role="grid"><thead><tr>${wd.join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>
+    </div>`;
+}
+
+function refreshDate(id, focus) {
+  const wrap = $("wrap-" + id);
+  if (!wrap) return;
+  wrap.outerHTML = dateFieldHtml(id);
+  if (focus === "input") $(id)?.focus();
+  if (focus === "button") $(id + "-calendar-button")?.focus();
+  if (focus === "day") document.querySelector(`[data-calendar="${id}"] .app-day[tabindex="0"]`)?.focus();
+  if (S.screen === "edition") refreshAside();
+}
+
+function statusCards() {
+  const opt = (v) => {
+    const sel = S.form.status === v;
+    return `<div class="app-radio-card" role="radio" id="edition-status-${v}" aria-checked="${sel}" tabindex="${sel ? 0 : -1}"
+      data-action="pick-status" data-value="${v}" aria-describedby="edition-status-${v}-description">
+      <span class="app-radio-dot" aria-hidden="true"></span>
+      <span><span class="app-radio-card-text">${esc(t("ExamEditions.Status." + v))}</span>
+      <span class="app-radio-card-description" id="edition-status-${v}-description">${esc(t("ExamEditions.Status." + v + ".Description"))}</span></span>
+    </div>`;
+  };
+  return `
+  <div class="app-field" id="wrap-edition-status" style="margin-bottom:0">
+    <span class="app-field-label" id="edition-status-label">${esc(t("ExamEditions.Field.Status"))}<span class="app-field-required" aria-hidden="true">*</span></span>
+    <div class="app-radio-cards" role="radiogroup" id="edition-status" aria-labelledby="edition-status-label" aria-required="true">
+      ${opt("Draft")}${opt("Published")}
+    </div>
+    <span id="edition-status-description" class="app-field-description"></span>
+  </div>`;
+}
+
+function asideHtml() {
+  const d = S.dates[AO];
+  const row = (k, v) => `<div class="app-aside-row"><dt>${esc(t(k))}</dt><dd class="${v ? "" : "empty"}">${esc(v || t("Common.Summary.NotFilled"))}</dd></div>`;
+  const check = (k, done) => `<li class="${done ? "app-check-done" : "app-check-pending"}">${icon(done ? "Verified" : "Pending", 18)}<span style="color:var(--text-primary)">${esc(t(k))}</span><span class="app-visually-hidden">${esc(t(done ? "Common.Checklist.Done" : "Common.Checklist.Pending"))}</span></li>`;
+  return `
+    <h2 class="app-form-aside-title" id="edition-aside-title">${esc(t("Common.Summary.Title"))}</h2>
+    <dl>
+      ${row("ExamEditions.Field.Exam", EXAM.name)}
+      ${row("Exams.Field.ContentLanguage", EXAM.language)}
+      ${row("ExamEditions.Field.Organizer", S.form.board ? `${S.form.board.name} (${S.form.board.acr})` : "")}
+      ${row("ExamEditions.Field.NoticeYear", S.form.year.trim())}
+      ${row("ExamEditions.Field.Position", S.form.position.trim())}
+      ${row("ExamEditions.Field.NoticeReference", S.form.ref.trim())}
+      ${row("ExamEditions.Field.AppliedOn", d && d.value && !d.invalid ? fmtDate(d.value) : "")}
+      ${row("ExamEditions.Field.Status", t("ExamEditions.Status." + S.form.status))}
+    </dl>
+    <p class="app-checklist-title">${esc(t("Common.Summary.Checklist"))}</p>
+    <ul class="app-checklist">${check("ExamEditions.Field.Organizer", !!S.form.board)}${check("ExamEditions.Field.NoticeYear", !!yearValue())}</ul>`;
+}
+function refreshAside() { const a = $("edition-aside"); if (a) a.innerHTML = asideHtml(); }
+
+function editionHtml() {
+  const st = S.state.edition;
+  if (st === "denied") return deniedHtml();
+  const isNew = S.form.mode === "new";
+  const current = st === "loading" ? "…" : isNew ? t("ExamEditions.Form.AddTitle")
+    : [String(S.saved.year), S.saved.position].filter(Boolean).join(" · ");
+  const title = st === "loading" ? t("ExamEditions.Form.EditTitle") : isNew ? t("ExamEditions.Form.AddTitle") : t("ExamEditions.Form.EditTitle");
+  const header = `
+    <div class="app-page-header">
+      <nav class="app-breadcrumbs" aria-label="Breadcrumb">
+        <span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span>
+        <a tabindex="0">${esc(t("Exams.Title"))}</a><span aria-hidden="true"> / </span>
+        <a tabindex="0" data-action="go-exam">${esc(st === "examnotfound" ? "…" : EXAM.name)}</a><span aria-hidden="true"> / </span>
+        <span aria-current="page">${esc(current)}</span>
+      </nav>
+      <h1 class="app-page-title">${esc(title)}</h1>
+    </div>`;
+  if (st === "loading") return header + `<div class="app-state" role="status"><span class="app-spinner" style="color:var(--primary)" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+  if (st === "examnotfound" || st === "editionnotfound") {
+    const exam = st === "examnotfound";
+    return header + `
+      <div class="app-form-card">
+        <div class="app-alert" role="alert">${icon("Error", 20)}<span>${esc(t(exam ? "exam.not_found" : "exam_edition.not_found"))}</span></div>
+        <a class="app-link" tabindex="0" ${exam ? "" : 'data-action="go-exam"'}>${esc(t(exam ? "Exams.BackToList" : "ExamEditions.BackToExam"))}</a>
+      </div>`;
+  }
+  const items = errorItems();
+  const summary = S.summary && items.length ? `
+    <div class="app-alert" id="edition-error-summary" role="alert" tabindex="-1">
+      ${icon("Warning", 20)}
+      <div><div class="app-alert-title">${esc(t("Common.ErrorSummary.Title"))}</div>
+      <ul class="app-error-summary-list">${items.map(([, fid, lk]) => `<li><a href="#${fid}" data-action="focus-field" data-target="${fid}">${esc(t(lk))}</a></li>`).join("")}</ul></div>
+    </div>` : "";
+  const alert = S.alert ? `<div class="app-alert" role="alert" id="edition-alert">${icon("Error", 20)}<span>${esc(t(S.alert))}</span></div>` : "";
+  return header + `
+  <div class="app-form-layout">
+    <form class="app-form-card" id="edition-form" novalidate>
+      ${summary}${alert}
+      <section class="app-section-card" aria-labelledby="edition-section-paper-title">
+        <h2 class="app-section-card-title" id="edition-section-paper-title">${icon("Exams", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Paper"))}</span></h2>
+        <p class="app-section-card-subtitle">${esc(t("ExamEditions.Section.Paper.Subtitle"))}</p>
+        <div class="app-form-grid app-form-grid-2">
+          ${lookupField()}
+          ${textField({ id: "edition-notice-year", field: "year", labelKey: "ExamEditions.Field.NoticeYear", required: true,
+             placeholderKey: "ExamEditions.Field.NoticeYear.Placeholder", hintKey: "ExamEditions.Field.NoticeYear.Hint", hintArg: String(MAX_YEAR),
+             maxlength: 4, type: "number", inputmode: "numeric" })}
+        </div>
+        <div class="app-form-grid app-form-grid-1">
+          ${textField({ id: "edition-position", field: "position", labelKey: "ExamEditions.Field.Position",
+             placeholderKey: "ExamEditions.Field.Position.Placeholder", hintKey: "ExamEditions.Field.Position.Hint", maxlength: 200 })}
+        </div>
+      </section>
+
+      <section class="app-section-card" aria-labelledby="edition-section-notice-title">
+        <h2 class="app-section-card-title" id="edition-section-notice-title">${icon("Notice", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Notice"))}</span></h2>
+        <p class="app-section-card-subtitle">${esc(t("ExamEditions.Section.Notice.Subtitle"))}</p>
+        <div class="app-form-grid app-form-grid-2">
+          ${textField({ id: "edition-notice-reference", field: "ref", labelKey: "ExamEditions.Field.NoticeReference",
+             placeholderKey: "ExamEditions.Field.NoticeReference.Placeholder", hintKey: "ExamEditions.Field.NoticeReference.Hint", maxlength: 100 })}
+          ${textField({ id: "edition-notice-url", field: "url", labelKey: "ExamEditions.Field.NoticeUrl", type: "url",
+             placeholderKey: "ExamEditions.Field.NoticeUrl.Placeholder", hintKey: "ExamEditions.Field.NoticeUrl.Hint", iconName: "Link", maxlength: 300 })}
+        </div>
+        <div class="app-form-grid app-form-grid-2">
+          ${dateFieldHtml(AO)}
+          <div></div>
+        </div>
+      </section>
+
+      <section class="app-section-card" aria-labelledby="edition-section-publication-title">
+        <h2 class="app-section-card-title" id="edition-section-publication-title">${icon("View", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Publication"))}</span></h2>
+        <p class="app-section-card-subtitle">${esc(t("ExamEditions.Section.Publication.Subtitle"))}</p>
+        ${statusCards()}
+      </section>
+
+      <div class="app-form-actions">
+        <button type="button" class="app-button app-button-text" data-action="cancel" ${S.saving ? "disabled" : ""}>${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-filled" data-action="save" ${S.saving ? "disabled" : ""}>
+          ${S.saving ? `<span class="app-spinner" aria-hidden="true"></span><span role="status">${esc(t("Common.Saving"))}</span>` : esc(t("Common.Save"))}
+        </button>
+      </div>
+    </form>
+    <aside class="app-form-aside" id="edition-aside" aria-labelledby="edition-aside-title">${asideHtml()}</aside>
+  </div>`;
+}
+
+/* ===================================================================== */
+/* Screen 3: /dev/ui gallery entry for AppDateField                       */
+/* ===================================================================== */
+function setGalleryState(st) {
+  S.state.gallery = st; S.dialog = null; S.snack = null;
+  S.dates["gallery-date-empty"] = mkDate({});
+  S.dates["gallery-date-filled"] = mkDate({ value: { y: 2026, m: 6, d: 14 }, open: st === "calendar" });
+  S.dates["gallery-date-error"] = mkDate({ text: "31/02/2026", invalid: true });
+  S.dates["gallery-date-disabled"] = mkDate({ value: { y: 2026, m: 6, d: 14 }, disabled: true });
+}
+function galleryHtml() {
+  const cap = (s) => `<span class="demo-note">Demo: ${s}</span>`;
+  return `
+  <div class="app-page-header">
+    <nav class="app-breadcrumbs" aria-label="Breadcrumb"><span>${esc(t("Gallery.Breadcrumb.Dev"))}</span><span aria-hidden="true"> / </span><span aria-current="page">${esc(t("Gallery.Title"))}</span></nav>
+    <h1 class="app-page-title">${esc(t("Gallery.Title"))}</h1>
+    <p class="app-page-intro">${esc(t("Gallery.Intro"))}</p>
+  </div>
+  <span class="demo-note">Demo: only the new section is shown; it sits after "Lookup field"</span>
+  <section class="gallery-section" id="gallery-date-field" aria-labelledby="gallery-date-field-title">
+    <h2 id="gallery-date-field-title">${esc(t("Gallery.Section.DateField"))}</h2>
+    <p class="gallery-hint">${esc(t("Gallery.DateField.Hint"))}</p>
+    <div class="gallery-paper">
+      <div class="app-form-grid app-form-grid-2">
+        <div>${cap("empty")}${dateFieldHtml("gallery-date-empty")}</div>
+        <div>${cap("filled")}${dateFieldHtml("gallery-date-filled")}</div>
+        <div>${cap("error")}${dateFieldHtml("gallery-date-error")}</div>
+        <div>${cap("disabled")}${dateFieldHtml("gallery-date-disabled")}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ===================================================================== */
+/* shared                                                                 */
+/* ===================================================================== */
+function deniedHtml() {
+  return `<div class="app-state">${icon("Error", 40)}<h1 class="app-state-title">${esc(t("NotFound.Title"))}</h1><p>${esc(t("NotFound.Message"))}</p></div>`;
+}
+
+function navHtml() {
+  const link = (ic, key, current) => `<span class="nav-link" ${current ? 'aria-current="page"' : ""}>${icon(ic, 20)}<span>${esc(t(key))}</span></span>`;
+  const inCatalog = S.screen !== "gallery";
+  return `
+    <span class="nav-section">${esc(t("Nav.Section.Content"))}</span>
+    ${link("Exams", "Exams.Title", inCatalog)}${link("IssuingAuthorities", "IssuingAuthorities.Title")}${link("Organizers", "Organizers.Title")}
+    <span class="nav-section">${esc(t("Nav.Section.Administration"))}</span>
+    ${link("Users", "Users.Title")}${link("Roles", "Roles.Title")}
+    <span class="nav-section">${esc(t("Nav.Section.Development"))}</span>
+    ${link("Build", "Gallery.Title", !inCatalog)}`;
+}
+
+function dialogHtml() {
+  if (!S.dialog) return "";
+  let title, message, confirm;
+  if (S.dialog.kind === "delete") {
+    const e = S.editions.find(x => x.id === S.dialog.id);
+    title = t("Common.Delete.Title");
+    message = t("ExamEditions.Delete.Message", rowLabelText(e), EXAM.name);
+    confirm = t("Common.Delete.Confirm", t("ExamEditions.Delete.Object", rowLabelText(e)));
+  } else {
+    title = t("Common.Discard.Title"); message = t("Common.Discard.Message"); confirm = t("Common.Discard.Confirm");
+  }
+  return `
+    <div class="app-overlay">
+      <div class="app-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-message">
+        <h2 class="app-dialog-title" id="dlg-title">${esc(title)}</h2>
+        <p class="app-dialog-message" id="dlg-message">${esc(message)}</p>
+        <div class="app-dialog-actions">
+          <button type="button" class="app-button app-button-text" data-action="dlg-cancel" id="dlg-cancel">${esc(t("Common.Cancel"))}</button>
+          <button type="button" class="app-button app-button-danger" data-action="dlg-confirm">${esc(confirm)}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+let snackTimer = null;
+function renderSnack() {
+  $("snackbar-root").innerHTML = S.snack
+    ? `<div class="app-snackbar" role="status">${icon("Check", 18)}<span>${esc(t(S.snack))}</span></div>` : "";
+  clearTimeout(snackTimer);
+  if (S.snack) snackTimer = setTimeout(() => { S.snack = null; $("snackbar-root").innerHTML = ""; }, 4000);
+}
+
+function renderDemo() {
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === S.screen)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeBtn === S.theme)));
+  $("demo-states").innerHTML = `<span class="demo-label">Demo &middot; state</span>` +
+    STATES[S.screen].map(([k, label]) => `<button type="button" data-state="${k}" aria-pressed="${S.state[S.screen] === k}">${label}</button>`).join("");
+}
+
+function render() {
+  document.documentElement.lang = S.lang;
+  document.documentElement.dataset.theme = S.theme;
+  renderDemo();
+  $("drawer").innerHTML = navHtml();
+  $("main").innerHTML = S.screen === "exam" ? examHtml() : S.screen === "edition" ? editionHtml() : galleryHtml();
+  $("dialog-root").innerHTML = dialogHtml();
+  renderSnack();
+  if (S.dialog) $("dlg-cancel")?.focus();
+}
+
+function setState(st) {
+  if (S.screen === "exam") setExamState(st);
+  else if (S.screen === "edition") setEditionState(st);
+  else setGalleryState(st);
+  render();
+  if (S.screen === "edition" && S.state.edition === "validation") $("edition-error-summary")?.focus();
+}
+
+/* ---- events ---- */
+document.addEventListener("click", (ev) => {
+  const demo = ev.target.closest(".demo button");
+  if (demo) {
+    if (demo.dataset.screen) { S.screen = demo.dataset.screen; setState(S.state[S.screen]); return; }
+    if (demo.dataset.state) { setState(demo.dataset.state); return; }
+    if (demo.dataset.lang) { S.lang = demo.dataset.lang; S.dates[AO] && (S.dates[AO].text = null); render(); return; }
+    if (demo.dataset.themeBtn) { S.theme = demo.dataset.themeBtn; render(); return; }
+  }
+  const el = ev.target.closest("[data-action]");
+  if (!el) {
+    /* a click outside closes an open calendar or list */
+    let changed = false;
+    Object.entries(S.dates).forEach(([id, d]) => { if (d.open && !ev.target.closest(`#wrap-${id}`)) { d.open = false; changed = true; refreshDate(id); } });
+    if (S.lookup.open && !ev.target.closest("#wrap-edition-organizer")) { S.lookup.open = false; refreshLookup(); }
+    return;
+  }
+  const a = el.dataset.action;
+  if (a !== "focus-field") ev.preventDefault();
+  switch (a) {
+    case "retry-editions": setState("ready"); break;
+    case "add-edition": S.screen = "edition"; setEditionState("new"); render(); $("edition-organizer")?.focus(); break;
+    case "edit-edition": {
+      const e = S.editions.find(x => x.id === Number(el.dataset.id));
+      S.screen = "edition"; S.state.edition = "ready"; S.dialog = null; S.snack = null; loadForm("edit", e); render(); break;
+    }
+    case "delete-edition": S.dialog = { kind: "delete", id: Number(el.dataset.id) }; S.lastTrigger = el.dataset.id; render(); break;
+    case "dlg-cancel": {
+      const kind = S.dialog.kind; S.dialog = null; render();
+      if (kind === "delete") document.querySelector(`[data-action="delete-edition"][data-id="${S.lastTrigger}"]`)?.focus();
+      break;
+    }
+    case "dlg-confirm":
+      if (S.dialog.kind === "delete") {
+        const e = S.editions.find(x => x.id === S.dialog.id);
+        S.dialog = null;
+        if (e.status === "Published") { S.sectionAlert = "exam_edition.published"; S.state.exam = "refused"; render(); }
+        else {
+          const idx = S.editions.indexOf(e);
+          S.editions.splice(idx, 1); S.sectionAlert = null; S.snack = "ExamEditions.Deleted"; S.state.exam = "deleted"; render();
+          const next = S.editions[idx] || null;
+          (next ? document.querySelector(`[data-action="edit-edition"][data-id="${next.id}"]`) : $("add-edition-link"))?.focus();
+        }
+      } else { S.dialog = null; S.screen = "exam"; setExamState("ready"); render(); }
+      break;
+    case "go-exam": case "cancel":
+      if (S.screen === "edition" && S.dirty && a === "cancel") { S.dialog = { kind: "discard" }; render(); }
+      else { S.screen = "exam"; setExamState("ready"); render(); }
+      break;
+    case "pick-board": {
+      const b = BOARDS[Number(el.dataset.idx)];
+      S.form.board = b; S.form.boardText = `${b.name} (${b.acr})`; S.lookup.open = false; S.errors.board = null; S.dirty = true;
+      rerenderField("wrap-edition-organizer", lookupField()); $("edition-organizer")?.focus(); refreshAside(); break;
+    }
+    case "clear-board":
+      S.form.board = null; S.form.boardText = ""; S.dirty = true;
+      rerenderField("wrap-edition-organizer", lookupField()); $("edition-organizer")?.focus(); refreshAside(); break;
+    case "lookup-retry":
+      S.lookup.failed = false; S.lookup.open = true; rerenderField("wrap-edition-organizer", lookupField()); $("edition-organizer")?.focus(); break;
+    case "pick-status": selectStatus(el.dataset.value); break;
+    case "focus-field": ev.preventDefault(); $(el.dataset.target)?.focus(); break;
+    case "save": save(); break;
+    case "cal-toggle": {
+      const d = S.dates[el.dataset.date]; d.open = !d.open;
+      if (d.open) d.view = d.value ? { y: d.value.y, m: d.value.m } : (d.min ? { y: d.min.y, m: 1 } : { y: CURRENT_YEAR, m: 9 });
+      refreshDate(el.dataset.date, d.open ? "day" : "button"); break;
+    }
+    case "cal-prev": case "cal-next": {
+      const d = S.dates[el.dataset.date]; let { y, m } = d.view; m += a === "cal-next" ? 1 : -1;
+      if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } d.view = { y, m };
+      refreshDate(el.dataset.date); document.querySelector(`[data-calendar="${el.dataset.date}"] [data-action="${a}"]`)?.focus(); break;
+    }
+    case "cal-pick": {
+      const id = el.dataset.date, d = S.dates[id];
+      d.value = { y: d.view.y, m: d.view.m, d: Number(el.dataset.day) }; d.text = null; d.invalid = false; d.open = false;
+      if (id === AO) { S.dirty = true; checkField("date"); }
+      refreshDate(id, "input"); break;
+    }
+    case "date-clear": {
+      const id = el.dataset.date, d = S.dates[id];
+      d.value = null; d.text = null; d.invalid = false; d.errorKey = null;
+      if (id === AO) S.dirty = true;
+      refreshDate(id, "input"); break;
+    }
+  }
+});
+
+function rerenderField(wrapId, html) { const w = $(wrapId); if (w) w.outerHTML = html; }
+function refreshLookup() {
+  const input = $("edition-organizer");
+  const pos = input ? input.selectionStart : null;
+  const focused = document.activeElement === input;
+  rerenderField("wrap-edition-organizer", lookupField());
+  if (focused) { const i = $("edition-organizer"); i.focus(); if (pos != null) i.setSelectionRange(pos, pos); }
+}
+function selectStatus(v) {
+  S.form.status = v; S.dirty = true;
+  rerenderField("wrap-edition-status", statusCards());
+  $("edition-status-" + v)?.focus(); refreshAside();
+}
+
+function setFieldError(id, errText, hintText) {
+  const wrap = $("wrap-" + id), input = $(id);
+  if (!wrap || !input) return;
+  wrap.classList.toggle("app-field-error", !!errText);
+  if (errText) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid");
+  $(id + "-description").innerHTML = describe(errText, hintText);
+}
+
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (el.dataset.field) {
+    S.form[el.dataset.field] = el.value; S.dirty = true;
+    if (el.dataset.field === "boardText") {
+      S.form.board = null; S.lookup.open = true; S.lookup.failed = false; refreshLookup();
+      const n = BOARDS.filter(b => el.value.trim().length >= 2 && (b.name.toLowerCase().includes(el.value.trim().toLowerCase()) || b.acr.toLowerCase().includes(el.value.trim().toLowerCase()))).length;
+      $("live").textContent = el.value.trim().length >= 2 ? (n ? t("Lookup.Results", n) : t("Lookup.NoResults", el.value.trim())) : "";
+    }
+    if (el.dataset.field === "year") syncMin();
+    refreshAside();
+  }
+  if (el.dataset.date) { S.dates[el.dataset.date].text = el.value; if (el.dataset.date === AO) S.dirty = true; }
+});
+
+document.addEventListener("focusout", (ev) => {
+  const el = ev.target;
+  if (S.screen === "edition" && el.dataset.field) {
+    const map = { year: ["edition-notice-year", "year", "ExamEditions.Field.NoticeYear.Hint", String(MAX_YEAR)],
+                  url: ["edition-notice-url", "url", "ExamEditions.Field.NoticeUrl.Hint"] };
+    const m = map[el.dataset.field];
+    if (m) {
+      checkField(m[1]);
+      setFieldError(m[0], S.errors[m[1]] && t(S.errors[m[1]]), t(m[2], m[3]));
+      if (m[1] === "year") { checkField("date"); refreshDateDescription(AO); }
+    }
+  }
+  if (el.dataset.date) {
+    const id = el.dataset.date, d = S.dates[id];
+    if (d.text != null) {
+      const p = parseDate(d.text);
+      d.invalid = p.invalid; d.value = p.value; if (!p.invalid) d.text = null;
+      if (id === AO) checkField("date");
+      refreshDateDescription(id);
+      if (!p.invalid && p.value) el.value = fmtDatePadded(p.value);
+      if (S.screen === "edition") refreshAside();
+    }
+  }
+});
+
+function refreshDateDescription(id) {
+  const d = S.dates[id];
+  if (!d) return;
+  const errText = d.invalid ? t("DateField.Invalid", t("DateField.Format")) : (d.errorKey ? t(d.errorKey) : null);
+  setFieldError(id, errText, d.hintKey ? t(d.hintKey) : t("DateField.Hint.Format", t("DateField.Format")));
+}
+
+document.addEventListener("keydown", (ev) => {
+  const el = ev.target;
+  if (ev.key === "Escape") {
+    if (S.dialog) { ev.preventDefault(); const kind = S.dialog.kind; S.dialog = null; render(); return; }
+    const cal = el.closest && el.closest("[data-calendar]");
+    if (cal) { const id = cal.dataset.calendar; S.dates[id].open = false; refreshDate(id, "button"); return; }
+    if (S.lookup.open) { S.lookup.open = false; refreshLookup(); return; }
+  }
+  /* calendar grid: arrows move the day, Enter picks it (MudDatePicker behaviour) */
+  if (el.classList && el.classList.contains("app-day")) {
+    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[ev.key];
+    if (step) {
+      ev.preventDefault();
+      const all = [...el.closest("table").querySelectorAll(".app-day")];
+      const target = all[Math.min(all.length - 1, Math.max(0, all.indexOf(el) + step))];
+      all.forEach(b => b.tabIndex = -1); target.tabIndex = 0; target.focus();
+    }
+  }
+  /* lookup: arrow down enters the list, Enter picks */
+  if (el.id === "edition-organizer" && ev.key === "ArrowDown") {
+    const first = document.querySelector('#edition-organizer-list [data-action="pick-board"]');
+    if (first) { ev.preventDefault(); first.focus(); }
+  }
+  if (el.getAttribute && el.getAttribute("role") === "option") {
+    if (ev.key === "Enter") { ev.preventDefault(); el.click(); }
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+      ev.preventDefault();
+      const sib = ev.key === "ArrowDown" ? el.nextElementSibling : el.previousElementSibling;
+      (sib || (ev.key === "ArrowUp" ? $("edition-organizer") : null))?.focus();
+    }
+  }
+  /* radio cards: one tab stop, arrows move, Space and Enter select */
+  if (el.getAttribute && el.getAttribute("role") === "radio" && el.dataset.value) {
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(ev.key)) { ev.preventDefault(); selectStatus(el.dataset.value === "Draft" ? "Published" : "Draft"); }
+    if (ev.key === " " || ev.key === "Enter") { ev.preventDefault(); selectStatus(el.dataset.value); }
+  }
+  if (el.matches && el.matches("a[tabindex], .app-link") && ev.key === "Enter") el.click();
+});
+
+function save() {
+  /* the date typed but not yet left is parsed first, as the blur would */
+  const d = S.dates[AO];
+  if (d.text != null) { const p = parseDate(d.text); d.invalid = p.invalid; d.value = p.value; if (!p.invalid) d.text = null; }
+  const items = validateAll();
+  if (items.length) { S.summary = true; S.alert = null; render(); $("edition-error-summary")?.focus(); return; }
+  S.summary = false; S.alert = null; S.saving = true; S.state.edition = "saving"; render();
+  setTimeout(() => {
+    S.saving = false; S.dirty = false;
+    S.form.mode = "edit";
+    S.saved = { year: Number(S.form.year), position: S.form.position.trim() };
+    S.snack = "ExamEditions.Saved"; S.state.edition = "success"; render();
+  }, 1200);
+}
+
+setExamState("ready");
+setEditionState("ready");
+setGalleryState("default");
+render();
+</script>
+</body>
+</html>

@@ -8,6 +8,8 @@ internal static class GallerySections
         "gallery-table", "gallery-row-actions", "gallery-states", "gallery-confirm",
         "gallery-form", "gallery-fields", "gallery-lookups", "gallery-alerts", "gallery-errors",
         "gallery-feedback", "gallery-icons",
+        // F-35 BR16: the kit's only date input.
+        "gallery-date-field",
         // F-43 BR1: the nine composition patterns. A screen mockup may use only what is shown here.
         "gallery-section-card", "gallery-form-grid", "gallery-radio-cards", "gallery-conditional-field",
         "gallery-leading-icons", "gallery-status-chips", "gallery-error-summary", "gallery-form-aside",

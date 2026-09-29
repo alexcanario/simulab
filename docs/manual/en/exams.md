@@ -1,14 +1,14 @@
 ---
 page: exams
 locale: en
-features: [F-34, F-43]
-updated: 2026-09-26
+features: [F-34, F-43, F-35]
+updated: 2026-09-29
 ---
 # Exams
 
 An exam is the assessment that comes back year after year: a city hall's public service exam, ENEM, a
 certification, a university's entrance exam. Every exam belongs to the **issuing authority** that publishes its
-notice. Each year's edition, with the board that applies the paper, comes later.
+notice. Each paper actually applied is an [edition](exam-editions.md), managed on the exam's own page.
 
 ## Who can use it
 Only an account with the permission "Manage the catalog" — the Admin role has it — can open the Exams page.
@@ -48,6 +48,7 @@ a notice at the top of the card lists every missing field; clicking one takes yo
 1. Choose **Delete** on its row and confirm.
 2. The exam leaves the catalog. Its name stays reserved inside that issuing authority, so nobody adds a second
    exam with the same name by mistake.
+3. An exam that still has editions cannot be deleted: delete its [editions](exam-editions.md) first.
 
 ## Fields
 | Field | Meaning | Rules |
@@ -73,6 +74,7 @@ a notice at the top of the card lists every missing field; clicking one takes yo
 | Choose the language of the content. | The language was not chosen. | Pick one of the three languages. |
 | This exam no longer exists. | Someone deleted the exam while your screen was open. | Reload the page. |
 | No exam matches the chosen filters. | The search and filters together found nothing. | Clear one filter and try again. |
+| This exam has editions. Delete its editions first. | The exam still has editions. | Delete the editions, then the exam. |
 | Page not found | Your account does not manage the catalog. | Talk to an admin if you think it should. |
 
 ## Related pages

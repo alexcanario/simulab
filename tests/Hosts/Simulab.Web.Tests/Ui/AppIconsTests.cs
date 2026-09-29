@@ -19,6 +19,16 @@ public class AppIconsTests
         icons.Should().AllSatisfy(icon => outlined.Should().Contain((string)icon.GetRawConstantValue()!, $"AppIcons.{icon.Name} must be Material Outlined"));
     }
 
+    // F-35: the edition section, the notice, its link and the date field's calendar button.
+    [Fact]
+    public void AppIcons_EditionsNoticeLinkAndCalendar_AreTheOutlinedIconsTheItemNames()
+    {
+        AppIcons.Editions.Should().Be(Icons.Material.Outlined.EventNote);
+        AppIcons.Notice.Should().Be(Icons.Material.Outlined.Article);
+        AppIcons.Link.Should().Be(Icons.Material.Outlined.Link);
+        AppIcons.Calendar.Should().Be(Icons.Material.Outlined.CalendarToday);
+    }
+
     [Fact]
     public void AppIcons_SemanticNames_CoverTheKitActions()
     {

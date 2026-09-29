@@ -185,6 +185,56 @@ public sealed class CatalogApiClient(HttpClient http)
     public Task<ApiResult<bool>> DeleteExamAsync(string accessToken, Guid examId, CancellationToken cancellationToken = default) =>
         SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/exams/{examId}"), accessToken), cancellationToken);
 
+    /// <summary>F-35 UC1: the exam's editions in one call, newest year first (the Api orders them, BR14).</summary>
+    public Task<ApiResult<IReadOnlyList<ExamEditionResponse>>> ListExamEditionsAsync(
+        string accessToken,
+        Guid examId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<ExamEditionResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/exams/{examId}/editions"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-35 UC3: the edition the edit page opens.</summary>
+    public Task<ApiResult<ExamEditionResponse>> FindExamEditionAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<ExamEditionResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/exams/{examId}/editions/{editionId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-35 UC2.</summary>
+    public Task<ApiResult<ExamEditionResponse>> CreateExamEditionAsync(
+        string accessToken,
+        Guid examId,
+        SaveExamEditionRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<ExamEditionResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, $"{Base}/exams/{examId}/editions", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-35 UC3. The Status must be sent: a blank one is refused on a PUT (BR9).</summary>
+    public Task<ApiResult<ExamEditionResponse>> UpdateExamEditionAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        SaveExamEditionRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<ExamEditionResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/exams/{examId}/editions/{editionId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-35 UC4 and UC5: a soft delete on the server, refused with a 409 while the edition is published.</summary>
+    public Task<ApiResult<bool>> DeleteExamEditionAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/exams/{examId}/editions/{editionId}"), accessToken),
+            cancellationToken);
+
     private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
         new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };
 

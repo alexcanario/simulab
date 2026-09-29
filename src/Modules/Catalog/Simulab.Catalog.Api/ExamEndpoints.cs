@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Simulab.Catalog.Application.ExamEditions;
 using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
@@ -28,7 +29,79 @@ public static class ExamEndpoints
         exams.MapPut("/{id:guid}", UpdateAsync).WithName("UpdateExam");
         exams.MapDelete("/{id:guid}", DeleteAsync).WithName("DeleteExam");
 
+        // F-35: the editions live under their exam and share its policy, so a caller without
+        // catalog.manage gets the same 403 on every one of them (AC16).
+        exams.MapGet("/{examId:guid}/editions", ListEditionsAsync).WithName("ListExamEditions");
+        exams.MapGet("/{examId:guid}/editions/{id:guid}", FindEditionAsync).WithName("FindExamEdition");
+        exams.MapPost("/{examId:guid}/editions", CreateEditionAsync).WithName("CreateExamEdition");
+        exams.MapPut("/{examId:guid}/editions/{id:guid}", UpdateEditionAsync).WithName("UpdateExamEdition");
+        exams.MapDelete("/{examId:guid}/editions/{id:guid}", DeleteEditionAsync).WithName("DeleteExamEdition");
+
         return group;
+    }
+
+    private static async Task<IResult> ListEditionsAsync(
+        Guid examId,
+        IExamQueries exams,
+        IExamEditionQueries editions,
+        CancellationToken cancellationToken)
+    {
+        // An exam that does not exist has no editions to list: the caller is told, not given an empty list.
+        if (await exams.FindAsync(examId, cancellationToken) is null)
+        {
+            return Problem(new SharedKernel.Results.Error(CatalogErrorCodes.ExamNotFound, SharedKernel.Results.ErrorKind.NotFound));
+        }
+
+        return Results.Ok(await editions.ListAsync(examId, cancellationToken));
+    }
+
+    private static async Task<IResult> FindEditionAsync(
+        Guid examId,
+        Guid id,
+        IExamEditionQueries editions,
+        CancellationToken cancellationToken)
+    {
+        var edition = await editions.FindAsync(examId, id, cancellationToken);
+
+        return edition is null
+            ? Problem(new SharedKernel.Results.Error(CatalogErrorCodes.ExamEditionNotFound, SharedKernel.Results.ErrorKind.NotFound))
+            : Results.Ok(edition);
+    }
+
+    private static async Task<IResult> CreateEditionAsync(
+        Guid examId,
+        SaveExamEditionRequest request,
+        SaveExamEditionHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(examId, null, request, cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Created($"/api/v1/catalog/exams/{examId}/editions/{result.Value.Id}", result.Value)
+            : Problem(result.Error!);
+    }
+
+    private static async Task<IResult> UpdateEditionAsync(
+        Guid examId,
+        Guid id,
+        SaveExamEditionRequest request,
+        SaveExamEditionHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(examId, id, request, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    private static async Task<IResult> DeleteEditionAsync(
+        Guid examId,
+        Guid id,
+        DeleteExamEditionHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(examId, id, cancellationToken);
+
+        return result.IsSuccess ? Results.NoContent() : Problem(result.Error!);
     }
 
     // The three enum-shaped filters arrive as text and an unreadable one is simply no filter: a list is a

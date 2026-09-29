@@ -26,7 +26,9 @@ public sealed class AdminPagesAuthorizationTests
         ["IssuingAuthorities"] = CatalogPermissions.Manage,
         // F-34: the list and the form page are two routes of the same screen, so both carry the gate.
         ["Exams"] = CatalogPermissions.Manage,
-        ["ExamForm"] = CatalogPermissions.Manage
+        ["ExamForm"] = CatalogPermissions.Manage,
+        // F-35 BR18: the edition page has two routes (adding and editing) and the same gate as the exam page.
+        ["ExamEditionForm"] = CatalogPermissions.Manage
     };
 
     [Fact]

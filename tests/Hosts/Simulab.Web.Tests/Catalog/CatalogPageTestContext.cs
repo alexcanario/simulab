@@ -114,6 +114,15 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>When set, reading one exam answers this problem (F-34: the form page's not-found state).</summary>
         public (HttpStatusCode Status, string Code)? FindExamFailure { get; set; }
 
+        /// <summary>The editions the fake holds (F-35), in the order the Api would answer them: the test sets it.</summary>
+        public List<ExamEditionResponse> Editions { get; } = [];
+
+        /// <summary>When set, listing an exam's editions answers this problem (F-35: the section's load error).</summary>
+        public (HttpStatusCode Status, string Code)? ListEditionsFailure { get; set; }
+
+        /// <summary>When set, reading one edition answers this problem (F-35: the edition page's not-found state).</summary>
+        public (HttpStatusCode Status, string Code)? FindEditionFailure { get; set; }
+
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -121,6 +130,13 @@ public abstract class CatalogPageTestContext : KitTestContext
             var path = request.RequestUri!.AbsolutePath;
             var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             Received.Add((request.Method, path, request.RequestUri.Query, body));
+
+            var editionRoute = System.Text.RegularExpressions.Regex.Match(
+                path, "^/api/v1/catalog/exams/(?<exam>[^/]+)/editions(/(?<id>[^/]+))?$");
+            if (editionRoute.Success)
+            {
+                return HandleEdition(request.Method, Guid.Parse(editionRoute.Groups["exam"].Value), editionRoute.Groups["id"], body);
+            }
 
             if (request.Method != HttpMethod.Get && WriteFailure is { } failure)
             {
@@ -230,6 +246,83 @@ public abstract class CatalogPageTestContext : KitTestContext
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        // F-35: the five edition routes, answering the way the Api does (BR3 to BR14 are the Api's; the fake keeps the
+        // shape: a list, one edition, a create that is a draft by default, an update, and a delete that refuses a
+        // published edition).
+        private HttpResponseMessage HandleEdition(
+            HttpMethod method,
+            Guid examId,
+            System.Text.RegularExpressions.Group idGroup,
+            string? body)
+        {
+            if (method != HttpMethod.Get && WriteFailure is { } failure)
+            {
+                return Problem(failure);
+            }
+
+            if (!idGroup.Success)
+            {
+                if (method == HttpMethod.Get)
+                {
+                    return ListEditionsFailure is { } listRefused
+                        ? Problem(listRefused)
+                        : Json<IReadOnlyList<ExamEditionResponse>>([.. Editions.Where(edition => edition.ExamId == examId)]);
+                }
+
+                var created = SavedEdition(Guid.CreateVersion7(), examId, Read<SaveExamEditionRequest>(body));
+                Editions.Add(created);
+                return Json(created, HttpStatusCode.Created);
+            }
+
+            var id = Guid.Parse(idGroup.Value);
+            var existing = Editions.Find(edition => edition.Id == id && edition.ExamId == examId);
+            if (method == HttpMethod.Get)
+            {
+                return FindEditionFailure is { } findRefused
+                    ? Problem(findRefused)
+                    : existing is null ? Problem((HttpStatusCode.NotFound, CatalogErrorCodes.ExamEditionNotFound)) : Json(existing);
+            }
+
+            if (existing is null)
+            {
+                return Problem((HttpStatusCode.NotFound, CatalogErrorCodes.ExamEditionNotFound));
+            }
+
+            if (method == HttpMethod.Put)
+            {
+                var updated = SavedEdition(id, examId, Read<SaveExamEditionRequest>(body));
+                Editions[Editions.IndexOf(existing)] = updated;
+                return Json(updated);
+            }
+
+            if (existing.Status == ExamEditionStatus.Published)
+            {
+                return Problem((HttpStatusCode.Conflict, CatalogErrorCodes.ExamEditionPublished));
+            }
+
+            Editions.Remove(existing);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        // The Api joins the board's name and acronym; the fake looks the board up in the rows it knows.
+        private ExamEditionResponse SavedEdition(Guid id, Guid examId, SaveExamEditionRequest request)
+        {
+            var organizer = Organizers?.Find(candidate => candidate.Id == request.OrganizerId) ?? Cebraspe;
+
+            return new ExamEditionResponse(
+                id,
+                examId,
+                organizer.Id,
+                organizer.Name,
+                organizer.Acronym,
+                request.NoticeYear ?? 0,
+                request.Position,
+                request.NoticeReference,
+                request.NoticeUrl,
+                request.AppliedOn,
+                request.ParseStatus() ?? ExamEditionStatus.Draft);
         }
 
         private static IssuingAuthorityResponse SavedAuthority(Guid id, SaveIssuingAuthorityRequest request) =>

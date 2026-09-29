@@ -20,7 +20,7 @@ As páginas entram aqui à medida que cada funcionalidade é lançada.
 
 | Área | Para que serve | Situação |
 |---|---|---|
-| Catálogo de avaliações | Cadastrar os órgãos contratantes, as bancas, os exames e as edições em que tudo o mais se apoia (Administradores) | Órgãos contratantes, bancas e exames disponíveis ([Órgãos contratantes](issuing-authorities.md), [Bancas](organizers.md), [Exames](exams.md)); edições em breve |
+| Catálogo de avaliações | Cadastrar os órgãos contratantes, as bancas, os exames e as edições em que tudo o mais se apoia (Administradores) | Órgãos contratantes, bancas e exames disponíveis ([Órgãos contratantes](issuing-authorities.md), [Bancas](organizers.md), [Exames](exams.md)) e as edições de cada exame ([Edições de um exame](exam-editions.md)) |
 | Simulado de prova | Fazer uma prova anterior real, com as mesmas questões, ordem, tempo e regras de pontuação | Em breve |
 | Simulado personalizado | Montar o seu treino por disciplina, organizadora, ano ou dificuldade | Em breve |
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e assunto, e a distância até a nota de corte | Em breve |
@@ -49,3 +49,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Órgãos contratantes](issuing-authorities.md): quem publica o edital de cada exame (Administradores)
 - [Bancas](organizers.md): quem elabora e aplica as provas — bancas, certificadoras e universidades (Administradores)
 - [Exames](exams.md): os exames do catálogo, com tipo, abrangência e idioma (Administradores)
+- [Edições de um exame](exam-editions.md): as provas efetivamente aplicadas, com ano, cargo e banca (Administradores)

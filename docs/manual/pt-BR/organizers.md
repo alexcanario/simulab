@@ -1,8 +1,8 @@
 ---
 page: organizers
 locale: pt-BR
-features: [F-33, F-34]
-updated: 2026-09-25
+features: [F-33, F-34, F-35]
+updated: 2026-09-29
 ---
 # Bancas
 
@@ -35,6 +35,7 @@ Só uma conta com a permissão "Gerenciar o catálogo" — o papel Administrador
 ### Excluir uma banca
 1. Escolha **Excluir** na linha dela e confirme.
 2. A banca sai do catálogo e deixa de aparecer em qualquer lugar do app. O nome e a sigla continuam ocupados, para ninguém cadastrar uma segunda com o mesmo nome por engano.
+3. Uma banca que alguma [edição](exam-editions.md) indica não pode ser excluída: altere ou exclua antes essas edições.
 
 ## Campos
 | Campo | Significado | Regras |
@@ -54,6 +55,7 @@ Só uma conta com a permissão "Gerenciar o catálogo" — o papel Administrador
 | Digite uma sigla com pelo menos 2 caracteres. | A sigla está vazia ou curta demais. | Digite a sigla. |
 | Digite o endereço completo, começando com http:// ou https:// | O site não é um endereço completo. | Acrescente `https://` na frente ou deixe o campo vazio. |
 | Esta banca não existe mais. Atualize a lista. | Alguém excluiu a banca enquanto sua tela estava aberta. | Recarregue a página. |
+| Há edições que indicam esta banca. Altere ou exclua essas edições primeiro. | A banca é usada por uma edição. | Altere ou exclua essas edições. |
 | Página não encontrada | Sua conta não gerencia o catálogo. | Fale com um administrador se você acha que deveria gerenciar. |
 
 ## Páginas relacionadas

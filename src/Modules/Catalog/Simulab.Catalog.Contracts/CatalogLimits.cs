@@ -36,6 +36,21 @@ public static class CatalogLimits
     /// <summary>Which state or which municipality an exam applies to (F-34, BR8).</summary>
     public const int ExamScopeDetailMaxLength = 120;
 
+    /// <summary>The job an edition selects for (F-35, BR5).</summary>
+    public const int ExamEditionPositionMaxLength = 200;
+
+    /// <summary>How the notice names itself (F-35, BR6).</summary>
+    public const int ExamEditionNoticeReferenceMaxLength = 100;
+
+    /// <summary>The notice's official address, an absolute http or https URL (F-35, BR7).</summary>
+    public const int ExamEditionNoticeUrlMaxLength = 300;
+
+    /// <summary>The oldest notice year an edition may carry (F-35, BR4).</summary>
+    public const int ExamEditionNoticeYearMin = 1990;
+
+    /// <summary>How many digits the notice year input accepts (F-35, BR4).</summary>
+    public const int ExamEditionNoticeYearDigits = 4;
+
     /// <summary>The shortest a name or an acronym may be (BR8).</summary>
     public const int NameMinLength = 2;
 }

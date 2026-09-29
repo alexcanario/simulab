@@ -764,6 +764,12 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-top: 5px;
 }
 
+/* F-35, BR16: the date field says what is wrong in its own description below (one place, announced through
+   aria-describedby). The picker's own helper line would repeat it with MudBlazor's wording. */
+.app-date-field .mud-input-helper-text {
+    display: none;
+}
+
 .app-password-strength {
     display: flex;
     align-items: center;

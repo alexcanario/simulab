@@ -1359,6 +1359,167 @@
           }
         }
       }
+    },
+    "/api/v1/catalog/exams/{examId}/editions": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListExamEditions",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CreateExamEdition",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamEditionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams/{examId}/editions/{id}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "FindExamEdition",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "UpdateExamEdition",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveExamEditionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "DeleteExamEdition",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1580,6 +1741,66 @@
           }
         },
         "description": "Chooses a new password with the token from the reset email (F-7 UC2)."
+      },
+      "SaveExamEditionRequest": {
+        "type": "object",
+        "properties": {
+          "organizerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The exam board that applied the paper (BR3). Required.",
+            "format": "uuid"
+          },
+          "noticeYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "The year of the notice, from 1990 to the current year plus one (BR4). Required.",
+            "format": "int32"
+          },
+          "position": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The job the paper selects for; blank is stored as null (BR5)."
+          },
+          "noticeReference": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "How the notice names itself, such as \"Edital nº 01/2026\" (BR6)."
+          },
+          "noticeUrl": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The official address of the notice, absolute http or https (BR7)."
+          },
+          "appliedOn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The day the paper was applied; not before 1 January of the notice year (BR8).",
+            "format": "date"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of Draft or Published, by name, ignoring case. Blank means Draft only when adding (BR9)."
+          }
+        },
+        "description": "What the edition form sends (F-35, UC2 and UC3). The status travels as text, not as an enum, so a caller\r\nthat sends an unknown value gets its own 400 code (BR9) instead of an uncoded deserialization failure —\r\nthe lesson F-33's review left on the organizer. Every struct is nullable with a default, so a missing\r\nfield is a validation error and never a silent zero."
       },
       "SaveExamRequest": {
         "required": [
