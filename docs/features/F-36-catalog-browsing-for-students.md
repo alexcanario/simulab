@@ -1,7 +1,7 @@
 ---
 feature: F-36
 epic: Assessment catalog
-status: refining
+status: approved
 board: 755
 version: 1
 ---
@@ -12,7 +12,7 @@ The student-facing half of the catalog: a signed-in student searches published e
 
 ## Start
 - Depends on: F-35 (`done`, merged as 0d547e2) — `ExamEdition` with `Draft`/`Published`, the `(OrganizerId, NoticeYear)` index and the exam page kit are in `main`.
-- Waits on (to start): the `/agile:screen` mockup of the two screens, approved by the owner with this feature.
+- Waits on (to start): nothing. The `/agile:screen` mockup was approved together with the feature on 2026-09-29. Recommended: merge B-20 first (same migration snapshot).
 - Needed to validate: the app host started from this worktree, at least one exam with a published edition and one with only drafts (created by the owner in the back office, or by F-37 if it lands first), and two accounts signed in by the owner — a Student and an Admin (Claude does not enter credentials).
 - Suggested path: glossary rows; `catalog.browse` in `CatalogPermissions` and its one-time grant in Identity's seed; `NormalizedScopeDetail` and its migration; `IPublishedExamQueries` and the three endpoints; the search page; the exam page; the menu item.
 - Can run beside it: F-37 (seed data only, no screen or contract in common) with the owner's `--worktree`; B-20 touches the `exams.scope` column comment and may conflict in the migration snapshot — merge it first or rebase after.
