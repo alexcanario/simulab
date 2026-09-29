@@ -31,6 +31,22 @@ public class UiGalleryTests : KitTestContext
         gallery.Markup.Should().Contain("AppIcons.Edit");
     }
 
+    // F-36 AC17: the gallery shows the new optional parameters: the link with its language, and a table that starts
+    // from a search, a page and a page size.
+    [Fact]
+    public void Render_Development_KitParametersSectionShowsTheLinkAndTheStartedTable()
+    {
+        var gallery = RenderGallery(Environments.Development);
+
+        gallery.Find("h1").HasAttribute("lang").Should().BeTrue();
+        gallery.FindAll("#gallery-kit-parameters a.app-link").Should().ContainSingle();
+        gallery.WaitForAssertion(() =>
+        {
+            gallery.FindAll("#gallery-kit-parameters tbody tr.mud-table-row").Should().ContainSingle();
+            gallery.Find("#gallery-kit-parameters tbody").TextContent.Should().Contain("Sample exam 19");
+        });
+    }
+
     /// <summary>
     /// F-34: an id that appears twice breaks every label and aria-describedby that points at it, and the
     /// browser silently resolves to the first one. Found on screen, when a section id repeated a field id.

@@ -11,6 +11,7 @@ public static class NavigationItems
     public static readonly IReadOnlyList<NavigationItem> All =
     [
         new(null, "/", AppIcons.Home, "Nav.Home", NavLinkMatch.All),
+        new(NavigationSection.Study, "/catalog", AppIcons.Catalog, "Nav.Catalog", RequiredPermission: CatalogPermissions.Browse),
         new(NavigationSection.Content, "/admin/organizers", AppIcons.Organizers, "Nav.Organizers", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/issuing-authorities", AppIcons.IssuingAuthorities, "Nav.IssuingAuthorities", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/exams", AppIcons.Exams, "Nav.Exams", RequiredPermission: CatalogPermissions.Manage),

@@ -29,6 +29,15 @@ public class AppIconsTests
         AppIcons.Calendar.Should().Be(Icons.Material.Outlined.CalendarToday);
     }
 
+    // F-36: the student catalog, clearing filters and a link that opens a new tab.
+    [Fact]
+    public void AppIcons_CatalogClearFiltersAndOpenInNew_AreTheOutlinedIconsTheItemNames()
+    {
+        AppIcons.Catalog.Should().Be(Icons.Material.Outlined.ManageSearch);
+        AppIcons.ClearFilters.Should().Be(Icons.Material.Outlined.FilterAltOff);
+        AppIcons.OpenInNew.Should().Be(Icons.Material.Outlined.OpenInNew);
+    }
+
     [Fact]
     public void AppIcons_SemanticNames_CoverTheKitActions()
     {

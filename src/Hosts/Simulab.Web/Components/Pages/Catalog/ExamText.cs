@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 using Simulab.Catalog.Contracts;
+using Simulab.Web.Localization;
 using Simulab.Web.Resources;
 
 namespace Simulab.Web.Components.Pages.Catalog;
@@ -25,6 +26,18 @@ public static class ExamText
         ArgumentNullException.ThrowIfNull(l);
 
         return l[$"Exams.Scope.{scope}"];
+    }
+
+    /// <summary>
+    /// F-36: an exam's content language in its own name ("Português (Brasil)"), the way the exam form's picker shows it;
+    /// the raw tag when it is not one of the UI languages.
+    /// </summary>
+    public static string ContentLanguageName(string contentLanguage)
+    {
+        var culture = SupportedCultures.All.FirstOrDefault(candidate =>
+            string.Equals(candidate.Name, contentLanguage, StringComparison.OrdinalIgnoreCase));
+
+        return culture is null ? contentLanguage : SupportedCultures.NativeName(culture);
     }
 
     public static IReadOnlyList<AssessmentType> AssessmentTypeOrder(IStringLocalizer<SharedResources> l) =>

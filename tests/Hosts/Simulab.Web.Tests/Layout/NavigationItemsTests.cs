@@ -84,6 +84,46 @@ public class NavigationItemsTests
     }
 
     [Fact]
+    public void All_StudyItems_AreTheCatalogBehindCatalogBrowse()
+    {
+        // F-36, BR10: the student catalog is the Study section's first item, behind its own permission.
+        NavigationItems.All.Where(item => item.Section == NavigationSection.Study)
+            .Select(item => (item.Route, item.ResourceKey, item.Icon, item.RequiredPermission))
+            .Should().Equal(("/catalog", "Nav.Catalog", AppIcons.Catalog, CatalogPermissions.Browse));
+    }
+
+    [Fact]
+    public void Visible_WithCatalogBrowse_ShowsCatalogInTheStudySection()
+    {
+        // F-36, AC12: with the permission the item shows in the Study section.
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, permission => permission == CatalogPermissions.Browse);
+
+        visible.Select(item => item.Route).Should().Equal("/", "/catalog");
+        NavigationItems.Sections(visible).Select(section => section.Key).Should().Equal(NavigationSection.Study);
+    }
+
+    [Fact]
+    public void Visible_WithCatalogManageButNotBrowse_HidesTheCatalogAndTheStudySection()
+    {
+        // F-36, AC12 and BR10: having catalog.manage alone does not open the student catalog.
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, permission => permission == CatalogPermissions.Manage);
+
+        visible.Select(item => item.Route).Should().NotContain("/catalog");
+        NavigationItems.Sections(visible).Select(section => section.Key).Should().NotContain(NavigationSection.Study);
+    }
+
+    [Fact]
+    public void IsActive_CatalogItem_StaysCurrentOnTheExamPage()
+    {
+        // F-36: the prefix match keeps "Catalog" current on /catalog/exams/{id}.
+        var catalog = NavigationItems.All.Single(item => item.Route == "/catalog");
+
+        catalog.IsActive("catalog").Should().BeTrue();
+        catalog.IsActive($"catalog/exams/{Guid.NewGuid()}?scope=State").Should().BeTrue();
+        catalog.IsActive("catalogs").Should().BeFalse();
+    }
+
+    [Fact]
     public void Visible_WithoutCatalogManage_HidesTheContentSection()
     {
         // F-33, AC4: a Student has no catalog permission, so the section never appears in their menu.

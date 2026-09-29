@@ -25,6 +25,25 @@ public class AppPageHeaderTests : KitTestContext
         clicked.Should().BeTrue();
     }
 
+    // F-36 AC17: a title that is content (an exam's name) carries its own language; the app's own titles carry none.
+    [Fact]
+    public void Render_TitleLang_SetsTheLanguageOfTheH1()
+    {
+        var header = Render<AppPageHeader>(parameters => parameters
+            .Add(p => p.Title, "Guarda Municipal")
+            .Add(p => p.TitleLang, "pt-BR"));
+
+        header.Find("h1").GetAttribute("lang").Should().Be("pt-BR");
+    }
+
+    [Fact]
+    public void Render_WithoutTitleLang_TheH1HasNoLang()
+    {
+        var header = Render<AppPageHeader>(parameters => parameters.Add(p => p.Title, "Home"));
+
+        header.Find("h1").HasAttribute("lang").Should().BeFalse();
+    }
+
     [Fact]
     public void Render_WithoutAction_ShowsNoButton()
     {

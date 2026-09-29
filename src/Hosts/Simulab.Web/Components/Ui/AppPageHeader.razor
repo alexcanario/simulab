@@ -8,7 +8,7 @@
         <MudBreadcrumbs Items="Breadcrumbs.ToList()" Class="app-breadcrumbs" />
     }
     <div class="app-page-header-row">
-        <MudText Typo="Typo.h1" Class="app-page-title">@Title</MudText>
+        <MudText Typo="Typo.h1" Class="app-page-title" lang="@TitleLang">@Title</MudText>
         @if (PrimaryActionText is not null && OnPrimaryAction.HasDelegate)
         {
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@PrimaryActionIcon"
@@ -19,6 +19,10 @@
 
 @code {
     [Parameter, EditorRequired] public string Title { get; set; } = "";
+
+    /// <summary>F-36: the language of a title that is content (an exam's name), as a BCP 47 tag. A title the app
+    /// wrote itself has none and follows the page.</summary>
+    [Parameter] public string? TitleLang { get; set; }
 
     [Parameter] public IReadOnlyList<BreadcrumbItem>? Breadcrumbs { get; set; }
 

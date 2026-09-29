@@ -1,0 +1,203 @@
+@page "/catalog/exams/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Browse)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-36, UC4 and BR8: a published exam and every published edition of it, whatever filters led here. The page is
+   read-only: no action of its own, so no primary button. Its breadcrumb and its back link carry the catalog's query
+   string, so the list is shown as it was left (BR13). *@
+<AppPageHeader Title="@(_exam?.Name ?? L["Catalog.Exam.Title"])"
+               TitleLang="@_exam?.ContentLanguage"
+               Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppLoadingState />
+    </MudPaper>
+}
+else if (_notFound)
+{
+    @* BR8 and BR1: a missing, deleted or draft-only exam looks the same; the alert never says why. *@
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.ExamNotFound)" Class="mb-4" />
+        <AppLink Href="@CatalogHref">@L["Catalog.BackToCatalog"]</AppLink>
+    </MudPaper>
+}
+else if (_exam is null)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppErrorState Message="@L["Catalog.Exam.LoadFailed"]" OnRetry="LoadAsync" />
+    </MudPaper>
+}
+else
+{
+    <div class="app-form-layout">
+        <MudPaper Class="app-form-card" Elevation="0">
+            <AppSectionCard Id="catalog-exam-editions"
+                            Title="@L["ExamEditions.Section.Title"]"
+                            Icon="@AppIcons.Editions"
+                            Subtitle="@L["Catalog.Editions.Subtitle"]">
+                @* The Api orders the editions (BR8); the page does not sort. *@
+                <AppItemRows TItem="PublishedExamEditionResponse"
+                             Items="_exam.Editions"
+                             EmptyMessage="@L["Catalog.Editions.Empty"]">
+                    <RowTemplate Context="edition">
+                        <div class="d-flex flex-wrap align-center gap-3">
+                            <span class="font-weight-medium">
+                                <span>@edition.NoticeYear.ToString(CultureInfo.InvariantCulture)</span>
+                                @if (!string.IsNullOrWhiteSpace(edition.Position))
+                                {
+                                    <span aria-hidden="true">@ExamEditionText.VisibleSeparator</span>
+                                    <span lang="@_exam.ContentLanguage">@edition.Position</span>
+                                }
+                                <span aria-hidden="true">@ExamEditionText.VisibleSeparator</span>
+                                <span>@edition.OrganizerName (@edition.OrganizerAcronym)</span>
+                            </span>
+                            @if (!string.IsNullOrWhiteSpace(edition.NoticeReference))
+                            {
+                                <span class="app-muted" lang="@_exam.ContentLanguage">@edition.NoticeReference</span>
+                            }
+                            @if (edition.AppliedOn is { } appliedOn)
+                            {
+                                <span class="app-muted">@L["ExamEditions.Row.AppliedOn", appliedOn.ToString("d", CultureInfo.CurrentCulture)]</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(edition.NoticeUrl))
+                            {
+                                @* BR9: another site, in a new tab, and the accessible name starts with the visible text and says so. *@
+                                <AppLink Href="@edition.NoticeUrl"
+                                         target="_blank"
+                                         rel="noopener noreferrer"
+                                         aria-label="@(L["Catalog.Editions.NoticeLink.Name", SpokenLabel(edition)].Value)">
+                                    @L["Catalog.Editions.NoticeLink"]
+                                    <MudIcon Icon="@AppIcons.OpenInNew" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
+                                </AppLink>
+                            }
+                        </div>
+                    </RowTemplate>
+                </AppItemRows>
+            </AppSectionCard>
+        </MudPaper>
+
+        @* The kit's read-only summary, reused as the exam's facts: no checklist, and every row has a value. *@
+        <AppFormAside Title="@L["Catalog.Exam.About"]"
+                      EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="AsideRows" />
+    </div>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Parameter] public Guid Id { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private PublishedExamDetailResponse? _exam;
+    private Guid? _loadedFor;
+    private bool _loading;
+    private bool _notFound;
+
+    // BR13: the catalog as it was left. Opened without its keys (a bookmark, a new tab), it is the plain list.
+    private string CatalogHref => "/catalog" + CatalogQueryString.Carried(Navigation.Uri);
+
+    private IReadOnlyList<AppAsideRow> AsideRows => _exam is not { } exam ? [] : BuildAsideRows(exam);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BuildBreadcrumbs();
+        if (_loadedFor == Id)
+        {
+            return;
+        }
+
+        _loadedFor = Id;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _notFound = false;
+        _exam = null;
+        BuildBreadcrumbs();
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindPublishedExamAsync(token, Id);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } exam })
+        {
+            _exam = exam;
+        }
+        else
+        {
+            _notFound = result?.ErrorCode == CatalogErrorCodes.ExamNotFound;
+        }
+
+        BuildBreadcrumbs();
+    }
+
+    // The exam's name is content, so it carries the exam's language; it is absent while loading, missing or failed.
+    private void BuildBreadcrumbs()
+    {
+        List<BreadcrumbItem> items =
+        [
+            new BreadcrumbItem(L["Nav.Section.Study"], href: null, disabled: true),
+            new BreadcrumbItem(L["Catalog.Title"], href: CatalogHref)
+        ];
+
+        if (_exam is not null)
+        {
+            items.Add(new BreadcrumbItem(_exam.Name, href: null, disabled: true));
+        }
+
+        _breadcrumbs = items;
+    }
+
+    // The year, the position and the board, as a screen reader hears them before "opens in a new tab".
+    private static string SpokenLabel(PublishedExamEditionResponse edition) =>
+        string.Join(
+            ExamEditionText.SpokenSeparator,
+            new[]
+            {
+                edition.NoticeYear.ToString(CultureInfo.InvariantCulture),
+                edition.Position,
+                $"{edition.OrganizerName} ({edition.OrganizerAcronym})"
+            }.Where(part => !string.IsNullOrWhiteSpace(part)));
+
+    private IReadOnlyList<AppAsideRow> BuildAsideRows(PublishedExamDetailResponse exam)
+    {
+        List<AppAsideRow> rows =
+        [
+            new(L["Exams.Field.IssuingAuthority"], $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})"),
+            new(L["Exams.Field.AssessmentType"], ExamText.AssessmentTypeName(L, exam.AssessmentType)),
+            new(L["Exams.Field.Scope"], ExamText.ScopeName(L, exam.Scope))
+        ];
+
+        if (exam.Scope is ExamScope.State or ExamScope.Municipal && !string.IsNullOrWhiteSpace(exam.ScopeDetail))
+        {
+            rows.Add(new AppAsideRow(
+                exam.Scope == ExamScope.State ? L["Exams.Field.State"] : L["Exams.Field.Municipality"],
+                exam.ScopeDetail));
+        }
+
+        rows.Add(new AppAsideRow(L["Exams.Field.ContentLanguage"], ExamText.ContentLanguageName(exam.ContentLanguage)));
+        rows.Add(new AppAsideRow(L["Catalog.Exam.PublishedEditions"], exam.PublishedEditionCount.ToString("N0", CultureInfo.CurrentCulture)));
+        rows.Add(new AppAsideRow(L["Catalog.Exam.LatestNoticeYear"], exam.LatestNoticeYear.ToString(CultureInfo.InvariantCulture)));
+        return rows;
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

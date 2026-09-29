@@ -14,5 +14,7 @@ internal static class GallerySections
         "gallery-section-card", "gallery-form-grid", "gallery-radio-cards", "gallery-conditional-field",
         "gallery-leading-icons", "gallery-status-chips", "gallery-error-summary", "gallery-form-aside",
         "gallery-item-rows",
+        // F-36 BR13: the optional parameters of the table, the truncated text and the page header.
+        "gallery-kit-parameters",
     ];
 }
