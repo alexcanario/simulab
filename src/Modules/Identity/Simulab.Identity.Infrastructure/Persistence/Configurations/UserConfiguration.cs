@@ -29,7 +29,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.PreferredLanguage).HasMaxLength(10).IsRequired()
             .HasComment("The language the app and its emails use for this person, such as pt-BR. It is the first source of the culture, before the cookie and the browser.");
         builder.Property(user => user.Status).HasConversion<string>().HasMaxLength(20).IsRequired()
-            .HasComment("Where the account stands: PendingVerification, Active or Erased.");
+            .HasComment("Where the account stands: Pending, Active or Erased.");
         builder.Property(user => user.ConcurrencyStamp).IsConcurrencyToken()
             .HasComment("Changes on every save, so two people editing the same account at once cannot overwrite each other silently.");
         builder.Property(user => user.EmailConfirmed)

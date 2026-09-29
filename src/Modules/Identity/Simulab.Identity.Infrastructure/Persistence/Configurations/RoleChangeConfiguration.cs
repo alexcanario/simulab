@@ -16,7 +16,7 @@ public sealed class RoleChangeConfiguration : IEntityTypeConfiguration<RoleChang
         builder.HasKey(change => change.Id);
 
         builder.Property(change => change.Action).HasConversion<string>().HasMaxLength(40).IsRequired()
-            .HasComment("What was done, such as RoleCreated, RoleRenamed, RoleDeleted or UserRolesChanged.");
+            .HasComment("What was done: RoleCreated, RoleUpdated, RoleDeleted or UserRolesChanged.");
         builder.Property(change => change.RoleId)
             .HasComment("The role that changed. Null when the change was about a person's roles rather than one role.");
         builder.Property(change => change.RoleName).HasMaxLength(256)

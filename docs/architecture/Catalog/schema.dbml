@@ -29,7 +29,7 @@ Table exams {
   issuing_authority_id uuid [not null, note: 'The body that publishes this exam\'s notices.']
   name varchar(200) [not null, note: 'The exam\'s name, unique inside its issuing authority.']
   normalized_name varchar(200) [not null, note: 'The name without case or accents, which is what the unique index compares.']
-  scope varchar(40) [not null, note: 'How far the exam reaches: Federal, State, Municipal, National or International.']
+  scope varchar(40) [not null, note: 'How far the exam reaches: National, State or Municipal.']
   scope_detail varchar(120) [note: 'Which state or city the scope means, when it is not national.']
 
   indexes {
