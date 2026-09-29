@@ -20,7 +20,7 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
         var sanitized = query.Sanitized();
         var rows = Published(sanitized.OrganizerId, sanitized.NoticeYear);
 
-        foreach (var word in CatalogText.Normalize(sanitized.Search).Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var word in CatalogText.Normalize(sanitized.Search).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
         {
             var term = word;
             rows = rows.Where(row =>

@@ -202,6 +202,24 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         page.Items.Should().ContainSingle().Which.Id.Should().Be(exam.Id);
     }
 
+    // Review of F-36: words split on any whitespace (a pasted tab), and an enum filter is read by name only.
+    [Fact]
+    public async Task List_TabBetweenWords_AndNumericEnumFilters_BehaveAsTheBookmarkPageDoes()
+    {
+        var admin = await AdminAsync();
+        var student = await StudentAsync();
+        var token = Token();
+        var authority = await AuthorityAsync(admin, $"Orgao {token}");
+        var board = await BoardAsync(admin);
+        var exam = await ExamAsync(admin, authority.Id, $"Guarda Municipal {token}", scope: ExamScope.State, detail: "Goiás");
+        await EditionAsync(admin, exam.Id, board.Id, 2025, "Published");
+
+        (await ListAsync(student, $"search={Uri.EscapeDataString($"guarda\tgoias\n{token}")}")).Items
+            .Should().ContainSingle().Which.Id.Should().Be(exam.Id);
+        // 1 is National: read as a number it would hide this State exam.
+        (await ListAsync(student, Search(token, "&scope=1"))).Items.Should().ContainSingle();
+    }
+
     // AC7: only boards and years that name a published edition are offered.
     [Fact]
     public async Task Filters_OfferOnlyWhatHasAPublishedEdition()

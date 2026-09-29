@@ -67,5 +67,7 @@ public static class PublishedExamEndpoints
 
     private static TEnum? ParseEnum<TEnum>(string? value)
         where TEnum : struct, Enum =>
-        Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed) && Enum.IsDefined(parsed) ? parsed : null;
+        Enum.GetNames<TEnum>().FirstOrDefault(name => string.Equals(name, value, StringComparison.OrdinalIgnoreCase)) is { } match
+            ? Enum.Parse<TEnum>(match)
+            : null; // by name only, as the Web reads the same keys: "scope=1" is no filter on either side
 }

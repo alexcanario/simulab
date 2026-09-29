@@ -1,7 +1,7 @@
 ---
 feature: F-36
 epic: Assessment catalog
-status: building
+status: validating
 board: 755
 version: 1
 ---
@@ -298,6 +298,8 @@ New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `Clear
 - 2026-09-29 — Build passes (`system-design`, then `architect`), checked against the files. Accepted: everything stays in the Catalog module (no new project or package, nothing in Application); the one-time grant is `PermissionCatalog.InitialGrants` (optional last parameter, permission to role names, never Admin), declared by `CatalogModule` with `IdentityRoles.Student`/`Curator` and applied only in the seed branch that creates the permission row; `organizerId` and `noticeYear` are bound as `string?` and parsed (AC6); the backfill translates both cases of every accented Latin letter before `upper`, checked by AC4 with ç and ã rows (Claude, technical).
 - 2026-09-29 — Dropped or changed after the review: page and page-size sanitizing lives in `PublishedExamListQuery.Sanitized()` and is applied by `PublishedExamQueries` (other modules calling `IPublishedExamQueries` get the cap too), not in the endpoint; the column length reads `CatalogLimits.ExamScopeDetailMaxLength`; the existing test `GetSession_SignedInAsStudent_HasNoPermissions` is rewritten to expect exactly `catalog.browse` (it is AC11 evidence); generated docs (`docs/architecture/`, `docs/api/`) are regenerated with the migration; one clause is added to `docs/agile/profile.md` line 20 about one-time grants (Claude, technical).
 - 2026-09-29 — Screens built by the `frontend` agent, then checked by the main session (files read, build and Web tests run: 794 passed). Changes to the spec found on the way: the latest-year column uses `Format="0"` because MudBlazor formats through a floating-point value and `"D"` throws; `Permission.catalog.browse.Name` / `.Description` were added in three languages (the roles back office needs them and the item table did not list them); the row label and secondary text use the kit classes `font-weight-medium` and `app-muted`, since `app-item-row-label` and `text-secondary` do not exist in `app.css`; two dev-only gallery keys were added (Claude, technical).
+- 2026-09-29 — Independent review (`/agile:review`), one round. Fixed: search words split on any whitespace, not only the space (BR3); the Api reads the enum filters by name only, as the Web does (`scope=1` is no filter on either side); the past-the-last-page fallback in `AppDataTable` logs a failure instead of leaving it unobserved (awaiting it would wait on the data callback itself). Accepted with a reason: the backfill's `btrim` and fixed `translate` list can differ from `CatalogText.Normalize` for a character outside Portuguese place names — the entity rewrites the column on the next save (comment in the migration). Not a defect of the build: the manual pages in three languages are written by `/agile:ship` (step of the definition of done), listed under `## Delivery` (Claude, technical).
+- 2026-09-29 — Query cost measured on a PostgreSQL test container with 5,000 exams and 25,000 published editions: plain list page 84 ms, three-word search 18 ms, board and year filter 9 ms, filter options 37 ms. No new index (Claude, technical).
 
 ## Out of scope
 - Choosing and saving a target exam with a date: that belongs to the AI coach's study plan (epic 701).
@@ -313,7 +315,16 @@ New `AppIcons` constants (Material Outlined): `Catalog` (`ManageSearch`), `Clear
 ## Change notes
 
 ## Validation script
-1. <Step> → <expected result>
+Needed to validate: the app host started from this worktree (provided by the owner, in place when step 1 runs), one Student account and one Admin account (signed in by the owner; Claude enters no credentials), and two exams to create in the back office. Not checked by Claude: the app host was not started (it starts PostgreSQL and Redis containers, which the project rules keep to the test containers) and both screens sit behind sign-in, so every screen step below is unverified on screen; the same rules are covered by the bUnit tests and the Api tests listed in the coverage table.
+
+1. Start the app: in `D:\dev\_icontrol\wt\simulab\f-36-catalog-browsing-for` run `dotnet run --project src/Hosts/Simulab.AppHost` (Git Bash and PowerShell 7 are the same); open the Web address the Aspire dashboard shows. Expected: the app starts and applies the migration.
+2. Sign in as the Admin, open Exams, and create (or use) two exams: one with a Published edition (year 2025, a board, a notice link) and one with only a Draft edition. Expected: both exist in the back office.
+3. Sign in as a Student (a new account is a Student). Expected: the menu has a Study section with "Catalog"; opening it lists the exam with the published edition and not the draft-only one; the row shows authority, type, scope, language, edition count and latest year.
+4. Type part of the exam's name, then of its authority's acronym, then its state or city without accents: the list narrows each time. Pick a board and year filter: only exams with a published edition of that board in that year stay; "Clear filters" brings the list back. Expected: the address changes without adding history entries (Back leaves the catalog).
+5. Open the exam by its name link. Expected: the header is the exam name; the editions list has only the published edition with board, position, notice reference, date and the notice link; the draft edition is not shown; the link opens in a new tab.
+6. Use the breadcrumb "Catalog" link, then reload `/catalog?scope=Bar&page=2`. Expected: the search and filters you had are back after the breadcrumb; `scope=Bar` is ignored and the address is cleaned.
+7. Switch the language in My account to pt-PT and then en, and return to the catalog. Expected: menu, headings, filters, empty states and the notice link name are translated; exam names stay as stored. Open `/catalog/exams/00000000-0000-0000-0000-000000000000`. Expected: the "not found" alert with a link back to the catalog.
+8. Keyboard only, on `/catalog`: Tab to the search box, the four filters, then the exam name link, press Enter. Expected: every stop has a visible focus and the exam name is one tab stop. Then, as the Admin, open Roles and remove "Browse the catalog" from Student, restart the app and sign in as the Student. Expected: no Catalog item and `/catalog` shows Not Found.
 
 ## Delivery
 - Branch: feature/F-36

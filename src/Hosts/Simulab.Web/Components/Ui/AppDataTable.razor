@@ -166,10 +166,19 @@
     private async Task ShowFirstPageAsync()
     {
         // The grid still counts the page that was past the end; it is told to sit on page 0, where the rows now are.
-        await Task.Yield();
-        if (_grid.CurrentPage != 0)
+        // It runs after the data callback returns (awaiting it there would wait on itself), so a failure is
+        // logged here: nobody observes this task.
+        try
         {
-            _grid.NavigateTo(Page.First);
+            await Task.Yield();
+            if (_grid.CurrentPage != 0)
+            {
+                _grid.NavigateTo(Page.First);
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Table for {ItemType} could not return to its first page", typeof(TItem).Name);
         }
     }
 
