@@ -1,7 +1,7 @@
 ---
 feature: F-52
 epic: Foundation and identity
-status: refining
+status: building
 board: 778
 version: 1
 ---
