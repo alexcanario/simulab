@@ -28,6 +28,12 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
     /// <summary>Extra configuration a test class adds on top of the defaults.</summary>
     public Action<IWebHostBuilder>? ConfigureHost { get; set; }
 
+    /// <summary>
+    /// F-52: the Development settings seed an administrator, and most tests count users or admins. The host
+    /// blanks that password unless a test turns this on to see the real Development start (AC10).
+    /// </summary>
+    public bool KeepDevelopmentSeedAdmin { get; set; }
+
     private string _redisConnectionString = string.Empty;
 
     /// <summary>Creates this host's own database and points it at the shared Redis container. Called before the first request.</summary>
@@ -66,6 +72,12 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
                 ["Authentication:OpenIddict:ClientId"] = TestClient.ClientId,
                 ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
             }));
+
+        if (!KeepDevelopmentSeedAdmin)
+        {
+            builder.ConfigureAppConfiguration(configuration =>
+                configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["Identity:SeedAdmin:Password"] = string.Empty }));
+        }
 
         ConfigureHost?.Invoke(builder);
 

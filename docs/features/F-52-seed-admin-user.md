@@ -77,3 +77,21 @@ A fresh installation has a working Admin account from its first start, with no m
 ## Validation script
 
 ## Delivery
+Code written; not yet compiled or run (the session had no .NET SDK). Status stays `building` until the gate is green. The development password in `appsettings.Development.json` is written on disk but not committed yet (waiting on the owner).
+
+| Criterion | Test (`SeedAdminTests`) |
+|---|---|
+| AC1 | `Start_ValidPasswordAndEmptyDatabase_CreatesTheActiveAdmin` |
+| AC2 | `SignIn_SeededAccount_ReceivesTokens` |
+| AC3 | `ListRoles_SeededAccount_IsAllowedByThePermission` |
+| AC4 | `Start_SeededAccount_HoldsEveryDeclaredPermissionThroughAdmin` |
+| AC5 | `Start_NoPassword_CreatesNoAccountAndStarts` |
+| AC6 | `Ensure_ExistingAccountWithOtherPasswordAndNoRole_KeepsPasswordAndGainsAdmin` |
+| AC7 | `Start_TwiceOnTheSameDatabase_LeavesOneUntouchedAccount` |
+| AC8 | `Start_PasswordBreaksThePolicy_FailsWithoutRevealingIt` |
+| AC9 | `Start_ReleaseWithoutMigrationsOnStart_SeedsRolesAndAdmin` |
+| AC10 | `Start_DevelopmentSettings_SeedTheAdminWithTheirOwnPassword` |
+| AC11 | `Start_WithPassword_NeverLogsIt` |
+| AC12 | no UI text added; the existing missing-key test covers it |
+
+The test host blanks `Identity:SeedAdmin:Password` by default (`SimulabApiFactory.KeepDevelopmentSeedAdmin`), so the Development seed does not add an admin to tests that count users or admins.
