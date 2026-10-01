@@ -14,36 +14,72 @@ Essas devem ser as colunas (valores do campo Status) na board.
 
 ## Passos para configurar
 
-### 1. Criar o Projeto (se ainda não existir)
+### 1. Usar o Script PowerShell (Recomendado)
+
+#### Pré-requisitos:
+- PowerShell 5.1+ (Windows) ou PowerShell 7.0+ (Linux/Mac)
+- GitHub CLI instalado e autenticado: `gh auth login`
+- `curl` e `jq` instalados
+
+#### Criar nova board:
+
+```powershell
+.\scripts\Configure-GitHubProjectBoard.ps1
+```
+
+Cria uma board chamada "Simulab" com as colunas do workflow.
+
+```powershell
+.\scripts\Configure-GitHubProjectBoard.ps1 -BoardName "Minha Board"
+```
+
+Cria uma board com nome customizado.
+
+#### Configurar board existente:
+
+```powershell
+.\scripts\Configure-GitHubProjectBoard.ps1 -BoardId 3
+```
+
+Configura o projeto #3 com as colunas do workflow.
+
+#### Exemplos completos:
+
+```powershell
+# Criar "Simulab" (padrão)
+.\scripts\Configure-GitHubProjectBoard.ps1
+
+# Criar com nome customizado
+.\scripts\Configure-GitHubProjectBoard.ps1 -BoardName "Sprint 1"
+
+# Alterar board existente
+.\scripts\Configure-GitHubProjectBoard.ps1 -BoardId 3
+```
+
+### 2. Script Bash (Alternativa)
+
+Se preferir bash/Linux:
+
+```bash
+./scripts/create-project.sh
+```
+
+### 3. Configurar manualmente via interface web
 
 1. Acesse: https://github.com/alexcanario/simulab/projects/new
 2. **Nome**: `Simulab`
 3. **Template**: `Table` (ou `Board` se preferir kanban)
 4. Clique em **Create project**
-
-### 2. Configurar as colunas
-
-#### Via interface web (recomendado):
-
-1. Acesse o projeto criado: https://github.com/alexcanario/simulab/projects/[numero]
-2. Clique na engrenagem ⚙️ no canto superior direito → **Settings**
-3. Vá em **Custom fields** → **Status**
-4. Adicione ou edite os seguintes valores (na ordem):
+5. Clique na engrenagem ⚙️ no canto superior direito → **Settings**
+6. Vá em **Custom fields** → **Status**
+7. Adicione os valores (na ordem):
    - ☐ `idea`
    - ☐ `refining`
    - ☐ `approved`
    - ☐ `building`
    - ☐ `validating`
    - ☐ `done`
-5. Clique em **Save**
-
-#### Via script (futuro):
-
-```bash
-./scripts/setup-github-project.sh <numero-do-projeto>
-```
-
-Exemplo: `./scripts/setup-github-project.sh 1`
+8. Clique em **Save**
 
 ### 3. Associar issues ao projeto
 
