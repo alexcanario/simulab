@@ -1,7 +1,7 @@
 ---
 feature: F-44
 epic: Assessment catalog
-status: refining
+status: approved
 board: 19
 version: 1
 ---
