@@ -1,7 +1,7 @@
 ---
 feature: F-38
 epic: Foundation and identity
-status: validating
+status: done
 board: 757
 version: 1
 ---
@@ -108,7 +108,10 @@ Needed to validate: nothing beyond the local app host (Docker running); no accou
 8. Open the Api console in the Aspire dashboard → exactly one warning line `Sign-in failures reached the limit for client address <your address>` for the whole window, with no e-mail in it (AC11).
 
 ## Delivery
-- Branch: feature/F-38
+- Branch: feature/F-38 (never pushed; removed after the merge)
+- Merge: 43c9c28
+- Tests: 1746 passed, 0 failed across 12 projects; 78 s test + 17 s build (2026-10-01); validated by the owner on 2026-10-01
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/sign-in-and-sign-out.md`, `docs/manual/{en,pt-BR,pt-PT}/two-factor.md`
 - Criterion → test (Identity: `SignInRateLimitTests` = S, `SignInRateLimitCodeStepTests` = C, `SignInNameLimitTests` = N; Web: `SignInRateLimitPageTests` = W):
 
 | Criterion | Tests |
