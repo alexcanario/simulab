@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <UserSecretsId>973fccbe-33dd-40d9-a90b-f90d91bc87c1</UserSecretsId>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <!-- Aspire client integration (F-5): wires TLS trust for the local Redis container's dev certificate. -->
