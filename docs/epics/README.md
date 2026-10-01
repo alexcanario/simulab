@@ -1,6 +1,6 @@
 # Epics
 
-Created on the board at bootstrap (2026-09-17). Each epic gets its own file `docs/epics/<slug>.md` when `/agile:epic` breaks it into features. Board: Azure Boards `acanariopt/simulab`.
+Created on the board at bootstrap (2026-09-17). Each epic gets its own file `docs/epics/<slug>.md` when `/agile:epic` breaks it into features. Board: GitHub Issues + Projects `alexcanario/simulab`.
 
 | Order | Epic | Slug | Board id | Status |
 |---|---|---|---|---|

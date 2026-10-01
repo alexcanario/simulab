@@ -25,9 +25,9 @@ An EU region for Portuguese users (GDPR) is a deferred decision.
 ## Code hosting, CI and board
 | What | Status | Where |
 |---|---|---|
-| Git remote | planned | Azure DevOps, organization `acanariopt`, project `simulab` |
-| CI (build + tests on pull requests and `main`, no deploy stages) | planned | Azure Pipelines |
-| Board | planned | Azure Boards, project `simulab` |
+| Git remote | provisioned | GitHub, repository `alexcanario/simulab` |
+| CI (build + tests on pull requests and `main`, no deploy stages) | planned | GitHub Actions |
+| Board | provisioned | GitHub Issues + Projects, repository `alexcanario/simulab` |
 
 ## Expected secrets
 Names only. None exists yet; each arrives with the feature that needs it.

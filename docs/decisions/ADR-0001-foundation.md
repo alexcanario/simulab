@@ -17,7 +17,7 @@ A large part of the code comes from Simulae (`D:\dev\_icontrol\simulae`, branch 
 - Billing holds `Plan` (features and limits as columns) and `PlanAssignment` (no validity period, no source). No payment code, no usage meter, no promo codes.
 - Integration events abstraction in `Common`, implemented with MassTransit 8.5.10 + RabbitMQ, used once. Redis used for the exam timer, the attempt lock, refresh tokens and the SignalR backplane. `IEmailSender` with SendGrid. No file storage code, no AI code.
 - About 1,360 tests (xUnit, AwesomeAssertions, NSubstitute, bUnit, Testcontainers); 42 test files create or reference their own PostgreSQL container. Architecture tests exist. The build has no warnings-as-errors and no analyzers.
-- Hosted on Azure DevOps (`acanariopt/simulae`) with a develop / release / main flow and Bicep for Azure Container Apps (Brazil South).
+- Hosted on GitHub (`anthropics-usable/simulae`) with a develop / main flow and Bicep for Azure Container Apps (Brazil South).
 
 Everything imported from Simulae is renamed to English and localized on the way in. Code is imported feature by feature, never in bulk.
 
@@ -87,8 +87,8 @@ Known exception: `User` inherits `IdentityUser<Guid>`, so it cannot inherit `Ten
 |---|---|---|---|
 | 31 | Observability | Structured logs + OpenTelemetry traces and metrics; Aspire dashboard locally; a custom metric for AI tokens and cost | Code exists; brief asks to track AI cost |
 | 32 | Environments | Dev only. Staging and production are `planned` (Azure Container Apps, Brazil South) | Nothing to publish yet |
-| 33 | Code hosting and CI | Azure DevOps, new project `simulab` in organization `acanariopt`. CI = build + tests on pull requests and `main`, no deploy stages yet | Organization, `az` sign-in and service connections already exist; a separate project keeps the board clean |
-| 34 | Board | Azure Boards: Epic → Feature → Bug, no tasks per role; ASCII English text | `az` corrupts non-ASCII text on Windows; the file in `docs/` is the source of truth |
+| 33 | Code hosting and CI | GitHub, repository `alexcanario/simulab`. CI = build + tests on pull requests and `main` with GitHub Actions, no deploy stages yet | Centralized platform; GitHub Issues + Projects for board and tracking |
+| 34 | Board | GitHub Issues + Projects: Epic → Feature → Bug, no tasks per role; ASCII English text | The file in `docs/` is the source of truth; board mirrors the files |
 | 35 | Branching | Trunk: `main` + short `feature/F-<n>` and `bug/B-<n>` branches | Team of two, one item in progress; no environments for release branches to serve |
 
 ### Round 7 — Quality
