@@ -10,19 +10,19 @@ public class IssuingAuthorityTests
 {
     private static Result<IssuingAuthority> Create(
         string? name = "Prefeitura Municipal de Guarulhos",
-        string? acronym = "pmg",
         string? description = null,
         string? website = null) =>
-        IssuingAuthority.Create(name, acronym, description, website);
+        IssuingAuthority.Create(name, description, website);
 
     [Fact]
-    public void Create_ValidData_TrimsAndUppercasesTheAcronym()
+    public void Create_ValidData_TrimsTheNameAndStoresNoAcronym()
     {
-        var result = Create(name: "  Prefeitura Municipal de Guarulhos  ", acronym: "  pmg ");
+        var result = Create(name: "  Prefeitura Municipal de Guarulhos  ");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be("Prefeitura Municipal de Guarulhos");
-        result.Value.Acronym.Should().Be("PMG");
+        result.Value.Acronym.Should().BeNull("a new authority has no acronym (F-44 BR4)");
+        result.Value.NormalizedAcronym.Should().BeNull();
         result.Value.Id.Should().NotBe(Guid.Empty);
         result.Value.TenantId.Should().BeNull("catalog rows are global in v1");
     }
@@ -46,25 +46,6 @@ public class IssuingAuthorityTests
         var result = Create(name: new string('a', CatalogLimits.IssuingAuthorityNameMaxLength + 1));
 
         result.Error!.Code.Should().Be(CatalogErrorCodes.IssuingAuthorityNameTooLong);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData(" ")]
-    [InlineData("X")]
-    public void Create_BlankOrTooShortAcronym_FailsWithAcronymRequired(string? acronym)
-    {
-        var result = Create(acronym: acronym);
-
-        result.Error!.Code.Should().Be(CatalogErrorCodes.IssuingAuthorityAcronymRequired);
-    }
-
-    [Fact]
-    public void Create_AcronymLongerThanTheColumn_FailsWithAcronymTooLong()
-    {
-        var result = Create(acronym: new string('a', CatalogLimits.IssuingAuthorityAcronymMaxLength + 1));
-
-        result.Error!.Code.Should().Be(CatalogErrorCodes.IssuingAuthorityAcronymTooLong);
     }
 
     [Fact]
@@ -108,24 +89,22 @@ public class IssuingAuthorityTests
     }
 
     [Fact]
-    public void Create_StoresTheNormalizedFormsTheIndexesRead()
+    public void Create_StoresTheNormalizedNameTheIndexReads()
     {
-        var result = Create(name: "Prefeitura de São Paulo", acronym: "psp");
+        var result = Create(name: "Prefeitura de São Paulo");
 
         result.Value.NormalizedName.Should().Be(CatalogText.Normalize("PREFEITURA DE SAO PAULO"));
-        result.Value.NormalizedAcronym.Should().Be("PSP");
     }
 
     [Fact]
-    public void Update_NewValues_ReplacesThemAndTheNormalizedForms()
+    public void Update_NewValues_ReplacesThemAndTheNormalizedName()
     {
         var authority = Create().Value;
 
-        var result = authority.Update("Ministério da Educação", "mec", "Since 1930", "https://www.gov.br/mec");
+        var result = authority.Update("Ministério da Educação", "Since 1930", "https://www.gov.br/mec");
 
         result.IsSuccess.Should().BeTrue();
         authority.Name.Should().Be("Ministério da Educação");
-        authority.Acronym.Should().Be("MEC");
         authority.NormalizedName.Should().Be(CatalogText.Normalize("MINISTERIO DA EDUCACAO"));
     }
 
@@ -134,7 +113,7 @@ public class IssuingAuthorityTests
     {
         var authority = Create(name: "Prefeitura Municipal de Guarulhos").Value;
 
-        var result = authority.Update("A", "pmg", null, null);
+        var result = authority.Update("A", null, null);
 
         result.IsFailure.Should().BeTrue();
         authority.Name.Should().Be("Prefeitura Municipal de Guarulhos");

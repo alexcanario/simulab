@@ -35,7 +35,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
     /// <summary>A fresh issuing authority, so each test owns the namespace its exam names live in (BR10).</summary>
     private static async Task<IssuingAuthorityResponse> AuthorityAsync(HttpClient admin)
     {
-        var request = new SaveIssuingAuthorityRequest(Unique("Orgao"), Guid.CreateVersion7().ToString("N")[..12]);
+        var request = new SaveIssuingAuthorityRequest(Unique("Orgao"));
 
         var response = await admin.PostAsJsonAsync(Authorities, request, AppJson.Options);
         response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
@@ -106,7 +106,6 @@ public sealed class ExamEndpointTests : CatalogApiTests
         exam.ScopeDetail.Should().BeNull();
         exam.IssuingAuthorityId.Should().Be(authority.Id);
         exam.IssuingAuthorityName.Should().Be(authority.Name);
-        exam.IssuingAuthorityAcronym.Should().Be(authority.Acronym);
         exam.ContentLanguage.Should().Be("pt-BR");
 
         var listed = await ListAsync(admin, $"?issuingAuthorityId={authority.Id}");
@@ -338,7 +337,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityHasExams);
 
         var listed = await admin.GetFromJsonAsync<IssuingAuthorityPageResponse>(
-            $"{Authorities}?search={Uri.EscapeDataString(authority.Acronym)}",
+            $"{Authorities}?search={Uri.EscapeDataString(authority.Name)}",
             AppJson.Options);
         listed!.Items.Should().ContainSingle(item => item.Id == authority.Id);
     }

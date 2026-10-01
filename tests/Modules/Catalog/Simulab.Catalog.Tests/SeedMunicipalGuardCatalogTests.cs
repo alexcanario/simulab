@@ -97,11 +97,10 @@ public sealed class SeedMunicipalGuardCatalogTests
 
         foreach (var stored in await context.Set<IssuingAuthority>().AsNoTracking().ToListAsync())
         {
-            var rebuilt = IssuingAuthority.Create(stored.Name, stored.Acronym, stored.Description, stored.Website);
+            var rebuilt = IssuingAuthority.Create(stored.Name, stored.Description, stored.Website);
 
             rebuilt.IsSuccess.Should().BeTrue(stored.Name);
-            rebuilt.Value.Should().BeEquivalentTo(stored, options => options.Including(a => a.Name)
-                .Including(a => a.Acronym).Including(a => a.NormalizedName).Including(a => a.NormalizedAcronym));
+            rebuilt.Value.Should().BeEquivalentTo(stored, options => options.Including(a => a.Name).Including(a => a.NormalizedName));
         }
 
         foreach (var stored in await context.Set<Exam>().AsNoTracking().ToListAsync())

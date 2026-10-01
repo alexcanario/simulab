@@ -359,7 +359,7 @@
   <data name="account_event.event_invalid" xml:space="preserve"><value>Escolha um dos eventos da lista.</value></data>
   <data name="Nav.Organizers" xml:space="preserve"><value>Bancas</value></data>
   <data name="Organizers.Title" xml:space="preserve"><value>Bancas</value></data>
-  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Buscar por nome ou sigla</value></data>
+  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Buscar por nome</value></data>
   <data name="Organizers.Empty" xml:space="preserve"><value>Nenhuma banca cadastrada ainda.</value></data>
   <data name="Organizers.Empty.Search" xml:space="preserve"><value>Nenhuma banca corresponde a "{0}".</value></data>
   <data name="Organizers.Column.Name" xml:space="preserve"><value>Nome</value></data>
@@ -414,7 +414,7 @@
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Editar exame</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Órgão contratante</value></data>
   <data name="Exams.Field.IssuingAuthority.Hint" xml:space="preserve"><value>O órgão que publica o edital e define as regras. A banca que aplica cada prova pertence à edição.</value></data>
-  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
+  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Nome</value></data>
   <data name="Exams.Field.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>De 2 a 200 caracteres</value></data>
   <data name="Exams.Field.Name.Placeholder" xml:space="preserve"><value>Ex.: Concurso PMF 2026 — Guarda Municipal</value></data>
@@ -463,17 +463,14 @@
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Escolha o idioma do conteúdo.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Órgãos contratantes</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Órgãos contratantes</value></data>
-  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Buscar por nome ou sigla</value></data>
+  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Buscar por nome</value></data>
   <data name="IssuingAuthorities.Empty" xml:space="preserve"><value>Nenhum órgão contratante cadastrado ainda.</value></data>
   <data name="IssuingAuthorities.Empty.Search" xml:space="preserve"><value>Nenhum órgão contratante corresponde a "{0}".</value></data>
   <data name="IssuingAuthorities.Column.Name" xml:space="preserve"><value>Nome</value></data>
-  <data name="IssuingAuthorities.Column.Acronym" xml:space="preserve"><value>Sigla</value></data>
   <data name="IssuingAuthorities.Dialog.AddTitle" xml:space="preserve"><value>Adicionar órgão contratante</value></data>
   <data name="IssuingAuthorities.Dialog.EditTitle" xml:space="preserve"><value>Editar órgão contratante</value></data>
   <data name="IssuingAuthorities.Field.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="IssuingAuthorities.Field.Name.Help" xml:space="preserve"><value>De 2 a 150 caracteres</value></data>
-  <data name="IssuingAuthorities.Field.Acronym" xml:space="preserve"><value>Sigla</value></data>
-  <data name="IssuingAuthorities.Field.Acronym.Help" xml:space="preserve"><value>De 2 a 20 caracteres, salva em maiúsculas</value></data>
   <data name="IssuingAuthorities.Field.Website" xml:space="preserve"><value>Site oficial</value></data>
   <data name="IssuingAuthorities.Field.Website.Help" xml:space="preserve"><value>Endereço completo, começando com http:// ou https://</value></data>
   <data name="IssuingAuthorities.Field.Description" xml:space="preserve"><value>Descrição</value></data>
@@ -484,9 +481,6 @@
   <data name="issuing_authority.name_required" xml:space="preserve"><value>Informe um nome com ao menos 2 caracteres.</value></data>
   <data name="issuing_authority.name_too_long" xml:space="preserve"><value>O nome é muito longo: no máximo 150 caracteres.</value></data>
   <data name="issuing_authority.name_taken" xml:space="preserve"><value>Outro órgão contratante já tem esse nome.</value></data>
-  <data name="issuing_authority.acronym_required" xml:space="preserve"><value>Informe uma sigla com ao menos 2 caracteres.</value></data>
-  <data name="issuing_authority.acronym_too_long" xml:space="preserve"><value>A sigla é muito longa: no máximo 20 caracteres.</value></data>
-  <data name="issuing_authority.acronym_taken" xml:space="preserve"><value>Outro órgão contratante já tem essa sigla.</value></data>
   <data name="issuing_authority.description_too_long" xml:space="preserve"><value>A descrição é muito longa: no máximo 500 caracteres.</value></data>
   <data name="issuing_authority.website_invalid" xml:space="preserve"><value>Informe um endereço completo, começando com http:// ou https://</value></data>
   <data name="issuing_authority.has_exams" xml:space="preserve"><value>Este órgão contratante tem exames no catálogo. Exclua esses exames primeiro, na página Exames.</value></data>
@@ -513,7 +507,7 @@
   <data name="ExamEditions.Section.Publication.Subtitle" xml:space="preserve"><value>Quem pode ver esta edição.</value></data>
   <data name="ExamEditions.Field.Exam" xml:space="preserve"><value>Exame</value></data>
   <data name="ExamEditions.Field.Organizer" xml:space="preserve"><value>Banca</value></data>
-  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
+  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Nome</value></data>
   <data name="ExamEditions.Field.Organizer.Hint" xml:space="preserve"><value>A banca que aplicou esta prova, como o edital a indica.</value></data>
   <data name="ExamEditions.Field.NoticeYear" xml:space="preserve"><value>Ano do edital</value></data>
   <data name="ExamEditions.Field.NoticeYear.Placeholder" xml:space="preserve"><value>Ex.: 2026</value></data>

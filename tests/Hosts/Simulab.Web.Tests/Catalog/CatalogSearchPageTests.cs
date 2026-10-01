@@ -53,7 +53,7 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         link.GetAttribute("href").Should().Be($"/catalog/exams/{GuardaMunicipal.Id}");
         link.GetAttribute("lang").Should().Be("pt-BR");
         link.TextContent.Should().Be("Guarda Municipal");
-        cells[1].TextContent.Should().Contain("Prefeitura de Sao Paulo").And.Contain("PMSP");
+        cells[1].TextContent.Trim().Should().Be("Prefeitura de Sao Paulo");
         cells[2].TextContent.Trim().Should().Be("Public service exam");
         cells[3].TextContent.Should().Contain("State").And.Contain("Sao Paulo");
         cells[4].TextContent.Trim().Should().Be(SupportedCultures.NativeName(new System.Globalization.CultureInfo("pt-BR")));

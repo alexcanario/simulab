@@ -4,6 +4,5 @@ namespace Simulab.Catalog.Contracts;
 public sealed record IssuingAuthorityResponse(
     Guid Id,
     string Name,
-    string Acronym,
     string? Description,
     string? Website);

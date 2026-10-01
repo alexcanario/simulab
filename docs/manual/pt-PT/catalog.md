@@ -16,7 +16,7 @@ O catálogo mostra o mesmo a todos, incluindo os Administradores: os exames apen
 ## Como fazer
 ### Encontrar um exame
 1. Escolha **Catálogo** na secção **Estudo** do menu.
-2. Escreva na caixa de pesquisa. As palavras podem ser parte do nome do exame, do nome ou da sigla da entidade contratante, ou do estado ou da cidade, por qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de uma entidade de São Paulo.
+2. Escreva na caixa de pesquisa. As palavras podem ser parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade, por qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de uma entidade de São Paulo.
 3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Entidade organizadora** e **Ano do aviso**, sozinhos ou juntamente com o texto. A entidade organizadora e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
 4. Escolha **Limpar filtros** para remover os quatro filtros. O texto da pesquisa tem o seu próprio botão de limpar.
 
@@ -38,7 +38,7 @@ Estas linhas são dados comuns: um Administrador pode editar ou eliminar qualque
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
-| Pesquisa | Parte do nome do exame, do nome ou da sigla da entidade contratante, ou do estado ou da cidade | Todas as palavras têm de coincidir nalgum lado; maiúsculas e acentos não contam |
+| Pesquisa | Parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade | Todas as palavras têm de coincidir nalgum lado; maiúsculas e acentos não contam |
 | Tipo de avaliação | Concurso público, certificação, exame de acesso ou ENEM | Um valor ou todos |
 | Abrangência | Nacional, Estadual ou Municipal | Um valor ou todos |
 | Entidade organizadora | O organizador que aplicou uma edição publicada | Só aparecem entidades com algo publicado |

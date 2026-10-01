@@ -16,7 +16,7 @@ The catalog shows the same to everyone, Admins included: exams with only draft e
 ## How to
 ### Find an exam
 1. Choose **Catalog** in the **Study** section of the menu.
-2. Type in the search box. Words can be part of the exam's name, of the issuing authority's name or acronym, or of the state or city, in any order, with or without accents and capitals. "guarda sp" finds "Guarda Municipal" of a São Paulo authority.
+2. Type in the search box. Words can be part of the exam's name, of the issuing authority's name, or of the state or city, in any order, with or without accents and capitals. "guarda sp" finds "Guarda Municipal" of a São Paulo authority.
 3. Narrow the list with **Assessment type**, **Scope**, **Board** and **Notice year**, alone or together with the text. The board and the year are matched on the same edition: an exam only appears for "FGV" and "2025" when it has a published FGV edition in 2025.
 4. Choose **Clear filters** to remove the four filters. The search text has its own clear button.
 
@@ -38,7 +38,7 @@ These rows are ordinary data: an Admin can edit or delete any of them and the ch
 ## Fields
 | Field | Meaning | Rules |
 |---|---|---|
-| Search | Part of the exam's name, its issuing authority's name or acronym, or its state or city | Every word must match somewhere; capitals and accents do not matter |
+| Search | Part of the exam's name, its issuing authority's name, or its state or city | Every word must match somewhere; capitals and accents do not matter |
 | Assessment type | Public service exam, certification, university entrance exam or ENEM | One value or all |
 | Scope | National, State or Municipal | One value or all |
 | Board | The organizer that applied a published edition | Only boards with something published are offered |

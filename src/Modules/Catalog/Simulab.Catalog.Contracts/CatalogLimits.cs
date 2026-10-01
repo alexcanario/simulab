@@ -21,9 +21,6 @@ public static class CatalogLimits
     /// <summary>The issuing authority's full name (F-34 BR18). Same widths as the organizer's: same shape.</summary>
     public const int IssuingAuthorityNameMaxLength = 150;
 
-    /// <summary>The issuing authority's short name (PMG, MEC), stored uppercase.</summary>
-    public const int IssuingAuthorityAcronymMaxLength = 20;
-
     /// <summary>Free text about the issuing authority.</summary>
     public const int IssuingAuthorityDescriptionMaxLength = 500;
 
@@ -51,6 +48,6 @@ public static class CatalogLimits
     /// <summary>How many digits the notice year input accepts (F-35, BR4).</summary>
     public const int ExamEditionNoticeYearDigits = 4;
 
-    /// <summary>The shortest a name or an acronym may be (BR8).</summary>
+    /// <summary>The shortest a name may be (BR8).</summary>
     public const int NameMinLength = 2;
 }

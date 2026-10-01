@@ -359,7 +359,7 @@
   <data name="account_event.event_invalid" xml:space="preserve"><value>Choose one of the events on the list.</value></data>
   <data name="Nav.Organizers" xml:space="preserve"><value>Organizers</value></data>
   <data name="Organizers.Title" xml:space="preserve"><value>Organizers</value></data>
-  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Search by name or acronym</value></data>
+  <data name="Organizers.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
   <data name="Organizers.Empty" xml:space="preserve"><value>No organizer has been registered yet.</value></data>
   <data name="Organizers.Empty.Search" xml:space="preserve"><value>No organizer matches "{0}".</value></data>
   <data name="Organizers.Column.Name" xml:space="preserve"><value>Name</value></data>
@@ -414,7 +414,7 @@
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Edit exam</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
   <data name="Exams.Field.IssuingAuthority.Hint" xml:space="preserve"><value>The body that publishes the notice and sets the rules. The board that applies each paper belongs to the edition.</value></data>
-  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Name or acronym</value></data>
+  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Name</value></data>
   <data name="Exams.Field.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>2 to 200 characters</value></data>
   <data name="Exams.Field.Name.Placeholder" xml:space="preserve"><value>E.g.: PMF 2026 Municipal Guard</value></data>
@@ -463,17 +463,14 @@
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Choose the language of the content.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Issuing authorities</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Issuing authorities</value></data>
-  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Search by name or acronym</value></data>
+  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
   <data name="IssuingAuthorities.Empty" xml:space="preserve"><value>No issuing authority yet.</value></data>
   <data name="IssuingAuthorities.Empty.Search" xml:space="preserve"><value>No issuing authority matches "{0}".</value></data>
   <data name="IssuingAuthorities.Column.Name" xml:space="preserve"><value>Name</value></data>
-  <data name="IssuingAuthorities.Column.Acronym" xml:space="preserve"><value>Acronym</value></data>
   <data name="IssuingAuthorities.Dialog.AddTitle" xml:space="preserve"><value>Add issuing authority</value></data>
   <data name="IssuingAuthorities.Dialog.EditTitle" xml:space="preserve"><value>Edit issuing authority</value></data>
   <data name="IssuingAuthorities.Field.Name" xml:space="preserve"><value>Name</value></data>
   <data name="IssuingAuthorities.Field.Name.Help" xml:space="preserve"><value>2 to 150 characters</value></data>
-  <data name="IssuingAuthorities.Field.Acronym" xml:space="preserve"><value>Acronym</value></data>
-  <data name="IssuingAuthorities.Field.Acronym.Help" xml:space="preserve"><value>2 to 20 characters, stored in capitals</value></data>
   <data name="IssuingAuthorities.Field.Website" xml:space="preserve"><value>Official website</value></data>
   <data name="IssuingAuthorities.Field.Website.Help" xml:space="preserve"><value>A full address, starting with http:// or https://</value></data>
   <data name="IssuingAuthorities.Field.Description" xml:space="preserve"><value>Description</value></data>
@@ -484,9 +481,6 @@
   <data name="issuing_authority.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
   <data name="issuing_authority.name_too_long" xml:space="preserve"><value>The name is too long: at most 150 characters.</value></data>
   <data name="issuing_authority.name_taken" xml:space="preserve"><value>Another issuing authority already has this name.</value></data>
-  <data name="issuing_authority.acronym_required" xml:space="preserve"><value>Type an acronym with at least 2 characters.</value></data>
-  <data name="issuing_authority.acronym_too_long" xml:space="preserve"><value>The acronym is too long: at most 20 characters.</value></data>
-  <data name="issuing_authority.acronym_taken" xml:space="preserve"><value>Another issuing authority already has this acronym.</value></data>
   <data name="issuing_authority.description_too_long" xml:space="preserve"><value>The description is too long: at most 500 characters.</value></data>
   <data name="issuing_authority.website_invalid" xml:space="preserve"><value>Type a full address, starting with http:// or https://</value></data>
   <data name="issuing_authority.has_exams" xml:space="preserve"><value>This issuing authority has exams in the catalog. Delete those exams first, on the Exams page.</value></data>
@@ -513,7 +507,7 @@
   <data name="ExamEditions.Section.Publication.Subtitle" xml:space="preserve"><value>Who can see this edition.</value></data>
   <data name="ExamEditions.Field.Exam" xml:space="preserve"><value>Exam</value></data>
   <data name="ExamEditions.Field.Organizer" xml:space="preserve"><value>Board</value></data>
-  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Name or acronym</value></data>
+  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Name</value></data>
   <data name="ExamEditions.Field.Organizer.Hint" xml:space="preserve"><value>The board that applied this paper, as the notice names it.</value></data>
   <data name="ExamEditions.Field.NoticeYear" xml:space="preserve"><value>Notice year</value></data>
   <data name="ExamEditions.Field.NoticeYear.Placeholder" xml:space="preserve"><value>E.g.: 2026</value></data>

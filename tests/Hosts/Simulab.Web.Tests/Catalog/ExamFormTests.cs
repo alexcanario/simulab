@@ -41,7 +41,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     {
         var lookup = page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == "exam-authority");
         page.InvokeAsync(() => lookup.Instance.ValueChanged.InvokeAsync(
-            new AppLookupOption(authority.Id, $"{authority.Name} ({authority.Acronym})"))).GetAwaiter().GetResult();
+            new AppLookupOption(authority.Id, authority.Name))).GetAwaiter().GetResult();
     }
 
     // AC4: a national exam is sent without a detail, and the page says "Add exam" until it is saved.
@@ -164,6 +164,17 @@ public sealed class ExamFormTests : CatalogPageTestContext
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Method == HttpMethod.Put && call.Path == $"/api/v1/catalog/exams/{Fuvest.Id}"));
         SentBody(Api, HttpMethod.Put).Name.Should().Be("FUVEST 2027");
+    }
+
+    // F-44 AC5: the picker shows the authority by its name, with no acronym after it.
+    [Fact]
+    public void Edit_PicksTheAuthorityByItsNameAlone()
+    {
+        var page = RenderEdit(Fuvest.Id);
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Edit exam"));
+        var lookup = page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == "exam-authority");
+        lookup.Instance.Value!.Text.Should().Be(Guarulhos.Name);
     }
 
     // AC6: a name the authority already has shows on the name field, not only at the top.

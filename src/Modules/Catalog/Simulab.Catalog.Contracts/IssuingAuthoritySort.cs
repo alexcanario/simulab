@@ -4,5 +4,4 @@ namespace Simulab.Catalog.Contracts;
 public static class IssuingAuthoritySort
 {
     public const string Name = "name";
-    public const string Acronym = "acronym";
 }

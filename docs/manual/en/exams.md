@@ -21,11 +21,11 @@ Everyone else gets Page not found.
    column title to sort by it.
 3. Type in the search box to filter by name. Case and accents do not matter: "publica" finds "Pública".
 4. The three filters above the list — issuing authority, assessment type and scope — can be combined. In the
-   issuing authority filter, type two letters of the name or the acronym and pick from the list that appears.
+   issuing authority filter, type two letters of the name and pick from the list that appears.
 
 ### Add an exam
 1. Choose **Add**. The form opens on a page of its own.
-2. In **Issuing authority**, type two letters of the name or the acronym and pick from the list. If the body is
+2. In **Issuing authority**, type two letters of the name and pick from the list. If the body is
    not there yet, add it first on [Issuing authorities](issuing-authorities.md).
 3. Type the exam's **name**, as it appears in the notice.
 4. Choose the **assessment type**. Choose the **scope** from the three cards — each one explains in a line

@@ -322,7 +322,7 @@ else
         }
 
         _saved = exam;
-        _authority = new AppLookupOption(exam.IssuingAuthorityId, $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})");
+        _authority = new AppLookupOption(exam.IssuingAuthorityId, exam.IssuingAuthorityName);
         _name = exam.Name;
         _assessmentType = exam.AssessmentType;
         _scope = exam.Scope;
@@ -414,7 +414,7 @@ else
         // v2: only bodies that publish notices are offered. A board is never a parent of an exam (BR2).
         return [.. result.Value!.Items.Select(authority => new AppLookupOption(
             authority.Id,
-            $"{authority.Name} ({authority.Acronym})"))];
+            authority.Name))];
     }
 
     private async Task SaveAsync()
