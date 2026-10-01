@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
@@ -173,14 +174,31 @@ public sealed class SeedAdminTests
     }
 
     [Fact]
-    public async Task Start_DevelopmentSettings_SeedTheAdminWithTheirOwnPassword()
+    public async Task Start_DevelopmentWithPasswordFromSecrets_SeedsTheAdmin()
     {
-        using var factory = new IdentityApiFactory { KeepDevelopmentSeedAdmin = true };
-        await factory.PrepareAsync($"seed_admin_dev_{Guid.NewGuid():N}");
+        // User secrets are one more configuration layer; an in-memory value stands in for it here.
+        await using var factory = await StartedAsync(Password);
 
-        var token = await TokenClient.SignInAsync(factory.CreateClient(), SeedAdmin.Email, DevelopmentPassword());
+        var token = await TokenClient.SignInAsync(factory.CreateClient(), SeedAdmin.Email, Password);
 
+        factory.Services.GetRequiredService<IHostEnvironment>().IsDevelopment().Should().BeTrue();
         token.AccessToken.Should().NotBeNullOrEmpty(token.ErrorDescription);
+    }
+
+    [Theory]
+    [InlineData("appsettings.json")]
+    [InlineData("appsettings.Development.json")]
+    public void Settings_CommittedFiles_CarryNoSeedAdminPassword(string file)
+    {
+        var configuration = new ConfigurationBuilder().AddJsonFile(ApiProjectFile(file), optional: false).Build();
+
+        configuration[SeedAdmin.PasswordKey].Should().BeNullOrEmpty("the password comes from user secrets or the environment (BR7)");
+    }
+
+    [Fact]
+    public void Project_Api_DeclaresUserSecrets()
+    {
+        File.ReadAllText(ApiProjectFile("Simulab.Api.csproj")).Should().Contain("<UserSecretsId>");
     }
 
     [Fact]
@@ -225,8 +243,8 @@ public sealed class SeedAdminTests
             .AddInMemoryCollection(new Dictionary<string, string?> { [SeedAdmin.PasswordKey] = password })
             .Build();
 
-    /// <summary>The password <c>appsettings.Development.json</c> of the Api carries, read from the file the host reads.</summary>
-    private static string DevelopmentPassword()
+    /// <summary>A file of the Api project, found from the solution root (the test output folder does not carry it).</summary>
+    private static string ApiProjectFile(string file)
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !File.Exists(Path.Combine(root.FullName, "Simulab.slnx")))
@@ -234,9 +252,7 @@ public sealed class SeedAdminTests
             root = root.Parent;
         }
 
-        var path = Path.Combine(root!.FullName, "src", "Hosts", "Simulab.Api", "appsettings.Development.json");
-        var configuration = new ConfigurationBuilder().AddJsonFile(path, optional: false).Build();
-        return configuration[SeedAdmin.PasswordKey]!;
+        return Path.Combine(root!.FullName, "src", "Hosts", "Simulab.Api", file);
     }
 
     private static async Task<T> ReadAsync<T>(IdentityApiFactory factory, Func<IdentityModuleDbContext, UserManager<User>, Task<T>> read)

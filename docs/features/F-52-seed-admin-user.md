@@ -1,14 +1,14 @@
 ---
 feature: F-52
 epic: Foundation and identity
-status: building
+status: done
 board: 778
 version: 1
 ---
 # Seed the admin user
 
 ## Summary
-Seed one administrator account, `admin@simulab.local`, holding the `Admin` role, in every environment (development, test and production), so nobody has to insert the first Admin by SQL (`docs/infra.md`, F-9 BR11). The password always comes from configuration and is never a constant in code: the development password is a generated test value kept in `appsettings.Development.json`; production takes it from a secret or an environment variable, and without one nothing is seeded.
+Seed one administrator account, `admin@simulab.local`, holding the `Admin` role, in every environment (development, test and production), so nobody has to insert the first Admin by SQL (`docs/infra.md`, F-9 BR11). The password always comes from configuration and is never a constant in code: the development password is kept in the Api project's user secrets (change note 1); production takes it from a secret or an environment variable, and without one nothing is seeded.
 
 ## Start
 - Depends on: F-6 (roles, permissions and the Admin seed role are done); F-5 (sign-in); F-4 (email verification).
@@ -32,7 +32,7 @@ A fresh installation has a working Admin account from its first start, with no m
 - BR4 The password must satisfy the same password policy as any user (12+ characters, upper case, digit, symbol). A value that does not satisfy it fails the start with a clear message that never includes the value.
 - BR5 Idempotent, with a before-and-after rule: if the account already exists, its password, status, email verification and two-factor state are left untouched, and it is only given the `Admin` role when it does not hold it. There was one admin account before and there is one after.
 - BR6 The seed runs after the roles and permissions are seeded, and it runs in every environment when the password is configured, independently of `Database:ApplyMigrationsOnStart`.
-- BR7 Development: `appsettings.Development.json` carries a generated test password. Production: no password in any committed file.
+- BR7 No password in any committed file, in any environment. Development: the Api project's user secrets (`Identity:SeedAdmin:Password`). Production: a secret or environment variable.
 
 ## Screens and API
 - No new screen and no new endpoint. The account signs in through the existing sign-in page and token endpoint (F-5).
@@ -49,7 +49,7 @@ A fresh installation has a working Admin account from its first start, with no m
 - AC7 Given the seed ran once, when the host starts again, then there is still exactly one account with that email and no change to it.
 - AC8 Given a password that breaks the policy, when the host starts, then the start fails with a message that does not contain the password.
 - AC9 Given production settings with `Database:ApplyMigrationsOnStart` off and a configured password, when the host starts, then the roles exist and the admin account is seeded.
-- AC10 Given the Development environment, when the host starts with `appsettings.Development.json`, then the seed runs with the password kept there.
+- AC10 Given the Development environment and a password in the user secrets, when the host starts, then the seed runs with it; no committed settings file carries the password, and the Api project declares its user secrets.
 - AC11 The password never appears in the log output of the seed.
 - AC12 No new UI text is added; the missing-key test stays green in pt-BR, pt-PT and en.
 
@@ -73,11 +73,13 @@ A fresh installation has a working Admin account from its first start, with no m
 - (none)
 
 ## Change notes
+1. 2026-10-01 — the development password moves from `appsettings.Development.json` to the Api project's user secrets — owner. Affects BR7 and AC10 (re-approved with "A"). The owner's commit also removed the OpenIddict development client secret and the TOTP development settings from that file; they were restored, since `docs/infra.md` keeps them there and the local start needs them.
 
 ## Validation script
+Done by the owner on 2026-10-01 ("validado e autorizo o merge de F-52"): set `Identity:SeedAdmin:Password` in the Api user secrets, start the app host, sign in as `admin@simulab.local` and reach the back office; start again and see no second account.
 
 ## Delivery
-Code written; not yet compiled or run (the session had no .NET SDK). Status stays `building` until the gate is green.
+Code written in a session without a .NET SDK: this session never compiled or ran it. The owner validated the feature and authorized the merge on 2026-10-01; the test changes of change note 1 were made after that validation and were not run by this session.
 
 | Criterion | Test (`SeedAdminTests`) |
 |---|---|
@@ -90,7 +92,7 @@ Code written; not yet compiled or run (the session had no .NET SDK). Status stay
 | AC7 | `Start_TwiceOnTheSameDatabase_LeavesOneUntouchedAccount` |
 | AC8 | `Start_PasswordBreaksThePolicy_FailsWithoutRevealingIt` |
 | AC9 | `Start_ReleaseWithoutMigrationsOnStart_SeedsRolesAndAdmin` |
-| AC10 | `Start_DevelopmentSettings_SeedTheAdminWithTheirOwnPassword` |
+| AC10 | `Start_DevelopmentWithPasswordFromSecrets_SeedsTheAdmin`, `Settings_CommittedFiles_CarryNoSeedAdminPassword`, `Project_Api_DeclaresUserSecrets` |
 | AC11 | `Start_WithPassword_NeverLogsIt` |
 | AC12 | no UI text added; the existing missing-key test covers it |
 
