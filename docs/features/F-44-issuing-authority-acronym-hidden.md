@@ -1,7 +1,7 @@
 ---
 feature: F-44
 epic: Assessment catalog
-status: idea
+status: refining
 board: 767
 version: 1
 ---
