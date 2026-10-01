@@ -2,7 +2,7 @@
 feature: F-55
 epic: Foundation and identity
 status: idea
-board: 782
+board: 93
 version: 1
 ---
 # Stop logging the typed user name on token requests
