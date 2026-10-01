@@ -2,7 +2,7 @@
 feature: F-42
 epic: Assessment catalog
 status: refining
-board: 763
+board: 81
 version: 1
 ---
 <!--
