@@ -42,7 +42,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 - Code searches and sweeps (Explore): Haiku. Mechanical import and rename from Simulae: Sonnet; the tests verify it.
 
 ## Board
-Board: Azure Boards (`acanariopt/simulab`) via `az boards`
+Board: GitHub Issues + Projects (`alexcanario/simulab`) via `gh`
 Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 
 ## Files
