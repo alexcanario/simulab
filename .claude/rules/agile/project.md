@@ -50,6 +50,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Files go through `IFileStorage`, in private containers. Never a public blob URL; never a path on local disk.
 - Email goes through `IEmailSender`, with templates in the three languages, chosen by the user's language.
 - When an effect moves out of the request (an email, an event, long work), re-read every test that asserted it instead of only making it compile: an assertion that "nothing was sent" passes for free once the effect is deferred (F-13).
+- A test host pins every configuration key a developer's user secrets can feed (`Identity:SeedAdmin:Password`, F-52): `SimulabApiFactory` and the `Simulab.Api.Tests` `ApiFactory` both set it empty (F-38).
 
 ## Exam sessions
 - Every answer is saved on the server as it is given. A lost Blazor circuit must not lose answers or time: the timer lives on the server (Redis), never in the browser.
