@@ -1,7 +1,7 @@
 ---
 feature: F-38
 epic: Foundation and identity
-status: refining
+status: approved
 board: 757
 version: 1
 ---
