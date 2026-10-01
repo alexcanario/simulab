@@ -267,6 +267,7 @@
   <data name="identity.invalid_credentials" xml:space="preserve"><value>E-mail ou palavra-passe incorretos.</value></data>
   <data name="identity.email_not_verified" xml:space="preserve"><value>Confirme o seu e-mail antes de iniciar sessão.</value></data>
   <data name="identity.account_locked" xml:space="preserve"><value>Demasiadas tentativas. Tente novamente dentro de {0}.</value></data>
+  <data name="identity.sign_in_rate_limited" xml:space="preserve"><value>Demasiadas tentativas a partir desta rede. Tente novamente dentro de {0}.</value></data>
   <data name="identity.refresh_token_invalid" xml:space="preserve"><value>A sua sessão terminou. Inicie sessão novamente.</value></data>
   <data name="identity.token_revoked" xml:space="preserve"><value>A sua sessão terminou. Inicie sessão novamente.</value></data>
   <data name="Layout.UserMenu.SignIn" xml:space="preserve"><value>Iniciar sessão</value></data>

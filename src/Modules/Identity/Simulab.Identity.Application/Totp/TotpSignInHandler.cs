@@ -31,7 +31,7 @@ public sealed class TotpSignInHandler(
     /// The challenge is spent before the code is checked, so a wrong code costs the whole attempt (BR9). A
     /// challenge whose account no longer has two-factor on reads as invalid too.
     /// </summary>
-    public async Task<Result<TotpSignIn>> CompleteAsync(string? challenge, string? code, CancellationToken cancellationToken = default)
+    public async Task<Result<TotpSignIn>> CompleteAsync(string? challenge, string? code, ISignInAttempt? attempt = null, CancellationToken cancellationToken = default)
     {
         var userId = string.IsNullOrWhiteSpace(challenge) ? null : await challenges.ConsumeAsync(challenge, cancellationToken);
         var user = userId is null ? null : await userManager.FindByIdAsync(userId.Value.ToString());
@@ -40,6 +40,17 @@ public sealed class TotpSignInHandler(
             // F-21 BR4: a challenge that is spent, expired or no longer belongs to a two-factor account.
             await accountEvents.SignInFailedAsync(userId, AccountEventReason.ChallengeInvalid, cancellationToken);
             return Result.Failure<TotpSignIn>(new Error(IdentityErrorCodes.TotpChallengeInvalid, ErrorKind.Validation));
+        }
+
+        // F-38 BR1, BR3: the account is known only now, so it is counted here, before anything is checked or
+        // written for it; at the limit the step ends with no failure count and no account event.
+        var accountName = user.UserName ?? user.Email ?? string.Empty;
+        if (attempt is not null && !attempt.TryCount(accountName))
+        {
+            return Result.Failure<TotpSignIn>(new Error(
+                IdentityErrorCodes.SignInRateLimited,
+                ErrorKind.BusinessRule,
+                Math.Max(0, (int)Math.Ceiling(attempt.RetryAfter.TotalSeconds)).ToString(System.Globalization.CultureInfo.InvariantCulture)));
         }
 
         var verified = await secondFactor.VerifyAsync(user, code);
@@ -58,6 +69,7 @@ public sealed class TotpSignInHandler(
             ? AccountEventMethod.RecoveryCode
             : AccountEventMethod.TotpCode;
         await accountEvents.SignInSucceededAsync(user.Id, method, cancellationToken);
+        attempt?.Clear(accountName);
 
         return Result.Success(new TotpSignIn(user, verified.Value));
     }

@@ -37,8 +37,33 @@ public sealed class ClientAddress(IConfiguration configuration)
         return context.Connection.RemoteIpAddress?.ToString();
     }
 
-    /// <summary>The key of one client's bucket for one limit.</summary>
-    public string KeyFor(HttpContext context, string scope) => $"{scope}:{Of(context) ?? "unknown"}";
+    /// <summary>
+    /// The key of one client's bucket for one limit. F-38 BR8: an IPv4 address mapped into IPv6 is the IPv4
+    /// address, and an IPv6 address is keyed by its /64 prefix, which one client controls whole.
+    /// </summary>
+    public string KeyFor(HttpContext context, string scope) => $"{scope}:{GroupOf(Of(context))}";
+
+    private static string GroupOf(string? address)
+    {
+        if (!IPAddress.TryParse(address, out var ip))
+        {
+            return "unknown";
+        }
+
+        if (ip.IsIPv4MappedToIPv6)
+        {
+            return ip.MapToIPv4().ToString();
+        }
+
+        if (ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+        {
+            return ip.ToString();
+        }
+
+        var bytes = ip.GetAddressBytes();
+        Array.Clear(bytes, 8, 8);
+        return $"{new IPAddress(bytes)}/64";
+    }
 
     private bool IsFromTheWeb(string presented) =>
         _trustedSecret.Length > 0

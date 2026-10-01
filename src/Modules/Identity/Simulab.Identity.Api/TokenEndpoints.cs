@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
@@ -149,16 +150,37 @@ public static class TokenEndpoints
         // Resolved here, not as a parameter: it exists only while the feature is on.
         var handler = context.RequestServices.GetRequiredService<TotpSignInHandler>();
 
+        // F-38 BR3: an address at its limit is refused before the challenge is read.
+        var attempt = StartAttempt(context);
+        if (attempt.IsAtLimit())
+        {
+            return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
+        }
+
         // F-21 BR3, BR4: the handler records this step's event — only it knows which account the spent
         // challenge belonged to, and which of the two codes was accepted.
-        var result = await handler.CompleteAsync((string?)request[TotpChallengeParameter], (string?)request[TotpCodeParameter], cancellationToken);
+        var result = await handler.CompleteAsync((string?)request[TotpChallengeParameter], (string?)request[TotpCodeParameter], attempt, cancellationToken);
 
         if (result.IsSuccess)
         {
             return await IssueTokensAsync(result.Value.User, sessions, timeProvider, cancellationToken);
         }
 
-        return Forbid(result.Error!.Code, result.Error.Code == IdentityErrorCodes.AccountLocked ? result.Error.Detail : null);
+        return Forbid(
+            result.Error!.Code,
+            result.Error.Code is IdentityErrorCodes.AccountLocked or IdentityErrorCodes.SignInRateLimited ? result.Error.Detail : null);
+    }
+
+    /// <summary>F-38: this request's side of the per-address limit, keyed by the client address (BR6, BR8).</summary>
+    private static SignInAttempt StartAttempt(HttpContext context)
+    {
+        var services = context.RequestServices;
+        var addresses = services.GetRequiredService<ClientAddress>();
+        return new SignInAttempt(
+            services.GetRequiredService<ClientRateLimiter>(),
+            addresses.KeyFor(context, "sign-in"),
+            addresses.Of(context),
+            services.GetRequiredService<ILoggerFactory>().CreateLogger<SignInAttempt>());
     }
 
     /// <summary>BR2, BR3: lockout is checked before the password, so a correct password during lockout is still refused.</summary>
@@ -171,6 +193,15 @@ public static class TokenEndpoints
         TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
+        // F-38 BR1, BR3: the typed name is counted first, so an address at its limit costs no account lookup,
+        // no failure count, no account event and no lockout. A step that is not a failure takes the name out again.
+        var attempt = StartAttempt(context);
+        var typedName = request.Username ?? string.Empty;
+        if (!attempt.TryCount(typedName))
+        {
+            return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
+        }
+
         var user = string.IsNullOrWhiteSpace(request.Username) ? null : await userManager.FindByNameAsync(request.Username);
         if (user is null)
         {
@@ -200,6 +231,9 @@ public static class TokenEndpoints
 
             return Forbid(IdentityErrorCodes.InvalidCredentials);
         }
+
+        // F-38 BR1, BR5: the password was right, so this account's name leaves the set from here on.
+        attempt.Clear(typedName);
 
         if (user.Status != AccountStatus.Active)
         {
