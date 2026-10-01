@@ -94,7 +94,15 @@ Slow down password guessing spread over many accounts from one address, without 
 ## Change notes
 
 ## Validation script
-1. <Step> → <expected result>
+Needed to validate: nothing beyond the local app host (Docker running); no account is needed for steps 1-3.
+1. Start the app: `dotnet run --project src/Hosts/Simulab.AppHost`, open the Web from the Aspire dashboard, go to `/sign-in` → the sign-in form shows.
+2. Sign in 30 times with 30 different e-mails that have no account (`a1@test.example` ... `a30@test.example`, any password) → each time the usual "e-mail or password is wrong" message; no limit message yet (UC1).
+3. Try a 31st e-mail (`a31@test.example`) → the alert "Muitas tentativas a partir desta rede. Tente de novo em 15:00." (about 15 minutes; it counts down on a new attempt) and no field is cleared wrongly (BR4, UC4).
+4. Try `a1@test.example` again (a name already counted) → the same alert (AC8).
+5. Switch the page language to English and to Português (Portugal) and repeat step 3's attempt → "Too many attempts from this network. Try again in 15:00." and "Demasiadas tentativas a partir desta rede. Tente novamente dentro de 15:00." (AC15).
+6. Keyboard only: Tab to the e-mail field, type, Tab, type the password, Enter → the same alert, focus stays usable, the alert is read by the screen reader as an error.
+7. Wait 15 minutes (or restart the Api from the Aspire dashboard, which clears the in-memory counters) and sign in with a real account and the right password → the sign-in works (AC6).
+8. Open the Api console in the Aspire dashboard → exactly one warning line `Sign-in failures reached the limit for client address <your address>` for the whole window, with no e-mail in it (AC11).
 
 ## Delivery
 - Branch: feature/F-38

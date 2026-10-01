@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using Simulab.Identity.Contracts;
-using Simulab.Testing.ApiHost;
 
 namespace Simulab.Identity.Tests;
 
