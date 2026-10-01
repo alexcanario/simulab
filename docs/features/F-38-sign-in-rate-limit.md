@@ -81,6 +81,7 @@ Slow down password guessing spread over many accounts from one address, without 
 - 2026-10-01 — Message says "from this network" — owner; the key is the network address, not the device (review, minor).
 - 2026-10-01 — Linking students to a school tenant (and treating a school's network differently) is captured as the epic idea "Institutions" — owner; it activates the dormant `TenantId` (ADR-0001 #7), which v1 keeps off, and the limit runs before the account is known.
 - 2026-10-01 — Review findings, pre-approval: BR1 lists the recovery code and the code-step lockout (minor); AC4/AC10 follow the page, which drops the challenge on any code-step failure (minor, `SignIn.razor:288`); BR6 limited to the steps sent from the circuit (minor, `VisitorContext.Address` is null on plain endpoints); new tests send `ClientAddressHeaders` with distinct addresses, and the build checks existing Identity tests against the shared `sign-in:unknown` bucket (minor).
+- 2026-10-01 — Independent review (fresh context): the warning line is written on the first refusal of the window, not when the set fills (major, confirmed: a success from a new name fills the set for a moment and would have spent the one report; `CheckSignIn`, `FirstRefusal`); the app manual in the three languages is updated at `/agile:ship` (major, deferred to ship); the two F-52 files are recorded in the change note (major, fixed). Accepted with a reason: a success whose name is new holds the 30th slot while its password is checked, so a parallel sign-in from the same network can be refused at the edge of the limit (inherent to the atomic reserve of AC14); in the code step a parallel fill can refuse after the challenge was spent (no account work is done, BR3 holds, the page drops the challenge anyway); AC10's registration clause is covered through the shared `KeyFor` (`ClientAddressKeyTests`) and the password-reset limit.
 - 2026-10-01 — Error code `identity.sign_in_rate_limited`, OAuth error shape, seconds in `error_description` — Claude; the token endpoint answers with the OAuth shape (F-5, decision 1) and the page already formats seconds for `identity.account_locked`.
 - 2026-10-01 — No new packages — Claude; everything needed is in the solution.
 
@@ -92,6 +93,7 @@ Slow down password guessing spread over many accounts from one address, without 
 - (none) — OQ1 answered 2026-10-01: distinct account names (see `## Decisions`).
 
 ## Change notes
+- 2026-10-01 — Two F-52 leftovers fixed inside this branch, with the owner's yes (A): `SeedAdminTests.cs` did not compile (missing `using Microsoft.AspNetCore.Hosting`, commit `8d7d89b`), blocking the Identity test project; and its release test removed roles with `Remove`, which only soft-deletes them, so the seed hit `ux_roles_normalized_name` (it now deletes for real); `SeedAdmin.cs` got an `IsEnabled` guard on two `LogInformation` calls to clear the two new CA1873 warnings the gate reported. No behavior of the seed changed. They are in the merge of F-38 and said so there.
 
 ## Validation script
 Needed to validate: nothing beyond the local app host (Docker running); no account is needed for steps 1-3.
@@ -106,3 +108,22 @@ Needed to validate: nothing beyond the local app host (Docker running); no accou
 
 ## Delivery
 - Branch: feature/F-38
+- Criterion → test (Identity: `SignInRateLimitTests` = S, `SignInRateLimitCodeStepTests` = C, `SignInNameLimitTests` = N; Web: `SignInRateLimitPageTests` = W):
+
+| Criterion | Tests |
+|---|---|
+| AC1 | S `Password_ThirtyNamesFailedFromTheAddress_RefusesTheNextWithoutTouchingTheAccount`, S `Password_AtTheLimit_RefusesTheRightPasswordToo`, N `Reserve_ThirtyNames_RefusesTheThirtyFirst` |
+| AC2 | S `Password_OneAccountFailingManyTimes_DoesNotBlockTheOthersOnTheSameNetwork` |
+| AC3 | S `Password_UnknownWrongAndLockedNames_AllCountTowardsTheLimit` |
+| AC4 | C `Code_AtTheLimit_IsRefusedBeforeTheChallengeIsRead`, C `Code_AWrongCode_CountsTheChallengesAccountAsAName`, C `Code_InvalidChallenges_NeverAddAName` |
+| AC5 | S `Refresh_AtTheLimit_IsProcessedAsBefore`, C `Google_AtTheLimit_IsProcessedAsBeforeAndNeverCounts` |
+| AC6 | S `Password_OtherAddressAndAfterTheWindow_AreProcessed`, N `Reserve_AnotherAddress_IsNotAffected`, N `Reserve_AfterTheWindow_StartsAgain` |
+| AC7 | S `Password_ASuccessTakesOnlyItsOwnNameOut`, C `Code_ARightCode_TakesTheAccountsNameOut`, N `Release_TakesOutOnlyThatName` |
+| AC8 | S `Password_AtTheLimit_RefusesANameAlreadyInTheSet`, N `Reserve_AtTheLimit_RefusesANameAlreadyInTheSet` |
+| AC9 | S `Password_AddressWithAWrongSecret_IsCountedOnTheConnectionNotTheHeader`, W `PasswordAndCodeSteps_CarryTheVisitorsAddressAndTheWebSecret`, W `PasswordStep_UnknownVisitor_SendsNeitherHeader`, W `GoogleAndRefreshSteps_SendNoVisitorHeaders` |
+| AC10 | `ClientAddressKeyTests.*`, `ClientAddressTests.ClientLimits_GroupAddressesOfTheSameClient` (through the password-reset limit; the key function is shared by the four limits) |
+| AC11 | S `Refusals_WriteNoAccountEventAndOneWarningLineWithTheAddress`, N `Reserve_ReportsTheFirstRefusalOnceAWindow`, N `Reserve_ASuccessThatFillsTheSetForAMoment_DoesNotSpendTheReport` |
+| AC12 | W `Password_RateLimited_ShowsTheAlertWithTheTimeLeft`, W `Code_RateLimited_GoesBackToThePasswordFormWithTheAlert` |
+| AC13 | N `Sweep_ByASignInCall_KeepsAnHourlyWindowUntilItsOwnHourEnds` |
+| AC14 | S `Password_FortyAtTheSameTime_ProcessesThirtyAndRefusesTheRest`, N `Reserve_FortyAtTheSameTime_LetsAtMostThirtyThrough` |
+| AC15 | the missing-key test (`ResourceParityTests`) |

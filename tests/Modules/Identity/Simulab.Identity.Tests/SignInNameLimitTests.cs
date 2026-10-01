@@ -43,7 +43,7 @@ public class SignInNameLimitTests
             limiter.ReserveSignInName("sign-in:a", "same@exemplo.com", Limit, Window).Allowed.Should().BeTrue();
         }
 
-        limiter.SignInRetryAfter("sign-in:a", Limit).Should().BeNull();
+        limiter.CheckSignIn("sign-in:a", Limit).Allowed.Should().BeTrue();
     }
 
     // BR1: the name is trimmed and lower-cased by the caller; the limiter keeps what it is given.
@@ -77,7 +77,7 @@ public class SignInNameLimitTests
         _clock.Advance(Window);
 
         limiter.ReserveSignInName("sign-in:a", "name-0", Limit, Window).Allowed.Should().BeTrue();
-        limiter.SignInRetryAfter("sign-in:a", Limit).Should().BeNull();
+        limiter.CheckSignIn("sign-in:a", Limit).Allowed.Should().BeTrue();
     }
 
     // AC7, BR5: a success takes only its own name out; two more new names are needed to be refused.
@@ -95,29 +95,29 @@ public class SignInNameLimitTests
         limiter.ReserveSignInName("sign-in:a", "new-3", Limit, Window).Allowed.Should().BeFalse();
     }
 
-    // BR3: SignInRetryAfter is what the code step reads before the challenge, without adding anything.
+    // BR3: CheckSignIn is what the code step reads before the challenge, without adding anything.
     [Fact]
     public void RetryAfter_IsSetOnlyWhileTheSetIsFull()
     {
         var limiter = new ClientRateLimiter(_clock);
         Fill(limiter, "sign-in:a", Limit - 1);
-        limiter.SignInRetryAfter("sign-in:a", Limit).Should().BeNull();
+        limiter.CheckSignIn("sign-in:a", Limit).Allowed.Should().BeTrue();
 
         limiter.ReserveSignInName("sign-in:a", "last", Limit, Window);
         _clock.Advance(TimeSpan.FromMinutes(5));
 
-        limiter.SignInRetryAfter("sign-in:a", Limit).Should().Be(TimeSpan.FromMinutes(10));
+        limiter.CheckSignIn("sign-in:a", Limit).Should().Match<SignInReservation>(check => !check.Allowed && check.RetryAfter == TimeSpan.FromMinutes(10));
     }
 
-    // AC11, BR7: the call that fills the set is the only one that says so, once per window.
+    // AC11, BR7: the first refusal of the window is the only one that says so; filling the set does not.
     [Fact]
-    public void Reserve_ReportsReachingTheLimitOnceAWindow()
+    public void Reserve_ReportsTheFirstRefusalOnceAWindow()
     {
         var limiter = new ClientRateLimiter(_clock);
         var reached = 0;
         for (var i = 0; i < Limit + 5; i++)
         {
-            if (limiter.ReserveSignInName("sign-in:a", $"name-{i}", Limit, Window).ReachedLimit)
+            if (limiter.ReserveSignInName("sign-in:a", $"name-{i}", Limit, Window).FirstRefusal)
             {
                 reached++;
             }
@@ -126,8 +126,23 @@ public class SignInNameLimitTests
         reached.Should().Be(1);
 
         _clock.Advance(Window);
+        limiter.ReserveSignInName("sign-in:a", "last", Limit, Window).FirstRefusal.Should().BeFalse("filling the set is no refusal");
         Fill(limiter, "sign-in:a", Limit - 1);
-        limiter.ReserveSignInName("sign-in:a", "last", Limit, Window).ReachedLimit.Should().BeTrue("a new window reports again");
+        limiter.ReserveSignInName("sign-in:a", "refused", Limit, Window).FirstRefusal.Should().BeTrue("a new window reports again");
+    }
+
+    // Review (major): a success that briefly fills the set must not spend the window's one report.
+    [Fact]
+    public void Reserve_ASuccessThatFillsTheSetForAMoment_DoesNotSpendTheReport()
+    {
+        var limiter = new ClientRateLimiter(_clock);
+        Fill(limiter, "sign-in:a", Limit - 1);
+
+        limiter.ReserveSignInName("sign-in:a", "x", Limit, Window).FirstRefusal.Should().BeFalse();
+        limiter.ReleaseSignInName("sign-in:a", "x");
+
+        limiter.ReserveSignInName("sign-in:a", "y", Limit, Window).Allowed.Should().BeTrue();
+        limiter.ReserveSignInName("sign-in:a", "z", Limit, Window).FirstRefusal.Should().BeTrue("the real refusal reports");
     }
 
     // AC13: the hourly registration window survives a sign-in call that sweeps after 20 minutes.

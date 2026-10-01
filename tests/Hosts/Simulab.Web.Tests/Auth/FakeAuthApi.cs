@@ -102,12 +102,9 @@ public sealed class FakeAuthApi : HttpMessageHandler
             {
                 return Json(new { error = PasswordError, error_description = PasswordErrorDescription }, HttpStatusCode.BadRequest);
             }
-        }
 
-        if (path == "/connect/token")
-        {
             // F-20: the Google step.
-            var form = await request.Content!.ReadAsStringAsync(cancellationToken);
+            var form = body;
             if (form.Contains($"grant_type={GoogleSignInProtocol.GrantType}", StringComparison.Ordinal))
             {
                 GoogleForms.Add(form);

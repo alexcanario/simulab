@@ -14,9 +14,10 @@ public sealed class SignInAttempt(ClientRateLimiter limiter, string key, string?
     /// <summary>BR3: true, with <see cref="RetryAfter"/> set, while the address is at its limit. Reads nothing else.</summary>
     public bool IsAtLimit()
     {
-        var left = limiter.SignInRetryAfter(key, IdentityRateLimits.SignInFailedAccountsPer15Minutes);
-        RetryAfter = left ?? TimeSpan.Zero;
-        return left is not null;
+        var check = limiter.CheckSignIn(key, IdentityRateLimits.SignInFailedAccountsPer15Minutes);
+        RetryAfter = check.RetryAfter;
+        ReportFirstRefusal(check);
+        return !check.Allowed;
     }
 
     public bool TryCount(string accountName)
@@ -28,13 +29,17 @@ public sealed class SignInAttempt(ClientRateLimiter limiter, string key, string?
             IdentityRateLimits.SignInWindow);
 
         RetryAfter = reservation.RetryAfter;
-        if (reservation.ReachedLimit)
-        {
-            // BR7: the address, never a user name, so the line can be acted on at the edge.
-            logger.LogWarning("Sign-in failures reached the limit for client address {ClientAddress}", address);
-        }
-
+        ReportFirstRefusal(reservation);
         return reservation.Allowed;
+    }
+
+    /// <summary>BR7: the first refusal of the window writes the address, never a user name, so the line can be acted on at the edge.</summary>
+    private void ReportFirstRefusal(SignInReservation decision)
+    {
+        if (decision.FirstRefusal)
+        {
+            logger.LogWarning("Sign-in refused: the failure limit was reached for client address {ClientAddress}", address);
+        }
     }
 
     public void Clear(string accountName) => limiter.ReleaseSignInName(key, Normalize(accountName));

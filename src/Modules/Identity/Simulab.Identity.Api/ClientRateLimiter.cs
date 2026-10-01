@@ -82,14 +82,12 @@ public sealed class ClientRateLimiter(TimeProvider timeProvider)
 
                 if (entry.Names.Count >= nameLimit)
                 {
-                    return new SignInReservation(false, entry.RetryAfter(now), false);
+                    return entry.Refuse(now);
                 }
 
                 entry.Names.Add(hash);
-                var reachedLimit = entry.Names.Count >= nameLimit && !entry.LimitReported;
-                entry.LimitReported |= reachedLimit;
                 Forget(now);
-                return new SignInReservation(true, TimeSpan.Zero, reachedLimit);
+                return new SignInReservation(true, TimeSpan.Zero, false);
             }
         }
     }
@@ -108,20 +106,23 @@ public sealed class ClientRateLimiter(TimeProvider timeProvider)
         }
     }
 
-    /// <summary>F-38 BR3: how long until the address may sign in again, or null while its set has room.</summary>
-    public TimeSpan? SignInRetryAfter(string key, int nameLimit)
+    /// <summary>
+    /// F-38 BR3: whether the address may sign in now, without adding a name. Refused while its set is full, with
+    /// the time left; the code step reads it before it touches the challenge.
+    /// </summary>
+    public SignInReservation CheckSignIn(string key, int nameLimit)
     {
         if (!_signIns.TryGetValue(key, out var entry))
         {
-            return null;
+            return new SignInReservation(true, TimeSpan.Zero, false);
         }
 
         var now = timeProvider.GetUtcNow();
         lock (entry)
         {
             return !entry.Removed && now - entry.StartedAt < entry.Length && entry.Names.Count >= nameLimit
-                ? entry.RetryAfter(now)
-                : null;
+                ? entry.Refuse(now)
+                : new SignInReservation(true, TimeSpan.Zero, false);
         }
     }
 
@@ -182,7 +183,7 @@ public sealed class ClientRateLimiter(TimeProvider timeProvider)
 
         public HashSet<string> Names { get; } = new(StringComparer.Ordinal);
 
-        public bool LimitReported { get; set; }
+        private bool _refusalReported;
 
         public bool Removed { get; set; }
 
@@ -191,15 +192,21 @@ public sealed class ClientRateLimiter(TimeProvider timeProvider)
             StartedAt = now;
             Length = window;
             Names.Clear();
-            LimitReported = false;
+            _refusalReported = false;
         }
 
-        public TimeSpan RetryAfter(DateTimeOffset now) => StartedAt + Length - now;
+        /// <summary>A refusal with the time left; the first one of the window says so, for the one warning line (BR7).</summary>
+        public SignInReservation Refuse(DateTimeOffset now)
+        {
+            var first = !_refusalReported;
+            _refusalReported = true;
+            return new SignInReservation(false, StartedAt + Length - now, first);
+        }
     }
 }
 
 /// <summary>
 /// What <see cref="ClientRateLimiter.ReserveSignInName"/> decided: whether the name was added, the time
-/// left in the window when it was not, and whether this call is the one that filled the address's set (BR7).
+/// left in the window when it was not, and whether this refusal is the first of the window (BR7).
 /// </summary>
-public readonly record struct SignInReservation(bool Allowed, TimeSpan RetryAfter, bool ReachedLimit);
+public readonly record struct SignInReservation(bool Allowed, TimeSpan RetryAfter, bool FirstRefusal);
