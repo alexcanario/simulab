@@ -23,6 +23,9 @@ public static class IdentityErrorCodes
     public const string InvalidCredentials = "identity.invalid_credentials";
     public const string EmailNotVerified = "identity.email_not_verified";
     public const string AccountLocked = "identity.account_locked";
+
+    /// <summary>F-38 BR4: too many account names failed from this client address; the seconds left are in the error description.</summary>
+    public const string SignInRateLimited = "identity.sign_in_rate_limited";
     public const string RefreshTokenInvalid = "identity.refresh_token_invalid";
     public const string TokenRevoked = "identity.token_revoked";
     public const string Forbidden = "identity.forbidden";

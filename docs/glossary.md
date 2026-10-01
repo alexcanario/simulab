@@ -116,6 +116,8 @@ Terms used in reports, reviews and item files. They are not identifiers. The pt-
 | Sec-Fetch-Site | Sec-Fetch-Site | Header the browser sends saying where a request came from (`same-origin` means from the app itself). |
 | open redirect | redirecionamento aberto | A flaw where the app redirects to an outside address taken from the URL; avoided by accepting only paths inside the app. |
 | connection pool | pool de conexões | Database connections kept open for reuse; when they are not released they exhaust the server's limit. |
+| rate limit | limite de tentativas | A cap on how many calls one client address may make in a window; past it, calls are refused until the window ends (F-4, F-38). |
+| lockout | bloqueio da conta | The per-account refusal after too many wrong passwords or codes (5 in 15 minutes). |
 | merge base | base do merge | The commit where the item branch left `main`; a review compares from it. |
 | bUnit | bUnit | Library that tests Blazor components without a browser. |
 | WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. |

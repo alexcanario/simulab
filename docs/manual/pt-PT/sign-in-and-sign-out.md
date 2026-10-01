@@ -37,6 +37,7 @@ Abrir **Iniciar sessão** enquanto já tem sessão iniciada leva-o diretamente �
 | E-mail ou palavra-passe incorretos. | O e-mail ou a palavra-passe não correspondem a uma conta ativa | Verifique ambos e tente novamente; esta mensagem nunca indica qual dos dois está errado |
 | Confirme o seu e-mail antes de iniciar sessão. | A sua conta ainda está pendente, desde o registo | Selecione **Reenviar o e-mail de verificação** na mesma página e depois verifique a sua caixa de correio |
 | Demasiadas tentativas. Tente novamente dentro de {0}. | Cinco palavras-passe erradas seguidas bloquearam a conta durante 15 minutos | Aguarde o tempo indicado antes de tentar novamente |
+| Demasiadas tentativas a partir desta rede. Tente novamente dentro de {0}. | 30 nomes de conta diferentes falharam ao entrar a partir da mesma rede em 15 minutos; ninguém nessa rede consegue entrar até o tempo indicado terminar | Aguarde o tempo indicado antes de tentar novamente, ou tente a partir de outra rede |
 | A sua sessão terminou. Inicie sessão novamente. | A sua sessão foi terminada noutro sítio — por exemplo, terminou a sessão noutro separador — e esta página voltou ao início de sessão | Inicie sessão novamente |
 
 Se iniciar sessão num dispositivo enquanto já tem sessão iniciada noutro, ambas as sessões continuam a funcionar: não há limite de quantos dispositivos podem ter sessão iniciada ao mesmo tempo.

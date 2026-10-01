@@ -7,6 +7,7 @@
 @inject IStringLocalizer<SharedResources> L
 @inject ErrorText Errors
 @inject AuthClient Auth
+@inject VisitorContext Visitor
 @inject IdentityApiClient IdentityApi
 @inject SignInHandOff HandOff
 @inject GoogleSignInSettings Google
@@ -76,6 +77,11 @@
     else if (_locked)
     {
         <AppAlert Severity="Severity.Error" Text="@L["identity.account_locked", _lockedFor]" />
+    }
+    else if (_rateLimited)
+    {
+        @* F-38 BR4: too many account names failed from this network; the same time format as the lockout. *@
+        <AppAlert Severity="Severity.Error" Text="@L["identity.sign_in_rate_limited", _rateLimitedFor]" />
     }
     else if (_resent)
     {
@@ -176,6 +182,8 @@
     private string? _serverError;
     private bool _locked;
     private string _lockedFor = "0:00";
+    private bool _rateLimited;
+    private string _rateLimitedFor = "0:00";
     private bool _unverified;
     private bool _resent;
     private bool _submitting;
@@ -230,6 +238,7 @@
         _serverError = null;
         _codeFailure = null;
         _locked = false;
+        _rateLimited = false;
         _unverified = false;
         _resent = false;
         if (!Validate())
@@ -240,7 +249,7 @@
         _submitting = true;
         _sessionEnded = false;
         _passwordChanged = false;
-        var result = await Auth.SignInAsync(_email!.Trim(), _password!);
+        var result = await Auth.SignInAsync(_email!.Trim(), _password!, Visitor.Address);
         _submitting = false;
         _password = null;
 
@@ -276,7 +285,7 @@
         }
 
         _submitting = true;
-        var result = await Auth.CompleteTotpSignInAsync(_challenge!, _code.Trim());
+        var result = await Auth.CompleteTotpSignInAsync(_challenge!, _code.Trim(), Visitor.Address);
         _submitting = false;
 
         if (result.IsSuccess)
@@ -323,6 +332,11 @@
         {
             _locked = true;
             _lockedFor = FormatSeconds(result.ErrorDescription);
+        }
+        else if (result.ErrorCode == IdentityErrorCodes.SignInRateLimited)
+        {
+            _rateLimited = true;
+            _rateLimitedFor = FormatSeconds(result.ErrorDescription);
         }
         else if (result.ErrorCode == IdentityErrorCodes.EmailNotVerified)
         {

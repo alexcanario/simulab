@@ -50,7 +50,7 @@ file sealed record TokenResponseBody(
 /// </summary>
 public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions> options)
 {
-    public Task<TokenResult> SignInAsync(string email, string password, CancellationToken cancellationToken = default) =>
+    public Task<TokenResult> SignInAsync(string email, string password, string? visitorAddress = null, CancellationToken cancellationToken = default) =>
         RequestAsync(
             new Dictionary<string, string>
             {
@@ -58,10 +58,11 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ["username"] = email,
                 ["password"] = password,
             },
-            cancellationToken);
+            cancellationToken,
+            visitorAddress);
 
     /// <summary>F-11 BR9: the code step, the custom <c>totp</c> grant. The challenge is spent whatever the answer.</summary>
-    public Task<TokenResult> CompleteTotpSignInAsync(string challenge, string code, CancellationToken cancellationToken = default) =>
+    public Task<TokenResult> CompleteTotpSignInAsync(string challenge, string code, string? visitorAddress = null, CancellationToken cancellationToken = default) =>
         RequestAsync(
             new Dictionary<string, string>
             {
@@ -69,7 +70,8 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ["challenge"] = challenge,
                 ["code"] = code,
             },
-            cancellationToken);
+            cancellationToken,
+            visitorAddress);
 
     /// <summary>F-20: the Google step, the custom <c>google</c> grant. The Api checks the ID token itself (BR2).</summary>
     public Task<TokenResult> SignInWithGoogleAsync(string idToken, CancellationToken cancellationToken = default) =>
@@ -140,14 +142,24 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
         }
     }
 
-    private async Task<TokenResult> RequestAsync(Dictionary<string, string> form, CancellationToken cancellationToken)
+    private async Task<TokenResult> RequestAsync(Dictionary<string, string> form, CancellationToken cancellationToken, string? visitorAddress = null)
     {
         form["client_id"] = options.Value.ClientId;
         form["client_secret"] = options.Value.ClientSecret;
 
         try
         {
-            using var response = await http.PostAsync("/connect/token", new FormUrlEncodedContent(form), cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/connect/token") { Content = new FormUrlEncodedContent(form) };
+
+            // F-38 BR6, B-4: the password and code steps of the sign-in page carry the visitor's address and the
+            // proof that it comes from the Web, so the Api's per-address limit counts the visitor, not this server.
+            if (!string.IsNullOrEmpty(visitorAddress) && !string.IsNullOrEmpty(options.Value.ClientSecret))
+            {
+                request.Headers.Add(ClientAddressHeaders.Address, visitorAddress);
+                request.Headers.Add(ClientAddressHeaders.Secret, options.Value.ClientSecret);
+            }
+
+            using var response = await http.SendAsync(request, cancellationToken);
             var body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
 
             if (body?.Error is not null)

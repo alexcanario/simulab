@@ -61,6 +61,14 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-11: the form bodies the <c>totp</c> grant received, in order.</summary>
     public List<string> TotpForms { get; } = [];
 
+    /// <summary>F-38: the error the password grant answers with (for example the per-address limit); null follows the other settings.</summary>
+    public string? PasswordError { get; set; }
+
+    public string? PasswordErrorDescription { get; set; }
+
+    /// <summary>F-38: every token request received — its form and the visitor headers it carried (B-4).</summary>
+    public List<TokenCall> TokenCalls { get; } = [];
+
     /// <summary>F-20: the error body the <c>google</c> grant answers with (an anonymous object); null issues a token pair.</summary>
     public object? GoogleError { get; set; }
 
@@ -84,8 +92,19 @@ public sealed class FakeAuthApi : HttpMessageHandler
 
         if (path == "/connect/token")
         {
+            var body = await request.Content!.ReadAsStringAsync(cancellationToken);
+            TokenCalls.Add(new TokenCall(
+                body,
+                request.Headers.TryGetValues(ClientAddressHeaders.Address, out var address) ? address.Single() : null,
+                request.Headers.TryGetValues(ClientAddressHeaders.Secret, out var secret) ? secret.Single() : null));
+
+            if (PasswordError is not null && body.Contains("grant_type=password", StringComparison.Ordinal))
+            {
+                return Json(new { error = PasswordError, error_description = PasswordErrorDescription }, HttpStatusCode.BadRequest);
+            }
+
             // F-20: the Google step.
-            var form = await request.Content!.ReadAsStringAsync(cancellationToken);
+            var form = body;
             if (form.Contains($"grant_type={GoogleSignInProtocol.GrantType}", StringComparison.Ordinal))
             {
                 GoogleForms.Add(form);
@@ -200,3 +219,6 @@ public sealed class FakeAuthApi : HttpMessageHandler
         new(status) { Content = JsonContent.Create(body, options: options) };
 }
 
+
+/// <summary>A request the fake token endpoint received: the form body and the B-4 visitor headers (null when absent).</summary>
+public sealed record TokenCall(string Form, string? Address, string? Secret);
