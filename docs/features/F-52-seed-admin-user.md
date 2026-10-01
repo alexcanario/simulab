@@ -77,7 +77,7 @@ A fresh installation has a working Admin account from its first start, with no m
 ## Validation script
 
 ## Delivery
-Code written; not yet compiled or run (the session had no .NET SDK). Status stays `building` until the gate is green. The development password in `appsettings.Development.json` is written on disk but not committed yet (waiting on the owner).
+Code written; not yet compiled or run (the session had no .NET SDK). Status stays `building` until the gate is green.
 
 | Criterion | Test (`SeedAdminTests`) |
 |---|---|
