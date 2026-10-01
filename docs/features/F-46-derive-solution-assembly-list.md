@@ -1,7 +1,7 @@
 ---
 feature: F-46
 epic: Foundation and identity
-status: refining
+status: approved
 board: 21
 version: 1
 ---
@@ -60,6 +60,7 @@ A project added to the solution is seen by every architecture rule without anyon
 - 2026-10-01 — Assemblies are loaded with `Assembly.Load(new AssemblyName(name))`; the pure part (select projects, check exemptions, report unresolved names) is a function over the solution text and the loadable names, tested without the real file, as F-45 did — technical choice, no product impact.
 - 2026-10-01 — `DocGenProjectReferences.UnresolvedMessage` and the `.csproj` comment drop "and to SolutionAssemblies.All" / "Add each new module project here" in favour of the BR5 wording — the list they mention no longer exists.
 - 2026-10-01 — The file header's `board: 770` was a leftover id; the GitHub issue is #21.
+- 2026-10-01 — Approved by the owner ("aprovo F-46").
 - 2026-10-01 — No new package: the tests already have xUnit, AwesomeAssertions and `System.Xml.Linq`.
 
 ## Out of scope
