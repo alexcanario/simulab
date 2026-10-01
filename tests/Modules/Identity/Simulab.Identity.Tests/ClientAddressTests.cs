@@ -85,6 +85,24 @@ public sealed class ClientAddressTests : IdentityApiTests
         another.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
     }
 
+    /// <summary>F-38 AC10, BR8: two addresses of one IPv6 /64, or an IPv4 address and its mapped form, are one client.</summary>
+    [Theory]
+    [InlineData("2001:db8::1", "2001:db8::2")]
+    [InlineData("::ffff:203.0.113.5", "203.0.113.5")]
+    public async Task ClientLimits_GroupAddressesOfTheSameClient(string first, string second)
+    {
+        var web = Client();
+        for (var i = 0; i < IdentityRateLimits.PasswordResetRequestsPerHour; i++)
+        {
+            using var used = await AskForResetAsync(web, first, TestClient.ClientSecret);
+            used.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        }
+
+        using var sameClient = await AskForResetAsync(web, second, TestClient.ClientSecret);
+
+        sameClient.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
     /// <summary>AC3: the consent record, the proof of acceptance, keeps the visitor's address.</summary>
     [Fact]
     public async Task SignUp_ThroughTheWeb_RecordsTheVisitorsAddressInTheConsent()
