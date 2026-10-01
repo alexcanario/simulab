@@ -30,6 +30,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - On an anonymous endpoint every input limit (column width, format) is checked before the account lookup: a failure only one path can hit, even a 500, reveals whether the account exists (B-7).
 - The OpenIddict password flow is for the first-party Web only. Never register a third-party client for it.
 - In a sign-in with more than one step, only the last step clears the failure count: a step that clears it gives unlimited tries to the next one (F-11).
+- A password, even a development-only one, is read from the user secrets or the environment, never from a committed settings file. A non-secret development value (the OpenIddict client secret, the TOTP key) stays where `docs/infra.md` says (F-52).
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
 - Testing a race on an Identity unique index: turn off the `UserManager`'s own pre-check (`RequireUniqueEmail` for the email one) or test the translation directly against `DbUpdateException` — a lying `IUserDirectory` alone is not enough, and `AddLoginAsync` has no switch to turn its own check off (F-30).
 
