@@ -2,7 +2,7 @@
 feature: F-44
 epic: Assessment catalog
 status: refining
-board: 767
+board: 19
 version: 1
 ---
 # The issuing authority's acronym off the screen
