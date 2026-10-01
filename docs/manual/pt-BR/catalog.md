@@ -1,7 +1,7 @@
 ---
 page: catalog
 locale: pt-BR
-features: [F-36]
+features: [F-36, F-37]
 updated: 2026-09-29
 ---
 # Catálogo
@@ -29,6 +29,11 @@ O endereço da página guarda sua busca, seus filtros e a página, então você 
 4. O cartão **Sobre este exame** traz o órgão contratante, o tipo de avaliação, a abrangência, o idioma do exame e quantas edições estão publicadas.
 
 O conteúdo do exame aparece no próprio idioma e nunca é traduzido.
+
+## O que um ambiente novo já tem
+Todo ambiente começa com os exames de guarda municipal, então o catálogo nunca começa vazio. Quatro exames aparecem para os alunos, cada um com a edição publicada e o link do edital oficial: Guarda Municipal de Curitiba (Instituto AOCP, edital de 2025), Guarda Municipal de Manaus (Instituto Consulplan, 2026), Guarda Civil Municipal de Salvador (FGV, 2026) e Guarda Civil Municipal de Maceió (Copeve/Ufal, 2026). Os exames de Recife e Goiânia já estão cadastrados, mas ainda não têm edital, então ficam só na administração até um Administrador cadastrar e publicar uma edição. As edições publicadas não mostram data de aplicação, porque ela não foi confirmada nos sites oficiais.
+
+Essas linhas são dados comuns: um Administrador pode editar ou excluir qualquer uma e a mudança permanece.
 
 ## Campos
 | Campo | Significado | Regras |
