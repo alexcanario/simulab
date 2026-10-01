@@ -101,13 +101,14 @@ public sealed class SeedAdminTests
 
         await factory.Services.EnsureSeedAdminAsync(Configure("Another#Password9"));
 
+        var normalizedEmail = SeedAdmin.Email.ToUpperInvariant();
         var (roles, keptPassword, count) = await ReadAsync(factory, async (context, users) =>
         {
             var found = (await users.FindByEmailAsync(SeedAdmin.Email))!;
             return (
                 await users.GetRolesAsync(found),
                 await users.CheckPasswordAsync(found, Accounts.ValidPassword),
-                await context.Users.CountAsync(user => user.NormalizedEmail == SeedAdmin.Email.ToUpperInvariant()));
+                await context.Users.CountAsync(user => user.NormalizedEmail == normalizedEmail));
         });
 
         roles.Should().Equal(IdentityRoles.Admin);
@@ -156,10 +157,9 @@ public sealed class SeedAdminTests
             // A release finds the schema from the pipeline but no roles: they are the seed's to create.
             await ReadAsync(first, async (context, users) =>
             {
-                context.RolePermissions.RemoveRange(context.RolePermissions);
-                await context.SaveChangesAsync();
-                context.Roles.RemoveRange(context.Roles);
-                await context.SaveChangesAsync();
+                // A hard delete: Remove would only mark the rows deleted, and the unique index still sees them.
+                await context.RolePermissions.IgnoreQueryFilters().ExecuteDeleteAsync();
+                await context.Roles.IgnoreQueryFilters().ExecuteDeleteAsync();
                 return 0;
             });
         }

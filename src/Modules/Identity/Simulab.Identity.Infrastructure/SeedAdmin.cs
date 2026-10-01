@@ -60,7 +60,10 @@ public static class SeedAdmin
                     + string.Join(", ", created.Errors.Select(error => error.Code)) + ".");
             }
 
-            logger.LogInformation("Seed administrator {Email} created.", Email);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Seed administrator {Email} created.", Email);
+            }
         }
 
         if (!await users.IsInRoleAsync(user, IdentityRoles.Admin))
@@ -73,7 +76,10 @@ public static class SeedAdmin
                     + string.Join(", ", added.Errors.Select(error => error.Code)) + ".");
             }
 
-            logger.LogInformation("Seed administrator {Email} holds the {Role} role.", Email, IdentityRoles.Admin);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Seed administrator {Email} holds the {Role} role.", Email, IdentityRoles.Admin);
+            }
         }
     }
 }
