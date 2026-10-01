@@ -1,7 +1,7 @@
 ---
 feature: F-46
 epic: Foundation and identity
-status: idea
+status: refining
 board: 770
 version: 1
 ---
