@@ -2,7 +2,7 @@
 feature: F-47
 epic: Foundation and identity
 status: refining
-board: 771
+board: 22
 version: 1
 ---
 <!--
