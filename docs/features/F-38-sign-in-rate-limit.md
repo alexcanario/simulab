@@ -94,6 +94,7 @@ Slow down password guessing spread over many accounts from one address, without 
 
 ## Change notes
 - 2026-10-01 — Two F-52 leftovers fixed inside this branch, with the owner's yes (A): `SeedAdminTests.cs` did not compile (missing `using Microsoft.AspNetCore.Hosting`, commit `8d7d89b`), blocking the Identity test project; and its release test removed roles with `Remove`, which only soft-deletes them, so the seed hit `ux_roles_normalized_name` (it now deletes for real); `SeedAdmin.cs` got an `IsEnabled` guard on two `LogInformation` calls to clear the two new CA1873 warnings the gate reported. No behavior of the seed changed. They are in the merge of F-38 and said so there.
+- 2026-10-01 — At ship, the full suite showed 10 red tests in `Simulab.Api.Tests` on this branch and on `main` alike (confirmed in the main checkout): the test host picks up the seed administrator password from the user secrets of whoever runs the tests (F-52) and then reaches for a database it does not have. `tests/Hosts/Simulab.Api.Tests/ApiFactory.cs` now sets `Identity:SeedAdmin:Password` empty, as `SimulabApiFactory` already does; 12 of 12 pass. Test-only, in the merge of F-38.
 
 ## Validation script
 Needed to validate: nothing beyond the local app host (Docker running); no account is needed for steps 1-3.

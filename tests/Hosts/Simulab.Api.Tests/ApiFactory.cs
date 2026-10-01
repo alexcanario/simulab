@@ -34,6 +34,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             {
                 ["Email:FromAddress"] = "no-reply@simulab.app",
                 ["Email:FromName"] = "Simulab",
+
+                // F-52: the seed administrator password of whoever runs the tests (user secrets) must not make this host
+                // reach for a database it does not have.
+                ["Identity:SeedAdmin:Password"] = string.Empty,
             }));
     }
 }
