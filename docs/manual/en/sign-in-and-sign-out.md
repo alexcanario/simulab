@@ -37,6 +37,7 @@ Opening **Sign in** while you are already signed in takes you straight to the ho
 | Incorrect email or password. | The email or the password does not match an active account | Check both and try again; this message never says which one is wrong |
 | Confirm your email before signing in. | Your account is still pending, from sign-up | Select **Resend the verification email** on the same page, then check your inbox |
 | Too many attempts. Try again in {0}. | Five wrong passwords in a row locked the account for 15 minutes | Wait for the time shown before trying again |
+| Too many attempts from this network. Try again in {0}. | 30 different account names failed to sign in from the same network in 15 minutes; nobody on that network can sign in until the time shown ends | Wait for the time shown before trying again, or try from another network |
 | Your session ended. Sign in again. | Your session was ended somewhere else — for example you signed out in another tab — so this page took you back to sign in | Sign in again |
 
 If you sign in on one device while already signed in on another, both sessions keep working: there is no limit on how many devices can be signed in at once.

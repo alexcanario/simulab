@@ -93,8 +93,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 23 s, 0 warnings; the baseline holds only the SDK marker (2026-09-29, F-36) |
-| Full test suite | < 5 min | 1692 tests, 75 s test + 26 s build (2026-09-29, F-37) |
+| Full build | | 17 s, 0 new warnings (2026-10-01, F-38) |
+| Full test suite | < 5 min | 1746 tests, 78 s test + 17 s build (2026-10-01, F-38) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".

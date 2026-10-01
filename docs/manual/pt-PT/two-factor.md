@@ -55,6 +55,7 @@ Ativar ou desativar a verificação não termina nenhuma sessão: aplica-se a pa
 | O código não foi aceite. Introduza novamente a palavra-passe para tentar outra vez. | No início de sessão, um código errado termina a tentativa | Introduza a palavra-passe outra vez e depois um código novo |
 | O início de sessão demorou demasiado. Introduza novamente a palavra-passe. | Passaram mais de 5 minutos entre a palavra-passe e o código | Recomece pela palavra-passe |
 | Demasiadas tentativas. Tente novamente dentro de {0}. | Cinco códigos ou palavras-passe errados seguidos bloquearam a conta durante 15 minutos | Aguarde o tempo indicado |
+| Demasiadas tentativas a partir desta rede. Tente novamente dentro de {0}. | 30 nomes de conta diferentes falharam ao entrar a partir da mesma rede em 15 minutos (um código errado também conta); volta ao passo da palavra-passe | Aguarde o tempo indicado, ou tente a partir de outra rede |
 | A palavra-passe atual não está correta. | A palavra-passe introduzida para desativar a verificação está errada | Introduza-a novamente |
 
 ## Páginas relacionadas

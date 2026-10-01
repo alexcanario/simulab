@@ -55,6 +55,7 @@ Ativar ou desativar a verificação não desconecta você de nenhum lugar: vale 
 | O código não foi aceito. Digite sua senha de novo para tentar outra vez. | No login, um código errado encerra a tentativa | Digite a senha de novo e depois um código novo |
 | O login demorou demais. Digite sua senha de novo. | Passaram mais de 5 minutos entre a senha e o código | Comece de novo pela senha |
 | Muitas tentativas. Tente de novo em {0}. | Cinco códigos ou senhas errados seguidos bloquearam a conta por 15 minutos | Espere o tempo indicado |
+| Muitas tentativas a partir desta rede. Tente de novo em {0}. | 30 nomes de conta diferentes falharam ao entrar a partir da mesma rede em 15 minutos (um código errado também conta); você volta ao passo da senha | Espere o tempo indicado, ou tente de outra rede |
 | A senha atual não está correta. | A senha digitada para desativar a verificação está errada | Digite de novo |
 
 ## Páginas relacionadas

@@ -37,6 +37,7 @@ Abrir **Entrar** enquanto você já está conectado leva direto para a página i
 | E-mail ou senha incorretos. | O e-mail ou a senha não correspondem a uma conta ativa | Confira os dois e tente de novo; esta mensagem nunca diz qual dos dois está errado |
 | Confirme seu e-mail antes de entrar. | Sua conta ainda está pendente, desde o cadastro | Clique em **Reenviar o e-mail de verificação** na mesma página e depois confira sua caixa de entrada |
 | Muitas tentativas. Tente de novo em {0}. | Cinco senhas erradas seguidas bloquearam a conta por 15 minutos | Espere o tempo mostrado antes de tentar de novo |
+| Muitas tentativas a partir desta rede. Tente de novo em {0}. | 30 nomes de conta diferentes falharam ao entrar a partir da mesma rede em 15 minutos; ninguém nessa rede consegue entrar até o tempo mostrado acabar | Espere o tempo mostrado antes de tentar de novo, ou tente de outra rede |
 | Sua sessão terminou. Entre novamente. | Sua sessão foi encerrada em outro lugar — por exemplo, você saiu em outra aba — e esta página voltou para o login | Entre de novo |
 
 Se você entrar em um dispositivo enquanto já está conectado em outro, as duas sessões continuam funcionando: não há limite de quantos dispositivos podem estar conectados ao mesmo tempo.

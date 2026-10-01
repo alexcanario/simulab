@@ -55,6 +55,7 @@ Turning two-factor sign-in on or off does not sign you out anywhere: it applies 
 | The code was not accepted. Enter your password again to try once more. | At sign-in, a wrong code ends the attempt | Enter your password again, then a new code |
 | The sign-in took too long. Enter your password again. | More than 5 minutes passed between the password and the code | Start again from the password |
 | Too many attempts. Try again in {0}. | Five wrong codes or passwords in a row locked the account for 15 minutes | Wait for the time shown |
+| Too many attempts from this network. Try again in {0}. | 30 different account names failed to sign in from the same network in 15 minutes (a wrong code counts too); you are taken back to the password step | Wait for the time shown, or try from another network |
 | The current password is not correct. | The password typed to turn two-factor sign-in off is wrong | Type it again |
 
 ## Related pages
