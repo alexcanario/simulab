@@ -123,4 +123,8 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
     await app.Services.EnsureRolesAndPermissionsAsync();
 }
 
+// F-52: the first administrator, in every environment and independent of the migrations switch above.
+// Without Identity:SeedAdmin:Password nothing happens.
+await app.Services.EnsureSeedAdminAsync(app.Configuration);
+
 app.Run();

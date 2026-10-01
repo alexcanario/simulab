@@ -67,6 +67,11 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
                 ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
             }));
 
+        // F-52: a password in the environment of whoever runs the tests must not seed an admin that tests
+        // which count users or admins would trip over; SeedAdminTests sets it itself, in ConfigureHost below.
+        builder.ConfigureAppConfiguration(configuration =>
+            configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["Identity:SeedAdmin:Password"] = string.Empty }));
+
         ConfigureHost?.Invoke(builder);
 
         builder.ConfigureServices(services =>
