@@ -14,36 +14,76 @@ Essas devem ser as colunas (valores do campo Status) na board.
 
 ## Passos para configurar
 
-### 1. Usar o Script PowerShell (Recomendado)
+### 1. Usar o Script Python (Multiplataforma - Recomendado)
 
 #### Pré-requisitos:
-- PowerShell 5.1+ (Windows) ou PowerShell 7.0+ (Linux/Mac)
+- Python 3.7+
 - GitHub CLI instalado e autenticado: `gh auth login`
 - `curl` e `jq` instalados
 
 #### Criar nova board:
 
-```powershell
-.\scripts\Configure-GitHubProjectBoard.ps1
+```bash
+python .claude/scripts/configure_github_project_board.py
 ```
 
 Cria uma board chamada "Simulab" com as colunas do workflow.
 
-```powershell
-.\scripts\Configure-GitHubProjectBoard.ps1 -BoardName "Minha Board"
+```bash
+python .claude/scripts/configure_github_project_board.py -n "Minha Board"
+python .claude/scripts/configure_github_project_board.py --name "Minha Board"
 ```
 
 Cria uma board com nome customizado.
 
 #### Configurar board existente:
 
-```powershell
-.\scripts\Configure-GitHubProjectBoard.ps1 -BoardId 3
+```bash
+python .claude/scripts/configure_github_project_board.py -i 3
+python .claude/scripts/configure_github_project_board.py --id 3
 ```
 
 Configura o projeto #3 com as colunas do workflow.
 
 #### Exemplos completos:
+
+```bash
+# Criar "Simulab" (padrão)
+python .claude/scripts/configure_github_project_board.py
+
+# Criar com nome customizado
+python .claude/scripts/configure_github_project_board.py -n "Sprint 1"
+
+# Alterar board existente
+python .claude/scripts/configure_github_project_board.py -i 3
+
+# Desabilitar cores (para CI/CD)
+python .claude/scripts/configure_github_project_board.py --no-color
+```
+
+### 2. Usar o Script PowerShell (Windows)
+
+Se preferir PowerShell no Windows:
+
+#### Pré-requisitos:
+- PowerShell 5.1+ (Windows) ou PowerShell 7.0+ (Linux/Mac)
+- GitHub CLI instalado e autenticado: `gh auth login`
+- `curl` e `jq` instalados
+
+#### Executar (resolver erro de política de execução):
+
+**Opção 1: Desbloquear arquivo (recomendado)**
+```powershell
+Unblock-File -Path ".\scripts\Configure-GitHubProjectBoard.ps1"
+.\scripts\Configure-GitHubProjectBoard.ps1
+```
+
+**Opção 2: Bypass de execução única**
+```powershell
+powershell -ExecutionPolicy Bypass -File ".\scripts\Configure-GitHubProjectBoard.ps1"
+```
+
+#### Exemplos:
 
 ```powershell
 # Criar "Simulab" (padrão)
@@ -56,7 +96,7 @@ Configura o projeto #3 com as colunas do workflow.
 .\scripts\Configure-GitHubProjectBoard.ps1 -BoardId 3
 ```
 
-### 2. Script Bash (Alternativa)
+### 3. Script Bash (Alternativa)
 
 Se preferir bash/Linux:
 
@@ -64,7 +104,7 @@ Se preferir bash/Linux:
 ./scripts/create-project.sh
 ```
 
-### 3. Configurar manualmente via interface web
+### 4. Configurar manualmente via interface web
 
 1. Acesse: https://github.com/alexcanario/simulab/projects/new
 2. **Nome**: `Simulab`
