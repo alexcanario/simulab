@@ -100,6 +100,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `feature-ship` step 4 and the Stop hook: `gate.js ship` runs in the foreground, or the Stop hook skips while a ship gate holds the worktree — both build the same `obj/` folders and collide (a background ship gate failed with 211 missing-reference errors while the hook reported MSB3061) | F-44 | |
 | ⏳ | agile | `[generic]` `feature-build` step 17: the validation script of an item that has a migration names the worktree's own database (`Database__Name`, which `AppHost.cs` reads) in its start step, never "your local database" — otherwise the first start applies the migration to the shared one | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 11 and `worktrees.md`: the lock probe (rename the folder to `<folder>.probe` and back) is one command run alone that stops the ship when it fails, so `git worktree remove` can never run after a failed probe | F-42 | |
+| ⏳ | agile | `[generic]` `feature-ship` step 8b: run the architecture tests after writing the bumped `<Version>` and before committing it — a test that pins a version number goes red on the first bump (F-46: two `AppVersionTests` failed, `Failed: 2, Passed: 162`) | F-46 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -852,3 +853,7 @@ From 0.0.102 to 0.0.104, run on a clean main with no item `building` or `validat
 - Left alone: `docs/agile/profile.md` (edited by project, upstream changed the version location from Api.csproj to Directory.Build.props, Simulab's own policy kept); `.claude/rules/agile/git.md` (edited, upstream unchanged); all manual files — `.editorconfig`, `Directory.Build.props`, `Directory.Packages.props`, `global.json`, `tests/Directory.Build.props`, `.gitignore` (none had upstream changes worth applying).
 - Missing capabilities: 4 — DocGen tool catalogue (item F-61 #100), app version movement to Directory.Build.props (F-60 / planned for next ship), deploy command per environment (F-62 #101), visual identity (F-63 #102).
 - Baseline: present. Docs command: declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes delivered: none. Build and full suite: green — build 12 s (0 warnings), full suite 2010 tests passed (0 failed, ~130 s total).
+
+## 2026-10-02 - Retro F-46 (derive the production assembly list)
+- Plugin note: `[generic]` `feature-ship` step 8b — run the architecture tests after writing the bumped `<Version>` and before committing it. Evidence: the first test run after the bump printed `Failed!  - Failed:     2, Passed:   162`, and the commit had already gone out because the command chained `git commit` after a `grep` that always exits 0 (fixed on the branch before the merge). Tracked in the table above.
+- Nothing: the board Status field stayed at `Ready` during the build because only the label was changed (own omission, once).
