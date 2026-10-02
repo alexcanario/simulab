@@ -10,7 +10,8 @@ namespace Simulab.Catalog.Tests;
 
 /// <summary>
 /// F-34 BR18 (v2) through HTTP: the back office of the body that publishes a notice. The tests share one
-/// database, so each works on rows of its own and never asserts a global count.
+/// database, so each works on rows of its own and never asserts a global count. F-44 took the acronym off
+/// the contract: a stored one is written straight to the table, as the rows typed earlier hold it.
 /// </summary>
 public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
 {
@@ -22,14 +23,13 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
         return value[..Math.Min(value.Length, 40)];
     }
 
-    private static string UniqueAcronym() => Guid.CreateVersion7().ToString("N")[..12];
+    private static string Marker() => Guid.CreateVersion7().ToString("N")[..12];
 
     private static SaveIssuingAuthorityRequest Valid(
         string? name = null,
-        string? acronym = null,
         string? description = null,
         string? website = null) =>
-        new(name ?? Unique("Orgao"), acronym ?? UniqueAcronym(), description, website);
+        new(name ?? Unique("Orgao"), description, website);
 
     private static async Task<IssuingAuthorityResponse> CreateAsync(HttpClient admin, SaveIssuingAuthorityRequest request)
     {
@@ -80,17 +80,19 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
         (await Client().GetAsync(Authorities)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    // AC17 (v2): create, with the acronym uppercased, and it is listed.
+    // F-44 AC2: create asks for no acronym, stores none, and the authority is listed.
     [Fact]
-    public async Task Create_ValidData_StoresTheAcronymUppercasedAndListsIt()
+    public async Task Create_ValidData_StoresNoAcronymAndListsIt()
     {
         var admin = await AdminAsync();
-        var acronym = UniqueAcronym();
+        var marker = Marker();
 
-        var created = await CreateAsync(admin, Valid(name: Unique("Prefeitura"), acronym: acronym));
+        var created = await CreateAsync(admin, Valid(name: $"Prefeitura {marker}"));
 
-        created.Acronym.Should().Be(acronym.ToUpperInvariant());
-        var listed = await ListAsync(admin, $"?search={acronym}");
+        var stored = await QueryAsync(context => context.IssuingAuthorities.AsNoTracking().SingleAsync(row => row.Id == created.Id));
+        stored.Acronym.Should().BeNull();
+        stored.NormalizedAcronym.Should().BeNull();
+        var listed = await ListAsync(admin, $"?search={marker}");
         listed.Items.Should().ContainSingle(item => item.Id == created.Id);
     }
 
@@ -111,17 +113,32 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityNameTaken);
     }
 
+    // F-44 AC4: the acronym is no longer unique, so two authorities with no acronym coexist.
     [Fact]
-    public async Task Create_AcronymTakenInAnyCase_IsRefusedWithAcronymTaken()
+    public async Task Create_TwoAuthoritiesWithNoAcronym_AreBothAccepted()
     {
         var admin = await AdminAsync();
-        var acronym = UniqueAcronym();
-        await CreateAsync(admin, Valid(acronym: acronym));
+        var marker = Marker();
 
-        var response = await admin.PostAsJsonAsync(Authorities, Valid(acronym: acronym.ToUpperInvariant()), AppJson.Options);
+        await CreateAsync(admin, Valid(name: $"Orgao {marker} A"));
+        await CreateAsync(admin, Valid(name: $"Orgao {marker} B"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityAcronymTaken);
+        (await ListAsync(admin, $"?search={marker}")).Total.Should().Be(2);
+    }
+
+    // F-44 AC4: the table accepts two authorities holding the same stored acronym.
+    [Fact]
+    public async Task StoredAcronym_TwoAuthoritiesWithTheSameOne_IsAccepted()
+    {
+        var admin = await AdminAsync();
+        var marker = Marker();
+        var first = await CreateAsync(admin, Valid(name: $"Orgao {marker} A"));
+        var second = await CreateAsync(admin, Valid(name: $"Orgao {marker} B"));
+
+        await StoreAcronymAsync(first.Id, marker);
+        var act = () => StoreAcronymAsync(second.Id, marker);
+
+        await act.Should().NotThrowAsync("the unique index over the acronym is gone");
     }
 
     [Fact]
@@ -139,31 +156,43 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
     public async Task Create_WebsiteThatIsNotAnAbsoluteWebAddress_IsRefusedAndNothingIsWritten()
     {
         var admin = await AdminAsync();
-        var acronym = UniqueAcronym();
+        var marker = Marker();
 
-        var response = await admin.PostAsJsonAsync(Authorities, Valid(acronym: acronym, website: "guarulhos.sp.gov.br"), AppJson.Options);
+        var response = await admin.PostAsJsonAsync(Authorities, Valid(name: $"Orgao {marker}", website: "guarulhos.sp.gov.br"), AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityWebsiteInvalid);
-        (await ListAsync(admin, $"?search={acronym}")).Total.Should().Be(0);
+        (await ListAsync(admin, $"?search={marker}")).Total.Should().Be(0);
     }
 
     [Fact]
     public async Task Update_NewName_ShowsOnTheListUnderTheSameId()
     {
         var admin = await AdminAsync();
-        var acronym = UniqueAcronym();
-        var created = await CreateAsync(admin, Valid(acronym: acronym));
+        var created = await CreateAsync(admin, Valid());
         var renamed = Unique("Ministerio");
 
-        var response = await admin.PutAsJsonAsync(
-            $"{Authorities}/{created.Id}",
-            Valid(name: renamed, acronym: acronym),
-            AppJson.Options);
+        var response = await admin.PutAsJsonAsync($"{Authorities}/{created.Id}", Valid(name: renamed), AppJson.Options);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
-        var listed = await ListAsync(admin, $"?search={acronym}");
+        var listed = await ListAsync(admin, $"?search={Uri.EscapeDataString(renamed)}");
         listed.Items.Should().ContainSingle(item => item.Id == created.Id && item.Name == renamed);
+    }
+
+    // F-44 AC3: an edit keeps the acronym stored for the authority.
+    [Fact]
+    public async Task Update_AnAuthorityWithAStoredAcronym_KeepsItUnchanged()
+    {
+        var admin = await AdminAsync();
+        var created = await CreateAsync(admin, Valid());
+        await StoreAcronymAsync(created.Id, "INSS");
+
+        var response = await admin.PutAsJsonAsync($"{Authorities}/{created.Id}", Valid(name: Unique("Instituto")), AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        var stored = await QueryAsync(context => context.IssuingAuthorities.AsNoTracking().SingleAsync(row => row.Id == created.Id));
+        stored.Acronym.Should().Be("INSS");
+        stored.NormalizedAcronym.Should().Be("INSS");
     }
 
     [Fact]
@@ -183,12 +212,11 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
     {
         var admin = await AdminAsync();
         var name = Unique("Autarquia");
-        var acronym = UniqueAcronym();
-        var created = await CreateAsync(admin, Valid(name: name, acronym: acronym));
+        var created = await CreateAsync(admin, Valid(name: name));
 
         (await admin.DeleteAsync($"{Authorities}/{created.Id}")).StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        (await ListAsync(admin, $"?search={acronym}")).Items.Should().BeEmpty();
+        (await ListAsync(admin, $"?search={Uri.EscapeDataString(name)}")).Items.Should().BeEmpty();
 
         var row = await QueryAsync(context => context.IssuingAuthorities
             .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
@@ -201,27 +229,40 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
         CodeOf(await again.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.IssuingAuthorityNameTaken);
     }
 
-    // BR18: the search ignores case and accents, over both columns.
+    // BR18: the search ignores case and accents.
     [Fact]
     public async Task List_SearchWithoutAccents_FindsAccentedNames()
     {
         var admin = await AdminAsync();
-        var marker = UniqueAcronym();
-        await CreateAsync(admin, Valid(name: $"Ministério da Educação {marker}", acronym: marker));
+        var marker = Marker();
+        var created = await CreateAsync(admin, Valid(name: $"Ministério da Educação {marker}"));
 
-        var found = await ListAsync(admin, $"?search={Uri.EscapeDataString("educacao")}");
+        var found = await ListAsync(admin, $"?search={Uri.EscapeDataString("educacao " + marker)}");
 
-        found.Items.Select(item => item.Acronym).Should().Contain(marker.ToUpperInvariant());
+        found.Items.Select(item => item.Id).Should().Contain(created.Id);
+    }
+
+    // F-44 AC7: a stored acronym is not searched; the name still finds the authority.
+    [Fact]
+    public async Task List_SearchByAStoredAcronym_DoesNotFindIt_ButTheNameDoes()
+    {
+        var admin = await AdminAsync();
+        var marker = Marker();
+        var created = await CreateAsync(admin, Valid(name: $"Instituto Nacional do Seguro Social {marker}"));
+        await StoreAcronymAsync(created.Id, $"IN{marker[..8]}");
+
+        (await ListAsync(admin, $"?search=IN{marker[..8]}")).Items.Should().BeEmpty();
+        (await ListAsync(admin, $"?search=Seguro Social {marker}")).Items.Should().ContainSingle(item => item.Id == created.Id);
     }
 
     [Fact]
     public async Task List_MoreRowsThanOnePage_ReturnsThePageAndTheFullTotal()
     {
         var admin = await AdminAsync();
-        var marker = UniqueAcronym();
+        var marker = Marker();
         for (var index = 0; index < 3; index++)
         {
-            await CreateAsync(admin, Valid(name: $"Orgao {marker} {index}", acronym: UniqueAcronym()));
+            await CreateAsync(admin, Valid(name: $"Orgao {marker} {index}"));
         }
 
         var page = await ListAsync(admin, $"?search={marker}&page=0&pageSize=2");
@@ -241,16 +282,17 @@ public sealed class IssuingAuthorityEndpointTests : CatalogApiTests
         page.Items.Count.Should().BeLessThanOrEqualTo(IssuingAuthorityListQuery.MaxPageSize);
     }
 
+    // F-44 BR6: there is no acronym sort; an unknown value sorts by name.
     [Fact]
-    public async Task List_SortedByAcronym_ComesBackInThatOrder()
+    public async Task List_SortedByAnAcronymColumn_FallsBackToTheNameOrder()
     {
         var admin = await AdminAsync();
-        var marker = UniqueAcronym()[..8];
-        await CreateAsync(admin, Valid(name: $"Orgao {marker} B", acronym: $"{marker}bb"));
-        await CreateAsync(admin, Valid(name: $"Orgao {marker} A", acronym: $"{marker}aa"));
+        var marker = Marker();
+        await CreateAsync(admin, Valid(name: $"Orgao {marker} B"));
+        await CreateAsync(admin, Valid(name: $"Orgao {marker} A"));
 
-        var page = await ListAsync(admin, $"?search={marker}&sortBy={IssuingAuthoritySort.Acronym}");
+        var page = await ListAsync(admin, $"?search={marker}&sortBy=acronym");
 
-        page.Items.Select(item => item.Acronym).Should().Equal($"{marker}aa".ToUpperInvariant(), $"{marker}bb".ToUpperInvariant());
+        page.Items.Select(item => item.Name).Should().Equal($"Orgao {marker} A", $"Orgao {marker} B");
     }
 }

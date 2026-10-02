@@ -89,7 +89,6 @@ public sealed class ExamUniqueIndexTests : CatalogApiTests
     {
         var authority = IssuingAuthority.Create(
             $"Orgao {Guid.CreateVersion7():N}"[..30],
-            Guid.CreateVersion7().ToString("N")[..12],
             null,
             null).Value;
 

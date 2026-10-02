@@ -21,9 +21,6 @@ public static class CatalogErrorCodes
     public const string IssuingAuthorityNameRequired = "issuing_authority.name_required";
     public const string IssuingAuthorityNameTooLong = "issuing_authority.name_too_long";
     public const string IssuingAuthorityNameTaken = "issuing_authority.name_taken";
-    public const string IssuingAuthorityAcronymRequired = "issuing_authority.acronym_required";
-    public const string IssuingAuthorityAcronymTooLong = "issuing_authority.acronym_too_long";
-    public const string IssuingAuthorityAcronymTaken = "issuing_authority.acronym_taken";
     public const string IssuingAuthorityDescriptionTooLong = "issuing_authority.description_too_long";
     public const string IssuingAuthorityWebsiteInvalid = "issuing_authority.website_invalid";
 

@@ -176,7 +176,7 @@ else
     {
         List<AppAsideRow> rows =
         [
-            new(L["Exams.Field.IssuingAuthority"], $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})"),
+            new(L["Exams.Field.IssuingAuthority"], exam.IssuingAuthorityName),
             new(L["Exams.Field.AssessmentType"], ExamText.AssessmentTypeName(L, exam.AssessmentType)),
             new(L["Exams.Field.Scope"], ExamText.ScopeName(L, exam.Scope))
         ];

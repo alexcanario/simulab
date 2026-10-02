@@ -21,11 +21,11 @@ a tela Exames. Para as demais, a página não é encontrada.
    título de uma coluna para ordenar por ela.
 3. Digite na caixa de busca para filtrar por nome. Acento e maiúscula não importam: "publica" encontra "Pública".
 4. Os três filtros acima da lista — órgão contratante, tipo de avaliação e abrangência — podem ser combinados.
-   No filtro de órgão contratante, digite duas letras do nome ou da sigla e escolha na lista que aparece.
+   No filtro de órgão contratante, digite duas letras do nome e escolha na lista que aparece.
 
 ### Cadastrar um exame
 1. Escolha **Adicionar**. O formulário abre em uma página própria.
-2. Em **Órgão contratante**, digite duas letras do nome ou da sigla e escolha na lista. Se o órgão ainda não
+2. Em **Órgão contratante**, digite duas letras do nome e escolha na lista. Se o órgão ainda não
    existe, cadastre-o antes em [Órgãos contratantes](issuing-authorities.md).
 3. Digite o **nome** do exame, como ele aparece no edital.
 4. Escolha o **tipo de avaliação**. Escolha a **abrangência** entre os três cartões — cada um explica numa

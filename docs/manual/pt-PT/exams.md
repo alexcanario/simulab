@@ -22,12 +22,12 @@ ecrã Exames. Para as restantes, a página não é encontrada.
 3. Escreva na caixa de pesquisa para filtrar pelo nome. Acentos e maiúsculas não contam: "publica" encontra
    "Pública".
 4. Os três filtros acima da lista — entidade contratante, tipo de avaliação e abrangência — podem ser
-   combinados. No filtro de entidade contratante, escreva duas letras do nome ou da sigla e escolha na lista que
+   combinados. No filtro de entidade contratante, escreva duas letras do nome e escolha na lista que
    aparece.
 
 ### Registar um exame
 1. Escolha **Adicionar**. O formulário abre numa página própria.
-2. Em **Entidade contratante**, escreva duas letras do nome ou da sigla e escolha na lista. Se a entidade ainda
+2. Em **Entidade contratante**, escreva duas letras do nome e escolha na lista. Se a entidade ainda
    não existe, registe-a antes em [Entidades contratantes](issuing-authorities.md).
 3. Escreva o **nome** do exame, tal como aparece no aviso.
 4. Escolha o **tipo de avaliação**. Escolha a **abrangência** entre os três cartões — cada um explica numa

@@ -19,9 +19,6 @@ public interface IIssuingAuthorityStore
     /// </summary>
     Task<bool> NameIsTakenAsync(string normalizedName, Guid? exceptId, CancellationToken cancellationToken);
 
-    /// <summary>True when another body already holds this normalized acronym.</summary>
-    Task<bool> AcronymIsTakenAsync(string normalizedAcronym, Guid? exceptId, CancellationToken cancellationToken);
-
     void Add(IssuingAuthority authority);
 
     /// <summary>Soft-deletes the body: the interceptor turns the removal into a flag.</summary>
@@ -30,7 +27,7 @@ public interface IIssuingAuthorityStore
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Saves, and answers with the 409 for a duplicate name or acronym when the unique index refuses the row
+    /// Saves, and answers with the 409 for a duplicate name when the unique index refuses the row
     /// after the "is taken" checks passed: another writer committed in between (the B-14 lesson).
     /// </summary>
     Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken);

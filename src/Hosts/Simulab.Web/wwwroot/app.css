@@ -142,6 +142,14 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     white-space: nowrap;
 }
 
+/* F-44: the line under a cell's main text (the scope's state or city). Without a style it ran into the
+   text before it: "MunicipalSalvador". */
+.app-data-table .app-cell-secondary {
+    display: block;
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+}
+
 .app-table-search {
     max-width: 22rem;
     /* F-34: with filters beside it the toolbar would squeeze the search to a few pixels. */

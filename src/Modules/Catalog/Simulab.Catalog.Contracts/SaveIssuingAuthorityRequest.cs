@@ -5,11 +5,9 @@ namespace Simulab.Catalog.Contracts;
 /// filters or groups by one yet, and it arrives when a screen needs it.
 /// </summary>
 /// <param name="Name">The body's full name, 2 to 150 characters.</param>
-/// <param name="Acronym">The short name, 2 to 20 characters, stored uppercase.</param>
 /// <param name="Description">Free text, optional.</param>
 /// <param name="Website">An absolute http or https address, optional.</param>
 public sealed record SaveIssuingAuthorityRequest(
     string? Name,
-    string? Acronym,
     string? Description = null,
     string? Website = null);
