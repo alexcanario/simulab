@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.97 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.102 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -63,7 +63,7 @@ Before anything is written, Claude checks that the skill it loaded and the insta
 
 | Round | Topics |
 |---|---|
-| 1. Shape | Type of app (web, mobile, desktop, API), architecture profile, the desktop technology (WinUI 3, Avalonia or MAUI) and how a desktop client reaches its data, **where a mobile app's backend lives** (question 2d), the **sections of a site** (question 2c, profile `website`), deployment target |
+| 1. Shape | Type of app (web, mobile, desktop, API), architecture profile, the desktop technology (WinUI 3, Avalonia or MAUI) and how a desktop client reaches its data, **where a mobile app's backend lives** (question 2d), the **sections of a site** (question 2c, profile `website`), **a mobile app from day one beside a site** (question 2e), deployment target |
 | 2. Data | Database (the house engine when there is an existing system next door), multi-tenancy, deletion, auditing, personal data and retention |
 | 3. Access | Authentication (for `web-api`, question 10a: how the API's consumers authenticate), RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage, and — when a feature calls a model — the LLM provider and where it runs, its cost ceiling and how it is faked in tests |
@@ -78,7 +78,9 @@ For a public site (profile `website`), question 2c comes right after the profile
 
 For an app that is only an API (profile `web-api`), answering "API only" in question 1 makes question 2 recommend `web-api`. Question 10a then asks, instead of question 10, how the API's consumers authenticate, as a multiple choice: **Identity bearer** (users sign in at the API; the default for the owner's own clients), an **external IdP** (users, and client credentials for machine clients; the API only validates the token) and **API key** (machine clients only, never a browser or mobile app, whose code is public). Each answer generates only the schemes, endpoints and policies it needs, and question 11 (social login, MFA) is asked only with Identity bearer. Claude does not ask 14 (there is no back office), 21 and 22 (no screens) or the visual identity and UI questions, and question 29 has no UI level. Example 14.28 shows the question.
 
-For a mobile app (profile `mobile`), question 2d asks where the backend lives: **in this solution** (today's behavior: `monolith` by default) or **an existing API in another repository** — an agile `web-app`, `website` or `web-api` (its repository), or any API that publishes an OpenAPI document (its URL); question 1 offers "mobile on an existing API" for it. With the external answer the app is its own repository, and Claude skips what the API already decides — question 3, the whole data round, 12, 13 and 14 — lists them under "Already clear", and turns question 10 into "the API's sign-in", read from the API. `CLAUDE.md` gets the line ``- Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`.`` and ADR-0001 says so. Example 14.30 shows the quiz and what the bootstrap proposes.
+For a mobile app (profile `mobile`), question 2d asks where the backend lives: **in this solution** (today's behavior: `monolith` by default) or **an existing API in another repository** — an agile `web-app`, `website` or `web-api` (its repository), or any API that publishes an OpenAPI document (its URL); question 1 offers "mobile on an existing API" for it. With the external answer the app is its own repository, and Claude skips what the API already decides — question 3, the whole data round, 12, 13 and 14 — lists them under "Already clear", and turns question 10 into "the API's sign-in", read from the API. `CLAUDE.md` gets the line ``- Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`.`` and ADR-0001 says so. When the API is an agile site whose `CLAUDE.md` names the `<App>.Shared` package, the screens are MAUI Blazor Hybrid: Claude reads that from the site, never asks it again, and adds ``- Shared screens: package `<App>.Shared` from the site's GitHub Packages feed``; otherwise they are XAML. Example 14.30 shows the quiz and what the bootstrap proposes; example 14.33 shows it with Hybrid.
+
+For a site that needs a mobile app from day one, question 2 first weighs the shape of the brief: when the API is the main consumer or there are several business areas, it recommends `mobile` (on `monolith`, or `modular-monolith`); when the product is a site with screens over simple data, or a public site, it recommends `web-app` or `website` and question 2e follows, right after 2 (after 2c for `website`): **a mobile app from day one: no · yes, MAUI Blazor Hybrid · yes, MAUI XAML**. The recommendation comes from the brief: no app named → no; an app named → Hybrid, so the site's screens are born where the app will reuse them. The app lives in this repository and solution; an app in its own repository is still started by its own bootstrap (question 2d). With yes, Claude lists the brief's features numbered in the same message, grouped as the brief groups them and all ticked (never a public section of a `website`); you answer "ok" or the numbers to untick. The bootstrap then adds `<App>.Contracts` and, with Hybrid, `<App>.Shared` (a Razor Class Library whose components have no `@page` and no render mode, with texts in every language of the app), both covered by the architecture and layout tests; it does **not** add the app's projects, the `Complement:` line or a second `<Version>`: those come with the epic's first item, so `/agile:sync` never asks for an app version before the app exists. The board proposal gains one epic "Mobile app" (`docs/epics/mobile-app.md`, with the list you approved written whole) whose ideas are "Mobile foundation" first, then one "<X> on mobile" per ticked feature; the site's own idea for each ticked feature says its screen is a component in `Shared` (Hybrid) and its rule or query a class in `Features/`, and with Hybrid the UI kit lives in `Shared` too. ADR-0001 records the answer. "No" leaves the bootstrap exactly as it was. Example 14.34.
 
 When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 8 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
@@ -88,7 +90,8 @@ Outputs, all in English:
 - `docs/agile/profile.md` — copy of the chosen architecture profile.
 - `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` — this workflow in both languages, and `docs/agile/templates/` — the templates, copied into the project.
 - `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
-- `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
+- `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), for each environment the command that deploys it, its check URL and the version deployed there (written only by `/agile:publish`), release steps and measured build and test times. Updated on ship when any of it changes.
+- `.github/workflows/deploy.yml` and `.github/scripts/agile-deploy.js` — only when `origin` is on github.com and a non-local environment declares a deploy command: the pipeline that deploys a pushed `v<Version>` tag by that same command (see "The deploy pipeline" below).
 - Solution skeleton for the profile, with i18n and the test projects in place.
 - `docs/design/identity.tokens.json` and `docs/design/DESIGN.md` — the app's visual identity (question 23a), for every app with screens. The tokens follow the W3C Design Tokens format (DTCG 2025.10) and are the source of the values: colors by role in light and dark, typography, corner radius, and the icon family, the source (file, URL, image or derived) and the date under `$extensions.agile`. `DESIGN.md` (Google's design-file format) has the same values as YAML front matter, generated from the tokens, followed by your own prose on why and where; regenerating keeps the prose. You can give a file (tokens or a `DESIGN.md`), a website URL, an image (a logo, a brand board) or nothing: three questions (primary color, font, light, dark or both) derive a full identity. A URL or an image is read by Claude, which shows one table before anything is written: colors by role (an image's are marked estimated), fonts, radius, icon family, and the WCAG 2.2 AA contrast of every foreground/background pair in both themes; a failing pair names its ratio and the nearest passing value, and you decide. Nothing is stored before you say "confirm". The plugin never writes the app's theme: the UI kit item does, from these tokens, and a test in the profile compares the two. Screen mockups take their colors, fonts and radius from the same file.
 - `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates, per module, a DBML schema read in a dbdiagram viewer (`entities: "mermaid"` in `docgen.json` gives an ER diagram instead, which renders on the board but grows unreadable past a dozen tables) and a data dictionary (from the EF model), a route map per area (from the OpenAPI document that the `/openapi/v1.json` integration test writes to `docs/api/`) and a module diagram (from project references, in Mermaid); the generator references the app's own EF Core provider (question 5: PostgreSQL, SQL Server or SQLite) and calls it by reflection, so it documents the real column types and default schema (`public`, `dbo`, or none on SQLite) even for a `DbContext` with no design-time factory; a context with a factory is built through it instead, so the names follow the database (snake_case, for example) — the output is the same either way; when round 8 also chose the tool catalogue (question 37), `tools.md` lists every tool the app offers to a model — the description the model receives, the input schema, what it reaches, the permissions it requires, whether it writes and whether it asks first — and `--check` fails when a tool has no description, no permissions or no reaches, or when two tools would reach the model under one name. Bootstrap declares the generator as the project's **docs command** in `.claude/agile/build.json` (`{ "docs": { "command": "dotnet run --project tools/<App>.DocGen", "check": "… -- --check", "paths": ["docs/architecture/"] } }`), so from 0.0.72 `/agile:ship` regenerates and checks them through the one generic step (section 9, "A declared docs command") instead of a step of its own; `--check` fails when they are stale. A project that got DocGen before 0.0.72 declares nothing, and the ship still runs it: the gate finds the single `tools/*.DocGen` and runs it as an **implicit** docs command, saying `implicit DocGen docs command: declare it with /agile:sync` — so no window leaves the code map stale, and `/agile:sync` offers the block once. Optionally a one-page hand-written overview (C4 context and containers), which the generator never touches: only files carrying its `Do not edit` marker are rewritten or deleted; a module or external system a feature adds is written there by hand at ship.
@@ -167,11 +170,19 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 | `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea`. On a `web-app`/`website`, a mobile app epic follows the `mobile-client` complement (section 12) |
 | `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
-| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization; it does not deploy |
+| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below) |
 
-**Releasing: `/agile:publish`.** A ship bumps the app's `<Version>` and merges; it does not build anything you can hand to someone. `/agile:publish` turns the version already on `main` into a release. It runs from the main checkout and stops, changing nothing, unless `main` is clean, level with `origin` and `v<Version>` exists neither locally nor there. Claude shows the plan once (version, previous tag, the items merged since it, the projects and runtimes) and goes on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release. It does not rerun the tests (the ship ran the full suite on what `main` holds); a compile error still fails `dotnet publish -c Release`, and then nothing is committed or tagged.
+**Releasing: `/agile:publish`.** A ship bumps the app's `<Version>` and merges; it does not build anything you can hand to someone. `/agile:publish` turns the version already on `main` into a release. It runs from the main checkout and stops, changing nothing, unless `main` is clean, level with `origin` and `v<Version>` exists neither locally nor there. Claude shows the plan once (version, previous tag, the items merged since it, the projects and runtimes) and goes on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release. It does not rerun the tests (the ship ran the full suite on what `main` holds); a compile error still fails `dotnet publish -c Release` (or `dotnet pack`), and then nothing is committed or tagged. The site of a Hybrid app in its own repository also packs its two packable projects, `<App>.Contracts` and `<App>.Shared`, at that same version and pushes them to its GitHub Packages feed after the tag (`--skip-duplicate`, so a rerun is safe), reading the token from `GITHUB_PACKAGES_TOKEN`; without the token, or with an `origin` outside github.com, the packages are left out with that reason and the site is still published.
 
-What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one; `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit. The deploy to an environment is #50, the pipeline #51.
+What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one; `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit.
+
+**Deploying: `/agile:publish <environment> [v<x.y.z>]`.** With an environment named, the release is followed by a deploy of it, by the command that `docs/infra.md` declares for that environment: its environments table has three more columns, `Deploy command` (`not declared` when there is none), `Check URL` (optional) and `Version (deployed on)`, which only `/agile:publish` writes. Typing the command is the authorization for that deploy too. Before it runs Claude shows the environment, the version deployed there now, the version to deploy, the command and the names (never the values) of the secrets it needs, and goes on. Three shapes: a new version (`/agile:publish staging` with no tag yet) runs the release above first, and a failed release deploys nothing; a **promotion** (`/agile:publish production` when `v<Version>` is already tagged) deploys that tag with no new package, notes or tag; a **rollback** (`/agile:publish production v0.3.0`) deploys an older tag, with no extra question. With no environment named, Claude lists the environments with their recorded versions and asks which one, or "none" (the release only). An environment whose command is `not declared` deploys nothing: Claude says where to declare it, and a new version is still released.
+
+Every deploy runs in one fixed worktree, `<worktree root>/deploy`, detached at the tag (made the first time, moved with `git checkout --detach` after), so your main checkout is never switched and a tool that keys on the folder path (Aspire names its compose project after it) replaces the running app instead of starting a second one. The command gets `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` and `AGILE_ARTIFACTS` (the package folder of that version, rebuilt from the tag when it is missing and the command is not the Aspire recipe); its output is saved whole outside the repository, with the value of every secret blanked, and its exit code decides success. The command runs in the machine's default shell (cmd.exe on Windows, so `%AGILE_TAG%`; /bin/sh elsewhere, `$AGILE_TAG`) and is limited to 30 minutes; two deploys never run at once (a lock file next to the deploy worktree), and one that finds tracked files changed in that worktree stops before running. A secret listed in `## Expected secrets` with "environment variable" and this environment is only checked by name: the variable must be set in the shell that started Claude (for the Aspire recipe it is `Parameters__<name>`), or the publish stops before anything runs. With a `Check URL`, after exit 0 the URL is polled for HTTP 200 for up to 60 seconds; no 200 fails the deploy. On success the environment's `Version (deployed on)` cell becomes `v<x.y.z> (YYYY-MM-DD)`, committed on `main` (`docs(release): v<x.y.z> deployed to <environment>`) and pushed. On a failure nothing is recorded and **nothing is rolled back by itself**: the report quotes the output's tail and gives the exact command that redeploys the version recorded before (`/agile:publish production v0.3.0`). The plugin never deletes old images (it counts the `aspire-deploy-*` tags and names the commands) and never runs `docker compose down -v`, which would delete the volume that keeps the app's Data Protection keys and with it every signed-in session. `/agile:sync` lists a project whose `docs/infra.md` lacks the `Deploy command` column as a missing capability and offers to capture an item; it never writes that file.
+
+**The deploy pipeline (GitHub Actions).** A project whose `origin` is on github.com and whose `docs/infra.md` declares a deploy command for a non-local environment gets `.github/workflows/deploy.yml` and its script `.github/scripts/agile-deploy.js`, written by `/agile:bootstrap` (`node sync.js pipeline write`). Pushing the tag `v<Version>` (which `/agile:publish` does) deploys it to the first environment that is neither `local` nor production, `staging` in the usual table, or to production when there is no other; the name is written once, as a literal, when the file is generated. Production is promoted by a manual run (Actions, Deploy, "Run workflow": `environment` and an existing `tag`, so a rollback is the same run with the old tag) or locally by `/agile:publish production`. What the run deploys is the **same `Deploy command` of the same row** that the local command runs, read from `docs/infra.md` when the run starts and never copied into the workflow, so the two cannot drift: edit the table, not the YAML. The job declares `environment: <name>`, so the secrets live in the GitHub environment of that name and you can add required reviewers there (the plugin never creates an environment, a reviewer or a secret, and never reads a value); it checks the tag out with its history, installs the .NET SDK from `global.json`, sets `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` and `AGILE_ARTIFACTS` (rebuilt from the tag when the command uses it), and polls the `Check URL` for 200 for up to 60 seconds. Every secret that `## Expected secrets` lists with "environment variable" for a non-local environment is passed from `secrets.<name>`; one that has no value stops the run **before** the command, naming it (values are never printed, and a value in the command's output is blanked). Runs of one environment never overlap, and the workflow holds read-only `contents` permission and uses only `actions/checkout` and `actions/setup-dotnet`. A failed command or check fails the run, nothing is rolled back, and the run summary names the rollback; a success prints `v<x.y.z> deployed to <environment>` and **commits nothing**: `Version (deployed on)` is still written only by a local `/agile:publish`. Before a local `/agile:publish <environment>` that will push the tag, Claude says that the pipeline also deploys it to its target (and, when that is the same environment, that the two run at the same time and are not serialized: the concurrency of the workflow queues only its own runs); typing the command stays the authorization. The file is yours once written: add a step before "Deploy" for any tool the command needs besides the SDK and what the Ubuntu runner has (the command runs in `/bin/sh` there, so `%AGILE_TAG%` forms do not work). `/agile:sync` never writes it: a project with a declared command and no workflow gets "Deploy pipeline" as a missing capability and the offer to capture an item, and one that has it sees a newer template, or a secret added to the table, as a `manual` difference to merge by hand. Only GitHub Actions is supported. Example 14.36.
+
+The plugin ships one recipe, for "containers + Aspire" (every profile that can have an AppHost: `monolith`, `modular-monolith`, `web-api`, `microservices`, `web-app`, `website`; the profile's "Deploy recipe" section has the exact lines): the deploy command is `aspire deploy --apphost src/<App>.AppHost/<App>.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`, which builds the container image and runs `docker compose up -d` for that environment. The AppHost declares one compose environment per environment name and pins each external port from its `appsettings.<Environment>.json` (staging and production run side by side, on `5081` and `5080` for example), each project resource sets `ASPNETCORE_ENVIRONMENT`, publishes only its `http` endpoint, and keeps the Data Protection keys in a named volume per environment, so a redeploy keeps cookies and antiforgery tokens valid. The Aspire CLI and every Aspire package of the AppHost are the latest stable and carry the same version (checked before the command runs; a mismatch stops with both versions). A `mobile` project has no AppHost: its `<App>.Api` is deployed only by a command you declare, and its `.aab` is never deployed. Docker must be running on the machine that deploys. Another target (Azure Container Apps, a server over SSH) is a command you declare in the same column; the GitHub Actions pipeline is #51.
 
 ## 6. Changing your mind
 
@@ -242,7 +253,7 @@ Details:
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
 - **What the turn gate sees.** A code file is `.cs`, `.vb`, `.fs`, `.fsi`, `.razor`, `.cshtml`, `.xaml`, `.resx`, a project file (`.csproj`, `.vbproj`, `.fsproj`) or a build file (`.props`, `.targets`, `.sln`, `.slnx`); an edit to anything else is not remembered and starts no build. The project that owns a file is the nearest `.csproj`, `.vbproj` or `.fsproj` above it, and the project graph holds every one of those under the root, so a C# test project that references a VB.NET library runs when a `.vb` file changes. A test project is one whose file carries `Microsoft.NET.Test.Sdk`, `Sdk="MSTest.Sdk` (with or without a version), `<IsTestProject>true` or `xunit`, whatever its language. Until 0.0.90 a `.vb` or `.fs` edit was invisible to the turn gate (SKIPPED, while `ship` built and tested the whole solution), and a project on `MSTest.Sdk` was built but never tested. DocGen is still looked for as a `tools/*.DocGen` folder with a `.csproj`: it is the plugin's C# template. `.sqlproj` and `.fsx` are not code for the gate.
-- **The solution's SDK.** Every `dotnet` call runs from the solution's folder (the git root when there is none), so the `global.json` beside the solution chooses the SDK and the test runner, exactly as it does for someone building in that folder. Every report opens with `sdk <version> (<folder>)`; `sdk unknown` means `dotnet --version` failed there (a pinned SDK that is not installed), and the build failure that follows says why. The baseline records the SDK it was taken with (`"#sdk"`). When a later build uses another one, the report adds `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. That line is information, not a failure: retaking the baseline is your call. With the Microsoft.Testing.Platform runner, the report quotes its totals (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`).
+- **The solution's SDK.** Every `dotnet` call runs from the solution's folder (the git root when there is none), so the `global.json` beside the solution chooses the SDK and the test runner, exactly as it does for someone building in that folder. Every report opens with `sdk <version> (<folder>)`; `sdk unknown` means `dotnet --version` failed there (a pinned SDK that is not installed), and the build failure that follows says why. The baseline records the SDK it was taken with (`"#sdk"`). When a later build uses another one, the report adds `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. That line is information, not a failure: retaking the baseline is your call. With the Microsoft.Testing.Platform runner, the report quotes its totals (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`), and the gate passes a solution to `dotnet test` with `--solution` and a test project with `--project` (SDK 10.0.1xx refuses a solution after `--project`).
 - **An adopted repository.** A code base that existed before the workflow (its `CLAUDE.md` says `Profile: adopted`, written by hand or by another plugin, such as legacy-lens's adoption) records how it is really built in `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` or `none`), `solution` (a path from the root), `scope` (the projects worth building when the whole solution is not), `testCommand`, `notes` and, under `msbuild`, the optional `msbuildPath` and `restoreCommand`. The gate reads `solution`, so a solution deep in the tree is still built, and `engine: none` turns it off with the reason in `notes`; `scope` is for people and is not read. The engine is trimmed and case does not matter, and a value outside the three is RED (`agile gate RED: unknown engine "MSBuild2" in .claude/agile/build.json (legal: dotnet, msbuild, none)`) instead of quietly behaving like `dotnet` — which is how `msbuild` went unhonored until 0.0.69. `/agile:sync` refreshes rules, templates and the workflow of such a repository but leaves its profile alone: there is no plugin profile to refresh it from.
 - **`engine: msbuild`.** For a solution the .NET SDK cannot build — typically an old project type whose targets only Visual Studio ships, such as an ASP.NET web application importing `$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets`, where `dotnet build` stops with `error MSB4019`. The gate then drives MSBuild.exe instead of the `dotnet` CLI; the warning parser, the baseline, the locked-output hint and the RED/GREEN verdict are the same. What differs:
   - **Finding MSBuild:** `msbuildPath` from `build.json` (absolute, or from the repository root) when the file is there, then `msbuild` on the PATH (a Developer Command Prompt puts it there), then `vswhere.exe` at its fixed location under `Program Files (x86)`, which ships with every Visual Studio install. A declared `msbuildPath` that exists is used as it is: the gate never falls through to a different MSBuild than the one you named. When none works, `agile gate RED: MSBuild not found`, listing every place it looked. `vswhere` is Windows-only, so off Windows there are two places, not three.
@@ -432,7 +443,7 @@ tests/
 └── <App>.Tests/                      backend tests, per its profile
 ```
 
-**`mobile` on an existing API (`Backend: external`).** The app is its own repository and its API is another system. There is no `Api` project: the app carries the only `<Version>` (`<App>.Mobile.csproj`, seeded at `0.1.0`), and `/agile:ship` bumps it alone. `<App>.Contracts` holds records you write by hand, and a pinned copy of the API's OpenAPI document sits in `docs/api/backend-openapi.json` (an agile API: its committed `docs/api/openapi.json` at a named commit; another API: its URL), with `docs/api/backend.md` saying where it came from. A test reads that document and fails when a record, a route, the `X-App-Version` header or the `426` response no longer match it (a generator was weighed and not adopted: the typed clients stay over one `HttpClient`); refreshing the copy is an explicit step of the item that needs it, and `/agile:sync` only reports when the API moved past the pinned commit. The app signs in at the API's `login`, adds the token and its version (`X-App-Version`) to every call, refreshes once on `401` (concurrent calls share one refresh) and, on `426` `app.update_required`, shows "update required" without trying to refresh. The screens are XAML; sharing the site's Razor components across repositories is not offered. Tests use a stub `HttpMessageHandler`; the API's own endpoints are tested in the API's repository, and each validation script has a device run against the API's development instance (`10.0.2.2` from the Android emulator).
+**`mobile` on an existing API (`Backend: external`).** The app is its own repository and its API is another system. There is no `Api` project: the app carries the only `<Version>` (`<App>.Mobile.csproj`, seeded at `0.1.0`), and `/agile:ship` bumps it alone. `<App>.Contracts` holds records you write by hand, and a pinned copy of the API's OpenAPI document sits in `docs/api/backend-openapi.json` (an agile API: its committed `docs/api/openapi.json` at a named commit; another API: its URL), with `docs/api/backend.md` saying where it came from. A test reads that document and fails when a record, a route, the `X-App-Version` header or the `426` response no longer match it (a generator was weighed and not adopted: the typed clients stay over one `HttpClient`); refreshing the copy is an explicit step of the item that needs it, and `/agile:sync` only reports when the API moved past the pinned commit. The app signs in at the API's `login`, adds the token and its version (`X-App-Version`) to every call, refreshes once on `401` (concurrent calls share one refresh) and, on `426` `app.update_required`, shows "update required" without trying to refresh. The screens are XAML, or MAUI Blazor Hybrid when the site shares its components as a package (next paragraph). Tests use a stub `HttpMessageHandler`; the API's own endpoints are tested in the API's repository, and each validation script has a device run against the API's development instance (`10.0.2.2` from the Android emulator).
 ```
 src/
 ├── <App>.Contracts/                  hand-written records and error codes, checked against the pinned document
@@ -446,9 +457,13 @@ docs/api/
 ```
 The API's side is the API's own session's work. For an agile site, an epic "API for the mobile app" (below) plans it; for an agile `web-api` or any other API, **the forced-update gate** is a line of its profile: the app sends `X-App-Version`, a middleware answers `426` with the code `app.update_required` when it is below a configured minimum or not a version (`2.0` equals `2.0.0`; no header passes; an empty minimum turns the gate off, a malformed one stops the app at start), it runs before authentication, and the OpenAPI document declares the header and the `426` on every `/api/v1` operation. It is a compatibility gate, not a security control.
 
+**Hybrid across repositories (the site's package).** The site keeps its shared components in `<App>.Shared` (a Razor Class Library) and its records in `<App>.Contracts`; they are the only projects with `<IsPackable>true</IsPackable>`, and `/agile:publish` packs both at the site's `<Version>` and pushes them to the GitHub Packages feed of the `origin` owner (private; the token is the classic personal access token in the environment variable `GITHUB_PACKAGES_TOKEN`, never written anywhere). The app has no `<App>.Contracts` of its own: `Mobile.Core` references the `<App>.Shared` package, which brings the site's records, and implements the components' data interfaces over `HttpClient`; the head hosts each component in a page of its own (route, `[Authorize]`, no render mode) and builds the `AuthenticationStateProvider` from `GET /api/v1/auth/me`. A `nuget.config` at the root lists nuget.org and the site's feed with a `packageSourceMapping` (`<App>.*` on the feed, `*` on nuget.org; without it a machine with source mapping on never looks at the feed) and `Directory.Packages.props` pins the exact `<App>.Shared` version, from the same site release as the pinned OpenAPI document. Moving to a newer package is a step of the app item that needs a newer component, committed with the refreshed document; `/agile:sync` only says when the site's latest release is past the pin. A site's breaking change to a component's parameters or a data interface is a MAJOR release. Texts come from `<App>.Shared/Resources/` in pt-BR, pt-PT and en, and the head sets the culture from the device.
+
 **The `mobile-client` complement.** A running `web-app` or `website` can gain a mobile app without changing profile. `mobile-client` is not a profile of its own: it adds the client half of `mobile` on top of the site's profile, and the project records it with one line under `Profile:` in `CLAUDE.md` (``- Complement: `mobile-client` — see `docs/agile/profile-mobile-client.md`.``). You start it with `/agile:epic` (example 14.24): Claude asks where the app lives (the site's own repository and solution, recommended, or a new repository — below) and its screens (MAUI Blazor Hybrid, recommended, reuses the site's Razor components; MAUI XAML gives the native look), then lists the site's features — the `done` items and the areas under `Pages/` — for you to tick; `Pages/Public/` of a `website` is never offered. The epic starts with "Mobile foundation" (the projects below, the app's sign-in with a bearer token on the site's own `/api/v1/auth/login` and `/api/v1/auth/refresh`, the app version) and then one "<X> on mobile" per ticked feature, with an "API for <X>" before it when the feature's logic still sits in a page used by several pages or holds a rule. One source of truth: the rule lives in one class in `Features/`, used in process by the site and by the endpoint the app calls. A shared screen is a component with no `@page` and no render mode, hosted by a page on each side. The app is online by default; offline comes per feature. A mobile client alone does not move the site to `monolith`.
 
-**The app in a new repository.** Answering "a new repository" skips the screens question (the app is XAML, `mobile` on an existing API above) and goes on with the list to tick, but the site's epic is "API for the mobile app" (example 14.30): "Mobile API foundation" first — the app's sign-in on the site, the forced-update gate, and an OpenAPI document (`Microsoft.AspNetCore.OpenApi`, only the `/api/v1` routes, not served in Production, written to `docs/api/openapi.json` and committed with every API change) — then one "API for <X>" per ticked feature, always, because the app cannot extract a page's logic across repositories. The ticked list goes into the epic as you ticked it, and the epic ends telling you the next step: a new repository whose `product/brief.md` names this one, then `/agile:bootstrap` there, which reads the list. The site records ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.``; its version stays on `<App>.Web.csproj` alone. Claude writes nothing in the app's repository, and the app's session writes nothing in the site's.
+**The app in a new repository.** Answering "a new repository" still asks the screens question (Hybrid recommended; in a new repository it works through the `<App>.Shared` package above) and goes on with the list to tick, but the site's epic is "API for the mobile app" (examples 14.30 and 14.33): "Mobile API foundation" first — the app's sign-in on the site, the forced-update gate, an OpenAPI document (`Microsoft.AspNetCore.OpenApi`, only the `/api/v1` routes, not served in Production, written to `docs/api/openapi.json` and committed with every API change) and, with Hybrid, the packable `Contracts` and `Shared` — then one item per ticked feature, always, because the app cannot extract a page's logic across repositories: "API for <X>" with XAML, "API and shared screen for <X>" with Hybrid (the component moves to `Shared` and its endpoints ship in the same release the app pins). The ticked list goes into the epic as you ticked it, and the epic ends telling you the next step: a new repository whose `product/brief.md` names this one, then `/agile:bootstrap` there, which reads the list. The site records ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.`` (with Hybrid: ``... <repository>; shared screens in the `<App>.Shared` package; see ...``); its version stays on `<App>.Web.csproj` alone, and the packages carry it. Claude writes nothing in the app's repository, and the app's session writes nothing in the site's.
+
+**Born with the site.** A `web-app` or `website` bootstrapped with question 2e yes already has the epic "Mobile app", `<App>.Contracts` and, with Hybrid, `<App>.Shared` with the UI kit and the screens of the ticked features. `/agile:epic` does not create the epic again: it says so and names the next idea. "Mobile foundation" there creates neither `Contracts` nor `Shared` and moves no component; it waits for the UI kit (Hybrid) and the site's sign-in. Everything else is as for a running site: the complement copied to `docs/agile/profile-mobile-client.md`, the `Complement:` line, the ADR, `Mobile.Core` and `Mobile`, bearer sign-in, the head started at the site's current version with `ApplicationVersion` 1, the key ring. Each "<X> on mobile" adds the `/api/v1/` endpoint over the class already in `Features/`, the HTTP implementation in `Mobile.Core` and the host page (or the XAML page); no "API for <X>" is suggested, because no ticked feature keeps its logic in a page. `Shared` reads its texts through `IStringLocalizer`, which a Razor Class Library gets only from the `Microsoft.Extensions.Localization.Abstractions` package.
 ```
 src/
 ├── <App>.Web/                        the site; Api/ gains the app's endpoints
@@ -1877,7 +1892,7 @@ Claude: Plan: v0.2.0, previous tag v0.1.0, 2 items since it.
   Going on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release.
 Claude: Packaged ExamPrep.Web: 156 files, zip 4.7 MB; docs/releases/v0.2.0.md written.
 Claude: Release v0.2.0: notes committed on main (docs(release): v0.2.0), annotated tag v0.2.0, main and the tag pushed, GitHub Release created with the notes.
-  Not packaged: nothing else. The deploy to an environment is not part of this command yet (#50).
+  Not packaged: nothing else. No environment was named, so nothing was deployed (example 14.35).
 ```
 
 The same command a minute later stops and writes nothing, because the tag now exists:
@@ -1983,6 +1998,202 @@ Claude: Release v0.2.0: both files committed on main (docs(release): v0.2.0), ta
 
 With `ApplicationId` still `com.companyname.exampreps`, the same command leaves the Mobile head out (`the id is permanent once uploaded: change it first`) and publishes the site.
 
+### 14.33 A Hybrid app in its own repository, sharing the site's components through a package
+
+The nutritionist's patient app (14.30) now wants the site's own screens inside the app. First, in the **site's** repository, the epic round:
+
+```
+> /agile:epic "Patient app"
+Claude: ... (a) Where does the app live? Recommendation: in this repository. Or a new repository, with its own version.
+(b) Screens? Recommendation: MAUI Blazor Hybrid — the site's components are reused in the app; in a new repository they travel
+    as the NutriSite.Shared package. Or MAUI XAML (native look).
+> a: a new repository, b: Hybrid; 1 and 2
+Claude: The site's epic is "API for the mobile app":
+- Mobile API foundation — sign-in for the app, the forced-update gate, the OpenAPI document, and NutriSite.Contracts and
+  NutriSite.Shared as packable projects (the Complement line will name the package; docs/infra.md names GITHUB_PACKAGES_TOKEN)
+- API and shared screen for meal plan
+- API and shared screen for appointments
+```
+
+When the site is released:
+
+```
+> /agile:publish
+Claude: Plan: v0.4.0, previous tag v0.3.0, 3 items since it.
+  Package: NutriSite.Web; NutriSite.Contracts (nuget 0.4.0); NutriSite.Shared (nuget 0.4.0).
+Claude: Packaged NutriSite.Web (zip 6.1 MB); packages/NutriSite.Contracts.0.4.0.nupkg and packages/NutriSite.Shared.0.4.0.nupkg
+  (Shared holds staticwebassets/ and depends on NutriSite.Contracts 0.4.0).
+Claude: Release v0.4.0: notes committed, tag, push, GitHub Release; both packages pushed to
+  https://nuget.pkg.github.com/<owner>/index.json with --skip-duplicate.
+```
+
+With `GITHUB_PACKAGES_TOKEN` not set, the same command says `Left out: NutriSite.Contracts, NutriSite.Shared: not published as NuGet packages, GITHUB_PACKAGES_TOKEN is not set` and publishes the site. If the push of the packages fails after the tag, the report names the `dotnet nuget push ... --skip-duplicate` command to rerun, without the token.
+
+Then, in the **app's** repository, with a brief that names the site:
+
+```
+> /agile:bootstrap
+Claude: Round 1 ... Question 2d, where does the backend live? Recommendation: an existing API — the brief names nutri-site.
+    Already clear: the screens are MAUI Blazor Hybrid — nutri-site's CLAUDE.md says its shared screens are in the NutriSite.Shared package.
+> ok
+...
+Claude: Skeleton: NutriApp.Mobile.Core (references the NutriSite.Shared package), NutriApp.Mobile (BlazorWebView head),
+  a nuget.config with nuget.org and the site's feed (source mapping: NutriSite.* on the feed, * on nuget.org; the token as
+  %GITHUB_PACKAGES_TOKEN%), Directory.Packages.props pinning NutriSite.Shared 0.4.0, docs/api/backend.md with release v0.4.0.
+  No NutriApp.Contracts project: the records come in the package. CLAUDE.md gets "- Shared screens: package NutriSite.Shared ...".
+```
+
+Later, `/agile:sync` in the app, after the site shipped `v0.5.0`:
+
+```
+Claude: Plugin files: all the same. The site has release v0.5.0, past the pinned NutriSite.Shared 0.4.0; moving the pin and
+  refreshing docs/api/backend-openapi.json from that release is an item of this app. Nothing was written.
+```
+
+### 14.34 A new site born with its mobile app
+
+A physiotherapist's brief asks for a site where patients see their exercise plans and book sessions, and "an app for patients, from the start":
+
+```
+> /agile:bootstrap
+Claude: Round 1.
+2. Architecture profile — Recommendation: web-app. Reason: screens over simple data (plans, sessions), one business area,
+   and the app shows part of the site. mobile on monolith would fit if an API were the main consumer; it is not.
+2e. A mobile app from day one? no · yes, MAUI Blazor Hybrid · yes, MAUI XAML
+   Recommendation: yes, Hybrid. Reason: the brief names an app for patients; with Hybrid the site's screens are born in
+   PhysioSite.Shared and the app reuses them. It lives in this repository and solution.
+   Which of the brief's features go to the app? All ticked; answer "ok" or the numbers to untick.
+   Patient area: 1 Exercise plan · 2 Session booking · 3 Messages
+   Back office:  4 Patient records · 5 Schedule settings
+> ok, untick 4 and 5
+Claude: Taken to the app: 1 Exercise plan, 2 Session booking, 3 Messages.
+...
+Claude: Board proposal:
+- UI kit and gallery, built from the identity — the kit in PhysioSite.Shared, the gallery page in PhysioSite.Web
+- Epic "Patient area": Exercise plan, Session booking, Messages — each screen a component in Shared hosted by a page in
+  Web, its rule or query in Features/ behind an interface in Shared
+- Epic "Back office": Patient records, Schedule settings
+- Epic "Mobile app" (docs/epics/mobile-app.md, the three features under "Features taken to the app"):
+  Mobile foundation (after the UI kit and sign-in), Exercise plan on mobile, Session booking on mobile, Messages on mobile
+  — each "on mobile" after Mobile foundation and the site's matching item
+Create them?
+> ok
+Claude: Skeleton: PhysioSite.Web (Version 0.1.0), PhysioSite.Contracts, PhysioSite.Shared (Razor Class Library, texts in
+  pt-BR, pt-PT and en), PhysioSite.Tests with the architecture and layout tests. No app project and no Complement line yet:
+  Mobile foundation brings them. Create it?
+```
+
+Months later, `/agile:refine` of "Mobile foundation" reads the complement's "Born with the site": `Contracts` and `Shared` are already there, so the item adds `PhysioSite.Mobile.Core` and `PhysioSite.Mobile`, the app's sign-in, the `Complement:` line and the head at the site's current version.
+
+### 14.35 Deploying a release
+
+ExamPrep (14.29) is a `web-app` with an AppHost on the recipe. Its `docs/infra.md` has staging (`http://localhost:5081`) and production (`http://localhost:5080`) with the deploy command and a Check URL, and `Parameters__apikey` in `## Expected secrets` as an environment variable of both. `main` carries `<Version>0.2.0</Version>` and there is no tag yet. Before starting Claude you set `Parameters__apikey` in your own terminal; its value is never typed in the chat.
+
+```
+> /agile:publish staging
+Claude: Plan: release v0.2.0 (previous v0.1.0, 2 items), then deploy it to staging.
+  Deployed on staging now: nothing recorded.
+  Command: aspire deploy --apphost src/ExamPrep.AppHost/ExamPrep.AppHost.csproj -e Staging
+           -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
+  Secrets, names only: Parameters__apikey (set).
+  Going on: typing the command is the authorization. The deploy builds the image: it takes about a minute.
+Claude: Release v0.2.0 done: notes committed, tag and main pushed, GitHub Release created.
+Claude: Deployed v0.2.0 to staging in 43 s. http://localhost:5081/health answered 200 after 0.1 s.
+  docs/infra.md says "v0.2.0 (2026-10-02)" for staging: commit 7172abd, pushed.
+  Output saved in C:\Users\you\AppData\Local\Temp\agile-deploy\staging-v0.2.0-....log.
+  1 image tag aspire-deploy-* is left (docker image ls --filter "reference=*:aspire-deploy-*"); old ones are never deleted here.
+```
+
+Staging is checked by you, then:
+
+```
+> /agile:publish production
+Claude: Plan: promotion. v0.2.0 is already tagged: no new package, notes or tag.
+  Deployed on production now: nothing recorded. To deploy: v0.2.0. Secrets, names only: Parameters__apikey (set).
+Claude: Deployed v0.2.0 to production in 18 s; http://localhost:5080/health answered 200. docs/infra.md updated (commit pushed).
+  Staging was not touched: two compose projects run side by side.
+```
+
+A later version, 0.3.0, goes to production and turns out wrong. The rollback needs the tag and no question:
+
+```
+> /agile:publish production v0.2.0
+Claude: Plan: rollback. Deployed on production now: v0.3.0. To deploy: v0.2.0 (the tag exists). Secrets: Parameters__apikey (set).
+Claude: Deployed v0.2.0 to production in 17 s; /health answered 200. docs/infra.md says "v0.2.0 (2026-10-02)".
+  One production project is running (replaced, not duplicated); your main checkout stayed on main.
+```
+
+A broken version fails and says how to go back; the secret is checked first:
+
+```
+> /agile:publish staging v0.3.1
+Claude: The deploy command exited 0 but http://localhost:5081/health never answered 200 in 60 s (last: HTTP 503).
+  Nothing was recorded and nothing was rolled back. Output tail: ...
+  To go back to the version recorded before: /agile:publish staging v0.3.0
+
+> /agile:publish production
+Claude: The environment variable Parameters__apikey is not set: set it outside this chat (its value is never read, printed
+  or asked for), then run the command again. Nothing ran.
+```
+
+A compile error at the tag ends the same way (`the deploy command exited 6`, the build's last lines, the running version still answering). With no environment, `/agile:publish` after a ship lists them: `local (not declared) · staging v0.3.0 · production v0.2.0`, and asks which one or "none" (the release only). An environment whose command says `not declared` deploys nothing: `Claude: production declares no deploy command: write it in the "Deploy command" cell of the production row of docs/infra.md.`
+
+### 14.36 A pushed tag deploys itself
+
+ExamPrep (14.35) has `staging` and `production` declared in `docs/infra.md`, `Parameters__apikey` as an environment variable of both, and a GitHub `origin`. It was bootstrapped before the pipeline existed, so after a plugin update `/agile:sync` says so and writes nothing:
+
+```
+> /agile:sync
+Claude: Deploy pipeline (since 0.0.102) is missing: a GitHub Actions workflow that deploys a pushed v<Version> tag
+  by the Deploy command of docs/infra.md. A sync never installs it; capture an item for it? (y/n)
+> y
+```
+
+The item runs `node sync.js pipeline write` and prints what it wrote; the report before it shows the choices it made from the table:
+
+```
+wrote .github/workflows/deploy.yml (tag deploys to staging; secrets: Parameters__apikey) and .github/scripts/agile-deploy.js
+```
+
+You add `Parameters__apikey` to the GitHub environments `staging` and `production` (Settings, Environments), and a required reviewer to `production`. From then on, a local release says it before running:
+
+```
+> /agile:publish staging
+Claude: Plan: release v0.3.0 (previous v0.2.0, 2 items), then deploy it to staging.
+  The pipeline (.github/workflows/deploy.yml) also deploys v0.3.0 to staging when the release pushes the tag:
+  the two run the same command on the same environment at the same time and are not serialized (the concurrency group of the pipeline queues only its own runs).
+  ...
+```
+
+Pushing the tag starts the run. Its summary, for the tag:
+
+```
+## Deployed
+
+v0.3.0 deployed to staging
+
+It took 43 s.
+Record it: the Version (deployed on) cell of staging in docs/infra.md is written only by a local /agile:publish.
+Check: http://staging.examprep.example/health answered 200 in 0.4 s.
+```
+
+Production is a manual run (Actions, Deploy, Run workflow: `environment` = `production`, `tag` = `v0.3.0`), which waits for the reviewer you set. A secret that was never added stops the run before the command, and nothing but its name is printed:
+
+```
+the secret Parameters__apikey is not set for the GitHub environment production: add it to the environment's secrets,
+make sure .github/workflows/deploy.yml passes it (secrets.<name>), then run again; the command did not run
+```
+
+A version that deploys but never answers fails the run and names how to go back; rolling back is the same manual run with the old tag, or `/agile:publish production v0.2.0` from your machine:
+
+```
+the deploy command exited 0 but http://staging.examprep.example/health never answered 200 in 60 s (last: HTTP 503)
+
+Nothing was rolled back. To go back: /agile:publish staging v<the version recorded for staging in docs/infra.md> locally, or run this workflow by hand with that tag.
+```
+
+When the table later lists one more secret, the next `/agile:sync` shows `.github/workflows/deploy.yml` as a `manual` difference (the new `secrets.<name>` line) and you merge it by hand.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2006,7 +2217,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:identity` | Record the app's visual identity (a file, a website, an image or three questions) in `docs/design/`, or review the one recorded |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | One item from idea to done in a single run with two stops: the questions (your answers approve it) and the validation script ("validado e autorizo o merge de F-n" ships it; "validado" alone stops at validating). `--assume` skips the questions except new packages |
 | `/agile:version` | Plugin version running in this session, the version the project's copies came from, and the next step when they differ |
-| `/agile:publish` | The app version on `main` as a release: package and zip per deployable project, notes, annotated tag, push and GitHub Release (typing it is the authorization; no deploy) |
+| `/agile:publish [<environment> [v<x.y.z>]]` | The app version on `main` as a release: package and zip per deployable project (a Hybrid app's site: its two NuGet packages too), notes, annotated tag, push and GitHub Release; with an environment, also its deploy by the command `docs/infra.md` declares (`v<x.y.z>`: a rollback to that tag); the tag it pushes also starts the deploy pipeline when the project has one. Typing it is the authorization |
 
 ## 16. Command flows
 
@@ -2019,7 +2230,8 @@ flowchart TD
     A -->|yes| B["Read the brief and the code base it names"]
     B --> C["Rounds 1 to 8, one message each:<br/>questions with recommendation and reason"]
     C --> C1["mobile on an existing API (2d): skip what the API decides;<br/>propose the app's ideas from the site's ticked list, or the gate issue on the API's board"]
-    C1 --> D{"Your answers ('ok' accepts)"}
+    C1 --> C2["web-app or website with an app from day one (2e): the brief's features to untick;<br/>later Contracts (+ Shared with Hybrid) and the epic 'Mobile app', no app project yet"]
+    C2 --> D{"Your answers ('ok' accepts)"}
     D --> E["Closing question: which domain concept worries you most?"]
     E --> F["Summary of every decision"]
     F --> G{"'confirmo'?"}
@@ -2227,7 +2439,7 @@ flowchart TD
     D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit (a missing Worktrees: or Plugins: line too);<br/>never touch project rules; no warnings baseline: offer the first one, gate.js baseline with your yes"]
     E --> E2["Something only bootstrap installs and this project lacks:<br/>name it and offer to capture a feature"]
     E2 --> E3["DocGen with no docs command declared:<br/>offer the block, sync.js docs writes it into build.json"]
-    E3 --> E4["Backend: external and the API reachable:<br/>report when its openapi.json moved past the pinned commit"]
+    E3 --> E4["Backend: external and the API reachable:<br/>report when its openapi.json moved past the pinned commit;<br/>on the site's shared package: report when its latest release is past the pinned version"]
     E4 --> F{"Build files or checked rules changed?"}
     F -->|yes| G["Build, full suite, fix findings, baseline"]
     F -->|no| H
@@ -2301,15 +2513,27 @@ flowchart TD
 ### /agile:publish
 ```mermaid
 flowchart TD
-    A["Plan: main checkout, on main, clean, level with origin;<br/>one version on the projects; the tag of that version free"] -->|"a check fails"| A1(["Stops with the reason, nothing written"])
+    A["Plan: main checkout, on main, clean, level with origin;<br/>one version on the projects; the tag of that version free (a release only: a promotion or a rollback of a tag already released skips this)"] -->|"a check fails"| A1(["Stops with the reason, nothing written"])
     A -->|ok| B["Shows version, previous tag, items since it, projects and runtimes<br/>(typing the command is the authorization: no question)"]
     B --> C["dotnet publish -c Release per project and runtime;<br/>drops appsettings.Development.json and the .xml; one zip each"]
     C -->|"publish or zip fails"| C1(["Stops: nothing committed or tagged"])
-    C --> D["Writes the notes in docs/releases/ (one file per version)"]
+    C --> C2["A Hybrid app's site: dotnet pack of Contracts and Shared at the release's version into packages/<br/>(no GITHUB_PACKAGES_TOKEN or origin off github.com: left out, with the reason)"]
+    C2 -->|"pack fails"| C1
+    C2 --> D["Writes the notes in docs/releases/ (one file per version)"]
     D --> D2["A mobile head: signed Android .aab (signing from four environment variables)<br/>and docs/releases/v<Version>-store.md, the store checklist"]
     D2 --> E["Commit on main (notes and checklist), annotated tag with the notes, push main and tag"]
     E -->|"push fails"| E1(["Names the command to rerun; commit and tag stay"])
+    E --> E2(["With .github/workflows/deploy.yml: the pushed tag starts the pipeline,<br/>which runs the same Deploy command on its target (the plan said so before)"])
     E --> F{"origin on github.com and gh installed?"}
     F -->|yes| G(["GitHub Release with the notes, no binaries"])
     F -->|no| H(["One line saying why; the tag stands"])
+    G --> I(["Packages pushed to GitHub Packages with --skip-duplicate;<br/>a failure names the push command to rerun"])
+    H --> I
+    I --> J{"An environment named?"}
+    J -->|no| J0(["Done: the release only"])
+    J -->|yes| K["Checks docs/infra.md: the environment, its command (not declared: says how to declare it),<br/>the tag (a rollback needs it to exist), every secret set by name, Aspire packages = CLI version"]
+    K -->|"a check fails"| K1(["Stops with the reason, nothing ran"])
+    K --> L["Runs the command in worktree root/deploy, detached at the tag;<br/>output saved outside the repository; Check URL polled for 200 (60 s)"]
+    L -->|"exit not 0, or no 200"| L1(["Nothing recorded, nothing rolled back;<br/>gives /agile:publish for the version recorded before"])
+    L --> M(["Records v<x.y.z> (date) in docs/infra.md: commit on main and push"])
 ```

@@ -116,3 +116,26 @@ Modules/<Module>/
 - Every rule of absence is paired with a rule of presence (the test asserts it matched at least one type). An empty assembly must fail, not pass.
 - Screens follow the `ui` rule: a UI kit and a dev-only gallery come before the first screen; pages use the kit, icons go through semantic names, and architecture tests forbid raw icons and raw tables outside the kit. The kit item writes the MudBlazor theme (`MudTheme` palette for light and dark, typography, default border radius) from `docs/design/identity.tokens.json`, and a test loads the tokens and asserts every palette value equals its token.
 - Layout: every project sits in the folder the `## Layout` assigns to its kind, and the solution folders mirror the disk folders. The test lists the solution and fails on a project outside its group (rule of presence: it saw at least one project per group).
+
+## Deploy recipe (containers + Aspire, with an AppHost)
+`docs/infra.md` declares each environment's "Deploy command"; with an AppHost it is `aspire deploy --apphost src/<App>.AppHost/<App>.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`, and `/agile:publish <environment>` runs it (`-o` keeps the `.env.<Environment>` that holds the secrets in plain text under the ignored `artifacts/`; `--clear-cache` keeps no saved value that would win over a new one). The AppHost is written for it once, at bootstrap (measured on Aspire 13.6.0):
+- The Aspire CLI, `Aspire.AppHost.Sdk`, `Aspire.Hosting.Docker` and every other `Aspire.*` package of the AppHost are the latest stable and carry the same version (13.6.0 packages with a 13.5.3 CLI fail with `Run completed without returning a backchannel`). `Aspire.Hosting.AppHost` is never a `PackageVersion` in `Directory.Packages.props` (the SDK adds it: NU1009). `<AspireUseCliBundle>true</AspireUseCliBundle>` on the AppHost removes ASPIRE010.
+- One compose environment per environment name (else staging replaces production), no dashboard (it publishes a random port on every address of the host), and one named volume per environment for the Data Protection keys, mounted at `/home/app` (another folder is not writable by the `app` user): declared on the service and at the top level, or compose fails with `refers to undefined volume`.
+- Each web or API project resource sets `ASPNETCORE_ENVIRONMENT` to the environment name (else staging logs `Production`), marks only its `http` endpoint external with a port pinned in the AppHost's `appsettings.<Environment>.json` (`{ "Deploy": { "HostPort": "<port>" } }`, the port of the URL in `docs/infra.md`; local runs have no such file and get port 0, which is fine; a deployed environment without it gets a random port that changes on every deploy; a second external resource needs its own key, never the same port; never `WithExternalHttpEndpoints()`, which also publishes the https endpoint on a random port) and parses the port with `CultureInfo.InvariantCulture` (CA1305).
+- The app calls `AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(path)).SetApplicationName("<App>")` only when `DataProtection:KeysPath` is set: a redeploy then keeps cookies and antiforgery tokens valid, and local development is unchanged.
+- A secret is `builder.AddParameter("<name>", secret: true)`, supplied by the environment variable `Parameters__<name>`, and listed in `docs/infra.md` "Expected secrets" with that environment variable as where it is kept; its value is never written down.
+- `docker compose down -v` is never run: it deletes the keys volume and, with it, every signed-in session.
+```csharp
+// <App>.AppHost/Program.cs: using System.Globalization; using Aspire.Hosting.Docker.Resources.ServiceNodes;
+var environmentName = builder.Environment.EnvironmentName;
+var hostPort = int.Parse(builder.Configuration["Deploy:HostPort"] ?? "0", CultureInfo.InvariantCulture);
+var keys = $"keys-{environmentName.ToLowerInvariant()}";
+builder.AddDockerComposeEnvironment($"compose-{environmentName.ToLowerInvariant()}")
+    .WithDashboard(false)
+    .ConfigureComposeFile(file => file.AddVolume(new Volume { Name = keys, Driver = "local" }));
+builder.AddProject<Projects.<App>_Api>("api")   // each web or API project resource
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+    .WithEnvironment("DataProtection__KeysPath", "/home/app/keys")
+    .WithEndpoint("http", e => { e.Port = hostPort; e.IsExternal = true; })
+    .PublishAsDockerComposeService((_, service) => service.AddVolume(new Volume { Name = keys, Source = keys, Target = "/home/app", Type = "volume" }));
+```

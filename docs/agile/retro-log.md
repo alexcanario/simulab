@@ -831,3 +831,12 @@ From 0.0.78 to 0.0.97, run after F-42 shipped (main clean, no item open).
 - Proposed, not applied (the owner approved the files, not `CLAUDE.md`): two wording lines of `CLAUDE.md` follow the new templates ("merge authorized (typing `/agile:ship <id>` is that gate)" and "Ask before: pushing or merging to `main` outside a ship").
 - Missing capabilities: app version `<Version>` on `Simulab.Api.csproj` captured as an idea; DocGen tool catalogue and visual identity (`/agile:identity`) declined for now.
 - Baseline: present. Docs command: declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes delivered: none in the plan. Build and suite not run: no build file and no rule with a build check changed.
+
+## 2026-10-02 — Sync with agile@canary 0.0.102
+From 0.0.97 to 0.0.102, run on a clean main with no item `building` or `validating`.
+- Copied (never edited, plugin changed): templates `infra` and `project-claude`; `docs/agile/workflow.md` and `workflow.pt-BR.md`.
+- Merged with the recorded base: `docs/agile/profile.md` (clean merge, no conflict: the new "Deploy recipe (containers + Aspire)" section was added).
+- Manual, applied: `.gitignore` got three lines only (`.env.*`, `!.env.example`, `aspire-output/`): Aspire writes a deploy's secrets in plain text there.
+- Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged); `.editorconfig`, `Directory.Build.props`, `Directory.Packages.props`, `global.json`, `tests/Directory.Build.props` (manual, no upstream change).
+- Missing capabilities captured as ideas: F-61 DocGen tool catalogue (#100), F-62 deploy command per environment (#101), F-63 visual identity (#102). The app version is F-60 (#99), captured at the 0.0.97 sync.
+- Baseline: present. Docs command: declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes delivered: none. Build and suite not run: only Markdown and `.gitignore` changed.

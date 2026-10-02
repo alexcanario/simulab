@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 *.swp
 /.contextkeeper/.git-branches/feature-F-52.ck
 /.contextkeeper/.git-branches/main.ck
+
+# Aspire deploy secrets (plain text in .env.<Env>; aspire-output/ when no -o is given)
+.env.*
+!.env.example
+aspire-output/

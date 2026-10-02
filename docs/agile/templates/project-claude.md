@@ -17,8 +17,9 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.
-- Complement: `<complement>` — see `docs/agile/profile-<complement>.md`. (Optional: only when a complement was added, such as `mobile-client` on `web-app`/`website`. Delete this line otherwise. With the app in a new repository, the line reads ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.``)
+- Complement: `<complement>` — see `docs/agile/profile-<complement>.md`. (Optional: only when a complement was added, such as `mobile-client` on `web-app`/`website`. Delete this line otherwise. With the app in a new repository, the line reads ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.``, and with Hybrid screens ``... <repository>; shared screens in the `<App>.Shared` package; see ...``)
 - Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`. (Optional: only on profile `mobile` whose API is another repository's, quiz 2d. Delete this line otherwise.)
+- Shared screens: package `<App>.Shared` from the site's GitHub Packages feed. (Optional: only under `- Backend: external` when the site's `Complement:` line names the package. Delete this line otherwise.)
 - Decisions: `docs/decisions/` (start with ADR-0001).
 - Keep code simple: add structure only where the profile asks for it.
 
