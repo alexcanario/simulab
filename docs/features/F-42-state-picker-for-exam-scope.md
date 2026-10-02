@@ -1,7 +1,7 @@
 ---
 feature: F-42
 epic: Assessment catalog
-status: validating
+status: done
 board: 81
 version: 1
 ---
@@ -153,6 +153,6 @@ Needed to validate: the app host started from this worktree (you start it) with 
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: feature/F-42
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Merge: 74616f9
+- Tests: 1808 passed, 0 failed, full suite 69 s test + 21 s build, `agile gate GREEN`, 0 new warnings (2026-10-02)
+- Manual pages: `docs/manual/en/exams.md`, `docs/manual/pt-BR/exams.md`, `docs/manual/pt-PT/exams.md`, and the same three of `catalog.md`
