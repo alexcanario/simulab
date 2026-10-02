@@ -128,6 +128,90 @@ public sealed class ExamEndpointTests : CatalogApiTests
         (await ListAsync(admin, $"?issuingAuthorityId={authority.Id}")).Total.Should().Be(0);
     }
 
+    // F-42 AC3, AC5 (BR1, BR2): a State exam stores the acronym, whatever case or spaces came in, and the Api
+    // answers with it on create, on update and on find.
+    [Theory]
+    [InlineData("SP")]
+    [InlineData("sp")]
+    [InlineData("  sP ")]
+    public async Task Create_StateWithAnAcronymOfTheList_StoresItInUpperCase(string sent)
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+
+        var exam = await CreateAsync(admin, Valid(authority.Id, scope: ExamScope.State, scopeDetail: sent));
+
+        exam.ScopeDetail.Should().Be("SP");
+        var found = (await admin.GetFromJsonAsync<ExamResponse>($"{Exams}/{exam.Id}", AppJson.Options))!;
+        found.ScopeDetail.Should().Be("SP");
+    }
+
+    [Fact]
+    public async Task Update_StateToAnotherAcronym_StoresIt()
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+        var created = await CreateAsync(admin, Valid(authority.Id, name: "Prova estadual", scope: ExamScope.State, scopeDetail: "SP"));
+
+        var response = await admin.PutAsJsonAsync(
+            $"{Exams}/{created.Id}",
+            Valid(authority.Id, name: "Prova estadual", scope: ExamScope.State, scopeDetail: "ce"),
+            AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        (await response.Content.ReadFromJsonAsync<ExamResponse>(AppJson.Options))!.ScopeDetail.Should().Be("CE");
+    }
+
+    // F-42 AC5 (UC4, BR2): a State exam whose detail is not an acronym of the list is refused, on create and on
+    // update, and nothing is written.
+    [Theory]
+    [InlineData("Sampa")]
+    [InlineData("São Paulo")]
+    [InlineData("XX")]
+    public async Task Create_StateWithTextOffTheList_IsRefusedAndNothingIsWritten(string sent)
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+
+        var response = await admin.PostAsJsonAsync(
+            Exams,
+            Valid(authority.Id, scope: ExamScope.State, scopeDetail: sent),
+            AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.ExamScopeDetailUnknownState);
+        (await ListAsync(admin, $"?issuingAuthorityId={authority.Id}")).Total.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Update_StateWithTextOffTheList_IsRefusedAndTheExamKeepsItsState()
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+        var created = await CreateAsync(admin, Valid(authority.Id, name: "Prova estadual", scope: ExamScope.State, scopeDetail: "SP"));
+
+        var response = await admin.PutAsJsonAsync(
+            $"{Exams}/{created.Id}",
+            Valid(authority.Id, name: "Prova estadual", scope: ExamScope.State, scopeDetail: "Sampa"),
+            AppJson.Options);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.ExamScopeDetailUnknownState);
+        (await admin.GetFromJsonAsync<ExamResponse>($"{Exams}/{created.Id}", AppJson.Options))!.ScopeDetail.Should().Be("SP");
+    }
+
+    // F-42 AC4 (BR3): a Municipal exam keeps free text, whatever the text says.
+    [Fact]
+    public async Task Create_MunicipalWithFreeText_StoresItAsTyped()
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+
+        var exam = await CreateAsync(admin, Valid(authority.Id, scope: ExamScope.Municipal, scopeDetail: "São Paulo (SP)"));
+
+        exam.ScopeDetail.Should().Be("São Paulo (SP)");
+    }
+
     // AC6: the name is taken inside the authority, ignoring case and accents.
     [Theory]
     [InlineData("AGENTE DE TRANSITO")]
@@ -280,7 +364,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
         var authority = await AuthorityAsync(admin);
         var exam = await CreateAsync(
             admin,
-            Valid(authority.Id, scope: ExamScope.State, scopeDetail: "Sao Paulo", assessmentType: AssessmentType.UniversityEntranceExam));
+            Valid(authority.Id, scope: ExamScope.State, scopeDetail: "SP", assessmentType: AssessmentType.UniversityEntranceExam));
 
         var found = (await admin.GetFromJsonAsync<ExamResponse>($"{Exams}/{exam.Id}", AppJson.Options))!;
 
@@ -377,7 +461,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
             authority.Id,
             assessmentType: AssessmentType.UniversityEntranceExam,
             scope: ExamScope.State,
-            scopeDetail: "Sao Paulo"));
+            scopeDetail: "SP"));
         await CreateAsync(admin, Valid(authority.Id, assessmentType: AssessmentType.Certification));
         await CreateAsync(admin, Valid(
             authority.Id,
@@ -458,7 +542,7 @@ public sealed class ExamEndpointTests : CatalogApiTests
         var authority = await AuthorityAsync(admin);
         await CreateAsync(admin, Valid(authority.Id, name: "A nacional"));
         await CreateAsync(admin, Valid(authority.Id, name: "B municipal", scope: ExamScope.Municipal, scopeDetail: "Guarulhos"));
-        await CreateAsync(admin, Valid(authority.Id, name: "C estadual", scope: ExamScope.State, scopeDetail: "Sao Paulo"));
+        await CreateAsync(admin, Valid(authority.Id, name: "C estadual", scope: ExamScope.State, scopeDetail: "SP"));
 
         var order = $"{ExamScope.Municipal},{ExamScope.State},{ExamScope.National}";
         var page = await ListAsync(admin, $"?issuingAuthorityId={authority.Id}&sortBy={ExamSort.Scope}&scopeOrder={order}");

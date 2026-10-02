@@ -178,15 +178,65 @@ public class ExamTests
         var exam = Create().Value;
         var other = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
-        var result = exam.Update(other, "FUVEST", AssessmentType.UniversityEntranceExam, ExamScope.State, "Sao Paulo", "pt-BR");
+        var result = exam.Update(other, "FUVEST", AssessmentType.UniversityEntranceExam, ExamScope.State, "SP", "pt-BR");
 
         result.IsSuccess.Should().BeTrue();
         exam.IssuingAuthorityId.Should().Be(other);
         exam.Name.Should().Be("FUVEST");
         exam.AssessmentType.Should().Be(AssessmentType.UniversityEntranceExam);
         exam.Scope.Should().Be(ExamScope.State);
-        exam.ScopeDetail.Should().Be("Sao Paulo");
+        exam.ScopeDetail.Should().Be("SP");
         exam.NormalizedName.Should().Be(CatalogText.Normalize("FUVEST"));
+    }
+
+    // F-42 BR1, BR2, AC3, AC5: a State exam names its state by acronym.
+    [Theory]
+    [InlineData("SP")]
+    [InlineData("sp")]
+    [InlineData("  Sp  ")]
+    public void Create_StateWithAnAcronymOfTheList_StoresItInUpperCaseAndSearchesByNameAndAcronym(string detail)
+    {
+        var result = Create(scope: ExamScope.State, scopeDetail: detail);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.ScopeDetail.Should().Be("SP");
+        result.Value.NormalizedScopeDetail.Should().Be("SAO PAULO SP");
+    }
+
+    [Theory]
+    [InlineData("Sampa")]
+    [InlineData("São Paulo")]
+    [InlineData("SPP")]
+    [InlineData("XX")]
+    public void Create_StateWithTextOffTheList_FailsWithUnknownState(string detail)
+    {
+        var result = Create(scope: ExamScope.State, scopeDetail: detail);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error!.Code.Should().Be(CatalogErrorCodes.ExamScopeDetailUnknownState);
+    }
+
+    [Fact]
+    public void Update_StateWithTextOffTheList_Fails_AndKeepsTheStateItHad()
+    {
+        var exam = Create(scope: ExamScope.State, scopeDetail: "SP").Value;
+
+        var result = exam.Update(Authority, exam.Name, exam.AssessmentType, ExamScope.State, "Sampa", "pt-BR");
+
+        result.Error!.Code.Should().Be(CatalogErrorCodes.ExamScopeDetailUnknownState);
+        exam.ScopeDetail.Should().Be("SP");
+        exam.NormalizedScopeDetail.Should().Be("SAO PAULO SP");
+    }
+
+    // F-42 AC4 (BR3): the same text a State exam refuses is fine for a Municipal one.
+    [Fact]
+    public void Create_MunicipalWithFreeText_KeepsItAsTyped()
+    {
+        var result = Create(scope: ExamScope.Municipal, scopeDetail: "Sampa");
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.ScopeDetail.Should().Be("Sampa");
+        result.Value.NormalizedScopeDetail.Should().Be("SAMPA");
     }
 
     // BR15: a refused update leaves the entity as it was.
