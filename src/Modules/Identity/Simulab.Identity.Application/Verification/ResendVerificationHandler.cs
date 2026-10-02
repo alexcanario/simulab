@@ -22,6 +22,7 @@ public sealed class ResendVerificationHandler(
     IUserDirectory userDirectory,
     IEmailVerificationTokenStore tokenStore,
     IVerificationMailer mailer,
+    IIdentityUnitOfWork unitOfWork,
     TimeProvider timeProvider)
 {
     public async Task<ResendOutcome> HandleAsync(string? email, CancellationToken cancellationToken = default)
@@ -45,12 +46,16 @@ public sealed class ResendVerificationHandler(
             return ResendOutcome.Throttled;
         }
 
+        var (rawToken, tokenHash) = SecureToken.Generate();
+
+        // F-47 BR1: consuming the older links and adding the new one commit together, so a failure between
+        // them never leaves an account with every link dead and none new.
+        await using var transaction = await unitOfWork.BeginAsync(cancellationToken);
+
         // The older links stop working before the new one exists, so only one link is ever valid.
         await tokenStore.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
 
-        var (rawToken, tokenHash) = SecureToken.Generate();
-
-        // F-13 BR2: staged first, written by the store's save, in the token's own transaction.
+        // F-13 BR2: staged first, written by the store's save, in the same transaction.
         await mailer.SendAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
 
         await tokenStore.AddAsync(
@@ -62,6 +67,7 @@ public sealed class ResendVerificationHandler(
             },
             cancellationToken);
 
+        await transaction.CommitAsync(cancellationToken);
         return ResendOutcome.Accepted;
     }
 

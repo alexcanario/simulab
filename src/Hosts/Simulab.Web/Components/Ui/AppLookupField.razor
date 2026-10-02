@@ -20,7 +20,8 @@
                      Margin="Margin.Dense"
                      MinCharacters="MinChars"
                      DebounceInterval="DebounceMilliseconds"
-                     MaxItems="MaxCandidates"
+                     MaxItems="MaxItems"
+                     OpenOnFocus="OpenOnFocus"
                      Clearable="Clearable"
                      ClearIcon="@AppIcons.Close"
                      Disabled="Disabled"
@@ -109,6 +110,18 @@
 
     /// <summary>How many characters before the first call: fewer would ask the server on every keystroke.</summary>
     [Parameter] public int MinChars { get; set; } = 2;
+
+    /// <summary>
+    /// F-42: opens the list when the field takes focus, before the reader types. Meant for a short fixed list
+    /// (the 27 states) together with <see cref="MinChars"/> 0; a search over the catalog keeps it off.
+    /// </summary>
+    [Parameter] public bool OpenOnFocus { get; set; }
+
+    /// <summary>
+    /// F-42: how many candidates the list shows. The default is <see cref="MaxCandidates"/>; a fixed list that is
+    /// longer than that raises it so the reader is never shown part of it.
+    /// </summary>
+    [Parameter] public int MaxItems { get; set; } = MaxCandidates;
 
     /// <summary>F-43 BR1: a decorative <see cref="AppIcons"/> constant in place of the magnifier, when what the
     /// field looks for is worth naming. It never carries meaning of its own; the label does.</summary>

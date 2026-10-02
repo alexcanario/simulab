@@ -414,7 +414,7 @@
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Editar exame</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Entidade contratante</value></data>
   <data name="Exams.Field.IssuingAuthority.Hint" xml:space="preserve"><value>A entidade que publica o aviso e define as regras. A entidade que aplica cada prova pertence à edição.</value></data>
-  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
+  <data name="Exams.Field.IssuingAuthority.Placeholder" xml:space="preserve"><value>Nome</value></data>
   <data name="Exams.Field.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Exams.Field.Name.Hint" xml:space="preserve"><value>Entre 2 e 200 caracteres</value></data>
   <data name="Exams.Field.Name.Placeholder" xml:space="preserve"><value>Ex.: Concurso CM Lisboa 2026 — Polícia Municipal</value></data>
@@ -422,7 +422,9 @@
   <data name="Exams.Field.AssessmentType.Placeholder" xml:space="preserve"><value>Selecione o tipo de avaliação</value></data>
   <data name="Exams.Field.Scope" xml:space="preserve"><value>Abrangência</value></data>
   <data name="Exams.Field.State" xml:space="preserve"><value>Estado</value></data>
-  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>Ex.: Ceará</value></data>
+  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>Escolha ou escreva um estado</value></data>
+  <data name="Exams.Field.State.Hint" xml:space="preserve"><value>Escreva o nome ou a sigla para filtrar a lista.</value></data>
+  <data name="Exams.Field.State.UnrecognizedHint" xml:space="preserve"><value>Este exame foi guardado com “{0}”, que não é um estado da lista. Escolha o estado correto.</value></data>
   <data name="Exams.Field.Municipality" xml:space="preserve"><value>Município</value></data>
   <data name="Exams.Field.Municipality.Placeholder" xml:space="preserve"><value>Ex.: Fortaleza/CE</value></data>
   <data name="Exams.Field.ScopeDetail.Hint" xml:space="preserve"><value>Onde este exame se aplica.</value></data>
@@ -460,20 +462,18 @@
   <data name="exam.scope_invalid" xml:space="preserve"><value>Escolha a abrangência.</value></data>
   <data name="exam.scope_detail_required" xml:space="preserve"><value>Indique onde este exame se aplica.</value></data>
   <data name="exam.scope_detail_too_long" xml:space="preserve"><value>Este campo é demasiado longo: no máximo 120 caracteres.</value></data>
+  <data name="exam.scope_detail_unknown_state" xml:space="preserve"><value>Escolha um dos 27 estados da lista.</value></data>
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Escolha o idioma do conteúdo.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Entidades contratantes</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Entidades contratantes</value></data>
-  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Pesquisar por nome ou sigla</value></data>
+  <data name="IssuingAuthorities.Search.Placeholder" xml:space="preserve"><value>Pesquisar por nome</value></data>
   <data name="IssuingAuthorities.Empty" xml:space="preserve"><value>Ainda não há entidades contratantes.</value></data>
   <data name="IssuingAuthorities.Empty.Search" xml:space="preserve"><value>Nenhuma entidade contratante corresponde a "{0}".</value></data>
   <data name="IssuingAuthorities.Column.Name" xml:space="preserve"><value>Nome</value></data>
-  <data name="IssuingAuthorities.Column.Acronym" xml:space="preserve"><value>Sigla</value></data>
   <data name="IssuingAuthorities.Dialog.AddTitle" xml:space="preserve"><value>Adicionar entidade contratante</value></data>
   <data name="IssuingAuthorities.Dialog.EditTitle" xml:space="preserve"><value>Editar entidade contratante</value></data>
   <data name="IssuingAuthorities.Field.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="IssuingAuthorities.Field.Name.Help" xml:space="preserve"><value>Entre 2 e 150 caracteres</value></data>
-  <data name="IssuingAuthorities.Field.Acronym" xml:space="preserve"><value>Sigla</value></data>
-  <data name="IssuingAuthorities.Field.Acronym.Help" xml:space="preserve"><value>Entre 2 e 20 caracteres, guardada em maiúsculas</value></data>
   <data name="IssuingAuthorities.Field.Website" xml:space="preserve"><value>Sítio oficial</value></data>
   <data name="IssuingAuthorities.Field.Website.Help" xml:space="preserve"><value>Endereço completo, a começar por http:// ou https://</value></data>
   <data name="IssuingAuthorities.Field.Description" xml:space="preserve"><value>Descrição</value></data>
@@ -484,9 +484,6 @@
   <data name="issuing_authority.name_required" xml:space="preserve"><value>Indique um nome com pelo menos 2 caracteres.</value></data>
   <data name="issuing_authority.name_too_long" xml:space="preserve"><value>O nome é demasiado longo: no máximo 150 caracteres.</value></data>
   <data name="issuing_authority.name_taken" xml:space="preserve"><value>Outra entidade contratante já tem este nome.</value></data>
-  <data name="issuing_authority.acronym_required" xml:space="preserve"><value>Indique uma sigla com pelo menos 2 caracteres.</value></data>
-  <data name="issuing_authority.acronym_too_long" xml:space="preserve"><value>A sigla é demasiado longa: no máximo 20 caracteres.</value></data>
-  <data name="issuing_authority.acronym_taken" xml:space="preserve"><value>Outra entidade contratante já tem esta sigla.</value></data>
   <data name="issuing_authority.description_too_long" xml:space="preserve"><value>A descrição é demasiado longa: no máximo 500 caracteres.</value></data>
   <data name="issuing_authority.website_invalid" xml:space="preserve"><value>Indique um endereço completo, a começar por http:// ou https://</value></data>
   <data name="issuing_authority.has_exams" xml:space="preserve"><value>Esta entidade contratante tem exames no catálogo. Elimine esses exames primeiro, na página Exames.</value></data>
@@ -513,7 +510,7 @@
   <data name="ExamEditions.Section.Publication.Subtitle" xml:space="preserve"><value>Quem pode ver esta edição.</value></data>
   <data name="ExamEditions.Field.Exam" xml:space="preserve"><value>Exame</value></data>
   <data name="ExamEditions.Field.Organizer" xml:space="preserve"><value>Entidade organizadora</value></data>
-  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Nome ou sigla</value></data>
+  <data name="ExamEditions.Field.Organizer.Placeholder" xml:space="preserve"><value>Nome</value></data>
   <data name="ExamEditions.Field.Organizer.Hint" xml:space="preserve"><value>A entidade organizadora que aplicou esta prova, como o aviso a indica.</value></data>
   <data name="ExamEditions.Field.NoticeYear" xml:space="preserve"><value>Ano do aviso</value></data>
   <data name="ExamEditions.Field.NoticeYear.Placeholder" xml:space="preserve"><value>Ex.: 2026</value></data>

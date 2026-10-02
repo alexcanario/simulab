@@ -38,6 +38,7 @@ public sealed class GoogleLinkHandler(
     /// BR2 to BR7. The ID token is checked exactly as a sign-in checks it; what differs is that the account is
     /// already known, so the address is never used to find one (BR4).
     /// </summary>
+    // F-47 BR7, no transaction: one write after the checks; the event is recorded after it.
     public async Task<Result> LinkAsync(Guid userId, string? idToken, CancellationToken cancellationToken = default)
     {
         var identity = await GoogleSignInHandler.CheckTokenAsync(validator, idToken, cancellationToken);
@@ -89,6 +90,7 @@ public sealed class GoogleLinkHandler(
     /// told nothing it did not already know; then the password, with the same lockout every other
     /// password-confirmed action of this module uses.
     /// </summary>
+    // F-47 BR7, no transaction: one write after the checks; the event is recorded after it.
     public async Task<Result> UnlinkAsync(Guid userId, string? currentPassword, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());

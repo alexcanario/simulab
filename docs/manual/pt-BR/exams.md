@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: pt-BR
-features: [F-34, F-43, F-35]
-updated: 2026-09-29
+features: [F-34, F-43, F-35, F-42]
+updated: 2026-10-02
 ---
 # Exames
 
@@ -21,17 +21,22 @@ a tela Exames. Para as demais, a página não é encontrada.
    título de uma coluna para ordenar por ela.
 3. Digite na caixa de busca para filtrar por nome. Acento e maiúscula não importam: "publica" encontra "Pública".
 4. Os três filtros acima da lista — órgão contratante, tipo de avaliação e abrangência — podem ser combinados.
-   No filtro de órgão contratante, digite duas letras do nome ou da sigla e escolha na lista que aparece.
+   No filtro de órgão contratante, digite duas letras do nome e escolha na lista que aparece.
 
 ### Cadastrar um exame
 1. Escolha **Adicionar**. O formulário abre em uma página própria.
-2. Em **Órgão contratante**, digite duas letras do nome ou da sigla e escolha na lista. Se o órgão ainda não
+2. Em **Órgão contratante**, digite duas letras do nome e escolha na lista. Se o órgão ainda não
    existe, cadastre-o antes em [Órgãos contratantes](issuing-authorities.md).
 3. Digite o **nome** do exame, como ele aparece no edital.
 4. Escolha o **tipo de avaliação**. Escolha a **abrangência** entre os três cartões — cada um explica numa
    linha o que significa.
 5. Se a abrangência for Estadual ou Municipal, aparece um campo a mais para dizer **onde** o exame se aplica.
-   Voltar a abrangência para Nacional esconde o campo e descarta o que você digitou.
+   - **Estadual**: o campo é uma lista com os 27 estados brasileiros (26 estados e o Distrito Federal). Clique nele
+     para ver todos, cada um como "São Paulo (SP)"; digite parte do nome ou da sigla ("sp", "paulo", "sao") para
+     filtrar a lista, com ou sem acento, e escolha um.
+   - **Municipal**: digite o nome do município, em texto livre.
+   - Voltar a abrangência para Nacional esconde o campo e descarta o que você escolheu. Passar de Estadual para
+     Municipal, ou o contrário, deixa o campo vazio.
 6. Escolha o **idioma do conteúdo**. Ele começa em Português (Brasil). Esse é o idioma em que o exame e suas
    questões estão escritos; o conteúdo nunca é traduzido.
 7. Escolha **Salvar**. Você continua na página, agora editando o exame que acabou de criar.
@@ -57,7 +62,7 @@ topo do cartão lista todos os campos que faltam; clicar num deles leva você di
 | Nome | Como o exame aparece em todo lugar | Obrigatório, de 2 a 200 caracteres. Não pode repetir o nome de outro exame do mesmo órgão contratante, inclusive de um excluído. Maiúscula e acento não fazem um nome diferente |
 | Tipo de avaliação | Concurso público, certificação, vestibular ou ENEM | Obrigatório |
 | Abrangência | Nacional, estadual ou municipal | Obrigatório |
-| Estado / Município | Onde o exame se aplica | Obrigatório quando a abrangência é Estadual ou Municipal, no máximo 120 caracteres. Não aparece quando é Nacional |
+| Estado / Município | Onde o exame se aplica | Obrigatório quando a abrangência é Estadual ou Municipal. Em um exame Estadual, um dos 27 estados da lista; aparece em todo lugar como "São Paulo (SP)", e a mesma lista é oferecida qualquer que seja o idioma do conteúdo. Em um exame Municipal, texto livre de no máximo 120 caracteres. Não aparece quando é Nacional |
 | Idioma do conteúdo | O idioma em que o exame e suas questões estão escritos | Obrigatório, um entre Português (Brasil), Português (Portugal) e English. Começa em Português (Brasil) |
 
 ## Mensagens
@@ -69,7 +74,9 @@ topo do cartão lista todos os campos que faltam; clicar num deles leva você di
 | Este órgão já tem um exame com este nome. | O nome está ocupado dentro daquele órgão, talvez por um exame excluído. | Escolha outro nome, ou outro órgão contratante. |
 | Escolha um tipo de avaliação. | O tipo não foi escolhido. | Escolha um dos quatro tipos. |
 | Escolha a abrangência. | A abrangência não foi escolhida. | Escolha nacional, estadual ou municipal. |
-| Informe onde este exame se aplica. | A abrangência é estadual ou municipal e o campo ficou vazio. | Digite o estado ou o município. |
+| Informe onde este exame se aplica. | A abrangência é estadual ou municipal e o campo ficou vazio. | Escolha o estado na lista, ou digite o município. |
+| Escolha um dos 27 estados da lista. | O estado foi recusado porque não é um dos 27 da lista. | Abra a lista e escolha o estado. |
+| Este exame foi salvo com “…”, que não é um estado da lista. Escolha o estado certo. | Foi aberto um exame salvo antes de existir a lista de estados, com um texto que nenhum estado reconhece (por exemplo "Sampa"). O campo fica vazio e a dica cita o texto antigo. | Escolha o estado certo e salve; salvar sem estado é recusado. |
 | Este campo é muito longo: no máximo 120 caracteres. | O estado ou município passou do limite. | Encurte o texto. |
 | Escolha o idioma do conteúdo. | O idioma não foi escolhido. | Escolha um dos três idiomas. |
 | Este exame não existe mais. | Alguém excluiu o exame enquanto sua tela estava aberta. | Recarregue a página. |

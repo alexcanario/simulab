@@ -39,7 +39,6 @@
         <PropertyColumn T="IssuingAuthorityResponse" TProperty="string" Property="row => row.Name" Title="@L["IssuingAuthorities.Column.Name"]">
             <CellTemplate><AppTruncatedText Text="@context.Item.Name" MaxWidth="26rem" /></CellTemplate>
         </PropertyColumn>
-        <PropertyColumn T="IssuingAuthorityResponse" TProperty="string" Property="row => row.Acronym" Title="@L["IssuingAuthorities.Column.Acronym"]" />
     </Columns>
     <RowActions>
         <AppRowActions ItemName="@context.Name"
@@ -82,7 +81,6 @@
     private static string? SortColumn(string? column) => column switch
     {
         nameof(IssuingAuthorityResponse.Name) => IssuingAuthoritySort.Name,
-        nameof(IssuingAuthorityResponse.Acronym) => IssuingAuthoritySort.Acronym,
         _ => null
     };
 

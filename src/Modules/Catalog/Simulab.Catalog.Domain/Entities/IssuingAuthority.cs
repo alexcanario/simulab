@@ -24,8 +24,11 @@ public sealed class IssuingAuthority : TenantEntity
     /// <summary>The body's full name, as it signs a notice.</summary>
     public string Name { get; private set; } = string.Empty;
 
-    /// <summary>The short name, stored uppercase.</summary>
-    public string Acronym { get; private set; } = string.Empty;
+    /// <summary>
+    /// The short name typed before F-44 hid it. No save sets or clears it: a new body has none and an edit
+    /// keeps what is stored, so showing it again is a code change only.
+    /// </summary>
+    public string? Acronym { get; private set; }
 
     /// <summary>Free text, optional.</summary>
     public string? Description { get; private set; }
@@ -36,23 +39,23 @@ public sealed class IssuingAuthority : TenantEntity
     /// <summary>The comparable form of <see cref="Name"/>: what the unique index and the search read.</summary>
     public string NormalizedName { get; private set; } = string.Empty;
 
-    /// <summary>The comparable form of <see cref="Acronym"/>, for the same reason.</summary>
-    public string NormalizedAcronym { get; private set; } = string.Empty;
+    /// <summary>The comparable form of <see cref="Acronym"/>, null when there is none.</summary>
+    public string? NormalizedAcronym { get; private set; }
 
-    public static Result<IssuingAuthority> Create(string? name, string? acronym, string? description, string? website)
+    public static Result<IssuingAuthority> Create(string? name, string? description, string? website)
     {
         var authority = new IssuingAuthority();
-        var applied = authority.Apply(name, acronym, description, website);
+        var applied = authority.Apply(name, description, website);
 
         return applied.IsFailure
             ? Result.Failure<IssuingAuthority>(applied.Error!)
             : Result.Success(authority);
     }
 
-    public Result Update(string? name, string? acronym, string? description, string? website) =>
-        Apply(name, acronym, description, website);
+    public Result Update(string? name, string? description, string? website) =>
+        Apply(name, description, website);
 
-    private Result Apply(string? name, string? acronym, string? description, string? website)
+    private Result Apply(string? name, string? description, string? website)
     {
         var trimmedName = name?.Trim() ?? string.Empty;
         if (trimmedName.Length < CatalogLimits.NameMinLength)
@@ -63,17 +66,6 @@ public sealed class IssuingAuthority : TenantEntity
         if (trimmedName.Length > CatalogLimits.IssuingAuthorityNameMaxLength)
         {
             return Result.Failure(new Error(CatalogErrorCodes.IssuingAuthorityNameTooLong, ErrorKind.Validation));
-        }
-
-        var trimmedAcronym = acronym?.Trim().ToUpperInvariant() ?? string.Empty;
-        if (trimmedAcronym.Length < CatalogLimits.NameMinLength)
-        {
-            return Result.Failure(new Error(CatalogErrorCodes.IssuingAuthorityAcronymRequired, ErrorKind.Validation));
-        }
-
-        if (trimmedAcronym.Length > CatalogLimits.IssuingAuthorityAcronymMaxLength)
-        {
-            return Result.Failure(new Error(CatalogErrorCodes.IssuingAuthorityAcronymTooLong, ErrorKind.Validation));
         }
 
         var trimmedDescription = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
@@ -89,11 +81,9 @@ public sealed class IssuingAuthority : TenantEntity
         }
 
         Name = trimmedName;
-        Acronym = trimmedAcronym;
         Description = trimmedDescription;
         Website = trimmedWebsite;
         NormalizedName = CatalogText.Normalize(trimmedName);
-        NormalizedAcronym = CatalogText.Normalize(trimmedAcronym);
 
         return Result.Success();
     }

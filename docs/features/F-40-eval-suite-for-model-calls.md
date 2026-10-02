@@ -27,3 +27,4 @@ Simulab will call the Claude API through `IAiGateway`, but it has no eval suite.
 
 ## Decisions
 - 2026-10-01 — Refinement paused, item back to `idea` (owner). Reason: no product feature calls a model yet; the only caller is the development diagnostics page, so a pass-rate baseline and a cost ceiling measured now would not describe any real prompt. Also found: `claude plugin eval` evaluates plugins, not the app's own calls, so the runner will be the app's own (tests that call the real API, outside the turn gate).
+- 2026-10-02 — Refinement asked again and kept at `idea` (owner, option A). Reason: `AiPurposes` still holds only `Diagnostics` and no item exists yet for a product feature that calls a model; F-40 is refined together with that first feature.

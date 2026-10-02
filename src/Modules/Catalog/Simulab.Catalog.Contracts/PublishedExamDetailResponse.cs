@@ -5,7 +5,6 @@ public sealed record PublishedExamDetailResponse(
     Guid Id,
     string Name,
     string IssuingAuthorityName,
-    string IssuingAuthorityAcronym,
     AssessmentType AssessmentType,
     ExamScope Scope,
     string? ScopeDetail,

@@ -13,16 +13,16 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
     private static IReadOnlyList<string> CellsOf(IRenderedComponent<IssuingAuthorities> page, int column) =>
         [.. page.FindAll("tbody tr").Select(row => row.QuerySelectorAll("td")[column].TextContent.Trim())];
 
-    // AC17: name and acronym, sorted by name, and no kind column — the entity has none.
+    // F-44 AC1: the name alone, sorted by name, with no acronym and no kind column.
     [Fact]
-    public void Load_ShowsNameAndAcronymAndNoKindColumn()
+    public void Load_ShowsTheNameAloneWithNoAcronymAndNoKindColumn()
     {
         var page = RenderPage();
 
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
         CellsOf(page, 0).Should().Equal("Prefeitura Municipal de Guarulhos", "Policia Federal");
-        CellsOf(page, 1).Should().Equal("PMG", "PF");
-        page.FindAll("thead th").Should().HaveCount(3, "name, acronym and the actions column");
+        page.FindAll("thead th").Should().HaveCount(2, "name and the actions column");
+        page.Markup.Should().NotContain("Acronym");
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         page.WaitForAssertion(() => page.Markup.Should().Contain("No issuing authority yet."));
     }
 
-    // AC17: what the dialog sends is what the reader typed, and the Api uppercases the acronym.
+    // F-44 AC2: the dialog has no acronym field, and sends only what the reader typed.
     [Fact]
     public void Add_ValidData_SendsItAndShowsTheSnackbar()
     {
@@ -80,7 +80,7 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
 
         providers.Dialogs.WaitForAssertion(() => providers.Dialogs.Find("#issuing-authority-name"));
         providers.Dialogs.Find("#issuing-authority-name").Change("Ministerio da Educacao");
-        providers.Dialogs.Find("#issuing-authority-acronym").Change("mec");
+        providers.Dialogs.FindAll("#issuing-authority-acronym").Should().BeEmpty("the acronym has no field (F-44 BR2)");
         providers.Dialogs.Find(".app-form-save").Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
@@ -88,7 +88,6 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         var sent = FakeCatalogApi.Read<SaveIssuingAuthorityRequest>(
             Api.Received.Last(call => call.Method == HttpMethod.Post).Body);
         sent.Name.Should().Be("Ministerio da Educacao");
-        sent.Acronym.Should().Be("mec");
         providers.Snackbars.WaitForAssertion(() => providers.Snackbars.Markup.Should().Contain("Issuing authority saved."));
     }
 
@@ -104,12 +103,20 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         page.Find(".app-page-header button").Click();
         providers.Dialogs.WaitForAssertion(() => providers.Dialogs.Find("#issuing-authority-name"));
         providers.Dialogs.Find("#issuing-authority-name").Change("Prefeitura Municipal de Guarulhos");
-        providers.Dialogs.Find("#issuing-authority-acronym").Change("pmg");
         providers.Dialogs.Find(".app-form-save").Click();
 
         providers.Dialogs.WaitForAssertion(() =>
             providers.Dialogs.Markup.Should().Contain("Another issuing authority already has this name."));
         providers.Dialogs.Find("#issuing-authority-name").GetAttribute("aria-invalid").Should().Be("true");
+    }
+
+    // F-44: the search says it matches the name only.
+    [Fact]
+    public void Search_PlaceholderAsksForTheNameOnly()
+    {
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => page.Find(".app-table-search input").GetAttribute("placeholder").Should().Be("Search by name"));
     }
 
     // The website is checked before the Api is called (comfort only; the Api runs the same check).
@@ -123,7 +130,6 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         page.Find(".app-page-header button").Click();
         providers.Dialogs.WaitForAssertion(() => providers.Dialogs.Find("#issuing-authority-name"));
         providers.Dialogs.Find("#issuing-authority-name").Change("Prefeitura de Sao Paulo");
-        providers.Dialogs.Find("#issuing-authority-acronym").Change("psp");
         providers.Dialogs.Find("#issuing-authority-website").Change("prefeitura.sp.gov.br");
         providers.Dialogs.Find(".app-form-save").Click();
 

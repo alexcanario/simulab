@@ -10,8 +10,11 @@ public interface IIdentityUnitOfWork
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Opens the transaction that holds every write of the sign-up handlers (F-30 BR1, BR2, BR8, BR9): open
-    /// it only after every validation, lookup and outbound call, since a write is all it should ever hold.
+    /// Opens the transaction that holds every write of the sign-up handlers (F-30 BR1, BR2, BR8, BR9) and of
+    /// the password reset and change, the reset and verification link requests and the two-factor
+    /// confirmation (F-47 BR1): open it only after every validation, lookup and outbound call, since a write
+    /// is all it should ever hold. The one exception (F-47 BR3) is the Redis session writes of the password
+    /// reset and change, made after the last Postgres write and before the commit.
     /// </summary>
     Task<IIdentityTransaction> BeginAsync(CancellationToken cancellationToken = default);
 

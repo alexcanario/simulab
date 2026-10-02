@@ -115,7 +115,7 @@ public sealed class ExamEditionsSectionTests : CatalogPageTestContext
 
         var lookup = page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == "exam-authority");
         await page.InvokeAsync(() => lookup.Instance.ValueChanged.InvokeAsync(
-            new AppLookupOption(PoliciaFederal.Id, $"{PoliciaFederal.Name} ({PoliciaFederal.Acronym})")));
+            new AppLookupOption(PoliciaFederal.Id, PoliciaFederal.Name)));
         page.Find("#exam-name").Change("Agente de Policia Federal");
         await page.InvokeAsync(() => page.FindComponents<AppSelectField<AssessmentType?>>().Single().Instance.ValueChanged
             .InvokeAsync(AssessmentType.PublicServiceExam));

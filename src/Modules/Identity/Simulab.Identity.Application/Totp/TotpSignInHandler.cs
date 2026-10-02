@@ -31,6 +31,7 @@ public sealed class TotpSignInHandler(
     /// The challenge is spent before the code is checked, so a wrong code costs the whole attempt (BR9). A
     /// challenge whose account no longer has two-factor on reads as invalid too.
     /// </summary>
+    // F-47 BR7, no transaction: as SecondFactor.VerifyAsync, a crash leaves a spent code and no tokens; the visitor signs in again.
     public async Task<Result<TotpSignIn>> CompleteAsync(string? challenge, string? code, ISignInAttempt? attempt = null, CancellationToken cancellationToken = default)
     {
         var userId = string.IsNullOrWhiteSpace(challenge) ? null : await challenges.ConsumeAsync(challenge, cancellationToken);
