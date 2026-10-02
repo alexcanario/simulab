@@ -840,3 +840,8 @@ From 0.0.97 to 0.0.102, run on a clean main with no item `building` or `validati
 - Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged); `.editorconfig`, `Directory.Build.props`, `Directory.Packages.props`, `global.json`, `tests/Directory.Build.props` (manual, no upstream change).
 - Missing capabilities captured as ideas: F-61 DocGen tool catalogue (#100), F-62 deploy command per environment (#101), F-63 visual identity (#102). The app version is F-60 (#99), captured at the 0.0.97 sync.
 - Baseline: present. Docs command: declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes delivered: none. Build and suite not run: only Markdown and `.gitignore` changed.
+
+## 2026-10-02 - Retro F-60 (app version on the Api project)
+- Plugin note: for `modular-monolith`, `scripts/publish.js` matches every `*.Api.csproj` under `src` (`Simulab.Catalog.Api`, `Simulab.Identity.Api` are module class libraries, not deployables) and does not list `Simulab.Web`, the second deployable host, so `/agile:publish` stays blocked for this solution.
+- Plugin note: `feature-ship` step 8b bumps `<Version>` on every ship, but the item that introduces the version has no rule: its ship either bumps at once (0.1.0 becomes 0.2.0 and a test pinned to the seed goes red) or does not bump. Say which, and say that a test must compare the csproj version with the assembly version instead of pinning a number.
+- Project follow-up: `AppVersionTests` (AC1, AC3) pin `0.1.0`; the next ship's bump turns them red. Loosen them in the next item that ships, before its bump.
