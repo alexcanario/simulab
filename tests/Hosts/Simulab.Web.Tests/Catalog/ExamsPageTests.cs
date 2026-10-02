@@ -26,7 +26,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         CellsOf(page, 2).Should().Equal("Public service exam", "University entrance exam");
         // The scope cell carries its detail under the label when the scope has one (BR8).
         CellsOf(page, 3)[0].Should().Be("National");
-        CellsOf(page, 3)[1].Should().Contain("State").And.Contain("Sao Paulo");
+        CellsOf(page, 3)[1].Should().Contain("State").And.Contain("São Paulo (SP)", "a State exam reads its state by name and acronym (F-42 AC6)");
     }
 
     [Fact]

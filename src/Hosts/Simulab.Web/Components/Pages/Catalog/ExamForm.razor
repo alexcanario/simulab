@@ -124,18 +124,40 @@ else
                 @* BR1: the detail only exists for the two scopes that need it, and clears itself when it
                    goes away, so a national exam never carries a stale place into the request. *@
                 <AppConditionalField Visible="NeedsScopeDetail" OnHidden="ClearScopeDetail">
-                    <AppTextField TValue="string"
-                                  Id="exam-scope-detail"
-                                  Label="@ScopeDetailLabel"
-                                  Value="@_scopeDetail"
-                                  ValueChanged="@((string? value) => OnScopeDetailChanged(value))"
-                                  Required="true"
-                                  MaxLength="CatalogLimits.ExamScopeDetailMaxLength"
-                                  Autocomplete="off"
-                                  LeadingIcon="@AppIcons.Place"
-                                  Placeholder="@ScopeDetailPlaceholder"
-                                  Hint="@L["Exams.Field.ScopeDetail.Hint"]"
-                                  Error="@_scopeDetailError" />
+                    @if (_scope == ExamScope.State)
+                    {
+                        @* F-42 BR1, UC1: a State exam picks one of the 27 states; the whole list opens on focus and
+                           typing narrows it by name or acronym. A value saved before this item that no state
+                           matches is not shown: the hint quotes it and the reader picks again (BR6, UC2). *@
+                        <AppLookupField Id="exam-scope-detail"
+                                        Label="@ScopeDetailLabel"
+                                        Placeholder="@ScopeDetailPlaceholder"
+                                        LeadingIcon="@AppIcons.Place"
+                                        SearchAsync="SearchStatesAsync"
+                                        MinChars="0"
+                                        MaxItems="@BrazilianStates.All.Count"
+                                        OpenOnFocus="true"
+                                        Value="StateOption"
+                                        ValueChanged="OnStateChanged"
+                                        Required="true"
+                                        Hint="@StateHint"
+                                        Error="@_scopeDetailError" />
+                    }
+                    else
+                    {
+                        <AppTextField TValue="string"
+                                      Id="exam-scope-detail"
+                                      Label="@ScopeDetailLabel"
+                                      Value="@_scopeDetail"
+                                      ValueChanged="@((string? value) => OnScopeDetailChanged(value))"
+                                      Required="true"
+                                      MaxLength="CatalogLimits.ExamScopeDetailMaxLength"
+                                      Autocomplete="off"
+                                      LeadingIcon="@AppIcons.Place"
+                                      Placeholder="@ScopeDetailPlaceholder"
+                                      Hint="@L["Exams.Field.ScopeDetail.Hint"]"
+                                      Error="@_scopeDetailError" />
+                    }
                 </AppConditionalField>
             </AppSectionCard>
 
@@ -181,6 +203,9 @@ else
     private AssessmentType? _assessmentType;
     private ExamScope? _scope;
     private string? _scopeDetail;
+
+    // F-42 BR6: what a State exam saved before the picker held when no state matches it; only to quote it.
+    private string? _unrecognizedScopeDetail;
     private string? _contentLanguage = DefaultContentLanguage;
     private string? _authorityError;
     private string? _nameError;
@@ -208,6 +233,18 @@ else
 
     private string ScopeDetailPlaceholder =>
         _scope == ExamScope.Municipal ? L["Exams.Field.Municipality.Placeholder"] : L["Exams.Field.State.Placeholder"];
+
+    // F-42: the state the form holds, as the picker shows it; empty when the stored text names no state (BR6).
+    private AppLookupOption? StateOption =>
+        BrazilianStates.FindByAcronym(_scopeDetail) is { } state ? ToOption(state) : null;
+
+    // BR6, UC2, AC9: while no state is picked, an exam saved with text no state matches says what it was.
+    private string StateHint =>
+        StateOption is null && !string.IsNullOrWhiteSpace(_unrecognizedScopeDetail)
+            ? L["Exams.Field.State.UnrecognizedHint", _unrecognizedScopeDetail]
+            : L["Exams.Field.State.Hint"];
+
+    private static AppLookupOption ToOption(BrazilianState state) => new(Guid.Empty, state.DisplayName);
 
     // F-43: the empty option is the placeholder itself, the way the mockup's native select shows it - not a
     // decoration the kit's AppSelectField would need a new parameter for.
@@ -243,7 +280,7 @@ else
         _scope is null
             ? null
             : NeedsScopeDetail && !string.IsNullOrWhiteSpace(_scopeDetail)
-                ? $"{ExamText.ScopeName(L, _scope.Value)} · {Trimmed(_scopeDetail)}"
+                ? $"{ExamText.ScopeName(L, _scope.Value)} · {ExamText.ScopeDetailText(_scope.Value, Trimmed(_scopeDetail))}"
                 : ExamText.ScopeName(L, _scope.Value);
 
     // F-43, UC5/AC7: what the read-only aside shows beside the form, without a button of its own (BR4).
@@ -299,7 +336,7 @@ else
         || Trimmed(_name) != (_saved?.Name ?? string.Empty)
         || _assessmentType != _saved?.AssessmentType
         || _scope != _saved?.Scope
-        || Trimmed(_scopeDetail) != (_saved?.ScopeDetail ?? string.Empty)
+        || Trimmed(_scopeDetail) != (_saved is null ? string.Empty : FormScopeDetail(_saved))
         || _contentLanguage != (_saved?.ContentLanguage ?? DefaultContentLanguage);
 
     protected override async Task OnParametersSetAsync()
@@ -326,9 +363,22 @@ else
         _name = exam.Name;
         _assessmentType = exam.AssessmentType;
         _scope = exam.Scope;
-        _scopeDetail = exam.ScopeDetail ?? string.Empty;
+        ShowScopeDetailOf(exam);
         _contentLanguage = exam.ContentLanguage;
         BuildBreadcrumbs();
+    }
+
+    // F-42 BR6, AC9: a State exam shows the picker with its state, or empty with a hint when the stored text names
+    // none (an exam saved before the picker); every other scope shows the text as stored.
+    private static string FormScopeDetail(ExamResponse exam) =>
+        exam.Scope == ExamScope.State
+            ? BrazilianStates.FindByAcronym(exam.ScopeDetail)?.Acronym ?? string.Empty
+            : exam.ScopeDetail ?? string.Empty;
+
+    private void ShowScopeDetailOf(ExamResponse exam)
+    {
+        _scopeDetail = FormScopeDetail(exam);
+        _unrecognizedScopeDetail = exam.Scope == ExamScope.State && _scopeDetail.Length == 0 ? exam.ScopeDetail : null;
     }
 
     private void BuildBreadcrumbs() =>
@@ -361,8 +411,30 @@ else
 
     private void OnScopeChanged(ExamScope? value)
     {
+        // F-42: State and Municipal read the same field but mean different things (an acronym of the list, free
+        // text), so moving from one to the other starts the detail empty instead of carrying a value across.
+        if (_scope != value && NeedsScopeDetail && value is ExamScope.State or ExamScope.Municipal)
+        {
+            _scopeDetail = string.Empty;
+            _unrecognizedScopeDetail = null;
+            _scopeDetailError = null;
+        }
+
         _scope = value;
         _scopeError = null;
+    }
+
+    // F-42 UC1: the candidates are the states whose name or acronym contains what was typed; nothing is asked of
+    // the server, the list is part of the app.
+    private static Task<IReadOnlyList<AppLookupOption>> SearchStatesAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>([.. BrazilianStates.Search(term).Select(ToOption)]);
+
+    private void OnStateChanged(AppLookupOption? value)
+    {
+        _scopeDetail = value is null
+            ? string.Empty
+            : BrazilianStates.All.FirstOrDefault(state => state.DisplayName == value.Text)?.Acronym ?? string.Empty;
+        _scopeDetailError = ScopeDetailError();
     }
 
     // F-43, BR1: called once by AppConditionalField when the detail goes away, so a value the reader can no
@@ -462,7 +534,7 @@ else
             // edition is the usual next step, and in F-35 that section is on this very page.
             var wasAdd = !IsEdit;
             _saved = exam;
-            _scopeDetail = exam.ScopeDetail ?? string.Empty;
+            ShowScopeDetailOf(exam);
             BuildBreadcrumbs();
             Snackbar.Add(L["Exams.Saved"], Severity.Success);
             if (wasAdd)
@@ -484,6 +556,7 @@ else
                 break;
             case CatalogErrorCodes.ExamScopeDetailRequired:
             case CatalogErrorCodes.ExamScopeDetailTooLong:
+            case CatalogErrorCodes.ExamScopeDetailUnknownState:
                 _scopeDetailError = Errors.For(result.ErrorCode);
                 break;
             case CatalogErrorCodes.IssuingAuthorityNotFound:

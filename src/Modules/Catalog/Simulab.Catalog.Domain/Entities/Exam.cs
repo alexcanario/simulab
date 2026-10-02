@@ -34,7 +34,10 @@ public sealed class Exam : TenantEntity
     /// <summary>How far the exam reaches (BR7).</summary>
     public ExamScope Scope { get; private set; }
 
-    /// <summary>Which state or which municipality; null when the scope is national (BR8).</summary>
+    /// <summary>
+    /// Which state or which municipality; null when the scope is national (BR8). For a State exam it is the
+    /// state's upper-case acronym, <c>SP</c> (F-42 BR1); for a Municipal one, the text as typed.
+    /// </summary>
     public string? ScopeDetail { get; private set; }
 
     /// <summary>The language the exam and its questions are written in; never translated (BR9, ADR-0001 #27).</summary>
@@ -118,6 +121,22 @@ public sealed class Exam : TenantEntity
             return Result.Failure(new Error(CatalogErrorCodes.ExamScopeDetailTooLong, ErrorKind.Validation));
         }
 
+        // F-42 BR1, BR2: a State exam names one of the 27 states by its acronym, stored in upper case; the
+        // Municipal detail stays free text (BR3). What the student search reads for a state is its name and
+        // its acronym, so "sp" and "sao paulo" both find it (BR5).
+        var normalizedDetail = trimmedDetail is null ? string.Empty : CatalogText.Normalize(trimmedDetail);
+        if (scope == ExamScope.State)
+        {
+            var state = BrazilianStates.FindByAcronym(trimmedDetail);
+            if (state is null)
+            {
+                return Result.Failure(new Error(CatalogErrorCodes.ExamScopeDetailUnknownState, ErrorKind.Validation));
+            }
+
+            trimmedDetail = state.Acronym;
+            normalizedDetail = BrazilianStates.SearchText(state);
+        }
+
         // BR9: one list of languages for the whole app, so the content language and the UI can never drift
         // apart. It lives in Identity's contracts because F-8 put it there; a module may read another
         // module's contracts (F-33 BR1), and this reads nothing else from Identity.
@@ -134,7 +153,7 @@ public sealed class Exam : TenantEntity
         ScopeDetail = trimmedDetail;
         ContentLanguage = language;
         NormalizedName = CatalogText.Normalize(trimmedName);
-        NormalizedScopeDetail = trimmedDetail is null ? string.Empty : CatalogText.Normalize(trimmedDetail);
+        NormalizedScopeDetail = normalizedDetail;
 
         return Result.Success();
     }

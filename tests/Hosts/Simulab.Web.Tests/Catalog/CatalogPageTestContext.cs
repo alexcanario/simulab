@@ -63,7 +63,7 @@ public abstract class CatalogPageTestContext : KitTestContext
         Guarulhos.Name,
         AssessmentType.UniversityEntranceExam,
         ExamScope.State,
-        "Sao Paulo",
+        "SP",
         "pt-BR");
 
     protected FakeCatalogApi Api { get; } = new();

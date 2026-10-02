@@ -41,6 +41,9 @@ public static class CatalogErrorCodes
     public const string ExamScopeDetailTooLong = "exam.scope_detail_too_long";
     public const string ExamContentLanguageInvalid = "exam.content_language_invalid";
 
+    /// <summary>F-42 BR2: a State exam names something that is not an acronym of the 27 Brazilian states.</summary>
+    public const string ExamScopeDetailUnknownState = "exam.scope_detail_unknown_state";
+
     /// <summary>F-35 BR12: the exam has editions, so it cannot leave the catalog. Carries no count, like its siblings.</summary>
     public const string ExamHasEditions = "exam.has_editions";
 

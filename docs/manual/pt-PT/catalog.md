@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: pt-PT
-features: [F-36, F-37]
-updated: 2026-09-29
+features: [F-36, F-37, F-42]
+updated: 2026-10-02
 ---
 # Catálogo
 
@@ -16,7 +16,7 @@ O catálogo mostra o mesmo a todos, incluindo os Administradores: os exames apen
 ## Como fazer
 ### Encontrar um exame
 1. Escolha **Catálogo** na secção **Estudo** do menu.
-2. Escreva na caixa de pesquisa. As palavras podem ser parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade, por qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de uma entidade de São Paulo.
+2. Escreva na caixa de pesquisa. As palavras podem ser parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade, por qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de uma entidade de São Paulo. Um exame estadual é encontrado pelo nome ou pela sigla do estado ("sp", "sao paulo" ou "São Paulo") e mostra o estado como "São Paulo (SP)", na lista e na página do exame.
 3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Entidade organizadora** e **Ano do aviso**, sozinhos ou juntamente com o texto. A entidade organizadora e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
 4. Escolha **Limpar filtros** para remover os quatro filtros. O texto da pesquisa tem o seu próprio botão de limpar.
 

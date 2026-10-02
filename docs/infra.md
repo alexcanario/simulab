@@ -13,6 +13,25 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 - Background work (F-13): the `Api` host runs the job worker of ADR-0001 #20. It polls `jobs.jobs` every 5 s, retries a failed job 5 times (1-2-4-8-16 minutes) and deletes it as soon as it succeeds. Every identity email leaves through it, so a Mailpit that is stopped delays an email instead of losing it. To watch the queue by hand: `select status, attempts, last_error from jobs.jobs;`.
 - Retention of failed jobs (F-27): a job given up on stays as a `Failed` row — the evidence of what was lost — for **90 days**, counted from `created_at`, and is then deleted. The cleanup runs inside the same worker poll, at most once an hour and always once when the process starts, and logs one line with the count only when it removed something. The number is `JobPolicy.FailedRetention`, a constant and not configuration, so changing it is a code change. `Pending` and `Running` rows are never deleted however old they are.
 
+### Useful commands
+The same command works in Git Bash and in PowerShell 7 unless two forms are shown.
+
+- **A worktree's own database** (rule: worktrees): `AppHost.cs` reads `Database:Name`, so an item's migration never lands in the shared `simulab` database. The Postgres server is the same; Aspire creates the database on first start.
+  - Git Bash: `Database__Name=simulab_f42 dotnet run --project src/Hosts/Simulab.AppHost`
+  - PowerShell 7: `$env:Database__Name = "simulab_f42"; dotnet run --project src/Hosts/Simulab.AppHost`
+  - Drop it when the item ships (server up, nobody connected to it): `DROP DATABASE simulab_f42;`
+- **Only the database server, through the app host**: there is no flag to start one resource. Start the app host, then in the dashboard's Resources page choose **Stop** on `api` and `web` (and `redis`, `mailpit` when not needed). Postgres stays on `127.0.0.1:5432`.
+- **Only the database server, without the app host**: a container on the app's volume. The Postgres version must be the one that created the volume, and the data path depends on it.
+  - Which layout (read only). In Git Bash set `export MSYS_NO_PATHCONV=1` first, or `/d` is rewritten to `D:/` and the command finds nothing: `docker run --rm -v simulab-postgres-data:/d:ro alpine ls -la /d`. A folder `18` means a PostgreSQL 18 volume (data in `18/docker`); `PG_VERSION` at the root means 17 or older.
+  - Verified 2026-10-02: the local volume is PostgreSQL 18 (`18/docker/PG_VERSION` holds `18`). The 18 image keeps data under `/var/lib/postgresql`, so mounting the volume on `/var/lib/postgresql/data` makes `initdb` run on a non-empty folder and refuse (`directory "/var/lib/postgresql/data" exists but is not empty`); nothing is lost, only the container fails.
+  - PostgreSQL 18: `docker run -d --name simulab-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -v simulab-postgres-data:/var/lib/postgresql postgres:18`
+  - PostgreSQL 17 or older: the same with `-v simulab-postgres-data:/var/lib/postgresql/data` and the matching image (`postgres:17`).
+  - Read through the container, with no client installed (the server asks for the password even on its socket): `docker exec -e PGPASSWORD=postgres simulab-pg psql -U postgres -d simulab -At -c "select count(*) from catalog.exams"`
+  - Stop it, keeping the data: `docker rm -f simulab-pg`
+  - Never run it together with the app host: both want port 5432 and the same data directory.
+- **Repeat one migration by hand** (a data migration being checked on screen): `DELETE FROM catalog.__ef_migrations_history WHERE migration_id = '<migration id>';` in that database, then start the app host again. Use it only on a worktree's own database. The history table of a module is `<schema>.__ef_migrations_history`, with `migration_id`.
+- **Connect by hand**: `Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres` (psql or DataGrip).
+
 ## Environments
 | Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in |
 |---|---|---|---|---|
@@ -93,8 +112,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 17 s, 0 new warnings (2026-10-01, F-38) |
-| Full test suite | < 5 min | 1746 tests, 78 s test + 17 s build (2026-10-01, F-38) |
+| Full build | | 21 s, 0 new warnings (2026-10-02, F-42) |
+| Full test suite | < 5 min | 1808 tests, 69 s test + 21 s build (2026-10-02, F-42) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".

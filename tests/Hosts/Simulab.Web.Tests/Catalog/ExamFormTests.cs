@@ -156,7 +156,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
 
         page.WaitForAssertion(() => page.Markup.Should().Contain("Edit exam"));
         page.Find("#exam-name").GetAttribute("value").Should().Be("FUVEST");
-        page.Find("#exam-scope-detail").GetAttribute("value").Should().Be("Sao Paulo", "the state scope carries its detail");
+        StatePicker(page).Instance.Value!.Text.Should().Be("São Paulo (SP)", "the state scope carries its state (F-42 AC3)");
 
         page.Find("#exam-name").Change("FUVEST 2027");
         page.Find(".app-form-save").Click();
@@ -164,6 +164,175 @@ public sealed class ExamFormTests : CatalogPageTestContext
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Method == HttpMethod.Put && call.Path == $"/api/v1/catalog/exams/{Fuvest.Id}"));
         SentBody(Api, HttpMethod.Put).Name.Should().Be("FUVEST 2027");
+        SentBody(Api, HttpMethod.Put).ScopeDetail.Should().Be("SP");
+    }
+
+    private static IRenderedComponent<AppLookupField> StatePicker(IRenderedComponent<ExamForm> page) =>
+        page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == "exam-scope-detail");
+
+    private static void PickState(IRenderedComponent<ExamForm> page, string displayName)
+    {
+        var picker = StatePicker(page);
+        page.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(new AppLookupOption(Guid.Empty, displayName)))
+            .GetAwaiter().GetResult();
+    }
+
+    private static IReadOnlyList<string> Offered(IRenderedComponent<ExamForm> page, string term) =>
+        [.. StatePicker(page).Instance.SearchAsync(term, CancellationToken.None).GetAwaiter().GetResult().Select(option => option.Text)];
+
+    private static void FillExam(IRenderedComponent<ExamForm> page, ExamScope scope)
+    {
+        PickAuthority(page, PoliciaFederal);
+        page.Find("#exam-name").Change("Prova estadual");
+        Set<AssessmentType?>(page, "exam-assessment-type", AssessmentType.PublicServiceExam);
+        Set<ExamScope?>(page, "exam-scope", scope);
+    }
+
+    // F-42 AC1 (UC1, BR1): the state field is a picker that opens on focus with the whole list, in the approved order.
+    [Fact]
+    public void Scope_State_OffersTheTwentySevenStatesOnFocus_InTheApprovedOrder()
+    {
+        var page = RenderAdd();
+
+        Set<ExamScope?>(page, "exam-scope", ExamScope.State);
+
+        page.WaitForAssertion(() => StatePicker(page).Should().NotBeNull());
+        var picker = StatePicker(page).Instance;
+        picker.OpenOnFocus.Should().BeTrue("the whole list opens on focus");
+        picker.MinChars.Should().Be(0);
+        picker.MaxItems.Should().BeGreaterThanOrEqualTo(27, "no state is cut off the list");
+        var all = Offered(page, string.Empty);
+        all.Should().HaveCount(27);
+        all.Take(2).Should().Equal("Acre (AC)", "Alagoas (AL)");
+        all[24].Should().Be("São Paulo (SP)");
+        all.TakeLast(2).Should().Equal("Sergipe (SE)", "Tocantins (TO)");
+        page.FindAll("input#exam-scope-detail").Should().ContainSingle("the picker has the id the error summary focuses");
+    }
+
+    // F-42 AC2 (UC1): typing narrows the list by name or acronym, ignoring accents and case.
+    [Theory]
+    [InlineData("paulo", new[] { "São Paulo (SP)" })]
+    [InlineData("sao", new[] { "São Paulo (SP)" })]
+    [InlineData("RJ", new[] { "Rio de Janeiro (RJ)" })]
+    [InlineData("São Paulo (SP)", new[] { "São Paulo (SP)" })]
+    [InlineData("mato", new[] { "Mato Grosso (MT)", "Mato Grosso do Sul (MS)" })]
+    public void StatePicker_Typing_NarrowsTheList(string term, string[] expected)
+    {
+        var page = RenderAdd();
+        Set<ExamScope?>(page, "exam-scope", ExamScope.State);
+
+        Offered(page, term).Should().Equal(expected);
+    }
+
+    // F-42 AC3 (UC1, BR1): picking São Paulo and saving sends the acronym; the saved exam reopens with it selected.
+    [Fact]
+    public void Add_StateExam_SendsTheAcronymOfThePickedState()
+    {
+        var page = RenderAdd();
+        FillExam(page, ExamScope.State);
+
+        PickState(page, "São Paulo (SP)");
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Post));
+        var sent = SentBody(Api, HttpMethod.Post);
+        sent.Scope.Should().Be("State");
+        sent.ScopeDetail.Should().Be("SP");
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Edit exam"));
+        StatePicker(page).Instance.Value!.Text.Should().Be("São Paulo (SP)");
+    }
+
+    // F-42 AC4 (BR3): a Municipal exam keeps the free text field and sends whatever was typed.
+    [Fact]
+    public void Add_MunicipalExam_KeepsTheFreeTextFieldAndSendsWhatWasTyped()
+    {
+        var page = RenderAdd();
+        FillExam(page, ExamScope.Municipal);
+
+        page.FindComponents<AppLookupField>().Should().NotContain(component => component.Instance.Id == "exam-scope-detail");
+        page.Find("#exam-scope-detail").Change("Sampa, interior");
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Post));
+        SentBody(Api, HttpMethod.Post).ScopeDetail.Should().Be("Sampa, interior");
+    }
+
+    // F-42: switching between State and Municipal starts the detail empty, so a state is never sent as a municipality.
+    [Fact]
+    public void Scope_StateToMunicipal_ClearsTheDetail_AndBackToStateStartsEmpty()
+    {
+        var page = RenderAdd();
+        FillExam(page, ExamScope.State);
+        PickState(page, "São Paulo (SP)");
+
+        Set<ExamScope?>(page, "exam-scope", ExamScope.Municipal);
+
+        page.WaitForAssertion(() => page.Find("#exam-scope-detail").GetAttribute("value").Should().BeNullOrEmpty());
+        page.Find("#exam-scope-detail").Change("Guarulhos");
+        Set<ExamScope?>(page, "exam-scope", ExamScope.State);
+        page.WaitForAssertion(() => StatePicker(page).Instance.Value.Should().BeNull());
+    }
+
+    // F-42 AC9 (UC2, BR6): a State exam saved with text no state matches opens with the picker empty and a hint that
+    // quotes the old text; saving without picking a state is refused before the Api is called.
+    [Fact]
+    public void Edit_StateExamSavedAsFreeText_OpensTheStateEmptyWithAHintQuotingIt_AndRequiresAState()
+    {
+        Api.Exams = [Fuvest with { ScopeDetail = "Sampa" }];
+        var page = RenderEdit(Fuvest.Id);
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Edit exam"));
+        StatePicker(page).Instance.Value.Should().BeNull();
+        page.Markup.Should().Contain("“Sampa”").And.Contain("not a state of the list");
+
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Say where this exam applies."));
+        Api.Received.Should().NotContain(call => call.Method == HttpMethod.Put);
+
+        PickState(page, "Ceará (CE)");
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Put));
+        SentBody(Api, HttpMethod.Put).ScopeDetail.Should().Be("CE");
+    }
+
+    // F-42 AC9: the unrecognized text is not a pending change, so the form opens with nothing to save.
+    [Fact]
+    public void Edit_StateExamSavedAsFreeText_OpensWithoutChanges()
+    {
+        Api.Exams = [Fuvest with { ScopeDetail = "Sampa" }];
+        var page = RenderEdit(Fuvest.Id);
+
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Edit exam"));
+        page.FindComponent<AppFormActions>().Instance.HasChanges.Should().BeFalse("leaving the page must not ask for a confirmation");
+    }
+
+    // F-42 AC10 (BR7): the same 27 states whatever the exam's content language.
+    [Fact]
+    public void Scope_State_OffersTheSameStatesForAPortugueseContentExam()
+    {
+        var page = RenderAdd();
+        Set<string>(page, "exam-content-language", "pt-PT");
+
+        Set<ExamScope?>(page, "exam-scope", ExamScope.State);
+
+        Offered(page, string.Empty).Should().HaveCount(27).And.Contain("São Paulo (SP)");
+    }
+
+    // F-42 BR2: the Api is the authority; when it refuses the state, the message stays on the field.
+    [Fact]
+    public void Save_ApiRefusesTheState_ShowsTheMessageOnTheField()
+    {
+        Api.WriteFailure = (HttpStatusCode.BadRequest, CatalogErrorCodes.ExamScopeDetailUnknownState);
+        var page = RenderAdd();
+        FillExam(page, ExamScope.State);
+        PickState(page, "São Paulo (SP)");
+
+        page.Find(".app-form-save").Click();
+
+        page.WaitForAssertion(() => page.Find("#exam-scope-detail").Closest(".app-field")!.TextContent
+            .Should().Contain("Choose one of the 27 states of the list."));
     }
 
     // F-44 AC5: the picker shows the authority by its name, with no acronym after it.

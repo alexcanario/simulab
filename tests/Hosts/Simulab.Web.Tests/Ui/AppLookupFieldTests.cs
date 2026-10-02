@@ -113,4 +113,38 @@ public sealed class AppLookupFieldTests : KitTestContext
         // "Results: 1", not "1 results": the count is read aloud, and no language here has one plural form.
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
+
+    // F-42: a search over the catalog keeps its defaults - nothing opens before the reader types, and the list is cut at 20.
+    [Fact]
+    public void Render_ByDefault_DoesNotOpenOnFocus_AndShowsAtMostTwentyCandidates()
+    {
+        var field = Render(Found);
+
+        var autocomplete = field.FindComponent<MudBlazor.MudAutocomplete<AppLookupOption>>().Instance;
+        autocomplete.OpenOnFocus.Should().BeFalse();
+        autocomplete.MaxItems.Should().Be(AppLookupField.MaxCandidates).And.Be(20);
+    }
+
+    // F-42: a short fixed list (the 27 states) opens on focus, with no minimum of characters and room for every item.
+    [Fact]
+    public void Render_ForAFixedList_OpensOnFocusWithoutATermAndKeepsEveryItem()
+    {
+        var field = Render<AppLookupField>(parameters => parameters
+            .Add(component => component.Id, "lookup")
+            .Add(component => component.Label, "State")
+            .Add(component => component.Placeholder, "Choose")
+            .Add(component => component.SearchAsync, Found)
+            .Add(component => component.MinChars, 0)
+            .Add(component => component.MaxItems, 27)
+            .Add(component => component.OpenOnFocus, true));
+
+        var autocomplete = field.FindComponent<MudBlazor.MudAutocomplete<AppLookupOption>>().Instance;
+        autocomplete.OpenOnFocus.Should().BeTrue();
+        autocomplete.MinCharacters.Should().Be(0);
+        autocomplete.MaxItems.Should().Be(27);
+
+        field.Find("#lookup").Focus();
+
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+    }
 }

@@ -78,7 +78,7 @@
                 @ExamText.ScopeName(L, context.Item.Scope)
                 @if (!string.IsNullOrEmpty(context.Item.ScopeDetail))
                 {
-                    <span class="app-cell-secondary">@context.Item.ScopeDetail</span>
+                    <span class="app-cell-secondary">@ExamText.ScopeDetailText(context.Item.Scope, context.Item.ScopeDetail)</span>
                 }
             </CellTemplate>
         </PropertyColumn>
