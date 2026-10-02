@@ -26,14 +26,14 @@ public class AppVersionTests
         files.Where(file => file != ApiProject && CarriesVersion(repositoryRoot, file));
 
     [Fact]
-    public void ApiProject_CarriesTheFirstVersion()
+    public void ApiProject_CarriesOneSemanticVersion()
     {
         var root = SolutionAssemblies.RepositoryRoot();
 
         var versions = XDocument.Load(Path.Combine(root, ApiProject)).Descendants("Version").ToList();
 
         versions.Should().ContainSingle(because: "the app version lives on Simulab.Api.csproj once");
-        versions[0].Value.Should().Be("0.1.0");
+        versions[0].Value.Should().MatchRegex(@"^\d+\.\d+\.\d+$", "/agile:ship bumps it as MAJOR.MINOR.PATCH");
     }
 
     [Fact]
@@ -72,6 +72,8 @@ public class AppVersionTests
 
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        informational.Should().StartWith("0.1.0");
+        var projectVersion = XDocument.Load(Path.Combine(SolutionAssemblies.RepositoryRoot(), ApiProject)).Descendants("Version").Single().Value;
+
+        informational.Should().StartWith(projectVersion);
     }
 }
