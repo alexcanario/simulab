@@ -36,7 +36,7 @@ public abstract class StudentCatalogTestContext : KitTestContext
         "Prefeitura de Sao Paulo",
         AssessmentType.PublicServiceExam,
         ExamScope.State,
-        "Sao Paulo",
+        "SP",
         "pt-BR",
         2,
         2025);

@@ -422,7 +422,9 @@
   <data name="Exams.Field.AssessmentType.Placeholder" xml:space="preserve"><value>Select the assessment type</value></data>
   <data name="Exams.Field.Scope" xml:space="preserve"><value>Scope</value></data>
   <data name="Exams.Field.State" xml:space="preserve"><value>State</value></data>
-  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>E.g.: Ceará</value></data>
+  <data name="Exams.Field.State.Placeholder" xml:space="preserve"><value>Choose or type a state</value></data>
+  <data name="Exams.Field.State.Hint" xml:space="preserve"><value>Type the name or the acronym to narrow the list.</value></data>
+  <data name="Exams.Field.State.UnrecognizedHint" xml:space="preserve"><value>This exam was saved with “{0}”, which is not a state of the list. Choose the right one.</value></data>
   <data name="Exams.Field.Municipality" xml:space="preserve"><value>Municipality</value></data>
   <data name="Exams.Field.Municipality.Placeholder" xml:space="preserve"><value>E.g.: Fortaleza/CE</value></data>
   <data name="Exams.Field.ScopeDetail.Hint" xml:space="preserve"><value>Where this exam applies.</value></data>
@@ -460,6 +462,7 @@
   <data name="exam.scope_invalid" xml:space="preserve"><value>Choose a scope.</value></data>
   <data name="exam.scope_detail_required" xml:space="preserve"><value>Say where this exam applies.</value></data>
   <data name="exam.scope_detail_too_long" xml:space="preserve"><value>This field is too long: at most 120 characters.</value></data>
+  <data name="exam.scope_detail_unknown_state" xml:space="preserve"><value>Choose one of the 27 states of the list.</value></data>
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Choose the language of the content.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Issuing authorities</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Issuing authorities</value></data>

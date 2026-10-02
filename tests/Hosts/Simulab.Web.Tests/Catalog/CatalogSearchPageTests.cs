@@ -55,7 +55,7 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         link.TextContent.Should().Be("Guarda Municipal");
         cells[1].TextContent.Trim().Should().Be("Prefeitura de Sao Paulo");
         cells[2].TextContent.Trim().Should().Be("Public service exam");
-        cells[3].TextContent.Should().Contain("State").And.Contain("Sao Paulo");
+        cells[3].TextContent.Should().Contain("State").And.Contain("São Paulo (SP)", "a State exam reads its state by name and acronym (F-42 AC6)");
         cells[4].TextContent.Trim().Should().Be(SupportedCultures.NativeName(new System.Globalization.CultureInfo("pt-BR")));
         cells[4].QuerySelector("span")!.GetAttribute("lang").Should().Be("pt-BR");
         cells[5].TextContent.Trim().Should().Be("2");

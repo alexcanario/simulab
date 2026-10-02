@@ -68,7 +68,7 @@ public sealed class CatalogExamPageTests : StudentCatalogTestContext
             ("Issuing authority", "Prefeitura de Sao Paulo"),
             ("Assessment type", "Public service exam"),
             ("Scope", "State"),
-            ("State", "Sao Paulo"),
+            ("State", "São Paulo (SP)"),
             ("Content language", SupportedCultures.NativeName(new System.Globalization.CultureInfo("pt-BR"))),
             ("Published editions", "2"),
             ("Latest notice year", "2025"));
