@@ -132,12 +132,17 @@ Brazilian states, in this order (name as shown, acronym stored):
 ## Change notes
 
 ## Validation script
-Needed to validate: the app host started from this worktree (you start it), the seeded admin (`admin@simulab.local`, F-52), and one `State` exam saved as free text to see BR6 (step 1 makes one; the app host applies the migration to your local database on start, which is why Claude did not start it). In place now: nothing is running.
+Needed to validate: the app host started from this worktree (you start it) with its own database, `simulab_f42`, so the shared `simulab` database never sees this item's migration (the `Database__Name` switch of `AppHost.cs`, rule: worktrees); the seeded admin (`admin@simulab.local`, F-52); and one `State` exam saved as free text to see BR6 (step 2 makes it). Claude did not start anything. In place now: nothing is running.
 
-1. Before starting, in DataGrip on the local `simulab` database (`Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres`), turn two exams into old-style ones, so the migration has something to fix and something to leave alone (pick any two exam names that exist):
-   `UPDATE catalog.exams SET scope = 'State', scope_detail = 'Sao Paulo' WHERE name = '<exam A>';`
-   `UPDATE catalog.exams SET scope = 'State', scope_detail = 'Sampa' WHERE name = '<exam B>';`
-2. Start the app (`dotnet run --project src/Hosts/Simulab.AppHost`, the same in Git Bash and PowerShell 7), sign in as the admin → the migration `NormalizeExamStates` applies on start. In DataGrip, `SELECT name, scope_detail, normalized_scope_detail FROM catalog.exams WHERE scope = 'State';` → exam A holds `SP` / `SAO PAULO SP`; exam B still holds `Sampa` (AC8).
+1. Start the app host with its own database (the Postgres server is the same, on `127.0.0.1:5432`; Aspire creates `simulab_f42` on first start):
+   Git Bash: `Database__Name=simulab_f42 dotnet run --project src/Hosts/Simulab.AppHost`
+   PowerShell 7: `$env:Database__Name = "simulab_f42"; dotnet run --project src/Hosts/Simulab.AppHost`
+   Sign in as the admin, choose **Add exam** twice, scope **State**, any state, any authority, names `Exam A` and `Exam B` → both save. Then stop the app host (Ctrl+C in the terminal). The migration `NormalizeExamStates` has already run, on an empty table.
+2. Make the two exams old-style and run the migration again. In DataGrip on `simulab_f42` (`Host=127.0.0.1;Port=5432;Database=simulab_f42;Username=postgres;Password=postgres`; with the app host stopped, the server is down, so keep it up first: start the app host and stop `api` and `web` in the Aspire dashboard, or run the Postgres container by hand on the app's volume, as the owner prefers):
+   `UPDATE catalog.exams SET scope_detail = 'Sao Paulo' WHERE name = 'Exam A';`
+   `UPDATE catalog.exams SET scope_detail = 'Sampa' WHERE name = 'Exam B';`
+   `DELETE FROM catalog.__ef_migrations_history WHERE migration_id = '20261002114230_NormalizeExamStates';`
+   Start the app host again with the same command as step 1 → it applies `NormalizeExamStates` once more. In DataGrip, `SELECT name, scope_detail, normalized_scope_detail FROM catalog.exams WHERE scope = 'State';` → Exam A holds `SP` / `SAO PAULO SP`; Exam B still holds `Sampa` (AC8). Repeat the check on the shared database only after `/agile:ship`.
 3. Open **Exams** → exam A reads `São Paulo (SP)` under "State"; exam B reads `Sampa` (AC6, BR4, BR6).
 4. Open exam B for editing → the state field is empty with the hint “This exam was saved with “Sampa”…”; choose **Save** → the page refuses with "Say where this exam applies."; type `paulo`, pick `São Paulo (SP)`, save → it saves and the list shows `São Paulo (SP)` (AC9, AC3).
 5. Choose **Add exam**, scope **State**, click into the state field → all 27 states open, from `Acre (AC)` to `Tocantins (TO)`; type `sp`, then `sao`, then `mato` → the list narrows each time, with or without accents (AC1, AC2). Switch the scope to **Municipal** → a plain text field appears, empty; type any text and save → it saves as typed (AC4).

@@ -13,6 +13,22 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 - Background work (F-13): the `Api` host runs the job worker of ADR-0001 #20. It polls `jobs.jobs` every 5 s, retries a failed job 5 times (1-2-4-8-16 minutes) and deletes it as soon as it succeeds. Every identity email leaves through it, so a Mailpit that is stopped delays an email instead of losing it. To watch the queue by hand: `select status, attempts, last_error from jobs.jobs;`.
 - Retention of failed jobs (F-27): a job given up on stays as a `Failed` row — the evidence of what was lost — for **90 days**, counted from `created_at`, and is then deleted. The cleanup runs inside the same worker poll, at most once an hour and always once when the process starts, and logs one line with the count only when it removed something. The number is `JobPolicy.FailedRetention`, a constant and not configuration, so changing it is a code change. `Pending` and `Running` rows are never deleted however old they are.
 
+### Useful commands
+The same command works in Git Bash and in PowerShell 7 unless two forms are shown.
+
+- **A worktree's own database** (rule: worktrees): `AppHost.cs` reads `Database:Name`, so an item's migration never lands in the shared `simulab` database. The Postgres server is the same; Aspire creates the database on first start.
+  - Git Bash: `Database__Name=simulab_f42 dotnet run --project src/Hosts/Simulab.AppHost`
+  - PowerShell 7: `$env:Database__Name = "simulab_f42"; dotnet run --project src/Hosts/Simulab.AppHost`
+  - Drop it when the item ships (server up, nobody connected to it): `DROP DATABASE simulab_f42;`
+- **Only the database server, through the app host**: there is no flag to start one resource. Start the app host, then in the dashboard's Resources page choose **Stop** on `api` and `web` (and `redis`, `mailpit` when not needed). Postgres stays on `127.0.0.1:5432`.
+- **Only the database server, without the app host**: a container on the app's volume. The Postgres version must be the one that created the volume, and the data path depends on it.
+  - Which version: `docker run --rm -v simulab-postgres-data:/d:ro alpine cat /d/PG_VERSION`
+  - For `17` or older (the volume goes to `/var/lib/postgresql/data`; the 18 image keeps data under `/var/lib/postgresql`): `docker run -d --name simulab-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -v simulab-postgres-data:/var/lib/postgresql/data postgres:17`
+  - Stop it, keeping the data: `docker rm -f simulab-pg`
+  - Never run it together with the app host: both want port 5432 and the same data directory.
+- **Repeat one migration by hand** (a data migration being checked on screen): `DELETE FROM catalog.__ef_migrations_history WHERE migration_id = '<migration id>';` in that database, then start the app host again. Use it only on a worktree's own database. The history table of a module is `<schema>.__ef_migrations_history`, with `migration_id`.
+- **Connect by hand**: `Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres` (psql or DataGrip).
+
 ## Environments
 | Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in |
 |---|---|---|---|---|
