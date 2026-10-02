@@ -1,7 +1,7 @@
 ---
 feature: F-46
 epic: Foundation and identity
-status: validating
+status: done
 board: 21
 version: 1
 ---
@@ -90,4 +90,7 @@ Needed to validate: nothing beyond the test run (no screen, no app host).
 - AC6 → no resource file touched
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-46`, merged with `--no-ff` into `main` as `17db23b` (board #21), 2026-10-02.
+- Full suite (`gate.js ship`): build 17 s, tests 70 s, 0 failed; architecture tests 164 passed (9 new in `ProductionProjectsTests`); Web 818, Catalog 334, Identity 399, Api 12, Jobs 25, Persistence 25, Ai 10, ApiResults 13, SharedKernel 12, AppHost 8, Email 2. Warnings baseline: 0 entries. `gate.js docs`: GREEN, 0 files changed.
+- App manual: not updated (no visible behavior changed).
+- Version: `0.1.0` to `0.2.0` (feature, MINOR). The two `AppVersionTests` that pinned `0.1.0` (F-60 warned about it) now read the version from `Simulab.Api.csproj` instead.
