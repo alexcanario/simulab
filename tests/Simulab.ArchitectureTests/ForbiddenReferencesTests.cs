@@ -12,17 +12,14 @@ public class ForbiddenReferencesTests
                               || name.Contains("." + term, StringComparison.OrdinalIgnoreCase));
 
     [Fact]
-    public void The_rules_see_every_production_assembly()
+    public void The_rules_see_every_production_project_of_the_solution()
     {
-        SolutionAssemblies.All.Select(a => a.GetName().Name).Should().BeEquivalentTo(
-            "Simulab.SharedKernel", "Simulab.Persistence", "Simulab.Email", "Simulab.Jobs", "Simulab.Api", "Simulab.Web", "Simulab.ServiceDefaults",
-            "Simulab.Ai", "Simulab.Ai.Contracts", "Simulab.Plans.Contracts", // F-41
-            "Simulab.ApiResults", // F-39
-            "Simulab.Identity.Domain", "Simulab.Identity.Contracts", "Simulab.Identity.Application",
-            "Simulab.Identity.Infrastructure", "Simulab.Identity.Api",
-            "Simulab.Catalog.Domain", "Simulab.Catalog.Contracts", "Simulab.Catalog.Application", // F-33
-            "Simulab.Catalog.Infrastructure", "Simulab.Catalog.Api",
-            "Simulab.DocGen"); // F-15: a tool, never deployed, but held to the same vocabulary and references
+        // F-46: the list is derived from Simulab.slnx; the expected side is read from the file again, not written by hand.
+        var solution = XDocument.Load(Path.Combine(SolutionAssemblies.RepositoryRoot(), "Simulab.slnx"));
+        var expected = ProductionProjects.Selected(ProductionProjects.Listed(solution), SolutionAssemblies.ExemptProjects.Keys);
+
+        expected.Should().HaveCountGreaterThan(20, "the rule must have looked at the whole solution");
+        SolutionAssemblies.All.Select(a => a.GetName().Name).Should().BeEquivalentTo(expected);
     }
 
     [Fact]
