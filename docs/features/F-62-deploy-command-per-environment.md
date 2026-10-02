@@ -1,7 +1,7 @@
 ---
 feature: F-62
 epic: Foundation and identity
-status: idea
+status: refining
 board: 101
 version: 1
 ---
