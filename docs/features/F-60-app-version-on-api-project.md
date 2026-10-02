@@ -1,7 +1,7 @@
 ---
 feature: F-60
 epic: Foundation and identity
-status: validating
+status: done
 board: 99
 version: 1
 ---
@@ -66,4 +66,7 @@ Needed to validate: nothing (no screen, no account, no app host).
 4. Prove the guard bites: add `<Version>9.9.9</Version>` to the `PropertyGroup` of `src/Hosts/Simulab.Web/Simulab.Web.csproj`, repeat step 3. Expected: `NoOtherProjectOrPropsFile_CarriesAVersion` fails and names `src/Hosts/Simulab.Web/Simulab.Web.csproj`. Undo the edit (`git checkout src/Hosts/Simulab.Web/Simulab.Web.csproj`).
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-60`, merged with `--no-ff` into `main` as `1211ccd` (board #99), 2026-10-02.
+- Full suite (`gate.js ship`): build 17 s, tests 72 s, 0 failed; architecture tests 154 passed (4 new, `AppVersionTests`); Web 818, Catalog 334, Identity 399, Api 12. Warnings baseline: 0 entries. `gate.js docs`: GREEN, 0 files changed.
+- App manual: not updated (no visible behavior changed).
+- Version: `0.1.0` stays; this ship did not bump it, because the item itself introduces the version and AC1/AC3 pin `0.1.0`. The next ship's bump would turn those two tests red: loosen them to "the Api csproj version equals the assembly informational version" before then.
