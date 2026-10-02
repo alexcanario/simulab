@@ -1,7 +1,7 @@
 ---
 feature: F-60
 epic: Foundation and identity
-status: approved
+status: validating
 board: 99
 version: 1
 ---
@@ -56,7 +56,14 @@ Give the app one version that `/agile:ship` raises on every ship, so a release c
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: nothing (no screen, no account, no app host).
+
+1. Open the worktree `D:\dev\_icontrol\wt\simulab\f-60-app-version-on-api` and read `src/Hosts/Simulab.Api/Simulab.Api.csproj`: line 5 is `<Version>0.1.0</Version>`.
+2. List every version element in the solution (expected: exactly one line, the Api project).
+   - Git Bash: `grep -rn "<Version>" src tools tests --include=*.csproj --include=*.props | grep -v "/obj/\|/bin/"`
+   - PowerShell 7: `Get-ChildItem src,tests,tools -Recurse -Include *.csproj,*.props | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' } | Select-String '<Version>'`
+3. Run the guard: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~AppVersionTests"` (same command in both shells). Expected: `Passed! - Failed: 0, Passed: 4, Skipped: 0, Total: 4`.
+4. Prove the guard bites: add `<Version>9.9.9</Version>` to the `PropertyGroup` of `src/Hosts/Simulab.Web/Simulab.Web.csproj`, repeat step 3. Expected: `NoOtherProjectOrPropsFile_CarriesAVersion` fails and names `src/Hosts/Simulab.Web/Simulab.Web.csproj`. Undo the edit (`git checkout src/Hosts/Simulab.Web/Simulab.Web.csproj`).
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
