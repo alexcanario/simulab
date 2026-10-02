@@ -97,7 +97,7 @@ public class DocGenModelDriftTests
         DocGenProjectReferences.UnresolvedMessage(unresolved)
             .Should().Contain("Simulab.Reports")
             .And.Contain("tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj")
-            .And.Contain("SolutionAssemblies.All");
+            .And.NotContain("SolutionAssemblies.All");
     }
 
     [Fact]
