@@ -48,6 +48,7 @@ public sealed class ProfileHandler(UserManager<User> userManager)
             : await SaveAsync(userId, user => user.PreferredLanguage = language);
     }
 
+    // F-47 BR7, no transaction: one write; the second UpdateAsync only retries it after a concurrency failure.
     private async Task<Result> SaveAsync(Guid userId, Action<User> change)
     {
         // A token that outlived its account (erasure, F-10): the endpoint answers 401, as for any ended session.

@@ -8,8 +8,9 @@ namespace Simulab.Identity.Infrastructure.Persistence;
 
 /// <summary>
 /// The account event trail (F-21, BR7). Every write is its own save: the account handlers have no transaction
-/// of their own, and what the event records has already been committed. The one exception is the erasure,
-/// which stages its event on the transaction that erases the account.
+/// of their own (the handlers that hold a transaction, F-30 and F-47, record theirs after the commit), and what
+/// the event records has already been committed. The one exception is the erasure, which stages its event on
+/// the transaction that erases the account.
 /// </summary>
 public sealed class AccountEventLog(
     IdentityModuleDbContext context,

@@ -26,6 +26,7 @@ public sealed class SecondFactor(
     /// Success saves the accepted step and clears the failure count. A wrong code counts as a failed access, like a
     /// wrong password; while locked, even the right code is refused with the seconds left.
     /// </summary>
+    // F-47 BR7, no transaction: a crash spends one of ten recovery codes or a TOTP step and nothing else; the other codes and the next TOTP code still work. A check's own writes must also survive a rollback (BR2).
     public async Task<Result<SecondFactorMethod>> VerifyAsync(User user, string? code, bool allowRecoveryCode = true)
     {
         ArgumentNullException.ThrowIfNull(user);

@@ -56,41 +56,50 @@ public sealed class ResetPasswordHandler(
             return Result.Failure(refusal);
         }
 
-        // BR2: the link is spent before anything changes, in one conditional update, so two concurrent
-        // resets with the same link cannot both succeed.
-        if (!await tokenStore.TryConsumeAsync(token, now, cancellationToken))
+        // F-47 BR1, BR2: every write below is one transaction, opened after every check. Disposed before the
+        // commit it rolls back, so the link is not spent and the account is as it was.
+        await using (var transaction = await unitOfWork.BeginAsync(cancellationToken))
         {
-            return Failure(IdentityErrorCodes.PasswordResetInvalid, ErrorKind.Validation);
+            // BR2: the link is spent before anything changes, in one conditional update, so two concurrent
+            // resets with the same link cannot both succeed.
+            if (!await tokenStore.TryConsumeAsync(token, now, cancellationToken))
+            {
+                return Failure(IdentityErrorCodes.PasswordResetInvalid, ErrorKind.Validation);
+            }
+
+            // Our own token proved the mailbox; Identity's own reset token is only the key its API asks for.
+            // The rules were checked above, so a failure here is not the visitor's password: a server error.
+            var identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
+            var reset = await userManager.ResetPasswordAsync(user, identityToken, newPassword!);
+            if (!reset.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Resetting the password failed after the checks passed: {string.Join(", ", reset.Errors.Select(error => error.Code))}.");
+            }
+
+            // BR5: the person who opened the link owns the mailbox; making them wait out a lockout protects nothing.
+            await userManager.ResetAccessFailedCountAsync(user);
+            await userManager.SetLockoutEndDateAsync(user, null);
+
+            // BR6: the link proved the mailbox exactly as the verification link does.
+            if (user.Status == AccountStatus.Pending)
+            {
+                user.VerifyEmail(now);
+                (await userManager.UpdateAsync(user)).ThrowIfFailed("Activating the account");
+                await verificationTokens.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
+            }
+
+            // F-47 BR3: the notice is staged and saved before the Redis call, so a failed commit never leaves
+            // a session alive that the reset was meant to end.
+            await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, now, cancellationToken);
+
+            // BR9: whoever holds the old password may hold a session too.
+            await sessions.RevokeAllAsync(user.Id, exceptSessionJti: null, cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
         }
 
-        // Our own token proved the mailbox; Identity's own reset token is only the key its API asks for.
-        // The rules were checked above, so a failure here is not the visitor's password: a server error.
-        var identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
-        var reset = await userManager.ResetPasswordAsync(user, identityToken, newPassword!);
-        if (!reset.Succeeded)
-        {
-            throw new InvalidOperationException(
-                $"Resetting the password failed after the checks passed: {string.Join(", ", reset.Errors.Select(error => error.Code))}.");
-        }
-
-        // BR5: the person who opened the link owns the mailbox; making them wait out a lockout protects nothing.
-        await userManager.ResetAccessFailedCountAsync(user);
-        await userManager.SetLockoutEndDateAsync(user, null);
-
-        // BR6: the link proved the mailbox exactly as the verification link does.
-        if (user.Status == AccountStatus.Pending)
-        {
-            user.VerifyEmail(now);
-            await userManager.UpdateAsync(user);
-            await verificationTokens.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
-        }
-
-        // BR9: whoever holds the old password may hold a session too.
-        await sessions.RevokeAllAsync(user.Id, exceptSessionJti: null, cancellationToken);
-
-        await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, now, cancellationToken);
-
-        // F-21 BR1, BR7: after the password is really set.
+        // F-21 BR1, BR7 and F-47 BR4: after the commit, once the password is really set.
         await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordResetCompleted, cancellationToken);
         return Result.Success();
     }

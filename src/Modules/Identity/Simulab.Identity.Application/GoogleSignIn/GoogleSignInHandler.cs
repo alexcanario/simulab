@@ -66,6 +66,7 @@ public sealed class GoogleSignInHandler(
     /// BR4 with change note v2: only when Google is the last step. With two-factor on, the count and the lockout stay
     /// for the code step, whose lockout rule is shared with the password (F-11 BR10).
     /// </summary>
+    // F-47 BR7, no transaction: while a lockout is active the count is already 0, and with a count above 0 any lockout end is past, so a crash between the two writes leaves nothing harmful.
     public async Task ClearFailuresAsync(User user)
     {
         ArgumentNullException.ThrowIfNull(user);

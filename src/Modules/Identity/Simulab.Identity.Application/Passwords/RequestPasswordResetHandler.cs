@@ -12,6 +12,7 @@ public sealed class RequestPasswordResetHandler(
     IUserDirectory userDirectory,
     IPasswordResetTokenStore tokenStore,
     IPasswordMailer mailer,
+    IIdentityUnitOfWork unitOfWork,
     IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
@@ -36,26 +37,33 @@ public sealed class RequestPasswordResetHandler(
             return;
         }
 
-        // The older links stop working before the new one exists, so only one link is ever valid.
-        await tokenStore.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
-
         var (rawToken, tokenHash) = SecureToken.Generate();
 
-        // F-13 BR2, BR3: the mailer stages the job and the store's save writes both rows. Nothing here
-        // talks to the mail server any more, so BR1 holds by construction: a slow or broken SMTP server
-        // cannot make this path answer differently, or later, than the unknown-address path above.
-        await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
+        // F-47 BR1: consuming the older links and adding the new one commit together, so a failure between
+        // them never leaves an account with every link dead and none new.
+        await using (var transaction = await unitOfWork.BeginAsync(cancellationToken))
+        {
+            // The older links stop working before the new one exists, so only one link is ever valid.
+            await tokenStore.ConsumePendingForUserAsync(user.Id, now, cancellationToken);
 
-        await tokenStore.AddAsync(
-            new PasswordResetToken
-            {
-                UserId = user.Id,
-                TokenHash = tokenHash,
-                ExpiresAt = now.Add(PasswordResetPolicy.Lifetime)
-            },
-            cancellationToken);
+            // F-13 BR2, BR3: the mailer stages the job and the store's save writes both rows. Nothing here
+            // talks to the mail server any more, so BR1 holds by construction: a slow or broken SMTP server
+            // cannot make this path answer differently, or later, than the unknown-address path above.
+            await mailer.SendResetLinkAsync(user.Email!, rawToken, user.PreferredLanguage, cancellationToken);
 
-        // F-21 BR6: only a known address leaves an event. Written after the link exists, and it changes
+            await tokenStore.AddAsync(
+                new PasswordResetToken
+                {
+                    UserId = user.Id,
+                    TokenHash = tokenHash,
+                    ExpiresAt = now.Add(PasswordResetPolicy.Lifetime)
+                },
+                cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+
+        // F-21 BR6: only a known address leaves an event. Written after the commit (F-47 BR4), and it changes
         // nothing the caller can observe: the answer is the same on every path (F-7 BR1).
         await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordResetRequested, cancellationToken);
     }

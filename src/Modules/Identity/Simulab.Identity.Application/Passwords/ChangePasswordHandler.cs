@@ -65,25 +65,34 @@ public sealed class ChangePasswordHandler(
             return Result.Failure(refusal);
         }
 
-        var changed = await userManager.ChangePasswordAsync(user, currentPassword, newPassword!);
-        if (!changed.Succeeded)
+        // F-47 BR1, BR2: every write below is one transaction, opened after every check; a failure before the
+        // commit leaves the old password in place and no notice behind.
+        await using (var transaction = await unitOfWork.BeginAsync(cancellationToken))
         {
-            return Failure(IdentityErrorCodes.PasswordChangeTooWeak, ErrorKind.Validation);
+            var changed = await userManager.ChangePasswordAsync(user, currentPassword, newPassword!);
+            if (!changed.Succeeded)
+            {
+                return Failure(IdentityErrorCodes.PasswordChangeTooWeak, ErrorKind.Validation);
+            }
+
+            // BR10.
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            // F-47 BR3: the notice is staged and saved before the Redis calls, so a failed commit never leaves
+            // a session alive that the change was meant to end.
+            await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, timeProvider.GetUtcNow(), cancellationToken);
+
+            // BR9: the other devices sign out; this one keeps working, with the stamp the change just renewed.
+            await sessions.RevokeAllAsync(user.Id, callerSessionJti, cancellationToken);
+            if (callerSessionJti is not null)
+            {
+                await sessions.RestampAsync(callerSessionJti, user.SecurityStamp, cancellationToken);
+            }
+
+            await transaction.CommitAsync(cancellationToken);
         }
 
-        // BR10.
-        await userManager.ResetAccessFailedCountAsync(user);
-
-        // BR9: the other devices sign out; this one keeps working, with the stamp the change just renewed.
-        await sessions.RevokeAllAsync(user.Id, callerSessionJti, cancellationToken);
-        if (callerSessionJti is not null)
-        {
-            await sessions.RestampAsync(callerSessionJti, user.SecurityStamp, cancellationToken);
-        }
-
-        await PasswordNotice.EnqueueAsync(mailer, unitOfWork, user, timeProvider.GetUtcNow(), cancellationToken);
-
-        // F-21 BR1, BR7: after the new password is really in place.
+        // F-21 BR1, BR7 and F-47 BR4: after the commit, once the new password is really in place.
         await accountEvents.RecordAsync(user.Id, AccountEventType.PasswordChanged, cancellationToken);
         return Result.Success();
     }
