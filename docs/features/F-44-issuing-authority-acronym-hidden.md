@@ -1,7 +1,7 @@
 ---
 feature: F-44
 epic: Assessment catalog
-status: validating
+status: done
 board: 19
 version: 1
 ---
@@ -173,8 +173,7 @@ Needed to validate: nothing beyond the app host and the seeded admin (`admin@sim
 8. Switch the language to pt-BR and pt-PT and repeat step 2 → the placeholder reads "Buscar por nome" / "Pesquisar por nome"; the organizer screens still show their acronym.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
-- Branch: <feature/F-44>
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
+- Branch: `feature/F-44` (removed at the merge)
+- Merge: `bf3d4f4` (the branch had already been fast-forwarded to `3665997` on `main` and `origin` by something outside this session before this merge, which brought the last two commits)
+- Tests: 1749 passing, 0 failing across the full suite (Catalog 290, Identity 399, Web 803, Architecture 150, Api 12, Jobs 25, Persistence 25, Ai 10, ApiResults 13, SharedKernel 12, AppHost 8, Email 2); build 18 s, tests 112 s; `agile gate GREEN`, 0 warnings; `agile docs GREEN`
+- Manual pages: `docs/manual/{en,pt-BR,pt-PT}/issuing-authorities.md`, `exams.md`, `catalog.md`
