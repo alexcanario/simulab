@@ -865,3 +865,6 @@ From 0.0.104 to 0.0.105, run on a clean main with no item `building` or `validat
 - Missing capabilities: DocGen tool catalogue (F-61 #100), deploy command per environment (F-62 #101), visual identity (F-63 #102); all already captured, nothing new.
 - Found: `/agile:publish develop` stopped because the environments table of `docs/infra.md` lacks the `Deploy command`, `Check URL` and `Version (deployed on)` columns (F-62) and has no environment named `develop`.
 - Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+- Manual, applied: `.gitignore` got `!docs/releases/` after `[Rr]eleases/`: the Visual Studio template pattern ignored the folder where `publish.js` writes the notes, and the first `release` failed at `git add`.
+- Plugin note: `scripts/publish.js` `package` listed `Simulab.Catalog.Api` and `Simulab.Identity.Api` (module class libraries under `src/Modules/*`) as deployables and left out `Simulab.Web`; the zips of v0.3.0 do not run the app (adds to the F-60 note). `plugin: agile`.
+- Plugin note: `templates/dotnet/gitignore` ignores `[Rr]eleases/`, which swallows `docs/releases/`; add `!docs/releases/` to the template. `plugin: agile`.
