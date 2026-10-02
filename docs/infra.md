@@ -33,11 +33,11 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 - **Connect by hand**: `Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres` (psql or DataGrip).
 
 ## Environments
-| Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in |
-|---|---|---|---|---|
-| local | provisioned | printed by the app host | app host | user secrets |
-| staging | planned | — | Azure Container Apps, Brazil South; Bicep adapted from Simulae | Azure Key Vault |
-| production | planned | — | Azure Container Apps, Brazil South; approval required | Azure Key Vault |
+| Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in | Deploy command | Check URL | Version (deployed on) |
+|---|---|---|---|---|---|---|---|
+| local | provisioned | printed by the app host | app host | user secrets | not declared | | |
+| staging | planned | — | Azure Container Apps, Brazil South; Bicep adapted from Simulae | Azure Key Vault | not declared | | |
+| production | planned | — | Azure Container Apps, Brazil South; approval required | Azure Key Vault | not declared | | |
 
 An EU region for Portuguese users (GDPR) is a deferred decision.
 
