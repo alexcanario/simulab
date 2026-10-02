@@ -35,10 +35,10 @@ public class ExamNormalizedScopeDetailTests
     {
         var exam = Exam.Create(Authority, "Guarda Municipal", AssessmentType.PublicServiceExam, ExamScope.Municipal, "Goiânia", "pt-BR").Value;
 
-        var result = exam.Update(Authority, "Guarda Municipal", AssessmentType.PublicServiceExam, ExamScope.State, "Pará", "pt-BR");
+        var result = exam.Update(Authority, "Guarda Municipal", AssessmentType.PublicServiceExam, ExamScope.State, "PA", "pt-BR");
 
         result.IsSuccess.Should().BeTrue();
-        exam.NormalizedScopeDetail.Should().Be("PARA");
+        exam.NormalizedScopeDetail.Should().Be("PARA PA", "a State exam is found by its state's name and by its acronym (F-42 BR5)");
     }
 
     [Fact]

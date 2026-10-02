@@ -42,7 +42,7 @@ internal static class DocGenProjectReferences
     /// <summary>What to do about the unresolved projects, in the words of the file that has to change.</summary>
     public static string UnresolvedMessage(IEnumerable<string> unresolved) =>
         $"DocGen references {string.Join(", ", unresolved)}, which no assembly loaded by the architecture tests answers for. "
-        + "Add the project to tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj and to SolutionAssemblies.All, "
+        + "Add a ProjectReference to the project in tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj, "
         + "or the tests stay blind to what DocGen documents.";
 
     private static List<string> References(string projectFile)

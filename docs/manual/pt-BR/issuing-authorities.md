@@ -20,12 +20,12 @@ a tela Órgãos contratantes. Para as demais, a página não é encontrada.
 ## Como fazer
 ### Ver os órgãos contratantes
 1. Escolha **Órgãos contratantes**, na seção **Conteúdo** do menu lateral.
-2. A lista mostra o nome e a sigla, em ordem de nome. Clique no título de uma coluna para ordenar por ela.
-3. Digite na caixa de busca para filtrar por nome ou sigla. Acento e maiúscula não importam.
+2. A lista mostra o nome, em ordem de nome. Clique no título da coluna para inverter a ordem.
+3. Digite na caixa de busca para filtrar por nome. Acento e maiúscula não importam.
 
 ### Cadastrar um órgão contratante
 1. Escolha **Adicionar**.
-2. Digite o **nome**, como o órgão assina seus editais, e a **sigla**. A sigla é salva em maiúsculas.
+2. Digite o **nome**, como o órgão assina seus editais.
 3. O **site oficial** e a **descrição** são opcionais. O site é o endereço completo, começando com `https://`.
 4. Escolha **Salvar**.
 
@@ -37,14 +37,13 @@ a tela Órgãos contratantes. Para as demais, a página não é encontrada.
 1. Escolha **Excluir** na linha dele e confirme.
 2. Se ele ainda tiver exames no catálogo, a exclusão é recusada e um aviso aparece no topo da lista. Exclua
    antes esses exames, na página [Exames](exams.md) — filtre a lista por este órgão para achá-los.
-3. Sem exames, o órgão sai do catálogo. O nome e a sigla continuam ocupados, para ninguém cadastrar um segundo
+3. Sem exames, o órgão sai do catálogo. O nome continua ocupado, para ninguém cadastrar um segundo
    com o mesmo nome por engano.
 
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
 | Nome | Como o órgão aparece em todo lugar | Obrigatório, de 2 a 150 caracteres, não pode repetir o nome de outro órgão, inclusive de um excluído. Maiúscula e acento não fazem um nome diferente |
-| Sigla | O nome curto (PMF, MEC, UFC) | Obrigatória, de 2 a 20 caracteres, salva em maiúsculas, única do mesmo jeito que o nome |
 | Site oficial | Onde ler sobre o órgão | Opcional, endereço completo começando com `http://` ou `https://` |
 | Descrição | Texto livre sobre o órgão | Opcional, no máximo 500 caracteres |
 
@@ -52,11 +51,8 @@ a tela Órgãos contratantes. Para as demais, a página não é encontrada.
 | Mensagem | O que significa | O que fazer |
 |---|---|---|
 | Outro órgão contratante já tem esse nome. | O nome está ocupado, talvez por um órgão excluído. | Escolha outro nome. |
-| Outro órgão contratante já tem essa sigla. | A sigla está ocupada, em qualquer combinação de maiúsculas. | Escolha outra sigla. |
 | Informe um nome com ao menos 2 caracteres. | O nome está vazio ou curto demais. | Digite o nome completo. |
 | O nome é muito longo: no máximo 150 caracteres. | O nome passou do limite. | Encurte o nome. |
-| Informe uma sigla com ao menos 2 caracteres. | A sigla está vazia ou curta demais. | Digite a sigla. |
-| A sigla é muito longa: no máximo 20 caracteres. | A sigla passou do limite. | Encurte a sigla. |
 | A descrição é muito longa: no máximo 500 caracteres. | A descrição passou do limite. | Encurte a descrição. |
 | Informe um endereço completo, começando com http:// ou https:// | O site não é um endereço completo. | Acrescente `https://` na frente ou deixe o campo vazio. |
 | Este órgão contratante tem exames no catálogo. Exclua esses exames primeiro, na página Exames. | O órgão ainda é dono de pelo menos um exame. | Vá até Exames, filtre por este órgão, exclua os exames e volte. |

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Every production assembly is referenced so the rules see it. Add each new module project here. -->
+  <!-- Every production project of Simulab.slnx is loaded by the rules (SolutionAssemblies.All); one the tests cannot load fails the run and names the ProjectReference to add here. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />

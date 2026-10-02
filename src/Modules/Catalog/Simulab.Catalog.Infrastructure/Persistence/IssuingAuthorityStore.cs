@@ -7,8 +7,8 @@ using Simulab.SharedKernel.Results;
 namespace Simulab.Catalog.Infrastructure.Persistence;
 
 /// <summary>
-/// The issuing-authority port over the module's context (F-34 BR18, v2). The two "is taken" queries ignore
-/// the soft-delete filter on purpose: a deleted body keeps its name and acronym, exactly as the unique
+/// The issuing-authority port over the module's context (F-34 BR18, v2). The "is taken" query ignore
+/// the soft-delete filter on purpose: a deleted body keeps its name, exactly as the unique
 /// indexes see them.
 /// </summary>
 public sealed class IssuingAuthorityStore(CatalogModuleDbContext context) : IIssuingAuthorityStore
@@ -18,9 +18,6 @@ public sealed class IssuingAuthorityStore(CatalogModuleDbContext context) : IIss
 
     public Task<bool> NameIsTakenAsync(string normalizedName, Guid? exceptId, CancellationToken cancellationToken) =>
         Others(exceptId).AnyAsync(authority => authority.NormalizedName == normalizedName, cancellationToken);
-
-    public Task<bool> AcronymIsTakenAsync(string normalizedAcronym, Guid? exceptId, CancellationToken cancellationToken) =>
-        Others(exceptId).AnyAsync(authority => authority.NormalizedAcronym == normalizedAcronym, cancellationToken);
 
     public void Add(IssuingAuthority authority) => context.IssuingAuthorities.Add(authority);
 

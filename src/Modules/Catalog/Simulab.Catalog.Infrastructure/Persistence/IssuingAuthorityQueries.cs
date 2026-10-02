@@ -8,8 +8,8 @@ namespace Simulab.Catalog.Infrastructure.Persistence;
 
 /// <summary>
 /// The issuing-authority list (F-34 BR18, v2): one page, its total, searched over the normalized columns so
-/// the search ignores case and accents without a PostgreSQL extension, and sorted by name or acronym with
-/// the name as the default. It is also what the exam form's picker calls.
+/// the search ignores case and accents without a PostgreSQL extension, and sorted by name.
+/// It is also what the exam form's picker calls.
 /// </summary>
 public sealed class IssuingAuthorityQueries(CatalogModuleDbContext context) : IIssuingAuthorityQueries
 {
@@ -26,7 +26,7 @@ public sealed class IssuingAuthorityQueries(CatalogModuleDbContext context) : II
         if (search.Length > 0)
         {
             authorities = authorities.Where(authority =>
-                authority.NormalizedName.Contains(search) || authority.NormalizedAcronym.Contains(search));
+                authority.NormalizedName.Contains(search));
         }
 
         var total = await authorities.CountAsync(cancellationToken);
@@ -37,7 +37,6 @@ public sealed class IssuingAuthorityQueries(CatalogModuleDbContext context) : II
             .Select(authority => new IssuingAuthorityResponse(
                 authority.Id,
                 authority.Name,
-                authority.Acronym,
                 authority.Description,
                 authority.Website))
             .ToListAsync(cancellationToken);
@@ -50,8 +49,6 @@ public sealed class IssuingAuthorityQueries(CatalogModuleDbContext context) : II
     private static IQueryable<IssuingAuthority> Sort(IQueryable<IssuingAuthority> authorities, IssuingAuthorityListQuery query) =>
         (query.SortBy, query.Descending) switch
         {
-            (IssuingAuthoritySort.Acronym, false) => authorities.OrderBy(authority => authority.NormalizedAcronym),
-            (IssuingAuthoritySort.Acronym, true) => authorities.OrderByDescending(authority => authority.NormalizedAcronym),
             (_, true) => authorities.OrderByDescending(authority => authority.NormalizedName),
             _ => authorities.OrderBy(authority => authority.NormalizedName)
         };

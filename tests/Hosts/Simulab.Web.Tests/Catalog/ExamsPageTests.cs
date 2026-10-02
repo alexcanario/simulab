@@ -21,11 +21,12 @@ public sealed class ExamsPageTests : CatalogPageTestContext
 
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
         CellsOf(page, 0).Should().Equal("Agente de Policia Federal", "FUVEST");
-        CellsOf(page, 1).Should().Contain(cell => cell.Contains("PF", StringComparison.Ordinal));
+        CellsOf(page, 1).Should().Equal("Policia Federal", "Prefeitura Municipal de Guarulhos");
+        page.Markup.Should().NotContain("PF").And.NotContain("PMG", "the authority is named without its acronym (F-44 BR1)");
         CellsOf(page, 2).Should().Equal("Public service exam", "University entrance exam");
         // The scope cell carries its detail under the label when the scope has one (BR8).
         CellsOf(page, 3)[0].Should().Be("National");
-        CellsOf(page, 3)[1].Should().Contain("State").And.Contain("Sao Paulo");
+        CellsOf(page, 3)[1].Should().Contain("State").And.Contain("São Paulo (SP)", "a State exam reads its state by name and acronym (F-42 AC6)");
     }
 
     [Fact]
@@ -114,7 +115,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         page.FindAll("tbody tr")[0].QuerySelectorAll("button")[1].Click();
 
         providers.Dialogs.WaitForAssertion(() =>
-            providers.Dialogs.Markup.Should().Contain("Agente de Policia Federal").And.Contain("PF"));
+            providers.Dialogs.Markup.Should().Contain("Agente de Policia Federal").And.Contain("inside Policia Federal.").And.NotContain("PF"));
         providers.Dialogs.FindAll("button").Last(button => button.TextContent.Contains("Delete", StringComparison.Ordinal)).Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>

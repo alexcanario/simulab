@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: en
-features: [F-34, F-43, F-35]
-updated: 2026-09-29
+features: [F-34, F-43, F-35, F-42]
+updated: 2026-10-02
 ---
 # Exams
 
@@ -21,17 +21,22 @@ Everyone else gets Page not found.
    column title to sort by it.
 3. Type in the search box to filter by name. Case and accents do not matter: "publica" finds "Pública".
 4. The three filters above the list — issuing authority, assessment type and scope — can be combined. In the
-   issuing authority filter, type two letters of the name or the acronym and pick from the list that appears.
+   issuing authority filter, type two letters of the name and pick from the list that appears.
 
 ### Add an exam
 1. Choose **Add**. The form opens on a page of its own.
-2. In **Issuing authority**, type two letters of the name or the acronym and pick from the list. If the body is
+2. In **Issuing authority**, type two letters of the name and pick from the list. If the body is
    not there yet, add it first on [Issuing authorities](issuing-authorities.md).
 3. Type the exam's **name**, as it appears in the notice.
 4. Choose the **assessment type**. Choose the **scope** from the three cards — each one explains in a line
    what it means.
-5. If the scope is State or Municipal, one more field appears, for **where** the exam applies. Setting the scope
-   back to National hides it and drops what you typed.
+5. If the scope is State or Municipal, one more field appears, for **where** the exam applies.
+   - **State**: the field is a list of the 27 Brazilian states (26 states and the Federal District). Click it to
+     see them all, each as "São Paulo (SP)"; type part of the name or the acronym ("sp", "paulo", "sao") to narrow
+     the list, with or without accents, and pick one.
+   - **Municipal**: type the municipality's name, as free text.
+   - Setting the scope back to National hides the field and drops what you chose. Moving between State and
+     Municipal starts the field empty.
 6. Choose the **content language**. It starts at Portuguese (Brazil). This is the language the exam and its
    questions are written in; content is never translated.
 7. Choose **Save**. You stay on the page, now editing the exam you just created.
@@ -57,7 +62,7 @@ a notice at the top of the card lists every missing field; clicking one takes yo
 | Name | How the exam appears everywhere | Required, 2 to 200 characters. It cannot repeat the name of another exam of the same issuing authority, a deleted one included. Case and accents do not make a name different |
 | Assessment type | Public service exam, certification, university entrance exam or ENEM | Required |
 | Scope | National, state or municipal | Required |
-| State / Municipality | Where the exam applies | Required when the scope is State or Municipal, at most 120 characters. Hidden when it is National |
+| State / Municipality | Where the exam applies | Required when the scope is State or Municipal. For a State exam, one of the 27 states of the list; it is shown everywhere as "São Paulo (SP)" and the same list is offered whatever the exam's content language. For a Municipal exam, free text of at most 120 characters. Hidden when it is National |
 | Content language | The language the exam and its questions are written in | Required, one of Portuguese (Brazil), Portuguese (Portugal) and English. Starts at Portuguese (Brazil) |
 
 ## Messages
@@ -69,7 +74,9 @@ a notice at the top of the card lists every missing field; clicking one takes yo
 | This issuing authority already has an exam with this name. | The name is taken inside that body, possibly by a deleted exam. | Choose another name, or another issuing authority. |
 | Choose an assessment type. | The type was not chosen. | Pick one of the four types. |
 | Choose a scope. | The scope was not chosen. | Pick national, state or municipal. |
-| Say where this exam applies. | The scope is state or municipal and the field was left empty. | Type the state or the municipality. |
+| Say where this exam applies. | The scope is state or municipal and the field was left empty. | Pick the state from the list, or type the municipality. |
+| Choose one of the 27 states of the list. | The state was refused because it is not one of the 27 of the list. | Open the list and pick the state. |
+| This exam was saved with “…”, which is not a state of the list. Choose the right one. | An exam saved before the state list existed, with a text no state matches (for example "Sampa"), was opened. The field is empty and the hint quotes the old text. | Pick the right state and save; saving without a state is refused. |
 | This field is too long: at most 120 characters. | The state or municipality is over the limit. | Shorten the text. |
 | Choose the language of the content. | The language was not chosen. | Pick one of the three languages. |
 | This exam no longer exists. | Someone deleted the exam while your screen was open. | Reload the page. |

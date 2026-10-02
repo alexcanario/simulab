@@ -55,8 +55,8 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
     public Task<ExamResponse?> FindAsync(Guid id, CancellationToken cancellationToken) =>
         Select(context.Exams.AsNoTracking().Where(exam => exam.Id == id)).FirstOrDefaultAsync(cancellationToken);
 
-    // The issuing authority's name and acronym come from the same query: the list draws them, and the form
-    // page fills its picker with them, so a second round trip would buy nothing.
+    // The issuing authority's name comes from the same query: the list draws it, and the form
+    // page fills its picker with it, so a second round trip would buy nothing.
     private IQueryable<ExamResponse> Select(IQueryable<Exam> exams) =>
         from exam in exams
         join authority in context.IssuingAuthorities on exam.IssuingAuthorityId equals authority.Id
@@ -65,7 +65,6 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
             exam.Name,
             exam.IssuingAuthorityId,
             authority.Name,
-            authority.Acronym,
             exam.AssessmentType,
             exam.Scope,
             exam.ScopeDetail,

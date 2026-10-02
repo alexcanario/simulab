@@ -91,7 +91,6 @@
         <TemplateColumn T="PublishedExamResponse" Title="@L["Exams.Column.IssuingAuthority"]" Sortable="false">
             <CellTemplate>
                 <AppTruncatedText Text="@context.Item.IssuingAuthorityName" MaxWidth="14rem" />
-                <span class="app-cell-secondary">@context.Item.IssuingAuthorityAcronym</span>
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn T="PublishedExamResponse" Title="@L["Exams.Column.AssessmentType"]" Sortable="false">
@@ -102,7 +101,7 @@
                 @ExamText.ScopeName(L, context.Item.Scope)
                 @if (!string.IsNullOrEmpty(context.Item.ScopeDetail))
                 {
-                    <span class="app-cell-secondary">@context.Item.ScopeDetail</span>
+                    <span class="app-cell-secondary">@ExamText.ScopeDetailText(context.Item.Scope, context.Item.ScopeDetail)</span>
                 }
             </CellTemplate>
         </TemplateColumn>

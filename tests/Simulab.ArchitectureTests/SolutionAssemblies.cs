@@ -1,35 +1,22 @@
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Simulab.ArchitectureTests;
 
 /// <summary>The production assemblies the rules run against, and the repository root.</summary>
 internal static class SolutionAssemblies
 {
-    public static readonly IReadOnlyList<Assembly> All =
-    [
-        typeof(Simulab.SharedKernel.Entities.Entity).Assembly,
-        typeof(Simulab.Persistence.ModuleDbContext).Assembly,
-        typeof(Simulab.ApiResults.ApiProblem).Assembly, // F-39
-        typeof(Simulab.Email.IEmailSender).Assembly,
-        typeof(Simulab.Jobs.IJobQueue).Assembly,
-        typeof(Simulab.Ai.IAiGateway).Assembly, // F-41
-        typeof(Simulab.Ai.Contracts.AiErrorCodes).Assembly, // F-41
-        typeof(Simulab.Plans.Contracts.IEntitlementService).Assembly, // F-41
-        typeof(Simulab.Api.Features.System.SystemInfoResponse).Assembly,
-        typeof(Simulab.Identity.Domain.Entities.User).Assembly,
-        typeof(Simulab.Identity.Contracts.IdentityErrorCodes).Assembly,
-        typeof(Simulab.Identity.Application.Registration.RegisterUserHandler).Assembly,
-        typeof(Simulab.Identity.Infrastructure.IdentityModule).Assembly,
-        typeof(Simulab.Identity.Api.IdentityEndpoints).Assembly,
-        typeof(Simulab.Catalog.Domain.Entities.Organizer).Assembly,
-        typeof(Simulab.Catalog.Contracts.CatalogErrorCodes).Assembly,
-        typeof(Simulab.Catalog.Application.Organizers.SaveOrganizerHandler).Assembly,
-        typeof(Simulab.Catalog.Infrastructure.CatalogModule).Assembly,
-        typeof(Simulab.Catalog.Api.CatalogEndpoints).Assembly,
-        typeof(Simulab.Web.Resources.SharedResources).Assembly,
-        typeof(Microsoft.Extensions.Hosting.Extensions).Assembly, // Simulab.ServiceDefaults
-        typeof(Simulab.DocGen.DocSet).Assembly
-    ];
+    /// <summary>Projects of the solution that the rules do not look at, each with its reason (F-46, BR4).</summary>
+    public static readonly IReadOnlyDictionary<string, string> ExemptProjects = new Dictionary<string, string>
+    {
+        ["Simulab.AppHost"] = "The Aspire orchestrator: referencing it would bring the Aspire.Hosting packages into the architecture tests. "
+                              + "ArchitectureOverviewTests checks it from its source.",
+    };
+
+    private static readonly Lazy<IReadOnlyList<Assembly>> Derived = new(Derive);
+
+    /// <summary>Every production project of <c>Simulab.slnx</c> except the exempt ones, loaded by name (F-46).</summary>
+    public static IReadOnlyList<Assembly> All => Derived.Value;
 
     public static string RepositoryRoot()
     {
@@ -40,5 +27,40 @@ internal static class SolutionAssemblies
         }
 
         return directory?.FullName ?? throw new InvalidOperationException("Simulab.slnx was not found above the test output folder.");
+    }
+
+    private static IReadOnlyList<Assembly> Derive()
+    {
+        var solution = XDocument.Load(Path.Combine(RepositoryRoot(), "Simulab.slnx"));
+        var listed = ProductionProjects.Listed(solution);
+
+        var stale = ProductionProjects.StaleExemptions(listed, ExemptProjects.Keys);
+        if (stale.Count > 0)
+        {
+            throw new InvalidOperationException(ProductionProjects.StaleExemptionMessage(stale));
+        }
+
+        var selected = ProductionProjects.Selected(listed, ExemptProjects.Keys);
+        var assemblies = new Dictionary<string, Assembly>(StringComparer.Ordinal);
+        var unresolved = ProductionProjects.Unresolved(selected, project => TryLoad(project, assemblies));
+        if (unresolved.Count > 0)
+        {
+            throw new InvalidOperationException(ProductionProjects.UnresolvedMessage(unresolved));
+        }
+
+        return [.. selected.Select(project => assemblies[project])];
+    }
+
+    private static bool TryLoad(string name, Dictionary<string, Assembly> loaded)
+    {
+        try
+        {
+            loaded[name] = Assembly.Load(new AssemblyName(name));
+            return true;
+        }
+        catch (FileNotFoundException)
+        {
+            return false;
+        }
     }
 }
