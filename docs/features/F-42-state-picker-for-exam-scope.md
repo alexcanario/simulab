@@ -1,7 +1,7 @@
 ---
 feature: F-42
 epic: Assessment catalog
-status: building
+status: validating
 board: 81
 version: 1
 ---
@@ -119,6 +119,7 @@ Brazilian states, in this order (name as shown, acronym stored):
 - 2026-10-02 — Build: the migration `NormalizeExamStates` writes the 27 states out in SQL instead of reading `BrazilianStates`: a migration is history and must not change when the code does. It also matches on the stored text with runs of spaces collapsed (`mato   grosso do sul - ms`), which the item's wording allows ("normalized text") (Claude, technical).
 - 2026-10-02 — Build: no app-host check by Claude. Starting it applies the migration to the owner's local database, which only the owner may change (`workflow.md`), and the exam form is behind sign-in, which Claude may not do. What the tests cannot see is in the validation script (Claude, process).
 - 2026-10-02 — Build: seven existing Catalog tests and the Web fixtures saved a `State` exam with free text (`Sao Paulo`, `Goiás`, `Pará`); they now use acronyms, because BR2 refuses the old input. Their intent is unchanged (Claude, technical).
+- 2026-10-02 — Review (`reviewer` agent, base `9b7d6a7`): no blocker, no major, four minors. (1) Fixed: `BrazilianStates.Search` also matches the displayed form `São Paulo (SP)`, so a filled picker that is focused again still offers its state; tests added in `BrazilianStatesTests` and `ExamFormTests`, and the validation script checks it on screen. (2) Fixed: the accent-stripping recipe was copied into `BrazilianStates`; it now lives once in `Simulab.SharedKernel.Text.ComparableText`, which `CatalogText.Normalize` and `BrazilianStates` both call. (3) Fixed: `/dev/ui` shows the fixed-list `AppLookupField` (`gallery-lookup-fixed-list`). (4) New at ship: the app manual (`docs/manual/<locale>/exams.md` and `catalog.md`) still describes the state as typed text; `/agile:ship` updates the three languages. Confirmed against the code before acting (Claude, process).
 
 ## Out of scope
 - A state filter on the catalog search and the exam list — F-57.
@@ -140,7 +141,7 @@ Needed to validate: the app host started from this worktree (you start it), the 
 3. Open **Exams** → exam A reads `São Paulo (SP)` under "State"; exam B reads `Sampa` (AC6, BR4, BR6).
 4. Open exam B for editing → the state field is empty with the hint “This exam was saved with “Sampa”…”; choose **Save** → the page refuses with "Say where this exam applies."; type `paulo`, pick `São Paulo (SP)`, save → it saves and the list shows `São Paulo (SP)` (AC9, AC3).
 5. Choose **Add exam**, scope **State**, click into the state field → all 27 states open, from `Acre (AC)` to `Tocantins (TO)`; type `sp`, then `sao`, then `mato` → the list narrows each time, with or without accents (AC1, AC2). Switch the scope to **Municipal** → a plain text field appears, empty; type any text and save → it saves as typed (AC4).
-6. Keyboard only, on **Add exam** with scope **State**: Tab into the state field → the list opens; type `rio`, arrow down to `Rio Grande do Sul (RS)`, Enter → it is picked; Tab to **Save** → it saves.
+6. Keyboard only, on **Add exam** with scope **State**: Tab into the state field → the list opens; type `rio`, arrow down to `Rio Grande do Sul (RS)`, Enter → it is picked; Tab to **Save** → it saves. Then Shift+Tab back into the state field, now filled → the list opens and still offers `Rio Grande do Sul (RS)`, not "nothing found".
 7. Sign in as a student, open the catalog search, type `sp`, then `sao paulo`, then `São Paulo` → the published State exam of São Paulo is found each time, and its row and its exam page read `São Paulo (SP)` (AC6, AC7). Set the exam's content language to pt-PT on the form → the same 27 states are offered (AC10).
 8. Switch the language to pt-BR and pt-PT on the exam form with scope State → the label, placeholder, hint and the refusal text are translated (AC11).
 

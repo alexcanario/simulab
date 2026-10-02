@@ -214,6 +214,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
     [InlineData("paulo", new[] { "São Paulo (SP)" })]
     [InlineData("sao", new[] { "São Paulo (SP)" })]
     [InlineData("RJ", new[] { "Rio de Janeiro (RJ)" })]
+    [InlineData("São Paulo (SP)", new[] { "São Paulo (SP)" })]
     [InlineData("mato", new[] { "Mato Grosso (MT)", "Mato Grosso do Sul (MS)" })]
     public void StatePicker_Typing_NarrowsTheList(string term, string[] expected)
     {

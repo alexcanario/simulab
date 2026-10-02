@@ -55,6 +55,7 @@ public class BrazilianStatesTests
     [InlineData("  São  ", new[] { "SP" })]
     [InlineData("mato", new[] { "MT", "MS" })]
     [InlineData("ceara", new[] { "CE" })]
+    [InlineData("São Paulo (SP)", new[] { "SP" })] // a filled picker searches with the text it shows when it is focused again
     [InlineData("zzz", new string[0])]
     public void Search_NarrowsByNameOrAcronym_IgnoringAccentsAndCase(string term, string[] expected)
     {

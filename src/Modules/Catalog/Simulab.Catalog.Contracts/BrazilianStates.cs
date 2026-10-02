@@ -1,5 +1,4 @@
-using System.Globalization;
-using System.Text;
+using Simulab.SharedKernel.Text;
 
 namespace Simulab.Catalog.Contracts;
 
@@ -60,17 +59,19 @@ public static class BrazilianStates
         FindByAcronym(scopeDetail)?.DisplayName ?? scopeDetail;
 
     /// <summary>
-    /// The states whose name or acronym contains <paramref name="term"/>, ignoring case and accents, in list
-    /// order; every state when the term is blank (AC1, AC2).
+    /// The states whose name, acronym or displayed form (<c>São Paulo (SP)</c>) contains <paramref name="term"/>,
+    /// ignoring case and accents, in list order; every state when the term is blank (AC1, AC2). The displayed form
+    /// is matched too because a picker that already holds a state searches with that very text when it is focused
+    /// again, and must still offer the state it holds.
     /// </summary>
     public static IReadOnlyList<BrazilianState> Search(string? term)
     {
-        var wanted = Fold(term);
+        var wanted = ComparableText.Normalize(term);
 
         return wanted.Length == 0
             ? All
-            : [.. All.Where(state => Fold(state.Name).Contains(wanted, StringComparison.Ordinal)
-                || Fold(state.Acronym).Contains(wanted, StringComparison.Ordinal))];
+            : [.. All.Where(state => ComparableText.Normalize(state.DisplayName).Contains(wanted, StringComparison.Ordinal)
+                || ComparableText.Normalize(state.Acronym).Contains(wanted, StringComparison.Ordinal))];
     }
 
     /// <summary>The comparable form of a state for the student search: <c>SAO PAULO SP</c> (F-42, F-36 BR4).</summary>
@@ -78,28 +79,6 @@ public static class BrazilianStates
     {
         ArgumentNullException.ThrowIfNull(state);
 
-        return $"{Fold(state.Name)} {state.Acronym}";
-    }
-
-    // Same recipe as the domain's CatalogText.Normalize (this project cannot reference the Domain): trim,
-    // upper-case with the invariant culture, strip the accents.
-    private static string Fold(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        var decomposed = value.Trim().ToUpperInvariant().Normalize(NormalizationForm.FormD);
-        var builder = new StringBuilder(decomposed.Length);
-        foreach (var character in decomposed)
-        {
-            if (CharUnicodeInfo.GetUnicodeCategory(character) != UnicodeCategory.NonSpacingMark)
-            {
-                builder.Append(character);
-            }
-        }
-
-        return builder.ToString().Normalize(NormalizationForm.FormC);
+        return $"{ComparableText.Normalize(state.Name)} {state.Acronym}";
     }
 }
