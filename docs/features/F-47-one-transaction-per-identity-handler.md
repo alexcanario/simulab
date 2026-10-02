@@ -1,7 +1,7 @@
 ---
 feature: F-47
 epic: Foundation and identity
-status: validating
+status: done
 board: 22
 version: 1
 ---
@@ -256,4 +256,10 @@ so the script checks that the normal flows still work through the real app host.
    expects `Passed!  - Failed: 0, Passed: 9`.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-47`; merge commit `589f0d2` (board #22). App version 0.2.0 -> 0.3.0.
+- Tests: full suite green on the branch after merging `main` into it (Identity 408, Catalog 334, Web 818,
+  architecture 164, Api 12, Jobs 25, Persistence 25, Ai 10, AppHost 8, ApiResults 13, SharedKernel 12, Email 2; 0
+  failed). Full build 23 s, full test run 93 s. The 9 new tests of `IdentityTransactionTests` fail without the
+  change and pass with it.
+- Manual: no page changed; no visible behavior changed (the failure cases only roll back). `docs/infra.md` unchanged.
+- Validated by the owner on screen, in the conversation, 2026-10-02.
