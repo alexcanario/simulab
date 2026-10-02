@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <!-- The app version: the only Version element in the solution; /agile:ship raises it (a feature MINOR, a bug PATCH). -->
-    <Version>0.2.0</Version>
     <UserSecretsId>973fccbe-33dd-40d9-a90b-f90d91bc87c1</UserSecretsId>
   </PropertyGroup>
 
