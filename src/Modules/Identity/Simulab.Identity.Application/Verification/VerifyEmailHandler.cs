@@ -12,6 +12,7 @@ public sealed class VerifyEmailHandler(
     IEmailVerificationTokenStore tokenStore,
     TimeProvider timeProvider)
 {
+    // F-47 BR7, no transaction: a crash leaves an active account with an unconsumed link, and F-4 BR10 already answers "verified" for any link of an active account.
     public async Task<VerificationOutcome> HandleAsync(string? rawToken, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(rawToken))

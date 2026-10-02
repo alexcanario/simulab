@@ -23,6 +23,7 @@ public sealed partial class ExportDataHandler(
     TimeProvider timeProvider,
     ILogger<ExportDataHandler> logger)
 {
+    // F-47 BR7, no transaction: the export is a read and the notice is best-effort (F-16); a crash leaves a reset failure count and no notice.
     public async Task<Result<DataExportResponse>> HandleAsync(Guid userId, string? currentPassword, CancellationToken cancellationToken = default)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());

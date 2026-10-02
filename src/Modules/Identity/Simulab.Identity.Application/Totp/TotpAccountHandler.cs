@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Simulab.Identity.Application.Abstractions;
+using Simulab.Identity.Application.Security;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.SharedKernel.Results;
@@ -16,6 +17,7 @@ public sealed class TotpAccountHandler(
     ITotpSecretProtector protector,
     RecoveryCodes recoveryCodes,
     SecondFactor secondFactor,
+    IIdentityUnitOfWork unitOfWork,
     IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
@@ -33,6 +35,7 @@ public sealed class TotpAccountHandler(
     }
 
     /// <summary>BR2: a new secret, encrypted on the account; two-factor stays off until <see cref="ConfirmAsync"/>.</summary>
+    // F-47 BR7, no transaction: one write.
     public async Task<Result<TotpEnrolmentResponse>> StartAsync(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
@@ -82,17 +85,26 @@ public sealed class TotpAccountHandler(
             return Result.Failure<RecoveryCodesResponse>(verified.Error!);
         }
 
-        user.EnableTotp(timeProvider.GetUtcNow());
-        await userManager.UpdateAsync(user);
+        // F-47 BR1, BR2: turning two-factor on and storing its recovery codes commit together, after the code
+        // check (whose spent time step is already committed, so a rollback never frees the code again).
+        RecoveryCodesResponse codes;
+        await using (var transaction = await unitOfWork.BeginAsync())
+        {
+            user.EnableTotp(timeProvider.GetUtcNow());
+            (await userManager.UpdateAsync(user)).ThrowIfFailed("Enabling two-factor");
 
-        var codes = new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user));
+            codes = new RecoveryCodesResponse(await recoveryCodes.ReplaceAsync(user));
 
-        // F-21 BR1: two-factor is on from here.
+            await transaction.CommitAsync();
+        }
+
+        // F-21 BR1 and F-47 BR4: two-factor is on from here, after the commit.
         await accountEvents.RecordAsync(user.Id, AccountEventType.TwoFactorEnabled);
         return Result.Success(codes);
     }
 
     /// <summary>BR7: a valid code or recovery code, then ten new codes; the previous ones stop working at once.</summary>
+    // F-47 BR7, no transaction: the code that proved it is spent and the old set stays, so the other old codes still work.
     public async Task<Result<RecoveryCodesResponse>> RegenerateRecoveryCodesAsync(Guid userId, string? code)
     {
         var user = await EnabledUserAsync(userId);
@@ -118,6 +130,7 @@ public sealed class TotpAccountHandler(
     /// BR8: the current password and a code, both, so a stolen password alone cannot disarm the protection. A wrong
     /// password counts on the same lockout as sign-in; nothing changes unless both are right.
     /// </summary>
+    // F-47 BR7, no transaction: a crash leaves two-factor off with recovery codes that only the code step reads, which requires it on, and turning it on again replaces them.
     public async Task<Result> DisableAsync(Guid userId, string? currentPassword, string? code)
     {
         var found = await EnabledUserAsync(userId);

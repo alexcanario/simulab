@@ -220,6 +220,7 @@ public static class TokenEndpoints
 
         if (!await userManager.CheckPasswordAsync(user, request.Password ?? string.Empty))
         {
+            // F-47 BR7, no transaction: one write (the failure count); the events and the Redis session follow it.
             await userManager.AccessFailedAsync(user);
             await accountEvents.SignInFailedAsync(user.Id, AccountEventReason.WrongPassword, cancellationToken);
 

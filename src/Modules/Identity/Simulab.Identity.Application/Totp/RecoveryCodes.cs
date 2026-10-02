@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
+using Simulab.Identity.Application.Security;
 using Simulab.Identity.Domain.Entities;
 
 namespace Simulab.Identity.Application.Totp;
@@ -24,7 +25,9 @@ public sealed class RecoveryCodes(UserManager<User> userManager, ITotpSecretProt
     public async Task<IReadOnlyList<string>> ReplaceAsync(User user)
     {
         var codes = Enumerable.Range(0, Count).Select(_ => NewCode()).ToList();
-        await userManager.SetAuthenticationTokenAsync(user, TokenProvider, TokenName, string.Join(';', codes.Select(code => Hash(user, code))));
+        // F-47 BR1b: codes that were never stored must not be shown as if they were.
+        (await userManager.SetAuthenticationTokenAsync(user, TokenProvider, TokenName, string.Join(';', codes.Select(code => Hash(user, code)))))
+            .ThrowIfFailed("Storing the recovery codes");
         return codes;
     }
 
