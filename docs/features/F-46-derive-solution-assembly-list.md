@@ -1,7 +1,7 @@
 ---
 feature: F-46
 epic: Foundation and identity
-status: building
+status: validating
 board: 21
 version: 1
 ---
@@ -74,7 +74,20 @@ A project added to the solution is seen by every architecture rule without anyon
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: nothing beyond the test run (no screen, no app host).
+
+1. Run `dotnet test tests/Simulab.ArchitectureTests` (Git Bash and PowerShell 7 alike) from the worktree: expect `Passed! - Failed: 0, Passed: 164`.
+2. Read `tests/Simulab.ArchitectureTests/SolutionAssemblies.cs`: no `typeof(...)` list remains; `ExemptProjects` holds only `Simulab.AppHost`, with its reason.
+3. Try UC1: add `<Project Path="src/BuildingBlocks/Simulab.Fake/Simulab.Fake.csproj" />` to the `/src/BuildingBlocks/` folder of `Simulab.slnx`, rerun step 1 with `--no-build`: the run fails with "The solution lists Simulab.Fake, which the architecture tests cannot load. Add a ProjectReference ..." (undo with `git checkout Simulab.slnx`). Checked on 2026-10-02.
+4. Try UC2: add `["Simulab.Gone"] = "x"` to `ExemptProjects`, rerun: the run fails naming `Simulab.Gone` (undo with `git checkout tests/Simulab.ArchitectureTests/SolutionAssemblies.cs`).
+
+## Coverage (criterion → test)
+- AC1 → `ProductionProjectsTests.All_OnTheRealSolution_HoldsTheProductionProjectsExceptTheAppHost`, `Listed_TakesSrcAndToolsAndNamesThemByFile`, `Exempt_OnTheRealSolution_NamesEachProjectWithItsReason`, `ForbiddenReferencesTests.The_rules_see_every_production_project_of_the_solution`
+- AC2 → `Unresolved_NamesTheProjectAndTheProjectReferenceToAdd`, `Unresolved_WithTheRealLoader_NamesAProjectNoOutputFolderHolds`
+- AC3 → `StaleExemptions_NamesTheExemptionAndTheEntryToRemove`
+- AC4 → `Listed_NeverTakesAProjectUnderTests`
+- AC5 → the existing rules, unchanged and green (164 tests), each with its own presence assertion
+- AC6 → no resource file touched
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
