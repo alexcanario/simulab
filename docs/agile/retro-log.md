@@ -845,3 +845,10 @@ From 0.0.97 to 0.0.102, run on a clean main with no item `building` or `validati
 - Plugin note: for `modular-monolith`, `scripts/publish.js` matches every `*.Api.csproj` under `src` (`Simulab.Catalog.Api`, `Simulab.Identity.Api` are module class libraries, not deployables) and does not list `Simulab.Web`, the second deployable host, so `/agile:publish` stays blocked for this solution.
 - Plugin note: `feature-ship` step 8b bumps `<Version>` on every ship, but the item that introduces the version has no rule: its ship either bumps at once (0.1.0 becomes 0.2.0 and a test pinned to the seed goes red) or does not bump. Say which, and say that a test must compare the csproj version with the assembly version instead of pinning a number.
 - Project follow-up: `AppVersionTests` (AC1, AC3) pin `0.1.0`; the next ship's bump turns them red. Loosen them in the next item that ships, before its bump.
+
+## 2026-10-02 — Sync with agile@canary 0.0.104
+From 0.0.102 to 0.0.104, run on a clean main with no item `building` or `validating`.
+- Copied (never edited, plugin changed): template `project-claude`; `docs/agile/workflow.md` and `workflow.pt-BR.md`.
+- Left alone: `docs/agile/profile.md` (edited by project, upstream changed the version location from Api.csproj to Directory.Build.props, Simulab's own policy kept); `.claude/rules/agile/git.md` (edited, upstream unchanged); all manual files — `.editorconfig`, `Directory.Build.props`, `Directory.Packages.props`, `global.json`, `tests/Directory.Build.props`, `.gitignore` (none had upstream changes worth applying).
+- Missing capabilities: 4 — DocGen tool catalogue (item F-61 #100), app version movement to Directory.Build.props (F-60 / planned for next ship), deploy command per environment (F-62 #101), visual identity (F-63 #102).
+- Baseline: present. Docs command: declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes delivered: none. Build and full suite: green — build 12 s (0 warnings), full suite 2010 tests passed (0 failed, ~130 s total).

@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.102 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.104 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -85,7 +85,7 @@ For a site that needs a mobile app from day one, question 2 first weighs the sha
 When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 8 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
 Outputs, all in English:
-- `CLAUDE.md` — short (≤ 60 lines), pointing to one profile.
+- `CLAUDE.md` — short (under ~900 words, none of the template's comments), pointing to one profile.
 - `docs/decisions/ADR-0001-foundation.md` — every quiz decision with its reason.
 - `docs/agile/profile.md` — copy of the chosen architecture profile.
 - `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` — this workflow in both languages, and `docs/agile/templates/` — the templates, copied into the project.
@@ -443,7 +443,7 @@ tests/
 └── <App>.Tests/                      backend tests, per its profile
 ```
 
-**`mobile` on an existing API (`Backend: external`).** The app is its own repository and its API is another system. There is no `Api` project: the app carries the only `<Version>` (`<App>.Mobile.csproj`, seeded at `0.1.0`), and `/agile:ship` bumps it alone. `<App>.Contracts` holds records you write by hand, and a pinned copy of the API's OpenAPI document sits in `docs/api/backend-openapi.json` (an agile API: its committed `docs/api/openapi.json` at a named commit; another API: its URL), with `docs/api/backend.md` saying where it came from. A test reads that document and fails when a record, a route, the `X-App-Version` header or the `426` response no longer match it (a generator was weighed and not adopted: the typed clients stay over one `HttpClient`); refreshing the copy is an explicit step of the item that needs it, and `/agile:sync` only reports when the API moved past the pinned commit. The app signs in at the API's `login`, adds the token and its version (`X-App-Version`) to every call, refreshes once on `401` (concurrent calls share one refresh) and, on `426` `app.update_required`, shows "update required" without trying to refresh. The screens are XAML, or MAUI Blazor Hybrid when the site shares its components as a package (next paragraph). Tests use a stub `HttpMessageHandler`; the API's own endpoints are tested in the API's repository, and each validation script has a device run against the API's development instance (`10.0.2.2` from the Android emulator).
+**`mobile` on an existing API (`Backend: external`).** The app is its own repository and its API is another system. There is no `Api` project: the app's own `Directory.Build.props` carries the only `<Version>` (seeded at `0.1.0`), and `/agile:ship` bumps it alone. `<App>.Contracts` holds records you write by hand, and a pinned copy of the API's OpenAPI document sits in `docs/api/backend-openapi.json` (an agile API: its committed `docs/api/openapi.json` at a named commit; another API: its URL), with `docs/api/backend.md` saying where it came from. A test reads that document and fails when a record, a route, the `X-App-Version` header or the `426` response no longer match it (a generator was weighed and not adopted: the typed clients stay over one `HttpClient`); refreshing the copy is an explicit step of the item that needs it, and `/agile:sync` only reports when the API moved past the pinned commit. The app signs in at the API's `login`, adds the token and its version (`X-App-Version`) to every call, refreshes once on `401` (concurrent calls share one refresh) and, on `426` `app.update_required`, shows "update required" without trying to refresh. The screens are XAML, or MAUI Blazor Hybrid when the site shares its components as a package (next paragraph). Tests use a stub `HttpMessageHandler`; the API's own endpoints are tested in the API's repository, and each validation script has a device run against the API's development instance (`10.0.2.2` from the Android emulator).
 ```
 src/
 ├── <App>.Contracts/                  hand-written records and error codes, checked against the pinned document
@@ -498,7 +498,7 @@ tests/
 └── <App>.Tests/                      backend tests, only with an API
 ```
 
-**App version.** The bootstrapped app carries its own `SemVer` version, on a single `<Version>` property of the profile's deployable project — `<App>.Api.csproj` (`monolith`, `modular-monolith`, `web-api`), `<App>.Web.csproj` (`web-app`, `website`), or both `<App>.Api.csproj` and `<App>.Mobile.csproj` at the same value (`mobile`; `<App>.Mobile.csproj` alone with `Backend: external`), or `<App>.Desktop.csproj` plus `<App>.Api.csproj` when there is an API (`desktop`); no other project carries it. Bootstrap seeds `0.1.0`; every `/agile:ship` bumps it once: MINOR for a feature (PATCH resets), PATCH for a bug, or MAJOR when the item's `## Decisions` records a breaking change (MINOR and PATCH reset). In `mobile` (and in a `desktop` MAUI head), the same ship also sets the head's `ApplicationDisplayVersion` to that string and increments its `ApplicationVersion` — the store's ever-increasing integer — by 1, a counter that never resets. With the `mobile-client` complement, `<App>.Web.csproj` and `<App>.Mobile.csproj` carry the same value: "Mobile foundation" starts the app at the site's current version (never `0.1.0`) with `ApplicationVersion` 1, and each ship bumps both — only when both carry `<Version>`; otherwise it leaves them and `/agile:sync` reports it. When the app is in its own repository, the site bumps `<App>.Web.csproj` alone. `microservices` is out of scope: one version does not map cleanly to independently deployable services. A project bootstrapped before this existed gets it only through `/agile:sync`, offered as a capability, never installed on its own.
+**App version.** The app carries one `SemVer` version: a single `<Version>` property in the `Directory.Build.props` beside the solution file. Every project inherits it, so every DLL, libraries included, reports the release and the commit it was built from (`0.4.0+3f2a9c1…`), and no `.csproj` carries `<Version>`. `/agile:publish` packages the profile's deployable project(s): `<App>.Api` (`monolith`, `modular-monolith`, `web-api`), `<App>.Web` (`web-app`, `website`), `<App>.Api` and `<App>.Mobile` (`mobile`; `<App>.Mobile` alone with `Backend: external`), `<App>.Desktop` (`desktop`), `<App>.Web` and `<App>.Mobile` (the `mobile-client` complement). Bootstrap seeds `0.1.0`. Every `/agile:ship` looks at it first and asks nothing: with none anywhere it adds `0.1.0` and does not bump (that item ships as `0.1.0`); with one on one or more `.csproj` (the layout before 0.0.104) it moves it to `Directory.Build.props`, removes it from every project (the highest wins when they differ) and then bumps; with it already there it just bumps. The bump is MINOR for a feature (PATCH resets), PATCH for a bug, or MAJOR when the item's `## Decisions` records a breaking change (MINOR and PATCH reset), and the ship report says which of the three cases ran. In `mobile`, the `mobile-client` head and a `desktop` MAUI head, the same ship also sets the head's `ApplicationDisplayVersion` to that string and increments its `ApplicationVersion` — the store's ever-increasing integer — by 1, a counter that never resets. `/agile:sync` only reports the state ("the next `/agile:ship` adds it" or "moves it") and never writes it. There is one number for the whole app, not one per project: replacing a single DLL would leave a machine with a mix the gate never tested; downloading only what changed belongs to an updater with delta packages (#58). When the app is in its own repository (`Backend: external`, or a Hybrid app), its solution has its own `Directory.Build.props` and its own number. `microservices` is out of scope: one version does not map cleanly to independently deployable services.
 
 Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
 
@@ -510,7 +510,7 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 Claude writes every file (code, tests, docs) with its editing tools, never through the text of a script: escapes such as `\t` or `\b` turn into control characters, and a test can pass while checking nothing.
 
-**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) are never touched, and `CLAUDE.md` only gets what you approve: a section the template gained, or a `Worktrees:` line when it has none (the bootstrap recommendation, `D:\wt\<repository>` or `C:\`; existing worktrees keep their names). If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. A project with no warnings baseline at all (an adopted repository, an old bootstrap) gets a row offering to take the first one: a full rebuild, run only with your yes, committed with the sync. A ⏳ plugin note in the retro log that cites an `agile-canary#N` the plugin has delivered gets a row too: with your yes, `sync.js notes` marks it ✅ with the version and merge commit. The project's own session is the only one that writes those marks; the plugin session never writes in your repository. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back. A project with screens and no `docs/design/identity.tokens.json` gets the same kind of note (from 0.0.86): the sync writes nothing, since the identity is your project's file and not a copy of the plugin, and suggests `/agile:identity`.
+**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) are never touched, and `CLAUDE.md` only gets what you approve: a section the template gained, or a `Worktrees:` line when it has none (the bootstrap recommendation, `D:\wt\<repository>` or `C:\`; existing worktrees keep their names). If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. A project with no warnings baseline at all (an adopted repository, an old bootstrap) gets a row offering to take the first one: a full rebuild, run only with your yes, committed with the sync. A ⏳ plugin note in the retro log that cites an `agile-canary#N` the plugin has delivered gets a row too: with your yes, `sync.js notes` marks it ✅ with the version and merge commit. The project's own session is the only one that writes those marks; the plugin session never writes in your repository. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back. A project with screens and no `docs/design/identity.tokens.json` gets the same kind of note (from 0.0.86): the sync writes nothing, since the identity is your project's file and not a copy of the plugin, and suggests `/agile:identity`. Every run also shows one row with the size of what is loaded in every session (from 0.0.103): the words of `CLAUDE.md` (limit ~900) and the always-loaded estimate, `CLAUDE.md` plus every rule without `paths:`, in tokens (words × 1.3, budget ~4.5k). When either is over, the row says which and names the two largest sections of `CLAUDE.md` as where to trim. Nothing blocks on size and the sync writes nothing: you trim, or the retro proposes it before adding a line. Example 14.37.
 
 `output-style` sets how Claude talks to you: in pt-BR, answer first, step reports of at most 10 lines, details in the file instead of the chat, one recommendation with its reason, no narration of the work, "not verified" said in those words, and bad news first. Long answers only when a gate failed, a question needs context, or you ask.
 
@@ -1881,7 +1881,7 @@ The skeleton then has `Rota.Api` with login, refresh and `me`, the API key handl
 
 ### 14.29 Publishing a release
 
-ExamPrep is a `web-app`; two items were shipped since the last release (`v0.1.0`), and `main` carries `<Version>0.2.0</Version>` on `ExamPrep.Web`. You are in the main checkout.
+ExamPrep is a `web-app`; two items were shipped since the last release (`v0.1.0`), and `main` carries `<Version>0.2.0</Version>` in `Directory.Build.props`. You are in the main checkout.
 
 ```
 > /agile:publish
@@ -2078,7 +2078,7 @@ Claude: Board proposal:
   — each "on mobile" after Mobile foundation and the site's matching item
 Create them?
 > ok
-Claude: Skeleton: PhysioSite.Web (Version 0.1.0), PhysioSite.Contracts, PhysioSite.Shared (Razor Class Library, texts in
+Claude: Skeleton: PhysioSite.Web, PhysioSite.Contracts, PhysioSite.Shared (Razor Class Library, texts in
   pt-BR, pt-PT and en), PhysioSite.Tests with the architecture and layout tests. No app project and no Complement line yet:
   Mobile foundation brings them. Create it?
 ```
@@ -2194,6 +2194,40 @@ Nothing was rolled back. To go back: /agile:publish staging v<the version record
 
 When the table later lists one more secret, the next `/agile:sync` shows `.github/workflows/deploy.yml` as a `manual` difference (the new `secrets.<name>` line) and you merge it by hand.
 
+### 14.37 The size of what is always loaded
+
+Simulab's `CLAUDE.md` has 553 words. At the next `/agile:sync` the table has one row, whatever else changed:
+
+```
+| File / check | State | Action |
+| CLAUDE.md size | 553 words (limit ~900); always loaded ~3.6k tokens (budget ~4.5k) | none |
+```
+
+Months later retros have grown `## Project-specific rules` and `## Models`; the row now marks it:
+
+```
+| CLAUDE.md size | 941 words (limit ~900); always loaded ~4.6k tokens (budget ~4.5k) | over the limit and the budget: trim "Project-specific rules" or "Models" |
+```
+
+The sync asks nothing and writes nothing here. At the next `/agile:retro`, before adding a line to `CLAUDE.md`, Claude proposes moving one first:
+
+```
+Claude: CLAUDE.md is at 941 words (limit ~900). Before adding this line, move "Use the shared JSON options" to .claude/rules/agile/project.md? (y/n)
+```
+
+You decide; if you say no, the line is added anyway: nothing blocks on size.
+
+### 14.38 The app version moves to Directory.Build.props
+
+AndreaLisboa is a `website` bootstrapped before 0.0.104: `<Version>0.4.0</Version>` sits on `AndreaLisboa.Web.csproj`, and `AndreaLisboa.Core.dll` reports `1.0.0` because no library carries a number. You update the plugin, restart, run `/agile:sync` (it reports the state and offers nothing: `<Version> is on AndreaLisboa.Web.csproj (0.4.0): the next /agile:ship moves it to Directory.Build.props`) and, a feature later, you type `/agile:ship F-12`. The ship report has two more lines, and no question came before them:
+
+```
+app version: moved 0.4.0 from AndreaLisboa.Web.csproj to Directory.Build.props (highest wins: 0.4.0)
+app version: 0.4.0 -> 0.5.0 in Directory.Build.props (feature)
+```
+
+The change is a commit of its own on the item's branch, before the merge. From then on every DLL of the app reports `0.5.0+<commit>`: the file properties of `AndreaLisboa.Core.dll` on any machine name the release and the commit it came from. A project with no version anywhere (Simulab) reads `app version: added 0.1.0 to Directory.Build.props (no bump: this item ships as 0.1.0)` instead, and `/agile:publish` reads the number from the same file.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2209,7 +2243,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build <feature> [--worktree]` | Implement an approved feature in the worktree the refinement created (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
-| `/agile:ship <feature>` | Full suite, app version bump, merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command |
+| `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
@@ -2382,7 +2416,7 @@ flowchart TD
     C -->|red| C1["Fix on the branch"]
     C1 --> C
     C -->|green| D["App manual in pt-BR, pt-PT, en; DocGen references and the hand-written overview;<br/>gate.js docs: the declared docs command, or DocGen implicitly;<br/>RED stops like the gate; infra.md; baseline"]
-    D --> D1["App version bumped on the deployable project(s): MINOR (feature), PATCH (bug),<br/>or MAJOR on a breaking-change decision; mobile also syncs ApplicationDisplayVersion/Version;<br/>mobile-client: Web and Mobile together, only when both carry Version, Web alone when the app is in its own repository;<br/>mobile with Backend: external: Mobile alone"]
+    D --> D1["App version in Directory.Build.props: added (0.1.0, no bump) when missing, moved from a .csproj when it sits there,<br/>then MINOR (feature), PATCH (bug) or MAJOR (breaking-change decision);<br/>a MAUI head also gets ApplicationDisplayVersion and ApplicationVersion + 1"]
     D1 --> E2["The command is the merge authorization; current branch is main; read main..branch:<br/>stop when a commit carries another item's id"]
     E2 --> F["Main moved during the ship? Merge it in, full check, bump from main's, go on (conflict or red stops);<br/>merge --no-ff, read its exit status, then push; lock probe, then verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
     F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
@@ -2398,7 +2432,7 @@ flowchart TD
     B --> C["Classify each: project rule, project setting,<br/>build check, template tweak, plugin note, nothing"]
     C --> D["Show lessons with destination and exact line"]
     D --> E{"Approve each one"}
-    E --> F["Apply; CLAUDE.md under 60 lines; one line per rule"]
+    E --> F["Apply; CLAUDE.md under ~900 words; one line per rule"]
     F --> F2["A new rule about a test pattern: sweep the existing tests;<br/>fix each hit or capture it as a bug"]
     F2 --> G["retro-log.md entry; a plugin note (plugin: name, from the Plugins: line)<br/>gets a ⏳ row with its plugin and scope; an old table gains the Plugin column;<br/>it cites agile-canary#N once it has one, and gets its ✅ at /agile:sync"]
     G --> H(["Commit on main: your pick of lessons authorizes it under a ship; run alone, it asks"])
