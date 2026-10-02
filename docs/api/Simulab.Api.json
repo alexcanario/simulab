@@ -1972,8 +1972,7 @@
       },
       "SaveIssuingAuthorityRequest": {
         "required": [
-          "name",
-          "acronym"
+          "name"
         ],
         "type": "object",
         "properties": {
@@ -1983,13 +1982,6 @@
               "string"
             ],
             "description": "The body's full name, 2 to 150 characters."
-          },
-          "acronym": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The short name, 2 to 20 characters, stored uppercase."
           },
           "description": {
             "type": [
