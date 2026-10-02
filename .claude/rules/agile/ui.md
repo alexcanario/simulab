@@ -11,7 +11,7 @@ paths:
 - Pages use the kit, not raw library components, for data tables, row actions, page header, confirmation dialog, form actions and the empty, loading and error states.
 - Every kit pattern is shown on a dev-only gallery page. Screen mockups use only patterns from the gallery.
 - Every table row has hover; every clickable element has a pointer cursor and a visible focus ring. Never set or remove these on a single page.
-- One icon family in the whole app (recorded in ADR-0001). Pages use semantic names (`AppIcons.Edit`), never the library's icon constants. The same action has the same icon everywhere.
+- One icon family in the whole app (recorded in ADR-0001), and one visual identity (`docs/design/identity.tokens.json`): colors, fonts and radius come from its tokens, never from a page or a mockup. Pages use semantic names (`AppIcons.Edit`), never the library's icon constants. The same action has the same icon everywhere.
 - An icon-only button always has a tooltip and an accessible name, both from resources.
 - An item is edited one way everywhere: row actions in the last column (edit, then delete; more than three go into an overflow menu). The name is a link only to a read-only detail page, never to the edit form.
 - Simple entity (about six fields, no nested lists): edit in a dialog. Complex entity: edit on its own page, with a route. The same entity is always edited the same way.

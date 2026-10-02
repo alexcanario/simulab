@@ -11,12 +11,14 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
 - Plugins: agile (short names, comma-separated; another plugin's adoption appends its own; a retro plugin note names one of them as `plugin: <name>`).
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
-- Three gates: feature approved → validated on screen → merge authorized.
-- Ask before: pushing or merging to `<main branch>`, touching shared databases, deleting data, anything outside this repository.
+- Three gates: feature approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate).
+- Ask before: pushing or merging to `<main branch>` outside a ship, touching shared databases, deleting data, anything outside this repository.
 - Worktrees: `<root from quiz 28c, e.g. D:\wt\<repo>>` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.
+- Complement: `<complement>` — see `docs/agile/profile-<complement>.md`. (Optional: only when a complement was added, such as `mobile-client` on `web-app`/`website`. Delete this line otherwise. With the app in a new repository, the line reads ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.``)
+- Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`. (Optional: only on profile `mobile` whose API is another repository's, quiz 2d. Delete this line otherwise.)
 - Decisions: `docs/decisions/` (start with ADR-0001).
 - Keep code simple: add structure only where the profile asks for it.
 
@@ -32,7 +34,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Build: `<build command>`
 - Affected tests: `<command or hook>` (budget: unit < 30 s, integration < 2 min)
 - Full suite (ship only): `<test command>` (budget: < 5 min)
-- Evals (ship and on demand, never in the turn gate; only when a feature calls a model, quiz 30b): `<evals command>` — pass-rate baseline `<file>`, cost ceiling `<amount>` per run. Delete this line otherwise.
+- Evals (ship and on demand, never in the turn gate; only when a feature calls a model, quiz 30b): `claude plugin eval <target> --model <model> --ablation none --max-cost-usd <ceiling> --json <result file>`, then `node evals/compare.js <result file>` — pass-rate baseline `evals/baseline.json` (records the model and the ablation; another model or ablation is "not measured"), cost ceiling `<amount>` per run, set after one measured run. Another runner keeps the model and the ceiling. Delete this line otherwise.
 - Run locally: `<app host command>`
 
 ## Models

@@ -1,7 +1,7 @@
 # Git
 
 - The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/F-<n>` or `bug/B-<n>`.
-- Never push, merge or rebase onto the main branch without the owner's explicit authorization in the current conversation.
+- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item.
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
@@ -11,7 +11,7 @@
 - If git and the board or the files disagree, stop and ask.
 - Every item has its own worktree, created by `/agile:refine` before it writes anything and reused by the build. No checkout is ever switched; one writer per worktree, and two writers never share one (the index races).
 - Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen) under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
-- Before merging or removing a worktree, ask the owner to close any IDE or app host running from it.
+- Before removing a worktree, run the lock probe of `worktrees.md` (build server shutdown, rename and back); ask only when the folder is held.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.
 - After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.

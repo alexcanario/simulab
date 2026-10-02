@@ -22,6 +22,10 @@ Never write a secret's value here, only its name and where it is kept.
 | Name | Used by | Kept in (per environment) |
 |---|---|---|
 
+## Store signing (a mobile app only)
+- `/agile:publish` signs the Android `.aab` with the upload key named by four environment variables: `ANDROID_SIGNING_KEYSTORE` (absolute path, outside the repository), `ANDROID_SIGNING_ALIAS`, `ANDROID_SIGNING_STORE_PASS`, `ANDROID_SIGNING_KEY_PASS`. Their values are never written here.
+- The keystore is kept in: <where, and where its backup is>. Passwords kept in: <where>.
+
 ## Release steps
 1. <step, or "no release process yet">
 

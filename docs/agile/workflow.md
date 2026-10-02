@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.78 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.97 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -39,7 +39,7 @@ Contents
 | Propose epics and features in the chat | Registers them on the board, unrefined |
 | Answer refinement questions and approve features | Asks **all** questions in one round, each with a recommendation, after checking the code |
 | Validate each feature on screen | Implements, tests and hands over a validation script |
-| Authorize merges | Merges, updates the board and the app manual, runs the retro |
+| Authorize merges (typing `/agile:ship <id>` is the authorization) | Merges, removes the branch and worktree, updates the board and the app manual, runs the retro |
 
 Subagents are the exception: a fresh-context reviewer for risky changes, two read-only passes before the code of a heavier item (`system-design` proposes the slice, the contracts and the data; `architect` reviews that proposal), two producing roles for screens (`ux-designer` designs one, `frontend` implements the mockup you approved), or parallel work that does not touch the same files. They are named jobs, not a chain of roles per feature, and none of them talks to you: the conversation is always with Claude, which reads what an agent wrote or proposed before following it. One writer at a time in a folder, and the two passes write nothing at all.
 
@@ -63,16 +63,22 @@ Before anything is written, Claude checks that the skill it loaded and the insta
 
 | Round | Topics |
 |---|---|
-| 1. Shape | Type of app (web, mobile, API), architecture profile, deployment target |
+| 1. Shape | Type of app (web, mobile, desktop, API), architecture profile, the desktop technology (WinUI 3, Avalonia or MAUI) and how a desktop client reaches its data, **where a mobile app's backend lives** (question 2d), the **sections of a site** (question 2c, profile `website`), deployment target |
 | 2. Data | Database (the house engine when there is an existing system next door), multi-tenancy, deletion, auditing, personal data and retention |
-| 3. Access | Authentication, RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
+| 3. Access | Authentication (for `web-api`, question 10a: how the API's consumers authenticate), RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage, and — when a feature calls a model — the LLM provider and where it runs, its cost ceiling and how it is faked in tests |
-| 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, icon family, how an item is edited, UI kit and gallery — or, for a conversational UI, the language it answers in, how a proposal is corrected and a states gallery |
+| 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, the **visual identity** (23a: a file, a website, an image or three basic questions), the design system library, icon family, how an item is edited — or, for a conversational UI, the language it answers in, how a proposal is corrected and a states gallery. The UI kit and gallery are no longer a question: an app with screens always gets one, built from the identity. Profile `web-api` has no screens: it skips the UI stack, the language switch (21), accessibility (22) and everything about the visual identity and the UI, and question 20 covers only the text the API sends to people |
 | 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
-| 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity, and evals when a feature calls a model |
+| 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity, and evals when a feature calls a model (which model runs the cases, with or without the no-plugin arm) |
 | 8. Documentation | Technical docs generated from the code (entity diagrams, data dictionary, route map, module diagram, and a tool catalogue when the app exposes tools to a model), the system prompt as a versioned file, and a hand-written architecture overview |
 
 When a feature calls a model, the quiz treats it as a system with its own decisions, not as a library: which provider and where it runs (a self-hosted one is the only place the data never leaves), a cost ceiling per user and a global breaker, a scripted fake so everything around the model stays testable, the system prompt as a versioned file, and a generated tool catalogue saying what each tool reaches and with whose permission. Example 14.14 shows the round.
+
+For a public site (profile `website`), question 2c comes right after the profile: Claude shows the catalogue of 26 sections as a numbered list in the chat, grouped into **launch** (about me, testimonials, FAQ, e-mail signup, products, contact and WhatsApp) and **later** (services, portfolio, blog, gallery, search, newsletter, PWA and the rest), every one selected. You answer "ok" or the numbers to untick; unticking a section another one needs (e-mail signup while downloadable materials stays) is said once, and your answer stands. The foundation is not in the list, because the site always has it: content area, home, basic SEO, 404 and error pages, privacy policy and cookie consent. After the quiz the board holds one epic "Website sections": the foundation first, then launch, then later, one feature idea per section. An online store is never a section: it is captured as its own epic. For `website`, question 9b is always asked (signups are personal data), 12 and 14 are fixed (roles `Admin` and `Editor`, admin area in the same app), and e-mail (19) cannot be "none" with the signup or the contact section. Example 14.23 shows the question.
+
+For an app that is only an API (profile `web-api`), answering "API only" in question 1 makes question 2 recommend `web-api`. Question 10a then asks, instead of question 10, how the API's consumers authenticate, as a multiple choice: **Identity bearer** (users sign in at the API; the default for the owner's own clients), an **external IdP** (users, and client credentials for machine clients; the API only validates the token) and **API key** (machine clients only, never a browser or mobile app, whose code is public). Each answer generates only the schemes, endpoints and policies it needs, and question 11 (social login, MFA) is asked only with Identity bearer. Claude does not ask 14 (there is no back office), 21 and 22 (no screens) or the visual identity and UI questions, and question 29 has no UI level. Example 14.28 shows the question.
+
+For a mobile app (profile `mobile`), question 2d asks where the backend lives: **in this solution** (today's behavior: `monolith` by default) or **an existing API in another repository** — an agile `web-app`, `website` or `web-api` (its repository), or any API that publishes an OpenAPI document (its URL); question 1 offers "mobile on an existing API" for it. With the external answer the app is its own repository, and Claude skips what the API already decides — question 3, the whole data round, 12, 13 and 14 — lists them under "Already clear", and turns question 10 into "the API's sign-in", read from the API. `CLAUDE.md` gets the line ``- Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`.`` and ADR-0001 says so. Example 14.30 shows the quiz and what the bootstrap proposes.
 
 When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 8 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
@@ -84,6 +90,7 @@ Outputs, all in English:
 - `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), release steps and measured build and test times. Updated on ship when any of it changes.
 - Solution skeleton for the profile, with i18n and the test projects in place.
+- `docs/design/identity.tokens.json` and `docs/design/DESIGN.md` — the app's visual identity (question 23a), for every app with screens. The tokens follow the W3C Design Tokens format (DTCG 2025.10) and are the source of the values: colors by role in light and dark, typography, corner radius, and the icon family, the source (file, URL, image or derived) and the date under `$extensions.agile`. `DESIGN.md` (Google's design-file format) has the same values as YAML front matter, generated from the tokens, followed by your own prose on why and where; regenerating keeps the prose. You can give a file (tokens or a `DESIGN.md`), a website URL, an image (a logo, a brand board) or nothing: three questions (primary color, font, light, dark or both) derive a full identity. A URL or an image is read by Claude, which shows one table before anything is written: colors by role (an image's are marked estimated), fonts, radius, icon family, and the WCAG 2.2 AA contrast of every foreground/background pair in both themes; a failing pair names its ratio and the nearest passing value, and you decide. Nothing is stored before you say "confirm". The plugin never writes the app's theme: the UI kit item does, from these tokens, and a test in the profile compares the two. Screen mockups take their colors, fonts and radius from the same file.
 - `docs/architecture/` — when round 8 chose any document: `tools/<App>.DocGen` generates, per module, a DBML schema read in a dbdiagram viewer (`entities: "mermaid"` in `docgen.json` gives an ER diagram instead, which renders on the board but grows unreadable past a dozen tables) and a data dictionary (from the EF model), a route map per area (from the OpenAPI document that the `/openapi/v1.json` integration test writes to `docs/api/`) and a module diagram (from project references, in Mermaid); the generator references the app's own EF Core provider (question 5: PostgreSQL, SQL Server or SQLite) and calls it by reflection, so it documents the real column types and default schema (`public`, `dbo`, or none on SQLite) even for a `DbContext` with no design-time factory; a context with a factory is built through it instead, so the names follow the database (snake_case, for example) — the output is the same either way; when round 8 also chose the tool catalogue (question 37), `tools.md` lists every tool the app offers to a model — the description the model receives, the input schema, what it reaches, the permissions it requires, whether it writes and whether it asks first — and `--check` fails when a tool has no description, no permissions or no reaches, or when two tools would reach the model under one name. Bootstrap declares the generator as the project's **docs command** in `.claude/agile/build.json` (`{ "docs": { "command": "dotnet run --project tools/<App>.DocGen", "check": "… -- --check", "paths": ["docs/architecture/"] } }`), so from 0.0.72 `/agile:ship` regenerates and checks them through the one generic step (section 9, "A declared docs command") instead of a step of its own; `--check` fails when they are stale. A project that got DocGen before 0.0.72 declares nothing, and the ship still runs it: the gate finds the single `tools/*.DocGen` and runs it as an **implicit** docs command, saying `implicit DocGen docs command: declare it with /agile:sync` — so no window leaves the code map stale, and `/agile:sync` offers the block once. Optionally a one-page hand-written overview (C4 context and containers), which the generator never touches: only files carrying its `Do not edit` marker are rewritten or deleted; a module or external system a feature adds is written there by hand at ship.
 - The first epics on the board, if the brief already names them.
 
@@ -97,21 +104,21 @@ stateDiagram-v2
     approved --> building: /agile:build
     building --> validating: coverage table + validation script
     validating --> building: a fix you reported
-    validating --> done: you say "validado", then /agile:ship (merge authorized)
+    validating --> done: you say "validado", then /agile:ship (typing it authorizes the merge)
     done --> [*]
     note right of approved: gate 1 — approved
     note right of validating: gate 2 — validated on screen
-    note right of done: gate 3 — merge authorized
+    note right of done: gate 3 — /agile:ship typed = merge authorized
 ```
 
 | Status | What happens | Who moves it |
 |---|---|---|
-| `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. A cause it names comes with its evidence (the command and the output line that shows it); without one, `## Start` says `Cause not verified: measure it at /agile:refine`, with the symptom seen. | Claude |
-| `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
+| `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. A cause it names comes with its evidence (the command and the output line that shows it); without one, `## Start` says `Cause not verified: measure it at /agile:refine`, with the symptom seen. | Claude |
+| `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number; an answer that folds an existing open item's scope into this one instead first checks that item — `git worktree list` for its folder and its file or issue for its status. Any status beyond `idea` anywhere blocks an automatic fold: Claude names the other item's status and worktree path and you decide, fold anyway (recorded in `## Decisions` with the reason) or drop it and leave the other item untouched. Still `idea` everywhere, with no worktree: it folds in exactly as before, no new question): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. A list you approved or edited in the chat (a catalogue, a set of options, numbered choices) is written whole into the item's `## Approved list`, in the approved order with your edits applied, and the file never says "the list shown in the refinement"; before asking for your approval Claude re-reads the file for phrases that send the reader to the chat, and pastes the list in where it finds one. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
 | `building` | `/agile:build`: it continues in the worktree the refinement created — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree; Claude then reads every file it names, runs the gate and quotes the real counts, and answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
-| `done` | `/agile:ship`: full test suite, merge after your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
+| `done` | `/agile:ship`: full test suite, app version bumped, merge — typing the command is your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 
 Small fixes found during validation are done right away, without leaving `validating`.
 
@@ -157,9 +164,14 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 | Command | When | Result |
 |---|---|---|
 | `/agile:discuss` | An idea with several possible directions, or doubts only you can answer | `docs/discussions/D-<n>-<slug>.md` (options, decisions, parked points) and the items captured as `idea` |
-| `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea` |
-| `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen |
+| `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea`. On a `web-app`/`website`, a mobile app epic follows the `mobile-client` complement (section 12) |
+| `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
+| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization; it does not deploy |
+
+**Releasing: `/agile:publish`.** A ship bumps the app's `<Version>` and merges; it does not build anything you can hand to someone. `/agile:publish` turns the version already on `main` into a release. It runs from the main checkout and stops, changing nothing, unless `main` is clean, level with `origin` and `v<Version>` exists neither locally nor there. Claude shows the plan once (version, previous tag, the items merged since it, the projects and runtimes) and goes on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release. It does not rerun the tests (the ship ran the full suite on what `main` holds); a compile error still fails `dotnet publish -c Release`, and then nothing is committed or tagged.
+
+What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one; `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit. The deploy to an environment is #50, the pipeline #51.
 
 ## 6. Changing your mind
 
@@ -198,6 +210,8 @@ board: <work item id>
 ## Validation script
 ```
 
+`## Approved list` is an optional section, after `## Screens and API`: it exists only when you approved a list in the chat (26 site sections, five export formats, ten error codes). It holds every element, numbered, one per line, in the approved order and with your edits applied; criteria and decisions point to it by name. The build and any later reader take the list from the file, never from the refinement chat.
+
 ## 8. Definition of done
 
 - [ ] Acceptance criteria met and covered by tests.
@@ -206,7 +220,7 @@ board: <work item id>
 - [ ] Validated on screen by you.
 - [ ] Full test suite green before merge.
 - [ ] Generated technical docs up to date — the docs command and its check, `gate.js docs` (DocGen, declared or implicit), when the project has them.
-- [ ] App manual updated in the three languages.
+- [ ] App manual updated in the profile's languages (three by default; `web-api`: pt-BR and en).
 - [ ] Board updated; the feature file reflects what was decided.
 
 ## 9. Quality gates
@@ -220,13 +234,14 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | **Every shell command** | A second guard warns before a Bash or PowerShell command writes a repository file through the command's own text instead of the Write and Edit tools — a heredoc, `echo`/`printf`, a PowerShell `Set-Content`/`Out-File`/`Add-Content`, a Python `open(..., 'w'/'a')`, a `node -e`/`.js` write whose literal carries a backslash, an escaped quote or an embedded newline, or a `sed -i` on a tracked file — or edits a GitHub issue or PR with an inline `--body`/`-b` instead of a whole one from a file. It exits 2 naming the rule and the file or command; a path outside the repository (temp, the session's scratchpad) and the plugin's own generated files (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) are silent. With your yes, Claude repeats the command ending with the comment `# agile:literal-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Rebuilds the changed projects (`--no-incremental`) and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
-| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them (a pass-rate drop fails the ship). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). |
+| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them: `evals/compare.js` compares the result with the baseline and its exit code is the verdict (a drop or a missing case fails the ship; a partial run, or a run of another model or ablation than the baseline's, is "not measured" and stops it). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). |
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
 - **The verdict is the last line.** Every report ends with `agile gate GREEN`, `agile gate RED: <what failed>` (the new warnings, the failing tests, the blocked build) or `agile gate SKIPPED: <why>` (nothing was edited, no solution, not a git repository — when no solution is found, it says to name one as `solution` in `.claude/agile/build.json`), or `agile gate OFF: <why>` in a repository whose `build.json` says `engine: none`. As a hook, a turn with no code change stays silent. Run by hand, `stop` cannot see the hook's marks (they belong to the session), so it asks git which code files changed since the main branch — committed, uncommitted and new — builds and tests those, and always prints its verdict. It never reads standard input: only the Stop hook, called as `gate.js stop --hook`, reads the hook event. Before 0.0.68 a stop by hand waited forever on a standard input left open, as in Claude's Bash tool. Claude saves the whole output to a file and quotes from it, never filtering it with `grep`, `head` or `tail`: a filtered view once hid the only list of new warnings.
 - **Wide changes.** If a change reaches more than 6 test projects, only the ones that reference it directly run; the rest waits for ship (`AGILE_GATE_MAX_TESTS`). A change to `.props`, `.targets` or the solution builds the whole solution and leaves the tests for ship.
 - **Solution lookup.** The solution is searched at the git root and one folder down (`repo/App.slnx`, `src/App.sln`).
+- **What the turn gate sees.** A code file is `.cs`, `.vb`, `.fs`, `.fsi`, `.razor`, `.cshtml`, `.xaml`, `.resx`, a project file (`.csproj`, `.vbproj`, `.fsproj`) or a build file (`.props`, `.targets`, `.sln`, `.slnx`); an edit to anything else is not remembered and starts no build. The project that owns a file is the nearest `.csproj`, `.vbproj` or `.fsproj` above it, and the project graph holds every one of those under the root, so a C# test project that references a VB.NET library runs when a `.vb` file changes. A test project is one whose file carries `Microsoft.NET.Test.Sdk`, `Sdk="MSTest.Sdk` (with or without a version), `<IsTestProject>true` or `xunit`, whatever its language. Until 0.0.90 a `.vb` or `.fs` edit was invisible to the turn gate (SKIPPED, while `ship` built and tested the whole solution), and a project on `MSTest.Sdk` was built but never tested. DocGen is still looked for as a `tools/*.DocGen` folder with a `.csproj`: it is the plugin's C# template. `.sqlproj` and `.fsx` are not code for the gate.
 - **The solution's SDK.** Every `dotnet` call runs from the solution's folder (the git root when there is none), so the `global.json` beside the solution chooses the SDK and the test runner, exactly as it does for someone building in that folder. Every report opens with `sdk <version> (<folder>)`; `sdk unknown` means `dotnet --version` failed there (a pinned SDK that is not installed), and the build failure that follows says why. The baseline records the SDK it was taken with (`"#sdk"`). When a later build uses another one, the report adds `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. That line is information, not a failure: retaking the baseline is your call. With the Microsoft.Testing.Platform runner, the report quotes its totals (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`).
 - **An adopted repository.** A code base that existed before the workflow (its `CLAUDE.md` says `Profile: adopted`, written by hand or by another plugin, such as legacy-lens's adoption) records how it is really built in `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` or `none`), `solution` (a path from the root), `scope` (the projects worth building when the whole solution is not), `testCommand`, `notes` and, under `msbuild`, the optional `msbuildPath` and `restoreCommand`. The gate reads `solution`, so a solution deep in the tree is still built, and `engine: none` turns it off with the reason in `notes`; `scope` is for people and is not read. The engine is trimmed and case does not matter, and a value outside the three is RED (`agile gate RED: unknown engine "MSBuild2" in .claude/agile/build.json (legal: dotnet, msbuild, none)`) instead of quietly behaving like `dotnet` — which is how `msbuild` went unhonored until 0.0.69. `/agile:sync` refreshes rules, templates and the workflow of such a repository but leaves its profile alone: there is no plugin profile to refresh it from.
 - **`engine: msbuild`.** For a solution the .NET SDK cannot build — typically an old project type whose targets only Visual Studio ships, such as an ASP.NET web application importing `$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets`, where `dotnet build` stops with `error MSB4019`. The gate then drives MSBuild.exe instead of the `dotnet` CLI; the warning parser, the baseline, the locked-output hint and the RED/GREEN verdict are the same. What differs:
@@ -253,11 +268,14 @@ Closing the issue is not trusted alone: at ship, after closing, Claude also sets
 
 An issue body is only ever replaced whole. `gh issue edit --body` replaces the entire body with what it is given, so a partial text there silently deletes the rest of the item (it happened in legacy-lens B-1). Claude writes the full item text to a file, sends it with `gh issue edit <id> --body-file <file>`, and reads the body back to compare. An Azure Boards description is likewise always sent whole, from a file.
 
+A GitHub Projects board with no "Ready" option no longer just gets a note about it: the first time `/agile:refine` mirrors a `refining` or `approved` item, Claude creates it — right after whatever option currently sits first (usually "Backlog"/"Todo"), so the flow stays Backlog → Ready → In Progress → Done. GitHub only lets you replace a Status field's whole option list, never add one option to it, and replacing the list gives every option a new id, which silently unsets the Status of every other item on the board — that cost 30 items their status by hand once (2026-09-27). Claude avoids it by reading every item's current Status **by name** first, replacing the list, then re-applying each captured name to its new id; an item that had no Status keeps having none. Any other missing option — "Ready" itself once `/agile:build` or `/agile:ship` run, or a missing done option — is still only reported, never invented.
+
 ## 11. Languages and the app manual
 
 - Code, docs, commits and identifiers are in English.
 - The app ships in **pt-BR, pt-PT and en** from day one: no hardcoded UI strings, one resource file per module per language, `IStringLocalizer`. Adding a language means adding resource files only.
-- The **app manual** lives in `docs/manual/<locale>/` (pt-BR, pt-PT, en) and is updated when each feature ships.
+- The **app manual** lives in `docs/manual/<locale>/` and is updated when each feature ships, in the locales the profile names: pt-BR, pt-PT and en by default, pt-BR and en for `web-api`.
+- `web-api` has no screens: its responses carry codes only, and the three-language resource files (`Resources/`) appear with the first feature that sends text to people, such as an e-mail. The lines about UI text, the language switch and mockups do not apply to it.
 - Only the conversation between you and Claude is in Portuguese.
 
 ## 12. Architecture profiles
@@ -269,8 +287,11 @@ The quiz picks one profile; `CLAUDE.md` points to it.
 | `modular-monolith` | One deployable, several business modules with clear boundaries |
 | `monolith` | One deployable, one business area |
 | `web-app` | Mostly screens over simple data; thin API or server-side UI |
+| `website` | A public site for visitors (search engines, content edited by the owner) that may grow into an app: `web-app` plus a public layer |
+| `web-api` | An app that is only an API for the owner's own clients (mobile, a single-page app in other repositories) and, when the bootstrap says so, machine clients: `monolith` without `Web`, plus consumer authentication, per-consumer rate limiting and a published contract |
 | `microservices` | Independent deployables owned separately; only with a real reason |
-| `mobile` | Native or MAUI client, with its own API profile |
+| `mobile` | Native or MAUI client, with its own API profile, or on an existing API in another repository (`Backend: external`) |
+| `desktop` | Standalone XAML client on the user's machine (WinUI 3, Avalonia 12 or .NET MAUI), behind an API or reaching the database directly |
 
 Each profile defines the folder layout, where business rules live, the test strategy and its time budget, and the architecture tests. The profile files are in `profiles/` in the plugin; bootstrap copies the chosen one to `docs/agile/profile.md`.
 
@@ -326,6 +347,24 @@ tests/
 └── <App>.Web.Tests/                  bUnit
 ```
 
+`web-api` — `monolith` without `Web`: one deployable that is only an API, and its contract:
+```
+src/
+├── <App>.AppHost/                    optional
+└── <App>.Api/                        the only deployable
+    ├── Features/<Feature>/
+    ├── Domain/
+    ├── Data/                         one DbContext, migrations
+    ├── Contracts/                    records for the API's consumers
+    ├── Auth/                         scheme selector, consumer claims, API key handler: what question 10a needs
+    ├── Common/                       Result/Error, AppJson, the helper that reads the caller
+    └── Resources/                    only when a feature sends text to people
+tests/
+└── <App>.Tests/                      unit + integration, the foundation's HTTP tests
+docs/api/openapi.json                 the contract, written by the integration tests
+```
+The bootstrap generates a foundation proven on a scratch solution (21 HTTP tests, then run by hand with each status code read). Every handler adds the same two claims, `consumer_kind` (`user` or `client`) and `consumer_id`, and code reads the caller only through them. A new endpoint accepts users only: machine clients enter where a feature names the `Clients` policy, and an anonymous endpoint must be on an allowlist an architecture test checks. Rate limiting answers 429 with `Retry-After` and a code, per user or client and per IP when anonymous, with a stricter limit on login and a separate one on refresh. CORS is an allowlist from configuration and never allows `X-Api-Key`. `/health` is public, `/health/ready` answers only on internal hosts, and neither is in the contract. OpenAPI and Scalar are not served in Production: consumers read the committed `docs/api/openapi.json`, which every feature's HTTP tests rewrite. Problems the framework writes itself (a 404, a 405, a malformed body) carry a `code` too. The Identity bearer answer lasts 1 hour for access and 14 days for refresh; a security-stamp change stops the next refresh, but an access token already issued lives until it expires, and `docs/infra.md` says so, with where the key ring (a secret folder shared by every instance) lives. Packages are approved with the profile; `Microsoft.AspNetCore.Authentication.JwtBearer` only when the external IdP is chosen. A second business area means an ADR and `modular-monolith` without `Web`.
+
 `web-app` — one Blazor project is the whole app:
 ```
 src/
@@ -341,6 +380,21 @@ src/
 tests/
 └── <App>.Tests/                      unit + integration + bUnit
 ```
+
+`website` — the `web-app` layout, plus the public pages, the content area and the islands:
+```
+src/
+└── <App>.Web/                        the only deployable
+    ├── Pages/<Area>/                 page + code-behind
+    ├── Pages/Public/                 public pages, static, /{culture}/...
+    ├── Pages/Content/                content area: Editor and Admin
+    ├── Pages/Admin/                  users, e-mail signups, settings
+    ├── Components/Islands/           interactive only where something changes live
+    └── ...                           the rest as in web-app
+tests/
+└── <App>.Tests/                      unit + integration + bUnit + HTTP tests of public pages
+```
+Public pages render on the server with no circuit (no `@rendermode`), which is what search engines read and what keeps an anonymous visitor from holding a server connection; a form (the e-mail signup, the contact) is a plain form post. Every public address starts with the language, with English slugs (`/pt-BR/about`, `/en/about`), and `/` sends the visitor to their browser's language. Each page has its title, description, canonical address and `hreflang`; `/sitemap.xml` is built from the pages themselves, so a new page cannot be left out. A text with no translation shows the default language. The content area has two fixed roles: `Editor` changes content, `Admin` also sees users, signups and settings. There is no page cache: once the content area's interactive mode is on, ASP.NET Core marks every page as not cacheable (measured, #36), so the content read from the database is cached instead, and a save clears it. E-mail signups stay in the app's own table, with a confirmation link and an unsubscribe link that needs no sign-in (LGPD). When logged-in features start sharing rules, the profile says to move to `monolith`, as `web-app` does.
 
 `microservices` — one solution, one folder per service, each a small monolith:
 ```
@@ -378,6 +432,59 @@ tests/
 └── <App>.Tests/                      backend tests, per its profile
 ```
 
+**`mobile` on an existing API (`Backend: external`).** The app is its own repository and its API is another system. There is no `Api` project: the app carries the only `<Version>` (`<App>.Mobile.csproj`, seeded at `0.1.0`), and `/agile:ship` bumps it alone. `<App>.Contracts` holds records you write by hand, and a pinned copy of the API's OpenAPI document sits in `docs/api/backend-openapi.json` (an agile API: its committed `docs/api/openapi.json` at a named commit; another API: its URL), with `docs/api/backend.md` saying where it came from. A test reads that document and fails when a record, a route, the `X-App-Version` header or the `426` response no longer match it (a generator was weighed and not adopted: the typed clients stay over one `HttpClient`); refreshing the copy is an explicit step of the item that needs it, and `/agile:sync` only reports when the API moved past the pinned commit. The app signs in at the API's `login`, adds the token and its version (`X-App-Version`) to every call, refreshes once on `401` (concurrent calls share one refresh) and, on `426` `app.update_required`, shows "update required" without trying to refresh. The screens are XAML; sharing the site's Razor components across repositories is not offered. Tests use a stub `HttpMessageHandler`; the API's own endpoints are tested in the API's repository, and each validation script has a device run against the API's development instance (`10.0.2.2` from the Android emulator).
+```
+src/
+├── <App>.Contracts/                  hand-written records and error codes, checked against the pinned document
+├── <App>.Mobile.Core/                view models, typed clients, token and version handler
+└── <App>.Mobile/                     MAUI head: XAML pages, shell, platform code
+tests/
+└── <App>.Mobile.Core.Tests/          view models, the contract test, clients over a stub handler
+docs/api/
+├── backend-openapi.json              pinned copy of the API's document
+└── backend.md                        where it came from, when, which API version
+```
+The API's side is the API's own session's work. For an agile site, an epic "API for the mobile app" (below) plans it; for an agile `web-api` or any other API, **the forced-update gate** is a line of its profile: the app sends `X-App-Version`, a middleware answers `426` with the code `app.update_required` when it is below a configured minimum or not a version (`2.0` equals `2.0.0`; no header passes; an empty minimum turns the gate off, a malformed one stops the app at start), it runs before authentication, and the OpenAPI document declares the header and the `426` on every `/api/v1` operation. It is a compatibility gate, not a security control.
+
+**The `mobile-client` complement.** A running `web-app` or `website` can gain a mobile app without changing profile. `mobile-client` is not a profile of its own: it adds the client half of `mobile` on top of the site's profile, and the project records it with one line under `Profile:` in `CLAUDE.md` (``- Complement: `mobile-client` — see `docs/agile/profile-mobile-client.md`.``). You start it with `/agile:epic` (example 14.24): Claude asks where the app lives (the site's own repository and solution, recommended, or a new repository — below) and its screens (MAUI Blazor Hybrid, recommended, reuses the site's Razor components; MAUI XAML gives the native look), then lists the site's features — the `done` items and the areas under `Pages/` — for you to tick; `Pages/Public/` of a `website` is never offered. The epic starts with "Mobile foundation" (the projects below, the app's sign-in with a bearer token on the site's own `/api/v1/auth/login` and `/api/v1/auth/refresh`, the app version) and then one "<X> on mobile" per ticked feature, with an "API for <X>" before it when the feature's logic still sits in a page used by several pages or holds a rule. One source of truth: the rule lives in one class in `Features/`, used in process by the site and by the endpoint the app calls. A shared screen is a component with no `@page` and no render mode, hosted by a page on each side. The app is online by default; offline comes per feature. A mobile client alone does not move the site to `monolith`.
+
+**The app in a new repository.** Answering "a new repository" skips the screens question (the app is XAML, `mobile` on an existing API above) and goes on with the list to tick, but the site's epic is "API for the mobile app" (example 14.30): "Mobile API foundation" first — the app's sign-in on the site, the forced-update gate, and an OpenAPI document (`Microsoft.AspNetCore.OpenApi`, only the `/api/v1` routes, not served in Production, written to `docs/api/openapi.json` and committed with every API change) — then one "API for <X>" per ticked feature, always, because the app cannot extract a page's logic across repositories. The ticked list goes into the epic as you ticked it, and the epic ends telling you the next step: a new repository whose `product/brief.md` names this one, then `/agile:bootstrap` there, which reads the list. The site records ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.``; its version stays on `<App>.Web.csproj` alone. Claude writes nothing in the app's repository, and the app's session writes nothing in the site's.
+```
+src/
+├── <App>.Web/                        the site; Api/ gains the app's endpoints
+├── <App>.Contracts/                  records and error codes shared with the app
+├── <App>.Shared/                     Hybrid only: shared components, their data interfaces, texts
+├── <App>.Mobile.Core/                plain library: HTTP implementations, token handler
+└── <App>.Mobile/                     MAUI head: host pages or XAML pages, sign-in, platform code
+tests/
+├── <App>.Tests/                      the site's tests, plus bUnit for the shared components
+└── <App>.Mobile.Core.Tests/          the app against the site in memory, with a bearer token
+```
+
+**Push notifications** (`mobile`, and a site with the `mobile-client` complement; only when the brief or an item asks for them). One provider: Firebase Cloud Messaging for Android and iOS (it relays to APNs), sent by the API through `FirebaseAdmin` behind an `IPushSender` interface. Registration is the API's: `PUT /api/v1/devices/{installationId}` with the device token, platform, culture and app version, and `DELETE` at sign-out, both bearer-only (`401` anonymous, `400` with `devices.invalid-token` for an empty token, `204` otherwise); a device belongs to one user and a token the provider reports as unregistered is deleted. A push carries a code and ids, never text: the app renders it from its resources in the device's culture. The app side is an interface in `Mobile.Core` implemented in the head with `Plugin.Firebase.CloudMessaging`; the permission prompt comes after sign-in. Tests need no device or Firebase account (fake sender, fake registration); the real delivery is a step of the validation script. The service-account key is a secret outside the repository. Store publishing is `/agile:publish`, below. Example 14.31.
+
+**Store publishing** (`mobile`, and a site with the `mobile-client` complement). `/agile:publish` also builds `<App>.Mobile` as an Android App Bundle, `dotnet publish -f <its android target framework> -c Release` with the signing as MSBuild properties, and copies only the signed file to `artifacts/publish/v<Version>/<App>.Mobile/<ApplicationId>-Signed.aab`. Signing comes from four environment variables, never from a file in the repository: `ANDROID_SIGNING_KEYSTORE` (an absolute path outside it), `ANDROID_SIGNING_ALIAS`, `ANDROID_SIGNING_STORE_PASS`, `ANDROID_SIGNING_KEY_PASS`; the passwords reach MSBuild as `env:` references, so no command line or log holds one, and `docs/infra.md` names the variables and where the keystore lives, never the values. The key is an **upload key** under Play App Signing (Google holds the app signing key; a lost upload key is reset through Play support, so keep a backup outside the machine). The Mobile head is left out, with the reason, and the server side is still published when: a variable is unset, the keystore is inside the repository or missing, `ApplicationId` still starts with the template's `com.companyname.` (Play makes the id permanent at the first upload), or the MAUI Android workload is missing. It is never built unsigned. A failed Android build stops the whole package step before any commit or tag. With a mobile head the release commit also carries `docs/releases/v<Version>-store.md`: the `.aab` path and both version numbers, the Play Console steps (testing track, then promote), the first-release-only steps (create the app, store listing, privacy policy URL, Data safety form from quiz 9b, content rating) and the iOS steps for a Mac, marked as not run by the plugin. The plugin uploads nothing to either store and builds nothing iOS. Play rejects a `versionCode` it has already seen: the ship raises `ApplicationVersion` at every release, and the checklist says so. The `.gitignore` template ignores `*.keystore`, `*.jks`, `*.p12`, `*.p8` and `*.mobileprovision`; a project whose file lacks them gets a warning from the plan, never an edit. First release with no keystore: Claude gives you the `keytool -genkeypair` command to run in your own terminal (it asks for the passwords there) and lists the variables to set. Example 14.32.
+
+`desktop` — the same shape as `mobile`, with the API optional. The quiz asks the technology (Avalonia when more than one operating system, WinUI 3 for Windows only with the native look, MAUI when mobile is in the same product) and, for PostgreSQL or SQL Server, whether the client goes through an API or straight to the database (direct only for a single-user app or a closed network: the credential then lives on every machine). The app runs standalone (`dotnet publish --self-contained`, which `/agile:publish` runs once per runtime; a WinUI 3 head needs `<EnableMsixTooling>true</EnableMsixTooling>` or the published exe crashes on start); installers and auto-update are not part of the profile. The Stop gate never builds the head; only Avalonia has automated screen tests (`Avalonia.Headless`), WinUI 3 and MAUI go through the validation script:
+```
+src/
+├── <App>.Api/                        only with an API, per its own profile
+├── <App>.Contracts/                  only with an API
+├── <App>.Desktop.Core/               plain library: everything testable
+│   ├── Features/<Feature>/           view models, feature services
+│   ├── Api/                          with an API: typed clients, AppJson
+│   ├── Data/                         direct access only: DbContext, or the SQLite store
+│   ├── Platform/                     interfaces the head implements
+│   └── Resources/
+└── <App>.Desktop/                    the head: XAML views, shell, platform code
+tests/
+├── <App>.Desktop.Core.Tests/         view models, services
+├── <App>.Desktop.Tests/              Avalonia only: headless screen tests
+└── <App>.Tests/                      backend tests, only with an API
+```
+
+**App version.** The bootstrapped app carries its own `SemVer` version, on a single `<Version>` property of the profile's deployable project — `<App>.Api.csproj` (`monolith`, `modular-monolith`, `web-api`), `<App>.Web.csproj` (`web-app`, `website`), or both `<App>.Api.csproj` and `<App>.Mobile.csproj` at the same value (`mobile`; `<App>.Mobile.csproj` alone with `Backend: external`), or `<App>.Desktop.csproj` plus `<App>.Api.csproj` when there is an API (`desktop`); no other project carries it. Bootstrap seeds `0.1.0`; every `/agile:ship` bumps it once: MINOR for a feature (PATCH resets), PATCH for a bug, or MAJOR when the item's `## Decisions` records a breaking change (MINOR and PATCH reset). In `mobile` (and in a `desktop` MAUI head), the same ship also sets the head's `ApplicationDisplayVersion` to that string and increments its `ApplicationVersion` — the store's ever-increasing integer — by 1, a counter that never resets. With the `mobile-client` complement, `<App>.Web.csproj` and `<App>.Mobile.csproj` carry the same value: "Mobile foundation" starts the app at the site's current version (never `0.1.0`) with `ApplicationVersion` 1, and each ship bumps both — only when both carry `<Version>`; otherwise it leaves them and `/agile:sync` reports it. When the app is in its own repository, the site bumps `<App>.Web.csproj` alone. `microservices` is out of scope: one version does not map cleanly to independently deployable services. A project bootstrapped before this existed gets it only through `/agile:sync`, offered as a capability, never installed on its own.
+
 Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
 
 **Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
@@ -388,7 +495,7 @@ Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at b
 
 Claude writes every file (code, tests, docs) with its editing tools, never through the text of a script: escapes such as `\t` or `\b` turn into control characters, and a test can pass while checking nothing.
 
-**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) are never touched, and `CLAUDE.md` only gets what you approve: a section the template gained, or a `Worktrees:` line when it has none (the bootstrap recommendation, `D:\wt\<repository>` or `C:\`; existing worktrees keep their names). If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. A project with no warnings baseline at all (an adopted repository, an old bootstrap) gets a row offering to take the first one: a full rebuild, run only with your yes, committed with the sync. A ⏳ plugin note in the retro log that cites an `agile-canary#N` the plugin has delivered gets a row too: with your yes, `sync.js notes` marks it ✅ with the version and merge commit. The project's own session is the only one that writes those marks; the plugin session never writes in your repository. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back.
+**Keeping a project up to date.** Bootstrap copies plugin files into the project (rules, templates, this workflow, the profile, the build files), so a plugin update does not reach them by itself. Update the plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, new session), then run `/agile:sync` in the project. Claude shows a table of what changed and copies only what you approve: a copy you never edited is replaced; a file you edited (usually the profile) is merged by hand, keeping your sections; build files (`Directory.Build.props`, `.editorconfig`, `global.json`...) are never copied over — each difference is proposed as an edit; your own rules (`project.md`, `*-project.md`) are never touched, and `CLAUDE.md` only gets what you approve: a section the template gained, or a `Worktrees:` line when it has none (the bootstrap recommendation, `D:\wt\<repository>` or `C:\`; existing worktrees keep their names). If build files or checked rules changed, Claude builds, runs the full suite and refreshes the warnings baseline. A project with no warnings baseline at all (an adopted repository, an old bootstrap) gets a row offering to take the first one: a full rebuild, run only with your yes, committed with the sync. A ⏳ plugin note in the retro log that cites an `agile-canary#N` the plugin has delivered gets a row too: with your yes, `sync.js notes` marks it ✅ with the version and merge commit. The project's own session is the only one that writes those marks; the plugin session never writes in your repository. The version and what was copied are recorded in `.claude/agile/sync.json`. Run it between features, not in the middle of one. `/agile:version` shows the plugin version running in the session next to the project's, and says whether a sync or a plugin update is the next step. The sync also names what only `/agile:bootstrap` installs and your project does not have — a tool of its own, such as the technical-docs generator — and offers to capture a feature for it; it never installs it behind your back. A project with screens and no `docs/design/identity.tokens.json` gets the same kind of note (from 0.0.86): the sync writes nothing, since the identity is your project's file and not a copy of the plugin, and suggests `/agile:identity`.
 
 `output-style` sets how Claude talks to you: in pt-BR, answer first, step reports of at most 10 lines, details in the file instead of the chat, one recommendation with its reason, no narration of the work, "not verified" said in those words, and bad news first. Long answers only when a gate failed, a question needs context, or you ask.
 
@@ -398,7 +505,7 @@ Claude writes every file (code, tests, docs) with its editing tools, never throu
 - Resume: `/agile:build <id>` on the item that is `building` continues from the last `wip` commit.
 - Pause mid-feature: `/agile:pause`, or just say you are stopping. Claude commits on the feature branch with a `wip(F-<n>):` prefix and writes a note (where we stopped, what is next, who decides); nothing stays only on disk. Closing the session without a pause is fine too: the next session commits the leftover work as `wip` first.
 - End: a short note (where we stopped, what is next, who decides).
-- Before merging from a worktree: Claude asks, as a blocking question, whether you have closed any IDE or app host running from that folder — a removal that fails halfway unregisters the worktree and leaves the folder on disk, worse than not removing it. On .NET it also runs `dotnet build-server shutdown` first, since a build server holds a lock the IDE closing does not release.
+- Before removing a worktree at ship: Claude no longer asks whether you closed the IDE or app host — typing `/agile:ship` counts as closed. It runs `dotnet build-server shutdown` (.NET), then a lock probe: it renames the folder to `<folder>.probe` and back. If a file is held, the rename fails, Claude names the holder and asks you to close it, then retries; nothing is removed halfway (a removal that fails halfway unregisters the worktree and leaves the folder on disk).
 
 **One folder per item.** Every item gets its own worktree — a separate folder outside the repository (the root is the `Worktrees:` line of `CLAUDE.md`, asked at bootstrap — recommended `D:\wt\<repository>`, or `C:\wt\<repository>` without a D: drive; without the line, `<repository parent>/wt/<repository>/`, and `/agile:sync` offers the line. The folder is `f-<n>-<desc>` or `b-<n>-<desc>`, `<desc>` being up to 20 characters of the slug, cut at a hyphen: `f-3-exam-board`. Kept short because of Windows path limits; a worktree created before this keeps its `<type>-<n>` name until the merge) — created by `/agile:refine` before it writes anything and used until the merge. That is what keeps an item's documents on its own branch: a session working in another item's folder used to write the feature file and the mockup there, and they ended up on an unrelated branch. The build reuses that folder and never makes a second one.
 
@@ -503,6 +610,8 @@ outside the repository; the file moved in and everything about F-3 is written th
 I checked the code: the Catalog module exists but has no entities yet.
 The user and role model from bootstrap has Curator and Admin.
 ```
+
+An item about evals is the exception to "ask everything at once": runs per case and the cost ceiling are proposed only after Claude runs one case once and quotes what it cost (worked example 14.26).
 
 The questions come as quiz cards, one per topic, the recommended option first. In the desktop app you click; in a terminal the same questions arrive as a numbered list you answer with "ok" or a letter. The first card, "Rules":
 
@@ -650,9 +759,7 @@ Claude: A resource key was missing in the pt-BR file. Fixed; test added for AC4.
 ```
 Claude: Full suite: 212 tests green (2 min 10 s). Architecture tests green.
 The run rewrote docs/api/ExamPrep.Api.json (a new route): committed with F-3.
-Ready to merge feature/F-3 into main. Authorize?
-> yes
-Claude: Merged. Board #12 closed, Status Done (read back). Manual updated: "Exam boards" page in pt-BR, pt-PT, en.
+Merged feature/F-3 into main (--no-ff), pushed; branch and worktree removed. Board #12 closed, Status Done (read back). Manual updated: "Exam boards" page in pt-BR, pt-PT, en.
 Retro: one lesson — "check every language file when adding a message". Add it as a rule?
 > yes
 Claude: Rule added to core/i18n. Status: done.
@@ -874,13 +981,9 @@ Shipping the bug: the full check runs in the worktree, the merge in the main che
 
 ```
 > /agile:ship B-2
-Claude: Before I remove the worktree: have you closed any IDE or app host running from
-D:\wt\examprep\b-2-exam-board-search? A removal that fails halfway leaves the folder on disk. Say "closed" once done.
-> closed
 Claude: Shutting down the .NET build server, then running the full suite in the worktree.
-Full suite green (212 tests, 1 min 58 s). Ready to merge bug/B-2 into main. Authorize?
-> yes
-Claude: Merged. Worktree removed, branch deleted, 0 0 against origin/main.
+Full suite green (212 tests, 1 min 58 s). Merged bug/B-2 into main. Lock probe on
+D:\wt\examprep\b-2-exam-board-search passed. Worktree removed, branch deleted, 0 0 against origin/main.
 remote branch: never pushed, nothing to delete.
 F-6 is now 1 commit behind main: bringing it up to date before its next test run.
 ```
@@ -1250,7 +1353,7 @@ and en (question-bank.md); merged --no-ff as 3f9c2e1, pushed; main...origin/main
 Board #31 closed, Status Done (read back). F-17 done. Retro: 1 lesson proposed — keep or drop?
 ```
 
-Your "validado e autorizo o merge" was the ship's merge authorization: it is not asked again.
+Your "validado e autorizo o merge" was the ship's merge authorization.
 
 #### 14.13.2 Validated, merge later
 
@@ -1261,7 +1364,7 @@ The same stop 2 for F-19, answered with "validado" only:
 Claude: F-19 validated and kept in validating; nothing merged. When you want it on main: /agile:ship F-19.
 ```
 
-"ok", "pode seguir" or "validado" never authorize a merge. Only a message that names the merge does.
+"ok", "pode seguir" or "validado" never authorize a merge. Only a message that names the merge does, or typing `/agile:ship F-19` afterwards.
 
 #### 14.13.3 A defect at stop 2
 
@@ -1349,7 +1452,9 @@ Round 7 adds question 30b:
 Claude: 30b. Evals → Recommendation: a test level of their own. 40 wrong answers with
     the explanation a teacher would accept, scored against the real model at ship and
     on demand, never in the turn gate. Baseline pass rate committed; a drop fails the
-    ship. Ceiling: US$ 2 per run.
+    ship. Which model runs the cases? → Recommendation: the one the tutor calls in
+    production. The command pins it (--model) and runs with --ablation none: the
+    default would run every case twice. The ceiling is set later, after one measured run.
 > ok
 ```
 
@@ -1418,6 +1523,466 @@ Claude: Same fixture, same 2,500-student exam, export now completes: 2,500 rows 
 
 A feature with no "fails today" premise — a new capability, not a claim that something breaks — skips this step entirely: one test per acceptance criterion, as before.
 
+### 14.17 A board with no "Ready" option yet
+
+A project bootstrapped before the board had a distinct Ready state — its Status field is just Backlog/In Progress/Done. F-20 reaches approval and its first mirror needs "Ready":
+
+```
+> /agile:refine F-20
+...
+Claude: aprovo F-20
+Claude: F-20 approved. The board's Status field had no "Ready" option: created it right
+after "Backlog" (Backlog, Ready, In Progress, Done) and re-applied every other item's
+Status by name — nothing else on the board moved. F-20 is now Ready.
+Next: /agile:build F-20 (nothing else is building or validating).
+```
+
+A later item on the same board just uses the option that is already there; `/agile:build` and `/agile:ship`, which never target "Ready", still only report — never create — any option their own mirror needs but does not find.
+
+### 14.18 Folding an open item into the one being refined
+
+While refining B-22, the owner proposes folding B-23's scope into it, "since they touch the same rule". Claude checks B-23 before folding it in:
+
+```
+> Fold B-23 into this one, it's the same rule.
+Claude: Checking B-23 first — git worktree list shows D:/wt/examprep/b-23-ship-sets-status
+[bug/B-23], and its file starts "Status: approved (owner, 2026-09-27; worktree ...)".
+B-23 is already approved on its own branch, not just an idea: folding it here would leave
+two items building the same fix. Fold it into B-22 anyway, or drop the fold and leave B-23
+where it is?
+> Drop it, ship B-23 on its own.
+Claude: B-23 stays untouched and out of scope for B-22. Recorded in ## Decisions.
+```
+
+A later proposal, to fold B-24 ("just an idea, no worktree yet") in the same round finds nothing beyond `idea` anywhere, so it folds in without a question:
+
+```
+> Fold B-24 too, it's still just an idea.
+Claude: B-24 has no worktree and is idea everywhere — folding it into B-22 now.
+```
+
+`epic-breakdown` and `discuss` are unaffected: they only capture new ideas, never absorb an existing open item's scope, so this check runs in `/agile:refine` only.
+
+### 14.19 A desktop app in the quiz
+
+The brief describes a standalone app for a clinic's front desk, Windows and macOS, several users on one PostgreSQL:
+
+```
+Claude: Question 1, type of app. Recommendation: desktop (the brief says "installed on the reception PCs").
+Question 2, profile. Recommendation: desktop.
+> ok, ok
+Claude: Question 2a, desktop technology. Windows and macOS, no mobile app in the brief.
+Options: A) Avalonia 12; B) WinUI 3 (Windows only: ruled out by the macOS target); C) .NET MAUI.
+Recommendation: A — one code base for both systems, no platform controls to reconcile.
+> A
+Claude: Question 5 is PostgreSQL. Question 2a2, how the client reaches it.
+Options: A) through an API; B) directly to the database.
+Recommendation: A — several users share the data, and B would put the database credential on every machine.
+> A
+Claude: Questions 4 and 23 are not asked in MudBlazor terms here: the stack is XAML. Question 23a, visual identity: a file,
+a site, an image or three questions (see 14.22). The UI kit and gallery are not a question any more: shared styles and
+controls with a dev-only gallery window, captured as the first item. Question 29: view-model
+tests, plus Avalonia.Headless for the screens; the gate builds Desktop.Core and the API, never the head.
+```
+
+### 14.20 What an item waits on to start, and what it needs to validate
+
+`## Start` of a feature or bug has two lines: `Waits on (to start)` and `Needed to validate`. Only the first, with `Depends on`, can stop a start. F-21 needs a real exam-board export, but only to be validated:
+
+```
+## Start
+- Depends on: nothing.
+- Waits on (to start): nothing.
+- Needed to validate: a real exam-board export (.csv) — from the curator.
+```
+
+```
+> /agile:autopilot F-21
+Claude: F-21 (idea) — two stops: questions now, validation script later. Start: depends on nothing, waits on
+nothing to start. It needs a real export to be validated: I will ask for it at stop 2, not now.
+```
+
+Before, the single "Waits on" line would have stopped the run here. At stop 2 the same text comes with the script:
+
+```
+Claude: STOP 2 — F-21 is in validating (Autopilot: stop 2).
+  Needed to validate: a real exam-board export (.csv), from the curator — not in the repository yet.
+  Validation script: docs/features/F-21-import-exam-board.md#validation-script (5 steps).
+  Answer "validado e autorizo o merge de F-21" to ship it now, or "validado" to stop here.
+```
+
+An item that waits on something to start (`Waits on (to start): the API key, from the platform team`) still stops the run and `/agile:status` still lists it as Blocked. An item file with the old single `Waits on:` line is read as "to start", so nothing already open changes by itself.
+
+### 14.21 Typing ship is the merge authorization
+
+You validated F-35 and type the command. There is no "Authorize?" question: the command is the authorization, for this item only.
+
+```
+> validado
+> /agile:ship F-35
+Claude: Full suite 231 tests green (2 min 4 s). Main moved (0.0.85 by another session): merged into the branch,
+suite green again, version bumped to 0.0.86. Merged feature/F-35 into main (--no-ff), pushed; main...origin/main 0 0.
+Lock probe on D:\wt\agile-canary\f-35-ship-authorizes: shut down the build server, renamed to
+f-35-ship-authorizes.probe and back. Worktree removed, branch deleted locally (remote: never pushed).
+Board #35 closed, Status Done (read back). Retro: 1 lesson proposed — which do you adopt?
+```
+
+When something still holds the folder, the probe stops once, before anything is removed:
+
+```
+Claude: Merged feature/F-35 into main. I stopped before removing the worktree: renaming
+D:\wt\agile-canary\f-35-ship-authorizes failed, a process holds a file in it (an IDE or an app host).
+Close it and tell me; I retry the probe. Nothing was removed.
+> closed
+Claude: Probe passed. Worktree removed, branch deleted. 0 0 against origin/main.
+```
+
+### 14.22 The app's visual identity, from a website
+
+Round 5 of the bootstrap of a clinic's web app. The identity is asked before the design system library, and the UI kit is no longer a question:
+
+```
+Claude: Question 23a, visual identity. Options: A) a file (DTCG *.tokens.json or DESIGN.md); B) a website URL;
+C) an image (logo, brand board); D) none, three questions derive one.
+Recommendation: B — the brief names the clinic's site. Then 23 is only the library choice: MudBlazor.
+> B https://clinica-exemplo.example
+Claude: I read the page and its stylesheets. Nothing is written yet. Found:
+| Role | Light | Dark (derived) | Text on it | Light | Dark |
+| primary | #0B6E6E | #4FD1C5 | on-primary #FFFFFF | 6.1:1 | on #0B2A2A: 8.2:1 |
+| secondary | #F2A93B | #F2B85F | text #1A1A1A | 8.7:1 | text #101010: 10.7:1 |
+| background | #FAFAF7 | #121614 | text #1A1A1A | 16.6:1 | text #ECEFEC: 15.8:1 |
+| error | #D92D20 | #F97066 | on-error #FFFFFF | 4.8:1 | on #1A0B09: 6.9:1 |
+Fonts: Inter (headings and body). Radius: 8 px. Icon family: Outlined. Source: URL, 2026-09-28.
+Two pairs fail AA: link #3AA8A8 on the light background is 2.7:1 (nearest passing: #1F7F7F, 4.6:1) and secondary as
+text on white is 2.0:1 (use it only as a fill). Fix the link color to #1F7F7F?
+> yes, confirm
+Claude: Written docs/design/identity.tokens.json and docs/design/DESIGN.md (front matter generated from the tokens,
+re-read and compared: 4 colors x 2 themes, fonts, radius, icon family equal). ADR-0001 line: source URL, 2026-09-28.
+First item captured: "UI kit and gallery, built from the identity". Both files go into the first commit.
+```
+
+An app bootstrapped before this version gets the same question later:
+
+```
+> /agile:sync
+Claude: Also missing (only /agile:identity adds it): Visual identity. The project has screens and no
+docs/design/identity.tokens.json. I write nothing here.
+> /agile:identity
+Claude: No identity recorded. Question 23a: a file, a website, an image or three questions?
+> none
+Claude: Primary color, font, light, dark or both? ... (derives the palette, shows the table, waits for "confirm")
+Claude: Written docs/design/ and the ADR-0001 line. The project already has a UI kit, so I captured the idea
+"Apply the identity to the theme". No application code was changed.
+```
+
+With an identity already there, `/agile:identity` shows it as a table (source, date, colors, fonts, radius, icon family) and asks what changes.
+
+### 14.23 The sections of a site in the quiz
+
+The brief describes a nutritionist's site: who the nutritionist is, what patients say, the plans she sells, a newsletter, and "maybe an online shop later":
+
+```
+Claude: Question 2, profile. Recommendation: website — a public site found by search engines, texts you edit
+yourself, and it can grow into an app (patient area) without changing profile.
+> ok
+Claude: Question 2c, the sections of the site. All selected; answer "ok" or the numbers to untick.
+Always in the site (not in the list): content area, home, basic SEO, 404 and error pages, privacy policy
+and cookie consent.
+Launch:  1 About me · 2 Testimonials · 3 FAQ · 4 E-mail signup · 5 Products · 6 Contact and WhatsApp
+Later:   7 Services and prices · 8 Portfolio · 9 Blog with RSS · 10 Moderated comments · 11 Gallery
+         12 Events / scheduling · 13 Search · 14 Location · 15 Team · 16 Partners' logos
+         17 Downloadable materials · 18 Newsletter sending · 19 Banner / pop-up · 20 Launch page
+         21 Link in bio · 22 Press kit · 23 Careers · 24 Accessibility statement · 25 Visitor dashboard
+         26 Installable site (PWA)
+> untick 4, 15, 23
+Claude: 18 (newsletter sending) needs 4 (e-mail signup): without 4 there is nobody to send to.
+Keep 4, or untick 18 too?
+> keep 4
+Claude: Selected: 24 sections (4 kept; 15 and 23 out). The online shop in the brief is not a section: it is an
+app feature with payments, so I will capture it as its own epic idea.
+...
+Claude: Question 19, e-mail. You chose "none", but sections 4 and 6 need to send (the confirmation link,
+the contact message). Recommendation: SMTP.
+> SMTP
+...
+Claude: Board: epic "Website sections" with 29 ideas — the 5 of the foundation (content area first), the
+6 launch sections, then 18 later ones — and the epic idea "Online shop". Create them?
+```
+
+### 14.24 A mobile app for a running site
+
+The nutritionist's site (14.23) has a patient area, and she wants patients to use it from their phones:
+
+```
+> /agile:epic "Patient app"
+Claude: The profile is website, and a mobile app for it follows the mobile-client complement. Two questions:
+(a) Where does the app live? Recommendation: in this repository and solution — the app reuses the site's
+    code and ships with the same version. (The other answer, a new repository, is example 14.30.)
+(b) Screens? Recommendation: MAUI Blazor Hybrid — the patient-area components are reused inside the app.
+    Alternative: MAUI XAML, native look, every screen written again.
+Which of the site's features go to the app? Tick by number:
+Done items: 1 F-31 Meal plan · 2 F-34 Appointments · 3 F-37 Progress chart
+Areas:      4 Pages/Messages
+(The public pages stay on the site and are not offered.)
+> a: this repository, b: Hybrid; 1, 2 and 4
+Claude: Mobile foundation comes first (the app's projects, sign-in with a token on the site, the version 1.8.0
+the site has today). Then:
+- Meal plan on mobile — the plan is read in one page only: this feature extracts it.
+- Appointments on mobile — the booking rule (no two in the same slot) sits in two pages. I suggest
+  "API for appointments" before it. OK?
+- Messages on mobile — the page reads directly, no rule: this feature extracts it.
+> ok
+Claude: Epic "Patient app": Mobile foundation, API for appointments, Meal plan on mobile, Appointments on mobile,
+Messages on mobile. The list you ticked goes into the epic file as you ticked it. Create them?
+```
+
+Had she answered "a new repository" in (a), the epic would be the site's half only: example 14.30.
+
+### 14.25 A list you approved ends up in the file
+
+While refining "Export a report", Claude proposes the formats in the question round and the owner edits the list:
+
+```
+Claude: Export formats, in this order:
+1 PDF · 2 XLSX · 3 CSV · 4 JSON · 5 XML
+> Drop XML, add DOCX at the end.
+Claude: Done: PDF, XLSX, CSV, JSON, DOCX.
+```
+
+Claude writes the file. Before asking for approval it re-reads it and finds one line, in the acceptance criteria: "the report exports in the formats shown in the refinement". It pastes the list in and points the criterion to it:
+
+```
+## Approved list
+Export formats
+1. PDF
+2. XLSX
+3. CSV
+4. JSON
+5. DOCX
+
+## Acceptance criteria
+- AC2 Given a finished report, when the owner picks any format of `## Approved list`, then the file downloads in that format.
+```
+
+Claude re-reads again, finds no line that sends the reader to the chat, and only then shows the summary and asks for "aprovo F-n". The build, opened days later in another session, reads the five formats from the file.
+
+### 14.26 Evals: the model is pinned, the ceiling is measured, the verdict is code
+
+Bootstrap of the exam tutor, question 30b. Claude asks the model as well and says what the command will carry:
+
+```
+Claude: 30b. Which model runs the cases? → Recommendation: the one the tutor calls in
+    production. The Evals line of CLAUDE.md gets --model, --ablation none (the default
+    would run every case twice, with and without the plugin), --max-cost-usd and --json.
+    The baseline records the model and the ablation.
+> ok
+```
+
+Later, refining "Score the tutor's explanations", Claude does not fix the number of runs yet. It runs one case once and quotes it:
+
+```
+Claude: claude plugin eval . --case wrong-answer-1 --runs 1 --ablation none --model <production model>
+    → cost US$ 0.21. Six cases × 3 runs = US$ 3.78; with a 30% margin, ceiling US$ 5.
+    Recorded in ## Decisions. Runs per case: 3? Ceiling: US$ 5?
+> ok
+```
+
+At ship, Claude runs the suite with `--json` and then the comparator, and quotes its whole output:
+
+```
+$ node evals/compare.js result.json
+ok       wrong-answer-1: 1 (baseline 1)
+DROP     wrong-answer-2: 0.67 < baseline 1
+cost US$ 3.61, model production-model, ablation none
+evals RED            (exit 1)
+```
+
+The ship stops. Had the run used another model than the baseline's, the last line would read `evals NOT MEASURED` (exit 2): not a drop and not a pass, and re-recording the baseline (`--write`) needs the owner's yes.
+
+### 14.27 A VB.NET repository: the turn gate builds and tests a `.vb` change
+
+An adopted repository written in VB.NET (`engine: dotnet`, SDK-style projects): `src/VbLib`, `tests/VbLib.Tests` (MSTest on `Microsoft.NET.Test.Sdk`), `tests/Sdk.Tests` (a VB project on `MSTest.Sdk/3.6.4`), a C# `tests/CsApp.Tests` that references `VbLib.vbproj`, and `src/FsLib` in F#. Claude edits `Class1.vb`. Until 0.0.90 the turn ended in silence, and `gate.js stop` by hand said:
+
+```
+agile gate SKIPPED: no code file changed since the main branch
+```
+
+Now the same edit gives:
+
+```
+agile gate (by hand): 1 code file(s) changed since the main branch
+sdk 8.0.131 (.)
+built tests/CsApp.Tests/CsApp.Tests.csproj (4 s)
+built tests/Sdk.Tests/Sdk.Tests.vbproj (3 s)
+built tests/VbLib.Tests/VbLib.Tests.vbproj (2 s)
+tested tests/CsApp.Tests/CsApp.Tests.csproj (2 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: < 1 ms - CsApp.Tests.dll (net8.0)
+tested tests/Sdk.Tests/Sdk.Tests.vbproj (1 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 156ms
+tested tests/VbLib.Tests/VbLib.Tests.vbproj (2 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 36 ms - VbLib.Tests.dll (net8.0)
+agile gate GREEN
+```
+
+The C# test project runs because the graph now has the `.vbproj` as a node; `Sdk.Tests` runs because `Sdk="MSTest.Sdk` counts as a test project (a C# project on `MSTest.Sdk` is found the same way). A second unused local in `Class1.vb` is a new VB warning, RED on every turn until it is fixed:
+
+```
+new warnings (fix them, or accept with `node gate.js baseline` after the owner agrees):
+src/VbLib/Class1.vb|BC42024 (1 -> 2)
+  src/VbLib/Class1.vb(3,13): BC42024 Unused local variable: 'unused'.
+  src/VbLib/Class1.vb(4,13): BC42024 Unused local variable: 'second'.
+agile gate RED: 1 new warning(s): BC42024 in src/VbLib/Class1.vb
+```
+
+A failing assertion in `Sdk.Tests` ends with `agile gate RED: tests failed (tests/Sdk.Tests/Sdk.Tests.vbproj)`. A change to `Library.fs` builds `src/FsLib/FsLib.fsproj` the same way. Under `engine: msbuild` (an old-style `.vbproj`) the affected project is rebuilt with MSBuild and the report says `tests skipped: engine msbuild runs the whole suite at ship`, as it does for C#.
+
+### 14.28 An app that is only an API: question 10a
+
+Bootstrap of "Rota", whose brief says a mobile app and a partner's system will call it and that it has no screens. Round 1:
+
+```
+Claude: 1. Type of app → Recommendation: API only. The brief has no screen of its own.
+    2. Architecture profile → Recommendation: web-api (an API for your own clients,
+       no screens). monolith would bring a Blazor project and bUnit you do not need.
+    Already clear from the brief: no back office (14), no screens (21, 22, 23a–23e).
+> ok
+```
+
+Round 3, instead of question 10:
+
+```
+Claude: 10a. How do the API's consumers authenticate? (several allowed)
+    · Identity bearer: users sign in at the API
+    · External IdP: users, and client credentials for machine clients
+    · API key: machine clients only, never a browser or mobile app
+    Recommendation: Identity bearer and API key. The mobile app signs in users, and the
+    partner's system is a machine client you control; an API key is never given to a
+    mobile app, because its code is public.
+    11. Social login or MFA in v1? → Recommendation: no (asked because Identity bearer is on).
+> ok
+```
+
+The skeleton then has `Rota.Api` with login, refresh and `me`, the API key handler and the selector between the two, `Rota.Tests` with the foundation's HTTP tests and no template test, `docs/api/openapi.json` written by the first test run, and in `docs/infra.md` the token lifetimes (1 h, 14 days) and where the key ring lives. The first endpoint a feature adds accepts users only; the partner's endpoint names the `Clients` policy.
+
+### 14.29 Publishing a release
+
+ExamPrep is a `web-app`; two items were shipped since the last release (`v0.1.0`), and `main` carries `<Version>0.2.0</Version>` on `ExamPrep.Web`. You are in the main checkout.
+
+```
+> /agile:publish
+Claude: Plan: v0.2.0, previous tag v0.1.0, 2 items since it.
+  Feature F-3: question bank import
+  Bug B-2: wrong total on the report
+  Package: ExamPrep.Web (artifacts/publish/v0.2.0/ExamPrep.Web + ExamPrep.Web.zip).
+  Going on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release.
+Claude: Packaged ExamPrep.Web: 156 files, zip 4.7 MB; docs/releases/v0.2.0.md written.
+Claude: Release v0.2.0: notes committed on main (docs(release): v0.2.0), annotated tag v0.2.0, main and the tag pushed, GitHub Release created with the notes.
+  Not packaged: nothing else. The deploy to an environment is not part of this command yet (#50).
+```
+
+The same command a minute later stops and writes nothing, because the tag now exists:
+
+```
+> /agile:publish
+Claude: Nothing to release: the tag v0.2.0 already exists. The next release comes after the next /agile:ship.
+```
+
+A project with a `mobile-client` complement and no signing set up says what it left out: `Not packaged: ExamPrep.Mobile (signing is not set up: ANDROID_SIGNING_KEYSTORE, ... unset); only ExamPrep.Web was.` (example 14.32). A desktop project with `<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>` gets one folder and one zip per runtime, and the linux zip comes with `made on Windows: after unzipping run chmod +x on the executable`. If `dotnet publish` fails on a compile error, the run ends with `nothing was committed or tagged` and the error line, and the fix goes through an item. If the push fails after the tag, the report names `git push origin main` and `git push origin v0.2.0` to rerun; the tag stays.
+
+### 14.30 A mobile app in its own repository, on the site's API
+
+The nutritionist (14.24) prefers the app in a repository of its own, versioned and released apart from the site. First, in the **site's** repository:
+
+```
+> /agile:epic "Patient app"
+Claude: The profile is website, and a mobile app for it follows the mobile-client complement.
+(a) Where does the app live? Recommendation: in this repository (it reuses the site's code and version).
+    Or a new repository, with its own version.
+Which of the site's features go to the app? Tick by number:
+Done items: 1 F-31 Meal plan · 2 F-34 Appointments · 3 F-37 Progress chart
+Areas:      4 Pages/Messages
+> a: a new repository; 1 and 2
+Claude: A new repository means the screens are MAUI XAML, so I skip that question. The site's epic is "API for the mobile app":
+- Mobile API foundation — sign-in for the app, the forced-update gate (minimum version, answer 426), the OpenAPI document
+- API for meal plan
+- API for appointments
+Meal plan and Appointments are saved under "Features taken to the app" as you ticked them. Create them?
+> ok
+Claude: Next step: create a new repository whose product/brief.md names this one (nutri-site), and run /agile:bootstrap there.
+The app's ideas "<X> on mobile" are written there, not here.
+```
+
+Then, in the **app's** repository, with a brief that names the site:
+
+```
+> /agile:bootstrap
+Claude: Round 1. Question 1: mobile on an existing API. Question 2: mobile. Question 2d, where does the backend live?
+    · in this solution · an existing API in another repository (a site or web-api of yours, or any API with an OpenAPI document)
+    Recommendation: an existing API in another repository — the brief names nutri-site.
+    Already clear: 3 (deployment), the data round, 12, 13 and 14 — the API decides them. Question 10 is "the API's sign-in": I read it from the site, Identity bearer.
+> ok
+...
+Claude: Board. nutri-site has the epic "API for the mobile app" with two ticked features. Proposed ideas, nothing written there:
+  1. Mobile foundation — sign-in against login/refresh/me, the handler with X-App-Version, the pinned document, the contract test (waits on nutri-site#41 "Mobile API foundation")
+  2. Meal plan on mobile (waits on nutri-site#42)
+  3. Appointments on mobile (waits on nutri-site#43)
+```
+
+`/agile:status` in the app shows the three as blocked while those issues are open on the site, and as free once they are closed (for the foundation also when the site's `docs/api/openapi.json` declares `X-App-Version`). If the API were an agile `web-api` or an API of someone else, the ideas come from the brief; when that API has no forced-update gate yet, Claude offers to open an issue "Forced-update gate for <App>" on its board, with your yes, and "Mobile foundation" waits on it. After the first ship in the app repository, only `<App>.Mobile.csproj` goes from `0.1.0` to `0.2.0`.
+
+### 14.31 Push notifications for a mobile app
+
+ExamPrep is a `website` with the `mobile-client` complement. You ask for push in a feature, "Notify when a result is ready", and Claude refines it against `docs/agile/profile-mobile-client.md`.
+
+```
+> /agile:refine F-9
+Claude: The profile describes push (section "Push notifications"). Two decisions stay with you:
+  1. Provider. Recommendation: Firebase Cloud Messaging through FirebaseAdmin 3.7.0 (Apache-2.0)
+     for both platforms; the client head adds Plugin.Firebase.CloudMessaging 4.0.1 (MIT).
+  2. Device registration. Recommendation: PUT/DELETE /api/v1/devices/{installationId} in the site's
+     Features/Devices class, so the API knows whom it can reach.
+You: ok
+Claude: The criteria cover 204 on register, 401 anonymous, 400 devices.invalid-token, a device
+  moving to the user who registers it, one message per device in its culture, and an unregistered
+  token deleted. The tests use a fake sender; real delivery is step 6 of the validation script,
+  which needs a Firebase project key and one Android device from you.
+```
+
+The gate stays green with no device and no Firebase account. At validation Claude hands you the script: sign in on the phone, accept the permission prompt, trigger the result, see the notification in the phone's language, sign out and trigger it again to see nothing arrives.
+
+### 14.32 Publishing a mobile app to the stores
+
+ExamPrep is a `website` with the `mobile-client` complement, at `0.2.0`, and this is its first store release. The four signing variables are not set yet.
+
+```
+> /agile:publish
+Claude: Plan: v0.2.0, previous tag v0.1.0, 1 item since it.
+  Package: ExamPrep.Web.
+  Left out: ExamPrep.Mobile: not published to the Play Store, signing is not set up (ANDROID_SIGNING_KEYSTORE,
+  ANDROID_SIGNING_ALIAS, ANDROID_SIGNING_STORE_PASS, ANDROID_SIGNING_KEY_PASS unset).
+  Want to create the upload keystore now? Tell me where it should live (an absolute path outside the repository).
+You: D:\keys\examprep-upload.keystore
+Claude: Run this in your own terminal (it asks for the passwords there, and I never see them):
+  keytool -genkeypair -keystore D:\keys\examprep-upload.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
+  Then set ANDROID_SIGNING_KEYSTORE (that path), ANDROID_SIGNING_ALIAS (upload), ANDROID_SIGNING_STORE_PASS and
+  ANDROID_SIGNING_KEY_PASS, name the four in docs/infra.md, and back the keystore up outside this machine:
+  it is the upload key, and Play can only reset it through support.
+```
+
+Later, with the variables set and `ApplicationId` changed from the template's `com.companyname.exampreps` to `br.com.exampreps`:
+
+```
+> /agile:publish
+Claude: Plan: v0.2.0 ... Package: ExamPrep.Web and ExamPrep.Mobile (android, aab).
+Claude: Packaged ExamPrep.Web (zip 4.7 MB) and ExamPrep.Mobile: br.com.exampreps-Signed.aab, 31 MB, jarsigner: jar verified.
+  docs/releases/v0.2.0.md and docs/releases/v0.2.0-store.md written.
+Claude: Release v0.2.0: both files committed on main (docs(release): v0.2.0), tag, push, GitHub Release.
+  Upload the .aab by hand: the plugin uploads nothing. docs/releases/v0.2.0-store.md lists the Play Console steps
+  (testing track first, then promote), the first-release ones and, for a Mac, the iOS ones.
+```
+
+With `ApplicationId` still `com.companyname.exampreps`, the same command leaves the Mobile head out (`the id is permanent once uploaded: change it first`) and publishes the site.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -1433,13 +1998,15 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build <feature> [--worktree]` | Implement an approved feature in the worktree the refinement created (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
-| `/agile:ship <feature>` | Full suite, merge, board, app manual, and the declared docs command |
+| `/agile:ship <feature>` | Full suite, app version bump, merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
 | `/agile:sync` | After a plugin update: refresh the project's copies of rules, templates, workflow and profile |
+| `/agile:identity` | Record the app's visual identity (a file, a website, an image or three questions) in `docs/design/`, or review the one recorded |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | One item from idea to done in a single run with two stops: the questions (your answers approve it) and the validation script ("validado e autorizo o merge de F-n" ships it; "validado" alone stops at validating). `--assume` skips the questions except new packages |
 | `/agile:version` | Plugin version running in this session, the version the project's copies came from, and the next step when they differ |
+| `/agile:publish` | The app version on `main` as a release: package and zip per deployable project, notes, annotated tag, push and GitHub Release (typing it is the authorization; no deploy) |
 
 ## 16. Command flows
 
@@ -1451,13 +2018,14 @@ flowchart TD
     A["product/brief.md exists?"] -->|no| A1(["Template copied; fill it and run again"])
     A -->|yes| B["Read the brief and the code base it names"]
     B --> C["Rounds 1 to 8, one message each:<br/>questions with recommendation and reason"]
-    C --> D{"Your answers ('ok' accepts)"}
+    C --> C1["mobile on an existing API (2d): skip what the API decides;<br/>propose the app's ideas from the site's ticked list, or the gate issue on the API's board"]
+    C1 --> D{"Your answers ('ok' accepts)"}
     D --> E["Closing question: which domain concept worries you most?"]
     E --> F["Summary of every decision"]
     F --> G{"'confirmo'?"}
     G -->|no| C
     G -->|yes| H["Generate: CLAUDE.md, ADR-0001, profile, workflow copies,<br/>templates, rules, glossary, infra, manual index"]
-    H --> I{"Epics on the board? Skeleton?"}
+    H --> I{"Epics on the board (website: 'Website sections')? Skeleton?"}
     I -->|yes| J["Create, build, test once, warnings baseline, sync record"]
     J --> K{"Authorize the first commit?"}
     K -->|yes| L(["Committed on main; next: /agile:epic or /agile:refine"])
@@ -1470,7 +2038,7 @@ flowchart TD
     B --> C["Find its epic"]
     C -->|none fits| C1{"Propose an epic; agree?"}
     C1 -->|yes| D
-    C --> D["Next id, English slug, file from the template<br/>with status: idea; header, Summary and Start<br/>(depends on, waits on, path, parallel — unknown if nobody said);<br/>a cause named with its evidence, or 'Cause not verified'"]
+    C --> D["Next id, English slug, file from the template<br/>with status: idea; header, Summary and Start<br/>(depends on, waits on to start, needed to validate, path, parallel — unknown if nobody said);<br/>a cause named with its evidence, or 'Cause not verified'"]
     D --> E["Mirror on the board; board id in the header"]
     E --> F(["Nothing else until /agile:refine <id>"])
 ```
@@ -1491,7 +2059,12 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["An epic to plan"] --> B["Read brief, existing items and code"]
-    B --> C["Session-sized features: value, priority, size,<br/>depends on, waits on (and from whom), screen design yes/no"]
+    B --> B1{"The profile or a complement it names<br/>has an Epic section for it? (mobile app on a site)"}
+    B1 -->|yes| B2["Follow it: where the app lives, its UI,<br/>the site's features to tick, Mobile foundation first"]
+    B1 -->|no| C
+    B2 -->|new repository| B3["Skip the UI question; the site's epic is 'API for the mobile app':<br/>Mobile API foundation, then API for each ticked feature"]
+    B3 --> C
+    B2 --> C["Session-sized features: value, priority, size,<br/>depends on, waits on (and from whom), screen design yes/no"]
     C --> D["Execution plan: order, suggested path, what runs in parallel;<br/>what waits outside the epic; first release cut"]
     D --> E{"Agree with the breakdown?"}
     E -->|change| C
@@ -1592,15 +2165,14 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["status: validating and you said 'validado'?"] -->|no| A1(["Ask"])
-    A -->|yes| B["Branch up to date with main; worktree: close IDE and app host"]
+    A -->|yes| B["Branch up to date with main; typing ship counts as IDE and app host closed"]
     B --> C["gate.js ship: full rebuild, full suite, architecture tests;<br/>output saved whole, last line GREEN or RED: what failed"]
     C -->|red| C1["Fix on the branch"]
     C1 --> C
     C -->|green| D["App manual in pt-BR, pt-PT, en; DocGen references and the hand-written overview;<br/>gate.js docs: the declared docs command, or DocGen implicitly;<br/>RED stops like the gate; infra.md; baseline"]
-    D --> E{"Authorize the merge into main?"}
-    E -->|no| E1(["Wait"])
-    E -->|yes| E2["Current branch is main; read main..branch:<br/>stop when a commit carries another item's id"]
-    E2 --> F["Merge --no-ff; push; verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
+    D --> D1["App version bumped on the deployable project(s): MINOR (feature), PATCH (bug),<br/>or MAJOR on a breaking-change decision; mobile also syncs ApplicationDisplayVersion/Version;<br/>mobile-client: Web and Mobile together, only when both carry Version, Web alone when the app is in its own repository;<br/>mobile with Backend: external: Mobile alone"]
+    D1 --> E2["The command is the merge authorization; current branch is main; read main..branch:<br/>stop when a commit carries another item's id"]
+    E2 --> F["Main moved during the ship? Merge it in, full check, bump from main's, go on (conflict or red stops);<br/>merge --no-ff, read its exit status, then push; lock probe, then verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
     F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
     G --> H["Close the board item with evidence;<br/>set Status to Done explicitly and read it back;<br/>not stuck after one retry: report the command by hand"]
     H --> I["Retro: at most 3 lessons"]
@@ -1617,7 +2189,7 @@ flowchart TD
     E --> F["Apply; CLAUDE.md under 60 lines; one line per rule"]
     F --> F2["A new rule about a test pattern: sweep the existing tests;<br/>fix each hit or capture it as a bug"]
     F2 --> G["retro-log.md entry; a plugin note (plugin: name, from the Plugins: line)<br/>gets a ⏳ row with its plugin and scope; an old table gains the Plugin column;<br/>it cites agile-canary#N once it has one, and gets its ✅ at /agile:sync"]
-    G --> H(["Commit with your authorization if on main"])
+    G --> H(["Commit on main: your pick of lessons authorizes it under a ship; run alone, it asks"])
 ```
 
 ### /agile:pause
@@ -1636,7 +2208,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Read-only"] --> B["Git: branch, uncommitted files,<br/>every worktree and its item status"]
-    B --> C["Files: item in progress, approved items with open questions,<br/>items whose Start depends on or waits on something"]
+    B --> C["Files: item in progress, approved items with open questions,<br/>items whose Start depends on an item not done or waits on something to start"]
     C --> D["Board: top 5, drift from the files"]
     D --> E["Retro log: ⏳ plugin notes, count per plugin"]
     E --> F(["Short report: in progress, next step, waiting on you, blocked and on whom,<br/>uncommitted work, backlog head (first one that can start), board drift,<br/>plugin notes waiting per plugin"])
@@ -1647,7 +2219,7 @@ flowchart TD
 flowchart TD
     A["Plugin updated; working tree clean; no item in progress?"] -->|no| A1{"Continue anyway?"}
     A1 -->|no| A2(["Wait for the item to finish"])
-    A -->|yes| B["sync.js plan: recorded version → plugin version;<br/>one state per file"]
+    A -->|yes| B["sync.js plan: recorded version → plugin version;<br/>one state per file; a Complement: line adds its own copy<br/>(docs/agile/profile-mobile-client.md)"]
     A1 -->|yes| B
     B -->|all same| B1(["Nothing to do"])
     B --> C["Table: new, update, edited, manual; a proposal per file"]
@@ -1655,7 +2227,8 @@ flowchart TD
     D --> E["Copy new and update; merge edited by hand;<br/>propose each manual edit (a missing Worktrees: or Plugins: line too);<br/>never touch project rules; no warnings baseline: offer the first one, gate.js baseline with your yes"]
     E --> E2["Something only bootstrap installs and this project lacks:<br/>name it and offer to capture a feature"]
     E2 --> E3["DocGen with no docs command declared:<br/>offer the block, sync.js docs writes it into build.json"]
-    E3 --> F{"Build files or checked rules changed?"}
+    E3 --> E4["Backend: external and the API reachable:<br/>report when its openapi.json moved past the pinned commit"]
+    E4 --> F{"Build files or checked rules changed?"}
     F -->|yes| G["Build, full suite, fix findings, baseline"]
     F -->|no| H
     G --> G2["Delivered plugin notes, when approved:<br/>sync.js notes marks them ✅"]
@@ -1664,12 +2237,31 @@ flowchart TD
     I -->|yes| J(["chore: sync with agile@canary <version>"])
 ```
 
+### /agile:identity
+```mermaid
+flowchart TD
+    A["Identity already in docs/design/?"] -->|yes| A1{"Table of it: what changes?"}
+    A -->|no| B{"23a: file, URL, image or none?"}
+    A1 --> B
+    B -->|file| C["Validate DTCG, or convert DESIGN.md to tokens"]
+    B -->|URL or image| D["Read the page or the image; image colors marked estimated"]
+    B -->|none| E["Primary color, font, light/dark/both; derive the palette"]
+    C --> F["Table: roles, fonts, radius, icon family, WCAG AA of every pair, both themes"]
+    D --> F
+    E --> F
+    F --> G{"Failing pair: nearest passing value; 'confirm'?"}
+    G -->|change| F
+    G -->|yes| H["Write docs/design/identity.tokens.json, then DESIGN.md front matter from it; compare the two"]
+    H --> I["ADR-0001 line; UI kit exists: capture 'Apply the identity to the theme'"]
+    I --> J(["No application code touched"])
+```
+
 ### /agile:autopilot
 ```mermaid
 flowchart TD
     A["Item not done"] --> R{"Autopilot: line in the file?"}
     R -->|yes| R1["Resume from that step"]
-    R -->|no| A1{"Start: depends on an item not done,<br/>or waits on something?"}
+    R -->|no| A1{"Start: depends on an item not done,<br/>or waits on something to start?<br/>(Needed to validate never stops it)"}
     A1 -->|yes| A2(["Says what it waits on and from whom; stops"])
     A1 -->|no| B["Refinement: code read, premises verified;<br/>screen-design when there is a new or complex screen"]
     B --> B1{"--assume?"}
@@ -1704,4 +2296,20 @@ flowchart TD
     B -->|yes| B1(["Up to date"])
     B -->|running is newer| C(["Next step: /agile:sync, between features"])
     B -->|project is newer| D(["Update the plugin, then a new session"])
+```
+
+### /agile:publish
+```mermaid
+flowchart TD
+    A["Plan: main checkout, on main, clean, level with origin;<br/>one version on the projects; the tag of that version free"] -->|"a check fails"| A1(["Stops with the reason, nothing written"])
+    A -->|ok| B["Shows version, previous tag, items since it, projects and runtimes<br/>(typing the command is the authorization: no question)"]
+    B --> C["dotnet publish -c Release per project and runtime;<br/>drops appsettings.Development.json and the .xml; one zip each"]
+    C -->|"publish or zip fails"| C1(["Stops: nothing committed or tagged"])
+    C --> D["Writes the notes in docs/releases/ (one file per version)"]
+    D --> D2["A mobile head: signed Android .aab (signing from four environment variables)<br/>and docs/releases/v<Version>-store.md, the store checklist"]
+    D2 --> E["Commit on main (notes and checklist), annotated tag with the notes, push main and tag"]
+    E -->|"push fails"| E1(["Names the command to rerun; commit and tag stay"])
+    E --> F{"origin on github.com and gh installed?"}
+    F -->|yes| G(["GitHub Release with the notes, no binaries"])
+    F -->|no| H(["One line saying why; the tag stands"])
 ```
