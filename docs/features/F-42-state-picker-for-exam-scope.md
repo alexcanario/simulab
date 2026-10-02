@@ -112,6 +112,13 @@ Brazilian states, in this order (name as shown, acronym stored):
 - 2026-10-01 — The list is a static class, not a table — 27 fixed values change by constitutional amendment, not by an editor (Claude, technical).
 - 2026-10-01 — No new packages: `AppLookupField`, EF migrations and the existing test stack cover it (Claude, technical).
 - 2026-10-01 — Board id corrected from the old Azure id 763 to GitHub issue 81 (Claude, housekeeping).
+- 2026-10-02 — Build: no `system-design` or `architect` pass. The item adds a static list to `Contracts`, one error code and a data-only migration (the model snapshot is unchanged); it creates no project, no message between modules and no schema change (Claude, technical).
+- 2026-10-02 — Build: `AppLookupField` gains two optional parameters, `OpenOnFocus` (default false) and `MaxItems` (default 20), because AC1 needs the whole list on focus and the kit capped a list at 20 and opened only after a minimum of characters. Every other picker keeps its behavior, pinned by `AppLookupFieldTests` (Claude, technical).
+- 2026-10-02 — Build: `AppLookupOption` carries a `Guid` id that a state does not have, so the state picker uses `Guid.Empty` and maps the picked option back to its acronym by the display text, which is unique in the list. A new id type in the kit would touch every other picker (Claude, technical).
+- 2026-10-02 — Build: moving the scope between `State` and `Municipal` clears the detail. Before this item the field stayed on screen and kept its text; with a picker on one side and free text on the other, carrying `SP` into a municipality (or `Guarulhos` into the picker) would send a value the reader cannot see (Claude, technical).
+- 2026-10-02 — Build: the migration `NormalizeExamStates` writes the 27 states out in SQL instead of reading `BrazilianStates`: a migration is history and must not change when the code does. It also matches on the stored text with runs of spaces collapsed (`mato   grosso do sul - ms`), which the item's wording allows ("normalized text") (Claude, technical).
+- 2026-10-02 — Build: no app-host check by Claude. Starting it applies the migration to the owner's local database, which only the owner may change (`workflow.md`), and the exam form is behind sign-in, which Claude may not do. What the tests cannot see is in the validation script (Claude, process).
+- 2026-10-02 — Build: seven existing Catalog tests and the Web fixtures saved a `State` exam with free text (`Sao Paulo`, `Goiás`, `Pará`); they now use acronyms, because BR2 refuses the old input. Their intent is unchanged (Claude, technical).
 
 ## Out of scope
 - A state filter on the catalog search and the exam list — F-57.
@@ -124,7 +131,18 @@ Brazilian states, in this order (name as shown, acronym stored):
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+Needed to validate: the app host started from this worktree (you start it), the seeded admin (`admin@simulab.local`, F-52), and one `State` exam saved as free text to see BR6 (step 1 makes one; the app host applies the migration to your local database on start, which is why Claude did not start it). In place now: nothing is running.
+
+1. Before starting, in DataGrip on the local `simulab` database (`Host=127.0.0.1;Port=5432;Database=simulab;Username=postgres;Password=postgres`), turn two exams into old-style ones, so the migration has something to fix and something to leave alone (pick any two exam names that exist):
+   `UPDATE catalog.exams SET scope = 'State', scope_detail = 'Sao Paulo' WHERE name = '<exam A>';`
+   `UPDATE catalog.exams SET scope = 'State', scope_detail = 'Sampa' WHERE name = '<exam B>';`
+2. Start the app (`dotnet run --project src/Hosts/Simulab.AppHost`, the same in Git Bash and PowerShell 7), sign in as the admin → the migration `NormalizeExamStates` applies on start. In DataGrip, `SELECT name, scope_detail, normalized_scope_detail FROM catalog.exams WHERE scope = 'State';` → exam A holds `SP` / `SAO PAULO SP`; exam B still holds `Sampa` (AC8).
+3. Open **Exams** → exam A reads `São Paulo (SP)` under "State"; exam B reads `Sampa` (AC6, BR4, BR6).
+4. Open exam B for editing → the state field is empty with the hint “This exam was saved with “Sampa”…”; choose **Save** → the page refuses with "Say where this exam applies."; type `paulo`, pick `São Paulo (SP)`, save → it saves and the list shows `São Paulo (SP)` (AC9, AC3).
+5. Choose **Add exam**, scope **State**, click into the state field → all 27 states open, from `Acre (AC)` to `Tocantins (TO)`; type `sp`, then `sao`, then `mato` → the list narrows each time, with or without accents (AC1, AC2). Switch the scope to **Municipal** → a plain text field appears, empty; type any text and save → it saves as typed (AC4).
+6. Keyboard only, on **Add exam** with scope **State**: Tab into the state field → the list opens; type `rio`, arrow down to `Rio Grande do Sul (RS)`, Enter → it is picked; Tab to **Save** → it saves.
+7. Sign in as a student, open the catalog search, type `sp`, then `sao paulo`, then `São Paulo` → the published State exam of São Paulo is found each time, and its row and its exam page read `São Paulo (SP)` (AC6, AC7). Set the exam's content language to pt-PT on the form → the same 27 states are offered (AC10).
+8. Switch the language to pt-BR and pt-PT on the exam form with scope State → the label, placeholder, hint and the refusal text are translated (AC11).
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
