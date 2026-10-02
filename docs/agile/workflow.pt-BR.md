@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.78 (rascunho). English: [en](workflow.md).
+> Versão 0.0.104 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -39,7 +39,7 @@ Sumário
 | Propõe épicos e features na conversa | Registra no board, sem refinamento |
 | Responde às perguntas de refinamento e aprova as features | Faz **todas** as perguntas numa rodada, cada uma com recomendação, depois de conferir o código |
 | Valida cada feature na tela | Implementa, testa e entrega um roteiro de validação |
-| Autoriza os merges | Faz o merge, atualiza o board e o manual da app, conduz a retro |
+| Autoriza os merges (digitar `/agile:ship <id>` é a autorização) | Faz o merge, remove a branch e a worktree, atualiza o board e o manual da app, conduz a retro |
 
 Subagentes são exceção: um revisor com contexto limpo para mudanças arriscadas, duas passagens somente leitura antes do código de um item mais pesado (`system-design` propõe o corte, os contratos e os dados; `architect` revisa essa proposta), dois papéis que produzem telas (`ux-designer` desenha, `frontend` implementa o mockup que você aprovou), ou trabalho paralelo que não mexe nos mesmos arquivos. São funções com nome, não uma cadeia de papéis por feature, e nenhuma delas fala com você: a conversa é sempre com o Claude, que lê o que o agente escreveu ou propôs antes de seguir. Um escritor por vez em cada pasta, e as duas passagens não escrevem nada.
 
@@ -63,27 +63,37 @@ Antes de escrever qualquer coisa, o Claude confere se a skill que carregou e o p
 
 | Rodada | Temas |
 |---|---|
-| 1. Forma | Tipo de app (web, mobile, API), perfil de arquitetura, onde vai rodar |
+| 1. Forma | Tipo de app (web, mobile, desktop, API), perfil de arquitetura, a tecnologia desktop (WinUI 3, Avalonia ou MAUI) e como um cliente desktop chega aos dados, **onde mora o backend de um app mobile** (pergunta 2d), as **seções de um site** (pergunta 2c, perfil `website`), **um app mobile desde o início ao lado de um site** (pergunta 2e), onde vai rodar |
 | 2. Dados | Banco (o motor da casa quando há um sistema existente ao lado), multi-tenancy, apagamento, auditoria, dados pessoais e retenção |
-| 3. Acesso | Autenticação, RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
+| 3. Acesso | Autenticação (no `web-api`, pergunta 10a: como os consumidores da API se autenticam), RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
 | 4. Integração | Mensageria (nenhuma, em processo, broker), serviços externos, armazenamento de arquivos e — quando alguma feature chama um modelo — o provedor do LLM e onde ele roda, o teto de custo e como ele é falsificado nos testes |
-| 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, família de ícones, como um item é editado, kit de UI e galeria — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados |
+| 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, a **identidade visual** (23a: um arquivo, um site, uma imagem ou três perguntas básicas), a biblioteca do design system, família de ícones, como um item é editado — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados. O kit de UI e a galeria deixaram de ser pergunta: todo app com telas ganha um, construído a partir da identidade. O perfil `web-api` não tem telas: pula a stack de UI, a troca de idioma (21), a acessibilidade (22) e tudo sobre identidade visual e UI, e a pergunta 20 vale só para o texto que a API envia a pessoas |
 | 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
-| 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo |
+| 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo (qual modelo roda os casos, com ou sem o braço sem plugin) |
 | 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos e um catálogo de tools quando o app expõe ferramentas a um modelo), o prompt de sistema como arquivo versionado, e uma visão geral da arquitetura escrita à mão |
 
 Quando alguma feature chama um modelo, o quiz trata isso como um sistema com decisões próprias, não como uma biblioteca: qual provedor e onde ele roda (um modelo local é o único lugar de onde os dados não saem), um teto de custo por usuário e um disjuntor global, um fake roteirizado para que tudo em volta do modelo continue testável, o prompt de sistema como arquivo versionado, e um catálogo de tools gerado dizendo o que cada uma alcança e com que permissão. O exemplo 14.14 mostra a rodada.
 
+Para um site público (perfil `website`), a pergunta 2c vem logo depois do perfil: o Claude mostra o catálogo de 26 seções como uma lista numerada no chat, em dois grupos, **lançamento** (sobre mim, depoimentos, FAQ, cadastro de e-mail, produtos, contato e WhatsApp) e **depois** (serviços, portfólio, blog, galeria, busca, newsletter, PWA e o resto), todas marcadas. Você responde "ok" ou os números a desmarcar; desmarcar uma seção de que outra precisa (o cadastro de e-mail enquanto os materiais para download ficam) é dito uma vez, e a sua resposta vale. A base não está na lista, porque o site sempre tem: área de conteúdo, home, SEO básico, páginas 404 e de erro, política de privacidade e consentimento de cookies. Depois do quiz o board tem um épico "Website sections": a base primeiro, depois lançamento, depois o resto, uma ideia de feature por seção. Uma loja online nunca é seção: vira um épico próprio. No `website`, a pergunta 9b é sempre feita (cadastros são dados pessoais), a 12 e a 14 são fixas (papéis `Admin` e `Editor`, área admin no mesmo app), e o e-mail (19) não pode ser "nenhum" com a seção de cadastro ou de contato. O exemplo 14.23 mostra a pergunta.
+
+Para uma app que é só uma API (perfil `web-api`), responder "só API" na pergunta 1 faz a pergunta 2 recomendar `web-api`. A pergunta 10a então pergunta, no lugar da 10, como os consumidores da API se autenticam, de múltipla escolha: **Identity bearer** (os usuários entram na própria API; o padrão para os clientes do próprio dono), um **IdP externo** (usuários e client credentials para clientes máquina; a API só valida o token) e **API key** (só clientes máquina, nunca um navegador ou app mobile, cujo código é público). Cada resposta gera só os esquemas, endpoints e políticas de que precisa, e a pergunta 11 (login social, MFA) só é feita com Identity bearer. O Claude não faz a 14 (não há back office), a 21 e a 22 (não há telas), nem as de identidade visual e UI, e a pergunta 29 não tem nível de UI. O exemplo 14.28 mostra a pergunta.
+
+Para um app mobile (perfil `mobile`), a pergunta 2d pergunta onde mora o backend: **nesta solução** (o comportamento de hoje: `monolith` por padrão) ou **uma API existente em outro repositório** — um `web-app`, `website` ou `web-api` do agile (o repositório dele), ou qualquer API que publique um documento OpenAPI (a URL); a pergunta 1 oferece "mobile sobre uma API existente" para isso. Com a resposta externa o app é um repositório próprio, e o Claude pula o que a API já decide — a pergunta 3, a rodada de dados inteira, a 12, a 13 e a 14 —, lista essas em "Já está claro" e transforma a pergunta 10 em "o login da API", lido da API. O `CLAUDE.md` ganha a linha ``- Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`.`` e o ADR-0001 diz isso. Quando a API é um site do agile cujo `CLAUDE.md` nomeia o pacote `<App>.Shared`, as telas são MAUI Blazor Hybrid: o Claude lê isso do site, não pergunta de novo, e acrescenta ``- Shared screens: package `<App>.Shared` from the site's GitHub Packages feed``; senão são XAML. O exemplo 14.30 mostra o quiz e o que o bootstrap propõe; o exemplo 14.33 mostra com Hybrid.
+
+Para um site que precisa de um app mobile desde o primeiro dia, a pergunta 2 pesa antes a forma do brief: quando a API é a principal consumidora ou há várias áreas de negócio, ela recomenda `mobile` (sobre `monolith`, ou `modular-monolith`); quando o produto é um site com telas sobre dados simples, ou um site público, ela recomenda `web-app` ou `website` e vem a pergunta 2e, logo depois da 2 (depois da 2c no `website`): **um app mobile desde o início: não · sim, MAUI Blazor Hybrid · sim, MAUI XAML**. A recomendação vem do brief: nenhum app citado → não; um app citado → Hybrid, para que as telas do site já nasçam onde o app vai reaproveitá-las. O app mora neste repositório e nesta solução; um app em repositório próprio continua começando pelo bootstrap dele (pergunta 2d). Com sim, o Claude lista as funcionalidades do brief numeradas na mesma mensagem, agrupadas como o brief agrupa e todas marcadas (nunca uma seção pública de um `website`); você responde "ok" ou os números para desmarcar. O bootstrap então acrescenta `<App>.Contracts` e, com Hybrid, `<App>.Shared` (uma Razor Class Library cujos componentes não têm `@page` nem render mode, com textos em todos os idiomas do app), os dois cobertos pelos testes de arquitetura e de layout; ele **não** acrescenta os projetos do app, a linha `Complement:` nem um segundo `<Version>`: isso vem com o primeiro item do épico, então o `/agile:sync` nunca pede a versão do app antes de o app existir. A proposta do quadro ganha um épico "Mobile app" (`docs/epics/mobile-app.md`, com a lista que você aprovou escrita inteira) cujas ideias são "Mobile foundation" primeiro e depois um "<X> on mobile" por funcionalidade marcada; a ideia do próprio site para cada funcionalidade marcada diz que a tela dela é um componente no `Shared` (Hybrid) e a regra ou consulta uma classe em `Features/`, e com Hybrid o kit de UI também mora no `Shared`. O ADR-0001 registra a resposta. "Não" deixa o bootstrap exatamente como era. Exemplo 14.34.
+
 Quando o brief cita uma base de código existente para reaproveitar e você dá acesso a ela, o Claude lê esse código (nunca edita) e usa o que encontra como motivo das recomendações. Depois da rodada 8 vem uma **pergunta de fechamento** — "qual conceito do domínio mais preocupa você, ou o quiz não tocou?" — porque o vocabulário central de um domínio (uma taxonomia, um modelo de entitlement, uma regra de pontuação) raramente cabe numa lista fixa de perguntas. O que ela levantar é decidido como qualquer pergunta do quiz e registrado na ADR-0001.
 
 Saídas, todas em inglês:
-- `CLAUDE.md` — curto (até 60 linhas), apontando para um perfil.
+- `CLAUDE.md` — curto (abaixo de ~900 palavras, sem nenhum comentário do modelo), apontando para um perfil.
 - `docs/decisions/ADR-0001-foundation.md` — cada decisão do quiz, com o motivo.
 - `docs/agile/profile.md` — cópia do perfil de arquitetura escolhido.
 - `docs/agile/workflow.md` e `docs/agile/workflow.pt-BR.md` — este workflow nos dois idiomas, e `docs/agile/templates/` — os templates, copiados para o projeto.
 - `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. Um termo técnico novo ganha uma linha na primeira vez que aparece.
-- `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
+- `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), para cada ambiente o comando que o implanta, a URL de checagem e a versão implantada lá (escrita só pelo `/agile:publish`), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
+- `.github/workflows/deploy.yml` e `.github/scripts/agile-deploy.js` — só quando o `origin` está no github.com e um ambiente que não é `local` declara um comando de deploy: o pipeline que implanta uma tag `v<Version>` enviada, por esse mesmo comando (veja "O pipeline de deploy" abaixo).
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
+- `docs/design/identity.tokens.json` e `docs/design/DESIGN.md` — a identidade visual do app (pergunta 23a), para todo app com telas. Os tokens seguem o formato de Design Tokens do W3C (DTCG 2025.10) e são a fonte dos valores: cores por papel em claro e escuro, tipografia, raio dos cantos, e a família de ícones, a origem (arquivo, URL, imagem ou derivada) e a data em `$extensions.agile`. O `DESIGN.md` (o formato de arquivo de design do Google) tem os mesmos valores no front matter YAML, gerado a partir dos tokens, seguido da sua prosa sobre o porquê e o onde; regerar mantém a prosa. Você pode dar um arquivo (tokens ou um `DESIGN.md`), a URL de um site, uma imagem (um logo, uma prancha de marca) ou nada: três perguntas (cor primária, fonte, claro, escuro ou os dois) derivam uma identidade completa. Uma URL ou uma imagem é lida pelo Claude, que mostra uma tabela antes de escrever qualquer coisa: cores por papel (as de uma imagem vão marcadas como estimadas), fontes, raio, família de ícones, e o contraste WCAG 2.2 AA de cada par frente/fundo nos dois temas; um par que falha traz a razão e o valor mais próximo que passa, e você decide. Nada é guardado antes de você dizer "confirmo". O plugin nunca escreve o tema do app: quem escreve é o item do kit de UI, a partir desses tokens, e um teste do perfil compara os dois. Os mockups de tela tiram cores, fontes e raio desse mesmo arquivo.
 - `docs/architecture/` — quando a rodada 8 escolheu algum documento: o `tools/<App>.DocGen` gera, por módulo, um schema DBML lido num visualizador dbdiagram (`entities: "mermaid"` no `docgen.json` dá um diagrama ER, que renderiza no board mas fica ilegível a partir de uma dúzia de tabelas) e um dicionário de dados (do modelo EF), mapa de rotas por área (do documento OpenAPI que o teste de integração de `/openapi/v1.json` grava em `docs/api/`) e diagrama de módulos (das referências entre projetos, em Mermaid); o gerador referencia o provedor EF Core do próprio app (pergunta 5: PostgreSQL, SQL Server ou SQLite) e o chama por reflexão, então documenta os tipos de coluna reais e o schema padrão (`public`, `dbo`, ou nenhum no SQLite) mesmo para um `DbContext` sem fábrica de design-time; um contexto com fábrica é montado por ela em vez disso, então os nomes seguem o banco (snake_case, por exemplo) — a saída é a mesma nos dois casos; quando a rodada 8 também escolheu o catálogo de ferramentas (pergunta 37), o `tools.md` lista cada ferramenta que o app oferece a um modelo — a descrição que o modelo recebe, o schema de entrada, o que ela alcança, as permissões que exige, se escreve e se pergunta antes — e o `--check` reprova quando uma ferramenta está sem descrição, sem permissões ou sem alcances, ou quando duas chegariam ao modelo com o mesmo nome. O bootstrap declara o gerador como o **comando de docs** do projeto no `.claude/agile/build.json` (`{ "docs": { "command": "dotnet run --project tools/<App>.DocGen", "check": "… -- --check", "paths": ["docs/architecture/"] } }`), então a partir da 0.0.72 o `/agile:ship` regenera e confere por aquele único passo genérico (seção 9, "Um comando de docs declarado") em vez de um passo próprio; o `--check` reprova quando estão desatualizados. Um projeto que ganhou o DocGen antes da 0.0.72 não declara nada, e o ship ainda o roda: o gate acha o único `tools/*.DocGen` e o roda como comando de docs **implícito**, dizendo `implicit DocGen docs command: declare it with /agile:sync` — assim nenhuma janela deixa o mapa do código desatualizado, e o `/agile:sync` oferece o bloco uma vez. Opcionalmente uma visão geral de uma página escrita à mão (C4 contexto e containers), na qual o gerador nunca mexe: só arquivos que carregam a marca `Do not edit` dele são reescritos ou apagados; um módulo ou sistema externo que uma feature adiciona é escrito ali à mão no ship.
 - Os primeiros épicos no board, se o brief já os citar.
 
@@ -97,21 +107,21 @@ stateDiagram-v2
     approved --> building: /agile:build
     building --> validating: tabela de cobertura + roteiro de validação
     validating --> building: um ajuste que você reportou
-    validating --> done: você diz "validado", depois /agile:ship (merge autorizado)
+    validating --> done: você diz "validado", depois /agile:ship (digitar autoriza o merge)
     done --> [*]
     note right of approved: gate 1 — aprovada
     note right of validating: gate 2 — validada na tela
-    note right of done: gate 3 — merge autorizado
+    note right of done: gate 3 — /agile:ship digitado = merge autorizado
 ```
 
 | Status | O que acontece | Quem muda |
 |---|---|---|
-| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. | Claude |
-| `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
+| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera para começar, o que só a validação precisa (nunca bloqueia) e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. | Claude |
+| `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número; uma resposta que junta o escopo de um item aberto já existente a este, em vez disso, primeiro confere aquele item — `git worktree list` procurando a pasta dele e o arquivo ou issue dele para o `status`. Qualquer status além de `idea` em qualquer lugar bloqueia a junção automática: o Claude nomeia o status e o caminho da worktree do outro item e você decide, juntar mesmo assim (registrado em `## Decisions` com o motivo) ou descartar a junção e deixar o outro item intocado. Ainda `idea` em todo lugar, sem worktree: a junção acontece como antes, sem pergunta nova): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Uma lista que você aprovou ou editou no chat (um catálogo, um conjunto de opções, escolhas numeradas) é escrita inteira na seção `## Approved list` do item, na ordem aprovada e com as suas edições aplicadas, e o arquivo nunca diz "a lista mostrada na refinação"; antes de pedir a sua aprovação o Claude relê o arquivo atrás de frases que mandam o leitor para o chat e cola a lista onde achar uma. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
 | `building` | `/agile:build`: continua na worktree criada no refinamento — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
 | `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. **Portão 2.** | Você |
-| `done` | `/agile:ship`: suíte completa, merge com o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
+| `done` | `/agile:ship`: suíte completa, versão da app incrementada, merge — digitar o comando é o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
 
 Pequenas correções encontradas na validação são feitas na hora, sem sair de `validating`.
 
@@ -157,9 +167,22 @@ A execução mantém uma linha `Autopilot:` no arquivo do item (`refined`, `stop
 | Comando | Quando | Resultado |
 |---|---|---|
 | `/agile:discuss` | Uma ideia com vários caminhos possíveis, ou dúvidas que só você responde | `docs/discussions/D-<n>-<slug>.md` (opções, decisões, pontos adiados) e os itens registrados como `idea` |
-| `/agile:epic` | Um épico novo para planejar | `docs/epics/<slug>.md` com features priorizadas, cada uma cabendo numa sessão, do que cada uma depende e pelo que espera, um plano de execução (ordem, caminho sugerido, o que roda em paralelo) e o que o épico espera de fora; cada feature registrada como `idea` |
-| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela |
+| `/agile:epic` | Um épico novo para planejar | `docs/epics/<slug>.md` com features priorizadas, cada uma cabendo numa sessão, do que cada uma depende e pelo que espera, um plano de execução (ordem, caminho sugerido, o que roda em paralelo) e o que o épico espera de fora; cada feature registrada como `idea`. Num `web-app`/`website`, um épico de app mobile segue o complemento `mobile-client` (seção 12) |
+| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela. As cores, fontes e raio do mockup vêm de `docs/design/identity.tokens.json`; num projeto sem esse arquivo, os pontos em aberto do agente avisam e o mockup usa os padrões da biblioteca |
 | `/agile:review` | Uma mudança arriscada (autenticação, permissões, isolamento por tenant, dados, contratos, dinheiro, ou mais de ~400 linhas), antes da validação | Achados por gravidade de um revisor só de leitura e com contexto limpo; os bloqueadores confirmados são corrigidos antes de você validar |
+| `/agile:publish` | Depois de um ou mais ships, quando você quer a versão do app que está na `main` como um release | Um pacote `dotnet publish` do(s) projeto(s) publicável(is) do perfil em `artifacts/publish/v<Versão>/`, com um `.zip` cada (um head mobile: um `.aab` Android assinado; o site de um app Hybrid: também os dois pacotes NuGet dele), as notas em `docs/releases/v<Versão>.md` (e `v<Versão>-store.md`, o checklist das lojas, para um head mobile), uma tag anotada `v<Versão>`, as duas enviadas ao remoto e um GitHub Release com as notas. Digitar o comando é a autorização. Com um ambiente nomeado (`/agile:publish production [v<x.y.z>]`), ele depois implanta esse release pelo comando que o `docs/infra.md` declara para o ambiente (veja "Fazendo deploy" abaixo) |
+
+**Publicando um release: `/agile:publish`.** Um ship sobe o `<Version>` do app e faz o merge; não gera nada que você possa entregar a alguém. O `/agile:publish` transforma a versão que já está na `main` em um release. Ele roda no checkout principal e para sem mudar nada, a menos que a `main` esteja limpa, em dia com o `origin` e a tag `v<Versão>` não exista nem aqui nem lá. O Claude mostra o plano uma vez (versão, tag anterior, os itens que entraram desde ela, os projetos e os runtimes) e segue: digitar o comando é a autorização para o commit das notas, a tag, o push e o GitHub Release. Ele não roda os testes de novo (o ship rodou a suíte completa sobre o que a `main` tem); um erro de compilação ainda derruba o `dotnet publish -c Release` (ou o `dotnet pack`), e então nada é commitado nem marcado. O site de um app Hybrid em repositório próprio também empacota os dois projetos empacotáveis dele, `<App>.Contracts` e `<App>.Shared`, nessa mesma versão e os envia ao feed GitHub Packages dele depois da tag (`--skip-duplicate`, então repetir é seguro), lendo o token de `GITHUB_PACKAGES_TOKEN`; sem o token, ou com um `origin` fora do github.com, os pacotes ficam de fora com esse motivo e o site é publicado do mesmo jeito.
+
+O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `monolith`, `modular-monolith` e `web-api` → `<App>.Api`; `desktop` → o head, self-contained, uma vez por runtime do `<RuntimeIdentifiers>` dele (senão o desta máquina), mais o `<App>.Api` quando houver; `mobile` → `<App>.Api` mais o head Mobile como um `.aab` Android assinado, e um web app com o complemento `mobile-client` → `<App>.Web` mais o mesmo `.aab` (veja "Publicação nas lojas" abaixo); `microservices` não é suportado. Todos os projetos de um release têm o mesmo `<Version>`. O pacote tira o `appsettings.Development.json` e o arquivo `.xml` de documentação do próprio projeto e mantém os `.pdb`. Um head WinUI 3 sem `<EnableMsixTooling>true</EnableMsixTooling>` barra o plano: publicaria um exe que fecha ao abrir. Um runtime linux ou macOS zipado no Windows perde o bit de execução, e o relatório manda dar `chmod +x`. As notas trazem uma linha por merge na `main` desde a tag `v*` anterior (`Feature F-3: …`, `Bug B-2: …`, outras branches em "Other"), em inglês; a tag leva o mesmo texto. Se o push ou o GitHub Release falhar depois da tag, o Claude diz o comando exato para repetir e nunca apaga a tag nem o commit.
+
+**Fazendo deploy: `/agile:publish <ambiente> [v<x.y.z>]`.** Com um ambiente nomeado, o release é seguido do deploy dele, pelo comando que o `docs/infra.md` declara para aquele ambiente: a tabela de ambientes tem três colunas a mais, `Deploy command` (`not declared` quando não há), `Check URL` (opcional) e `Version (deployed on)`, que só o `/agile:publish` escreve. Digitar o comando também é a autorização para esse deploy. Antes de rodar, o Claude mostra o ambiente, a versão que está lá agora, a versão a implantar, o comando e os nomes (nunca os valores) dos segredos que ele precisa, e segue. Três formas: uma versão nova (`/agile:publish staging` sem tag ainda) faz antes o release acima, e um release que falha não implanta nada; uma **promoção** (`/agile:publish production` quando `v<Versão>` já está marcada) implanta aquela tag, sem pacote, notas nem tag novos; um **rollback** (`/agile:publish production v0.3.0`) implanta uma tag mais antiga, sem pergunta extra. Sem ambiente nomeado, o Claude lista os ambientes com as versões registradas e pergunta qual, ou "nenhum" (só o release). Um ambiente cujo comando é `not declared` não implanta nada: o Claude diz onde declará-lo, e uma versão nova é liberada do mesmo jeito.
+
+Todo deploy roda num worktree fixo, `<raiz dos worktrees>/deploy`, solto (detached) na tag (criado na primeira vez, movido depois com `git checkout --detach`); por isso o seu checkout principal nunca é trocado, e uma ferramenta que usa o caminho da pasta como chave (o Aspire dá ao projeto compose um nome derivado dele) substitui o app que está rodando em vez de abrir um segundo. O comando recebe `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` e `AGILE_ARTIFACTS` (a pasta do pacote daquela versão, refeita a partir da tag quando falta e o comando não é a receita do Aspire); a saída dele é salva inteira fora do repositório, com o valor de cada segredo apagado, e o código de saída decide o sucesso. O comando roda no shell padrão da máquina (cmd.exe no Windows, então `%AGILE_TAG%`; /bin/sh nos demais, `$AGILE_TAG`) e tem limite de 30 minutos; dois deploys nunca rodam ao mesmo tempo (um arquivo de trava ao lado do worktree de deploy), e um que encontra arquivos rastreados alterados nesse worktree para antes de rodar. Um segredo listado em `## Expected secrets` com "environment variable" e este ambiente só tem o nome conferido: a variável precisa estar definida no shell que iniciou o Claude (na receita do Aspire é `Parameters__<nome>`), senão o publish para antes de rodar qualquer coisa. Com um `Check URL`, depois da saída 0 a URL é consultada até responder HTTP 200, por no máximo 60 segundos; sem 200, o deploy falhou. No sucesso, a célula `Version (deployed on)` do ambiente vira `v<x.y.z> (AAAA-MM-DD)`, commitada na `main` (`docs(release): v<x.y.z> deployed to <ambiente>`) e enviada. Numa falha nada é registrado e **nada é revertido sozinho**: o relatório cita o fim da saída e dá o comando exato que reimplanta a versão registrada antes (`/agile:publish production v0.3.0`). O plugin nunca apaga imagens antigas (ele conta as tags `aspire-deploy-*` e nomeia os comandos) e nunca roda `docker compose down -v`, que apagaria o volume com as chaves de Data Protection do app e, com ele, todas as sessões abertas. O `/agile:sync` lista como capacidade ausente um projeto cujo `docs/infra.md` não tem a coluna `Deploy command` e oferece capturar um item; ele nunca escreve esse arquivo.
+
+**O pipeline de deploy (GitHub Actions).** Um projeto cujo `origin` está no github.com e cujo `docs/infra.md` declara um comando de deploy para um ambiente que não é `local` ganha `.github/workflows/deploy.yml` e o script `.github/scripts/agile-deploy.js`, escritos pelo `/agile:bootstrap` (`node sync.js pipeline write`). Fazer push da tag `v<Version>` (o que o `/agile:publish` faz) implanta no primeiro ambiente que não é `local` nem produção, `staging` na tabela usual, ou em produção quando não há outro; o nome é escrito uma só vez, como literal, quando o arquivo é gerado. Produção é promovida por uma execução manual (Actions, Deploy, "Run workflow": `environment` e uma `tag` que já existe, então o rollback é a mesma execução com a tag antiga) ou localmente por `/agile:publish production`. O que a execução implanta é o **mesmo `Deploy command` da mesma linha** que o comando local roda, lido do `docs/infra.md` quando a execução começa e nunca copiado para o workflow, então os dois não se afastam: edite a tabela, não o YAML. O job declara `environment: <nome>`, então os segredos ficam no environment do GitHub com esse nome e você pode pôr revisores obrigatórios lá (o plugin nunca cria environment, revisor nem segredo, e nunca lê um valor); ele faz checkout da tag com o histórico, instala o SDK .NET do `global.json`, define `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` e `AGILE_ARTIFACTS` (reconstruído da tag quando o comando o usa) e consulta a `Check URL` até dar 200, por até 60 segundos. Todo segredo que `## Expected secrets` lista com "environment variable" para um ambiente que não é `local` é repassado de `secrets.<nome>`; um sem valor para a execução **antes** do comando, dizendo o nome (valores nunca são impressos, e um valor na saída do comando é substituído por `***`). Execuções do mesmo ambiente nunca se sobrepõem, e o workflow tem permissão `contents` só de leitura e usa apenas `actions/checkout` e `actions/setup-dotnet`. Um comando ou checagem que falha derruba a execução, nada é revertido, e o resumo da execução diz o rollback; um sucesso imprime `v<x.y.z> deployed to <ambiente>` e **não faz commit**: `Version (deployed on)` continua sendo escrita só por um `/agile:publish` local. Antes de um `/agile:publish <ambiente>` local que vai enviar a tag, o Claude avisa que o pipeline também a implanta no destino dele (e, quando é o mesmo ambiente, que os dois rodam ao mesmo tempo e não são serializados: a concorrência do workflow só enfileira as execuções dele); digitar o comando continua sendo a autorização. O arquivo é seu depois de escrito: acrescente um passo antes de "Deploy" para qualquer ferramenta que o comando precise além do SDK e do que o runner Ubuntu tem (lá o comando roda em `/bin/sh`, então formas como `%AGILE_TAG%` não funcionam). O `/agile:sync` nunca o escreve: um projeto com comando declarado e sem workflow recebe "Deploy pipeline" como capacidade ausente e a oferta de capturar um item, e um que já o tem vê um template mais novo, ou um segredo novo na tabela, como diferença `manual` para mesclar à mão. Só GitHub Actions é suportado. Exemplo 14.36.
+
+O plugin traz uma receita, a de "contêineres + Aspire" (todo perfil que pode ter um AppHost: `monolith`, `modular-monolith`, `web-api`, `microservices`, `web-app`, `website`; a seção "Deploy recipe" do perfil tem as linhas exatas): o comando de deploy é `aspire deploy --apphost src/<App>.AppHost/<App>.AppHost.csproj -e <Ambiente> -o artifacts/deploy/<ambiente> --clear-cache --non-interactive --nologo`, que gera a imagem do contêiner e roda `docker compose up -d` para aquele ambiente. O AppHost declara um ambiente compose por nome de ambiente e fixa cada porta externa a partir do `appsettings.<Ambiente>.json` dele (staging e produção rodam lado a lado, em `5081` e `5080`, por exemplo); cada recurso de projeto define `ASPNETCORE_ENVIRONMENT`, publica só o endpoint `http` e guarda as chaves de Data Protection num volume nomeado por ambiente, então um redeploy mantém cookies e tokens antifalsificação válidos. O CLI do Aspire e todos os pacotes Aspire do AppHost são a última versão estável e têm o mesmo número (conferido antes de o comando rodar; uma diferença para com as duas versões). Um projeto `mobile` não tem AppHost: o `<App>.Api` dele só é implantado por um comando que você declara, e o `.aab` nunca é implantado. O Docker precisa estar rodando na máquina que implanta. Outro destino (Azure Container Apps, um servidor por SSH) é um comando que você declara na mesma coluna; a pipeline do GitHub Actions é o #51.
 
 ## 6. Mudando de ideia
 
@@ -198,6 +221,8 @@ board: <id do work item>
 ## Validation script
 ```
 
+`## Approved list` é uma seção opcional, depois de `## Screens and API`: só existe quando você aprovou uma lista no chat (26 seções de um site, cinco formatos de exportação, dez códigos de erro). Ela guarda todos os elementos, numerados, um por linha, na ordem aprovada e com as suas edições aplicadas; critérios e decisões apontam para ela pelo nome. O build e qualquer leitor posterior tiram a lista do arquivo, nunca do chat da refinação.
+
 O arquivo é escrito em inglês, como todo o projeto.
 
 ## 8. Definição de pronto
@@ -208,7 +233,7 @@ O arquivo é escrito em inglês, como todo o projeto.
 - [ ] Validado na tela por você.
 - [ ] Suíte completa verde antes do merge.
 - [ ] Documentação técnica gerada em dia — o comando de docs e seu check, `gate.js docs` (DocGen, declarado ou implícito), quando o projeto a tem.
-- [ ] Manual da app atualizado nos três idiomas.
+- [ ] Manual da app atualizado nos idiomas do perfil (três por padrão; `web-api`: pt-BR e en).
 - [ ] Board atualizado; o arquivo da feature reflete o que foi decidido.
 
 ## 9. Gates de qualidade
@@ -222,14 +247,15 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | **A cada comando de shell** | Uma segunda guarda avisa antes que um comando Bash ou PowerShell escreva um arquivo do repositório pelo texto do próprio comando em vez das ferramentas Write e Edit — um heredoc, `echo`/`printf`, um `Set-Content`/`Out-File`/`Add-Content` do PowerShell, um `open(..., 'w'/'a')` do Python, uma escrita `node -e`/`.js` cujo literal traz uma barra invertida, uma aspa escapada ou uma quebra de linha embutida, ou um `sed -i` num arquivo versionado — ou edite uma issue ou PR do GitHub com um `--body`/`-b` inline em vez de um corpo inteiro a partir de um arquivo. Termina com código 2, nomeando a regra e o arquivo ou comando; um caminho fora do repositório (temp, o scratchpad da sessão) e os arquivos gerados do próprio plugin (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) ficam em silêncio. Com o seu sim, o Claude repete o comando terminando com o comentário `# agile:literal-ok`. |
 | **A cada edição** | Nada é compilado. O arquivo editado só é anotado, sob a raiz git a que pertence — assim, uma edição dentro de uma worktree é verificada naquela worktree, e não na pasta onde a sessão começou. |
 | **Fim do turno** (só se houve mudança de código) | Recompila os projetos alterados (`--no-incremental`) e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
-| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem (uma queda na taxa de acerto reprova o ship). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara — ou, sem nada declarado, o único `tools/*.DocGen` que encontrar (abaixo). |
+| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem: `evals/compare.js` compara o resultado com a base e o código de saída dele é o veredito (uma queda ou um caso ausente reprova o ship; uma execução parcial, ou de outro modelo ou outra ablação que a da base, é "não medida" e o interrompe). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara — ou, sem nada declarado, o único `tools/*.DocGen` que encontrar (abaixo). |
 
 Detalhes:
 - **Só avisos novos.** Os avisos são comparados com `.claude/agile/warnings-baseline.json`, um arquivo versionado. Avisos que já existiam não reprovam o gate; um aviso novo, sim, listado com arquivo, linha e mensagem. A baseline só é reescrita por um ship verde (ou por `gate.js baseline`, com o seu sim).
 - **O veredito é a última linha.** Todo relatório termina com `agile gate GREEN`, `agile gate RED: <o que falhou>` (os avisos novos, os testes que falharam, o build bloqueado) ou `agile gate SKIPPED: <por quê>` (nada foi editado, não há solução, não é um repositório git — quando não acha a solução, diz para nomeá-la como `solution` no `.claude/agile/build.json`), ou `agile gate OFF: <por quê>` num repositório cujo `build.json` diz `engine: none`. Como hook, um turno sem mudança de código fica em silêncio. Rodado à mão, o `stop` não enxerga as marcações do hook (elas pertencem à sessão), então pergunta ao git quais arquivos de código mudaram desde a main — commitados, não commitados e novos —, compila e testa esses, e sempre imprime o veredito. Ele nunca lê a entrada padrão: só o hook de Stop, chamado como `gate.js stop --hook`, lê o evento do hook. Antes da 0.0.68, um stop à mão esperava para sempre por uma entrada padrão deixada aberta, como no Bash tool do Claude. O Claude grava a saída inteira num arquivo e cita dali, sem nunca filtrá-la com `grep`, `head` ou `tail`: uma vez, uma saída filtrada escondeu a única lista de avisos novos.
 - **Mudanças amplas.** Se uma mudança alcança mais de 6 projetos de teste, rodam só os que a referenciam diretamente; o resto fica para o ship (`AGILE_GATE_MAX_TESTS`). Uma mudança em `.props`, `.targets` ou na solução compila a solução inteira e deixa os testes para o ship.
 - **Busca da solução.** A solução é procurada na raiz git e uma pasta abaixo (`repo/App.slnx`, `src/App.sln`).
-- **O SDK da solução.** Toda chamada ao `dotnet` roda a partir da pasta da solução (a raiz git quando não há solução), então o `global.json` ao lado da solução escolhe o SDK e o runner de testes, exatamente como para quem compila naquela pasta. Todo relatório abre com `sdk <versão> (<pasta>)`; `sdk unknown` quer dizer que `dotnet --version` falhou ali (um SDK fixado que não está instalado), e a falha de build que vem em seguida diz o porquê. O baseline registra o SDK com que foi tirado (`"#sdk"`). Quando um build posterior usa outro, o relatório acrescenta `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. Essa linha é informação, não falha: tirar o baseline de novo é decisão sua. Com o runner Microsoft.Testing.Platform, o relatório cita os totais dele (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`).
+- **O que o gate de turno enxerga.** Um arquivo de código é `.cs`, `.vb`, `.fs`, `.fsi`, `.razor`, `.cshtml`, `.xaml`, `.resx`, um arquivo de projeto (`.csproj`, `.vbproj`, `.fsproj`) ou um arquivo de build (`.props`, `.targets`, `.sln`, `.slnx`); uma edição em qualquer outra coisa não é anotada e não dispara build. O projeto dono de um arquivo é o `.csproj`, `.vbproj` ou `.fsproj` mais próximo acima dele, e o grafo de projetos tem todos esses sob a raiz, então um projeto de teste C# que referencia uma biblioteca VB.NET roda quando um `.vb` muda. Um projeto de teste é aquele cujo arquivo traz `Microsoft.NET.Test.Sdk`, `Sdk="MSTest.Sdk` (com ou sem versão), `<IsTestProject>true` ou `xunit`, qualquer que seja a linguagem. Até a 0.0.90 uma edição em `.vb` ou `.fs` era invisível para o gate de turno (SKIPPED, enquanto o `ship` compilava e testava a solução inteira), e um projeto em `MSTest.Sdk` era compilado mas nunca testado. O DocGen continua sendo procurado como uma pasta `tools/*.DocGen` com um `.csproj`: ele é o template C# do plugin. `.sqlproj` e `.fsx` não são código para o gate.
+- **O SDK da solução.** Toda chamada ao `dotnet` roda a partir da pasta da solução (a raiz git quando não há solução), então o `global.json` ao lado da solução escolhe o SDK e o runner de testes, exatamente como para quem compila naquela pasta. Todo relatório abre com `sdk <versão> (<pasta>)`; `sdk unknown` quer dizer que `dotnet --version` falhou ali (um SDK fixado que não está instalado), e a falha de build que vem em seguida diz o porquê. O baseline registra o SDK com que foi tirado (`"#sdk"`). Quando um build posterior usa outro, o relatório acrescenta `baseline taken with <a>, this build used <b>: warning counts may differ; ...`. Essa linha é informação, não falha: tirar o baseline de novo é decisão sua. Com o runner Microsoft.Testing.Platform, o relatório cita os totais dele (`Test run summary`, `total`, `failed`, `succeeded`, `skipped`), e o gate passa uma solução ao `dotnet test` com `--solution` e um projeto de testes com `--project` (o SDK 10.0.1xx recusa uma solução depois de `--project`).
 - **Um repositório adotado.** Uma base de código que existia antes do workflow (o `CLAUDE.md` dela diz `Profile: adopted`, escrito à mão ou por outro plugin, como a adoção do legacy-lens) registra como ela é compilada de verdade em `.claude/agile/build.json`: `engine` (`dotnet`, `msbuild` ou `none`), `solution` (caminho a partir da raiz), `scope` (os projetos que vale compilar quando a solução inteira não dá), `testCommand`, `notes` e, sob `msbuild`, os opcionais `msbuildPath` e `restoreCommand`. O gate lê `solution`, então uma solução funda na árvore ainda é compilada, e `engine: none` o desliga com o motivo em `notes`; `scope` é para pessoas e não é lido. O engine é lido sem espaços nas pontas e sem diferenciar maiúsculas, e um valor fora dos três é RED (`agile gate RED: unknown engine "MSBuild2" in .claude/agile/build.json (legal: dotnet, msbuild, none)`) em vez de se comportar calado como `dotnet` — que foi justamente como o `msbuild` ficou sem ser honrado até a 0.0.69. O `/agile:sync` atualiza regras, templates e o workflow de um repositório assim, mas não toca no perfil dele: não há perfil do plugin de onde atualizá-lo.
 - **`engine: msbuild`.** Para uma solução que o SDK do .NET não compila — tipicamente um tipo de projeto antigo cujos targets só o Visual Studio traz, como uma aplicação web ASP.NET que importa `$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets`, onde o `dotnet build` para com `error MSB4019`. O gate então usa o MSBuild.exe no lugar da CLI do `dotnet`; o parser de avisos, o baseline, a dica de saída travada e o veredito RED/GREEN são os mesmos. O que muda:
   - **Achar o MSBuild:** `msbuildPath` do `build.json` (absoluto, ou a partir da raiz do repositório) quando o arquivo está lá, depois `msbuild` no PATH (um Developer Command Prompt o coloca lá), depois o `vswhere.exe` no caminho fixo dele sob `Program Files (x86)`, que vem com toda instalação do Visual Studio. Um `msbuildPath` declarado que existe é usado como está: o gate nunca cai para um MSBuild diferente do que você nomeou. Quando nenhum funciona, `agile gate RED: MSBuild not found`, listando cada lugar onde procurou. O `vswhere` só existe no Windows, então fora dele são dois lugares, não três.
@@ -255,11 +281,14 @@ Fechar o issue sozinho não é confiável: no ship, depois de fechar, o Claude t
 
 O corpo de um issue só é substituído inteiro. `gh issue edit --body` troca o corpo todo pelo que recebe, então um texto parcial ali apaga em silêncio o resto do item (aconteceu no B-1 do legacy-lens). O Claude grava o texto completo do item num arquivo, envia com `gh issue edit <id> --body-file <arquivo>` e lê o corpo de volta para comparar. Uma descrição no Azure Boards também vai sempre inteira, de um arquivo.
 
+Um board do GitHub Projects sem a opção "Ready" não recebe mais só um aviso: na primeira vez que o `/agile:refine` espelha um item `refining` ou `approved`, o Claude cria a opção — logo depois da que hoje está em primeiro lugar (normalmente "Backlog"/"Todo"), para o fluxo ficar Backlog → Ready → In Progress → Done. O GitHub só permite substituir a lista inteira de opções do campo Status, nunca acrescentar uma; e substituir a lista dá um id novo para cada opção, o que zera em silêncio o Status de todos os outros itens do board — foi assim que 30 itens perderam o status à mão uma vez (2026-09-27). O Claude evita isso lendo primeiro o Status atual de cada item **pelo nome**, substituindo a lista, e depois reaplicando cada nome capturado ao seu id novo; um item que não tinha Status continua sem. Qualquer outra opção que falte — o próprio "Ready" quando é o `/agile:build` ou o `/agile:ship` que espelham, ou uma opção de done ausente — continua só sendo reportada, nunca inventada.
+
 ## 11. Idiomas e o manual da app
 
 - Código, documentação, commits e identificadores em inglês.
 - A app sai em **pt-BR, pt-PT e en** desde o primeiro dia: nenhum texto de tela fixo no código, um arquivo de recursos por módulo e por idioma, e `IStringLocalizer`. Acrescentar um idioma é só acrescentar arquivos de recursos.
-- O **manual da app** fica em `docs/manual/<idioma>/` (pt-BR, pt-PT, en) e é atualizado no ship de cada feature.
+- O **manual da app** fica em `docs/manual/<idioma>/` e é atualizado no ship de cada feature, nos idiomas que o perfil nomeia: pt-BR, pt-PT e en por padrão, pt-BR e en no `web-api`.
+- O `web-api` não tem telas: as respostas levam só códigos, e os arquivos de recursos nos três idiomas (`Resources/`) aparecem com a primeira feature que envia texto a pessoas, como um e-mail. As linhas sobre texto de tela, troca de idioma e mockups não valem para ele.
 - Só a conversa entre você e o Claude é em português.
 
 ## 12. Perfis de arquitetura
@@ -271,8 +300,11 @@ O quiz escolhe um perfil, e o `CLAUDE.md` aponta para ele.
 | `modular-monolith` | Um único deploy, com vários módulos de negócio e fronteiras claras |
 | `monolith` | Um único deploy, com uma só área de negócio |
 | `web-app` | Principalmente telas sobre dados simples; API fina ou UI no servidor |
+| `website` | Um site público para visitantes (buscadores, conteúdo editado pelo dono) que pode virar app: `web-app` mais uma camada pública |
+| `web-api` | Uma app que é só uma API para os clientes do próprio dono (mobile, uma SPA em outros repositórios) e, quando o bootstrap manda, clientes máquina: `monolith` sem `Web`, mais autenticação de consumidores, limite de uso por consumidor e um contrato publicado |
 | `microservices` | Deploys independentes, com donos separados; só com motivo real |
-| `mobile` | Cliente nativo ou MAUI, com o seu próprio perfil de API |
+| `mobile` | Cliente nativo ou MAUI, com o seu próprio perfil de API, ou sobre uma API existente em outro repositório (`Backend: external`) |
+| `desktop` | Cliente XAML standalone na máquina do usuário (WinUI 3, Avalonia 12 ou .NET MAUI), atrás de uma API ou chegando direto ao banco |
 
 Cada perfil define o layout de pastas, onde ficam as regras de negócio, a estratégia de testes com o tempo máximo e os testes de arquitetura. Os arquivos de perfil ficam em `profiles/` no plugin; o bootstrap copia o escolhido para `docs/agile/profile.md`.
 
@@ -328,6 +360,24 @@ tests/
 └── <App>.Web.Tests/                  bUnit
 ```
 
+`web-api` — `monolith` sem `Web`: um deployável que é só uma API, e o contrato dela:
+```
+src/
+├── <App>.AppHost/                    opcional
+└── <App>.Api/                        o único deployável
+    ├── Features/<Feature>/
+    ├── Domain/
+    ├── Data/                         um DbContext, migrations
+    ├── Contracts/                    records para os consumidores da API
+    ├── Auth/                         seletor de esquema, claims do consumidor, handler de API key: o que a pergunta 10a pede
+    ├── Common/                       Result/Error, AppJson, o auxiliar que lê quem chama
+    └── Resources/                    só quando uma feature envia texto a pessoas
+tests/
+└── <App>.Tests/                      unitários + integração, os testes HTTP da fundação
+docs/api/openapi.json                 o contrato, escrito pelos testes de integração
+```
+O bootstrap gera uma fundação provada numa solução de teste (21 testes HTTP, depois rodada à mão lendo cada status code). Todo handler acrescenta as mesmas duas claims, `consumer_kind` (`user` ou `client`) e `consumer_id`, e o código lê quem chama só por elas. Um endpoint novo aceita só usuários: clientes máquina entram onde uma feature nomeia a política `Clients`, e um endpoint anônimo precisa estar numa lista que um teste de arquitetura confere. O limite de uso responde 429 com `Retry-After` e um código, por usuário ou cliente e por IP quando anônimo, com um limite mais estrito no login e outro separado no refresh. O CORS é uma lista de origens da configuração e nunca permite `X-Api-Key`. `/health` é público, `/health/ready` só responde em hosts internos, e nenhum dos dois está no contrato. OpenAPI e Scalar não são servidos em Production: os consumidores leem o `docs/api/openapi.json` versionado, que os testes HTTP de cada feature reescrevem. Os problemas que o próprio framework escreve (um 404, um 405, um corpo malformado) também levam um `code`. A resposta Identity bearer dura 1 hora de acesso e 14 dias de refresh; uma troca do security stamp barra o próximo refresh, mas um token de acesso já emitido vive até expirar, e o `docs/infra.md` diz isso, com onde fica o key ring (uma pasta secreta compartilhada por todas as instâncias). Os pacotes são aprovados com o perfil; `Microsoft.AspNetCore.Authentication.JwtBearer` só quando o IdP externo é escolhido. Uma segunda área de negócio significa um ADR e `modular-monolith` sem `Web`.
+
 `web-app` — um projeto Blazor é o app inteiro:
 ```
 src/
@@ -343,6 +393,21 @@ src/
 tests/
 └── <App>.Tests/                      unitários + integração + bUnit
 ```
+
+`website` — o layout do `web-app`, mais as páginas públicas, a área de conteúdo e as ilhas:
+```
+src/
+└── <App>.Web/                        o único deployable
+    ├── Pages/<Area>/                 página + code-behind
+    ├── Pages/Public/                 páginas públicas, estáticas, /{culture}/...
+    ├── Pages/Content/                área de conteúdo: Editor e Admin
+    ├── Pages/Admin/                  usuários, cadastros de e-mail, configurações
+    ├── Components/Islands/           interativo só onde algo muda ao vivo
+    └── ...                           o resto como no web-app
+tests/
+└── <App>.Tests/                      unitários + integração + bUnit + testes HTTP das páginas públicas
+```
+As páginas públicas são renderizadas no servidor sem circuito (sem `@rendermode`): é o que os buscadores leem, e um visitante anônimo não segura uma conexão aberta no servidor. Um formulário (o cadastro de e-mail, o contato) é um post de formulário comum. Todo endereço público começa pelo idioma, com slugs em inglês (`/pt-BR/about`, `/en/about`), e `/` leva o visitante ao idioma do navegador. Cada página tem título, descrição, endereço canônico e `hreflang`; o `/sitemap.xml` é montado a partir das próprias páginas, então uma página nova não fica de fora. Um texto sem tradução aparece no idioma padrão. A área de conteúdo tem dois papéis fixos: `Editor` muda conteúdo, `Admin` também vê usuários, cadastros e configurações. Não há cache de página: com o modo interativo da área de conteúdo ligado, o ASP.NET Core marca toda página como não cacheável (medido, #36); por isso quem fica em cache é o conteúdo lido do banco, e salvar limpa esse cache. Os cadastros de e-mail ficam numa tabela do próprio app, com link de confirmação e link de descadastro que não pede login (LGPD). Quando funções com login começam a compartilhar regras, o perfil manda migrar para `monolith`, como no `web-app`.
 
 `microservices` — uma solução, uma pasta por serviço, cada um um monolito pequeno:
 ```
@@ -380,6 +445,63 @@ tests/
 └── <App>.Tests/                      testes do backend, pelo perfil dele
 ```
 
+**`mobile` sobre uma API existente (`Backend: external`).** O app é um repositório próprio e a API dele é outro sistema. Não há projeto `Api`: o `Directory.Build.props` do próprio app leva a única `<Version>` (semeada em `0.1.0`), e o `/agile:ship` incrementa só ela. O `<App>.Contracts` guarda records escritos à mão, e uma cópia fixada do documento OpenAPI da API fica em `docs/api/backend-openapi.json` (uma API do agile: o `docs/api/openapi.json` versionado dela, num commit nomeado; outra API: a URL), com o `docs/api/backend.md` dizendo de onde veio. Um teste lê esse documento e falha quando um record, uma rota, o cabeçalho `X-App-Version` ou a resposta `426` deixam de bater com ele (um gerador foi avaliado e não adotado: os clientes tipados continuam sobre um só `HttpClient`); atualizar a cópia é um passo explícito do item que precisa disso, e o `/agile:sync` só avisa quando a API passou do commit fixado. O app entra no `login` da API, põe o token e a versão dele (`X-App-Version`) em toda chamada, renova uma vez no `401` (chamadas simultâneas dividem uma só renovação) e, num `426` `app.update_required`, mostra "atualização obrigatória" sem tentar renovar. As telas são XAML, ou MAUI Blazor Hybrid quando o site compartilha os componentes dele como pacote (próximo parágrafo). Os testes usam um `HttpMessageHandler` de mentira; os endpoints da API são testados no repositório da API, e cada roteiro de validação tem uma execução no aparelho contra a instância de desenvolvimento da API (`10.0.2.2` a partir do emulador Android).
+```
+src/
+├── <App>.Contracts/                  records e códigos de erro escritos à mão, conferidos contra o documento fixado
+├── <App>.Mobile.Core/                view models, clientes tipados, handler de token e versão
+└── <App>.Mobile/                     cabeça MAUI: páginas XAML, shell, código de plataforma
+tests/
+└── <App>.Mobile.Core.Tests/          view models, o teste de contrato, clientes sobre um handler de mentira
+docs/api/
+├── backend-openapi.json              cópia fixada do documento da API
+└── backend.md                        de onde veio, quando, qual versão da API
+```
+O lado da API é trabalho da sessão da própria API. Para um site do agile, um épico "API for the mobile app" (abaixo) o planeja; para um `web-api` do agile ou qualquer outra API, **o portão de atualização obrigatória** é uma linha do perfil dela: o app manda `X-App-Version`, um middleware responde `426` com o código `app.update_required` quando a versão está abaixo de um mínimo configurado ou não é uma versão (`2.0` é igual a `2.0.0`; sem cabeçalho passa; um mínimo vazio desliga o portão, um malformado derruba a app na partida), ele roda antes da autenticação, e o documento OpenAPI declara o cabeçalho e o `426` em toda operação de `/api/v1`. É um portão de compatibilidade, não um controle de segurança.
+
+**Hybrid entre repositórios (o pacote do site).** O site mantém seus componentes compartilhados em `<App>.Shared` (uma Razor Class Library) e seus records em `<App>.Contracts`; são os únicos projetos com `<IsPackable>true</IsPackable>`, e o `/agile:publish` empacota os dois na `<Version>` do site e os envia ao feed GitHub Packages do dono do `origin` (privado; o token é o personal access token clássico na variável de ambiente `GITHUB_PACKAGES_TOKEN`, nunca escrito em lugar nenhum). O app não tem `<App>.Contracts` próprio: o `Mobile.Core` referencia o pacote `<App>.Shared`, que traz os records do site, e implementa as interfaces de dados dos componentes sobre `HttpClient`; o head hospeda cada componente numa página própria (rota, `[Authorize]`, sem render mode) e monta o `AuthenticationStateProvider` a partir de `GET /api/v1/auth/me`. Um `nuget.config` na raiz lista o nuget.org e o feed do site com um `packageSourceMapping` (`<App>.*` no feed, `*` no nuget.org; sem ele uma máquina com source mapping ligado nunca olha o feed) e o `Directory.Packages.props` fixa a versão exata do `<App>.Shared`, do mesmo release do site que o documento OpenAPI fixado. Passar para um pacote mais novo é um passo do item do app que precisa de um componente mais novo, commitado com o documento renovado; o `/agile:sync` só avisa quando o último release do site passou da versão fixada. Uma quebra do site nos parâmetros de um componente ou numa interface de dados é um release MAJOR. Os textos vêm de `<App>.Shared/Resources/` em pt-BR, pt-PT e en, e o head define a cultura a partir do aparelho.
+
+**O complemento `mobile-client`.** Um `web-app` ou `website` em funcionamento pode ganhar um app mobile sem trocar de perfil. O `mobile-client` não é um perfil próprio: ele soma a metade cliente do `mobile` ao perfil do site, e o projeto o registra com uma linha abaixo de `Profile:` no `CLAUDE.md` (``- Complement: `mobile-client` — see `docs/agile/profile-mobile-client.md`.``). Você o inicia com `/agile:epic` (exemplo 14.24): o Claude pergunta onde o app mora (no próprio repositório e na solução do site, recomendado, ou num repositório novo — abaixo) e as telas dele (MAUI Blazor Hybrid, recomendado, reaproveita os componentes Razor do site; MAUI XAML dá o visual nativo), e depois lista as funcionalidades do site — os itens `done` e as áreas em `Pages/` — para você marcar; o `Pages/Public/` de um `website` nunca é oferecido. O épico começa com "Mobile foundation" (os projetos abaixo, o login do app com token bearer nos próprios `/api/v1/auth/login` e `/api/v1/auth/refresh` do site, a versão do app) e segue com um "<X> on mobile" por funcionalidade marcada, com um "API for <X>" antes quando a lógica da funcionalidade ainda está numa página usada por várias páginas ou tem uma regra. Uma só fonte da verdade: a regra mora numa classe em `Features/`, usada em processo pelo site e pelo endpoint que o app chama. Uma tela compartilhada é um componente sem `@page` e sem render mode, hospedado por uma página de cada lado. O app é online por padrão; offline vem por funcionalidade. Um cliente mobile sozinho não leva o site para `monolith`.
+
+**O app num repositório novo.** Responder "um repositório novo" ainda faz a pergunta das telas (Hybrid recomendado; num repositório novo ele funciona pelo pacote `<App>.Shared` acima) e segue com a lista para marcar, mas o épico do site é "API for the mobile app" (exemplos 14.30 e 14.33): "Mobile API foundation" primeiro — o login do app no site, o portão de atualização obrigatória, um documento OpenAPI (`Microsoft.AspNetCore.OpenApi`, só as rotas de `/api/v1`, não servido em Produção, escrito em `docs/api/openapi.json` e versionado a cada mudança da API) e, com Hybrid, os `Contracts` e `Shared` empacotáveis — e depois um item por funcionalidade marcada, sempre, porque o app não consegue extrair a lógica de uma página entre repositórios: "API for <X>" com XAML, "API and shared screen for <X>" com Hybrid (o componente vai para o `Shared` e os endpoints dele saem no mesmo release que o app fixa). A lista marcada vai para o épico como você marcou, e o épico termina dizendo o próximo passo: um repositório novo cujo `product/brief.md` cite este, e então o `/agile:bootstrap` lá, que lê a lista. O site registra ``- Complement: `mobile-client` — app in its own repository: <repository>; see `docs/agile/profile-mobile-client.md`.`` (com Hybrid: ``... <repository>; shared screens in the `<App>.Shared` package; see ...``); a versão dele fica só no `<App>.Web.csproj`, e os pacotes a carregam. O Claude não escreve no repositório do app, e a sessão do app não escreve no do site.
+
+**Nascido com o site.** Um `web-app` ou `website` que passou pelo bootstrap com sim na pergunta 2e já tem o épico "Mobile app", o `<App>.Contracts` e, com Hybrid, o `<App>.Shared` com o kit de UI e as telas das funcionalidades marcadas. O `/agile:epic` não cria o épico de novo: diz isso e nomeia a próxima ideia. O "Mobile foundation" ali não cria nem `Contracts` nem `Shared` e não move nenhum componente; ele espera o kit de UI (Hybrid) e o login do site. Todo o resto é como num site em funcionamento: o complemento copiado para `docs/agile/profile-mobile-client.md`, a linha `Complement:`, o ADR, o `Mobile.Core` e o `Mobile`, o login bearer, a cabeça começando na versão atual do site com `ApplicationVersion` 1, o key ring. Cada "<X> on mobile" acrescenta o endpoint `/api/v1/` sobre a classe que já está em `Features/`, a implementação HTTP no `Mobile.Core` e a página hospedeira (ou a página XAML); nenhum "API for <X>" é sugerido, porque nenhuma funcionalidade marcada guarda a lógica numa página. O `Shared` lê os textos por `IStringLocalizer`, que uma Razor Class Library só ganha com o pacote `Microsoft.Extensions.Localization.Abstractions`.
+```
+src/
+├── <App>.Web/                        o site; Api/ ganha os endpoints do app
+├── <App>.Contracts/                  records e códigos de erro compartilhados com o app
+├── <App>.Shared/                     só Hybrid: componentes compartilhados, interfaces de dados, textos
+├── <App>.Mobile.Core/                biblioteca simples: implementações HTTP, handler do token
+└── <App>.Mobile/                     cabeça MAUI: páginas host ou páginas XAML, login, código de plataforma
+tests/
+├── <App>.Tests/                      testes do site, mais bUnit dos componentes compartilhados
+└── <App>.Mobile.Core.Tests/          o app contra o site em memória, com token bearer
+```
+
+**Notificações push** (`mobile`, e um site com o complemento `mobile-client`; só quando o briefing ou um item pede). Um provedor: Firebase Cloud Messaging para Android e iOS (ele repassa ao APNs), enviado pela API com `FirebaseAdmin` atrás de uma interface `IPushSender`. O cadastro é da API: `PUT /api/v1/devices/{installationId}` com o token do dispositivo, a plataforma, a cultura e a versão do app, e `DELETE` ao sair, os dois só com bearer (`401` anônimo, `400` com `devices.invalid-token` para token vazio, `204` nos demais); um dispositivo pertence a um usuário e um token que o provedor diz não estar mais registrado é apagado. O push carrega um código e ids, nunca texto: o app monta o texto pelos recursos dele, na cultura do dispositivo. O lado do app é uma interface em `Mobile.Core` implementada na cabeça com `Plugin.Firebase.CloudMessaging`; o pedido de permissão vem depois do login. Os testes não precisam de aparelho nem de conta Firebase (remetente e cadastro falsos); a entrega real é um passo do roteiro de validação. A chave de serviço é um segredo fora do repositório. A publicação nas lojas é o `/agile:publish`, abaixo. Exemplo 14.31.
+
+**Publicação nas lojas** (`mobile`, e um site com o complemento `mobile-client`). O `/agile:publish` também gera o `<App>.Mobile` como um Android App Bundle, `dotnet publish -f <o target framework android dele> -c Release` com a assinatura como propriedades do MSBuild, e copia só o arquivo assinado para `artifacts/publish/v<Versão>/<App>.Mobile/<ApplicationId>-Signed.aab`. A assinatura vem de quatro variáveis de ambiente, nunca de um arquivo no repositório: `ANDROID_SIGNING_KEYSTORE` (um caminho absoluto fora dele), `ANDROID_SIGNING_ALIAS`, `ANDROID_SIGNING_STORE_PASS`, `ANDROID_SIGNING_KEY_PASS`; as senhas chegam ao MSBuild como referências `env:`, então nenhuma linha de comando nem log guarda uma, e o `docs/infra.md` nomeia as variáveis e onde o keystore fica, nunca os valores. A chave é uma **chave de upload** sob o Play App Signing (o Google guarda a chave de assinatura do app; uma chave de upload perdida é redefinida pelo suporte do Play, então guarde uma cópia fora da máquina). O head Mobile fica de fora, com o motivo, e o lado do servidor é publicado mesmo assim quando: uma variável não está definida, o keystore está dentro do repositório ou não existe, o `ApplicationId` ainda começa com o `com.companyname.` do template (o Play torna o id permanente no primeiro upload) ou falta o workload Android do MAUI. Nunca é gerado sem assinatura. Uma falha no build Android para todo o passo de empacotar antes de qualquer commit ou tag. Com um head mobile, o commit do release também leva o `docs/releases/v<Versão>-store.md`: o caminho do `.aab` e os dois números de versão, os passos do Play Console (faixa de teste, depois promover), os passos só da primeira publicação (criar o app, ficha da loja, URL da política de privacidade, formulário Data safety a partir da pergunta 9b do quiz, classificação de conteúdo) e os passos do iOS para um Mac, marcados como não executados pelo plugin. O plugin não envia nada a nenhuma loja e não gera nada iOS. O Play recusa um `versionCode` que já viu: o ship aumenta o `ApplicationVersion` a cada release, e o checklist avisa. O template de `.gitignore` ignora `*.keystore`, `*.jks`, `*.p12`, `*.p8` e `*.mobileprovision`; um projeto cujo arquivo não os tem recebe um aviso do plano, nunca uma edição. Primeira publicação sem keystore: o Claude dá o comando `keytool -genkeypair` para você rodar no seu terminal (ele pede as senhas lá) e lista as variáveis a definir. Exemplo 14.32.
+
+`desktop` — o mesmo formato do `mobile`, com a API opcional. O quiz pergunta a tecnologia (Avalonia quando há mais de um sistema operacional, WinUI 3 só para Windows com o visual nativo, MAUI quando há mobile no mesmo produto) e, com PostgreSQL ou SQL Server, se o cliente passa por uma API ou vai direto ao banco (direto só para app de um usuário ou rede fechada: a credencial fica então em cada máquina). O app roda standalone (`dotnet publish --self-contained`, que o `/agile:publish` roda uma vez por runtime; um head WinUI 3 precisa de `<EnableMsixTooling>true</EnableMsixTooling>`, senão o exe publicado fecha ao abrir); instalador e atualização automática não fazem parte do perfil. O Stop gate nunca compila a cabeça; só o Avalonia tem testes de tela automatizados (`Avalonia.Headless`), WinUI 3 e MAUI passam pelo roteiro de validação:
+```
+src/
+├── <App>.Api/                        só com API, pelo perfil dela
+├── <App>.Contracts/                  só com API
+├── <App>.Desktop.Core/               biblioteca simples: tudo que é testável
+│   ├── Features/<Feature>/           view models, serviços de feature
+│   ├── Api/                          com API: clientes tipados, AppJson
+│   ├── Data/                         só acesso direto: DbContext, ou o armazenamento SQLite
+│   ├── Platform/                     interfaces que a cabeça implementa
+│   └── Resources/
+└── <App>.Desktop/                    a cabeça: views XAML, shell, código de plataforma
+tests/
+├── <App>.Desktop.Core.Tests/         view models, serviços
+├── <App>.Desktop.Tests/              só Avalonia: testes de tela headless
+└── <App>.Tests/                      testes do backend, só com API
+```
+
+**Versão da app.** A app tem uma só versão `SemVer`: uma única propriedade `<Version>` no `Directory.Build.props` ao lado do arquivo da solução. Todo projeto a herda, então toda DLL, bibliotecas incluídas, informa o release e o commit de onde saiu (`0.4.0+3f2a9c1…`), e nenhum `.csproj` leva `<Version>`. O `/agile:publish` empacota o(s) projeto(s) deployável(is) do perfil: `<App>.Api` (`monolith`, `modular-monolith`, `web-api`), `<App>.Web` (`web-app`, `website`), `<App>.Api` e `<App>.Mobile` (`mobile`; só `<App>.Mobile` com `Backend: external`), `<App>.Desktop` (`desktop`), `<App>.Web` e `<App>.Mobile` (o complemento `mobile-client`). O bootstrap semeia `0.1.0`. Cada `/agile:ship` olha para ela primeiro e não pergunta nada: sem versão em lugar nenhum, acrescenta `0.1.0` e não incrementa (esse item sai como `0.1.0`); com ela em um ou mais `.csproj` (o formato anterior à 0.0.104), move para o `Directory.Build.props`, tira de todo projeto (a maior vence quando diferem) e então incrementa; com ela já lá, só incrementa. O incremento é MINOR numa feature (PATCH volta a 0), PATCH num bug, ou MAJOR quando as `## Decisions` do item registram uma mudança que quebra compatibilidade (MINOR e PATCH voltam a 0), e o relatório do ship diz qual dos três casos rodou. No `mobile`, na cabeça do `mobile-client` e numa cabeça MAUI do `desktop`, o mesmo ship também ajusta o `ApplicationDisplayVersion` da cabeça para esse mesmo texto e incrementa o seu `ApplicationVersion` — o inteiro sempre crescente que a loja exige — em 1, um contador que nunca volta a zero. O `/agile:sync` só informa o estado ("o próximo `/agile:ship` acrescenta" ou "move") e nunca a escreve. É um número para a app inteira, não um por projeto: trocar uma DLL isolada deixaria uma máquina com uma mistura que o gate nunca testou; baixar só o que mudou é trabalho de um atualizador com pacotes delta (#58). Com o app num repositório próprio (`Backend: external`, ou um app Hybrid), a solução dele tem o seu `Directory.Build.props` e o seu número. O `microservices` fica fora do escopo: uma versão só não mapeia bem para serviços implantados de forma independente.
+
 As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agile/` no bootstrap: `workflow`, `naming`, `git`, `definition-of-done` e `output-style` são sempre carregadas; `i18n` e `api-contracts` só são carregadas quando o Claude trabalha em arquivos de código, `ui` só em arquivos de tela (`.razor`, `.xaml`), e `build-config` só em arquivos de projeto e de build. Uma regra por linha, no máximo 30 linhas por arquivo. As regras core são genéricas: valem para todos os perfis. O que depende de um perfil, de uma stack ou de uma biblioteca de UI fica no arquivo do perfil, em `templates/dotnet/` ou numa regra limitada por tipo de arquivo, e o plugin aplica isso a todos os perfis a que diz respeito.
 
 **Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
@@ -390,7 +512,7 @@ As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agil
 
 O Claude escreve todo arquivo (código, testes, docs) com as suas ferramentas de edição, nunca pelo texto de um script: escapes como `\t` ou `\b` viram caracteres de controle, e um teste pode passar sem conferir nada.
 
-**Mantendo um projeto atualizado.** O bootstrap copia arquivos do plugin para dentro do projeto (regras, templates, este workflow, o perfil, os arquivos de build), então uma atualização do plugin não chega a eles sozinha. Atualize o plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, sessão nova) e rode `/agile:sync` no projeto. O Claude mostra uma tabela do que mudou e só copia o que você aprovar: uma cópia que você nunca editou é substituída; um arquivo que você editou (normalmente o perfil) é mesclado à mão, mantendo as suas seções; os arquivos de build (`Directory.Build.props`, `.editorconfig`, `global.json`...) nunca são copiados por cima — cada diferença é proposta como uma edição; as suas regras próprias (`project.md`, `*-project.md`) nunca são tocadas, e o `CLAUDE.md` só recebe o que você aprovar: uma seção que o template ganhou, ou uma linha `Worktrees:` quando ele não tem (a recomendação do bootstrap, `D:\wt\<repositório>` ou `C:\`; as worktrees que já existem mantêm o nome). Se arquivos de build ou regras conferidas pelo build mudaram, o Claude compila, roda a suíte completa e refaz a baseline de avisos. Um projeto sem nenhuma baseline de avisos (um repositório adotado, um bootstrap antigo) ganha uma linha oferecendo tirar a primeira: um rebuild completo, feito só com o seu sim, commitado com o sync. Uma nota de plugin ⏳ no retro log que cita um `agile-canary#N` já entregue pelo plugin também ganha uma linha: com o seu sim, `sync.js notes` a marca com ✅, a versão e o commit do merge. Só a própria sessão do projeto escreve essas marcas; a sessão do plugin nunca escreve no seu repositório. A versão e o que foi copiado ficam registrados em `.claude/agile/sync.json`. Rode entre features, não no meio de uma. O `/agile:version` mostra a versão do plugin em uso na sessão ao lado da versão do projeto, e diz se o próximo passo é um sync ou uma atualização do plugin. O sync também aponta o que só o `/agile:bootstrap` instala e o seu projeto não tem — uma ferramenta própria, como o gerador de documentação técnica — e oferece registrar uma feature para isso; ele nunca instala nada disso por conta.
+**Mantendo um projeto atualizado.** O bootstrap copia arquivos do plugin para dentro do projeto (regras, templates, este workflow, o perfil, os arquivos de build), então uma atualização do plugin não chega a eles sozinha. Atualize o plugin (`claude plugin marketplace update canary`, `claude plugin update agile@canary`, sessão nova) e rode `/agile:sync` no projeto. O Claude mostra uma tabela do que mudou e só copia o que você aprovar: uma cópia que você nunca editou é substituída; um arquivo que você editou (normalmente o perfil) é mesclado à mão, mantendo as suas seções; os arquivos de build (`Directory.Build.props`, `.editorconfig`, `global.json`...) nunca são copiados por cima — cada diferença é proposta como uma edição; as suas regras próprias (`project.md`, `*-project.md`) nunca são tocadas, e o `CLAUDE.md` só recebe o que você aprovar: uma seção que o template ganhou, ou uma linha `Worktrees:` quando ele não tem (a recomendação do bootstrap, `D:\wt\<repositório>` ou `C:\`; as worktrees que já existem mantêm o nome). Se arquivos de build ou regras conferidas pelo build mudaram, o Claude compila, roda a suíte completa e refaz a baseline de avisos. Um projeto sem nenhuma baseline de avisos (um repositório adotado, um bootstrap antigo) ganha uma linha oferecendo tirar a primeira: um rebuild completo, feito só com o seu sim, commitado com o sync. Uma nota de plugin ⏳ no retro log que cita um `agile-canary#N` já entregue pelo plugin também ganha uma linha: com o seu sim, `sync.js notes` a marca com ✅, a versão e o commit do merge. Só a própria sessão do projeto escreve essas marcas; a sessão do plugin nunca escreve no seu repositório. A versão e o que foi copiado ficam registrados em `.claude/agile/sync.json`. Rode entre features, não no meio de uma. O `/agile:version` mostra a versão do plugin em uso na sessão ao lado da versão do projeto, e diz se o próximo passo é um sync ou uma atualização do plugin. O sync também aponta o que só o `/agile:bootstrap` instala e o seu projeto não tem — uma ferramenta própria, como o gerador de documentação técnica — e oferece registrar uma feature para isso; ele nunca instala nada disso por conta. Um projeto com telas e sem `docs/design/identity.tokens.json` recebe o mesmo tipo de aviso (a partir da 0.0.86): o sync não escreve nada, porque a identidade é um arquivo do seu projeto e não uma cópia do plugin, e sugere o `/agile:identity`. Toda execução mostra também uma linha com o tamanho do que é carregado em toda sessão (a partir da 0.0.103): as palavras do `CLAUDE.md` (limite ~900) e a estimativa do sempre carregado, `CLAUDE.md` mais toda regra sem `paths:`, em tokens (palavras × 1,3, orçamento ~4,5k). Quando um dos dois passa, a linha diz qual e aponta as duas maiores seções do `CLAUDE.md` como onde enxugar. Nada bloqueia por tamanho e o sync não escreve nada: você enxuga, ou o retro propõe isso antes de acrescentar uma linha. Exemplo 14.37.
 
 A `output-style` define como o Claude fala com você: em pt-BR, com a resposta primeiro, relatórios de passo com no máximo 10 linhas, detalhes no arquivo e não no chat, uma recomendação com o motivo, sem narrar o trabalho, "não verificado" dito com essas palavras e a má notícia primeiro. Respostas longas só quando um gate falhou, quando uma pergunta precisa de contexto ou quando você pedir.
 
@@ -400,7 +522,7 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 - **Retomada:** `/agile:build <id>` no item que está em `building` continua a partir do último commit `wip`.
 - **Pausa no meio da feature:** `/agile:pause`, ou só diga que vai parar. O Claude faz o commit na branch da feature com o prefixo `wip(F-<n>):` e escreve uma nota (onde paramos, o que vem a seguir, quem decide); nada fica só no disco. Fechar a sessão sem pausar também não perde nada: a sessão seguinte commita o que sobrou como `wip` antes de tudo.
 - **Fim:** uma nota curta (onde paramos, o que vem a seguir, quem decide).
-- **Antes do merge a partir de uma worktree:** o Claude pergunta, como uma pergunta bloqueante, se você já fechou a IDE e o app host que estiverem rodando daquela pasta — uma remoção que falha no meio desregistra a worktree e deixa a pasta no disco, pior do que não remover. No .NET ele também roda `dotnet build-server shutdown` antes, porque um build server segura um lock que fechar a IDE não libera.
+- **Antes de remover uma worktree no ship:** o Claude não pergunta mais se você fechou a IDE ou o app host — digitar `/agile:ship` conta como fechado. Ele roda `dotnet build-server shutdown` (.NET) e depois uma sonda de lock: renomeia a pasta para `<pasta>.probe` e de volta. Se um arquivo está preso, o rename falha, o Claude diz quem segura e pede que você feche, e tenta de novo; nada é removido pela metade (uma remoção que falha no meio desregistra a worktree e deixa a pasta no disco).
 
 **Uma pasta por item.** Cada item ganha a própria worktree — uma pasta separada, fora do repositório (a raiz é a linha `Worktrees:` do `CLAUDE.md`, perguntada no bootstrap — recomendação `D:\wt\<repositório>`, ou `C:\wt\<repositório>` sem drive D:; sem a linha, `<pasta pai do repositório>/wt/<repositório>/`, e o `/agile:sync` propõe a linha. A pasta é `f-<n>-<desc>` ou `b-<n>-<desc>`, com `<desc>` = até 20 caracteres do slug, cortado num hífen: `f-3-exam-board`. Curta por causa do limite de caminho do Windows; uma worktree criada antes mantém o nome `<tipo>-<n>` até o merge) — criada pelo `/agile:refine` antes de ele escrever qualquer coisa e usada até o merge. É isso que mantém os documentos de um item na branch dele: uma sessão trabalhando na pasta de outro item escrevia ali o arquivo da feature e o mockup, e eles acabavam numa branch que não era a deles. O build reaproveita essa pasta e nunca cria uma segunda.
 
@@ -505,6 +627,8 @@ fora do repositório; o arquivo foi movido para lá e tudo da F-3 é escrito ali
 Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
 O modelo de usuários e papéis do bootstrap tem Curator e Admin.
 ```
+
+Um item sobre evals é a exceção a "perguntar tudo de uma vez": o número de execuções por caso e o teto de custo só são propostos depois que o Claude roda um caso uma vez e cita quanto custou (exemplo 14.26).
 
 As perguntas vêm como cartões de quiz, um por tema, com a opção recomendada primeiro. No app desktop você clica; num terminal as mesmas perguntas chegam como lista numerada, respondida com "ok" ou uma letra. O primeiro cartão, "Regras":
 
@@ -652,9 +776,7 @@ Claude: Faltava a chave no arquivo pt-BR. Corrigido, e acrescentei um teste para
 ```
 Claude: Suíte completa: 212 testes verdes (2 min 10 s). Testes de arquitetura verdes.
 A execução reescreveu docs/api/ExamPrep.Api.json (uma rota nova): commitado com a F-3.
-Pronto para o merge de feature/F-3 em main. Autoriza?
-> sim
-Claude: Mergeado. Board #12 fechado, Status Done (lido de volta). Manual atualizado: página "Exam boards" em pt-BR, pt-PT e en.
+Merge de feature/F-3 em main feito (--no-ff), push feito; branch e worktree removidas. Board #12 fechado, Status Done (lido de volta). Manual atualizado: página "Exam boards" em pt-BR, pt-PT e en.
 Retro: uma lição — "conferir todos os arquivos de idioma ao criar uma mensagem". Viro regra?
 > sim
 Claude: Regra acrescentada em core/i18n. Status: done.
@@ -878,13 +1000,9 @@ No ship do bug, a checagem completa roda na worktree e o merge no checkout princ
 
 ```
 > /agile:ship B-2
-Claude: Antes de remover a worktree: você já fechou a IDE e o app host que estiverem rodando de
-D:\wt\examprep\b-2-exam-board-search? Uma remoção que falha no meio deixa a pasta no disco. Diga "fechado" quando terminar.
-> fechado
 Claude: Desligando o build server do .NET, depois rodando a suíte completa na worktree.
-Suíte completa verde (212 testes, 1 min 58 s). Pronto para o merge de bug/B-2 em main. Autoriza?
-> sim
-Claude: Merge feito. Worktree removida, branch apagada, 0 0 contra origin/main.
+Suíte completa verde (212 testes, 1 min 58 s). Merge de bug/B-2 em main feito. Sonda de lock em
+D:\wt\examprep\b-2-exam-board-search passou. Worktree removida, branch apagada, 0 0 contra origin/main.
 remote branch: never pushed, nothing to delete.
 A F-6 ficou 1 commit atrás da main: vou atualizá-la antes da próxima rodada de testes.
 ```
@@ -1255,7 +1373,7 @@ pt-BR, pt-PT e en (question-bank.md); merge --no-ff em 3f9c2e1, push feito; main
 removida. Board #31 fechado, Status Done (lido de volta). F-17 done. Retro: 1 lição proposta — mantém ou descarta?
 ```
 
-O seu "validado e autorizo o merge" foi a autorização de merge do ship: ela não é pedida de novo.
+O seu "validado e autorizo o merge" foi a autorização de merge do ship.
 
 #### 14.13.2 Validado, merge depois
 
@@ -1266,7 +1384,7 @@ A mesma parada 2 da F-19, respondida só com "validado":
 Claude: F-19 validada e mantida em validating; nada foi para a main. Quando quiser: /agile:ship F-19.
 ```
 
-"ok", "pode seguir" ou "validado" nunca autorizam merge. Só uma mensagem que nomeia o merge autoriza.
+"ok", "pode seguir" ou "validado" nunca autorizam merge. Só uma mensagem que nomeia o merge autoriza, ou digitar `/agile:ship F-19` depois.
 
 #### 14.13.3 Um defeito na parada 2
 
@@ -1354,7 +1472,9 @@ A rodada 7 ganha a pergunta 30b:
 Claude: 30b. Evals → Recomendação: um nível de teste próprio. 40 respostas erradas com
     a explicação que um professor aceitaria, pontuadas contra o modelo real no ship e
     sob demanda, nunca no gate do turno. Taxa de acerto de base commitada; uma queda
-    reprova o ship. Teto: US$ 2 por execução.
+    reprova o ship. Qual modelo roda os casos? → Recomendação: o que o tutor chama em
+    produção. O comando o fixa (--model) e roda com --ablation none: o padrão rodaria
+    cada caso duas vezes. O teto é definido depois, após uma execução medida.
 > ok
 ```
 
@@ -1423,6 +1543,696 @@ linhas escritas, 1,8s. O fix está provado contra a falha que ele diz resolver.
 
 Uma feature sem premissa de "falha hoje" — uma capacidade nova, não uma alegação de que algo quebra — pula esse passo por completo: um teste por critério de aceitação, como antes.
 
+### 14.17 Um board sem a opção "Ready" ainda
+
+Um projeto bootstrapado antes de o board ter um estado distinto para Ready — o campo Status é só Backlog/In Progress/Done. A F-20 chega à aprovação e o primeiro espelho precisa de "Ready":
+
+```
+> /agile:refine F-20
+...
+Claude: aprovo F-20
+Claude: F-20 aprovada. O campo Status do board não tinha a opção "Ready": criei logo
+depois de "Backlog" (Backlog, Ready, In Progress, Done) e reapliquei o Status de todos
+os outros itens pelo nome — nada mais no board se moveu. F-20 está agora em Ready.
+Próximo: /agile:build F-20 (nada mais em building ou validating).
+```
+
+Um item seguinte no mesmo board só usa a opção que já está lá; o `/agile:build` e o `/agile:ship`, que nunca visam "Ready", continuam só reportando — nunca criando — qualquer opção que o espelho deles precise e não encontre.
+
+### 14.18 Juntando um item aberto ao item em refinamento
+
+Durante o refinamento da B-22, o dono propõe juntar o escopo da B-23 a ela, "já que mexem na mesma regra". O Claude confere a B-23 antes de juntar:
+
+```
+> Junta a B-23 nessa, é a mesma regra.
+Claude: Conferindo a B-23 antes — git worktree list mostra D:/wt/examprep/b-23-ship-sets-status
+[bug/B-23], e o arquivo dela começa com "Status: approved (owner, 2026-09-27; worktree ...)".
+A B-23 já está approved na própria branch, não é só uma ideia: juntar ela aqui deixaria dois
+itens corrigindo a mesma coisa. Junto a B-23 na B-22 mesmo assim, ou descarto a junção e
+deixo a B-23 onde está?
+> Descarta, entrega a B-23 sozinha.
+Claude: A B-23 fica intocada e fora do escopo da B-22. Registrado em ## Decisions.
+```
+
+Uma proposta seguinte, de juntar a B-24 ("é só uma ideia, sem worktree ainda") na mesma rodada, não encontra nada além de `idea` em lugar nenhum, então a junção acontece sem pergunta:
+
+```
+> Junta a B-24 também, ainda é só ideia.
+Claude: A B-24 não tem worktree e está idea em todo lugar — juntando ela na B-22 agora.
+```
+
+`epic-breakdown` e `discuss` não são afetadas: elas só capturam ideias novas, nunca absorvem o escopo de um item aberto já existente, então essa checagem roda só no `/agile:refine`.
+
+### 14.19 Um app desktop no quiz
+
+O brief descreve um app standalone para a recepção de uma clínica, Windows e macOS, vários usuários num PostgreSQL:
+
+```
+Claude: Pergunta 1, tipo de app. Recomendação: desktop (o brief diz "instalado nos PCs da recepção").
+Pergunta 2, perfil. Recomendação: desktop.
+> ok, ok
+Claude: Pergunta 2a, tecnologia desktop. Windows e macOS, sem app mobile no brief.
+Opções: A) Avalonia 12; B) WinUI 3 (só Windows: descartada pelo macOS); C) .NET MAUI.
+Recomendação: A — uma base de código para os dois sistemas, sem controles de plataforma para conciliar.
+> A
+Claude: A pergunta 5 é PostgreSQL. Pergunta 2a2, como o cliente chega a ele.
+Opções: A) por uma API; B) direto ao banco.
+Recomendação: A — vários usuários dividem os dados, e B poria a credencial do banco em cada máquina.
+> A
+Claude: As perguntas 4 e 23 não são feitas em termos de MudBlazor aqui: a stack é XAML. Pergunta 23a, identidade visual: um arquivo,
+um site, uma imagem ou três perguntas (veja 14.22). O kit de UI e a galeria deixaram de ser pergunta: estilos e
+controles compartilhados com uma janela de galeria só de desenvolvimento, registrados como o primeiro item.
+Pergunta 29: testes de view model, mais Avalonia.Headless para as telas; o gate compila Desktop.Core e a API, nunca a cabeça.
+```
+
+### 14.20 Pelo que um item espera para começar, e o que precisa para validar
+
+O `## Start` de uma feature ou bug tem duas linhas: `Waits on (to start)` e `Needed to validate`. Só a primeira, junto com `Depends on`, pode impedir um começo. A F-21 precisa de uma exportação real da banca, mas só para ser validada:
+
+```
+## Start
+- Depends on: nothing.
+- Waits on (to start): nothing.
+- Needed to validate: a real exam-board export (.csv) — from the curator.
+```
+
+```
+> /agile:autopilot F-21
+Claude: F-21 (idea) — dois stops: perguntas agora, roteiro de validação depois. Start: não depende de nada,
+não espera por nada para começar. Precisa de uma exportação real para ser validada: peço no stop 2, não agora.
+```
+
+Antes, a linha única "Waits on" teria parado a execução aqui. No stop 2 o mesmo texto vem junto com o roteiro:
+
+```
+Claude: STOP 2 — F-21 está em validating (Autopilot: stop 2).
+  Needed to validate: uma exportação real da banca (.csv), do curador — ainda não está no repositório.
+  Roteiro de validação: docs/features/F-21-import-exam-board.md#validation-script (5 passos).
+  Responda "validado e autorizo o merge de F-21" para entregar agora, ou "validado" para parar aqui.
+```
+
+Um item que espera por algo para começar (`Waits on (to start): a chave da API, do time de plataforma`) continua parando a execução, e o `/agile:status` continua listando como bloqueado. Um arquivo de item com a linha única antiga `Waits on:` é lido como "para começar", então nada já aberto muda sozinho.
+
+### 14.21 Digitar ship é a autorização do merge
+
+Você validou a F-35 e digita o comando. Não há pergunta "Autoriza?": o comando é a autorização, só para esse item.
+
+```
+> validado
+> /agile:ship F-35
+Claude: Suíte completa 231 testes verdes (2 min 4 s). A main andou (0.0.85, outra sessão): trazida para a branch,
+suíte verde de novo, versão subida para 0.0.86. Merge de feature/F-35 em main feito (--no-ff), push feito; main...origin/main 0 0.
+Sonda de lock em D:\wt\agile-canary\f-35-ship-authorizes: build server desligado, pasta renomeada para
+f-35-ship-authorizes.probe e de volta. Worktree removida, branch apagada localmente (remoto: nunca enviada).
+Board #35 fechado, Status Done (lido de volta). Retro: 1 lição proposta — qual você adota?
+```
+
+Quando algo ainda segura a pasta, a sonda para uma vez, antes de remover qualquer coisa:
+
+```
+Claude: Merge de feature/F-35 em main feito. Parei antes de remover a worktree: renomear
+D:\wt\agile-canary\f-35-ship-authorizes falhou, um processo segura um arquivo nela (uma IDE ou um app host).
+Feche e me avise; repito a sonda. Nada foi removido.
+> fechado
+Claude: Sonda passou. Worktree removida, branch apagada. 0 0 contra origin/main.
+```
+
+### 14.22 A identidade visual do app, a partir de um site
+
+Rodada 5 do bootstrap do app web de uma clínica. A identidade é perguntada antes da biblioteca do design system, e o kit de UI deixou de ser pergunta:
+
+```
+Claude: Pergunta 23a, identidade visual. Opções: A) um arquivo (DTCG *.tokens.json ou DESIGN.md); B) a URL de um site;
+C) uma imagem (logo, prancha de marca); D) nenhuma, três perguntas derivam uma.
+Recomendação: B — o brief cita o site da clínica. Então a 23 é só a escolha da biblioteca: MudBlazor.
+> B https://clinica-exemplo.example
+Claude: Li a página e as folhas de estilo. Nada foi escrito ainda. Encontrei:
+| Papel | Claro | Escuro (derivado) | Texto sobre ele | Claro | Escuro |
+| primary | #0B6E6E | #4FD1C5 | on-primary #FFFFFF | 6.1:1 | sobre #0B2A2A: 8.2:1 |
+| secondary | #F2A93B | #F2B85F | texto #1A1A1A | 8.7:1 | texto #101010: 10.7:1 |
+| background | #FAFAF7 | #121614 | texto #1A1A1A | 16.6:1 | texto #ECEFEC: 15.8:1 |
+| error | #D92D20 | #F97066 | on-error #FFFFFF | 4.8:1 | sobre #1A0B09: 6.9:1 |
+Fontes: Inter (títulos e corpo). Raio: 8 px. Família de ícones: Outlined. Origem: URL, 2026-09-28.
+Dois pares não passam no AA: o link #3AA8A8 sobre o fundo claro dá 2.7:1 (o mais próximo que passa: #1F7F7F, 4.6:1) e
+o secondary como texto sobre branco dá 2.0:1 (use só como preenchimento). Troco a cor do link para #1F7F7F?
+> sim, confirmo
+Claude: Escrevi docs/design/identity.tokens.json e docs/design/DESIGN.md (front matter gerado dos tokens, relidos e
+comparados: 4 cores x 2 temas, fontes, raio e família de ícones iguais). Linha no ADR-0001: origem URL, 2026-09-28.
+Primeiro item registrado: "Kit de UI e galeria, construídos a partir da identidade". Os dois arquivos entram no primeiro commit.
+```
+
+Um app criado antes desta versão recebe a mesma pergunta depois:
+
+```
+> /agile:sync
+Claude: Falta também (só o /agile:identity adiciona): Identidade visual. O projeto tem telas e não tem
+docs/design/identity.tokens.json. Não escrevo nada aqui.
+> /agile:identity
+Claude: Nenhuma identidade registrada. Pergunta 23a: um arquivo, um site, uma imagem ou três perguntas?
+> nenhuma
+Claude: Cor primária, fonte, claro, escuro ou os dois? ... (deriva a paleta, mostra a tabela, espera o "confirmo")
+Claude: Escrevi docs/design/ e a linha do ADR-0001. O projeto já tem um kit de UI, então registrei a ideia
+"Aplicar a identidade ao tema". Nenhum código do app foi alterado.
+```
+
+Com uma identidade já registrada, o `/agile:identity` mostra ela como tabela (origem, data, cores, fontes, raio, família de ícones) e pergunta o que muda.
+
+### 14.23 As seções de um site no quiz
+
+O brief descreve o site de um consultório de nutrição: quem atende, o que os pacientes dizem, os planos vendidos, uma newsletter e "talvez uma loja online depois":
+
+```
+Claude: Pergunta 2, perfil. Recomendação: website — um site público achado pelos buscadores, textos que você
+mesmo edita, e ele pode virar app (área do paciente) sem trocar de perfil.
+> ok
+Claude: Pergunta 2c, as seções do site. Todas marcadas; responda "ok" ou os números a desmarcar.
+Sempre no site (fora da lista): área de conteúdo, home, SEO básico, páginas 404 e de erro, política de
+privacidade e consentimento de cookies.
+Lançamento: 1 Sobre mim · 2 Depoimentos · 3 FAQ · 4 Cadastro de e-mail · 5 Produtos · 6 Contato e WhatsApp
+Depois:     7 Serviços e preços · 8 Portfólio · 9 Blog com RSS · 10 Comentários moderados · 11 Galeria
+            12 Eventos / agendamento · 13 Busca · 14 Localização · 15 Equipe · 16 Logos de parceiros
+            17 Materiais para download · 18 Envio de newsletter · 19 Banner / pop-up · 20 Página de lançamento
+            21 Link na bio · 22 Kit de imprensa · 23 Carreiras · 24 Declaração de acessibilidade
+            25 Painel de visitas · 26 Site instalável (PWA)
+> desmarca 4, 15, 23
+Claude: O 18 (envio de newsletter) precisa do 4 (cadastro de e-mail): sem o 4 não há para quem enviar.
+Mantém o 4, ou desmarca o 18 também?
+> mantém o 4
+Claude: Selecionadas: 24 seções (o 4 fica; 15 e 23 saem). A loja online do brief não é seção: é uma função de
+app com pagamento, então registro como uma ideia de épico própria.
+...
+Claude: Pergunta 19, e-mail. Você escolheu "nenhum", mas as seções 4 e 6 precisam enviar (o link de
+confirmação, a mensagem de contato). Recomendação: SMTP.
+> SMTP
+...
+Claude: Board: épico "Website sections" com 29 ideias — as 5 da base (área de conteúdo primeiro), as
+6 de lançamento, depois as 18 restantes — e a ideia de épico "Loja online". Crio?
+```
+
+### 14.24 Um app mobile para um site em funcionamento
+
+O site da nutricionista (14.23) tem uma área do paciente, e ela quer que os pacientes a usem pelo celular:
+
+```
+> /agile:epic "Patient app"
+Claude: O perfil é website, e um app mobile para ele segue o complemento mobile-client. Duas perguntas:
+(a) Onde o app mora? Recomendação: neste repositório e nesta solução — o app reaproveita o código do site
+    e sai com a mesma versão. (A outra resposta, um repositório novo, é o exemplo 14.30.)
+(b) Telas? Recomendação: MAUI Blazor Hybrid — os componentes da área do paciente são reaproveitados no app.
+    Alternativa: MAUI XAML, visual nativo, cada tela escrita de novo.
+Quais funcionalidades do site vão para o app? Marque pelos números:
+Itens done: 1 F-31 Meal plan · 2 F-34 Appointments · 3 F-37 Progress chart
+Áreas:      4 Pages/Messages
+(As páginas públicas ficam no site e não são oferecidas.)
+> a: este repositório, b: Hybrid; 1, 2 e 4
+Claude: O Mobile foundation vem primeiro (os projetos do app, login com token no site, a versão 1.8.0 que o site
+tem hoje). Depois:
+- Meal plan on mobile — o plano é lido numa página só: esta feature o extrai.
+- Appointments on mobile — a regra de agendamento (dois no mesmo horário, não) está em duas páginas.
+  Sugiro "API for appointments" antes. Pode ser?
+- Messages on mobile — a página lê direto, sem regra: esta feature a extrai.
+> pode
+Claude: Épico "Patient app": Mobile foundation, API for appointments, Meal plan on mobile, Appointments on mobile,
+Messages on mobile. A lista que você marcou vai para o arquivo do épico como você marcou. Crio?
+```
+
+Se ela tivesse respondido "um repositório novo" em (a), o épico seria só a metade do site: exemplo 14.30.
+
+### 14.25 Uma lista que você aprovou termina no arquivo
+
+Ao refinar "Export a report", o Claude propõe os formatos na rodada de perguntas e o dono edita a lista:
+
+```
+Claude: Formatos de exportação, nesta ordem:
+1 PDF · 2 XLSX · 3 CSV · 4 JSON · 5 XML
+> Tira o XML e põe DOCX no fim.
+Claude: Pronto: PDF, XLSX, CSV, JSON, DOCX.
+```
+
+O Claude escreve o arquivo. Antes de pedir a aprovação, relê e acha uma linha, nos critérios de aceitação: "o relatório exporta nos formatos mostrados na refinação". Ele cola a lista e faz o critério apontar para ela:
+
+```
+## Approved list
+Export formats
+1. PDF
+2. XLSX
+3. CSV
+4. JSON
+5. DOCX
+
+## Acceptance criteria
+- AC2 Given a finished report, when the owner picks any format of `## Approved list`, then the file downloads in that format.
+```
+
+O Claude relê de novo, não acha nenhuma linha que mande o leitor para o chat, e só então mostra o resumo e pede o "aprovo F-n". O build, aberto dias depois em outra sessão, lê os cinco formatos do arquivo.
+
+### 14.26 Evals: o modelo é fixado, o teto é medido, o veredito é código
+
+Bootstrap do tutor de provas, pergunta 30b. O Claude pergunta também o modelo e diz o que o comando vai carregar:
+
+```
+Claude: 30b. Qual modelo roda os casos? → Recomendação: o que o tutor chama em
+    produção. A linha Evals do CLAUDE.md ganha --model, --ablation none (o padrão
+    rodaria cada caso duas vezes, com e sem o plugin), --max-cost-usd e --json.
+    A base registra o modelo e a ablação.
+> ok
+```
+
+Depois, ao refinar "Pontuar as explicações do tutor", o Claude ainda não fixa o número de execuções. Roda um caso uma vez e cita:
+
+```
+Claude: claude plugin eval . --case wrong-answer-1 --runs 1 --ablation none --model <modelo de produção>
+    → custo US$ 0.21. Seis casos × 3 execuções = US$ 3.78; com 30% de margem, teto US$ 5.
+    Registrado em ## Decisions. Execuções por caso: 3? Teto: US$ 5?
+> ok
+```
+
+No ship, o Claude roda a suíte com `--json`, depois o comparador, e cita a saída inteira:
+
+```
+$ node evals/compare.js result.json
+ok       wrong-answer-1: 1 (baseline 1)
+DROP     wrong-answer-2: 0.67 < baseline 1
+cost US$ 3.61, model production-model, ablation none
+evals RED            (exit 1)
+```
+
+O ship para. Se a execução tivesse usado outro modelo que o da base, a última linha seria `evals NOT MEASURED` (exit 2): nem queda, nem aprovação, e regravar a base (`--write`) precisa do seu sim.
+
+### 14.27 Um repositório VB.NET: o gate de turno compila e testa uma mudança em `.vb`
+
+Um repositório adotado escrito em VB.NET (`engine: dotnet`, projetos SDK-style): `src/VbLib`, `tests/VbLib.Tests` (MSTest com `Microsoft.NET.Test.Sdk`), `tests/Sdk.Tests` (um projeto VB em `MSTest.Sdk/3.6.4`), um `tests/CsApp.Tests` em C# que referencia `VbLib.vbproj`, e `src/FsLib` em F#. O Claude edita `Class1.vb`. Até a 0.0.90 o turno terminava em silêncio, e o `gate.js stop` à mão dizia:
+
+```
+agile gate SKIPPED: no code file changed since the main branch
+```
+
+Agora a mesma edição dá:
+
+```
+agile gate (by hand): 1 code file(s) changed since the main branch
+sdk 8.0.131 (.)
+built tests/CsApp.Tests/CsApp.Tests.csproj (4 s)
+built tests/Sdk.Tests/Sdk.Tests.vbproj (3 s)
+built tests/VbLib.Tests/VbLib.Tests.vbproj (2 s)
+tested tests/CsApp.Tests/CsApp.Tests.csproj (2 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: < 1 ms - CsApp.Tests.dll (net8.0)
+tested tests/Sdk.Tests/Sdk.Tests.vbproj (1 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 156ms
+tested tests/VbLib.Tests/VbLib.Tests.vbproj (2 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 36 ms - VbLib.Tests.dll (net8.0)
+agile gate GREEN
+```
+
+O projeto de teste C# roda porque o grafo agora tem o `.vbproj` como nó; o `Sdk.Tests` roda porque `Sdk="MSTest.Sdk` conta como projeto de teste (um projeto C# em `MSTest.Sdk` é achado do mesmo jeito). Uma segunda variável local sem uso em `Class1.vb` é um aviso VB novo, RED a cada turno até ser corrigido:
+
+```
+new warnings (fix them, or accept with `node gate.js baseline` after the owner agrees):
+src/VbLib/Class1.vb|BC42024 (1 -> 2)
+  src/VbLib/Class1.vb(3,13): BC42024 Unused local variable: 'unused'.
+  src/VbLib/Class1.vb(4,13): BC42024 Unused local variable: 'second'.
+agile gate RED: 1 new warning(s): BC42024 in src/VbLib/Class1.vb
+```
+
+Uma asserção que falha em `Sdk.Tests` termina com `agile gate RED: tests failed (tests/Sdk.Tests/Sdk.Tests.vbproj)`. Uma mudança em `Library.fs` compila `src/FsLib/FsLib.fsproj` do mesmo jeito. Com `engine: msbuild` (um `.vbproj` antigo) o projeto afetado é recompilado com o MSBuild e o relatório diz `tests skipped: engine msbuild runs the whole suite at ship`, como faz para C#.
+
+### 14.28 Uma app que é só uma API: a pergunta 10a
+
+Bootstrap do "Rota", cujo brief diz que um app mobile e o sistema de um parceiro vão chamá-la e que ela não tem telas. Rodada 1:
+
+```
+Claude: 1. Tipo de app → Recomendação: só API. O brief não tem tela própria.
+    2. Perfil de arquitetura → Recomendação: web-api (uma API para os seus clientes,
+       sem telas). O monolith traria um projeto Blazor e o bUnit, que você não precisa.
+    Já claro no brief: sem back office (14), sem telas (21, 22, 23a–23e).
+> ok
+```
+
+Rodada 3, no lugar da pergunta 10:
+
+```
+Claude: 10a. Como os consumidores da API se autenticam? (pode marcar várias)
+    · Identity bearer: os usuários entram na própria API
+    · IdP externo: usuários e client credentials para clientes máquina
+    · API key: só clientes máquina, nunca um navegador ou app mobile
+    Recomendação: Identity bearer e API key. O app mobile faz o login dos usuários, e o
+    sistema do parceiro é um cliente máquina que você controla; uma API key nunca vai
+    para um app mobile, porque o código dele é público.
+    11. Login social ou MFA na v1? → Recomendação: não (perguntada porque Identity bearer está ligado).
+> ok
+```
+
+O esqueleto então tem o `Rota.Api` com login, refresh e `me`, o handler de API key e o seletor entre os dois, o `Rota.Tests` com os testes HTTP da fundação e sem o teste do template, o `docs/api/openapi.json` escrito pela primeira execução dos testes, e no `docs/infra.md` os prazos dos tokens (1 h, 14 dias) e onde fica o key ring. O primeiro endpoint que uma feature acrescenta aceita só usuários; o endpoint do parceiro nomeia a política `Clients`.
+
+### 14.29 Publicando um release
+
+O ExamPrep é um `web-app`; dois itens foram entregues desde o último release (`v0.1.0`), e a `main` tem `<Version>0.2.0</Version>` no `Directory.Build.props`. Você está no checkout principal.
+
+```
+> /agile:publish
+Claude: Plano: v0.2.0, tag anterior v0.1.0, 2 itens desde ela.
+  Feature F-3: question bank import
+  Bug B-2: wrong total on the report
+  Pacote: ExamPrep.Web (artifacts/publish/v0.2.0/ExamPrep.Web + ExamPrep.Web.zip).
+  Seguindo: digitar o comando é a autorização para o commit das notas, a tag, o push e o GitHub Release.
+Claude: ExamPrep.Web empacotado: 156 arquivos, zip de 4,7 MB; docs/releases/v0.2.0.md escrito.
+Claude: Release v0.2.0: notas commitadas na main (docs(release): v0.2.0), tag anotada v0.2.0, main e tag enviadas, GitHub Release criado com as notas.
+  Não empacotado: nada mais. Nenhum ambiente foi nomeado, então nada foi implantado (exemplo 14.35).
+```
+
+O mesmo comando um minuto depois para e não escreve nada, porque a tag agora existe:
+
+```
+> /agile:publish
+Claude: Nada a publicar: a tag v0.2.0 já existe. O próximo release vem depois do próximo /agile:ship.
+```
+
+Um projeto com o complemento `mobile-client` e sem a assinatura configurada diz o que deixou de fora: `Não empacotado: ExamPrep.Mobile (a assinatura não está configurada: ANDROID_SIGNING_KEYSTORE, ... sem valor); só o ExamPrep.Web foi.` (exemplo 14.32). Um projeto desktop com `<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>` ganha uma pasta e um zip por runtime, e o zip do linux vem com `feito no Windows: depois de descompactar, rode chmod +x no executável`. Se o `dotnet publish` falhar por erro de compilação, a execução termina com `nothing was committed or tagged` e a linha do erro, e a correção passa por um item. Se o push falhar depois da tag, o relatório diz `git push origin main` e `git push origin v0.2.0` para repetir; a tag fica.
+
+### 14.30 Um app mobile em repositório próprio, sobre a API do site
+
+A nutricionista (14.24) prefere o app num repositório só dele, com versão e release à parte do site. Primeiro, no repositório **do site**:
+
+```
+> /agile:epic "Patient app"
+Claude: O perfil é website, e um app mobile para ele segue o complemento mobile-client.
+(a) Onde o app mora? Recomendação: neste repositório (reaproveita o código e a versão do site).
+    Ou um repositório novo, com versão própria.
+Quais funcionalidades do site vão para o app? Marque pelos números:
+Itens done: 1 F-31 Meal plan · 2 F-34 Appointments · 3 F-37 Progress chart
+Áreas:      4 Pages/Messages
+> a: um repositório novo; 1 e 2
+Claude: Repositório novo significa telas MAUI XAML, então pulo essa pergunta. O épico do site é "API for the mobile app":
+- Mobile API foundation — login do app, o portão de atualização obrigatória (versão mínima, resposta 426), o documento OpenAPI
+- API for meal plan
+- API for appointments
+Meal plan e Appointments ficam em "Features taken to the app" como você marcou. Crio?
+> ok
+Claude: Próximo passo: crie um repositório novo cujo product/brief.md cite este (nutri-site) e rode /agile:bootstrap lá.
+As ideias "<X> on mobile" do app são escritas lá, não aqui.
+```
+
+Depois, no repositório **do app**, com um brief que cita o site:
+
+```
+> /agile:bootstrap
+Claude: Rodada 1. Pergunta 1: mobile sobre uma API existente. Pergunta 2: mobile. Pergunta 2d, onde mora o backend?
+    · nesta solução · uma API existente em outro repositório (um site ou web-api seu, ou qualquer API com documento OpenAPI)
+    Recomendação: uma API existente em outro repositório — o brief cita o nutri-site.
+    Já está claro: 3 (hospedagem), a rodada de dados, 12, 13 e 14 — a API decide. A pergunta 10 é "o login da API": li no site, Identity bearer.
+> ok
+...
+Claude: Quadro. O nutri-site tem o épico "API for the mobile app" com duas funcionalidades marcadas. Ideias propostas, nada escrito lá:
+  1. Mobile foundation — login no login/refresh/me, o handler com X-App-Version, o documento fixado, o teste de contrato (espera o nutri-site#41 "Mobile API foundation")
+  2. Meal plan on mobile (espera o nutri-site#42)
+  3. Appointments on mobile (espera o nutri-site#43)
+```
+
+O `/agile:status` no app mostra as três como bloqueadas enquanto essas issues estiverem abertas no site, e como livres quando fecharem (a foundation também só quando o `docs/api/openapi.json` do site declara `X-App-Version`). Se a API fosse um `web-api` do agile ou de outra pessoa, as ideias saem do brief; quando essa API ainda não tem o portão, o Claude se oferece para abrir uma issue "Forced-update gate for <App>" no quadro dela, com o seu sim, e o "Mobile foundation" espera por ela. Depois do primeiro ship no repositório do app, só o `<App>.Mobile.csproj` vai de `0.1.0` para `0.2.0`.
+
+### 14.31 Notificações push para um app mobile
+
+O ExamPrep é um `website` com o complemento `mobile-client`. Você pede push numa feature, "Avisar quando um resultado ficar pronto", e o Claude refina contra o `docs/agile/profile-mobile-client.md`.
+
+```
+> /agile:refine F-9
+Claude: O perfil descreve push (seção "Push notifications"). Duas decisões ficam com você:
+  1. Provedor. Recomendação: Firebase Cloud Messaging com FirebaseAdmin 3.7.0 (Apache-2.0)
+     para as duas plataformas; a cabeça do cliente soma Plugin.Firebase.CloudMessaging 4.0.1 (MIT).
+  2. Cadastro de dispositivos. Recomendação: PUT/DELETE /api/v1/devices/{installationId} na classe
+     Features/Devices do site, para a API saber a quem consegue chegar.
+Você: ok
+Claude: Os critérios cobrem 204 ao cadastrar, 401 anônimo, 400 devices.invalid-token, o dispositivo
+  passando para o usuário que o cadastra, uma mensagem por dispositivo na cultura dele e o token
+  não registrado apagado. Os testes usam um remetente falso; a entrega real é o passo 6 do roteiro
+  de validação, que pede de você a chave de um projeto Firebase e um Android.
+```
+
+O gate continua verde sem aparelho e sem conta Firebase. Na validação o Claude entrega o roteiro: entrar no celular, aceitar o pedido de permissão, disparar o resultado, ver a notificação no idioma do celular, sair e disparar de novo para ver que nada chega.
+
+### 14.32 Publicando um app mobile nas lojas
+
+O ExamPrep é um `website` com o complemento `mobile-client`, na `0.2.0`, e esta é a primeira publicação nas lojas. As quatro variáveis de assinatura ainda não existem.
+
+```
+> /agile:publish
+Claude: Plano: v0.2.0, tag anterior v0.1.0, 1 item desde ela.
+  Pacote: ExamPrep.Web.
+  Fica de fora: ExamPrep.Mobile: não publicado no Play Store, a assinatura não está configurada (ANDROID_SIGNING_KEYSTORE,
+  ANDROID_SIGNING_ALIAS, ANDROID_SIGNING_STORE_PASS, ANDROID_SIGNING_KEY_PASS sem valor).
+  Quer criar o keystore de upload agora? Diga onde ele deve ficar (um caminho absoluto fora do repositório).
+Você: D:\keys\examprep-upload.keystore
+Claude: Rode isto no seu terminal (ele pede as senhas lá, e eu nunca as vejo):
+  keytool -genkeypair -keystore D:\keys\examprep-upload.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
+  Depois defina ANDROID_SIGNING_KEYSTORE (esse caminho), ANDROID_SIGNING_ALIAS (upload), ANDROID_SIGNING_STORE_PASS e
+  ANDROID_SIGNING_KEY_PASS, nomeie as quatro no docs/infra.md e guarde uma cópia do keystore fora desta máquina:
+  é a chave de upload, e o Play só a redefine pelo suporte.
+```
+
+Depois, com as variáveis definidas e o `ApplicationId` trocado do `com.companyname.exampreps` do template para `br.com.exampreps`:
+
+```
+> /agile:publish
+Claude: Plano: v0.2.0 ... Pacote: ExamPrep.Web e ExamPrep.Mobile (android, aab).
+Claude: Empacotados ExamPrep.Web (zip de 4,7 MB) e ExamPrep.Mobile: br.com.exampreps-Signed.aab, 31 MB, jarsigner: jar verified.
+  docs/releases/v0.2.0.md e docs/releases/v0.2.0-store.md escritos.
+Claude: Release v0.2.0: os dois arquivos commitados na main (docs(release): v0.2.0), tag, push, GitHub Release.
+  Envie o .aab à mão: o plugin não envia nada. O docs/releases/v0.2.0-store.md lista os passos do Play Console
+  (faixa de teste primeiro, depois promover), os da primeira publicação e, para um Mac, os do iOS.
+```
+
+Com o `ApplicationId` ainda `com.companyname.exampreps`, o mesmo comando deixa o head Mobile de fora (`o id é permanente depois do upload: troque antes`) e publica o site.
+
+### 14.33 Um app Hybrid em repositório próprio, compartilhando os componentes do site por um pacote
+
+O app do paciente da nutricionista (14.30) agora quer as telas do próprio site dentro do app. Primeiro, no repositório do **site**, a rodada do épico:
+
+```
+> /agile:epic "App do paciente"
+Claude: ... (a) Onde o app mora? Recomendação: neste repositório. Ou num repositório novo, com versão própria.
+(b) Telas? Recomendação: MAUI Blazor Hybrid — os componentes do site são reaproveitados no app; num repositório novo eles
+    viajam como o pacote NutriSite.Shared. Ou MAUI XAML (visual nativo).
+> a: um repositório novo, b: Hybrid; 1 e 2
+Claude: O épico do site é "API for the mobile app":
+- Mobile API foundation — login do app, o portão de atualização obrigatória, o documento OpenAPI, e NutriSite.Contracts e
+  NutriSite.Shared como projetos empacotáveis (a linha Complement vai nomear o pacote; o docs/infra.md nomeia GITHUB_PACKAGES_TOKEN)
+- API and shared screen for meal plan
+- API and shared screen for appointments
+```
+
+Quando o site é publicado:
+
+```
+> /agile:publish
+Claude: Plano: v0.4.0, tag anterior v0.3.0, 3 itens desde ela.
+  Pacote: NutriSite.Web; NutriSite.Contracts (nuget 0.4.0); NutriSite.Shared (nuget 0.4.0).
+Claude: Empacotei o NutriSite.Web (zip de 6,1 MB); packages/NutriSite.Contracts.0.4.0.nupkg e packages/NutriSite.Shared.0.4.0.nupkg
+  (o Shared leva staticwebassets/ e depende do NutriSite.Contracts 0.4.0).
+Claude: Release v0.4.0: notas commitadas, tag, push, GitHub Release; os dois pacotes enviados para
+  https://nuget.pkg.github.com/<dono>/index.json com --skip-duplicate.
+```
+
+Com `GITHUB_PACKAGES_TOKEN` sem valor, o mesmo comando diz `Fica de fora: NutriSite.Contracts, NutriSite.Shared: não publicados como pacotes NuGet, GITHUB_PACKAGES_TOKEN não está definido` e publica o site. Se o envio dos pacotes falhar depois da tag, o relatório diz o comando `dotnet nuget push ... --skip-duplicate` para repetir, sem o token.
+
+Depois, no repositório do **app**, com um brief que cita o site:
+
+```
+> /agile:bootstrap
+Claude: Rodada 1 ... Pergunta 2d, onde mora o backend? Recomendação: uma API existente — o brief cita o nutri-site.
+    Já está claro: as telas são MAUI Blazor Hybrid — o CLAUDE.md do nutri-site diz que as telas compartilhadas estão no pacote NutriSite.Shared.
+> ok
+...
+Claude: Esqueleto: NutriApp.Mobile.Core (referencia o pacote NutriSite.Shared), NutriApp.Mobile (head com BlazorWebView),
+  um nuget.config com o nuget.org e o feed do site (source mapping: NutriSite.* no feed, * no nuget.org; o token como
+  %GITHUB_PACKAGES_TOKEN%), Directory.Packages.props fixando o NutriSite.Shared 0.4.0, docs/api/backend.md com o release v0.4.0.
+  Sem projeto NutriApp.Contracts: os records vêm no pacote. O CLAUDE.md ganha "- Shared screens: package NutriSite.Shared ...".
+```
+
+Mais tarde, o `/agile:sync` no app, depois que o site lançou a `v0.5.0`:
+
+```
+Claude: Arquivos do plugin: todos iguais. O site tem o release v0.5.0, adiante do NutriSite.Shared 0.4.0 fixado; passar o pin e
+  renovar o docs/api/backend-openapi.json a partir desse release é um item deste app. Nada foi escrito.
+```
+
+### 14.34 Um site novo que nasce com o app mobile
+
+O brief de uma fisioterapeuta pede um site onde os pacientes veem os planos de exercício e marcam sessões, e "um app para os pacientes, desde o começo":
+
+```
+> /agile:bootstrap
+Claude: Rodada 1.
+2. Perfil de arquitetura — Recomendação: web-app. Motivo: telas sobre dados simples (planos, sessões), uma área de negócio,
+   e o app mostra parte do site. mobile sobre monolith caberia se uma API fosse a principal consumidora; não é.
+2e. Um app mobile desde o início? não · sim, MAUI Blazor Hybrid · sim, MAUI XAML
+   Recomendação: sim, Hybrid. Motivo: o brief cita um app para os pacientes; com Hybrid as telas do site já nascem no
+   PhysioSite.Shared e o app as reaproveita. Ele mora neste repositório e nesta solução.
+   Quais funcionalidades do brief vão para o app? Todas marcadas; responda "ok" ou os números para desmarcar.
+   Área do paciente: 1 Plano de exercícios · 2 Marcação de sessões · 3 Mensagens
+   Administração:    4 Prontuários · 5 Configuração da agenda
+> ok, desmarca 4 e 5
+Claude: Vão para o app: 1 Plano de exercícios, 2 Marcação de sessões, 3 Mensagens.
+...
+Claude: Proposta para o quadro:
+- UI kit and gallery, built from the identity — o kit no PhysioSite.Shared, a página da galeria no PhysioSite.Web
+- Épico "Patient area": Exercise plan, Session booking, Messages — cada tela um componente no Shared hospedado por uma
+  página no Web, a regra ou consulta em Features/ atrás de uma interface no Shared
+- Épico "Back office": Patient records, Schedule settings
+- Épico "Mobile app" (docs/epics/mobile-app.md, as três funcionalidades em "Features taken to the app"):
+  Mobile foundation (depois do kit de UI e do login), Exercise plan on mobile, Session booking on mobile, Messages on mobile
+  — cada "on mobile" depois do Mobile foundation e do item correspondente do site
+Crio?
+> ok
+Claude: Esqueleto: PhysioSite.Web, PhysioSite.Contracts, PhysioSite.Shared (Razor Class Library, textos em
+  pt-BR, pt-PT e en), PhysioSite.Tests com os testes de arquitetura e de layout. Ainda sem projeto do app e sem linha
+  Complement: o Mobile foundation traz isso. Crio?
+```
+
+Meses depois, o `/agile:refine` do "Mobile foundation" lê o "Born with the site" do complemento: `Contracts` e `Shared` já estão lá, então o item acrescenta `PhysioSite.Mobile.Core` e `PhysioSite.Mobile`, o login do app, a linha `Complement:` e a cabeça na versão atual do site.
+
+### 14.35 Fazendo deploy de um release
+
+O ExamPrep (14.29) é um `web-app` com um AppHost na receita. O `docs/infra.md` dele tem staging (`http://localhost:5081`) e produção (`http://localhost:5080`) com o comando de deploy e uma Check URL, e `Parameters__apikey` em `## Expected secrets` como variável de ambiente dos dois. A `main` tem `<Version>0.2.0</Version>` e ainda não há tag. Antes de iniciar o Claude você definiu `Parameters__apikey` no seu próprio terminal; o valor nunca é digitado no chat.
+
+```
+> /agile:publish staging
+Claude: Plano: release v0.2.0 (anterior v0.1.0, 2 itens), depois deploy dele em staging.
+  Em staging agora: nada registrado.
+  Comando: aspire deploy --apphost src/ExamPrep.AppHost/ExamPrep.AppHost.csproj -e Staging
+           -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
+  Segredos, só os nomes: Parameters__apikey (definida).
+  Seguindo: digitar o comando é a autorização. O deploy gera a imagem: leva cerca de um minuto.
+Claude: Release v0.2.0 feito: notas commitadas, tag e main enviadas, GitHub Release criado.
+Claude: v0.2.0 implantada em staging em 43 s. http://localhost:5081/health respondeu 200 após 0,1 s.
+  O docs/infra.md diz "v0.2.0 (2026-10-02)" para staging: commit 7172abd, enviado.
+  Saída salva em C:\Users\voce\AppData\Local\Temp\agile-deploy\staging-v0.2.0-....log.
+  Sobrou 1 tag de imagem aspire-deploy-* (docker image ls --filter "reference=*:aspire-deploy-*"); aqui as antigas nunca são apagadas.
+```
+
+Você confere o staging e então:
+
+```
+> /agile:publish production
+Claude: Plano: promoção. A v0.2.0 já está marcada: sem pacote, notas nem tag novos.
+  Em produção agora: nada registrado. A implantar: v0.2.0. Segredos, só os nomes: Parameters__apikey (definida).
+Claude: v0.2.0 implantada em produção em 18 s; http://localhost:5080/health respondeu 200. docs/infra.md atualizado (commit enviado).
+  O staging não foi tocado: dois projetos compose rodam lado a lado.
+```
+
+Uma versão posterior, a 0.3.0, vai para produção e sai errada. O rollback precisa da tag e de nenhuma pergunta:
+
+```
+> /agile:publish production v0.2.0
+Claude: Plano: rollback. Em produção agora: v0.3.0. A implantar: v0.2.0 (a tag existe). Segredos: Parameters__apikey (definida).
+Claude: v0.2.0 implantada em produção em 17 s; /health respondeu 200. O docs/infra.md diz "v0.2.0 (2026-10-02)".
+  Um projeto de produção está rodando (substituído, não duplicado); o seu checkout principal continuou na main.
+```
+
+Uma versão quebrada falha e diz como voltar; o segredo é conferido primeiro:
+
+```
+> /agile:publish staging v0.3.1
+Claude: O comando de deploy saiu com 0, mas http://localhost:5081/health nunca respondeu 200 em 60 s (último: HTTP 503).
+  Nada foi registrado e nada foi revertido. Fim da saída: ...
+  Para voltar à versão registrada antes: /agile:publish staging v0.3.0
+
+> /agile:publish production
+Claude: A variável de ambiente Parameters__apikey não está definida: defina-a fora deste chat (o valor nunca é lido,
+  mostrado nem pedido) e rode o comando de novo. Nada rodou.
+```
+
+Um erro de compilação na tag termina do mesmo jeito (`the deploy command exited 6`, as últimas linhas do build, a versão que estava no ar ainda respondendo). Sem ambiente, o `/agile:publish` depois de um ship lista: `local (not declared) · staging v0.3.0 · production v0.2.0`, e pergunta qual ou "nenhum" (só o release). Um ambiente cujo comando diz `not declared` não implanta nada: `Claude: production não declara comando de deploy: escreva-o na célula "Deploy command" da linha production do docs/infra.md.`
+
+### 14.36 Uma tag enviada se implanta sozinha
+
+O ExamPrep (14.35) tem `staging` e `production` declarados no `docs/infra.md`, `Parameters__apikey` como variável de ambiente dos dois e um `origin` no GitHub. Ele foi iniciado antes de o pipeline existir, então, depois de uma atualização do plugin, o `/agile:sync` avisa e não escreve nada:
+
+```
+> /agile:sync
+Claude: Deploy pipeline (desde a 0.0.102) está ausente: um workflow do GitHub Actions que implanta uma tag v<Version>
+  enviada pelo Deploy command do docs/infra.md. O sync nunca o instala; capturo um item para isso? (s/n)
+> s
+```
+
+O item roda `node sync.js pipeline write` e mostra o que escreveu; o relatório antes dele mostra as escolhas que ele fez a partir da tabela:
+
+```
+wrote .github/workflows/deploy.yml (tag deploys to staging; secrets: Parameters__apikey) and .github/scripts/agile-deploy.js
+```
+
+Você adiciona `Parameters__apikey` aos environments `staging` e `production` do GitHub (Settings, Environments) e um revisor obrigatório em `production`. Daí em diante, um release local avisa antes de rodar:
+
+```
+> /agile:publish staging
+Claude: Plano: release v0.3.0 (anterior v0.2.0, 2 itens), depois deploy dele em staging.
+  O pipeline (.github/workflows/deploy.yml) também implanta a v0.3.0 em staging quando o release enviar a tag:
+  os dois rodam o mesmo comando no mesmo ambiente ao mesmo tempo e não são serializados (o grupo de concorrência do pipeline só enfileira as execuções dele).
+  ...
+```
+
+O push da tag inicia a execução. O resumo dela, para a tag:
+
+```
+## Deployed
+
+v0.3.0 deployed to staging
+
+It took 43 s.
+Record it: the Version (deployed on) cell of staging in docs/infra.md is written only by a local /agile:publish.
+Check: http://staging.examprep.example/health answered 200 in 0.4 s.
+```
+
+Produção é uma execução manual (Actions, Deploy, Run workflow: `environment` = `production`, `tag` = `v0.3.0`), que espera o revisor que você pôs. Um segredo que nunca foi adicionado para a execução antes do comando, e só o nome dele é impresso:
+
+```
+the secret Parameters__apikey is not set for the GitHub environment production: add it to the environment's secrets,
+make sure .github/workflows/deploy.yml passes it (secrets.<name>), then run again; the command did not run
+```
+
+Uma versão que implanta mas nunca responde derruba a execução e diz como voltar; o rollback é a mesma execução manual com a tag antiga, ou `/agile:publish production v0.2.0` na sua máquina:
+
+```
+the deploy command exited 0 but http://staging.examprep.example/health never answered 200 in 60 s (last: HTTP 503)
+
+Nothing was rolled back. To go back: /agile:publish staging v<the version recorded for staging in docs/infra.md> locally, or run this workflow by hand with that tag.
+```
+
+(As mensagens do pipeline ficam em inglês: são o log de uma execução do GitHub, não o chat.) Quando a tabela listar mais um segredo, o próximo `/agile:sync` mostra o `.github/workflows/deploy.yml` como diferença `manual` (a linha nova `secrets.<nome>`) e você mescla à mão.
+
+### 14.37 O tamanho do que é sempre carregado
+
+O `CLAUDE.md` do Simulab tem 553 palavras. No próximo `/agile:sync` a tabela tem uma linha a mais, seja qual for o resto:
+
+```
+| Arquivo / verificação | Estado | Ação |
+| Tamanho do CLAUDE.md | 553 palavras (limite ~900); sempre carregado ~3,6k tokens (orçamento ~4,5k) | nenhuma |
+```
+
+Meses depois os retros engordaram `## Project-specific rules` e `## Models`; a linha agora marca:
+
+```
+| Tamanho do CLAUDE.md | 941 palavras (limite ~900); sempre carregado ~4,6k tokens (orçamento ~4,5k) | acima do limite e do orçamento: enxugue "Project-specific rules" ou "Models" |
+```
+
+O sync não pergunta nem escreve nada aqui. No próximo `/agile:retro`, antes de acrescentar uma linha ao `CLAUDE.md`, o Claude propõe mover uma primeiro:
+
+```
+Claude: o CLAUDE.md está com 941 palavras (limite ~900). Antes de acrescentar esta linha, mover "Use the shared JSON options" para .claude/rules/agile/project.md? (s/n)
+```
+
+Você decide; se disser não, a linha entra do mesmo jeito: nada bloqueia por tamanho.
+
+### 14.38 A versão da app passa para o Directory.Build.props
+
+O AndreaLisboa é um `website` do bootstrap anterior à 0.0.104: o `<Version>0.4.0</Version>` está no `AndreaLisboa.Web.csproj`, e o `AndreaLisboa.Core.dll` informa `1.0.0` porque nenhuma biblioteca leva número. Você atualiza o plugin, reinicia, roda `/agile:sync` (ele informa o estado e não oferece nada: `<Version> is on AndreaLisboa.Web.csproj (0.4.0): the next /agile:ship moves it to Directory.Build.props`) e, uma feature depois, digita `/agile:ship F-12`. O relatório do ship ganha duas linhas, e nenhuma pergunta veio antes:
+
+```
+app version: moved 0.4.0 from AndreaLisboa.Web.csproj to Directory.Build.props (highest wins: 0.4.0)
+app version: 0.4.0 -> 0.5.0 in Directory.Build.props (feature)
+```
+
+A mudança é um commit próprio na branch do item, antes do merge. Dali em diante toda DLL da app informa `0.5.0+<commit>`: as propriedades do arquivo `AndreaLisboa.Core.dll`, em qualquer máquina, dizem o release e o commit de onde ele veio. Um projeto sem versão em lugar nenhum (o Simulab) lê `app version: added 0.1.0 to Directory.Build.props (no bump: this item ships as 0.1.0)`, e o `/agile:publish` lê o número do mesmo arquivo.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -1438,13 +2248,15 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build <feature> [--worktree]` | Implementa uma feature aprovada na worktree criada no refinamento (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
-| `/agile:ship <feature>` | Suíte completa, merge, board, manual da app e o comando de docs declarado |
+| `/agile:ship <feature>` | Suíte completa, versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização), branch e worktree removidas, board, manual da app e o comando de docs declarado |
 | `/agile:retro` | Transforma lições em regras ou skills |
 | `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
 | `/agile:status` | Feature em andamento, topo do backlog, perguntas em aberto, o que está bloqueado e por quem |
+| `/agile:identity` | Registra a identidade visual do app (um arquivo, um site, uma imagem ou três perguntas) em `docs/design/`, ou revisa a que já existe |
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow e perfil dentro do projeto |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | Um item da ideia até done numa execução com duas paradas: as perguntas (as suas respostas o aprovam) e o roteiro de validação ("validado e autorizo o merge de F-n" entrega; só "validado" para em validating). `--assume` pula as perguntas, menos pacotes novos |
 | `/agile:version` | Versão do plugin em uso nesta sessão, a versão de onde vieram as cópias do projeto, e o próximo passo quando diferem |
+| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um. Digitar é a autorização |
 
 ## 16. Fluxo de cada comando
 
@@ -1456,13 +2268,15 @@ flowchart TD
     A["product/brief.md existe?"] -->|não| A1(["Template copiado; preencha e rode de novo"])
     A -->|sim| B["Ler o brief e a base de código que ele cita"]
     B --> C["Rodadas 1 a 8, uma mensagem cada:<br/>perguntas com recomendação e motivo"]
-    C --> D{"Suas respostas ('ok' aceita)"}
+    C --> C1["mobile sobre uma API existente (2d): pula o que a API decide;<br/>propõe as ideias do app a partir da lista marcada no site, ou a issue do portão no quadro da API"]
+    C1 --> C2["web-app ou website com app desde o início (2e): as funcionalidades do brief para desmarcar;<br/>depois Contracts (+ Shared com Hybrid) e o épico 'Mobile app', ainda sem projeto do app"]
+    C2 --> D{"Suas respostas ('ok' aceita)"}
     D --> E["Pergunta de fechamento: qual conceito do domínio mais preocupa?"]
     E --> F["Resumo de todas as decisões"]
     F --> G{"'confirmo'?"}
     G -->|não| C
     G -->|sim| H["Gerar: CLAUDE.md, ADR-0001, perfil, cópias do workflow,<br/>templates, regras, glossário, infra, índice do manual"]
-    H --> I{"Épicos no board? Esqueleto?"}
+    H --> I{"Épicos no board (website: 'Website sections')? Esqueleto?"}
     I -->|sim| J["Criar, compilar, testar uma vez, baseline de avisos, registro do sync"]
     J --> K{"Autoriza o primeiro commit?"}
     K -->|sim| L(["Commit na main; próximo: /agile:epic ou /agile:refine"])
@@ -1475,7 +2289,7 @@ flowchart TD
     B --> C["Achar o épico"]
     C -->|nenhum serve| C1{"Propor um épico; concorda?"}
     C1 -->|sim| D
-    C --> D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por, caminho, paralelo — desconhecido se ninguém disse);<br/>uma causa citada com a evidência, ou 'Cause not verified'"]
+    C --> D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por para começar, necessário para validar, caminho, paralelo — desconhecido se ninguém disse);<br/>uma causa citada com a evidência, ou 'Cause not verified'"]
     D --> E["Espelhar no board; id do board no cabeçalho"]
     E --> F(["Nada mais até /agile:refine <id>"])
 ```
@@ -1496,7 +2310,12 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Um épico para planejar"] --> B["Ler brief, itens existentes e código"]
-    B --> C["Features do tamanho de uma sessão: valor, prioridade, tamanho,<br/>depende de, espera por (e de quem), design de tela sim/não"]
+    B --> B1{"O perfil ou um complemento que ele cita<br/>tem uma seção Epic para isso? (app mobile de um site)"}
+    B1 -->|sim| B2["Segui-la: onde o app mora, as telas,<br/>as funcionalidades do site para marcar, Mobile foundation primeiro"]
+    B1 -->|não| C
+    B2 -->|repositório novo| B3["Pula a pergunta de telas; o épico do site é 'API for the mobile app':<br/>Mobile API foundation, depois API for de cada funcionalidade marcada"]
+    B3 --> C
+    B2 --> C["Features do tamanho de uma sessão: valor, prioridade, tamanho,<br/>depende de, espera por (e de quem), design de tela sim/não"]
     C --> D["Plano de execução: ordem, caminho sugerido, o que roda em paralelo;<br/>o que espera de fora do épico; corte da primeira release"]
     D --> E{"Concorda com a quebra?"}
     E -->|mudar| C
@@ -1597,15 +2416,14 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["status: validating e você disse 'validado'?"] -->|não| A1(["Perguntar"])
-    A -->|sim| B["Branch atualizada com a main; worktree: fechar IDE e app host"]
+    A -->|sim| B["Branch atualizada com a main; digitar ship conta como IDE e app host fechados"]
     B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura;<br/>saída gravada inteira, última linha GREEN ou RED: o que falhou"]
     C -->|vermelho| C1["Corrigir na branch"]
     C1 --> C
     C -->|verde| D["Manual da app em pt-BR, pt-PT, en; referências do DocGen e a visão geral à mão;<br/>gate.js docs: o comando de docs declarado, ou o DocGen implicitamente;<br/>RED para como o gate; infra.md; baseline"]
-    D --> E{"Autoriza o merge na main?"}
-    E -->|não| E1(["Esperar"])
-    E -->|sim| E2["Branch atual é a main; ler main..branch:<br/>parar se algum commit carrega o id de outro item"]
-    E2 --> F["Merge --no-ff; push; verificar 0 0, worktree removida,<br/>branch apagada (no origin só se o ls-remote a lista)"]
+    D --> D1["Versão da app no Directory.Build.props: acrescentada (0.1.0, sem incremento) quando falta, movida de um .csproj quando está lá,<br/>depois MINOR (feature), PATCH (bug) ou MAJOR (decisão que quebra compatibilidade);<br/>uma cabeça MAUI também recebe ApplicationDisplayVersion e ApplicationVersion + 1"]
+    D1 --> E2["O comando é a autorização do merge; branch atual é a main; ler main..branch:<br/>parar se algum commit carrega o id de outro item"]
+    E2 --> F["A main andou durante o ship? Traz para a branch, suíte completa, sobe a versão da main, segue (conflito ou vermelho para);<br/>merge --no-ff, lê o status de saída, depois push; sonda de lock, verificar 0 0, worktree removida,<br/>branch apagada (no origin só se o ls-remote a lista)"]
     F --> G["Decisões que citam arquivo estão nele; ## Delivery; status: done"]
     G --> H["Fechar o item do board com evidência;<br/>definir Status como Done explicitamente e ler de volta;<br/>não fixou após uma nova tentativa: reportar o comando à mão"]
     H --> I["Retro: no máximo 3 lições"]
@@ -1619,10 +2437,10 @@ flowchart TD
     B --> C["Classificar cada uma: regra do projeto, configuração,<br/>verificação de build, ajuste de template, nota do plugin, nada"]
     C --> D["Mostrar lições com destino e linha exata"]
     D --> E{"Aprovar cada uma"}
-    E --> F["Aplicar; CLAUDE.md abaixo de 60 linhas; uma linha por regra"]
+    E --> F["Aplicar; CLAUDE.md abaixo de ~900 palavras; uma linha por regra"]
     F --> F2["Regra nova sobre um padrão de teste: varrer os testes existentes;<br/>corrigir cada caso ou registrar como bug"]
     F2 --> G["Entrada no retro-log.md; nota de plugin (plugin: nome, da linha Plugins:)<br/>ganha linha ⏳ com plugin e escopo; tabela antiga ganha a coluna Plugin;<br/>cita agile-canary#N quando tiver, e recebe o ✅ no /agile:sync"]
-    G --> H(["Commit com a sua autorização se for na main"])
+    G --> H(["Commit na main: a sua escolha das lições autoriza num ship; rodando sozinho, pergunta"])
 ```
 
 ### /agile:pause
@@ -1641,7 +2459,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Somente leitura"] --> B["Git: branch, arquivos sem commit,<br/>cada worktree e o status do item dela"]
-    B --> C["Arquivos: item em andamento, aprovados com perguntas abertas,<br/>itens cujo Start depende de algo ou espera por algo"]
+    B --> C["Arquivos: item em andamento, aprovados com perguntas abertas,<br/>itens cujo Start depende de um item não pronto ou espera por algo para começar"]
     C --> D["Board: top 5, divergência com os arquivos"]
     D --> E["Retro log: notas ⏳ de plugin, contagem por plugin"]
     E --> F(["Relatório curto: em andamento, próximo passo, esperando você, bloqueados e por quem,<br/>trabalho sem commit, topo do backlog (o primeiro que pode começar), divergência do board,<br/>notas de plugin em espera por plugin"])
@@ -1652,7 +2470,7 @@ flowchart TD
 flowchart TD
     A["Plugin atualizado; árvore limpa; nenhum item em andamento?"] -->|não| A1{"Continuar mesmo assim?"}
     A1 -->|não| A2(["Esperar o item terminar"])
-    A -->|sim| B["sync.js plan: versão registrada → versão do plugin;<br/>um estado por arquivo"]
+    A -->|sim| B["sync.js plan: versão registrada → versão do plugin;<br/>um estado por arquivo; uma linha Complement: soma a cópia dele<br/>(docs/agile/profile-mobile-client.md)"]
     A1 -->|sim| B
     B -->|tudo igual| B1(["Nada a fazer"])
     B --> C["Tabela: new, update, edited, manual; uma proposta por arquivo"]
@@ -1660,7 +2478,8 @@ flowchart TD
     D --> E["Copiar new e update; mesclar edited à mão;<br/>propor cada edição manual (inclusive a linha Worktrees: ou Plugins: que faltar);<br/>nunca tocar nas regras do projeto; sem baseline de avisos: oferecer a primeira, gate.js baseline com o seu sim"]
     E --> E2["Algo que só o bootstrap instala e o projeto não tem:<br/>apontar e oferecer registrar uma feature"]
     E2 --> E3["DocGen sem comando de docs declarado:<br/>oferece o bloco, sync.js docs escreve no build.json"]
-    E3 --> F{"Arquivos de build ou regras conferidas mudaram?"}
+    E3 --> E4["Backend: external e a API alcançável:<br/>avisa quando o openapi.json dela passou do commit fixado;<br/>no pacote de telas do site: avisa quando o último release dele passou da versão fixada"]
+    E4 --> F{"Arquivos de build ou regras conferidas mudaram?"}
     F -->|sim| G["Build, suíte completa, corrigir achados, baseline"]
     F -->|não| H
     G --> G2["Notas de plugin entregues, se aprovado:<br/>sync.js notes as marca com ✅"]
@@ -1669,12 +2488,31 @@ flowchart TD
     I -->|sim| J(["chore: sync with agile@canary <versão>"])
 ```
 
+### /agile:identity
+```mermaid
+flowchart TD
+    A["Já há identidade em docs/design/?"] -->|sim| A1{"Tabela dela: o que muda?"}
+    A -->|não| B{"23a: arquivo, URL, imagem ou nenhuma?"}
+    A1 --> B
+    B -->|arquivo| C["Valida o DTCG, ou converte o DESIGN.md em tokens"]
+    B -->|URL ou imagem| D["Lê a página ou a imagem; cores de imagem marcadas como estimadas"]
+    B -->|nenhuma| E["Cor primária, fonte, claro/escuro/os dois; deriva a paleta"]
+    C --> F["Tabela: papéis, fontes, raio, família de ícones, WCAG AA de cada par, nos dois temas"]
+    D --> F
+    E --> F
+    F --> G{"Par que falha: valor mais próximo que passa; 'confirmo'?"}
+    G -->|muda| F
+    G -->|sim| H["Escreve docs/design/identity.tokens.json e, a partir dele, o front matter do DESIGN.md; compara os dois"]
+    H --> I["Linha no ADR-0001; há kit de UI: registra 'Aplicar a identidade ao tema'"]
+    I --> J(["Nenhum código do app alterado"])
+```
+
 ### /agile:autopilot
 ```mermaid
 flowchart TD
     A["Item não pronto"] --> R{"Linha Autopilot: no arquivo?"}
     R -->|sim| R1["Retoma daquele passo"]
-    R -->|não| A1{"Start: depende de um item não pronto,<br/>ou espera por algo?"}
+    R -->|não| A1{"Start: depende de um item não pronto,<br/>ou espera por algo para começar?<br/>(Needed to validate nunca para)"}
     A1 -->|sim| A2(["Diz pelo que espera e de quem; para"])
     A1 -->|não| B["Refinamento: código lido, premissas verificadas;<br/>screen-design quando há tela nova ou complexa"]
     B --> B1{"--assume?"}
@@ -1709,4 +2547,32 @@ flowchart TD
     B -->|sim| B1(["Em dia"])
     B -->|a em uso é mais nova| C(["Próximo passo: /agile:sync, entre features"])
     B -->|a do projeto é mais nova| D(["Atualizar o plugin, depois uma sessão nova"])
+```
+
+### /agile:publish
+```mermaid
+flowchart TD
+    A["Plano: checkout principal, na main, limpo, em dia com o origin;<br/>uma só versão nos projetos; a tag dessa versão livre (só num release: uma promoção ou um rollback de uma tag já liberada pula isto)"] -->|"uma conferência falha"| A1(["Para com o motivo, nada escrito"])
+    A -->|ok| B["Mostra versão, tag anterior, itens desde ela, projetos e runtimes<br/>(digitar o comando é a autorização: sem pergunta)"]
+    B --> C["dotnet publish -c Release por projeto e runtime;<br/>tira o appsettings.Development.json e o .xml; um zip cada"]
+    C -->|"publish ou zip falha"| C1(["Para: nada commitado nem marcado"])
+    C --> C2["O site de um app Hybrid: dotnet pack de Contracts e Shared na versão do release, em packages/<br/>(sem GITHUB_PACKAGES_TOKEN ou com origin fora do github.com: ficam de fora, com o motivo)"]
+    C2 -->|"o pack falha"| C1
+    C2 --> D["Escreve as notas em docs/releases/ (um arquivo por versão)"]
+    D --> D2["Um head mobile: .aab Android assinado (assinatura em quatro variáveis de ambiente)<br/>e docs/releases/v<Versão>-store.md, o checklist das lojas"]
+    D2 --> E["Commit na main (notas e checklist), tag anotada com as notas, push da main e da tag"]
+    E -->|"o push falha"| E1(["Diz o comando para repetir; commit e tag ficam"])
+    E --> E2(["Com .github/workflows/deploy.yml: a tag enviada inicia o pipeline,<br/>que roda o mesmo Deploy command no destino dele (o plano avisou antes)"])
+    E --> F{"origin no github.com e gh instalado?"}
+    F -->|sim| G(["GitHub Release com as notas, sem binários"])
+    F -->|não| H(["Uma linha dizendo por quê; a tag fica"])
+    G --> I(["Pacotes enviados ao GitHub Packages com --skip-duplicate;<br/>uma falha diz o comando de push para repetir"])
+    H --> I
+    I --> J{"Um ambiente nomeado?"}
+    J -->|não| J0(["Pronto: só o release"])
+    J -->|sim| K["Confere o docs/infra.md: o ambiente, o comando dele (not declared: diz como declarar),<br/>a tag (um rollback precisa que ela exista), cada segredo definido (só o nome), pacotes Aspire = versão do CLI"]
+    K -->|"uma conferência falha"| K1(["Para com o motivo, nada rodou"])
+    K --> L["Roda o comando em raiz dos worktrees/deploy, solto na tag;<br/>saída salva fora do repositório; Check URL consultada até dar 200 (60 s)"]
+    L -->|"saída diferente de 0, ou sem 200"| L1(["Nada registrado, nada revertido;<br/>dá o /agile:publish da versão registrada antes"])
+    L --> M(["Registra v<x.y.z> (data) no docs/infra.md: commit na main e push"])
 ```

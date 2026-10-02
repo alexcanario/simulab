@@ -161,6 +161,15 @@
         <AppLookupField Id="gallery-lookup-failing" Label="@L["Exams.Field.IssuingAuthority"]"
                         Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
                         SearchAsync="GalleryFailingLookupAsync" />
+
+        @* F-42: a short fixed list - no minimum of characters, the whole list opens on focus and none is cut off
+           at 20. Focus it, type to narrow it, pick one, then focus it again: it still offers the state it holds. *@
+        <AppLookupField Id="gallery-lookup-fixed-list" Label="@L["Exams.Field.State"]"
+                        Placeholder="@L["Exams.Field.State.Placeholder"]" Hint="@L["Exams.Field.State.Hint"]"
+                        LeadingIcon="@AppIcons.Place" Required="true"
+                        MinChars="0" MaxItems="@Simulab.Catalog.Contracts.BrazilianStates.All.Count" OpenOnFocus="true"
+                        SearchAsync="GalleryStatesAsync" Value="@_stateValue"
+                        ValueChanged="@(value => _stateValue = value)" />
     </MudPaper>
 </section>
 
@@ -425,6 +434,7 @@
     private readonly DateOnly? _dateDisabled = new DateOnly(2026, 6, 14);
 
     private AppLookupOption? _lookupValue;
+    private AppLookupOption? _stateValue;
     private AppLookupOption? _filterLookup;
     private string? _filterValue;
 
@@ -444,6 +454,10 @@
     private static Task<IReadOnlyList<AppLookupOption>> GalleryLookupAsync(string term, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<AppLookupOption>>(
             [.. GalleryLookupOptions.Where(option => option.Text.Contains(term, StringComparison.OrdinalIgnoreCase))]);
+
+    private static Task<IReadOnlyList<AppLookupOption>> GalleryStatesAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>(
+            [.. Simulab.Catalog.Contracts.BrazilianStates.Search(term).Select(state => new AppLookupOption(Guid.Empty, state.DisplayName))]);
 
     private static Task<IReadOnlyList<AppLookupOption>> GalleryFailingLookupAsync(string term, CancellationToken cancellationToken) =>
         Task.FromException<IReadOnlyList<AppLookupOption>>(new HttpRequestException("gallery: the search failed on purpose"));

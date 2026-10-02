@@ -13,7 +13,6 @@ public sealed class CatalogExamPageTests : StudentCatalogTestContext
             exam.Id,
             exam.Name,
             exam.IssuingAuthorityName,
-            exam.IssuingAuthorityAcronym,
             exam.AssessmentType,
             exam.Scope,
             exam.ScopeDetail,
@@ -66,10 +65,10 @@ public sealed class CatalogExamPageTests : StudentCatalogTestContext
         var terms = page.FindAll(".app-form-aside dt").Select(term => term.TextContent.Trim());
         var values = page.FindAll(".app-form-aside dd").Select(value => value.TextContent.Trim());
         terms.Zip(values).Should().Equal(
-            ("Issuing authority", "Prefeitura de Sao Paulo (PMSP)"),
+            ("Issuing authority", "Prefeitura de Sao Paulo"),
             ("Assessment type", "Public service exam"),
             ("Scope", "State"),
-            ("State", "Sao Paulo"),
+            ("State", "São Paulo (SP)"),
             ("Content language", SupportedCultures.NativeName(new System.Globalization.CultureInfo("pt-BR"))),
             ("Published editions", "2"),
             ("Latest notice year", "2025"));

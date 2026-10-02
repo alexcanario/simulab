@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Contracts;
@@ -18,6 +19,14 @@ public abstract class CatalogApiTests : ApiHostTests
         await using var scope = Factory.Services.CreateAsyncScope();
         return await query(scope.ServiceProvider.GetRequiredService<CatalogModuleDbContext>());
     }
+
+    /// <summary>
+    /// Stores an acronym on an issuing authority, as the rows typed before F-44 hid it hold one: no screen or
+    /// request sets it any more, so only the table can.
+    /// </summary>
+    protected Task StoreAcronymAsync(Guid authorityId, string acronym) =>
+        QueryAsync(context => context.Database.ExecuteSqlInterpolatedAsync(
+            $"UPDATE catalog.issuing_authorities SET acronym = {acronym.ToUpperInvariant()}, normalized_acronym = {acronym.ToUpperInvariant()} WHERE id = {authorityId}"));
 
     /// <summary>A client signed in as a fresh account holding the Admin role.</summary>
     protected async Task<HttpClient> AdminAsync()

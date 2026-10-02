@@ -176,7 +176,7 @@ else
     {
         List<AppAsideRow> rows =
         [
-            new(L["Exams.Field.IssuingAuthority"], $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})"),
+            new(L["Exams.Field.IssuingAuthority"], exam.IssuingAuthorityName),
             new(L["Exams.Field.AssessmentType"], ExamText.AssessmentTypeName(L, exam.AssessmentType)),
             new(L["Exams.Field.Scope"], ExamText.ScopeName(L, exam.Scope))
         ];
@@ -185,7 +185,7 @@ else
         {
             rows.Add(new AppAsideRow(
                 exam.Scope == ExamScope.State ? L["Exams.Field.State"] : L["Exams.Field.Municipality"],
-                exam.ScopeDetail));
+                ExamText.ScopeDetailText(exam.Scope, exam.ScopeDetail)));
         }
 
         rows.Add(new AppAsideRow(L["Exams.Field.ContentLanguage"], ExamText.ContentLanguageName(exam.ContentLanguage)));

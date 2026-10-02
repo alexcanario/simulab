@@ -68,7 +68,6 @@
         <PropertyColumn T="ExamResponse" TProperty="string" Property="row => row.IssuingAuthorityName" Title="@L["Exams.Column.IssuingAuthority"]">
             <CellTemplate>
                 <AppTruncatedText Text="@context.Item.IssuingAuthorityName" MaxWidth="14rem" />
-                <span class="app-cell-secondary">@context.Item.IssuingAuthorityAcronym</span>
             </CellTemplate>
         </PropertyColumn>
         <PropertyColumn T="ExamResponse" TProperty="AssessmentType" Property="row => row.AssessmentType" Title="@L["Exams.Column.AssessmentType"]">
@@ -79,7 +78,7 @@
                 @ExamText.ScopeName(L, context.Item.Scope)
                 @if (!string.IsNullOrEmpty(context.Item.ScopeDetail))
                 {
-                    <span class="app-cell-secondary">@context.Item.ScopeDetail</span>
+                    <span class="app-cell-secondary">@ExamText.ScopeDetailText(context.Item.Scope, context.Item.ScopeDetail)</span>
                 }
             </CellTemplate>
         </PropertyColumn>
@@ -182,7 +181,7 @@
         // v2: only bodies that publish notices are offered. A board is never a parent of an exam (BR2).
         return [.. result.Value!.Items.Select(authority => new AppLookupOption(
             authority.Id,
-            $"{authority.Name} ({authority.Acronym})"))];
+            authority.Name))];
     }
 
     private Task OnAuthorityFilterChangedAsync(AppLookupOption? value)
@@ -210,7 +209,7 @@
     private async Task DeleteAsync(ExamResponse exam)
     {
         _error = null;
-        var authority = $"{exam.IssuingAuthorityName} ({exam.IssuingAuthorityAcronym})";
+        var authority = exam.IssuingAuthorityName;
         if (!await Confirm.ConfirmDeleteAsync(L, exam.Name, L["Exams.Delete.Message", exam.Name, authority]))
         {
             return;

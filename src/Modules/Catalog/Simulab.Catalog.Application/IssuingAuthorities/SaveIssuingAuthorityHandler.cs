@@ -6,7 +6,7 @@ namespace Simulab.Catalog.Application.IssuingAuthorities;
 
 /// <summary>
 /// Creates an issuing authority or replaces the fields of an existing one (F-34 BR18, v2). The shape rules
-/// belong to the entity; the two that need the table — name and acronym already taken — belong here. The
+/// belong to the entity; the one that needs the table — name already taken — belongs here. The
 /// unique indexes are the real guarantee; these checks turn the common case into a clean 409.
 /// </summary>
 public sealed class SaveIssuingAuthorityHandler(IIssuingAuthorityStore store)
@@ -25,17 +25,17 @@ public sealed class SaveIssuingAuthorityHandler(IIssuingAuthorityStore store)
                 new Error(CatalogErrorCodes.IssuingAuthorityNotFound, ErrorKind.NotFound));
         }
 
-        // Shape first, so a blank name is answered as a blank name even when the acronym is also taken.
-        var candidate = IssuingAuthority.Create(request.Name, request.Acronym, request.Description, request.Website);
+        // Shape first, then the name against the table.
+        var candidate = IssuingAuthority.Create(request.Name, request.Description, request.Website);
         if (candidate.IsFailure)
         {
             return Result.Failure<IssuingAuthorityResponse>(candidate.Error!);
         }
 
-        var taken = await TakenAsync(candidate.Value, id, cancellationToken);
-        if (taken is not null)
+        if (await store.NameIsTakenAsync(candidate.Value.NormalizedName, id, cancellationToken))
         {
-            return Result.Failure<IssuingAuthorityResponse>(taken);
+            return Result.Failure<IssuingAuthorityResponse>(
+                new Error(CatalogErrorCodes.IssuingAuthorityNameTaken, ErrorKind.Conflict));
         }
 
         var authority = existing ?? candidate.Value;
@@ -46,10 +46,10 @@ public sealed class SaveIssuingAuthorityHandler(IIssuingAuthorityStore store)
         else
         {
             // The same validation ran on the candidate a moment ago, so this one cannot fail.
-            authority.Update(request.Name, request.Acronym, request.Description, request.Website);
+            authority.Update(request.Name, request.Description, request.Website);
         }
 
-        // Another writer may have committed the same name or acronym since the check above (B-14).
+        // Another writer may have committed the same name since the check above (B-14).
         var refused = await store.TrySaveChangesAsync(cancellationToken);
         if (refused is not null)
         {
@@ -59,22 +59,7 @@ public sealed class SaveIssuingAuthorityHandler(IIssuingAuthorityStore store)
         return Result.Success(new IssuingAuthorityResponse(
             authority.Id,
             authority.Name,
-            authority.Acronym,
             authority.Description,
             authority.Website));
-    }
-
-    // The comparison runs over the same normalized form the unique index uses, so this answer and
-    // PostgreSQL's never disagree.
-    private async Task<Error?> TakenAsync(IssuingAuthority candidate, Guid? exceptId, CancellationToken cancellationToken)
-    {
-        if (await store.NameIsTakenAsync(candidate.NormalizedName, exceptId, cancellationToken))
-        {
-            return new Error(CatalogErrorCodes.IssuingAuthorityNameTaken, ErrorKind.Conflict);
-        }
-
-        return await store.AcronymIsTakenAsync(candidate.NormalizedAcronym, exceptId, cancellationToken)
-            ? new Error(CatalogErrorCodes.IssuingAuthorityAcronymTaken, ErrorKind.Conflict)
-            : null;
     }
 }

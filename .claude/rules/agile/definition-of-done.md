@@ -15,6 +15,6 @@ An item is `done` only when every line is true. "Almost" is `validating`.
 - The owner followed the validation script and said it passed, in this conversation.
 - The item file reflects what was built: decisions, change notes, `## Delivery`.
 - The app manual is updated in the three languages when visible behavior changed; the generated technical docs (`docs/architecture/`) pass `DocGen --check` when the project has them.
-- The merge was authorized by the owner (in `/agile:autopilot`, possibly in the same message as the validation, naming the merge), verified (`0 0`, branch and worktree gone) and the board item is closed with evidence.
+- The merge was authorized by the owner (typing `/agile:ship <id>`; in `/agile:autopilot`, possibly in the validation message naming the merge), verified (`0 0`, branch and worktree gone) and the board item is closed with evidence.
 - Nothing is left uncommitted in any worktree.
 - The retro ran: at most three lessons, each one proposed as a rule, a skill change or nothing.

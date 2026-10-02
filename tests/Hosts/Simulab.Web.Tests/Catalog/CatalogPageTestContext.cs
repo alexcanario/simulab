@@ -34,14 +34,12 @@ public abstract class CatalogPageTestContext : KitTestContext
     protected static readonly IssuingAuthorityResponse Guarulhos = new(
         Guid.Parse("0198f0a3-0000-7000-8000-000000000011"),
         "Prefeitura Municipal de Guarulhos",
-        "PMG",
         null,
         null);
 
     protected static readonly IssuingAuthorityResponse PoliciaFederal = new(
         Guid.Parse("0198f0a3-0000-7000-8000-000000000012"),
         "Policia Federal",
-        "PF",
         null,
         null);
 
@@ -53,7 +51,6 @@ public abstract class CatalogPageTestContext : KitTestContext
         "Agente de Policia Federal",
         PoliciaFederal.Id,
         PoliciaFederal.Name,
-        PoliciaFederal.Acronym,
         AssessmentType.PublicServiceExam,
         ExamScope.National,
         null,
@@ -64,10 +61,9 @@ public abstract class CatalogPageTestContext : KitTestContext
         "FUVEST",
         Guarulhos.Id,
         Guarulhos.Name,
-        Guarulhos.Acronym,
         AssessmentType.UniversityEntranceExam,
         ExamScope.State,
-        "Sao Paulo",
+        "SP",
         "pt-BR");
 
     protected FakeCatalogApi Api { get; } = new();
@@ -326,7 +322,7 @@ public abstract class CatalogPageTestContext : KitTestContext
         }
 
         private static IssuingAuthorityResponse SavedAuthority(Guid id, SaveIssuingAuthorityRequest request) =>
-            new(id, request.Name!, request.Acronym!.ToUpperInvariant(), request.Description, request.Website);
+            new(id, request.Name!, request.Description, request.Website);
 
         // The Api joins the issuing authority's name; the fake looks it up in the same sample rows.
         private static ExamResponse SavedExam(Guid id, SaveExamRequest request)
@@ -338,7 +334,6 @@ public abstract class CatalogPageTestContext : KitTestContext
                 request.Name!,
                 authority.Id,
                 authority.Name,
-                authority.Acronym,
                 request.ParseAssessmentType() ?? AssessmentType.PublicServiceExam,
                 request.ParseScope() ?? ExamScope.National,
                 request.ScopeDetail,

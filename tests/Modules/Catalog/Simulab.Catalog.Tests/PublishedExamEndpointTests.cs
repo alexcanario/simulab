@@ -22,11 +22,11 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
 
     private static string Token() => Guid.CreateVersion7().ToString("N")[..12];
 
-    private static async Task<IssuingAuthorityResponse> AuthorityAsync(HttpClient admin, string name, string? acronym = null)
+    private static async Task<IssuingAuthorityResponse> AuthorityAsync(HttpClient admin, string name)
     {
         var response = await admin.PostAsJsonAsync(
             Authorities,
-            new SaveIssuingAuthorityRequest(name, acronym ?? Token()),
+            new SaveIssuingAuthorityRequest(name),
             AppJson.Options);
         response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
 
@@ -139,7 +139,8 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         second.Items.Select(item => item.Name).Should().Equal($"Charlie {token}");
     }
 
-    // AC3: word by word, ignoring case and accents, across exam, authority and scope detail.
+    // AC3: word by word, ignoring case and accents, across exam, authority and scope detail; a stored
+    // acronym is not searched (F-44 AC7).
     [Fact]
     public async Task List_SearchWords_MatchAcrossExamAuthorityAndScopeDetail()
     {
@@ -147,13 +148,14 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         var student = await StudentAsync();
         var token = Token();
         var acronym = $"PM{Token()[..8]}";
-        var authority = await AuthorityAsync(admin, $"Prefeitura de São Paulo {token}", acronym);
+        var authority = await AuthorityAsync(admin, $"Prefeitura de São Paulo {token}");
+        await StoreAcronymAsync(authority.Id, acronym);
         var board = await BoardAsync(admin);
         var exam = await ExamAsync(admin, authority.Id, $"Guarda Municipal {token}", scope: ExamScope.Municipal, detail: "São Paulo");
         await EditionAsync(admin, exam.Id, board.Id, 2025, "Published");
 
         (await ListAsync(student, Search($"guarda sao {token}"))).Items.Should().ContainSingle().Which.Id.Should().Be(exam.Id);
-        (await ListAsync(student, Search(acronym.ToLowerInvariant()))).Items.Should().ContainSingle().Which.Id.Should().Be(exam.Id);
+        (await ListAsync(student, Search(acronym.ToLowerInvariant()))).Items.Should().BeEmpty("the stored acronym is no longer searched (F-44 BR5)");
         (await ListAsync(student, Search($"GUARDA  paulo   {token}"))).Items.Should().ContainSingle().Which.Id.Should().Be(exam.Id);
         (await ListAsync(student, Search($"guarda rio {token}"))).Items.Should().BeEmpty();
     }
@@ -168,7 +170,7 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         var authority = await AuthorityAsync(admin, $"Orgao {token}");
         var fgv = await BoardAsync(admin);
         var cebraspe = await BoardAsync(admin);
-        var exam = await ExamAsync(admin, authority.Id, $"Exame {token}", scope: ExamScope.State, detail: "Goiás");
+        var exam = await ExamAsync(admin, authority.Id, $"Exame {token}", scope: ExamScope.State, detail: "GO");
         await EditionAsync(admin, exam.Id, fgv.Id, 2024, "Published");
         await EditionAsync(admin, exam.Id, cebraspe.Id, 2025, "Published");
 
@@ -211,13 +213,38 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         var token = Token();
         var authority = await AuthorityAsync(admin, $"Orgao {token}");
         var board = await BoardAsync(admin);
-        var exam = await ExamAsync(admin, authority.Id, $"Guarda Municipal {token}", scope: ExamScope.State, detail: "Goiás");
+        var exam = await ExamAsync(admin, authority.Id, $"Guarda Municipal {token}", scope: ExamScope.State, detail: "GO");
         await EditionAsync(admin, exam.Id, board.Id, 2025, "Published");
 
         (await ListAsync(student, $"search={Uri.EscapeDataString($"guarda\tgoias\n{token}")}")).Items
             .Should().ContainSingle().Which.Id.Should().Be(exam.Id);
         // 1 is National: read as a number it would hide this State exam.
         (await ListAsync(student, Search(token, "&scope=1"))).Items.Should().ContainSingle();
+    }
+
+    // F-42 AC6, AC7 (BR4, BR5): a published State exam stored as SP comes back with its acronym and is found by
+    // the acronym, the name and the name with its accent, in any case; a student who searches another state
+    // does not find it.
+    [Theory]
+    [InlineData("sp")]
+    [InlineData("SP")]
+    [InlineData("sao paulo")]
+    [InlineData("São Paulo")]
+    [InlineData("paulo")]
+    public async Task List_StateExamStoredAsAnAcronym_IsFoundByTheStateNameOrAcronym(string term)
+    {
+        var admin = await AdminAsync();
+        var student = await StudentAsync();
+        var token = Token();
+        var authority = await AuthorityAsync(admin, $"Orgao {token}");
+        var board = await BoardAsync(admin);
+        var exam = await ExamAsync(admin, authority.Id, $"Exame {token}", scope: ExamScope.State, detail: "sp");
+        await EditionAsync(admin, exam.Id, board.Id, 2025, "Published");
+
+        var found = await ListAsync(student, $"search={Uri.EscapeDataString($"{term} {token}")}");
+
+        found.Items.Should().ContainSingle().Which.ScopeDetail.Should().Be("SP");
+        (await ListAsync(student, $"search={Uri.EscapeDataString($"ceara {token}")}")).Items.Should().BeEmpty();
     }
 
     // AC7: only boards and years that name a published edition are offered.

@@ -129,7 +129,6 @@ public sealed class ExamEditionUniqueIndexTests : CatalogApiTests
     {
         var authority = IssuingAuthority.Create(
             $"Orgao {Guid.CreateVersion7():N}"[..30],
-            Guid.CreateVersion7().ToString("N")[..12],
             null,
             null).Value;
         var exam = Exam.Create(authority.Id, $"Exame {Guid.CreateVersion7():N}"[..30], AssessmentType.PublicServiceExam, ExamScope.National, null, "pt-BR").Value;

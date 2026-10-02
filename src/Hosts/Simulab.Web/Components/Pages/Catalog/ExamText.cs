@@ -29,6 +29,13 @@ public static class ExamText
     }
 
     /// <summary>
+    /// F-42 BR4: the place an exam applies to, as a reader sees it. A State exam stores an acronym and reads
+    /// <c>São Paulo (SP)</c>; a value the list does not know (BR6) and every Municipal detail read as stored.
+    /// </summary>
+    public static string? ScopeDetailText(ExamScope scope, string? scopeDetail) =>
+        scope == ExamScope.State ? BrazilianStates.Display(scopeDetail) : scopeDetail;
+
+    /// <summary>
     /// F-36: an exam's content language in its own name ("Português (Brasil)"), the way the exam form's picker shows it;
     /// the raw tag when it is not one of the UI languages.
     /// </summary>

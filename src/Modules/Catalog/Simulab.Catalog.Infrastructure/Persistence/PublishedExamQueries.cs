@@ -9,7 +9,7 @@ namespace Simulab.Catalog.Infrastructure.Persistence;
 /// The student side of the catalog (F-36). An exam exists here only when at least one of its editions is
 /// published (BR1); the soft-delete filter runs inside every correlated subquery, so a deleted edition, exam
 /// or board never counts. The search is word by word over the normalized exam name, issuing authority name
-/// and acronym, and scope detail (BR3), and the board and year filters match on the same edition (BR5).
+/// and scope detail (BR3), and the board and year filters match on the same edition (BR5).
 /// </summary>
 public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPublishedExamQueries
 {
@@ -26,7 +26,6 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
             rows = rows.Where(row =>
                 row.Exam.NormalizedName.Contains(term)
                 || row.Authority.NormalizedName.Contains(term)
-                || row.Authority.NormalizedAcronym.Contains(term)
                 || row.Exam.NormalizedScopeDetail.Contains(term));
         }
 
@@ -79,7 +78,6 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
             exam.Id,
             exam.Name,
             exam.IssuingAuthorityName,
-            exam.IssuingAuthorityAcronym,
             exam.AssessmentType,
             exam.Scope,
             exam.ScopeDetail,
@@ -138,7 +136,6 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
             row.Exam.Id,
             row.Exam.Name,
             row.Authority.Name,
-            row.Authority.Acronym,
             row.Exam.AssessmentType,
             row.Exam.Scope,
             row.Exam.ScopeDetail,
