@@ -1,7 +1,7 @@
 ---
 feature: F-47
 epic: Foundation and identity
-status: building
+status: validating
 board: 22
 version: 1
 ---
@@ -223,8 +223,37 @@ The `reviewer` agent read the file against the code; every major was checked her
 
 ## Change notes
 
+### Build decisions and independent review of the diff (2026-10-02)
+- `RecoveryCodes.ReplaceAsync` now throws on a failed `IdentityResult` (BR1b). `RegenerateRecoveryCodesAsync`
+  shares it, so a failed store there answers 500 instead of success with codes that were never stored; accepted as
+  the same defect, said here because BR7 otherwise leaves that path as is.
+- `IdentityResultExtensions.ThrowIfFailed` (internal, `Security/`) is the one way the five paths throw on a failed
+  result; `ResetPasswordHandler` uses it for its existing check too.
+- Review, minor, fixed — the password grant in `TokenEndpoints` lacked its BR7 comment line; added.
+- Review, minor, fixed — the exception text said "inside a transaction" on a path that has none; now neutral.
+- Review, minor, fixed — `ResetPasswordHandler` threw by hand beside `ThrowIfFailed`; one way now.
+- Review, no blocker or major. Concurrent resets with the same link: the conditional update inside the transaction
+  blocks the second request on the row lock and updates 0 rows after the first commits, so exactly one succeeds.
+- No app-host wiring changed (no connection string, resource or URL), so there is no app-host check beyond the
+  validation script below.
+
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+Needed to validate: nothing beyond the app host. The change has no screen; the failure cases are proven by tests,
+so the script checks that the normal flows still work through the real app host.
+1. Start: `dotnet run --project src/Hosts/Simulab.AppHost`; open the Web at https://localhost:7125 and Mailpit from
+   the dashboard.
+2. Sign up at `/sign-up`, then verify with the email link and sign in at `/sign-in`.
+3. Sign out, open `/forgot-password`, ask for a link twice (the second after a minute): only the newest link works.
+4. Use it at the reset page with a new password: you can sign in with it, not with the old one, and a "password
+   changed" email arrives in Mailpit. Opening the same link again says it is invalid.
+5. Signed in on two browsers, change the password on the Security page: the other browser is signed out, this one
+   stays, and the notice email arrives.
+6. On the Security page turn two-factor on (secret from the page, code from an authenticator): ten recovery codes
+   appear; sign out and in again with a code.
+7. A sign-in with a wrong password still counts: five wrong attempts lock the account.
+8. Evidence the failure cases hold (terminal, Git Bash and PowerShell 7, same command):
+   `dotnet test tests/Modules/Identity/Simulab.Identity.Tests --filter "FullyQualifiedName~IdentityTransactionTests"`
+   expects `Passed!  - Failed: 0, Passed: 9`.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

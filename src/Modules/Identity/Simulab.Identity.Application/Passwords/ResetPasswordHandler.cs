@@ -70,12 +70,7 @@ public sealed class ResetPasswordHandler(
             // Our own token proved the mailbox; Identity's own reset token is only the key its API asks for.
             // The rules were checked above, so a failure here is not the visitor's password: a server error.
             var identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
-            var reset = await userManager.ResetPasswordAsync(user, identityToken, newPassword!);
-            if (!reset.Succeeded)
-            {
-                throw new InvalidOperationException(
-                    $"Resetting the password failed after the checks passed: {string.Join(", ", reset.Errors.Select(error => error.Code))}.");
-            }
+            (await userManager.ResetPasswordAsync(user, identityToken, newPassword!)).ThrowIfFailed("Resetting the password");
 
             // BR5: the person who opened the link owns the mailbox; making them wait out a lockout protects nothing.
             await userManager.ResetAccessFailedCountAsync(user);
