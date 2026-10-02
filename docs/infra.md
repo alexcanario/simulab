@@ -22,8 +22,11 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
   - Drop it when the item ships (server up, nobody connected to it): `DROP DATABASE simulab_f42;`
 - **Only the database server, through the app host**: there is no flag to start one resource. Start the app host, then in the dashboard's Resources page choose **Stop** on `api` and `web` (and `redis`, `mailpit` when not needed). Postgres stays on `127.0.0.1:5432`.
 - **Only the database server, without the app host**: a container on the app's volume. The Postgres version must be the one that created the volume, and the data path depends on it.
-  - Which version: `docker run --rm -v simulab-postgres-data:/d:ro alpine cat /d/PG_VERSION`
-  - For `17` or older (the volume goes to `/var/lib/postgresql/data`; the 18 image keeps data under `/var/lib/postgresql`): `docker run -d --name simulab-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -v simulab-postgres-data:/var/lib/postgresql/data postgres:17`
+  - Which layout (read only). In Git Bash set `export MSYS_NO_PATHCONV=1` first, or `/d` is rewritten to `D:/` and the command finds nothing: `docker run --rm -v simulab-postgres-data:/d:ro alpine ls -la /d`. A folder `18` means a PostgreSQL 18 volume (data in `18/docker`); `PG_VERSION` at the root means 17 or older.
+  - Verified 2026-10-02: the local volume is PostgreSQL 18 (`18/docker/PG_VERSION` holds `18`). The 18 image keeps data under `/var/lib/postgresql`, so mounting the volume on `/var/lib/postgresql/data` makes `initdb` run on a non-empty folder and refuse (`directory "/var/lib/postgresql/data" exists but is not empty`); nothing is lost, only the container fails.
+  - PostgreSQL 18: `docker run -d --name simulab-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -v simulab-postgres-data:/var/lib/postgresql postgres:18`
+  - PostgreSQL 17 or older: the same with `-v simulab-postgres-data:/var/lib/postgresql/data` and the matching image (`postgres:17`).
+  - Read through the container, with no client installed (the server asks for the password even on its socket): `docker exec -e PGPASSWORD=postgres simulab-pg psql -U postgres -d simulab -At -c "select count(*) from catalog.exams"`
   - Stop it, keeping the data: `docker rm -f simulab-pg`
   - Never run it together with the app host: both want port 5432 and the same data directory.
 - **Repeat one migration by hand** (a data migration being checked on screen): `DELETE FROM catalog.__ef_migrations_history WHERE migration_id = '<migration id>';` in that database, then start the app host again. Use it only on a worktree's own database. The history table of a module is `<schema>.__ef_migrations_history`, with `migration_id`.
