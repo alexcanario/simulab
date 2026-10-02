@@ -15,7 +15,7 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
 | Banca | Entidade organizadora | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
 | Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
-| Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33) |
+| Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33). The issuing authority's `Acronym` is not shown or set since F-44; the column stays, optional and not unique |
 | Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper |
 | Abrangência | Abrangência | `ExamScope` | How far an exam reaches: `National`, `State` or `Municipal`. The state or the municipality is the `ScopeDetail` (F-34) |
 | Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) |

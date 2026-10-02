@@ -186,9 +186,11 @@ public sealed class SeedAdminTests
         token.AccessToken.Should().NotBeNullOrEmpty(token.ErrorDescription);
     }
 
+    // F-44 (owner, 2026-10-02): appsettings.Development.json is exempt on purpose — the owner keeps the local
+    // admin's development password there so the app host seeds it without user secrets. The base file, which
+    // every environment reads, still carries none.
     [Theory]
     [InlineData("appsettings.json")]
-    [InlineData("appsettings.Development.json")]
     public void Settings_CommittedFiles_CarryNoSeedAdminPassword(string file)
     {
         var configuration = new ConfigurationBuilder().AddJsonFile(ApiProjectFile(file), optional: false).Build();
