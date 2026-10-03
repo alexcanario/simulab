@@ -1,7 +1,7 @@
 ---
 feature: F-48
 epic: Foundation and identity
-status: building
+status: validating
 board: 773
 version: 1
 ---
@@ -93,7 +93,17 @@ No screen and no API change.
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+Needed to validate: nothing. There is no screen; the item changes tests only.
+
+1. Open a terminal in the worktree `D:\wt\simulab\f-48-debounce-on` and run (Git Bash and PowerShell 7, same line):
+   `dotnet test tests/Hosts/Simulab.Web.Tests --nologo` → `Passed! - Failed: 0, Passed: 820, Skipped: 0, Total: 820`, about 5 to 10 s.
+2. Run it again a few times: the result is the same every time, and no run waits 300 ms on a search box.
+3. `git diff --stat main...HEAD -- src` → prints nothing (no production file changed).
+4. Open `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs` → it registers one `FakeTimeProvider` (`Clock`) and an `AdvanceDebounce()` helper; every test that types into a search box or lookup field calls it.
+
+## Build evidence
+- 2026-10-03 — AC4: 20 runs of `Simulab.Web.Tests`, each after `dotnet clean` and a rebuild, 20 green, each `Passed: 820, Total: 820`, 5 to 9 s. Baseline before the change: 818 tests, 5 s.
+- 2026-10-03 — `gate.js stop` → `agile gate GREEN`, build with 0 warnings.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

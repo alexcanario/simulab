@@ -43,6 +43,7 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
 
         page.Find(".app-table-search input").Input("guarulhos");
+        AdvanceDebounce();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Query!.Contains("search=guarulhos", StringComparison.Ordinal)));
