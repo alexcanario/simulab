@@ -1,7 +1,7 @@
 ---
 feature: F-68
 epic: Foundation and identity
-status: refining
+status: approved
 board: 107
 version: 1
 ---
