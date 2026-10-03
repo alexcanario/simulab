@@ -1,7 +1,7 @@
 ---
 feature: F-62
 epic: Foundation and identity
-status: validating
+status: done
 board: 101
 version: 2
 ---
@@ -116,3 +116,9 @@ Needed to validate: the owner authorizes pushing `feature/F-62` to GitHub so the
 - Simulae (`D:\dev\_icontrol\simulae\infra`, read-only): `main.bicep` plus modules for Container Apps (api and web, 0.5 vCPU / 1 GiB, min 1 replica), PostgreSQL Flexible (B1ms staging, D2ds_v5 prod, v16, 32 GB), Azure Cache for Redis (Basic staging, Standard prod), Key Vault, a shared registry and an OIDC federation script. Database names are Simulae's (`identitydb`, `billingdb`, ...), not Simulab's single `simulab` database.
 - Tooling on this machine: `az` logged in to "Azure subscription 1"; `azd` not installed.
 - Azure retail prices, Brazil South (prices.azure.com, 2026-10-02, USD, 730 h/month): PostgreSQL Flexible B1ms 0.035/h (~25.6) + storage 0.2185/GB-month (32 GB ~7.0); Azure Cache for Redis C0 Basic 0.022/h (~16.1); Container Apps vCPU 0.000024/s active, 0.000003/s idle, memory 0.000003/GiB-s; Linux VM B2s 0.0672/h (~49.1). Container Apps free monthly grant: not verified.
+
+## Delivery
+- Branch `feature/F-62`, merge commit `39d29a5` (2026-10-04), app version 0.6.0. Pull request #110 was a draft opened only to run the CI once; it stays unmerged.
+- Tests: 1859 passed, 0 failed (`gate.js ship`, build 20 s, slowest project Identity 1 m 6 s); 19 in `Simulab.AppHost.Tests`, 7 of them new for this item, plus 2 version tests. GitHub Actions `ci` green on the PR (run 37141042169).
+- Manual pages: none (no visible behavior changed). `docs/infra.md`, `docs/decisions/ADR-0002-host.md`, `docs/agile/profile.md` and `docs/architecture-overview.md` updated.
+- Not delivered, by design: no Azure resource exists; staging start and stop commands are declared and not run (F-64); the deploy workflow is F-65.
