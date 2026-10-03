@@ -118,6 +118,22 @@ public class AppDataTableTests : KitTestContext
         table.WaitForAssertion(() => table.FindAll("tbody tr.mud-table-row").Should().HaveCount(11)); // Item 3, 30-39
     }
 
+    // F-48 AC1: the box debounces on the container's clock - typing alone asks nothing, the interval passing asks once.
+    [Fact]
+    public void Search_TypedIntoTheBox_AsksOnlyWhenTheDebounceElapses()
+    {
+        var table = RenderTable(new GallerySource(Sample, TimeSpan.Zero));
+        table.WaitForAssertion(() => _queries.Should().HaveCount(1));
+
+        table.Find(".app-table-search input").Input("Item 3");
+        _queries.Should().HaveCount(1, "the term is still waiting out the debounce");
+
+        AdvanceDebounce();
+
+        table.WaitForAssertion(() => _queries.Should().HaveCount(2));
+        _queries.Last().Should().Be(new AppTableQuery(0, 25, "Item 3", null, false));
+    }
+
     [Fact]
     public void RowActions_Given_RenderedInLastColumn()
     {

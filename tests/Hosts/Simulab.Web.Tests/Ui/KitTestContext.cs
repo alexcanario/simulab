@@ -2,6 +2,7 @@ using System.Globalization;
 using Bunit;
 using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Simulab.Web.Components.Ui;
 
 namespace Simulab.Web.Tests.Ui;
@@ -17,11 +18,16 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     /// <c>Authorization.SetAuthorized(...)</c> to render the signed-in state instead.</summary>
     protected BunitAuthorizationContext Authorization { get; }
 
+    /// <summary>F-48: the clock MudBlazor's debounce reads from the container. A test that types into a search box or a
+    /// lookup field moves it with <see cref="AdvanceDebounce"/> instead of waiting for 300 ms of wall clock.</summary>
+    protected FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero));
+
     protected KitTestContext()
     {
         CultureInfo.CurrentUICulture = new CultureInfo("en");
         CultureInfo.CurrentCulture = new CultureInfo("en");
         Services.AddLocalization();
+        Services.AddSingleton<TimeProvider>(Clock);
         Services.AddUiKit();
         JSInterop.Mode = JSRuntimeMode.Loose;
 
@@ -33,6 +39,11 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
 
         Authorization = AddAuthorization().SetNotAuthorized();
     }
+
+    /// <summary>Lets the kit's debounce elapse (F-48). The default is the lookup's interval, which the table's search box
+    /// shares; a field with another interval passes it.</summary>
+    protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
+        Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
     public Task InitializeAsync() => Task.CompletedTask;
 

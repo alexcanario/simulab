@@ -400,6 +400,7 @@ public sealed class ExamFormTests : CatalogPageTestContext
         var page = RenderAdd();
 
         page.Find("#exam-authority").Input("gua");
+        AdvanceDebounce();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/catalog/issuing-authorities"
