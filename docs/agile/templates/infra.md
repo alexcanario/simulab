@@ -34,6 +34,10 @@ The deploy pipeline (.github/workflows/deploy.yml, written by /agile:bootstrap w
 - The site's `/agile:publish` pushes `<App>.Contracts` and `<App>.Shared` to the GitHub Packages feed of the `origin` owner; the app restores them. Both sides read the token from the environment variable `GITHUB_PACKAGES_TOKEN`, a classic personal access token (`write:packages` on the site, `read:packages` in the app). Its value is never written here.
 - Kept in: <where the token lives on each machine and in CI>.
 
+## Desktop updates (a desktop app only)
+- Update source: <\\server\share\<app> | https://updates.example.com/<app> | not declared>
+- `/agile:publish` packs the Windows head with Velopack and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private GitHub Releases address here.
+
 ## Release steps
 1. <step, or "no release process yet">
 

@@ -881,3 +881,10 @@ Shipped as 0.4.0 (merge 7037e30). The full gate needed three runs: a hung test o
 Shipped as 0.5.0 (merge c8d525c), tests only: the refinement found the premise false (MudBlazor 9.9.0 already reads an injected `TimeProvider`), so no production file changed.
 - Plugin note: the Stop gate hook collides with a background build loop of the same worktree. Evidence: `agile gate RED: build failed` with `MSB3030 ... because it was not found` while `dotnet clean` ran in the loop, and `loop.txt` showed runs 1 and 2 empty. The loop was redone in the foreground, in blocks of 5. `plugin: agile [generic]`.
 - Nothing: the premise check in the library source at the pinned tag (already in the refinement step 6); the `board: 773` header that matched no GitHub issue (the real one was 24), cause not verified, no audit captured (owner: no); capturing B-21 for a failure F-50 had already fixed on main, a one-off.
+
+## 2026-10-03 - Sync with agile@canary 0.0.110
+From 0.0.105 to 0.0.110, run on a clean main; F-62 was `validating` in its worktree and the owner said to go on (only docs touched).
+- Copied (never edited, plugin changed): templates `infra` (desktop updates section) and `project-claude` (offline-first also for `desktop` with an API); `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.0.110, question 26b).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.

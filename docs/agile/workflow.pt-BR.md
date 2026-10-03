@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.105 (rascunho). English: [en](workflow.md).
+> Versão 0.0.110 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -68,7 +68,7 @@ Antes de escrever qualquer coisa, o Claude confere se a skill que carregou e o p
 | 3. Acesso | Autenticação (no `web-api`, pergunta 10a: como os consumidores da API se autenticam), RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
 | 4. Integração | Mensageria (nenhuma, em processo, broker), serviços externos, armazenamento de arquivos e — quando alguma feature chama um modelo — o provedor do LLM e onde ele roda, o teto de custo e como ele é falsificado nos testes |
 | 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, a **identidade visual** (23a: um arquivo, um site, uma imagem ou três perguntas básicas), a biblioteca do design system, família de ícones, como um item é editado — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados. O kit de UI e a galeria deixaram de ser pergunta: todo app com telas ganha um, construído a partir da identidade. O perfil `web-api` não tem telas: pula a stack de UI, a troca de idioma (21), a acessibilidade (22) e tudo sobre identidade visual e UI, e a pergunta 20 vale só para o texto que a API envia a pessoas |
-| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
+| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, para um app desktop de onde as cópias instaladas se atualizam (pergunta 26b), as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
 | 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo (qual modelo roda os casos, com ou sem o braço sem plugin) |
 | 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos e um catálogo de tools quando o app expõe ferramentas a um modelo), o prompt de sistema como arquivo versionado, e uma visão geral da arquitetura escrita à mão |
 
@@ -82,6 +82,8 @@ Para um app mobile (perfil `mobile`), a pergunta 2d pergunta onde mora o backend
 
 Para um app mobile, a pergunta 2f vem depois da 2d, com qualquer resposta de backend: **online · offline-first**. A recomendação vem do brief: o app trabalha em campo, com conectividade ruim ou nenhuma, ou o brief diz "offline" ou "sem internet" → offline-first; senão online, que mantém o comportamento de hoje (uma funcionalidade ainda pode pedir offline na sua refinação). Offline-first cobre leitura e escrita: o `CLAUDE.md` ganha `- Offline: first` sob `Profile:`, o ADR-0001 uma linha, e a proposta do quadro ganha "Offline foundation" (o armazenamento local, a fila de escritas, o enviador, a interface de conectividade e o banner `OfflineStatus`) logo depois do kit de UI e da primeira funcionalidade; daí em diante todo arquivo de funcionalidade tem uma seção `## Offline`. Com uma API existente, o Claude lê o documento fixado: uma API agile cujas operações de escrita não têm o cabeçalho `Idempotency-Key` ganha uma proposta de issue "Idempotent writes for <App>" no quadro dela (com o seu sim; o Claude nunca escreve naquele repositório) e "Offline foundation" espera por ela; qualquer outra API que não declare isso deixa o app offline só para leitura, e o ADR-0001 diz isso. Voltar de offline-first para online não é oferecido; um projeto online liga o offline depois com uma ideia "Offline foundation". Exemplo 14.39.
 
+Para um app desktop, a pergunta 2f vem depois da 2a2 quando a 2a2 escolheu uma API, com a mesma recomendação e as mesmas escritas (a linha `- Offline: first`, uma linha no ADR-0001, "Offline foundation" depois do UI kit e da primeira feature). Com acesso direto ao banco ela não é feita, e o ADR-0001 diz que offline-first precisa de uma API (um armazenamento SQLite já é local). Exemplo 14.43.
+
 Para um site que precisa de um app mobile desde o primeiro dia, a pergunta 2 pesa antes a forma do brief: quando a API é a principal consumidora ou há várias áreas de negócio, ela recomenda `mobile` (sobre `monolith`, ou `modular-monolith`); quando o produto é um site com telas sobre dados simples, ou um site público, ela recomenda `web-app` ou `website` e vem a pergunta 2e, logo depois da 2 (depois da 2c no `website`): **um app mobile desde o início: não · sim, MAUI Blazor Hybrid · sim, MAUI XAML**. A recomendação vem do brief: nenhum app citado → não; um app citado → Hybrid, para que as telas do site já nasçam onde o app vai reaproveitá-las. O app mora neste repositório e nesta solução; um app em repositório próprio continua começando pelo bootstrap dele (pergunta 2d). Com sim, o Claude lista as funcionalidades do brief numeradas na mesma mensagem, agrupadas como o brief agrupa e todas marcadas (nunca uma seção pública de um `website`); você responde "ok" ou os números para desmarcar. O bootstrap então acrescenta `<App>.Contracts` e, com Hybrid, `<App>.Shared` (uma Razor Class Library cujos componentes não têm `@page` nem render mode, com textos em todos os idiomas do app), os dois cobertos pelos testes de arquitetura e de layout; ele **não** acrescenta os projetos do app, a linha `Complement:` nem um segundo `<Version>`: isso vem com o primeiro item do épico, então o `/agile:sync` nunca pede a versão do app antes de o app existir. A proposta do quadro ganha um épico "Mobile app" (`docs/epics/mobile-app.md`, com a lista que você aprovou escrita inteira) cujas ideias são "Mobile foundation" primeiro e depois um "<X> on mobile" por funcionalidade marcada; a ideia do próprio site para cada funcionalidade marcada diz que a tela dela é um componente no `Shared` (Hybrid) e a regra ou consulta uma classe em `Features/`, e com Hybrid o kit de UI também mora no `Shared`. O ADR-0001 registra a resposta. "Não" deixa o bootstrap exatamente como era. Exemplo 14.34.
 
 Quando o brief cita uma base de código existente para reaproveitar e você dá acesso a ela, o Claude lê esse código (nunca edita) e usa o que encontra como motivo das recomendações. Depois da rodada 8 vem uma **pergunta de fechamento** — "qual conceito do domínio mais preocupa você, ou o quiz não tocou?" — porque o vocabulário central de um domínio (uma taxonomia, um modelo de entitlement, uma regra de pontuação) raramente cabe numa lista fixa de perguntas. O que ela levantar é decidido como qualquer pergunta do quiz e registrado na ADR-0001.
@@ -92,7 +94,7 @@ Saídas, todas em inglês:
 - `docs/agile/profile.md` — cópia do perfil de arquitetura escolhido.
 - `docs/agile/workflow.md` e `docs/agile/workflow.pt-BR.md` — este workflow nos dois idiomas, e `docs/agile/templates/` — os templates, copiados para o projeto.
 - `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. Um termo técnico novo ganha uma linha na primeira vez que aparece.
-- `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), para cada ambiente o comando que o implanta, a URL de checagem e a versão implantada lá (escrita só pelo `/agile:publish`), os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
+- `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), para cada ambiente o comando que o implanta, a URL de checagem e a versão implantada lá (escrita só pelo `/agile:publish`), para um app desktop a fonte de atualização dos apps instalados, os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
 - `.github/workflows/deploy.yml` e `.github/scripts/agile-deploy.js` — só quando o `origin` está no github.com e um ambiente que não é `local` declara um comando de deploy: o pipeline que implanta uma tag `v<Version>` enviada, por esse mesmo comando (veja "O pipeline de deploy" abaixo).
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
 - `docs/design/identity.tokens.json` e `docs/design/DESIGN.md` — a identidade visual do app (pergunta 23a), para todo app com telas. Os tokens seguem o formato de Design Tokens do W3C (DTCG 2025.10) e são a fonte dos valores: cores por papel em claro e escuro, tipografia, raio dos cantos, e a família de ícones, a origem (arquivo, URL, imagem ou derivada) e a data em `$extensions.agile`. O `DESIGN.md` (o formato de arquivo de design do Google) tem os mesmos valores no front matter YAML, gerado a partir dos tokens, seguido da sua prosa sobre o porquê e o onde; regerar mantém a prosa. Você pode dar um arquivo (tokens ou um `DESIGN.md`), a URL de um site, uma imagem (um logo, uma prancha de marca) ou nada: três perguntas (cor primária, fonte, claro, escuro ou os dois) derivam uma identidade completa. Uma URL ou uma imagem é lida pelo Claude, que mostra uma tabela antes de escrever qualquer coisa: cores por papel (as de uma imagem vão marcadas como estimadas), fontes, raio, família de ícones, e o contraste WCAG 2.2 AA de cada par frente/fundo nos dois temas; um par que falha traz a razão e o valor mais próximo que passa, e você decide. Nada é guardado antes de você dizer "confirmo". O plugin nunca escreve o tema do app: quem escreve é o item do kit de UI, a partir desses tokens, e um teste do perfil compara os dois. Os mockups de tela tiram cores, fontes e raio desse mesmo arquivo.
@@ -176,7 +178,7 @@ A execução mantém uma linha `Autopilot:` no arquivo do item (`refined`, `stop
 
 **Publicando um release: `/agile:publish`.** Um ship sobe o `<Version>` do app e faz o merge; não gera nada que você possa entregar a alguém. O `/agile:publish` transforma a versão que já está na `main` em um release. Ele roda no checkout principal e para sem mudar nada, a menos que a `main` esteja limpa, em dia com o `origin` e a tag `v<Versão>` não exista nem aqui nem lá. O Claude mostra o plano uma vez (versão, tag anterior, os itens que entraram desde ela, os projetos e os runtimes) e segue: digitar o comando é a autorização para o commit das notas, a tag, o push e o GitHub Release. Ele não roda os testes de novo (o ship rodou a suíte completa sobre o que a `main` tem); um erro de compilação ainda derruba o `dotnet publish -c Release` (ou o `dotnet pack`), e então nada é commitado nem marcado. O site de um app Hybrid em repositório próprio também empacota os dois projetos empacotáveis dele, `<App>.Contracts` e `<App>.Shared`, nessa mesma versão e os envia ao feed GitHub Packages dele depois da tag (`--skip-duplicate`, então repetir é seguro), lendo o token de `GITHUB_PACKAGES_TOKEN`; sem o token, ou com um `origin` fora do github.com, os pacotes ficam de fora com esse motivo e o site é publicado do mesmo jeito.
 
-O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `monolith`, `modular-monolith` e `web-api` → `<App>.Api`; `desktop` → o head, self-contained, uma vez por runtime do `<RuntimeIdentifiers>` dele (senão o desta máquina), mais o `<App>.Api` quando houver; `mobile` → `<App>.Api` mais o head Mobile como um `.aab` Android assinado, e um web app com o complemento `mobile-client` → `<App>.Web` mais o mesmo `.aab` (veja "Publicação nas lojas" abaixo); `microservices` não é suportado. Todos os projetos de um release têm o mesmo `<Version>`. O pacote tira o `appsettings.Development.json` e o arquivo `.xml` de documentação do próprio projeto e mantém os `.pdb`. Um head WinUI 3 sem `<EnableMsixTooling>true</EnableMsixTooling>` barra o plano: publicaria um exe que fecha ao abrir. Um runtime linux ou macOS zipado no Windows perde o bit de execução, e o relatório manda dar `chmod +x`. As notas trazem uma linha por merge na `main` desde a tag `v*` anterior (`Feature F-3: …`, `Bug B-2: …`, outras branches em "Other"), em inglês; a tag leva o mesmo texto. Se o push ou o GitHub Release falhar depois da tag, o Claude diz o comando exato para repetir e nunca apaga a tag nem o commit.
+O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `monolith`, `modular-monolith` e `web-api` → `<App>.Api`; `desktop` → o head, self-contained, uma vez por runtime do `<RuntimeIdentifiers>` dele (senão o desta máquina), mais o `<App>.Api` quando houver (com uma fonte de atualização declarada no `docs/infra.md`, o head é empacotado pelo Velopack em vez de zipado: veja "Atualizações do desktop", abaixo); `mobile` → `<App>.Api` mais o head Mobile como um `.aab` Android assinado, e um web app com o complemento `mobile-client` → `<App>.Web` mais o mesmo `.aab` (veja "Publicação nas lojas" abaixo); `microservices` não é suportado. Todos os projetos de um release têm o mesmo `<Version>`. O pacote tira o `appsettings.Development.json` e o arquivo `.xml` de documentação do próprio projeto e mantém os `.pdb`. Um head WinUI 3 sem `<EnableMsixTooling>true</EnableMsixTooling>` barra o plano: publicaria um exe que fecha ao abrir. Um runtime linux ou macOS zipado no Windows perde o bit de execução, e o relatório manda dar `chmod +x`. As notas trazem uma linha por merge na `main` desde a tag `v*` anterior (`Feature F-3: …`, `Bug B-2: …`, outras branches em "Other"), em inglês; a tag leva o mesmo texto. Se o push ou o GitHub Release falhar depois da tag, o Claude diz o comando exato para repetir e nunca apaga a tag nem o commit.
 
 **Fazendo deploy: `/agile:publish <ambiente> [v<x.y.z>]`.** Com um ambiente nomeado, o release é seguido do deploy dele, pelo comando que o `docs/infra.md` declara para aquele ambiente: a tabela de ambientes tem três colunas a mais, `Deploy command` (`not declared` quando não há), `Check URL` (opcional) e `Version (deployed on)`, que só o `/agile:publish` escreve. Digitar o comando também é a autorização para esse deploy. Antes de rodar, o Claude mostra o ambiente, a versão que está lá agora, a versão a implantar, o comando e os nomes (nunca os valores) dos segredos que ele precisa, e segue. Três formas: uma versão nova (`/agile:publish staging` sem tag ainda) faz antes o release acima, e um release que falha não implanta nada; uma **promoção** (`/agile:publish production` quando `v<Versão>` já está marcada) implanta aquela tag, sem pacote, notas nem tag novos; um **rollback** (`/agile:publish production v0.3.0`) implanta uma tag mais antiga, sem pergunta extra. Sem ambiente nomeado, o Claude lista os ambientes com as versões registradas e pergunta qual, ou "nenhum" (só o release). Um ambiente cujo comando é `not declared` não implanta nada: o Claude diz onde declará-lo, e uma versão nova é liberada do mesmo jeito.
 
@@ -482,11 +484,11 @@ tests/
 
 **Notificações push** (`mobile`, e um site com o complemento `mobile-client`; só quando o briefing ou um item pede). Um provedor: Firebase Cloud Messaging para Android e iOS (ele repassa ao APNs), enviado pela API com `FirebaseAdmin` atrás de uma interface `IPushSender`. O cadastro é da API: `PUT /api/v1/devices/{installationId}` com o token do dispositivo, a plataforma, a cultura e a versão do app, e `DELETE` ao sair, os dois só com bearer (`401` anônimo, `400` com `devices.invalid-token` para token vazio, `204` nos demais); um dispositivo pertence a um usuário e um token que o provedor diz não estar mais registrado é apagado. O push carrega um código e ids, nunca texto: o app monta o texto pelos recursos dele, na cultura do dispositivo. O lado do app é uma interface em `Mobile.Core` implementada na cabeça com `Plugin.Firebase.CloudMessaging`; o pedido de permissão vem depois do login. Os testes não precisam de aparelho nem de conta Firebase (remetente e cadastro falsos); a entrega real é um passo do roteiro de validação. A chave de serviço é um segredo fora do repositório. A publicação nas lojas é o `/agile:publish`, abaixo. Exemplo 14.31.
 
-**Offline-first** (`mobile`, e um site com o complemento `mobile-client` quando a parte (c) do épico disse offline-first; a pergunta é a 2f). Um arquivo SQLite por usuário logado (`sqlite-net-pcl`; `sqlite-net-sqlcipher` no lugar quando o brief marca os dados como sensíveis), fora do backup do Android e apagado ao sair. A leitura mostra o cache primeiro, com a hora em que foi buscado, e atualiza quando há rede sem tocar numa linha que tem escritas pendentes. Salvar grava no cache e numa fila; a fila é enviada uma escrita por vez, em ordem, cada uma com `Idempotency-Key` e, para atualizar ou apagar, `If-Match`, na abertura do app, quando a rede volta, depois de salvar e no puxar-para-atualizar. Um erro de rede mantém a escrita e tenta de novo depois; um `401` passa pela renovação; um `426` para a fila ("atualização necessária"); um `409` (outra pessoa mudou o registro) leva a escrita para a lista de conflitos, onde o usuário reenvia a dele sobre a versão atual ou descarta, e só as escritas seguintes naquele registro esperam. Sair com mudanças não enviadas pergunta: enviar agora ou descartar. Um componente do kit, `OfflineStatus`, mostra o banner, a contagem de pendentes e a lista de conflitos em toda tela. Os testes rodam num arquivo SQLite de verdade com uma conectividade falsa; a execução no aparelho (modo avião ligado, dois salvamentos, rede ligada) é um passo do roteiro de validação. O lado da API é **Offline writes (the API)**, o mesmo texto em `web-api`, `mobile` e `mobile-client`: uma escrita com `Idempotency-Key` é gravada na mesma transação da escrita e repetida (não executada de novo) quando a chave volta, `422` quando a chave volta com outro corpo; uma entidade escrita offline carrega uma versão (`xmin` no PostgreSQL), e seu update e delete exigem `If-Match` (`428` sem ele, `409` com o registro atual quando está velho). As chaves ficam 30 dias. Os dois blocos foram executados numa API de teste e num app de teste no emulador Android.
+**Offline-first** (`mobile`, e um site com o complemento `mobile-client` quando a parte (c) do épico disse offline-first; a pergunta é a 2f). Um arquivo SQLite por usuário logado (`sqlite-net-pcl`; `sqlite-net-sqlcipher` no lugar quando o brief marca os dados como sensíveis), fora do backup do Android e apagado ao sair. A leitura mostra o cache primeiro, com a hora em que foi buscado, e atualiza quando há rede sem tocar numa linha que tem escritas pendentes. Salvar grava no cache e numa fila; a fila é enviada uma escrita por vez, em ordem, cada uma com `Idempotency-Key` e, para atualizar ou apagar, `If-Match`, na abertura do app, quando a rede volta, depois de salvar e no puxar-para-atualizar. Um erro de rede mantém a escrita e tenta de novo depois; um `401` passa pela renovação; um `426` para a fila ("atualização necessária"); um `409` (outra pessoa mudou o registro) leva a escrita para a lista de conflitos, onde o usuário reenvia a dele sobre a versão atual ou descarta, e só as escritas seguintes naquele registro esperam. Sair com mudanças não enviadas pergunta: enviar agora ou descartar. No Android a fila também é enviada com o app fechado: um pedido único do WorkManager com a restrição "rede conectada", agendado quando a fila deixa de estar vazia e quando o app sai do primeiro plano, atrás de `IBackgroundSync` no `Mobile.Core` (sem efeito nas outras heads; o iOS é outro item). Uma execução em segundo plano nunca desconecta o usuário nem apaga uma escrita; ela registra "entre de novo" (`401` cuja renovação falha) ou "atualização necessária" (`426`) para a próxima abertura, divide um bloqueio com o envio em primeiro plano, e quem força a parada do app espera até a próxima abertura. Nada é mostrado com o app fechado. Um conflito sobre uma atualização também oferece **Mesclar** (Exemplo 14.42): cada escrita pendente guarda a `base`, o registro como estava antes da sua primeira edição, e a tela compara três versões por campo. Um campo que só você ou só a outra pessoa mudou é mantido sem perguntar; um campo mudado nos dois lados para valores diferentes é uma escolha (uma lista é uma escolha, inteira); nada vem pré-selecionado e "Enviar mesclado" espera todas as escolhas. Ele troca as escritas pendentes do registro por uma atualização sobre a versão atual; um `404`, `400`, `422`, um conflito sobre uma exclusão e um registro cujo `## Offline` desliga a mesclagem mantêm "Enviar a minha de novo" e "Descartar". Rodado numa app de teste: 13 testes do Core passaram. Exemplo 14.41. Um componente do kit, `OfflineStatus`, mostra o banner, a contagem de pendentes e a lista de conflitos em toda tela. Os testes rodam num arquivo SQLite de verdade com uma conectividade falsa; a execução no aparelho (modo avião ligado, dois salvamentos, rede ligada) é um passo do roteiro de validação. O lado da API é **Offline writes (the API)**, o mesmo texto em `web-api`, `mobile`, `mobile-client` e `desktop`: uma escrita com `Idempotency-Key` é gravada na mesma transação da escrita e repetida (não executada de novo) quando a chave volta, `422` quando a chave volta com outro corpo; uma entidade escrita offline carrega uma versão (`xmin` no PostgreSQL), e seu update e delete exigem `If-Match` (`428` sem ele, `409` com o registro atual quando está velho). As chaves ficam 30 dias. Os dois blocos foram executados numa API de teste e num app de teste no emulador Android.
 
 **Publicação nas lojas** (`mobile`, e um site com o complemento `mobile-client`). O `/agile:publish` também gera o `<App>.Mobile` como um Android App Bundle, `dotnet publish -f <o target framework android dele> -c Release` com a assinatura como propriedades do MSBuild, e copia só o arquivo assinado para `artifacts/publish/v<Versão>/<App>.Mobile/<ApplicationId>-Signed.aab`. A assinatura vem de quatro variáveis de ambiente, nunca de um arquivo no repositório: `ANDROID_SIGNING_KEYSTORE` (um caminho absoluto fora dele), `ANDROID_SIGNING_ALIAS`, `ANDROID_SIGNING_STORE_PASS`, `ANDROID_SIGNING_KEY_PASS`; as senhas chegam ao MSBuild como referências `env:`, então nenhuma linha de comando nem log guarda uma, e o `docs/infra.md` nomeia as variáveis e onde o keystore fica, nunca os valores. A chave é uma **chave de upload** sob o Play App Signing (o Google guarda a chave de assinatura do app; uma chave de upload perdida é redefinida pelo suporte do Play, então guarde uma cópia fora da máquina). O head Mobile fica de fora, com o motivo, e o lado do servidor é publicado mesmo assim quando: uma variável não está definida, o keystore está dentro do repositório ou não existe, o `ApplicationId` ainda começa com o `com.companyname.` do template (o Play torna o id permanente no primeiro upload) ou falta o workload Android do MAUI. Nunca é gerado sem assinatura. Uma falha no build Android para todo o passo de empacotar antes de qualquer commit ou tag. Com um head mobile, o commit do release também leva o `docs/releases/v<Versão>-store.md`: o caminho do `.aab` e os dois números de versão, os passos do Play Console (faixa de teste, depois promover), os passos só da primeira publicação (criar o app, ficha da loja, URL da política de privacidade, formulário Data safety a partir da pergunta 9b do quiz, classificação de conteúdo) e os passos do iOS para um Mac, marcados como não executados pelo plugin. O plugin não envia nada a nenhuma loja e não gera nada iOS. O Play recusa um `versionCode` que já viu: o ship aumenta o `ApplicationVersion` a cada release, e o checklist avisa. O template de `.gitignore` ignora `*.keystore`, `*.jks`, `*.p12`, `*.p8` e `*.mobileprovision`; um projeto cujo arquivo não os tem recebe um aviso do plano, nunca uma edição. Primeira publicação sem keystore: o Claude dá o comando `keytool -genkeypair` para você rodar no seu terminal (ele pede as senhas lá) e lista as variáveis a definir. Exemplo 14.32.
 
-`desktop` — o mesmo formato do `mobile`, com a API opcional. O quiz pergunta a tecnologia (Avalonia quando há mais de um sistema operacional, WinUI 3 só para Windows com o visual nativo, MAUI quando há mobile no mesmo produto) e, com PostgreSQL ou SQL Server, se o cliente passa por uma API ou vai direto ao banco (direto só para app de um usuário ou rede fechada: a credencial fica então em cada máquina). O app roda standalone (`dotnet publish --self-contained`, que o `/agile:publish` roda uma vez por runtime; um head WinUI 3 precisa de `<EnableMsixTooling>true</EnableMsixTooling>`, senão o exe publicado fecha ao abrir); instalador e atualização automática não fazem parte do perfil. O Stop gate nunca compila a cabeça; só o Avalonia tem testes de tela automatizados (`Avalonia.Headless`), WinUI 3 e MAUI passam pelo roteiro de validação:
+`desktop` — o mesmo formato do `mobile`, com a API opcional. O quiz pergunta a tecnologia (Avalonia quando há mais de um sistema operacional, WinUI 3 só para Windows com o visual nativo, MAUI quando há mobile no mesmo produto) e, com PostgreSQL ou SQL Server, se o cliente passa por uma API ou vai direto ao banco (direto só para app de um usuário ou rede fechada: a credencial fica então em cada máquina). O app roda standalone (`dotnet publish --self-contained`, que o `/agile:publish` roda uma vez por runtime; um head WinUI 3 precisa de `<EnableMsixTooling>true</EnableMsixTooling>`, senão o exe publicado fecha ao abrir); com uma fonte de atualização declarada, o app instalado se atualiza sozinho ("Atualizações do desktop", abaixo). Com uma API ele também pode ser offline-first (pergunta 2f, abaixo). O Stop gate nunca compila a cabeça; só o Avalonia tem testes de tela automatizados (`Avalonia.Headless`), WinUI 3 e MAUI passam pelo roteiro de validação:
 ```
 src/
 ├── <App>.Api/                        só com API, pelo perfil dela
@@ -503,6 +505,10 @@ tests/
 ├── <App>.Desktop.Tests/              só Avalonia: testes de tela headless
 └── <App>.Tests/                      testes do backend, só com API
 ```
+
+**Atualizações do desktop** (`desktop`; a fonte é a pergunta 26b do quiz, uma linha do `docs/infra.md`). O atualizador é o Velopack, para os três heads, só Windows, só canal estável, sem assinatura. O `docs/infra.md` diz `Update source:` uma pasta de rede compartilhada, uma URL https ou `not declared` (então o app continua sendo um zip). O app lê isso de `Updates:Source` no `appsettings.json`; rodando pela IDE ou por uma pasta de publish ele não checa nada. Ao abrir, o app consulta a fonte em segundo plano e baixa o que é novo (só a parte que mudou, um delta, quando existe); depois pergunta "Atualizar agora / Depois". "Atualizar agora" reinicia na versão nova; "Depois" aplica quando o app é fechado; um app encerrado à força depois do download aplica na próxima abertura. Uma checagem que falha vai para o log e não aparece para ninguém. Com uma API, um `426` abre "Atualização necessária" só com "Atualizar agora". O `/agile:publish` empacota cada runtime Windows com o `vpk` (Setup.exe, um zip portátil, o pacote completo, o delta, o índice do feed), envia o feed para a pasta de rede depois da tag e, para uma URL https, lista os arquivos para copiar à mão; o GitHub Release leva o Setup.exe e o zip portátil. A primeira release diz: instale uma vez com o Setup.exe (uma cópia zipada não se atualiza) e o SmartScreen avisa porque o instalador não é assinado ("Mais informações", depois "Executar assim mesmo"). O bootstrap escreve o atualizador quando a fonte é declarada; um projeto antigo é avisado pelo `/agile:sync` ("Desktop updates") e captura um item. Exemplo 14.44.
+
+**Offline-first no desktop** (`desktop` com uma API; a pergunta é a 2f). O mesmo desenho do mobile, em `Desktop.Core/Storage/`: um arquivo SQLite por usuário logado em `LocalApplicationData` (nunca a pasta de roaming; `sqlite-net-pcl`, ou `sqlite-net-sqlcipher` com a chave no armazenamento protegido do sistema operacional quando o brief marca os dados como sensíveis), apagado no logout, sem exclusão de backup porque o desktop não tem um como o do Android. A leitura, a fila, o `Idempotency-Key`, o `If-Match`, a lista de conflitos, a mesclagem campo a campo e a pergunta do logout são as linhas do mobile palavra por palavra. O que muda é o head: o `IConnectivity` é implementado com `Connectivity.Current` no MAUI e com o `NetworkChange` da BCL no WinUI 3 e no Avalonia; como "há rede" não significa que a API responde, um envio que falha marca a API como inalcançável até a próxima mudança de conectividade ou a próxima requisição bem-sucedida, e o comando Atualizar (F5) sempre tenta; a fila não é enviada com o app fechado (sem ícone de bandeja nem serviço: instaladores e serviços estão fora do perfil). Rodado num app Avalonia de rascunho em um container Linux com a rede cortada e restaurada: 19 testes do Core verdes, `NetworkAvailabilityChanged` disparado nos dois sentidos, dois salvamentos enviados uma vez cada e em ordem, e uma API parada com a rede de pé limpa pelo Atualizar. Os heads WinUI 3 e MAUI são medidos na sua máquina, no roteiro de validação da primeira "Offline foundation". O lado da API é o mesmo bloco **Offline writes (the API)**, agora palavra por palavra em quatro perfis.
 
 **Versão da app.** A app tem uma só versão `SemVer`: uma única propriedade `<Version>` no `Directory.Build.props` ao lado do arquivo da solução. Todo projeto a herda, então toda DLL, bibliotecas incluídas, informa o release e o commit de onde saiu (`0.4.0+3f2a9c1…`), e nenhum `.csproj` leva `<Version>`. O `/agile:publish` empacota o(s) projeto(s) deployável(is) do perfil: `<App>.Api` (`monolith`, `modular-monolith`, `web-api`), `<App>.Web` (`web-app`, `website`), `<App>.Api` e `<App>.Mobile` (`mobile`; só `<App>.Mobile` com `Backend: external`), `<App>.Desktop` (`desktop`), `<App>.Web` e `<App>.Mobile` (o complemento `mobile-client`). O bootstrap semeia `0.1.0`. Cada `/agile:ship` olha para ela primeiro e não pergunta nada: sem versão em lugar nenhum, acrescenta `0.1.0` e não incrementa (esse item sai como `0.1.0`); com ela em um ou mais `.csproj` (o formato anterior à 0.0.104), move para o `Directory.Build.props`, tira de todo projeto (a maior vence quando diferem) e então incrementa; com ela já lá, só incrementa. O incremento é MINOR numa feature (PATCH volta a 0), PATCH num bug, ou MAJOR quando as `## Decisions` do item registram uma mudança que quebra compatibilidade (MINOR e PATCH voltam a 0), e o relatório do ship diz qual dos três casos rodou. No `mobile`, na cabeça do `mobile-client` e numa cabeça MAUI do `desktop`, o mesmo ship também ajusta o `ApplicationDisplayVersion` da cabeça para esse mesmo texto e incrementa o seu `ApplicationVersion` — o inteiro sempre crescente que a loja exige — em 1, um contador que nunca volta a zero. O `/agile:sync` só informa o estado ("o próximo `/agile:ship` acrescenta" ou "move") e nunca a escreve. É um número para a app inteira, não um por projeto: trocar uma DLL isolada deixaria uma máquina com uma mistura que o gate nunca testou; baixar só o que mudou é trabalho de um atualizador com pacotes delta (#58). Com o app num repositório próprio (`Backend: external`, ou um app Hybrid), a solução dele tem o seu `Directory.Build.props` e o seu número. O `microservices` fica fora do escopo: uma versão só não mapeia bem para serviços implantados de forma independente.
 
@@ -2257,6 +2263,137 @@ Claude: Resumo: o CLAUDE.md ganha "- Offline: first", o ADR-0001 uma linha. Quad
 Semanas depois, o `/agile:refine` de "Checklist no mobile" faz a rodada extra que o perfil exige, `## Offline`: quais checklists ficam no cache (os atribuídos ao inspetor), quais escritas entram na fila (respostas e notas; o envio de foto é uma escrita à parte) e quem ganha num conflito — o padrão (o servidor recusa a escrita velha e o usuário escolhe), a menos que você diga outra coisa. O arquivo da funcionalidade leva as suas respostas, e cada critério de aceite sobre salvar tem o seu gêmeo offline.
 
 
+### 14.40 Os argumentos opcionais: retomar um quiz, uma tela pelo nome, uma mudança numa linha, uma nota de pausa, uma retro de um item
+
+Cinco comandos aceitam um argumento que você pode deixar de fora. Cada exemplo abaixo é o mesmo comando que você já conhece, com o argumento escrito.
+
+Retomar um quiz que você parou (`/agile:bootstrap [rodada]`). As respostas das rodadas já feitas estão em `docs/decisions/.quiz-draft.md`, então nada é perguntado de novo:
+
+```
+> /agile:bootstrap 4
+Claude: Retomando da rodada 4. As rodadas 1 a 3 estão em docs/decisions/.quiz-draft.md (mobile, offline-first, PostgreSQL).
+   Rodada 4. Pergunta 9: ...
+```
+
+Desenhar uma tela de uma feature que tem várias (`/agile:screen F-12 "Resumo do checkout"`). O nome diz ao Claude qual tela mandar para o `ux-designer`:
+
+```
+> /agile:screen F-12 "Resumo do checkout"
+Claude: F-12 está em refinamento. Desenhando só "Resumo do checkout" com o ux-designer; "Carrinho" segue uma tela existente, então só a cito no arquivo.
+```
+
+Dizer a mudança na mesma linha (`/agile:change F-12 "o desconto é por item, não por pedido"`). O Claude ainda mostra os ids afetados e espera o seu "aprovo" antes de escrever a nota de mudança:
+
+```
+> /agile:change F-12 "o desconto é por item, não por pedido"
+Claude: F-12 está em build. Afetados: BR-2 (desconto por pedido → por item), AC-3, AC-5; não afetados: UC-1, AC-1. Código já escrito: DiscountCalculator.cs e 2 testes a ajustar. Aprova?
+> aprovo
+Claude: Nota de mudança v2 escrita, F-12 continua em build; retomando no passo 4 do plano.
+```
+
+Deixar um recado para a próxima sessão (`/agile:pause "esperando a chave do sandbox de pagamento"`). A nota entra na mensagem de pausa, junto do commit wip e do próximo passo:
+
+```
+> /agile:pause "esperando a chave do sandbox de pagamento"
+Claude: wip(F-12): desconto por item, testes do AC-3 pela metade (4e1f2a9). Próximo: terminar o AC-3, depois a tela.
+   Pendente com você: a chave do sandbox de pagamento. Nada rodando.
+```
+
+Transformar as lições de um item, ou da sessão inteira, em regras (`/agile:retro F-12` ou `/agile:retro session`). Com o id de um item o Claude lê as notas de mudança, as decisões e as correções de validação dele; com `session` lê o que deu errado ou foi corrigido neste chat. No máximo 3 lições nos dois casos:
+
+```
+> /agile:retro session
+Claude: 2 lições desta sessão, cada uma com o destino e a linha exata. Aprova?
+```
+
+### 14.41 A fila offline é enviada com o app fechado
+
+A "Offline foundation" do FieldCheck está sendo construída (Exemplo 14.39). Nada extra é perguntado: o envio em segundo plano faz parte desse item, então os critérios de aceite já o carregam, e o roteiro de validação ganha uma passada para ele:
+
+```
+> /agile:build #12
+Claude: ... IBackgroundSync (Schedule, Cancel) no Mobile.Core; a head Android o implementa com WorkManager
+   (Xamarin.AndroidX.Work.Runtime 2.11.2.1, MIT AND Apache-2.0, só na head). Testes do Core com um IBackgroundSync falso: 14 passaram.
+   Roteiro de validação, passo 6 (emulador): modo avião ligado, salve dois checklists, deslize o app para fora dos recentes,
+   rede ligada. Sem abrir o app, a API recebe os dois, uma vez cada, em ordem. Abra o app: 0 pendentes.
+   Passo 7: um checklist que outra pessoa mudou nesse meio tempo termina na lista de conflitos na próxima abertura; o outro foi enviado.
+   Passo 8: Configurações, Forçar parada, rede ligada: nada é enviado até você abrir o app, e então a fila sai de uma vez.
+```
+
+Com o app fechado nada é mostrado: nem notificação nem permissão. Uma sessão expirada ou uma atualização obrigatória espera a próxima abertura, onde o banner diz "entre de novo" ou "atualização necessária"; uma execução em segundo plano nunca desconecta o usuário nem apaga uma escrita pendente. O iOS é outro item (agile-canary#55).
+
+### 14.42 Um conflito é mesclado campo a campo
+
+O FieldCheck é offline-first (Exemplos 14.39 e 14.41). Dois inspetores mudaram o mesmo checklist, um deles sem sinal. Nada é perguntado no refinamento: a mesclagem faz parte da "Offline foundation" para todo registro, e uma feature a desliga para um registro na sua seção `## Offline`, com o motivo (um valor em dinheiro, onde misturar campos está errado).
+
+```
+[Celular da inspetora Ana, sinal de volta] Lista de conflitos: "O checklist 12 foi alterado por outra pessoa"
+   [Mesclar]  [Enviar a minha de novo]  [Descartar]
+> Mesclar
+   3 campos foram alterados nos dois lados — escolha um para cada
+   Telefone   alterado nos dois   ( ) Seu 555-0101   ( ) Atual 555-0199
+   Notas      alterado nos dois   ( ) Seu "porta consertada"   ( ) Atual "porta trocada"
+   Contatos   lista inteira       ( ) Seu (3 pessoas)   ( ) Atual (4 pessoas)
+   E-mail     só o seu mudou      ana@field.test
+   Cidade     só o deles mudou    Porto
+   [Cancelar]   [Enviar mesclado] (desabilitado até as três escolhas)
+> escolhe Telefone: Seu, Notas: Atual, Contatos: Atual → Enviar mesclado
+Claude (relatório do build): testes do Core: 13 passaram (cada linha da regra por campo, uma lista como uma escolha,
+   "Enviar mesclado" desabilitado, uma atualização restante no registro com a versão atual, outros registros intactos,
+   uma mesclagem velha volta para a lista).
+   Roteiro de validação, passo 7 (emulador): dois usuários mudam um registro, o offline mescla, a API guarda os valores mesclados uma vez;
+   passo 8: uma segunda mesclagem velha volta o registro para a lista.
+```
+
+"Cancelar" deixa o conflito como estava. Um conflito sobre uma exclusão, um `404`, um `400` ou um `422` não tem o que mesclar e mantém as duas ações antigas.
+
+### 14.43 Um app desktop que funciona sem rede
+
+O brief descreve um app desktop de vendas externas para Windows e macOS: os representantes precificam orçamentos no cliente, quase sempre sem conexão, e sincronizam depois. A pergunta 2a2 acabou de escolher uma API.
+
+```
+Claude: Pergunta 2f, online ou offline-first? online · offline-first
+   Recomendação: offline-first. Motivo: o brief diz que os orçamentos são precificados "no cliente, quase sempre sem conexão".
+> ok
+Claude: Resumo: o CLAUDE.md ganha "- Offline: first" em Profile:, o ADR-0001 uma linha. Board: UI kit e galeria,
+   a primeira feature, Offline foundation (depois das duas), depois as features. A fila não é enviada com o app fechado:
+   isso está fora do perfil (sem ícone de bandeja nem serviço).
+```
+
+Com o mesmo brief, mas um app de um só usuário numa rede fechada que vai direto ao PostgreSQL, a 2f não é feita e o ADR-0001 diz: "Offline-first precisa de uma API; um armazenamento SQLite já é local."
+
+Depois, o `/agile:refine` de "Lista de orçamentos" pergunta a seção `## Offline`: quais orçamentos ficam no cache (os abertos do representante), quais escritas entram na fila (edições de preço, anotações) e quem vence um conflito. O roteiro de validação da "Offline foundation" tem dois passos que só você executa, um por head escolhido: com o adaptador de rede desligado, salve duas vezes; o banner mostra "2 pendentes"; ligue o adaptador e a contagem esvazia em ordem, e a API guarda cada alteração uma vez.
+
+### 14.44 Um app desktop que se atualiza sozinho
+
+O app da recepção (Avalonia, Windows) é montado no bootstrap com uma pasta de rede da empresa. Na rodada 6:
+
+```
+Claude: Pergunta 26b, fonte de atualização? pasta de rede · URL https · não declarada
+   Recomendação: pasta de rede. Motivo: o brief diz que os PCs ficam na rede da clínica.
+> pasta de rede, o servidor de arquivos da clínica, pasta updates/recepcao
+Claude: o docs/infra.md ganha "## Desktop updates" com a linha Update source; o head ganha o Velopack,
+   o IAppUpdater com um fake para os testes, o Main que roda o Velopack primeiro e os dois diálogos em pt-BR, pt-PT e en.
+```
+
+O `/agile:publish` na 1.0.0 e, depois, na 1.1.0:
+
+```
+> /agile:publish
+Claude: v1.1.0, App.Desktop (velopack, win-x64 -> a pasta de rede).
+   Empacotado: App-win-Setup.exe 47 MB, App-1.1.0-full.nupkg 39 MB, App-1.1.0-delta.nupkg 62 KB
+   (delta feito a partir da 1.0.0, baixada da pasta de rede). Tag v1.1.0, feed enviado para a pasta.
+```
+
+Num PC com a 1.0.0 instalada, o app abre normalmente; um instante depois aparece uma janela pequena:
+
+```
+Atualização disponível
+A versão 1.1.0 está disponível.        [ Atualizar agora ]  [ Depois ]
+```
+
+"Atualizar agora" reinicia o app na 1.1.0. "Depois" deixa a recepcionista continuar trabalhando; a atualização é aplicada quando o app é fechado, mesmo fora do expediente. Na primeira release as notas dizem também: "Instale uma vez com o App-win-Setup.exe" e que o SmartScreen do Windows avisa porque o instalador não é assinado. Um PC que não alcança a pasta de rede segue com a versão que tem.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -2280,7 +2417,30 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow e perfil dentro do projeto |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | Um item da ideia até done numa execução com duas paradas: as perguntas (as suas respostas o aprovam) e o roteiro de validação ("validado e autorizo o merge de F-n" entrega; só "validado" para em validating). `--assume` pula as perguntas, menos pacotes novos |
 | `/agile:version` | Versão do plugin em uso nesta sessão, a versão de onde vieram as cópias do projeto, e o próximo passo quando diferem |
-| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um. Digitar é a autorização |
+| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (um head desktop com fonte de atualização: pacotes e feed do Velopack; o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um. Digitar é a autorização |
+
+### Quando usar cada comando
+
+| Comando | Use quando | Exemplo na seção 14 |
+|---|---|---|
+| `/agile:bootstrap` | Um app novo com `product/brief.md` preenchido e sem `CLAUDE.md` do agile ainda; `/agile:bootstrap <rodada>` para retomar um quiz que você parou | 14.1, 14.40 |
+| `/agile:discuss` | Você tem uma ideia sem forma e quer opções antes de decidir qualquer coisa | 14.7 |
+| `/agile:epic` | Um épico é grande demais para uma sessão e você quer quebrá-lo em features | 14.7 |
+| `/agile:idea` | Você pensou em algo no meio do trabalho e quer no quadro sem parar | 14.2, 14.5 |
+| `/agile:refine` | Um item é uma ideia e você está pronto para responder às perguntas dele e aprová-lo | 14.2, 14.16 |
+| `/agile:screen` | A feature tem uma tela nova ou complexa; formulários e listas simples não precisam | 14.8, 14.40 |
+| `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9 |
+| `/agile:review` | Uma mudança é arriscada (dados, dinheiro, permissões) e você quer olhos sem contexto antes de validar | 14.8 |
+| `/agile:change` | Você mudou de ideia num item aprovado ou em build; um item done ganha um item novo | 14.3, 14.40 |
+| `/agile:ship` | Você validou o item e autoriza o merge | 14.2, 14.21 |
+| `/agile:retro` | Depois de um ship ou no fim de uma sessão, para guardar no máximo 3 lições como regras; com um id de item ou `session` para escolher a fonte | 14.37, 14.40 |
+| `/agile:pause` | Você vai parar por agora; nada fica só no disco | 14.6, 14.40 |
+| `/agile:status` | No começo de uma sessão, ou para ver o que está bloqueado e por quem | 14.6, 14.20 |
+| `/agile:sync` | Depois de atualizar o plugin, antes do próximo item | 14.10 |
+| `/agile:identity` | O app tem telas e nenhuma identidade visual registrada, ou você quer revisar a que existe | 14.22 |
+| `/agile:autopilot` | Um item pequeno e bem entendido que você quer numa execução com duas paradas; `--assume` quando as recomendações servem para você | 14.13 |
+| `/agile:version` | Você quer saber qual versão do plugin esta sessão usa e se as cópias do projeto estão atrasadas | 14.10 |
+| `/agile:publish` | A `main` tem uma versão que você quer empacotar como release; com um ambiente, também implantada; com `v<x.y.z>`, um rollback | 14.29, 14.35, 14.44 |
 
 ## 16. Fluxo de cada comando
 
@@ -2293,7 +2453,7 @@ flowchart TD
     A -->|sim| B["Ler o brief e a base de código que ele cita"]
     B --> C["Rodadas 1 a 8, uma mensagem cada:<br/>perguntas com recomendação e motivo"]
     C --> C1["mobile sobre uma API existente (2d): pula o que a API decide;<br/>propõe as ideias do app a partir da lista marcada no site, ou a issue do portão no quadro da API"]
-    C1 --> C1b["mobile (2f): online ou offline-first;<br/>offline-first escreve a linha Offline e a ideia Offline foundation"]
+    C1 --> C1b["mobile, ou desktop com API (2f): online ou offline-first;<br/>offline-first escreve a linha Offline e a ideia Offline foundation"]
     C1b --> C2["web-app ou website com app desde o início (2e): as funcionalidades do brief para desmarcar;<br/>depois Contracts (+ Shared com Hybrid) e o épico 'Mobile app', ainda sem projeto do app"]
     C2 --> D{"Suas respostas ('ok' aceita)"}
     D --> E["Pergunta de fechamento: qual conceito do domínio mais preocupa?"]
