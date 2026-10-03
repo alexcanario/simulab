@@ -59,10 +59,15 @@
     <PackageVersion Include="Npgsql.DependencyInjection" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.12" />
     <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
-    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.4.6" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.5.0" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.6.0" />
+    <!-- F-62: the Azure publish model of the app host (ADR-0002). Same version as every other Aspire package. -->
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.KeyVault" Version="13.6.0" />
   </ItemGroup>
 
   <!-- Identity (F-4) -->
@@ -79,8 +84,8 @@
   <ItemGroup>
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.7.1" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.7.1" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.5.4" />
-    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.5.4" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.0" />
+    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.6.0" />
     <PackageVersion Include="StackExchange.Redis" Version="3.3.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
   </ItemGroup>

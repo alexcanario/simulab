@@ -1,46 +1,99 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Fixed local-only password (owner decision): easier to reach the container by hand (psql, DataGrip)
-// without checking the dashboard every run. Never used outside local development.
-var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+// F-62 (ADR-0002): the Azure resources exist only when the host publishes (`aspire publish` / `aspire deploy`).
+// A local run keeps today's containers and needs no Azure sign-in.
+var publishing = builder.ExecutionContext.IsPublishMode;
+var environmentName = builder.Environment.EnvironmentName;
 
-// One PostgreSQL server with the app database. The named volume keeps local data across restarts.
-var postgres = builder.AddPostgres("postgres", password: postgresPassword)
-    .WithDataVolume("simulab-postgres-data")
-    .WithHostPort(5432);
+IResourceBuilder<IResourceWithConnectionString> database;
+IResourceBuilder<IResourceWithConnectionString> redis;
+IResourceBuilder<MailPitContainerResource>? mailpit = null;
 
-// The resource keeps its name, so every connection string stays "simulab"; only the physical database
-// changes. A worktree sets Database:Name (or Database__Name) so an item's migration never lands in the
-// shared local database while it is still being built (rule: worktrees).
-var database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
+if (publishing)
+{
+    builder.AddAzureContainerAppEnvironment("cae");
 
-// Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
-var mailpit = builder.AddMailPit("mailpit");
+    // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
+    builder.AddAzureKeyVault("keyvault");
 
-// Refresh-token sessions and the access-token revocation set (F-5).
-var redis = builder.AddRedis("redis")
-    .WithDataVolume("simulab-redis-data");
+    database = builder.AddAzurePostgresFlexibleServer("postgres").AddDatabase("simulab");
+
+    // Azure Cache for Redis cannot be stopped, only deleted. Staging is parked outside test windows and its Redis
+    // holds only sessions, so it runs as a container in the environment; production uses the managed cache.
+    redis = environmentName == "Production"
+        ? builder.AddAzureManagedRedis("redis")
+        : builder.AddRedis("redis");
+}
+else
+{
+    // Fixed local-only password (owner decision): easier to reach the container by hand (psql, DataGrip)
+    // without checking the dashboard every run. Never used outside local development.
+    var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+
+    // One PostgreSQL server with the app database. The named volume keeps local data across restarts.
+    var postgres = builder.AddPostgres("postgres", password: postgresPassword)
+        .WithDataVolume("simulab-postgres-data")
+        .WithHostPort(5432);
+
+    // The resource keeps its name, so every connection string stays "simulab"; only the physical database
+    // changes. A worktree sets Database:Name (or Database__Name) so an item's migration never lands in the
+    // shared local database while it is still being built (rule: worktrees).
+    database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
+
+    // Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
+    mailpit = builder.AddMailPit("mailpit");
+
+    // Refresh-token sessions and the access-token revocation set (F-5).
+    redis = builder.AddRedis("redis")
+        .WithDataVolume("simulab-redis-data");
+}
 
 var api = builder.AddProject<Projects.Simulab_Api>("api")
     .WithReference(database)
     .WaitFor(database)
-    .WithReference(mailpit)
-    .WaitFor(mailpit)
     .WithReference(redis)
-    .WaitFor(redis)
-    // The MailPit connection string carries the container's own SMTP port (1025), which is not the port
-    // the Api reaches from the host. Without this the Api talks to localhost:1025 and every email is
-    // refused (found on screen, F-4). The endpoint reference resolves to the mapped host and port.
-    .WithEnvironment("ConnectionStrings__mailpit", ReferenceExpression.Create(
-        $"smtp://{mailpit.GetEndpoint("smtp").Property(EndpointProperty.HostAndPort)}"));
+    .WaitFor(redis);
 
 var web = builder.AddProject<Projects.Simulab_Web>("web")
-    .WithExternalHttpEndpoints()
     .WithReference(api)
     .WaitFor(api)
     // B-3: each signed-in browser's tokens live here, not in its cookie.
     .WithReference(redis)
     .WaitFor(redis);
+
+if (mailpit is not null)
+{
+    api.WithReference(mailpit)
+        .WaitFor(mailpit)
+        // The MailPit connection string carries the container's own SMTP port (1025), which is not the port
+        // the Api reaches from the host. Without this the Api talks to localhost:1025 and every email is
+        // refused (found on screen, F-4). The endpoint reference resolves to the mapped host and port.
+        .WithEnvironment("ConnectionStrings__mailpit", ReferenceExpression.Create(
+            $"smtp://{mailpit.GetEndpoint("smtp").Property(EndpointProperty.HostAndPort)}"));
+}
+
+if (publishing)
+{
+    // The cloud sets the environment name on the hosts (else a staging deploy logs "Production").
+    // BR5: the Api runs the job worker, so it never goes to zero (at zero replicas no email leaves);
+    // the Web keeps its sign-in tickets in memory, so it runs as one instance and may sleep at zero.
+    var openIddictSecret = builder.AddParameter("openiddict-client-secret", secret: true);
+    api.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+        .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
+        .PublishAsAzureContainerApp((_, app) => app.Template.Scale.MinReplicas = 1);
+    web.WithExternalHttpEndpoints()
+        .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+        .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
+        .PublishAsAzureContainerApp((_, app) =>
+        {
+            app.Template.Scale.MinReplicas = 0;
+            app.Template.Scale.MaxReplicas = 1;
+        });
+}
+else
+{
+    web.WithExternalHttpEndpoints();
+}
 
 // The verification link in the email points at the Web page that consumes the token (F-4). The Api
 // cannot know that address on its own, and the ports change on every run.
