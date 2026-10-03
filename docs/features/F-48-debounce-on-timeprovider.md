@@ -1,7 +1,7 @@
 ---
 feature: F-48
 epic: Foundation and identity
-status: validating
+status: done
 board: 773
 version: 1
 ---
@@ -108,6 +108,6 @@ Needed to validate: nothing. There is no screen; the item changes tests only.
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: feature/F-48
-- Merge:
-- Tests:
-- Manual pages:
+- Merge: c8d525c (app version 0.4.0 -> 0.5.0)
+- Tests: full suite 1848 tests, 77 s test + 16 s build, 0 new warnings (`gate.js ship` GREEN, 2026-10-03); `Simulab.Web.Tests` 835 (the 820 of this item plus the 15 F-50 added); AC4 loop 20 of 20 green
+- Manual pages: none (tests only, no visible behavior changed)
