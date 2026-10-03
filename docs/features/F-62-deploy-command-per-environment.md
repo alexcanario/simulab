@@ -1,7 +1,7 @@
 ---
 feature: F-62
 epic: Foundation and identity
-status: building
+status: validating
 board: 101
 version: 2
 ---
@@ -68,12 +68,30 @@ Know where Simulab will run, at what monthly cost, and with which command, befor
 - 2026-10-02 — The CI workflow runs on `ubuntu-latest`, where Docker is available for the test containers; the measured suite (1808 tests, ~90 s) fits the free minutes of a private repository (Claude, technical).
 - 2026-10-03 — Approved by the owner ("aprovo f-62"), including the staging Redis as a container.
 
+- 2026-10-03 — Built (Claude, technical): the Azure resources live in `src/Hosts/Simulab.AppHost/AzureDeployment.cs`, called from `AppHost.cs` only when `IsPublishMode`; the overview test reads `AppHost.cs` as text, so the cloud resources are not nodes of the containers diagram (a sentence in `docs/architecture-overview.md` says so).
+- 2026-10-03 — Built (Claude, technical): in publish mode the AppHost ignores `Google:*` and `Ai:ApiKey` from the machine's user secrets, so a local secret can never become a parameter default of the deployment files (BR7). The Google switch and the AI key reach the cloud later, from Key Vault.
+- 2026-10-03 — Built (Claude, technical): the publish files are tested by running the built AppHost with the manifest publisher (`--operation publish --publisher manifest`): it writes the same Bicep modules as `aspire publish`, needs no CLI and no Azure sign-in, and runs in about a second.
+- 2026-10-03 — Built (Claude, technical): `Microsoft.Extensions.Http.Resilience` 10.9.0 → 10.10.0, forced by `Aspire.Hosting.Testing` 13.6.0 (restore failed with NU1109). A Microsoft package of the same family already used; not in the owner's package list, so reported here.
+- 2026-10-03 — Built (Claude, technical): `<AspireUseCliBundle>true</AspireUseCliBundle>` on the AppHost, as the profile asks, so Aspire 13.6.0 raises no ASPIRE010 warning.
+- 2026-10-03 — Mailpit and email are not part of the publish model: cloud email is F-66. The deployed `api` has no SMTP setting until then.
+- 2026-10-03 — The Api's connection string to the Azure PostgreSQL carries no password (managed identity). Whether the Npgsql client of the Api signs in that way is not verified here: F-64 finds out when the environment is created.
+
 ## Change notes
 ### v2 — 2026-10-03
 - What: BR1 — the images are kept in the Azure Container Registry (Basic) that Aspire creates (`cae-acr`), not in GHCR.
 - Why: found while building. With a GHCR registry on the environment, `aspire publish` fails: "The container registry configured for the Azure Container App Environment 'cae' is not an Azure Container Registry. Only Azure Container Registry resources are supported." (Aspire 13.6.0). Option B (hand-edited Bicep) would break `aspire deploy` as the single command; option C (publish without Aspire: Dockerfiles, hand-written Bicep, GHCR) was weighed and deferred to F-65 if cost or drift becomes a problem.
 - Affected: BR1 (text above). BR2: the ADR adds the ACR to every cost state (about US$ 5/month, not verified; an ACR cannot be stopped, so it also counts while staging is parked). The decision of 2026-10-02 that names GHCR stays as history. AC1 to AC9 unchanged.
 - Re-approved: 2026-10-03 (owner, "A, pode seguir").
+
+## Validation script
+Needed to validate: the owner authorizes pushing `feature/F-62` to GitHub so the CI runs once on GitHub's runners (step 6) — owner; not in place yet. The item has no screen, so there is no language switch, permission check or keyboard pass; the Aspire CLI 13.6.0 is installed (`aspire --version`).
+
+1. Read `docs/decisions/ADR-0002-host.md`: it compares Container Apps with one VM and Compose on monthly cost per state (with the price source and date), operations and the GitHub Actions deploy path, and records BR1 to BR5. (AC1)
+2. Publish for Staging with no Azure sign-in, from the worktree root (same command in Git Bash and PowerShell 7): `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo`. Expected: `11/11 steps succeeded`, and the folders `cae`, `cae-acr`, `api`, `web`, `postgres`, `keyvault`, `redis` under `artifacts/publish/staging`. Repeat the same with `-e Production`: `redis` is then a managed cache (no `redis-containerapp` file). (AC2)
+3. Look for secrets in what it wrote. Git Bash: `grep -rl "dev-only" artifacts/publish | wc -l`; PowerShell 7: `(Get-ChildItem artifacts\publish -Recurse -File | Select-String "dev-only" | Measure-Object).Count`. Expected: `0`. (AC5)
+4. Open `docs/infra.md`: staging and production are `planned` on Azure Container Apps, Brazil South, each with its `aspire deploy` command, and "Staging start and stop" has the park and start commands (declared, not run: no environment exists). (AC7)
+5. Start the app as always, on its own database: Git Bash `Database__Name=simulab_f62 dotnet run --project src/Hosts/Simulab.AppHost`; PowerShell 7 `$env:Database__Name = "simulab_f62"; dotnet run --project src/Hosts/Simulab.AppHost`. Expected: the dashboard lists `postgres`, `simulab`, `mailpit`, `redis`, `api`, `web`, and no Azure resource; sign-up and the email in Mailpit work as before. Stop it afterwards and drop the database (`DROP DATABASE simulab_f62;`). (AC3)
+6. Authorize the push of `feature/F-62` (say "push F-62"). Expected: the `ci` run on GitHub is green (build and tests, no deploy step). (AC8)
 
 ## Out of scope
 - Creating staging on Azure, the first deploy, persisting Data Protection keys and setting `ForwardedHeaders` in the cloud, measuring the real cost: F-64.
