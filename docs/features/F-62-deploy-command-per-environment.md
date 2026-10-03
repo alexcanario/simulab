@@ -1,7 +1,7 @@
 ---
 feature: F-62
 epic: Foundation and identity
-status: refining
+status: approved
 board: 101
 version: 1
 ---
@@ -66,6 +66,7 @@ Know where Simulab will run, at what monthly cost, and with which command, befor
 - 2026-10-02 — The deploy command follows the profile's form: `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`; the Azure subscription, resource group and location come from environment variables, never from a committed file (Claude, technical).
 - 2026-10-02 — ADR-0002 overrides the profile's Docker Compose deploy recipe for Simulab; the profile gets one line pointing at it, the recipe stays as plan B (Claude, technical).
 - 2026-10-02 — The CI workflow runs on `ubuntu-latest`, where Docker is available for the test containers; the measured suite (1808 tests, ~90 s) fits the free minutes of a private repository (Claude, technical).
+- 2026-10-03 — Approved by the owner ("aprovo f-62"), including the staging Redis as a container.
 
 ## Out of scope
 - Creating staging on Azure, the first deploy, persisting Data Protection keys and setting `ForwardedHeaders` in the cloud, measuring the real cost: F-64.
