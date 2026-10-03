@@ -101,6 +101,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `feature-build` step 17: the validation script of an item that has a migration names the worktree's own database (`Database__Name`, which `AppHost.cs` reads) in its start step, never "your local database" — otherwise the first start applies the migration to the shared one | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 11 and `worktrees.md`: the lock probe (rename the folder to `<folder>.probe` and back) is one command run alone that stops the ship when it fails, so `git worktree remove` can never run after a failed probe | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 8b: run the architecture tests after writing the bumped `<Version>` and before committing it — a test that pins a version number goes red on the first bump (F-46: two `AppVersionTests` failed, `Failed: 2, Passed: 162`) | F-46 | |
+| ⏳ | agile | `[generic]` `version.js` writes `<Version>` to the root `Directory.Build.props`, while the `AppVersionTests` the project got from F-60 pin it to `Simulab.Api.csproj`: after F-47's ship `gate.js ship` was red on `main` and blocked F-48 and F-50 (B-21). The plugin should name where the version lives in one place (bootstrap or `/agile:sync`) so a test and the script cannot disagree | F-50 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -868,3 +869,9 @@ From 0.0.104 to 0.0.105, run on a clean main with no item `building` or `validat
 - Manual, applied: `.gitignore` got `!docs/releases/` after `[Rr]eleases/`: the Visual Studio template pattern ignored the folder where `publish.js` writes the notes, and the first `release` failed at `git add`.
 - Plugin note: `scripts/publish.js` `package` listed `Simulab.Catalog.Api` and `Simulab.Identity.Api` (module class libraries under `src/Modules/*`) as deployables and left out `Simulab.Web`; the zips of v0.3.0 do not run the app (adds to the F-60 note). `plugin: agile`.
 - Plugin note: `templates/dotnet/gitignore` ignores `[Rr]eleases/`, which swallows `docs/releases/`; add `!docs/releases/` to the template. `plugin: agile`.
+
+## 2026-10-03 - F-50 Table search announces results
+Shipped as 0.4.0 (merge 7037e30). The full gate needed three runs: a hung test of this item, then two version tests red on main (B-21).
+- Project rule, applied: a test that holds a load never awaits the call that started it (`.claude/rules/agile/project.md`). Evidence: `agile gate RED: a test hung (Simulab.slnx)` with `not finished: ...Search_FirstLoadCancelledByASecond_SaysOnlyTheSecondTotal`; it passed alone. Swept the other hold-style tests (`HoldFind`, `HoldFilters`, `RefreshGate`): all release before awaiting, nothing to fix.
+- Plugin note: `version.js` puts `<Version>` in `Directory.Build.props` while `AppVersionTests` pinned it to `Simulab.Api.csproj` (B-21). Evidence: `Failed: 2, Passed: 2` on `AppVersionTests`, and `Directory.Build.props:4` holds `0.3.0`. The tests were fixed in this item; B-21 stays with the owner. `plugin: agile [generic]`.
+- Idea, captured: `DataExportPageTests.Dialog_AccountWithoutPassword_ShowsHowToCreateOne` failed once in the full suite (1 of 833) and passed 7 of 7 alone. Cause not verified.
