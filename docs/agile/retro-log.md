@@ -857,3 +857,14 @@ From 0.0.102 to 0.0.104, run on a clean main with no item `building` or `validat
 ## 2026-10-02 - Retro F-46 (derive the production assembly list)
 - Plugin note: `[generic]` `feature-ship` step 8b — run the architecture tests after writing the bumped `<Version>` and before committing it. Evidence: the first test run after the bump printed `Failed!  - Failed:     2, Passed:   162`, and the commit had already gone out because the command chained `git commit` after a `grep` that always exits 0 (fixed on the branch before the merge). Tracked in the table above.
 - Nothing: the board Status field stayed at `Ready` during the build because only the label was changed (own omission, once).
+
+## 2026-10-02 - Sync with agile@canary 0.0.105
+From 0.0.104 to 0.0.105, run on a clean main with no item `building` or `validating`.
+- Copied (never edited, plugin changed): template `project-claude`; `docs/agile/workflow.md` and `workflow.pt-BR.md` (question 2f, offline-first).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Missing capabilities: DocGen tool catalogue (F-61 #100), deploy command per environment (F-62 #101), visual identity (F-63 #102); all already captured, nothing new.
+- Found: `/agile:publish develop` stopped because the environments table of `docs/infra.md` lacks the `Deploy command`, `Check URL` and `Version (deployed on)` columns (F-62) and has no environment named `develop`.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+- Manual, applied: `.gitignore` got `!docs/releases/` after `[Rr]eleases/`: the Visual Studio template pattern ignored the folder where `publish.js` writes the notes, and the first `release` failed at `git add`.
+- Plugin note: `scripts/publish.js` `package` listed `Simulab.Catalog.Api` and `Simulab.Identity.Api` (module class libraries under `src/Modules/*`) as deployables and left out `Simulab.Web`; the zips of v0.3.0 do not run the app (adds to the F-60 note). `plugin: agile`.
+- Plugin note: `templates/dotnet/gitignore` ignores `[Rr]eleases/`, which swallows `docs/releases/`; add `!docs/releases/` to the template. `plugin: agile`.
