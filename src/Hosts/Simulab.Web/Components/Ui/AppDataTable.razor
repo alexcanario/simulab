@@ -22,6 +22,7 @@
                           ValueChanged="OnSearchChangedAsync"
                           Placeholder="@(SearchPlaceholder ?? L["Common.Search"])"
                           aria-label="@L["Common.Search"]"
+                          aria-describedby="@(HasSearchHint ? _hintId : null)"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@AppIcons.Search"
                           Immediate="true"
@@ -62,6 +63,12 @@
                           InfoFormat="@L["Common.Table.PageInfo"]" />
     </PagerContent>
 </MudDataGrid>
+@* F-50: the live region is in the page from the first render, empty; only its text changes. *@
+<div id="@_statusId" class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+@if (HasSearchHint)
+{
+    <span id="@_hintId" class="app-visually-hidden">@SearchPlaceholder</span>
+}
 
 @code {
     public const int DefaultPageSize = 25;
@@ -72,6 +79,17 @@
     private bool _failed;
     private int _rowsPerPage = DefaultPageSize;
     private int _currentPage;
+
+    // F-50: ids are per instance, so two tables on one page never repeat one.
+    private readonly string _hintId = $"app-table-hint-{Guid.NewGuid():N}";
+    private readonly string _statusId = $"app-table-status-{Guid.NewGuid():N}";
+    private bool _announcePending;
+    private string? _announcement;
+
+    // The hint repeats the placeholder only when it says more than the box's name ("Search"): else the reader says it twice.
+    private bool HasSearchHint => Searchable
+        && !string.IsNullOrWhiteSpace(SearchPlaceholder)
+        && SearchPlaceholder != L["Common.Search"];
 
     /// <summary>Column definitions (PropertyColumn, TemplateColumn, AppNumberColumn, AppDateColumn).</summary>
     [Parameter, EditorRequired] public RenderFragment Columns { get; set; } = default!;
@@ -126,6 +144,7 @@
     /// <summary>Reloads from the first page: after a filter outside the table changes (F-9: the role filter), as the search box does.</summary>
     public async Task ReloadFromFirstPageAsync()
     {
+        ExpectAnnouncement();
         if (_grid.CurrentPage != 0)
             _grid.NavigateTo(Page.First);
         await _grid.ReloadServerData();
@@ -149,6 +168,7 @@
                 _ = InvokeAsync(ShowFirstPageAsync);
             }
 
+            Announce(page.TotalItems, cancellationToken);
             return new GridData<TItem> { Items = page.Items, TotalItems = page.TotalItems };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -159,8 +179,34 @@
         {
             Logger.LogWarning(exception, "Table data for {ItemType} failed to load", typeof(TItem).Name);
             _failed = true;
+            _announcePending = false; // the error state has role="alert"; no count is spoken
             return new GridData<TItem> { Items = [], TotalItems = 0 };
         }
+    }
+
+    /// <summary>F-50, BR1: a search change or a reload from the first page is followed by a count. The text is cleared
+    /// first so that the same count twice in a row still changes the region.</summary>
+    private void ExpectAnnouncement()
+    {
+        _announcePending = true;
+        _announcement = null;
+    }
+
+    /// <summary>F-50, BR1-BR3: says the total after the load that follows a search or filter change; a cancelled
+    /// load says nothing (the newer one will).</summary>
+    private void Announce(int total, CancellationToken cancellationToken)
+    {
+        if (!_announcePending || cancellationToken.IsCancellationRequested)
+            return;
+
+        _announcePending = false;
+        _announcement = total switch
+        {
+            0 => L["Common.Table.Results.None"],
+            1 => L["Common.Table.Results.One"],
+            _ => string.Format(CultureInfo.CurrentCulture, L["Common.Table.Results.Many"].Value, total)
+        };
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task ShowFirstPageAsync()
@@ -185,6 +231,7 @@
     private async Task OnSearchChangedAsync(string? value)
     {
         _search = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        ExpectAnnouncement();
         if (_grid.CurrentPage != 0)
             _grid.NavigateTo(Page.First);
         await _grid.ReloadServerData();

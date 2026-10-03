@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: en
-features: [F-2, F-8, F-17]
-updated: 2026-09-23
+features: [F-2, F-8, F-17, F-50]
+updated: 2026-10-03
 ---
 # Getting around
 
@@ -31,6 +31,10 @@ Everyone, signed in or not.
 ### Use the keyboard
 1. Press Tab once after a page loads: a "Skip to main content" link appears at the top left. Press Enter to jump straight to the page content.
 2. Tab moves through the menu button, the Simulab name (back to the home page), the mode and language switches, and the menu items.
+
+### Search a list with a screen reader
+1. Tab into the search box above a list: the screen reader says its name ("Search") and, when the box searches by something specific, what it searches by (for example "Search by name or e-mail").
+2. Type a term, or change a filter next to the list. When the list has reloaded, the screen reader says how many rows it has now ("12 results", "1 result" or "No results"). Changing page or sorting a column does not repeat it.
 
 ## Related pages
 - [Simulab](index.md)
