@@ -1,7 +1,7 @@
 ---
 feature: F-50
 epic: Foundation and identity
-status: building
+status: validating
 board: 87
 version: 1
 ---
@@ -103,3 +103,10 @@ A screen reader user who types in a table's search box, or changes one of its fi
 - Merge: <commit>
 - Tests: <count, duration>
 - Manual pages: <paths>
+
+## Delivery
+- `AppDataTable.razor`: hidden live region (`role="status"`, `aria-live="polite"`) present from the first render; `aria-describedby` to a hidden placeholder element only when the placeholder differs from the name; per-instance ids.
+- Announcement flag set by `OnSearchChangedAsync` and `ReloadFromFirstPageAsync`, consumed by the next successful, non-cancelled load; cleared on failure.
+- Keys `Common.Table.Results.None/One/Many` in the three resource files.
+- Tests: `AppDataTableAnnouncementTests` (14). MudBlazor passes `aria-describedby` to the `<input>` (verified in the DOM by the AC8 test).
+- Not checked by Claude: the signed-in screens (`/admin/users`, `/catalog`) through the app host, and a real screen reader (AC11): both are in the validation script.
