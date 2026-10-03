@@ -1,3 +1,5 @@
+using Simulab.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // F-62 (ADR-0002): the Azure resources exist only when the host publishes (`aspire publish` / `aspire deploy`).
@@ -11,18 +13,7 @@ IResourceBuilder<MailPitContainerResource>? mailpit = null;
 
 if (publishing)
 {
-    builder.AddAzureContainerAppEnvironment("cae");
-
-    // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
-    builder.AddAzureKeyVault("keyvault");
-
-    database = builder.AddAzurePostgresFlexibleServer("postgres").AddDatabase("simulab");
-
-    // Azure Cache for Redis cannot be stopped, only deleted. Staging is parked outside test windows and its Redis
-    // holds only sessions, so it runs as a container in the environment; production uses the managed cache.
-    redis = environmentName == "Production"
-        ? builder.AddAzureManagedRedis("redis")
-        : builder.AddRedis("redis");
+    (database, redis) = AzureDeployment.AddResources(builder, environmentName);
 }
 else
 {
@@ -74,21 +65,7 @@ if (mailpit is not null)
 
 if (publishing)
 {
-    // The cloud sets the environment name on the hosts (else a staging deploy logs "Production").
-    // BR5: the Api runs the job worker, so it never goes to zero (at zero replicas no email leaves);
-    // the Web keeps its sign-in tickets in memory, so it runs as one instance and may sleep at zero.
-    var openIddictSecret = builder.AddParameter("openiddict-client-secret", secret: true);
-    api.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
-        .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
-        .PublishAsAzureContainerApp((_, app) => app.Template.Scale.MinReplicas = 1);
-    web.WithExternalHttpEndpoints()
-        .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
-        .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
-        .PublishAsAzureContainerApp((_, app) =>
-        {
-            app.Template.Scale.MinReplicas = 0;
-            app.Template.Scale.MaxReplicas = 1;
-        });
+    AzureDeployment.ConfigureHosts(builder, api, web, environmentName);
 }
 else
 {
