@@ -3,7 +3,7 @@ feature: F-62
 epic: Foundation and identity
 status: building
 board: 101
-version: 1
+version: 2
 ---
 # Each environment declares how it is deployed: Azure as the host
 
@@ -27,7 +27,7 @@ Know where Simulab will run, at what monthly cost, and with which command, befor
 - UC4 A developer opens a pull request or pushes to `main`, and GitHub Actions builds the solution and runs the tests.
 
 ## Business rules
-- BR1 The host is **Azure Container Apps, Brazil South**, with managed PostgreSQL (Flexible Server), Azure Cache for Redis and Key Vault; container images are kept in GitHub Container Registry (GHCR), not in an Azure registry.
+- BR1 The host is **Azure Container Apps, Brazil South**, with managed PostgreSQL (Flexible Server), Azure Cache for Redis and Key Vault; container images are kept in the Azure Container Registry (Basic) that Aspire creates with the Container Apps environment (change note v2; GHCR is not supported by Aspire 13.6.0 for this environment).
 - BR2 Cost ceiling: **US$ 80 per month** for staging and production together. The ADR records the estimate per state from Azure retail prices (source and date); the real cost is measured by F-64. When the measured monthly cost is above the ceiling, plan B applies: one Linux VM running staging and production as two Docker Compose environments (the profile's deploy recipe).
 - BR3 **Staging** exists for testers in Brazil: it runs during test windows and is parked outside them (apps at zero replicas, PostgreSQL stopped). `docs/infra.md` declares the start and the stop command.
 - BR4 **Production** has its deploy command declared, but it is created only at the first release (ADR-0001 #5); until then it costs nothing.
@@ -67,6 +67,13 @@ Know where Simulab will run, at what monthly cost, and with which command, befor
 - 2026-10-02 — ADR-0002 overrides the profile's Docker Compose deploy recipe for Simulab; the profile gets one line pointing at it, the recipe stays as plan B (Claude, technical).
 - 2026-10-02 — The CI workflow runs on `ubuntu-latest`, where Docker is available for the test containers; the measured suite (1808 tests, ~90 s) fits the free minutes of a private repository (Claude, technical).
 - 2026-10-03 — Approved by the owner ("aprovo f-62"), including the staging Redis as a container.
+
+## Change notes
+### v2 — 2026-10-03
+- What: BR1 — the images are kept in the Azure Container Registry (Basic) that Aspire creates (`cae-acr`), not in GHCR.
+- Why: found while building. With a GHCR registry on the environment, `aspire publish` fails: "The container registry configured for the Azure Container App Environment 'cae' is not an Azure Container Registry. Only Azure Container Registry resources are supported." (Aspire 13.6.0). Option B (hand-edited Bicep) would break `aspire deploy` as the single command; option C (publish without Aspire: Dockerfiles, hand-written Bicep, GHCR) was weighed and deferred to F-65 if cost or drift becomes a problem.
+- Affected: BR1 (text above). BR2: the ADR adds the ACR to every cost state (about US$ 5/month, not verified; an ACR cannot be stopped, so it also counts while staging is parked). The decision of 2026-10-02 that names GHCR stays as history. AC1 to AC9 unchanged.
+- Re-approved: 2026-10-03 (owner, "A, pode seguir").
 
 ## Out of scope
 - Creating staging on Azure, the first deploy, persisting Data Protection keys and setting `ForwardedHeaders` in the cloud, measuring the real cost: F-64.
