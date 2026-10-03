@@ -102,6 +102,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `feature-ship` step 11 and `worktrees.md`: the lock probe (rename the folder to `<folder>.probe` and back) is one command run alone that stops the ship when it fails, so `git worktree remove` can never run after a failed probe | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 8b: run the architecture tests after writing the bumped `<Version>` and before committing it — a test that pins a version number goes red on the first bump (F-46: two `AppVersionTests` failed, `Failed: 2, Passed: 162`) | F-46 | |
 | ⏳ | agile | `[generic]` `version.js` writes `<Version>` to the root `Directory.Build.props`, while the `AppVersionTests` the project got from F-60 pin it to `Simulab.Api.csproj`: after F-47's ship `gate.js ship` was red on `main` and blocked F-48 and F-50 (B-21). The plugin should name where the version lives in one place (bootstrap or `/agile:sync`) so a test and the script cannot disagree | F-50 | |
+| ⏳ | agile | `[generic]` The Stop gate hook builds the worktree while a background `dotnet clean`/`build` loop of the same session runs in it, and both fail (the loop's runs come back empty). The gate should detect a `dotnet` build already running in the worktree and defer instead of reporting `RED` | F-48 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -875,3 +876,8 @@ Shipped as 0.4.0 (merge 7037e30). The full gate needed three runs: a hung test o
 - Project rule, applied: a test that holds a load never awaits the call that started it (`.claude/rules/agile/project.md`). Evidence: `agile gate RED: a test hung (Simulab.slnx)` with `not finished: ...Search_FirstLoadCancelledByASecond_SaysOnlyTheSecondTotal`; it passed alone. Swept the other hold-style tests (`HoldFind`, `HoldFilters`, `RefreshGate`): all release before awaiting, nothing to fix.
 - Plugin note: `version.js` puts `<Version>` in `Directory.Build.props` while `AppVersionTests` pinned it to `Simulab.Api.csproj` (B-21). Evidence: `Failed: 2, Passed: 2` on `AppVersionTests`, and `Directory.Build.props:4` holds `0.3.0`. The tests were fixed in this item; B-21 stays with the owner. `plugin: agile [generic]`.
 - Idea, captured: `DataExportPageTests.Dialog_AccountWithoutPassword_ShowsHowToCreateOne` failed once in the full suite (1 of 833) and passed 7 of 7 alone. Cause not verified.
+
+## 2026-10-03 - F-48 Drive the search debounce from TimeProvider
+Shipped as 0.5.0 (merge c8d525c), tests only: the refinement found the premise false (MudBlazor 9.9.0 already reads an injected `TimeProvider`), so no production file changed.
+- Plugin note: the Stop gate hook collides with a background build loop of the same worktree. Evidence: `agile gate RED: build failed` with `MSB3030 ... because it was not found` while `dotnet clean` ran in the loop, and `loop.txt` showed runs 1 and 2 empty. The loop was redone in the foreground, in blocks of 5. `plugin: agile [generic]`.
+- Nothing: the premise check in the library source at the pinned tag (already in the refinement step 6); the `board: 773` header that matched no GitHub issue (the real one was 24), cause not verified, no audit captured (owner: no); capturing B-21 for a failure F-50 had already fixed on main, a one-off.
