@@ -2,7 +2,7 @@
 feature: F-48
 epic: Foundation and identity
 status: done
-board: 773
+board: 24
 version: 1
 ---
 # Drive the search debounce from TimeProvider
