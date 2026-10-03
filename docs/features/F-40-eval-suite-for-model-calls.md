@@ -16,6 +16,8 @@ Remove these comments when the file leaves `idea`.
 -->
 # Eval suite for model calls
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Simulab will call the Claude API through `IAiGateway`, but it has no eval suite. Add an evals command that runs at ship and on demand (never in the turn gate), with a pass-rate baseline file and a cost ceiling per run, and add the Evals line to `CLAUDE.md` (agile@canary 0.0.57 template, manual section 14.14).
 

@@ -7,6 +7,8 @@ version: 1
 ---
 # App shell and navigation
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Side navigation menu, app-wide light/dark switch (remembered per user later), a slot for the user menu and a skip-to-content link. Uses the UI kit from F-1 and the `ThemeState` it introduced.
 

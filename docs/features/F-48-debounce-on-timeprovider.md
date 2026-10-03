@@ -7,6 +7,8 @@ version: 1
 ---
 # Drive the search debounce from TimeProvider
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The 300 ms debounce of the shared UI kit (`AppDataTable.razor:28`, `AppLookupField.razor:22,75`) waits on the real
 clock in every bUnit test that types into a search box or a lookup field, and under the load of the whole solution

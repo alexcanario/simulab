@@ -7,6 +7,8 @@ version: 1
 ---
 # Every error code has a text
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 One test that checks, by reflection over every module's `*ErrorCodes` constants, that each code has a text in pt-BR, pt-PT and en. Today each resource test picks code prefixes by hand, so F-14's `role_change.period_invalid` shipped to review with no text in any language (F-14 retro, 2026-09-21).
 

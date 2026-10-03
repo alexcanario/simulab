@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # Flaky overflow menu test in AppRowActionsTests
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 `AppRowActionsTests.Render_FiveActions_ShowsThreeAndPutsTheRestInOverflowMenu` (`tests/Hosts/Simulab.Web.Tests`)
 failed on the first run after each build, both with the B-10 change and on the `main` code alone, with

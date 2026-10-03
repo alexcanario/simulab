@@ -7,6 +7,8 @@ version: 2
 ---
 # Exams back office
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Admin screens to create, edit and remove an exam under the body that runs it: the issuing authority
 (a required link to an `IssuingAuthority`, v2), the name, the assessment type (public service exam, certification,

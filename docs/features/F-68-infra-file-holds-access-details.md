@@ -7,6 +7,8 @@ version: 1
 ---
 # infra.md holds the access details of the infrastructure
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The owner wants `docs/infra.md` to be the one place that holds the URI and the password of the board, the pipelines, the Key Vault and the hosts, so nobody (human or agent) has to hunt for them. Raised by the owner on 2026-10-03.
 

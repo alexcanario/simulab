@@ -3,6 +3,8 @@ updated: 2026-09-20
 ---
 # Infra
 
+Technical terms: [glossary](glossary.md)
+
 Written at bootstrap from ADR-0001 round 6. What is true today; anything that does not exist yet is `planned`.
 
 ## Run locally

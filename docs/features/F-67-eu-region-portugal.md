@@ -7,6 +7,8 @@ version: 1
 ---
 # Portuguese users' data stays in an EU region
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Decide whether Portuguese users need their data hosted in an EU region (GDPR) and, if so, how: a second environment, a region move or a split by country. A deferred decision in `docs/infra.md`; captured so it is tracked on the board. Raised as out of scope by the F-62 refinement, 2026-10-02.
 

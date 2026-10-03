@@ -5,6 +5,8 @@ date: 2026-09-25
 ---
 # Visual language and control patterns
 
+Technical terms: [glossary](../glossary.md)
+
 ## Idea
 On the screen validation of F-34 the owner rejected the look of the exam form: the colours and the controls
 do not read like Simulae, whose back office he had already approved. He asked to rediscuss the visual

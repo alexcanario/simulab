@@ -7,6 +7,8 @@ severity: high
 ---
 # The full suite is not reliably green: tests fail under parallel load
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 `dotnet test Simulab.slnx` runs the test projects in parallel, and two tests lose races there that they never lose
 alone. It stopped the merge of F-28 twice, on a change that touches neither of them.

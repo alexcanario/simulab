@@ -7,6 +7,8 @@ version: 2
 ---
 # Catalog module and organizers back office
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Create the `Catalog` module — five projects, the `catalog` schema, its own `DbContext` and first migration, the `catalog.manage` permission and the mechanism a second module needs to register a permission at all — and, on it, the first screen: an Admin manages organizers (exam boards, certifying bodies and universities) at `/admin/organizers`, in the list-plus-dialog pattern of `/admin/roles`.
 

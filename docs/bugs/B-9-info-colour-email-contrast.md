@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # Info colour and email buttons still use the old primary blue
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 Found during B-8 (AB#734), not yet measured.
 1. `Info = "#2478C5"` in both palettes (`src/Hosts/Simulab.Web/Theme/SimulabTheme.cs`), the blue B-8 replaced as

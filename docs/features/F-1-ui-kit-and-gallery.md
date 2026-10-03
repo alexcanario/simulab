@@ -7,6 +7,8 @@ version: 1
 ---
 # UI kit and gallery
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The owner wants one frontend behavior everywhere: hover on every control, one way to edit an item, one icon style. Simulae's screens drifted because each page assembled MudBlazor on its own (8 raw `MudTable`, 316 raw `Icons.Material` uses, no shared kit).
 Build the UI kit in `Simulab.Web/Components/Ui/`, `AppIcons` with semantic names over Material Outlined, a dev-only gallery page `/dev/ui`, and architecture tests that forbid raw `Icons.Material` and raw `MudTable` / `MudDataGrid` outside the kit. Standards: `.claude/rules/agile/ui.md` and `ui-project.md`.

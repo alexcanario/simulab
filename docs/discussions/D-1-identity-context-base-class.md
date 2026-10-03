@@ -5,6 +5,8 @@ date: 2026-09-22
 ---
 # Identity context base class
 
+Technical terms: [glossary](../glossary.md)
+
 ## Idea
 While refining B-13 (Identity tables have no foreign keys), the owner asked whether `ModuleDbContext` should inherit
 ASP.NET Identity's `IdentityDbContext` instead, solving the bug without writing foreign keys by hand.

@@ -16,6 +16,8 @@ Remove these comments when the file leaves `idea`.
 -->
 # Every project on disk is in the solution
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 F-46 derives the assemblies the architecture rules see from the projects listed in `Simulab.slnx`. A `.csproj` under `src/` or `tools/` that exists on disk but is missing from the solution escapes every one of those rules. An architecture test checks that every such project is listed in `Simulab.slnx`. Raised while refining F-46 (2026-10-01).
 

@@ -16,6 +16,8 @@ Remove these comments when the file leaves `idea`.
 -->
 # The account erasure's after-commit steps survive a crash
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 `EraseAccountHandler` (`src/Modules/Identity/Simulab.Identity.Application/Account/EraseAccountHandler.cs`) commits
 the erasure inside `RunExclusiveAsync`, then revokes every refresh session in Redis and publishes the `UserErased`

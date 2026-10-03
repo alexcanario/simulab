@@ -10,6 +10,8 @@ ADR-0001 is created by /agile:bootstrap and lists every quiz decision.
 -->
 # ADR-<number>: <Decision title>
 
+Technical terms: [glossary](../glossary.md)
+
 ## Context
 <!-- The situation and the forces at play. Link the brief, feature or bug that raised it. -->
 

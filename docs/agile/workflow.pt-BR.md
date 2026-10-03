@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.0.110 (rascunho). English: [en](workflow.md).
+> Versão 0.0.111 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -19,6 +19,7 @@ Sumário
 14. Exemplos de workflow
 15. Referência rápida
 16. Fluxo de cada comando
+17. Glossário
 
 ---
 
@@ -93,7 +94,7 @@ Saídas, todas em inglês:
 - `docs/decisions/ADR-0001-foundation.md` — cada decisão do quiz, com o motivo.
 - `docs/agile/profile.md` — cópia do perfil de arquitetura escolhido.
 - `docs/agile/workflow.md` e `docs/agile/workflow.pt-BR.md` — este workflow nos dois idiomas, e `docs/agile/templates/` — os templates, copiados para o projeto.
-- `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. Um termo técnico novo ganha uma linha na primeira vez que aparece.
+- `docs/glossary.md` — termos de negócio e os identificadores em inglês, e os termos técnicos que o Claude usa em relatórios e revisões (as severidades da revisão, por exemplo) com a palavra em pt-BR que ele usa ao falar com você. As duas tabelas terminam numa coluna `Meaning (pt-BR)`, o significado escrito em português: o único texto de um projeto que não é inglês. Termo técnico é o que você pode não conhecer: nome de produto ou serviço (Bicep, ACR), sigla, protocolo, padrão, biblioteca; termo de negócio, palavra comum, identificador, caminho ou comando não é. A skill que escreve um documento acrescenta as linhas que faltam no mesmo passo e no mesmo commit: `/agile:bootstrap` para o ADR-0001 e o `docs/infra.md`, `/agile:ship` para as mudanças do item em `docs/` (fora de `docs/manual/`), `/agile:publish` para as notas de release. Cada um desses documentos (infra, ADRs, arquivos de item, discussões, épicos, notas de release) tem, logo abaixo do título, a linha `Technical terms: [glossary](../glossary.md)`; o manual da app para o usuário final não tem. Um projeto anterior a isso recebe a coluna, as linhas que faltam e as linhas de link propostas pelo `/agile:sync`, escritas só com o seu OK. Exemplo 14.45.
 - `docs/infra.md` — como rodar localmente, quais ambientes existem de fato (`provisioned` ou `planned`), os segredos esperados (só os nomes), para cada ambiente o comando que o implanta, a URL de checagem e a versão implantada lá (escrita só pelo `/agile:publish`), para um app desktop a fonte de atualização dos apps instalados, os passos de release e os tempos medidos de build e testes. Atualizado no ship quando algo disso muda.
 - `.github/workflows/deploy.yml` e `.github/scripts/agile-deploy.js` — só quando o `origin` está no github.com e um ambiente que não é `local` declara um comando de deploy: o pipeline que implanta uma tag `v<Version>` enviada, por esse mesmo comando (veja "O pipeline de deploy" abaixo).
 - Esqueleto da solução conforme o perfil, já com i18n e os projetos de teste.
@@ -251,7 +252,7 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | **A cada comando de shell** | Uma segunda guarda avisa antes que um comando Bash ou PowerShell escreva um arquivo do repositório pelo texto do próprio comando em vez das ferramentas Write e Edit — um heredoc, `echo`/`printf`, um `Set-Content`/`Out-File`/`Add-Content` do PowerShell, um `open(..., 'w'/'a')` do Python, uma escrita `node -e`/`.js` cujo literal traz uma barra invertida, uma aspa escapada ou uma quebra de linha embutida, ou um `sed -i` num arquivo versionado — ou edite uma issue ou PR do GitHub com um `--body`/`-b` inline em vez de um corpo inteiro a partir de um arquivo. Termina com código 2, nomeando a regra e o arquivo ou comando; um caminho fora do repositório (temp, o scratchpad da sessão) e os arquivos gerados do próprio plugin (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) ficam em silêncio. Com o seu sim, o Claude repete o comando terminando com o comentário `# agile:literal-ok`. |
 | **A cada edição** | Nada é compilado. O arquivo editado só é anotado, sob a raiz git a que pertence — assim, uma edição dentro de uma worktree é verificada naquela worktree, e não na pasta onde a sessão começou. |
 | **Fim do turno** (só se houve mudança de código) | Recompila os projetos alterados (`--no-incremental`) e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
-| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem: `evals/compare.js` compara o resultado com a base e o código de saída dele é o veredito (uma queda ou um caso ausente reprova o ship; uma execução parcial, ou de outro modelo ou outra ablação que a da base, é "não medida" e o interrompe). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara — ou, sem nada declarado, o único `tools/*.DocGen` que encontrar (abaixo). |
+| **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem: `evals/compare.js` compara o resultado com a base e o código de saída dele é o veredito (uma queda ou um caso ausente reprova o ship; uma execução parcial, ou de outro modelo ou outra ablação que a da base, é "não medida" e o interrompe). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara — ou, sem nada declarado, o único `tools/*.DocGen` que encontrar (abaixo). Antes do commit de docs o Claude lê o diff do item em `docs/` (fora de `docs/manual/`) e acrescenta uma linha de glossário, na branch do item, para cada termo técnico novo sem linha; o relatório diz `Glossário: N linhas acrescentadas: <termos>` ou `Glossário: nada faltando`. |
 
 Detalhes:
 - **Só avisos novos.** Os avisos são comparados com `.claude/agile/warnings-baseline.json`, um arquivo versionado. Avisos que já existiam não reprovam o gate; um aviso novo, sim, listado com arquivo, linha e mensagem. A baseline só é reescrita por um ship verde (ou por `gate.js baseline`, com o seu sim).
@@ -2394,6 +2395,36 @@ A versão 1.1.0 está disponível.        [ Atualizar agora ]  [ Depois ]
 
 "Atualizar agora" reinicia o app na 1.1.0. "Depois" deixa a recepcionista continuar trabalhando; a atualização é aplicada quando o app é fechado, mesmo fora do expediente. Na primeira release as notas dizem também: "Instale uma vez com o App-win-Setup.exe" e que o SmartScreen do Windows avisa porque o instalador não é assinado. Um PC que não alcança a pasta de rede segue com a versão que tem.
 
+### 14.45 O glossário sob cada documento
+
+O `docs/infra.md` do app da recepção diz "Bicep" e "ACR", e o glossário não tem linha para nenhum dos dois. No ship, o diff do item em `docs/` é lido:
+
+```
+> /agile:ship F-12
+Claude: Suíte completa, 214 testes verdes (41 s). Glossário: 2 linhas acrescentadas: Bicep, ACR
+   (o diff do docs/infra.md cita os dois; as linhas estão na branch, com o significado em pt-BR). Merge feito.
+```
+
+O `docs/glossary.md` agora tem, em "Technical terms":
+
+```
+| Bicep | Bicep | Azure's language for describing infrastructure as code. | A linguagem do Azure para descrever infraestrutura como código. |
+| ACR | ACR (registro de contêineres) | Azure Container Registry, where the app's container images are kept. | Azure Container Registry, onde ficam guardadas as imagens de contêiner da app. |
+```
+
+Um ship cujo diff não traz termo novo diz `Glossário: nada faltando`. O `docs/infra.md` mostra, logo abaixo do título, `Technical terms: [glossary](glossary.md)`; um ADR ou um arquivo de item mostra `../glossary.md`.
+
+Num projeto anterior à 0.0.111, o `/agile:sync`:
+
+```
+> /agile:sync
+Claude: glossário, 3 propostas:
+   1. a coluna "Meaning (pt-BR)" nas duas tabelas, escrita para as 36 linhas existentes;
+   2. 3 linhas para termos sem nenhuma: Bicep, Azure Container Apps, Azure Key Vault (docs/infra.md, ADR-0001);
+   3. a linha do glossário sob o título do docs/infra.md e de outros 14 documentos.
+   Nada é escrito antes do seu OK.
+```
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -2743,9 +2774,9 @@ flowchart TD
     C -->|"publish ou zip falha"| C1(["Para: nada commitado nem marcado"])
     C --> C2["O site de um app Hybrid: dotnet pack de Contracts e Shared na versão do release, em packages/<br/>(sem GITHUB_PACKAGES_TOKEN ou com origin fora do github.com: ficam de fora, com o motivo)"]
     C2 -->|"o pack falha"| C1
-    C2 --> D["Escreve as notas em docs/releases/ (um arquivo por versão)"]
+    C2 --> D["Escreve as notas em docs/releases/ (um arquivo por versão, com o link do glossário sob o título)"]
     D --> D2["Um head mobile: .aab Android assinado (assinatura em quatro variáveis de ambiente)<br/>e docs/releases/v<Versão>-store.md, o checklist das lojas"]
-    D2 --> E["Commit na main (notas e checklist), tag anotada com as notas, push da main e da tag"]
+    D2 --> E["Commit na main (notas, checklist, linhas de glossário que as notas pediram), tag anotada com as notas, push da main e da tag"]
     E -->|"o push falha"| E1(["Diz o comando para repetir; commit e tag ficam"])
     E --> E2(["Com .github/workflows/deploy.yml: a tag enviada inicia o pipeline,<br/>que roda o mesmo Deploy command no destino dele (o plano avisou antes)"])
     E --> F{"origin no github.com e gh instalado?"}
@@ -2761,3 +2792,30 @@ flowchart TD
     L -->|"saída diferente de 0, ou sem 200"| L1(["Nada registrado, nada revertido;<br/>dá o /agile:publish da versão registrada antes"])
     L --> M(["Registra v<x.y.z> (data) no docs/infra.md: commit na main e push"])
 ```
+
+## 17. Glossário
+
+Os termos técnicos que este manual usa, com a palavra em pt-BR que o Claude usa ao falar com você. Um projeto recebe este manual como `docs/agile/workflow.pt-BR.md`, então os significados ficam a um clique do texto; os termos do próprio projeto ficam no `docs/glossary.md` dele.
+
+| Termo | Palavra em pt-BR | Significado |
+|---|---|---|
+| ADR (architecture decision record) | ADR (registro de decisão de arquitetura) | Um arquivo curto que registra uma decisão cara de reverter, com o motivo; o ADR-0001 guarda todas as respostas do quiz. |
+| worktree | worktree (cópia de trabalho) | Uma segunda pasta do mesmo repositório, em sua própria branch, para que dois itens nunca dividam arquivos. |
+| merge base | base do merge | O commit em que a branch do item saiu da principal; a revisão compara a partir dele. |
+| gate | gate (portão) | Uma verificação automática que precisa passar antes de o trabalho seguir: build, testes, nenhum aviso novo. |
+| warnings baseline | baseline de avisos | Os avisos de build aceitos até agora; o gate só falha nos novos. |
+| acceptance criterion (AC) | critério de aceite | Uma frase Dado/Quando/Então que um teste comprova. |
+| profile | perfil | A arquitetura escolhida no bootstrap (monolith, web-app, mobile...), copiada para `docs/agile/profile.md`. |
+| Mermaid | Mermaid | Um formato de texto para diagramas que o board e o editor desenham. |
+| OpenAPI | OpenAPI | Um documento JSON que descreve cada endpoint de uma API; testes e ferramentas o leem. |
+| DocGen | DocGen | A ferramenta do próprio projeto que gera o `docs/architecture/` a partir do código. |
+| DbContext | DbContext (contexto do banco) | A classe do Entity Framework que mapeia tabelas para código em um módulo. |
+| .NET Aspire (app host) | .NET Aspire (host da app) | A ferramenta da Microsoft que sobe a app e seus serviços (banco, captador de e-mail) juntos no trabalho local. |
+| MAUI | MAUI | O framework da Microsoft para um app móvel ou desktop em várias plataformas. |
+| Blazor Hybrid | Blazor Híbrido | Telas web escritas uma vez e exibidas dentro de um app MAUI. |
+| Velopack | Velopack | A ferramenta que empacota um app desktop e deixa as cópias instaladas se atualizarem sozinhas. |
+| SmartScreen | SmartScreen | O aviso do Windows para um instalador sem assinatura de código. |
+| SemVer | versionamento semântico | O número de versão `MAJOR.MINOR.PATCH`: uma quebra de compatibilidade, uma feature, uma correção. |
+| DTCG | DTCG (tokens de design) | O formato W3C para tokens de design, usado na identidade visual da app. |
+| WCAG | WCAG | As diretrizes de acessibilidade; AA é o nível de contraste contra o qual a identidade é conferida. |
+| CI pipeline | pipeline de CI | Um job que roda no servidor quando algo é enviado, como o deploy de uma tag. |

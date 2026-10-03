@@ -7,6 +7,8 @@ version: 1
 ---
 # Filter exams by state
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A state filter on the student catalog search (`CatalogSearch`) and on the back-office exam list (`Exams`), built on the 27-state list F-42 introduces. Raised while refining F-42 (owner, 2026-10-01): kept out of F-42 so that item stays one field on one screen; until then the text search already finds an exam by the state's name or acronym.
 

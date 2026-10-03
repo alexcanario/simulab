@@ -7,6 +7,8 @@ version: 1
 ---
 # Sign-in rate limit per client
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Limit failed sign-in attempts per client address on `/connect/token`, next to the per-account lockout (5 attempts / 15 minutes). Today someone spraying many accounts, or insisting on addresses that belong to no account, is not slowed down at all, and since F-21 every attempt also writes a row in the account event trail. Found while refining F-21 (2026-09-23).
 

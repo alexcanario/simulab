@@ -8,6 +8,8 @@ severity: high
 ---
 # The app version tests fail on main and block every ship
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Run `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~AppVersionTests"` on `main` (`82ba1da`, clean checkout).
 2. Two of the four tests fail: `AppVersionTests.ApiProject_CarriesOneSemanticVersion` and `AppVersionTests.ApiAssembly_CarriesTheVersionInItsInformationalVersion` (`Failed: 2, Passed: 2, Total: 4`).

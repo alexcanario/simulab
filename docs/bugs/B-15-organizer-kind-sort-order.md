@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # Sorting organizers by kind uses the English name, not the label on screen
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 `OrganizerQueries` orders the kind column by the value stored in the database, which is the English enum name:
 `CertifyingBody`, `ExamBoard`, `University`. On screen the reader sees the translated labels, so in pt-BR clicking

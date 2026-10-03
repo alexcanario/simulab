@@ -7,6 +7,8 @@ severity: low
 ---
 # Replace the obsolete Aspire environment API in AppHostModelTests
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Build `tests/Hosts/Simulab.AppHost.Tests` → 2 warnings `CS0618`: `ResourceExtensions.GetEnvironmentVariableValuesAsync(IResourceWithEnvironment, DistributedApplicationOperation)` is obsolete, "Use ExecutionConfigurationBuilder instead."
 2. The 2 warnings were accepted in `.claude/agile/warnings-baseline.json` by the owner on 2026-09-18, during F-12, so the Stop gate does not block other work.

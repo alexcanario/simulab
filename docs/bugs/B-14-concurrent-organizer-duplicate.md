@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # A concurrent duplicate organizer answers 500 instead of 409
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 Two requests creating organizers with the same normalized name (or acronym) at the same time both pass
 `SaveOrganizerHandler.TakenAsync`, because each reads the table before the other writes. The unique index does its

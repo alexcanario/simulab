@@ -12,6 +12,8 @@ The deploy pipeline (.github/workflows/deploy.yml, written by /agile:bootstrap w
 -->
 # Infra
 
+Technical terms: [glossary](glossary.md)
+
 ## Run locally
 - Prerequisites: <SDK version, container runtime, tools>
 - Start: `<app host command>` → <URL>. Sign in as: <seed user and role; password kept in <where>>

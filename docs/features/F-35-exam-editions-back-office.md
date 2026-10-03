@@ -7,6 +7,8 @@ version: 1
 ---
 # Exam editions back office
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Admin screens to manage the editions of an exam. An edition is one paper actually applied: the year, the job it selects for (named in the edition itself), the application date, the official link to its notice, and whether it is a draft or published. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20). The closest Simulae source is `ExamNotice` and `ExamNoticeFormDialog`, but the model is new work. Needs /agile:screen.
 

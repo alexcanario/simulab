@@ -6,145 +6,197 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 -->
 # Glossary
 
-| Business term (pt-BR) | pt-PT | English identifier | Meaning |
-|---|---|---|---|
-| Tipo de avaliação | Tipo de avaliação | `AssessmentType` | Public service exam, certification, university entrance exam, ENEM |
-| Concurso público | Concurso público | `PublicServiceExam` | Assessment type: competitive exam for a public position |
-| Certificação | Certificação | `Certification` | Assessment type: professional certification |
-| Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam |
-| ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory |
-| Banca | Entidade organizadora | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) |
-| Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) |
-| Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33). The issuing authority's `Acronym` is not shown or set since F-44; the column stays, optional and not unique |
-| Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper |
-| Abrangência | Abrangência | `ExamScope` | How far an exam reaches: `National`, `State` or `Municipal`. The state or the municipality is the `ScopeDetail` (F-34); for a `State` exam it is the state's acronym (F-42) |
-| Estado (UF) | Estado | `BrazilianState` | One of the 26 Brazilian states or the Federal District, identified by its two-letter acronym (`SP`) and listed in `BrazilianStates` (F-42). Portugal's districts are epic 704's |
-| Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) |
-| Prova / Concurso | Prova | `Exam` | An assessment its `IssuingAuthority` contracts and publishes a notice for; the board that applies each paper is on the edition (F-34) |
-| Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) |
-| Edital | Aviso | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows |
-| Cargo | Posto de trabalho | `Position` | The job one edition's paper selects for, as free text on the edition; optional, there is no job entity (F-35) |
-| Número do edital | Referência do aviso | `NoticeReference` | How the notice names itself ("Edital nº 01/2026"); editions cut from the same edital share it (F-35) |
-| Data de aplicação | Data de aplicação | `AppliedOn` | The day the paper of an edition was applied; optional (F-35) |
-| Rascunho / Publicada (edição) | Rascunho / Publicada | `ExamEditionStatus` (`Draft` / `Published`) | Whether students can see an edition; `InReview` joins with the AI import (F-35) |
-| Exame publicado | Exame publicado | `PublishedExam` | An exam with at least one `Published` edition (deleted ones excluded); the only kind the student side ever sees, drafts stay in the back office (F-36) |
-| Catálogo (do aluno) | Catálogo | `Catalog` (menu, `catalog.browse`) | The student-facing read side over published exams and their published editions: search, filters, exam page (F-36) |
-| Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) |
-| Matéria / Disciplina | Disciplina | `Subject` | Top level of the canonical taxonomy: what a student studies (Constitutional Law, Portuguese, Logical Reasoning). Simulae's `KnowledgeDomain` becomes this |
-| Assunto / Tópico | Tópico | `Topic` | Second and last level of the canonical taxonomy, inside a subject |
-| Área | Área | `Area` | Optional grouping attribute of a subject (Law, Languages, Natural Sciences). Not a taxonomy level. Simulae's top-level `Subject` becomes this |
-| Disciplina do edital | Disciplina do aviso (?) | `NoticeSubject` | A subject as one edition's notice names and groups it, with number of questions, weight and minimum; mapped to canonical subjects and topics |
-| Apelido | Alias (?) | `SubjectAlias` / `TopicAlias` | A name an organizer uses for a canonical subject or topic; used to map imports |
-| Conteúdo programático | Conteúdo programático | `NoticeSubject` (the rows of a notice) | What the notice says the edition covers: it is the list of notice subjects, not an entity of its own (owner, 2026-09-20). `SubjectCoverage` is retired before its first use |
-| Questão | Questão | `Question` | An item a student answers, of one of the supported types |
-| Tipo de questão | Tipo de questão | `QuestionType` | SingleChoice, MultipleAnswer, TrueFalse, Matching, FillInTheBlanks, ShortAnswer, OpenAnswer, Essay |
-| Texto-base | Texto de apoio (?) | `BaseText` | Text or image shared by one or more questions |
-| Gabarito | Chave de respostas (?) | `AnswerKey` | The official correct answers; may change after appeals |
-| Comentário / Explicação | Explicação | `Explanation` | Why the answer is right or wrong |
-| Questão anulada | Questão anulada | `AnnulledQuestion` | A question cancelled by the organizer; scoring follows the organizer's rule |
-| Dificuldade | Dificuldade | `Difficulty` | Difficulty level of a question |
-| Questão autoral | Questão de autor (?) | `AuthoredQuestion` | A question written by a curator or admin, not from a past exam |
-| Rascunho / Revisão / Publicado | Rascunho / Revisão / Publicado | `Draft` / `InReview` / `Published` | Content workflow states |
-| Importação de prova | Importação de prova | `ExamImport` | AI-assisted extraction of a past exam into a draft |
-| Simulado de prova | Simulação de prova (?) | `ExamSimulation` | Exam Simulator session that reproduces a real edition |
-| Simulado personalizado | Simulação personalizada (?) | `PracticeSession` | Question Bank Simulator session built from filters |
-| Tentativa | Tentativa | `Attempt` | One run of a simulation by a student, with answers and times |
-| Cartão-resposta | Folha de respostas | `AnswerSheet` | Where the candidate marks final answers |
-| Regra de pontuação | Regra de pontuação | `ScoringRule` | How an organizer turns answers into a score |
-| Penalidade por erro | Penalização por erro | `WrongAnswerPenalty` | Points lost for a wrong answer (for example Cebraspe) |
-| Nota de corte | Nota mínima (?) | `CutOffScore` | The minimum score to pass or be classified |
-| Desempenho | Desempenho | `Performance` | Analytics of a student's results |
-| Recomendação de estudo | Recomendação de estudo | `StudyRecommendation` | Topics and practice sets suggested to a student |
-| Coach | Coach | `Coach` | The conversational AI study coach |
-| Plano de estudos | Plano de estudos | `StudyPlan` | The coach's plan toward a target exam and date |
-| Prova-alvo | Prova-alvo | `TargetExam` | The exam and date a student prepares for |
-| Estudante | Estudante | `Student` | Role: practices and follows progress |
-| Curador | Curador | `Curator` | Role: imports, reviews, writes and publishes content |
-| Administrador | Administrador | `Admin` | Role: manages catalog, users, roles, plans |
-| Papel / Permissão | Perfil / Permissão (?) | `Role` / `Permission` | RBAC |
-| Papel de sistema | Perfil de sistema (?) | `Role.IsSystem` | A seed role (Student, Curator, Admin): cannot be renamed or deleted, only its permissions change (F-9) |
-| Atribuição de papel | Atribuição de perfil (?) | `UserRole` | A role given to a user; a user may hold several and gets the union of their permissions (F-9) |
-| Mudança de papel / Histórico de papéis | Alteração de perfil / Histórico de perfis (?) | `RoleChange` | One recorded change to a role or to a user's roles: author, time, before and after (F-14) |
-| Plano | Plano | `Plan` | What a user is entitled to: features and limits. Not to be confused with `StudyPlan` |
-| Atribuição de plano | Atribuição de plano | `PlanAssignment` | A plan given to a user, with validity and source |
-| Código promocional | Código promocional | `PromoCode` | A code that grants a target plan for a number of days |
-| Campanha | Campanha | `Campaign` | A group of promo codes; one redemption per user per campaign |
-| Resgate | Resgate (?) | `Redemption` | A user's use of a promo code |
-| Cota / Consumo de IA | Quota / Consumo de IA | `AiQuota` / `AiUsage` | The AI limit of a plan and what a user has consumed in a period |
-| Consentimento | Consentimento | `ConsentRecord` | A recorded acceptance (privacy policy, age declaration) |
-| Cadastro / Criar conta | Registo / Criar conta | `Registration` | A visitor creating an account: sign-up form, endpoint and command |
-| Usuário | Utilizador | `User` | An account that signs in; inherits `IdentityUser<Guid>` (declared exception to `TenantEntity`) |
-| Situação da conta | Estado da conta | `AccountStatus` | `Pending` until the email is verified, then `Active` |
-| Verificação de e-mail | Verificação de e-mail | `EmailVerification` / `EmailVerificationToken` | The single-use hashed token, valid 24 h, that activates an account |
-| Reenvio da verificação | Reenvio da verificação | `ResendVerification` | Asking for a new verification email; throttled |
-| Redefinição de senha / Esqueci a senha | Redefinição da palavra-passe | `PasswordReset` / `PasswordResetToken` | Asking for a link by email and choosing a new password with it; the single-use hashed token lives 1 h (F-7) |
-| Troca de senha | Alteração da palavra-passe | `PasswordChange` | A signed-in user changing the password with the current one (F-7) |
-| Senha | Palavra-passe | `Password` | The account's secret; policy 12 / uppercase / digit / symbol |
-| Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) |
-| Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts |
-| Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts |
-| Idioma preferido | Idioma preferido | `PreferredLanguage` | The user's locale: first culture source after sign-in and the language of their emails (F-8) |
-| Minha conta | A minha conta | `Account` (page `/account`) | The signed-in user's own page: profile and link to change the password (F-8) |
-| Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) |
-| Apagamento de conta | Eliminação da conta | `AccountErasure` | The user erasing their own account: the personal data in Identity is overwritten and the id stays as a pseudonym (F-10, ADR-0001 #9) |
-| Conta apagada | Conta eliminada | `AccountStatus.Erased` | The state of an account after erasure: invisible to every lookup, with a tombstone address (F-10) |
-| Baixar meus dados | Transferir os meus dados | `DataExport` | The user downloading, as one JSON file, everything the app holds about them (portability, F-16) |
-| Verificação em duas etapas | Verificação em dois passos | `TwoFactor` / `Totp` | The second barrier at sign-in: a six-digit code from an authenticator app (F-11) |
-| Código de recuperação | Código de recuperação | `RecoveryCode` | One of the ten single-use codes that replace the authenticator when the phone is gone (F-11) |
-| Desafio de segunda etapa | Desafio de segundo passo | `TotpChallenge` | The single-use token the password step returns when the account asks for a code (F-11) |
-| Entrar com o Google | Iniciar sessão com o Google | `GoogleSignIn` | Signing up or in with a Google account; the Api checks Google's ID token itself (F-20) |
-| Vínculo com o Google | Ligação ao Google | `user_logins` row (provider `Google`) | The link between an account and a Google account's subject (`sub`), made on the first Google sign-in (F-20) |
+| Business term (pt-BR) | pt-PT | English identifier | Meaning | Meaning (pt-BR) |
+|---|---|---|---|---|
+| Tipo de avaliação | Tipo de avaliação | `AssessmentType` | Public service exam, certification, university entrance exam, ENEM | Concurso público, certificação, vestibular ou ENEM |
+| Concurso público | Concurso público | `PublicServiceExam` | Assessment type: competitive exam for a public position | Tipo de avaliação: seleção concorrida para um cargo público |
+| Certificação | Certificação | `Certification` | Assessment type: professional certification | Tipo de avaliação: certificação profissional |
+| Vestibular | Exame de acesso (?) | `UniversityEntranceExam` | Assessment type: university entrance exam | Tipo de avaliação: exame de entrada na universidade |
+| ENEM | — | `Enem` | Brazilian national secondary education exam, scored with Item Response Theory | Exame nacional do ensino médio brasileiro, pontuado com Teoria de Resposta ao Item |
+| Banca | Entidade organizadora | `Organizer` | The institution that elaborates, applies and marks a paper: an exam board, a certifying body or a university running its own entrance exam. It is what an edition points at (F-35); it never publishes a notice (F-34 v2) | A instituição que elabora, aplica e corrige uma prova: banca de concurso, entidade certificadora ou universidade com vestibular próprio. É o que uma edição aponta (F-35); nunca publica um edital (F-34 v2) |
+| Tipo de organizadora | Tipo de entidade organizadora (?) | `OrganizerKind` | What an organizer is: `ExamBoard`, `CertifyingBody` or `University` (F-33) | O que a organizadora é: banca de concurso, entidade certificadora ou universidade (F-33) |
+| Sigla | Sigla | `Acronym` | The organizer's short name (CEBRASPE, FGV); unique, uppercase, at most 20 characters (F-33). The issuing authority's `Acronym` is not shown or set since F-44; the column stays, optional and not unique | O nome curto da organizadora (CEBRASPE, FGV); único, em maiúsculas, até 20 caracteres (F-33). A sigla do órgão contratante não é mais exibida nem preenchida desde a F-44; a coluna fica, opcional e sem unicidade |
+| Órgão contratante | Entidade contratante (?) | `IssuingAuthority` | The body that publishes the notice and defines the positions, the syllabus, the schedule and the rules of an exam (a city hall, a state government, a ministry, a university, a company). Its own entity and table since F-34 v2; the exam belongs to it, and it never applies a paper | O órgão que publica o edital e define os cargos, o conteúdo programático, o cronograma e as regras de um concurso (prefeitura, governo estadual, ministério, universidade, empresa). Entidade e tabela próprias desde a F-34 v2; o concurso pertence a ele, que nunca aplica a prova |
+| Abrangência | Abrangência | `ExamScope` | How far an exam reaches: `National`, `State` or `Municipal`. The state or the municipality is the `ScopeDetail` (F-34); for a `State` exam it is the state's acronym (F-42) | Até onde o concurso alcança: nacional, estadual ou municipal. O estado ou o município é o `ScopeDetail` (F-34); num concurso estadual é a sigla do estado (F-42) |
+| Estado (UF) | Estado | `BrazilianState` | One of the 26 Brazilian states or the Federal District, identified by its two-letter acronym (`SP`) and listed in `BrazilianStates` (F-42). Portugal's districts are epic 704's | Um dos 26 estados brasileiros ou o Distrito Federal, identificado pela sigla de duas letras (`SP`) e listado em `BrazilianStates` (F-42). Os distritos de Portugal são do épico 704 |
+| Idioma do conteúdo | Idioma do conteúdo | `ContentLanguage` | The language an exam and its questions are written in; never translated (ADR-0001 #27, F-34) | O idioma em que um concurso e suas questões são escritos; nunca traduzido (ADR-0001 #27, F-34) |
+| Prova / Concurso | Prova | `Exam` | An assessment its `IssuingAuthority` contracts and publishes a notice for; the board that applies each paper is on the edition (F-34) | Uma avaliação para a qual o órgão contratante publica um edital; a banca que aplica cada prova fica na edição (F-34) |
+| Edição | Edição | `ExamEdition` | One exam actually applied: its notice, its year and the job it selects for, named in the edition itself. An edital that opens several jobs with different papers becomes one edition per paper (owner, 2026-09-20) | Uma aplicação real do concurso: seu edital, seu ano e o cargo para o qual seleciona, nomeados na própria edição. Um edital que abre vários cargos com provas diferentes vira uma edição por prova (dono, 2026-09-20) |
+| Edital | Aviso | `Notice` | The official document that opens an edition; its subjects are the `NoticeSubject` rows | O documento oficial que abre uma edição; suas disciplinas são as linhas de `NoticeSubject` |
+| Cargo | Posto de trabalho | `Position` | The job one edition's paper selects for, as free text on the edition; optional, there is no job entity (F-35) | O cargo para o qual a prova de uma edição seleciona, em texto livre na edição; opcional, não existe entidade de cargo (F-35) |
+| Número do edital | Referência do aviso | `NoticeReference` | How the notice names itself ("Edital nº 01/2026"); editions cut from the same edital share it (F-35) | Como o edital se chama ("Edital nº 01/2026"); edições do mesmo edital compartilham esse número (F-35) |
+| Data de aplicação | Data de aplicação | `AppliedOn` | The day the paper of an edition was applied; optional (F-35) | O dia em que a prova de uma edição foi aplicada; opcional (F-35) |
+| Rascunho / Publicada (edição) | Rascunho / Publicada | `ExamEditionStatus` (`Draft` / `Published`) | Whether students can see an edition; `InReview` joins with the AI import (F-35) | Se os alunos podem ver uma edição; "Em revisão" entra com a importação por IA (F-35) |
+| Exame publicado | Exame publicado | `PublishedExam` | An exam with at least one `Published` edition (deleted ones excluded); the only kind the student side ever sees, drafts stay in the back office (F-36) | Um concurso com ao menos uma edição publicada (as apagadas não contam); é o único tipo que o lado do aluno vê, rascunhos ficam no back office (F-36) |
+| Catálogo (do aluno) | Catálogo | `Catalog` (menu, `catalog.browse`) | The student-facing read side over published exams and their published editions: search, filters, exam page (F-36) | O lado de leitura voltado ao aluno sobre concursos publicados e suas edições publicadas: busca, filtros, página do concurso (F-36) |
+| Caderno / Seção | Secção | `Section` | A part of a paper with its own questions, order and rules. Not decided: it exists only if the Exam Simulator reproduces the paper divided into booklets — settled when epic 695 is refined (owner, 2026-09-20) | Uma parte da prova com questões, ordem e regras próprias. Não decidido: só existe se o simulador de prova reproduzir a prova dividida em cadernos — decidido quando o épico 695 for refinado (dono, 2026-09-20) |
+| Matéria / Disciplina | Disciplina | `Subject` | Top level of the canonical taxonomy: what a student studies (Constitutional Law, Portuguese, Logical Reasoning). Simulae's `KnowledgeDomain` becomes this | Nível mais alto da taxonomia canônica: o que o aluno estuda (Direito Constitucional, Português, Raciocínio Lógico). O `KnowledgeDomain` do Simulae vira isto |
+| Assunto / Tópico | Tópico | `Topic` | Second and last level of the canonical taxonomy, inside a subject | Segundo e último nível da taxonomia canônica, dentro de uma disciplina |
+| Área | Área | `Area` | Optional grouping attribute of a subject (Law, Languages, Natural Sciences). Not a taxonomy level. Simulae's top-level `Subject` becomes this | Atributo opcional de agrupamento de uma disciplina (Direito, Linguagens, Ciências da Natureza). Não é nível da taxonomia. O `Subject` de topo do Simulae vira isto |
+| Disciplina do edital | Disciplina do aviso (?) | `NoticeSubject` | A subject as one edition's notice names and groups it, with number of questions, weight and minimum; mapped to canonical subjects and topics | Uma disciplina como o edital de uma edição a nomeia e agrupa, com número de questões, peso e mínimo; mapeada para disciplinas e tópicos canônicos |
+| Apelido | Alias (?) | `SubjectAlias` / `TopicAlias` | A name an organizer uses for a canonical subject or topic; used to map imports | Um nome que a organizadora usa para uma disciplina ou tópico canônico; serve para mapear importações |
+| Conteúdo programático | Conteúdo programático | `NoticeSubject` (the rows of a notice) | What the notice says the edition covers: it is the list of notice subjects, not an entity of its own (owner, 2026-09-20). `SubjectCoverage` is retired before its first use | O que o edital diz que a edição cobre: é a lista de disciplinas do edital, não uma entidade própria (dono, 2026-09-20). `SubjectCoverage` foi aposentado antes do primeiro uso |
+| Questão | Questão | `Question` | An item a student answers, of one of the supported types | Um item que o aluno responde, de um dos tipos suportados |
+| Tipo de questão | Tipo de questão | `QuestionType` | SingleChoice, MultipleAnswer, TrueFalse, Matching, FillInTheBlanks, ShortAnswer, OpenAnswer, Essay | Escolha única, múltiplas respostas, certo/errado, associação, lacunas, resposta curta, resposta aberta, redação |
+| Texto-base | Texto de apoio (?) | `BaseText` | Text or image shared by one or more questions | Texto ou imagem compartilhado por uma ou mais questões |
+| Gabarito | Chave de respostas (?) | `AnswerKey` | The official correct answers; may change after appeals | As respostas corretas oficiais; podem mudar após recursos |
+| Comentário / Explicação | Explicação | `Explanation` | Why the answer is right or wrong | Por que a resposta está certa ou errada |
+| Questão anulada | Questão anulada | `AnnulledQuestion` | A question cancelled by the organizer; scoring follows the organizer's rule | Uma questão cancelada pela organizadora; a pontuação segue a regra dela |
+| Dificuldade | Dificuldade | `Difficulty` | Difficulty level of a question | Nível de dificuldade de uma questão |
+| Questão autoral | Questão de autor (?) | `AuthoredQuestion` | A question written by a curator or admin, not from a past exam | Uma questão escrita por um curador ou administrador, não de uma prova anterior |
+| Rascunho / Revisão / Publicado | Rascunho / Revisão / Publicado | `Draft` / `InReview` / `Published` | Content workflow states | Estados do fluxo de conteúdo |
+| Importação de prova | Importação de prova | `ExamImport` | AI-assisted extraction of a past exam into a draft | Extração assistida por IA de uma prova anterior para um rascunho |
+| Simulado de prova | Simulação de prova (?) | `ExamSimulation` | Exam Simulator session that reproduces a real edition | Sessão do simulador de prova que reproduz uma edição real |
+| Simulado personalizado | Simulação personalizada (?) | `PracticeSession` | Question Bank Simulator session built from filters | Sessão do simulador do banco de questões montada a partir de filtros |
+| Tentativa | Tentativa | `Attempt` | One run of a simulation by a student, with answers and times | Uma execução de um simulado por um aluno, com respostas e tempos |
+| Cartão-resposta | Folha de respostas | `AnswerSheet` | Where the candidate marks final answers | Onde o candidato marca as respostas finais |
+| Regra de pontuação | Regra de pontuação | `ScoringRule` | How an organizer turns answers into a score | Como uma organizadora transforma respostas em nota |
+| Penalidade por erro | Penalização por erro | `WrongAnswerPenalty` | Points lost for a wrong answer (for example Cebraspe) | Pontos perdidos por uma resposta errada (por exemplo, Cebraspe) |
+| Nota de corte | Nota mínima (?) | `CutOffScore` | The minimum score to pass or be classified | A nota mínima para ser aprovado ou classificado |
+| Desempenho | Desempenho | `Performance` | Analytics of a student's results | Análise dos resultados de um aluno |
+| Recomendação de estudo | Recomendação de estudo | `StudyRecommendation` | Topics and practice sets suggested to a student | Tópicos e conjuntos de prática sugeridos a um aluno |
+| Coach | Coach | `Coach` | The conversational AI study coach | O coach de estudos conversacional com IA |
+| Plano de estudos | Plano de estudos | `StudyPlan` | The coach's plan toward a target exam and date | O plano do coach rumo a uma prova-alvo e uma data |
+| Prova-alvo | Prova-alvo | `TargetExam` | The exam and date a student prepares for | A prova e a data para as quais o aluno se prepara |
+| Estudante | Estudante | `Student` | Role: practices and follows progress | Papel: pratica e acompanha o progresso |
+| Curador | Curador | `Curator` | Role: imports, reviews, writes and publishes content | Papel: importa, revisa, escreve e publica conteúdo |
+| Administrador | Administrador | `Admin` | Role: manages catalog, users, roles, plans | Papel: gerencia catálogo, usuários, papéis e planos |
+| Papel / Permissão | Perfil / Permissão (?) | `Role` / `Permission` | RBAC | Controle de acesso por papéis (RBAC) |
+| Papel de sistema | Perfil de sistema (?) | `Role.IsSystem` | A seed role (Student, Curator, Admin): cannot be renamed or deleted, only its permissions change (F-9) | Um papel da carga inicial (Estudante, Curador, Administrador): não pode ser renomeado nem apagado, só suas permissões mudam (F-9) |
+| Atribuição de papel | Atribuição de perfil (?) | `UserRole` | A role given to a user; a user may hold several and gets the union of their permissions (F-9) | Um papel dado a um usuário; ele pode ter vários e recebe a união das permissões (F-9) |
+| Mudança de papel / Histórico de papéis | Alteração de perfil / Histórico de perfis (?) | `RoleChange` | One recorded change to a role or to a user's roles: author, time, before and after (F-14) | Uma mudança registrada num papel ou nos papéis de um usuário: autor, hora, antes e depois (F-14) |
+| Plano | Plano | `Plan` | What a user is entitled to: features and limits. Not to be confused with `StudyPlan` | Aquilo a que o usuário tem direito: recursos e limites. Não confundir com `StudyPlan` |
+| Atribuição de plano | Atribuição de plano | `PlanAssignment` | A plan given to a user, with validity and source | Um plano dado a um usuário, com validade e origem |
+| Código promocional | Código promocional | `PromoCode` | A code that grants a target plan for a number of days | Um código que concede um plano por um número de dias |
+| Campanha | Campanha | `Campaign` | A group of promo codes; one redemption per user per campaign | Um grupo de códigos promocionais; um resgate por usuário por campanha |
+| Resgate | Resgate (?) | `Redemption` | A user's use of a promo code | O uso de um código promocional por um usuário |
+| Cota / Consumo de IA | Quota / Consumo de IA | `AiQuota` / `AiUsage` | The AI limit of a plan and what a user has consumed in a period | O limite de IA de um plano e o que o usuário consumiu num período |
+| Consentimento | Consentimento | `ConsentRecord` | A recorded acceptance (privacy policy, age declaration) | Um aceite registrado (política de privacidade, declaração de idade) |
+| Cadastro / Criar conta | Registo / Criar conta | `Registration` | A visitor creating an account: sign-up form, endpoint and command | Um visitante criando uma conta: formulário, endpoint e comando |
+| Usuário | Utilizador | `User` | An account that signs in; inherits `IdentityUser<Guid>` (declared exception to `TenantEntity`) | Uma conta que faz login; herda `IdentityUser<Guid>` (exceção declarada a `TenantEntity`) |
+| Situação da conta | Estado da conta | `AccountStatus` | `Pending` until the email is verified, then `Active` | Pendente até o e-mail ser verificado, depois ativa |
+| Verificação de e-mail | Verificação de e-mail | `EmailVerification` / `EmailVerificationToken` | The single-use hashed token, valid 24 h, that activates an account | O token de uso único, guardado como hash, válido por 24 h, que ativa uma conta |
+| Reenvio da verificação | Reenvio da verificação | `ResendVerification` | Asking for a new verification email; throttled | Pedir um novo e-mail de verificação; com limite de frequência |
+| Redefinição de senha / Esqueci a senha | Redefinição da palavra-passe | `PasswordReset` / `PasswordResetToken` | Asking for a link by email and choosing a new password with it; the single-use hashed token lives 1 h (F-7) | Pedir um link por e-mail e escolher uma nova senha com ele; o token de uso único, em hash, vale 1 h (F-7) |
+| Troca de senha | Alteração da palavra-passe | `PasswordChange` | A signed-in user changing the password with the current one (F-7) | Um usuário logado trocando a senha com a senha atual (F-7) |
+| Senha | Palavra-passe | `Password` | The account's secret; policy 12 / uppercase / digit / symbol | O segredo da conta; política: 12 caracteres, maiúscula, dígito, símbolo |
+| Maioridade declarada | Maioridade declarada | `IsAdultDeclared` | The 18+ self-declaration made at sign-up (ADR-0001 #17) | A autodeclaração de 18+ feita no cadastro (ADR-0001 #17) |
+| Termos de Uso | Termos de Utilização | `LegalDocument` (topic `Terms`) | Versioned institutional document the user accepts | Documento institucional versionado que o usuário aceita |
+| Política de Privacidade | Política de Privacidade | `LegalDocument` (topic `Privacy`) | Versioned privacy document the user accepts | Documento de privacidade versionado que o usuário aceita |
+| Idioma preferido | Idioma preferido | `PreferredLanguage` | The user's locale: first culture source after sign-in and the language of their emails (F-8) | O idioma do usuário: primeira fonte de cultura após o login e idioma dos e-mails dele (F-8) |
+| Minha conta | A minha conta | `Account` (page `/account`) | The signed-in user's own page: profile and link to change the password (F-8) | A página do próprio usuário logado: perfil e link para trocar a senha (F-8) |
+| Perfil / Nome de exibição | Perfil / Nome de apresentação | `Profile` / `FullName` | The user's editable data: display name and preferred language (F-8) | Os dados editáveis do usuário: nome de exibição e idioma preferido (F-8) |
+| Apagamento de conta | Eliminação da conta | `AccountErasure` | The user erasing their own account: the personal data in Identity is overwritten and the id stays as a pseudonym (F-10, ADR-0001 #9) | O usuário apagando a própria conta: os dados pessoais no Identity são sobrescritos e o id fica como pseudônimo (F-10, ADR-0001 #9) |
+| Conta apagada | Conta eliminada | `AccountStatus.Erased` | The state of an account after erasure: invisible to every lookup, with a tombstone address (F-10) | O estado de uma conta após o apagamento: invisível em qualquer consulta, com um endereço-lápide (F-10) |
+| Baixar meus dados | Transferir os meus dados | `DataExport` | The user downloading, as one JSON file, everything the app holds about them (portability, F-16) | O usuário baixando, num arquivo JSON, tudo que o app guarda sobre ele (portabilidade, F-16) |
+| Verificação em duas etapas | Verificação em dois passos | `TwoFactor` / `Totp` | The second barrier at sign-in: a six-digit code from an authenticator app (F-11) | A segunda barreira no login: um código de seis dígitos de um app autenticador (F-11) |
+| Código de recuperação | Código de recuperação | `RecoveryCode` | One of the ten single-use codes that replace the authenticator when the phone is gone (F-11) | Um dos dez códigos de uso único que substituem o autenticador quando o celular some (F-11) |
+| Desafio de segunda etapa | Desafio de segundo passo | `TotpChallenge` | The single-use token the password step returns when the account asks for a code (F-11) | O token de uso único que a etapa da senha devolve quando a conta pede um código (F-11) |
+| Entrar com o Google | Iniciar sessão com o Google | `GoogleSignIn` | Signing up or in with a Google account; the Api checks Google's ID token itself (F-20) | Cadastrar-se ou entrar com uma conta Google; a Api confere o token de identidade do Google por conta própria (F-20) |
+| Vínculo com o Google | Ligação ao Google | `user_logins` row (provider `Google`) | The link between an account and a Google account's subject (`sub`), made on the first Google sign-in (F-20) | O vínculo entre uma conta e o identificador (`sub`) de uma conta Google, criado no primeiro login com o Google (F-20) |
 
 ## Forbidden terms in identifiers
 Portuguese terms from Simulae that must not appear in code: `Banca`, `Concurso`, `Edital`, `Prova`, `Questao`, `Disciplina`, `Assunto`, `Gabarito`, `Simulado`, `Cadastro`, `Senha`, `Usuario`, `Plano`, `Cargo`.
 
 ## Technical terms
-Terms used in reports, reviews and item files. They are not identifiers. The pt-BR column is the word to use when talking to the owner.
+Terms used in documents, reports, reviews and item files. They are not identifiers. The pt-BR column is the word to use when talking to the owner.
 
-| Term | pt-BR | Meaning |
-|---|---|---|
-| blocker | bloqueador | Review finding that stops the merge until it is fixed. |
-| major | grave | Review finding that is a real defect or a test gap; fixed before validation unless the owner decides otherwise. |
-| minor | leve | Small review finding; fixed, accepted with a reason, or turned into a new item. |
-| acceptance criterion (AC) | critério de aceite | A Given/When/Then sentence that a test proves. |
-| app host | app host | The Aspire project (`Simulab.AppHost`) that starts the Web, the Api and the local containers (PostgreSQL, Redis, Mailpit) together. |
-| claim | claim (dado da sessão) | A fact about the user kept in the cookie or the token: id, email, name, permissions. |
-| concurrency failure | conflito de concorrência | Two saves of the same record at once; the second finds the record already changed. |
-| last-write-wins | a última gravação vale | Concurrency rule where the latest save prevails. |
-| audit trail | trilha de auditoria | Recorded history of who changed what and when, kept unchanged. |
-| CSRF | CSRF (requisição forjada) | Cross-site request forgery: another site makes a signed-in user's browser trigger an action in the app. |
-| SameSite=Lax | SameSite=Lax | Cookie setting: the browser does not send it on requests from another site, except a top-level GET navigation (a link). |
-| Sec-Fetch-Site | Sec-Fetch-Site | Header the browser sends saying where a request came from (`same-origin` means from the app itself). |
-| open redirect | redirecionamento aberto | A flaw where the app redirects to an outside address taken from the URL; avoided by accepting only paths inside the app. |
-| connection pool | pool de conexões | Database connections kept open for reuse; when they are not released they exhaust the server's limit. |
-| rate limit | limite de tentativas | A cap on how many calls one client address may make in a window; past it, calls are refused until the window ends (F-4, F-38). |
-| lockout | bloqueio da conta | The per-account refusal after too many wrong passwords or codes (5 in 15 minutes). |
-| merge base | base do merge | The commit where the item branch left `main`; a review compares from it. |
-| bUnit | bUnit | Library that tests Blazor components without a browser. |
-| WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. |
-| coverage gap | lacuna de cobertura | A criterion with no test through the path a user reaches. |
-| validation script | roteiro de validação | At most 8 steps the owner follows on screen before the merge. |
-| gate | gate (portão) | An automatic check that must pass before the work goes on: build, tests, no new warnings. |
-| warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |
-| WCAG 2.2 AA | WCAG 2.2 AA | The accessibility level the app targets (ADR-0001 #29); among other things, text needs a contrast of at least 4.5:1 with its background (3:1 for large text). |
-| contrast ratio | contraste | How far apart a text colour and its background are in brightness, from 1:1 (same colour) to 21:1 (black on white). |
-| theme token | cor do tema | A named colour of the palette (`Primary`, `Surface`, `LinesInputs`...), defined once in `SimulabTheme` for each theme and used by every screen (F-17). |
-| hover tone | tom ao passar o mouse | The darker shade (`<Colour>Darken`) a filled button takes while the pointer is over it (F-17). |
-| anonymization | anonimização | Overwriting the data that names a person, keeping the rest of the record usable as statistics. |
-| tombstone | lápide (valor-lápide) | The meaningless value written over a personal one so the column stays filled and unique (F-10: `erased-<id>@erased.invalid`). |
-| danger zone | zona de risco | The part of a screen that holds the destructive actions, set apart and marked as such. |
-| integration event | evento de integração | A past-tense record one module publishes so other modules can react, without either knowing the other (`IIntegrationEvent`). |
-| job queue | fila de jobs | The `jobs` table plus the worker in the Api host (ADR-0001 #20, F-13): work a request stages and a background worker runs, retries and gives up on. |
-| outbox | outbox (caixa de saida) | Writing the message to send in the same transaction as the data that justifies it, so the two can never disagree (F-13 BR2). |
-| backoff | espera progressiva | Waiting longer before each retry (F-13: 1, 2, 4, 8, 16 minutes). |
-| SKIP LOCKED | SKIP LOCKED | PostgreSQL clause that makes a reader skip rows another transaction has locked instead of waiting for them; it is what lets two workers share one queue (F-13 BR8). |
-| at-least-once | pelo menos uma vez | Delivery guarantee where a message may arrive more than once but never zero times (F-13 BR10). |
-| TOTP | TOTP (código temporário) | Time-based one-time password (RFC 6238): a six-digit code an authenticator app derives from a shared secret and the clock, valid for 30 seconds. |
-| replay | reuso do código | Sending a code that was already accepted, while its 30-second window is still open; refused by storing the last accepted step. |
-| AES-GCM | AES-GCM | The encryption used for the TOTP secret at rest: it both hides the value and detects a tampered one. |
-| HMAC | hash com chave | A hash computed with a secret key (F-11: the recovery codes); without the key, a copy of the database cannot be used to guess the codes. |
-| grant (OAuth2) | grant (tipo de concessão) | The kind of exchange the token endpoint performs: password, refresh token, and the `totp` one F-11 adds for the second step. |
-| UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. |
-| C4 model | modelo C4 | A way to draw architecture in zoom levels: system context (who uses the system and what it talks to), containers, components, code (F-23). |
-| container (C4) | contêiner | In the C4 model, a process or store that runs on its own (the Web, the Api, PostgreSQL, Redis); not necessarily a Docker container. |
-| drift guard | teste contra divergência | A test that fails when a hand-written document no longer matches the code it describes (F-23: the overview against the app host). |
+| Term | pt-BR | Meaning | Meaning (pt-BR) |
+|---|---|---|---|
+| blocker | bloqueador | Review finding that stops the merge until it is fixed. | Achado de revisão que impede o merge até ser corrigido. |
+| major | grave | Review finding that is a real defect or a test gap; fixed before validation unless the owner decides otherwise. | Achado de revisão que é defeito real ou lacuna de teste; corrigido antes da validação, salvo decisão do dono. |
+| minor | leve | Small review finding; fixed, accepted with a reason, or turned into a new item. | Achado pequeno de revisão; corrigido, aceito com justificativa ou transformado em novo item. |
+| acceptance criterion (AC) | critério de aceite | A Given/When/Then sentence that a test proves. | Uma frase Dado/Quando/Então que um teste comprova. |
+| app host | app host | The Aspire project (`Simulab.AppHost`) that starts the Web, the Api and the local containers (PostgreSQL, Redis, Mailpit) together. | O projeto Aspire (`Simulab.AppHost`) que sobe juntos a Web, a Api e os contêineres locais (PostgreSQL, Redis, Mailpit). |
+| claim | claim (dado da sessão) | A fact about the user kept in the cookie or the token: id, email, name, permissions. | Um fato sobre o usuário guardado no cookie ou no token: id, e-mail, nome, permissões. |
+| concurrency failure | conflito de concorrência | Two saves of the same record at once; the second finds the record already changed. | Duas gravações do mesmo registro ao mesmo tempo; a segunda encontra o registro já alterado. |
+| last-write-wins | a última gravação vale | Concurrency rule where the latest save prevails. | Regra de concorrência em que a gravação mais recente prevalece. |
+| audit trail | trilha de auditoria | Recorded history of who changed what and when, kept unchanged. | Histórico registrado de quem mudou o quê e quando, mantido sem alteração. |
+| CSRF | CSRF (requisição forjada) | Cross-site request forgery: another site makes a signed-in user's browser trigger an action in the app. | Falsificação de requisição entre sites: outro site faz o navegador de um usuário logado disparar uma ação no app. |
+| SameSite=Lax | SameSite=Lax | Cookie setting: the browser does not send it on requests from another site, except a top-level GET navigation (a link). | Configuração de cookie: o navegador não o envia em requisições de outro site, exceto numa navegação GET de topo (um link). |
+| Sec-Fetch-Site | Sec-Fetch-Site | Header the browser sends saying where a request came from (`same-origin` means from the app itself). | Cabeçalho que o navegador envia dizendo de onde veio a requisição (`same-origin` significa do próprio app). |
+| open redirect | redirecionamento aberto | A flaw where the app redirects to an outside address taken from the URL; avoided by accepting only paths inside the app. | Falha em que o app redireciona para um endereço externo tirado da URL; evitada aceitando só caminhos internos do app. |
+| connection pool | pool de conexões | Database connections kept open for reuse; when they are not released they exhaust the server's limit. | Conexões de banco mantidas abertas para reuso; se não são liberadas, esgotam o limite do servidor. |
+| rate limit | limite de tentativas | A cap on how many calls one client address may make in a window; past it, calls are refused until the window ends (F-4, F-38). | Um teto de quantas chamadas um endereço cliente pode fazer numa janela; acima dele, as chamadas são recusadas até a janela acabar (F-4, F-38). |
+| lockout | bloqueio da conta | The per-account refusal after too many wrong passwords or codes (5 in 15 minutes). | A recusa por conta após muitas senhas ou códigos errados (5 em 15 minutos). |
+| merge base | base do merge | The commit where the item branch left `main`; a review compares from it. | O commit em que a branch do item saiu da `main`; a revisão compara a partir dele. |
+| bUnit | bUnit | Library that tests Blazor components without a browser. | Biblioteca que testa componentes Blazor sem navegador. |
+| WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. | Sobe a Api ou a Web dentro de um teste para ser chamada por HTTP de verdade. |
+| coverage gap | lacuna de cobertura | A criterion with no test through the path a user reaches. | Um critério sem teste pelo caminho que o usuário percorre. |
+| validation script | roteiro de validação | At most 8 steps the owner follows on screen before the merge. | No máximo 8 passos que o dono segue na tela antes do merge. |
+| gate | gate (portão) | An automatic check that must pass before the work goes on: build, tests, no new warnings. | Uma verificação automática que precisa passar antes de o trabalho seguir: build, testes, nenhum aviso novo. |
+| warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. | Os avisos de build aceitos até agora; o gate só falha com avisos novos. |
+| WCAG 2.2 AA | WCAG 2.2 AA | The accessibility level the app targets (ADR-0001 #29); among other things, text needs a contrast of at least 4.5:1 with its background (3:1 for large text). | O nível de acessibilidade que o app busca (ADR-0001 #29); entre outras coisas, o texto precisa de contraste de ao menos 4,5:1 com o fundo (3:1 para texto grande). |
+| contrast ratio | contraste | How far apart a text colour and its background are in brightness, from 1:1 (same colour) to 21:1 (black on white). | Quão distantes em brilho estão a cor do texto e a do fundo, de 1:1 (mesma cor) a 21:1 (preto no branco). |
+| theme token | cor do tema | A named colour of the palette (`Primary`, `Surface`, `LinesInputs`...), defined once in `SimulabTheme` for each theme and used by every screen (F-17). | Uma cor nomeada da paleta (`Primary`, `Surface`, `LinesInputs`...), definida uma vez em `SimulabTheme` para cada tema e usada por todas as telas (F-17). |
+| hover tone | tom ao passar o mouse | The darker shade (`<Colour>Darken`) a filled button takes while the pointer is over it (F-17). | O tom mais escuro (`<Cor>Darken`) que um botão preenchido assume enquanto o ponteiro está sobre ele (F-17). |
+| anonymization | anonimização | Overwriting the data that names a person, keeping the rest of the record usable as statistics. | Sobrescrever os dados que nomeiam uma pessoa, mantendo o resto do registro utilizável como estatística. |
+| tombstone | lápide (valor-lápide) | The meaningless value written over a personal one so the column stays filled and unique (F-10: `erased-<id>@erased.invalid`). | O valor sem significado escrito sobre um dado pessoal para a coluna continuar preenchida e única (F-10: `erased-<id>@erased.invalid`). |
+| danger zone | zona de risco | The part of a screen that holds the destructive actions, set apart and marked as such. | A parte da tela que reúne as ações destrutivas, separada e sinalizada como tal. |
+| integration event | evento de integração | A past-tense record one module publishes so other modules can react, without either knowing the other (`IIntegrationEvent`). | Um registro no passado que um módulo publica para outros reagirem, sem um conhecer o outro (`IIntegrationEvent`). |
+| job queue | fila de jobs | The `jobs` table plus the worker in the Api host (ADR-0001 #20, F-13): work a request stages and a background worker runs, retries and gives up on. | A tabela `jobs` mais o worker no host da Api (ADR-0001 #20, F-13): trabalho que uma requisição deixa preparado e um worker em segundo plano executa, repete e abandona. |
+| outbox | outbox (caixa de saida) | Writing the message to send in the same transaction as the data that justifies it, so the two can never disagree (F-13 BR2). | Gravar a mensagem a enviar na mesma transação dos dados que a justificam, para os dois nunca divergirem (F-13 BR2). |
+| backoff | espera progressiva | Waiting longer before each retry (F-13: 1, 2, 4, 8, 16 minutes). | Esperar mais antes de cada nova tentativa (F-13: 1, 2, 4, 8, 16 minutos). |
+| SKIP LOCKED | SKIP LOCKED | PostgreSQL clause that makes a reader skip rows another transaction has locked instead of waiting for them; it is what lets two workers share one queue (F-13 BR8). | Cláusula do PostgreSQL que faz o leitor pular linhas travadas por outra transação em vez de esperar; é o que deixa dois workers dividirem uma fila (F-13 BR8). |
+| at-least-once | pelo menos uma vez | Delivery guarantee where a message may arrive more than once but never zero times (F-13 BR10). | Garantia de entrega em que uma mensagem pode chegar mais de uma vez, mas nunca zero (F-13 BR10). |
+| TOTP | TOTP (código temporário) | Time-based one-time password (RFC 6238): a six-digit code an authenticator app derives from a shared secret and the clock, valid for 30 seconds. | Senha de uso único baseada no tempo (RFC 6238): um código de seis dígitos que o app autenticador deriva de um segredo compartilhado e do relógio, válido por 30 segundos. |
+| replay | reuso do código | Sending a code that was already accepted, while its 30-second window is still open; refused by storing the last accepted step. | Enviar de novo um código já aceito enquanto sua janela de 30 segundos ainda está aberta; recusado guardando o último passo aceito. |
+| AES-GCM | AES-GCM | The encryption used for the TOTP secret at rest: it both hides the value and detects a tampered one. | A criptografia usada para o segredo do TOTP guardado: esconde o valor e detecta um valor adulterado. |
+| HMAC | hash com chave | A hash computed with a secret key (F-11: the recovery codes); without the key, a copy of the database cannot be used to guess the codes. | Um hash calculado com uma chave secreta (F-11: os códigos de recuperação); sem a chave, uma cópia do banco não serve para adivinhar os códigos. |
+| grant (OAuth2) | grant (tipo de concessão) | The kind of exchange the token endpoint performs: password, refresh token, and the `totp` one F-11 adds for the second step. | O tipo de troca que o endpoint de token faz: senha, refresh token e o `totp` que a F-11 acrescenta para a segunda etapa. |
+| UI kit | kit de interface | The app's own components (`Components/Ui/`, shown at `/dev/ui`) that pages use instead of the library's raw ones, so every screen behaves the same. | Os componentes próprios do app (`Components/Ui/`, exibidos em `/dev/ui`) que as páginas usam no lugar dos crus da biblioteca, para toda tela se comportar igual. |
+| C4 model | modelo C4 | A way to draw architecture in zoom levels: system context (who uses the system and what it talks to), containers, components, code (F-23). | Um jeito de desenhar arquitetura em níveis de zoom: contexto do sistema (quem usa e com o que conversa), contêineres, componentes, código (F-23). |
+| container (C4) | contêiner | In the C4 model, a process or store that runs on its own (the Web, the Api, PostgreSQL, Redis); not necessarily a Docker container. | No modelo C4, um processo ou armazenamento que roda por conta própria (a Web, a Api, o PostgreSQL, o Redis); não é necessariamente um contêiner Docker. |
+| drift guard | teste contra divergência | A test that fails when a hand-written document no longer matches the code it describes (F-23: the overview against the app host). | Um teste que falha quando um documento escrito à mão deixa de bater com o código que descreve (F-23: a visão geral contra o app host). |
+| Aspire | Aspire | .NET tool that starts the app, database, mail and cache together locally, with a dashboard. | Ferramenta .NET que sobe aplicação, banco, e-mail e cache juntos no ambiente local, com um painel. |
+| Azurite | Azurite | Local emulator of Azure file/blob storage, used in dev instead of the real cloud. | Emulador local do armazenamento de arquivos do Azure, usado em desenvolvimento no lugar da nuvem real. |
+| Mailpit | Mailpit | Local fake mail server that catches sent emails so they can be read in a web page. | Servidor de e-mail falso local que captura os e-mails enviados para serem lidos numa página web. |
+| OpenIddict | OpenIddict | Library that makes the Api an OpenID Connect/OAuth2 server which issues sign-in tokens. | Biblioteca que faz da Api um servidor OpenID Connect/OAuth2 que emite os tokens de login. |
+| MudBlazor | MudBlazor | Ready-made visual component library (buttons, tables, dialogs) for Blazor. | Biblioteca de componentes visuais prontos (botões, tabelas, diálogos) para o Blazor. |
+| Blazor | Blazor | Microsoft framework for building the web UI in C# instead of JavaScript. | Framework da Microsoft para construir a interface web em C# em vez de JavaScript. |
+| Blazor Server circuit | circuito do Blazor Server | Live connection between one browser and the server that drives the page. | Conexão viva entre um navegador e o servidor que conduz a página. |
+| ASP.NET Identity | ASP.NET Identity | Microsoft library that stores users, passwords, roles and recovery codes. | Biblioteca da Microsoft que guarda usuários, senhas, papéis e códigos de recuperação. |
+| EF Core | EF Core | Entity Framework Core: library that reads and writes database rows as C# objects. | Entity Framework Core: biblioteca que lê e grava linhas do banco como objetos C#. |
+| EF migration | migração (EF) | Versioned script that changes the database structure to match the code. | Script versionado que altera a estrutura do banco para acompanhar o código. |
+| migration snapshot | snapshot da migração | File where EF remembers the last known database model to detect pending changes. | Arquivo onde o EF guarda o último modelo conhecido do banco para detectar mudanças pendentes. |
+| DbContext | DbContext | EF Core class that represents one module's database session and its tables. | Classe do EF Core que representa a sessão de banco e as tabelas de um módulo. |
+| Npgsql | Npgsql | The .NET driver that lets the app talk to PostgreSQL. | Driver .NET que permite à aplicação conversar com o PostgreSQL. |
+| PostgreSQL | PostgreSQL | Open-source relational database that stores all Simulab data. | Banco de dados relacional de código aberto que guarda todos os dados do Simulab. |
+| GIN index | índice GIN | PostgreSQL index type that speeds up searches inside arrays and JSON. | Tipo de índice do PostgreSQL que acelera buscas dentro de listas e JSON. |
+| partial index | índice parcial | Index covering only the rows that match a condition, so it stays small. | Índice que cobre só as linhas que atendem a uma condição, ficando pequeno. |
+| JSONB | JSONB | PostgreSQL column type that stores JSON in a searchable binary form. | Tipo de coluna do PostgreSQL que guarda JSON em formato binário pesquisável. |
+| GUID / UUID | GUID / UUID | Random 128-bit unique identifier used as a record id. | Identificador único aleatório de 128 bits usado como id de registro. |
+| DBML | DBML | Text notation for describing database tables, used to draw the data dictionary. | Notação em texto para descrever tabelas do banco, usada para gerar o dicionário de dados. |
+| Mermaid | Mermaid | Tool that draws diagrams from plain text in the docs. | Ferramenta que desenha diagramas a partir de texto simples nos documentos. |
+| Redis | Redis | In-memory store that holds web sessions and revoked tokens. | Armazenamento em memória que guarda sessões web e tokens revogados. |
+| Data Protection | Data Protection | ASP.NET feature that encrypts sensitive values (session entries, cookies) with managed keys. | Recurso do ASP.NET que criptografa valores sensíveis (sessões, cookies) com chaves gerenciadas. |
+| ForwardedHeaders | ForwardedHeaders | Setting that makes the app trust the real client address and scheme sent by the cloud proxy. | Configuração que faz a aplicação confiar no endereço e protocolo reais do cliente repassados pelo proxy da nuvem. |
+| OpenID Connect (OIDC) | OpenID Connect (OIDC) | Sign-in layer on top of OAuth2 that tells the app who the user is. | Camada de login sobre o OAuth2 que informa à aplicação quem é o usuário. |
+| OAuth2 | OAuth2 | Standard for letting an app act for a user using tokens, without sharing the password. | Padrão que permite a um app agir pelo usuário usando tokens, sem compartilhar a senha. |
+| PKCE | PKCE | Extra protection for the authorization code flow that stops code theft. | Proteção extra do fluxo de código de autorização que impede o roubo do código. |
+| access token / refresh token | token de acesso / de renovação | Short-lived proof of sign-in / longer-lived one used to get a new access token. | Prova de login de curta duração / de longa duração usada para obter novo token de acesso. |
+| Problem Details | Problem Details (RFC 9457) | Standard JSON format for API error responses with status, title and code. | Formato JSON padrão para respostas de erro da API, com status, título e código. |
+| OpenAPI | OpenAPI | Machine-readable description of every Api endpoint, written to `docs/api`. | Descrição legível por máquina de todos os endpoints da Api, gerada em `docs/api`. |
+| CSP | CSP (política de segurança de conteúdo) | Content-Security-Policy: browser rule listing which scripts and sources a page may load. | Content-Security-Policy: regra do navegador que lista quais scripts e origens a página pode carregar. |
+| Retry-After | Retry-After | Header that tells the client how long to wait before trying again. | Cabeçalho que diz ao cliente quanto esperar antes de tentar de novo. |
+| xUnit | xUnit | The .NET test framework that runs the automated tests. | Framework de testes do .NET que executa os testes automatizados. |
+| Testcontainers | Testcontainers | Library that starts a throwaway real database in Docker for each test run. | Biblioteca que sobe um banco real descartável no Docker a cada execução de testes. |
+| AwesomeAssertions | AwesomeAssertions | Test library that makes checks read like sentences. | Biblioteca de testes que faz as verificações lerem como frases. |
+| NSubstitute | NSubstitute | Test library that creates stand-in fakes of dependencies. | Biblioteca de testes que cria dublês (fakes) das dependências. |
+| TimeProvider | TimeProvider | .NET abstraction for the current time so code and tests do not call the system clock; `FakeTimeProvider` is the test clock that moves time on demand. | Abstração do .NET para a hora atual, para o código e os testes não chamarem o relógio do sistema; `FakeTimeProvider` é o relógio de teste que avança o tempo sob comando. |
+| debounce | debounce (esperar parar de digitar) | Wait until the user stops typing before running the search. | Esperar o usuário parar de digitar antes de executar a busca. |
+| MailKit | MailKit | Library that sends email over SMTP. | Biblioteca que envia e-mail por SMTP. |
+| SMTP | SMTP | Standard protocol for sending email between servers. | Protocolo padrão para envio de e-mail entre servidores. |
+| RESX | RESX | .NET resource file holding the translated texts of one language. | Arquivo de recursos do .NET que guarda os textos traduzidos de um idioma. |
+| i18n | i18n (internacionalização) | Short for internationalization: preparing the app for several languages and time zones. | Abreviação de internacionalização: preparar o app para vários idiomas e fusos. |
+| idempotent | idempotente | Safe to run many times with the same result, with no duplicates. | Seguro de rodar várias vezes com o mesmo resultado, sem duplicar. |
+| seed | seed (carga inicial) | Data inserted at start-up, such as roles or the first admin. | Dados inseridos na inicialização, como papéis ou o primeiro administrador. |
+| AI gateway | gateway de IA | Single internal entry point (`IAiGateway`) for all model calls; checks quota and records usage. | Ponto único interno (`IAiGateway`) para todas as chamadas ao modelo; confere cota e registra uso. |
+| eval suite | suíte de evals | Automated checks of model answer quality, with a cost ceiling per run. | Verificações automáticas da qualidade das respostas do modelo, com teto de custo por execução. |
+| Azure Container Apps | Azure Container Apps | Azure service that runs the app's containers in the cloud (planned target). | Serviço do Azure que executa os contêineres do app na nuvem (destino planejado). |
+| Azure Key Vault | Azure Key Vault | Azure safe for secrets such as passwords and keys. | Cofre do Azure para segredos como senhas e chaves. |
+| Bicep | Bicep | Azure language for declaring cloud infrastructure as code. | Linguagem do Azure para declarar a infraestrutura de nuvem como código. |
+| GitHub Actions | GitHub Actions | GitHub's automation that builds, tests and deploys on each change. | Automação do GitHub que compila, testa e implanta a cada mudança. |
+| RBAC | RBAC (controle por papéis) | Role-based access control: permissions are given to roles, roles to users. | Controle de acesso por papéis: permissões vão para papéis, papéis para usuários. |
+| LGPD / GDPR | LGPD / RGPD | Brazilian / European data-protection laws behind erasure and data export. | Leis de proteção de dados do Brasil / da Europa que motivam a exclusão e a exportação de dados. |
+| SSR / prerender | SSR / pré-renderização | Server builds the page HTML before the browser shows it. | O servidor monta o HTML da página antes de o navegador exibi-la. |

@@ -7,6 +7,8 @@ severity: low
 ---
 # The data export dialog test fails now and then in the full suite
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 `Simulab.Web.Tests.Identity.DataExportPageTests.Dialog_AccountWithoutPassword_ShowsHowToCreateOne` failed once in the full suite and passes when run alone.
 

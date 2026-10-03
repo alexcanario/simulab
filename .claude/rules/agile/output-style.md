@@ -2,7 +2,7 @@
 
 - Talk to the owner in Brazilian Portuguese (pt-BR): answers, questions, reports and summaries of what a subagent found. Only what is written to the repository is English.
 - Keep code, identifiers, paths, commands and quoted tool output as they are; never translate them.
-- A technical term (a review severity, a protocol, a library) goes to the owner with its pt-BR word from "Technical terms" in `docs/glossary.md`; a term used for the first time gets a row there.
+- A technical term (a review severity, a service, an acronym, a protocol, a library) goes to the owner, in the chat and in the documents, with its pt-BR word from "Technical terms" in `docs/glossary.md`; the skill that writes a document adds the row (term, pt-BR word, both meanings) the first time one is used.
 - Answer first. The first sentence is the answer, the result or the question — never a preamble, a recap of the request or praise.
 - A step report is at most 10 lines: what changed (files), result (real numbers), what is next, who acts next.
 - Details live in the file, not in the chat. Link the file; never paste its content unless the owner asks.

@@ -7,6 +7,8 @@ version: 1
 ---
 # Account erasure
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A user can ask to erase the account (LGPD/GDPR). Identity anonymizes the personal data and publishes an integration event so other modules can anonymize theirs later; attempts stay for statistics without identity (ADR-0001 #9).
 

@@ -888,3 +888,11 @@ From 0.0.105 to 0.0.110, run on a clean main; F-62 was `validating` in its workt
 - Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
 - Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
 - Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+
+## 2026-10-03 - Sync with agile@canary 0.0.111
+From 0.0.110 to 0.0.111, run on a clean main; F-62 was `validating` in its worktree and only docs were touched.
+- Copied (never edited, plugin changed): rule `output-style`; templates `adr`, `bug`, `discussion`, `epic`, `feature`, `infra` (glossary link line) and `glossary` (`Meaning (pt-BR)` column); `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.0.111, section 17).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary (owner: all): `Meaning (pt-BR)` column written for every existing row of both tables; 54 technical-term rows added, drawn from a sampled scan of the docs, not an exhaustive read; the `Technical terms: [glossary](...)` line added under the title of 97 documents (infra, features, bugs, ADR, discussions, epics except the README, release notes). The worktree copies of F-62 and F-68 get theirs at their merge.
+- Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.

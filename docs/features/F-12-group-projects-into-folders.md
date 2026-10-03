@@ -7,6 +7,8 @@ version: 2
 ---
 # Group projects into folders
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Technical chore, after F-4 ships. Move the projects into grouped folders on disk (`Hosts`, `BuildingBlocks`, `Modules/<Module>`) under `src/` and `tests/`, with solution folders in `Simulab.slnx` that mirror them. A single `Directory.Packages.props` stays at the root. Updates project references, the architecture tests that read paths, `profile.md` (layout), `CLAUDE.md`, `docs/infra.md` and `.claude/launch.json`. Decided by the owner on 2026-09-18 (move on disk; one packages file; separate item so F-4 merges clean).
 

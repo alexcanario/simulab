@@ -7,6 +7,8 @@ version: 1
 ---
 # Account events in the data export
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Include the account's own security events (F-21) in the data export of F-16, which today returns the profile, the sessions and the consent records with their IP address. The events are personal data of the account holder, so a data subject request should carry them. F-21 left F-16 untouched (owner, question 8, 2026-09-23) because F-16 is already shipped.
 

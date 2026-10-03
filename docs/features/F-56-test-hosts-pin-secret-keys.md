@@ -7,6 +7,8 @@ version: 1
 ---
 # Check that every Api test host pins the user-secret keys
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A test host must pin every configuration key a developer's user secrets can feed. Found while shipping F-38 (2026-10-01): the `Simulab.Api.Tests` `ApiFactory` did not set `Identity:SeedAdmin:Password` to empty, so on a machine with that user secret (F-52) the host tried to seed an administrator against an unreachable database and 10 tests failed. `SimulabApiFactory` already pins it. A project rule (`.claude/rules/agile/project.md`) now says it; this item turns the rule into a check.
 

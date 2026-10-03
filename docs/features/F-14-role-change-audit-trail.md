@@ -7,6 +7,8 @@ version: 2
 ---
 # Role change audit trail
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Record every change to roles and their assignments (role created, edited or deleted, permissions of a role changed, role assigned to or removed from a user): who did it, when, and what changed. Admins can read the trail. Builds on F-9 (role management back office).
 

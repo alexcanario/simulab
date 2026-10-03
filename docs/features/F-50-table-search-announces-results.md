@@ -7,6 +7,8 @@ version: 1
 ---
 # Table search announces results
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The search box of `AppDataTable` gets an accessible description (its placeholder, through `aria-describedby`) and a polite live announcement of how many rows came back after a search or a filter change, in every list of the app. Today its accessible name is only "Search" and nothing tells a screen reader user what the search found. Raised by F-36's screen design (owner, 2026-09-29).
 

@@ -8,6 +8,8 @@ Autopilot: shipped
 ---
 # Retention of failed jobs
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Jobs given up on stay in `jobs.jobs` as `Failed` rows forever: they are the evidence of what was lost (F-13 BR7, no automatic cleanup). Decide how long that evidence is kept (for example 90 days) and add a cleanup that removes older `Failed` rows. Captured during the F-18 refinement (2026-09-23); the owner kept it out of F-18, whose index already stops those rows from slowing the claim query.
 

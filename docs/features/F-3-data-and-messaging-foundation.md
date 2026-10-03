@@ -7,6 +7,8 @@ version: 1
 ---
 # Data and messaging foundation
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Technical slice with no screen: PostgreSQL and Mailpit in the app host; a persistence building block (`Simulab.Persistence`) with the module `DbContext` base, audit and soft-delete interceptors and the global tenant and soft-delete filters; `IEmailSender` over SMTP; the in-process integration events abstraction; and one shared PostgreSQL test fixture per test project.
 

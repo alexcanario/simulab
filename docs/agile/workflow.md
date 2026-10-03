@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.0.110 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.0.111 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -19,6 +19,7 @@ Contents
 14. Worked examples
 15. Quick reference
 16. Command flows
+17. Glossary
 
 ---
 
@@ -93,7 +94,7 @@ Outputs, all in English:
 - `docs/decisions/ADR-0001-foundation.md` — every quiz decision with its reason.
 - `docs/agile/profile.md` — copy of the chosen architecture profile.
 - `docs/agile/workflow.md` and `docs/agile/workflow.pt-BR.md` — this workflow in both languages, and `docs/agile/templates/` — the templates, copied into the project.
-- `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. A new technical term gets a row the first time it appears.
+- `docs/glossary.md` — business terms and their English identifiers, and the technical terms Claude uses in reports and reviews (the review severities, for example) with the pt-BR word it uses when talking to you. Both tables end with a column `Meaning (pt-BR)`, the meaning written in Portuguese: the one text in a project that is not English. A technical term is one you may not know: a product or service name (Bicep, ACR), an acronym, a protocol, a pattern, a library; a business term, a plain word, an identifier, a path or a command is not. The skill that writes a document adds the missing rows in the same step and the same commit: `/agile:bootstrap` for ADR-0001 and `docs/infra.md`, `/agile:ship` for the item's changes under `docs/` (outside `docs/manual/`), `/agile:publish` for the release notes. Each of those documents (infra, ADRs, item files, discussions, epics, release notes) has, right under its title, the line `Technical terms: [glossary](../glossary.md)`; the app manual for end users does not. A project that predates this gets the column, the missing rows and the link lines proposed by `/agile:sync`, written only with your OK. Example 14.45.
 - `docs/infra.md` — how to run locally, which environments really exist (`provisioned` or `planned`), expected secrets (names only), for each environment the command that deploys it, its check URL and the version deployed there (written only by `/agile:publish`), for a desktop app the update source of the installed apps, release steps and measured build and test times. Updated on ship when any of it changes.
 - `.github/workflows/deploy.yml` and `.github/scripts/agile-deploy.js` — only when `origin` is on github.com and a non-local environment declares a deploy command: the pipeline that deploys a pushed `v<Version>` tag by that same command (see "The deploy pipeline" below).
 - Solution skeleton for the profile, with i18n and the test projects in place.
@@ -249,7 +250,7 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | **Every shell command** | A second guard warns before a Bash or PowerShell command writes a repository file through the command's own text instead of the Write and Edit tools — a heredoc, `echo`/`printf`, a PowerShell `Set-Content`/`Out-File`/`Add-Content`, a Python `open(..., 'w'/'a')`, a `node -e`/`.js` write whose literal carries a backslash, an escaped quote or an embedded newline, or a `sed -i` on a tracked file — or edits a GitHub issue or PR with an inline `--body`/`-b` instead of a whole one from a file. It exits 2 naming the rule and the file or command; a path outside the repository (temp, the session's scratchpad) and the plugin's own generated files (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) are silent. With your yes, Claude repeats the command ending with the comment `# agile:literal-ok`. |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed) | Rebuilds the changed projects (`--no-incremental`) and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
-| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them: `evals/compare.js` compares the result with the baseline and its exit code is the verdict (a drop or a missing case fails the ship; a partial run, or a run of another model or ablation than the baseline's, is "not measured" and stops it). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). |
+| **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them: `evals/compare.js` compares the result with the baseline and its exit code is the verdict (a drop or a missing case fails the ship; a partial run, or a run of another model or ablation than the baseline's, is "not measured" and stops it). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). Before the docs commit Claude reads the item's diff under `docs/` (outside `docs/manual/`) and adds a glossary row, on the item branch, for each technical term it brings with no row; the report says `Glossary: N rows added: <terms>` or `Glossary: nothing missing`. |
 
 Details:
 - **New warnings only.** Warnings are compared with `.claude/agile/warnings-baseline.json`, a committed file. Existing warnings do not fail the gate; a new one does, listed with file, line and message. The baseline is rewritten only by a green ship (or by `gate.js baseline`, with your yes).
@@ -2387,6 +2388,36 @@ Version 1.1.0 is available.            [ Update now ]  [ Later ]
 
 "Update now" restarts the app on 1.1.0. "Later" lets the receptionist keep working; the update is applied when the app is closed, even after hours. On the first release the notes also say: "Install once with App-win-Setup.exe" and that Windows SmartScreen warns because the installer is unsigned. A PC that cannot reach the share simply keeps running its version.
 
+### 14.45 The glossary under every document
+
+The reception app's `docs/infra.md` says "Bicep" and "ACR" and the glossary has no row for either. At ship, the item's diff under `docs/` is read:
+
+```
+> /agile:ship F-12
+Claude: Full suite 214 tests green (41 s). Glossary: 2 rows added: Bicep, ACR
+   (the diff of docs/infra.md names both; the rows are on the branch, with the pt-BR meaning). Merged.
+```
+
+`docs/glossary.md` now has, under "Technical terms":
+
+```
+| Bicep | Bicep | Azure's language for describing infrastructure as code. | A linguagem do Azure para descrever infraestrutura como código. |
+| ACR | ACR (registro de contêineres) | Azure Container Registry, where the app's container images are kept. | Azure Container Registry, onde ficam guardadas as imagens de contêiner da app. |
+```
+
+A ship whose diff adds no term says `Glossary: nothing missing`. `docs/infra.md` shows, right under its title, `Technical terms: [glossary](glossary.md)`; an ADR or an item file shows `../glossary.md`.
+
+In a project from before 0.0.111, `/agile:sync`:
+
+```
+> /agile:sync
+Claude: glossary, 3 proposals:
+   1. the "Meaning (pt-BR)" column on both tables, written for all 36 existing rows;
+   2. 3 rows for terms with none: Bicep, Azure Container Apps, Azure Key Vault (docs/infra.md, ADR-0001);
+   3. the glossary line under the title of docs/infra.md and 14 other documents.
+   Nothing is written before your OK.
+```
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2736,9 +2767,9 @@ flowchart TD
     C -->|"publish or zip fails"| C1(["Stops: nothing committed or tagged"])
     C --> C2["A Hybrid app's site: dotnet pack of Contracts and Shared at the release's version into packages/<br/>(no GITHUB_PACKAGES_TOKEN or origin off github.com: left out, with the reason)"]
     C2 -->|"pack fails"| C1
-    C2 --> D["Writes the notes in docs/releases/ (one file per version)"]
+    C2 --> D["Writes the notes in docs/releases/ (one file per version, a glossary link under the title)"]
     D --> D2["A mobile head: signed Android .aab (signing from four environment variables)<br/>and docs/releases/v<Version>-store.md, the store checklist"]
-    D2 --> E["Commit on main (notes and checklist), annotated tag with the notes, push main and tag"]
+    D2 --> E["Commit on main (notes, checklist, glossary rows the notes needed), annotated tag with the notes, push main and tag"]
     E -->|"push fails"| E1(["Names the command to rerun; commit and tag stay"])
     E --> E2(["With .github/workflows/deploy.yml: the pushed tag starts the pipeline,<br/>which runs the same Deploy command on its target (the plan said so before)"])
     E --> F{"origin on github.com and gh installed?"}
@@ -2754,3 +2785,30 @@ flowchart TD
     L -->|"exit not 0, or no 200"| L1(["Nothing recorded, nothing rolled back;<br/>gives /agile:publish for the version recorded before"])
     L --> M(["Records v<x.y.z> (date) in docs/infra.md: commit on main and push"])
 ```
+
+## 17. Glossary
+
+The technical terms this manual uses, with the pt-BR word Claude uses when talking to you. A project receives this manual as `docs/agile/workflow.md`, so the meanings are one click from the text; the project's own terms live in its `docs/glossary.md`.
+
+| Term | pt-BR | Meaning |
+|---|---|---|
+| ADR (architecture decision record) | ADR (registro de decisão de arquitetura) | A short file that records a decision expensive to reverse, with its reason; ADR-0001 holds every quiz answer. |
+| worktree | worktree (cópia de trabalho) | A second folder of the same repository on its own branch, so two items never share files. |
+| merge base | base do merge | The commit where the item branch left the main branch; a review compares from it. |
+| gate | gate (portão) | An automatic check that must pass before the work goes on: build, tests, no new warnings. |
+| warnings baseline | baseline de avisos | The build warnings accepted so far; the gate fails only on new ones. |
+| acceptance criterion (AC) | critério de aceite | A Given/When/Then sentence that a test proves. |
+| profile | perfil | The architecture chosen at bootstrap (monolith, web-app, mobile...), copied to `docs/agile/profile.md`. |
+| Mermaid | Mermaid | A text format for diagrams that the board and the editor draw. |
+| OpenAPI | OpenAPI | A JSON document that describes every endpoint of an API; tests and tools read it. |
+| DocGen | DocGen | The project's own tool that generates `docs/architecture/` from the code. |
+| DbContext | DbContext (contexto do banco) | The Entity Framework class that maps tables to code for one module. |
+| .NET Aspire (app host) | .NET Aspire (host da app) | Microsoft's tool that starts the app and its services (database, mail catcher) together for local work. |
+| MAUI | MAUI | Microsoft's framework for one mobile or desktop app on several platforms. |
+| Blazor Hybrid | Blazor Híbrido | Web screens written once and shown inside a MAUI app. |
+| Velopack | Velopack | The tool that packs a desktop app and lets installed copies update themselves. |
+| SmartScreen | SmartScreen | The Windows warning shown for an installer that is not code-signed. |
+| SemVer | versionamento semântico | The version number `MAJOR.MINOR.PATCH`: a breaking change, a feature, a fix. |
+| DTCG | DTCG (tokens de design) | The W3C format for design tokens, used for the app's visual identity. |
+| WCAG | WCAG | The accessibility guidelines; AA is the contrast level the identity is checked against. |
+| CI pipeline | pipeline de CI | A job that runs on the server when something is pushed, such as the deploy of a tag. |

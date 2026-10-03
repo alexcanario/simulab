@@ -10,6 +10,8 @@ It records how we decided. It is not a spec: refinement happens in the feature f
 -->
 # <Topic>
 
+Technical terms: [glossary](../glossary.md)
+
 ## Idea
 <!-- The idea as the owner described it, in two lines. -->
 

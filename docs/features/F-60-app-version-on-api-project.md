@@ -7,6 +7,8 @@ version: 1
 ---
 # The app version lives on the Api project
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The app has no version today: `grep -rn "<Version>"` over `src`, `tools` and `tests` (`.csproj` and `.props`) finds nothing (2026-10-02). agile@canary expects one `<Version>` on `src/Hosts/Simulab.Api/Simulab.Api.csproj` and nowhere else — never `Directory.Build.props`, `SharedKernel`, a module, a `Contracts` project, `ServiceDefaults` or `AppHost` (`docs/agile/profile.md`) — so `/agile:ship` bumps it once per ship (a feature raises MINOR, a bug raises PATCH). Raised by `/agile:sync` to 0.0.97 (capability since 0.0.79); the owner chose to capture it on 2026-10-02.
 
