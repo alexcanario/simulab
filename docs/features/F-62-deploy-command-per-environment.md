@@ -119,6 +119,6 @@ Needed to validate: the owner authorizes pushing `feature/F-62` to GitHub so the
 
 ## Delivery
 - Branch `feature/F-62`, merge commit `39d29a5` (2026-10-04), app version 0.6.0. Pull request #110 was a draft opened only to run the CI once; it stays unmerged.
-- Tests: 1859 passed, 0 failed (`gate.js ship`, build 20 s, slowest project Identity 1 m 6 s); 19 in `Simulab.AppHost.Tests`, 7 of them new for this item, plus 2 version tests. GitHub Actions `ci` green on the PR (run 37141042169).
+- Tests: 1859 passed, 0 failed (`gate.js ship`, build 20 s, slowest project Identity 1 m 6 s); 19 in `Simulab.AppHost.Tests`, 11 of them new for this item (4 model, 5 publish files, 2 version). GitHub Actions `ci` green on the PR (run 37141042169).
 - Manual pages: none (no visible behavior changed). `docs/infra.md`, `docs/decisions/ADR-0002-host.md`, `docs/agile/profile.md` and `docs/architecture-overview.md` updated.
 - Not delivered, by design: no Azure resource exists; staging start and stop commands are declared and not run (F-64); the deploy workflow is F-65.
