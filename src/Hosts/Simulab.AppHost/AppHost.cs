@@ -115,8 +115,10 @@ api.WithEnvironment(context =>
 
 // F-20: Google sign-in is on locally only when the OAuth client is in this host's user secrets (Google:ClientId,
 // Google:ClientSecret; docs/infra.md). Both hosts read the same switch; only the Web gets the secret.
-var googleClientId = builder.Configuration["Google:ClientId"];
-var googleClientSecret = builder.Configuration["Google:ClientSecret"];
+// F-62 BR7: never when publishing, or the value of a local secret would become the default of a parameter
+// and be written into the deployment files. In the cloud these come from Key Vault (docs/infra.md).
+var googleClientId = publishing ? null : builder.Configuration["Google:ClientId"];
+var googleClientSecret = publishing ? null : builder.Configuration["Google:ClientSecret"];
 if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
 {
     // A secret parameter, so the dashboard masks it like the database password.
@@ -131,7 +133,8 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
 // F-41: the gateway's key lives in this host's user secrets (Ai:ApiKey; docs/infra.md) and reaches only
 // the Api, as a secret parameter so the dashboard masks it. Without it the app starts normally and every
 // call fails with ai.not_configured (BR4), which is what a session that does not need the model wants.
-var aiApiKey = builder.Configuration["Ai:ApiKey"];
+// F-62 BR7: not when publishing, for the same reason as the Google secret above.
+var aiApiKey = publishing ? null : builder.Configuration["Ai:ApiKey"];
 if (!string.IsNullOrWhiteSpace(aiApiKey))
 {
     api.WithEnvironment("Ai__ApiKey", builder.AddParameter("ai-api-key", aiApiKey, secret: true));
