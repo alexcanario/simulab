@@ -1,7 +1,7 @@
 ---
 feature: F-50
 epic: Foundation and identity
-status: validating
+status: done
 board: 87
 version: 1
 ---
@@ -99,14 +99,12 @@ A screen reader user who types in a table's search box, or changes one of its fi
 8. Open `/catalog`, pick a board in the filters. → It says the new total.
 
 ## Delivery
-- Branch: feature/F-50
-- Merge: <commit>
-- Tests: <count, duration>
-- Manual pages: <paths>
-
-## Delivery
+- Branch: feature/F-50 (merged, then removed). Merge commit: 7037e30. App version 0.3.0 -> 0.4.0.
+- Tests (full gate, 2026-10-03): Web 833, Identity 408, Catalog 334, Architecture 164, Api 12, Jobs 25, Persistence 25, Ai 10, Email 2, SharedKernel 12, ApiResults 13, AppHost 8: all green, 0 new warnings. New: `AppDataTableAnnouncementTests` (15).
+- Manual pages: `docs/manual/{pt-BR,pt-PT,en}/getting-around.md`.
+- Also changed (owner said to proceed, option A): `AppVersionTests` now read the version from `Directory.Build.props`. This is the cause of B-21; B-21 stays open for the owner to close or refine.
 - `AppDataTable.razor`: hidden live region (`role="status"`, `aria-live="polite"`) present from the first render; `aria-describedby` to a hidden placeholder element only when the placeholder differs from the name; per-instance ids.
 - Announcement flag set by `OnSearchChangedAsync` and `ReloadFromFirstPageAsync`, consumed by the next successful, non-cancelled load; cleared on failure.
 - Keys `Common.Table.Results.None/One/Many` in the three resource files.
-- Tests: `AppDataTableAnnouncementTests` (14). MudBlazor passes `aria-describedby` to the `<input>` (verified in the DOM by the AC8 test).
+- Tests: `AppDataTableAnnouncementTests` (15). MudBlazor passes `aria-describedby` to the `<input>` (verified in the DOM by the AC8 test).
 - Not checked by Claude: the signed-in screens (`/admin/users`, `/catalog`) through the app host, and a real screen reader (AC11): both are in the validation script.
