@@ -189,6 +189,7 @@ public sealed class AppDataTableAnnouncementTests : KitTestContext
     public async Task Search_FirstLoadCancelledByASecond_SaysOnlyTheSecondTotal()
     {
         var firstStarted = new TaskCompletionSource();
+        var release = new TaskCompletionSource();
         var source = new GallerySource(Sample, TimeSpan.Zero);
         var table = RenderTable(load: async (query, token) =>
         {
@@ -196,19 +197,22 @@ public sealed class AppDataTableAnnouncementTests : KitTestContext
             {
                 // Held until a newer search replaces it: its cancellation is the only way out.
                 firstStarted.TrySetResult();
-                await Task.Delay(Timeout.Infinite, token);
+                await release.Task.WaitAsync(token);
             }
 
             return await source.LoadAsync(query, token);
         });
         table.WaitForAssertion(() => table.FindAll("tbody tr.mud-table-row").Should().NotBeEmpty());
 
-        await Search(table, "Item 1");
+        _ = Search(table, "Item 1"); // not awaited: it ends only when the held load does
         await firstStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Status(table).Should().BeEmpty();
-        await Search(table, "Item 60");
+        _ = Search(table, "Item 60");
 
         table.WaitForAssertion(() => Status(table).Should().Be("1 result"));
+        release.SetResult(); // the stale first load ends late and must not speak
+        await Task.Delay(100);
+        Status(table).Should().Be("1 result");
     }
 
     [Fact]

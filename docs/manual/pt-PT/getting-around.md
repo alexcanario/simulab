@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: pt-PT
-features: [F-2, F-8, F-17]
-updated: 2026-09-23
+features: [F-2, F-8, F-17, F-50]
+updated: 2026-10-03
 ---
 # Como navegar
 
@@ -31,6 +31,10 @@ Todos, com ou sem sessão iniciada.
 ### Utilizar o teclado
 1. Prima Tab uma vez depois de a página carregar: aparece a ligação "Saltar para o conteúdo" no canto superior esquerdo. Prima Enter para ir diretamente ao conteúdo da página.
 2. O Tab percorre o botão de menu, o nome Simulab (volta à página inicial), os botões de modo e de idioma e os itens do menu.
+
+### Pesquisar numa lista com um leitor de ecrã
+1. Use o Tab até à caixa de pesquisa acima de uma lista: o leitor de ecrã diz o nome dela ("Pesquisar") e, quando a caixa pesquisa por algo específico, por que campos pesquisa (por exemplo "Pesquisar por nome ou e-mail").
+2. Escreva um termo ou altere um filtro ao lado da lista. Quando a lista acabar de recarregar, o leitor de ecrã diz quantas linhas tem agora ("12 resultados", "1 resultado" ou "Nenhum resultado"). Mudar de página ou ordenar uma coluna não repete o aviso.
 
 ## Páginas relacionadas
 - [Simulab](index.md)
