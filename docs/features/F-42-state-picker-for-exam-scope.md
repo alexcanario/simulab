@@ -7,6 +7,8 @@ version: 1
 ---
 # State picker for the exam scope
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 F-34 stores the exam's scope detail as free text, so `SP`, `Sao Paulo` and `São Paulo` can sit in the same
 column. Offer the 27 Brazilian states as a fixed list in that field when the scope is `State`, keeping free

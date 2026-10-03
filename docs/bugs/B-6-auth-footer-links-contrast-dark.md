@@ -7,6 +7,8 @@ severity: medium
 ---
 # Links fail the AA contrast (auth footer and three more)
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Switch to the dark theme and open `/sign-in`.
 2. The "Terms of use" and "Privacy policy" links in the `AuthLayout` footer are primary blue (#2478C5) on the dark background: about 3.5:1, under WCAG 2.2 AA (4.5:1).

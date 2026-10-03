@@ -7,6 +7,8 @@ version: 1
 ---
 # Catalog seed from Simulae
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Bring the municipal guard catalog into the new model as data every environment starts with: exam boards, issuing authorities, exams and editions, so the epics that follow have real rows instead of invented ones. Simulae's `GuardaMunicipalContentSeed` only carries the seven boards (and the subject taxonomy, which is not part of this item); the authorities, exams and editions are new work built from the owner's source document and a web research of the official notices (2026-09-29). The data ships as a one-time data migration of the `catalog` schema, with its tests.
 

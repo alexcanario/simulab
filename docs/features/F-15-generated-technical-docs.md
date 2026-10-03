@@ -7,6 +7,8 @@ version: 2
 ---
 # Generated technical docs
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Adopt the plugin's DocGen tool, which arrived in agile@canary 0.0.21, after this project was bootstrapped: copy `templates/dotnet/DocGen/` to `tools/Simulab.DocGen/`, reference the projects that own a `DbContext`, and generate `docs/architecture/` from the code — entity diagrams and a data dictionary per module (from the EF model), a route map per area (from the OpenAPI document) and a module diagram (from project references), all Mermaid. From then on `/agile:ship` regenerates them and `--check` fails when they are stale, and the definition of done covers it.
 

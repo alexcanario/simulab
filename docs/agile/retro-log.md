@@ -101,6 +101,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `feature-build` step 17: the validation script of an item that has a migration names the worktree's own database (`Database__Name`, which `AppHost.cs` reads) in its start step, never "your local database" — otherwise the first start applies the migration to the shared one | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 11 and `worktrees.md`: the lock probe (rename the folder to `<folder>.probe` and back) is one command run alone that stops the ship when it fails, so `git worktree remove` can never run after a failed probe | F-42 | |
 | ⏳ | agile | `[generic]` `feature-ship` step 8b: run the architecture tests after writing the bumped `<Version>` and before committing it — a test that pins a version number goes red on the first bump (F-46: two `AppVersionTests` failed, `Failed: 2, Passed: 162`) | F-46 | |
+| ⏳ | agile | `[generic]` `version.js` writes `<Version>` to the root `Directory.Build.props`, while the `AppVersionTests` the project got from F-60 pin it to `Simulab.Api.csproj`: after F-47's ship `gate.js ship` was red on `main` and blocked F-48 and F-50 (B-21). The plugin should name where the version lives in one place (bootstrap or `/agile:sync`) so a test and the script cannot disagree | F-50 | |
+| ⏳ | agile | `[generic]` The Stop gate hook builds the worktree while a background `dotnet clean`/`build` loop of the same session runs in it, and both fail (the loop's runs come back empty). The gate should detect a `dotnet` build already running in the worktree and defer instead of reporting `RED` | F-48 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -864,4 +866,41 @@ From 0.0.104 to 0.0.105, run on a clean main with no item `building` or `validat
 - Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
 - Missing capabilities: DocGen tool catalogue (F-61 #100), deploy command per environment (F-62 #101), visual identity (F-63 #102); all already captured, nothing new.
 - Found: `/agile:publish develop` stopped because the environments table of `docs/infra.md` lacks the `Deploy command`, `Check URL` and `Version (deployed on)` columns (F-62) and has no environment named `develop`.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+- Manual, applied: `.gitignore` got `!docs/releases/` after `[Rr]eleases/`: the Visual Studio template pattern ignored the folder where `publish.js` writes the notes, and the first `release` failed at `git add`.
+- Plugin note: `scripts/publish.js` `package` listed `Simulab.Catalog.Api` and `Simulab.Identity.Api` (module class libraries under `src/Modules/*`) as deployables and left out `Simulab.Web`; the zips of v0.3.0 do not run the app (adds to the F-60 note). `plugin: agile`.
+- Plugin note: `templates/dotnet/gitignore` ignores `[Rr]eleases/`, which swallows `docs/releases/`; add `!docs/releases/` to the template. `plugin: agile`.
+
+## 2026-10-03 - F-50 Table search announces results
+Shipped as 0.4.0 (merge 7037e30). The full gate needed three runs: a hung test of this item, then two version tests red on main (B-21).
+- Project rule, applied: a test that holds a load never awaits the call that started it (`.claude/rules/agile/project.md`). Evidence: `agile gate RED: a test hung (Simulab.slnx)` with `not finished: ...Search_FirstLoadCancelledByASecond_SaysOnlyTheSecondTotal`; it passed alone. Swept the other hold-style tests (`HoldFind`, `HoldFilters`, `RefreshGate`): all release before awaiting, nothing to fix.
+- Plugin note: `version.js` puts `<Version>` in `Directory.Build.props` while `AppVersionTests` pinned it to `Simulab.Api.csproj` (B-21). Evidence: `Failed: 2, Passed: 2` on `AppVersionTests`, and `Directory.Build.props:4` holds `0.3.0`. The tests were fixed in this item; B-21 stays with the owner. `plugin: agile [generic]`.
+- Idea, captured: `DataExportPageTests.Dialog_AccountWithoutPassword_ShowsHowToCreateOne` failed once in the full suite (1 of 833) and passed 7 of 7 alone. Cause not verified.
+
+## 2026-10-03 - F-48 Drive the search debounce from TimeProvider
+Shipped as 0.5.0 (merge c8d525c), tests only: the refinement found the premise false (MudBlazor 9.9.0 already reads an injected `TimeProvider`), so no production file changed.
+- Plugin note: the Stop gate hook collides with a background build loop of the same worktree. Evidence: `agile gate RED: build failed` with `MSB3030 ... because it was not found` while `dotnet clean` ran in the loop, and `loop.txt` showed runs 1 and 2 empty. The loop was redone in the foreground, in blocks of 5. `plugin: agile [generic]`.
+- Nothing: the premise check in the library source at the pinned tag (already in the refinement step 6); the `board: 773` header that matched no GitHub issue (the real one was 24), cause not verified, no audit captured (owner: no); capturing B-21 for a failure F-50 had already fixed on main, a one-off.
+
+## 2026-10-03 - Sync with agile@canary 0.0.110
+From 0.0.105 to 0.0.110, run on a clean main; F-62 was `validating` in its worktree and the owner said to go on (only docs touched).
+- Copied (never edited, plugin changed): templates `infra` (desktop updates section) and `project-claude` (offline-first also for `desktop` with an API); `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.0.110, question 26b).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+
+## 2026-10-03 - Sync with agile@canary 0.0.111
+From 0.0.110 to 0.0.111, run on a clean main; F-62 was `validating` in its worktree and only docs were touched.
+- Copied (never edited, plugin changed): rule `output-style`; templates `adr`, `bug`, `discussion`, `epic`, `feature`, `infra` (glossary link line) and `glossary` (`Meaning (pt-BR)` column); `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.0.111, section 17).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary (owner: all): `Meaning (pt-BR)` column written for every existing row of both tables; 54 technical-term rows added, drawn from a sampled scan of the docs, not an exhaustive read; the `Technical terms: [glossary](...)` line added under the title of 97 documents (infra, features, bugs, ADR, discussions, epics except the README, release notes). The worktree copies of F-62 and F-68 get theirs at their merge.
+- Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+
+## 2026-10-03 - Sync with agile@canary 0.1.0
+From 0.0.111 to 0.1.0 (the plugin now numbers versions by what changed), run on a clean main; F-62 was `validating` and F-68 `approved` in their worktrees, only docs touched.
+- Copied (never edited, plugin changed): `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.1.0, version numbering paragraph).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary: nothing to add (column and link lines already there).
+- Missing capabilities, captured as ideas (owner: yes): DocGen tool catalogue as F-69 (board 111), visual identity as F-70 (board 112).
 - Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.

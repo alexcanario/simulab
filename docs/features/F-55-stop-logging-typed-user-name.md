@@ -7,6 +7,8 @@ version: 1
 ---
 # Stop logging the typed user name on token requests
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The Api's OpenIddict server logs "The token request was successfully extracted" at Information level (category `OpenIddict.Server.OpenIddictServerDispatcher`, event 6075) with the whole request form. The password and the client secret are redacted, but `username` is not: the typed sign-in name, an e-mail address, is written in clear text to every log sink. This goes against the intent of F-21 BR4 (the attempt is recorded, the typed name is not) and F-38 BR7 (the warning line carries no user name). Found while building F-38 (2026-10-01), when a test that looked for the name in the log found it in this entry.
 

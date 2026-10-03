@@ -5,6 +5,8 @@ date: 2026-09-17
 ---
 # ADR-0001: Foundation
 
+Technical terms: [glossary](../glossary.md)
+
 ## Context
 Simulab is described in `product/brief.md`: a study coach that runs realistic practice exams and tells each student what to study next. The team is the product owner and Claude, working with the agile@canary workflow.
 

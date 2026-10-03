@@ -7,6 +7,8 @@ severity: low
 ---
 # Selecting a menu item makes its label harder to read in dark mode
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 `NavMenu` paints the selected item with a translucent white background (`rgba(255,255,255,0.14)`) while the
 label keeps the same translucent white text. In dark mode the background lightens but the text does not, so

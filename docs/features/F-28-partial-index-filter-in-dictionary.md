@@ -7,6 +7,8 @@ version: 1
 ---
 # Partial index filter in the data dictionary
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The data dictionary that `tools/Simulab.DocGen` writes lists a partial index without its filter: since F-18, `docs/architecture/Jobs/data-dictionary.md` shows `ix_jobs_active_created_at` on `created_at`, but not `WHERE status IN (0, 1)`, so a reader takes it for a full index. Show the filter of every partial index (and the schema diagram too, if the format allows it). Captured at the F-18 retro (2026-09-23).
 

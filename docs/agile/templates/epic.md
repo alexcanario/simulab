@@ -10,6 +10,8 @@ Created by /agile:epic. Features are refined one at a time with /agile:refine.
 -->
 # <Epic name>
 
+Technical terms: [glossary](../glossary.md)
+
 ## Goal
 <!-- The business outcome, in one or two sentences. -->
 

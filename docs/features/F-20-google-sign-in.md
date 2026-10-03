@@ -7,6 +7,8 @@ version: 4
 ---
 # Google sign-in
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Sign up and sign in with a Google account, behind a configuration switch (ADR-0001 #13). Split out of F-11 on 2026-09-20, which became TOTP only: the two are different jobs, and this one cannot start before the owner registers an OAuth client in Google Cloud and gets a client id, a client secret and the redirect URIs for development and for the future public address.
 

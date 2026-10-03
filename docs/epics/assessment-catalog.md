@@ -5,6 +5,8 @@ board: 691
 ---
 # Assessment catalog
 
+Technical terms: [glossary](../glossary.md)
+
 ## Goal
 Give Simulab the spine every content epic hangs on: who runs an exam (`Organizer`), which exam it is (`Exam`) and which paper was actually applied (`ExamEdition`). Without it there is nothing to attach a syllabus, a question or a simulation to, and no way for a student to pick a target exam. Source: `product/brief.md` capability 1, ADR-0001 rounds 8 and 43 to 46.
 

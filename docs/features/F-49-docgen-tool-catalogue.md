@@ -7,6 +7,8 @@ version: 1
 ---
 # DocGen tool catalogue
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Since plugin agile@canary 0.0.70, `tools/<App>.DocGen` can also generate `docs/architecture/tools.md`: one row
 per tool the app offers to a model, built from a `[ModelTool]` attribute (description, input schema, what it

@@ -7,6 +7,8 @@ version: 1
 ---
 # Seed the admin user
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Seed one administrator account, `admin@simulab.local`, holding the `Admin` role, in every environment (development, test and production), so nobody has to insert the first Admin by SQL (`docs/infra.md`, F-9 BR11). The password always comes from configuration and is never a constant in code: the development password is kept in the Api project's user secrets (change note 1); production takes it from a secret or an environment variable, and without one nothing is seeded.
 

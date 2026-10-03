@@ -7,6 +7,8 @@ version: 3
 ---
 # One problem-details helper for every module's API
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 `CatalogEndpoints.Problem`/`StatusFor`, `IdentityEndpoints.Problem`/`StatusFor` and, since F-41, `AiDiagnosticsEndpoints.Problem`/`StatusFor` are the same code: they turn an `Error` into the problem-details response with its status and its stable `code`. Move it to a new building block all three call, so the answer a caller gets does not depend on which module wrote the endpoint, and a fourth module inherits it. An architecture test then refuses the fourth copy, which is how this debt grew twice. Raised by the independent review of F-33 (2026-09-23); the third copy was recorded here during F-41 (2026-09-24).
 

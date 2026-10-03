@@ -7,6 +7,8 @@ version: 1
 ---
 # Sign-in and sign-out
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 OpenIddict local server with the password and refresh token flows for the first-party Web only. Sign-in page, sign-out, refresh tokens in Redis and session revocation check. Needs /agile:screen.
 

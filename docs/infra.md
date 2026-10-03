@@ -3,6 +3,8 @@ updated: 2026-10-03
 ---
 # Infra
 
+Technical terms: [glossary](glossary.md)
+
 Written at bootstrap from ADR-0001 round 6. What is true today; anything that does not exist yet is `planned`.
 
 ## Run locally
@@ -121,8 +123,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 21 s, 0 new warnings (2026-10-02, F-42) |
-| Full test suite | < 5 min | 1808 tests, 69 s test + 21 s build (2026-10-02, F-42) |
+| Full build | | 16 s, 0 new warnings (2026-10-03, F-48) |
+| Full test suite | < 5 min | 1848 tests, 77 s test + 16 s build (2026-10-03, F-48) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".

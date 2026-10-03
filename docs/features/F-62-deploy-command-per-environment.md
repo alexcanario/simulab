@@ -7,6 +7,8 @@ version: 2
 ---
 # Each environment declares how it is deployed: Azure as the host
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Captured as "add the deploy columns to `docs/infra.md`" (raised by `/agile:sync` to 0.0.102, 2026-10-02); the columns landed on `main` in `976db15`, so the owner reframed the item at `/agile:refine` (2026-10-02): decide the host with Azure as the candidate, prove locally that the AppHost publishes to it, declare the deploy commands of staging and production, and add the build-and-test CI. No Azure resource is created and nothing is spent in this item.
 

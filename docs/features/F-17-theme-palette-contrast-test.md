@@ -7,6 +7,8 @@ version: 1
 ---
 # Theme palette contrast test
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The `ui` rule that arrived with agile@canary 0.0.35 asks for a test over the theme tokens that checks the contrast ratio of every foreground/background pair, in both themes: a screen check only sees the pairs that screen happens to render.
 `ThemeContrastTests`, written for F-10, covers the pairs the current screens use. Extend it to the whole palette, so a token that no screen has rendered yet (as the dark error red was until F-10) fails in the build instead of in a later feature.

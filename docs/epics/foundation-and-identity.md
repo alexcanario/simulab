@@ -5,6 +5,8 @@ board: 690
 ---
 # Foundation and identity
 
+Technical terms: [glossary](../glossary.md)
+
 ## Goal
 Give Simulab the base every other epic stands on: one UI standard, the app shell, the data and messaging foundation, and accounts with sign-up, sign-in, permissions and privacy rights. Source: `product/brief.md` capabilities 10 and 11, ADR-0001 rounds 1, 3 and 5.
 

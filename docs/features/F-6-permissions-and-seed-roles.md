@@ -7,6 +7,8 @@ version: 2
 ---
 # Permissions and seed roles
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Permission catalog, seed roles Student, Curator and Admin, and permission checks on endpoints, pages and menu items (never by role name). Imported from Simulae RBAC.
 

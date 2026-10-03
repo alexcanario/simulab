@@ -7,6 +7,8 @@ version: 1
 ---
 # Sign-up writes in one transaction
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Both sign-ups write the account in several separate saves: the password sign-up (`RegisterUserHandler`: user, role, consent record, verification token) and the Google sign-up (`RegisterGoogleUserHandler`: user, role, Google link, consent record). A failure between two saves leaves an account without its consent record or its link. Found by the independent review of F-20 (finding 4) on 2026-09-23; accepted there because the password sign-up has had the same shape since F-4.
 

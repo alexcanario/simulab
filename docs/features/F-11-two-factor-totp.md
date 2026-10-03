@@ -7,6 +7,8 @@ version: 4
 ---
 # Two-factor sign-in with an authenticator app (TOTP)
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A user can protect the account with a six-digit code from an authenticator app (RFC 6238). Enrolment lives on a new security page; sign-in gains a second step; ten single-use recovery codes cover a lost phone. The whole feature is behind `Identity:TotpEnabled`, false by default and true in development (ADR-0001 #13).
 

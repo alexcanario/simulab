@@ -16,6 +16,8 @@ Remove these comments when the file leaves `idea`.
 -->
 # <Feature name>
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 <!-- 2-3 lines captured from the chat. -->
 

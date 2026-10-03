@@ -16,6 +16,8 @@ Remove these comments when the file leaves `idea`.
 -->
 # Shared client rate limits across Api instances
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Move `ClientRateLimiter` (registration, resend, password reset and the F-38 sign-in failure limit) from the in-memory, per-process counter to a shared counter in Redis, so the limits still hold when the Api runs more than one instance. Found while refining F-38 (2026-10-01).
 

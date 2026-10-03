@@ -72,6 +72,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Nothing);
 
         field.Find("#lookup").Input("zzz");
+        AdvanceDebounce();
 
         field.WaitForAssertion(() =>
             field.Find("[aria-live='polite']").TextContent.Should().Contain("Nothing found for \"zzz\"."));
@@ -85,6 +86,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Broken);
 
         field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
 
         field.WaitForAssertion(() => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
         field.Markup.Should().Contain("Try again");
@@ -96,11 +98,31 @@ public sealed class AppLookupFieldTests : KitTestContext
     {
         var field = Render(Broken);
         field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
         field.WaitForAssertion(() => field.Markup.Should().Contain("The search failed."));
 
         field.FindAll("button").First(button => button.TextContent.Contains("Try again", StringComparison.Ordinal)).Click();
 
         field.WaitForAssertion(() => field.Markup.Should().NotContain("The search failed."));
+    }
+
+    // F-48 AC2: the picker debounces on the container's clock - typing alone searches nothing, the interval passing searches once.
+    [Fact]
+    public void Search_Typed_SearchesOnlyWhenTheDebounceElapses()
+    {
+        var terms = new List<string>();
+        var field = Render((term, cancellationToken) =>
+        {
+            terms.Add(term);
+            return Found(term, cancellationToken);
+        });
+
+        field.Find("#lookup").Input("ceb");
+        terms.Should().BeEmpty("the term is still waiting out the debounce");
+
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => terms.Should().Equal("ceb"));
     }
 
     [Fact]
@@ -109,6 +131,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Found);
 
         field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
 
         // "Results: 1", not "1 results": the count is read aloud, and no language here has one plural form.
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));

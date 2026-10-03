@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # <Bug title>
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 <!-- Observed behavior, with the steps to reproduce. -->
 1. <Step>

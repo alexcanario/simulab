@@ -7,6 +7,8 @@ version: 2
 ---
 # Download my data
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A signed-in user downloads everything the app holds about them, in a machine-readable file (portability, LGPD article 18 / GDPR article 20). Left out of F-10 (account erasure) on 2026-09-19 because Identity held little personal data. Built now with the account data only (owner, 2026-09-21); each future module (attempts, answers, scores, coach conversations) adds its own section to the same file.
 

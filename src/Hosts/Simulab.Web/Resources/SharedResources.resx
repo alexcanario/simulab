@@ -43,6 +43,9 @@
   <data name="Common.Table.Empty" xml:space="preserve"><value>Nothing here yet.</value></data>
   <data name="Common.Table.RowsPerPage" xml:space="preserve"><value>Rows per page:</value></data>
   <data name="Common.Table.PageInfo" xml:space="preserve"><value>{first_item}-{last_item} of {all_items}</value></data>
+  <data name="Common.Table.Results.None" xml:space="preserve"><value>No results</value></data>
+  <data name="Common.Table.Results.One" xml:space="preserve"><value>1 result</value></data>
+  <data name="Common.Table.Results.Many" xml:space="preserve"><value>{0} results</value></data>
   <data name="Common.ActionOnItem" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="Common.Delete.Title" xml:space="preserve"><value>Delete item?</value></data>
   <data name="Common.Delete.Confirm" xml:space="preserve"><value>Delete {0}</value></data>

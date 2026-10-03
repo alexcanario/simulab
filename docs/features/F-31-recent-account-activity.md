@@ -7,6 +7,8 @@ version: 1
 ---
 # Recent account activity for the user
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Show each person their own recent security events on `/account/security` — signed in, sign-in failed, password changed, two-factor turned on or off, and the rest of the F-21 trail — read from the same `identity.account_events` table, scoped to their own account. F-21 keeps the full trail for Admins only (owner, question 2, 2026-09-23); this is what lets the owner of an account notice an access that is not theirs, without asking an Admin.
 

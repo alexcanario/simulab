@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # Outlined primary buttons in the kit may fail AA contrast
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 Found during F-11 (AB#715), not yet verified on the kit components themselves.
 1. `AppErrorState` ("Try again") and `AppEmptyState` (its action) use `MudButton Variant.Outlined Color.Primary`.
