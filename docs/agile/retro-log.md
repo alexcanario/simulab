@@ -896,3 +896,11 @@ From 0.0.110 to 0.0.111, run on a clean main; F-62 was `validating` in its workt
 - Glossary (owner: all): `Meaning (pt-BR)` column written for every existing row of both tables; 54 technical-term rows added, drawn from a sampled scan of the docs, not an exhaustive read; the `Technical terms: [glossary](...)` line added under the title of 97 documents (infra, features, bugs, ADR, discussions, epics except the README, release notes). The worktree copies of F-62 and F-68 get theirs at their merge.
 - Missing capabilities, declined (owner: no): DocGen tool catalogue, visual identity.
 - Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+
+## 2026-10-03 - Sync with agile@canary 0.1.0
+From 0.0.111 to 0.1.0 (the plugin now numbers versions by what changed), run on a clean main; F-62 was `validating` and F-68 `approved` in their worktrees, only docs touched.
+- Copied (never edited, plugin changed): `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.1.0, version numbering paragraph).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary: nothing to add (column and link lines already there).
+- Missing capabilities, captured as ideas (owner: yes): DocGen tool catalogue as F-69 (board 111), visual identity as F-70 (board 112).
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
