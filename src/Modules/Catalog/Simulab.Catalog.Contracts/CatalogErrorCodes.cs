@@ -60,4 +60,18 @@ public static class CatalogErrorCodes
     public const string ExamEditionStatusInvalid = "exam_edition.status_invalid";
     public const string ExamEditionDuplicate = "exam_edition.duplicate";
     public const string ExamEditionPublished = "exam_edition.published";
+
+    public const string SubjectNotFound = "subject.not_found";
+    public const string SubjectNameRequired = "subject.name_required";
+    public const string SubjectNameTooLong = "subject.name_too_long";
+    public const string SubjectNameTaken = "subject.name_taken";
+    public const string SubjectAreaInvalid = "subject.area_invalid";
+
+    /// <summary>F-79 BR8: the subject still has topics, so it cannot leave the catalog. Carries no count.</summary>
+    public const string SubjectHasTopics = "subject.has_topics";
+
+    public const string TopicNotFound = "topic.not_found";
+    public const string TopicNameRequired = "topic.name_required";
+    public const string TopicNameTooLong = "topic.name_too_long";
+    public const string TopicNameTaken = "topic.name_taken";
 }
