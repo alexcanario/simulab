@@ -104,6 +104,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `version.js` writes `<Version>` to the root `Directory.Build.props`, while the `AppVersionTests` the project got from F-60 pin it to `Simulab.Api.csproj`: after F-47's ship `gate.js ship` was red on `main` and blocked F-48 and F-50 (B-21). The plugin should name where the version lives in one place (bootstrap or `/agile:sync`) so a test and the script cannot disagree | F-50 | |
 | ⏳ | agile | `[generic]` The Stop gate hook builds the worktree while a background `dotnet clean`/`build` loop of the same session runs in it, and both fail (the loop's runs come back empty). The gate should detect a `dotnet` build already running in the worktree and defer instead of reporting `RED` | F-48 | |
 | ⏳ | agile | `[generic]` The Stop gate SKIPS a diff with no code file, yet test projects read documents (here `VocabularyTests` reads `docs/glossary.md`, `ArchitectureOverviewTests` reads `docs/infra.md`): a docs-only edit can break them unseen until ship. The gate should run the test projects that read the changed docs, or treat those docs as code | F-67 | |
+| ⏳ | agile | `[generic]` `feature-build` step 12 requires opening the screen through the app host, while `workflow.md` says "never start, mount or reset a database or volume outside the test containers": the two texts disagree. Say which wins (suggestion: the owner's yes, asked once per item, covers the item's own database, as F-79 did with `Database__Name`) | F-79 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -916,4 +917,8 @@ From 0.1.0 to 0.4.0, run on a clean main; no item `building` or `validating` (F-
 - Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
 - Glossary (owner: 2a): 15 technical-term rows added from an agent sweep of the docs, each checked absent from the table and present in the docs; not an exhaustive read. `Technical terms:` line added to `docs/decisions/ADR-0002-host.md` and `docs/epics/README.md`.
 - Missing capabilities: `## Cloud accounts` in `docs/infra.md` (since 0.2.0) found similar to F-68 (approved, `## Access` table); owner chose to improve F-68 through `/agile:change F-68`, no new item. DocGen tool catalogue and visual identity already captured (F-69, F-70).
-- Baseline: present. Docs command: declared. Plugin notes delivered: none. `CLAUDE.md`: 563 words, ~3.6k tokens always loaded. Build not run (only Markdown changed); architecture tests run by hand because they read `docs/glossary.md`.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. `CLAUDE.md`: 563 words, ~3.6k tokens always loaded.
+
+## 2026-10-04 - F-79 Subjects and topics back office
+- Lesson 1 (plugin: agile [generic]): the app-host check of `feature-build` step 12 and the database rule of `workflow.md` disagree; resolved in the item by asking the owner once. Cause read from the two texts, not run. Went to the plugin notes table above.
+- Nothing else kept: the pinned page and menu lists failing when a page is added worked as guards, and a heredoc write was refused by the existing rule. Build not run (only Markdown changed); architecture tests run by hand because they read `docs/glossary.md`.
