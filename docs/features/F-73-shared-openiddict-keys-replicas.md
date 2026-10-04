@@ -1,7 +1,7 @@
 ---
 feature: F-73
 epic: Foundation and identity
-status: refining
+status: approved
 board: 115
 version: 1
 ---
@@ -73,6 +73,7 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 - 2026-10-04 — No new package: `Aspire.Hosting.Azure.KeyVault` 13.6.0 is already in `Directory.Packages.props`; the Api uses only `System.Security.Cryptography` — verified.
 - 2026-10-04 — The tests generate throwaway self-signed certificates in memory (`CertificateRequest`); no certificate file is committed — technical; nothing secret or expiring in the repository.
 - 2026-10-04 — The build waits for F-54's merge and branches the work from `main` after it — technical; both items edit the Api's scale in `AzureDeployment.cs` and the same assertion in `AzurePublishFilesTests`.
+- 2026-10-04 — Approved by the owner ("aprovo F-73"); the build waits for F-54's merge, the validation for F-64's staging — owner.
 - 2026-10-04 — The app manual is not changed (no visible behavior changes beyond staying signed in) — technical.
 
 ## Out of scope
