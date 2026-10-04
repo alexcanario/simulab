@@ -118,6 +118,11 @@ Areas, in display order (code — en / pt-BR / pt-PT):
 - 2026-10-04 — Routes under `/api/v1/catalog/`, topic update and delete at `/api/v1/catalog/topics/{id}` so a move does not depend on the old parent in the route (Claude, technical).
 - 2026-10-04 — Approved without a `/agile:screen` mockup: the two screens reuse the list-plus-dialog pattern of `/admin/issuing-authorities` and the parent page with a child section of `ExamForm` + `ExamEditionsSection` (owner, "aprovo F-79").
 - 2026-10-04 — Limits: subject name 150, topic name 200 characters, in `CatalogLimits` (Claude, technical — the organizer and exam widths).
+- 2026-10-04 — Build design passes (`system-design` then `architect`, read-only, checked against the files): accepted the five-project Catalog slice following IssuingAuthority and Exam/ExamEdition, `Area : TenantEntity` (the project rule `project.md:13` allows no other base), explicit `ix_subjects_area` and `ix_topics_subject` (EF would name them itself otherwise), the seed as `InsertData` with frozen literals and fixed ids like F-37, `ListAreasAsync` on `ISubjectQueries` (a separate interface would have one method and one caller), and `AppLookupField` for the topic's subject picker (a plain select would drop subjects past the first hundred). Dropped: nothing. Nothing left the item (no package, no other module's contract).
+- 2026-10-04 — `SaveTopicRequest(Name, SubjectId?)`: a create takes its subject from the route and ignores the body's; an update with a null `SubjectId` keeps the current subject. No new error code (Claude, technical — the architect asked for a 400 on a mismatch, dropped because the item carries no code for it).
+- 2026-10-04 — `GET /subjects` with `withoutArea=true` and an `areaId` together: `withoutArea` wins and the list is not an error (Claude, technical — a list is a read, like the exam list's filters).
+- 2026-10-04 — A topic whose subject is deleted by another curator between the has-topics check and the delete can stay live under a deleted subject: a soft delete is an UPDATE, so the foreign key never fires. Accepted, as `DeleteExamHandler` accepts it for editions (Claude, `system-design` risk 5).
+- 2026-10-04 — The manual pages are written at `/agile:ship`, which owns the manual update; not part of the build commits (Claude, workflow).
 
 ## Out of scope
 - Aliases (`SubjectAlias`, `TopicAlias`) — F-77.
@@ -134,5 +139,30 @@ Areas, in display order (code — en / pt-BR / pt-PT):
 ## Change notes
 
 ## Validation script
+Needed to validate: the app host started from this worktree and an Admin account signed in by the owner. Both are yours: Claude did not start the app host (it starts the local PostgreSQL, Redis and Mailpit containers, which needs the owner's yes) and does not enter credentials. Close any app host running from another checkout first: two hosts fight for the same ports. The migration is applied at start (Development), in a database of this item.
+
+Git Bash, from `D:/wt/simulab/f-79-subjects-topics`:
+
+```bash
+Database__Name=simulab_f79 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+PowerShell 7, from the same folder:
+
+```powershell
+$env:Database__Name = "simulab_f79"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: the Aspire dashboard URL is printed and the Web is at https://localhost:7125, with no `fail` line while the migrations apply. To repeat, stop it (Ctrl+C) and run it again.
+
+1. Sign in as `admin@simulab.local`. The **Content** menu section has a new entry **Subjects** after Exams. Open it: the list is empty, with "No subject registered yet." and an Add action.
+2. Choose **Add**. Type `Direito Constitucional`, pick the area **Law** and Save. A snackbar says "Subject saved." and the row shows area Law and 0 topics. Add `Português` with area **Languages** and `Atualidades` with no area.
+3. Filter by area **Law**: only Direito Constitucional shows. Filter by **No area**: only Atualidades. Clear the filter and search `constit`: Direito Constitucional shows, with no other.
+4. Try to add `portugues` (no accent, lower case): the name field says another subject already has this name. Try `A`: the field asks for at least 2 characters. Nothing is saved.
+5. Open **Português** (click its name). Its page shows the area and a Topics card with "No topics yet." Add `Pontuação` then `Crase`: they list alphabetically (Crase first). Add `crase` again: the name field says the subject already has a topic with this name.
+6. Back on the list, **Português** shows 2 topics and its delete button is disabled; hover it to read the reason. Delete **Atualidades** (confirm): it leaves the list.
+7. On Português's page, choose **Edit** on `Crase`, type `Séc` in the Subject picker, pick another subject and Save: the topic leaves this page and shows on the other subject's page. Move it back, then delete both topics (confirm each). Back on the list, delete **Português**: it is allowed now.
+8. Switch the language to **pt-PT** and then **pt-BR** (your profile): the menu entry, both pages, the dialogs and the area names (Direito, Linguagens, Tecnologias de Informação / Tecnologia da Informação) are in that language. Keyboard only, on the list: Tab to **Add**, Enter, type a name, Tab to Save, Enter; Esc on a dialog with a typed name asks before discarding.
+9. Permission check: sign in as a Student. The menu has no Subjects entry, and `/admin/subjects` and `/admin/subjects/<any id>` show Page not found.
 
 ## Delivery
