@@ -121,11 +121,22 @@ public abstract class CatalogPageTestContext : KitTestContext
 
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
+        /// <summary>
+        /// A test that owns its own routes (F-79: the taxonomy) answers them here, ahead of the built-in ones;
+        /// returning null falls through to those.
+        /// </summary>
+        public Func<HttpMethod, string, string?, string?, HttpResponseMessage?>? Custom { get; set; }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var path = request.RequestUri!.AbsolutePath;
             var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             Received.Add((request.Method, path, request.RequestUri.Query, body));
+
+            if (Custom?.Invoke(request.Method, path, request.RequestUri.Query, body) is { } custom)
+            {
+                return custom;
+            }
 
             var editionRoute = System.Text.RegularExpressions.Regex.Match(
                 path, "^/api/v1/catalog/exams/(?<exam>[^/]+)/editions(/(?<id>[^/]+))?$");
@@ -345,10 +356,10 @@ public abstract class CatalogPageTestContext : KitTestContext
 
         public static T Read<T>(string? body) => System.Text.Json.JsonSerializer.Deserialize<T>(body!, AppJson.Options)!;
 
-        private static HttpResponseMessage Json<T>(T value, HttpStatusCode status = HttpStatusCode.OK) =>
+        public static HttpResponseMessage Json<T>(T value, HttpStatusCode status = HttpStatusCode.OK) =>
             new(status) { Content = JsonContent.Create(value, options: AppJson.Options) };
 
-        private static HttpResponseMessage Problem((HttpStatusCode Status, string Code) failure) =>
+        public static HttpResponseMessage Problem((HttpStatusCode Status, string Code) failure) =>
             new(failure.Status)
             {
                 Content = JsonContent.Create(

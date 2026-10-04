@@ -51,6 +51,12 @@ public static class AppIcons
 
     /// <summary>F-34: the exams of the assessment catalog.</summary>
     public const string Exams = Icons.Material.Outlined.Description;
+
+    /// <summary>F-79: the subjects of the taxonomy.</summary>
+    public const string Subjects = Icons.Material.Outlined.MenuBook;
+
+    /// <summary>F-79: the topics under a subject.</summary>
+    public const string Topics = Icons.Material.Outlined.Bookmarks;
     public const string Security = Icons.Material.Outlined.Security;
 
     /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>

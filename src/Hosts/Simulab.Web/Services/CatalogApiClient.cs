@@ -285,6 +285,117 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/exams/{examId}/editions/{editionId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-79 BR1: the seeded areas in display order; the names are the screen's.</summary>
+    public Task<ApiResult<IReadOnlyList<AreaResponse>>> ListAreasAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<AreaResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/areas"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC1: one page of subjects, searched and filtered by area on the server.</summary>
+    public Task<ApiResult<SubjectPageResponse>> ListSubjectsAsync(
+        string accessToken,
+        SubjectListQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{Base}/subjects?page={query.Page}&pageSize={query.PageSize}";
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (query.WithoutArea)
+        {
+            route += "&withoutArea=true";
+        }
+        else if (query.AreaId is { } areaId)
+        {
+            route += $"&areaId={areaId}";
+        }
+
+        return SendAsync<SubjectPageResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken),
+            cancellationToken);
+    }
+
+    /// <summary>F-79 UC5: the subject the page opens.</summary>
+    public Task<ApiResult<SubjectResponse>> FindSubjectAsync(
+        string accessToken,
+        Guid subjectId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<SubjectResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/subjects/{subjectId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC2.</summary>
+    public Task<ApiResult<SubjectResponse>> CreateSubjectAsync(
+        string accessToken,
+        SaveSubjectRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<SubjectResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, $"{Base}/subjects", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC3.</summary>
+    public Task<ApiResult<SubjectResponse>> UpdateSubjectAsync(
+        string accessToken,
+        Guid subjectId,
+        SaveSubjectRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<SubjectResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/subjects/{subjectId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC4: a soft delete on the server, refused with a 409 while the subject has topics.</summary>
+    public Task<ApiResult<bool>> DeleteSubjectAsync(
+        string accessToken,
+        Guid subjectId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/subjects/{subjectId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC5: the subject's topics in one call, alphabetically (the Api orders them, BR11).</summary>
+    public Task<ApiResult<IReadOnlyList<TopicResponse>>> ListTopicsAsync(
+        string accessToken,
+        Guid subjectId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<TopicResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/subjects/{subjectId}/topics"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC6.</summary>
+    public Task<ApiResult<TopicResponse>> CreateTopicAsync(
+        string accessToken,
+        Guid subjectId,
+        SaveTopicRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<TopicResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, $"{Base}/subjects/{subjectId}/topics", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC7: the body's subject is where the topic moves to (BR10).</summary>
+    public Task<ApiResult<TopicResponse>> UpdateTopicAsync(
+        string accessToken,
+        Guid topicId,
+        SaveTopicRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<TopicResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/topics/{topicId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-79 UC8: a soft delete on the server.</summary>
+    public Task<ApiResult<bool>> DeleteTopicAsync(
+        string accessToken,
+        Guid topicId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/topics/{topicId}"), accessToken),
+            cancellationToken);
+
     private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
         new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };
 

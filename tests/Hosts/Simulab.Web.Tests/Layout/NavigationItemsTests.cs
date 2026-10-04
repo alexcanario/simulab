@@ -80,7 +80,8 @@ public class NavigationItemsTests
             .Should().Equal(
                 ("/admin/organizers", CatalogPermissions.Manage),
                 ("/admin/issuing-authorities", CatalogPermissions.Manage),
-                ("/admin/exams", CatalogPermissions.Manage));
+                ("/admin/exams", CatalogPermissions.Manage),
+                ("/admin/subjects", CatalogPermissions.Manage));
     }
 
     [Fact]

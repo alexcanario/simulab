@@ -24,6 +24,22 @@ Technical terms: [glossary](glossary.md)
 |---|---|---|---|---|---|---|---|
 | local | provisioned | | app host | user secrets | not declared | | |
 
+## Cloud accounts
+<!--
+One row per non-local environment: the client's cloud account its deploy lands in. The repository, the tag, the GitHub Release and the board stay in the owner's GitHub; only the deploy moves.
+Cloud: `azure`, `aws`, `gcp`, `other` or `none` (a host without a cloud account, such as the compose recipe). An environment with a Deploy command and no row stops /agile:publish.
+Azure: Tenant and Subscription are GUIDs (not a name or a domain), written here (ids are not secrets; no secret goes in this file). /agile:publish keeps one `az` login per subscription in
+`<home>/.agile/azure/<tenant>/<subscription>`, checks that it sees that subscription before the deploy command and runs the command with Azure__TenantId, Azure__SubscriptionId, Azure__CredentialSource=AzureCli
+(and Azure__ResourceGroup and Azure__Location when filled), after removing every inherited AZURE_*, ARM_* and Azure__* variable. Log in once, in Git Bash: AZURE_CONFIG_DIR="<folder>" az login --tenant <tenant>.
+Other clouds are shown in the plan and not checked.
+What to ask the client's administrator: locally, the owner as a guest in their tenant with the role Contributor on the subscription (plus Role Based Access Control Administrator limited to the roles the app's managed
+identities need, when the deploy creates role assignments); for the pipeline, an app registration in their tenant with the same roles and a federated credential for `repo:<owner>/<repo>:environment:<environment>`.
+GitHub: set the variables AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID on the GitHub environment (variables, not secrets), and give each Azure environment a deployment protection rule: "Selected branches and tags"
+with the tag pattern `v*` only, and required reviewers on production. A manual run can start from any branch and gets the same federated subject: the protection rule is the boundary, the plugin's check only catches a mistake.
+-->
+| Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region |
+|---|---|---|---|---|---|---|
+
 ## Expected secrets
 | Name | Used by | Kept in (per environment) |
 |---|---|---|
