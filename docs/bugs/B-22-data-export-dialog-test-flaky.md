@@ -1,7 +1,7 @@
 ---
 bug: B-22
 feature: F-16
-status: building
+status: validating
 board: 109
 severity: low
 ---
@@ -135,9 +135,26 @@ at once) for 10 rounds, 40 runs, all `Failed: 0`. The real output is recorded un
 - (none)
 
 ## Validation script
-1. Run the stress loop: 4 copies of `dotnet test tests/Hosts/Simulab.Web.Tests --no-build` at once, 10 rounds. → 40 runs, all `Failed: 0`.
-2. Run `dotnet test Simulab.slnx` once. → green; the four tests pass.
+Needed to validate: nothing. No screen is involved; close the IDE and any app host first (a running one locks the build output).
+Both commands below are the same in Git Bash and in PowerShell 7, run from the worktree `D:\wt\simulab\b-22-data-export-dialog`. Run in both on 2026-10-05.
+1. Run the four test classes this bug touched:
+   `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DataExportPageTests|FullyQualifiedName~AccountErasureTests|FullyQualifiedName~ChangePasswordTests|FullyQualifiedName~SecurityPageTests"`
+   → `Passed!  - Failed:     0, Passed:    40, Skipped:     0, Total:    40`. Repeat it as often as you like.
+2. Run the project once more: `dotnet test tests/Hosts/Simulab.Web.Tests` → `Passed!  - Failed:     0, Passed:  1044, Skipped:     0, Total:  1044`.
+3. Read the diff: `git diff main --stat -- src` → empty (nothing under `src/` changed).
+The stress loop (AC2) takes about 5 minutes and cannot be repeated by hand without care: its real output is under `## Delivery`.
+The full solution (`dotnet test Simulab.slnx`) runs at `/agile:ship`.
 
 ## Delivery
 - Branch: bug/B-22
+- Commits: `02edf54` (four Click/Uri tests), `6d2d30d` (two Type/disabled tests; change note).
+- Stress loop (AC2), run on a copy of the build output inside the worktree (`bin/b22-stress`, ignored by git) so the
+  Stop gate cannot rebuild it: 10 rounds of 4 parallel `dotnet test Simulab.Web.Tests.dll` → 40 of 40
+  `Passed!  - Failed:     0, Passed:  1044, Skipped:     0, Total:  1044` (9 s each).
+- Before the second fix, the same loop gave 38 of 40 green; the 2 reds (r4-p2, r7-p2) were
+  `AccountErasureTests.Dialog_WithoutAPassword_CannotConfirm` (`AccountErasureTests.cs:75`). An earlier loop on a copy
+  outside the repository is not counted (see `## Decisions`).
+- Build: `dotnet build --no-incremental` → `0 Warning(s)`, `0 Error(s)`. Gate: `agile gate GREEN`.
+- Not fixed, found by the grep (same hazard, a blank line between the click and the read; out of AC1's wording):
+  `ResetPasswordTests.cs:99` and `ExamEditionsSectionTests.cs:169` read `NavigationManager.Uri` right after a `Click()`.
 - Merge: <commit>
