@@ -1,7 +1,7 @@
 ---
 bug: B-22
 feature: F-16
-status: validating
+status: done
 board: 109
 severity: low
 ---
@@ -157,4 +157,9 @@ The full solution (`dotnet test Simulab.slnx`) runs at `/agile:ship`.
 - Build: `dotnet build --no-incremental` → `0 Warning(s)`, `0 Error(s)`. Gate: `agile gate GREEN`.
 - Not fixed, found by the grep (same hazard, a blank line between the click and the read; out of AC1's wording):
   `ResetPasswordTests.cs:99` and `ExamEditionsSectionTests.cs:169` read `NavigationManager.Uri` right after a `Click()`.
-- Merge: <commit>
+  Captured as B-23 (board #135).
+- Full check at ship (`gate.js ship`, 107 s, budget 5 min): `agile gate GREEN`; 2187 tests, 0 failed
+  (`Simulab.Web.Tests` 1044, `Simulab.Catalog.Tests` 453, `Simulab.Identity.Tests` 408, `Simulab.ArchitectureTests` 164,
+  others 118). `gate.js docs` GREEN (0 files changed). App version 0.9.0 -> 0.9.1.
+- Manual: no page changed (no visible behavior change). Glossary: 4 rows added (flaky test, race, stack trace, worktree).
+- Merge: `14d58c3` (board #109)
