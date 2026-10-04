@@ -1,7 +1,7 @@
 ---
 bug: B-22
 feature: F-16
-status: approved
+status: building
 board: 109
 severity: low
 ---

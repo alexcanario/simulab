@@ -114,7 +114,7 @@ public sealed class AccountErasureTests : IdentityPageTestContext
 
         dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Your account was created with Google and has no password yet."));
         dialogs.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
-        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+        dialogs.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password"));
     }
 
     [Fact]
