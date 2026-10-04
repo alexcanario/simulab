@@ -1,7 +1,7 @@
 ---
 feature: F-74
 epic: Subject taxonomy
-status: validating
+status: done
 board: 118
 version: 1
 ---
@@ -269,4 +269,9 @@ Expected: the Aspire dashboard URL is printed and the Web is at https://localhos
 8. Permission check: sign in as a Student. `/admin/exams` and the edition page show Page not found, so the card is never reachable.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Shipped 2026-10-04, version 0.9.0. Branch `feature/F-74`, merged into `main` with `--no-ff` as `a2a3dd5` (board #118); branch and worktree removed, the branch was never pushed.
+- Full suite: 2187 tests, 0 failed, in 99 s (build 22 s); slowest project Identity, 1 m 34 s. Catalog 453, Web 1044, architecture 164. Warnings baseline: 0 entries.
+- Migration `20261004210926_AddNoticeSubjects`: table `catalog.notice_subjects`, unique index filtered to live rows and `NULLS NOT DISTINCT`.
+- App manual: `exam-editions.md` and `index.md` in pt-BR, pt-PT and en. Technical docs regenerated (`docs/architecture/Catalog/`, `docs/api/Simulab.Api.json`).
+- Independent review: 0 blockers, 2 majors fixed, minors in `## Decisions`. The owner validated on screen and authorized the merge, 2026-10-04.
+- First full run of the ship gate was red on one test, `DocSetTests.Generate_TwiceWithNoCodeChange_GivesTheSameText`; it passed alone and the full run passed on the second try.
