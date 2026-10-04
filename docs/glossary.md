@@ -104,6 +104,7 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 
 | Term | pt-BR | Meaning | Meaning (pt-BR) |
 |---|---|---|---|
+| stress loop | rodada de carga | Several copies of a test project run at once, repeated, to make a timing fault show up (B-22). | Várias cópias de um projeto de testes rodando ao mesmo tempo, repetidas, para fazer aparecer uma falha de tempo (B-22). |
 | blocker | bloqueador | Review finding that stops the merge until it is fixed. | Achado de revisão que impede o merge até ser corrigido. |
 | major | grave | Review finding that is a real defect or a test gap; fixed before validation unless the owner decides otherwise. | Achado de revisão que é defeito real ou lacuna de teste; corrigido antes da validação, salvo decisão do dono. |
 | minor | leve | Small review finding; fixed, accepted with a reason, or turned into a new item. | Achado pequeno de revisão; corrigido, aceito com justificativa ou transformado em novo item. |
