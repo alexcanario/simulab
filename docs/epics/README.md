@@ -6,7 +6,7 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 |---|---|---|---|---|
 | 1 | Foundation and identity | `foundation-and-identity` | 690 | agreed (F-1 to F-11) |
 | 2 | Assessment catalog | `assessment-catalog` | 691 | draft (F-33 to F-37) |
-| 3 | Subject taxonomy | `subject-taxonomy` | 692 (GitHub #3) | draft (F-51, F-74 to F-79) |
+| 3 | Subject taxonomy | `subject-taxonomy` | 692 (GitHub #3) | agreed (F-51, F-74 to F-79) |
 | 4 | Question bank | `question-bank` | 693 | idea |
 | 5 | Question Bank Simulator | `question-bank-simulator` | 694 | idea |
 | 6 | Exam Simulator | `exam-simulator` | 695 | idea |
