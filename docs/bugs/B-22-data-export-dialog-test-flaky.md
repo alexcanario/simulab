@@ -1,7 +1,7 @@
 ---
 bug: B-22
 feature: F-16
-status: refining
+status: approved
 board: 109
 severity: low
 ---
@@ -93,6 +93,7 @@ at once) for 10 rounds, 40 runs, all `Failed: 0`. The real output is recorded un
 - Localization: no UI text changes; the missing-key test stays green.
 
 ## Decisions
+- 2026-10-05 - Approved by the owner ("aprovo B-22").
 - 2026-10-05 - Fix by the inference, without a reproduction - owner; 30 runs did not reproduce it, the change is one
   line per test, it follows a rule the project already has (F-8) and the same fault was measured in B-11 and F-8.
 - 2026-10-05 - Fix the three other tests with the same pattern in this bug - owner; same defect, one line each, and it
