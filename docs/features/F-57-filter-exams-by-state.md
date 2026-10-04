@@ -1,7 +1,7 @@
 ---
 feature: F-57
 epic: Assessment catalog
-status: refining
+status: approved
 board: 96
 version: 1
 ---
@@ -82,6 +82,7 @@ A student or an editor narrows an exam list to one state in one step, and the li
 - 2026-10-04 — No schema change and no migration: the filter reads `scope` and `scope_detail` as F-42 left them (Claude, technical).
 - 2026-10-04 — No new packages: `AppLookupField`, the Catalog test fixtures and bUnit already cover it (Claude, technical).
 - 2026-10-04 — No `/agile:screen` mockup: one field added to two existing filter bars with an existing kit component (Claude, process).
+- 2026-10-04 — Approved by the owner ("aprovo F-57").
 
 ## Out of scope
 - Several states at once.
