@@ -104,6 +104,11 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 
 | Term | pt-BR | Meaning | Meaning (pt-BR) |
 |---|---|---|---|
+| stress loop | rodada de carga | Several copies of a test project run at once, repeated, to make a timing fault show up (B-22). | Várias cópias de um projeto de testes rodando ao mesmo tempo, repetidas, para fazer aparecer uma falha de tempo (B-22). |
+| flaky test | teste instável | A test that passes and fails on the same code, usually because it loses a timing race under load (B-11, B-22). | Teste que passa e falha com o mesmo código, em geral porque perde uma corrida de tempo sob carga (B-11, B-22). |
+| race | corrida (de tempo) | Two things that finish in an unpredictable order, such as a click handler and the line of a test that checks its result. | Duas coisas que terminam em ordem imprevisível, como o tratador de um clique e a linha do teste que confere o resultado. |
+| stack trace | pilha de chamadas | The list of calls a failure went through, printed with its error message. | A lista de chamadas pela qual uma falha passou, impressa com a mensagem de erro. |
+| worktree | pasta de trabalho do item | A separate folder of the same repository with its own branch, one per item. | Pasta separada do mesmo repositório com a sua própria branch, uma por item. |
 | blocker | bloqueador | Review finding that stops the merge until it is fixed. | Achado de revisão que impede o merge até ser corrigido. |
 | major | grave | Review finding that is a real defect or a test gap; fixed before validation unless the owner decides otherwise. | Achado de revisão que é defeito real ou lacuna de teste; corrigido antes da validação, salvo decisão do dono. |
 | minor | leve | Small review finding; fixed, accepted with a reason, or turned into a new item. | Achado pequeno de revisão; corrigido, aceito com justificativa ou transformado em novo item. |
