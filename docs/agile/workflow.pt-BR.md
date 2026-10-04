@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.1.0 (rascunho). English: [en](workflow.md).
+> Versão 0.4.0 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -69,7 +69,7 @@ Antes de escrever qualquer coisa, o Claude confere se a skill que carregou e o p
 | 3. Acesso | Autenticação (no `web-api`, pergunta 10a: como os consumidores da API se autenticam), RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
 | 4. Integração | Mensageria (nenhuma, em processo, broker), serviços externos, armazenamento de arquivos e — quando alguma feature chama um modelo — o provedor do LLM e onde ele roda, o teto de custo e como ele é falsificado nos testes |
 | 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, a **identidade visual** (23a: um arquivo, um site, uma imagem ou três perguntas básicas), a biblioteca do design system, família de ícones, como um item é editado — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados. O kit de UI e a galeria deixaram de ser pergunta: todo app com telas ganha um, construído a partir da identidade. O perfil `web-api` não tem telas: pula a stack de UI, a troca de idioma (21), a acessibilidade (22) e tudo sobre identidade visual e UI, e a pergunta 20 vale só para o texto que a API envia a pessoas |
-| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, para um app desktop de onde as cópias instaladas se atualizam (pergunta 26b), as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
+| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, a conta de nuvem do cliente de cada um que não é local (pergunta 25a), para um app desktop de onde as cópias instaladas se atualizam (pergunta 26b), as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
 | 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo (qual modelo roda os casos, com ou sem o braço sem plugin) |
 | 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos e um catálogo de tools quando o app expõe ferramentas a um modelo), o prompt de sistema como arquivo versionado, e uma visão geral da arquitetura escrita à mão |
 
@@ -109,6 +109,9 @@ stateDiagram-v2
     [*] --> idea: /agile:idea
     idea --> refining: /agile:refine
     refining --> approved: você diz "aprovo F-n"
+    idea --> cancelled: duplicata, escolhida no card de itens parecidos
+    refining --> cancelled: duplicata, escolhida no card de itens parecidos
+    cancelled --> [*]
     approved --> building: /agile:build
     building --> validating: tabela de cobertura + roteiro de validação
     validating --> building: um ajuste que você reportou
@@ -121,12 +124,15 @@ stateDiagram-v2
 
 | Status | O que acontece | Quem muda |
 |---|---|---|
-| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera para começar, o que só a validação precisa (nunca bloqueia) e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. | Claude |
+| `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera para começar, o que só a validação precisa (nunca bloqueia) e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. Para uma feature ou bug, antes de criar qualquer coisa o Claude pergunta onde ela mora: uma pergunta com o épico que ele sugere primeiro (um épico aberto cujo objetivo serve, com o motivo), depois "Novo épico" e "Sem épico"; um épico novo só é criado depois do seu sim, no board e como `docs/epics/<slug>.md` (status `draft`). O `/agile:epic` e um texto que já é um épico não perguntam nada. | Claude |
 | `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número; uma resposta que junta o escopo de um item aberto já existente a este, em vez disso, primeiro confere aquele item — `git worktree list` procurando a pasta dele e o arquivo ou issue dele para o `status`. Qualquer status além de `idea` em qualquer lugar bloqueia a junção automática: o Claude nomeia o status e o caminho da worktree do outro item e você decide, juntar mesmo assim (registrado em `## Decisions` com o motivo) ou descartar a junção e deixar o outro item intocado. Ainda `idea` em todo lugar, sem worktree: a junção acontece como antes, sem pergunta nova): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Uma lista que você aprovou ou editou no chat (um catálogo, um conjunto de opções, escolhas numeradas) é escrita inteira na seção `## Approved list` do item, na ordem aprovada e com as suas edições aplicadas, e o arquivo nunca diz "a lista mostrada na refinação"; antes de pedir a sua aprovação o Claude relê o arquivo atrás de frases que mandam o leitor para o chat e cola a lista onde achar uma. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
-| `building` | `/agile:build`: continua na worktree criada no refinamento — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
+| `building` | `/agile:build`: primeiro acha a worktree do item pela branch e diz `Worktree of <id>: <caminho> [<branch>]` (`(created now)` quando um item antigo não tinha); o status e a checagem de árvore limpa são lidos ali, nunca no checkout principal, e continua nessa worktree — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
 | `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. **Portão 2.** | Você |
 | `done` | `/agile:ship`: suíte completa, versão da app incrementada, merge — digitar o comando é o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
+| `cancelled` | Uma saída, não uma etapa: só a partir de `idea` ou `refining`, só como duplicata, escolhida no card que o `/agile:refine` mostra ao achar um item parecido (abaixo). O arquivo fica com `status: cancelled` e a linha `Duplicate of <id> (<data>): <onde a melhoria foi parar>`, então o número nunca é reaproveitado; o status da sessão e o início do backlog o ignoram. No GitHub o issue é fechado como duplicata do outro e o item do projeto é arquivado (nunca Done: isso mostraria trabalho não entregue como entregue); no Azure Boards o estado é `Removed`; sem board a linha de `docs/agile/backlog.md` é riscada. | Você, no card |
+
+**Itens parecidos.** Antes de o `/agile:idea` pegar um número, e antes de o `/agile:refine` criar uma branch, o Claude lê todos os itens (`docs/features`, `docs/bugs`, o arquivo do item em cada worktree, onde um item em andamento guarda o status atual, e o board, abertos e fechados, `done` e `cancelled` incluídos) e julga quais cobrem o mesmo assunto com outras palavras. Nunca por regra de palavras-chave. Sem candidato, diz `No similar item (<N> items read).` e segue. Com candidatos (no máximo 3, um motivo cada) faz um card, a ação recomendada primeiro. Para melhorar o item existente: um `idea` ganha `Added <data>: <texto>` no resumo; um item `refining` recebe o texto como pergunta aberta na própria worktree (o Claude diz o caminho); um item `approved`, `building` ou `validating` não é tocado e o Claude imprime `/agile:change <id>` com o texto para você digitar; um item `done` é informado como `Already delivered in <id>`, e você não cria nada ou cria o novo item com uma linha ligando o `done`. No `/agile:refine` o card tem três ações: levar a melhoria ao outro item e cancelar este (um refinamento retomado também perde a worktree e a branch), manter os dois (uma linha em `## Decisions`) ou absorver o outro neste (a checagem de status e worktree da seção 14.18). `/agile:epic` e `/agile:discuss` buscam uma vez para a lista toda e mostram todas as colisões em um card; `/agile:autopilot --assume` termina com a pergunta, pois duplicata é decisão sua.
 
 Pequenas correções encontradas na validação são feitas na hora, sem sair de `validating`.
 
@@ -186,6 +192,12 @@ O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `mono
 Todo deploy roda num worktree fixo, `<raiz dos worktrees>/deploy`, solto (detached) na tag (criado na primeira vez, movido depois com `git checkout --detach`); por isso o seu checkout principal nunca é trocado, e uma ferramenta que usa o caminho da pasta como chave (o Aspire dá ao projeto compose um nome derivado dele) substitui o app que está rodando em vez de abrir um segundo. O comando recebe `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` e `AGILE_ARTIFACTS` (a pasta do pacote daquela versão, refeita a partir da tag quando falta e o comando não é a receita do Aspire); a saída dele é salva inteira fora do repositório, com o valor de cada segredo apagado, e o código de saída decide o sucesso. O comando roda no shell padrão da máquina (cmd.exe no Windows, então `%AGILE_TAG%`; /bin/sh nos demais, `$AGILE_TAG`) e tem limite de 30 minutos; dois deploys nunca rodam ao mesmo tempo (um arquivo de trava ao lado do worktree de deploy), e um que encontra arquivos rastreados alterados nesse worktree para antes de rodar. Um segredo listado em `## Expected secrets` com "environment variable" e este ambiente só tem o nome conferido: a variável precisa estar definida no shell que iniciou o Claude (na receita do Aspire é `Parameters__<nome>`), senão o publish para antes de rodar qualquer coisa. Com um `Check URL`, depois da saída 0 a URL é consultada até responder HTTP 200, por no máximo 60 segundos; sem 200, o deploy falhou. No sucesso, a célula `Version (deployed on)` do ambiente vira `v<x.y.z> (AAAA-MM-DD)`, commitada na `main` (`docs(release): v<x.y.z> deployed to <ambiente>`) e enviada. Numa falha nada é registrado e **nada é revertido sozinho**: o relatório cita o fim da saída e dá o comando exato que reimplanta a versão registrada antes (`/agile:publish production v0.3.0`). O plugin nunca apaga imagens antigas (ele conta as tags `aspire-deploy-*` e nomeia os comandos) e nunca roda `docker compose down -v`, que apagaria o volume com as chaves de Data Protection do app e, com ele, todas as sessões abertas. O `/agile:sync` lista como capacidade ausente um projeto cujo `docs/infra.md` não tem a coluna `Deploy command` e oferece capturar um item; ele nunca escreve esse arquivo.
 
 **O pipeline de deploy (GitHub Actions).** Um projeto cujo `origin` está no github.com e cujo `docs/infra.md` declara um comando de deploy para um ambiente que não é `local` ganha `.github/workflows/deploy.yml` e o script `.github/scripts/agile-deploy.js`, escritos pelo `/agile:bootstrap` (`node sync.js pipeline write`). Fazer push da tag `v<Version>` (o que o `/agile:publish` faz) implanta no primeiro ambiente que não é `local` nem produção, `staging` na tabela usual, ou em produção quando não há outro; o nome é escrito uma só vez, como literal, quando o arquivo é gerado. Produção é promovida por uma execução manual (Actions, Deploy, "Run workflow": `environment` e uma `tag` que já existe, então o rollback é a mesma execução com a tag antiga) ou localmente por `/agile:publish production`. O que a execução implanta é o **mesmo `Deploy command` da mesma linha** que o comando local roda, lido do `docs/infra.md` quando a execução começa e nunca copiado para o workflow, então os dois não se afastam: edite a tabela, não o YAML. O job declara `environment: <nome>`, então os segredos ficam no environment do GitHub com esse nome e você pode pôr revisores obrigatórios lá (o plugin nunca cria environment, revisor nem segredo, e nunca lê um valor); ele faz checkout da tag com o histórico, instala o SDK .NET do `global.json`, define `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` e `AGILE_ARTIFACTS` (reconstruído da tag quando o comando o usa) e consulta a `Check URL` até dar 200, por até 60 segundos. Todo segredo que `## Expected secrets` lista com "environment variable" para um ambiente que não é `local` é repassado de `secrets.<nome>`; um sem valor para a execução **antes** do comando, dizendo o nome (valores nunca são impressos, e um valor na saída do comando é substituído por `***`). Execuções do mesmo ambiente nunca se sobrepõem, e o workflow tem permissão `contents` só de leitura e usa apenas `actions/checkout` e `actions/setup-dotnet`. Um comando ou checagem que falha derruba a execução, nada é revertido, e o resumo da execução diz o rollback; um sucesso imprime `v<x.y.z> deployed to <ambiente>` e **não faz commit**: `Version (deployed on)` continua sendo escrita só por um `/agile:publish` local. Antes de um `/agile:publish <ambiente>` local que vai enviar a tag, o Claude avisa que o pipeline também a implanta no destino dele (e, quando é o mesmo ambiente, que os dois rodam ao mesmo tempo e não são serializados: a concorrência do workflow só enfileira as execuções dele); digitar o comando continua sendo a autorização. O arquivo é seu depois de escrito: acrescente um passo antes de "Deploy" para qualquer ferramenta que o comando precise além do SDK e do que o runner Ubuntu tem (lá o comando roda em `/bin/sh`, então formas como `%AGILE_TAG%` não funcionam). O `/agile:sync` nunca o escreve: um projeto com comando declarado e sem workflow recebe "Deploy pipeline" como capacidade ausente e a oferta de capturar um item, e um que já o tem vê um template mais novo, ou um segredo novo na tabela, como diferença `manual` para mesclar à mão. Só GitHub Actions é suportado. Exemplo 14.36.
+
+**Implantar na conta de nuvem do cliente (`## Cloud accounts`, #66).** O repositório, o board, a tag, o GitHub Release e o feed de pacotes ficam no seu GitHub; só o deploy vai para a conta do cliente para quem o projeto é feito. O `docs/infra.md` tem uma seção `## Cloud accounts` com uma linha por ambiente que não é local: `Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region`. `Cloud` é `azure`, `aws`, `gcp`, `other` ou `none` (um host sem conta de nuvem, como a receita compose na sua própria máquina). Os ids não são segredos e ficam escritos ali; um segredo nunca fica. Um ambiente que declara comando de deploy e não tem linha faz o `/agile:publish` (e o `--plan`) parar antes de qualquer coisa rodar, dizendo a linha a acrescentar; duas linhas para o mesmo ambiente também param. A pergunta 25a do quiz escreve as linhas no bootstrap (cliente e nuvem; os ids podem ficar em branco até o cliente fornecê-los, e o publish para até lá), e o `/agile:sync` oferece a seção a um projeto que não a tem, uma linha em branco por ambiente não local, sem nunca inventar um id.
+
+Para `azure`, Tenant e Subscription precisam ser GUIDs (um nome de domínio como `contoso.onmicrosoft.com` é recusado). O plugin guarda um login do `az` por assinatura em `<sua pasta pessoal>/.agile/azure/<tenant>/<subscription>`, fora de todo repositório: dois clientes, ou o staging e a produção de um cliente, nunca dividem uma assinatura ativa, e o seu login padrão do `az` nunca é tocado. Antes do comando de deploy, e já no `--plan` (então um login faltando para antes de a tag ser enviada), ele consulta `az account show` nessa pasta e compara `tenantId` e `id` com a linha, sem diferenciar maiúsculas (o `homeTenantId` de um convidado nunca é comparado). Sem login na pasta: para e mostra o login de uma vez, `AZURE_CONFIG_DIR="<pasta>" az login --tenant <tenant>` para o Git Bash e uma forma de PowerShell que não fica definida. Com login, mas outra assinatura ativa: o plugin mesmo roda `az account set` nessa pasta e confere de novo. O login não enxerga a assinatura, ou enxerga outro tenant: para mostrando a conta declarada e a ativa (nomes e ids) e pede que você obtenha acesso com o cliente ou corrija a linha. Aí o comando roda com toda variável herdada `AZURE_*`, `ARM_*` e `Azure__*` removida (o plano lista os nomes, nunca um valor) e com `AZURE_CONFIG_DIR`, `AZURE_EXTENSION_DIR`, `Azure__TenantId`, `Azure__SubscriptionId`, `Azure__CredentialSource=AzureCli` e, quando a linha as preenche, `Azure__ResourceGroup` e `Azure__Location`: o que o `aspire deploy` lê, então a conta é a da linha e nada mais na máquina escolhe outra (medido: o `AzureCliCredential` do .NET respeita o `AZURE_CONFIG_DIR`, e uma variável de ambiente vence um valor guardado nos user secrets do AppHost). `aws`, `gcp` e `other` aparecem no plano e na saída como "not checked by the plugin" (#68); o `--plan` e o `deploy --list` mostram cliente, nuvem e conta de cada ambiente.
+
+O que pedir ao administrador do cliente (o comentário da seção em `templates/infra.md` diz o mesmo): para a sua máquina, você como convidado no tenant dele com o papel `Contributor` na assinatura, mais `Role Based Access Control Administrator` limitado aos papéis de que as identidades gerenciadas do app precisam quando o deploy cria atribuições de papel (um deploy Aspire no Azure cria); para o pipeline, um registro de aplicativo no tenant dele com os mesmos papéis e uma credencial federada para `repo:<dono>/<repo>:environment:<ambiente>`. Com uma linha `azure`, o `deploy.yml` gerado também faz login com `azure/login@v3` por OIDC, a partir das variáveis do ambiente do GitHub `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` e `AZURE_SUBSCRIPTION_ID` (variáveis, não segredos; o passo é pulado quando `AZURE_TENANT_ID` está vazio, então uma execução para outro ambiente não é afetada), as permissões do job são `contents: read` e `id-token: write`, o `docs/infra.md` é lido do commit que tem o workflow (então um rollback para uma tag anterior à seção é conferido contra a linha de hoje), e o `agile-deploy.js` para antes do comando quando o login não bate com a linha. Essa conferência pega um erro de configuração; não é a fronteira de segurança: uma execução manual pode partir de qualquer branch e recebe o mesmo sujeito federado, então dê a todo ambiente Azure do GitHub uma regra de proteção de implantação, "Selected branches and tags" só com o padrão de tag `v*`, e revisores obrigatórios na produção. O `/agile:sync` oferece o passo, as permissões e a linha do sparse-checkout junto com o novo `agile-deploy.js` a um projeto cujo workflow não os tem, e relata "login step without the check" para um workflow que faz login com um script antigo; o workflow continua seu, nunca é sobrescrito. Exemplo 14.47.
 
 O plugin traz uma receita, a de "contêineres + Aspire" (todo perfil que pode ter um AppHost: `monolith`, `modular-monolith`, `web-api`, `microservices`, `web-app`, `website`; a seção "Deploy recipe" do perfil tem as linhas exatas): o comando de deploy é `aspire deploy --apphost src/<App>.AppHost/<App>.AppHost.csproj -e <Ambiente> -o artifacts/deploy/<ambiente> --clear-cache --non-interactive --nologo`, que gera a imagem do contêiner e roda `docker compose up -d` para aquele ambiente. O AppHost declara um ambiente compose por nome de ambiente e fixa cada porta externa a partir do `appsettings.<Ambiente>.json` dele (staging e produção rodam lado a lado, em `5081` e `5080`, por exemplo); cada recurso de projeto define `ASPNETCORE_ENVIRONMENT`, publica só o endpoint `http` e guarda as chaves de Data Protection num volume nomeado por ambiente, então um redeploy mantém cookies e tokens antifalsificação válidos. O CLI do Aspire e todos os pacotes Aspire do AppHost são a última versão estável e têm o mesmo número (conferido antes de o comando rodar; uma diferença para com as duas versões). Um projeto `mobile` não tem AppHost: o `<App>.Api` dele só é implantado por um comando que você declara, e o `.aab` nunca é implantado. O Docker precisa estar rodando na máquina que implanta. Outro destino (Azure Container Apps, um servidor por SSH) é um comando que você declara na mesma coluna; a pipeline do GitHub Actions é o #51.
 
@@ -283,6 +295,8 @@ Detalhes:
 O `CLAUDE.md` tem uma linha `Board:`: GitHub Issues + Projects (`gh`), Azure Boards (`az boards`) ou nenhum (nesse caso, usa `docs/agile/backlog.md`). Mapeamento: épico → feature. Sem Tasks por papel. O arquivo da feature guarda o id do board, e o merge fecha o work item.
 
 Fechar o issue sozinho não é confiável: no ship, depois de fechar, o Claude também define o campo Status do board como Done de forma explícita e lê de volta, porque a automação do projeto para isso pode falhar (visto uma vez, causa desconhecida). Uma leitura que ainda mostra outra coisa é tentada mais uma vez e depois reportada com o comando exato para corrigir à mão; o ship não para nem desfaz o merge por causa disso — o arquivo já diz `done`. Um item que ainda não está no board do projeto é adicionado primeiro. O Azure Boards recebe a mesma leitura de volta em `System.State`.
+
+Uma duplicata cancelada no `/agile:refine` não é apagada nem vai para Done: o GitHub fecha o issue com `gh issue close <n> --duplicate-of <m>` e arquiva o item do projeto, o Azure Boards define `Removed` com um comentário que cita o outro item, e sem board a linha do backlog é riscada com `cancelled, duplicate of <id>`.
 
 O corpo de um issue só é substituído inteiro. `gh issue edit --body` troca o corpo todo pelo que recebe, então um texto parcial ali apaga em silêncio o resto do item (aconteceu no B-1 do legacy-lens). O Claude grava o texto completo do item num arquivo, envia com `gh issue edit <id> --body-file <arquivo>` e lê o corpo de volta para comparar. Uma descrição no Azure Boards também vai sempre inteira, de um arquivo.
 
@@ -622,6 +636,12 @@ e os épicos do brief no board: *Catalog*, *Question bank*, *Practice tests*, *P
 ```
 
 ```
+Claude: Épico para F-3 "Exam board registration"?
+        1. Catalog (Recomendado) - o objetivo do épico é cadastrar o que o candidato pesquisa
+        2. Content - conteúdo das provas
+        3. Novo épico: "Exam boards" - cadastro e manutenção de bancas
+        4. Sem épico
+Você: 1
 Claude: Criei a feature F-3 "Exam board registration" (board #12), no épico "Catalog".
 Status: idea. Nada mais acontece até a refinarmos.
 ```
@@ -2425,6 +2445,128 @@ Claude: glossário, 3 propostas:
    Nada é escrito antes do seu OK.
 ```
 
+### 14.46 O build acha a worktree do item primeiro
+
+Você refinou o B-65 até `approved`; o arquivo dele vive só na worktree. Uma sessão nova está no checkout principal, que tem arquivos não commitados próprios, e você digita:
+
+```
+> /agile:build B-65
+Claude: Worktree of B-65: D:\wt\examprep\b-65-search-index [bug/B-65]
+   status: approved (lido ali; o checkout principal não tem cópia). Essa worktree está limpa;
+   os arquivos não commitados do checkout principal não são assunto do build. Construindo.
+```
+
+Um item aprovado antes de existirem worktrees, ou cuja worktree foi removida, não tem nenhuma; a branch ainda pode existir:
+
+```
+> /agile:build B-12
+Claude: Worktree of B-12: D:\wt\examprep\b-12-export-csv [bug/B-12] (created now)
+   (a branch bug/B-12 já existia, então a worktree foi adicionada nela, sem -b).
+```
+
+O `/agile:ship` e o `/agile:change` leem o status na mesma worktree. Sem ela, param e dizem a branch que procuraram (`bug/B-12`); nunca criam uma.
+
+### 14.47 Um deploy que cai no Azure do cliente, nunca em outro
+
+O repositório e o board do Simulab são seus; o staging dele pertence ao cliente Acme, no tenant Azure deles. Na rodada 6 do bootstrap:
+
+```
+Claude: Pergunta 25a, conta de nuvem do staging? o nome do cliente e azure · aws · gcp · other · none
+        Recomendado: azure (a pergunta 3 diz Azure Container Apps).
+Você: Acme, azure. Ainda não tenho os ids.
+Claude: o docs/infra.md ganha, em "## Cloud accounts":
+        | staging | Acme | azure | | | | |
+        Os ids ficam em branco até a Acme fornecê-los; o /agile:publish para até lá.
+```
+
+O administrador da Acme convida você como convidado e dá o papel Contributor na assinatura; você escreve os dois ids na linha. O primeiro publish para no login, antes de a tag ser enviada:
+
+```
+> /agile:publish staging
+Claude: staging is in Acme's Azure (tenant 11111111-1111-4111-8111-111111111111, subscription
+        22222222-2222-4222-8222-222222222222): no login in C:/Users/voce/.agile/azure/11111111-.../22222222-...;
+        nothing ran. Log in once, in Git Bash:
+        AZURE_CONFIG_DIR="C:/Users/voce/.agile/azure/11111111-.../22222222-..." az login --tenant 11111111-...
+        No PowerShell (não fica definida):
+        & { $env:AZURE_CONFIG_DIR = 'C:\Users\voce\.agile\azure\11111111-...\22222222-...'; az login --tenant 11111111-...; Remove-Item Env:AZURE_CONFIG_DIR }
+```
+
+Você roda uma das duas linhas no seu próprio terminal e digita o comando de novo. O plano agora mostra a conta e o que foi limpo:
+
+```
+Claude: staging: v0.4.0 (release, depois deploy) · cliente Acme · azure · pasta de login .agile/azure/1111.../2222...
+        removidas do ambiente: AZURE_CLIENT_SECRET, ARM_SUBSCRIPTION_ID (só nomes; os valores da linha entram no lugar)
+```
+
+O seu login padrão do `az` (a assinatura de outro cliente) não é tocado. Se o login não enxergasse a assinatura da Acme, a parada diria a declarada e a encontrada: `... but the login in <pasta> is Basic subscription 2fae... (tenant ...) and cannot see it: ask the client for access to that subscription, or correct the row; nothing ran`. Quando o projeto tem o pipeline de deploy, o `/agile:sync` oferece o passo `azure/login` ao workflow dele, o administrador da Acme cria a credencial federada e você define `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` e `AZURE_SUBSCRIPTION_ID` como variáveis do ambiente `staging` do GitHub, com uma regra de proteção que só aceita tags `v*`.
+
+### 14.48 Onde um item novo mora: a pergunta do épico
+
+Dois épicos estão abertos, "Catalog" e "Content", e o que você digita a seguir cabe no primeiro. Nada é criado antes da sua resposta:
+
+```
+> /agile:idea "Exam board registration: name and acronym, list and edit"
+```
+
+```
+Claude: Épico para F-3 "Exam board registration"?
+        (também serve: "Admin" - cadastros de apoio; escolha por Outro)
+        1. Catalog (Recomendado) - o objetivo do épico é cadastrar o que o candidato pesquisa
+        2. Content - conteúdo das provas
+        3. Novo épico: "Exam boards" - cadastro e manutenção de bancas
+        4. Sem épico
+```
+
+Com um texto que não cabe em nenhum épico, "Novo épico" vem primeiro, como recomendação. Responder isso cria o épico e, depois, a feature debaixo dele:
+
+```
+> /agile:idea "Reports on candidate retention"
+Claude: Épico para F-4 "Reports on candidate retention"?
+        1. Novo épico: "Retention" - entender por que candidatos param de praticar (Recomendado)
+        2. Sem épico
+Você: 1
+Claude: Criei o épico "Retention" (board #14, docs/epics/retention.md, draft) e a feature F-4 (board #15) debaixo dele.
+```
+
+"Sem épico" não cria épico e a saída diz `epic: none`. O `/agile:epic` nunca pergunta: ele já sabe o épico. No `/agile:refine F-3`, uma resposta fora do escopo que vira ideia nova lista "Catalog" primeiro, o épico do item em refinamento.
+
+### 14.49 Uma duplicata achada antes de registrar, e outra cancelada no refinamento
+
+O ExamPrep tem a F-12 "Exam board search" em `idea` e a F-15 "Search by acronym" em `refining` na própria worktree. Você digita:
+
+```
+> /agile:idea "buscar bancas por sigla"
+Claude: 2 itens parecidos (14 itens lidos):
+  1. F-12 Exam board search (idea) — a mesma busca, a sigla é só mais um campo.
+  2. F-15 Search by acronym (refining, só na worktree) — o mesmo assunto com outras palavras.
+  Recomendo: melhorar a F-12. [Melhorar a F-12 | Melhorar a F-15 | Registrar mesmo assim]
+> Melhorar a F-12
+Claude: o Summary da F-12 agora termina com "Added 2026-10-04: search also by board acronym".
+Nenhum número foi pego e nada foi criado no board.
+```
+
+Se você tivesse escolhido a F-15, o Claude teria colocado o texto em `## Open questions` de `D:/wt/examprep/f-15-search-by-acronym/docs/features/F-15-search-by-acronym.md`, dizendo esse caminho. Para uma F-12 `approved` não escreveria nada e imprimiria `/agile:change F-12 "search also by board acronym"` para você digitar. Em outro momento nada se parece:
+
+```
+> /agile:idea "exportar os resultados das provas para planilha"
+Claude: No similar item (14 items read).
+F-16 Export results, épico Results, board #31, status idea. Nada mais acontece até /agile:refine F-16.
+```
+
+Depois você refina um item registrado à mão antes desta checagem existir:
+
+```
+> /agile:refine F-14
+Claude: 1 item parecido (15 itens lidos):
+  1. F-12 Exam board search (idea) — a F-14 pede a mesma busca por sigla.
+  Recomendo: levar a melhoria à F-12 e cancelar a F-14.
+  [Levar e cancelar a F-14 | Manter os dois | Absorver a F-12 na F-14]
+> Levar e cancelar a F-14
+Claude: o Summary da F-12 agora tem "Added 2026-10-04: ...". A F-14 está `cancelled` ("Duplicate of F-12
+(2026-10-04): the Summary of F-12"); issue #29 fechado como duplicata do #27 e arquivado do projeto.
+Nenhuma branch ou worktree foi criada. O próximo /agile:idea pega a F-17.
+```
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -2434,10 +2576,10 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:bootstrap` | Quiz a partir do brief → `CLAUDE.md`, ADR, perfil e esqueleto |
 | `/agile:discuss "<ideia>"` | Explora uma ideia: opções, decisões, itens registrados |
 | `/agile:epic "<nome>"` | Quebra um épico em features priorizadas |
-| `/agile:idea "<texto>"` | Registra um épico, feature ou bug, sem refinamento |
-| `/agile:refine <feature>` | Cria a branch e a worktree do item e faz a rodada de refinamento → arquivo da feature para aprovação |
+| `/agile:idea "<texto>"` | Registra um épico, feature ou bug, sem refinamento, depois de procurar um item parecido (melhorá-lo em vez disso, ou registrar mesmo assim) |
+| `/agile:refine <feature>` | Procura um item parecido (levar e cancelar este, manter os dois, ou absorver), depois cria a branch e a worktree do item e faz a rodada de refinamento → arquivo da feature para aprovação |
 | `/agile:screen <feature>` | Detalhe de tela e mockup HTML durante o refinamento, pelo agente `ux-designer` |
-| `/agile:build <feature> [--worktree]` | Implementa uma feature aprovada na worktree criada no refinamento (uma por vez; `--worktree` para uma segunda em paralelo) |
+| `/agile:build <feature> [--worktree]` | Acha a worktree do item pela branch e implementa ali uma feature aprovada (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
 | `/agile:ship <feature>` | Suíte completa, versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização), branch e worktree removidas, board, manual da app e o comando de docs declarado |
@@ -2448,7 +2590,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow e perfil dentro do projeto |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | Um item da ideia até done numa execução com duas paradas: as perguntas (as suas respostas o aprovam) e o roteiro de validação ("validado e autorizo o merge de F-n" entrega; só "validado" para em validating). `--assume` pula as perguntas, menos pacotes novos |
 | `/agile:version` | Versão do plugin em uso nesta sessão, a versão de onde vieram as cópias do projeto, e o próximo passo quando diferem |
-| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (um head desktop com fonte de atualização: pacotes e feed do Velopack; o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um. Digitar é a autorização |
+| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (um head desktop com fonte de atualização: pacotes e feed do Velopack; o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um; o deploy cai na conta de nuvem do cliente que a linha de `## Cloud accounts` declara (um login Azure é conferido antes). Digitar é a autorização |
 
 ### Quando usar cada comando
 
@@ -2457,10 +2599,10 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:bootstrap` | Um app novo com `product/brief.md` preenchido e sem `CLAUDE.md` do agile ainda; `/agile:bootstrap <rodada>` para retomar um quiz que você parou | 14.1, 14.40 |
 | `/agile:discuss` | Você tem uma ideia sem forma e quer opções antes de decidir qualquer coisa | 14.7 |
 | `/agile:epic` | Um épico é grande demais para uma sessão e você quer quebrá-lo em features | 14.7 |
-| `/agile:idea` | Você pensou em algo no meio do trabalho e quer no quadro sem parar | 14.2, 14.5 |
+| `/agile:idea` | Você pensou em algo no meio do trabalho e quer no quadro sem parar | 14.2, 14.5, 14.48 |
 | `/agile:refine` | Um item é uma ideia e você está pronto para responder às perguntas dele e aprová-lo | 14.2, 14.16 |
 | `/agile:screen` | A feature tem uma tela nova ou complexa; formulários e listas simples não precisam | 14.8, 14.40 |
-| `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9 |
+| `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9, 14.46 |
 | `/agile:review` | Uma mudança é arriscada (dados, dinheiro, permissões) e você quer olhos sem contexto antes de validar | 14.8 |
 | `/agile:change` | Você mudou de ideia num item aprovado ou em build; um item done ganha um item novo | 14.3, 14.40 |
 | `/agile:ship` | Você validou o item e autoriza o merge | 14.2, 14.21 |
@@ -2502,11 +2644,19 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Texto da conversa"] --> B["Classificar: épico, feature ou bug"]
-    B --> C["Achar o épico"]
-    C -->|nenhum serve| C1{"Propor um épico; concorda?"}
-    C1 -->|sim| D
-    C --> D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por para começar, necessário para validar, caminho, paralelo — desconhecido se ninguém disse);<br/>uma causa citada com a evidência, ou 'Cause not verified'"]
+    B --> B1["Procurar um item parecido, antes de pegar qualquer número"]
+    B1 -->|candidato| B2{"Card: melhorar o item existente,<br/>registrar mesmo assim, ou já entregue"}
+    B2 -->|melhorar, ou nada a criar| B3(["Nenhum número, arquivo ou item no board"])
+    B2 -->|registrar mesmo assim| B5{"Classe"}
+    B1 -->|"nenhum: 'No similar item (N items read)'"| B5
+    B5 -->|épico| D
+    B5 -->|feature ou bug| C["Ler os épicos abertos (board, docs/epics, backlog, cabeçalhos);<br/>quem chama e já nomeia o épico pula a pergunta"]
+    C --> C1{"Perguntar: épicos que servem primeiro, depois Novo épico, depois Sem épico"}
+    C1 -->|"Novo épico: sim"| C2["Criar o épico no board e em docs/epics, status draft"]
+    C2 --> D
+    C1 -->|"um épico ou nenhum"| D["Próximo id, slug em inglês, arquivo do template<br/>com status: idea; cabeçalho, Summary e Start<br/>(depende de, espera por para começar, necessário para validar, caminho, paralelo — desconhecido se ninguém disse);<br/>uma causa citada com a evidência, ou 'Cause not verified'"]
     D --> E["Espelhar no board; id do board no cabeçalho"]
+    D -.-> D0["epic e discuss buscam a lista toda uma vez, um card para todas as colisões"]
     E --> F(["Nada mais até /agile:refine <id>"])
 ```
 
@@ -2542,7 +2692,11 @@ flowchart TD
 ### /agile:refine
 ```mermaid
 flowchart TD
-    A["Item em idea ou refining"] --> A1["Branch e worktree do item, antes de escrever;<br/>arquivo do item ainda não commitado é movido para lá"]
+    A["Item em idea ou refining"] --> A0["Procurar um item parecido, antes de a branch existir"]
+    A0 -->|candidato| A00{"Card: levar a melhoria ao outro e cancelar este,<br/>manter os dois, ou absorver o outro"}
+    A00 -->|"levar e cancelar"| A01(["status: cancelled; sem branch nem worktree<br/>(uma retomada os remove); board pelo mapeamento"])
+    A00 -->|"manter os dois, ou absorver"| A1
+    A0 -->|"nenhum: 'No similar item (N items read)'"| A1["Branch e worktree do item, antes de escrever;<br/>arquivo do item ainda não commitado é movido para lá"]
     A1 --> B["status: refining na worktree; ler brief, perfil, código que toca"]
     B --> C["Conferir cada premissa no código"]
     C -->|premissa falsa| C1["Dizer isso primeiro"]
@@ -2576,7 +2730,8 @@ flowchart TD
 ### /agile:build
 ```mermaid
 flowchart TD
-    A["Item aprovado?"] -->|já em building| A2["Retomar: branch, último commit wip, próximo passo do plano"]
+    A0["Achar a worktree do item pela branch (refs/heads/branch no git worktree list --porcelain);<br/>nenhuma: criar, branch sem -b quando já existe; dizer: Worktree of id: caminho [branch]"] --> A["Item aprovado, lido nessa worktree?"]
+    A -->|já em building| A2["Retomar: branch, último commit wip, próximo passo do plano"]
     A2 --> D
     A -->|não| A1(["Parar: refinar e aprovar antes"])
     A -->|sim| B["Outro item em building ou validating?"]
@@ -2622,7 +2777,7 @@ flowchart TD
 ### /agile:change
 ```mermaid
 flowchart TD
-    A["Mudança de ideia, ou premissa errada, em item aprovado ou em build"] --> B["Nota de mudança: o que mudou, por quê,<br/>quais critérios são afetados"]
+    A["Mudança de ideia, ou premissa errada, em item aprovado ou em build<br/>(status lido na worktree do item, achada pela branch; nenhuma: parar, nunca criar)"] --> B["Nota de mudança: o que mudou, por quê,<br/>quais critérios são afetados"]
     B --> C["Nova versão do arquivo; critérios afetados reescritos"]
     C --> D{"Reaprovar só os critérios afetados"}
     D -->|sim| E(["O trabalho continua; o resto segue aprovado"])
@@ -2631,7 +2786,7 @@ flowchart TD
 ### /agile:ship
 ```mermaid
 flowchart TD
-    A["status: validating e você disse 'validado'?"] -->|não| A1(["Perguntar"])
+    A["status: validating, lido na worktree do item (achada pela branch; nenhuma: parar, nunca criar),<br/>e você disse 'validado'?"] -->|não| A1(["Perguntar"])
     A -->|sim| B["Branch atualizada com a main; digitar ship conta como IDE e app host fechados"]
     B --> C["gate.js ship: rebuild completo, suíte completa, testes de arquitetura;<br/>saída gravada inteira, última linha GREEN ou RED: o que falhou"]
     C -->|vermelho| C1["Corrigir na branch"]

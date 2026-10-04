@@ -909,3 +909,11 @@ From 0.0.111 to 0.1.0 (the plugin now numbers versions by what changed), run on 
 ## 2026-10-04 - F-67 Data region decision
 - ⏳ plugin: agile [generic] — The Stop gate reported `agile gate SKIPPED: no code file changed since the main branch` on a docs-only diff, while `tests/Simulab.ArchitectureTests/VocabularyTests.cs:20` reads `docs/glossary.md` and `ArchitectureOverviewTests.cs:175` reads `docs/infra.md`; the architecture tests were run by hand (164 passed). Plugin note, row in the table above.
 - The refinement's premise check (Brazil adequate under Art. 45 GDPR since 2026-01-26) turned a second EU environment into one ADR. The workflow already asks for it: nothing to change.
+
+## 2026-10-04 - Sync with agile@canary 0.4.0
+From 0.1.0 to 0.4.0, run on a clean main; no item `building` or `validating` (F-51 to F-74 `approved`, F-79 `refining`, each in its worktree), only docs touched.
+- Copied (never edited, plugin changed): `.claude/rules/agile/workflow.md` (status `cancelled`, duplicate only), templates `feature.md`, `bug.md`, `backlog.md` (same exit), `infra.md` (`## Cloud accounts`), `docs/agile/workflow.md` and `workflow.pt-BR.md` (sections 14.46 to 14.49).
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary (owner: 2a): 15 technical-term rows added from an agent sweep of the docs, each checked absent from the table and present in the docs; not an exhaustive read. `Technical terms:` line added to `docs/decisions/ADR-0002-host.md` and `docs/epics/README.md`.
+- Missing capabilities: `## Cloud accounts` in `docs/infra.md` (since 0.2.0) found similar to F-68 (approved, `## Access` table); owner chose to improve F-68 through `/agile:change F-68`, no new item. DocGen tool catalogue and visual identity already captured (F-69, F-70).
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. `CLAUDE.md`: 563 words, ~3.6k tokens always loaded. Build not run (only Markdown changed); architecture tests run by hand because they read `docs/glossary.md`.
