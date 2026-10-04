@@ -38,12 +38,14 @@
                           Hint="@L["NoticeSubjects.Field.Label.Hint"]"
                           Error="@_labelError" />
 
-            <AppTextField TValue="int?"
+            @* Bound as text: a typed value that is not a whole number (1.5) never reaches an int? binding, and the field
+                 would show no message; here it is read, and refused with the same code the Api answers. *@
+            <AppTextField TValue="string"
                           Id="notice-subject-question-count"
                           Label="@L["NoticeSubjects.Field.QuestionCount"]"
                           Placeholder="@L["NoticeSubjects.Field.QuestionCount.Placeholder"]"
-                          Value="_questionCount"
-                          ValueChanged="@((int? value) => OnQuestionCountChanged(value))"
+                          Value="_questionCountText"
+                          ValueChanged="@((string? value) => OnQuestionCountChanged(value))"
                           InputType="InputType.Number"
                           Autocomplete="off"
                           Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
@@ -72,7 +74,7 @@
 
     private string? _group;
     private string? _label;
-    private int? _questionCount;
+    private string? _questionCountText;
     private string? _groupError;
     private string? _labelError;
     private string? _questionCountError;
@@ -85,7 +87,7 @@
     private bool HasChanges =>
         Trimmed(_group) != StartGroup
         || Trimmed(_label) != (NoticeSubject?.Label ?? string.Empty)
-        || _questionCount != NoticeSubject?.QuestionCount;
+        || Trimmed(_questionCountText) != (NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
 
     // BR7: in edit mode a group that differs from the saved one (case and accents do not count) sends the row to the
     // end of the new group, and the hint says so.
@@ -99,7 +101,7 @@
     {
         _group = StartGroup;
         _label = NoticeSubject?.Label ?? string.Empty;
-        _questionCount = NoticeSubject?.QuestionCount;
+        _questionCountText = NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture);
         _focusFirstField = true;
     }
 
@@ -129,10 +131,28 @@
         _labelError = LabelError(value);
     }
 
-    private void OnQuestionCountChanged(int? value)
+    private void OnQuestionCountChanged(string? value)
     {
-        _questionCount = value;
+        _questionCountText = value;
         _questionCountError = QuestionCountError(value);
+    }
+
+    // Blank means "the notice does not say" (null); anything else must be a whole number.
+    private static bool TryParseCount(string? text, out int? count)
+    {
+        count = null;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return true;
+        }
+
+        if (!int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+        {
+            return false;
+        }
+
+        count = parsed;
+        return true;
     }
 
     // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
@@ -155,16 +175,19 @@
         return length > CatalogLimits.NoticeSubjectLabelMaxLength ? Errors.For(CatalogErrorCodes.NoticeSubjectLabelTooLong) : null;
     }
 
-    private string? QuestionCountError(int? value) =>
-        value is { } count && (count < CatalogLimits.NoticeSubjectQuestionCountMin || count > CatalogLimits.NoticeSubjectQuestionCountMax)
+    private string? QuestionCountError(string? text) =>
+        !TryParseCount(text, out var count)
+        || (count is { } value && (value < CatalogLimits.NoticeSubjectQuestionCountMin || value > CatalogLimits.NoticeSubjectQuestionCountMax))
             ? Errors.For(CatalogErrorCodes.NoticeSubjectQuestionCountInvalid)
             : null;
+
+    private int? ParsedCount() => TryParseCount(_questionCountText, out var count) ? count : null;
 
     private async Task SaveAsync()
     {
         _groupError = GroupError(_group);
         _labelError = LabelError(_label);
-        _questionCountError = QuestionCountError(_questionCount);
+        _questionCountError = QuestionCountError(_questionCountText);
         if (_groupError is not null || _labelError is not null || _questionCountError is not null)
         {
             return;
@@ -175,7 +198,7 @@
 
         // A blank group is "no group": the Api stores it as null (BR3).
         var group = Trimmed(_group);
-        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), _questionCount));
+        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), ParsedCount()));
 
         _saving = false;
         if (result.IsSuccess)

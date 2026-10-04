@@ -55,8 +55,8 @@ public sealed class AppSuggestFieldTests : KitTestContext
     }
 
     [Theory]
-    [InlineData("Básicos", "basicos")]
-    [InlineData("  AÇÃO ", "acao")]
+    [InlineData("Básicos", "BASICOS")]
+    [InlineData("  AÇÃO ", "ACAO")]
     [InlineData(null, "")]
     public void Normalize_StripsAccentsAndCaseAndTrims(string? text, string expected)
     {

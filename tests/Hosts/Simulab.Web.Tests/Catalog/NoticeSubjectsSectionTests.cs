@@ -574,6 +574,8 @@ public sealed class NoticeSubjectsSectionTests : CatalogPageTestContext
     [InlineData("0")]
     [InlineData("501")]
     [InlineData("-3")]
+    [InlineData("1.5")]
+    [InlineData("abc")]
     public void Save_NumberOutsideOneToFiveHundred_IsRefusedUnderTheNumberWithoutCallingTheApi(string typed)
     {
         var (dialogs, _) = RenderProviders();
@@ -725,6 +727,71 @@ public sealed class NoticeSubjectsSectionTests : CatalogPageTestContext
             && call.Path == $"/api/v1/catalog/exams/{AgentePf.Id}/editions/{EditionId}/notice-subjects/{informatics.Id}"));
         providers.Snackbars.WaitForAssertion(() => providers.Snackbars.Markup.Should().Contain("Notice subject deleted."));
         section.WaitForAssertion(() => Labels(section).Should().Equal("Língua Portuguesa"));
+    }
+
+    // Focus (Screen 1): the page cannot see where the focus went, so these read the calls to the shell's focus helper.
+    private List<string> FocusTargets() =>
+        [.. JSInterop.Invocations
+            .Where(invocation => invocation.Identifier == "simulabShell.focusElement")
+            .Select(invocation => (string)invocation.Arguments[0]!)];
+
+    [Fact]
+    public void Move_Down_FocusStaysOnTheSameButtonOfTheMovedRow()
+    {
+        var a = Add(Basic, "Língua Portuguesa", 15);
+        Add(Basic, "Informática", 5);
+        Add(Basic, "Conhecimentos Gerais", 5);
+        var section = RenderSection();
+        WaitForRows(section, 3);
+
+        section.Find(ButtonOf(a, "move-down")).Click();
+
+        section.WaitForAssertion(() => FocusTargets().Should().Contain(ButtonOf(a, "move-down")[1..]));
+    }
+
+    [Fact]
+    public void Move_Down_ToTheLastPlace_FocusGoesToTheOtherMoveButtonBecauseThePressedOneIsNowDisabled()
+    {
+        var a = Add(Basic, "Língua Portuguesa", 15);
+        Add(Basic, "Informática", 5);
+        var section = RenderSection();
+        WaitForRows(section, 2);
+
+        section.Find(ButtonOf(a, "move-down")).Click();
+
+        section.WaitForAssertion(() => FocusTargets().Should().Contain(ButtonOf(a, "move-up")[1..]));
+        section.Find(ButtonOf(a, "move-down")).HasAttribute("disabled").Should().BeTrue();
+    }
+
+    [Fact]
+    public void Delete_FocusGoesToTheNextRowsEditButton_ElseThePreviousRows_ElseTheAddButton()
+    {
+        var first = Add(Basic, "Língua Portuguesa", 15);
+        var second = Add(Basic, "Informática", 5);
+        var third = Add(Basic, "Conhecimentos Gerais", 5);
+        var providers = RenderProviders();
+        var section = RenderSection();
+        WaitForRows(section, 3);
+
+        // The middle row leaves: the next row (the third) takes the focus.
+        section.Find(ButtonOf(second, "delete")).Click();
+        providers.Dialogs.WaitForAssertion(() => providers.Dialogs.FindAll(".app-confirm-ok").Should().ContainSingle());
+        providers.Dialogs.Find(".app-confirm-ok").Click();
+        section.WaitForAssertion(() => FocusTargets().Should().Contain(ButtonOf(third, "edit")[1..]));
+
+        // The last row leaves: the previous row (the first) takes the focus.
+        WaitForRows(section, 2);
+        section.Find(ButtonOf(third, "delete")).Click();
+        providers.Dialogs.WaitForAssertion(() => providers.Dialogs.FindAll(".app-confirm-ok").Should().ContainSingle());
+        providers.Dialogs.Find(".app-confirm-ok").Click();
+        section.WaitForAssertion(() => FocusTargets().Should().Contain(ButtonOf(first, "edit")[1..]));
+
+        // The only row leaves: the Add button.
+        WaitForRows(section, 1);
+        section.Find(ButtonOf(first, "delete")).Click();
+        providers.Dialogs.WaitForAssertion(() => providers.Dialogs.FindAll(".app-confirm-ok").Should().ContainSingle());
+        providers.Dialogs.Find(".app-confirm-ok").Click();
+        section.WaitForAssertion(() => FocusTargets().Should().Contain("notice-subject-add"));
     }
 
     [Fact]

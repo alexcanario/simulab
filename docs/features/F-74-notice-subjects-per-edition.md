@@ -1,7 +1,7 @@
 ---
 feature: F-74
 epic: Subject taxonomy
-status: building
+status: validating
 board: 118
 version: 1
 ---
@@ -228,6 +228,7 @@ New keys unless marked "changed". `—` is a symbol, not a resource.
 - 2026-10-04 — Build design pass (`system-design`, then `architect`; verified against `CatalogEndpoints.cs`, `glossary.md`, `Area.cs`): accepted — routes under `/api/v1/catalog/...` (the module's real prefix; the item said `/api/v1/exams/...`), column and property `display_order` / `DisplayOrder` instead of `position` (`Position` is the glossary word for Cargo; `Area` already uses `DisplayOrder`), a missing exam answers `exam_edition.not_found` (one lookup of the edition under its exam; `exam.not_found` dropped from the list), `Group` mapped to column `group_label` explicitly (`group` is a reserved word), `CatalogText.Normalize` for both normalized columns, an empty `normalized_group` for "no group", the filter text as a constant, no concurrency token (last writer wins, positions renumbered on every write), no unique index on `display_order` (a swap changes two rows in one save), the edition delete removes its notice subjects through the second store in the same `SaveChanges` (both share the scoped `CatalogModuleDbContext`) (Claude).
 - 2026-10-04 — Dropped from the design: storing the spelling of an existing group on save. It is a rule the item does not state (BR3: stored as typed). Rows of one normalized group stay together and the screen draws one heading per run of rows with the same normalized group, using the first row's text (Claude; owner may ask for the other rule with `/agile:change`).
 - 2026-10-04 — Not touched, captured as an observation: `DeleteExamEditionHandler` ignores the result of `TrySaveChangesAsync`; F-74 returns that error on the line it changes anyway (Claude).
+- 2026-10-04 — Independent review (`reviewer`, Opus, branch diff against `b8890d3`): 0 blockers, 2 majors, 6 minors. Fixed: the number field is bound as text and parsed in the dialog, so `1.5` or `abc` is refused with `notice_subject.question_count_invalid` instead of being dropped silently (major; test cases added); focus after Add, Edit, Move and Delete is now asserted through the calls to the shell focus helper (major; 3 tests); the group key reuses `ComparableText.Normalize` instead of a copy (minor); no focus call when the list failed to load (minor). Accepted: concurrent writes on one edition can briefly split a group on screen until the next write (the last-writer-wins decision above); the live text of the suggestion count is assembled in code and the suggestion list has no accessible name of its own (minor, left for a kit follow-up); the number field has no `inputmode="numeric"` attribute because `AppTextField` has no hook for it, `type="number"` already brings the numeric keyboard (minor); a `notice_subject.not_found` in the dialog says the list was reloaded while the section reloads only after the dialog closes (minor) (Claude).
 
 ## Out of scope
 - Weight and minimum score per notice subject — epic E-6.
@@ -242,7 +243,30 @@ New keys unless marked "changed". `—` is a symbol, not a resource.
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: the app host started from this worktree and an Admin account signed in by the owner, with an exam that has an edition. Both are yours: Claude did not start the app host (it starts the local PostgreSQL, Redis and Mailpit containers, which needs the owner's yes) and does not enter credentials. The F-37 municipal guard seed should already give an exam with editions; this was checked only in its test, not in your local database, so if the Exams list is empty, add an exam and an edition at step 1. Close any app host running from another checkout first: two hosts fight for the same ports. The migration is applied at start (Development), in a database of this item.
+
+Git Bash, from `D:/wt/simulab/f-74-notice-subjects-per`:
+
+```bash
+Database__Name=simulab_f74 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+PowerShell 7, from the same folder:
+
+```powershell
+$env:Database__Name = "simulab_f74"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: the Aspire dashboard URL is printed and the Web is at https://localhost:7125, with no `fail` line while the migrations apply. To repeat, stop it (Ctrl+C) and run it again.
+
+1. Sign in as `admin@simulab.local`. Open **Exams**, open an exam, then one of its editions (or add one and save it). Below the edition fields there is a **Notice subjects** card. On **Add edition** (a new, unsaved edition) the same card says to save the edition first and has no Add button.
+2. Choose **Add notice subject**. Group `Basic knowledge`, subject `Portuguese`, number `10`, Save: the snackbar says "Notice subject saved." and the row shows under the heading **Basic knowledge** with "10 questions". Add `Math` in the same group (the group field already starts with `Basic knowledge`) with no number: the row shows "—" and the footer says the sum is 10 and 1 subject has no number. Add `Law` under a new group `Specific`.
+3. Try to add `portugues` in group `basic knowledge`: the dialog says this group already has a subject with this name. Try subject `A`, number `0`, `501` and `1.5`: each shows its message under its own field and nothing is saved. In the group field type `bas`: `Basic knowledge` is suggested.
+4. Move **Math** up: it goes above Portuguese and a screen reader announcement is made (visible in the page, hidden). **Math** is now first, so its Move up button is disabled and its tooltip says why; the last row of a group has Move down disabled. A row never crosses to another group.
+5. Edit **Law**: change its group to `Basic knowledge`. The hint says it goes to the end of the new group; after Save it is last there. Delete **Law** (confirm): it leaves the list, then add `Law` again in the same group: allowed.
+6. Open the edition list of the exam, delete a **Draft** edition that has notice subjects: the confirmation says its notice subjects leave with it. Edit a **Published** edition and add, move and delete one notice subject: all allowed.
+7. Switch the language to **pt-PT** and then **pt-BR** (your profile): the card, the dialog, the messages and the tooltips are in that language (pt-BR says "disciplina do edital", pt-PT "disciplina do aviso"). Light and dark theme: the card, the group headings and the disabled buttons stay readable. Keyboard only: Tab through a row (Move up, Move down, Edit, Delete) to **Add notice subject**, Enter, fill the fields with Tab, Tab to Save, Enter; Esc on a dialog with typed text asks before discarding; Esc inside the open group suggestions closes only the list.
+8. Permission check: sign in as a Student. `/admin/exams` and the edition page show Page not found, so the card is never reachable.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

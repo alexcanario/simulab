@@ -185,7 +185,11 @@
         }
 
         _pendingFocus = null;
-        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+        // With the list failed to load the Add button is not drawn: there is nowhere to put the focus.
+        if (!_loadFailed)
+        {
+            await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+        }
     }
 
     // A reload after an action keeps the list on screen (no loading state): the focus must still find its button.
