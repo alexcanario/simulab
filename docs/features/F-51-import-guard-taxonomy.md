@@ -1,7 +1,7 @@
 ---
 feature: F-51
 epic: Subject taxonomy
-status: idea
+status: refining
 board: 88
 version: 1
 ---
