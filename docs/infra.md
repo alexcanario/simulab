@@ -49,7 +49,7 @@ Staging runs during test windows and is parked outside them. These commands are 
 - Start: `az postgres flexible-server start -g <rg> -n <server>`, then `az containerapp update -n redis -g <rg> --min-replicas 1`, `-n api --min-replicas 1`, `-n web --min-replicas 0 --max-replicas 1` (the `web` wakes on the first request).
 - Production is not created until the first release and is never parked.
 
-An EU region for Portuguese users (GDPR) is a deferred decision.
+Data region: every user's data, Portuguese users included, is hosted in Brazil South; Brazil is adequate under Art. 45 GDPR, so no EU region is planned (ADR-0003, with the triggers that reopen it).
 
 ## Code hosting, CI and board
 | What | Status | Where |
@@ -123,8 +123,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 20 s, 0 new warnings (2026-10-04, F-62) |
-| Full test suite | < 5 min | 1859 tests, slowest project 1 m 6 s (Identity, projects run in parallel), 20 s build (2026-10-04, F-62) |
+| Full build | | 21 s, 0 new warnings (2026-10-04, F-67) |
+| Full test suite | < 5 min | 1859 tests in 71 s, slowest project 1 m 6 s (Identity, projects run in parallel), 21 s build (2026-10-04, F-67) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".
