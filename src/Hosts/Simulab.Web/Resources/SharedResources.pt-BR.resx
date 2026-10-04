@@ -580,4 +580,58 @@
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Edital oficial, {0}, abre em uma nova aba</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parâmetros para uma página que guarda o estado no endereço</value></data>
   <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>Um link truncado com o idioma, um título de página que é conteúdo e uma tabela que começa de uma busca, uma página e um tamanho de página.</value></data>
+  <data name="Nav.Subjects" xml:space="preserve"><value>Disciplinas</value></data>
+  <data name="Subjects.Title" xml:space="preserve"><value>Disciplinas</value></data>
+  <data name="Subjects.Search.Placeholder" xml:space="preserve"><value>Buscar por nome</value></data>
+  <data name="Subjects.Empty" xml:space="preserve"><value>Nenhuma disciplina cadastrada ainda.</value></data>
+  <data name="Subjects.Empty.Filters" xml:space="preserve"><value>Nenhuma disciplina corresponde à área escolhida.</value></data>
+  <data name="Subjects.Empty.Search" xml:space="preserve"><value>Nenhuma disciplina corresponde a "{0}".</value></data>
+  <data name="Subjects.Filter.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Column.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Subjects.Column.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Column.Topics" xml:space="preserve"><value>Tópicos</value></data>
+  <data name="Subjects.NoArea" xml:space="preserve"><value>Sem área</value></data>
+  <data name="Subjects.Delete.DisabledHasTopics" xml:space="preserve"><value>Esta disciplina tem tópicos. Exclua-os primeiro, na página da disciplina.</value></data>
+  <data name="Subjects.Delete.Message" xml:space="preserve"><value>{0} sai da taxonomia e deixa de aparecer em qualquer lugar do app.</value></data>
+  <data name="Subjects.Saved" xml:space="preserve"><value>Disciplina salva.</value></data>
+  <data name="Subjects.Deleted" xml:space="preserve"><value>Disciplina excluída.</value></data>
+  <data name="Subjects.Dialog.AddTitle" xml:space="preserve"><value>Adicionar disciplina</value></data>
+  <data name="Subjects.Dialog.EditTitle" xml:space="preserve"><value>Editar disciplina</value></data>
+  <data name="Subjects.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Subjects.Field.Name.Help" xml:space="preserve"><value>Como o aluno vai ver, por exemplo Direito Constitucional. De 2 a 150 caracteres.</value></data>
+  <data name="Subjects.Field.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Field.Area.Help" xml:space="preserve"><value>Opcional. Agrupa a disciplina com outras parecidas.</value></data>
+  <data name="Subjects.BackToList" xml:space="preserve"><value>Voltar para as disciplinas</value></data>
+  <data name="Topics.Section.Title" xml:space="preserve"><value>Tópicos</value></data>
+  <data name="Topics.Section.Subtitle" xml:space="preserve"><value>O que se estuda dentro desta disciplina, em ordem alfabética.</value></data>
+  <data name="Topics.Empty" xml:space="preserve"><value>Nenhum tópico ainda.</value></data>
+  <data name="Topics.Dialog.AddTitle" xml:space="preserve"><value>Adicionar tópico</value></data>
+  <data name="Topics.Dialog.EditTitle" xml:space="preserve"><value>Editar tópico</value></data>
+  <data name="Topics.Saved" xml:space="preserve"><value>Tópico salvo.</value></data>
+  <data name="Topics.Deleted" xml:space="preserve"><value>Tópico excluído.</value></data>
+  <data name="Topics.Delete.Message" xml:space="preserve"><value>{0} sai da disciplina {1} e deixa de aparecer em qualquer lugar do app.</value></data>
+  <data name="Topics.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Topics.Field.Name.Help" xml:space="preserve"><value>Por exemplo Crase. De 2 a 200 caracteres, único dentro da disciplina.</value></data>
+  <data name="Topics.Field.Subject" xml:space="preserve"><value>Disciplina</value></data>
+  <data name="Topics.Field.Subject.Placeholder" xml:space="preserve"><value>Digite 2 letras para buscar</value></data>
+  <data name="Topics.Field.Subject.Help" xml:space="preserve"><value>Escolha outra disciplina para mover o tópico.</value></data>
+  <data name="Area.Languages" xml:space="preserve"><value>Linguagens</value></data>
+  <data name="Area.Mathematics" xml:space="preserve"><value>Matemática</value></data>
+  <data name="Area.LogicalReasoning" xml:space="preserve"><value>Raciocínio Lógico</value></data>
+  <data name="Area.NaturalSciences" xml:space="preserve"><value>Ciências da Natureza</value></data>
+  <data name="Area.HumanSciences" xml:space="preserve"><value>Ciências Humanas</value></data>
+  <data name="Area.Law" xml:space="preserve"><value>Direito</value></data>
+  <data name="Area.InformationTechnology" xml:space="preserve"><value>Tecnologia da Informação</value></data>
+  <data name="Area.Administration" xml:space="preserve"><value>Administração e Gestão</value></data>
+  <data name="Area.SpecificKnowledge" xml:space="preserve"><value>Conhecimentos Específicos</value></data>
+  <data name="subject.not_found" xml:space="preserve"><value>Esta disciplina não existe mais. Atualize a lista.</value></data>
+  <data name="subject.name_required" xml:space="preserve"><value>Informe um nome com ao menos 2 caracteres.</value></data>
+  <data name="subject.name_too_long" xml:space="preserve"><value>O nome é longo demais. Use no máximo 150 caracteres.</value></data>
+  <data name="subject.name_taken" xml:space="preserve"><value>Outra disciplina já tem este nome, mesmo que tenha sido excluída. Escolha um nome diferente.</value></data>
+  <data name="subject.area_invalid" xml:space="preserve"><value>Esta área não está na lista. Escolha uma das áreas oferecidas.</value></data>
+  <data name="subject.has_topics" xml:space="preserve"><value>Esta disciplina tem tópicos. Exclua-os primeiro, na página da disciplina.</value></data>
+  <data name="topic.not_found" xml:space="preserve"><value>Este tópico não existe mais. Atualize a lista.</value></data>
+  <data name="topic.name_required" xml:space="preserve"><value>Informe um nome com ao menos 2 caracteres.</value></data>
+  <data name="topic.name_too_long" xml:space="preserve"><value>O nome é longo demais. Use no máximo 200 caracteres.</value></data>
+  <data name="topic.name_taken" xml:space="preserve"><value>Esta disciplina já tem um tópico com este nome, mesmo que tenha sido excluído. Escolha um nome diferente.</value></data>
 </root>

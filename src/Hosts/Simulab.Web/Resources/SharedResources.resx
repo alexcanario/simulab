@@ -580,4 +580,58 @@
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Official notice, {0}, opens in a new tab</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parameters for a page that keeps its state in the address</value></data>
   <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>A truncated link with its language, a page title that is content, and a table that starts from a search, a page and a page size.</value></data>
+  <data name="Nav.Subjects" xml:space="preserve"><value>Subjects</value></data>
+  <data name="Subjects.Title" xml:space="preserve"><value>Subjects</value></data>
+  <data name="Subjects.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
+  <data name="Subjects.Empty" xml:space="preserve"><value>No subject registered yet.</value></data>
+  <data name="Subjects.Empty.Filters" xml:space="preserve"><value>No subject matches the chosen area.</value></data>
+  <data name="Subjects.Empty.Search" xml:space="preserve"><value>No subject matches "{0}".</value></data>
+  <data name="Subjects.Filter.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Subjects.Column.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Column.Topics" xml:space="preserve"><value>Topics</value></data>
+  <data name="Subjects.NoArea" xml:space="preserve"><value>No area</value></data>
+  <data name="Subjects.Delete.DisabledHasTopics" xml:space="preserve"><value>This subject has topics. Delete them first, on the subject's page.</value></data>
+  <data name="Subjects.Delete.Message" xml:space="preserve"><value>{0} leaves the taxonomy and stops appearing anywhere in the app.</value></data>
+  <data name="Subjects.Saved" xml:space="preserve"><value>Subject saved.</value></data>
+  <data name="Subjects.Deleted" xml:space="preserve"><value>Subject deleted.</value></data>
+  <data name="Subjects.Dialog.AddTitle" xml:space="preserve"><value>Add subject</value></data>
+  <data name="Subjects.Dialog.EditTitle" xml:space="preserve"><value>Edit subject</value></data>
+  <data name="Subjects.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Subjects.Field.Name.Help" xml:space="preserve"><value>As students will see it, for example Constitutional Law. 2 to 150 characters.</value></data>
+  <data name="Subjects.Field.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Field.Area.Help" xml:space="preserve"><value>Optional. Groups the subject with similar ones.</value></data>
+  <data name="Subjects.BackToList" xml:space="preserve"><value>Back to the subjects</value></data>
+  <data name="Topics.Section.Title" xml:space="preserve"><value>Topics</value></data>
+  <data name="Topics.Section.Subtitle" xml:space="preserve"><value>What is studied inside this subject, in alphabetical order.</value></data>
+  <data name="Topics.Empty" xml:space="preserve"><value>No topics yet.</value></data>
+  <data name="Topics.Dialog.AddTitle" xml:space="preserve"><value>Add topic</value></data>
+  <data name="Topics.Dialog.EditTitle" xml:space="preserve"><value>Edit topic</value></data>
+  <data name="Topics.Saved" xml:space="preserve"><value>Topic saved.</value></data>
+  <data name="Topics.Deleted" xml:space="preserve"><value>Topic deleted.</value></data>
+  <data name="Topics.Delete.Message" xml:space="preserve"><value>{0} leaves the subject {1} and stops appearing anywhere in the app.</value></data>
+  <data name="Topics.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Topics.Field.Name.Help" xml:space="preserve"><value>For example Crase. 2 to 200 characters, unique inside the subject.</value></data>
+  <data name="Topics.Field.Subject" xml:space="preserve"><value>Subject</value></data>
+  <data name="Topics.Field.Subject.Placeholder" xml:space="preserve"><value>Type 2 letters to search</value></data>
+  <data name="Topics.Field.Subject.Help" xml:space="preserve"><value>Pick another subject to move the topic.</value></data>
+  <data name="Area.Languages" xml:space="preserve"><value>Languages</value></data>
+  <data name="Area.Mathematics" xml:space="preserve"><value>Mathematics</value></data>
+  <data name="Area.LogicalReasoning" xml:space="preserve"><value>Logical Reasoning</value></data>
+  <data name="Area.NaturalSciences" xml:space="preserve"><value>Natural Sciences</value></data>
+  <data name="Area.HumanSciences" xml:space="preserve"><value>Human Sciences</value></data>
+  <data name="Area.Law" xml:space="preserve"><value>Law</value></data>
+  <data name="Area.InformationTechnology" xml:space="preserve"><value>Information Technology</value></data>
+  <data name="Area.Administration" xml:space="preserve"><value>Administration and Management</value></data>
+  <data name="Area.SpecificKnowledge" xml:space="preserve"><value>Specific Knowledge</value></data>
+  <data name="subject.not_found" xml:space="preserve"><value>This subject no longer exists. Refresh the list.</value></data>
+  <data name="subject.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="subject.name_too_long" xml:space="preserve"><value>The name is too long. Use at most 150 characters.</value></data>
+  <data name="subject.name_taken" xml:space="preserve"><value>Another subject already has this name, even if it was deleted. Pick a different name.</value></data>
+  <data name="subject.area_invalid" xml:space="preserve"><value>This area is not on the list. Pick one of the areas offered.</value></data>
+  <data name="subject.has_topics" xml:space="preserve"><value>This subject has topics. Delete them first, on the subject's page.</value></data>
+  <data name="topic.not_found" xml:space="preserve"><value>This topic no longer exists. Refresh the list.</value></data>
+  <data name="topic.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="topic.name_too_long" xml:space="preserve"><value>The name is too long. Use at most 200 characters.</value></data>
+  <data name="topic.name_taken" xml:space="preserve"><value>This subject already has a topic with this name, even if it was deleted. Pick a different name.</value></data>
 </root>
