@@ -1,7 +1,7 @@
 ---
 feature: F-67
 epic: Foundation and identity
-status: building
+status: validating
 board: 106
 version: 1
 ---
@@ -64,6 +64,9 @@ Turn the deferred "EU region for GDPR" line into a recorded decision with its le
 - 2026-10-04 — The ADR is numbered ADR-0003 and is written after the F-62 merge — ADR-0002 (host) lives on the F-62 branch and is cited by it (Claude, technical).
 - 2026-10-04 — No new package (Claude, technical: docs only).
 - 2026-10-04 — Approved by the owner ("aprovo F-67"); the build waits for the F-62 merge.
+- 2026-10-04 — Build: F-62 already merged on `main`; `main` merged into the branch first. No `system-design` / `architect` pass: no project, contract, message or schema (Claude, technical).
+- 2026-10-04 — ADR-0002's consequence line "an EU region (F-67)" is left as written: an accepted ADR is history, and ADR-0003 is the answer it points to (Claude, technical).
+- 2026-10-04 — The ADR also records the options weighed (EU environment, full move to the EU) so the "why not" is on file (Claude, technical).
 
 ## Out of scope
 - Privacy policy text, processors and transfer bases: F-71.
@@ -78,5 +81,17 @@ Turn the deferred "EU region for GDPR" line into a recorded decision with its le
 ## Change notes
 
 ## Validation script
+Needed to validate: nothing — the owner reads the documents in the worktree `D:\wt\simulab\f-67-eu-region-portugal`. No app to start, no sign-in, no language switch, no permission and no keyboard pass: the item changes no screen.
+
+1. Open `docs/decisions/ADR-0003-data-region.md`. Check the Decision: one region, Brazil South, for every user (1); the basis Art. 45 GDPR, Implementing Decision (EU) 2026/179 of 2026-01-26 (2), with the three sources and the date 2026-10-04 under Context; the reopening triggers (3); F-71 and F-72 named (4); the bold "not legal advice" line. (AC1)
+2. Search `docs/infra.md` for "deferred" — expected: no match. (AC2)
+   - Git Bash: `cd /d/wt/simulab/f-67-eu-region-portugal && grep -n -i "deferred" docs/infra.md` → no output, exit code 1.
+   - PowerShell 7: `Set-Location D:\wt\simulab\f-67-eu-region-portugal; Select-String -Path docs\infra.md -Pattern 'deferred'` → no output.
+3. In `docs/infra.md`, the line after "Staging start and stop" (line 52) says "Data region: ... (ADR-0003, ...)". (AC2)
+4. In `docs/decisions/ADR-0001-foundation.md`, "Deferred decisions" (line 126) reads "Portugal: which exams. When: after v1; data region: ... (ADR-0003, ...)" — no "EU region for GDPR" left open. In `product/brief.md`, "Open questions" (line 86) reads "Portugal: which exams. When: after v1 ...". (AC3)
+5. In `docs/glossary.md`, "Technical terms", the row `adequacy decision | decisão de adequação` has both meanings. (AC4)
+6. Every check at once (repeatable; expects four lines, one per file):
+   - Git Bash: `cd /d/wt/simulab/f-67-eu-region-portugal && grep -n "ADR-0003" docs/infra.md docs/decisions/ADR-0001-foundation.md product/brief.md docs/glossary.md`
+   - PowerShell 7: `Set-Location D:\wt\simulab\f-67-eu-region-portugal; Select-String -Path docs\infra.md,docs\decisions\ADR-0001-foundation.md,product\brief.md,docs\glossary.md -Pattern 'ADR-0003' | ForEach-Object { "$($_.Filename):$($_.LineNumber)" }` → `infra.md:52`, `ADR-0001-foundation.md:126`, `brief.md:86`, `glossary.md:202`.
 
 ## Delivery
