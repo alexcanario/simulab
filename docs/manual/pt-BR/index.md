@@ -1,7 +1,7 @@
 ---
 page: index
 locale: pt-BR
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-79]
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79]
 updated: 2026-10-04
 ---
 # Simulab

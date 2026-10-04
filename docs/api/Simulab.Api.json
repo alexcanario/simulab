@@ -1521,6 +1521,224 @@
         }
       }
     },
+    "/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListNoticeSubjects",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CreateNoticeSubject",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveNoticeSubjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}": {
+      "put": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "UpdateNoticeSubject",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveNoticeSubjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "DeleteNoticeSubject",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "MoveNoticeSubject",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveNoticeSubjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/catalog/published-exams": {
       "get": {
         "tags": [
@@ -2014,6 +2232,19 @@
         },
         "description": "A signed-in user erases their own account (F-10 UC2). The account is the token subject (BR1), so the\r\nbody carries only the proof that the person at the keyboard owns it (BR2)."
       },
+      "MoveNoticeSubjectRequest": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "\"up\" or \"down\", ignoring case."
+          }
+        },
+        "description": "What a move sends (F-74, UC4). The direction travels as text so an unknown or missing value gets its own\r\n400 code, `notice_subject.move_invalid`, instead of an uncoded deserialization failure."
+      },
       "PasswordResetTokenCheckRequest": {
         "required": [
           "token"
@@ -2287,6 +2518,36 @@
           }
         },
         "description": "What the add and the edit dialog send (F-34 BR18, v2). The issuing authority has no kind: nothing\r\nfilters or groups by one yet, and it arrives when a screen needs it."
+      },
+      "SaveNoticeSubjectRequest": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "How the notice groups the subject; blank is stored as null, \"no group\" (BR3)."
+          },
+          "label": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The subject as the notice names it, 2 to 200 characters (BR2). Required."
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "The number of questions the notice states, 1 to 500; null when it does not say (BR4).",
+            "format": "int32"
+          }
+        },
+        "description": "What the notice subject dialog sends (F-74, UC2 and UC3). Every field is optional in the contract so a\r\nmissing one is a validation error with a code, never a silent default."
       },
       "SaveOrganizerRequest": {
         "required": [
