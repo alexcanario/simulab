@@ -72,7 +72,7 @@ public sealed class AccountErasureTests : IdentityPageTestContext
 
         Type(dialogs, "Estudar#2026!");
 
-        dialogs.Find("button.app-erase-confirm").HasAttribute("disabled").Should().BeFalse();
+        dialogs.WaitForAssertion(() => dialogs.Find("button.app-erase-confirm").HasAttribute("disabled").Should().BeFalse());
     }
 
     [Fact]

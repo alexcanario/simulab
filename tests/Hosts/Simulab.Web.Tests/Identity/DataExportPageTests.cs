@@ -76,7 +76,7 @@ public sealed class DataExportPageTests : IdentityPageTestContext
 
         Type(dialogs, "Estudar#2026!");
 
-        dialogs.Find("button.app-download-confirm").HasAttribute("disabled").Should().BeFalse();
+        dialogs.WaitForAssertion(() => dialogs.Find("button.app-download-confirm").HasAttribute("disabled").Should().BeFalse());
     }
 
     [Fact]
