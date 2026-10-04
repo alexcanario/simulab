@@ -189,6 +189,7 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 | SMTP | SMTP | Standard protocol for sending email between servers. | Protocolo padrão para envio de e-mail entre servidores. |
 | RESX | RESX | .NET resource file holding the translated texts of one language. | Arquivo de recursos do .NET que guarda os textos traduzidos de um idioma. |
 | i18n | i18n (internacionalização) | Short for internationalization: preparing the app for several languages and time zones. | Abreviação de internacionalização: preparar o app para vários idiomas e fusos. |
+| chip | chip (etiqueta removível) | A small removable tag inside a field, one per value, used to type a list of short texts. | Uma etiqueta pequena e removível dentro de um campo, uma por valor, usada para digitar uma lista de textos curtos. |
 | idempotent | idempotente | Safe to run many times with the same result, with no duplicates. | Seguro de rodar várias vezes com o mesmo resultado, sem duplicar. |
 | seed | seed (carga inicial) | Data inserted at start-up, such as roles or the first admin. | Dados inseridos na inicialização, como papéis ou o primeiro administrador. |
 | AI gateway | gateway de IA | Single internal entry point (`IAiGateway`) for all model calls; checks quota and records usage. | Ponto único interno (`IAiGateway`) para todas as chamadas ao modelo; confere cota e registra uso. |
