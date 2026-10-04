@@ -1,7 +1,7 @@
 ---
 feature: F-79
 epic: Subject taxonomy
-status: validating
+status: done
 board: 117
 version: 1
 ---
@@ -166,3 +166,10 @@ Expected: the Aspire dashboard URL is printed and the Web is at https://localhos
 9. Permission check: sign in as a Student. The menu has no Subjects entry, and `/admin/subjects` and `/admin/subjects/<any id>` show Page not found.
 
 ## Delivery
+- Shipped 2026-10-04 as app version 0.8.0, board #117.
+- Branch `feature/F-79`, merged into `main` with `--no-ff` (merge commit `966251c`); the branch was never pushed, and its worktree is gone.
+- Full suite at ship: 1951 tests, 0 failed, in 143 s (slowest project Identity, 2 m 15 s); build 36 s, 0 new warnings. Catalog 383, Web 878, architecture 164.
+- Manual: `docs/manual/{en,pt-BR,pt-PT}/subjects.md`, plus the three index pages.
+- Technical docs regenerated: `docs/api/Simulab.Api.json` and `docs/architecture/Catalog/`.
+- Migration `AddSubjectTaxonomy`: `catalog.areas` (nine seeded areas), `catalog.subjects`, `catalog.topics`.
+- Validated on screen by the owner against the validation script.
