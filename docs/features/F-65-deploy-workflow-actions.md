@@ -1,7 +1,7 @@
 ---
 feature: F-65
 epic: Foundation and identity
-status: refining
+status: approved
 board: 104
 version: 1
 ---
@@ -76,6 +76,7 @@ None. The only interface is GitHub's "Run workflow" form and its approval button
 - 2026-10-04 — Action versions in `deploy.yml`: the current majors, checked 2026-10-04 on GitHub releases: `actions/checkout@v7`, `actions/setup-dotnet@v6`, `azure/login@v3` (Claude, technical).
 - 2026-10-04 — The Aspire CLI is installed on the runner at the pinned version (`dotnet tool install --global Aspire.Cli --version <version>`), and the version is read from one place the test of AC5 compares with `Directory.Packages.props` (Claude, technical).
 - 2026-10-04 — The tests live in `tests/Hosts/Simulab.AppHost.Tests` beside F-62's publish tests (Claude, technical).
+- 2026-10-04 — Approved by the owner ("aprovo F-65"). The build waits for F-64.
 - 2026-10-04 — Glossary: added the technical terms "federated credential", "GitHub environment", "required reviewer" and "workflow_dispatch" (Claude, technical).
 
 ## Out of scope
