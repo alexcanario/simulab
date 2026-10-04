@@ -5,6 +5,8 @@ date: 2026-10-04
 ---
 # ADR-0003: Data region — one region, Brazil South, for every user
 
+Technical terms: [glossary](../glossary.md)
+
 ## Context
 ADR-0001 deferred "Portugal: which exams and when; EU region for GDPR", and `docs/infra.md` carried the line "An EU region for Portuguese users (GDPR) is a deferred decision". ADR-0002 hosts every environment in Azure Container Apps, Brazil South, and left the EU region to F-67.
 
