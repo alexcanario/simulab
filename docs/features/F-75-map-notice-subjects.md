@@ -60,6 +60,142 @@ Screens follow the rules `ui` and `ui-project`; the detailed screen section and 
 - Error codes: `notice_subject.mapping_invalid`, `notice_subject.mapping_too_many`, `notice_subject.mapping_target_not_found`, `notice_subject.mapping_overlap`, `subject.in_use`, `topic.in_use`.
 - Table `catalog.notice_subject_mappings`: `id`, `tenant_id`, `notice_subject_id` (FK, cascade), `subject_id` (FK, restrict, nullable), `topic_id` (FK, restrict, nullable), audit columns, column comments; check constraint "exactly one of `subject_id`, `topic_id`"; unique index `ux_notice_subject_mappings_tenant_notice_subject_target` over (`tenant_id`, `notice_subject_id`, `subject_id`, `topic_id`) `NULLS NOT DISTINCT`; indexes on `subject_id` and `topic_id` for BR9.
 
+## Screen
+Mockup: [`mockups/F-75-map-notice-subjects.html`](mockups/F-75-map-notice-subjects.html) (states, languages, light and dark). It shows only the F-75 deltas on the F-74 and F-79 screens, with enough of those screens around them; everything not named here stays as F-74 `## Screen` and the F-79 pages describe it.
+
+### Screen 1 — "Notice subjects" section on the edition page (delta on F-74 Screen 1)
+- Place: `NoticeSubjectsSection.razor` on `/admin/exams/{examId}/editions/{id}` (F-74). Card, groups, move/edit/delete actions, Add button and sum stay as F-74.
+- Each row (`RowTemplate`) becomes two lines in the content column; the number of questions stays right-aligned beside it:
+  1. The label (`AppTruncatedText`), as F-74.
+  2. The mapping (UC1, BR13):
+     - Mapped: a list of read-only chips (`ul`, labelled `NoticeSubjects.Field.Covers` + the row's label), wrapping onto more lines when needed; every entry is shown, none is hidden behind a "more". Order on the screen: subject name (case and accents ignored), the whole subject before its topics, then topic name. The Api's order is not relied on.
+     - Whole-subject chip: icon `AppIcons.Subjects` (decorative), the subject name, then the marker `NoticeSubjects.Covers.WholeMarker` in secondary text ("Matemática · disciplina inteira").
+     - Topic chip: icon `AppIcons.Topics` (decorative), `NoticeSubjects.Covers.Topic` ("Raciocínio Lógico › Proposições"); the `›` form is `aria-hidden` and the visually hidden `NoticeSubjects.Covers.Topic.Spoken` ("Proposições, tópico de Raciocínio Lógico") is what a screen reader hears. The subject is the topic's **current** subject (BR8): after a topic move the chip shows the new one.
+     - An overlap made by a later topic move (BR4, AC6) is shown as is: both chips, no marker.
+     - Not mapped (BR2): `AppStatusChip` with tone `Warning` and text `NoticeSubjects.Row.NotMapped`. The tone means "still to do"; nothing is blocked.
+- Footer (F-74 item 5), right side: after the sum lines, `NoticeSubjects.Total.Unmapped.One` / `.Many` with the count of rows not mapped, in secondary text, only when that count is above zero (AC10). Computed from the loaded list, like the sum.
+- Chip names are content: shown as typed, never translated (BR13). The chips do not link anywhere and are not focusable.
+- The read-only chip is a kit component (`AppChip`, Screen 4) — not the raw `.app-chip` class `Users.razor` uses today.
+- Permissions: unchanged from F-74 (BR12): the section exists only on a page that requires `catalog.manage`.
+
+### Screen 2 — Add / edit dialog, new field "Covers" (delta on F-74 Screen 2)
+- `NoticeSubjectDialog.razor`. Fields in this order: group, label, number of questions (F-74), then **Covers** (UC2, UC3). Dialog size, alert, `AppFormActions`, discard confirmation and saving behaviour stay as F-74; a change of the picks makes the dialog "changed" for the discard confirmation.
+
+| Id | Label key | Type | Required | Limits | Hint / placeholder keys |
+|---|---|---|---|---|---|
+| `notice-subject-covers` | `NoticeSubjects.Field.Covers` | multi-pick with search over the taxonomy, grouped by subject, a subject pickable whole (new kit field `AppMultiPickField`, Screen 4) | no (BR2) | 0 to 50 entries (BR1) | `NoticeSubjects.Field.Covers.Hint`, `.Covers.Placeholder`; listbox label `.Covers.Options`; picked list label `.Covers.Picked` |
+
+- Anatomy, top to bottom: label; the search input (`combobox`); its popup list; the description line (hint, or a state message, or the field error); the line `NoticeSubjects.Field.Covers.Count` ("Escolhidos: 3 de 50") with, on the right, the text button `Lookup.Clear` (only when at least one item is picked; UC3 "clear"); then the picked items as removable chips. With nothing picked, the chips area says `NoticeSubjects.Field.Covers.None`.
+- Taxonomy load: `GET /api/v1/catalog/taxonomy` once when the dialog opens (Screens and API). The picked chips of an edit come from the row (`mappings` carries the names), so they show and can be removed before and without the taxonomy.
+  - Loading: input disabled, description `NoticeSubjects.Field.Covers.Loading` with a small progress indicator.
+  - Load error: input disabled, description `NoticeSubjects.Field.Covers.LoadFailed` in error style with the text button `Common.TryAgain` (calls the endpoint again). Save still works with the picks already there.
+  - Empty taxonomy: input disabled, description `NoticeSubjects.Field.Covers.EmptyTaxonomy`. No link (it would leave a dialog with unsaved changes).
+- Popup list: opens on a click in the input, on typing or on Arrow down — not on focus alone, so a field error under the input stays visible when Save moves the focus there (the whole taxonomy is local: no minimum of characters, no debounce). Groups are the subjects in the Api's order (alphabetical, AC13); each group starts with the **whole-subject option** (the subject name, secondary text `NoticeSubjects.Covers.WholeMarker`), followed by its topics, indented. A subject without topics has only its whole option.
+- Search: contains-match ignoring case and accents. A subject whose name matches shows with all its topics; otherwise a subject shows with only its matching topics (its whole option stays, for context). No match: `Lookup.NoResults` with the term. The result count is announced (`Lookup.Results`).
+- Picking: each option toggles (a check mark shows the picked ones); the list stays open so several can be picked in a row; the input keeps its term. Each toggle is announced by the polite live region: `NoticeSubjects.Covers.Added` / `.Removed`. BR5 never arises from the screen: an option is picked or not.
+- Comfort checks in the list (the Api stays the authority), compared with the **saved** mapping exactly like BR4, so an overlap that a topic move created is never blocked:
+  - a topic whose subject is picked whole: disabled, secondary text `NoticeSubjects.Covers.CoveredByWhole`;
+  - a whole-subject option while some of its topics are picked: disabled, secondary text `NoticeSubjects.Covers.WholeBlocked`;
+  - 50 entries picked: every unpicked option disabled, and the description shows `NoticeSubjects.Field.Covers.LimitReached` (50) instead of the hint.
+  Disabled options keep their place; the arrow keys still reach them so their reason is read, and Space or Enter does nothing on them (`aria-disabled`).
+- Picked chips: the same chip as Screen 1 with a remove button (`AppIcons.Close`, tooltip and accessible name `Common.RemoveItem` with the chip's spoken name). Removing announces `NoticeSubjects.Covers.Removed` and moves focus to the next chip's remove button, else the previous one, else the search input. `Lookup.Clear` removes all, announces `NoticeSubjects.Covers.Cleared` and moves focus to the search input. The row's mapping only changes on Save (BR7).
+- Save sends the full list of picks as `mappings` (BR7); none picked sends an empty list (not mapped, AC9).
+- Api refusal, under the Covers field (it replaces the hint; the dialog stays open with what was picked):
+  - `notice_subject.mapping_overlap`: the topic chips whose subject is picked whole are marked (error border and the text `NoticeSubjects.Covers.Overlaps`). Arises only when the taxonomy changed while the dialog was open (a topic moved).
+  - `notice_subject.mapping_target_not_found`: the taxonomy is loaded again; the chips whose subject or topic is no longer in it are marked (error border and `NoticeSubjects.Covers.Gone`) and the options are rebuilt.
+  - `notice_subject.mapping_too_many`, `notice_subject.mapping_invalid`: the message alone (neither should arise from the screen).
+  Other codes keep F-74's placement (fields or the top alert).
+- Focus: on open, the group field (F-74); after Save, F-74. The first field in error on a failed Save is focused; for the Covers errors that is the search input.
+
+### Screen 3 — Subject list and topics section (delta on the F-79 screens, BR10)
+- `/admin/subjects` (`Subjects.razor`): the row's `AppRowActions.DeleteDisabledReason` is `Subjects.Delete.DisabledHasTopics` when the topic count is above zero (as today, BR9: `subject.has_topics` first), else `Subjects.Delete.DisabledInUse` when `inUse` is true, else none. No new column.
+- `/admin/subjects/{id}` (`TopicsSection.razor`): each topic row's `AppRowActions` gets `DeleteDisabledReason` `Topics.Delete.DisabledInUse` when the topic's `inUse` is true. The subject page itself has no delete (F-79): nothing else changes there.
+- A refusal at the click (someone mapped the item after the list loaded): `subject.in_use` / `topic.in_use` in the page or section alert through `Errors.For`, and the list is reloaded — the existing F-79 refusal path.
+- The disabled Delete keeps its tooltip with the reason, as `subject.has_topics` does (kit behaviour).
+
+### Screen 4 — Kit additions (`Simulab.Web/Components/Ui/`, each with a `/dev/ui` gallery entry)
+- `AppChip`: a read-only label chip (the look of today's `.app-chip`), with an optional decorative leading icon, an optional secondary text, an error state (for a marked chip) and an optional remove button whose accessible name is `[EditorRequired]` when the button is shown (rule `ui`: the wording depends on the page). `AppFilterChip` keeps its own wording.
+- `AppMultiPickField`: label above, search input as a `combobox` with a multi-select `listbox` popup (`aria-multiselectable="true"`), options in labelled groups where the group's first option can be the group itself, per-option disabled reason shown as secondary text, client-side contains-match ignoring case and accents, loading / load-failed (with try again) / empty states in the description line, count line with clear, and the picked items as `AppChip`s with remove. Built on MudBlazor parts; no new package. `AppLookupField` stays the single-pick, server-search field.
+- `AppIcons`: no new constant (`Subjects`, `Topics`, `Close` exist).
+
+### States
+| State | What shows |
+|---|---|
+| Section: loading, load error, empty, unsaved edition | As F-74; no mapping shown. |
+| Section: rows mapped and not mapped | Chips under each mapped label; `Not mapped` chip on the others; footer adds the not-mapped count. |
+| Section: every row mapped | No not-mapped line in the footer. |
+| Section: no row mapped | Every row marked; footer says all of them. |
+| Section: overlap after a topic move (AC6) | Both chips shown, no marker. |
+| Section: row with many entries | Chips wrap on several lines; the row grows. |
+| Saved | Snackbar `NoticeSubjects.Saved`; the row shows its new chips (or `Not mapped` after clearing). |
+| Dialog, Covers: add (nothing picked) | Count 0 of 50; `Covers.None`. |
+| Dialog, Covers: edit with picks | Chips from the row; taxonomy loading in the background. |
+| Dialog, Covers: taxonomy loading / load error / empty | As described above; chips stay removable. |
+| Dialog, Covers: list open, no term | Every subject with its topics; picked ones checked. |
+| Dialog, Covers: search with results / no results | Filtered groups / `Lookup.NoResults`. |
+| Dialog, Covers: subject picked whole | Its topics disabled with `Covers.CoveredByWhole`. |
+| Dialog, Covers: topics picked | Their subject's whole option disabled with `Covers.WholeBlocked`. |
+| Dialog, Covers: limit reached | 50 of 50; unpicked options disabled; `Covers.LimitReached`. |
+| Dialog, Covers: overlap refused (400) | Field error; topic chips marked `Covers.Overlaps`. |
+| Dialog, Covers: target not found (400) | Field error; taxonomy reloaded; the gone chip marked `Covers.Gone`. |
+| Dialog: saving, unsaved changes, server error | As F-74; the Covers input, clear and remove buttons are disabled while saving. |
+| Subject list: subject in use | Delete disabled, tooltip `Subjects.Delete.DisabledInUse`. |
+| Subject list: subject with topics (and possibly in use) | Delete disabled, tooltip `Subjects.Delete.DisabledHasTopics` (BR9 order). |
+| Topics section: topic in use | Delete disabled, tooltip `Topics.Delete.DisabledInUse`. |
+| Delete refused at the click (409 in use) | Alert with `subject.in_use` / `topic.in_use`; list reloaded. |
+| Permission denied | As F-74 and F-79: the pages are not reachable without `catalog.manage` ("page not found"). |
+
+### Accessibility
+- Section rows: each mapped row's chips are a `ul` labelled "Covers: <row label>", so a screen reader announces "Abrange: Raciocínio Lógico-Matemático, list, 3 items"; each chip reads "Matemática, disciplina inteira" or "Proposições, tópico de Raciocínio Lógico". The `Not mapped` chip is plain text after the label. Chip icons are `aria-hidden`; the meaning is always in the text.
+- Tab order of a row is unchanged (move up, move down, edit, delete): the chips are not focusable.
+- The footer's not-mapped line is plain text, not live.
+- Dialog Covers field: the input has `role="combobox"`, `aria-expanded`, `aria-controls` (the listbox), `aria-autocomplete="list"`, `aria-describedby` (description and count line), `aria-invalid` on an error. The popup is a `listbox` with `aria-multiselectable="true"` and `aria-label` `NoticeSubjects.Field.Covers.Options`; each subject is a `group` labelled by its name; each option has `aria-selected`, and `aria-disabled` with its reason in its accessible description when disabled.
+- Keyboard: Arrow down opens the list and enters it; Arrow up/down move through the options (groups included, disabled options included); Space or Enter toggles the option and keeps the list open; Home/End go to the first/last option; Esc closes the list and returns to the input without closing the dialog (a second Esc is the dialog's, F-74); Tab leaves the list closed. Typing while in the list returns to the input.
+- Tab order of the field: search input → `Lookup.Clear` (when shown) → each chip's remove button in order → the dialog actions.
+- Announcements (polite, visually hidden): result count while typing, picked/removed/cleared after each toggle, the taxonomy load failure.
+- Real elements: options are listbox options (not links, not checkboxes); remove and clear are buttons; nothing on these screens navigates except the existing breadcrumbs and the subject name link on the list.
+- Targets: chip remove buttons 24 px (rule minimum, inside a 28 px chip); options at least 36 px high; other buttons as F-74.
+- Colours: only existing `SimulabTheme` tokens (no identity tokens file yet): chips use surface, divider and text-primary / text-secondary; the picked option uses primary-lighten with text-primary and a primary check; marked chips use the error colour for border and text, the pair already used by field errors; the `Not mapped` chip is `AppStatusChip` Warning (its dot is decorative, the text carries the meaning). No new colour.
+
+### UI texts
+New keys. `›` sits inside a resource format, so a language can change it. Reused unchanged: `Lookup.Clear`, `Lookup.NoResults`, `Lookup.Results`, `Common.TryAgain`, `NoticeSubjects.Saved`.
+
+| Key | pt-BR | pt-PT | en |
+|---|---|---|---|
+| `Common.RemoveItem` | Remover {0} | Retirar {0} | Remove {0} |
+| `NoticeSubjects.Field.Covers` | Abrange | Abrange | Covers |
+| `NoticeSubjects.Field.Covers.Placeholder` | Busque uma disciplina ou um tópico | Pesquise uma disciplina ou um tópico | Search a subject or a topic |
+| `NoticeSubjects.Field.Covers.Hint` | Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do edital cobre: escolha uma disciplina inteira ou só alguns tópicos dela. Até 50 itens. | Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do aviso abrange: escolha uma disciplina inteira ou apenas alguns dos seus tópicos. No máximo 50 itens. | Optional. The taxonomy subjects and topics this notice subject covers: pick a whole subject or only some of its topics. At most 50 items. |
+| `NoticeSubjects.Field.Covers.Options` | Taxonomia: disciplinas e tópicos | Taxonomia: disciplinas e tópicos | Taxonomy: subjects and topics |
+| `NoticeSubjects.Field.Covers.Picked` | Itens escolhidos | Itens escolhidos | Picked items |
+| `NoticeSubjects.Field.Covers.Count` | Escolhidos: {0} de {1} | Escolhidos: {0} de {1} | Picked: {0} of {1} |
+| `NoticeSubjects.Field.Covers.None` | Nada escolhido: a disciplina fica não mapeada. | Nada escolhido: a disciplina fica sem mapeamento. | Nothing picked: the subject stays not mapped. |
+| `NoticeSubjects.Field.Covers.Loading` | Carregando a taxonomia... | A carregar a taxonomia... | Loading the taxonomy... |
+| `NoticeSubjects.Field.Covers.LoadFailed` | Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui. | Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui. | The taxonomy could not be loaded. The items already picked stay here. |
+| `NoticeSubjects.Field.Covers.EmptyTaxonomy` | A taxonomia ainda não tem disciplinas. Cadastre-as em Conteúdo › Disciplinas. | A taxonomia ainda não tem disciplinas. Registe-as em Conteúdo › Disciplinas. | The taxonomy has no subject yet. Add them under Content › Subjects. |
+| `NoticeSubjects.Field.Covers.LimitReached` | Limite de {0} itens atingido. Remova um para escolher outro. | Limite de {0} itens atingido. Retire um para escolher outro. | Limit of {0} items reached. Remove one to pick another. |
+| `NoticeSubjects.Covers.WholeMarker` | disciplina inteira | disciplina inteira | whole subject |
+| `NoticeSubjects.Covers.Topic` | {0} › {1} | {0} › {1} | {0} › {1} |
+| `NoticeSubjects.Covers.Topic.Spoken` | {1}, tópico de {0} | {1}, tópico de {0} | {1}, topic of {0} |
+| `NoticeSubjects.Covers.CoveredByWhole` | Já coberto pela disciplina inteira | Já abrangido pela disciplina inteira | Already covered by the whole subject |
+| `NoticeSubjects.Covers.WholeBlocked` | Remova os tópicos dela já escolhidos para escolher a disciplina inteira | Retire os tópicos dela já escolhidos para escolher a disciplina inteira | Remove its picked topics to pick the whole subject |
+| `NoticeSubjects.Covers.Added` | Escolhido: {0}. | Escolhido: {0}. | Picked: {0}. |
+| `NoticeSubjects.Covers.Removed` | Removido: {0}. | Retirado: {0}. | Removed: {0}. |
+| `NoticeSubjects.Covers.Cleared` | Todos os itens foram removidos. | Todos os itens foram retirados. | All items were removed. |
+| `NoticeSubjects.Covers.Overlaps` | repete a disciplina inteira | repete a disciplina inteira | repeats the whole subject |
+| `NoticeSubjects.Covers.Gone` | não existe mais na taxonomia | já não existe na taxonomia | no longer in the taxonomy |
+| `NoticeSubjects.Row.NotMapped` | Não mapeada | Não mapeada | Not mapped |
+| `NoticeSubjects.Total.Unmapped.One` | 1 disciplina ainda não está mapeada. | 1 disciplina ainda não está mapeada. | 1 subject is not mapped yet. |
+| `NoticeSubjects.Total.Unmapped.Many` | {0} disciplinas ainda não estão mapeadas. | {0} disciplinas ainda não estão mapeadas. | {0} subjects are not mapped yet. |
+| `Subjects.Delete.DisabledInUse` | Disciplinas do edital estão mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de excluir. | Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar. | Notice subjects map this whole subject. Remove it from their mappings before deleting it. |
+| `Topics.Delete.DisabledInUse` | Disciplinas do edital estão mapeadas para este tópico. Retire-o desses mapeamentos antes de excluir. | Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar. | Notice subjects map this topic. Remove it from their mappings before deleting it. |
+| `notice_subject.mapping_invalid` | Um dos itens escolhidos não é válido. Remova-o e escolha de novo. | Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo. | One of the picked items is not valid. Remove it and pick it again. |
+| `notice_subject.mapping_too_many` | No máximo 50 itens por disciplina do edital. | No máximo 50 itens por disciplina do aviso. | At most 50 items per notice subject. |
+| `notice_subject.mapping_target_not_found` | Um dos itens escolhidos não existe mais na taxonomia; ele está marcado abaixo. Remova-o e salve de novo. | Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente. | One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again. |
+| `notice_subject.mapping_overlap` | Um tópico não pode ser escolhido junto com a disciplina inteira dele; os itens estão marcados abaixo. Remova o tópico ou a disciplina inteira. | Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira. | A topic cannot be picked together with its whole subject; the items are marked below. Remove the topic or the whole subject. |
+| `subject.in_use` | Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada. | Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada. | Notice subjects map this subject, so it cannot be deleted. The list was reloaded. |
+| `topic.in_use` | Este tópico está mapeado em disciplinas do edital e não pode ser excluído. A lista foi recarregada. | Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada. | Notice subjects map this topic, so it cannot be deleted. The list was reloaded. |
+
 ## Acceptance criteria
 - AC1 Given a notice subject "Raciocínio Lógico-Matemático", when the admin maps it to Mathematics (whole) and to the topic Logical Reasoning › Propositions and saves, then both entries are stored and the row shows both chips (UC2, BR1, BR13).
 - AC2 Given an entry with both `subjectId` and `topicId`, or with neither, when saved, then 400 `notice_subject.mapping_invalid` and nothing changes (BR1).
@@ -93,6 +229,11 @@ Screens follow the rules `ui` and `ui-project`; the detailed screen section and 
 - 2026-10-04 — At most 50 entries per notice subject — the widest real heading lists about 20 laws; a ceiling stops a runaway request (Claude, technical).
 - 2026-10-04 — The picker loads the whole taxonomy in one call (`GET /api/v1/catalog/taxonomy`) — the F-51 guard taxonomy is 23 subjects and 70 topics; not measured at larger sizes, revisit with E-9 imports (Claude, technical).
 - 2026-10-04 — Mapping lives in the `Catalog` module, `catalog` schema — epic decision; plain foreign keys inside one schema (Claude, epic decision).
+- 2026-10-04 — Two new kit components, `AppMultiPickField` and `AppChip`, each with a `/dev/ui` gallery entry, built on MudBlazor parts with no new package — the kit has no grouped multi-pick and no general chip; question filters (E-4) and aliases (F-77) reuse them (owner, screen question 1).
+- 2026-10-04 — A whole-subject option is disabled, with its reason, while some of its topics are picked; picking it never removes picks — nothing vanishes without the admin seeing it (owner, screen question 2).
+- 2026-10-04 — The in-use reason does not say where the item is used; a "where used" view is captured as F-90 (owner, screen question 3).
+- 2026-10-04 — Field label "Abrange" / "Covers" and row marker "Não mapeada" / "Not mapped", as in `### UI texts` (owner, screen question 4).
+- 2026-10-04 — A row with many entries wraps its chips (no "more" collapse), and chips do not show the area — the widest real heading has about 20 entries; BR13 asks only for "Subject › Topic" (Claude, screen design).
 
 ## Out of scope
 - AI suggestion of the closest topic or a new draft topic — epic E-9.
@@ -101,6 +242,7 @@ Screens follow the rules `ui` and `ui-project`; the detailed screen section and 
 - Copying notice subjects and their mapping from another edition — F-86.
 - Mapping the municipal guard editions — F-78.
 - Weight and minimum per notice subject — epic E-6.
+- Showing where a subject or topic is used — F-90.
 - Weighting the entries of one mapping (how much of a row is Mathematics vs. Logic) — not asked by any epic yet.
 
 ## Open questions
