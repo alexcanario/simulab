@@ -24,7 +24,7 @@ Give each edition its syllabus in the notice's own words, so the Exam Simulator 
 
 ## What exists (verified 2026-10-04)
 - `ExamEdition` (F-35) in the `Catalog` module, edited on its own page `/admin/exams/{examId}/editions/{id}` (`ExamEditionForm.razor`) with `AppSectionCard` sections; soft delete; `Draft`/`Published`; a published edition stays editable.
-- Endpoints under `/api/v1/exams/{examId}/editions` (`ExamEndpoints.cs`), guarded by `catalog.manage`.
+- Endpoints under `/api/v1/catalog/exams/{examId}/editions` (`ExamEndpoints.cs`), guarded by `catalog.manage`.
 - No `NoticeSubject` in `src/`. Simulae has no notice subject (only `ExamNoticeTopic`, notice → topic): nothing to import.
 - `docs/glossary.md` row `NoticeSubject` still mentions weight and minimum: corrected by this item.
 
@@ -52,13 +52,13 @@ Give each edition its syllabus in the notice's own words, so the Exam Simulator 
 
 ## Screens and API
 - `/admin/exams/{examId}/editions/{id}` — new section card "Notice subjects" below the edition's fields (only for a saved edition): rows grouped under their group heading, each row with label, number of questions (or "—"), move up, move down, edit, delete; an "Add notice subject" button; footer with the sum (BR8). Add and edit in a dialog (rule `ui-project`: simple entity). Detailed in `## Screen` by `/agile:screen`.
-- GET `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects` — the list in display order.
-- POST `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects` — add (UC2).
-- PUT `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects/{id}` — edit (UC3).
-- POST `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move` — body `{ "direction": "up" | "down" }` (UC4).
-- DELETE `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects/{id}` — soft delete (UC5).
-- Error codes: `exam.not_found`, `exam_edition.not_found` (existing); `notice_subject.not_found`, `notice_subject.label_required`, `notice_subject.label_too_short`, `notice_subject.label_too_long`, `notice_subject.group_too_long`, `notice_subject.question_count_invalid`, `notice_subject.duplicate`, `notice_subject.move_invalid`.
-- Table `catalog.notice_subjects`: `id`, `tenant_id`, `exam_edition_id`, `group_label`, `label`, `normalized_group`, `normalized_label`, `question_count`, `position`, audit and soft-delete columns, column comments; unique index `ux_notice_subjects_tenant_edition_group_label` over (`tenant_id`, `exam_edition_id`, `normalized_group`, `normalized_label`) `NULLS NOT DISTINCT`, filtered to rows not deleted.
+- GET `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` — the list in display order.
+- POST `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` — add (UC2).
+- PUT `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}` — edit (UC3).
+- POST `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move` — body `{ "direction": "up" | "down" }` (UC4).
+- DELETE `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}` — soft delete (UC5).
+- Error codes: `exam_edition.not_found` (existing; also answers a missing exam); `notice_subject.not_found`, `notice_subject.label_required`, `notice_subject.label_too_short`, `notice_subject.label_too_long`, `notice_subject.group_too_long`, `notice_subject.question_count_invalid`, `notice_subject.duplicate`, `notice_subject.move_invalid`.
+- Table `catalog.notice_subjects`: `id`, `tenant_id`, `exam_edition_id`, `group_label`, `label`, `normalized_group`, `normalized_label`, `question_count`, `display_order`, audit and soft-delete columns, column comments; unique index `ux_notice_subjects_tenant_edition_group_label` over (`tenant_id`, `exam_edition_id`, `normalized_group`, `normalized_label`) `NULLS NOT DISTINCT`, filtered to rows not deleted.
 
 ## Screen
 Mockup: [`mockups/F-74-notice-subjects-per-edition.html`](mockups/F-74-notice-subjects-per-edition.html) (states, languages, light and dark).
@@ -225,6 +225,9 @@ New keys unless marked "changed". `—` is a symbol, not a resource.
 - 2026-10-04 — The add dialog pre-fills the group of the last subject added on the same page visit (BR12) — notices list ten subjects per block (owner, screen question 3).
 - 2026-10-04 — pt-PT uses "aviso" for the notice; the glossary loses its "(?)" — the Portuguese term for the document that opens a public exam (owner, screen question 4).
 - 2026-10-04 — `NoticeSubject` lives in the `Catalog` module under `ExamEdition`, as the epic decided (Claude, epic decision).
+- 2026-10-04 — Build design pass (`system-design`, then `architect`; verified against `CatalogEndpoints.cs`, `glossary.md`, `Area.cs`): accepted — routes under `/api/v1/catalog/...` (the module's real prefix; the item said `/api/v1/exams/...`), column and property `display_order` / `DisplayOrder` instead of `position` (`Position` is the glossary word for Cargo; `Area` already uses `DisplayOrder`), a missing exam answers `exam_edition.not_found` (one lookup of the edition under its exam; `exam.not_found` dropped from the list), `Group` mapped to column `group_label` explicitly (`group` is a reserved word), `CatalogText.Normalize` for both normalized columns, an empty `normalized_group` for "no group", the filter text as a constant, no concurrency token (last writer wins, positions renumbered on every write), no unique index on `display_order` (a swap changes two rows in one save), the edition delete removes its notice subjects through the second store in the same `SaveChanges` (both share the scoped `CatalogModuleDbContext`) (Claude).
+- 2026-10-04 — Dropped from the design: storing the spelling of an existing group on save. It is a rule the item does not state (BR3: stored as typed). Rows of one normalized group stay together and the screen draws one heading per run of rows with the same normalized group, using the first row's text (Claude; owner may ask for the other rule with `/agile:change`).
+- 2026-10-04 — Not touched, captured as an observation: `DeleteExamEditionHandler` ignores the result of `TrySaveChangesAsync`; F-74 returns that error on the line it changes anyway (Claude).
 
 ## Out of scope
 - Weight and minimum score per notice subject — epic E-6.
