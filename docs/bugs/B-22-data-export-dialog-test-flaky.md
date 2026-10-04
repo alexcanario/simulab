@@ -1,7 +1,7 @@
 ---
 bug: B-22
 feature: F-16
-status: idea
+status: refining
 board: 109
 severity: low
 ---
