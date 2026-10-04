@@ -1,7 +1,7 @@
 ---
 feature: F-51
 epic: Subject taxonomy
-status: refining
+status: approved
 board: 88
 version: 1
 ---
@@ -104,6 +104,7 @@ Not seeded (folded into "Conhecimentos locais", BR5): the subject "História e G
 - 2026-10-04 — Simulae's seed tests come over as their Simulab equivalents (counts, accents through the normalized literals, coexistence through BR6); its idempotence test becomes AC7 because a migration runs once — "no code without its tests" (Claude, technical).
 - 2026-10-04 — No new package: xunit, AwesomeAssertions and Testcontainers.PostgreSql are already in `Directory.Packages.props` (Claude, verified).
 - 2026-10-04 — Board: GitHub issue #88 set to Ready (Claude).
+- 2026-10-04 — Approved by the owner ("aprovo F-51"); the build waits for the merge of F-79 (owner).
 
 ## Out of scope
 - Simulae's seven boards — done in F-37.
