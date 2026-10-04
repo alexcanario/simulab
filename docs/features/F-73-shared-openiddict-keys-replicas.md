@@ -1,7 +1,7 @@
 ---
 feature: F-73
 epic: Foundation and identity
-status: idea
+status: refining
 board: 115
 version: 1
 ---
