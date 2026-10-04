@@ -37,7 +37,7 @@ Raised while refining F-47 (2026-10-01); the owner chose to keep it out of F-47.
 - Waits on (to start): nothing.
 - Needed to validate: the app host running from this worktree and two browser sessions of one test account
   (Claude prepares them; the owner follows the script).
-- Suggested path: `/agile:refine` → `/agile:build`.
+- Suggested path: `/agile:refine` -> `/agile:build`.
 - Parallel with: anything outside `Simulab.Identity`.
 
 ## Goal
@@ -81,22 +81,22 @@ process dies right after the commit.
 - AC7 No new UI text; the missing-key test stays green in pt-BR, pt-PT and en.
 
 ## Decisions
-- 2026-10-04 — Both after-commit steps move into one job staged in the erasure transaction (owner, option "job in
-  the transaction") — reuses the F-13 queue, gives at-least-once delivery; the cost is a delay of about 5 s before
+- 2026-10-04 - Both after-commit steps move into one job staged in the erasure transaction (owner, option "job in
+  the transaction") - reuses the F-13 queue, gives at-least-once delivery; the cost is a delay of about 5 s before
   the access tokens stop.
-- 2026-10-04 — No generic outbox; the in-process publisher stays (owner) — `UserErased` is the only integration
+- 2026-10-04 - No generic outbox; the in-process publisher stays (owner) - `UserErased` is the only integration
   event published today; the next event reuses this job pattern.
-- 2026-10-04 — One job for both steps, revoke first then publish (Claude) — keeps F-10 BR13's order and a single
+- 2026-10-04 - One job for both steps, revoke first then publish (Claude) - keeps F-10 BR13's order and a single
   retry unit; both steps are idempotent, so a repeat after a partial attempt is harmless.
-- 2026-10-04 — Consumers of `UserErased` must be idempotent, stated in its doc comment (Claude) — at-least-once
+- 2026-10-04 - Consumers of `UserErased` must be idempotent, stated in its doc comment (Claude) - at-least-once
   delivery can repeat the event.
-- 2026-10-04 — A job that gives up is handled like a failed email job: `Failed` row and error log, no new alert
-  (Claude) — same policy as the rest of the queue; alerting on failed jobs is not this item.
-- 2026-10-04 — The job handler lives in the Identity module (Application for the handler, Infrastructure for the
-  registration) and uses `IRefreshSessionStore` and `IIntegrationEventPublisher` as today (Claude) — no new contract
+- 2026-10-04 - A job that gives up is handled like a failed email job: `Failed` row and error log, no new alert
+  (Claude) - same policy as the rest of the queue; alerting on failed jobs is not this item.
+- 2026-10-04 - The job handler lives in the Identity module (Application for the handler, Infrastructure for the
+  registration) and uses `IRefreshSessionStore` and `IIntegrationEventPublisher` as today (Claude) - no new contract
   between modules.
-- 2026-10-04 — No new packages (Claude) — the job queue, Redis store and test containers are already referenced.
-- 2026-10-04 — The app manual does not change (Claude) — no visible behavior changes beyond a delay of seconds.
+- 2026-10-04 - No new packages (Claude) - the job queue, Redis store and test containers are already referenced.
+- 2026-10-04 - The app manual does not change (Claude) - no visible behavior changes beyond a delay of seconds.
 
 ## Out of scope
 - A generic outbox replacing `InProcessIntegrationEventPublisher` (owner, 2026-10-04; no idea captured).
