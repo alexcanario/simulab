@@ -1,7 +1,7 @@
 ---
 feature: F-67
 epic: Foundation and identity
-status: refining
+status: approved
 board: 106
 version: 1
 ---
@@ -63,6 +63,7 @@ Turn the deferred "EU region for GDPR" line into a recorded decision with its le
 - 2026-10-04 — Portugal comes after v1; recorded in the brief by this item (owner).
 - 2026-10-04 — The ADR is numbered ADR-0003 and is written after the F-62 merge — ADR-0002 (host) lives on the F-62 branch and is cited by it (Claude, technical).
 - 2026-10-04 — No new package (Claude, technical: docs only).
+- 2026-10-04 — Approved by the owner ("aprovo F-67"); the build waits for the F-62 merge.
 
 ## Out of scope
 - Privacy policy text, processors and transfer bases: F-71.
