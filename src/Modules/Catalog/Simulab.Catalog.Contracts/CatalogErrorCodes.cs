@@ -74,4 +74,15 @@ public static class CatalogErrorCodes
     public const string TopicNameRequired = "topic.name_required";
     public const string TopicNameTooLong = "topic.name_too_long";
     public const string TopicNameTaken = "topic.name_taken";
+
+    public const string NoticeSubjectNotFound = "notice_subject.not_found";
+    public const string NoticeSubjectLabelRequired = "notice_subject.label_required";
+    public const string NoticeSubjectLabelTooShort = "notice_subject.label_too_short";
+    public const string NoticeSubjectLabelTooLong = "notice_subject.label_too_long";
+    public const string NoticeSubjectGroupTooLong = "notice_subject.group_too_long";
+    public const string NoticeSubjectQuestionCountInvalid = "notice_subject.question_count_invalid";
+    public const string NoticeSubjectDuplicate = "notice_subject.duplicate";
+
+    /// <summary>F-74 BR6: the row is first or last in its group, or the direction is not up or down.</summary>
+    public const string NoticeSubjectMoveInvalid = "notice_subject.move_invalid";
 }

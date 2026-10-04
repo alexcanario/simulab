@@ -456,6 +456,61 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* ---- Notice subjects of an edition (F-74): kit parts composed, no new colour. ---- */
+
+.app-notice-subjects-group + .app-notice-subjects-group {
+    margin-top: var(--app-space-4);
+}
+
+.app-notice-subjects-group-title {
+    margin: 0 0 var(--app-space-2);
+}
+
+.app-notice-subject-row {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    min-width: 0;
+}
+
+.app-notice-subject-row .app-truncate-host {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-notice-subject-count {
+    flex: none;
+    min-width: 6.5rem;
+    text-align: right;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-notice-subjects-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-3);
+}
+
+.app-notice-subjects-total {
+    margin: 0;
+    font-size: var(--app-font-sm);
+    text-align: right;
+}
+
+.app-notice-subjects-total-sum {
+    display: block;
+    font-weight: 700;
+}
+
+.app-notice-subjects-total-unstated {
+    display: block;
+}
+
 /* ---- Form + read-only aside layout (F-43, BR1, BR4): the reference screen's two-column page. ---- */
 
 .app-form-layout {

@@ -124,7 +124,7 @@ The Web picks up the change on the next page load, at most a minute after its la
 | What | Budget | Last measured (date) |
 |---|---|---|
 | Full build | | 36 s, 0 new warnings (2026-10-04, F-79) |
-| Full test suite | < 5 min | 1951 tests in 143 s, slowest project 2 m 15 s (Identity, projects run in parallel), 36 s build (2026-10-04, F-79) |
+| Full test suite | < 5 min | 2187 tests in 99 s, slowest project 1 m 34 s (Identity, projects run in parallel), 22 s build (2026-10-04, F-74) |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. A red full run is now a real failure, not "the usual flake".

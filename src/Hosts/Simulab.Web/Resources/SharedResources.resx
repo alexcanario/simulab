@@ -500,7 +500,7 @@
   <data name="ExamEditions.Status.Draft.Description" xml:space="preserve"><value>Kept in the administration. Students do not see it.</value></data>
   <data name="ExamEditions.Status.Published.Description" xml:space="preserve"><value>Offered to students in the catalog. Set it back to Draft before deleting it.</value></data>
   <data name="ExamEditions.Delete.Object" xml:space="preserve"><value>edition {0}</value></data>
-  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>The edition {0} leaves the exam {1}. The same year, position and board cannot be added to this exam again.</value></data>
+  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>The edition {0} leaves the exam {1}, with its notice subjects. The same year, position and board cannot be added to this exam again.</value></data>
   <data name="ExamEditions.Deleted" xml:space="preserve"><value>Edition deleted.</value></data>
   <data name="ExamEditions.Delete.DisabledPublished" xml:space="preserve"><value>Set it back to Draft before deleting it.</value></data>
   <data name="ExamEditions.Form.AddTitle" xml:space="preserve"><value>Add edition</value></data>
@@ -634,4 +634,50 @@
   <data name="topic.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
   <data name="topic.name_too_long" xml:space="preserve"><value>The name is too long. Use at most 200 characters.</value></data>
   <data name="topic.name_taken" xml:space="preserve"><value>This subject already has a topic with this name, even if it was deleted. Pick a different name.</value></data>
+  <data name="Common.MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="Common.MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="Gallery.Section.SuggestField" xml:space="preserve"><value>Free text with suggestions</value></data>
+  <data name="Gallery.SuggestField.Hint" xml:space="preserve"><value>The reader types any text; the suggestions only save typing. They match ignoring case and accents. Empty, typed, error and the suggestions list.</value></data>
+  <data name="NoticeSubjects.Section.Title" xml:space="preserve"><value>Notice subjects</value></data>
+  <data name="NoticeSubjects.Section.Subtitle" xml:space="preserve"><value>The syllabus as the notice states it: each subject under its group, in the notice's order, with its number of questions.</value></data>
+  <data name="NoticeSubjects.Section.SaveEditionFirst" xml:space="preserve"><value>Save the edition first. Its notice subjects are added here.</value></data>
+  <data name="NoticeSubjects.Empty" xml:space="preserve"><value>This edition has no notice subject yet.</value></data>
+  <data name="NoticeSubjects.Group.None" xml:space="preserve"><value>No group</value></data>
+  <data name="NoticeSubjects.Row.Questions.One" xml:space="preserve"><value>1 question</value></data>
+  <data name="NoticeSubjects.Row.Questions.Many" xml:space="preserve"><value>{0} questions</value></data>
+  <data name="NoticeSubjects.Row.NoCount.Spoken" xml:space="preserve"><value>number of questions not stated</value></data>
+  <data name="NoticeSubjects.MoveUp.DisabledFirst" xml:space="preserve"><value>Already first in its group</value></data>
+  <data name="NoticeSubjects.MoveDown.DisabledLast" xml:space="preserve"><value>Already last in its group</value></data>
+  <data name="NoticeSubjects.Moved" xml:space="preserve"><value>{0} moved to position {1} of {2} in {3}.</value></data>
+  <data name="NoticeSubjects.Moved.NoGroup" xml:space="preserve"><value>{0} moved to position {1} of {2}.</value></data>
+  <data name="NoticeSubjects.Total.One" xml:space="preserve"><value>Stated in the notice: 1 question in total</value></data>
+  <data name="NoticeSubjects.Total.Many" xml:space="preserve"><value>Stated in the notice: {0} questions in total</value></data>
+  <data name="NoticeSubjects.Total.None" xml:space="preserve"><value>No subject states its number of questions.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.One" xml:space="preserve"><value>1 subject has no number and is left out of the sum.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.Many" xml:space="preserve"><value>{0} subjects have no number and are left out of the sum.</value></data>
+  <data name="NoticeSubjects.Form.AddTitle" xml:space="preserve"><value>Add notice subject</value></data>
+  <data name="NoticeSubjects.Form.EditTitle" xml:space="preserve"><value>Edit notice subject</value></data>
+  <data name="NoticeSubjects.Field.Group" xml:space="preserve"><value>Group</value></data>
+  <data name="NoticeSubjects.Field.Group.Placeholder" xml:space="preserve"><value>E.g.: Basic knowledge</value></data>
+  <data name="NoticeSubjects.Field.Group.Hint" xml:space="preserve"><value>How the notice groups its subjects. Pick a group already used or type a new one; leave it empty when the notice has no groups. At most 100 characters.</value></data>
+  <data name="NoticeSubjects.Field.Group.MoveNote" xml:space="preserve"><value>Changing the group moves the subject to the end of the new group.</value></data>
+  <data name="NoticeSubjects.Field.Group.Suggestions" xml:space="preserve"><value>Groups already used in this edition</value></data>
+  <data name="NoticeSubjects.Field.Label" xml:space="preserve"><value>Subject</value></data>
+  <data name="NoticeSubjects.Field.Label.Placeholder" xml:space="preserve"><value>E.g.: Portuguese language</value></data>
+  <data name="NoticeSubjects.Field.Label.Hint" xml:space="preserve"><value>As the notice names it. From 2 to 200 characters.</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount" xml:space="preserve"><value>Number of questions</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Placeholder" xml:space="preserve"><value>E.g.: 10</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Hint" xml:space="preserve"><value>From 1 to 500. Leave it empty when the notice does not say.</value></data>
+  <data name="NoticeSubjects.Saved" xml:space="preserve"><value>Notice subject saved.</value></data>
+  <data name="NoticeSubjects.Deleted" xml:space="preserve"><value>Notice subject deleted.</value></data>
+  <data name="NoticeSubjects.Delete.Object" xml:space="preserve"><value>subject {0}</value></data>
+  <data name="NoticeSubjects.Delete.Message" xml:space="preserve"><value>The subject {0} leaves this edition's notice. It can be added again later.</value></data>
+  <data name="notice_subject.not_found" xml:space="preserve"><value>This subject is no longer in the edition. The list was reloaded.</value></data>
+  <data name="notice_subject.label_required" xml:space="preserve"><value>Type the subject as the notice names it.</value></data>
+  <data name="notice_subject.label_too_short" xml:space="preserve"><value>The subject needs at least 2 characters.</value></data>
+  <data name="notice_subject.label_too_long" xml:space="preserve"><value>The subject is too long: at most 200 characters.</value></data>
+  <data name="notice_subject.group_too_long" xml:space="preserve"><value>The group is too long: at most 100 characters.</value></data>
+  <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Type a whole number from 1 to 500, or leave it empty.</value></data>
+  <data name="notice_subject.duplicate" xml:space="preserve"><value>This group already has a subject with this name (capitals and accents do not count).</value></data>
+  <data name="notice_subject.move_invalid" xml:space="preserve"><value>This subject cannot move that way. The list was reloaded.</value></data>
 </root>

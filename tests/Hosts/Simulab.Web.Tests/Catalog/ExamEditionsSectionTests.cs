@@ -203,7 +203,7 @@ public sealed class ExamEditionsSectionTests : CatalogPageTestContext
         section.Find(DeleteButtonOf("2024, Analista, CEBRASPE")).Click();
 
         providers.Dialogs.WaitForAssertion(() =>
-            Flat(providers.Dialogs.Markup).Should().Contain("The edition 2024 · Analista · CEBRASPE leaves the exam Agente de Policia Federal.")
+            Flat(providers.Dialogs.Markup).Should().Contain("The edition 2024 · Analista · CEBRASPE leaves the exam Agente de Policia Federal, with its notice subjects.")
                 .And.Contain("Delete edition 2024 · Analista · CEBRASPE"));
         providers.Dialogs.Find(".app-confirm-ok").Click();
 

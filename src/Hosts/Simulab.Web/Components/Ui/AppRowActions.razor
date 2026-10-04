@@ -1,10 +1,36 @@
 @inject IStringLocalizer<SharedResources> L
 
 <div class="app-row-actions" role="group" aria-label="@L["Common.Actions"]">
+    @* F-74: an optional move pair for a sortable list. It comes before Edit and Delete and is not one of the three
+       visible actions; each button stays visible when it cannot move and its tooltip says why. *@
+    @if (OnMoveUp.HasDelegate || OnMoveDown.HasDelegate)
+    {
+        <MudTooltip Text="@(MoveUpDisabledReason ?? L["Common.MoveUp"])">
+            <MudIconButton Icon="@AppIcons.MoveUp"
+                           id="@ButtonId(MoveUpKey)"
+                           aria-label="@AccessibleName(L["Common.MoveUp"])"
+                           Color="Color.Default"
+                           Size="Size.Small"
+                           Disabled="@(Moving || MoveUpDisabledReason is not null)"
+                           OnClick="() => OnMoveUp.InvokeAsync()"
+                           Class="app-row-action app-row-move" />
+        </MudTooltip>
+        <MudTooltip Text="@(MoveDownDisabledReason ?? L["Common.MoveDown"])">
+            <MudIconButton Icon="@AppIcons.MoveDown"
+                           id="@ButtonId(MoveDownKey)"
+                           aria-label="@AccessibleName(L["Common.MoveDown"])"
+                           Color="Color.Default"
+                           Size="Size.Small"
+                           Disabled="@(Moving || MoveDownDisabledReason is not null)"
+                           OnClick="() => OnMoveDown.InvokeAsync()"
+                           Class="app-row-action app-row-move" />
+        </MudTooltip>
+    }
     @foreach (var action in _visible)
     {
         <MudTooltip Text="@(action.DisabledReason ?? action.Label)">
             <MudIconButton Icon="@action.Icon"
+                           id="@ButtonId(action.Key)"
                            aria-label="@AccessibleName(action)"
                            Color="@(action.Destructive ? Color.Error : Color.Default)"
                            Size="Size.Small"
@@ -35,6 +61,12 @@
     /// <summary>Visible icon buttons before the rest go into the overflow menu.</summary>
     public const int MaxVisible = 3;
 
+    /// <summary>Keys of the built-in buttons; with <see cref="IdPrefix"/> they make the button ids.</summary>
+    public const string EditKey = "edit";
+    public const string DeleteKey = "delete";
+    public const string MoveUpKey = "move-up";
+    public const string MoveDownKey = "move-down";
+
     private List<AppRowAction> _visible = [];
     private List<AppRowAction> _overflow = [];
 
@@ -48,6 +80,24 @@
     /// <summary>Actions after edit and delete, in order.</summary>
     [Parameter] public IReadOnlyList<AppRowAction>? MoreActions { get; set; }
 
+    /// <summary>F-74: moves the row up. Setting either move callback shows the pair, before Edit and Delete.</summary>
+    [Parameter] public EventCallback OnMoveUp { get; set; }
+
+    /// <summary>F-74: moves the row down.</summary>
+    [Parameter] public EventCallback OnMoveDown { get; set; }
+
+    /// <summary>F-74: when set, Move up is disabled and its tooltip says why (the first row of its group).</summary>
+    [Parameter] public string? MoveUpDisabledReason { get; set; }
+
+    /// <summary>F-74: when set, Move down is disabled and its tooltip says why (the last row of its group).</summary>
+    [Parameter] public string? MoveDownDisabledReason { get; set; }
+
+    /// <summary>F-74: true while a move runs; both move buttons are disabled so one row is never moved twice.</summary>
+    [Parameter] public bool Moving { get; set; }
+
+    /// <summary>F-74: when set, each keyed button gets the id <c>{IdPrefix}-{key}</c>, so a page can move focus to it.</summary>
+    [Parameter] public string? IdPrefix { get; set; }
+
     /// <summary>The row's name, added to each button's accessible name.</summary>
     [Parameter] public string? ItemName { get; set; }
 
@@ -55,14 +105,16 @@
     {
         var all = new List<AppRowAction>();
         if (OnEdit.HasDelegate)
-            all.Add(new AppRowAction(L["Common.Edit"], AppIcons.Edit, () => OnEdit.InvokeAsync()));
+            all.Add(new AppRowAction(L["Common.Edit"], AppIcons.Edit, () => OnEdit.InvokeAsync(), Key: EditKey));
         if (OnDelete.HasDelegate)
-            all.Add(new AppRowAction(L["Common.Delete"], AppIcons.Delete, () => OnDelete.InvokeAsync(), Destructive: true, DisabledReason: DeleteDisabledReason));
+            all.Add(new AppRowAction(L["Common.Delete"], AppIcons.Delete, () => OnDelete.InvokeAsync(), Destructive: true, DisabledReason: DeleteDisabledReason, Key: DeleteKey));
         all.AddRange(MoreActions ?? []);
 
         _visible = [.. all.Take(MaxVisible)];
         _overflow = [.. all.Skip(MaxVisible)];
     }
+
+    private string? ButtonId(string? key) => IdPrefix is null || key is null ? null : $"{IdPrefix}-{key}";
 
     private string AccessibleName(AppRowAction action) => AccessibleName(action.Label);
 
