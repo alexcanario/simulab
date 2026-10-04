@@ -49,7 +49,7 @@ Staging runs during test windows and is parked outside them. These commands are 
 - Start: `az postgres flexible-server start -g <rg> -n <server>`, then `az containerapp update -n redis -g <rg> --min-replicas 1`, `-n api --min-replicas 1`, `-n web --min-replicas 0 --max-replicas 1` (the `web` wakes on the first request).
 - Production is not created until the first release and is never parked.
 
-An EU region for Portuguese users (GDPR) is a deferred decision.
+Data region: every user's data, Portuguese users included, is hosted in Brazil South; Brazil is adequate under Art. 45 GDPR, so no EU region is planned (ADR-0003, with the triggers that reopen it).
 
 ## Code hosting, CI and board
 | What | Status | Where |
