@@ -1,7 +1,7 @@
 ---
 feature: F-67
 epic: Foundation and identity
-status: validating
+status: done
 board: 106
 version: 1
 ---
@@ -95,3 +95,7 @@ Needed to validate: nothing — the owner reads the documents in the worktree `D
    - PowerShell 7: `Set-Location D:\wt\simulab\f-67-eu-region-portugal; Select-String -Path docs\infra.md,docs\decisions\ADR-0001-foundation.md,product\brief.md,docs\glossary.md -Pattern 'ADR-0003' | ForEach-Object { "$($_.Filename):$($_.LineNumber)" }` → `infra.md:52`, `ADR-0001-foundation.md:126`, `brief.md:86`, `glossary.md:202`.
 
 ## Delivery
+- Branch `feature/F-67`, merged into `main` with `--no-ff` (merge commit 36aa030), validated by the owner on 2026-10-04.
+- Files: `docs/decisions/ADR-0003-data-region.md` (new), `docs/infra.md`, `docs/decisions/ADR-0001-foundation.md`, `product/brief.md`, `docs/glossary.md` (adequacy decision, ANPD, standard contractual clauses, EU-US Data Privacy Framework, EU representative).
+- Full suite (gate ship, 2026-10-04): 1859 passed, 0 failed, 0 skipped; build 21 s, tests 71 s; 0 new warnings. DocGen: 0 files changed, check green.
+- App manual: unchanged (no visible behavior changed). App version 0.6.0 -> 0.7.0.
