@@ -195,6 +195,8 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 | eval suite | suíte de evals | Automated checks of model answer quality, with a cost ceiling per run. | Verificações automáticas da qualidade das respostas do modelo, com teto de custo por execução. |
 | Azure Container Apps | Azure Container Apps | Azure service that runs the app's containers in the cloud (planned target). | Serviço do Azure que executa os contêineres do app na nuvem (destino planejado). |
 | Azure Key Vault | Azure Key Vault | Azure safe for secrets such as passwords and keys. | Cofre do Azure para segredos como senhas e chaves. |
+| Azure Cost Management | Azure Cost Management | Azure screen that shows what each resource really cost, by day. | Tela do Azure que mostra quanto cada recurso custou de verdade, por dia. |
+| Azure Budget | alerta de orçamento | Monthly spending limit on a subscription that emails an alert at set percentages; it does not stop anything. | Limite mensal de gasto na assinatura que manda alerta por e-mail em percentuais definidos; não desliga nada. |
 | Bicep | Bicep | Azure language for declaring cloud infrastructure as code. | Linguagem do Azure para declarar a infraestrutura de nuvem como código. |
 | GitHub Actions | GitHub Actions | GitHub's automation that builds, tests and deploys on each change. | Automação do GitHub que compila, testa e implanta a cada mudança. |
 | RBAC | RBAC (controle por papéis) | Role-based access control: permissions are given to roles, roles to users. | Controle de acesso por papéis: permissões vão para papéis, papéis para usuários. |
