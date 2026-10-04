@@ -1,7 +1,7 @@
 ---
 feature: F-55
 epic: Foundation and identity
-status: refining
+status: approved
 board: 93
 version: 1
 ---
@@ -60,6 +60,7 @@ No screen, route or error code changes. No user-visible behavior changes, so the
 - 2026-10-04 — The tests record at Trace level, not at the configured Information level — Claude; a developer or operator may lower `Default`, and the rule must hold then too.
 - 2026-10-04 — Logging picks the rule with the longest matching category and, between equal ones, the last registered; a configuration key on the full dispatcher category would beat a code rule on the `OpenIddict.Server` prefix. The code rule therefore covers the prefix and the full category name, and AC5 tests both configuration keys — Claude; not yet reproduced, AC5 is written first in the build and must be seen failing without the filter.
 - 2026-10-04 — No purge of existing logs — Claude; no environment with a persistent log store exists yet (`docs/infra.md`).
+- 2026-10-04 — Approved by the owner ("aprovo F-55").
 - 2026-10-04 — No new packages — Claude; `Microsoft.Extensions.Logging` filtering and the existing `RecordingLoggerProvider` are enough.
 
 ## Out of scope
