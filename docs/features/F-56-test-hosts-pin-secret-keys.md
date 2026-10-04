@@ -1,7 +1,7 @@
 ---
 feature: F-56
 epic: Foundation and identity
-status: refining
+status: approved
 board: 94
 version: 1
 ---
@@ -56,6 +56,7 @@ A new Api test host that forgets to pin a developer-fed key fails the architectu
 - AC7 No UI text is added (localization not applicable); the missing-key test stays green.
 
 ## Decisions
+- 2026-10-04 — Approved by the owner ("aprovo F-56") — gate 1.
 - 2026-10-04 — A source-scanning architecture test over the test projects that reference `Simulab.Api` — owner's choice; small, and leaves the existing tests untouched (a shared helper or a `Testing` environment were heavier).
 - 2026-10-04 — Pin `Ai:ApiKey` too — owner's choice; a real Claude key in a test host would spend money, and empty makes the gateway answer `ai.not_configured`.
 - 2026-10-04 — Refuse direct `WebApplicationFactory<Program>` use in Api test projects — owner's choice; without a subclass there is nowhere to pin the keys.
