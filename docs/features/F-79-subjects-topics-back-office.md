@@ -1,7 +1,7 @@
 ---
 feature: F-79
 epic: Subject taxonomy
-status: refining
+status: approved
 board: 117
 version: 1
 ---
@@ -116,6 +116,7 @@ Areas, in display order (code — en / pt-BR / pt-PT):
 - 2026-10-04 — `Area` is a seeded table with a code and display order, names in resource files by code — a foreign key keeps subjects consistent and the names follow the UI language (Claude, technical).
 - 2026-10-04 — The "in use" guard for topics is deferred to the items that create the references (F-75, E-4) — nothing points at a topic in this item (Claude, premise verified in `src/`).
 - 2026-10-04 — Routes under `/api/v1/catalog/`, topic update and delete at `/api/v1/catalog/topics/{id}` so a move does not depend on the old parent in the route (Claude, technical).
+- 2026-10-04 — Approved without a `/agile:screen` mockup: the two screens reuse the list-plus-dialog pattern of `/admin/issuing-authorities` and the parent page with a child section of `ExamForm` + `ExamEditionsSection` (owner, "aprovo F-79").
 - 2026-10-04 — Limits: subject name 150, topic name 200 characters, in `CatalogLimits` (Claude, technical — the organizer and exam widths).
 
 ## Out of scope
