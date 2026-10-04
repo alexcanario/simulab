@@ -1,7 +1,7 @@
 ---
 feature: F-64
 epic: Foundation and identity
-status: refining
+status: approved
 board: 103
 version: 1
 ---
@@ -80,6 +80,7 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - 2026-10-04 — D10 OpenIddict loads its signing and encryption certificates from configuration (Key Vault secrets) outside Development and refuses to start without them; Development keeps the development certificates (Claude) — the alternative, ephemeral keys, signs everybody out on every deploy.
 - 2026-10-04 — D11 Staging applies migrations on start through `Database:ApplyMigrationsOnStart`, set by the AppHost for Staging only (Claude) — the switch already exists; a release pipeline is F-65.
 - 2026-10-04 — D12 Both hosts add `X-Forwarded-Proto` to the headers they believe, still only from the listed proxies; the Api gets the same `TrustedProxies` rule as the Web (Claude). The ingress range of a Container Apps environment without a custom network is not documented as fixed: the build reads the address the hosts see on staging and records it, and the list is configured from that, never a guess.
+- 2026-10-04 — Approved by the owner ("aprovo F-64"); the build waits for F-66 and the first test window.
 - 2026-10-04 — D13 The `api` keeps the Container Apps default TCP probe; the health endpoints stay Development-only (Claude) — exposing them is a separate security decision.
 
 ## Out of scope
