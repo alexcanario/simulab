@@ -38,6 +38,9 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
     /// <summary>F-79: the topics, each under its subject.</summary>
     public DbSet<Topic> Topics => Set<Topic>();
 
+    /// <summary>F-74: the subjects each edition's notice names, grouped and ordered.</summary>
+    public DbSet<NoticeSubject> NoticeSubjects => Set<NoticeSubject>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -50,5 +53,6 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         modelBuilder.ApplyConfiguration(new AreaConfiguration());
         modelBuilder.ApplyConfiguration(new SubjectConfiguration());
         modelBuilder.ApplyConfiguration(new TopicConfiguration());
+        modelBuilder.ApplyConfiguration(new NoticeSubjectConfiguration());
     }
 }

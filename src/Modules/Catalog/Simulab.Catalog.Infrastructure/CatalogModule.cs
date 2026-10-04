@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Simulab.Catalog.Application.ExamEditions;
 using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Application.IssuingAuthorities;
+using Simulab.Catalog.Application.NoticeSubjects;
 using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Application.Subjects;
 using Simulab.Catalog.Application.Topics;
@@ -67,6 +68,12 @@ public static class CatalogModule
         services.AddScoped<ITopicQueries, TopicQueries>();
         services.AddScoped<SaveTopicHandler>();
         services.AddScoped<DeleteTopicHandler>();
+
+        services.AddScoped<INoticeSubjectStore, NoticeSubjectStore>();
+        services.AddScoped<INoticeSubjectQueries, NoticeSubjectQueries>();
+        services.AddScoped<SaveNoticeSubjectHandler>();
+        services.AddScoped<MoveNoticeSubjectHandler>();
+        services.AddScoped<DeleteNoticeSubjectHandler>();
 
         return services;
     }

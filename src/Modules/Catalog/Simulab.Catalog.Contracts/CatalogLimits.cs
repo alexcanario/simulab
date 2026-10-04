@@ -57,6 +57,18 @@ public static class CatalogLimits
     /// <summary>The stable code of a seeded area (F-79, BR1).</summary>
     public const int AreaCodeMaxLength = 40;
 
+    /// <summary>A notice subject's label, as the notice names it (F-74, BR2).</summary>
+    public const int NoticeSubjectLabelMaxLength = 200;
+
+    /// <summary>A notice subject's group, as the notice names it (F-74, BR3).</summary>
+    public const int NoticeSubjectGroupMaxLength = 100;
+
+    /// <summary>The fewest questions a notice subject may state (F-74, BR4).</summary>
+    public const int NoticeSubjectQuestionCountMin = 1;
+
+    /// <summary>The most questions a notice subject may state (F-74, BR4).</summary>
+    public const int NoticeSubjectQuestionCountMax = 500;
+
     /// <summary>The shortest a name may be (BR8).</summary>
     public const int NameMinLength = 2;
 }
