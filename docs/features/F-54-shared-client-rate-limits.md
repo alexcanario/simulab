@@ -1,7 +1,7 @@
 ---
 feature: F-54
 epic: Foundation and identity
-status: idea
+status: refining
 board: 95
 version: 1
 ---
