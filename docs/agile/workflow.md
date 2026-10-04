@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.4.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.7.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -69,7 +69,7 @@ Before anything is written, Claude checks that the skill it loaded and the insta
 | 3. Access | Authentication (for `web-api`, question 10a: how the API's consumers authenticate), RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage, and — when a feature calls a model — the LLM provider and where it runs, its cost ceiling and how it is faked in tests |
 | 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, the **visual identity** (23a: a file, a website, an image or three basic questions), the design system library, icon family, how an item is edited — or, for a conversational UI, the language it answers in, how a proposal is corrected and a states gallery. The UI kit and gallery are no longer a question: an app with screens always gets one, built from the identity. Profile `web-api` has no screens: it skips the UI stack, the language switch (21), accessibility (22) and everything about the visual identity and the UI, and question 20 covers only the text the API sends to people |
-| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, the client's cloud account of each non-local one (question 25a), for a desktop app where its installed copies update from (question 26b), the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
+| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, the client's cloud account of each non-local one (question 25a), for a desktop app where its installed copies update from (question 26b) and, from a share, whether every merge goes to testers as a beta (question 26c), the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
 | 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity, and evals when a feature calls a model (which model runs the cases, with or without the no-plugin arm) |
 | 8. Documentation | Technical docs generated from the code (entity diagrams, data dictionary, route map, module diagram, and a tool catalogue when the app exposes tools to a model), the system prompt as a versioned file, and a hand-written architecture overview |
 
@@ -181,11 +181,11 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 | `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea`. On a `web-app`/`website`, a mobile app epic follows the `mobile-client` complement (section 12) |
 | `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
-| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below) |
+| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below). `/agile:publish --beta` only reruns a desktop app's beta of `main` when the ship's beta step failed (see "Desktop updates") |
 
 **Releasing: `/agile:publish`.** A ship bumps the app's `<Version>` and merges; it does not build anything you can hand to someone. `/agile:publish` turns the version already on `main` into a release. It runs from the main checkout and stops, changing nothing, unless `main` is clean, level with `origin` and `v<Version>` exists neither locally nor there. Claude shows the plan once (version, previous tag, the items merged since it, the projects and runtimes) and goes on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release. It does not rerun the tests (the ship ran the full suite on what `main` holds); a compile error still fails `dotnet publish -c Release` (or `dotnet pack`), and then nothing is committed or tagged. The site of a Hybrid app in its own repository also packs its two packable projects, `<App>.Contracts` and `<App>.Shared`, at that same version and pushes them to its GitHub Packages feed after the tag (`--skip-duplicate`, so a rerun is safe), reading the token from `GITHUB_PACKAGES_TOKEN`; without the token, or with an `origin` outside github.com, the packages are left out with that reason and the site is still published.
 
-What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one (with an update source declared in `docs/infra.md`, the head is packed by Velopack instead of zipped: see "Desktop updates" below); `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit.
+What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one (with an update source declared in `docs/infra.md`, the head's Windows runtimes, and an Avalonia head's `linux-x64` as an AppImage, are packed by Velopack instead of zipped: see "Desktop updates" below); `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit.
 
 **Deploying: `/agile:publish <environment> [v<x.y.z>]`.** With an environment named, the release is followed by a deploy of it, by the command that `docs/infra.md` declares for that environment: its environments table has three more columns, `Deploy command` (`not declared` when there is none), `Check URL` (optional) and `Version (deployed on)`, which only `/agile:publish` writes. Typing the command is the authorization for that deploy too. Before it runs Claude shows the environment, the version deployed there now, the version to deploy, the command and the names (never the values) of the secrets it needs, and goes on. Three shapes: a new version (`/agile:publish staging` with no tag yet) runs the release above first, and a failed release deploys nothing; a **promotion** (`/agile:publish production` when `v<Version>` is already tagged) deploys that tag with no new package, notes or tag; a **rollback** (`/agile:publish production v0.3.0`) deploys an older tag, with no extra question. With no environment named, Claude lists the environments with their recorded versions and asks which one, or "none" (the release only). An environment whose command is `not declared` deploys nothing: Claude says where to declare it, and a new version is still released.
 
@@ -519,7 +519,13 @@ tests/
 └── <App>.Tests/                      backend tests, only with an API
 ```
 
-**Desktop updates** (`desktop`; the source is quiz question 26b, a line of `docs/infra.md`). The updater is Velopack, for the three heads, Windows only, stable channel only, unsigned. `docs/infra.md` says `Update source:` a network share, an https URL or `not declared` (then the app stays a zip). The app reads it from `Updates:Source` in its `appsettings.json`; run from the IDE or a publish folder it checks nothing. At start the app checks the source in the background and downloads what is new (only the changed part, a delta, when one exists); then it asks "Update now / Later". "Update now" restarts on the new version; "Later" applies it when the app is closed; an app killed after a download applies it at its next start. A failed check is logged and shown to nobody. With an API, a `426` opens "Update required" with "Update now" only. `/agile:publish` packs each Windows runtime with `vpk` (Setup.exe, a portable zip, the full package, the delta, the feed index), sends the feed to a share after the tag, and for an https URL lists the files to copy by hand; the GitHub Release carries Setup.exe and the portable zip. The first release says: install once with Setup.exe (a zip copy does not update itself) and SmartScreen warns because the installer is unsigned ("More info", then "Run anyway"). The bootstrap writes the updater when the source is declared; an older project is told by `/agile:sync` ("Desktop updates") and captures an item. Example 14.44.
+**Desktop updates** (`desktop`; the source is quiz question 26b, a line of `docs/infra.md`). The updater is Velopack, for the three heads on Windows and for an Avalonia head on Linux (below), a stable channel and an opt-in beta channel (Windows only), unsigned unless `docs/infra.md` declares Code signing (below). `docs/infra.md` says `Update source:` a network share, an https URL or `not declared` (then the app stays a zip). The app reads it from `Updates:Source` in its `appsettings.json`; run from the IDE or a publish folder it checks nothing. At start the app checks the source in the background and downloads what is new (only the changed part, a delta, when one exists); then it asks "Update now / Later". "Update now" restarts on the new version; "Later" applies it when the app is closed; an app killed after a download applies it at its next start. A failed check is logged and shown to nobody. With an API, a `426` opens "Update required" with "Update now" only. `/agile:publish` packs each Windows runtime with `vpk` (Setup.exe, a portable zip, the full package, the delta, the feed index), sends the feed to a share after the tag, and for an https URL lists the files to copy by hand; the GitHub Release carries Setup.exe and the portable zip. The first release says: install once with Setup.exe (a zip copy does not update itself) and SmartScreen warns because the installer is unsigned ("More info", then "Run anyway"). The bootstrap writes the updater when the source is declared; an older project is told by `/agile:sync` ("Desktop updates") and captures an item. A head packed for more than one Windows runtime puts each on its own channel (`win-x64`, `win-arm64`), so their feeds do not overwrite one another; with one runtime the channel stays Velopack's default and installed copies are not touched. Example 14.44.
+
+**Beta channel** (`desktop` with a share; quiz question 26c, asked only after a share). `docs/infra.md` says `- Beta channel: every merge` or `off` (no line is off). With `every merge`, every `/agile:ship` ends by packing `main` as `<Version>-beta` (`0.5.1-beta`) on Velopack's beta channel and sending it to the share: no tag, no GitHub Release, no notes. A tester installs `<App>-beta-Setup.exe` from the share once; from then on that PC takes each new beta, by a delta, and never a stable release, even a newer one. The beta install replaces the stable one on that PC (one channel per PC); running the stable `<App>-win-Setup.exe` takes it back to stable. App users on stable never see a beta. The share keeps the five newest betas (each is 50-120 MB); a tester away for more than five merges downloads the whole package once. A beta already on the share is not sent again. A failed beta (share unreachable, a `vpk` error) never undoes the merge: the ship report shows the error and the rerun, `/agile:publish --beta`. An https source refuses the beta (the plugin sends nothing there), and the step runs on Windows only. With an API, a beta reports `0.5.1` in `X-App-Version`, so the forced-update gate treats it as that number. An older project with a share is told by `/agile:sync` ("Desktop updates, beta channel") and adds the line itself: the app needs no change. Example 14.50.
+
+**Desktop updates on Linux** (`desktop` with an Avalonia head that lists `linux-x64`). `/agile:publish`, still on your Windows machine, packs `linux-x64` as `<App>.AppImage` with `vpk "[linux]"`, on Velopack's channel `linux`, beside the Windows feed in the same share; the GitHub Release carries the AppImage too. The Linux app reads its own line, `- Update source (linux): <the share's path as mounted on Linux, or https://...>`, which `/agile:publish` writes into the Linux package's `appsettings.json`: a Windows share name means nothing on Linux. With no such line an https source serves both; a share stops the publish with the exact line to add. The head needs a PNG icon at `Assets/app-icon.png` (an AppImage requires one; the foundation makes it from the visual identity); without it the publish stops naming the path. A Linux user puts the AppImage in `~/Applications`, runs `chmod +x` and starts it; from then on it updates itself with the same dialogs, "Later" and kill behavior as on Windows. The first update downloads the full package, the next ones only what changed. The machine needs `libfuse3`, and Avalonia needs `libice6` and `libsm6` (a desktop distribution has them; a minimal WSL Ubuntu does not). The first release with an AppImage says all this in its notes. `linux-arm64` stays a zip; WinUI 3 and MAUI have no Linux; macOS is a later item (it packs only on a Mac); there is no Linux beta. The bootstrap asks nothing new. Example 14.51.
+
+**Code signing** (`desktop` with an Update source; a section of `docs/infra.md`, no quiz question). Unsigned, Windows names the installer's publisher "Unknown publisher", Smart App Control on Windows 11 may block it, and SmartScreen reputation starts from zero at every release. `## Code signing` says `- Code signing:` `artifact-signing` (Microsoft's Artifact Signing: organizations in the USA, Canada, EU and UK, individuals in the USA and Canada), `signtool` (a certificate from a certificate authority, on a token or a cloud HSM), `template` (a vendor's own signing command) or `none` (no line is `none`: unsigned, as before). Each mode reads one environment variable of the shell you publish from: `VPK_AZURE_TRUSTED_SIGN_FILE` (the path of Artifact Signing's `metadata.json`, outside the repository), `VPK_SIGN_PARAMS` (signtool's parameters, the certificate by `/sha1 <thumbprint>`, never `/p` with a password, nor a token PIN in `/kc`) or `VPK_SIGN_TEMPLATE` (the command, with `{{file}}`). The value is never written in `docs/infra.md` or shown in the chat. `vpk pack` signs Setup.exe, the app's files and `Update.exe`; `/agile:publish` gives it only the declared variable (a variable left in your shell for another project, or for a project that says `none`, signs nothing here), then checks Setup.exe, the app's `.exe` and `Update.exe` with Windows' own signature check and names the publisher in its report. It stops before anything is committed or tagged when the variable is unset, holds `/p`, the `metadata.json` is missing or inside the repository, the machine is not Windows, or a file is not validly signed: a declared mode is never published unsigned. `artifact-signing` also needs `- Signing account: <tenant id>/<subscription id>`, whose `az` login lives in the same folder per account as a deploy's (`~/.agile/azure/<tenant>/<subscription>`, section 5, `## Cloud accounts`): the publisher is the project's, your company for your apps, the client's for a client's app. A beta is signed the same way; the Linux AppImage and plain zips are never signed. Signing does not make SmartScreen silent at once: the dialog shows your name but may still say "unrecognized app" for some weeks and hundreds of installs (Microsoft: EV certificates included), so the first release signed by a publisher says so in its notes. Example 14.52.
 
 **Offline-first on desktop** (`desktop` with an API; the question is 2f). The same design as the mobile one, in `Desktop.Core/Storage/`: one SQLite file per signed-in user under `LocalApplicationData` (never the roaming folder; `sqlite-net-pcl`, or `sqlite-net-sqlcipher` with its key in the operating system's protected store when the brief marks the data as sensitive), deleted at sign-out, no backup exclusion because a desktop has none like Android's. Reads, the queue, `Idempotency-Key`, `If-Match`, the conflict list, the field-by-field merge and the sign-out question are the mobile lines word for word. What differs is the head: `IConnectivity` is implemented with `Connectivity.Current` on MAUI and with the BCL's `NetworkChange` on WinUI 3 and Avalonia; because "a network is available" does not mean the API answers, a failed send marks the API unreachable until the next connectivity change or the next successful request, and a Refresh command (F5) always tries; the queue is not sent with the app closed (no tray icon or service: installers and services are outside the profile). Run on a scratch Avalonia app in a Linux container with its network cut and restored: 19 Core tests green, `NetworkAvailabilityChanged` raised both ways, two saves sent once each and in order, and an API stopped with the network up cleared by the Refresh. The WinUI 3 and MAUI heads are measured on your machine, in the validation script of the first "Offline foundation". The API's side is the same **Offline writes (the API)** block, now word for word in four profiles.
 
@@ -2560,6 +2566,100 @@ Claude: F-12's Summary now has "Added 2026-10-04: ...". F-14 is `cancelled` ("Du
 No branch or worktree was created. The next /agile:idea takes F-17.
 ```
 
+### 14.50 Every merge reaches the testers as a beta
+
+The reception app of 14.44 has two receptionists who try each change before the clinic gets it. Its `docs/infra.md` gains one line under `## Desktop updates` (a new project answers question 26c with "every merge"):
+
+```
+- Update source: \\fs01\updates\reception
+- Beta channel: every merge
+```
+
+Each tester runs `Reception-beta-Setup.exe` from the share once (it replaces the stable install on that PC). The ship of F-21 ends with one more line:
+
+```
+> /agile:ship F-21
+Claude: ... merged (a1b2c3d), board #21 Done (read back).
+   Beta: 0.5.1-beta sent to \\fs01\updates\reception (delta 72 KB built from 0.5.0-beta);
+   testers install Reception-beta-Setup.exe from there.
+```
+
+At their next start the testers' PCs show "Version 0.5.1-beta is available."; the clinic's PCs, on stable, see nothing. When the version is released with `/agile:publish`, the clinic takes 0.5.1; the testers stay on beta and take 0.5.2-beta after the next ship.
+
+A week later the file server is down during a ship:
+
+```
+> /agile:ship F-22
+Claude: ... merged (d4e5f6a), board #22 Done (read back).
+   Beta: not sent. vpk upload of 0.5.2-beta (beta) to \\fs01\updates\reception failed:
+   "The network path was not found." The merge stays. When the share is back: /agile:publish --beta
+> /agile:publish --beta
+Claude: Beta: 0.5.2-beta sent to \\fs01\updates\reception (delta 70 KB built from 0.5.1-beta).
+```
+
+Running it once more says "0.5.2-beta is already on the share: nothing was packed or sent". A tester who wants stable again runs `Reception-win-Setup.exe`.
+
+### 14.51 The same app updates itself on Linux
+
+The clinic's new front desk runs Ubuntu. The reception app of 14.44 is Avalonia, so its head lists one more runtime: `<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>`. The first `/agile:publish` after that stops before building anything:
+
+```
+> /agile:publish
+Claude: Not published. Reception.Desktop: the Update source is the share \\fs01\updates\reception,
+   which Linux machines do not read by that name: add
+   `- Update source (linux): <the path where Linux mounts it, or https://...>` under `## Desktop updates`.
+```
+
+The Linux PCs mount the file server at `/mnt/updates`, so `docs/infra.md` gains one line (an item on the main branch, like any change):
+
+```
+- Update source: \\fs01\updates\reception
+- Update source (linux): /mnt/updates/reception
+```
+
+Publishing again, still from the Windows PC:
+
+```
+> /agile:publish
+Claude: v1.3.0, Reception.Desktop (velopack, win-x64, linux-x64 -> \\fs01\updates\reception;
+   Linux reads /mnt/updates/reception).
+   win-x64: delta 74 KB built from 1.2.0. linux-x64: Reception.AppImage 49 MB, first release on channel linux
+   at this source: no delta. Tagged v1.3.0; both feeds sent to the share; the GitHub Release carries the AppImage.
+```
+
+The notes of v1.3.0 end with the Linux install lines: download `Reception.AppImage`, put it in `~/Applications`, `chmod +x`, start it; a copy from an earlier zip does not update itself; the first update downloads the full package, the next ones only what changed. From 1.4.0 on, the Ubuntu desk sees the same "Version 1.4.0 is available." window as the Windows PCs, in the language of the session (`LANG`), and "Later" applies it when the app is closed.
+
+### 14.52 The installer carries the clinic's name
+
+The reception app of 14.44 asks every new PC "Do you want to allow this app from an unknown publisher?". The clinic's company, in Portugal, opens a Microsoft Artifact Signing account with a public-trust certificate profile, and the owner writes its `metadata.json` to `C:\signing\clinic\metadata.json`, outside the repository. `docs/infra.md` gains, through an item like any change:
+
+```
+## Code signing (a desktop app only)
+- Code signing: artifact-signing
+- Signing account: 0f3c.../7a1d...
+```
+
+The first publish after the merge stops before building anything:
+
+```
+> /agile:publish
+Claude: Not published. Code signing is artifact-signing in docs/infra.md but VPK_AZURE_TRUSTED_SIGN_FILE
+   is not set: set it in the shell that runs /agile:publish (its value is never written in docs/infra.md).
+   A declared mode is never published unsigned; nothing was built.
+```
+
+The owner sets the variable in their own terminal (`$env:VPK_AZURE_TRUSTED_SIGN_FILE = 'C:\signing\clinic\metadata.json'`), restarts the session from there, and logs the signing account in once, with the line the next stop gives (`AZURE_CONFIG_DIR="C:/Users/owner/.agile/azure/0f3c.../7a1d..." az login --tenant 0f3c...`). Then:
+
+```
+> /agile:publish
+Claude: v1.5.0, Reception.Desktop (velopack, win-x64 -> \\fs01\updates\reception, signed: artifact-signing;
+   login in C:/Users/owner/.agile/azure/0f3c.../7a1d...).
+   win-x64: delta 81 KB built from 1.4.0. Signed by Clinica Sorriso, Lda: Reception-win-Setup.exe,
+   Reception.Desktop.exe and Update.exe checked, Valid. Tagged v1.5.0; feed sent to the share.
+```
+
+The notes of v1.5.0 say: "The installer is signed by Clinica Sorriso, Lda. During the first weeks Windows may still show "unrecognized app" with that name: click "More info", then "Run anyway"." The installed PCs update to 1.5.0 by the usual delta and notice nothing; a new PC's download dialog names the clinic. v1.6.0's notes do not repeat the line. Had the certificate profile expired, the publish would have stopped with `Reception-win-Setup.exe is not validly signed (status ...)`, before the notes and the tag.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2575,7 +2675,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build <feature> [--worktree]` | Find the item's worktree by its branch, then implement an approved feature there (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
-| `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command |
+| `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command; a desktop app with `- Beta channel: every merge`: `main` sent to the share as `<Version>-beta` |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
@@ -2583,7 +2683,8 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:identity` | Record the app's visual identity (a file, a website, an image or three questions) in `docs/design/`, or review the one recorded |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | One item from idea to done in a single run with two stops: the questions (your answers approve it) and the validation script ("validado e autorizo o merge de F-n" ships it; "validado" alone stops at validating). `--assume` skips the questions except new packages |
 | `/agile:version` | Plugin version running in this session, the version the project's copies came from, and the next step when they differ |
-| `/agile:publish [<environment> [v<x.y.z>]]` | The app version on `main` as a release: package and zip per deployable project (a desktop head with an update source: Velopack packages and feed; a Hybrid app's site: its two NuGet packages too), notes, annotated tag, push and GitHub Release; with an environment, also its deploy by the command `docs/infra.md` declares (`v<x.y.z>`: a rollback to that tag); the tag it pushes also starts the deploy pipeline when the project has one; the deploy lands in the client's cloud account the row of `## Cloud accounts` declares (an Azure login is checked first). Typing it is the authorization |
+| `/agile:publish --beta` | A desktop app's beta of `main` only (`<Version>-beta` to the share; no tag, no Release): the rerun of a ship's failed beta step |
+| `/agile:publish [<environment> [v<x.y.z>]]` | The app version on `main` as a release: package and zip per deployable project (a desktop head with an update source: Velopack packages and feed, an AppImage for an Avalonia head's `linux-x64`; a Hybrid app's site: its two NuGet packages too), notes, annotated tag, push and GitHub Release; with an environment, also its deploy by the command `docs/infra.md` declares (`v<x.y.z>`: a rollback to that tag); the tag it pushes also starts the deploy pipeline when the project has one; the deploy lands in the client's cloud account the row of `## Cloud accounts` declares (an Azure login is checked first). Typing it is the authorization |
 
 ### When to use each command
 
@@ -2606,7 +2707,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:identity` | The app has screens and no visual identity recorded, or you want to review the one there is | 14.22 |
 | `/agile:autopilot` | A small, well-understood item you want in one run with two stops; `--assume` when the recommendations are fine with you | 14.13 |
 | `/agile:version` | You want to know which plugin version this session runs and whether the project's copies are behind | 14.10 |
-| `/agile:publish` | `main` holds a version you want packaged as a release; with an environment, also deployed; with `v<x.y.z>`, a rollback | 14.29, 14.35, 14.44 |
+| `/agile:publish` | `main` holds a version you want packaged as a release; with an environment, also deployed; with `v<x.y.z>`, a rollback; with `--beta`, a desktop beta the ship could not send | 14.29, 14.35, 14.44, 14.50, 14.51 |
 
 ## 16. Command flows
 
@@ -2790,7 +2891,8 @@ flowchart TD
     E2 --> F["Main moved during the ship? Merge it in, full check, bump from main's, go on (conflict or red stops);<br/>merge --no-ff, read its exit status, then push; lock probe, then verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
     F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
     G --> H["Close the board item with evidence;<br/>set Status to Done explicitly and read it back;<br/>not stuck after one retry: report the command by hand"]
-    H --> I["Retro: at most 3 lessons"]
+    H --> H2["Desktop with '- Beta channel: every merge': publish.js beta from the main checkout,<br/>main as Version-beta to the share; a failure keeps the merge and names /agile:publish --beta"]
+    H2 --> I["Retro: at most 3 lessons"]
     I --> J(["Next item at the top of the backlog"])
 ```
 
@@ -2962,7 +3064,11 @@ The technical terms this manual uses, with the pt-BR word Claude uses when talki
 | MAUI | MAUI | Microsoft's framework for one mobile or desktop app on several platforms. |
 | Blazor Hybrid | Blazor Híbrido | Web screens written once and shown inside a MAUI app. |
 | Velopack | Velopack | The tool that packs a desktop app and lets installed copies update themselves. |
-| SmartScreen | SmartScreen | The Windows warning shown for an installer that is not code-signed. |
+| SmartScreen | SmartScreen | The Windows warning shown for an installer that is not code-signed, or signed but downloaded by few people yet ("unrecognized app", with the publisher's name). |
+| code signing | assinatura de código | A certificate's signature on the installer and the app's files: Windows shows the publisher's name instead of "Unknown publisher", and the reputation of the name carries from one release to the next. |
+| beta channel | canal beta | A second line of updates of a desktop app, fed by every merge, that only the PCs installed from the beta Setup.exe follow. |
+| AppImage | AppImage | A Linux app in one file: made executable with `chmod +x`, it runs with nothing installed, and Velopack updates it in place. |
+| WSL (WSLg) | WSL (WSLg) | Linux running inside Windows; WSLg shows its windows on the Windows desktop. |
 | SemVer | versionamento semântico | The version number `MAJOR.MINOR.PATCH`: a breaking change, a feature, a fix. |
 | DTCG | DTCG (tokens de design) | The W3C format for design tokens, used for the app's visual identity. |
 | WCAG | WCAG | The accessibility guidelines; AA is the contrast level the identity is checked against. |

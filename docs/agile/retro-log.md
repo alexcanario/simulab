@@ -922,3 +922,12 @@ From 0.1.0 to 0.4.0, run on a clean main; no item `building` or `validating` (F-
 ## 2026-10-04 - F-79 Subjects and topics back office
 - Lesson 1 (plugin: agile [generic]): the app-host check of `feature-build` step 12 and the database rule of `workflow.md` disagree; resolved in the item by asking the owner once. Cause read from the two texts, not run. Went to the plugin notes table above.
 - Nothing else kept: the pinned page and menu lists failing when a page is added worked as guards, and a heredoc write was refused by the existing rule. Build not run (only Markdown changed); architecture tests run by hand because they read `docs/glossary.md`.
+
+## 2026-10-04 - Sync with agile@canary 0.7.0
+From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-51 to F-89 `approved` or `refining`, each in its worktree), only docs touched.
+- Copied (never edited, plugin changed): template `infra.md` (`Update source (linux)`, `Beta channel`, `## Code signing`, desktop only), `docs/agile/workflow.md` and `workflow.pt-BR.md` (0.7.0: beta channel, Linux updates, code signing, `/agile:publish --beta`); the pt-BR/en links between the two stayed correct.
+- Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged); all manual build files (no upstream change).
+- Glossary (owner: 2A): column and `Technical terms:` link lines already present in every done document (103 checked); the technical-term sweep of the docs was not run and became F-91 (board 134, idea).
+- Missing capabilities (owner: 3A): no new item. `## Cloud accounts` is in F-68 (change note v2); visual identity is F-70; the DocGen tool catalogue was delivered by F-49 (F-69 closed as already delivered).
+- ⏳ plugin: agile [generic] — `sync.js plan` still lists the DocGen tool catalogue under `missingCapabilities` while `tools/Simulab.DocGen/ToolCatalogueDoc.cs` and `docs/architecture/tools.md` exist (F-49); the check should look for the delivered files, not only the template. It raised the duplicates F-61 and F-69 in earlier syncs.
+- Baseline: present. Docs command: declared. Plugin notes delivered: none. `CLAUDE.md`: 563 words, ~3.6k tokens always loaded. Build and suite not run: only Markdown changed.

@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.4.0 (rascunho). English: [en](workflow.md).
+> Versão 0.7.0 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -69,7 +69,7 @@ Antes de escrever qualquer coisa, o Claude confere se a skill que carregou e o p
 | 3. Acesso | Autenticação (no `web-api`, pergunta 10a: como os consumidores da API se autenticam), RBAC, a ponte de identidade para os usuários de um sistema vizinho, entitlements/planos (limites de uso, trials, concessões por prazo, códigos promocionais), back office administrativo |
 | 4. Integração | Mensageria (nenhuma, em processo, broker), serviços externos, armazenamento de arquivos e — quando alguma feature chama um modelo — o provedor do LLM e onde ele roda, o teto de custo e como ele é falsificado nos testes |
 | 5. Experiência | Stack de UI, idiomas (padrão pt-BR, pt-PT e en), acessibilidade, a **identidade visual** (23a: um arquivo, um site, uma imagem ou três perguntas básicas), a biblioteca do design system, família de ícones, como um item é editado — ou, numa UI de conversa, em que língua ela responde, como uma proposta é corrigida e uma galeria de estados. O kit de UI e a galeria deixaram de ser pergunta: todo app com telas ganha um, construído a partir da identidade. O perfil `web-api` não tem telas: pula a stack de UI, a troca de idioma (21), a acessibilidade (22) e tudo sobre identidade visual e UI, e a pergunta 20 vale só para o texto que a API envia a pessoas |
-| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, a conta de nuvem do cliente de cada um que não é local (pergunta 25a), para um app desktop de onde as cópias instaladas se atualizam (pergunta 26b), as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
+| 6. Operação | Observabilidade, hospedagem, CI, board (GitHub ou Azure), ambientes, a conta de nuvem do cliente de cada um que não é local (pergunta 25a), para um app desktop de onde as cópias instaladas se atualizam (pergunta 26b) e, com uma pasta de rede, se cada merge vai para os testadores como beta (pergunta 26c), as convenções da casa quando o código vive ao lado de um sistema existente e — sempre — onde ficam as worktrees dos itens (`D:\wt\<repositório>`, ou `C:\` sem drive D:) |
 | 7. Qualidade | Tempo máximo de teste por nível, expectativa de cobertura, testes de arquitetura, modelos por atividade, e evals quando alguma feature chama um modelo (qual modelo roda os casos, com ou sem o braço sem plugin) |
 | 8. Documentação | Documentação técnica gerada do código (diagramas de entidades, dicionário de dados, mapa de rotas, diagrama de módulos e um catálogo de tools quando o app expõe ferramentas a um modelo), o prompt de sistema como arquivo versionado, e uma visão geral da arquitetura escrita à mão |
 
@@ -181,11 +181,11 @@ A execução mantém uma linha `Autopilot:` no arquivo do item (`refined`, `stop
 | `/agile:epic` | Um épico novo para planejar | `docs/epics/<slug>.md` com features priorizadas, cada uma cabendo numa sessão, do que cada uma depende e pelo que espera, um plano de execução (ordem, caminho sugerido, o que roda em paralelo) e o que o épico espera de fora; cada feature registrada como `idea`. Num `web-app`/`website`, um épico de app mobile segue o complemento `mobile-client` (seção 12) |
 | `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela. As cores, fontes e raio do mockup vêm de `docs/design/identity.tokens.json`; num projeto sem esse arquivo, os pontos em aberto do agente avisam e o mockup usa os padrões da biblioteca |
 | `/agile:review` | Uma mudança arriscada (autenticação, permissões, isolamento por tenant, dados, contratos, dinheiro, ou mais de ~400 linhas), antes da validação | Achados por gravidade de um revisor só de leitura e com contexto limpo; os bloqueadores confirmados são corrigidos antes de você validar |
-| `/agile:publish` | Depois de um ou mais ships, quando você quer a versão do app que está na `main` como um release | Um pacote `dotnet publish` do(s) projeto(s) publicável(is) do perfil em `artifacts/publish/v<Versão>/`, com um `.zip` cada (um head mobile: um `.aab` Android assinado; o site de um app Hybrid: também os dois pacotes NuGet dele), as notas em `docs/releases/v<Versão>.md` (e `v<Versão>-store.md`, o checklist das lojas, para um head mobile), uma tag anotada `v<Versão>`, as duas enviadas ao remoto e um GitHub Release com as notas. Digitar o comando é a autorização. Com um ambiente nomeado (`/agile:publish production [v<x.y.z>]`), ele depois implanta esse release pelo comando que o `docs/infra.md` declara para o ambiente (veja "Fazendo deploy" abaixo) |
+| `/agile:publish` | Depois de um ou mais ships, quando você quer a versão do app que está na `main` como um release | Um pacote `dotnet publish` do(s) projeto(s) publicável(is) do perfil em `artifacts/publish/v<Versão>/`, com um `.zip` cada (um head mobile: um `.aab` Android assinado; o site de um app Hybrid: também os dois pacotes NuGet dele), as notas em `docs/releases/v<Versão>.md` (e `v<Versão>-store.md`, o checklist das lojas, para um head mobile), uma tag anotada `v<Versão>`, as duas enviadas ao remoto e um GitHub Release com as notas. Digitar o comando é a autorização. Com um ambiente nomeado (`/agile:publish production [v<x.y.z>]`), ele depois implanta esse release pelo comando que o `docs/infra.md` declara para o ambiente (veja "Fazendo deploy" abaixo). `/agile:publish --beta` só refaz o beta da `main` de um app desktop quando o passo beta do ship falhou (veja "Atualizações do desktop") |
 
 **Publicando um release: `/agile:publish`.** Um ship sobe o `<Version>` do app e faz o merge; não gera nada que você possa entregar a alguém. O `/agile:publish` transforma a versão que já está na `main` em um release. Ele roda no checkout principal e para sem mudar nada, a menos que a `main` esteja limpa, em dia com o `origin` e a tag `v<Versão>` não exista nem aqui nem lá. O Claude mostra o plano uma vez (versão, tag anterior, os itens que entraram desde ela, os projetos e os runtimes) e segue: digitar o comando é a autorização para o commit das notas, a tag, o push e o GitHub Release. Ele não roda os testes de novo (o ship rodou a suíte completa sobre o que a `main` tem); um erro de compilação ainda derruba o `dotnet publish -c Release` (ou o `dotnet pack`), e então nada é commitado nem marcado. O site de um app Hybrid em repositório próprio também empacota os dois projetos empacotáveis dele, `<App>.Contracts` e `<App>.Shared`, nessa mesma versão e os envia ao feed GitHub Packages dele depois da tag (`--skip-duplicate`, então repetir é seguro), lendo o token de `GITHUB_PACKAGES_TOKEN`; sem o token, ou com um `origin` fora do github.com, os pacotes ficam de fora com esse motivo e o site é publicado do mesmo jeito.
 
-O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `monolith`, `modular-monolith` e `web-api` → `<App>.Api`; `desktop` → o head, self-contained, uma vez por runtime do `<RuntimeIdentifiers>` dele (senão o desta máquina), mais o `<App>.Api` quando houver (com uma fonte de atualização declarada no `docs/infra.md`, o head é empacotado pelo Velopack em vez de zipado: veja "Atualizações do desktop", abaixo); `mobile` → `<App>.Api` mais o head Mobile como um `.aab` Android assinado, e um web app com o complemento `mobile-client` → `<App>.Web` mais o mesmo `.aab` (veja "Publicação nas lojas" abaixo); `microservices` não é suportado. Todos os projetos de um release têm o mesmo `<Version>`. O pacote tira o `appsettings.Development.json` e o arquivo `.xml` de documentação do próprio projeto e mantém os `.pdb`. Um head WinUI 3 sem `<EnableMsixTooling>true</EnableMsixTooling>` barra o plano: publicaria um exe que fecha ao abrir. Um runtime linux ou macOS zipado no Windows perde o bit de execução, e o relatório manda dar `chmod +x`. As notas trazem uma linha por merge na `main` desde a tag `v*` anterior (`Feature F-3: …`, `Bug B-2: …`, outras branches em "Other"), em inglês; a tag leva o mesmo texto. Se o push ou o GitHub Release falhar depois da tag, o Claude diz o comando exato para repetir e nunca apaga a tag nem o commit.
+O que é empacotado segue o perfil: `web-app` e `website` → `<App>.Web`; `monolith`, `modular-monolith` e `web-api` → `<App>.Api`; `desktop` → o head, self-contained, uma vez por runtime do `<RuntimeIdentifiers>` dele (senão o desta máquina), mais o `<App>.Api` quando houver (com uma fonte de atualização declarada no `docs/infra.md`, os runtimes Windows do head, e o `linux-x64` de um head Avalonia como AppImage, são empacotados pelo Velopack em vez de zipados: veja "Atualizações do desktop", abaixo); `mobile` → `<App>.Api` mais o head Mobile como um `.aab` Android assinado, e um web app com o complemento `mobile-client` → `<App>.Web` mais o mesmo `.aab` (veja "Publicação nas lojas" abaixo); `microservices` não é suportado. Todos os projetos de um release têm o mesmo `<Version>`. O pacote tira o `appsettings.Development.json` e o arquivo `.xml` de documentação do próprio projeto e mantém os `.pdb`. Um head WinUI 3 sem `<EnableMsixTooling>true</EnableMsixTooling>` barra o plano: publicaria um exe que fecha ao abrir. Um runtime linux ou macOS zipado no Windows perde o bit de execução, e o relatório manda dar `chmod +x`. As notas trazem uma linha por merge na `main` desde a tag `v*` anterior (`Feature F-3: …`, `Bug B-2: …`, outras branches em "Other"), em inglês; a tag leva o mesmo texto. Se o push ou o GitHub Release falhar depois da tag, o Claude diz o comando exato para repetir e nunca apaga a tag nem o commit.
 
 **Fazendo deploy: `/agile:publish <ambiente> [v<x.y.z>]`.** Com um ambiente nomeado, o release é seguido do deploy dele, pelo comando que o `docs/infra.md` declara para aquele ambiente: a tabela de ambientes tem três colunas a mais, `Deploy command` (`not declared` quando não há), `Check URL` (opcional) e `Version (deployed on)`, que só o `/agile:publish` escreve. Digitar o comando também é a autorização para esse deploy. Antes de rodar, o Claude mostra o ambiente, a versão que está lá agora, a versão a implantar, o comando e os nomes (nunca os valores) dos segredos que ele precisa, e segue. Três formas: uma versão nova (`/agile:publish staging` sem tag ainda) faz antes o release acima, e um release que falha não implanta nada; uma **promoção** (`/agile:publish production` quando `v<Versão>` já está marcada) implanta aquela tag, sem pacote, notas nem tag novos; um **rollback** (`/agile:publish production v0.3.0`) implanta uma tag mais antiga, sem pergunta extra. Sem ambiente nomeado, o Claude lista os ambientes com as versões registradas e pergunta qual, ou "nenhum" (só o release). Um ambiente cujo comando é `not declared` não implanta nada: o Claude diz onde declará-lo, e uma versão nova é liberada do mesmo jeito.
 
@@ -521,7 +521,13 @@ tests/
 └── <App>.Tests/                      testes do backend, só com API
 ```
 
-**Atualizações do desktop** (`desktop`; a fonte é a pergunta 26b do quiz, uma linha do `docs/infra.md`). O atualizador é o Velopack, para os três heads, só Windows, só canal estável, sem assinatura. O `docs/infra.md` diz `Update source:` uma pasta de rede compartilhada, uma URL https ou `not declared` (então o app continua sendo um zip). O app lê isso de `Updates:Source` no `appsettings.json`; rodando pela IDE ou por uma pasta de publish ele não checa nada. Ao abrir, o app consulta a fonte em segundo plano e baixa o que é novo (só a parte que mudou, um delta, quando existe); depois pergunta "Atualizar agora / Depois". "Atualizar agora" reinicia na versão nova; "Depois" aplica quando o app é fechado; um app encerrado à força depois do download aplica na próxima abertura. Uma checagem que falha vai para o log e não aparece para ninguém. Com uma API, um `426` abre "Atualização necessária" só com "Atualizar agora". O `/agile:publish` empacota cada runtime Windows com o `vpk` (Setup.exe, um zip portátil, o pacote completo, o delta, o índice do feed), envia o feed para a pasta de rede depois da tag e, para uma URL https, lista os arquivos para copiar à mão; o GitHub Release leva o Setup.exe e o zip portátil. A primeira release diz: instale uma vez com o Setup.exe (uma cópia zipada não se atualiza) e o SmartScreen avisa porque o instalador não é assinado ("Mais informações", depois "Executar assim mesmo"). O bootstrap escreve o atualizador quando a fonte é declarada; um projeto antigo é avisado pelo `/agile:sync` ("Desktop updates") e captura um item. Exemplo 14.44.
+**Atualizações do desktop** (`desktop`; a fonte é a pergunta 26b do quiz, uma linha do `docs/infra.md`). O atualizador é o Velopack, para os três heads no Windows e para um head Avalonia no Linux (abaixo), um canal estável e um canal beta opcional (só Windows), sem assinatura a menos que o `docs/infra.md` declare a assinatura de código (abaixo). O `docs/infra.md` diz `Update source:` uma pasta de rede compartilhada, uma URL https ou `not declared` (então o app continua sendo um zip). O app lê isso de `Updates:Source` no `appsettings.json`; rodando pela IDE ou por uma pasta de publish ele não checa nada. Ao abrir, o app consulta a fonte em segundo plano e baixa o que é novo (só a parte que mudou, um delta, quando existe); depois pergunta "Atualizar agora / Depois". "Atualizar agora" reinicia na versão nova; "Depois" aplica quando o app é fechado; um app encerrado à força depois do download aplica na próxima abertura. Uma checagem que falha vai para o log e não aparece para ninguém. Com uma API, um `426` abre "Atualização necessária" só com "Atualizar agora". O `/agile:publish` empacota cada runtime Windows com o `vpk` (Setup.exe, um zip portátil, o pacote completo, o delta, o índice do feed), envia o feed para a pasta de rede depois da tag e, para uma URL https, lista os arquivos para copiar à mão; o GitHub Release leva o Setup.exe e o zip portátil. A primeira release diz: instale uma vez com o Setup.exe (uma cópia zipada não se atualiza) e o SmartScreen avisa porque o instalador não é assinado ("Mais informações", depois "Executar assim mesmo"). O bootstrap escreve o atualizador quando a fonte é declarada; um projeto antigo é avisado pelo `/agile:sync` ("Desktop updates") e captura um item. Um head empacotado para mais de um runtime Windows põe cada um no seu canal (`win-x64`, `win-arm64`), para que um feed não sobrescreva o outro; com um runtime só, o canal continua o padrão do Velopack e as cópias instaladas não são afetadas. Exemplo 14.44.
+
+**Canal beta** (`desktop` com pasta de rede; pergunta 26c do quiz, feita só depois de uma pasta de rede). O `docs/infra.md` diz `- Beta channel: every merge` ou `off` (sem a linha é off). Com `every merge`, todo `/agile:ship` termina empacotando a `main` como `<Version>-beta` (`0.5.1-beta`) no canal beta do Velopack e mandando para a pasta de rede: sem tag, sem GitHub Release, sem notas. Um testador roda uma vez o `<App>-beta-Setup.exe` da pasta; dali em diante aquele PC pega cada beta novo, por delta, e nunca um release estável, nem um mais novo. A instalação beta substitui a estável naquele PC (um canal por PC); rodar o `<App>-win-Setup.exe` estável o leva de volta ao estável. Quem usa o estável nunca vê um beta. A pasta guarda os cinco betas mais novos (cada um tem 50-120 MB); um testador que ficou fora mais de cinco merges baixa o pacote inteiro uma vez. Um beta que já está na pasta não é mandado de novo. Um beta que falhou (pasta fora do ar, erro do `vpk`) nunca desfaz o merge: o relatório do ship mostra o erro e o comando para refazer, `/agile:publish --beta`. Uma fonte https recusa o beta (o plugin não manda nada para lá), e o passo só roda no Windows. Com API, um beta informa `0.5.1` no `X-App-Version`, e o portão de atualização forçada o trata como esse número. Um projeto mais antigo com pasta de rede fica sabendo pelo `/agile:sync` ("Desktop updates, beta channel") e acrescenta a linha ele mesmo: o app não muda. Exemplo 14.50.
+
+**Atualizações do desktop no Linux** (`desktop` com um head Avalonia que lista `linux-x64`). O `/agile:publish`, ainda na sua máquina Windows, empacota o `linux-x64` como `<App>.AppImage` com `vpk "[linux]"`, no canal `linux` do Velopack, ao lado do feed do Windows na mesma pasta de rede; o GitHub Release também leva o AppImage. O app Linux lê a própria linha, `- Update source (linux): <o caminho da pasta de rede como o Linux a monta, ou https://...>`, que o `/agile:publish` escreve no `appsettings.json` do pacote Linux: um nome de pasta de rede do Windows não significa nada no Linux. Sem essa linha, uma fonte https serve os dois; uma pasta de rede barra a publicação com a linha exata a acrescentar. O head precisa de um ícone PNG em `Assets/app-icon.png` (o AppImage exige um; a fundação faz a partir da identidade visual); sem ele a publicação para e diz o caminho. Quem usa Linux põe o AppImage em `~/Applications`, roda `chmod +x` e abre; daí em diante ele se atualiza com as mesmas janelas e o mesmo comportamento de "Depois" e de encerramento à força do Windows. A primeira atualização baixa o pacote completo; as seguintes, só o que mudou. A máquina precisa do `libfuse3`, e o Avalonia precisa do `libice6` e do `libsm6` (uma distribuição desktop tem; um Ubuntu mínimo do WSL não tem). A primeira release com AppImage diz tudo isso nas notas. O `linux-arm64` continua zip; WinUI 3 e MAUI não têm Linux; o macOS é um item posterior (só empacota num Mac); não há beta no Linux. O bootstrap não pergunta nada novo. Exemplo 14.51.
+
+**Assinatura de código** (`desktop` com Update source; uma seção do `docs/infra.md`, sem pergunta no quiz). Sem assinatura, o Windows chama o publicador do instalador de "Editor desconhecido", o Smart App Control do Windows 11 pode bloqueá-lo, e a reputação no SmartScreen recomeça do zero a cada release. A seção `## Code signing` diz `- Code signing:` `artifact-signing` (o Artifact Signing da Microsoft: empresas nos EUA, Canadá, UE e Reino Unido, pessoas físicas nos EUA e Canadá), `signtool` (um certificado de uma autoridade certificadora, num token ou num HSM na nuvem), `template` (o comando de assinatura do próprio fornecedor) ou `none` (sem a linha é `none`: sem assinatura, como antes). Cada modo lê uma variável de ambiente do shell de onde você publica: `VPK_AZURE_TRUSTED_SIGN_FILE` (o caminho do `metadata.json` do Artifact Signing, fora do repositório), `VPK_SIGN_PARAMS` (os parâmetros do signtool, o certificado por `/sha1 <thumbprint>`, nunca `/p` com senha, nem o PIN de um token no `/kc`) ou `VPK_SIGN_TEMPLATE` (o comando, com `{{file}}`). O valor nunca é escrito no `docs/infra.md` nem mostrado no chat. O `vpk pack` assina o Setup.exe, os arquivos do app e o `Update.exe`; o `/agile:publish` entrega a ele só a variável declarada (uma variável que ficou no seu shell para outro projeto, ou para um projeto que diz `none`, não assina nada aqui), depois confere o Setup.exe, o `.exe` do app e o `Update.exe` com a própria checagem de assinatura do Windows e diz o publicador no relatório. Ele para antes de qualquer commit ou tag quando a variável não está definida, contém `/p`, o `metadata.json` não existe ou está dentro do repositório, a máquina não é Windows, ou um arquivo não está assinado de forma válida: um modo declarado nunca é publicado sem assinatura. O `artifact-signing` também precisa de `- Signing account: <tenant id>/<subscription id>`, cujo login do `az` fica na mesma pasta por conta que a de um deploy (`~/.agile/azure/<tenant>/<subscription>`, seção 5, `## Cloud accounts`): o publicador é o do projeto, a sua empresa para os seus apps, a do cliente para o app de um cliente. Um beta é assinado do mesmo jeito; o AppImage do Linux e os zips simples nunca são assinados. Assinar não cala o SmartScreen de imediato: a janela mostra o seu nome, mas ainda pode dizer "aplicativo não reconhecido" por algumas semanas e centenas de instalações (Microsoft: certificados EV inclusive), por isso a primeira release assinada por um publicador avisa isso nas notas. Exemplo 14.52.
 
 **Offline-first no desktop** (`desktop` com uma API; a pergunta é a 2f). O mesmo desenho do mobile, em `Desktop.Core/Storage/`: um arquivo SQLite por usuário logado em `LocalApplicationData` (nunca a pasta de roaming; `sqlite-net-pcl`, ou `sqlite-net-sqlcipher` com a chave no armazenamento protegido do sistema operacional quando o brief marca os dados como sensíveis), apagado no logout, sem exclusão de backup porque o desktop não tem um como o do Android. A leitura, a fila, o `Idempotency-Key`, o `If-Match`, a lista de conflitos, a mesclagem campo a campo e a pergunta do logout são as linhas do mobile palavra por palavra. O que muda é o head: o `IConnectivity` é implementado com `Connectivity.Current` no MAUI e com o `NetworkChange` da BCL no WinUI 3 e no Avalonia; como "há rede" não significa que a API responde, um envio que falha marca a API como inalcançável até a próxima mudança de conectividade ou a próxima requisição bem-sucedida, e o comando Atualizar (F5) sempre tenta; a fila não é enviada com o app fechado (sem ícone de bandeja nem serviço: instaladores e serviços estão fora do perfil). Rodado num app Avalonia de rascunho em um container Linux com a rede cortada e restaurada: 19 testes do Core verdes, `NetworkAvailabilityChanged` disparado nos dois sentidos, dois salvamentos enviados uma vez cada e em ordem, e uma API parada com a rede de pé limpa pelo Atualizar. Os heads WinUI 3 e MAUI são medidos na sua máquina, no roteiro de validação da primeira "Offline foundation". O lado da API é o mesmo bloco **Offline writes (the API)**, agora palavra por palavra em quatro perfis.
 
@@ -2567,6 +2573,100 @@ Claude: o Summary da F-12 agora tem "Added 2026-10-04: ...". A F-14 está `cance
 Nenhuma branch ou worktree foi criada. O próximo /agile:idea pega a F-17.
 ```
 
+### 14.50 Cada merge chega aos testadores como beta
+
+O app da recepção do 14.44 tem duas recepcionistas que testam cada mudança antes da clínica recebê-la. O `docs/infra.md` dele ganha uma linha em `## Desktop updates` (um projeto novo responde "every merge" na pergunta 26c):
+
+```
+- Update source: \\fs01\updates\reception
+- Beta channel: every merge
+```
+
+Cada testadora roda uma vez o `Reception-beta-Setup.exe` da pasta de rede (ele substitui a instalação estável naquele PC). O ship da F-21 termina com uma linha a mais:
+
+```
+> /agile:ship F-21
+Claude: ... merge feito (a1b2c3d), board #21 Done (lido de volta).
+   Beta: 0.5.1-beta mandado para \\fs01\updates\reception (delta de 72 KB a partir do 0.5.0-beta);
+   as testadoras instalam o Reception-beta-Setup.exe de lá.
+```
+
+No próximo início, os PCs das testadoras mostram "Version 0.5.1-beta is available."; os PCs da clínica, no estável, não veem nada. Quando a versão sai com `/agile:publish`, a clínica pega a 0.5.1; as testadoras continuam no beta e pegam a 0.5.2-beta depois do próximo ship.
+
+Uma semana depois, o servidor de arquivos está fora do ar durante um ship:
+
+```
+> /agile:ship F-22
+Claude: ... merge feito (d4e5f6a), board #22 Done (lido de volta).
+   Beta: não mandado. vpk upload of 0.5.2-beta (beta) to \\fs01\updates\reception failed:
+   "The network path was not found." O merge fica. Quando a pasta voltar: /agile:publish --beta
+> /agile:publish --beta
+Claude: Beta: 0.5.2-beta mandado para \\fs01\updates\reception (delta de 70 KB a partir do 0.5.1-beta).
+```
+
+Rodar de novo diz "0.5.2-beta is already on the share: nothing was packed or sent". Uma testadora que quer voltar ao estável roda o `Reception-win-Setup.exe`.
+
+### 14.51 O mesmo app se atualiza no Linux
+
+O novo balcão da clínica roda Ubuntu. O app da recepção do 14.44 é Avalonia, então o head passa a listar mais um runtime: `<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>`. O primeiro `/agile:publish` depois disso para antes de construir qualquer coisa:
+
+```
+> /agile:publish
+Claude: Não publicado. Reception.Desktop: a fonte de atualização é a pasta de rede \\fs01\updates\reception,
+   que as máquinas Linux não leem por esse nome: acrescente
+   `- Update source (linux): <the path where Linux mounts it, or https://...>` em `## Desktop updates`.
+```
+
+Os PCs Linux montam o servidor de arquivos em `/mnt/updates`, então o `docs/infra.md` ganha uma linha (num item na branch principal, como qualquer mudança):
+
+```
+- Update source: \\fs01\updates\reception
+- Update source (linux): /mnt/updates/reception
+```
+
+Publicando de novo, ainda do PC Windows:
+
+```
+> /agile:publish
+Claude: v1.3.0, Reception.Desktop (velopack, win-x64, linux-x64 -> \\fs01\updates\reception;
+   o Linux lê /mnt/updates/reception).
+   win-x64: delta de 74 KB feito a partir da 1.2.0. linux-x64: Reception.AppImage 49 MB, primeira release no canal linux
+   nesta fonte: sem delta. Tag v1.3.0; os dois feeds enviados para a pasta; o GitHub Release leva o AppImage.
+```
+
+As notas da v1.3.0 terminam com as linhas de instalação no Linux: baixe o `Reception.AppImage`, ponha em `~/Applications`, `chmod +x`, abra; uma cópia de um zip antigo não se atualiza; a primeira atualização baixa o pacote completo, as seguintes só o que mudou. Da 1.4.0 em diante, o balcão Ubuntu vê a mesma janela "A versão 1.4.0 está disponível." que os PCs Windows, no idioma da sessão (`LANG`), e "Depois" aplica quando o app é fechado.
+
+### 14.52 O instalador leva o nome da clínica
+
+O app da recepção do 14.44 pergunta em todo PC novo "Deseja permitir que este aplicativo de um editor desconhecido...?". A empresa da clínica, em Portugal, abre uma conta do Microsoft Artifact Signing com um perfil de certificado de confiança pública, e o dono grava o `metadata.json` dela em `C:\signing\clinic\metadata.json`, fora do repositório. O `docs/infra.md` ganha, por um item como qualquer mudança:
+
+```
+## Code signing (a desktop app only)
+- Code signing: artifact-signing
+- Signing account: 0f3c.../7a1d...
+```
+
+A primeira publicação depois do merge para antes de construir qualquer coisa:
+
+```
+> /agile:publish
+Claude: Não publicado. Code signing is artifact-signing in docs/infra.md but VPK_AZURE_TRUSTED_SIGN_FILE
+   is not set: set it in the shell that runs /agile:publish (its value is never written in docs/infra.md).
+   Um modo declarado nunca é publicado sem assinatura; nada foi construído.
+```
+
+O dono define a variável no próprio terminal (`$env:VPK_AZURE_TRUSTED_SIGN_FILE = 'C:\signing\clinic\metadata.json'`), reabre a sessão a partir dele e faz login uma vez na conta de assinatura, com a linha que a parada seguinte dá (`AZURE_CONFIG_DIR="C:/Users/dono/.agile/azure/0f3c.../7a1d..." az login --tenant 0f3c...`). Então:
+
+```
+> /agile:publish
+Claude: v1.5.0, Reception.Desktop (velopack, win-x64 -> \\fs01\updates\reception, signed: artifact-signing;
+   login em C:/Users/dono/.agile/azure/0f3c.../7a1d...).
+   win-x64: delta de 81 KB a partir da 1.4.0. Assinado por Clinica Sorriso, Lda: Reception-win-Setup.exe,
+   Reception.Desktop.exe e Update.exe conferidos, Valid. Tag v1.5.0; feed enviado para a pasta de rede.
+```
+
+As notas da v1.5.0 dizem (em inglês, como toda linha que o `publish.js` escreve nas notas): "The installer is signed by Clinica Sorriso, Lda. During the first weeks Windows may still show "unrecognized app" with that name: click "More info", then "Run anyway"." Os PCs instalados se atualizam para a 1.5.0 pelo delta de sempre e não percebem nada; a janela de download de um PC novo mostra o nome da clínica. As notas da v1.6.0 não repetem a linha. Se o perfil do certificado tivesse expirado, a publicação teria parado com `Reception-win-Setup.exe is not validly signed (status ...)`, antes das notas e da tag.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -2582,7 +2682,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build <feature> [--worktree]` | Acha a worktree do item pela branch e implementa ali uma feature aprovada (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
-| `/agile:ship <feature>` | Suíte completa, versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização), branch e worktree removidas, board, manual da app e o comando de docs declarado |
+| `/agile:ship <feature>` | Suíte completa, versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização), branch e worktree removidas, board, manual da app e o comando de docs declarado; um app desktop com `- Beta channel: every merge`: a `main` mandada para a pasta de rede como `<Version>-beta` |
 | `/agile:retro` | Transforma lições em regras ou skills |
 | `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
 | `/agile:status` | Feature em andamento, topo do backlog, perguntas em aberto, o que está bloqueado e por quem |
@@ -2590,7 +2690,8 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow e perfil dentro do projeto |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | Um item da ideia até done numa execução com duas paradas: as perguntas (as suas respostas o aprovam) e o roteiro de validação ("validado e autorizo o merge de F-n" entrega; só "validado" para em validating). `--assume` pula as perguntas, menos pacotes novos |
 | `/agile:version` | Versão do plugin em uso nesta sessão, a versão de onde vieram as cópias do projeto, e o próximo passo quando diferem |
-| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (um head desktop com fonte de atualização: pacotes e feed do Velopack; o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um; o deploy cai na conta de nuvem do cliente que a linha de `## Cloud accounts` declara (um login Azure é conferido antes). Digitar é a autorização |
+| `/agile:publish --beta` | Só o beta da `main` de um app desktop (`<Version>-beta` para a pasta de rede; sem tag, sem Release): refaz o passo beta que falhou num ship |
+| `/agile:publish [<ambiente> [v<x.y.z>]]` | A versão do app que está na `main` como release: pacote e zip por projeto publicável (um head desktop com fonte de atualização: pacotes e feed do Velopack, um AppImage para o `linux-x64` de um head Avalonia; o site de um app Hybrid: também os dois pacotes NuGet dele), notas, tag anotada, push e GitHub Release; com um ambiente, também o deploy dele pelo comando que o `docs/infra.md` declara (`v<x.y.z>`: rollback para essa tag); a tag que ele envia também inicia o pipeline de deploy quando o projeto tem um; o deploy cai na conta de nuvem do cliente que a linha de `## Cloud accounts` declara (um login Azure é conferido antes). Digitar é a autorização |
 
 ### Quando usar cada comando
 
@@ -2613,7 +2714,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:identity` | O app tem telas e nenhuma identidade visual registrada, ou você quer revisar a que existe | 14.22 |
 | `/agile:autopilot` | Um item pequeno e bem entendido que você quer numa execução com duas paradas; `--assume` quando as recomendações servem para você | 14.13 |
 | `/agile:version` | Você quer saber qual versão do plugin esta sessão usa e se as cópias do projeto estão atrasadas | 14.10 |
-| `/agile:publish` | A `main` tem uma versão que você quer empacotar como release; com um ambiente, também implantada; com `v<x.y.z>`, um rollback | 14.29, 14.35, 14.44 |
+| `/agile:publish` | A `main` tem uma versão que você quer empacotar como release; com um ambiente, também implantada; com `v<x.y.z>`, um rollback; com `--beta`, um beta desktop que o ship não conseguiu mandar | 14.29, 14.35, 14.44, 14.50, 14.51 |
 
 ## 16. Fluxo de cada comando
 
@@ -2797,7 +2898,8 @@ flowchart TD
     E2 --> F["A main andou durante o ship? Traz para a branch, suíte completa, sobe a versão da main, segue (conflito ou vermelho para);<br/>merge --no-ff, lê o status de saída, depois push; sonda de lock, verificar 0 0, worktree removida,<br/>branch apagada (no origin só se o ls-remote a lista)"]
     F --> G["Decisões que citam arquivo estão nele; ## Delivery; status: done"]
     G --> H["Fechar o item do board com evidência;<br/>definir Status como Done explicitamente e ler de volta;<br/>não fixou após uma nova tentativa: reportar o comando à mão"]
-    H --> I["Retro: no máximo 3 lições"]
+    H --> H2["Desktop com '- Beta channel: every merge': publish.js beta no checkout principal,<br/>a main como Version-beta na pasta de rede; uma falha mantém o merge e cita /agile:publish --beta"]
+    H2 --> I["Retro: no máximo 3 lições"]
     I --> J(["Próximo item no topo do backlog"])
 ```
 
@@ -2969,7 +3071,11 @@ Os termos técnicos que este manual usa, com a palavra em pt-BR que o Claude usa
 | MAUI | MAUI | O framework da Microsoft para um app móvel ou desktop em várias plataformas. |
 | Blazor Hybrid | Blazor Híbrido | Telas web escritas uma vez e exibidas dentro de um app MAUI. |
 | Velopack | Velopack | A ferramenta que empacota um app desktop e deixa as cópias instaladas se atualizarem sozinhas. |
-| SmartScreen | SmartScreen | O aviso do Windows para um instalador sem assinatura de código. |
+| SmartScreen | SmartScreen | O aviso do Windows para um instalador sem assinatura de código, ou assinado mas ainda baixado por pouca gente ("aplicativo não reconhecido", com o nome do publicador). |
+| code signing | assinatura de código | A assinatura de um certificado no instalador e nos arquivos do app: o Windows mostra o nome do publicador em vez de "Editor desconhecido", e a reputação do nome passa de uma release para a seguinte. |
+| beta channel | canal beta | Uma segunda linha de atualizações de um app desktop, alimentada por cada merge, que só os PCs instalados pelo Setup.exe beta seguem. |
+| AppImage | AppImage | Um app Linux num arquivo só: com `chmod +x`, roda sem instalar nada, e o Velopack o atualiza no lugar. |
+| WSL (WSLg) | WSL (WSLg) | O Linux rodando dentro do Windows; o WSLg mostra as janelas dele na área de trabalho do Windows. |
 | SemVer | versionamento semântico | O número de versão `MAJOR.MINOR.PATCH`: uma quebra de compatibilidade, uma feature, uma correção. |
 | DTCG | DTCG (tokens de design) | O formato W3C para tokens de design, usado na identidade visual da app. |
 | WCAG | WCAG | As diretrizes de acessibilidade; AA é o nível de contraste contra o qual a identidade é conferida. |

@@ -54,7 +54,19 @@ with the tag pattern `v*` only, and required reviewers on production. A manual r
 
 ## Desktop updates (a desktop app only)
 - Update source: <\\server\share\<app> | https://updates.example.com/<app> | not declared>
-- `/agile:publish` packs the Windows head with Velopack and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private GitHub Releases address here.
+- Update source (linux): <only with linux-x64 in the head: the share's path as mounted on Linux (/mnt/updates/<app>) | https://... | not declared (an https main line is used)>
+- Beta channel: <every merge | off>
+- With a share and `every merge`, `/agile:ship` packs each merge to the main branch as `<Version>-beta` on Velopack's beta channel and sends it to the share (the five newest betas stay); testers install `<App>-beta-Setup.exe` from there, and the stable Setup.exe takes a machine back to stable. `off`, or an https source, sends no beta.
+- `/agile:publish` packs the Windows head with Velopack (and an Avalonia head's `linux-x64` as an AppImage, which reads the Linux line) and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private GitHub Releases address here.
+
+## Code signing (a desktop app only)
+- Code signing: none
+- Signing account: <artifact-signing only: <tenant id>/<subscription id> of the Azure account that owns the signing account>
+- `none` (or no line) ships the Windows installer unsigned and Windows warns "Unknown publisher". A mode makes `vpk` sign Setup.exe, the app's files and Update.exe of every Windows release and beta, from one environment variable of the shell that runs `/agile:publish` (and `/agile:ship`, for the beta); the plugin passes only that one to `vpk`, so a variable left for another project never signs this one. The publish stops when the variable is unset, and the Linux AppImage and plain zips are never signed.
+  - `artifact-signing` (Microsoft's Artifact Signing, organizations in the USA, Canada, EU and UK, individuals in the USA and Canada): `VPK_AZURE_TRUSTED_SIGN_FILE` = absolute path of its `metadata.json`, outside the repository (`Endpoint`, `CodeSigningAccountName`, `CertificateProfileName`, and `"ExcludeCredentials": ["ManagedIdentityCredential", "SharedTokenCacheCredential", "VisualStudioCredential", "VisualStudioCodeCredential"]` so the signing uses the Azure CLI login below). The login lives in `<home>/.agile/azure/<tenant>/<subscription>`; log in once, in Git Bash: AZURE_CONFIG_DIR="<that folder>" az login --tenant <tenant>.
+  - `signtool` (a certificate from a CA, on a token or a cloud HSM): `VPK_SIGN_PARAMS` = signtool's parameters, the certificate chosen by `/sha1 <thumbprint>` (or the token's CSP), with a timestamp: `/fd SHA256 /tr <the CA's timestamp URL> /td SHA256 /sha1 <thumbprint>`. Never `/p`, nor a token PIN in `/kc` (`[{{...}}]`): the publish refuses a secret on a command line.
+  - `template` (a vendor's own signing tool): `VPK_SIGN_TEMPLATE` = its command with `{{file}}` (one file) or `{{file...}}` (several) where the file goes.
+- The certificate or the Artifact Signing account is kept in: <where; who renews it and when it expires>. The variable's value is never written here.
 
 ## Release steps
 1. <step, or "no release process yet">
