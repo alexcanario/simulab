@@ -1,0 +1,219 @@
+@* F-74, UC2-UC3: add or edit a notice subject. A simple entity, so a dialog (rule: ui-project). The Api runs every
+   rule (BR2 to BR5); the checks here are for comfort. *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+@inject IJSRuntime JS
+
+<MudDialog Class="app-notice-subject-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppSuggestField Id="notice-subject-group"
+                             Label="@L["NoticeSubjects.Field.Group"]"
+                             Placeholder="@L["NoticeSubjects.Field.Group.Placeholder"]"
+                             Suggestions="Groups"
+                             SuggestionsLabel="@L["NoticeSubjects.Field.Group.Suggestions"]"
+                             MaxLength="CatalogLimits.NoticeSubjectGroupMaxLength"
+                             Value="@_group"
+                             ValueChanged="@((string? value) => OnGroupChanged(value))"
+                             Hint="@GroupHint"
+                             Error="@_groupError" />
+
+            <AppTextField TValue="string"
+                          Id="notice-subject-label"
+                          Label="@L["NoticeSubjects.Field.Label"]"
+                          Placeholder="@L["NoticeSubjects.Field.Label.Placeholder"]"
+                          Value="@_label"
+                          ValueChanged="@((string? value) => OnLabelChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.NoticeSubjectLabelMaxLength"
+                          Autocomplete="off"
+                          Hint="@L["NoticeSubjects.Field.Label.Hint"]"
+                          Error="@_labelError" />
+
+            <AppTextField TValue="int?"
+                          Id="notice-subject-question-count"
+                          Label="@L["NoticeSubjects.Field.QuestionCount"]"
+                          Placeholder="@L["NoticeSubjects.Field.QuestionCount.Placeholder"]"
+                          Value="_questionCount"
+                          ValueChanged="@((int? value) => OnQuestionCountChanged(value))"
+                          InputType="InputType.Number"
+                          Autocomplete="off"
+                          Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
+                          Error="@_questionCountError" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The notice subject being edited; null to add one.</summary>
+    [Parameter] public NoticeSubjectResponse? NoticeSubject { get; set; }
+
+    /// <summary>The groups already used in the edition, in display order: what the group field suggests.</summary>
+    [Parameter] public IReadOnlyList<string> Groups { get; set; } = [];
+
+    /// <summary>BR12: the group the field starts with when adding (the last one added on this page visit).</summary>
+    [Parameter] public string? InitialGroup { get; set; }
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired] public Func<SaveNoticeSubjectRequest, Task<ApiResult<NoticeSubjectResponse>>> Save { get; set; } = default!;
+
+    private string? _group;
+    private string? _label;
+    private int? _questionCount;
+    private string? _groupError;
+    private string? _labelError;
+    private string? _questionCountError;
+    private string? _error;
+    private bool _saving;
+    private bool _focusFirstField;
+
+    private string StartGroup => NoticeSubject is null ? Trimmed(InitialGroup) : Trimmed(NoticeSubject.Group);
+
+    private bool HasChanges =>
+        Trimmed(_group) != StartGroup
+        || Trimmed(_label) != (NoticeSubject?.Label ?? string.Empty)
+        || _questionCount != NoticeSubject?.QuestionCount;
+
+    // BR7: in edit mode a group that differs from the saved one (case and accents do not count) sends the row to the
+    // end of the new group, and the hint says so.
+    private bool GroupChanged =>
+        NoticeSubject is not null
+        && AppSuggestField.Normalize(_group) != AppSuggestField.Normalize(NoticeSubject.Group);
+
+    private string GroupHint => GroupChanged ? L["NoticeSubjects.Field.Group.MoveNote"] : L["NoticeSubjects.Field.Group.Hint"];
+
+    protected override void OnInitialized()
+    {
+        _group = StartGroup;
+        _label = NoticeSubject?.Label ?? string.Empty;
+        _questionCount = NoticeSubject?.QuestionCount;
+        _focusFirstField = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusFirstField)
+        {
+            return;
+        }
+
+        // Focus goes to the first field on open (rule: ui).
+        _focusFirstField = false;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", "notice-subject-group");
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private void OnGroupChanged(string? value)
+    {
+        _group = value;
+        _groupError = GroupError(value);
+    }
+
+    private void OnLabelChanged(string? value)
+    {
+        _label = value;
+        _labelError = LabelError(value);
+    }
+
+    private void OnQuestionCountChanged(int? value)
+    {
+        _questionCount = value;
+        _questionCountError = QuestionCountError(value);
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? GroupError(string? value) =>
+        Trimmed(value).Length > CatalogLimits.NoticeSubjectGroupMaxLength ? Errors.For(CatalogErrorCodes.NoticeSubjectGroupTooLong) : null;
+
+    private string? LabelError(string? value)
+    {
+        var length = Trimmed(value).Length;
+        if (length == 0)
+        {
+            return Errors.For(CatalogErrorCodes.NoticeSubjectLabelRequired);
+        }
+
+        if (length < CatalogLimits.NameMinLength)
+        {
+            return Errors.For(CatalogErrorCodes.NoticeSubjectLabelTooShort);
+        }
+
+        return length > CatalogLimits.NoticeSubjectLabelMaxLength ? Errors.For(CatalogErrorCodes.NoticeSubjectLabelTooLong) : null;
+    }
+
+    private string? QuestionCountError(int? value) =>
+        value is { } count && (count < CatalogLimits.NoticeSubjectQuestionCountMin || count > CatalogLimits.NoticeSubjectQuestionCountMax)
+            ? Errors.For(CatalogErrorCodes.NoticeSubjectQuestionCountInvalid)
+            : null;
+
+    private async Task SaveAsync()
+    {
+        _groupError = GroupError(_group);
+        _labelError = LabelError(_label);
+        _questionCountError = QuestionCountError(_questionCount);
+        if (_groupError is not null || _labelError is not null || _questionCountError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        // A blank group is "no group": the Api stores it as null (BR3).
+        var group = Trimmed(_group);
+        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), _questionCount));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        // A code of one field goes under that field; a duplicate, a missing edition and the rest go to the alert.
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.NoticeSubjectGroupTooLong:
+                _groupError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.NoticeSubjectLabelRequired:
+            case CatalogErrorCodes.NoticeSubjectLabelTooShort:
+            case CatalogErrorCodes.NoticeSubjectLabelTooLong:
+                _labelError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.NoticeSubjectQuestionCountInvalid:
+                _questionCountError = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using MudBlazor;
 using Simulab.Catalog.Contracts;
 using Simulab.SharedKernel.Serialization;
+using Simulab.Web.Components.Ui;
 using Simulab.Web.Services;
 using Simulab.Web.Services.Auth;
 using Simulab.Web.Tests.Auth;
@@ -119,6 +120,15 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>When set, reading one edition answers this problem (F-35: the edition page's not-found state).</summary>
         public (HttpStatusCode Status, string Code)? FindEditionFailure { get; set; }
 
+        /// <summary>The notice subjects the fake holds (F-74), in display order: the test sets it, the writes change it.</summary>
+        public List<NoticeSubjectResponse> NoticeSubjects { get; } = [];
+
+        /// <summary>When set, listing an edition's notice subjects answers this problem (F-74: the section's load error).</summary>
+        public (HttpStatusCode Status, string Code)? ListNoticeSubjectsFailure { get; set; }
+
+        /// <summary>When set, a move answers this problem (F-74: a stale list), and nothing changes.</summary>
+        public (HttpStatusCode Status, string Code)? MoveFailure { get; set; }
+
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
         /// <summary>
@@ -136,6 +146,18 @@ public abstract class CatalogPageTestContext : KitTestContext
             if (Custom?.Invoke(request.Method, path, request.RequestUri.Query, body) is { } custom)
             {
                 return custom;
+            }
+
+            var subjectRoute = System.Text.RegularExpressions.Regex.Match(
+                path, "^/api/v1/catalog/exams/(?<exam>[^/]+)/editions/(?<edition>[^/]+)/notice-subjects(/(?<id>[^/]+))?(?<move>/move)?$");
+            if (subjectRoute.Success)
+            {
+                return HandleNoticeSubject(
+                    request.Method,
+                    Guid.Parse(subjectRoute.Groups["edition"].Value),
+                    subjectRoute.Groups["id"],
+                    subjectRoute.Groups["move"].Success,
+                    body);
             }
 
             var editionRoute = System.Text.RegularExpressions.Regex.Match(
@@ -311,6 +333,93 @@ public abstract class CatalogPageTestContext : KitTestContext
 
             Editions.Remove(existing);
             return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        // F-74: the five notice subject routes. The fake keeps the shape the Api has (rows of one group stay together, a
+        // new row goes last in its group, a changed group goes to the end of the new one, a move swaps two neighbours of
+        // one group); the rules about text and numbers are the Api's and are tested there.
+        private HttpResponseMessage HandleNoticeSubject(
+            HttpMethod method,
+            Guid editionId,
+            System.Text.RegularExpressions.Group idGroup,
+            bool isMove,
+            string? body)
+        {
+            if (method == HttpMethod.Get)
+            {
+                return ListNoticeSubjectsFailure is { } listRefused
+                    ? Problem(listRefused)
+                    : Json<IReadOnlyList<NoticeSubjectResponse>>([.. NoticeSubjects.Where(row => row.ExamEditionId == editionId)]);
+            }
+
+            var refusal = isMove ? MoveFailure ?? WriteFailure : WriteFailure;
+            if (refusal is { } refused)
+            {
+                return Problem(refused);
+            }
+
+            if (!idGroup.Success)
+            {
+                var request = Read<SaveNoticeSubjectRequest>(body);
+                var created = new NoticeSubjectResponse(Guid.CreateVersion7(), editionId, Blank(request.Group), request.Label!, request.QuestionCount);
+                InsertLastInGroup(created);
+                return Json(created, HttpStatusCode.Created);
+            }
+
+            var id = Guid.Parse(idGroup.Value);
+            var existing = NoticeSubjects.Find(row => row.Id == id && row.ExamEditionId == editionId);
+            if (existing is null)
+            {
+                return Problem((HttpStatusCode.NotFound, CatalogErrorCodes.NoticeSubjectNotFound));
+            }
+
+            if (isMove)
+            {
+                var up = Read<MoveNoticeSubjectRequest>(body).ParseDirection() == NoticeSubjectMoveDirection.Up;
+                var sameGroup = NoticeSubjects.Where(row => row.ExamEditionId == editionId
+                    && AppSuggestField.Normalize(row.Group) == AppSuggestField.Normalize(existing.Group)).ToList();
+                var at = sameGroup.IndexOf(existing);
+                var neighbour = up ? at - 1 : at + 1;
+                if (neighbour < 0 || neighbour >= sameGroup.Count)
+                {
+                    return Problem((HttpStatusCode.BadRequest, CatalogErrorCodes.NoticeSubjectMoveInvalid));
+                }
+
+                var first = NoticeSubjects.IndexOf(sameGroup[Math.Min(at, neighbour)]);
+                var second = NoticeSubjects.IndexOf(sameGroup[Math.Max(at, neighbour)]);
+                (NoticeSubjects[first], NoticeSubjects[second]) = (NoticeSubjects[second], NoticeSubjects[first]);
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            if (method == HttpMethod.Put)
+            {
+                var request = Read<SaveNoticeSubjectRequest>(body);
+                var updated = existing with { Group = Blank(request.Group), Label = request.Label!, QuestionCount = request.QuestionCount };
+                if (AppSuggestField.Normalize(updated.Group) == AppSuggestField.Normalize(existing.Group))
+                {
+                    NoticeSubjects[NoticeSubjects.IndexOf(existing)] = updated;
+                }
+                else
+                {
+                    NoticeSubjects.Remove(existing);
+                    InsertLastInGroup(updated);
+                }
+
+                return Json(updated);
+            }
+
+            NoticeSubjects.Remove(existing);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        private static string? Blank(string? group) => string.IsNullOrWhiteSpace(group) ? null : group.Trim();
+
+        private void InsertLastInGroup(NoticeSubjectResponse row)
+        {
+            var key = AppSuggestField.Normalize(row.Group);
+            var last = NoticeSubjects.FindLastIndex(candidate => candidate.ExamEditionId == row.ExamEditionId
+                && AppSuggestField.Normalize(candidate.Group) == key);
+            NoticeSubjects.Insert(last < 0 ? NoticeSubjects.Count : last + 1, row);
         }
 
         // The Api joins the board's name and acronym; the fake looks the board up in the rows it knows.

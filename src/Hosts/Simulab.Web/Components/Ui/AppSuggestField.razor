@@ -1,0 +1,169 @@
+@* F-74: free text that suggests what was typed before. Unlike AppLookupField it never insists on a pick: the text
+   is the value, and a suggestion only saves typing and typos. The suggestions are a list the page already holds, so
+   it asks no server. Same anatomy as AppTextField and AppLookupField - label above, required marker, hint or error
+   below. *@
+@using System.Globalization
+@using System.Text
+
+@* While the list is open a key stays here: Esc closes the list and must not also close a dialog around the field. *@
+<div class="app-field @(HasError ? "app-field-error" : null)" @onkeydown:stopPropagation="_open">
+    <label class="app-field-label" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <MudAutocomplete T="string"
+                     Value="Value"
+                     ValueChanged="OnValueChanged"
+                     Text="@Value"
+                     TextChanged="OnTextChanged"
+                     SearchFunc="SearchSuggestionsAsync"
+                     Placeholder="@Placeholder"
+                     Variant="Variant.Outlined"
+                     Margin="Margin.Dense"
+                     MinCharacters="0"
+                     MaxItems="@MaxSuggestions"
+                     OpenOnFocus="true"
+                     Clearable="false"
+                     Disabled="Disabled"
+                     Error="HasError"
+                     CoerceValue="true"
+                     CoerceText="false"
+                     ResetValueOnEmptyText="true"
+                     OpenChanged="OnOpenChanged"
+                     UserAttributes="@Attributes" />
+    @* Typing a new text is allowed: with nothing to suggest there is no "no results" message, the list stays closed. *@
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+    <span class="app-visually-hidden" aria-live="polite">@_announcement</span>
+</div>
+
+@code {
+    /// <summary>How many suggestions one list shows; a notice has a handful of groups, so this is never reached.</summary>
+    public const int MaxSuggestions = 20;
+
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>What the page offers, in the order it wants them shown. Distinct texts, already trimmed.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Suggestions { get; set; } = [];
+
+    /// <summary>Names the list of suggestions for a screen reader, already translated ("Groups already used").</summary>
+    [Parameter, EditorRequired] public string SuggestionsLabel { get; set; } = string.Empty;
+
+    /// <summary>The text the field holds; whatever the reader typed or picked.</summary>
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>The longest text the input accepts; the browser stops the typing.</summary>
+    [Parameter] public int? MaxLength { get; set; }
+
+    private bool _open;
+    private string _announcement = string.Empty;
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string DescriptionId => $"{Id}-description";
+
+    // The same combobox pattern as AppLookupField, written once more because the library renders a plain input.
+    private Dictionary<string, object?> Attributes => new()
+    {
+        ["id"] = Id,
+        ["role"] = "combobox",
+        ["aria-expanded"] = _open ? "true" : "false",
+        ["aria-autocomplete"] = "list",
+        ["aria-haspopup"] = "listbox",
+        ["aria-describedby"] = DescriptionId,
+        ["aria-invalid"] = HasError ? "true" : null,
+        ["aria-required"] = Required ? "true" : null,
+        ["autocomplete"] = "off",
+        ["maxlength"] = MaxLength
+    };
+
+    /// <summary>
+    /// Case and accents do not count when the suggestions are matched ("conhecimentos" finds "Conhecimentos Básicos",
+    /// "basicos" finds it too), the same normalization the Api uses to tell two groups apart.
+    /// </summary>
+    public static string Normalize(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        var decomposed = text.Trim().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(decomposed.Length);
+        foreach (var character in decomposed)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(character) != UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(character);
+            }
+        }
+
+        return builder.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+    }
+
+    /// <summary>The suggestions that contain the typed text, in the order the page gave them.</summary>
+    public static IReadOnlyList<string> Match(IReadOnlyList<string> suggestions, string? term)
+    {
+        var wanted = Normalize(term);
+        return [.. suggestions.Where(suggestion => wanted.Length == 0 || Normalize(suggestion).Contains(wanted, StringComparison.Ordinal))];
+    }
+
+    private Task<IEnumerable<string>> SearchSuggestionsAsync(string? term, CancellationToken cancellationToken)
+    {
+        var found = Match(Suggestions, term);
+        _announcement = found.Count == 0 ? string.Empty : $"{SuggestionsLabel}: {found.Count}";
+
+        return Task.FromResult<IEnumerable<string>>(found);
+    }
+
+    private Task OnOpenChanged(bool open)
+    {
+        _open = open;
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnValueChanged(string? value) => Commit(value);
+
+    // Typing is a value too: the page must see the text when the reader presses Save without leaving the field.
+    private Task OnTextChanged(string? text) => Commit(text);
+
+    private Task Commit(string? value)
+    {
+        if (string.Equals(Value, value, StringComparison.Ordinal))
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = value;
+
+        return ValueChanged.InvokeAsync(value);
+    }
+}

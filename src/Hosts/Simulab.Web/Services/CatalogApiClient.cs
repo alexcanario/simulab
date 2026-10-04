@@ -285,6 +285,67 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/exams/{examId}/editions/{editionId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-74 UC1: the edition's notice subjects in display order (the Api orders them, BR6).</summary>
+    public Task<ApiResult<IReadOnlyList<NoticeSubjectResponse>>> ListNoticeSubjectsAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<NoticeSubjectResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, NoticeSubjectsRoute(examId, editionId)), accessToken),
+            cancellationToken);
+
+    /// <summary>F-74 UC2.</summary>
+    public Task<ApiResult<NoticeSubjectResponse>> CreateNoticeSubjectAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        SaveNoticeSubjectRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<NoticeSubjectResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, NoticeSubjectsRoute(examId, editionId), body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-74 UC3.</summary>
+    public Task<ApiResult<NoticeSubjectResponse>> UpdateNoticeSubjectAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        Guid noticeSubjectId,
+        SaveNoticeSubjectRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<NoticeSubjectResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{NoticeSubjectsRoute(examId, editionId)}/{noticeSubjectId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-74 UC4: swaps the notice subject with its neighbour in the same group; "up" or "down".</summary>
+    public Task<ApiResult<bool>> MoveNoticeSubjectAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        Guid noticeSubjectId,
+        string direction,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(
+                WithJson(HttpMethod.Post, $"{NoticeSubjectsRoute(examId, editionId)}/{noticeSubjectId}/move", new MoveNoticeSubjectRequest(direction)),
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-74 UC5: a soft delete on the server.</summary>
+    public Task<ApiResult<bool>> DeleteNoticeSubjectAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        Guid noticeSubjectId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{NoticeSubjectsRoute(examId, editionId)}/{noticeSubjectId}"), accessToken),
+            cancellationToken);
+
+    private static string NoticeSubjectsRoute(Guid examId, Guid editionId) =>
+        $"{Base}/exams/{examId}/editions/{editionId}/notice-subjects";
+
     /// <summary>F-79 BR1: the seeded areas in display order; the names are the screen's.</summary>
     public Task<ApiResult<IReadOnlyList<AreaResponse>>> ListAreasAsync(
         string accessToken,
