@@ -103,6 +103,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `feature-ship` step 8b: run the architecture tests after writing the bumped `<Version>` and before committing it — a test that pins a version number goes red on the first bump (F-46: two `AppVersionTests` failed, `Failed: 2, Passed: 162`) | F-46 | |
 | ⏳ | agile | `[generic]` `version.js` writes `<Version>` to the root `Directory.Build.props`, while the `AppVersionTests` the project got from F-60 pin it to `Simulab.Api.csproj`: after F-47's ship `gate.js ship` was red on `main` and blocked F-48 and F-50 (B-21). The plugin should name where the version lives in one place (bootstrap or `/agile:sync`) so a test and the script cannot disagree | F-50 | |
 | ⏳ | agile | `[generic]` The Stop gate hook builds the worktree while a background `dotnet clean`/`build` loop of the same session runs in it, and both fail (the loop's runs come back empty). The gate should detect a `dotnet` build already running in the worktree and defer instead of reporting `RED` | F-48 | |
+| ⏳ | agile | `[generic]` The Stop gate SKIPS a diff with no code file, yet test projects read documents (here `VocabularyTests` reads `docs/glossary.md`, `ArchitectureOverviewTests` reads `docs/infra.md`): a docs-only edit can break them unseen until ship. The gate should run the test projects that read the changed docs, or treat those docs as code | F-67 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -904,3 +905,7 @@ From 0.0.111 to 0.1.0 (the plugin now numbers versions by what changed), run on 
 - Glossary: nothing to add (column and link lines already there).
 - Missing capabilities, captured as ideas (owner: yes): DocGen tool catalogue as F-69 (board 111), visual identity as F-70 (board 112).
 - Baseline: present. Docs command: declared. Plugin notes delivered: none. Build and suite not run: only Markdown changed.
+
+## 2026-10-04 - F-67 Data region decision
+- ⏳ plugin: agile [generic] — The Stop gate reported `agile gate SKIPPED: no code file changed since the main branch` on a docs-only diff, while `tests/Simulab.ArchitectureTests/VocabularyTests.cs:20` reads `docs/glossary.md` and `ArchitectureOverviewTests.cs:175` reads `docs/infra.md`; the architecture tests were run by hand (164 passed). Plugin note, row in the table above.
+- The refinement's premise check (Brazil adequate under Art. 45 GDPR since 2026-01-26) turned a second EU environment into one ADR. The workflow already asks for it: nothing to change.
