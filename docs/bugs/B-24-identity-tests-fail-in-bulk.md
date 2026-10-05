@@ -28,7 +28,68 @@ On 2026-10-05, at the ship of F-51, the first `node gate.js ship` run (worktree 
 A red full run means a real defect: the same tree gives the same result on a rerun, or the output says why a test failed.
 
 ## Cause
-Not verified.
+Reproduced on 2026-10-05 in this worktree (`bug/B-24`, `ee9c89e`, same code as `main` `d49fa08`). The cause is in
+the tests' process, not in the product code and not in PostgreSQL: the test process runs out of thread-pool
+threads while 24 Api hosts start at once, and Npgsql's 15-second open timeout expires while the connection's
+continuation waits for a thread.
+
+**Measurements** (logs kept in the session scratchpad; machine: 24 cores, Docker 29.8.2):
+
+| Setup | Runs | Result |
+|---|---|---|
+| `dotnet test Simulab.slnx`, nothing else running | 3 | 3 green (2215 tests, 88-92 s; Identity 1 m 27 s) |
+| full suite + 3 extra `Simulab.Identity.Tests` processes at once (copies under `bin/stress/`) | 3 rounds, 12 Identity processes | round 1 green; round 2: one process **24 failed**, another 1 failed; round 3: one process **24 failed** |
+| full suite + 6 extra Identity processes (3 with `System.Threading.ThreadPool.MinThreads=256`) | 3 rounds, 21 Identity processes | all green, in both halves: the A/B did not separate them |
+
+Under load Identity takes about 3 m instead of 1 m 27 s, so the load is real; the failure shows in about 1 process
+run in 6 under that load.
+
+**What the failures have in common** (both 24-failure runs here, and the F-51 gate run of 2026-10-05):
+- Always exactly 24 tests: the number of test classes xUnit runs at once on this 24-core machine.
+- All 24 end inside 80 ms of each other: `00:00:36.23`-`36.31` here and `00:00:36.00`-`36.02` in F-51 (the first
+  wave of classes); `01:57.26`-`01:57.29` in the other run.
+- All 24 messages are the same: `InvalidOperationException: An exception has been raised that is likely due to a
+  transient failure` → `NpgsqlException: The operation has timed out` → `TimeoutException`, thrown from
+  `NpgsqlTimeout.Check()` inside `NpgsqlConnector.RawOpen`, while the Api host starts
+  (`src/Hosts/Simulab.Api/Program.cs:118` → `ModuleMigrationExtensions.MigrateModuleAsync`
+  (`src/BuildingBlocks/Simulab.Persistence/ModuleMigrationExtensions.cs:23`) → `IHistoryRepository.CreateIfNotExistsAsync`),
+  reached from the test's synchronous first use of the factory (`WebApplicationFactory.StartServer()` →
+  `IHost.Start()`, e.g. `tests/Modules/Identity/Simulab.Identity.Tests/IdentityApiTests.cs:38`).
+- The tests that failed are unrelated to each other, as in F-51: what they share is the moment their host started.
+
+**Why it is the thread pool and not the database** (Npgsql 10.0.3 source, `src/Npgsql/Internal/NpgsqlConnector.cs`):
+- `RawOpen` (line 947) first awaits `ConnectAsync`, whose socket connect is bounded by a
+  `CancellationTokenSource.CancelAfter(timeLeft)` (lines 1428-1432). A database or Docker port that does not answer
+  makes that connect fail with `Failed to connect to <endpoint>` (line 1456).
+- Our exception is not that one. It is thrown by `timeout.CheckAndApply(this)` at line 975, **after** the socket
+  connected. So the connect completed, but by the time its continuation ran the 15 seconds were gone, and the
+  `CancelAfter` timer, whose callback also needs a pool thread, had not fired either. Nothing ran for 15 seconds:
+  that is a starved thread pool.
+- The only non-Npgsql failure seen under load says it in its own words: `RedisTimeoutException: Timeout performing
+  SCAN (5000ms) ... WORKER: (Busy=25,Free=32742,Min=24,Max=32767), POOL: (Threads=25,QueuedItems=64,...)`
+  (`ClientRateLimiterTests.Keys_AreUnderThePrefixWithATimeToLiveWithinTheWindow`): 25 busy worker threads against a
+  minimum of 24, and 64 work items waiting.
+
+**Who holds the threads.** Every Api test class (`ApiHostTests`, `tests/Simulab.Testing.ApiHost/ApiHostTests.cs`)
+gets one host per test, and the first `Factory.Services` / `Factory.CreateClient()` starts it synchronously:
+`WebApplicationFactory.StartServer()` blocks the calling thread until the host, migrations included, has started.
+With 24 classes starting at once, 24 threads block while the work that would release them (the socket
+continuations, the timers) waits in the pool's queue. The pool adds threads slowly when it sees starvation; on an
+idle machine that is fast enough, on a loaded one it is not, which is why the same tree is green alone and red
+under other sessions' runs (F-51 ran with 19 worktrees on the machine).
+
+**Same mechanism elsewhere.** Every test project that starts a `WebApplicationFactory` synchronously is exposed
+the same way: `Simulab.Catalog.Tests` (`CatalogApiTests`, on `ApiHostTests`), `Simulab.Api.Tests` (`ApiFactory`,
+its own `ApiHostTests`), and the Web host tests (`Simulab.Web.Tests`, 9 files under `Auth/`, `Layout/` and the
+root). None of them failed in these runs (Identity starts by far the most hosts: one per test, 425 tests). No
+product code takes part: the product's own start is asynchronous.
+
+**Not verified.** The A/B (raised minimum vs default) produced no failure in either half, so the fix is not yet
+proven by comparison; the 3 failing process runs all had the default minimum. Proving the fix is the build's job
+(see `## Open questions`).
+
+**On the B-19 premise** (`docs/infra.md`, "Measured times": "a red full run is now a real failure"): it is still
+false under load. This failure needs the tests to fix, not a rerun.
 
 ## Fix
 
