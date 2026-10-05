@@ -95,7 +95,7 @@ The per-client limits protect registration, email resends, password reset and si
 ## Change notes
 
 ## Validation script
-Needed to validate: nothing beyond the local app host and its Redis container — the owner; in place now. Stop the app host of any other checkout first (ports collide). The app host has not been run by Claude for this item (the workflow forbids starting the local database outside the test containers without the owner's yes); this script is its first run.
+Needed to validate: nothing beyond the local app host and its Redis container — the owner; in place now. Stop the app host of any other checkout first (ports collide). Claude ran the app host of this worktree on 2026-10-05, with the owner's yes (it starts the local PostgreSQL, Redis and Mailpit containers), and checked steps 2-5 against the Api directly (HTTP, no browser): 10 registrations answered 202, the 11th 429 `registration.rate_limited`; after `aspire resource api restart` (new process id, same Redis) the next one still answered 429. Not checked by Claude: the registration page and the sign-in (no admin credentials entered), the keyboard pass and the Redis-down step 7 — they stay with the owner.
 
 1. In the worktree, start the app host: `dotnet run --project src/Hosts/Simulab.AppHost` (Git Bash and PowerShell 7 alike) → the dashboard shows `api`, `web` and `redis` running.
 2. On the registration page, submit 10 registrations with different emails from the same browser within an hour → each is accepted (generic "check your email" message). Do the last one with the keyboard only (Tab through the fields, Enter to submit).
