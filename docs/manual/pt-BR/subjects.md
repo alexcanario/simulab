@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: pt-BR
-features: [F-79]
-updated: 2026-10-04
+features: [F-79, F-51]
+updated: 2026-10-05
 ---
 # Disciplinas e tópicos
 
@@ -13,6 +13,13 @@ lista.
 ## Quem pode usar
 Só uma conta com a permissão "Gerenciar o catálogo" — o papel Administrador a tem — abre as páginas de
 Disciplinas. Quem não a tem vê Página não encontrada, e o menu não mostra a entrada Disciplinas.
+
+## A lista com que você começa
+Um Simulab novo já traz 23 disciplinas e 70 tópicos para concursos de guarda municipal, de Português e Matemática a
+Direito Penal e Procedimentos Policiais, cada uma com sua área. A disciplina **Conhecimentos locais** tem um tópico
+por cidade do catálogo (Curitiba, Manaus, Salvador, Recife, Goiânia e Maceió). Trate-as como qualquer outra
+disciplina: renomeie, mova ou apague e a mudança fica. Se já existia uma disciplina com o mesmo nome, ela é mantida
+como estava e só os tópicos que faltam são acrescentados nela.
 
 ## Como fazer
 ### Ver as disciplinas

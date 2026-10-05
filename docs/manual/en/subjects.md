@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: en
-features: [F-79]
-updated: 2026-10-04
+features: [F-79, F-51]
+updated: 2026-10-05
 ---
 # Subjects and topics
 
@@ -13,6 +13,14 @@ content points at this list.
 ## Who can use it
 Only an account with the permission "Manage the catalog" — the Admin role has it — can open the Subjects
 pages. Everyone else gets Page not found, and the menu has no Subjects entry.
+
+## The list you start with
+A new Simulab already holds 23 subjects and 70 topics for municipal guard exams, from language and
+mathematics to criminal law and police procedures, each with its area. Names are content, so they stay in
+Portuguese in every language. The subject **Conhecimentos locais** has
+one topic per city of the catalog (Curitiba, Manaus, Salvador, Recife, Goiânia and Maceió). Treat them like any
+other subject: rename, move or delete them and the change stays. If a subject with the same name already existed,
+it is kept as it was and only the missing topics are added under it.
 
 ## How to
 ### See the subjects
