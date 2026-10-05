@@ -91,6 +91,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 - A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
 - A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
+- A sweep for a pattern across the solution takes its list of places from the guard test run before the fix, not from a hand-made grep: the refinement of B-23 listed nine places and the guard found a tenth (B-23).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
