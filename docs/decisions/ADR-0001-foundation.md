@@ -123,7 +123,7 @@ Deferred by the owner on 2026-09-17; each returns when its epic is refined.
 - ENEM scoring (IRT item parameters).
 - Essay and open-answer grading.
 - Institutions (activates the dormant `TenantId`).
-- Portugal: which exams and when; EU region for GDPR.
+- Portugal: which exams. When: after v1; data region: Brazil South for every user, no EU region (ADR-0003, 2026-10-04).
 - Dedicated OCR service: decided after the first real import.
 - Concrete trial values: durations, limits, list of plans.
 

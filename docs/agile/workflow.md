@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.1.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.7.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -69,7 +69,7 @@ Before anything is written, Claude checks that the skill it loaded and the insta
 | 3. Access | Authentication (for `web-api`, question 10a: how the API's consumers authenticate), RBAC, the identity bridge to a neighbouring system's users, entitlements/plans (usage limits, trials, time-bound grants, promo codes), admin back office |
 | 4. Integration | Messaging (none, in-process, broker), external services, file storage, and — when a feature calls a model — the LLM provider and where it runs, its cost ceiling and how it is faked in tests |
 | 5. Experience | UI stack, languages (default pt-BR, pt-PT, en), accessibility, the **visual identity** (23a: a file, a website, an image or three basic questions), the design system library, icon family, how an item is edited — or, for a conversational UI, the language it answers in, how a proposal is corrected and a states gallery. The UI kit and gallery are no longer a question: an app with screens always gets one, built from the identity. Profile `web-api` has no screens: it skips the UI stack, the language switch (21), accessibility (22) and everything about the visual identity and the UI, and question 20 covers only the text the API sends to people |
-| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, for a desktop app where its installed copies update from (question 26b), the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
+| 6. Operations | Observability, hosting, CI, board (GitHub or Azure), environments, the client's cloud account of each non-local one (question 25a), for a desktop app where its installed copies update from (question 26b) and, from a share, whether every merge goes to testers as a beta (question 26c), the house conventions when the code lives beside an existing system, and — always — where the item worktrees live (`D:\wt\<repository>`, or `C:\` without a D: drive) |
 | 7. Quality | Test budget per level, coverage expectations, architecture tests, models per activity, and evals when a feature calls a model (which model runs the cases, with or without the no-plugin arm) |
 | 8. Documentation | Technical docs generated from the code (entity diagrams, data dictionary, route map, module diagram, and a tool catalogue when the app exposes tools to a model), the system prompt as a versioned file, and a hand-written architecture overview |
 
@@ -109,6 +109,9 @@ stateDiagram-v2
     [*] --> idea: /agile:idea
     idea --> refining: /agile:refine
     refining --> approved: you say "aprovo F-n"
+    idea --> cancelled: a duplicate, chosen at the similar-item card
+    refining --> cancelled: a duplicate, chosen at the similar-item card
+    cancelled --> [*]
     approved --> building: /agile:build
     building --> validating: coverage table + validation script
     validating --> building: a fix you reported
@@ -121,12 +124,15 @@ stateDiagram-v2
 
 | Status | What happens | Who moves it |
 |---|---|---|
-| `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. A cause it names comes with its evidence (the command and the output line that shows it); without one, `## Start` says `Cause not verified: measure it at /agile:refine`, with the symptom seen. | Claude |
+| `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. A cause it names comes with its evidence (the command and the output line that shows it); without one, `## Start` says `Cause not verified: measure it at /agile:refine`, with the symptom seen. For a feature or bug, before anything is created Claude asks where it lives: one question with the epic it suggests first (an open epic whose goal fits, with the reason), then "New epic" and "No epic"; a new epic is created only after your yes, on the board and as `docs/epics/<slug>.md` (status `draft`). `/agile:epic` and a text that is itself an epic ask nothing. | Claude |
 | `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number; an answer that folds an existing open item's scope into this one instead first checks that item — `git worktree list` for its folder and its file or issue for its status. Any status beyond `idea` anywhere blocks an automatic fold: Claude names the other item's status and worktree path and you decide, fold anyway (recorded in `## Decisions` with the reason) or drop it and leave the other item untouched. Still `idea` everywhere, with no worktree: it folds in exactly as before, no new question): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. A list you approved or edited in the chat (a catalogue, a set of options, numbered choices) is written whole into the item's `## Approved list`, in the approved order with your edits applied, and the file never says "the list shown in the refinement"; before asking for your approval Claude re-reads the file for phrases that send the reader to the chat, and pastes the list in where it finds one. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: it continues in the worktree the refinement created — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree; Claude then reads every file it names, runs the gate and quotes the real counts, and answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
+| `building` | `/agile:build`: first it finds the item's worktree by its branch and says `Worktree of <id>: <path> [<branch>]` (`(created now)` when an older item had none); the status and the clean-tree check are read there, never in the main checkout, and it continues in that worktree — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree; Claude then reads every file it names, runs the gate and quotes the real counts, and answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
 | `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, app version bumped, merge — typing the command is your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
+| `cancelled` | An exit, not a step: only from `idea` or `refining`, only as a duplicate, chosen at the card `/agile:refine` shows when it finds a similar item (below). The file stays with `status: cancelled` and the line `Duplicate of <id> (<date>): <where the improvement went>`, so its number is never reused; the session status and the backlog head ignore it. On GitHub the issue is closed as a duplicate of the other and its project item archived (never Done: that would show undelivered work as delivered); on Azure Boards the state is `Removed`; with no board its row in `docs/agile/backlog.md` is struck through. | You, at the card |
+
+**Similar items.** Before `/agile:idea` takes a number, and before `/agile:refine` creates a branch, Claude reads every item (`docs/features`, `docs/bugs`, the item file in each worktree, where an item in progress keeps its current status, and the board, open and closed, `done` and `cancelled` included) and judges which ones cover the same subject in other words. It never uses a keyword rule. With no candidate it says `No similar item (<N> items read).` and goes on. With candidates (at most 3, a reason each) it asks one card, the recommended action first. To improve the existing item: an `idea` gets `Added <date>: <text>` in its summary; a `refining` item gets the text as an open question in its own worktree (Claude says the path); an `approved`, `building` or `validating` item is not touched and Claude prints `/agile:change <id>` with the text for you to type; a `done` item is reported as `Already delivered in <id>`, and you create nothing or create the new item with a line linking the `done` one. In `/agile:refine` the card has three actions: carry the improvement to the other item and cancel this one (a resumed refinement also loses its worktree and branch), keep both (a line in `## Decisions`), or fold the other into this one (the check of its status and worktree of section 14.18). `/agile:epic` and `/agile:discuss` search once for the whole list and show every collision in one card; `/agile:autopilot --assume` ends with the question, since a duplicate is your decision.
 
 Small fixes found during validation are done right away, without leaving `validating`.
 
@@ -175,17 +181,23 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 | `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea`. On a `web-app`/`website`, a mobile app epic follows the `mobile-client` complement (section 12) |
 | `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
-| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below) |
+| `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below). `/agile:publish --beta` only reruns a desktop app's beta of `main` when the ship's beta step failed (see "Desktop updates") |
 
 **Releasing: `/agile:publish`.** A ship bumps the app's `<Version>` and merges; it does not build anything you can hand to someone. `/agile:publish` turns the version already on `main` into a release. It runs from the main checkout and stops, changing nothing, unless `main` is clean, level with `origin` and `v<Version>` exists neither locally nor there. Claude shows the plan once (version, previous tag, the items merged since it, the projects and runtimes) and goes on: typing the command is the authorization for the commit of the notes, the tag, the push and the GitHub Release. It does not rerun the tests (the ship ran the full suite on what `main` holds); a compile error still fails `dotnet publish -c Release` (or `dotnet pack`), and then nothing is committed or tagged. The site of a Hybrid app in its own repository also packs its two packable projects, `<App>.Contracts` and `<App>.Shared`, at that same version and pushes them to its GitHub Packages feed after the tag (`--skip-duplicate`, so a rerun is safe), reading the token from `GITHUB_PACKAGES_TOKEN`; without the token, or with an `origin` outside github.com, the packages are left out with that reason and the site is still published.
 
-What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one (with an update source declared in `docs/infra.md`, the head is packed by Velopack instead of zipped: see "Desktop updates" below); `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit.
+What is packaged follows the profile: `web-app` and `website` → `<App>.Web`; `monolith`, `modular-monolith` and `web-api` → `<App>.Api`; `desktop` → the head, self-contained, once per runtime in its `<RuntimeIdentifiers>` (else this machine's), plus `<App>.Api` when there is one (with an update source declared in `docs/infra.md`, the head's Windows runtimes, and an Avalonia head's `linux-x64` as an AppImage, are packed by Velopack instead of zipped: see "Desktop updates" below); `mobile` → `<App>.Api` plus the Mobile head as a signed Android `.aab`, and a web app with the `mobile-client` complement → `<App>.Web` plus the same `.aab` (see "Store publishing" below); `microservices` is not supported. All projects of one release carry the same `<Version>`. The package drops `appsettings.Development.json` and the project's own `.xml` documentation file and keeps the `.pdb` files. A WinUI 3 head without `<EnableMsixTooling>true</EnableMsixTooling>` stops the plan: it would publish an exe that crashes on start. A linux or macOS runtime zipped on Windows loses the execute bit, and the report says to `chmod +x` it. The notes list one line per merge on `main` since the previous `v*` tag (`Feature F-3: …`, `Bug B-2: …`, other branches under "Other"), in English; the tag carries the same text. If the push or the GitHub Release fails after the tag, Claude names the exact command to rerun and never deletes the tag or the commit.
 
 **Deploying: `/agile:publish <environment> [v<x.y.z>]`.** With an environment named, the release is followed by a deploy of it, by the command that `docs/infra.md` declares for that environment: its environments table has three more columns, `Deploy command` (`not declared` when there is none), `Check URL` (optional) and `Version (deployed on)`, which only `/agile:publish` writes. Typing the command is the authorization for that deploy too. Before it runs Claude shows the environment, the version deployed there now, the version to deploy, the command and the names (never the values) of the secrets it needs, and goes on. Three shapes: a new version (`/agile:publish staging` with no tag yet) runs the release above first, and a failed release deploys nothing; a **promotion** (`/agile:publish production` when `v<Version>` is already tagged) deploys that tag with no new package, notes or tag; a **rollback** (`/agile:publish production v0.3.0`) deploys an older tag, with no extra question. With no environment named, Claude lists the environments with their recorded versions and asks which one, or "none" (the release only). An environment whose command is `not declared` deploys nothing: Claude says where to declare it, and a new version is still released.
 
 Every deploy runs in one fixed worktree, `<worktree root>/deploy`, detached at the tag (made the first time, moved with `git checkout --detach` after), so your main checkout is never switched and a tool that keys on the folder path (Aspire names its compose project after it) replaces the running app instead of starting a second one. The command gets `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` and `AGILE_ARTIFACTS` (the package folder of that version, rebuilt from the tag when it is missing and the command is not the Aspire recipe); its output is saved whole outside the repository, with the value of every secret blanked, and its exit code decides success. The command runs in the machine's default shell (cmd.exe on Windows, so `%AGILE_TAG%`; /bin/sh elsewhere, `$AGILE_TAG`) and is limited to 30 minutes; two deploys never run at once (a lock file next to the deploy worktree), and one that finds tracked files changed in that worktree stops before running. A secret listed in `## Expected secrets` with "environment variable" and this environment is only checked by name: the variable must be set in the shell that started Claude (for the Aspire recipe it is `Parameters__<name>`), or the publish stops before anything runs. With a `Check URL`, after exit 0 the URL is polled for HTTP 200 for up to 60 seconds; no 200 fails the deploy. On success the environment's `Version (deployed on)` cell becomes `v<x.y.z> (YYYY-MM-DD)`, committed on `main` (`docs(release): v<x.y.z> deployed to <environment>`) and pushed. On a failure nothing is recorded and **nothing is rolled back by itself**: the report quotes the output's tail and gives the exact command that redeploys the version recorded before (`/agile:publish production v0.3.0`). The plugin never deletes old images (it counts the `aspire-deploy-*` tags and names the commands) and never runs `docker compose down -v`, which would delete the volume that keeps the app's Data Protection keys and with it every signed-in session. `/agile:sync` lists a project whose `docs/infra.md` lacks the `Deploy command` column as a missing capability and offers to capture an item; it never writes that file.
 
 **The deploy pipeline (GitHub Actions).** A project whose `origin` is on github.com and whose `docs/infra.md` declares a deploy command for a non-local environment gets `.github/workflows/deploy.yml` and its script `.github/scripts/agile-deploy.js`, written by `/agile:bootstrap` (`node sync.js pipeline write`). Pushing the tag `v<Version>` (which `/agile:publish` does) deploys it to the first environment that is neither `local` nor production, `staging` in the usual table, or to production when there is no other; the name is written once, as a literal, when the file is generated. Production is promoted by a manual run (Actions, Deploy, "Run workflow": `environment` and an existing `tag`, so a rollback is the same run with the old tag) or locally by `/agile:publish production`. What the run deploys is the **same `Deploy command` of the same row** that the local command runs, read from `docs/infra.md` when the run starts and never copied into the workflow, so the two cannot drift: edit the table, not the YAML. The job declares `environment: <name>`, so the secrets live in the GitHub environment of that name and you can add required reviewers there (the plugin never creates an environment, a reviewer or a secret, and never reads a value); it checks the tag out with its history, installs the .NET SDK from `global.json`, sets `AGILE_ENVIRONMENT`, `AGILE_VERSION`, `AGILE_TAG` and `AGILE_ARTIFACTS` (rebuilt from the tag when the command uses it), and polls the `Check URL` for 200 for up to 60 seconds. Every secret that `## Expected secrets` lists with "environment variable" for a non-local environment is passed from `secrets.<name>`; one that has no value stops the run **before** the command, naming it (values are never printed, and a value in the command's output is blanked). Runs of one environment never overlap, and the workflow holds read-only `contents` permission and uses only `actions/checkout` and `actions/setup-dotnet`. A failed command or check fails the run, nothing is rolled back, and the run summary names the rollback; a success prints `v<x.y.z> deployed to <environment>` and **commits nothing**: `Version (deployed on)` is still written only by a local `/agile:publish`. Before a local `/agile:publish <environment>` that will push the tag, Claude says that the pipeline also deploys it to its target (and, when that is the same environment, that the two run at the same time and are not serialized: the concurrency of the workflow queues only its own runs); typing the command stays the authorization. The file is yours once written: add a step before "Deploy" for any tool the command needs besides the SDK and what the Ubuntu runner has (the command runs in `/bin/sh` there, so `%AGILE_TAG%` forms do not work). `/agile:sync` never writes it: a project with a declared command and no workflow gets "Deploy pipeline" as a missing capability and the offer to capture an item, and one that has it sees a newer template, or a secret added to the table, as a `manual` difference to merge by hand. Only GitHub Actions is supported. Example 14.36.
+
+**Deploying to the client's cloud account (`## Cloud accounts`, #66).** The repository, the board, the tag, the GitHub Release and the package feed stay in your GitHub; only the deploy goes to the account of the client the project is built for. `docs/infra.md` has a section `## Cloud accounts` with one row per non-local environment: `Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region`. `Cloud` is `azure`, `aws`, `gcp`, `other`, or `none` (a host with no cloud account, such as the compose recipe on your own machine). The ids are not secrets and are written there; a secret never is. An environment that declares a deploy command and has no row stops `/agile:publish` (and `--plan`) before anything runs, naming the row to add; two rows for one environment stop it too. Quiz question 25a writes the rows at bootstrap (client and cloud; the ids may stay blank until the client gives them, and the publish stops until then), and `/agile:sync` offers the section to a project without it, one blank row per non-local environment, never inventing an id.
+
+For `azure`, Tenant and Subscription must be GUIDs (a domain name such as `contoso.onmicrosoft.com` is refused). The plugin keeps one `az` login per subscription in `<your home>/.agile/azure/<tenant>/<subscription>`, outside every repository, so two clients, or staging and production of one client, never share an active subscription and your own default `az` login is never touched. Before the deploy command, and already in `--plan` (so a missing login stops before the tag is pushed), it asks `az account show` in that folder and compares `tenantId` and `id` with the row, ignoring case (a guest's `homeTenantId` is never compared). No login in the folder: it stops and prints the one-time login, `AZURE_CONFIG_DIR="<folder>" az login --tenant <tenant>` for Git Bash and a PowerShell form that does not stay set. Logged in with another subscription active: the plugin runs `az account set` in that folder itself and checks again. The login cannot see the subscription, or sees another tenant: it stops with the declared and the active account (names and ids) and asks you to get access from the client or to correct the row. Then the command runs with every inherited `AZURE_*`, `ARM_*` and `Azure__*` variable removed (the plan lists their names, never a value) and with `AZURE_CONFIG_DIR`, `AZURE_EXTENSION_DIR`, `Azure__TenantId`, `Azure__SubscriptionId`, `Azure__CredentialSource=AzureCli` and, when the row fills them, `Azure__ResourceGroup` and `Azure__Location`: what `aspire deploy` reads, so the account is the row's and nothing else on the machine can pick another one (measured: the .NET `AzureCliCredential` honors `AZURE_CONFIG_DIR`, and an environment variable wins over a value saved in the AppHost's user secrets). `aws`, `gcp` and `other` are shown in the plan and the output as "not checked by the plugin" (#68); `--plan` and `deploy --list` show client, cloud and account for every environment.
+
+What to ask the client's administrator (the section's comment in `templates/infra.md` says the same): for your machine, you as a guest in their tenant with the role `Contributor` on the subscription, plus `Role Based Access Control Administrator` limited to the roles the app's managed identities need when the deploy creates role assignments (an Aspire Azure deploy does); for the pipeline, an app registration in their tenant with the same roles and a federated credential for `repo:<owner>/<repo>:environment:<environment>`. With an `azure` row the generated `deploy.yml` also logs in with `azure/login@v3` by OIDC, from the GitHub environment's variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` (variables, not secrets; the step is skipped when `AZURE_TENANT_ID` is empty, so a run to another environment is not affected), the job's permissions are `contents: read` and `id-token: write`, `docs/infra.md` is read from the commit that holds the workflow (so a rollback to a tag from before the section is checked against today's row), and `agile-deploy.js` stops before the command when the login does not match the row. That check catches a misconfiguration; it is not the security boundary: a manual run can start from any branch and gets the same federated subject, so give every Azure GitHub environment a deployment protection rule, "Selected branches and tags" with the tag pattern `v*` only, and required reviewers on production. `/agile:sync` offers the step, the permissions and the sparse-checkout line together with the new `agile-deploy.js` to a project whose workflow lacks them, and reports "login step without the check" for a workflow that logs in with an old script; the workflow stays yours, never written over. Example 14.47.
 
 The plugin ships one recipe, for "containers + Aspire" (every profile that can have an AppHost: `monolith`, `modular-monolith`, `web-api`, `microservices`, `web-app`, `website`; the profile's "Deploy recipe" section has the exact lines): the deploy command is `aspire deploy --apphost src/<App>.AppHost/<App>.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`, which builds the container image and runs `docker compose up -d` for that environment. The AppHost declares one compose environment per environment name and pins each external port from its `appsettings.<Environment>.json` (staging and production run side by side, on `5081` and `5080` for example), each project resource sets `ASPNETCORE_ENVIRONMENT`, publishes only its `http` endpoint, and keeps the Data Protection keys in a named volume per environment, so a redeploy keeps cookies and antiforgery tokens valid. The Aspire CLI and every Aspire package of the AppHost are the latest stable and carry the same version (checked before the command runs; a mismatch stops with both versions). A `mobile` project has no AppHost: its `<App>.Api` is deployed only by a command you declare, and its `.aab` is never deployed. Docker must be running on the machine that deploys. Another target (Azure Container Apps, a server over SSH) is a command you declare in the same column; the GitHub Actions pipeline is #51.
 
@@ -281,6 +293,8 @@ Details:
 `CLAUDE.md` has a `Board:` line: GitHub Issues + Projects (`gh`), Azure Boards (`az boards`), or none (then `docs/agile/backlog.md` is used). Mapping: epic → feature. No tasks per role. The feature file keeps the board id; the merge closes the work item.
 
 Closing the issue is not trusted alone: at ship, after closing, Claude also sets the board's Status field to Done explicitly and reads it back, because a project's own automation for that can miss (seen once, cause unknown). A read-back that still shows something else is retried once, then reported with the exact command to fix it by hand; the ship does not stop or undo the merge over it — the file already says `done`. An item not yet on the project board is added first. Azure Boards gets the same read-back on `System.State`.
+
+A duplicate cancelled at `/agile:refine` is neither deleted nor Done: GitHub closes the issue with `gh issue close <n> --duplicate-of <m>` and archives its project item, Azure Boards sets `Removed` with a comment naming the other item, and with no board the backlog row is struck through with `cancelled, duplicate of <id>`.
 
 An issue body is only ever replaced whole. `gh issue edit --body` replaces the entire body with what it is given, so a partial text there silently deletes the rest of the item (it happened in legacy-lens B-1). Claude writes the full item text to a file, sends it with `gh issue edit <id> --body-file <file>`, and reads the body back to compare. An Azure Boards description is likewise always sent whole, from a file.
 
@@ -505,7 +519,13 @@ tests/
 └── <App>.Tests/                      backend tests, only with an API
 ```
 
-**Desktop updates** (`desktop`; the source is quiz question 26b, a line of `docs/infra.md`). The updater is Velopack, for the three heads, Windows only, stable channel only, unsigned. `docs/infra.md` says `Update source:` a network share, an https URL or `not declared` (then the app stays a zip). The app reads it from `Updates:Source` in its `appsettings.json`; run from the IDE or a publish folder it checks nothing. At start the app checks the source in the background and downloads what is new (only the changed part, a delta, when one exists); then it asks "Update now / Later". "Update now" restarts on the new version; "Later" applies it when the app is closed; an app killed after a download applies it at its next start. A failed check is logged and shown to nobody. With an API, a `426` opens "Update required" with "Update now" only. `/agile:publish` packs each Windows runtime with `vpk` (Setup.exe, a portable zip, the full package, the delta, the feed index), sends the feed to a share after the tag, and for an https URL lists the files to copy by hand; the GitHub Release carries Setup.exe and the portable zip. The first release says: install once with Setup.exe (a zip copy does not update itself) and SmartScreen warns because the installer is unsigned ("More info", then "Run anyway"). The bootstrap writes the updater when the source is declared; an older project is told by `/agile:sync` ("Desktop updates") and captures an item. Example 14.44.
+**Desktop updates** (`desktop`; the source is quiz question 26b, a line of `docs/infra.md`). The updater is Velopack, for the three heads on Windows and for an Avalonia head on Linux (below), a stable channel and an opt-in beta channel (Windows only), unsigned unless `docs/infra.md` declares Code signing (below). `docs/infra.md` says `Update source:` a network share, an https URL or `not declared` (then the app stays a zip). The app reads it from `Updates:Source` in its `appsettings.json`; run from the IDE or a publish folder it checks nothing. At start the app checks the source in the background and downloads what is new (only the changed part, a delta, when one exists); then it asks "Update now / Later". "Update now" restarts on the new version; "Later" applies it when the app is closed; an app killed after a download applies it at its next start. A failed check is logged and shown to nobody. With an API, a `426` opens "Update required" with "Update now" only. `/agile:publish` packs each Windows runtime with `vpk` (Setup.exe, a portable zip, the full package, the delta, the feed index), sends the feed to a share after the tag, and for an https URL lists the files to copy by hand; the GitHub Release carries Setup.exe and the portable zip. The first release says: install once with Setup.exe (a zip copy does not update itself) and SmartScreen warns because the installer is unsigned ("More info", then "Run anyway"). The bootstrap writes the updater when the source is declared; an older project is told by `/agile:sync` ("Desktop updates") and captures an item. A head packed for more than one Windows runtime puts each on its own channel (`win-x64`, `win-arm64`), so their feeds do not overwrite one another; with one runtime the channel stays Velopack's default and installed copies are not touched. Example 14.44.
+
+**Beta channel** (`desktop` with a share; quiz question 26c, asked only after a share). `docs/infra.md` says `- Beta channel: every merge` or `off` (no line is off). With `every merge`, every `/agile:ship` ends by packing `main` as `<Version>-beta` (`0.5.1-beta`) on Velopack's beta channel and sending it to the share: no tag, no GitHub Release, no notes. A tester installs `<App>-beta-Setup.exe` from the share once; from then on that PC takes each new beta, by a delta, and never a stable release, even a newer one. The beta install replaces the stable one on that PC (one channel per PC); running the stable `<App>-win-Setup.exe` takes it back to stable. App users on stable never see a beta. The share keeps the five newest betas (each is 50-120 MB); a tester away for more than five merges downloads the whole package once. A beta already on the share is not sent again. A failed beta (share unreachable, a `vpk` error) never undoes the merge: the ship report shows the error and the rerun, `/agile:publish --beta`. An https source refuses the beta (the plugin sends nothing there), and the step runs on Windows only. With an API, a beta reports `0.5.1` in `X-App-Version`, so the forced-update gate treats it as that number. An older project with a share is told by `/agile:sync` ("Desktop updates, beta channel") and adds the line itself: the app needs no change. Example 14.50.
+
+**Desktop updates on Linux** (`desktop` with an Avalonia head that lists `linux-x64`). `/agile:publish`, still on your Windows machine, packs `linux-x64` as `<App>.AppImage` with `vpk "[linux]"`, on Velopack's channel `linux`, beside the Windows feed in the same share; the GitHub Release carries the AppImage too. The Linux app reads its own line, `- Update source (linux): <the share's path as mounted on Linux, or https://...>`, which `/agile:publish` writes into the Linux package's `appsettings.json`: a Windows share name means nothing on Linux. With no such line an https source serves both; a share stops the publish with the exact line to add. The head needs a PNG icon at `Assets/app-icon.png` (an AppImage requires one; the foundation makes it from the visual identity); without it the publish stops naming the path. A Linux user puts the AppImage in `~/Applications`, runs `chmod +x` and starts it; from then on it updates itself with the same dialogs, "Later" and kill behavior as on Windows. The first update downloads the full package, the next ones only what changed. The machine needs `libfuse3`, and Avalonia needs `libice6` and `libsm6` (a desktop distribution has them; a minimal WSL Ubuntu does not). The first release with an AppImage says all this in its notes. `linux-arm64` stays a zip; WinUI 3 and MAUI have no Linux; macOS is a later item (it packs only on a Mac); there is no Linux beta. The bootstrap asks nothing new. Example 14.51.
+
+**Code signing** (`desktop` with an Update source; a section of `docs/infra.md`, no quiz question). Unsigned, Windows names the installer's publisher "Unknown publisher", Smart App Control on Windows 11 may block it, and SmartScreen reputation starts from zero at every release. `## Code signing` says `- Code signing:` `artifact-signing` (Microsoft's Artifact Signing: organizations in the USA, Canada, EU and UK, individuals in the USA and Canada), `signtool` (a certificate from a certificate authority, on a token or a cloud HSM), `template` (a vendor's own signing command) or `none` (no line is `none`: unsigned, as before). Each mode reads one environment variable of the shell you publish from: `VPK_AZURE_TRUSTED_SIGN_FILE` (the path of Artifact Signing's `metadata.json`, outside the repository), `VPK_SIGN_PARAMS` (signtool's parameters, the certificate by `/sha1 <thumbprint>`, never `/p` with a password, nor a token PIN in `/kc`) or `VPK_SIGN_TEMPLATE` (the command, with `{{file}}`). The value is never written in `docs/infra.md` or shown in the chat. `vpk pack` signs Setup.exe, the app's files and `Update.exe`; `/agile:publish` gives it only the declared variable (a variable left in your shell for another project, or for a project that says `none`, signs nothing here), then checks Setup.exe, the app's `.exe` and `Update.exe` with Windows' own signature check and names the publisher in its report. It stops before anything is committed or tagged when the variable is unset, holds `/p`, the `metadata.json` is missing or inside the repository, the machine is not Windows, or a file is not validly signed: a declared mode is never published unsigned. `artifact-signing` also needs `- Signing account: <tenant id>/<subscription id>`, whose `az` login lives in the same folder per account as a deploy's (`~/.agile/azure/<tenant>/<subscription>`, section 5, `## Cloud accounts`): the publisher is the project's, your company for your apps, the client's for a client's app. A beta is signed the same way; the Linux AppImage and plain zips are never signed. Signing does not make SmartScreen silent at once: the dialog shows your name but may still say "unrecognized app" for some weeks and hundreds of installs (Microsoft: EV certificates included), so the first release signed by a publisher says so in its notes. Example 14.52.
 
 **Offline-first on desktop** (`desktop` with an API; the question is 2f). The same design as the mobile one, in `Desktop.Core/Storage/`: one SQLite file per signed-in user under `LocalApplicationData` (never the roaming folder; `sqlite-net-pcl`, or `sqlite-net-sqlcipher` with its key in the operating system's protected store when the brief marks the data as sensitive), deleted at sign-out, no backup exclusion because a desktop has none like Android's. Reads, the queue, `Idempotency-Key`, `If-Match`, the conflict list, the field-by-field merge and the sign-out question are the mobile lines word for word. What differs is the head: `IConnectivity` is implemented with `Connectivity.Current` on MAUI and with the BCL's `NetworkChange` on WinUI 3 and Avalonia; because "a network is available" does not mean the API answers, a failed send marks the API unreachable until the next connectivity change or the next successful request, and a Refresh command (F5) always tries; the queue is not sent with the app closed (no tray icon or service: installers and services are outside the profile). Run on a scratch Avalonia app in a Linux container with its network cut and restored: 19 Core tests green, `NetworkAvailabilityChanged` raised both ways, two saves sent once each and in order, and an API stopped with the network up cleared by the Refresh. The WinUI 3 and MAUI heads are measured on your machine, in the validation script of the first "Offline foundation". The API's side is the same **Offline writes (the API)** block, now word for word in four profiles.
 
@@ -620,6 +640,12 @@ and the epics from the brief on the board: *Catalog*, *Question bank*, *Practice
 ```
 
 ```
+Claude: Epic for F-3 "Exam board registration"?
+        1. Catalog (Recommended) - the epic's goal is registering what the candidate searches
+        2. Content - exam content
+        3. New epic: "Exam boards" - registration and upkeep of exam boards
+        4. No epic
+You: 1
 Claude: Created feature F-3 "Exam board registration" (board #12) under epic "Catalog".
 Status: idea. Nothing else is done until we refine it.
 ```
@@ -2418,6 +2444,222 @@ Claude: glossary, 3 proposals:
    Nothing is written before your OK.
 ```
 
+### 14.46 The build finds the item's worktree first
+
+You refined B-65 to `approved`; its file lives only in its worktree. A new session sits in the main checkout, which has uncommitted files of its own, and you type:
+
+```
+> /agile:build B-65
+Claude: Worktree of B-65: D:\wt\examprep\b-65-search-index [bug/B-65]
+   status: approved (read there; the main checkout has no copy). That worktree is clean;
+   the uncommitted files in the main checkout are not the build's business. Building.
+```
+
+An item approved before worktrees existed, or whose worktree was removed, has none; the branch may still exist:
+
+```
+> /agile:build B-12
+Claude: Worktree of B-12: D:\wt\examprep\b-12-export-csv [bug/B-12] (created now)
+   (the branch bug/B-12 already existed, so the worktree was added on it, without -b).
+```
+
+`/agile:ship` and `/agile:change` read the status in the same worktree. With none, they stop and name the branch they looked for (`bug/B-12`); they never create one.
+
+### 14.47 A deploy that lands in the client's Azure, never in another one
+
+Simulab's repository and board are yours; its staging belongs to the client Acme, in their Azure tenant. In round 6 of the bootstrap:
+
+```
+Claude: Question 25a, cloud account of staging? the client's name and azure · aws · gcp · other · none
+        Recommended: azure (question 3 says Azure Container Apps).
+You: Acme, azure. I don't have the ids yet.
+Claude: docs/infra.md gets, under "## Cloud accounts":
+        | staging | Acme | azure | | | | |
+        The ids stay blank until Acme gives them; /agile:publish stops until then.
+```
+
+Acme's administrator invites you as a guest and gives you the Contributor role on the subscription; you write the two ids in the row. The first publish stops on the login, before the tag is pushed:
+
+```
+> /agile:publish staging
+Claude: staging is in Acme's Azure (tenant 11111111-1111-4111-8111-111111111111, subscription
+        22222222-2222-4222-8222-222222222222): no login in C:/Users/you/.agile/azure/11111111-.../22222222-...;
+        nothing ran. Log in once, in Git Bash:
+        AZURE_CONFIG_DIR="C:/Users/you/.agile/azure/11111111-.../22222222-..." az login --tenant 11111111-...
+        In PowerShell (it does not stay set):
+        & { $env:AZURE_CONFIG_DIR = 'C:\Users\you\.agile\azure\11111111-...\22222222-...'; az login --tenant 11111111-...; Remove-Item Env:AZURE_CONFIG_DIR }
+```
+
+You run one of the two lines in your own terminal and type the command again. The plan now shows the account and what was cleaned:
+
+```
+Claude: staging: v0.4.0 (release, then deploy) · client Acme · azure · login folder .agile/azure/1111.../2222...
+        removed from the environment: AZURE_CLIENT_SECRET, ARM_SUBSCRIPTION_ID (names only; the row's values are set instead)
+```
+
+Your own default `az` login (another client's subscription) is untouched. Had the login not seen Acme's subscription, the stop would name the declared one and the one it found: `... but the login in <folder> is Basic subscription 2fae... (tenant ...) and cannot see it: ask the client for access to that subscription, or correct the row; nothing ran`. When the project has the deploy pipeline, `/agile:sync` offers the `azure/login` step to its workflow, and Acme's administrator creates the federated credential and you set `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` as variables of the GitHub environment `staging`, with a protection rule that allows only `v*` tags.
+
+### 14.48 Where a new item lives: the epic question
+
+Two epics are open, "Catalog" and "Content", and no epic fits what you type next. Nothing is created before your answer:
+
+```
+> /agile:idea "Exam board registration: name and acronym, list and edit"
+```
+
+```
+Claude: Epic for F-3 "Exam board registration"?
+        (also fits: "Admin" - support registers; choose it through Other)
+        1. Catalog (Recommended) - the epic's goal is registering what the candidate searches
+        2. Content - exam content
+        3. New epic: "Exam boards" - registration and upkeep of exam boards
+        4. No epic
+```
+
+With a text that fits none of the epics, "New epic" comes first, as the recommendation. Answering it creates the epic, then the feature under it:
+
+```
+> /agile:idea "Reports on candidate retention"
+Claude: Epic for F-4 "Reports on candidate retention"?
+        1. New epic: "Retention" - understand why candidates stop practising (Recommended)
+        2. No epic
+You: 1
+Claude: Created epic "Retention" (board #14, docs/epics/retention.md, draft) and feature F-4 (board #15) under it.
+```
+
+"No epic" creates no epic and the output says `epic: none`. `/agile:epic` never asks: it already knows its epic. In `/agile:refine F-3`, an out-of-scope answer that becomes a new idea lists "Catalog" first, the epic of the item being refined.
+
+### 14.49 A duplicate found before it is captured, and one cancelled at refinement
+
+ExamPrep has F-12 "Exam board search" in `idea`, and F-15 "Search by acronym" in `refining` in its own worktree. You type:
+
+```
+> /agile:idea "search exam boards by acronym"
+Claude: 2 similar items (14 items read):
+  1. F-12 Exam board search (idea) — the same search, the acronym is one more field.
+  2. F-15 Search by acronym (refining, only in its worktree) — the same subject in other words.
+  Recommended: improve F-12. [Improve F-12 | Improve F-15 | Capture anyway]
+> Improve F-12
+Claude: F-12 now ends its Summary with "Added 2026-10-04: search also by board acronym".
+No number was taken and nothing was created on the board.
+```
+
+Had you chosen F-15, Claude would have added the text to `## Open questions` of `D:/wt/examprep/f-15-search-by-acronym/docs/features/F-15-search-by-acronym.md`, saying that path. For an `approved` F-12 it would have written nothing and printed `/agile:change F-12 "search also by board acronym"` for you to type. Another time nothing is close:
+
+```
+> /agile:idea "export the exam results to a spreadsheet"
+Claude: No similar item (14 items read).
+F-16 Export results, epic Results, board #31, status idea. Nothing else happens until /agile:refine F-16.
+```
+
+Later you refine an item captured by hand before this check existed:
+
+```
+> /agile:refine F-14
+Claude: 1 similar item (15 items read):
+  1. F-12 Exam board search (idea) — F-14 asks for the same acronym search.
+  Recommended: carry the improvement to F-12 and cancel F-14.
+  [Carry over and cancel F-14 | Keep both | Fold F-12 into F-14]
+> Carry over and cancel F-14
+Claude: F-12's Summary now has "Added 2026-10-04: ...". F-14 is `cancelled` ("Duplicate of F-12
+(2026-10-04): the Summary of F-12"); issue #29 closed as a duplicate of #27 and archived from the project.
+No branch or worktree was created. The next /agile:idea takes F-17.
+```
+
+### 14.50 Every merge reaches the testers as a beta
+
+The reception app of 14.44 has two receptionists who try each change before the clinic gets it. Its `docs/infra.md` gains one line under `## Desktop updates` (a new project answers question 26c with "every merge"):
+
+```
+- Update source: \\fs01\updates\reception
+- Beta channel: every merge
+```
+
+Each tester runs `Reception-beta-Setup.exe` from the share once (it replaces the stable install on that PC). The ship of F-21 ends with one more line:
+
+```
+> /agile:ship F-21
+Claude: ... merged (a1b2c3d), board #21 Done (read back).
+   Beta: 0.5.1-beta sent to \\fs01\updates\reception (delta 72 KB built from 0.5.0-beta);
+   testers install Reception-beta-Setup.exe from there.
+```
+
+At their next start the testers' PCs show "Version 0.5.1-beta is available."; the clinic's PCs, on stable, see nothing. When the version is released with `/agile:publish`, the clinic takes 0.5.1; the testers stay on beta and take 0.5.2-beta after the next ship.
+
+A week later the file server is down during a ship:
+
+```
+> /agile:ship F-22
+Claude: ... merged (d4e5f6a), board #22 Done (read back).
+   Beta: not sent. vpk upload of 0.5.2-beta (beta) to \\fs01\updates\reception failed:
+   "The network path was not found." The merge stays. When the share is back: /agile:publish --beta
+> /agile:publish --beta
+Claude: Beta: 0.5.2-beta sent to \\fs01\updates\reception (delta 70 KB built from 0.5.1-beta).
+```
+
+Running it once more says "0.5.2-beta is already on the share: nothing was packed or sent". A tester who wants stable again runs `Reception-win-Setup.exe`.
+
+### 14.51 The same app updates itself on Linux
+
+The clinic's new front desk runs Ubuntu. The reception app of 14.44 is Avalonia, so its head lists one more runtime: `<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>`. The first `/agile:publish` after that stops before building anything:
+
+```
+> /agile:publish
+Claude: Not published. Reception.Desktop: the Update source is the share \\fs01\updates\reception,
+   which Linux machines do not read by that name: add
+   `- Update source (linux): <the path where Linux mounts it, or https://...>` under `## Desktop updates`.
+```
+
+The Linux PCs mount the file server at `/mnt/updates`, so `docs/infra.md` gains one line (an item on the main branch, like any change):
+
+```
+- Update source: \\fs01\updates\reception
+- Update source (linux): /mnt/updates/reception
+```
+
+Publishing again, still from the Windows PC:
+
+```
+> /agile:publish
+Claude: v1.3.0, Reception.Desktop (velopack, win-x64, linux-x64 -> \\fs01\updates\reception;
+   Linux reads /mnt/updates/reception).
+   win-x64: delta 74 KB built from 1.2.0. linux-x64: Reception.AppImage 49 MB, first release on channel linux
+   at this source: no delta. Tagged v1.3.0; both feeds sent to the share; the GitHub Release carries the AppImage.
+```
+
+The notes of v1.3.0 end with the Linux install lines: download `Reception.AppImage`, put it in `~/Applications`, `chmod +x`, start it; a copy from an earlier zip does not update itself; the first update downloads the full package, the next ones only what changed. From 1.4.0 on, the Ubuntu desk sees the same "Version 1.4.0 is available." window as the Windows PCs, in the language of the session (`LANG`), and "Later" applies it when the app is closed.
+
+### 14.52 The installer carries the clinic's name
+
+The reception app of 14.44 asks every new PC "Do you want to allow this app from an unknown publisher?". The clinic's company, in Portugal, opens a Microsoft Artifact Signing account with a public-trust certificate profile, and the owner writes its `metadata.json` to `C:\signing\clinic\metadata.json`, outside the repository. `docs/infra.md` gains, through an item like any change:
+
+```
+## Code signing (a desktop app only)
+- Code signing: artifact-signing
+- Signing account: 0f3c.../7a1d...
+```
+
+The first publish after the merge stops before building anything:
+
+```
+> /agile:publish
+Claude: Not published. Code signing is artifact-signing in docs/infra.md but VPK_AZURE_TRUSTED_SIGN_FILE
+   is not set: set it in the shell that runs /agile:publish (its value is never written in docs/infra.md).
+   A declared mode is never published unsigned; nothing was built.
+```
+
+The owner sets the variable in their own terminal (`$env:VPK_AZURE_TRUSTED_SIGN_FILE = 'C:\signing\clinic\metadata.json'`), restarts the session from there, and logs the signing account in once, with the line the next stop gives (`AZURE_CONFIG_DIR="C:/Users/owner/.agile/azure/0f3c.../7a1d..." az login --tenant 0f3c...`). Then:
+
+```
+> /agile:publish
+Claude: v1.5.0, Reception.Desktop (velopack, win-x64 -> \\fs01\updates\reception, signed: artifact-signing;
+   login in C:/Users/owner/.agile/azure/0f3c.../7a1d...).
+   win-x64: delta 81 KB built from 1.4.0. Signed by Clinica Sorriso, Lda: Reception-win-Setup.exe,
+   Reception.Desktop.exe and Update.exe checked, Valid. Tagged v1.5.0; feed sent to the share.
+```
+
+The notes of v1.5.0 say: "The installer is signed by Clinica Sorriso, Lda. During the first weeks Windows may still show "unrecognized app" with that name: click "More info", then "Run anyway"." The installed PCs update to 1.5.0 by the usual delta and notice nothing; a new PC's download dialog names the clinic. v1.6.0's notes do not repeat the line. Had the certificate profile expired, the publish would have stopped with `Reception-win-Setup.exe is not validly signed (status ...)`, before the notes and the tag.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2427,13 +2669,13 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:bootstrap` | Quiz from the brief → `CLAUDE.md`, ADR, profile, skeleton |
 | `/agile:discuss "<idea>"` | Explore an idea: options, decisions, items captured |
 | `/agile:epic "<name>"` | Break an epic into prioritized features |
-| `/agile:idea "<text>"` | Capture an epic, feature or bug, unrefined |
-| `/agile:refine <feature>` | Creates the item's branch and worktree, then the refinement round → feature file for approval |
+| `/agile:idea "<text>"` | Capture an epic, feature or bug, unrefined, after looking for a similar item (improve it instead, or capture anyway) |
+| `/agile:refine <feature>` | Looks for a similar item (carry over and cancel this one, keep both, or fold), then creates the item's branch and worktree and runs the refinement round → feature file for approval |
 | `/agile:screen <feature>` | Screen details and HTML mockup during refinement, by the `ux-designer` agent |
-| `/agile:build <feature> [--worktree]` | Implement an approved feature in the worktree the refinement created (one at a time; `--worktree` for a second one in parallel) |
+| `/agile:build <feature> [--worktree]` | Find the item's worktree by its branch, then implement an approved feature there (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
-| `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command |
+| `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command; a desktop app with `- Beta channel: every merge`: `main` sent to the share as `<Version>-beta` |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
@@ -2441,7 +2683,8 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:identity` | Record the app's visual identity (a file, a website, an image or three questions) in `docs/design/`, or review the one recorded |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | One item from idea to done in a single run with two stops: the questions (your answers approve it) and the validation script ("validado e autorizo o merge de F-n" ships it; "validado" alone stops at validating). `--assume` skips the questions except new packages |
 | `/agile:version` | Plugin version running in this session, the version the project's copies came from, and the next step when they differ |
-| `/agile:publish [<environment> [v<x.y.z>]]` | The app version on `main` as a release: package and zip per deployable project (a desktop head with an update source: Velopack packages and feed; a Hybrid app's site: its two NuGet packages too), notes, annotated tag, push and GitHub Release; with an environment, also its deploy by the command `docs/infra.md` declares (`v<x.y.z>`: a rollback to that tag); the tag it pushes also starts the deploy pipeline when the project has one. Typing it is the authorization |
+| `/agile:publish --beta` | A desktop app's beta of `main` only (`<Version>-beta` to the share; no tag, no Release): the rerun of a ship's failed beta step |
+| `/agile:publish [<environment> [v<x.y.z>]]` | The app version on `main` as a release: package and zip per deployable project (a desktop head with an update source: Velopack packages and feed, an AppImage for an Avalonia head's `linux-x64`; a Hybrid app's site: its two NuGet packages too), notes, annotated tag, push and GitHub Release; with an environment, also its deploy by the command `docs/infra.md` declares (`v<x.y.z>`: a rollback to that tag); the tag it pushes also starts the deploy pipeline when the project has one; the deploy lands in the client's cloud account the row of `## Cloud accounts` declares (an Azure login is checked first). Typing it is the authorization |
 
 ### When to use each command
 
@@ -2450,10 +2693,10 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:bootstrap` | A new app with a filled `product/brief.md` and no `CLAUDE.md` of agile yet; `/agile:bootstrap <round>` to resume a quiz you stopped | 14.1, 14.40 |
 | `/agile:discuss` | You have an idea with no shape and want options before deciding anything | 14.7 |
 | `/agile:epic` | An epic is too big for one session and you want it broken into features | 14.7 |
-| `/agile:idea` | You thought of something mid-work and want it on the board without stopping | 14.2, 14.5 |
+| `/agile:idea` | You thought of something mid-work and want it on the board without stopping | 14.2, 14.5, 14.48 |
 | `/agile:refine` | An item is an idea and you are ready to answer its questions and approve it | 14.2, 14.16 |
 | `/agile:screen` | The feature has a new or complex screen; simple forms and lists do not need it | 14.8, 14.40 |
-| `/agile:build` | The item is approved; `--worktree` only when a second item must run while another is building | 14.2, 14.9 |
+| `/agile:build` | The item is approved; `--worktree` only when a second item must run while another is building | 14.2, 14.9, 14.46 |
 | `/agile:review` | A change is risky (data, money, permissions) and you want eyes with no context before validating | 14.8 |
 | `/agile:change` | You changed your mind on an approved or building item; a done item gets a new item instead | 14.3, 14.40 |
 | `/agile:ship` | You validated the item and authorize the merge | 14.2, 14.21 |
@@ -2464,7 +2707,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:identity` | The app has screens and no visual identity recorded, or you want to review the one there is | 14.22 |
 | `/agile:autopilot` | A small, well-understood item you want in one run with two stops; `--assume` when the recommendations are fine with you | 14.13 |
 | `/agile:version` | You want to know which plugin version this session runs and whether the project's copies are behind | 14.10 |
-| `/agile:publish` | `main` holds a version you want packaged as a release; with an environment, also deployed; with `v<x.y.z>`, a rollback | 14.29, 14.35, 14.44 |
+| `/agile:publish` | `main` holds a version you want packaged as a release; with an environment, also deployed; with `v<x.y.z>`, a rollback; with `--beta`, a desktop beta the ship could not send | 14.29, 14.35, 14.44, 14.50, 14.51 |
 
 ## 16. Command flows
 
@@ -2495,11 +2738,19 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["Text from the chat"] --> B["Classify: epic, feature or bug"]
-    B --> C["Find its epic"]
-    C -->|none fits| C1{"Propose an epic; agree?"}
-    C1 -->|yes| D
-    C --> D["Next id, English slug, file from the template<br/>with status: idea; header, Summary and Start<br/>(depends on, waits on to start, needed to validate, path, parallel — unknown if nobody said);<br/>a cause named with its evidence, or 'Cause not verified'"]
+    B --> B1["Look for a similar item, before any number is taken"]
+    B1 -->|candidate| B2{"Card: improve the existing item,<br/>capture anyway, or already delivered"}
+    B2 -->|improve, or nothing to create| B3(["No number, no file, no board item"])
+    B2 -->|capture anyway| B5{"Class"}
+    B1 -->|"none: 'No similar item (N items read)'"| B5
+    B5 -->|epic| D
+    B5 -->|feature or bug| C["Read the open epics (board, docs/epics, backlog, headers);<br/>a caller that names the epic skips the question"]
+    C --> C1{"Ask: fitting epics first, then New epic, then No epic"}
+    C1 -->|"New epic: yes"| C2["Create the epic on the board and in docs/epics, status draft"]
+    C2 --> D
+    C1 -->|"an epic or none"| D["Next id, English slug, file from the template<br/>with status: idea; header, Summary and Start<br/>(depends on, waits on to start, needed to validate, path, parallel — unknown if nobody said);<br/>a cause named with its evidence, or 'Cause not verified'"]
     D --> E["Mirror on the board; board id in the header"]
+    D -.-> D0["epic and discuss search the whole list once, one card for every collision"]
     E --> F(["Nothing else until /agile:refine <id>"])
 ```
 
@@ -2535,7 +2786,11 @@ flowchart TD
 ### /agile:refine
 ```mermaid
 flowchart TD
-    A["Item in idea or refining"] --> A1["Branch and worktree of the item, before any writing;<br/>an uncommitted item file is moved in"]
+    A["Item in idea or refining"] --> A0["Look for a similar item, before the branch exists"]
+    A0 -->|candidate| A00{"Card: carry the improvement over and cancel this one,<br/>keep both, or fold the other in"}
+    A00 -->|"carry over and cancel"| A01(["status: cancelled; no branch or worktree<br/>(a resume removes them); board by the mapping"])
+    A00 -->|"keep both, or fold"| A1
+    A0 -->|"none: 'No similar item (N items read)'"| A1["Branch and worktree of the item, before any writing;<br/>an uncommitted item file is moved in"]
     A1 --> B["status: refining in the worktree; read brief, profile, code it touches"]
     B --> C["Check every premise in the code"]
     C -->|a premise is false| C1["Say so first"]
@@ -2569,7 +2824,8 @@ flowchart TD
 ### /agile:build
 ```mermaid
 flowchart TD
-    A["Item approved?"] -->|already building| A2["Resume: branch, last wip commit, next step of the plan"]
+    A0["Find the item's worktree by branch (refs/heads/branch in git worktree list --porcelain);<br/>none: create it, branch without -b when it exists; say: Worktree of id: path [branch]"] --> A["Item approved, read in that worktree?"]
+    A -->|already building| A2["Resume: branch, last wip commit, next step of the plan"]
     A2 --> D
     A -->|no| A1(["Stop: refine and approve first"])
     A -->|yes| B["Another item building or validating?"]
@@ -2615,7 +2871,7 @@ flowchart TD
 ### /agile:change
 ```mermaid
 flowchart TD
-    A["Change of mind, or a wrong premise, on an approved or building item"] --> B["Change note: what changed, why,<br/>which criteria are affected"]
+    A["Change of mind, or a wrong premise, on an approved or building item<br/>(status read in the item's worktree, found by branch; none: stop, never create)"] --> B["Change note: what changed, why,<br/>which criteria are affected"]
     B --> C["New version of the file; affected criteria rewritten"]
     C --> D{"Re-approve the affected criteria only"}
     D -->|yes| E(["Work continues; the rest stays approved"])
@@ -2624,7 +2880,7 @@ flowchart TD
 ### /agile:ship
 ```mermaid
 flowchart TD
-    A["status: validating and you said 'validado'?"] -->|no| A1(["Ask"])
+    A["status: validating, read in the item's worktree (found by branch; none: stop, never create),<br/>and you said 'validado'?"] -->|no| A1(["Ask"])
     A -->|yes| B["Branch up to date with main; typing ship counts as IDE and app host closed"]
     B --> C["gate.js ship: full rebuild, full suite, architecture tests;<br/>output saved whole, last line GREEN or RED: what failed"]
     C -->|red| C1["Fix on the branch"]
@@ -2635,7 +2891,8 @@ flowchart TD
     E2 --> F["Main moved during the ship? Merge it in, full check, bump from main's, go on (conflict or red stops);<br/>merge --no-ff, read its exit status, then push; lock probe, then verify 0 0, worktree gone,<br/>branch deleted (on origin only when ls-remote lists it)"]
     F --> G["Decisions naming a file are true in that file; ## Delivery; status: done"]
     G --> H["Close the board item with evidence;<br/>set Status to Done explicitly and read it back;<br/>not stuck after one retry: report the command by hand"]
-    H --> I["Retro: at most 3 lessons"]
+    H --> H2["Desktop with '- Beta channel: every merge': publish.js beta from the main checkout,<br/>main as Version-beta to the share; a failure keeps the merge and names /agile:publish --beta"]
+    H2 --> I["Retro: at most 3 lessons"]
     I --> J(["Next item at the top of the backlog"])
 ```
 
@@ -2807,7 +3064,11 @@ The technical terms this manual uses, with the pt-BR word Claude uses when talki
 | MAUI | MAUI | Microsoft's framework for one mobile or desktop app on several platforms. |
 | Blazor Hybrid | Blazor Híbrido | Web screens written once and shown inside a MAUI app. |
 | Velopack | Velopack | The tool that packs a desktop app and lets installed copies update themselves. |
-| SmartScreen | SmartScreen | The Windows warning shown for an installer that is not code-signed. |
+| SmartScreen | SmartScreen | The Windows warning shown for an installer that is not code-signed, or signed but downloaded by few people yet ("unrecognized app", with the publisher's name). |
+| code signing | assinatura de código | A certificate's signature on the installer and the app's files: Windows shows the publisher's name instead of "Unknown publisher", and the reputation of the name carries from one release to the next. |
+| beta channel | canal beta | A second line of updates of a desktop app, fed by every merge, that only the PCs installed from the beta Setup.exe follow. |
+| AppImage | AppImage | A Linux app in one file: made executable with `chmod +x`, it runs with nothing installed, and Velopack updates it in place. |
+| WSL (WSLg) | WSL (WSLg) | Linux running inside Windows; WSLg shows its windows on the Windows desktop. |
 | SemVer | versionamento semântico | The version number `MAJOR.MINOR.PATCH`: a breaking change, a feature, a fix. |
 | DTCG | DTCG (tokens de design) | The W3C format for design tokens, used for the app's visual identity. |
 | WCAG | WCAG | The accessibility guidelines; AA is the contrast level the identity is checked against. |

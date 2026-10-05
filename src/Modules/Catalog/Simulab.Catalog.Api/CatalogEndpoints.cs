@@ -18,7 +18,9 @@ public static class CatalogEndpoints
         group.MapOrganizerEndpoints();
         group.MapIssuingAuthorityEndpoints();
         group.MapExamEndpoints();
+        group.MapNoticeSubjectEndpoints();
         group.MapPublishedExamEndpoints();
+        group.MapSubjectEndpoints();
 
         return endpoints;
     }

@@ -71,7 +71,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## UI tests
 - An item whose product is a guard (a test that exists to catch a mistake) is seen failing on that very mistake before it ships, and that step goes into the validation script (F-22).
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
-- After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
+- After a click, a typed value or a fill whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after it, blank line or not (F-8, B-22).
+- A stress loop of parallel test processes runs on a copy of the build output under the worktree's `bin/` (git-ignored), never on `bin/Debug` (the Stop gate rebuilds it) and never outside the repository (stylesheet tests need it); count the `Passed!`/`Failed!` lines and treat a missing one as a failure (B-22).
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
 - A contrast failure of a theme token is fixed in the palette, with `ThemeContrastTests` holding the numbers; patching the screen that showed it is debt, not a fix (B-8).
 - Read a rendered colour only after the theme transition settles (0.25 s in MudBlazor): a value read right after the theme switch is still the old colour (B-8). With the browser pane hidden, transitions never finish: inject `* { transition: none !important }` before measuring (F-17).
@@ -90,6 +91,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 - A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
 - A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
+- A sweep for a pattern across the solution takes its list of places from the guard test run before the fix, not from a hand-made grep: the refinement of B-23 listed nine places and the guard found a tenth (B-23).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
