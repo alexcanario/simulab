@@ -107,7 +107,7 @@ To turn it off again: `dotnet user-secrets remove "Google:ClientId" --project sr
 
 The Web keeps its short-lived sign-in tickets in memory (`SignInTicketStore`, `GoogleSignUpTickets`, `CodeStepTickets`, all on `SingleUseTickets<T>`): it runs as **one instance**. A second Web instance needs them moved to Redis first, or a sign-in that lands on the other instance finds no ticket.
 
-The Api is capped at **one replica** in the publish model (`minReplicas: 1`, `maxReplicas: 1`, F-54 BR7): OpenIddict signs tokens with development certificates per machine, so a token from one replica is rejected by another (F-73 shares the keys and lifts the cap). The rate limits already count in Redis and hold at any replica count.
+The Api is capped at **one replica** in the publish model (`minReplicas: 1`, `maxReplicas: 1`, F-54 BR7): OpenIddict signs tokens with development certificates per machine, so a token from one replica is rejected by another (F-73 shares the keys and lifts the cap). The rate limits already count in Redis and hold at any replica count. The setting `Identity:RateLimit:Namespace` exists for tests only (it gives each test host its own counters); it must stay unset in every deployed environment, or each replica would count alone again.
 
 ## The first Admin (F-9, BR11)
 Every new account gets `Student` automatically (F-6), and roles are given on the back office screen `/admin/users` (F-9) by someone who already manages roles. The very first Admin of an installation has nobody to give it, so it is inserted directly against the module's database, once:

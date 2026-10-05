@@ -216,7 +216,7 @@ public sealed class ClientRateLimiter
             : new SignInReservation(false, TimeSpan.FromMilliseconds(parts[1]), parts[2] == 1);
     }
 
-    private static bool IsRedisFailure(Exception exception) => exception is RedisException or TimeoutException;
+    private static bool IsRedisFailure(Exception exception) => exception is RedisConnectionException or RedisTimeoutException or TimeoutException;
 
     private long NowMilliseconds() => _timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
 

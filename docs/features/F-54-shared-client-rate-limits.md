@@ -1,7 +1,7 @@
 ---
 feature: F-54
 epic: Foundation and identity
-status: building
+status: validating
 board: 95
 version: 1
 ---
@@ -76,6 +76,12 @@ The per-client limits protect registration, email resends, password reset and si
 - 2026-10-04 — No new package: `StackExchange.Redis` 3.3.0 (through `Aspire.StackExchange.Redis` 13.6.0) and `Testcontainers.Redis` 4.15.0 are already in `Directory.Packages.props` — verified.
 - 2026-10-04 — `docs/infra.md` gains Redis' new role (rate-limit counters) and the Api's one-replica cap; no app manual change (no visible behavior changes).
 
+- 2026-10-05 — Test seam `Identity:RateLimit:Namespace` (empty in every deployed environment; documented in `docs/infra.md` as test-only) — technical; test hosts share one Redis container and every in-process call has no address, so without it the counters leak between test classes.
+- 2026-10-05 — Review (independent, fresh context), major: fail-open might not cover an outage present when the limiter is first built — rejected as a defect after checking: the Aspire client registration does not abort on a failed first connection; a new test (`Registration_RealRedisRegistrationUnreachableFromTheStart_StillAccepts`) runs the Api's real registration against `localhost:1` and the registration is accepted. Kept as a regression test.
+- 2026-10-05 — Review, minor: only `RedisConnectionException`, `RedisTimeoutException` and `TimeoutException` count as an outage; a server error (a script defect) now surfaces instead of being logged as "cannot reach Redis" — fixed.
+- 2026-10-05 — Review, minor: the namespace setting could split the shared counter if set in a deployed environment — accepted with a warning line in `docs/infra.md`.
+- 2026-10-05 — Not measured: with Redis down, each limited call waits for the client's own timeout (5 s default) before it is allowed; accepted for v1 (sign-in already depends on Redis), to revisit if an outage is ever seen in the cloud.
+
 ## Out of scope
 - Sharing the OpenIddict signing and encryption keys across replicas, and lifting the cap — F-73 (#115).
 - Data Protection keys and `ForwardedHeaders` for the cloud ingress (without the latter every client shares the proxy's address in the cloud) — F-64 (idea).
@@ -89,12 +95,34 @@ The per-client limits protect registration, email resends, password reset and si
 ## Change notes
 
 ## Validation script
-1. Start the app host (`dotnet run --project src/Hosts/Simulab.AppHost`) → dashboard shows `api`, `web`, `redis` running.
-2. On the registration page, submit 10 registrations with different emails from the same browser within an hour → each is accepted (generic "check your email" message).
+Needed to validate: nothing beyond the local app host and its Redis container — the owner; in place now. Stop the app host of any other checkout first (ports collide). The app host has not been run by Claude for this item (the workflow forbids starting the local database outside the test containers without the owner's yes); this script is its first run.
+
+1. In the worktree, start the app host: `dotnet run --project src/Hosts/Simulab.AppHost` (Git Bash and PowerShell 7 alike) → the dashboard shows `api`, `web` and `redis` running.
+2. On the registration page, submit 10 registrations with different emails from the same browser within an hour → each is accepted (generic "check your email" message). Do the last one with the keyboard only (Tab through the fields, Enter to submit).
 3. Submit an 11th → the page shows the "too many registrations, try again later" message.
-4. In the dashboard, restart the `api` resource and wait until it is running again → —
+4. In the dashboard, restart the `api` resource and wait until it is running again → it shows running.
 5. Submit one more registration → still refused with the same message (the counter lives in Redis, not in the process).
 6. Sign in with the admin account → sign-in works normally.
+7. Optional, outage: in the dashboard stop `redis`, then submit a registration with a new email → it is accepted after a few seconds, and the `api` console log shows one error line "The client rate limits cannot reach Redis". Start `redis` again.
+
+No UI text was added, so there is no language step.
 
 ## Delivery
 - Branch: feature/F-54
+- Tests: `ClientRateLimiterTests`, `SignInNameLimitTests`, `RateLimitRedisOutageTests` (Identity.Tests); `AzurePublishFilesTests` (AppHost.Tests). Measured 2026-10-05: Identity.Tests 424 passed in 1 m 3 s, AppHost.Tests 19 in 2 s, ArchitectureTests 167 in 1 s, Api.Tests 12 in 24 s; `gate.js stop` GREEN.
+
+| Criterion | Test |
+|---|---|
+| AC1 | `ClientRateLimiterTests.TryAcquire_CallsSpreadAcrossTwoReplicas_RefusesThePastTheLimitOnEither` (four scopes) |
+| AC2 | `SignInNameLimitTests.Reserve_ThirtyNamesSpreadAcrossTwoReplicas_RefusesTheThirtyFirstOnEither` |
+| AC3 | `SignInNameLimitTests.Reserve_TwoNamesAtOnceOnTwoReplicasWithOnePlaceLeft_AddsExactlyOne` |
+| AC4 | `SignInNameLimitTests.Release_OnTheOtherReplica_TakesOutOnlyThatNameForBoth` |
+| AC5 | `ClientRateLimiterTests.TryAcquire_AShortWindowOnTheSameKey_DoesNotEndTheLongOne` |
+| AC6 | `SignInNameLimitTests.Reserve_RefusalsOnBothReplicas_ReportOncePerWindow`; the warning line itself: `SignInRateLimitTests` (endpoint) |
+| AC7 | `SignInNameLimitTests.Reserve_StoresOnlyAKeyedHashOfTheName` |
+| AC8 | `RateLimitRedisOutageTests` (registration, resend, reset, sign-in, cold start) and `ClientRateLimiterTests.TryAcquire_RedisUnreachable_AllowsAndLogsOneErrorAMinute` |
+| AC9 | `ClientRateLimiterTests.Keys_AreUnderThePrefixWithATimeToLiveWithinTheWindow` |
+| AC10 | `AzurePublishFilesTests.Publish_KeepsTheApiAwakeAndBothHostsAtMostOnce` |
+| AC11 | `RateLimitEndpointTests`, `SignInRateLimitTests`, `SignInRateLimitCodeStepTests`, `PasswordResetTests`, `GoogleSignInTests` (unchanged assertions, green) |
+| AC12 | no UI text changed; missing-key test unchanged |
+| AC13 | validation script, steps 3-5 |

@@ -94,6 +94,18 @@ public sealed class RateLimitRedisOutageTests : IdentityApiTests
         OutageLines().Should().Be(1);
     }
 
+    // Review (major): the Api's own Redis registration (Aspire client, default options), pointed at nothing from the
+    // start, must not turn the first limited call into a 500.
+    [Fact]
+    public async Task Registration_RealRedisRegistrationUnreachableFromTheStart_StillAccepts()
+    {
+        using var cold = new IdentityApiFactory { ConfigureHost = builder => builder.UseSetting("ConnectionStrings:redis", "localhost:1") };
+        await cold.PrepareAsync(nameof(RateLimitRedisOutageTests) + "Cold");
+
+        using var client = cold.CreateClient("en");
+        await PostAsync(client, RegisterRoute, SignUpForm.Valid("frio@exemplo.com"), HttpStatusCode.Accepted);
+    }
+
     private int OutageLines() =>
         _logs.Entries.Count(entry => entry.Level == LogLevel.Error && entry.Message.Contains("rate limits cannot reach Redis", StringComparison.Ordinal));
 }
