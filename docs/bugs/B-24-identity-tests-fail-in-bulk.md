@@ -2,7 +2,7 @@
 bug: B-24
 feature: -
 epic: Foundation and identity
-status: refining
+status: approved
 board: 136
 severity: medium
 ---
