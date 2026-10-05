@@ -2,7 +2,7 @@
 bug: B-23
 feature: -
 epic: none
-status: validating
+status: done
 board: 135
 severity: low
 ---
@@ -133,7 +133,7 @@ No screen changes. The owner checks the evidence under `## Delivery`:
 
 ## Delivery
 - Branch: bug/B-23
-- Merge: <commit>
+- Merge: de4d928 (version 0.9.2)
 - Guard before the fix (`UiTestTimingTests.ClickThenUriRead_InTestSources_IsNotFound`, `Failed: 1, Passed: 2`), hits:
   `AccountEventsPageTests.cs:165`; `RoleHistoryPageTests.cs:166`, `:174`; `ExamEditionsSectionTests.cs:169`;
   `GoogleSignInPageTests.cs:54`, `:65`; `GoogleSignUpPageTests.cs:170`, `:194`; `ResetPasswordTests.cs:99`;
@@ -145,3 +145,5 @@ No screen changes. The owner checks the evidence under `## Delivery`:
 - Criterion -> test: AC1 -> the ten tests, green, and the guard; AC2 -> the guard (seen failing, then passing) and its
   two negative controls (`FindClickThenUriRead_UriReadAfterAClick_NamesTheFileAndLine`,
   `FindClickThenUriRead_UriReadInsideWaitForAssertion_IsLeftAlone`); AC3 -> the stress loop above.
+- Full suite at ship: `agile gate GREEN`; build 21 s, tests 85 s (budget < 5 min); 0 warnings in the baseline.
+- Manual: no visible behavior change, no page updated. Glossary: `guard test` row added.
