@@ -1,7 +1,7 @@
 ---
 feature: F-51
 epic: Subject taxonomy
-status: building
+status: validating
 board: 88
 version: 1
 ---
@@ -105,6 +105,9 @@ Not seeded (folded into "Conhecimentos locais", BR5): the subject "História e G
 - 2026-10-04 — No new package: xunit, AwesomeAssertions and Testcontainers.PostgreSql are already in `Directory.Packages.props` (Claude, verified).
 - 2026-10-04 — Board: GitHub issue #88 set to Ready (Claude).
 - 2026-10-04 — Approved by the owner ("aprovo F-51"); the build waits for the merge of F-79 (owner).
+- 2026-10-05 — Build: F-79 is on `main` (0.8.0), so the build started after bringing `main` into the branch. The migration is `20261005135846_SeedGuardTaxonomy`, after F-74's `AddNoticeSubjects`, which landed on `main` after F-79; the model snapshot is unchanged (`has-pending-model-changes`: no changes). No system-design or architect pass: no new project, contract, message or schema change (Claude).
+- 2026-10-05 — Build: each row's fixed id is `0198f370-0006-7000-8000-<n>` (subjects) and `0198f370-0007-7000-8000-<n>` (topics), `<n>` being the number written beside the row in the migration; the order and numbers are frozen. `Down` deletes the seeded topics by id, and a seeded subject only while no topic points at it (an admin's own topic keeps its subject) (Claude, technical).
+- 2026-10-05 — Build: the test keeps its own copy of the approved list, so a slip in the migration's literals fails a test instead of agreeing with itself (Claude, technical).
 
 ## Out of scope
 - Simulae's seven boards — done in F-37.
@@ -120,5 +123,29 @@ Not seeded (folded into "Conhecimentos locais", BR5): the subject "História e G
 ## Change notes
 
 ## Validation script
+Needed to validate: the app host started from this worktree and an Admin account signed in by the owner. Both are yours: Claude did not start the app host (it starts the local PostgreSQL, Redis and Mailpit containers, which needs the owner's yes) and does not enter credentials. Close any app host running from another checkout first: two hosts fight for the same ports. The migrations are applied at start (Development), in a database of this item, so it starts empty and receives the seed.
+
+Git Bash, from `D:/wt/simulab/f-51-import-guard`:
+
+```bash
+Database__Name=simulab_f51 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+PowerShell 7, from the same folder:
+
+```powershell
+$env:Database__Name = "simulab_f51"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: the Aspire dashboard URL is printed and the Web is at https://localhost:7125, with no `fail` line while the migrations apply. To repeat, stop it (Ctrl+C) and run it again (the seed does not run twice: a second start changes nothing).
+
+1. Sign in as `admin@simulab.local`. Open **Subjects** (Content menu). The list shows 23 subjects, each with an area and a topic count, with no empty-state message (UC1, AC1).
+2. Filter by area **Law**: eight subjects (Direito Administrativo, Direito Constitucional, Direito Penal, Direitos Humanos, Estatuto do Desarmamento, Estatuto das Guardas Municipais, Legislação Municipal, Legislação Federal). Filter by **Specific Knowledge**: Procedimentos Policiais and Conhecimentos locais (AC2).
+3. Open **Conhecimentos locais**: six topics — Curitiba (PR), Manaus (AM), Salvador (BA), Recife (PE), Goiânia (GO), Maceió (AL). Search `curitiba` on the list: no subject named after the city (the history and geography subject is not seeded) (UC2, AC2).
+4. Open **Direito Penal**: seven topics, accents intact (Tipificação de crimes, Penas e sanções, Códigos penais). Back on the list, search `legislacao` (no accent): Legislação Federal and Legislação Municipal show, as case and accents do not matter in F-79.
+5. Edit the subject **Geometria**: rename it to `Geometria plana` and change its area; Save. Delete its topic `Geometria` (confirm). Reload the page: the change stays (UC3).
+6. Stop the app host and start it again with the same command. Open **Subjects**: still 23 subjects, **Geometria plana** is not duplicated and its topic is still deleted (AC7, BR7).
+7. Switch the language to **pt-PT** and back to **pt-BR**: the seeded names do not change (content is not translated); the area names and the page texts follow the language (AC9).
+8. Keyboard only on the list: Tab to the search box, type `informatica`, the list narrows to **Informática**; Tab to its name and press Enter to open it; five topics are listed.
 
 ## Delivery
