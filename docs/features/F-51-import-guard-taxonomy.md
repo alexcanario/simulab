@@ -1,7 +1,7 @@
 ---
 feature: F-51
 epic: Subject taxonomy
-status: approved
+status: building
 board: 88
 version: 1
 ---
