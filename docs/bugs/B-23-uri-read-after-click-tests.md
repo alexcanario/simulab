@@ -2,7 +2,7 @@
 bug: B-23
 feature: -
 epic: none
-status: refining
+status: approved
 board: 135
 severity: low
 ---
