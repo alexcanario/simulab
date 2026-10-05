@@ -2,7 +2,7 @@
 bug: B-23
 feature: -
 epic: none
-status: idea
+status: refining
 board: 135
 severity: low
 ---
@@ -36,7 +36,37 @@ Neither has been seen failing. They were found by the grep run for B-22 (a `Clic
 Both tests pass whenever the solution is tested, alone or in parallel.
 
 ## Cause
-Not investigated yet.
+**Not reproduced.** Measured at the refinement (2026-10-05, worktree `b-23-uri-read-after-click`, branch `bug/B-23`
+at `f06135f`), with the stress loop of the project rule (copy of the build output in `bin/stress`, git-ignored):
+
+| Run | Load | Result |
+|---|---|---|
+| 4 copies of `dotnet test Simulab.Web.Tests.dll` at once, 5 rounds | 4 processes in parallel | 20 of 20 `Passed!  - Failed: 0, Passed: 1044` |
+
+What the code says about each of the two tests:
+- `ResetPasswordTests.cs:97-99`: the handler awaits before it navigates.
+  `src/Hosts/Simulab.Web/Components/Pages/Identity/ResetPassword.razor:215` awaits `Api.ResetPasswordAsync` (an
+  `HttpClient` call to the `StubApiHandler` of `IdentityPageTestContext`), then navigates at line 220. This is the
+  case rule F-8 names ("a click whose handler awaits"); in these runs the stub answered fast enough for the URL to be
+  set before `Click()` returned, so the race stays an inference.
+- `ExamEditionsSectionTests.cs:167-169`: the handler is synchronous.
+  `src/Hosts/Simulab.Web/Components/Pages/Catalog/ExamEditionsSection.razor:160-161` navigates without an await,
+  through `AppRowActions` (`OnEdit.InvokeAsync()`). By rule F-8 it is not a race today; it becomes one the day the
+  handler awaits anything.
+
+The product code is not involved in either test.
+
+Same pattern elsewhere: a `Click()` followed by a `NavigationManager.Uri` assertion, not inside `WaitForAssertion`
+(all synchronous handlers today; each is a test, not a reimplementation of a rule):
+- `tests/Hosts/Simulab.Web.Tests/Admin/AccountEventsPageTests.cs:162-165` (handler `Users.razor:157-160`)
+- `tests/Hosts/Simulab.Web.Tests/Admin/RoleHistoryPageTests.cs:164-166` (handler `Roles.razor:124-127`)
+- `tests/Hosts/Simulab.Web.Tests/Admin/RoleHistoryPageTests.cs:172-174` (handler `Users.razor:149-152`)
+- `tests/Hosts/Simulab.Web.Tests/Identity/GoogleSignInPageTests.cs:52-54` and `:63-65` (`AppGoogleButton`)
+- `tests/Hosts/Simulab.Web.Tests/Identity/GoogleSignUpPageTests.cs:169-170` and `:192-194` (`GoogleSignUp.razor:237`
+  and the cancel button)
+
+URL reads not preceded by a click (after `Render`, after a `WaitForAssertion`, or negative `NotContain` checks) are
+not this pattern and are left out.
 
 ## Fix
 Not decided yet.
