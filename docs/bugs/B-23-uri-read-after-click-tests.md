@@ -30,10 +30,13 @@ Neither has been seen failing. They were found by the grep run for B-22 (a `Clic
 - Suggested path: `/agile:refine` -> `/agile:build` (or `/agile:autopilot <id>`): test code only, one line per test,
   assert inside `WaitForAssertion`.
 - Parallel with: none.
-- Cause not verified: measure it at `/agile:refine`. The symptom seen is none; the two lines were found by reading.
+- Cause measured at `/agile:refine` (2026-10-05): not reproduced in 20 parallel runs; it stays an inference
+  (`## Cause`).
 
 ## Expected
-Both tests pass whenever the solution is tested, alone or in parallel.
+The nine tests listed under `## Cause` (the two above and the seven of "Same pattern elsewhere") pass whenever the
+solution is tested, alone or in parallel, and no test in the solution reads `NavigationManager.Uri` on the statement
+after a `Click()` again.
 
 ## Cause
 **Not reproduced.** Measured at the refinement (2026-10-05, worktree `b-23-uri-read-after-click`, branch `bug/B-23`
@@ -69,16 +72,61 @@ URL reads not preceded by a click (after `Render`, after a `WaitForAssertion`, o
 not this pattern and are left out.
 
 ## Fix
-Not decided yet.
+Test code only. No production file changes.
+- In each of the nine tests of `## Cause`, the URL assertion after `Click()` moves inside `WaitForAssertion` on the
+  rendered component the test already holds (`page`, `section`, `users`, `roles`), as B-22 did:
+  `x.WaitForAssertion(() => <NavigationManager>.Uri.Should().EndWith(...))`. Nothing else in those tests changes.
+- A guard test, `tests/Simulab.ArchitectureTests/UiTestTimingTests.cs`, reads every `*Tests.cs` file under `tests/`
+  and fails when a statement ending in `.Click();` is followed, after blank lines only, by a statement that reads
+  `.Uri` outside a `WaitForAssertion(` call. The failure lists each hit as `file:line`. It is a source-text check, the
+  same kind as the other repository-reading tests of that project.
 
 ## Regression test
-- Not decided yet.
+- `UiTestTimingTests.ClickThenUriRead_InTestSources_IsNotFound`: run before the fix, it fails and lists the nine
+  locations of `## Cause` (that failing output is recorded under `## Delivery`); after the fix it passes.
+- Stress loop of the project rule, on a copy of the build output under `bin/`: 4 copies of
+  `dotnet test Simulab.Web.Tests.dll` at once, 10 rounds, 40 runs, every one `Failed: 0`. The real output is recorded
+  under `## Delivery`.
+
+## Acceptance criteria
+- AC1 Given the nine tests of `## Cause`, when each one clicks the control that navigates, then it asserts the URL
+  inside `WaitForAssertion`, never on the statement after `Click()`.
+  -> the nine tests themselves, green; `UiTestTimingTests.ClickThenUriRead_InTestSources_IsNotFound`.
+- AC2 Given a test source with a `Click()` followed (blank lines only) by a `.Uri` read outside `WaitForAssertion`,
+  when the architecture tests run, then the guard fails and names that file and line; with none, it passes.
+  -> `UiTestTimingTests.ClickThenUriRead_InTestSources_IsNotFound`, seen failing before the fix with the nine hits.
+- AC3 Given the fixed tests, when `Simulab.Web.Tests` runs in 4 parallel processes for 10 rounds, then all 40 runs
+  report `Failed: 0`. -> stress loop output under `## Delivery`.
+- Localization: not applicable; no UI text changes.
+
+## Decisions
+- 2026-10-05 Similar item: B-22 (done) is the same defect in six other tests; keep both. B-22 did not touch these
+  tests and recorded them as this item (owner, refinement card).
+- 2026-10-05 Scope: all nine tests of `## Cause`, not only the two of the title. One line per test, and it removes the
+  pattern from the solution in one sweep, as the B-22 retro (lesson 2) asked (owner, refinement card).
+- 2026-10-05 Proof: a guard test that reads the test sources plus the stress loop. No failure was ever seen, so the
+  guard is the regression test that can be seen failing before the fix (definition of done) and it keeps the pattern
+  from coming back (owner, refinement card).
+- 2026-10-05 Guard placement and name: `Simulab.ArchitectureTests`, where the other repository-reading convention
+  tests live; class `UiTestTimingTests`. Technical choice, no product impact.
+- 2026-10-05 Guard reach: only `Click()` then a `.Uri` read. The wider family (a `Type()`/`Change()` then a markup or
+  attribute read) is not checked: those reads are legitimate after a synchronous handler and a text rule cannot tell
+  which handlers await. Technical choice, no product impact.
+- 2026-10-05 Packages: none.
+
+## Out of scope
+- Product code: no handler changes.
+- Reads after `Type()`, `Change()` or a fill that are not a URL read (see the guard reach decision).
+- URL reads not preceded by a click (after `Render`, after a `WaitForAssertion`, `NotContain` checks).
 
 ## Open questions
 - (none)
 
 ## Validation script
-1. Not written yet.
+No screen changes. The owner checks the evidence under `## Delivery`:
+1. The guard's failing output before the fix lists the nine locations of `## Cause`.
+2. The guard passes after the fix (`Simulab.ArchitectureTests` green).
+3. The stress loop shows 40 of 40 runs with `Failed: 0`.
 
 ## Delivery
 - Branch: bug/B-23
