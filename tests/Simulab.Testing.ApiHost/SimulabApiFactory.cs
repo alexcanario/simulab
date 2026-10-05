@@ -65,6 +65,9 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
                 ["Identity:SignUpUrl"] = "https://localhost/sign-up",
                 ["Authentication:OpenIddict:ClientId"] = TestClient.ClientId,
                 ["Authentication:OpenIddict:ClientSecret"] = TestClient.ClientSecret,
+                // F-54: the rate-limit counters live in Redis, which every host of a test project shares and
+                // every in-process call reaches from no address: each host counts in its own keyspace.
+                ["Identity:RateLimit:Namespace"] = Guid.NewGuid().ToString("N"),
             }));
 
         // F-52: a password in the environment of whoever runs the tests must not seed an admin that tests

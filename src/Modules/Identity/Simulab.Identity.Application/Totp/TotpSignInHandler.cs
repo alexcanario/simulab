@@ -46,7 +46,7 @@ public sealed class TotpSignInHandler(
         // F-38 BR1, BR3: the account is known only now, so it is counted here, before anything is checked or
         // written for it; at the limit the step ends with no failure count and no account event.
         var accountName = user.UserName ?? user.Email ?? string.Empty;
-        if (attempt is not null && !attempt.TryCount(accountName))
+        if (attempt is not null && !await attempt.TryCountAsync(accountName))
         {
             return Result.Failure<TotpSignIn>(new Error(
                 IdentityErrorCodes.SignInRateLimited,
@@ -70,7 +70,10 @@ public sealed class TotpSignInHandler(
             ? AccountEventMethod.RecoveryCode
             : AccountEventMethod.TotpCode;
         await accountEvents.SignInSucceededAsync(user.Id, method, cancellationToken);
-        attempt?.Clear(accountName);
+        if (attempt is not null)
+        {
+            await attempt.ClearAsync(accountName);
+        }
 
         return Result.Success(new TotpSignIn(user, verified.Value));
     }
