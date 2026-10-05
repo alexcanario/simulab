@@ -1,7 +1,7 @@
 ---
 feature: F-51
 epic: Subject taxonomy
-status: validating
+status: done
 board: 88
 version: 1
 ---
@@ -149,3 +149,9 @@ Expected: the Aspire dashboard URL is printed and the Web is at https://localhos
 8. Keyboard only on the list: Tab to the search box, type `informatica`, the list narrows to **Informática**; Tab to its name and press Enter to open it; five topics are listed.
 
 ## Delivery
+- Shipped 2026-10-05 as app version 0.10.0, board #88.
+- Branch `feature/F-51`, merged into `main` with `--no-ff` (merge commit `8c03158`); the branch was never pushed.
+- Full suite at ship: 2198 tests, 0 failed, in 141 s (slowest project Identity, 2 m 12 s); build 29 s, 0 new warnings. Catalog 461, Web 1044, architecture 167. The first full run failed 24 Identity tests (Identity alone: 408 of 408 green; the second full run green): a load-dependent flake outside this item, reported as a retro finding.
+- Manual: `docs/manual/{en,pt-BR,pt-PT}/subjects.md` (section "The list you start with"). Glossary: one row, `data migration`.
+- Migration `SeedGuardTaxonomy` (data only, no schema change): 23 subjects and 70 topics, fixed ids `0198f370-0006-...` and `0198f370-0007-...`, names already taken are reused (BR6).
+- Not seen by Claude: the app host (no database or containers started outside the test containers); the owner validated on screen against the validation script.
