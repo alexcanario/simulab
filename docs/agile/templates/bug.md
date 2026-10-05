@@ -7,7 +7,7 @@ severity: low | medium | high | critical
 ---
 <!--
 One short file per bug. Save as: docs/bugs/B-<number>-<slug>.md
-Same status flow as a feature. Approval is needed only when the expected behavior is a product decision.
+Same status flow as a feature, including `cancelled` (a duplicate, from idea or refining only). Approval is needed only when the expected behavior is a product decision.
 -->
 # <Bug title>
 

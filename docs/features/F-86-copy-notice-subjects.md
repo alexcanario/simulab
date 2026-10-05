@@ -11,6 +11,7 @@ Technical terms: [glossary](../glossary.md)
 
 ## Summary
 On an exam edition, the admin copies the `NoticeSubject` rows (group, label, number of questions, order) of another edition of the same exam, to save typing when a notice repeats from year to year. Captured from the F-74 refinement (owner, 2026-10-04).
+Added 2026-10-04: the copy also brings each row's mapping to canonical subjects and topics (F-75), when F-75 is done (owner, F-75 refinement).
 
 ## Start
 - Depends on: F-74.

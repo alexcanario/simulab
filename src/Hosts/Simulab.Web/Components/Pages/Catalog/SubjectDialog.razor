@@ -1,0 +1,148 @@
+@* F-79: add or edit a subject. Two fields, so a dialog (rule: ui-project). *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog>
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppTextField TValue="string"
+                          Id="subject-name"
+                          Label="@L["Subjects.Field.Name"]"
+                          Value="@_name"
+                          ValueChanged="@((string? value) => OnNameChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.SubjectNameMaxLength"
+                          Autocomplete="off"
+                          LeadingIcon="@AppIcons.Subjects"
+                          Hint="@L["Subjects.Field.Name.Help"]"
+                          Error="@_nameError" />
+
+            <AppSelectField TValue="Guid?"
+                            Id="subject-area"
+                            Label="@L["Subjects.Field.Area"]"
+                            Value="_areaId"
+                            ValueChanged="@((Guid? value) => OnAreaChanged(value))"
+                            Options="AreaOptions"
+                            Hint="@L["Subjects.Field.Area.Help"]"
+                            Error="@_areaError" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The subject being edited; null to add one.</summary>
+    [Parameter] public SubjectResponse? Subject { get; set; }
+
+    /// <summary>The seeded areas the select offers, in display order.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AreaResponse> Areas { get; set; } = [];
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired]
+    public Func<SaveSubjectRequest, Task<ApiResult<SubjectResponse>>> Save { get; set; } = default!;
+
+    private string? _name;
+    private Guid? _areaId;
+    private string? _nameError;
+    private string? _areaError;
+    private string? _error;
+    private bool _saving;
+
+    private IReadOnlyList<AppSelectOption<Guid?>> AreaOptions =>
+        [
+            new(null, L["Subjects.NoArea"]),
+            .. Areas.Select(area => new AppSelectOption<Guid?>(area.Id, AreaText.Name(L, area.Code)))
+        ];
+
+    private bool HasChanges =>
+        Trimmed(_name) != (Subject?.Name ?? string.Empty)
+        || _areaId != Subject?.AreaId;
+
+    protected override void OnInitialized()
+    {
+        _name = Subject?.Name ?? string.Empty;
+        _areaId = Subject?.AreaId;
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError(value);
+    }
+
+    private void OnAreaChanged(Guid? value)
+    {
+        _areaId = value;
+        _areaError = null;
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? NameError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength
+            ? Errors.For(CatalogErrorCodes.SubjectNameRequired)
+            : null;
+
+    private async Task SaveAsync()
+    {
+        _nameError = NameError(_name);
+        if (_nameError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        var result = await Save(new SaveSubjectRequest(Trimmed(_name), _areaId));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        // A conflict belongs to the field that caused it, so the reader sees where to change something.
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.SubjectNameTaken:
+            case CatalogErrorCodes.SubjectNameRequired:
+            case CatalogErrorCodes.SubjectNameTooLong:
+                _nameError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.SubjectAreaInvalid:
+                _areaError = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}
