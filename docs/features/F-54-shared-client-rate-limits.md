@@ -1,7 +1,7 @@
 ---
 feature: F-54
 epic: Foundation and identity
-status: validating
+status: done
 board: 95
 version: 1
 ---
@@ -108,7 +108,10 @@ Needed to validate: nothing beyond the local app host and its Redis container â€
 No UI text was added, so there is no language step.
 
 ## Delivery
-- Branch: feature/F-54
+- Branch: feature/F-54 (merged with `--no-ff`, merge commit `77cbc8b`, board #95)
+- Version: 0.11.0 (feature bump of 0.10.0).
+- Full gate 2026-10-05: build 21 s, suite 2215 tests in 76 s (slowest project Identity, 1 m 11 s), 0 failed, 0 new warnings.
+- App manual: unchanged (no visible behavior changed). `docs/infra.md`: Redis' new role, the one-replica cap, the test-only namespace setting, measured times. Glossary: HKDF, Lua script (Redis), fail-open.
 - Tests: `ClientRateLimiterTests`, `SignInNameLimitTests`, `RateLimitRedisOutageTests` (Identity.Tests); `AzurePublishFilesTests` (AppHost.Tests). Measured 2026-10-05: Identity.Tests 424 passed in 1 m 3 s, AppHost.Tests 19 in 2 s, ArchitectureTests 167 in 1 s, Api.Tests 12 in 24 s; `gate.js stop` GREEN.
 
 | Criterion | Test |
