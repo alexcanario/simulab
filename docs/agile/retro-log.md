@@ -946,3 +946,8 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Lesson 2 (project rule, `project.md`, line widened): the refinement grep covered only `Click()` then `NavigationManager.Uri`. Evidence: the first valid loop failed 2 of 40 on `AccountErasureTests.cs:75` (`Expected dialogs.Find("button.app-erase-confirm").HasAttribute("disabled") to be False, but found True.`), a `Type()` then attribute read that 30 earlier runs missed; the final grep found two more `Click()` then `Uri` reads with a blank line between (B-23). Sweep of the pattern: fixed in B-22 (six tests) and captured as B-23 (board #135).
 - Lesson 3 (plugin: agile [generic]): not a new note; it is the open note on the Stop gate rebuilding a worktree under a background loop (F-48), now with a second occurrence. Row in the table updated: From `F-48, B-22`.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-05 - F-51 Import the municipal guard taxonomy
+- Lesson 1 (bug, B-24, board #136): the first `gate.js ship` run was `agile gate RED` with 24 of 408 `Simulab.Identity.Tests` failing; `dotnet test tests/Modules/Identity/Simulab.Identity.Tests` alone gave `Passed: 408`, and the second full run was `agile gate GREEN` (2198 tests, 141 s). Cause not verified: the failure messages were not read. The `docs/infra.md` premise from B-19 (a red full run is a real failure) is in doubt until B-24 measures it.
+- Not kept: the worktree folder held by something outside the session at ship (the rename probe failed twice until the owner closed what was open) and an untracked `.contextkeeper/` that made `git worktree remove` refuse; cause not verified, one occurrence.
+- Build and suite not run: only Markdown changed.
