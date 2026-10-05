@@ -152,7 +152,7 @@ public static class TokenEndpoints
 
         // F-38 BR3: an address at its limit is refused before the challenge is read.
         var attempt = StartAttempt(context);
-        if (attempt.IsAtLimit())
+        if (await attempt.IsAtLimitAsync())
         {
             return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
         }
@@ -197,7 +197,7 @@ public static class TokenEndpoints
         // no failure count, no account event and no lockout. A step that is not a failure takes the name out again.
         var attempt = StartAttempt(context);
         var typedName = request.Username ?? string.Empty;
-        if (!attempt.TryCount(typedName))
+        if (!await attempt.TryCountAsync(typedName))
         {
             return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
         }
@@ -234,7 +234,7 @@ public static class TokenEndpoints
         }
 
         // F-38 BR1, BR5: the password was right, so this account's name leaves the set from here on.
-        attempt.Clear(typedName);
+        await attempt.ClearAsync(typedName);
 
         if (user.Status != AccountStatus.Active)
         {
