@@ -166,8 +166,8 @@ public sealed class ExamEditionsSectionTests : CatalogPageTestContext
 
         section.Find("button[aria-label='Edit: 2026, CEBRASPE']").Click();
 
-        Services.GetRequiredService<NavigationManager>().Uri.Should()
-            .EndWith($"/admin/exams/{AgentePf.Id}/editions/{Edition2026Id}");
+        section.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should()
+            .EndWith($"/admin/exams/{AgentePf.Id}/editions/{Edition2026Id}"));
     }
 
     // AC12: a published edition's delete is disabled, with the reason as the tooltip.

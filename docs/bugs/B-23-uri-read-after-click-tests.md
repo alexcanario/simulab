@@ -2,7 +2,7 @@
 bug: B-23
 feature: -
 epic: none
-status: approved
+status: validating
 board: 135
 severity: low
 ---
@@ -113,6 +113,9 @@ Test code only. No production file changes.
   attribute read) is not checked: those reads are legitimate after a synchronous handler and a text rule cannot tell
   which handlers await. Technical choice, no product impact.
 - 2026-10-05 Packages: none.
+- 2026-10-05 Build: the guard found a tenth hit the refinement grep missed, `SignInProfileTests.cs:34`
+  (`SignIn_IssuesATicketWithTheAccountNameAndLanguage`, handler awaits). Fixed in the same sweep, so "the nine tests"
+  of the criteria are ten; the guard, not the list, is the proof that none is left.
 
 ## Out of scope
 - Product code: no handler changes.
@@ -124,10 +127,21 @@ Test code only. No production file changes.
 
 ## Validation script
 No screen changes. The owner checks the evidence under `## Delivery`:
-1. The guard's failing output before the fix lists the nine locations of `## Cause`.
+1. The guard's failing output before the fix lists the ten locations (the nine of `## Cause` plus `SignInProfileTests.cs:34`).
 2. The guard passes after the fix (`Simulab.ArchitectureTests` green).
 3. The stress loop shows 40 of 40 runs with `Failed: 0`.
 
 ## Delivery
 - Branch: bug/B-23
 - Merge: <commit>
+- Guard before the fix (`UiTestTimingTests.ClickThenUriRead_InTestSources_IsNotFound`, `Failed: 1, Passed: 2`), hits:
+  `AccountEventsPageTests.cs:165`; `RoleHistoryPageTests.cs:166`, `:174`; `ExamEditionsSectionTests.cs:169`;
+  `GoogleSignInPageTests.cs:54`, `:65`; `GoogleSignUpPageTests.cs:170`, `:194`; `ResetPasswordTests.cs:99`;
+  `SignInProfileTests.cs:34`.
+- After the fix: `Simulab.ArchitectureTests` `Passed!  - Failed: 0, Passed: 167`; `Simulab.Web.Tests` `Passed!  - Failed: 0,
+  Passed: 1044`; `agile gate GREEN`.
+- Stress loop (4 parallel `dotnet test Simulab.Web.Tests.dll` on a copy of the build output, 10 rounds): 40 files,
+  40 lines `Passed!  - Failed: 0, Passed: 1044`, 0 `Failed!`.
+- Criterion -> test: AC1 -> the ten tests, green, and the guard; AC2 -> the guard (seen failing, then passing) and its
+  two negative controls (`FindClickThenUriRead_UriReadAfterAClick_NamesTheFileAndLine`,
+  `FindClickThenUriRead_UriReadInsideWaitForAssertion_IsLeftAlone`); AC3 -> the stress loop above.
