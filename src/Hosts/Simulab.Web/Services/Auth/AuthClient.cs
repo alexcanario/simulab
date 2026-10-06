@@ -23,6 +23,9 @@ public sealed record TokenResult(
     /// <summary>F-11 BR9: the password was right and the account asks for a code; <see cref="Challenge"/> carries the attempt on.</summary>
     public bool NeedsTotpCode => ErrorCode == IdentityErrorCodes.TotpRequired && !string.IsNullOrEmpty(Challenge);
 
+    /// <summary>F-53 BR3: the right password (and code) of a marked account; <see cref="Challenge"/> carries the attempt to the new-password step.</summary>
+    public bool NeedsPasswordChange => ErrorCode == IdentityErrorCodes.PasswordChangeRequired && !string.IsNullOrEmpty(Challenge);
+
     /// <summary>F-20 BR7: Google knows this person and Simulab does not yet; the confirmation page takes over.</summary>
     public bool NeedsGoogleSignUp => ErrorCode == IdentityErrorCodes.GoogleSignUpRequired && !string.IsNullOrEmpty(GoogleEmail);
 
@@ -69,6 +72,18 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
                 ["grant_type"] = "totp",
                 ["challenge"] = challenge,
                 ["code"] = code,
+            },
+            cancellationToken,
+            visitorAddress);
+
+    /// <summary>F-53 BR4: the new-password step, the custom <c>password_change</c> grant. Signs the user in when it succeeds.</summary>
+    public Task<TokenResult> CompletePasswordChangeAsync(string challenge, string newPassword, string? visitorAddress = null, CancellationToken cancellationToken = default) =>
+        RequestAsync(
+            new Dictionary<string, string>
+            {
+                ["grant_type"] = "password_change",
+                ["challenge"] = challenge,
+                ["new_password"] = newPassword,
             },
             cancellationToken,
             visitorAddress);

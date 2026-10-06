@@ -65,11 +65,15 @@ public sealed class TotpSignInHandler(
             return Result.Failure<TotpSignIn>(verified.Error!);
         }
 
+        // F-53 BR3: a marked account gets a password-change challenge instead of tokens, so this step is not the
+        // sign-in: no event and the name stays in the set. The change step records the sign-in and clears it.
+        if (user.MustChangePassword)
+        {
+            return Result.Success(new TotpSignIn(user, verified.Value));
+        }
+
         // F-21 BR3: this step issues the tokens, so the sign-in is this account's, by the code it used.
-        var method = verified.Value == SecondFactorMethod.RecoveryCode
-            ? AccountEventMethod.RecoveryCode
-            : AccountEventMethod.TotpCode;
-        await accountEvents.SignInSucceededAsync(user.Id, method, cancellationToken);
+        await accountEvents.SignInSucceededAsync(user.Id, MethodOf(verified.Value), cancellationToken);
         if (attempt is not null)
         {
             await attempt.ClearAsync(accountName);
@@ -77,4 +81,8 @@ public sealed class TotpSignInHandler(
 
         return Result.Success(new TotpSignIn(user, verified.Value));
     }
+
+    /// <summary>The account event method of the code a step accepted (F-21 BR3, F-53 BR9).</summary>
+    public static AccountEventMethod MethodOf(SecondFactorMethod method) =>
+        method == SecondFactorMethod.RecoveryCode ? AccountEventMethod.RecoveryCode : AccountEventMethod.TotpCode;
 }

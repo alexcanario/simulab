@@ -33,6 +33,23 @@ public static class SignInFrom
         return SendAsync(client, address, secret, form);
     }
 
+    /// <summary>The new-password step of a marked account (F-53 BR4): the challenge the sign-in handed out, and the password to set.</summary>
+    public static Task<TokenResponse> PasswordChangeAsync(HttpClient client, string? address, string? challenge, string? newPassword, string grantType = "password_change")
+    {
+        var form = new Dictionary<string, string> { ["grant_type"] = grantType };
+        if (challenge is not null)
+        {
+            form["challenge"] = challenge;
+        }
+
+        if (newPassword is not null)
+        {
+            form["new_password"] = newPassword;
+        }
+
+        return SendAsync(client, address, TestClient.ClientSecret, form);
+    }
+
     public static Task<TokenResponse> RefreshAsync(HttpClient client, string? address, string refreshToken) =>
         SendAsync(client, address, TestClient.ClientSecret, new Dictionary<string, string>
         {
