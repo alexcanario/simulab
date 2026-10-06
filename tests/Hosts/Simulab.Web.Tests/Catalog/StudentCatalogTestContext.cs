@@ -115,7 +115,7 @@ public abstract class StudentCatalogTestContext : KitTestContext
         public List<PublishedExamResponse>? Exams { get; set; } = [GuardaMunicipal, Toefl];
 
         /// <summary>What the filter options hold; null makes them answer a server error.</summary>
-        public PublishedExamFiltersResponse? Filters { get; set; } = new([Consulplan, Fgv], [2026, 2025]);
+        public PublishedExamFiltersResponse? Filters { get; set; } = new([Consulplan, Fgv], [2026, 2025], ["SP"]);
 
         /// <summary>The exam pages the fake knows; an id that is not here answers 404 <c>exam.not_found</c>.</summary>
         public Dictionary<Guid, PublishedExamDetailResponse> Details { get; } = [];
@@ -175,7 +175,7 @@ public abstract class StudentCatalogTestContext : KitTestContext
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
-        // Paged like the Api, and filtered by the text, the type and the scope: enough to see a filter change the rows.
+        // Paged like the Api, and filtered by the text, the type, the scope and the state: enough to see a filter change the rows.
         // The board and year rules (BR5) are the Api's and are tested there.
         private PublishedExamPageResponse Page(string queryString)
         {
@@ -197,6 +197,11 @@ public abstract class StudentCatalogTestContext : KitTestContext
             if (Enum.TryParse<ExamScope>(query["scope"], out var scope))
             {
                 matching = matching.Where(exam => exam.Scope == scope);
+            }
+
+            if (query["state"] is { Length: > 0 } state)
+            {
+                matching = matching.Where(exam => exam.Scope == ExamScope.State && exam.ScopeDetail == state);
             }
 
             var all = matching.ToList();

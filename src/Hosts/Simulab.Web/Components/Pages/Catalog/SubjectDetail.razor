@@ -1,0 +1,165 @@
+@page "/admin/subjects/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+
+@* F-79 UC5: a subject's own page. Its name and area at the top, edited in the same dialog as on the list (one way
+   to edit an item, rule: ui-project), and its topics below. The Exams -> Editions pattern of F-35. *@
+<AppPageHeader Title="@(_subject?.Name ?? L["Subjects.Title"].Value)"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@(_subject is null ? null : L["Common.Edit"].Value)"
+               PrimaryActionIcon="@(_subject is null ? null : AppIcons.Edit)"
+               OnPrimaryAction="EditAsync" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_notFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(CatalogErrorCodes.SubjectNotFound)" Class="mb-4" />
+        <AppLink Href="/admin/subjects">@L["Subjects.BackToList"]</AppLink>
+    </MudPaper>
+}
+else if (_loadFailed)
+{
+    <AppErrorState OnRetry="LoadAsync" />
+}
+else if (_subject is not null)
+{
+    <MudText Typo="Typo.body1" Class="mb-4" id="subject-area-text">
+        <span class="app-muted">@L["Subjects.Field.Area"]:</span>
+        @if (_subject.AreaCode is { } code)
+        {
+            @AreaText.Name(L, code)
+        }
+        else
+        {
+            @L["Subjects.NoArea"]
+        }
+    </MudText>
+
+    <TopicsSection SubjectId="_subject.Id" SubjectName="@_subject.Name" />
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Parameter] public Guid Id { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AreaResponse> _areas = [];
+    private SubjectResponse? _subject;
+    private Guid? _loadedFor;
+    private bool _loading = true;
+    private bool _notFound;
+    private bool _loadFailed;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == Id)
+        {
+            return;
+        }
+
+        _loadedFor = Id;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _notFound = false;
+        _loadFailed = false;
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindSubjectAsync(token, Id);
+        if (token is not null && _areas.Count == 0
+            && await Api.ListAreasAsync(token) is { IsSuccess: true, Value: { } areas })
+        {
+            _areas = areas;
+        }
+
+        _loading = false;
+        if (result is { IsSuccess: true, Value: { } subject })
+        {
+            _subject = subject;
+        }
+        else if (result?.ErrorCode == CatalogErrorCodes.SubjectNotFound)
+        {
+            _subject = null;
+            _notFound = true;
+        }
+        else
+        {
+            _subject = null;
+            _loadFailed = true;
+        }
+
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Subjects.Title"], href: "/admin/subjects"),
+            new BreadcrumbItem(_subject?.Name ?? L["Subjects.Title"].Value, href: null, disabled: true)
+        ];
+    }
+
+    private async Task EditAsync()
+    {
+        if (_subject is not { } subject || await TokenAsync() is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<SubjectDialog>
+        {
+            { dialog => dialog.Subject, subject },
+            { dialog => dialog.Areas, _areas },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<SubjectResponse>(ErrorText.UnexpectedCode)
+                    : await Api.UpdateSubjectAsync(fresh, subject.Id, request)
+            }
+        };
+
+        var dialog = await Dialogs.ShowAsync<SubjectDialog>(L["Subjects.Dialog.EditTitle"], parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: SubjectResponse saved })
+        {
+            Snackbar.Add(L["Subjects.Saved"], Severity.Success);
+            _subject = saved;
+            _breadcrumbs =
+            [
+                new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+                new BreadcrumbItem(L["Subjects.Title"], href: "/admin/subjects"),
+                new BreadcrumbItem(saved.Name, href: null, disabled: true)
+            ];
+        }
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

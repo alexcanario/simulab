@@ -50,6 +50,15 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
     /// <summary>The last 30-second step whose code was accepted (F-11 BR4). A code at or below it is a replay.</summary>
     public long? TotpLastAcceptedStep { get; private set; }
 
+    /// <summary>F-53 BR1: the account must pick a new password before it gets tokens. False by default.</summary>
+    public bool MustChangePassword { get; private set; }
+
+    /// <summary>F-53 BR2: marks the account; the seed does it only when it creates the account.</summary>
+    public void RequirePasswordChange() => MustChangePassword = true;
+
+    /// <summary>F-53 BR4, BR8: any successful password set clears the mark.</summary>
+    public void ClearPasswordChangeRequirement() => MustChangePassword = false;
+
     /// <summary>
     /// F-11 BR2: stores a new secret for an enrolment. An earlier unconfirmed secret is simply replaced;
     /// two-factor stays off until <see cref="EnableTotp"/>.
@@ -147,6 +156,7 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
 
         // F-11 BR13: the second factor goes with the account; the recovery codes go with user_tokens.
         DisableTotp();
+        ClearPasswordChangeRequirement();
 
         EmailConfirmed = false;
         EmailVerifiedAt = null;

@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35]
-updated: 2026-09-29
+features: [F-35, F-74]
+updated: 2026-10-04
 ---
 # Edições de um exame
 
@@ -32,7 +32,7 @@ Apenas uma conta com a permissão "Gerenciar o catálogo" — o papel Admin a te
 
 ### Excluir uma edição
 1. Só um rascunho pode ser excluído. Se a edição está publicada, abra-a, escolha **Rascunho** e salve antes: a ação de excluir da linha publicada fica desativada.
-2. Escolha **Excluir** na linha e confirme. A edição sai da lista. O ano, o cargo e a banca continuam reservados dentro do exame, para que a mesma prova não seja adicionada de novo por engano.
+2. Escolha **Excluir** na linha e confirme. A edição sai da lista, com as suas disciplinas do edital (a confirmação avisa). O ano, o cargo e a banca continuam reservados dentro do exame, para que a mesma prova não seja adicionada de novo por engano.
 
 Um exame que ainda tem edições não pode ser excluído, nem uma banca que alguma edição indica. Exclua ou altere as edições primeiro.
 
@@ -61,6 +61,43 @@ Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúscula
 | Este exame tem edições. Exclua as edições primeiro. | Um exame com edições não pode ser excluído. | Exclua as edições e depois o exame. |
 | Há edições que indicam esta banca. Altere ou exclua essas edições primeiro. | Uma banca em uso não pode ser excluída. | Altere ou exclua essas edições. |
 | Esta edição não existe mais. | Alguém a excluiu com a sua tela aberta. | Volte ao exame. |
+
+## Disciplinas do edital
+No cartão **Disciplinas do edital**, abaixo do formulário da edição, você registra as disciplinas exatamente como o edital as apresenta: o grupo (por exemplo "Conhecimentos Básicos"), o nome da disciplina e o número de questões. O cartão só aparece depois que a edição é salva; numa edição nova ele pede para salvar primeiro. Cada disciplina é salva pelo seu próprio diálogo ou ação: o botão **Salvar** da edição nunca as salva. Funciona em edições em rascunho e publicadas.
+
+### Adicionar uma disciplina
+1. No cartão, escolha **Adicionar disciplina do edital**.
+2. Se o edital agrupa as disciplinas, escolha um grupo já usado (a lista sugere ao digitar, sem diferenciar maiúsculas e acentos) ou digite um novo. Deixe vazio se o edital não agrupa. Ao adicionar várias seguidas, o grupo da última adicionada já vem preenchido.
+3. Digite a **disciplina** como o edital a nomeia e, se o edital informa, o **número de questões** (de 1 a 500; vazio quer dizer que o edital não informa).
+4. Escolha **Salvar**. A nova disciplina entra no fim do seu grupo, ou no fim da lista quando o grupo é novo.
+
+### Ver, ordenar, alterar e excluir
+- As disciplinas aparecem sob o título do seu grupo, na ordem do edital. Quando nenhuma tem grupo, não há título. Um traço (—) quer dizer que o número de questões não foi informado.
+- Abaixo da lista, o total soma só os números informados e diz quantas disciplinas ficaram fora da soma por não terem número. O total não é guardado nem conferido com nada.
+- **Mover para cima** e **Mover para baixo** trocam a disciplina com a vizinha do mesmo grupo. A primeira do grupo não sobe e a última não desce (o botão fica desativado e explica o motivo); uma disciplina nunca muda de grupo ao ser movida.
+- **Editar** abre o mesmo diálogo preenchido. Mudar o grupo leva a disciplina para o fim do novo grupo; mudar só o nome ou o número mantém a posição.
+- **Excluir** pede confirmação e remove a disciplina da edição. Ela pode ser adicionada de novo depois.
+
+### Campos das disciplinas do edital
+| Campo | Significado | Regras |
+|---|---|---|
+| Grupo | O título sob o qual o edital lista a disciplina | Opcional, até 100 caracteres. Vazio é "Sem grupo" |
+| Disciplina | A disciplina como o edital a nomeia | Obrigatório, de 2 a 200 caracteres |
+| Número de questões | Quantas questões o edital reserva à disciplina | Opcional, número inteiro de 1 a 500 |
+
+Na mesma edição, o nome da disciplina não pode se repetir dentro do mesmo grupo (maiúsculas e acentos não contam; "sem grupo" é um grupo). Uma disciplina excluída não conta.
+
+### Mensagens das disciplinas do edital
+| Mensagem | O que significa | O que fazer |
+|---|---|---|
+| Informe a disciplina como o edital a nomeia. | O nome está vazio. | Digite o nome. |
+| A disciplina precisa de ao menos 2 caracteres. | O nome tem 1 caractere. | Digite o nome completo. |
+| A disciplina é longa demais: no máximo 200 caracteres. | O nome passa de 200 caracteres. | Encurte o nome. |
+| O grupo é longo demais: no máximo 100 caracteres. | O grupo passa de 100 caracteres. | Encurte o grupo. |
+| Informe um número inteiro de 1 a 500, ou deixe vazio. | O número não é inteiro ou está fora do intervalo. | Corrija ou deixe vazio. |
+| Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam). | A mesma disciplina já está no grupo. | Mude o nome ou o grupo. |
+| Esta disciplina não está mais na edição. A lista foi recarregada. | Alguém a excluiu com a sua tela aberta. | Confira a lista atualizada. |
+| Esta disciplina não pode ir nessa direção. A lista foi recarregada. | Outra pessoa já a moveu. | Confira a ordem atual. |
 
 ## Páginas relacionadas
 - [Exames](exams.md): os exames do catálogo (Administradores)

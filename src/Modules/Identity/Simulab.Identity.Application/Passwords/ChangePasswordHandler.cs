@@ -69,6 +69,8 @@ public sealed class ChangePasswordHandler(
         // commit leaves the old password in place and no notice behind.
         await using (var transaction = await unitOfWork.BeginAsync(cancellationToken))
         {
+            // F-53 BR8: any successful password set clears the mark; it travels in the same UPDATE as the password.
+            user.ClearPasswordChangeRequirement();
             var changed = await userManager.ChangePasswordAsync(user, currentPassword, newPassword!);
             if (!changed.Succeeded)
             {

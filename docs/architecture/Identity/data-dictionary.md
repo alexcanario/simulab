@@ -371,6 +371,7 @@ Entity: `User` — A person with an account. Erasing an account anonymizes this 
 | is_deleted | boolean | no |  |  | True once the row was deleted. Rows are never removed; a global query filter hides the deleted ones. |
 | lockout_enabled | boolean | no |  |  | True when this account can be locked out after failed sign-ins. True for everyone. |
 | lockout_end | timestamp with time zone | yes |  |  | The account refuses sign-in until this instant, after too many failed attempts. Null when it is not locked. |
+| must_change_password | boolean | no |  |  | True when the person must pick a new password before signing in for real. Set on the seeded administrator and cleared by any password set. |
 | normalized_email | character varying(254) | no |  |  | max 254; The address upper-cased, which is what the unique index compares: one account per address. |
 | normalized_user_name | character varying(254) | yes |  |  | max 254; The sign-in name upper-cased, which is what the unique index compares. |
 | password_hash | text | yes |  |  | The password, hashed by ASP.NET Identity. The password itself is never stored and cannot be recovered from this. |
