@@ -1,7 +1,7 @@
 ---
 feature: F-53
 epic: Foundation and identity
-status: validating
+status: done
 board: 90
 version: 1
 ---
@@ -119,3 +119,32 @@ Needed to validate: a database of its own and the switch `Identity:SeedAdmin:Req
 Not shown on screen, covered by tests: AC1 to AC19 (migration, seed, token endpoint, challenge rules, race, limits, events). Not checked on screen by Claude: the browser pane was hidden (no viewport), so contrast and layout of the new step are for step 2 to 5; Claude ran the flow in the real app host by script and saw the step, the new password and the old one refused.
 
 ## Delivery
+- Branch `feature/F-53`, merged as `3db13d6` (`merge: F-53 force a password change at first sign-in (board #90)`), app version 0.11.1 -> 0.12.0.
+- Validated by the owner on screen on 2026-10-06; the owner accepted change note 1 (BR3 on the two-factor path) in the same message and authorized the merge by `/agile:ship F-53`.
+- Full suite on the item branch: 13 + 12 + 167 + 19 + 2 + 1055 + 25 + 10 + 25 + 13 + 462 + 459 passed, 0 failed, in 94 s (inside the 5 min budget); the Identity project took 1 m 30 s (budget 2 min); no new warning.
+- Manual: `sign-in-and-sign-out` in pt-BR, pt-PT and en. Technical docs: `docs/architecture/Identity/` regenerated, `DocGen --check` green. Glossary: 3 rows added (`MustChangePassword`, `PasswordChangeChallenge`, security stamp).
+- Review: independent review before validation, findings in `## Decisions`. Open for F-92: the refresh and Google grants do not look at the mark; the guard belongs to F-92 before any admin can mark an account.
+
+| Criterion | Test |
+|---|---|
+| AC1 | `AddMustChangePasswordMigrationTests.Up_AccountsExist_EveryAccountIsUnmarked_AndTheColumnHasItsDescription` |
+| AC2 | `SeedAdminTests.Start_SwitchOn_CreatesTheAdminMarked` |
+| AC3 | `SeedAdminTests.Start_SwitchOff_CreatesTheAdminUnmarked` |
+| AC4 | `SeedAdminTests.Ensure_ExistingUnmarkedAccountAndSwitchOn_StaysUnmarked` |
+| AC5 | `SeedAdminTests.Settings_DevelopmentFile_TurnsTheSwitchOff`, `Settings_BaseFile_CarriesNoValueForTheSwitch`, `Start_SwitchNotSet_TreatsItAsOn` |
+| AC6 | `ForcedPasswordChangeTests.Password_MarkedAccount_AnswersAChallengeAndNoTokens` |
+| AC7 | `ForcedPasswordChangeTests.Password_MarkedAccountThatIsLockedOut_IsRefusedAsAnyOtherAccount`, `Password_MarkedAccountThatIsNotVerified_IsRefusedAsAnyOtherAccount`, `Password_MarkedAccountThatIsNotVerified_ReleasesItsNameFromTheAddressLimit` |
+| AC8 | `ForcedPasswordChangeTwoFactorTests.Code_MarkedAccount_AnswersThePasswordChangeChallengeAndRecordsNoSignIn` |
+| AC9 | `ForcedPasswordChangeTests.Change_ValidChallengeAndPassword_IssuesTokensAndReplacesThePassword` |
+| AC10 | `ForcedPasswordChangeTests.Change_AnotherSessionExists_EndsItAndRenewsTheStamp` |
+| AC11 | `ForcedPasswordChangeTests.Change_SameAsCurrent_IsRefusedAndTheChallengeStillWorks` |
+| AC12 | `ForcedPasswordChangeTests.Change_WeakPassword_IsRefusedAndTheChallengeStillWorks` |
+| AC13 | `ForcedPasswordChangeTests.Change_UnknownChallenge_*`, `Change_ChallengeUsedTwice_*`, `Change_ExpiredChallenge_*`, `Change_AccountWasResetByEmailMeanwhile_*`, `Change_AccountIsNoLongerMarked_*`, `Change_AccountIsNoLongerActive_*` |
+| AC14 | `ForcedPasswordChangeTwoFactorTests.Change_WithATwoFactorChallenge_IsInvalid`, `Code_WithAPasswordChangeChallenge_IsInvalid` |
+| AC15 | `ForcedPasswordChangeTests.Change_TwoConcurrentRequestsWithTheSameChallenge_OnlyOneSucceeds` |
+| AC16 | `ForcedPasswordChangeTests.Change_AtTheAddressLimit_IsRefusedAndTheChallengeIsKept` |
+| AC17 | `ForcedPasswordChangeTests.Reset_MarkedAccount_ClearsTheMark`, `AccountPageChange_MarkedAccount_ClearsTheMark` |
+| AC18 | `ForcedPasswordChangeTests.Change_AfterThePasswordStep_*`, `ForcedPasswordChangeTwoFactorTests.Change_AfterTheAppCode_*`, `Change_AfterARecoveryCode_*` |
+| AC19 | `ForcedPasswordChangeTests.Grant_TwoFactorOff_IsAcceptedAndNotUnsupported` |
+| AC20 | `SignInPasswordChangeTests` (10 tests) and the validation script |
+| AC21 | `ErrorCodeTextTests`, `ErrorCodeTextCheckTests` and the missing-key tests |
