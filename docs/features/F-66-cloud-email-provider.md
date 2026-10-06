@@ -1,7 +1,7 @@
 ---
 feature: F-66
 epic: Foundation and identity
-status: validating
+status: done
 board: 105
 version: 1
 ---
@@ -100,3 +100,12 @@ Needed to validate: the staging environment created by F-64 (owner; not in place
 - Creating the staging environment itself: F-64.
 
 ## Open questions
+
+## Delivery
+- Branch `feature/F-66`, merged with `--no-ff` (merge commit `5787f49`, board #105). App version 0.17.0 -> 0.18.0.
+- Files: `Simulab.Email` (`EmailProvider`, `AzureCommunicationServicesOptions`, `EmailOptionsValidator`, `AzureCommunicationServicesEmailSender`, provider choice in `AddEmailSender`), `src/Hosts/Simulab.AppHost/Bicep/email.bicep` and its wiring in `AzureDeployment.cs`, the Api's SMTP settings moved to `appsettings.Development.json`, `Azure.Communication.Email` 1.1.0 and `Azure.Identity` 1.21.0 in `Directory.Packages.props`; docs: `docs/infra.md`, ADR-0001 #24, `docs/architecture-overview.md`, the profile, two glossary rows.
+- Full suite: 2350 tests, 0 failed, 89 s; build 23 s, 0 new warnings (gate GREEN, 2026-10-06). Architecture tests 181 passed. `gate.js docs`: GREEN, 0 files changed.
+- Independent review: no blocker; the one major (the display name `Simulab` on the Azure-managed domain) is a recorded risk with a fallback in `## Decisions`.
+- Owner said "validado" on 2026-10-06. Claude did not verify: the Api through the app host with Mailpit, a real `aspire deploy`, Brazil as the data location of the Email Communication Service, and the display name on the sender (they need the staging of F-64). The first deploy shows them; BR8 and the fallback say what to do if Azure refuses.
+- App manual: not updated (no visible behavior changed).
+- The email processor is now Microsoft (Azure Communication Services): F-71 (privacy policy) must name it.
