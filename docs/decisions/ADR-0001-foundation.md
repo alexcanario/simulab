@@ -72,7 +72,7 @@ Known exception: `User` inherits `IdentityUser<Guid>`, so it cannot inherit `Ten
 | 21 | Redis | Kept: exam timer, attempt lock, refresh tokens, SignalR backplane | Core of the Exam Simulator |
 | 22 | AI provider | Claude API behind `IAiGateway` in a new `Ai` building block. Import: PDF and scanned-image reading with structured output. Coach: tool calls over the app's own data. Every call records user, purpose, tokens and cost | Brief: the coach answers from the app's data and must not invent facts; per-call records enable plan limits and cost per active student; the abstraction avoids provider lock-in |
 | 23 | File storage | Blob storage behind `IFileStorage`; Azurite through Aspire in dev; private containers; the original exam file is kept | The curator compares the draft with the original during review |
-| 24 | Email | `IEmailSender`; SendGrid in the cloud, Mailpit through Aspire in dev; templates in three languages | Code exists; local capture tests sign-up and password reset |
+| 24 | Email | `IEmailSender`; Azure Communication Services Email over HTTP with the Api's managed identity in the cloud (amended by F-66, 2026-10-06: SendGrid retired its free plan and ACS lives in the ADR-0002 subscription), Mailpit through Aspire in dev; provider chosen by `Email:Provider`; templates in three languages | Code exists; local capture tests sign-up and password reset; staging sends to a real mailbox |
 
 ### Round 5 — Experience
 | # | Question | Decision | Reason |

@@ -125,6 +125,76 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         Bicep("cae-acr").Should().Contain("Microsoft.ContainerRegistry/registries");
     }
 
+    /// <summary>The template the manifest points at: the one the deploy reads.</summary>
+    private string EmailTemplate()
+    {
+        using var manifest = System.Text.Json.JsonDocument.Parse(_files["manifest.json"]);
+        var path = manifest.RootElement.GetProperty("resources").GetProperty("email").GetProperty("path").GetString()!;
+        return File.ReadAllText(path);
+    }
+
+    /// <summary>F-66 AC5 (BR8, BR9): the template creates the services in Brazil and one role assignment for the Api only.</summary>
+    [Fact]
+    public void Publish_Email_CreatesTheServicesInBrazilAndOneRoleAssignmentOnTheCommunicationService()
+    {
+        var template = EmailTemplate();
+
+        template.Should().Contain("Microsoft.Communication/emailServices@")
+            .And.Contain("'AzureManagedDomain'")
+            .And.Contain("domainManagement: 'AzureManaged'")
+            .And.Contain("Microsoft.Communication/communicationServices@")
+            .And.Contain("linkedDomains")
+            .And.Contain("displayName: 'Simulab'")
+            .And.Contain("principalType: 'ServicePrincipal'")
+            .And.Contain("scope: communicationService");
+        // Brazil on both resources: the domain only links when the two data locations match.
+        template.Should().Contain("param dataLocation string = 'Brazil'");
+        System.Text.RegularExpressions.Regex.Matches(template, "dataLocation: dataLocation").Should().HaveCount(2);
+        System.Text.RegularExpressions.Regex.Matches(template, "Microsoft.Authorization/roleAssignments@").Should().HaveCount(1);
+        template.Should().NotContain("listKeys").And.NotContain("@secure");
+    }
+
+    /// <summary>F-66 AC5 (BR1, BR9): the template is told the Api's identity and nothing else; no email secret or parameter exists.</summary>
+    [Fact]
+    public void Publish_Email_IsBoundToTheApiIdentityAndAsksForNoSecret()
+    {
+        using var manifest = System.Text.Json.JsonDocument.Parse(_files["manifest.json"]);
+        var resources = manifest.RootElement.GetProperty("resources");
+
+        var email = resources.GetProperty("email");
+        email.GetProperty("type").GetString().Should().Be("azure.bicep.v0");
+        email.GetProperty("params").EnumerateObject().Select(parameter => parameter.Name).Should().Equal("apiPrincipalId");
+        email.GetProperty("params").GetProperty("apiPrincipalId").GetString().Should().Be("{api-identity.outputs.principalId}");
+
+        resources.EnumerateObject().Where(resource => resource.Name.Contains("email", StringComparison.OrdinalIgnoreCase))
+            .Select(resource => resource.Name).Should().Equal("email");
+        resources.EnumerateObject().Where(resource => resource.Value.TryGetProperty("type", out var type)
+                && type.GetString() == "parameter.v0" && resource.Name.Contains("email", StringComparison.OrdinalIgnoreCase))
+            .Should().BeEmpty();
+        _files["manifest.json"].Should().NotContain("email-api-key").And.NotContain("email_api_key");
+    }
+
+    /// <summary>F-66 AC5 (BR9): the Api gets the three settings and its identity's client id; the Web gets no email setting.</summary>
+    [Fact]
+    public void Publish_Email_GivesTheApiItsSettingsAndTheWebNone()
+    {
+        var api = Bicep("api-containerapp");
+        api.Should().Contain("'Email__Provider'").And.Contain("'AzureCommunicationServices'")
+            .And.Contain("'Email__AzureCommunicationServices__Endpoint'")
+            .And.Contain("'Email__FromAddress'")
+            .And.Contain("name: 'AZURE_CLIENT_ID'");
+        Bicep("web-containerapp").Should().NotContain("Email__").And.NotContain("AZURE_CLIENT_ID");
+    }
+
+    /// <summary>F-66: one identity serves the Api (PostgreSQL and email), so the role assignment and the sign-in meet.</summary>
+    [Fact]
+    public void Publish_Email_UsesTheSingleIdentityOfTheApi()
+    {
+        _files.Keys.Where(file => file.EndsWith("-identity.module.bicep", StringComparison.Ordinal))
+            .Should().Equal("api-identity.module.bicep");
+        Bicep("api-containerapp").Should().Contain("api_identity_outputs_clientid");
+    }
+
     /// <summary>The Production files differ from Staging in one thing worth a test: the cache is the managed one.</summary>
     [Fact]
     public async Task Publish_ProductionUsesTheManagedRedis()
