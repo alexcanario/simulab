@@ -96,7 +96,7 @@ public sealed class ForwardedHeadersHostTests(ApiFactory factory) : IClassFixtur
         answer.Should().Contain("ID2083");
     }
 
-    private static async Task<List<RecordedLogEntry>> WarningsAfterAsync(WebApplicationFactory<Program> factory, string environment, bool proxyListed, int requests)
+    private static async Task<List<RecordedLogEntry>> WarningsAfterAsync(ApiFactory factory, string environment, bool proxyListed, int requests)
     {
         var logs = new RecordingLoggerProvider();
         await using var host = factory.WithWebHostBuilder(builder =>
