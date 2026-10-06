@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: en
-features: [F-36, F-37, F-42]
-updated: 2026-10-02
+features: [F-36, F-37, F-42, F-57]
+updated: 2026-10-06
 ---
 # Catalog
 
@@ -17,8 +17,9 @@ The catalog shows the same to everyone, Admins included: exams with only draft e
 ### Find an exam
 1. Choose **Catalog** in the **Study** section of the menu.
 2. Type in the search box. Words can be part of the exam's name, of the issuing authority's name, or of the state or city, in any order, with or without accents and capitals. "guarda sp" finds "Guarda Municipal" of a São Paulo authority. A state exam is found by its state's name or acronym ("sp", "sao paulo" or "São Paulo") and shows its state as "São Paulo (SP)", in the list and on the exam page.
-3. Narrow the list with **Assessment type**, **Scope**, **Board** and **Notice year**, alone or together with the text. The board and the year are matched on the same edition: an exam only appears for "FGV" and "2025" when it has a published FGV edition in 2025.
-4. Choose **Clear filters** to remove the four filters. The search text has its own clear button.
+3. Narrow the list with **Assessment type**, **Scope**, **State**, **Board** and **Notice year**, alone or together with the text. The board and the year are matched on the same edition: an exam only appears for "FGV" and "2025" when it has a published FGV edition in 2025.
+4. To see the exams of one state, open **State** (the whole list appears; type a name or an acronym to narrow it) and pick one, such as "São Paulo (SP)". Only the state exams of that state are listed, and **Scope** changes to State. Choosing another scope, or all scopes, empties the state; clearing only the state keeps the scope. National exams and municipal exams are never listed under a state.
+5. Choose **Clear filters** to remove the filters, the state included. The search text has its own clear button.
 
 The address of the page keeps your search, filters and page, so you can bookmark or share it. Going back from an exam returns to the list as you left it.
 
@@ -41,6 +42,7 @@ These rows are ordinary data: an Admin can edit or delete any of them and the ch
 | Search | Part of the exam's name, its issuing authority's name, or its state or city | Every word must match somewhere; capitals and accents do not matter |
 | Assessment type | Public service exam, certification, university entrance exam or ENEM | One value or all |
 | Scope | National, State or Municipal | One value or all |
+| State | One of the 27 states, shown as "São Paulo (SP)" | Only states with a published state exam are offered, in the order of the official list; picking one sets Scope to State |
 | Board | The organizer that applied a published edition | Only boards with something published are offered |
 | Notice year | The year of a published edition's notice | Only years with something published are offered |
 | Editions | How many editions of the exam are published | Counts all of them, whatever the filters |
@@ -52,7 +54,7 @@ These rows are ordinary data: an Admin can edit or delete any of them and the ch
 | No exam is published in the catalog yet. | Nothing has been published. | Come back later. |
 | No published exam matches "…". | The search found nothing. | Try fewer or shorter words. |
 | No published exam matches the chosen filters. | The filters together leave nothing. | Choose **Clear filters**. |
-| We could not load the board and year options. The rest of the search works. | The two lists of options failed to load. | Choose **Try again**, or keep searching without them. |
+| We could not load the board, year and state options. The rest of the search works. | The three lists of options failed to load. | Choose **Try again**, or keep searching without them. |
 | We could not load this exam. | The exam page failed to load. | Choose **Try again**. |
 | This exam no longer exists. | The exam does not exist, was removed or has nothing published. | Choose **Back to the catalog**. |
 

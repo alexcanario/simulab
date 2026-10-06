@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: pt-BR
-features: [F-36, F-37, F-42]
-updated: 2026-10-02
+features: [F-36, F-37, F-42, F-57]
+updated: 2026-10-06
 ---
 # Catálogo
 
@@ -17,8 +17,9 @@ O catálogo mostra o mesmo para todos, inclusive para Administradores: exames co
 ### Encontrar um exame
 1. Escolha **Catálogo** na seção **Estudo** do menu.
 2. Digite na caixa de busca. As palavras podem ser parte do nome do exame, do nome do órgão contratante, ou do estado ou da cidade, em qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de um órgão de São Paulo. Um exame estadual é encontrado pelo nome ou pela sigla do estado ("sp", "sao paulo" ou "São Paulo") e mostra o estado como "São Paulo (SP)", na lista e na página do exame.
-3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Banca** e **Ano do edital**, sozinhos ou junto com o texto. A banca e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
-4. Escolha **Limpar filtros** para remover os quatro filtros. O texto da busca tem o próprio botão de limpar.
+3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Estado**, **Banca** e **Ano do edital**, sozinhos ou junto com o texto. A banca e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
+4. Para ver os exames de um estado, abra **Estado** (a lista inteira aparece; digite um nome ou uma sigla para reduzi-la) e escolha um, como "São Paulo (SP)". Só os exames estaduais desse estado aparecem, e **Abrangência** passa a Estadual. Escolher outra abrangência, ou todas, esvazia o estado; limpar só o estado mantém a abrangência. Exames nacionais e municipais nunca aparecem sob um estado.
+5. Escolha **Limpar filtros** para remover os filtros, inclusive o estado. O texto da busca tem o próprio botão de limpar.
 
 O endereço da página guarda sua busca, seus filtros e a página, então você pode marcá-lo ou compartilhá-lo. Ao voltar de um exame, a lista reaparece como você a deixou.
 
@@ -41,6 +42,7 @@ Essas linhas são dados comuns: um Administrador pode editar ou excluir qualquer
 | Busca | Parte do nome do exame, do nome do órgão contratante, ou do estado ou da cidade | Todas as palavras precisam combinar em algum lugar; maiúsculas e acentos não importam |
 | Tipo de avaliação | Concurso público, certificação, vestibular ou ENEM | Um valor ou todos |
 | Abrangência | Nacional, Estadual ou Municipal | Um valor ou todos |
+| Estado | Um dos 27 estados, mostrado como "São Paulo (SP)" | Só aparecem estados com um exame estadual publicado, na ordem da lista oficial; escolher um define a Abrangência como Estadual |
 | Banca | O organizador que aplicou uma edição publicada | Só aparecem bancas com algo publicado |
 | Ano do edital | O ano do edital de uma edição publicada | Só aparecem anos com algo publicado |
 | Edições | Quantas edições do exame estão publicadas | Conta todas, quaisquer que sejam os filtros |
@@ -52,7 +54,7 @@ Essas linhas são dados comuns: um Administrador pode editar ou excluir qualquer
 | Ainda não há exames publicados no catálogo. | Nada foi publicado. | Volte mais tarde. |
 | Nenhum exame publicado corresponde a "…". | A busca não achou nada. | Tente menos palavras ou palavras mais curtas. |
 | Nenhum exame publicado corresponde aos filtros escolhidos. | Os filtros juntos não deixam nada. | Escolha **Limpar filtros**. |
-| Não foi possível carregar as opções de banca e ano. O resto da busca funciona. | As duas listas de opções não carregaram. | Escolha **Tentar novamente** ou continue buscando sem elas. |
+| Não foi possível carregar as opções de banca, ano e estado. O resto da busca funciona. | As três listas de opções não carregaram. | Escolha **Tentar novamente** ou continue buscando sem elas. |
 | Não foi possível carregar este exame. | A página do exame não carregou. | Escolha **Tentar novamente**. |
 | Este exame não existe mais. | O exame não existe, foi removido ou não tem nada publicado. | Escolha **Voltar para o catálogo**. |
 

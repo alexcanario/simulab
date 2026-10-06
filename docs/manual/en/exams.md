@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: en
-features: [F-34, F-43, F-35, F-42]
-updated: 2026-10-02
+features: [F-34, F-43, F-35, F-42, F-57]
+updated: 2026-10-06
 ---
 # Exams
 
@@ -20,8 +20,10 @@ Everyone else gets Page not found.
 2. The list shows the name, the issuing authority, the assessment type and the scope, in name order. Click a
    column title to sort by it.
 3. Type in the search box to filter by name. Case and accents do not matter: "publica" finds "Pública".
-4. The three filters above the list — issuing authority, assessment type and scope — can be combined. In the
-   issuing authority filter, type two letters of the name and pick from the list that appears.
+4. The four filters above the list — issuing authority, assessment type, scope and state — can be combined. In the
+   issuing authority filter, type two letters of the name and pick from the list that appears. The state filter
+   opens with all 27 states; picking one lists only the state exams of that state, published or not, and sets the
+   scope to State. Choosing another scope empties the state.
 
 ### Add an exam
 1. Choose **Add**. The form opens on a page of its own.
