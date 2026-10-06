@@ -8,6 +8,7 @@ version: 1
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
 Status flow: idea -> refining -> approved -> building -> validating -> done
+- cancelled: exit from idea or refining only, as a duplicate; the file stays, with "Duplicate of <id> (<date>): <where the improvement went>" under the header.
 - idea: title, summary and start only (/agile:idea, /agile:epic).
 - refining: sections below filled during /agile:refine.
 - approved: set only after the product owner says "approve F-<number>" and Open questions is empty or deferred.

@@ -24,6 +24,22 @@ Technical terms: [glossary](glossary.md)
 |---|---|---|---|---|---|---|---|
 | local | provisioned | | app host | user secrets | not declared | | |
 
+## Cloud accounts
+<!--
+One row per non-local environment: the client's cloud account its deploy lands in. The repository, the tag, the GitHub Release and the board stay in the owner's GitHub; only the deploy moves.
+Cloud: `azure`, `aws`, `gcp`, `other` or `none` (a host without a cloud account, such as the compose recipe). An environment with a Deploy command and no row stops /agile:publish.
+Azure: Tenant and Subscription are GUIDs (not a name or a domain), written here (ids are not secrets; no secret goes in this file). /agile:publish keeps one `az` login per subscription in
+`<home>/.agile/azure/<tenant>/<subscription>`, checks that it sees that subscription before the deploy command and runs the command with Azure__TenantId, Azure__SubscriptionId, Azure__CredentialSource=AzureCli
+(and Azure__ResourceGroup and Azure__Location when filled), after removing every inherited AZURE_*, ARM_* and Azure__* variable. Log in once, in Git Bash: AZURE_CONFIG_DIR="<folder>" az login --tenant <tenant>.
+Other clouds are shown in the plan and not checked.
+What to ask the client's administrator: locally, the owner as a guest in their tenant with the role Contributor on the subscription (plus Role Based Access Control Administrator limited to the roles the app's managed
+identities need, when the deploy creates role assignments); for the pipeline, an app registration in their tenant with the same roles and a federated credential for `repo:<owner>/<repo>:environment:<environment>`.
+GitHub: set the variables AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID on the GitHub environment (variables, not secrets), and give each Azure environment a deployment protection rule: "Selected branches and tags"
+with the tag pattern `v*` only, and required reviewers on production. A manual run can start from any branch and gets the same federated subject: the protection rule is the boundary, the plugin's check only catches a mistake.
+-->
+| Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region |
+|---|---|---|---|---|---|---|
+
 ## Expected secrets
 | Name | Used by | Kept in (per environment) |
 |---|---|---|
@@ -38,7 +54,19 @@ Technical terms: [glossary](glossary.md)
 
 ## Desktop updates (a desktop app only)
 - Update source: <\\server\share\<app> | https://updates.example.com/<app> | not declared>
-- `/agile:publish` packs the Windows head with Velopack and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private GitHub Releases address here.
+- Update source (linux): <only with linux-x64 in the head: the share's path as mounted on Linux (/mnt/updates/<app>) | https://... | not declared (an https main line is used)>
+- Beta channel: <every merge | off>
+- With a share and `every merge`, `/agile:ship` packs each merge to the main branch as `<Version>-beta` on Velopack's beta channel and sends it to the share (the five newest betas stay); testers install `<App>-beta-Setup.exe` from there, and the stable Setup.exe takes a machine back to stable. `off`, or an https source, sends no beta.
+- `/agile:publish` packs the Windows head with Velopack (and an Avalonia head's `linux-x64` as an AppImage, which reads the Linux line) and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private GitHub Releases address here.
+
+## Code signing (a desktop app only)
+- Code signing: none
+- Signing account: <artifact-signing only: <tenant id>/<subscription id> of the Azure account that owns the signing account>
+- `none` (or no line) ships the Windows installer unsigned and Windows warns "Unknown publisher". A mode makes `vpk` sign Setup.exe, the app's files and Update.exe of every Windows release and beta, from one environment variable of the shell that runs `/agile:publish` (and `/agile:ship`, for the beta); the plugin passes only that one to `vpk`, so a variable left for another project never signs this one. The publish stops when the variable is unset, and the Linux AppImage and plain zips are never signed.
+  - `artifact-signing` (Microsoft's Artifact Signing, organizations in the USA, Canada, EU and UK, individuals in the USA and Canada): `VPK_AZURE_TRUSTED_SIGN_FILE` = absolute path of its `metadata.json`, outside the repository (`Endpoint`, `CodeSigningAccountName`, `CertificateProfileName`, and `"ExcludeCredentials": ["ManagedIdentityCredential", "SharedTokenCacheCredential", "VisualStudioCredential", "VisualStudioCodeCredential"]` so the signing uses the Azure CLI login below). The login lives in `<home>/.agile/azure/<tenant>/<subscription>`; log in once, in Git Bash: AZURE_CONFIG_DIR="<that folder>" az login --tenant <tenant>.
+  - `signtool` (a certificate from a CA, on a token or a cloud HSM): `VPK_SIGN_PARAMS` = signtool's parameters, the certificate chosen by `/sha1 <thumbprint>` (or the token's CSP), with a timestamp: `/fd SHA256 /tr <the CA's timestamp URL> /td SHA256 /sha1 <thumbprint>`. Never `/p`, nor a token PIN in `/kc` (`[{{...}}]`): the publish refuses a secret on a command line.
+  - `template` (a vendor's own signing tool): `VPK_SIGN_TEMPLATE` = its command with `{{file}}` (one file) or `{{file...}}` (several) where the file goes.
+- The certificate or the Artifact Signing account is kept in: <where; who renews it and when it expires>. The variable's value is never written here.
 
 ## Release steps
 1. <step, or "no release process yet">

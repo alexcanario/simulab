@@ -86,12 +86,15 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         _files["manifest.json"].Should().Contain("\"redis\"");
     }
 
-    /// <summary>AC4 (BR5): the Api always runs (it carries the job worker); the Web runs at most once and may sleep.</summary>
+    /// <summary>
+    /// AC4 (BR5): the Api always runs (it carries the job worker); the Web runs at most once and may sleep.
+    /// F-54 AC10 (BR7): the Api runs at most once too, until F-73 shares the OpenIddict keys.
+    /// </summary>
     [Fact]
-    public void Publish_KeepsTheApiAwakeAndTheWebAtMostOnce()
+    public void Publish_KeepsTheApiAwakeAndBothHostsAtMostOnce()
     {
         var api = Bicep("api-containerapp");
-        api.Should().Contain("minReplicas: 1");
+        api.Should().Contain("minReplicas: 1").And.Contain("maxReplicas: 1");
 
         var web = Bicep("web-containerapp");
         web.Should().Contain("minReplicas: 0").And.Contain("maxReplicas: 1");

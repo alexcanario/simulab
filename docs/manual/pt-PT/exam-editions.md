@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-PT
-features: [F-35]
-updated: 2026-09-29
+features: [F-35, F-74]
+updated: 2026-10-04
 ---
 # Edições de um exame
 
@@ -32,7 +32,7 @@ Apenas uma conta com a permissão "Gerir o catálogo" — o perfil Admin tem-na.
 
 ### Eliminar uma edição
 1. Só um rascunho pode ser eliminado. Se a edição está publicada, abra-a, escolha **Rascunho** e guarde primeiro: a ação de eliminar da linha publicada fica desativada.
-2. Escolha **Eliminar** na linha e confirme. A edição sai da lista. O ano, o posto de trabalho e a entidade continuam ocupados dentro do exame, para que a mesma prova não volte a ser adicionada por engano.
+2. Escolha **Eliminar** na linha e confirme. A edição sai da lista, com as suas disciplinas do aviso (a confirmação avisa). O ano, o posto de trabalho e a entidade continuam ocupados dentro do exame, para que a mesma prova não volte a ser adicionada por engano.
 
 Um exame que ainda tem edições não pode ser eliminado, nem uma entidade organizadora que alguma edição indique. Elimine ou altere primeiro as edições.
 
@@ -61,6 +61,43 @@ Um exame não pode ter duas edições com o mesmo ano, posto de trabalho e entid
 | Este exame tem edições. Elimine primeiro as edições. | Um exame com edições não pode ser eliminado. | Elimine as edições e depois o exame. |
 | Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições. | Uma entidade em uso não pode ser eliminada. | Altere ou elimine essas edições. |
 | Esta edição já não existe. | Alguém a eliminou com o seu ecrã aberto. | Volte ao exame. |
+
+## Disciplinas do aviso
+No cartão **Disciplinas do aviso**, abaixo do formulário da edição, regista as disciplinas tal como o aviso as apresenta: o grupo (por exemplo "Conhecimentos gerais"), o nome da disciplina e o número de questões. O cartão só aparece depois de a edição ser guardada; numa edição nova pede para guardar primeiro. Cada disciplina é guardada pelo seu próprio diálogo ou ação: o botão **Guardar** da edição nunca as guarda. Funciona em edições em rascunho e publicadas.
+
+### Adicionar uma disciplina
+1. No cartão, escolha **Adicionar disciplina do aviso**.
+2. Se o aviso agrupa as disciplinas, escolha um grupo já usado (a lista sugere ao escrever, sem distinguir maiúsculas e acentos) ou escreva um novo. Deixe vazio se o aviso não agrupa. Ao adicionar várias seguidas, o grupo da última adicionada já vem preenchido.
+3. Escreva a **disciplina** como o aviso a designa e, se o aviso o indica, o **número de questões** (de 1 a 500; vazio quer dizer que o aviso não o indica).
+4. Escolha **Guardar**. A nova disciplina entra no fim do seu grupo, ou no fim da lista quando o grupo é novo.
+
+### Ver, ordenar, alterar e eliminar
+- As disciplinas aparecem sob o título do seu grupo, pela ordem do aviso. Quando nenhuma tem grupo, não há título. Um traço (—) quer dizer que o número de questões não foi indicado.
+- Abaixo da lista, o total soma só os números indicados e diz quantas disciplinas ficaram fora da soma por não terem número. O total não é guardado nem comparado com nada.
+- **Mover para cima** e **Mover para baixo** trocam a disciplina com a vizinha do mesmo grupo. A primeira do grupo não sobe e a última não desce (o botão fica desativado e explica o motivo); uma disciplina nunca muda de grupo ao ser movida.
+- **Editar** abre o mesmo diálogo preenchido. Mudar o grupo passa a disciplina para o fim do novo grupo; mudar só o nome ou o número mantém a posição.
+- **Eliminar** pede confirmação e retira a disciplina da edição. Pode voltar a ser adicionada mais tarde.
+
+### Campos das disciplinas do aviso
+| Campo | Significado | Regras |
+|---|---|---|
+| Grupo | O título sob o qual o aviso lista a disciplina | Opcional, no máximo 100 caracteres. Vazio é "Sem grupo" |
+| Disciplina | A disciplina como o aviso a designa | Obrigatório, de 2 a 200 caracteres |
+| Número de questões | Quantas questões o aviso reserva à disciplina | Opcional, número inteiro de 1 a 500 |
+
+Na mesma edição, o nome da disciplina não pode repetir-se dentro do mesmo grupo (maiúsculas e acentos não contam; "sem grupo" é um grupo). Uma disciplina eliminada não conta.
+
+### Mensagens das disciplinas do aviso
+| Mensagem | O que significa | O que fazer |
+|---|---|---|
+| Indique a disciplina tal como o aviso a designa. | O nome está vazio. | Escreva o nome. |
+| A disciplina precisa de pelo menos 2 caracteres. | O nome tem 1 caractere. | Escreva o nome completo. |
+| A disciplina é demasiado longa: no máximo 200 caracteres. | O nome passa de 200 caracteres. | Encurte o nome. |
+| O grupo é demasiado longo: no máximo 100 caracteres. | O grupo passa de 100 caracteres. | Encurte o grupo. |
+| Indique um número inteiro de 1 a 500, ou deixe vazio. | O número não é inteiro ou está fora do intervalo. | Corrija ou deixe vazio. |
+| Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam). | A mesma disciplina já está no grupo. | Mude o nome ou o grupo. |
+| Esta disciplina já não está na edição. A lista foi recarregada. | Alguém eliminou-a com o seu ecrã aberto. | Confira a lista atualizada. |
+| Esta disciplina não pode ir nesse sentido. A lista foi recarregada. | Outra pessoa já a moveu. | Confira a ordem atual. |
 
 ## Páginas relacionadas
 - [Exames](exams.md): os exames do catálogo (Administradores)

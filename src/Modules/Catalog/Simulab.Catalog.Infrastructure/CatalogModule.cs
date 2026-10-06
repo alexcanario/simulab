@@ -3,7 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Simulab.Catalog.Application.ExamEditions;
 using Simulab.Catalog.Application.Exams;
 using Simulab.Catalog.Application.IssuingAuthorities;
+using Simulab.Catalog.Application.NoticeSubjects;
 using Simulab.Catalog.Application.Organizers;
+using Simulab.Catalog.Application.Subjects;
+using Simulab.Catalog.Application.Topics;
 using Simulab.Catalog.Contracts;
 using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Contracts;
@@ -55,6 +58,22 @@ public static class CatalogModule
         services.AddScoped<IExamEditionQueries, ExamEditionQueries>();
         services.AddScoped<SaveExamEditionHandler>();
         services.AddScoped<DeleteExamEditionHandler>();
+
+        services.AddScoped<ISubjectStore, SubjectStore>();
+        services.AddScoped<ISubjectQueries, SubjectQueries>();
+        services.AddScoped<SaveSubjectHandler>();
+        services.AddScoped<DeleteSubjectHandler>();
+
+        services.AddScoped<ITopicStore, TopicStore>();
+        services.AddScoped<ITopicQueries, TopicQueries>();
+        services.AddScoped<SaveTopicHandler>();
+        services.AddScoped<DeleteTopicHandler>();
+
+        services.AddScoped<INoticeSubjectStore, NoticeSubjectStore>();
+        services.AddScoped<INoticeSubjectQueries, NoticeSubjectQueries>();
+        services.AddScoped<SaveNoticeSubjectHandler>();
+        services.AddScoped<MoveNoticeSubjectHandler>();
+        services.AddScoped<DeleteNoticeSubjectHandler>();
 
         return services;
     }

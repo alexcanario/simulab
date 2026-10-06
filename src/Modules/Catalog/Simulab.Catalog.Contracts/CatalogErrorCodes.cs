@@ -60,4 +60,29 @@ public static class CatalogErrorCodes
     public const string ExamEditionStatusInvalid = "exam_edition.status_invalid";
     public const string ExamEditionDuplicate = "exam_edition.duplicate";
     public const string ExamEditionPublished = "exam_edition.published";
+
+    public const string SubjectNotFound = "subject.not_found";
+    public const string SubjectNameRequired = "subject.name_required";
+    public const string SubjectNameTooLong = "subject.name_too_long";
+    public const string SubjectNameTaken = "subject.name_taken";
+    public const string SubjectAreaInvalid = "subject.area_invalid";
+
+    /// <summary>F-79 BR8: the subject still has topics, so it cannot leave the catalog. Carries no count.</summary>
+    public const string SubjectHasTopics = "subject.has_topics";
+
+    public const string TopicNotFound = "topic.not_found";
+    public const string TopicNameRequired = "topic.name_required";
+    public const string TopicNameTooLong = "topic.name_too_long";
+    public const string TopicNameTaken = "topic.name_taken";
+
+    public const string NoticeSubjectNotFound = "notice_subject.not_found";
+    public const string NoticeSubjectLabelRequired = "notice_subject.label_required";
+    public const string NoticeSubjectLabelTooShort = "notice_subject.label_too_short";
+    public const string NoticeSubjectLabelTooLong = "notice_subject.label_too_long";
+    public const string NoticeSubjectGroupTooLong = "notice_subject.group_too_long";
+    public const string NoticeSubjectQuestionCountInvalid = "notice_subject.question_count_invalid";
+    public const string NoticeSubjectDuplicate = "notice_subject.duplicate";
+
+    /// <summary>F-74 BR6: the row is first or last in its group, or the direction is not up or down.</summary>
+    public const string NoticeSubjectMoveInvalid = "notice_subject.move_invalid";
 }
