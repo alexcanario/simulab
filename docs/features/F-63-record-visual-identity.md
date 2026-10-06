@@ -1,7 +1,7 @@
 ---
 feature: F-63
 epic: Foundation and identity
-status: validating
+status: done
 board: 102
 version: 1
 ---
@@ -117,3 +117,7 @@ Needed to validate: the owner reads `docs/design/DESIGN.md` and the token table 
 | AC9 | no UI text added; the missing-key test is in the Web.Tests run (1083 passed) |
 
 ## Delivery
+- Branch `feature/F-63`, merged with `--no-ff` (merge commit `5f314be`, board #102). App version 0.16.0 -> 0.17.0.
+- Files: `docs/design/identity.tokens.json` (39 colors in light and dark, font stack, type scale, radius, icon family), `docs/design/DESIGN.md`, `IdentityTokensTests` and `IdentityTokensComparison`, ADR-0001 decision 30, two glossary rows. `SimulabTheme.cs` unchanged.
+- Full suite: 2323 tests, 0 failed, 88 s; build 17 s, 0 new warnings (gate GREEN, 2026-10-06). Architecture tests 181 passed.
+- Owner validated on 2026-10-06. App manual: not updated (no visible behavior changed).
