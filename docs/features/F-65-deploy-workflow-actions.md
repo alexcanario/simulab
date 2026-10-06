@@ -1,6 +1,6 @@
 ---
 feature: F-65
-epic: Foundation and identity
+epic: Cloud hosting and operations
 status: approved
 board: 104
 version: 1
