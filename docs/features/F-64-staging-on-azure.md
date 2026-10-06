@@ -1,6 +1,6 @@
 ---
 feature: F-64
-epic: Foundation and identity
+epic: Cloud hosting and operations
 status: building
 board: 103
 version: 1
