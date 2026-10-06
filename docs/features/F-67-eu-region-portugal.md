@@ -1,6 +1,6 @@
 ---
 feature: F-67
-epic: Foundation and identity
+epic: Cloud hosting and operations
 status: done
 board: 106
 version: 1

@@ -1,6 +1,6 @@
 ---
 feature: F-81
-epic: Foundation and identity
+epic: Cloud hosting and operations
 status: idea
 board: 124
 version: 1
