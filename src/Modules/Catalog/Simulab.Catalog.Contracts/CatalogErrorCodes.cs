@@ -44,6 +44,9 @@ public static class CatalogErrorCodes
     /// <summary>F-42 BR2: a State exam names something that is not an acronym of the 27 Brazilian states.</summary>
     public const string ExamScopeDetailUnknownState = "exam.scope_detail_unknown_state";
 
+    /// <summary>F-57 BR6: a list asked for a state that is not an acronym of the 27 states.</summary>
+    public const string ExamFilterUnknownState = "exam.filter_unknown_state";
+
     /// <summary>F-35 BR12: the exam has editions, so it cannot leave the catalog. Carries no count, like its siblings.</summary>
     public const string ExamHasEditions = "exam.has_editions";
 

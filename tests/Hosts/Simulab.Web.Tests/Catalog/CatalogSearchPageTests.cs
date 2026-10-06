@@ -18,6 +18,13 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
     private static AppSelectField<T> Filter<T>(IRenderedComponent<CatalogSearch> page, string id) =>
         page.FindComponents<AppSelectField<T>>().Single(field => field.Instance.Id == id).Instance;
 
+    private static AppLookupField StateFilter(IRenderedComponent<CatalogSearch> page) =>
+        page.FindComponents<AppLookupField>().Single(field => field.Instance.Id == "catalog-filter-state").Instance;
+
+    private static Task PickStateAsync(IRenderedComponent<CatalogSearch> page, string? displayName) =>
+        page.InvokeAsync(() => StateFilter(page).ValueChanged.InvokeAsync(
+            displayName is null ? null : new AppLookupOption(Guid.Empty, displayName)));
+
     private static void WaitForRows(IRenderedComponent<CatalogSearch> page, int count) =>
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(count));
 
@@ -218,14 +225,15 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         WaitForRows(page, 2);
 
         page.WaitForAssertion(() => page.Find(".app-alert").TextContent.Should()
-            .Contain("We could not load the board and year options. The rest of the search works."));
+            .Contain("We could not load the board, year and state options. The rest of the search works."));
+        StateFilter(page).Disabled.Should().BeTrue("AC9: the state options come with the board and year ones");
         Filter<Guid?>(page, "catalog-filter-organizer").Disabled.Should().BeTrue();
         Filter<int?>(page, "catalog-filter-year").Disabled.Should().BeTrue();
         Filter<Guid?>(page, "catalog-filter-organizer").Options.Should().ContainSingle();
         Filter<AssessmentType?>(page, "catalog-filter-type").Disabled.Should().BeFalse();
         var listCalls = Api.ListQueries.Count();
 
-        Api.Filters = new PublishedExamFiltersResponse([Fgv], [2025]);
+        Api.Filters = new PublishedExamFiltersResponse([Fgv], [2025], ["SP"]);
         page.Find(".app-alert-action").Click();
 
         page.WaitForAssertion(() => page.FindAll(".app-alert").Should().BeEmpty());
@@ -315,5 +323,169 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
 
         page.WaitForAssertion(() => page.Find(".app-state-error").TextContent.Should().Contain("We could not load this list."));
         page.Find(".app-retry").TextContent.Should().Contain("Try again");
+    }
+
+    // F-57 AC2 (screen side): the state field offers only the states the Api says have a published State exam,
+    // in the Api's order, and all of them when the field opens (empty term).
+    [Fact]
+    public async Task StateFilter_OffersOnlyTheStatesTheApiListed_InListOrder()
+    {
+        Api.Filters = new PublishedExamFiltersResponse([Fgv], [2025], ["RJ", "SP"]);
+        var page = RenderPage();
+        WaitForRows(page, 2);
+        page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
+
+        var options = await StateFilter(page).SearchAsync(string.Empty, CancellationToken.None);
+
+        options.Select(option => option.Text).Should().Equal("Rio de Janeiro (RJ)", "São Paulo (SP)");
+        // Typing narrows by name, accent-insensitive.
+        (await StateFilter(page).SearchAsync("sao", CancellationToken.None)).Select(option => option.Text)
+            .Should().Equal("São Paulo (SP)");
+        (await StateFilter(page).SearchAsync("MG", CancellationToken.None)).Should().BeEmpty("MG has no published exam");
+    }
+
+    // F-57 AC1: picking a state asks the Api for it, sets the scope to State and keeps the state in the address.
+    [Fact]
+    public async Task StateFilter_Pick_SendsTheStateSetsTheScopeAndWritesTheAddress()
+    {
+        var page = RenderPage();
+        WaitForRows(page, 2);
+        page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
+
+        await PickStateAsync(page, "São Paulo (SP)");
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("state=SP").And.Contain("scope=State").And.Contain("page=0"));
+        WaitForRows(page, 1);
+        page.Find("tbody tr td a").TextContent.Should().Be("Guarda Municipal");
+        Filter<ExamScope?>(page, "catalog-filter-scope").Value.Should().Be(ExamScope.State);
+        StateFilter(page).Value!.Text.Should().Be("São Paulo (SP)");
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/catalog?scope=State&state=SP"));
+        page.FindAll(ClearFilters).Should().ContainSingle();
+    }
+
+    // F-57 AC4: another scope empties the state; clearing only the state leaves the scope.
+    [Fact]
+    public async Task StateFilter_ScopeChangedAwayFromState_ClearsTheState_ClearingTheStateKeepsTheScope()
+    {
+        var page = RenderPage();
+        WaitForRows(page, 2);
+        page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
+        await PickStateAsync(page, "São Paulo (SP)");
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("state=SP"));
+
+        await page.InvokeAsync(() => Filter<ExamScope?>(page, "catalog-filter-scope").ValueChanged.InvokeAsync(ExamScope.National));
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("scope=National").And.NotContain("state="));
+        StateFilter(page).Value.Should().BeNull();
+
+        await PickStateAsync(page, "São Paulo (SP)");
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("state=SP").And.Contain("scope=State"));
+        await page.InvokeAsync(() => Filter<ExamScope?>(page, "catalog-filter-scope").ValueChanged.InvokeAsync(null));
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().NotContain("scope=").And.NotContain("state="));
+        StateFilter(page).Value.Should().BeNull("all scopes leaves no state");
+
+        await PickStateAsync(page, "São Paulo (SP)");
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("state=SP"));
+        await PickStateAsync(page, null);
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().NotContain("state=").And.Contain("scope=State"));
+        Filter<ExamScope?>(page, "catalog-filter-scope").Value.Should().Be(ExamScope.State);
+    }
+
+    // F-57 AC5: the state in the address is restored, shown and sent; an address with an unknown state loads
+    // unfiltered by state, with no error, and is written back clean.
+    [Fact]
+    public void Open_WithAState_RestoresItAndSendsIt()
+    {
+        OpenAt("/catalog?scope=State&state=sp");
+
+        var page = RenderPage();
+
+        WaitForRows(page, 1);
+        Api.ListQueries.First().Should().Contain("state=SP");
+        StateFilter(page).Value!.Text.Should().Be("São Paulo (SP)");
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/catalog?scope=State&state=SP"));
+    }
+
+    [Fact]
+    public void Open_WithAStateOffTheList_LoadsWithoutItAndCleansTheAddress()
+    {
+        OpenAt("/catalog?state=XX");
+
+        var page = RenderPage();
+
+        WaitForRows(page, 2);
+        Api.ListQueries.First().Should().NotContain("state=");
+        StateFilter(page).Value.Should().BeNull();
+        page.FindAll(".app-state-error").Should().BeEmpty();
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/catalog"));
+    }
+
+    // F-57 BR4, BR6: a state of the list that no published exam has (a stale link) is dropped once the options
+    // arrive, and the list reloads without it.
+    [Fact]
+    public void Open_WithAStateNoPublishedExamHas_DropsItAndReloads()
+    {
+        OpenAt("/catalog?scope=State&state=MG");
+
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().NotContain("state="));
+        StateFilter(page).Value.Should().BeNull();
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/catalog?scope=State"));
+    }
+
+    // F-57 AC6: the state combines with the type and the text; "Clear filters" empties the state too.
+    [Fact]
+    public async Task StateFilter_CombinesWithTheOtherFilters_AndClearFiltersEmptiesIt()
+    {
+        var page = RenderPage();
+        WaitForRows(page, 2);
+        page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
+        await page.InvokeAsync(() => Filter<AssessmentType?>(page, "catalog-filter-type").ValueChanged.InvokeAsync(AssessmentType.PublicServiceExam));
+        page.Find(".app-table-search input").Input("guarda");
+        AdvanceDebounce();
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("search=guarda"));
+        await PickStateAsync(page, "São Paulo (SP)");
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should()
+            .Contain("state=SP").And.Contain("assessmentType=PublicServiceExam").And.Contain("search=guarda"));
+
+        page.Find(ClearFilters).Click();
+
+        page.WaitForAssertion(() => Api.ListQueries.Last().Should().NotContain("state=").And.NotContain("assessmentType="));
+        StateFilter(page).Value.Should().BeNull();
+        Filter<ExamScope?>(page, "catalog-filter-scope").Value.Should().BeNull();
+    }
+
+    // F-57 BR13 (F-36): the state goes on the exam link with the other keys, so the exam page brings the list back as it was.
+    [Fact]
+    public void Load_ExamLinkCarriesTheState()
+    {
+        Api.Exams = [GuardaMunicipal];
+        OpenAt("/catalog?scope=State&state=SP");
+
+        var page = RenderPage();
+
+        WaitForRows(page, 1);
+        page.Find("tbody a").GetAttribute("href").Should().Be($"/catalog/exams/{GuardaMunicipal.Id}?scope=State&state=SP");
+    }
+
+    // F-57 AC9 (the field while the options load): it is disabled with board and year, and the page renders it with its real parameters.
+    [Fact]
+    public async Task StateFilter_WhileTheOptionsLoad_IsDisabled()
+    {
+        Api.HoldFilters = new TaskCompletionSource();
+
+        var page = RenderPage();
+        WaitForRows(page, 2);
+
+        StateFilter(page).Disabled.Should().BeTrue();
+        page.Find("#catalog-filter-state").Should().NotBeNull();
+
+        await page.InvokeAsync(() => Api.HoldFilters!.SetResult());
+
+        page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
     }
 }

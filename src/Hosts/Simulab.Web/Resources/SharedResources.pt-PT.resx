@@ -414,6 +414,8 @@
   <data name="Exams.Filter.IssuingAuthority" xml:space="preserve"><value>Entidade contratante</value></data>
   <data name="Exams.Filter.AssessmentType" xml:space="preserve"><value>Tipo de avaliação</value></data>
   <data name="Exams.Filter.Scope" xml:space="preserve"><value>Abrangência</value></data>
+  <data name="Exams.Filter.State" xml:space="preserve"><value>Estado</value></data>
+  <data name="Exams.Filter.State.Placeholder" xml:space="preserve"><value>Todos os estados</value></data>
   <data name="Exams.Form.AddTitle" xml:space="preserve"><value>Adicionar exame</value></data>
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Editar exame</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Entidade contratante</value></data>
@@ -467,6 +469,7 @@
   <data name="exam.scope_detail_required" xml:space="preserve"><value>Indique onde este exame se aplica.</value></data>
   <data name="exam.scope_detail_too_long" xml:space="preserve"><value>Este campo é demasiado longo: no máximo 120 caracteres.</value></data>
   <data name="exam.scope_detail_unknown_state" xml:space="preserve"><value>Escolha um dos 27 estados da lista.</value></data>
+  <data name="exam.filter_unknown_state" xml:space="preserve"><value>Escolha um dos 27 estados da lista.</value></data>
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Escolha o idioma do conteúdo.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Entidades contratantes</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Entidades contratantes</value></data>
@@ -562,7 +565,9 @@
   <data name="Catalog.Filter.Organizer" xml:space="preserve"><value>Entidade organizadora</value></data>
   <data name="Catalog.Filter.NoticeYear" xml:space="preserve"><value>Ano do aviso</value></data>
   <data name="Catalog.Filter.Clear" xml:space="preserve"><value>Limpar filtros</value></data>
-  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona.</value></data>
+  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>Não foi possível carregar as opções de entidade organizadora, ano e estado. O resto da pesquisa funciona.</value></data>
+  <data name="Catalog.Filter.State" xml:space="preserve"><value>Estado</value></data>
+  <data name="Catalog.Filter.State.Placeholder" xml:space="preserve"><value>Todos os estados</value></data>
   <data name="Catalog.Column.ContentLanguage" xml:space="preserve"><value>Idioma</value></data>
   <data name="Catalog.Column.Editions" xml:space="preserve"><value>Edições</value></data>
   <data name="Catalog.Column.LatestYear" xml:space="preserve"><value>Último ano</value></data>
