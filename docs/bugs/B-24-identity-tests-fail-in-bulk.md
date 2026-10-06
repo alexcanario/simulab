@@ -2,7 +2,7 @@
 bug: B-24
 feature: -
 epic: Foundation and identity
-status: building
+status: validating
 board: 136
 severity: medium
 ---
@@ -149,5 +149,33 @@ false under load. This failure needs the tests to fix, not a rerun.
 - (none)
 
 ## Validation script
+Needed to validate: nothing. There is no screen; the owner checks the guard and the diff.
+1. In Git Bash or PowerShell 7, from `D:\wt\simulab\b-24-identity-tests-fail`, run
+   `dotnet test tests/Hosts/Simulab.Api.Tests --filter ThreadPoolMinimumTests`. Expected: `Passed!  - Failed: 0, Passed: 1` (repeat for `tests/Hosts/Simulab.Web.Tests`, `tests/Modules/Catalog/Simulab.Catalog.Tests`, `tests/Modules/Identity/Simulab.Identity.Tests`).
+2. Open `tests/Directory.Build.props`: the `RuntimeHostConfigurationOption` for `System.Threading.ThreadPool.MinThreads` (256) is there, once.
+3. Run `git diff --name-only main` (same command in both shells): every path starts with `tests/` or `docs/`, none with `src/` (AC5).
+4. Read the "Measured times" paragraph in `docs/infra.md` (AC6).
+5. Remove the option, rebuild and rerun step 1: the guard fails with `found 24` on this machine (the loop below did this by editing the `runtimeconfig.json` files: 4 of 12 projects failed).
 
 ## Delivery
+Fix: one `RuntimeHostConfigurationOption` (`System.Threading.ThreadPool.MinThreads` = 256) in `tests/Directory.Build.props`, plus `ThreadPoolMinimumTests` in the four projects that start a host. No product code.
+
+**Proof** (2026-10-05/06, 24 cores, other sessions running on the machine, 38-54% CPU outside this run):
+- Guard seen failing before the setting: `Expected workerThreads to be greater than or equal to 256, but found 24`; passing after, in all four projects.
+- Load rounds (full suite plus 3 extra Identity processes from copies under `bin/stress/`): 10 valid rounds (2 to 11), 40 Identity process runs of 426 tests and 10 full suites, all green; 3 Identity runs took 2 m 43 s to 3 m 40 s under load. The first round's full suite was void: the Stop gate rebuilt the worktree under it (`deps.json` deleted, `Failed: 115` Identity, `Failed: 104` Catalog, not a timeout), so a replacement round was run.
+- Same binaries, `MinThreads` removed from the `runtimeconfig.json` files: 4 of 12 projects fail (the guards), which shows the guards guard.
+- Time (AC4): the alone baseline of 88-92 s could not be reproduced because other sessions loaded the machine (135-141 s alone, no difference by setting). Alternating runs: with the setting 113 s and 85 s, without 98 s and 101 s. No slowdown measurable; the budget of 5 min holds.
+- Baseline: the first Stop gate run after the loop began was `RED` for `MSB3061` (file locks while the loop used `bin/`); `gate.js stop` alone afterwards: `agile gate GREEN`.
+
+**Decisions kept:** see `## Decisions`. The `docs/agile/retro-log.md` row for the gate that keeps only test names is the plugin note of the Fix.
+
+### Criterion → test
+| Criterion | Test or evidence |
+|---|---|
+| AC1 minimum set once in `tests/Directory.Build.props` | the same option, one place; the four guards read its effect |
+| AC2 guard in each exposed project | `Simulab.Identity.Tests.ThreadPoolMinimumTests`, `Simulab.Catalog.Tests.ThreadPoolMinimumTests`, `Simulab.Api.Tests.ThreadPoolMinimumTests`, `Simulab.Web.Tests.ThreadPoolMinimumTests` (`ThreadPool_MinimumWorkerThreads_IsRaisedForHostStarts`) |
+| AC3 10 rounds green | proof above, logs in the session scratchpad |
+| AC4 not slower | alternating runs above (the 88-92 s baseline could not be reproduced under shared load) |
+| AC5 no product code | `git diff --name-only main`: only `tests/` and `docs/` |
+| AC6 `docs/infra.md` | "Measured times" paragraph |
+| AC7 no UI text | none added; the full suite incl. `ResourceParityTests` green |
