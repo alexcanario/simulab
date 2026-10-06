@@ -295,8 +295,9 @@ public static class TokenEndpoints
         }
 
         // F-38 BR1, BR5: the password was right, so this account's name leaves the set from here on.
-        // F-53 BR3: not for a marked account: its password step hands out a challenge, not tokens, and the change step clears it.
-        if (!user.MustChangePassword)
+        // F-53 BR3: not for a marked account that goes on to a challenge: its password step hands out no tokens, and the
+        // change step clears the name. An account that is not active ends here as any other does, so it is released.
+        if (!user.MustChangePassword || user.Status != AccountStatus.Active)
         {
             await attempt.ClearAsync(typedName);
         }

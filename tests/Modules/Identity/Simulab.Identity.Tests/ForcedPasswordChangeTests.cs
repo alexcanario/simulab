@@ -45,6 +45,12 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
             .OrderBy(accountEvent => accountEvent.CreatedAt).ThenBy(accountEvent => accountEvent.Id)
             .ToListAsync());
 
+    /// <summary>F-21 BR4, F-53 BR6: every refused challenge records one <c>SignInFailed</c> with this reason.</summary>
+    private Task<List<AccountEvent>> ChallengeFailuresAsync() =>
+        QueryAsync(context => context.AccountEvents.AsNoTracking()
+            .Where(accountEvent => accountEvent.Type == AccountEventType.SignInFailed && accountEvent.Reason == AccountEventReason.ChallengeInvalid)
+            .ToListAsync());
+
     // AC6, BR3: no tokens, a five-minute challenge, no sign-in event and the failure count where it was.
     [Fact]
     public async Task Password_MarkedAccount_AnswersAChallengeAndNoTokens()
@@ -78,6 +84,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         var refused = await SignInFrom.PasswordAsync(client, Address, email, SignUpForm.ValidPassword);
 
         refused.Error.Should().Be(IdentityErrorCodes.AccountLocked);
+        refused.Challenge.Should().BeNull("a locked account gets no challenge");
     }
 
     // AC7, BR3.
@@ -93,6 +100,23 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
 
         step.Error.Should().Be(IdentityErrorCodes.EmailNotVerified);
         step.Challenge.Should().BeNull();
+    }
+
+    // AC7, F-38 BR5: an unverified account ends its sign-in whatever the mark says, so its name leaves the address's set.
+    [Fact]
+    public async Task Password_MarkedAccountThatIsNotVerified_ReleasesItsNameFromTheAddressLimit()
+    {
+        var client = Client();
+        var request = SignUpForm.Valid();
+        await client.PostAsJsonAsync("/api/v1/identity/registrations", request, AppJson.Options);
+        await SetMarkAsync(request.Email, true);
+        const string address = "203.0.113.54";
+        await SignInFrom.FailUnknownNamesAsync(client, address, IdentityRateLimits.SignInFailedAccountsPer15Minutes - 1);
+
+        (await SignInFrom.PasswordAsync(client, address, request.Email, SignUpForm.ValidPassword)).Error.Should().Be(IdentityErrorCodes.EmailNotVerified);
+        var next = await SignInFrom.PasswordAsync(client, address, "one.more@exemplo.com", "not-the-password");
+
+        next.Error.Should().Be(IdentityErrorCodes.InvalidCredentials, "the unverified account's name was released, so this one still fits under the limit");
     }
 
     // AC9, BR4: tokens, the old password gone, the new one working, the mark and the count cleared.
@@ -173,14 +197,13 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
     {
         var client = Client();
         var email = await MarkedAccountAsync(client);
-        var user = await UserAsync(email);
 
         var refused = await SignInFrom.PasswordChangeAsync(client, Address, new string('a', 64), NewPassword);
 
         refused.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid);
         (await UserAsync(email)).MustChangePassword.Should().BeTrue("nothing changed");
         (await SignInFrom.PasswordAsync(client, Address, email, SignUpForm.ValidPassword)).Error.Should().Be(IdentityErrorCodes.PasswordChangeRequired);
-        user.Id.Should().NotBeEmpty();
+        (await ChallengeFailuresAsync()).Should().ContainSingle().Which.UserId.Should().BeNull("an unknown challenge names no account");
     }
 
     [Fact]
@@ -195,10 +218,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
 
         // A spent challenge no longer says whose it was, so the failure is recorded with no account (F-21 BR4, as the code step does).
         again.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid);
-        var failures = await QueryAsync(context => context.AccountEvents.AsNoTracking()
-            .Where(accountEvent => accountEvent.Type == AccountEventType.SignInFailed && accountEvent.Reason == AccountEventReason.ChallengeInvalid)
-            .ToListAsync());
-        failures.Should().ContainSingle();
+        (await ChallengeFailuresAsync()).Should().ContainSingle();
         (await SignInFrom.PasswordAsync(client, Address, email, "Outra#Senha2026x")).Error.Should().Be(IdentityErrorCodes.InvalidCredentials, "the second password was never set");
     }
 
@@ -214,6 +234,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
 
         refused.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid);
         (await UserAsync(email)).MustChangePassword.Should().BeTrue();
+        (await ChallengeFailuresAsync()).Should().ContainSingle("an expired challenge reads as unknown");
     }
 
     // AC13, BR6: the challenge is bound to the account's state.
@@ -238,6 +259,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         var refused = await SignInFrom.PasswordChangeAsync(client, Address, challenge, NewPassword);
 
         refused.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid, "the reset renewed the security stamp");
+        (await ChallengeFailuresAsync()).Should().ContainSingle().Which.UserId.Should().Be((await UserAsync(email)).Id);
     }
 
     [Fact]
@@ -251,6 +273,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         var refused = await SignInFrom.PasswordChangeAsync(client, Address, challenge, NewPassword);
 
         refused.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid);
+        (await ChallengeFailuresAsync()).Should().ContainSingle().Which.UserId.Should().Be((await UserAsync(email)).Id);
     }
 
     [Fact]
@@ -265,6 +288,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         var refused = await SignInFrom.PasswordChangeAsync(client, Address, challenge, NewPassword);
 
         refused.Error.Should().Be(IdentityErrorCodes.PasswordChangeChallengeInvalid);
+        (await ChallengeFailuresAsync()).Should().ContainSingle().Which.UserId.Should().Be((await UserAsync(email)).Id);
     }
 
     // AC15, BR6: two requests with one challenge; exactly one wins.

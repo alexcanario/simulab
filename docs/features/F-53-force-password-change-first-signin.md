@@ -1,7 +1,7 @@
 ---
 feature: F-53
 epic: Foundation and identity
-status: building
+status: validating
 board: 90
 version: 1
 ---
@@ -87,6 +87,7 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - 2026-10-06 — The board id in this file was 779; the real issue is #90 — corrected.
 - 2026-10-06 — Build design passes (`system-design`, then `architect`, both read-only; the main session checked `TokenEndpoints.cs:237`, `SecondFactor.cs:42` and the handlers in the files). Accepted: everything in the Identity module, own Redis key prefix with peek then atomic spend, handler order of BR6/BR7, grant always registered, the mark cleared in `ResetPasswordHandler` and `ChangePasswordHandler` before their password call (one UPDATE, BR8/AC17), the race loser records `SignInFailed(ChallengeInvalid)`, a failure of `ResetPasswordAsync` after the rules passed is a server error (as the reset handler), the column default carried by the migration only, the glossary row for "must change password". Dropped: `HasDefaultValue(false)` in the model (no other bool of `users` has one).
 - 2026-10-06 — BR3, name in the rate-limit set: honoured as written. The password step takes the account name out of the set only when the account is not marked (`TokenEndpoints.cs:237`); the change step counts and clears it (BR7).
+- 2026-10-06 — Independent review of the built branch (reviewer agent, `/agile:review`), checked in the code: (1) major, confirmed — the "unknown challenge" test asserted nothing about the `ChallengeInvalid` event and the expired / not marked / not active / reset cases only the code: each now asserts exactly one event, with the account or none (an expired or unknown challenge names none); (2) minor, confirmed — a marked account that is not verified kept its name in the address's set: the name is now released whenever the account is not active, with a test; (3) minor, confirmed — the locked-out test now asserts no challenge; (4) minor, recorded — the refresh grant and the Google grant do not look at the mark. Not a bypass in v1 (the only marked account has no session and no Google link) but F-92 makes "session exists and marked" reachable: the guard on both belongs to F-92 before any admin can mark an account; (5) minor — the manual page was updated in three languages.
 - 2026-10-06 — BR3, failure count on a marked account with two-factor: NOT as written. `SecondFactor.VerifyAsync` clears the count on a right code (F-11 BR10) and `TotpAccountHandler` shares it; the code step therefore clears it before the challenge is handed out. After that step nothing is left to guess, so the rule behind BR3 does not bite. The password-only path keeps the count (AC6). Change note proposed, waiting for the owner (see `## Change notes`).
 
 ## Out of scope
@@ -102,5 +103,19 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - v1 note 1 (proposed 2026-10-06, waiting for the owner): BR3 says the step that hands out the password-change challenge "does not clear the failure count". On the two-factor path the right code has already cleared it (F-11 BR10, shared `SecondFactor.VerifyAsync`). Proposal: BR3 keeps its wording for the password step and reads "after the two-factor code step the count is already clear". Affects BR3 only; no acceptance criterion changes (AC6 is password-only, AC8 asserts the events).
 
 ## Validation script
+Needed to validate: a database of its own and the switch `Identity:SeedAdmin:RequirePasswordChange` on for the run — both are in the start command below (Claude prepared them; nothing else is needed). Sign-in is `admin@simulab.local` with the development password of `appsettings.Development.json` (`Admin@Simulab123!`); a new password to type: `Nova#Senha2026!`.
+
+1. **Start the app host** from the F-53 worktree, with every other app host stopped first. The first start creates the database and the seed marks the administrator. Expected: the dashboard opens at `https://localhost:17162` with `api` and `web` Running; the sign-in page is the Web URL the dashboard shows (usually `https://localhost:7125/sign-in`).
+   - Git Bash: `cd /d/wt/simulab/f-53-force-password && Database__Name=simulab_f53_val Identity__SeedAdmin__RequirePasswordChange=true dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`
+   - PowerShell 7: `Set-Location D:\wt\simulab\f-53-force-password; $env:Database__Name = "simulab_f53_val"; $env:Identity__SeedAdmin__RequirePasswordChange = "true"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`
+   - To repeat the whole script, stop the app host and start it again with another database name (`simulab_f53_val2`): the first run changes the password.
+2. Sign in as `admin@simulab.local`. Expected: the page shows **Choose a new password** with the two fields and a hint about 12 characters, not the home page.
+3. Language: select **Cancel** (back to the password), switch the language to Português (Brasil) with the globe, sign in again. Expected: **Escolha uma nova senha**, the fields and **Salvar e entrar** in Portuguese. Switch back to English.
+4. Keyboard only, from the step: Tab to the first field, type `abc`, Tab, type `abc`, Enter. Expected: the message *This password does not follow the rules above.* in the step, which stays. Then use the current password in both fields. Expected: *Choose a password different from the current one.*
+5. Keyboard only: type `Nova#Senha2026!` in both fields and press Enter. Expected: you land on the home page signed in, with no second password prompt.
+6. Sign out, then sign in with `Nova#Senha2026!`. Expected: straight to the home page, no extra step. Sign out and try `Admin@Simulab123!`. Expected: *Incorrect email or password.*
+7. Stop the app host (Ctrl+C in its terminal).
+
+Not shown on screen, covered by tests: AC1 to AC19 (migration, seed, token endpoint, challenge rules, race, limits, events). Not checked on screen by Claude: the browser pane was hidden (no viewport), so contrast and layout of the new step are for step 2 to 5; Claude ran the flow in the real app host by script and saw the step, the new password and the old one refused.
 
 ## Delivery
