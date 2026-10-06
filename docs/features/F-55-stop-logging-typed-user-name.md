@@ -1,7 +1,7 @@
 ---
 feature: F-55
 epic: Foundation and identity
-status: validating
+status: done
 board: 93
 version: 1
 ---
@@ -58,7 +58,7 @@ No screen, route or error code changes. No user-visible behavior changes, so the
 - 2026-10-04 — Direction: raise the `OpenIddict.Server` category to Warning with a logging filter registered in code by the Identity module, not an `appsettings.json` line and not a wrapper that drops only event 6075 — owner, at refinement; the rule travels with the module and a configuration value cannot reopen it; the wrapper would depend on OpenIddict internals. Trade-off accepted: OpenIddict's Information diagnostics (for example, the reason a token request was rejected) no longer appear; its warnings and errors still do.
 - 2026-10-04 — The tests cover sign-in (success, failure, refused by the limit), sign-up and the password-reset request, across every category and level — owner, at refinement; these are the endpoints that receive a typed e-mail, and the test costs the same.
 - 2026-10-04 — The tests record at Trace level, not at the configured Information level — Claude; a developer or operator may lower `Default`, and the rule must hold then too.
-- 2026-10-04 — Logging picks the rule with the longest matching category and, between equal ones, the last registered; a configuration key on the full dispatcher category would beat a code rule on the `OpenIddict.Server` prefix. The code rule therefore covers the prefix and the full category name, and AC5 tests both configuration keys — Claude; not yet reproduced, AC5 is written first in the build and must be seen failing without the filter.
+- 2026-10-04 — Logging picks the rule with the longest matching category and, between equal ones, the last registered; a configuration key on the full dispatcher category would beat a code rule on the `OpenIddict.Server` prefix. The code rule therefore covers the prefix and the full category name, and AC5 tests both configuration keys — Claude; AC5 was written first and seen failing without the filter (2026-10-06). Not covered: a provider-specific key (`Logging:Console:LogLevel:...`) outranks a rule with no provider.
 - 2026-10-04 — No purge of existing logs — Claude; no environment with a persistent log store exists yet (`docs/infra.md`).
 - 2026-10-04 — Approved by the owner ("aprovo F-55").
 - 2026-10-04 — No new packages — Claude; `Microsoft.Extensions.Logging` filtering and the existing `RecordingLoggerProvider` are enough.
@@ -88,7 +88,9 @@ Needed to validate: nothing beyond the local app host (in place now).
 Not checked through the app host by Claude: sign-in needs an account, and creating one is left to the owner; the test host covers the same path at Trace level.
 
 ## Delivery
-- Tests (item branch, 2026-10-06): Identity 465 passed, 0 failed, 1 m 18 s (budget 2 min); stop gate GREEN, no new warning.
+- Branch `feature/F-55`, merged on 2026-10-06 (`merge: F-55 keep the typed user name out of the OpenIddict log (board #93)`), app version 0.12.0 -> 0.13.0. Validated by the owner on 2026-10-06; merge authorized by `/agile:ship F-55`.
+- Full suite on the item branch: 13 + 12 + 167 + 19 + 1055 + 25 + 10 + 25 + 2 + 13 + 462 + 465 passed, 0 failed, in 96 s (budget 5 min); Identity 1 m 32 s (budget 2 min); no new warning. DocGen: 0 files changed.
+- Manual: not updated, no visible behavior changed. Glossary: nothing missing.
 - Seen failing first: 5 of the 6 new tests failed without the filter, on event 6075 with `"username": "..."`; all 6 pass with it.
 
 | Criterion | Test |
