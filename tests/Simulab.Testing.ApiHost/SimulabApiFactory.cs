@@ -77,6 +77,9 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
             {
                 ["Identity:SeedAdmin:Password"] = string.Empty,
 
+                // F-56: a real Claude key in the environment of whoever runs the tests must not reach a test host.
+                ["Ai:ApiKey"] = string.Empty,
+
                 // F-53: the mark is pinned too, so a value from the runner's secrets never decides a test.
                 ["Identity:SeedAdmin:RequirePasswordChange"] = "false",
             }));
