@@ -152,4 +152,68 @@ public sealed class ExamsPageTests : CatalogPageTestContext
             call.Path == "/api/v1/catalog/issuing-authorities" && call.Query!.Contains("search=gua", StringComparison.Ordinal)));
         Api.Received.Should().NotContain(call => call.Path == "/api/v1/catalog/organizers");
     }
+
+    private static AppLookupField StateFilter(IRenderedComponent<Exams> page) =>
+        page.FindComponents<AppLookupField>().Single(field => field.Instance.Id == "exams-filter-state").Instance;
+
+    private static Task PickStateAsync(IRenderedComponent<Exams> page, string? displayName) =>
+        page.InvokeAsync(() => StateFilter(page).ValueChanged.InvokeAsync(
+            displayName is null ? null : new AppLookupOption(Guid.Empty, displayName)));
+
+    private static IReadOnlyList<string> ListQueries(FakeCatalogApi api) =>
+        [.. api.Received.Where(call => call.Path == "/api/v1/catalog/exams").Select(call => call.Query!)];
+
+    // F-57 AC3: the back office offers the 27 states of the approved list, in that order, whatever is stored.
+    [Fact]
+    public async Task StateFilter_OffersThe27StatesInTheApprovedOrder()
+    {
+        var page = RenderPage();
+        page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
+
+        var options = await StateFilter(page).SearchAsync(string.Empty, CancellationToken.None);
+
+        options.Select(option => option.Text).Should().Equal(BrazilianStates.All.Select(state => state.DisplayName));
+        options.Should().HaveCount(27);
+        options[0].Text.Should().Be("Acre (AC)");
+        options.Should().Contain(option => option.Text == "Minas Gerais (MG)");
+        StateFilter(page).Disabled.Should().BeFalse();
+    }
+
+    // F-57 AC3, AC1: picking a state sends it, sets the scope to State and keeps "Clear" honest.
+    [Fact]
+    public async Task StateFilter_Pick_SendsTheStateAndSetsTheScope()
+    {
+        var page = RenderPage();
+        page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
+
+        await PickStateAsync(page, "Minas Gerais (MG)");
+
+        page.WaitForAssertion(() => ListQueries(Api)[^1].Should().Contain("state=MG").And.Contain("scope=State"));
+        StateFilter(page).Value!.Text.Should().Be("Minas Gerais (MG)");
+        page.FindComponents<AppSelectField<ExamScope?>>().Single(field => field.Instance.Id == "exams-filter-scope")
+            .Instance.Value.Should().Be(ExamScope.State);
+    }
+
+    // F-57 AC4: another scope empties the state; clearing only the state keeps the scope.
+    [Fact]
+    public async Task StateFilter_ScopeChangedAwayFromState_ClearsTheState_ClearingTheStateKeepsTheScope()
+    {
+        var page = RenderPage();
+        page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
+        var scope = page.FindComponents<AppSelectField<ExamScope?>>().Single(field => field.Instance.Id == "exams-filter-scope");
+        await PickStateAsync(page, "Minas Gerais (MG)");
+        page.WaitForAssertion(() => ListQueries(Api)[^1].Should().Contain("state=MG"));
+
+        await page.InvokeAsync(() => scope.Instance.ValueChanged.InvokeAsync(ExamScope.Municipal));
+
+        page.WaitForAssertion(() => ListQueries(Api)[^1].Should().Contain("scope=Municipal").And.NotContain("state="));
+        StateFilter(page).Value.Should().BeNull();
+
+        await PickStateAsync(page, "Minas Gerais (MG)");
+        page.WaitForAssertion(() => ListQueries(Api)[^1].Should().Contain("state=MG"));
+        await PickStateAsync(page, null);
+
+        page.WaitForAssertion(() => ListQueries(Api)[^1].Should().NotContain("state=").And.Contain("scope=State"));
+        scope.Instance.Value.Should().Be(ExamScope.State);
+    }
 }

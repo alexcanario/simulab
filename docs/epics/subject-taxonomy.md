@@ -1,6 +1,6 @@
 ---
 epic: subject-taxonomy
-status: draft
+status: agreed
 board: 3
 ---
 # Subject taxonomy

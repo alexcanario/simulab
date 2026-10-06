@@ -1,0 +1,157 @@
+@* F-79: add or edit a topic. The name, and on an edit the subject it may move to (BR10). A dialog (rule: ui-project). *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+
+<MudDialog>
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <AppTextField TValue="string"
+                          Id="topic-name"
+                          Label="@L["Topics.Field.Name"]"
+                          Value="@_name"
+                          ValueChanged="@((string? value) => OnNameChanged(value))"
+                          Required="true"
+                          MaxLength="CatalogLimits.TopicNameMaxLength"
+                          Autocomplete="off"
+                          LeadingIcon="@AppIcons.Topics"
+                          Hint="@L["Topics.Field.Name.Help"]"
+                          Error="@_nameError" />
+
+            @if (Topic is not null)
+            {
+                @* The paged list holds at most a hundred subjects, so a plain select would drop the rest:
+                   the picker searches on the server instead. *@
+                <AppLookupField Id="topic-subject"
+                                Label="@L["Topics.Field.Subject"]"
+                                Placeholder="@L["Topics.Field.Subject.Placeholder"]"
+                                LeadingIcon="@AppIcons.Subjects"
+                                SearchAsync="SearchSubjects"
+                                Value="_subject"
+                                ValueChanged="OnSubjectChanged"
+                                Required="true"
+                                Clearable="false"
+                                Hint="@L["Topics.Field.Subject.Help"]"
+                                Error="@_subjectError" />
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The topic being edited; null to add one under <see cref="CurrentSubject"/>.</summary>
+    [Parameter] public TopicResponse? Topic { get; set; }
+
+    /// <summary>The subject the topic sits under now: where an add lands, and what an edit starts from.</summary>
+    [Parameter, EditorRequired] public AppLookupOption CurrentSubject { get; set; } = default!;
+
+    /// <summary>Searches the subjects an edit may move the topic to.</summary>
+    [Parameter, EditorRequired]
+    public Func<string, CancellationToken, Task<IReadOnlyList<AppLookupOption>>> SearchSubjectsAsync { get; set; } = default!;
+
+    /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired]
+    public Func<SaveTopicRequest, Task<ApiResult<TopicResponse>>> Save { get; set; } = default!;
+
+    private string? _name;
+    private AppLookupOption? _subject;
+    private string? _nameError;
+    private string? _subjectError;
+    private string? _error;
+    private bool _saving;
+
+    private bool HasChanges =>
+        Trimmed(_name) != (Topic?.Name ?? string.Empty)
+        || (_subject is not null && _subject.Id != CurrentSubject.Id);
+
+    protected override void OnInitialized()
+    {
+        _name = Topic?.Name ?? string.Empty;
+        _subject = CurrentSubject;
+    }
+
+    private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private Task<IReadOnlyList<AppLookupOption>> SearchSubjects(string term, CancellationToken cancellationToken) =>
+        SearchSubjectsAsync(term, cancellationToken);
+
+    private void OnNameChanged(string? value)
+    {
+        _name = value;
+        _nameError = NameError(value);
+    }
+
+    private void OnSubjectChanged(AppLookupOption? value)
+    {
+        _subject = value;
+        _subjectError = null;
+    }
+
+    // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
+    private string? NameError(string? value) =>
+        Trimmed(value).Length < CatalogLimits.NameMinLength
+            ? Errors.For(CatalogErrorCodes.TopicNameRequired)
+            : null;
+
+    private async Task SaveAsync()
+    {
+        _nameError = NameError(_name);
+        if (_nameError is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+
+        // An add takes its subject from the route; only an edit sends one, and only to move the topic.
+        var result = await Save(new SaveTopicRequest(Trimmed(_name), Topic is null ? null : (_subject ?? CurrentSubject).Id));
+
+        _saving = false;
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.TopicNameTaken:
+            case CatalogErrorCodes.TopicNameRequired:
+            case CatalogErrorCodes.TopicNameTooLong:
+                _nameError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.SubjectNotFound when Topic is not null:
+                _subjectError = Errors.For(result.ErrorCode);
+                break;
+            default:
+                _error = Errors.For(result.ErrorCode);
+                break;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_saving || (HasChanges && !await Confirm.ConfirmDiscardAsync(L)))
+        {
+            return;
+        }
+
+        Dialog.Cancel();
+    }
+
+    /// <summary>Esc closes the dialog, but asks first when there are unsaved changes (rule: ui).</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}
