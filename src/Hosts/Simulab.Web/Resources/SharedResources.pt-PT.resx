@@ -298,6 +298,7 @@
   <data name="data_export.current_password_invalid" xml:space="preserve"><value>A palavra-passe atual não está correta.</value></data>
   <data name="totp.code_invalid" xml:space="preserve"><value>O código não está correto ou já foi usado.</value></data>
   <data name="totp.challenge_invalid" xml:space="preserve"><value>O início de sessão demorou demasiado. Introduza novamente a palavra-passe.</value></data>
+  <data name="password_change.challenge_invalid" xml:space="preserve"><value>O início de sessão demorou demasiado. Introduza novamente a palavra-passe.</value></data>
   <data name="totp.already_enabled" xml:space="preserve"><value>A verificação em dois passos já está ativa.</value></data>
   <data name="totp.not_enabled" xml:space="preserve"><value>A verificação em dois passos não está ativa.</value></data>
   <data name="totp.current_password_invalid" xml:space="preserve"><value>A palavra-passe atual não está correta.</value></data>
