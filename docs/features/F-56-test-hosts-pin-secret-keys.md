@@ -1,7 +1,7 @@
 ---
 feature: F-56
 epic: Foundation and identity
-status: validating
+status: done
 board: 94
 version: 1
 ---
@@ -88,4 +88,7 @@ Needed to validate: nothing. No screen, so no app host and no sign-in.
 4. Check the docs: `docs/infra.md` has no `Ai:Anthropic:ApiKey` row, and `.claude/rules/agile/project.md` names `Identity:SeedAdmin:Password` and `Ai:ApiKey`.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Shipped 2026-10-06 as app version 0.14.0. Branch `feature/F-56`, merge commit `311a735` (board #94).
+- Full suite: 2,282 tests passed, 0 failed (`gate.js ship`: build 22 s, tests 108 s, inside the 5 min budget); architecture tests 181 (14 new, `ApiTestHostPinTests`); no new warnings.
+- Docs: `DocGen --check` green (0 files changed). App manual: not updated, no visible behavior changed. Glossary: nothing missing.
+- Rule in `.claude/rules/agile/project.md` names both pinned keys; `docs/infra.md` no longer lists `Ai:Anthropic:ApiKey`.
