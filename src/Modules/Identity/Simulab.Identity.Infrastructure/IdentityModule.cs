@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenIddict.Abstractions;
@@ -201,6 +202,13 @@ public static class IdentityModule
             // F-29: the account's own link, behind the same switch as the rest of the feature.
             services.AddScoped<GoogleLinkHandler>();
         }
+
+        // F-55 BR2: the server logs the whole token request at Information, typed user name included (event 6075),
+        // and every server event shares one category. Registered in code, after the host's configuration rules, so a
+        // configuration key cannot lower it; the full category is named too because a longer match wins over a prefix.
+        services.AddLogging(logging => logging
+            .AddFilter("OpenIddict.Server", LogLevel.Warning)
+            .AddFilter("OpenIddict.Server.OpenIddictServerDispatcher", LogLevel.Warning));
 
         services.AddOpenIddict()
             .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityModuleDbContext>())
