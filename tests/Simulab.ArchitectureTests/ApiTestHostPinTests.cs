@@ -49,7 +49,7 @@ public class ApiTestHostPinTests
 
     /// <summary>True when the source uses the factory somewhere other than as the base class of a host (BR3).</summary>
     internal static bool UsesFactoryDirectly(string source) =>
-        AnyUse.Matches(source).Count > HostDeclaration.Matches(source).Count;
+        AnyUse.Count(source) > HostDeclaration.Count(source);
 
     /// <summary>Test projects that reference the Api (found by their project reference, not by name), except this one.</summary>
     internal static IReadOnlyList<string> ApiTestProjectFolders(string testsRoot, string ownFolder) =>
