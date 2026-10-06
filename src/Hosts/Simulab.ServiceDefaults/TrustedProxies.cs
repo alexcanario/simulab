@@ -1,12 +1,15 @@
 using System.Net;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 
-namespace Simulab.Web.Services;
+namespace Simulab.ServiceDefaults;
 
 /// <summary>
-/// B-4 BR5: the Web believes <c>X-Forwarded-For</c> only from the proxies its configuration lists
-/// (<c>ForwardedHeaders:KnownProxies</c>, <c>ForwardedHeaders:KnownNetworks</c>). Both are empty in dev, so the
-/// connection's address is the visitor's; the cloud environment fills them (<c>docs/infra.md</c>).
+/// B-4 BR5, F-64 BR6: each host believes <c>X-Forwarded-For</c> and <c>X-Forwarded-Proto</c> only from the proxies
+/// its configuration lists (<c>ForwardedHeaders:KnownProxies</c>, <c>ForwardedHeaders:KnownNetworks</c>). Both are
+/// empty in dev, so the connection is the visitor's; the cloud environment fills them (<c>docs/infra.md</c>). The
+/// scheme matters behind a TLS-ending ingress: OpenIddict refuses a request it sees as plain http.
 /// </summary>
 public static class TrustedProxies
 {
@@ -21,7 +24,7 @@ public static class TrustedProxies
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         options.KnownProxies.Clear();
         options.KnownIPNetworks.Clear();
 

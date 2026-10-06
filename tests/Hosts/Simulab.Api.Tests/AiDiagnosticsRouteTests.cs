@@ -19,7 +19,7 @@ public class AiDiagnosticsRouteTests(ApiFactory factory) : IClassFixture<ApiFact
             builder.UseEnvironment(environment);
 
             // F-66 BR4: outside Development the Api refuses to start without the cloud email settings.
-            CloudEmailSettings.Apply(builder);
+            CloudSettings.Apply(builder);
         }).CreateClient();
 
     [Theory]

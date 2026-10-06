@@ -12,6 +12,7 @@ using Simulab.Identity.Api.Authorization;
 using Simulab.Identity.Infrastructure;
 using Simulab.Jobs;
 using Simulab.Persistence;
+using Simulab.ServiceDefaults;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
 using Simulab.SharedKernel.Serialization;
@@ -76,7 +77,17 @@ builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.Authen
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityAuthorization();
 
+// F-64 BR6: X-Forwarded-For and X-Forwarded-Proto only from the proxies the configuration lists (none in dev).
+// Behind the cloud ingress the request arrives as http; OpenIddict refuses it unless the scheme is believed.
+var forwarded = new ForwardedHeadersOptions();
+var behindTrustedProxy = TrustedProxies.Configure(forwarded, builder.Configuration);
+
 var app = builder.Build();
+
+if (behindTrustedProxy)
+{
+    app.UseForwardedHeaders(forwarded);
+}
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();

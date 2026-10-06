@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Simulab.Identity.Contracts;
+using Simulab.ServiceDefaults;
 using Simulab.Web.Components;
 using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
@@ -127,7 +128,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     ];
 });
 
-// B-4 BR5: X-Forwarded-For only from the proxies the configuration lists (none in dev).
+// B-4 BR5, F-64 BR6: X-Forwarded-For and X-Forwarded-Proto only from the proxies the configuration lists (none in dev).
 var forwarded = new ForwardedHeadersOptions();
 var behindTrustedProxy = TrustedProxies.Configure(forwarded, builder.Configuration);
 
