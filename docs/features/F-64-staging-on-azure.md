@@ -3,7 +3,7 @@ feature: F-64
 epic: Cloud hosting and operations
 status: building
 board: 103
-version: 1
+version: 2
 ---
 # Staging runs on Azure for testers in Brazil
 
@@ -57,7 +57,7 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 ## Acceptance criteria
 - AC1 Given the AppHost in publish mode for Staging, when the manifest is generated, then the `api` has `Database__ApplyMigrationsOnStart=true` and production does not (BR5).
 - AC2 Given a host started outside Development, when it signs a token and then restarts with the same configured certificates, then a token issued before the restart is still accepted; with no certificates configured outside Development the host refuses to start with a message naming the missing setting (BR4).
-- AC3 Given two instances of a host sharing the database, when one protects a value, then the other unprotects it, and the keys are stored encrypted with the configured key when one is set (BR4).
+- AC3 Given a host with `ConnectionStrings:keys` set, when it starts, then its Data Protection key repository is the Azure Blob one, and with `DataProtection:KeyVaultKeyId` set the keys are encrypted with that Key Vault key; with neither set, behavior is unchanged (BR4; cross-instance proof in AC8).
 - AC4 Given the Api outside Development behind a listed proxy, when a request arrives over http with `X-Forwarded-Proto: https` from that proxy, then OpenIddict treats it as HTTPS; from an unlisted address the header is ignored (BR6).
 - AC5 Given the Web behind a listed proxy, when a request arrives with `X-Forwarded-Proto: https`, then the request scheme is https; with no proxy listed, behavior is unchanged (BR6, B-4).
 - AC6 Given the AppHost in publish mode, when the manifest is generated, then no secret value appears in it, the seeded admin password reaches the Api from Key Vault and no AI key is passed for Staging (BR3, BR7).
@@ -75,8 +75,8 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - 2026-10-04 — D5 Cost measured after one test window plus 7 parked days, extrapolated (owner) — done in weeks, not a month.
 - 2026-10-04 — D6 Azure Budget at US$ 80 with alerts at 50 % and 100 % (owner) — no cost, catches a resource left running.
 - 2026-10-04 — D7 The owner runs every Azure command from a script in `docs/infra.md`; Claude never signs in (owner) — the subscription and its bill are the owner's.
-- 2026-10-04 — D8 Packages approved by the owner (all MIT, versions checked on nuget.org on 2026-10-04): `Microsoft.AspNetCore.DataProtection.EntityFrameworkCore` 10.0.12, `Azure.Extensions.AspNetCore.DataProtection.Keys` 1.6.4, `Aspire.Azure.Security.KeyVault` 13.6.0, `Azure.Identity` 1.21.0. The tests need no new package.
-- 2026-10-04 — D9 The Data Protection key ring is stored in PostgreSQL (one table in a schema of its own, `NULLS NOT DISTINCT` not applicable: no tenant column) and encrypted with a Key Vault key in the cloud; each host keeps its own application name — the database already exists and is persisted while parked, and the staging Redis is a container with no volume. The Web gains a reference to the database for this table only; the architect pass at build reviews that dependency (Claude).
+- 2026-10-04 — D8 Packages approved by the owner (all MIT, versions checked on nuget.org on 2026-10-04): `Microsoft.AspNetCore.DataProtection.EntityFrameworkCore` 10.0.12, `Azure.Extensions.AspNetCore.DataProtection.Keys` 1.6.4, `Aspire.Azure.Security.KeyVault` 13.6.0, `Azure.Identity` 1.21.0. The tests need no new package. Superseded in part by change note v2: `Microsoft.AspNetCore.DataProtection.EntityFrameworkCore` is dropped; `Aspire.Hosting.Azure.Storage` 13.6.0, `Aspire.Azure.Storage.Blobs` 13.6.0 and `Azure.Extensions.AspNetCore.DataProtection.Blobs` 1.5.4 are added (all MIT, checked on nuget.org on 2026-10-07).
+- 2026-10-04 — D9 The Data Protection key ring is stored in PostgreSQL (one table in a schema of its own, `NULLS NOT DISTINCT` not applicable: no tenant column) and encrypted with a Key Vault key in the cloud; each host keeps its own application name — the database already exists and is persisted while parked, and the staging Redis is a container with no volume. The Web gains a reference to the database for this table only; the architect pass at build reviews that dependency (Claude). **Superseded by change note v2 (2026-10-07):** the key ring is stored in a blob container of an Azure Storage account (`Standard_LRS`, access by managed identity), as the profile recipe does; encrypted with a Key Vault key in the cloud; each host keeps its own application name; the repository is wired only when `ConnectionStrings:keys` is set, so a local run is unchanged. No new building block, no table, no migration. The Web gets a role on that container only, never on the database (architect review: with one generated administrator login a database reference would make the Web an administrator).
 - 2026-10-04 — D10 OpenIddict loads its signing and encryption certificates from configuration (Key Vault secrets) outside Development and refuses to start without them; Development keeps the development certificates (Claude) — the alternative, ephemeral keys, signs everybody out on every deploy.
 - 2026-10-04 — D11 Staging applies migrations on start through `Database:ApplyMigrationsOnStart`, set by the AppHost for Staging only (Claude) — the switch already exists; a release pipeline is F-65.
 - 2026-10-04 — D12 Both hosts add `X-Forwarded-Proto` to the headers they believe, still only from the listed proxies; the Api gets the same `TrustedProxies` rule as the Web (Claude). The ingress range of a Container Apps environment without a custom network is not documented as fixed: the build reads the address the hosts see on staging and records it, and the list is configured from that, never a guess.
@@ -98,6 +98,13 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - (none)
 
 ## Change notes
+
+### v2 — 2026-10-07
+- What: the Data Protection key ring moves from PostgreSQL to an Azure Blob container (D9 superseded, D8 packages changed, AC3 rewritten).
+- Why: the Web would otherwise receive the database administrator connection string (password sign-in has one generated login, D15) and could read and change every schema; the profile's own recipe keeps the keys in a blob and needs no building block, table or migration.
+- Affected: D8, D9, AC3. Not affected: BR4, AC1, AC2, AC4-AC11, D10-D17.
+- AC3 is proven by the wiring (`KeyManagementOptions`), without a storage emulator; the cross-instance proof is AC8 on the real staging.
+- Re-approved by the owner on 2026-10-07 ("sim").
 
 ## Validation script
 
