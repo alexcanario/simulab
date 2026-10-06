@@ -85,6 +85,9 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - 2026-10-06 — Technical: the screen is a state of the existing sign-in page built from the same kit components as the two-factor state; no `/agile:screen` mockup.
 - 2026-10-06 — New packages: none (production and tests).
 - 2026-10-06 — The board id in this file was 779; the real issue is #90 — corrected.
+- 2026-10-06 — Build design passes (`system-design`, then `architect`, both read-only; the main session checked `TokenEndpoints.cs:237`, `SecondFactor.cs:42` and the handlers in the files). Accepted: everything in the Identity module, own Redis key prefix with peek then atomic spend, handler order of BR6/BR7, grant always registered, the mark cleared in `ResetPasswordHandler` and `ChangePasswordHandler` before their password call (one UPDATE, BR8/AC17), the race loser records `SignInFailed(ChallengeInvalid)`, a failure of `ResetPasswordAsync` after the rules passed is a server error (as the reset handler), the column default carried by the migration only, the glossary row for "must change password". Dropped: `HasDefaultValue(false)` in the model (no other bool of `users` has one).
+- 2026-10-06 — BR3, name in the rate-limit set: honoured as written. The password step takes the account name out of the set only when the account is not marked (`TokenEndpoints.cs:237`); the change step counts and clears it (BR7).
+- 2026-10-06 — BR3, failure count on a marked account with two-factor: NOT as written. `SecondFactor.VerifyAsync` clears the count on a right code (F-11 BR10) and `TotpAccountHandler` shares it; the code step therefore clears it before the challenge is handed out. After that step nothing is left to guess, so the rule behind BR3 does not bite. The password-only path keeps the count (AC6). Change note proposed, waiting for the owner (see `## Change notes`).
 
 ## Out of scope
 - An admin action in the back office to mark any user "must change password" (F-92, idea).
@@ -96,6 +99,7 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - (none)
 
 ## Change notes
+- v1 note 1 (proposed 2026-10-06, waiting for the owner): BR3 says the step that hands out the password-change challenge "does not clear the failure count". On the two-factor path the right code has already cleared it (F-11 BR10, shared `SecondFactor.VerifyAsync`). Proposal: BR3 keeps its wording for the password step and reads "after the two-factor code step the count is already clear". Affects BR3 only; no acceptance criterion changes (AC6 is password-only, AC8 asserts the events).
 
 ## Validation script
 

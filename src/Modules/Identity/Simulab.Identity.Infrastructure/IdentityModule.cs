@@ -23,6 +23,7 @@ using Simulab.Identity.Infrastructure.Authorization;
 using Simulab.Identity.Infrastructure.Content;
 using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.GoogleSignIn;
+using Simulab.Identity.Infrastructure.Passwords;
 using Simulab.Identity.Infrastructure.Persistence;
 using Simulab.Identity.Infrastructure.Sessions;
 using Simulab.Identity.Infrastructure.Totp;
@@ -41,6 +42,12 @@ public static class IdentityModule
 
     /// <summary>The custom grant of the code step at sign-in (F-11 BR9): <c>challenge</c> and <c>code</c> in, tokens out.</summary>
     public const string TotpGrantType = "totp";
+
+    /// <summary>
+    /// The custom grant of a forced password change (F-53 BR4): <c>challenge</c> and <c>new_password</c> in, tokens out.
+    /// Always on (BR10): the seeded administrator could never sign in without it.
+    /// </summary>
+    public const string PasswordChangeGrantType = "password_change";
 
     /// <summary>
     /// <paramref name="services"/> already has an <c>IConnectionMultiplexer</c> registered by the host
@@ -116,6 +123,10 @@ public static class IdentityModule
         services.AddScoped<CheckPasswordResetTokenHandler>();
         services.AddScoped<ResetPasswordHandler>();
         services.AddScoped<ChangePasswordHandler>();
+
+        // F-53 BR10: the forced password change is registered whatever the two-factor switch says.
+        services.AddScoped<IPasswordChangeChallengeStore, RedisPasswordChangeChallengeStore>();
+        services.AddScoped<ForcedPasswordChangeHandler>();
         services.AddScoped<ProfileHandler>();
 
         // F-9: the role management back office.
@@ -200,6 +211,9 @@ public static class IdentityModule
                 // Password flow is first-party only (ADR-0001 #12); refresh keeps a session alive silently.
                 options.AllowPasswordFlow();
                 options.AllowRefreshTokenFlow();
+
+                // F-53 BR10: the forced password change, on whatever the other switches say.
+                options.AllowCustomFlow(PasswordChangeGrantType);
 
                 // F-11 BR9: the code step of a two-factor sign-in, only while the feature is on (BR12).
                 if (totp.TotpEnabled)
@@ -291,7 +305,8 @@ public static class IdentityModule
                 Permissions.GrantTypes.Password,
                 Permissions.GrantTypes.RefreshToken,
                 TotpGrantPermission,
-                GoogleGrantPermission
+                GoogleGrantPermission,
+                PasswordChangeGrantPermission
             }
         }, cancellationToken);
     }
@@ -305,7 +320,10 @@ public static class IdentityModule
     /// <summary>F-20 BR1: granted on or off for the same reason as <see cref="TotpGrantPermission"/>.</summary>
     private const string GoogleGrantPermission = Permissions.Prefixes.GrantType + GoogleSignInProtocol.GrantType;
 
-    private static readonly string[] CustomGrantPermissions = [TotpGrantPermission, GoogleGrantPermission];
+    /// <summary>F-53 BR10: the grant is always on, so the permission is always needed.</summary>
+    private const string PasswordChangeGrantPermission = Permissions.Prefixes.GrantType + PasswordChangeGrantType;
+
+    private static readonly string[] CustomGrantPermissions = [TotpGrantPermission, GoogleGrantPermission, PasswordChangeGrantPermission];
 
     /// <summary>
     /// Creates the seed roles (F-6, BR1) and every permission the registered modules declare (F-33, BR2),
