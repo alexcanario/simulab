@@ -1,7 +1,7 @@
 ---
 feature: F-55
 epic: Foundation and identity
-status: building
+status: validating
 board: 93
 version: 1
 ---
@@ -74,5 +74,28 @@ None.
 ## Change notes
 
 ## Validation script
+Needed to validate: nothing beyond the local app host (in place now).
+
+1. Stop any other app host, then start this one from the item's worktree.
+   - Git Bash: `cd /d/wt/simulab/f-55-stop-logging-typed && Database__Name=simulab_f55_val dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`
+   - PowerShell 7: `Set-Location D:\wt\simulab\f-55-stop-logging-typed; $env:Database__Name = "simulab_f55_val"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https`
+2. Open the Aspire dashboard, then Structured logs, resource `api`.
+3. In the Web, sign up with a new address, for example `validacao-55@exemplo.com` (the confirmation e-mail is in Mailpit), confirm it and sign in.
+4. Sign in again with a wrong password, and once with an unknown address (`fantasma-55@exemplo.com`).
+5. In Structured logs, filter by `validacao-55`, then by `fantasma-55`: expected, no entry for either, and no "The token request was successfully extracted" line.
+6. Clear the filter: the Api's own lines (requests, warnings) are still there.
+
+Not checked through the app host by Claude: sign-in needs an account, and creating one is left to the owner; the test host covers the same path at Trace level.
 
 ## Delivery
+- Tests (item branch, 2026-10-06): Identity 465 passed, 0 failed, 1 m 18 s (budget 2 min); stop gate GREEN, no new warning.
+- Seen failing first: 5 of the 6 new tests failed without the filter, on event 6075 with `"username": "..."`; all 6 pass with it.
+
+| Criterion | Test |
+|---|---|
+| AC1 | `TypedNameLogTests.SignIn_WithTheRightPassword_LogsNoTypedName` |
+| AC2 | `TypedNameLogTests.SignIn_WithAWrongPasswordAndAnUnknownName_LogsNoTypedName` |
+| AC3 | `TypedNameLogTests.SignIn_RefusedByTheLimit_LogsNoTypedNameAndKeepsTheWarning` |
+| AC4 | `TypedNameLogTests.SignUpAndPasswordReset_LogNoTypedAddress` |
+| AC5 | `OpenIddictServerPrefixLogRuleTests`, `OpenIddictServerDispatcherLogRuleTests` (`SignIn_WritesNoOpenIddictServerEntryBelowWarning`) |
+| AC6 | the rest of `Simulab.Identity.Tests` (465 green) |
