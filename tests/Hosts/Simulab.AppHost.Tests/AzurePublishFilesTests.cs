@@ -263,7 +263,29 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
 
         Bicep("api-containerapp").Should().Contain("ConnectionStrings__simulab");
         Bicep("web-containerapp").Should().NotContain("ConnectionStrings__simulab");
-        Bicep("storage").Should().Contain("Standard_LRS").And.Contain("name: 'keys'");
+        foreach (var account in new[] { "storage-api", "storage-web" })
+        {
+            Bicep(account).Should().Contain("Standard_LRS").And.Contain("name: 'keys'");
+        }
+    }
+
+    /// <summary>
+    /// F-64 review: each host has a storage account of its own, so the Web can neither read nor overwrite the Api's key ring;
+    /// and the Api, which reads its secrets from the vault, has the Key Vault Secrets User role (the Web has not).
+    /// </summary>
+    [Fact]
+    public void Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets()
+    {
+        const string SecretsUser = "4633458b-17de-408a-b874-0445c86b69e6";
+        _files.Keys.Where(file => file.StartsWith("storage", StringComparison.Ordinal)).Should()
+            .BeEquivalentTo("storage-api.module.bicep", "storage-web.module.bicep");
+        _files.Keys.Where(file => file.StartsWith("web-roles-storage", StringComparison.Ordinal)).Should()
+            .ContainSingle("the Web's role assignments name its own account only");
+        Bicep("web-roles-storage-web").Should().Contain("storage_web");
+        Bicep("web-roles-storage-web").Should().NotContain("storage_api");
+        Bicep("api-roles-keyvault").Should().Contain(SecretsUser);
+        _files.Keys.Where(file => file.StartsWith("web-roles-keyvault", StringComparison.Ordinal)).Should().ContainSingle();
+        Bicep("web-roles-keyvault").Should().NotContain(SecretsUser);
     }
 
     /// <summary>The Production files differ from Staging in one thing worth a test: the cache is the managed one.</summary>

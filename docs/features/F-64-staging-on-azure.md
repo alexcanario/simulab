@@ -1,7 +1,7 @@
 ---
 feature: F-64
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 103
 version: 2
 ---
@@ -87,6 +87,9 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - 2026-10-06 — D16 The F-66 assertions "web has no `AZURE_CLIENT_ID`" and "only `api-identity`" are narrowed to the email settings (owner): this item gives the Web an identity for Key Vault; the F-66 BR9 rule (the Web sends no email) stays tested.
 - 2026-10-06 — D17 The publish output sets `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` on the `api` (seen in `api.bicep`): it makes the host believe every proxy, which contradicts BR6. The build removes it for both hosts and a test pins its absence (Claude).
 
+- 2026-10-07 — D18 One storage account per host for the key ring (review of F-64, major): Aspire gives a referencing host its Blob, Table and Queue roles on the whole account, so the shared account of change note v2 let the Web read and overwrite the Api's `simulab-api.xml`. Two `Standard_LRS` accounts (`storage-api`, `storage-web`, a few cents) each with a container `keys`; the publish shows each host's role file naming its own account only, and a test pins it (Claude).
+- 2026-10-07 — D19 Accepted for staging, recorded not fixed (review of F-64, minor): the Web's Key Vault role (Crypto Service Encryption User) is vault-wide, so it could also wrap and unwrap with the key behind `OpenIddict--EncryptionCertificate`. Scoping a role to one key needs a hand-written Bicep role assignment; revisit at the production release (Claude). Also documented in `docs/infra.md`: a vault secret has the same key as an app host setting and wins over it, because the Key Vault source is added last.
+
 ## Out of scope
 - Creating production (ADR-0002 #3: at the first release).
 - The deploy workflow in GitHub Actions (F-65).
@@ -107,5 +110,48 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - Re-approved by the owner on 2026-10-07 ("sim").
 
 ## Validation script
+Needed to validate: an Azure subscription with billing, signed in with `az` on the owner's machine, and the Aspire CLI 13.6.0 (owner, in place only if you confirm it); at least one tester in Brazil (owner); F-66 done (it is, board #105). This item has no screen, so there is no keyboard-only pass and no language switch of its own; step 1 uses the app's screens only to prove that a local run did not change. Every command that creates a paid resource is run by you (BR10); the full commands are in `docs/infra.md`, "First deploy of staging" and "Budget and cost of staging".
+
+1. Local run unchanged. Start the app host (`dotnet run --project src/Hosts/Simulab.AppHost`, stop any other app host first), sign up at `/sign-up`, open the verification email in Mailpit, sign in, switch the language to English and back in the profile. Expected: all works as before; the Api log has no line about Key Vault, blob or certificates.
+2. Preview the deployment files without Azure (no sign-in, nothing created):
+   - Git Bash: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo; grep -c ASPNETCORE_FORWARDEDHEADERS_ENABLED artifacts/publish/staging/api/api.bicep artifacts/publish/staging/web/web.bicep; grep -c Database__ApplyMigrationsOnStart artifacts/publish/staging/api/api.bicep; grep -c ConnectionStrings__simulab artifacts/publish/staging/web/web.bicep`
+   - PowerShell 7: the same `aspire publish ...`, then `(Select-String -Path artifacts\publish\staging\api\api.bicep,artifacts\publish\staging\web\web.bicep -Pattern ASPNETCORE_FORWARDEDHEADERS_ENABLED | Measure-Object).Count` and likewise for the other two files.
+   - Expected, run by Claude in both shells on 2026-10-07: `Pipeline succeeded`, then `0`, `0` (one per file), `1` (the Api applies migrations on start in Staging) and `0` (the Web has no database). Repeat: delete `artifacts/publish/staging` and run again.
+3. First deploy (infra.md steps 1 to 8, then 3 again as step 10 after step 9): create the resource group, deploy, learn the names, give yourself the vault role, create the key, the two certificates and the admin password secret. Expected after the first deploy: the `web` runs and the `api` restarts in a loop (it refuses to start without its certificates); after the second deploy `https://<staging address>/api/v1/system/info` answers 200 with `"environment": "Staging"`. Paste me the ingress address you measured in step 9 (AC7, D12).
+4. A tester in Brazil (or you on a phone) opens the staging address, creates an account, receives the verification email, opens the link, signs in and uses the app. Also sign in as `admin@simulab.local` with the password of step 8: it must ask for a new password before anything else (AC7, UC2). If the sign-in fails, first check that the proxy list of step 3 is filled and deployed: the Web calls the Api at `https://api.internal.<environment domain>` (seen in the publish output), the internal ingress ends TLS and forwards plain http with `X-Forwarded-Proto`, and the Api refuses that request until it believes the ingress. If it still fails, stop and paste me the Api log (`az containerapp logs show -n api -g simulab-staging --type console --tail 50`); the address the Api sees for that internal ingress cannot be known without Azure.
+5. Persistence (AC8, BR4, UC3): sign up a second account but do **not** open its verification link; sign in with the first one and keep the page open. Park staging and start it again with the commands of "Staging start and stop". Expected: the first account is still signed in or signs in again with the same password, its data is there, and the second account's verification link, sent before the park, still works.
+6. Budget (AC9, BR9): run the budget command of "Budget and cost of staging" and read it back. Expected: two notifications, 50 % and 100 % of 80.
+7. Cost (AC10, BR8): after one full test window and 7 parked days, run the cost query for the two periods and paste me the two figures and the number of test days a month you expect; I record the monthly figure and whether plan B applies in `docs/infra.md` and ADR-0002.
+8. Park staging when the window ends (UC3) and tell me when it is done.
 
 ## Delivery
+Built 2026-10-07 on `feature/F-64` (status `validating`). Not shipped: AC7 to AC10 need the owner's Azure subscription (validation script).
+
+### Criterion → test
+| Criterion | Test(s) |
+|---|---|
+| AC1 | `AzurePublishFilesTests.Publish_StagingAppliesTheMigrationsOnStartAndProductionDoesNot` |
+| AC2 | `OpenIddictCertificateRestartTests` (same certificates accept the token after a restart; other certificates refuse it) and `OpenIddictCertificateStartTests` (no certificates, one missing, not a PKCS#12 file: the start refuses and names the setting; both present: OpenIddict holds them) |
+| AC3 | `DataProtectionWiringTests` (blob repository, Key Vault encryptor, application name per host, bad key address, local run unchanged); `AzurePublishFilesTests.Publish_GivesBothHostsTheirKeyRingAndTheWebNoDatabase` and `Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets` |
+| AC4 | `ForwardedHeadersHostTests` (listed proxy: OpenIddict treats http as https; no header, unlisted sender, no proxy listed: `ID2083`; the one-time log with the sender's address) |
+| AC5 | `TrustedProxiesTests` (`ListedProxy_ForwardedProto_TheSchemeIsHttps`, `UnlistedSender_...`, `NothingListed_...`, plus the B-4 address cases) |
+| AC6 | `AzurePublishFilesTests.Publish_PassesNoSecretAndNoBlanketForwardedHeaders` (Staging and Production), `Publish_WritesNoSecretValue`, `Publish_KeepsEachHostsKeyRingApart...` (Secrets User role on the Api only) and `Publish_PassesTheListedProxiesToBothHosts` |
+| AC7, AC8, AC9, AC10 | Validation script steps 3 to 7 (they need the Azure subscription) |
+| AC11 | No UI text added; no resource file touched |
+
+### What is proven and what is not
+- The Key Vault source in the Api's configuration (`Program.cs`) has no automated test: reaching a vault needs Azure. It is proven on the first staging (a certificate or the admin password read from the vault). The publish tests prove the Api has the vault's address and the Secrets User role, and the Web has neither.
+- Not verified without Azure: the address the Api sees for the internal ingress (the Web calls `https://api.internal.<domain>`; the ingress ends TLS and forwards http), whether the ACA setting `autoConfigureDataProtection: true` in the publish output interacts with the explicit key ring, and that Key Vault's default-policy certificates pass OpenIddict's key-usage checks at runtime (tests use certificates with the same key usages).
+- Review: independent fresh-context review ran; its major finding (the Web's storage roles, D18) is fixed with a test, its minor findings are D19 and the documented precedence of the vault source; its missing validation script is written.
+
+### Results (2026-10-07, worktree)
+- Gate (`gate.js stop`): `agile gate GREEN`, build 21 s, 0 new warnings.
+- Api.Tests 39, AppHost.Tests 31, Web.Tests 1086, Identity.Tests 472 (1 m 21 s), ArchitectureTests 181: all passed. The full suite runs at `/agile:ship`.
+
+### Changes to existing files worth knowing
+- `TrustedProxies` moved from the Web to `Simulab.ServiceDefaults` and now also believes `X-Forwarded-Proto`; the Api uses it too.
+- `ASPNETCORE_FORWARDEDHEADERS_ENABLED`, which the Aspire publish adds, is removed from both hosts (D17).
+- The two F-66 publish assertions about identities were narrowed to the email settings (D16).
+- `docs/infra.md`: first-deploy, budget, cost, expected secrets; `docs/agile/profile.md`: one line naming the three deviations from the Azure recipe; `docs/glossary.md`: three technical terms.
+- Packages added (D8, change note v2): `Aspire.Hosting.Azure.Storage`, `Aspire.Azure.Storage.Blobs`, `Aspire.Azure.Security.KeyVault`, `Azure.Extensions.AspNetCore.DataProtection.Blobs`, `Azure.Extensions.AspNetCore.DataProtection.Keys`.
+- Precondition for F-65: a production deploy applies no migration (BR5); the Api writes its keys to a blob regardless.

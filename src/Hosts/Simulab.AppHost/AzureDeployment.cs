@@ -16,7 +16,8 @@ internal static class AzureDeployment
         IResourceBuilder<IResourceWithConnectionString> Database,
         IResourceBuilder<IResourceWithConnectionString> Redis,
         IResourceBuilder<AzureKeyVaultResource> KeyVault,
-        IResourceBuilder<AzureBlobStorageContainerResource> Keys);
+        IResourceBuilder<AzureBlobStorageContainerResource> ApiKeys,
+        IResourceBuilder<AzureBlobStorageContainerResource> WebKeys);
 
     /// <summary>
     /// The Container Apps environment, Key Vault, the storage account of the Data Protection keys, PostgreSQL and the Redis
@@ -31,18 +32,11 @@ internal static class AzureDeployment
         // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
         var keyVault = builder.AddAzureKeyVault("keyvault");
 
-        // F-64 D9 (change note v2): the Data Protection key ring of each host is a blob in this container, so a restart,
-        // a deploy or a park does not lose it. Locally redundant: the keys are cheap to lose in staging (everybody signs
-        // in again) and the default, geo-redundant, costs more.
-        var keys = builder.AddAzureStorage("storage")
-            .ConfigureInfrastructure(infrastructure =>
-            {
-                foreach (var account in infrastructure.GetProvisionableResources().OfType<StorageAccount>())
-                {
-                    account.Sku = new StorageSku { Name = StorageSkuName.StandardLrs };
-                }
-            })
-            .AddBlobContainer("keys");
+        // F-64 D9 (change note v2): the Data Protection key ring of each host is a blob, so a restart, a deploy or a park does
+        // not lose it. One storage account per host (a few cents): Aspire gives a referencing host its roles on the whole
+        // account, so a shared one would let the Web read and overwrite the Api's key ring (review of F-64).
+        var apiKeys = AddKeyStorage(builder, "storage-api");
+        var webKeys = AddKeyStorage(builder, "storage-web");
 
         IResourceBuilder<IResourceWithConnectionString> database =
             builder.AddAzurePostgresFlexibleServer("postgres").WithPasswordAuthentication(keyVault).AddDatabase("simulab");
@@ -53,8 +47,23 @@ internal static class AzureDeployment
             ? builder.AddAzureManagedRedis("redis")
             : builder.AddRedis("redis");
 
-        return new CloudResources(database, redis, keyVault, keys);
+        return new CloudResources(database, redis, keyVault, apiKeys, webKeys);
     }
+
+    /// <summary>
+    /// A locally redundant storage account (the default, geo-redundant, costs more and the keys are cheap to lose in staging:
+    /// everybody signs in again) with the blob container <c>keys</c>.
+    /// </summary>
+    private static IResourceBuilder<AzureBlobStorageContainerResource> AddKeyStorage(IDistributedApplicationBuilder builder, string name) =>
+        builder.AddAzureStorage(name)
+            .ConfigureInfrastructure(infrastructure =>
+            {
+                foreach (var account in infrastructure.GetProvisionableResources().OfType<StorageAccount>())
+                {
+                    account.Sku = new StorageSku { Name = StorageSkuName.StandardLrs };
+                }
+            })
+            .AddBlobContainer($"keys-{name["storage-".Length..]}", "keys");
 
     /// <summary>
     /// F-66: the Email Communication Service, its Azure-managed domain, the Communication Service and the role that lets
@@ -98,10 +107,11 @@ internal static class AzureDeployment
         // key (the owner creates it, docs/infra.md). The Api also reads its secrets from the vault as configuration
         // (the seeded admin password, the OpenIddict certificates; BR7), which `WithReference` lets it do.
         var keyId = ReferenceExpression.Create($"{cloud.KeyVault.Resource.VaultUri}keys/dataprotection");
+        api.WithReference(cloud.ApiKeys, connectionName: "keys");
+        web.WithReference(cloud.WebKeys, connectionName: "keys");
         foreach (var host in new[] { api, web })
         {
-            host.WithReference(cloud.Keys)
-                .WithEnvironment("DataProtection__KeyVaultKeyId", keyId);
+            host.WithEnvironment("DataProtection__KeyVaultKeyId", keyId);
         }
 
         // An explicit role assignment replaces the default one of `WithReference`, so each host names all it needs: the Web
