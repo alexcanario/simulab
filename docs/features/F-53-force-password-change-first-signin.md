@@ -100,7 +100,7 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - (none)
 
 ## Change notes
-- v1 note 1 (proposed 2026-10-06, waiting for the owner): BR3 says the step that hands out the password-change challenge "does not clear the failure count". On the two-factor path the right code has already cleared it (F-11 BR10, shared `SecondFactor.VerifyAsync`). Proposal: BR3 keeps its wording for the password step and reads "after the two-factor code step the count is already clear". Affects BR3 only; no acceptance criterion changes (AC6 is password-only, AC8 asserts the events).
+- v1 note 1 (accepted by the owner 2026-10-06, with the validation): BR3 says the step that hands out the password-change challenge "does not clear the failure count". On the two-factor path the right code has already cleared it (F-11 BR10, shared `SecondFactor.VerifyAsync`). Proposal: BR3 keeps its wording for the password step and reads "after the two-factor code step the count is already clear". Affects BR3 only; no acceptance criterion changes (AC6 is password-only, AC8 asserts the events).
 
 ## Validation script
 Needed to validate: a database of its own and the switch `Identity:SeedAdmin:RequirePasswordChange` on for the run — both are in the start command below (Claude prepared them; nothing else is needed). Sign-in is `admin@simulab.local` with the development password of `appsettings.Development.json` (`Admin@Simulab123!`); a new password to type: `Nova#Senha2026!`.
