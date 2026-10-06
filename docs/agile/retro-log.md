@@ -995,5 +995,5 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 ## 2026-10-06 - Sync with agile@canary 0.21.0
 - From 0.17.0 to 0.21.0. Copied: `.claude/rules/agile/output-style.md` (questions as a `❓` block when no card), `docs/agile/templates/infra.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`. Merged without conflicts: `docs/agile/profile.md` (custom domain on Azure Container Apps; "Simulab specifics" kept). Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged), build files (no upstream change).
 - Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
-- Proposed: an idea for `## Cloud accounts` in `docs/infra.md` (accepted); DocGen tools catalogue not captured; glossary sweep deferred.
+- Proposed: an idea for `## Cloud accounts` in `docs/infra.md`; not captured, F-68 (change note v2) already delivers it. DocGen tools catalogue not captured; glossary sweep deferred.
 - Build and suite not run: only Markdown changed.
