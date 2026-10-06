@@ -27,7 +27,10 @@ builder.Services.ConfigureHttpJsonOptions(options => AppJson.Configure(options.S
 builder.Services.AddAppDatabase(builder.Configuration.GetConnectionString("simulab")
     ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 builder.Services.AddModulePersistence();
-builder.Services.AddEmailSender(builder.Configuration, builder.Configuration.GetConnectionString("mailpit"));
+builder.Services.AddEmailSender(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("mailpit"),
+    cloudEnvironment: !builder.Environment.IsDevelopment());
 builder.Services.AddIntegrationEvents();
 
 // The one door to a model (F-41, BR1). Without a key the host still starts and every call fails with

@@ -2,10 +2,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Simulab.Email;
 
-/// <summary>SMTP settings, section <c>Email</c>. In development they point at the Mailpit container.</summary>
+/// <summary>
+/// Email settings, section <c>Email</c>. The SMTP keys are for the <see cref="EmailProvider.Smtp"/> provider and, in
+/// development, point at the Mailpit container; the sender address and name serve both providers.
+/// </summary>
 public sealed class EmailOptions
 {
     public const string SectionName = "Email";
+
+    /// <summary>Which sender delivers the messages (F-66 BR3). SMTP when absent.</summary>
+    public EmailProvider Provider { get; set; } = EmailProvider.Smtp;
+
+    /// <summary>Settings of <see cref="EmailProvider.AzureCommunicationServices"/>.</summary>
+    public AzureCommunicationServicesOptions AzureCommunicationServices { get; set; } = new();
 
     /// <summary>SMTP host name.</summary>
     [Required]
@@ -15,10 +24,13 @@ public sealed class EmailOptions
     [Range(1, 65535)]
     public int Port { get; set; } = 1025;
 
-    /// <summary>Address every message is sent from.</summary>
+    /// <summary>
+    /// Address every message is sent from. No default: a cloud host that forgets it stops at start (F-66 BR4)
+    /// instead of sending from a made-up address. Development sets it in <c>appsettings.Development.json</c>.
+    /// </summary>
     [Required]
     [EmailAddress]
-    public string FromAddress { get; set; } = "no-reply@simulab.app";
+    public string FromAddress { get; set; } = string.Empty;
 
     /// <summary>Display name of the sender.</summary>
     [Required]
