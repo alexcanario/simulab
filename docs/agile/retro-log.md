@@ -979,3 +979,15 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
 - Proposed: an item adding `## Cloud accounts` to `docs/infra.md` (to be captured as an idea); `/agile:identity` and the DocGen tools catalogue (F-61) declined for now.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-06 - Sync with agile@canary 0.17.0
+- From 0.16.0 to 0.17.0. Copied: `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md` (new `/agile:script` command, scenario 14.62). Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged), build files (no upstream change).
+- Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
+- Declined: DocGen tools catalogue, `## Cloud accounts`, `/agile:identity` (no item captured); glossary sweep skipped.
+- Build and suite not run: only Markdown changed.
+
+## 2026-10-06 - F-66 Emails leave the cloud environments
+- Lesson 1 (project rule, `project.md`, applied): a test of the app host's model never calls `GetEnvironmentVariableValuesAsync`. Evidence: `dotnet test tests/Hosts/Simulab.AppHost.Tests` ran past the 500 s timeout with a run-mode test calling it; after the test read the `EnvironmentCallbackAnnotation` callbacks instead, `Passed: 25, Total: 25, Duration: 4 s`. Sweep of the existing tests: the method appears only in a doc comment of `AppHostModelTests`, nothing to fix.
+- Lesson 2 (not applied, owner's pick): the ship assumes the IDE is closed, but the worktree lock probe failed (`mv ...: Device or resource busy`, twice) with Visual Studio Insiders and VS Code open; the holder was not identified (no process had the path in its command line), cause not verified. The rule on `git worktree remove` in `project.md` already asks for Visual Studio to be closed, so no new line and no plugin note.
+- Lesson 3 (nothing): four documentation files were first written through a `python` heredoc, which the workflow forbids; it was caught before the commit and redone with the edit tool. The rule exists, so there is nothing to add.
+- Build and suite not run: only Markdown changed.

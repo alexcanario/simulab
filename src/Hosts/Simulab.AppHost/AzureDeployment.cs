@@ -1,3 +1,5 @@
+using Aspire.Hosting.Azure;
+
 namespace Simulab.AppHost;
 
 /// <summary>
@@ -31,6 +33,24 @@ internal static class AzureDeployment
     }
 
     /// <summary>
+    /// F-66: the Email Communication Service, its Azure-managed domain, the Communication Service and the role that lets
+    /// the Api, and only the Api, send (<c>Bicep/email.bicep</c>), then the settings the Api reads. No secret and no
+    /// parameter: the Api signs in with its managed identity (BR1). The Web gets nothing (BR9).
+    /// </summary>
+    private static void AddEmail(
+        IDistributedApplicationBuilder builder,
+        IResourceBuilder<ProjectResource> api,
+        IResourceBuilder<AzureUserAssignedIdentityResource> apiIdentity)
+    {
+        var email = builder.AddBicepTemplate("email", "Bicep/email.bicep")
+            .WithParameter("apiPrincipalId", apiIdentity.GetOutput("principalId"));
+
+        api.WithEnvironment("Email__Provider", "AzureCommunicationServices")
+            .WithEnvironment("Email__AzureCommunicationServices__Endpoint", email.GetOutput("endpoint"))
+            .WithEnvironment("Email__FromAddress", email.GetOutput("senderAddress"));
+    }
+
+    /// <summary>
     /// The settings of the two hosts in the cloud. The cloud sets the environment name on them (else a staging
     /// deploy logs "Production"). BR5: the Api runs the job worker, so it never goes to zero (at zero replicas no
     /// email leaves); the Web keeps its sign-in tickets in memory, so it runs as one instance and may sleep at zero.
@@ -42,6 +62,12 @@ internal static class AzureDeployment
         string environmentName)
     {
         var openIddictSecret = builder.AddParameter("openiddict-client-secret", secret: true);
+
+        // F-66: one managed identity for the Api, attached explicitly because the email template needs its principal
+        // id for the role assignment. It also serves PostgreSQL (Entra ID sign-in) and, in Production, the managed Redis.
+        var apiIdentity = builder.AddAzureUserAssignedIdentity("api-identity");
+        api.WithAzureUserAssignedIdentity(apiIdentity);
+        AddEmail(builder, api, apiIdentity);
 
         api.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
             .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)

@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.16.0 (rascunho). English: [en](workflow.md).
+> Versão 0.17.0 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -130,11 +130,11 @@ stateDiagram-v2
 | `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número; uma resposta que junta o escopo de um item aberto já existente a este, em vez disso, primeiro confere aquele item — `git worktree list` procurando a pasta dele e o arquivo ou issue dele para o `status`. Qualquer status além de `idea` em qualquer lugar bloqueia a junção automática: o Claude nomeia o status e o caminho da worktree do outro item e você decide, juntar mesmo assim (registrado em `## Decisions` com o motivo) ou descartar a junção e deixar o outro item intocado. Ainda `idea` em todo lugar, sem worktree: a junção acontece como antes, sem pergunta nova): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Uma lista que você aprovou ou editou no chat (um catálogo, um conjunto de opções, escolhas numeradas) é escrita inteira na seção `## Approved list` do item, na ordem aprovada e com as suas edições aplicadas, e o arquivo nunca diz "a lista mostrada na refinação"; antes de pedir a sua aprovação o Claude relê o arquivo atrás de frases que mandam o leitor para o chat e cola a lista onde achar uma. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
 | `building` | `/agile:build`: primeiro acha a worktree do item pela branch e diz `Worktree of <id>: <caminho> [<branch>]` (`(created now)` quando um item antigo não tinha); o status e a checagem de árvore limpa são lidos ali, nunca no checkout principal, e continua nessa worktree — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree; depois o Claude lê cada arquivo que ele citou, roda o gate e cita os números reais, e responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
-| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. **Portão 2.** | Você |
+| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. Um passo que uma correção deixou errado se corrige com `/agile:script <id> <o que mudou>`, sem nota de mudança. **Portão 2.** | Você |
 | `done` | `/agile:ship`: suíte completa, versão da app incrementada, merge — digitar o comando é o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
 | `cancelled` | Uma saída, não uma etapa: só a partir de `idea` ou `refining`, só como duplicata, escolhida no card que o `/agile:refine` mostra ao achar um item parecido (abaixo). O arquivo fica com `status: cancelled` e a linha `Duplicate of <id> (<data>): <onde a melhoria foi parar>`, então o número nunca é reaproveitado; o status da sessão e o início do backlog o ignoram. No GitHub o issue é fechado como duplicata do outro e o item do projeto é arquivado (nunca Done: isso mostraria trabalho não entregue como entregue); no Azure Boards o estado é `Removed`; sem board a linha de `docs/agile/backlog.md` é riscada. | Você, no card |
 
-**A linha do item.** `/agile:refine`, `/agile:build`, `/agile:ship`, `/agile:change`, `/agile:review`, `/agile:autopilot`, `/agile:screen` e `/agile:pause` começam nomeando o item em que atuam: `F-12 — Export the monthly report as CSV [idea]` (id, título, status), antes de qualquer checagem e antes de criar ou mudar qualquer coisa; assim um id errado aparece na hora, mesmo que uma checagem pare o comando em seguida. O título e o status vêm do arquivo do item (a cópia da worktree quando há uma), nunca do board, então funciona com `Board: none`; um id sem arquivo imprime `F-99 — no item file found` e o comando segue com a própria regra para item inexistente. É escrita uma vez por execução: o `/agile:autopilot` imprime no início, não de novo a cada fase, e o `/agile:build` mantém a linha `Worktree of ...` logo abaixo. O `/agile:pause` imprime uma linha por item que commita. `/agile:status` e `/agile:idea` não precisam: um lista todos os itens com o status, o outro termina com o id e o título do item novo.
+**A linha do item.** `/agile:refine`, `/agile:build`, `/agile:ship`, `/agile:change`, `/agile:review`, `/agile:autopilot`, `/agile:screen`, `/agile:script` e `/agile:pause` começam nomeando o item em que atuam: `F-12 — Export the monthly report as CSV [idea]` (id, título, status), antes de qualquer checagem e antes de criar ou mudar qualquer coisa; assim um id errado aparece na hora, mesmo que uma checagem pare o comando em seguida. O título e o status vêm do arquivo do item (a cópia da worktree quando há uma), nunca do board, então funciona com `Board: none`; um id sem arquivo imprime `F-99 — no item file found` e o comando segue com a própria regra para item inexistente. É escrita uma vez por execução: o `/agile:autopilot` imprime no início, não de novo a cada fase, e o `/agile:build` mantém a linha `Worktree of ...` logo abaixo. O `/agile:pause` imprime uma linha por item que commita. `/agile:status` e `/agile:idea` não precisam: um lista todos os itens com o status, o outro termina com o id e o título do item novo.
 
 **Itens parecidos.** Antes de o `/agile:idea` pegar um número, e antes de o `/agile:refine` criar uma branch, o Claude lê todos os itens (`docs/features`, `docs/bugs`, o arquivo do item em cada worktree, onde um item em andamento guarda o status atual, e o board, abertos e fechados, `done` e `cancelled` incluídos) e julga quais cobrem o mesmo assunto com outras palavras. Nunca por regra de palavras-chave. Sem candidato, diz `No similar item (<N> items read).` e segue. Com candidatos (no máximo 3, um motivo cada) faz um card, a ação recomendada primeiro. Para melhorar o item existente: um `idea` ganha `Added <data>: <texto>` no resumo; um item `refining` recebe o texto como pergunta aberta na própria worktree (o Claude diz o caminho); um item `approved`, `building` ou `validating` não é tocado e o Claude imprime `/agile:change <id>` com o texto para você digitar; um item `done` é informado como `Already delivered in <id>`, e você não cria nada ou cria o novo item com uma linha ligando o `done`. No `/agile:refine` o card tem três ações: levar a melhoria ao outro item e cancelar este (um refinamento retomado também perde a worktree e a branch), manter os dois (uma linha em `## Decisions`) ou absorver o outro neste (a checagem de status e worktree da seção 14.18). `/agile:epic` e `/agile:discuss` buscam uma vez para a lista toda e mostram todas as colisões em um card; `/agile:autopilot --assume` termina com a pergunta, pois duplicata é decisão sua.
 
@@ -2988,6 +2988,31 @@ Claude: F-999 — no item file found
 
 Digitar `/agile:ship F-13` para um item ainda `building` imprime `F-13 — Import the exam list [building]` acima da parada por status errado. O `/agile:autopilot F-14` imprime a linha uma vez no início, e a refinação, o build e o ship que ele executa não repetem.
 
+### 14.62 Um passo do roteiro de validação ficou errado
+
+O F-12 está `validating`. No passo 3 você descobre que o comando precisa de uma flag que o roteiro não deu. O Claude corrige o código, mas o roteiro ainda traz o comando antigo. Você digita o que mudou:
+
+```
+> /agile:script F-12 step 3 now needs --no-build
+Claude: F-12 — Export the monthly report as CSV [validating]
+        Step 3 changed: both forms run (Git Bash and PowerShell 7), the output quoted is the real one.
+        Steps 1, 2, 4, 5 are unchanged. Commit: docs(F-12): validation script. The issue body was sent whole and read back: same.
+        You repeat the script from step 3.
+```
+
+O arquivo ganhou o texto novo da seção e um commit na branch do item. Não há nota de mudança, nem `version` nova, nem reaprovação, e o status continua `validating`. Sem texto depois do id (`/agile:script F-12`), o roteiro inteiro é refeito a partir dos critérios e do diff da branch.
+
+Se o seu texto muda de verdade o que um critério diz, nada é gravado:
+
+```
+> /agile:script F-12 export only the last 3 months
+Claude: F-12 — Export the monthly report as CSV [validating]
+        That changes AC2 ("the file holds every month of the year"), not only how it is checked.
+        Nothing written. Type: /agile:change F-12 export only the last 3 months
+```
+
+Um item `approved` ou `done` para na hora, com uma linha dizendo por quê: o roteiro é escrito no build, e um item done nunca é reaberto.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
@@ -3003,6 +3028,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build <feature> [--worktree]` | Acha a worktree do item pela branch e implementa ali uma feature aprovada (uma por vez; `--worktree` para uma segunda em paralelo) |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature>` | Registra uma mudança de ideia durante o build |
+| `/agile:script <feature> [o que mudou]` | Refaz o roteiro de validação de um item `building` ou `validating`: só os passos que o seu texto atinge, ou o roteiro inteiro sem texto; arquivo, commit e corpo do issue, sem nota de mudança |
 | `/agile:ship <feature>` | Suíte completa, versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização), branch e worktree removidas, board, manual da app e o comando de docs declarado; um app desktop com `- Beta channel: every merge`: a `main` mandada para a pasta de rede como `<Version>-beta` |
 | `/agile:retro` | Transforma lições em regras ou skills |
 | `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
@@ -3030,6 +3056,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9, 14.46 |
 | `/agile:review` | Uma mudança é arriscada (dados, dinheiro, permissões) e você quer olhos sem contexto antes de validar | 14.8 |
 | `/agile:change` | Você mudou de ideia num item aprovado ou em build; um item done ganha um item novo | 14.3, 14.40 |
+| `/agile:script` | Um passo do roteiro de validação está errado ou velho depois de uma correção; um texto que muda um critério vai para o `/agile:change` | 14.62 |
 | `/agile:ship` | Você validou o item e autoriza o merge | 14.2, 14.21 |
 | `/agile:retro` | Depois de um ship ou no fim de uma sessão, para guardar no máximo 3 lições como regras; com um id de item ou `session` para escolher a fonte | 14.37, 14.40 |
 | `/agile:pause` | Você vai parar por agora; nada fica só no disco | 14.6, 14.40 |
@@ -3206,6 +3233,15 @@ flowchart TD
     B --> C["Nova versão do arquivo; critérios afetados reescritos"]
     C --> D{"Reaprovar só os critérios afetados"}
     D -->|sim| E(["O trabalho continua; o resto segue aprovado"])
+```
+
+### /agile:script
+```mermaid
+flowchart TD
+    A["Id do item + texto opcional<br/>(status lido na worktree do item: building ou validating)"] --> B{"O texto muda um critério?"}
+    B -->|sim| C(["Nada gravado: /agile:change é impresso"])
+    B -->|não| D["Só os passos que o texto atinge, ou o roteiro inteiro sem texto;<br/>passos de terminal alterados rodam em Git Bash e PowerShell 7"]
+    D --> E(["Arquivo + commit docs(F-n): validation script + corpo do issue enviado inteiro e lido de volta"])
 ```
 
 ### /agile:ship
