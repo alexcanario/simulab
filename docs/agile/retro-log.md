@@ -973,3 +973,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Lesson 2 (plugin: agile [generic]): `literal-guard.js` let a `python` heredoc write a test file. Evidence: the command exited 0 and `git diff --stat` showed 76 insertions in `SeedAdminTests.cs`; the next command, a `sed -i`, was blocked. Row added to the plugin notes table. The file was checked afterwards (build and diff), the rule was still broken.
 - Lesson 3 (plugin: agile [generic]): refinement did not check BR3 ("does not clear the failure count") against the shared `SecondFactor.VerifyAsync`, which clears it on a right code (`SecondFactor.cs:42`). Found by the build design pass and settled by change note 1. Row added to the plugin notes table.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-06 - Sync with agile@canary 0.16.0
+- From 0.7.0 to 0.16.0. Copied: `docs/agile/templates/infra.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`. Merged without conflicts: `docs/agile/profile.md` (new "Deploy recipe (Azure Container Apps + Aspire)" section added; "Simulab specifics" kept). Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged), build files (no upstream change).
+- Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
+- Proposed: an item adding `## Cloud accounts` to `docs/infra.md` (to be captured as an idea); `/agile:identity` and the DocGen tools catalogue (F-61) declined for now.
+- Build and suite not run: only Markdown changed.
