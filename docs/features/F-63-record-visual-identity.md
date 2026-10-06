@@ -1,7 +1,7 @@
 ---
 feature: F-63
 epic: Foundation and identity
-status: building
+status: validating
 board: 102
 version: 1
 ---
@@ -64,6 +64,9 @@ Give screens, mockups and agents one written source of the app's colors, fonts a
 - 2026-10-04 — Technical: the comparison logic is a helper that takes a `MudTheme` and the parsed tokens, so AC2 can feed it an altered theme. — Proves the test fails when it should, not only that it passes today.
 - 2026-10-04 — Technical: the JSON is read with `System.Text.Json` and the YAML front matter with a small line parser in the test (flat `key: value` lines). — No new package (BR7).
 - 2026-10-04 — Technical: the `visual-identity` skill's own step 12 ("capture the idea 'Apply the identity to the theme'") is satisfied by this item's test and is not captured again. — The theme already equals the tokens, and the test keeps it so.
+- 2026-10-06 — Built: 39 color tokens (every palette color that differs from MudBlazor's default in at least one theme, the `Lighten` / `Darken` tones MudBlazor derives included), the font stack, five type-scale entries and the 10px radius. `appbarText` has no token: the theme sets it to MudBlazor's own default in both modes, so it is indistinguishable from unset (the rule decided on 2026-10-04); `DESIGN.md` says so. — Matches the rule as decided; nothing the theme paints is lost to a mockup that cannot be inferred from the prose.
+- 2026-10-06 — Built: `DESIGN.md`'s front matter mirrors the token paths (`color.primary.light`, `color.primary.dark`, `typography.h1.fontSize`, `shape.borderRadius`) plus `source`, `sourceRef`, `date` and `iconFamily`; the test parses it with a nested `key:` line parser and fails on a missing, extra or different value. — Same names on both files keep the comparison a plain one.
+- 2026-10-06 — Built: two terms added to the glossary's technical terms (design tokens, front matter), as the output style asks. — The owner reads these words in the chat.
 
 ## Out of scope
 - A new brand (logo, new colors, a web font): a later item when Simulab has one.
@@ -77,5 +80,40 @@ Give screens, mockups and agents one written source of the app's colors, fonts a
 ## Change notes
 
 ## Validation script
+Needed to validate: the owner reads `docs/design/DESIGN.md` and the token table (owner; in place now, in the worktree `D:\wt\simulab\f-63-record-visual`). No app host and no sign-in: this item has no screen.
+
+1. Open `docs/design/DESIGN.md` in the worktree. Read the "Colors by role" section: each role says what it paints and why light and dark differ. Say if a role is wrong or missing.
+2. Open `docs/design/identity.tokens.json`. Check three tokens against what you see in the app: `primary` (`#216DB5` light, `#64A2E3` dark), `surface` and `background`.
+3. Open `docs/decisions/ADR-0001-foundation.md`, line of decision 30 (AC8): it points to `docs/design/identity.tokens.json` and says primary `#216DB5`.
+4. Confirm the theme did not change (AC7). Git Bash:
+   ```bash
+   cd /d/wt/simulab/f-63-record-visual && git diff main -- src/Hosts/Simulab.Web/Theme/SimulabTheme.cs | wc -l
+   ```
+   PowerShell 7:
+   ```powershell
+   cd D:\wt\simulab\f-63-record-visual; (git diff main -- src/Hosts/Simulab.Web/Theme/SimulabTheme.cs | Measure-Object -Line).Lines
+   ```
+   Expected: `0`. Repeat any time.
+5. See the test catch a drift. In your editor, change `Primary = "#216DB5"` to `Primary = "#216DB6"` in `src/Hosts/Simulab.Web/Theme/SimulabTheme.cs` (the light palette, first color) and save. Then run the same command in Git Bash or PowerShell 7:
+   ```bash
+   cd /d/wt/simulab/f-63-record-visual && dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~IdentityTokensTests"
+   ```
+   ```powershell
+   cd D:\wt\simulab\f-63-record-visual; dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~IdentityTokensTests"
+   ```
+   Expected: `Failed`, with the message `token 'primary' in the light theme: theme #216DB6, tokens #216DB5`. Then restore the file: `git checkout src/Hosts/Simulab.Web/Theme/SimulabTheme.cs` (same in both shells); `git status` shows nothing under `src/`.
+
+## Criterion → test
+| Criterion | Test (`tests/Hosts/Simulab.Web.Tests/Ui/IdentityTokensTests.cs`) |
+|---|---|
+| AC1 | `Colours_EqualTheThemeInBothModes` |
+| AC2 | `Colours_AreRecordedForEveryColourTheThemeSets`, `Colours_AThemeColourWithNoToken_FailsByName`, `Colours_AChangedThemeValue_FailsWithTheModeAndBothValues`, `Colours_ATokenTheThemeDoesNotSet_FailsByName` |
+| AC3 | `Typography_AndRadius_EqualTheTheme`, `Typography_AChangedSize_FailsByName` |
+| AC4 | `Identity_NamesTheIconFamilyAndTheSource` |
+| AC5 | `Tokens_FollowTheDtcgShape` |
+| AC6 | `DesignMd_FrontMatterGivesTheValueOfEveryToken`, `DesignMd_AValueThatDiffersOrIsMissing_FailsByName` |
+| AC7 | `ThemeContrastTests` and `ThemePaletteTests` unedited and green (Web.Tests 1083 passed); empty diff: step 4 |
+| AC8 | step 3 |
+| AC9 | no UI text added; the missing-key test is in the Web.Tests run (1083 passed) |
 
 ## Delivery
