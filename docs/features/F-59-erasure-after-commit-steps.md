@@ -1,7 +1,7 @@
 ---
 feature: F-59
 epic: Foundation and identity
-status: validating
+status: done
 board: 98
 version: 1
 ---
@@ -146,4 +146,7 @@ Needed to validate: the Redis and PostgreSQL containers of the app host (Claude 
 The crash case (steps killed between commit and revoke) is proven by tests AC4 and AC6, not by hand.
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-59`; merge commit `b06c601` (board #98); app version 0.16.0.
+- Tests: full suite 2312 passed, 0 failed, 105 s (build 23 s, 0 new warnings); 8 new tests in `AccountErasureFollowUpTests` (AC1, AC3-AC6) plus AC2 in `ErasureLastManagerTests`; F-10 tests adjusted to run the jobs before checking the event (change note in F-10).
+- Manual: unchanged (nothing visible to the user).
+- Decision kept: one `account.erased` job staged in the erasure transaction; the handler still revokes right after the commit.
