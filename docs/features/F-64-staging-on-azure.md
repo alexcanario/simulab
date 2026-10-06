@@ -1,7 +1,7 @@
 ---
 feature: F-64
 epic: Foundation and identity
-status: approved
+status: building
 board: 103
 version: 1
 ---
@@ -82,6 +82,7 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 - 2026-10-04 — D12 Both hosts add `X-Forwarded-Proto` to the headers they believe, still only from the listed proxies; the Api gets the same `TrustedProxies` rule as the Web (Claude). The ingress range of a Container Apps environment without a custom network is not documented as fixed: the build reads the address the hosts see on staging and records it, and the list is configured from that, never a guess.
 - 2026-10-04 — Approved by the owner ("aprovo F-64"); the build waits for F-66 and the first test window.
 - 2026-10-04 — D13 The `api` keeps the Container Apps default TCP probe; the health endpoints stay Development-only (Claude) — exposing them is a separate security decision.
+- 2026-10-06 — D14 D2 relaxed by the owner: F-66 was in validating when the build was asked for; it is done now (merged, board #105), so the wait is over and the item builds whole.
 
 ## Out of scope
 - Creating production (ADR-0002 #3: at the first release).
