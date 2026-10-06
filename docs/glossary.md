@@ -104,6 +104,9 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 
 | Term | pt-BR | Meaning | Meaning (pt-BR) |
 |---|---|---|---|
+| thread pool | pool de threads | The shared set of threads .NET uses to run async continuations and timer callbacks (B-24). | O conjunto compartilhado de threads que o .NET usa para continuar código assíncrono e disparar timers (B-24). |
+| thread-pool starvation | falta de threads no pool | Every pool thread is blocked waiting, so queued work (a finished socket, a timer) cannot run; the pool adds threads slowly (B-24). | Todas as threads do pool estão bloqueadas esperando, então o trabalho na fila (um socket pronto, um timer) não roda; o pool cria threads devagar (B-24). |
+| sync-over-async | espera síncrona de código assíncrono | Blocking a thread until an async operation ends (`.GetAwaiter().GetResult()`, a synchronous `Start()`), which holds a pool thread meanwhile (B-24). | Bloquear uma thread até uma operação assíncrona terminar (`.GetAwaiter().GetResult()`, um `Start()` síncrono), o que prende uma thread do pool enquanto isso (B-24). |
 | stress loop | rodada de carga | Several copies of a test project run at once, repeated, to make a timing fault show up (B-22). | Várias cópias de um projeto de testes rodando ao mesmo tempo, repetidas, para fazer aparecer uma falha de tempo (B-22). |
 | flaky test | teste instável | A test that passes and fails on the same code, usually because it loses a timing race under load (B-11, B-22). | Teste que passa e falha com o mesmo código, em geral porque perde uma corrida de tempo sob carga (B-11, B-22). |
 | race | corrida (de tempo) | Two things that finish in an unpredictable order, such as a click handler and the line of a test that checks its result. | Duas coisas que terminam em ordem imprevisível, como o tratador de um clique e a linha do teste que confere o resultado. |
