@@ -39,6 +39,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
                 // reach for a database it does not have.
                 ["Identity:SeedAdmin:Password"] = string.Empty,
 
+                // F-56: a real Claude key in the Api's user secrets must not reach a test host.
+                ["Ai:ApiKey"] = string.Empty,
+
                 // F-53: pinned as the password is.
                 ["Identity:SeedAdmin:RequirePasswordChange"] = "false",
             }));
