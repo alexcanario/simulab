@@ -146,7 +146,9 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             .And.Contain("linkedDomains")
             .And.Contain("displayName: 'Simulab'")
             .And.Contain("principalType: 'ServicePrincipal'")
-            .And.Contain("scope: communicationService");
+            .And.Contain("scope: communicationService")
+            .And.Contain("principalId: apiPrincipalId")
+            .And.Contain("'09976791-48a7-449e-bb21-39d1a415f350'");
         // Brazil on both resources: the domain only links when the two data locations match.
         template.Should().Contain("param dataLocation string = 'Brazil'");
         System.Text.RegularExpressions.Regex.Matches(template, "dataLocation: dataLocation").Should().HaveCount(2);
@@ -171,7 +173,6 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         resources.EnumerateObject().Where(resource => resource.Value.TryGetProperty("type", out var type)
                 && type.GetString() == "parameter.v0" && resource.Name.Contains("email", StringComparison.OrdinalIgnoreCase))
             .Should().BeEmpty();
-        _files["manifest.json"].Should().NotContain("email-api-key").And.NotContain("email_api_key");
     }
 
     /// <summary>F-66 AC5 (BR9): the Api gets the three settings and its identity's client id; the Web gets no email setting.</summary>

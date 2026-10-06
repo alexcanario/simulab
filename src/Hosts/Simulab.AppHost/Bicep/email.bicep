@@ -68,4 +68,4 @@ resource apiMaySend 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 output endpoint string = 'https://${communicationService.properties.hostName}'
-output senderAddress string = 'DoNotReply@${domain.properties.mailFromSenderDomain}'
+output senderAddress string = 'DoNotReply@${domain.properties.fromSenderDomain}'

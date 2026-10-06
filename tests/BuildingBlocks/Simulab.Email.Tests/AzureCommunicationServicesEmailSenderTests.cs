@@ -1,5 +1,6 @@
 using Azure;
 using Azure.Communication.Email;
+using Azure.Identity;
 using Microsoft.Extensions.Options;
 
 namespace Simulab.Email.Tests;
@@ -56,6 +57,19 @@ public class AzureCommunicationServicesEmailSenderTests
         var thrown = (await send.Should().ThrowAsync<InvalidOperationException>()).Which;
         thrown.Message.Should().Contain("InvalidRecipientEmailAddress").And.Contain(Endpoint).And.Contain("400");
         thrown.Message.Should().NotContain("student@example.com");
+        thrown.InnerException.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Send_IdentityCannotSignIn_ThrowsWithTheEndpointAndNoInnerException()
+    {
+        var sender = SenderFor(new FakeEmailClient { Throws = new CredentialUnavailableException("no identity endpoint") });
+
+        var send = async () => await sender.SendAsync(
+            new EmailMessage("student@example.com", "Subject", "<p>Body</p>"), CancellationToken.None);
+
+        var thrown = (await send.Should().ThrowAsync<InvalidOperationException>()).Which;
+        thrown.Message.Should().Contain(Endpoint).And.Contain("managed identity");
         thrown.InnerException.Should().BeNull();
     }
 
