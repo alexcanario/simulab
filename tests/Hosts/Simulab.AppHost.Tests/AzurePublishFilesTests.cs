@@ -32,9 +32,9 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    private async Task<Dictionary<string, string>> PublishAsync(string environment)
+    private async Task<Dictionary<string, string>> PublishAsync(string environment, params string[] extraArguments)
     {
-        var output = Path.Combine(_output, environment);
+        var output = Path.Combine(_output, environment + extraArguments.Length);
         var appHost = Path.Combine(AppContext.BaseDirectory, "Simulab.AppHost.dll");
 
         var start = new ProcessStartInfo("dotnet")
@@ -48,7 +48,7 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
                      "--output-path", Path.Combine(output, "manifest.json"),
                      "--Google:ClientId=sentinel.apps.googleusercontent.com", $"--Google:ClientSecret={GoogleSentinel}",
                      $"--Ai:ApiKey={AiSentinel}",
-                 })
+                 }.Concat(extraArguments))
         {
             start.ArgumentList.Add(argument);
         }
@@ -231,6 +231,21 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         // The rule of presence: the Api does get the vault, so the absences above are not an empty file.
         api.Should().Contain("ConnectionStrings__keyvault");
         web.Should().NotContain("ConnectionStrings__keyvault");
+    }
+
+    /// <summary>F-64 BR6, D12: the ingress addresses of the app host's configuration reach both hosts; with none, neither gets a setting.</summary>
+    [Fact]
+    public async Task Publish_PassesTheListedProxiesToBothHosts()
+    {
+        var listed = await PublishAsync("Staging", "--ForwardedHeaders:KnownProxies:0=10.0.0.5", "--ForwardedHeaders:KnownNetworks:0=10.0.0.0/24");
+
+        foreach (var host in new[] { "api", "web" })
+        {
+            listed[$"{host}-containerapp.module.bicep"].Should()
+                .MatchRegex(@"name: 'ForwardedHeaders__KnownProxies__0'\s+value: '10\.0\.0\.5'")
+                .And.MatchRegex(@"name: 'ForwardedHeaders__KnownNetworks__0'\s+value: '10\.0\.0\.0/24'");
+            Bicep($"{host}-containerapp").Should().NotContain("ForwardedHeaders__", "nothing is listed in the committed Staging settings");
+        }
     }
 
     /// <summary>

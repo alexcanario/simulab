@@ -140,6 +140,10 @@ if (behindTrustedProxy)
 {
     app.UseForwardedHeaders(forwarded);
 }
+else if (!app.Environment.IsDevelopment())
+{
+    app.UseUnlistedProxyLog();
+}
 
 if (!app.Environment.IsDevelopment())
 {

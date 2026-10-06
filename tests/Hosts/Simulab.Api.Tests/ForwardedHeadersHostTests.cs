@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Simulab.Testing;
 
 namespace Simulab.Api.Tests;
 
@@ -92,5 +94,54 @@ public sealed class ForwardedHeadersHostTests(ApiFactory factory) : IClassFixtur
         var answer = await TokenRequestAnswerAsync(Proxy, proxyListed: false, sendsProto: true);
 
         answer.Should().Contain("ID2083");
+    }
+
+    private static async Task<List<RecordedLogEntry>> WarningsAfterAsync(WebApplicationFactory<Program> factory, string environment, bool proxyListed, int requests)
+    {
+        var logs = new RecordingLoggerProvider();
+        await using var host = factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment(environment);
+            CloudSettings.Apply(builder);
+            builder.ConfigureLogging(logging => logging.AddProvider(logs));
+            if (proxyListed)
+            {
+                builder.UseSetting("ForwardedHeaders:KnownProxies:0", Proxy);
+            }
+
+            builder.ConfigureTestServices(services =>
+                services.AddSingleton<IStartupFilter>(new FixedRemoteAddress(IPAddress.Parse("10.0.0.9"))));
+        });
+        using var client = host.CreateClient();
+
+        for (var request = 0; request < requests; request++)
+        {
+            using var message = new HttpRequestMessage(HttpMethod.Get, "/api/v1/system/info");
+            message.Headers.Add("X-Forwarded-For", "203.0.113.10");
+            using var response = await client.SendAsync(message);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, "the request is answered whatever the log says");
+        }
+
+        return [.. logs.Entries.Where(entry => entry.Category == "TrustedProxies")];
+    }
+
+    /// <summary>F-64 D12: with no proxy listed the first forwarded header names the address it came from, once.</summary>
+    [Fact]
+    public async Task NoProxyListed_AForwardedHeaderIsLoggedOnceWithTheAddressItCameFrom()
+    {
+        var entries = await WarningsAfterAsync(factory, "Staging", proxyListed: false, requests: 3);
+
+        entries.Should().ContainSingle().Which.Message.Should().Contain("10.0.0.9").And.Contain("KnownProxies");
+    }
+
+    [Theory]
+    [InlineData("Staging", true)]
+    [InlineData("Development", false)]
+    public async Task ProxyListedOrDevelopment_NothingIsLogged(string environment, bool proxyListed)
+    {
+        // The Development host also needs no cloud settings, which Apply only adds: harmless there.
+        var entries = await WarningsAfterAsync(factory, environment, proxyListed, requests: 1);
+
+        entries.Should().BeEmpty();
     }
 }

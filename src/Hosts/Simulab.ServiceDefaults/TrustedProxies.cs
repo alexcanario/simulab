@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Simulab.ServiceDefaults;
 
@@ -44,6 +46,33 @@ public static class TrustedProxies
         }
 
         return options.KnownProxies.Count > 0 || options.KnownIPNetworks.Count > 0;
+    }
+
+    /// <summary>
+    /// F-64 D12: while no proxy is listed, the first request that carries a forwarded header is logged once with the address it
+    /// came from, so the owner reads the ingress address on the first staging and writes it into the configuration
+    /// (<c>docs/infra.md</c>) instead of guessing a range. The header is still ignored.
+    /// </summary>
+    public static IApplicationBuilder UseUnlistedProxyLog(this IApplicationBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+
+        var logged = 0;
+        return app.Use((context, next) =>
+        {
+            var headers = context.Request.Headers;
+            if ((headers.ContainsKey("X-Forwarded-For") || headers.ContainsKey("X-Forwarded-Proto"))
+                && Interlocked.Exchange(ref logged, 1) == 0)
+            {
+                context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(TrustedProxies)).LogWarning(
+                    "A forwarded header arrived from {Address} and is ignored: {Section}:KnownProxies and {Section}:KnownNetworks list no proxy.",
+                    context.Connection.RemoteIpAddress,
+                    SectionName,
+                    SectionName);
+            }
+
+            return next(context);
+        });
     }
 
     private static InvalidOperationException Invalid(string key, string value) =>

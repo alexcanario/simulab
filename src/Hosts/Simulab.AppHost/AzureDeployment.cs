@@ -89,7 +89,7 @@ internal static class AzureDeployment
         var openIddictSecret = builder.AddParameter("openiddict-client-secret", secret: true);
 
         // F-66: one managed identity for the Api, attached explicitly because the email template needs its principal
-        // id for the role assignment. It also serves PostgreSQL (Entra ID sign-in) and, in Production, the managed Redis.
+        // id for the role assignment. It also reads the vault and, in Production, the managed Redis; the database uses a password (F-64 D15).
         var apiIdentity = builder.AddAzureUserAssignedIdentity("api-identity");
         api.WithAzureUserAssignedIdentity(apiIdentity);
         AddEmail(builder, api, apiIdentity);
