@@ -22,6 +22,7 @@ using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Authorization;
 using Simulab.Identity.Infrastructure.Content;
+using Simulab.Identity.Infrastructure.Account;
 using Simulab.Identity.Infrastructure.Email;
 using Simulab.Identity.Infrastructure.GoogleSignIn;
 using Simulab.Identity.Infrastructure.Passwords;
@@ -111,6 +112,8 @@ public static class IdentityModule
         services.AddScoped<IPasswordResetTokenStore, PasswordResetTokenStore>();
         services.AddScoped<IPasswordMailer, PasswordMailer>();
         services.AddScoped<IErasureMailer, ErasureMailer>();
+        services.AddScoped<IErasureFollowUp, ErasureFollowUp>();
+        services.AddScoped<IJobHandler, AccountErasedJobHandler>();
         services.AddSingleton<ILegalDocumentProvider, LegalDocumentProvider>();
 
         // The verification email is written from this module's own resources.
