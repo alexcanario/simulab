@@ -1,7 +1,7 @@
 ---
 feature: F-56
 epic: Foundation and identity
-status: building
+status: validating
 board: 94
 version: 1
 ---
@@ -64,6 +64,8 @@ A new Api test host that forgets to pin a developer-fed key fails the architectu
 - 2026-10-04 — Api test projects are found by their `ProjectReference` to `Simulab.Api.csproj`, not by name — Claude; the Web's `Program` has the same name, and the reference is what decides which one a file means.
 - 2026-10-04 — The detection rules (BR2, BR3) get unit tests on sample source text, so AC1–AC3 are shown failing without breaking a real host — Claude; a check that only ever passes proves nothing.
 - 2026-10-04 — No new package — Claude; the scan reads text with the BCL.
+- 2026-10-06 — The scan skips `Simulab.ArchitectureTests` itself, although it references the Api — Claude; that project holds the sample sources of the check, not a host.
+- 2026-10-06 — The two tests that scan real sources (`ApiTestHosts_PinEveryKey`, `ApiTestProjects_NeverUseTheFactoryDirectly`) were seen failing before the hosts pinned `Ai:ApiKey` (2 failed, 12 passed), naming both files and the key — Claude.
 
 ## Out of scope
 - Switching test hosts to a non-`Development` environment.
@@ -76,7 +78,14 @@ A new Api test host that forgets to pin a developer-fed key fails the architectu
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: nothing. No screen, so no app host and no sign-in.
+
+1. In the worktree `D:\wt\simulab\f-56-test-hosts-pin`, run the check. Git Bash and PowerShell 7 take the same command:
+   `dotnet test tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj --filter "FullyQualifiedName~ApiTestHostPinTests"`
+   Expected: `Passed!  - Failed: 0, Passed: 14, Skipped: 0, Total: 14`.
+2. Make it fail on purpose: in `tests/Simulab.Testing.ApiHost/SimulabApiFactory.cs`, change `["Ai:ApiKey"] = string.Empty,` to `["Ai:ApiKey"] = "x",` and repeat step 1. Expected: `Failed: 2` (two tests see the same gap) and a message naming `Simulab.Testing.ApiHost\SimulabApiFactory.cs` and `'Ai:ApiKey'`.
+3. Undo the edit (`git checkout tests/Simulab.Testing.ApiHost/SimulabApiFactory.cs`) and repeat step 1: green again.
+4. Check the docs: `docs/infra.md` has no `Ai:Anthropic:ApiKey` row, and `.claude/rules/agile/project.md` names `Identity:SeedAdmin:Password` and `Ai:ApiKey`.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
