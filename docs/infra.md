@@ -125,8 +125,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 23 s, 0 new warnings (2026-10-06, F-59). Earlier, F-57: 17 s; B-24: B-24: 28 s |
-| Full test suite | < 5 min | 2312 tests in 105 s, slowest projects 1 m 40 s (Identity) and 1 m 32 s (Catalog), 23 s build (2026-10-06, F-59). Earlier, F-57: 2307 tests in 92 s, slowest projects 1 m 27 s (Identity) and 1 m 26 s (Catalog), 17 s build (2026-10-06, F-57). Earlier, B-24: 2219 tests in 116 s, slowest project 1 m 48 s (Identity, projects run in parallel, machine shared with other sessions), 28 s build. Earlier, F-54: 2215 tests in 76 s. Earlier, F-51: 2198 tests in 141 s; its first full run failed 24 Identity tests, the same project alone passed 408 of 408 and a second full run was green |
+| Full build | | 17 s, 0 new warnings (2026-10-06, F-63). Earlier, F-59: 23 s; F-57: 17 s; B-24: B-24: 28 s |
+| Full test suite | < 5 min | 2323 tests in 88 s, slowest projects 1 m 23 s (Identity) and 1 m 22 s (Catalog), 17 s build (2026-10-06, F-63). Earlier, F-59: 2312 tests in 105 s, slowest projects 1 m 40 s (Identity) and 1 m 32 s (Catalog), 23 s build. Earlier, F-57: 2307 tests in 92 s, slowest projects 1 m 27 s (Identity) and 1 m 26 s (Catalog), 17 s build (2026-10-06, F-57). Earlier, B-24: 2219 tests in 116 s, slowest project 1 m 48 s (Identity, projects run in parallel, machine shared with other sessions), 28 s build. Earlier, F-54: 2215 tests in 76 s. Earlier, F-51: 2198 tests in 141 s; its first full run failed 24 Identity tests, the same project alone passed 408 of 408 and a second full run was green |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. B-19 did not close it: on 2026-10-05 (F-51) one full run failed 24 Identity tests
