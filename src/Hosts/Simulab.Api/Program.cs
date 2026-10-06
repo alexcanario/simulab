@@ -19,7 +19,15 @@ using Simulab.SharedKernel.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// F-64 BR7: in the cloud the secrets (the seeded admin password, the OpenIddict certificates) are read from Key Vault
+// as configuration, before anything below reads it. A local run has no vault and changes nothing.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("keyvault")))
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("keyvault");
+}
+
 builder.AddServiceDefaults();
+builder.AddAppDataProtection("simulab-api");
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options => AppJson.Configure(options.SerializerOptions));

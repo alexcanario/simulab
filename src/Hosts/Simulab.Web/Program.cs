@@ -12,6 +12,8 @@ using Simulab.Web.Services.Auth;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+// F-64 BR4: the key ring of a deployed host lives in a blob container, not in the container's file system.
+builder.AddAppDataProtection("simulab-web");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddUiKit();
