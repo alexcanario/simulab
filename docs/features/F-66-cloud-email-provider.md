@@ -18,6 +18,7 @@ Staging and production send real emails (sign-up verification, password reset, p
 - Needed to validate: the staging environment created by F-64 — owner; a real mailbox outside the company (for example Gmail) to receive the emails — owner.
 - Suggested path: `/agile:refine` → `/agile:build` (with the `system-design` and `architect` passes: it adds an Azure resource and a role assignment).
 - Parallel with: none recommended. F-64 also edits `src/Hosts/Simulab.AppHost/AzureDeployment.cs` and `docs/infra.md`: build F-66 after F-64 merges, or expect conflicts there.
+- Privacy policy: F-71 names SendGrid as the email processor. A provider other than SendGrid also publishes a new version of the privacy policy naming it (F-71 D2).
 
 ## Goal
 A tester on staging receives the sign-up verification email in their real mailbox and finishes the sign-up, with no secret to create, store or rotate for the email.

@@ -21,6 +21,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Backend: external — <API name>, <repository or URL>; contract in `docs/api/backend-openapi.json`. (Optional: only on profile `mobile` whose API is another repository's, quiz 2d. Delete this line otherwise.)
 - Shared screens: package `<App>.Shared` from the site's GitHub Packages feed. (Optional: only under `- Backend: external` when the site's `Complement:` line names the package. Delete this line otherwise.)
 - Offline: first (Optional: only on profile `mobile`, or `desktop` with an API, when quiz question 2f chose offline-first, or after an "Offline foundation" item on an online project; `mobile-client` apps write it under the `Complement:` line. Delete this line otherwise.)
+- Backoffice: staff | none (Optional: only on profile `mobile` with the backend in this solution, when quiz question 2g chose a staff backoffice or declined it, or after a "Backoffice foundation" item; `none` stops the `/agile:sync` note. Delete this line otherwise.)
 - Decisions: `docs/decisions/` (start with ADR-0001).
 - Keep code simple: add structure only where the profile asks for it.
 
