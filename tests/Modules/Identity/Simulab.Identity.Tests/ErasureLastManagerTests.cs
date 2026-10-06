@@ -43,6 +43,9 @@ public sealed class ErasureLastManagerTests : IdentityApiTests
         // F-21 AC7, BR7: the erasure event is staged on the transaction, so the rollback took it too.
         (await ErasedEventsAsync(admin.Id)).Should().Be(0);
 
+        // F-59 AC2: and so did the follow-up job.
+        (await JobsAsync()).Should().NotContain(job => job.Type == "account.erased");
+
         // With a second active manager, the same call goes through.
         await Accounts.CreateAsync(Factory.Services, roles: IdentityRoles.Admin);
         using var allowed = await EraseAsync(client, session, SignUpForm.ValidPassword);

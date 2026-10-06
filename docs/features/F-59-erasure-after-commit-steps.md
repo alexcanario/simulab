@@ -1,7 +1,7 @@
 ---
 feature: F-59
 epic: Foundation and identity
-status: approved
+status: validating
 board: 98
 version: 1
 ---
@@ -134,7 +134,16 @@ process dies right after the commit.
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: the Redis and PostgreSQL containers of the app host (Claude has not started them; the owner's `dotnet run` does).
+
+1. Start the app host: `dotnet run --project src/Hosts/Simulab.AppHost` (same command in Git Bash and PowerShell 7), from `D:\wt\simulab-59-erasure-after-commit`.
+2. Sign up and confirm a test account, then sign in on two browsers (two devices).
+3. In one browser, erase the account (Account > Erase, current password). Expect: signed out at once.
+4. In the other browser, reload or click any page: expect the sign-in page (the access token is refused).
+5. In the app host dashboard, open the `api` logs: within about 5 seconds the job `account.erased` runs and no job stays failed.
+6. Check the jobs table is empty of `account.erased` rows afterwards (schema `jobs`, table `jobs`).
+7. Language switch and keyboard pass: no text changed; nothing to check.
+The crash case (steps killed between commit and revoke) is proven by tests AC4 and AC6, not by hand.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
