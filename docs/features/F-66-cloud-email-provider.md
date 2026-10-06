@@ -18,3 +18,4 @@ Staging and production send real emails (sign-up verification, password reset, f
 - Needed to validate: a sending domain or verified sender at the provider — owner.
 - Suggested path: `/agile:refine` → `/agile:build`.
 - Parallel with: F-62.
+- Privacy policy: F-71 names SendGrid as the email processor. A provider other than SendGrid also publishes a new version of the privacy policy naming it (F-71 D2).

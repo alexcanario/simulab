@@ -166,8 +166,8 @@ public sealed class ExamEditionsSectionTests : CatalogPageTestContext
 
         section.Find("button[aria-label='Edit: 2026, CEBRASPE']").Click();
 
-        Services.GetRequiredService<NavigationManager>().Uri.Should()
-            .EndWith($"/admin/exams/{AgentePf.Id}/editions/{Edition2026Id}");
+        section.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should()
+            .EndWith($"/admin/exams/{AgentePf.Id}/editions/{Edition2026Id}"));
     }
 
     // AC12: a published edition's delete is disabled, with the reason as the tooltip.
@@ -203,7 +203,7 @@ public sealed class ExamEditionsSectionTests : CatalogPageTestContext
         section.Find(DeleteButtonOf("2024, Analista, CEBRASPE")).Click();
 
         providers.Dialogs.WaitForAssertion(() =>
-            Flat(providers.Dialogs.Markup).Should().Contain("The edition 2024 · Analista · CEBRASPE leaves the exam Agente de Policia Federal.")
+            Flat(providers.Dialogs.Markup).Should().Contain("The edition 2024 · Analista · CEBRASPE leaves the exam Agente de Policia Federal, with its notice subjects.")
                 .And.Contain("Delete edition 2024 · Analista · CEBRASPE"));
         providers.Dialogs.Find(".app-confirm-ok").Click();
 

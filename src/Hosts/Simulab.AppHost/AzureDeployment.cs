@@ -45,7 +45,14 @@ internal static class AzureDeployment
 
         api.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
             .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
-            .PublishAsAzureContainerApp((_, app) => app.Template.Scale.MinReplicas = 1);
+            .PublishAsAzureContainerApp((_, app) =>
+            {
+                app.Template.Scale.MinReplicas = 1;
+
+                // F-54 BR7: a second replica would reject the first one's tokens (OpenIddict development
+                // certificates per machine, F-73); F-73 lifts this cap.
+                app.Template.Scale.MaxReplicas = 1;
+            });
 
         web.WithExternalHttpEndpoints()
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)

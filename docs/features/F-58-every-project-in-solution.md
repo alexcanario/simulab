@@ -26,3 +26,6 @@ F-46 derives the assemblies the architecture rules see from the projects listed 
 - Waits on: nothing.
 - Suggested path: `/agile:autopilot F-58` (small and clear) — unknown, settled at `/agile:refine`.
 - Parallel with: unknown — settled at `/agile:refine`.
+
+## Decisions
+- 2026-10-04 — Closed as already covered, not built. The premise was false: F-12 (commit `59fa899`) added `SolutionLayoutTests.EveryProjectOnDisk_IsListedInTheSolution`, which lists every `.csproj` under `src/`, `tests/` and `tools/` and fails when one is missing from `Simulab.slnx`. Today all 37 projects on disk are listed and the test is green. A project outside those roots is not production (F-46, BR1), so no gap is left. Issue #97 closed as not planned. Owner's choice at `/agile:refine`.
