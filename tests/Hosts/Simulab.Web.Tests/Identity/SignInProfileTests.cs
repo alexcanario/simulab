@@ -31,8 +31,8 @@ public sealed class SignInProfileTests : IdentityPageTestContext
 
         page.Find("button.app-sign-in-submit").Click();
 
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should().Contain("/account/sign-in-complete?ticket="));
         var target = Services.GetRequiredService<NavigationManager>().Uri;
-        target.Should().Contain("/account/sign-in-complete?ticket=");
         var ticketId = target[(target.IndexOf("ticket=", StringComparison.Ordinal) + "ticket=".Length)..];
         Services.GetRequiredService<SignInTicketStore>().TryConsume(ticketId, out var ticket).Should().BeTrue();
         ticket.DisplayName.Should().Be("Ana Souza");
