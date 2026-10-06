@@ -115,3 +115,59 @@ builder.AddProject<Projects.<App>_Api>("api")   // each web or API project resou
     .WithEndpoint("http", e => { e.Port = hostPort; e.IsExternal = true; })
     .PublishAsDockerComposeService((_, service) => service.AddVolume(new Volume { Name = keys, Source = keys, Target = "/home/app", Type = "volume" }));
 ```
+
+## Deploy recipe (Azure Container Apps + Aspire)
+An environment that runs in the client's Azure subscription (its row in `## Cloud accounts` of `docs/infra.md` says `azure`, with Resource group and Region filled) uses the same `aspire deploy` command as the compose recipe above, and the AppHost then provisions Azure Container Apps instead of a compose environment: `Deploy:Target` (`compose`, the default, or `aca`, any case) in the AppHost's own `appsettings.<Environment>.json` chooses per environment, so staging may stay on a host while production goes to the client's Azure. `/agile:publish <environment>` (`--plan` included) and the pipeline stop an `aca` environment whose row is not `azure` or leaves Resource group or Region blank (they are `Azure__ResourceGroup` and `Azure__Location`) or has no `Monthly budget` (a whole number, the monthly ceiling, or `none`), and the pipeline installs `Aspire.Cli` at the version of `Aspire.AppHost.Sdk` of the AppHost before the command. The AppHost is written for it at bootstrap (measured on Aspire 13.6.0 with `aspire publish -e Staging`, 11 of 11 steps, and a local run):
+- Both shapes live in one `Program.cs`; Azure resources are declared only in publish mode with `Deploy:Target` `aca`, so a local run and a `compose` environment need no Azure sign-in, and the compose block of the recipe above moves under `if (compose)` (both declared, the publish fails with `Compute resource(s) 'api', 'web' are not assigned to a compute environment, but the model contains multiple compute environments`). A local run keeps the database as a container with its password.
+- The packages are the compose recipe's plus `Aspire.Hosting.Azure.AppContainers`, `Aspire.Hosting.Azure.Storage` and `Aspire.Hosting.Azure.PostgreSQL` or `Aspire.Hosting.Azure.Sql` (and `Aspire.Hosting.PostgreSQL` or `Aspire.Hosting.SqlServer` for the local container), all at the version of the CLI; each web or API project adds `Aspire.Azure.Storage.Blobs` and `Azure.Extensions.AspNetCore.DataProtection.Blobs` (its latest stable: only the `Aspire.*` packages follow the CLI's version), and a PostgreSQL project `Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL` (`AddNpgsqlDbContext<T>("appdb")`: the Entra ID token in Azure, the container's password locally).
+- `AddAzureContainerAppEnvironment("cae").WithDashboard(false)`: it creates its own Azure Container Registry (Basic) and a Log Analytics workspace, images go only to that registry, and the Aspire dashboard component is off (0 matches in `cae.bicep`).
+- The database is managed, never a container in Container Apps: `AddAzurePostgresFlexibleServer("postgres")` is `Standard_B1ms` Burstable, 32 GB, version 16, Entra ID sign-in only (`passwordAuth: Disabled`); `AddAzureSqlServer("sql")` is serverless `GP_S_Gen5_2` with `useFreeLimit: true` and `AutoPause`, Entra ID only, and an `AllowAllAzureIps` firewall rule. Each app's managed identity becomes administrator of the server, so migrations run with it.
+- Each web or API project resource sets `ASPNETCORE_ENVIRONMENT` to the environment name and `ASPNETCORE_FORWARDEDHEADERS_ENABLED` to `true` (https behind the ingress; a compose environment gets it from Aspire), calls `WithExternalHttpEndpoints()` only when it is public (the other one is `external: false`), and runs `MinReplicas = 0`, `MaxReplicas = 1` through `PublishAsAzureContainerApp`; a host with background work (a queue, e-mail, scheduled jobs) sets `MinReplicas = 1`.
+- Data Protection keys go to a blob: `AddAzureStorage("storage")` with `Standard_LRS` set in `ConfigureInfrastructure` (the default is `Standard_GRS`; shared key access is off, the apps reach it by their managed identity), `.AddBlobs("keys")` and `WithReference(keys)` on every web or API project (that reference supplies `ConnectionStrings:keys`; an `aca` project never gets `DataProtection__KeysPath`); the app calls `AddAzureBlobServiceClient("keys")` and `PersistKeysToAzureBlobStorage` only when `ConnectionStrings:keys` is set, else it keeps the compose rule (`DataProtection:KeysPath`), so local development is unchanged.
+- A secret is `AddParameter("<name>", secret: true)` as in the compose recipe (`Parameters__<name>`, "Expected secrets"); it becomes a secret of the container app (no Key Vault); a local run needs `Parameters__<name>` set, or the project that uses it stays `Waiting` (`ValueMissing`) and `aspire run` does not fail.
+- The recipe creates a user-assigned managed identity per app and role assignments for it, so the client's administrator grants the deploying account Contributor and Role Based Access Control Administrator on the subscription. The address of the app is generated and known after the first deploy: fill URL and Check URL of `docs/infra.md` by hand from the command's output.
+- After the deploy command, whatever its exit code while the resource group exists, the plugin writes one monthly budget on that group with `az rest` (`Microsoft.Consumption/budgets` `agile-monthly-ceiling`, api-version `2023-11-01`; a budget declared in the AppHost would fail a month later, measured: the start date of a budget cannot change and cannot be before the current month): the amount is the whole number of the `Monthly budget` cell of `## Cloud accounts` (the billing currency of the subscription), the start date is the first day of the month it was created and every later write keeps it, and Owner and Contributor of the group get Azure's e-mail at 80 % and 100 % of the spend and at 100 % of the forecast. `none` writes nothing and deletes nothing, and a failed write ends the run as `deploy ok; budget not written: <reason>` (the deploy is not undone). The alert only warns: nothing is stopped or scaled.
+- `/agile:publish <environment> --park` stops what costs while nobody uses an `aca` environment and `--resume` brings it back; both show their plan (`--plan`) and wait for the owner's yes. Park sets every container app to minimum 0 (its minimum is kept in the tag `agile-min-replicas` of the app) and stops the group's PostgreSQL server after marking it `agile-parked=<UTC date>`, apps first; resume starts the server and removes the mark, then restores each app's minimum. The registry, the Log Analytics workspace, the storage account and the database's disk keep costing (measured 2026-10-06, eastus2, USD: a parked environment costs about 8.7 a month plus what Log Analytics ingests; parking stops the PostgreSQL compute, about 12.4, and a background host at minimum 1, about 11.8 before the monthly free grant); an Azure SQL database pauses itself and is never stopped. Azure starts a stopped PostgreSQL server by itself after 7 days: park again (the mark stays, so a later park knows it was parked). A deploy of a parked environment, local or by the pipeline, starts the PostgreSQL server first and removes the mark, because deploying over a stopped server half deploys (`UpsertServerManagementOperationComputeOnlySupportForStoppedServer`); the apps then get the AppHost's minimums. The deploying account's Contributor role covers all of it.
+- `/agile:publish <environment> --cost` reads what an `aca` environment has cost this month: one Azure Cost Management query (`az rest` on the resource group's `Microsoft.CostManagement/query`, `ActualCost`, `MonthToDate`, the total, in the subscription's billing currency) printed as `Spend this month: <amount> <currency> of <ceiling> (<n> %)` against the row's Monthly budget (`(no ceiling declared)` for `none`), and as the `Spend:` line after `Budget:` in `--plan`, where a failed reading never stops the plan or a deploy. The figures lag 8 to 24 hours behind the spend, so a young environment reads 0.00; the service answers 429 after a handful of queries in a minute (retried three times, then the command says to try again in a minute); an account whose role cannot read cost gets Azure's own message. A deploy and `/agile:status` never read it.
+- Deleting an environment is deleting its resource group and then its budget, both by hand in the client's subscription (the budget outlives its group): `az rest --method delete --url "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.Consumption/budgets/agile-monthly-ceiling?api-version=2023-11-01"`; no plugin command does either, and the `docker compose down -v` warning does not apply.
+```csharp
+// <App>.AppHost/Program.cs, beside the compose block's usings, `builder` and `environmentName`, plus: using Azure.Provisioning.Storage;
+var aca = builder.ExecutionContext.IsPublishMode && string.Equals(builder.Configuration["Deploy:Target"], "aca", StringComparison.OrdinalIgnoreCase);
+var compose = builder.ExecutionContext.IsPublishMode && !aca;
+IResourceBuilder<IResourceWithConnectionString> database = aca
+    ? builder.AddAzurePostgresFlexibleServer("postgres").AddDatabase("appdb")
+    : builder.AddPostgres("postgres").AddDatabase("appdb");
+var apiKey = builder.AddParameter("apikey", secret: true);   // each secret, as in the compose recipe
+var api = builder.AddProject<Projects.<App>_Api>("api").WithReference(database).WaitFor(database)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName).WithEnvironment("ApiKey", apiKey);
+var web = builder.AddProject<Projects.<App>_Web>("web").WithReference(api).WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName);
+if (aca)
+{
+    builder.AddAzureContainerAppEnvironment("cae").WithDashboard(false);
+    var keys = builder.AddAzureStorage("storage")
+        .ConfigureInfrastructure(infra => { foreach (var a in infra.GetProvisionableResources().OfType<StorageAccount>()) a.Sku = new StorageSku { Name = StorageSkuName.StandardLrs }; })
+        .AddBlobs("keys");
+    api.WithReference(keys).WithEnvironment("ASPNETCORE_FORWARDEDHEADERS_ENABLED", "true")
+        .PublishAsAzureContainerApp((_, app) => { app.Template.Scale.MinReplicas = 1; app.Template.Scale.MaxReplicas = 1; });   // background work: stays on
+    web.WithReference(keys).WithEnvironment("ASPNETCORE_FORWARDEDHEADERS_ENABLED", "true").WithExternalHttpEndpoints()
+        .PublishAsAzureContainerApp((_, app) => { app.Template.Scale.MinReplicas = 0; app.Template.Scale.MaxReplicas = 1; });
+}
+else if (compose) { /* the compose block of the recipe above, for each project resource */ }
+```
+```csharp
+// <App>.Api/Program.cs and every other web or API project (the PostgreSQL client only where the project has a DbContext): using Azure.Storage.Blobs; using Microsoft.AspNetCore.DataProtection;
+builder.AddNpgsqlDbContext<AppDb>("appdb");
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("<App>");
+if (!string.IsNullOrEmpty(builder.Configuration.GetConnectionString("keys")))
+{
+    builder.AddAzureBlobServiceClient("keys");
+    dataProtection.PersistKeysToAzureBlobStorage(sp =>
+    {
+        var container = sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient("dataprotection");
+        container.CreateIfNotExists();
+        return container.GetBlobClient("keys.xml");
+    });
+}
+else if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } path)
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(path));
+```
