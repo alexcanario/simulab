@@ -72,7 +72,7 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - AC21 All new texts appear in pt-BR, pt-PT and en, and the missing-key and error-code-text tests are green.
 
 ## Decisions
-- 2026-10-06 — Only the seeded administrator is marked in v1; an admin action to mark any user in the back office is a separate idea — owner, question 1. It is the only account created by someone other than its owner today.
+- 2026-10-06 — Only the seeded administrator is marked in v1; an admin action to mark any user in the back office is F-92 (idea) — owner, question 1. It is the only account created by someone other than its owner today.
 - 2026-10-06 — The seed does not mark the account in development (switch off in `appsettings.Development.json`) — owner, question 2. Otherwise the development password stops working after the first sign-in and every validation script breaks.
 - 2026-10-06 — Only an account created by the seed after this item is marked; an existing one is left alone, no data migration — owner, question 3. Keeps F-52 BR5; no staging or production installation exists yet.
 - 2026-10-06 — After the new password the user is signed in directly; the new password must differ from the current one; a password reset by email also clears the mark — owner, question 4.
@@ -87,7 +87,7 @@ Nobody keeps using the seeded administrator with the password an operator typed 
 - 2026-10-06 — The board id in this file was 779; the real issue is #90 — corrected.
 
 ## Out of scope
-- An admin action in the back office to mark any user "must change password" (separate idea).
+- An admin action in the back office to mark any user "must change password" (F-92, idea).
 - Marking an existing seeded account, or any account other than the seeded administrator.
 - Password expiry or periodic rotation.
 - Showing the mark in the back office user list.
