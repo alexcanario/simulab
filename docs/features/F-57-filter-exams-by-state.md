@@ -1,7 +1,7 @@
 ---
 feature: F-57
 epic: Assessment catalog
-status: validating
+status: done
 board: 96
 version: 1
 ---
@@ -113,4 +113,9 @@ Needed to validate: the app host started from this worktree (the owner starts it
 8. Light and dark: the open list and the field read well in both (the screen check of the library's own states was not made by Claude).
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch `feature/F-57`, merge commit `7ab9002` (board #96), app version 0.15.0.
+- Full suite (2026-10-06): 2307 tests green in 92 s, build 17 s with 0 new warnings; `agile gate GREEN`. Affected before that: Catalog 470, Web 1072, Api 13, architecture 181. `DocGen --check` green; `docs/api/Simulab.Api.json` regenerated.
+- API: `state` on `GET /api/v1/catalog/published-exams` and `/exams`, `states` on `/published-exam-filters`, error `exam.filter_unknown_state` (400). No schema change, no migration, no index (not measured).
+- Screens: state filter on `/catalog` (kept in the URL) and `/admin/exams`.
+- Manual: `catalog.md` and `exams.md` in pt-BR, pt-PT and en.
+- Validated on screen by the owner ("validado", 2026-10-06). Claude did not open the signed-in screens (no credentials), so the validation script was the screen check.
