@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-PT
-features: [F-5, B-3, F-7, F-11]
-updated: 2026-09-21
+features: [F-5, B-3, F-7, F-11, F-53]
+updated: 2026-10-06
 ---
 # Iniciar e terminar sessão
 
@@ -47,6 +47,13 @@ A sessão mantém-se durante até 30 dias em cada dispositivo, mesmo que deixe u
 
 ## Com a verificação em dois passos
 Se ativou a verificação em dois passos, depois da palavra-passe a página pede o código de seis dígitos da sua aplicação de autenticação, ou um dos seus códigos de recuperação. Consulte [Verificação em dois passos](two-factor.md).
+
+## Quando tem de escolher uma nova palavra-passe
+A conta de administrador inicial de uma instalação nova é criada com uma palavra-passe que quem montou a instalação conhece. No primeiro início de sessão com ela, a página mostra **Escolha uma nova palavra-passe** em vez de o levar à aplicação (depois do código de dois passos, quando está ativo).
+1. Introduza uma nova palavra-passe e repita-a para confirmar. Tem de ter pelo menos 12 caracteres, com letra maiúscula, número e símbolo, e ser diferente da atual.
+2. Selecione **Guardar e iniciar sessão**. Inicia sessão com a nova palavra-passe, e qualquer outra sessão da conta é terminada.
+
+Se a página disser *O início de sessão demorou demasiado. Introduza novamente a palavra-passe.*, passaram mais de cinco minutos: selecione **Cancelar** ou inicie sessão de novo desde o princípio. Selecione **Cancelar** em qualquer momento para voltar ao passo da palavra-passe; nada muda até guardar.
 
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)

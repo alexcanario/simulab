@@ -60,6 +60,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.TotpLastAcceptedStep)
             .HasComment("The last time step accepted by two-factor. A code from that step or earlier is refused, so one code cannot be used twice.");
 
+        builder.Property(user => user.MustChangePassword)
+            .HasComment("True when the person must pick a new password before signing in for real. Set on the seeded administrator and cleared by any password set.");
+
         // F-11 BR3: base64 of nonce, ciphertext and tag of a 32-character secret is 80 characters.
         builder.Property(user => user.TotpSecretEncrypted).HasMaxLength(AccountLimits.TotpSecretEncryptedMaxLength)
             .HasComment("The two-factor secret, encrypted with the app's key. Losing that key makes every enrolment unusable.");

@@ -1,0 +1,434 @@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+@inject IDialogService Dialogs
+@inject IJSRuntime JS
+
+@* F-74 UC1-UC5: the notice subjects of an edition, in a card of their own below the edition form and outside it - the
+   edition's Save (the page's only primary button) never saves one. Each is saved by its own dialog or row action.
+   The Api orders the rows (BR6); the screen draws one heading per run of rows with the same group. *@
+<AppSectionCard Id="edition-section-notice-subjects"
+                Title="@L["NoticeSubjects.Section.Title"]"
+                Icon="@AppIcons.NoticeSubjects"
+                Subtitle="@L["NoticeSubjects.Section.Subtitle"]">
+    @if (EditionId is null)
+    {
+        @* AC17: an edition that is not saved has no notice subjects to list and nowhere to add them. *@
+        <MudText Typo="Typo.body2">@L["NoticeSubjects.Section.SaveEditionFirst"]</MudText>
+    }
+    else
+    {
+        @if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+        }
+
+        @if (_loading)
+        {
+            <AppLoadingState />
+        }
+        else if (_loadFailed)
+        {
+            <AppErrorState OnRetry="@(() => LoadAsync(showLoading: true))" />
+        }
+        else
+        {
+            @if (_rows.Count == 0)
+            {
+                <AppItemRows TItem="NoticeSubjectResponse" Items="_rows" EmptyMessage="@L["NoticeSubjects.Empty"]">
+                    <RowTemplate Context="row">@RowContent(row)</RowTemplate>
+                </AppItemRows>
+            }
+
+            @for (var index = 0; index < _groups.Count; index++)
+            {
+                var group = _groups[index];
+                var headingId = HeadingId(index);
+                <div class="app-notice-subjects-group">
+                    @if (_showHeadings)
+                    {
+                        <MudText Typo="Typo.subtitle2" HtmlTag="h3" id="@headingId" Class="app-notice-subjects-group-title">
+                            @(group.Label ?? L["NoticeSubjects.Group.None"].Value)
+                        </MudText>
+                    }
+
+                    <AppItemRows TItem="NoticeSubjectResponse"
+                                 Items="group.Rows"
+                                 EmptyMessage="@L["NoticeSubjects.Empty"]"
+                                 AriaLabelledBy="@(_showHeadings ? headingId : null)">
+                        <RowTemplate Context="row">@RowContent(row)</RowTemplate>
+                        <Actions Context="row">
+                            <AppRowActions ItemName="@ItemName(row)"
+                                           IdPrefix="@ActionsId(row)"
+                                           Moving="@(_movingId == row.Id)"
+                                           OnMoveUp="@(() => MoveAsync(row, MoveUp))"
+                                           MoveUpDisabledReason="@(row.Id == group.Rows[0].Id ? L["NoticeSubjects.MoveUp.DisabledFirst"].Value : null)"
+                                           OnMoveDown="@(() => MoveAsync(row, MoveDown))"
+                                           MoveDownDisabledReason="@(row.Id == group.Rows[^1].Id ? L["NoticeSubjects.MoveDown.DisabledLast"].Value : null)"
+                                           OnEdit="@(() => EditAsync(row))"
+                                           OnDelete="@(() => DeleteAsync(row))" />
+                        </Actions>
+                    </AppItemRows>
+                </div>
+            }
+
+            <div class="app-notice-subjects-footer">
+                @* A button, not a link: it opens a dialog and does not navigate. Outlined: the edition's Save stays the
+                   page's only primary button. *@
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@AppIcons.Add"
+                           OnClick="AddAsync"
+                           id="@AddButtonId">@L["NoticeSubjects.Form.AddTitle"]</MudButton>
+
+                @if (_rows.Count > 0)
+                {
+                    <p class="app-notice-subjects-total">
+                        @if (_statedCount == 0)
+                        {
+                            <span>@L["NoticeSubjects.Total.None"]</span>
+                        }
+                        else
+                        {
+                            <span class="app-notice-subjects-total-sum">@TotalText</span>
+                            @if (_unstatedCount > 0)
+                            {
+                                <span class="app-notice-subjects-total-unstated app-muted">@UnstatedText</span>
+                            }
+                        }
+                    </p>
+                }
+            </div>
+
+            @* BR6: the result of a move is announced; add, edit and delete are announced by the snackbar. *@
+            <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+        }
+    }
+</AppSectionCard>
+
+@code {
+    private const string AddButtonId = "notice-subject-add";
+    private const string MoveUp = "up";
+    private const string MoveDown = "down";
+
+    private sealed record RowGroup(string? Label, IReadOnlyList<NoticeSubjectResponse> Rows);
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The exam the edition belongs to.</summary>
+    [Parameter, EditorRequired] public Guid ExamId { get; set; }
+
+    /// <summary>The edition whose notice subjects are listed; null while the edition is not saved yet (AC17).</summary>
+    [Parameter] public Guid? EditionId { get; set; }
+
+    private IReadOnlyList<NoticeSubjectResponse> _rows = [];
+    private IReadOnlyList<RowGroup> _groups = [];
+    private bool _showHeadings;
+    private int _statedCount;
+    private long _statedSum;
+    private int _unstatedCount;
+    private Guid? _loadedFor;
+    private Guid? _movingId;
+    private string? _error;
+    private string? _announcement;
+    private string? _pendingFocus;
+    // BR12: the group of the last notice subject added during this page visit; never stored.
+    private string? _lastAddedGroup;
+    private bool _loading;
+    private bool _loadFailed;
+
+    private string TotalText => _statedSum == 1
+        ? L["NoticeSubjects.Total.One"]
+        : L["NoticeSubjects.Total.Many", _statedSum.ToString("N0", CultureInfo.CurrentCulture)];
+
+    private string UnstatedText => _unstatedCount == 1
+        ? L["NoticeSubjects.Total.Unstated.One"]
+        : L["NoticeSubjects.Total.Unstated.Many", _unstatedCount.ToString("N0", CultureInfo.CurrentCulture)];
+
+    private static string HeadingId(int index) => $"notice-subjects-group-{index}";
+
+    private static string ActionsId(NoticeSubjectResponse row) => $"notice-subject-actions-{row.Id}";
+
+    // "Língua Portuguesa, Conhecimentos Básicos": what a screen reader hears after the action's name.
+    private static string ItemName(NoticeSubjectResponse row) =>
+        string.IsNullOrWhiteSpace(row.Group) ? row.Label : $"{row.Label}, {row.Group}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EditionId is not { } editionId)
+        {
+            _loadedFor = null;
+            Apply([]);
+            return;
+        }
+
+        // The first save of a new edition turns the page into its edit form: the section loads then (it is empty).
+        if (_loadedFor == editionId)
+        {
+            return;
+        }
+
+        _loadedFor = editionId;
+        await LoadAsync(showLoading: true);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        // With the list failed to load the Add button is not drawn: there is nowhere to put the focus.
+        if (!_loadFailed)
+        {
+            await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+        }
+    }
+
+    // A reload after an action keeps the list on screen (no loading state): the focus must still find its button.
+    private async Task LoadAsync(bool showLoading)
+    {
+        if (EditionId is not { } editionId)
+        {
+            return;
+        }
+
+        _loading = showLoading;
+        _loadFailed = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListNoticeSubjectsAsync(token, ExamId, editionId);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } rows })
+        {
+            Apply(rows);
+        }
+        else
+        {
+            Apply([]);
+            _loadFailed = true;
+        }
+    }
+
+    // BR6: the Api sends the rows in display order and the rows of one group are consecutive; one heading per run of
+    // rows with the same group, case and accents ignored, using the first row's text.
+    private void Apply(IReadOnlyList<NoticeSubjectResponse> rows)
+    {
+        _rows = rows;
+        var groups = new List<(string Key, string? Label, List<NoticeSubjectResponse> Rows)>();
+        foreach (var row in rows)
+        {
+            var key = AppSuggestField.Normalize(row.Group);
+            if (groups.Count == 0 || groups[^1].Key != key)
+            {
+                groups.Add((key, string.IsNullOrWhiteSpace(row.Group) ? null : row.Group.Trim(), new List<NoticeSubjectResponse>()));
+            }
+
+            groups[^1].Rows.Add(row);
+        }
+
+        _groups = [.. groups.Select(group => new RowGroup(group.Label, group.Rows))];
+        // When every row has no group, no heading is drawn: "No group" over the whole list says nothing.
+        _showHeadings = _groups.Any(group => group.Label is not null);
+
+        var stated = rows.Where(row => row.QuestionCount is not null).ToList();
+        _statedCount = stated.Count;
+        _statedSum = stated.Sum(row => (long)row.QuestionCount!.Value);
+        _unstatedCount = rows.Count - stated.Count;
+    }
+
+    private RenderFragment RowContent(NoticeSubjectResponse row) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "app-notice-subject-row");
+
+        builder.OpenComponent<AppTruncatedText>(2);
+        builder.AddAttribute(3, nameof(AppTruncatedText.Text), row.Label);
+        builder.AddAttribute(4, nameof(AppTruncatedText.MaxWidth), "100%");
+        builder.CloseComponent();
+
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "app-notice-subject-count");
+        if (row.QuestionCount is { } count)
+        {
+            var formatted = count.ToString("N0", CultureInfo.CurrentCulture);
+            builder.AddContent(7, count == 1 ? L["NoticeSubjects.Row.Questions.One"].Value : L["NoticeSubjects.Row.Questions.Many", formatted].Value);
+        }
+        else
+        {
+            // The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead.
+            builder.OpenElement(8, "span");
+            builder.AddAttribute(9, "aria-hidden", "true");
+            builder.AddContent(10, "—");
+            builder.CloseElement();
+            builder.OpenElement(11, "span");
+            builder.AddAttribute(12, "class", "app-visually-hidden");
+            builder.AddContent(13, L["NoticeSubjects.Row.NoCount.Spoken"].Value);
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private Task AddAsync() => OpenDialogAsync(null);
+
+    private Task EditAsync(NoticeSubjectResponse row) => OpenDialogAsync(row);
+
+    private async Task OpenDialogAsync(NoticeSubjectResponse? row)
+    {
+        if (EditionId is not { } editionId)
+        {
+            return;
+        }
+
+        _error = null;
+        var parameters = new DialogParameters<NoticeSubjectDialog>
+        {
+            { dialog => dialog.NoticeSubject, row },
+            { dialog => dialog.Groups, DistinctGroups() },
+            { dialog => dialog.InitialGroup, _lastAddedGroup },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<NoticeSubjectResponse>(ErrorText.UnexpectedCode)
+                    : row is null
+                        ? await Api.CreateNoticeSubjectAsync(fresh, ExamId, editionId, request)
+                        : await Api.UpdateNoticeSubjectAsync(fresh, ExamId, editionId, row.Id, request)
+            }
+        };
+
+        var title = row is null ? L["NoticeSubjects.Form.AddTitle"] : L["NoticeSubjects.Form.EditTitle"];
+        var dialog = await Dialogs.ShowAsync<NoticeSubjectDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is not { Canceled: false, Data: NoticeSubjectResponse saved })
+        {
+            // Closed without saving: the focus goes back to the button that opened the dialog.
+            _pendingFocus = row is null ? AddButtonId : $"{ActionsId(row)}-{AppRowActions.EditKey}";
+            return;
+        }
+
+        if (row is null)
+        {
+            _lastAddedGroup = saved.Group;
+        }
+
+        Snackbar.Add(L["NoticeSubjects.Saved"], Severity.Success);
+        await LoadAsync(showLoading: false);
+        // The row may have changed group (BR7): the focus follows it wherever it is now.
+        _pendingFocus = $"{ActionsId(saved)}-{AppRowActions.EditKey}";
+    }
+
+    // The suggestions of the group field: the distinct groups of the edition, in display order, first spelling wins.
+    private IReadOnlyList<string> DistinctGroups() =>
+        [.. _groups.Where(group => group.Label is not null).Select(group => group.Label!)
+            .DistinctBy(AppSuggestField.Normalize)];
+
+    private async Task MoveAsync(NoticeSubjectResponse row, string direction)
+    {
+        if (EditionId is not { } editionId || _movingId is not null)
+        {
+            return;
+        }
+
+        _error = null;
+        _announcement = null;
+        _movingId = row.Id;
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.MoveNoticeSubjectAsync(token, ExamId, editionId, row.Id, direction);
+        _movingId = null;
+
+        if (result is { IsSuccess: true })
+        {
+            await LoadAsync(showLoading: false);
+            AnnounceAndFocusAfterMove(row, direction);
+            return;
+        }
+
+        // 400 notice_subject.move_invalid (another admin moved it first), 404 (it is gone) or a server error: the
+        // alert says which, and the list is read again so the buttons tell the truth.
+        _error = Errors.For(result?.ErrorCode);
+        await LoadAsync(showLoading: false);
+    }
+
+    private void AnnounceAndFocusAfterMove(NoticeSubjectResponse row, string direction)
+    {
+        var group = _groups.FirstOrDefault(candidate => candidate.Rows.Any(item => item.Id == row.Id));
+        if (group is null)
+        {
+            return;
+        }
+
+        var position = group.Rows.ToList().FindIndex(item => item.Id == row.Id);
+        _announcement = group.Label is null
+            ? L["NoticeSubjects.Moved.NoGroup", row.Label, position + 1, group.Rows.Count]
+            : L["NoticeSubjects.Moved", row.Label, position + 1, group.Rows.Count, group.Label];
+
+        // The focus stays on the pressed button; when it became disabled, on the other move button.
+        var pressedIsDisabled = direction == MoveUp ? position == 0 : position == group.Rows.Count - 1;
+        var key = (direction == MoveUp) != pressedIsDisabled ? AppRowActions.MoveUpKey : AppRowActions.MoveDownKey;
+        _pendingFocus = $"{ActionsId(row)}-{key}";
+    }
+
+    private async Task DeleteAsync(NoticeSubjectResponse row)
+    {
+        if (EditionId is not { } editionId)
+        {
+            return;
+        }
+
+        _error = null;
+        var confirmed = await Confirm.ConfirmDeleteAsync(
+            L,
+            L["NoticeSubjects.Delete.Object", row.Label],
+            L["NoticeSubjects.Delete.Message", row.Label]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteNoticeSubjectAsync(token, ExamId, editionId, row.Id);
+        var index = _rows.ToList().FindIndex(candidate => candidate.Id == row.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["NoticeSubjects.Deleted"], Severity.Success);
+            await LoadAsync(showLoading: false);
+            // Focus goes to the next row's Edit button, else the previous row's, else the Add button.
+            _pendingFocus = index >= 0 && index < _rows.Count
+                ? $"{ActionsId(_rows[index])}-{AppRowActions.EditKey}"
+                : _rows.Count > 0
+                    ? $"{ActionsId(_rows[^1])}-{AppRowActions.EditKey}"
+                    : AddButtonId;
+            return;
+        }
+
+        // 404 notice_subject.not_found (it is gone) or a server error: the alert says which, and the list is read again.
+        _error = Errors.For(result?.ErrorCode);
+        await LoadAsync(showLoading: false);
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}
