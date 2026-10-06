@@ -298,6 +298,7 @@
   <data name="data_export.current_password_invalid" xml:space="preserve"><value>The current password is not correct.</value></data>
   <data name="totp.code_invalid" xml:space="preserve"><value>The code is not correct or was already used.</value></data>
   <data name="totp.challenge_invalid" xml:space="preserve"><value>The sign-in took too long. Enter your password again.</value></data>
+  <data name="password_change.challenge_invalid" xml:space="preserve"><value>The sign-in took too long. Enter your password again.</value></data>
   <data name="totp.already_enabled" xml:space="preserve"><value>Two-factor sign-in is already on.</value></data>
   <data name="totp.not_enabled" xml:space="preserve"><value>Two-factor sign-in is not on.</value></data>
   <data name="totp.current_password_invalid" xml:space="preserve"><value>The current password is not correct.</value></data>
@@ -500,7 +501,7 @@
   <data name="ExamEditions.Status.Draft.Description" xml:space="preserve"><value>Kept in the administration. Students do not see it.</value></data>
   <data name="ExamEditions.Status.Published.Description" xml:space="preserve"><value>Offered to students in the catalog. Set it back to Draft before deleting it.</value></data>
   <data name="ExamEditions.Delete.Object" xml:space="preserve"><value>edition {0}</value></data>
-  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>The edition {0} leaves the exam {1}. The same year, position and board cannot be added to this exam again.</value></data>
+  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>The edition {0} leaves the exam {1}, with its notice subjects. The same year, position and board cannot be added to this exam again.</value></data>
   <data name="ExamEditions.Deleted" xml:space="preserve"><value>Edition deleted.</value></data>
   <data name="ExamEditions.Delete.DisabledPublished" xml:space="preserve"><value>Set it back to Draft before deleting it.</value></data>
   <data name="ExamEditions.Form.AddTitle" xml:space="preserve"><value>Add edition</value></data>
@@ -580,4 +581,104 @@
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Official notice, {0}, opens in a new tab</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parameters for a page that keeps its state in the address</value></data>
   <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>A truncated link with its language, a page title that is content, and a table that starts from a search, a page and a page size.</value></data>
+  <data name="Nav.Subjects" xml:space="preserve"><value>Subjects</value></data>
+  <data name="Subjects.Title" xml:space="preserve"><value>Subjects</value></data>
+  <data name="Subjects.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
+  <data name="Subjects.Empty" xml:space="preserve"><value>No subject registered yet.</value></data>
+  <data name="Subjects.Empty.Filters" xml:space="preserve"><value>No subject matches the chosen area.</value></data>
+  <data name="Subjects.Empty.Search" xml:space="preserve"><value>No subject matches "{0}".</value></data>
+  <data name="Subjects.Filter.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Column.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Subjects.Column.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Column.Topics" xml:space="preserve"><value>Topics</value></data>
+  <data name="Subjects.NoArea" xml:space="preserve"><value>No area</value></data>
+  <data name="Subjects.Delete.DisabledHasTopics" xml:space="preserve"><value>This subject has topics. Delete them first, on the subject's page.</value></data>
+  <data name="Subjects.Delete.Message" xml:space="preserve"><value>{0} leaves the taxonomy and stops appearing anywhere in the app.</value></data>
+  <data name="Subjects.Saved" xml:space="preserve"><value>Subject saved.</value></data>
+  <data name="Subjects.Deleted" xml:space="preserve"><value>Subject deleted.</value></data>
+  <data name="Subjects.Dialog.AddTitle" xml:space="preserve"><value>Add subject</value></data>
+  <data name="Subjects.Dialog.EditTitle" xml:space="preserve"><value>Edit subject</value></data>
+  <data name="Subjects.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Subjects.Field.Name.Help" xml:space="preserve"><value>As students will see it, for example Constitutional Law. 2 to 150 characters.</value></data>
+  <data name="Subjects.Field.Area" xml:space="preserve"><value>Area</value></data>
+  <data name="Subjects.Field.Area.Help" xml:space="preserve"><value>Optional. Groups the subject with similar ones.</value></data>
+  <data name="Subjects.BackToList" xml:space="preserve"><value>Back to the subjects</value></data>
+  <data name="Topics.Section.Title" xml:space="preserve"><value>Topics</value></data>
+  <data name="Topics.Section.Subtitle" xml:space="preserve"><value>What is studied inside this subject, in alphabetical order.</value></data>
+  <data name="Topics.Empty" xml:space="preserve"><value>No topics yet.</value></data>
+  <data name="Topics.Dialog.AddTitle" xml:space="preserve"><value>Add topic</value></data>
+  <data name="Topics.Dialog.EditTitle" xml:space="preserve"><value>Edit topic</value></data>
+  <data name="Topics.Saved" xml:space="preserve"><value>Topic saved.</value></data>
+  <data name="Topics.Deleted" xml:space="preserve"><value>Topic deleted.</value></data>
+  <data name="Topics.Delete.Message" xml:space="preserve"><value>{0} leaves the subject {1} and stops appearing anywhere in the app.</value></data>
+  <data name="Topics.Field.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Topics.Field.Name.Help" xml:space="preserve"><value>For example Crase. 2 to 200 characters, unique inside the subject.</value></data>
+  <data name="Topics.Field.Subject" xml:space="preserve"><value>Subject</value></data>
+  <data name="Topics.Field.Subject.Placeholder" xml:space="preserve"><value>Type 2 letters to search</value></data>
+  <data name="Topics.Field.Subject.Help" xml:space="preserve"><value>Pick another subject to move the topic.</value></data>
+  <data name="Area.Languages" xml:space="preserve"><value>Languages</value></data>
+  <data name="Area.Mathematics" xml:space="preserve"><value>Mathematics</value></data>
+  <data name="Area.LogicalReasoning" xml:space="preserve"><value>Logical Reasoning</value></data>
+  <data name="Area.NaturalSciences" xml:space="preserve"><value>Natural Sciences</value></data>
+  <data name="Area.HumanSciences" xml:space="preserve"><value>Human Sciences</value></data>
+  <data name="Area.Law" xml:space="preserve"><value>Law</value></data>
+  <data name="Area.InformationTechnology" xml:space="preserve"><value>Information Technology</value></data>
+  <data name="Area.Administration" xml:space="preserve"><value>Administration and Management</value></data>
+  <data name="Area.SpecificKnowledge" xml:space="preserve"><value>Specific Knowledge</value></data>
+  <data name="subject.not_found" xml:space="preserve"><value>This subject no longer exists. Refresh the list.</value></data>
+  <data name="subject.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="subject.name_too_long" xml:space="preserve"><value>The name is too long. Use at most 150 characters.</value></data>
+  <data name="subject.name_taken" xml:space="preserve"><value>Another subject already has this name, even if it was deleted. Pick a different name.</value></data>
+  <data name="subject.area_invalid" xml:space="preserve"><value>This area is not on the list. Pick one of the areas offered.</value></data>
+  <data name="subject.has_topics" xml:space="preserve"><value>This subject has topics. Delete them first, on the subject's page.</value></data>
+  <data name="topic.not_found" xml:space="preserve"><value>This topic no longer exists. Refresh the list.</value></data>
+  <data name="topic.name_required" xml:space="preserve"><value>Type a name with at least 2 characters.</value></data>
+  <data name="topic.name_too_long" xml:space="preserve"><value>The name is too long. Use at most 200 characters.</value></data>
+  <data name="topic.name_taken" xml:space="preserve"><value>This subject already has a topic with this name, even if it was deleted. Pick a different name.</value></data>
+  <data name="Common.MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="Common.MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="Gallery.Section.SuggestField" xml:space="preserve"><value>Free text with suggestions</value></data>
+  <data name="Gallery.SuggestField.Hint" xml:space="preserve"><value>The reader types any text; the suggestions only save typing. They match ignoring case and accents. Empty, typed, error and the suggestions list.</value></data>
+  <data name="NoticeSubjects.Section.Title" xml:space="preserve"><value>Notice subjects</value></data>
+  <data name="NoticeSubjects.Section.Subtitle" xml:space="preserve"><value>The syllabus as the notice states it: each subject under its group, in the notice's order, with its number of questions.</value></data>
+  <data name="NoticeSubjects.Section.SaveEditionFirst" xml:space="preserve"><value>Save the edition first. Its notice subjects are added here.</value></data>
+  <data name="NoticeSubjects.Empty" xml:space="preserve"><value>This edition has no notice subject yet.</value></data>
+  <data name="NoticeSubjects.Group.None" xml:space="preserve"><value>No group</value></data>
+  <data name="NoticeSubjects.Row.Questions.One" xml:space="preserve"><value>1 question</value></data>
+  <data name="NoticeSubjects.Row.Questions.Many" xml:space="preserve"><value>{0} questions</value></data>
+  <data name="NoticeSubjects.Row.NoCount.Spoken" xml:space="preserve"><value>number of questions not stated</value></data>
+  <data name="NoticeSubjects.MoveUp.DisabledFirst" xml:space="preserve"><value>Already first in its group</value></data>
+  <data name="NoticeSubjects.MoveDown.DisabledLast" xml:space="preserve"><value>Already last in its group</value></data>
+  <data name="NoticeSubjects.Moved" xml:space="preserve"><value>{0} moved to position {1} of {2} in {3}.</value></data>
+  <data name="NoticeSubjects.Moved.NoGroup" xml:space="preserve"><value>{0} moved to position {1} of {2}.</value></data>
+  <data name="NoticeSubjects.Total.One" xml:space="preserve"><value>Stated in the notice: 1 question in total</value></data>
+  <data name="NoticeSubjects.Total.Many" xml:space="preserve"><value>Stated in the notice: {0} questions in total</value></data>
+  <data name="NoticeSubjects.Total.None" xml:space="preserve"><value>No subject states its number of questions.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.One" xml:space="preserve"><value>1 subject has no number and is left out of the sum.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.Many" xml:space="preserve"><value>{0} subjects have no number and are left out of the sum.</value></data>
+  <data name="NoticeSubjects.Form.AddTitle" xml:space="preserve"><value>Add notice subject</value></data>
+  <data name="NoticeSubjects.Form.EditTitle" xml:space="preserve"><value>Edit notice subject</value></data>
+  <data name="NoticeSubjects.Field.Group" xml:space="preserve"><value>Group</value></data>
+  <data name="NoticeSubjects.Field.Group.Placeholder" xml:space="preserve"><value>E.g.: Basic knowledge</value></data>
+  <data name="NoticeSubjects.Field.Group.Hint" xml:space="preserve"><value>How the notice groups its subjects. Pick a group already used or type a new one; leave it empty when the notice has no groups. At most 100 characters.</value></data>
+  <data name="NoticeSubjects.Field.Group.MoveNote" xml:space="preserve"><value>Changing the group moves the subject to the end of the new group.</value></data>
+  <data name="NoticeSubjects.Field.Group.Suggestions" xml:space="preserve"><value>Groups already used in this edition</value></data>
+  <data name="NoticeSubjects.Field.Label" xml:space="preserve"><value>Subject</value></data>
+  <data name="NoticeSubjects.Field.Label.Placeholder" xml:space="preserve"><value>E.g.: Portuguese language</value></data>
+  <data name="NoticeSubjects.Field.Label.Hint" xml:space="preserve"><value>As the notice names it. From 2 to 200 characters.</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount" xml:space="preserve"><value>Number of questions</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Placeholder" xml:space="preserve"><value>E.g.: 10</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Hint" xml:space="preserve"><value>From 1 to 500. Leave it empty when the notice does not say.</value></data>
+  <data name="NoticeSubjects.Saved" xml:space="preserve"><value>Notice subject saved.</value></data>
+  <data name="NoticeSubjects.Deleted" xml:space="preserve"><value>Notice subject deleted.</value></data>
+  <data name="NoticeSubjects.Delete.Object" xml:space="preserve"><value>subject {0}</value></data>
+  <data name="NoticeSubjects.Delete.Message" xml:space="preserve"><value>The subject {0} leaves this edition's notice. It can be added again later.</value></data>
+  <data name="notice_subject.not_found" xml:space="preserve"><value>This subject is no longer in the edition. The list was reloaded.</value></data>
+  <data name="notice_subject.label_required" xml:space="preserve"><value>Type the subject as the notice names it.</value></data>
+  <data name="notice_subject.label_too_short" xml:space="preserve"><value>The subject needs at least 2 characters.</value></data>
+  <data name="notice_subject.label_too_long" xml:space="preserve"><value>The subject is too long: at most 200 characters.</value></data>
+  <data name="notice_subject.group_too_long" xml:space="preserve"><value>The group is too long: at most 100 characters.</value></data>
+  <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Type a whole number from 1 to 500, or leave it empty.</value></data>
+  <data name="notice_subject.duplicate" xml:space="preserve"><value>This group already has a subject with this name (capitals and accents do not count).</value></data>
+  <data name="notice_subject.move_invalid" xml:space="preserve"><value>This subject cannot move that way. The list was reloaded.</value></data>
 </root>

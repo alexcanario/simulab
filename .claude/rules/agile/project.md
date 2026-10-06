@@ -71,7 +71,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## UI tests
 - An item whose product is a guard (a test that exists to catch a mistake) is seen failing on that very mistake before it ships, and that step goes into the validation script (F-22).
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
-- After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
+- After a click, a typed value or a fill whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after it, blank line or not (F-8, B-22).
+- A stress loop of parallel test processes runs on a copy of the build output under the worktree's `bin/` (git-ignored), never on `bin/Debug` (the Stop gate rebuilds it) and never outside the repository (stylesheet tests need it); count the `Passed!`/`Failed!` lines and treat a missing one as a failure (B-22).
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
 - A contrast failure of a theme token is fixed in the palette, with `ThemeContrastTests` holding the numbers; patching the screen that showed it is debt, not a fix (B-8).
 - Read a rendered colour only after the theme transition settles (0.25 s in MudBlazor): a value read right after the theme switch is still the old colour (B-8). With the browser pane hidden, transitions never finish: inject `* { transition: none !important }` before measuring (F-17).
@@ -90,6 +91,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 - A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
 - A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
+- A sweep for a pattern across the solution takes its list of places from the guard test run before the fix, not from a hand-made grep: the refinement of B-23 listed nine places and the guard found a tenth (B-23).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
@@ -112,4 +114,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Every item lives in its own worktree (`D:\wt\simulab\f-<n>-<desc>`, `D:\wt\simulab\b-<n>-<desc>`, root as in the `Worktrees:` line of `CLAUDE.md`, `<desc>` being up to 20 characters of the slug cut at a hyphen); a worktree created before sync 0.0.63 keeps its `<type>-<n>` name until its merge. The main checkout stays on `main` and is used only to merge (B-13, B-14).
 - After stopping an app host started by hand (outside `preview_start`), confirm with `netstat -ano` that its ports are free: a `Simulab.AppHost.exe` can outlive the killed process tree and lock the build output of the ship gate (B-15).
 - A test that holds a load (`TaskCompletionSource`, an endless delay) never `await`s the call that started it: that call ends only when the load does. Start it with `_ = ...`, assert, then release the load. One such test hung the full suite while passing alone (F-50).
+- To restart or stop one app host resource, run `aspire resource <name> restart|stop --apphost <AppHost csproj>`: clicking in the dashboard through the browser pane picked the wrong menu twice, while the command restarted the `api` and its process id changed (F-54).
 - A page that turns into the edit form after saving calls `StateHasChanged(); await Task.Yield();` before `NavigateTo(..., replace: true)`: the `NavigationLock` of `AppFormActions` reads `HasChanges` from the last render and would ask to discard what was just saved (F-35).
+- A test project that starts a `WebApplicationFactory` keeps `ThreadPoolMinimumTests` (it asserts `ThreadPool.GetMinThreads` is at least 256) and relies on the `System.Threading.ThreadPool.MinThreads` option in `tests/Directory.Build.props`: each synchronous host start blocks a pool thread, and under load Npgsql's 15 s open timeout expires. Add the guard to every new project of that kind (B-24).
+- A test named for an event or a state change asserts that event or state itself; an assertion that cannot fail (an id not empty) does not count, and the review reads each "records X" test for it (F-53).

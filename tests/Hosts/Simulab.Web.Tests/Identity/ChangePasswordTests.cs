@@ -88,7 +88,7 @@ public sealed class ChangePasswordTests : IdentityPageTestContext
 
         page.WaitForAssertion(() => page.Markup.Should().Contain("Your account was created with Google and has no password yet."));
         page.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
-        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password"));
     }
 
     [Fact]

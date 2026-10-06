@@ -51,7 +51,7 @@ public sealed class GoogleSignInPageTests : IdentityPageTestContext
 
         button.Click();
 
-        Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath);
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath));
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class GoogleSignInPageTests : IdentityPageTestContext
 
         page.Find("button.app-google-button").Click();
 
-        Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath);
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath));
     }
 
     // BR6, AC10 on screen: a Google sign-in that needs the code opens the code step; the code goes with its challenge.
