@@ -1,6 +1,6 @@
 ---
 feature: F-68
-epic: Foundation and identity
+epic: Cloud hosting and operations
 status: approved
 board: 107
 version: 2
