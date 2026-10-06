@@ -149,6 +149,11 @@ public sealed class CatalogApiClient(HttpClient http)
             route += $"&noticeYear={year.ToString(CultureInfo.InvariantCulture)}";
         }
 
+        if (!string.IsNullOrWhiteSpace(query.State))
+        {
+            route += $"&state={Uri.EscapeDataString(query.State)}";
+        }
+
         return SendAsync<PublishedExamPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
 
@@ -192,6 +197,11 @@ public sealed class CatalogApiClient(HttpClient http)
         if (query.Scope is { } scope)
         {
             route += $"&scope={scope}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.State))
+        {
+            route += $"&state={Uri.EscapeDataString(query.State)}";
         }
 
         if (!string.IsNullOrWhiteSpace(query.SortBy))

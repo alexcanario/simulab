@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: pt-PT
-features: [F-36, F-37, F-42]
-updated: 2026-10-02
+features: [F-36, F-37, F-42, F-57]
+updated: 2026-10-06
 ---
 # Catálogo
 
@@ -17,8 +17,9 @@ O catálogo mostra o mesmo a todos, incluindo os Administradores: os exames apen
 ### Encontrar um exame
 1. Escolha **Catálogo** na secção **Estudo** do menu.
 2. Escreva na caixa de pesquisa. As palavras podem ser parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade, por qualquer ordem, com ou sem acentos e maiúsculas. "guarda sp" encontra a "Guarda Municipal" de uma entidade de São Paulo. Um exame estadual é encontrado pelo nome ou pela sigla do estado ("sp", "sao paulo" ou "São Paulo") e mostra o estado como "São Paulo (SP)", na lista e na página do exame.
-3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Entidade organizadora** e **Ano do aviso**, sozinhos ou juntamente com o texto. A entidade organizadora e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
-4. Escolha **Limpar filtros** para remover os quatro filtros. O texto da pesquisa tem o seu próprio botão de limpar.
+3. Restrinja a lista com **Tipo de avaliação**, **Abrangência**, **Estado**, **Entidade organizadora** e **Ano do aviso**, sozinhos ou juntamente com o texto. A entidade organizadora e o ano são comparados na mesma edição: um exame só aparece para "FGV" e "2025" quando tem uma edição publicada da FGV em 2025.
+4. Para ver os exames de um estado, abra **Estado** (a lista inteira aparece; escreva um nome ou uma sigla para a reduzir) e escolha um, como "São Paulo (SP)". Só os exames estaduais desse estado aparecem, e **Abrangência** passa a Estadual. Escolher outra abrangência, ou todas, esvazia o estado; limpar só o estado mantém a abrangência. Os exames nacionais e municipais nunca aparecem sob um estado.
+5. Escolha **Limpar filtros** para remover os filtros, incluindo o estado. O texto da pesquisa tem o seu próprio botão de limpar.
 
 O endereço da página guarda a sua pesquisa, os seus filtros e a página, pelo que o pode guardar nos favoritos ou partilhar. Ao voltar de um exame, a lista reaparece como a deixou.
 
@@ -41,6 +42,7 @@ Estas linhas são dados comuns: um Administrador pode editar ou eliminar qualque
 | Pesquisa | Parte do nome do exame, do nome da entidade contratante, ou do estado ou da cidade | Todas as palavras têm de coincidir nalgum lado; maiúsculas e acentos não contam |
 | Tipo de avaliação | Concurso público, certificação, exame de acesso ou ENEM | Um valor ou todos |
 | Abrangência | Nacional, Estadual ou Municipal | Um valor ou todos |
+| Estado | Um dos 27 estados, mostrado como "São Paulo (SP)" | Só aparecem estados com um exame estadual publicado, pela ordem da lista oficial; escolher um define a Abrangência como Estadual |
 | Entidade organizadora | O organizador que aplicou uma edição publicada | Só aparecem entidades com algo publicado |
 | Ano do aviso | O ano do aviso de uma edição publicada | Só aparecem anos com algo publicado |
 | Edições | Quantas edições do exame estão publicadas | Conta todas, sejam quais forem os filtros |
@@ -52,7 +54,7 @@ Estas linhas são dados comuns: um Administrador pode editar ou eliminar qualque
 | Ainda não há exames publicados no catálogo. | Nada foi publicado. | Volte mais tarde. |
 | Nenhum exame publicado corresponde a "…". | A pesquisa não encontrou nada. | Experimente menos palavras ou palavras mais curtas. |
 | Nenhum exame publicado corresponde aos filtros escolhidos. | Os filtros em conjunto não deixam nada. | Escolha **Limpar filtros**. |
-| Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona. | As duas listas de opções não carregaram. | Escolha **Tentar novamente** ou continue a pesquisar sem elas. |
+| Não foi possível carregar as opções de entidade organizadora, ano e estado. O resto da pesquisa funciona. | As três listas de opções não carregaram. | Escolha **Tentar novamente** ou continue a pesquisar sem elas. |
 | Não foi possível carregar este exame. | A página do exame não carregou. | Escolha **Tentar novamente**. |
 | Este exame já não existe. | O exame não existe, foi removido ou não tem nada publicado. | Escolha **Voltar ao catálogo**. |
 

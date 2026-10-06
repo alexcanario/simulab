@@ -1252,6 +1252,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1802,6 +1809,13 @@
           },
           {
             "name": "noticeYear",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
             "in": "query",
             "schema": {
               "type": "string"

@@ -414,6 +414,8 @@
   <data name="Exams.Filter.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
   <data name="Exams.Filter.AssessmentType" xml:space="preserve"><value>Assessment type</value></data>
   <data name="Exams.Filter.Scope" xml:space="preserve"><value>Scope</value></data>
+  <data name="Exams.Filter.State" xml:space="preserve"><value>State</value></data>
+  <data name="Exams.Filter.State.Placeholder" xml:space="preserve"><value>All states</value></data>
   <data name="Exams.Form.AddTitle" xml:space="preserve"><value>Add exam</value></data>
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Edit exam</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Issuing authority</value></data>
@@ -467,6 +469,7 @@
   <data name="exam.scope_detail_required" xml:space="preserve"><value>Say where this exam applies.</value></data>
   <data name="exam.scope_detail_too_long" xml:space="preserve"><value>This field is too long: at most 120 characters.</value></data>
   <data name="exam.scope_detail_unknown_state" xml:space="preserve"><value>Choose one of the 27 states of the list.</value></data>
+  <data name="exam.filter_unknown_state" xml:space="preserve"><value>Choose one of the 27 states of the list.</value></data>
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Choose the language of the content.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Issuing authorities</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Issuing authorities</value></data>
@@ -562,7 +565,9 @@
   <data name="Catalog.Filter.Organizer" xml:space="preserve"><value>Board</value></data>
   <data name="Catalog.Filter.NoticeYear" xml:space="preserve"><value>Notice year</value></data>
   <data name="Catalog.Filter.Clear" xml:space="preserve"><value>Clear filters</value></data>
-  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>We could not load the board and year options. The rest of the search works.</value></data>
+  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>We could not load the board, year and state options. The rest of the search works.</value></data>
+  <data name="Catalog.Filter.State" xml:space="preserve"><value>State</value></data>
+  <data name="Catalog.Filter.State.Placeholder" xml:space="preserve"><value>All states</value></data>
   <data name="Catalog.Column.ContentLanguage" xml:space="preserve"><value>Language</value></data>
   <data name="Catalog.Column.Editions" xml:space="preserve"><value>Editions</value></data>
   <data name="Catalog.Column.LatestYear" xml:space="preserve"><value>Latest year</value></data>
