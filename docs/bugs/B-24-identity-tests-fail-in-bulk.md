@@ -2,7 +2,7 @@
 bug: B-24
 feature: -
 epic: Foundation and identity
-status: validating
+status: done
 board: 136
 severity: medium
 ---
@@ -179,3 +179,5 @@ Fix: one `RuntimeHostConfigurationOption` (`System.Threading.ThreadPool.MinThrea
 | AC5 no product code | `git diff --name-only main`: only `tests/` and `docs/` |
 | AC6 `docs/infra.md` | "Measured times" paragraph |
 | AC7 no UI text | none added; the full suite incl. `ResourceParityTests` green |
+
+**Ship (2026-10-06):** branch `bug/B-24`, merge commit `9879ec1`, version 0.11.1. Full gate: `agile gate GREEN`, 2219 tests in 116 s (build 28 s), slowest project Identity 1 m 48 s. DocGen `--check` green, 0 files changed. App manual: not changed (no visible behavior). Glossary: nothing missing (`thread pool` and `thread-pool starvation` already had rows).
