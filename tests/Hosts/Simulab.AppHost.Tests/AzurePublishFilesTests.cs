@@ -184,16 +184,71 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             .And.Contain("'Email__AzureCommunicationServices__Endpoint'")
             .And.Contain("'Email__FromAddress'")
             .And.Contain("name: 'AZURE_CLIENT_ID'");
-        Bicep("web-containerapp").Should().NotContain("Email__").And.NotContain("AZURE_CLIENT_ID");
+        // D16 (F-64): the Web has an identity of its own now (the key ring), so "no AZURE_CLIENT_ID" no longer says it sends no email.
+        Bicep("web-containerapp").Should().NotContain("Email__");
     }
 
-    /// <summary>F-66: one identity serves the Api (PostgreSQL and email), so the role assignment and the sign-in meet.</summary>
+    /// <summary>
+    /// F-66: the Api's own identity is the one the email role is given to and the one it signs in with. D16 (F-64): the Web has
+    /// an identity too, for its key ring only; the email template is told the Api's alone (the params test above).
+    /// </summary>
     [Fact]
-    public void Publish_Email_UsesTheSingleIdentityOfTheApi()
+    public void Publish_Email_UsesTheIdentityOfTheApi()
     {
         _files.Keys.Where(file => file.EndsWith("-identity.module.bicep", StringComparison.Ordinal))
-            .Should().Equal("api-identity.module.bicep");
+            .Should().BeEquivalentTo("api-identity.module.bicep", "web-identity.module.bicep");
         Bicep("api-containerapp").Should().Contain("api_identity_outputs_clientid");
+    }
+
+    /// <summary>F-64 AC1 (BR5, D11): Staging applies the migrations on start; Production keeps the default.</summary>
+    [Fact]
+    public async Task Publish_StagingAppliesTheMigrationsOnStartAndProductionDoesNot()
+    {
+        Bicep("api-containerapp").Should().MatchRegex(@"name: 'Database__ApplyMigrationsOnStart'\s+value: 'true'");
+
+        var production = await PublishAsync("Production");
+
+        production["api-containerapp.module.bicep"].Should().NotContain("Database__ApplyMigrationsOnStart");
+    }
+
+    /// <summary>
+    /// F-64 AC6 (BR3, BR6, BR7, D17): no AI key, no seeded admin password and no blanket "believe every proxy" switch on either host;
+    /// the Api reads its secrets from Key Vault and the Web does not.
+    /// </summary>
+    [Theory]
+    [InlineData("Staging")]
+    [InlineData("Production")]
+    public async Task Publish_PassesNoSecretAndNoBlanketForwardedHeaders(string environment)
+    {
+        var files = environment == "Staging" ? _files : await PublishAsync(environment);
+        var api = files["api-containerapp.module.bicep"];
+        var web = files["web-containerapp.module.bicep"];
+
+        api.Should().NotContain("Identity__SeedAdmin__Password").And.NotContain("Ai__ApiKey");
+        web.Should().NotContain("Identity__SeedAdmin__Password").And.NotContain("Ai__ApiKey");
+        api.Should().NotContain("ASPNETCORE_FORWARDEDHEADERS_ENABLED");
+        web.Should().NotContain("ASPNETCORE_FORWARDEDHEADERS_ENABLED");
+        // The rule of presence: the Api does get the vault, so the absences above are not an empty file.
+        api.Should().Contain("ConnectionStrings__keyvault");
+        web.Should().NotContain("ConnectionStrings__keyvault");
+    }
+
+    /// <summary>
+    /// F-64 AC3 (BR4, D9 v2): both hosts get the blob container of their keys and the Key Vault key that encrypts them; the Web
+    /// never gets the database (the architect's finding: with one generated login it would become an administrator).
+    /// </summary>
+    [Fact]
+    public void Publish_GivesBothHostsTheirKeyRingAndTheWebNoDatabase()
+    {
+        foreach (var host in new[] { "api", "web" })
+        {
+            Bicep($"{host}-containerapp").Should().Contain("ConnectionStrings__keys")
+                .And.Contain("DataProtection__KeyVaultKeyId");
+        }
+
+        Bicep("api-containerapp").Should().Contain("ConnectionStrings__simulab");
+        Bicep("web-containerapp").Should().NotContain("ConnectionStrings__simulab");
+        Bicep("storage").Should().Contain("Standard_LRS").And.Contain("name: 'keys'");
     }
 
     /// <summary>The Production files differ from Staging in one thing worth a test: the cache is the managed one.</summary>

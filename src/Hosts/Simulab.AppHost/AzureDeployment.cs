@@ -1,4 +1,6 @@
 using Aspire.Hosting.Azure;
+using Azure.Provisioning.KeyVault;
+using Azure.Provisioning.Storage;
 
 namespace Simulab.AppHost;
 
@@ -9,9 +11,18 @@ namespace Simulab.AppHost;
 /// </summary>
 internal static class AzureDeployment
 {
-    /// <summary>The Container Apps environment, Key Vault, PostgreSQL and the Redis of the named environment.</summary>
-    internal static (IResourceBuilder<IResourceWithConnectionString> Database, IResourceBuilder<IResourceWithConnectionString> Redis) AddResources(
-        IDistributedApplicationBuilder builder, string environmentName)
+    /// <summary>The cloud resources the hosts are wired to, returned by <see cref="AddResources"/>.</summary>
+    internal sealed record CloudResources(
+        IResourceBuilder<IResourceWithConnectionString> Database,
+        IResourceBuilder<IResourceWithConnectionString> Redis,
+        IResourceBuilder<AzureKeyVaultResource> KeyVault,
+        IResourceBuilder<AzureBlobStorageContainerResource> Keys);
+
+    /// <summary>
+    /// The Container Apps environment, Key Vault, the storage account of the Data Protection keys, PostgreSQL and the Redis
+    /// of the named environment.
+    /// </summary>
+    internal static CloudResources AddResources(IDistributedApplicationBuilder builder, string environmentName)
     {
         // The images go to the Azure Container Registry this environment creates; Aspire 13.6.0 accepts no other
         // registry here (change note v2 of F-62).
@@ -19,6 +30,19 @@ internal static class AzureDeployment
 
         // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
         var keyVault = builder.AddAzureKeyVault("keyvault");
+
+        // F-64 D9 (change note v2): the Data Protection key ring of each host is a blob in this container, so a restart,
+        // a deploy or a park does not lose it. Locally redundant: the keys are cheap to lose in staging (everybody signs
+        // in again) and the default, geo-redundant, costs more.
+        var keys = builder.AddAzureStorage("storage")
+            .ConfigureInfrastructure(infrastructure =>
+            {
+                foreach (var account in infrastructure.GetProvisionableResources().OfType<StorageAccount>())
+                {
+                    account.Sku = new StorageSku { Name = StorageSkuName.StandardLrs };
+                }
+            })
+            .AddBlobContainer("keys");
 
         IResourceBuilder<IResourceWithConnectionString> database =
             builder.AddAzurePostgresFlexibleServer("postgres").WithPasswordAuthentication(keyVault).AddDatabase("simulab");
@@ -29,7 +53,7 @@ internal static class AzureDeployment
             ? builder.AddAzureManagedRedis("redis")
             : builder.AddRedis("redis");
 
-        return (database, redis);
+        return new CloudResources(database, redis, keyVault, keys);
     }
 
     /// <summary>
@@ -59,7 +83,8 @@ internal static class AzureDeployment
         IDistributedApplicationBuilder builder,
         IResourceBuilder<ProjectResource> api,
         IResourceBuilder<ProjectResource> web,
-        string environmentName)
+        string environmentName,
+        CloudResources cloud)
     {
         var openIddictSecret = builder.AddParameter("openiddict-client-secret", secret: true);
 
@@ -69,10 +94,42 @@ internal static class AzureDeployment
         api.WithAzureUserAssignedIdentity(apiIdentity);
         AddEmail(builder, api, apiIdentity);
 
+        // F-64 BR4, D9: both hosts keep their Data Protection keys in the blob container and encrypt them with this Key Vault
+        // key (the owner creates it, docs/infra.md). The Api also reads its secrets from the vault as configuration
+        // (the seeded admin password, the OpenIddict certificates; BR7), which `WithReference` lets it do.
+        var keyId = ReferenceExpression.Create($"{cloud.KeyVault.Resource.VaultUri}keys/dataprotection");
+        foreach (var host in new[] { api, web })
+        {
+            host.WithReference(cloud.Keys)
+                .WithEnvironment("DataProtection__KeyVaultKeyId", keyId);
+        }
+
+        // An explicit role assignment replaces the default one of `WithReference`, so each host names all it needs: the Web
+        // only unwraps its keys; the Api also reads the secrets.
+        web.WithRoleAssignments(cloud.KeyVault, KeyVaultBuiltInRole.KeyVaultCryptoServiceEncryptionUser);
+        api.WithReference(cloud.KeyVault)
+            .WithRoleAssignments(cloud.KeyVault, KeyVaultBuiltInRole.KeyVaultSecretsUser, KeyVaultBuiltInRole.KeyVaultCryptoServiceEncryptionUser);
+
+        // F-64 BR6, D12: the ingress addresses the hosts believe `X-Forwarded-*` from. The deploy knows no fixed range of its
+        // own, so they are measured on the first staging and written to the app host's `appsettings.<Environment>.json`;
+        // with none listed nothing is believed (docs/infra.md).
+        foreach (var host in new[] { api, web })
+        {
+            AddForwardedHeaders(builder, host);
+        }
+
+        // F-64 BR5, D11: Staging applies the module migrations, roles and the OpenIddict client on start; production keeps
+        // the default (off) until the release pipeline decides how a release migrates (F-65).
+        if (environmentName == "Staging")
+        {
+            api.WithEnvironment("Database__ApplyMigrationsOnStart", "true");
+        }
+
         api.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
             .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
             .PublishAsAzureContainerApp((_, app) =>
             {
+                DropBlanketForwardedHeaders(app);
                 app.Template.Scale.MinReplicas = 1;
 
                 // F-54 BR7: a second replica would reject the first one's tokens (OpenIddict development
@@ -85,8 +142,44 @@ internal static class AzureDeployment
             .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
             .PublishAsAzureContainerApp((_, app) =>
             {
+                DropBlanketForwardedHeaders(app);
                 app.Template.Scale.MinReplicas = 0;
                 app.Template.Scale.MaxReplicas = 1;
             });
+    }
+
+    /// <summary>
+    /// F-64 BR6, D17: the publish sets <c>ASPNETCORE_FORWARDEDHEADERS_ENABLED=true</c> on every project, which makes a host
+    /// believe the forwarded headers of any sender. Removed: the hosts believe only the proxies they are told (BR6).
+    /// </summary>
+    private static void DropBlanketForwardedHeaders(Azure.Provisioning.AppContainers.ContainerApp app)
+    {
+        foreach (var container in app.Template.Containers)
+        {
+            var environment = container.Value!.Env;
+            for (var index = environment.Count - 1; index >= 0; index--)
+            {
+                if (environment[index].Value?.Name.Value == "ASPNETCORE_FORWARDEDHEADERS_ENABLED")
+                {
+                    environment.RemoveAt(index);
+                }
+            }
+        }
+    }
+
+    /// <summary>Passes <c>ForwardedHeaders:KnownProxies</c> and <c>KnownNetworks</c> of the app host's configuration to a host.</summary>
+    private static void AddForwardedHeaders(IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> host)
+    {
+        foreach (var key in new[] { "KnownProxies", "KnownNetworks" })
+        {
+            var entries = builder.Configuration.GetSection($"ForwardedHeaders:{key}").GetChildren()
+                .Select(entry => entry.Value)
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .ToArray();
+            for (var index = 0; index < entries.Length; index++)
+            {
+                host.WithEnvironment($"ForwardedHeaders__{key}__{index}", entries[index]);
+            }
+        }
     }
 }
