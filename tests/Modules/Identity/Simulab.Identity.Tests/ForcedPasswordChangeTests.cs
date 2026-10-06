@@ -24,14 +24,14 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         return email;
     }
 
-    private Task SetMarkAsync(string email, bool marked) =>
+    private Task<int> SetMarkAsync(string email, bool marked) =>
         QueryAsync(context => context.Users.Where(user => user.Email == email)
             .ExecuteUpdateAsync(set => set.SetProperty(user => user.MustChangePassword, marked)));
 
     private Task<User> UserAsync(string email) =>
         QueryAsync(context => context.Users.AsNoTracking().SingleAsync(user => user.Email == email));
 
-    private async Task<string> ChallengeAsync(HttpClient client, string email)
+    private static async Task<string> ChallengeAsync(HttpClient client, string email)
     {
         var step = await TotpApi.PasswordStepAsync(client, email, SignUpForm.ValidPassword);
         step.Error.Should().Be(IdentityErrorCodes.PasswordChangeRequired);
@@ -300,7 +300,7 @@ public sealed class ForcedPasswordChangeTests : IdentityApiTests
         refused.Error.Should().Be(IdentityErrorCodes.SignInRateLimited);
         (await UserAsync(email)).MustChangePassword.Should().BeTrue("the password is not changed");
         var elsewhere = await SignInFrom.PasswordChangeAsync(client, "198.51.100.53", challenge, NewPassword);
-        elsewhere.AccessToken.Should().NotBeNullOrWhiteSpace("the challenge was not spent", elsewhere.ErrorDescription);
+        elsewhere.AccessToken.Should().NotBeNullOrWhiteSpace("the challenge was not spent: {0}", elsewhere.ErrorDescription);
     }
 
     // AC17, BR8: a reset by email clears the mark.
