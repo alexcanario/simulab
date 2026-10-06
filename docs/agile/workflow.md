@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.16.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.17.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -130,11 +130,11 @@ stateDiagram-v2
 | `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number; an answer that folds an existing open item's scope into this one instead first checks that item — `git worktree list` for its folder and its file or issue for its status. Any status beyond `idea` anywhere blocks an automatic fold: Claude names the other item's status and worktree path and you decide, fold anyway (recorded in `## Decisions` with the reason) or drop it and leave the other item untouched. Still `idea` everywhere, with no worktree: it folds in exactly as before, no new question): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. A list you approved or edited in the chat (a catalogue, a set of options, numbered choices) is written whole into the item's `## Approved list`, in the approved order with your edits applied, and the file never says "the list shown in the refinement"; before asking for your approval Claude re-reads the file for phrases that send the reader to the chat, and pastes the list in where it finds one. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
 | `building` | `/agile:build`: first it finds the item's worktree by its branch and says `Worktree of <id>: <path> [<branch>]` (`(created now)` when an older item had none); the status and the clean-tree check are read there, never in the main checkout, and it continues in that worktree — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree; Claude then reads every file it names, runs the gate and quotes the real counts, and answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
-| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. **Gate 2.** | You |
+| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. A step that a fix made wrong is corrected with `/agile:script <id> <what changed>`, without a change note. **Gate 2.** | You |
 | `done` | `/agile:ship`: full test suite, app version bumped, merge — typing the command is your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 | `cancelled` | An exit, not a step: only from `idea` or `refining`, only as a duplicate, chosen at the card `/agile:refine` shows when it finds a similar item (below). The file stays with `status: cancelled` and the line `Duplicate of <id> (<date>): <where the improvement went>`, so its number is never reused; the session status and the backlog head ignore it. On GitHub the issue is closed as a duplicate of the other and its project item archived (never Done: that would show undelivered work as delivered); on Azure Boards the state is `Removed`; with no board its row in `docs/agile/backlog.md` is struck through. | You, at the card |
 
-**The item line.** `/agile:refine`, `/agile:build`, `/agile:ship`, `/agile:change`, `/agile:review`, `/agile:autopilot`, `/agile:screen` and `/agile:pause` start by naming the item they act on: `F-12 — Export the monthly report as CSV [idea]` (id, title, status), before any check and before anything is created or changed, so a wrong id is caught at once even when a check then stops the command. The title and the status are read from the item's file (the copy in its worktree when it has one), never from the board, so it works with `Board: none`; an id with no file prints `F-99 — no item file found` and the command goes on with its own rule for a missing item. It is written once per run: `/agile:autopilot` prints it at its start, not again for each phase, and `/agile:build` keeps its `Worktree of ...` line right below it. `/agile:pause` prints one line per item it commits. `/agile:status` and `/agile:idea` do not need it: one lists every item with its status, the other ends with the new item's id and title.
+**The item line.** `/agile:refine`, `/agile:build`, `/agile:ship`, `/agile:change`, `/agile:review`, `/agile:autopilot`, `/agile:screen`, `/agile:script` and `/agile:pause` start by naming the item they act on: `F-12 — Export the monthly report as CSV [idea]` (id, title, status), before any check and before anything is created or changed, so a wrong id is caught at once even when a check then stops the command. The title and the status are read from the item's file (the copy in its worktree when it has one), never from the board, so it works with `Board: none`; an id with no file prints `F-99 — no item file found` and the command goes on with its own rule for a missing item. It is written once per run: `/agile:autopilot` prints it at its start, not again for each phase, and `/agile:build` keeps its `Worktree of ...` line right below it. `/agile:pause` prints one line per item it commits. `/agile:status` and `/agile:idea` do not need it: one lists every item with its status, the other ends with the new item's id and title.
 
 **Similar items.** Before `/agile:idea` takes a number, and before `/agile:refine` creates a branch, Claude reads every item (`docs/features`, `docs/bugs`, the item file in each worktree, where an item in progress keeps its current status, and the board, open and closed, `done` and `cancelled` included) and judges which ones cover the same subject in other words. It never uses a keyword rule. With no candidate it says `No similar item (<N> items read).` and goes on. With candidates (at most 3, a reason each) it asks one card, the recommended action first. To improve the existing item: an `idea` gets `Added <date>: <text>` in its summary; a `refining` item gets the text as an open question in its own worktree (Claude says the path); an `approved`, `building` or `validating` item is not touched and Claude prints `/agile:change <id>` with the text for you to type; a `done` item is reported as `Already delivered in <id>`, and you create nothing or create the new item with a line linking the `done` one. In `/agile:refine` the card has three actions: carry the improvement to the other item and cancel this one (a resumed refinement also loses its worktree and branch), keep both (a line in `## Decisions`), or fold the other into this one (the check of its status and worktree of section 14.18). `/agile:epic` and `/agile:discuss` search once for the whole list and show every collision in one card; `/agile:autopilot --assume` ends with the question, since a duplicate is your decision.
 
@@ -2981,6 +2981,31 @@ Claude: F-999 — no item file found
 
 Typing `/agile:ship F-13` for an item still `building` prints `F-13 — Import the exam list [building]` above the stop for a wrong status. `/agile:autopilot F-14` prints its line once at its start, and the refinement, build and ship it runs do not repeat it.
 
+### 14.62 A step of the validation script turned out wrong
+
+F-12 is `validating`. On step 3 you find the command needs a flag the script did not give. Claude fixes the code; the script still says the old command. You type what changed:
+
+```
+> /agile:script F-12 step 3 now needs --no-build
+Claude: F-12 — Export the monthly report as CSV [validating]
+        Step 3 changed: both forms run (Git Bash and PowerShell 7), the output quoted is the real one.
+        Steps 1, 2, 4, 5 are unchanged. Commit: docs(F-12): validation script. The issue body was sent whole and read back: same.
+        You repeat the script from step 3.
+```
+
+The file got a new section text and one commit on the item's branch. There is no change note, no new `version` and no re-approval, and the status stays `validating`. With no text after the id (`/agile:script F-12`) the whole script is rebuilt from the criteria and the branch diff.
+
+If your text really changes what a criterion says, nothing is written:
+
+```
+> /agile:script F-12 export only the last 3 months
+Claude: F-12 — Export the monthly report as CSV [validating]
+        That changes AC2 ("the file holds every month of the year"), not only how it is checked.
+        Nothing written. Type: /agile:change F-12 export only the last 3 months
+```
+
+An item that is `approved` or `done` stops at once with one line saying why: the script is written at the build, and a done item is never reopened.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
@@ -2996,6 +3021,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build <feature> [--worktree]` | Find the item's worktree by its branch, then implement an approved feature there (one at a time; `--worktree` for a second one in parallel) |
 | `/agile:review <feature>` | Fresh-context review of a risky change |
 | `/agile:change <feature>` | Record a change of mind during build |
+| `/agile:script <feature> [what changed]` | Rewrite the validation script of an item that is `building` or `validating`: only the steps your text reaches, or the whole script with no text; file, commit and issue body, no change note |
 | `/agile:ship <feature>` | Full suite, app version (added or moved to `Directory.Build.props` when missing, then bumped), merge (typing it is the authorization), branch and worktree removed, board, app manual, and the declared docs command; a desktop app with `- Beta channel: every merge`: `main` sent to the share as `<Version>-beta` |
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
@@ -3023,6 +3049,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:build` | The item is approved; `--worktree` only when a second item must run while another is building | 14.2, 14.9, 14.46 |
 | `/agile:review` | A change is risky (data, money, permissions) and you want eyes with no context before validating | 14.8 |
 | `/agile:change` | You changed your mind on an approved or building item; a done item gets a new item instead | 14.3, 14.40 |
+| `/agile:script` | A step of the validation script is wrong or outdated after a fix; a text that changes a criterion goes to `/agile:change` instead | 14.62 |
 | `/agile:ship` | You validated the item and authorize the merge | 14.2, 14.21 |
 | `/agile:retro` | After a ship or at the end of a session, to keep at most 3 lessons as rules; with an item id or `session` to pick the source | 14.37, 14.40 |
 | `/agile:pause` | You are stopping for now; nothing stays only on disk | 14.6, 14.40 |
@@ -3199,6 +3226,15 @@ flowchart TD
     B --> C["New version of the file; affected criteria rewritten"]
     C --> D{"Re-approve the affected criteria only"}
     D -->|yes| E(["Work continues; the rest stays approved"])
+```
+
+### /agile:script
+```mermaid
+flowchart TD
+    A["Item id + optional text<br/>(status read in the item's worktree: building or validating)"] --> B{"Text changes a criterion?"}
+    B -->|yes| C(["Nothing written: /agile:change is printed"])
+    B -->|no| D["Only the steps the text reaches, or the whole script with no text;<br/>changed terminal steps run in Git Bash and PowerShell 7"]
+    D --> E(["File + commit docs(F-n): validation script + issue body sent whole and read back"])
 ```
 
 ### /agile:ship

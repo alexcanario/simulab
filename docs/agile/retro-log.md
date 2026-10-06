@@ -979,3 +979,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
 - Proposed: an item adding `## Cloud accounts` to `docs/infra.md` (to be captured as an idea); `/agile:identity` and the DocGen tools catalogue (F-61) declined for now.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-06 - Sync with agile@canary 0.17.0
+- From 0.16.0 to 0.17.0. Copied: `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md` (new `/agile:script` command, scenario 14.62). Left alone: `.claude/rules/agile/git.md` and `docs/agile/profile.md` (edited, upstream unchanged), build files (no upstream change).
+- Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
+- Declined: DocGen tools catalogue, `## Cloud accounts`, `/agile:identity` (no item captured); glossary sweep skipped.
+- Build and suite not run: only Markdown changed.
