@@ -18,10 +18,10 @@ internal static class AzureDeployment
         builder.AddAzureContainerAppEnvironment("cae");
 
         // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
-        builder.AddAzureKeyVault("keyvault");
+        var keyVault = builder.AddAzureKeyVault("keyvault");
 
         IResourceBuilder<IResourceWithConnectionString> database =
-            builder.AddAzurePostgresFlexibleServer("postgres").AddDatabase("simulab");
+            builder.AddAzurePostgresFlexibleServer("postgres").WithPasswordAuthentication(keyVault).AddDatabase("simulab");
 
         // Azure Cache for Redis cannot be stopped, only deleted. Staging is parked outside test windows and its Redis
         // holds only sessions, so it runs as a container in the environment; production uses the managed cache.
