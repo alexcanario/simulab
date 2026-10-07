@@ -255,8 +255,32 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             listed[$"{host}-containerapp.module.bicep"].Should()
                 .MatchRegex(@"name: 'ForwardedHeaders__KnownProxies__0'\s+value: '10\.0\.0\.5'")
                 .And.MatchRegex(@"name: 'ForwardedHeaders__KnownNetworks__0'\s+value: '10\.0\.0\.0/24'");
-            Bicep($"{host}-containerapp").Should().NotContain("ForwardedHeaders__", "nothing is listed in the committed Staging settings");
+            // The test's content root has no Staging settings file (it is not copied to the output), so the default publish passes none.
+            Bicep($"{host}-containerapp").Should().NotContain("ForwardedHeaders__");
         }
+    }
+
+    /// <summary>
+    /// F-64 D12: the committed Staging settings list the ingress address read on the first staging (the web logged
+    /// <c>::ffff:100.100.0.17</c>, 2026-10-07), as one proxy and no network. <c>aspire deploy</c> reads this file from the
+    /// app host's folder; the test reads it from the source tree because the publish test's content root does not have it.
+    /// </summary>
+    [Fact]
+    public void StagingSettings_ListTheIngressAddressMeasuredOnTheFirstStaging()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Simulab.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        directory.Should().NotBeNull("the repository root holds Simulab.slnx");
+        using var settings = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(directory!.FullName, "src", "Hosts", "Simulab.AppHost", "appsettings.Staging.json")));
+        var section = settings.RootElement.GetProperty("ForwardedHeaders");
+
+        section.GetProperty("KnownProxies").EnumerateArray().Select(address => address.GetString()).Should().Equal("100.100.0.17");
+        section.GetProperty("KnownNetworks").GetArrayLength().Should().Be(0);
     }
 
     /// <summary>
