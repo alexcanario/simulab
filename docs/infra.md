@@ -50,12 +50,19 @@ Two rules while a deploy runs: start nothing else from the same folder (the app 
 
 The Api refuses to start until its certificates exist (F-64 BR4), so the first deploy ends with a healthy `web` and an `api` that restarts in a loop. That is expected: steps 5 to 8 give it what it needs, and the second deploy (step 10) starts it.
 
-1. Settings for the deploy command (never committed). The subscription id is `az account show --query id -o tsv`. The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once (`[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`), keep it in a password manager, and never paste it in a chat.
+1. Settings for the deploy command (never committed). The subscription id is `az account show --query id -o tsv`. The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once (`[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`) and never paste it in a chat. The vault does not exist before the first deploy, so the first time you type the value at a hidden prompt, and step 5 stores it in the vault (secret `deploy--OpenIddictClientSecret`); every later deploy reads it from there. The prefix `deploy--` is deliberate: a secret named like a configuration key the hosts read (for example `Authentication--OpenIddict--ClientSecret`) would win over the deploy value, because the vault source is added last. A lost value can still be read from the deployed `api` (`az containerapp secret show -n api -g simulab-staging --secret-name authentication--openiddict--clientsecret --query value -o tsv`).
    ```powershell
    $env:AZURE__SUBSCRIPTIONID = (az account show --query id -o tsv)
    $env:AZURE__LOCATION = "brazilsouth"
    $env:AZURE__RESOURCEGROUP = "simulab-staging"
-   ${env:Parameters__openiddict-client-secret} = "SECRET_VALUE"
+   ```
+   First deploy (the vault does not exist yet): the value from the generator above, typed at a hidden prompt.
+   ```powershell
+   ${env:Parameters__openiddict-client-secret} = (ConvertFrom-SecureString (Read-Host -AsSecureString "OpenIddict client secret") -AsPlainText)
+   ```
+   Every later deploy: read from the vault (`VAULT_NAME` is step 4).
+   ```powershell
+   ${env:Parameters__openiddict-client-secret} = (az keyvault secret show --vault-name VAULT_NAME -n deploy--OpenIddictClientSecret --query value -o tsv)
    ```
    Git Bash: `export AZURE__SUBSCRIPTIONID=<subscription id> AZURE__LOCATION=brazilsouth AZURE__RESOURCEGROUP=simulab-staging`; a name with a hyphen cannot be exported there, so put `env 'Parameters__openiddict-client-secret=SECRET_VALUE'` in front of the command of step 3.
 2. The resource group (skip when it exists: `az group show -n simulab-staging`):
@@ -74,6 +81,11 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
 5. Give yourself access to the vault's secrets (the owner of a subscription has no data access to a vault by default). The role takes a minute or two to reach the vault; a `Forbidden` at step 6 or later is solved by waiting and repeating.
    ```powershell
    az role assignment create --role "Key Vault Administrator" --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User --scope "$(az keyvault show -n VAULT_NAME -g simulab-staging --query id -o tsv)"
+   ```
+   Then store the deploy secret of step 1, the same value the first deploy used, so the next deploy can read it (hidden prompt):
+   ```powershell
+   $s = Read-Host -AsSecureString "OpenIddict client secret"
+   az keyvault secret set --vault-name VAULT_NAME -n deploy--OpenIddictClientSecret --value (ConvertFrom-SecureString $s -AsPlainText) -o none
    ```
 6. The key that encrypts the Data Protection key ring. Never delete or rotate it: every key in the ring becomes unreadable, every tester is signed out and every sent link dies (soft delete keeps a deleted one for 90 days).
    ```powershell
