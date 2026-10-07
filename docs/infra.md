@@ -41,32 +41,64 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 | staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo` | | |
 | production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo` | | |
 
-The deploy command needs the Aspire CLI on the same version as the packages (13.6.0), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`brazilsouth`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
+The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`brazilsouth`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
 
 ### First deploy of staging (F-64)
-The owner runs every command below in the owner's own subscription (F-64 BR10); nothing here is run by Claude, and each one that creates a resource is paid. Command shapes were checked with `az <command> --help` only. Names in `<angle brackets>` are read from step 4. The same command works in Git Bash and PowerShell 7 unless two forms are shown. The sign-in and the subscription are the owner's: `az login`, then `az account set --subscription <subscription id>`.
+The owner runs every command below in the owner's own subscription (F-64 BR10); nothing here is run by Claude, and each one that creates a resource is paid. Run them from the repository root (the worktree root when the item is not merged), in one PowerShell 7 terminal: the variables of step 1 live only in that terminal. Names in capitals (`VAULT_NAME`, `SECRET_VALUE`) are placeholders: replace the whole word, never paste it as it is. The sign-in and the subscription are the owner's: `az login`, then `az account set --subscription <subscription id>`.
+
+Two rules while a deploy runs: start nothing else from the same folder (the app host the Aspire CLI runs from `bin/` is rebuilt by any `dotnet build` or `dotnet test`, and the deploy then fails with `Could not load file or assembly`), and stop a deploy that failed (`Ctrl+C`; check with `Get-Process aspire, Simulab.AppHost`), because the process stays alive and locks the build output.
 
 The Api refuses to start until its certificates exist (F-64 BR4), so the first deploy ends with a healthy `web` and an `api` that restarts in a loop. That is expected: steps 5 to 8 give it what it needs, and the second deploy (step 10) starts it.
 
-1. Settings for the deploy command (never committed):
-   - Git Bash: `export AZURE__SUBSCRIPTIONID=<subscription id> AZURE__LOCATION=brazilsouth AZURE__RESOURCEGROUP=simulab-staging`
-   - PowerShell 7: `$env:AZURE__SUBSCRIPTIONID = "<subscription id>"; $env:AZURE__LOCATION = "brazilsouth"; $env:AZURE__RESOURCEGROUP = "simulab-staging"`
-   - The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once, keep it in a password manager, and pass it as the environment variable `Parameters__openiddict-client-secret` in front of the command of step 3 (a name with a hyphen cannot be exported in Git Bash, so use `env 'Parameters__openiddict-client-secret=<value>' aspire deploy ...`; in PowerShell 7 `${env:Parameters__openiddict-client-secret} = "<value>"`).
-2. The resource group: `az group create -n simulab-staging -l brazilsouth`.
-3. Deploy: the staging command of the table above. The Aspire CLI must be 13.6.0.
-4. Learn the names: `az resource list -g simulab-staging -o table`. Note the Key Vault (`keyvault...`) as `<vault>`, the PostgreSQL server (`postgres-...`) as `<server>` and the two storage accounts (`storageapi...`, `storageweb...`, one per host).
-5. Give yourself access to the vault's secrets (the owner of a subscription has no data access to a vault by default). In Git Bash and PowerShell 7: `az role assignment create --role "Key Vault Administrator" --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User --scope "$(az keyvault show -n <vault> -g simulab-staging --query id -o tsv)"` (PowerShell 7 accepts the same line). The role takes a minute or two to reach the vault.
-6. The key that encrypts the Data Protection key ring (never delete or rotate it: every key in the ring becomes unreadable and every tester is signed out, every sent link dies; soft delete keeps a deleted one for 90 days): `az keyvault key create --vault-name <vault> -n dataprotection --kty RSA --size 2048 --ops wrapKey unwrapKey`.
-7. The two OpenIddict certificates, created by the vault itself so the private key never touches a disk (the default policy is exportable, valid 12 months, with the key usages OpenIddict checks; the names are the configuration keys `OpenIddict:SigningCertificate` and `OpenIddict:EncryptionCertificate` with `--` for `:`):
-   - `az keyvault certificate get-default-policy > policy.json`
-   - `az keyvault certificate create --vault-name <vault> -n OpenIddict--SigningCertificate -p @policy.json`
-   - `az keyvault certificate create --vault-name <vault> -n OpenIddict--EncryptionCertificate -p @policy.json`
-   - Delete `policy.json` afterwards. A certificate renewed by the vault is picked up at the next restart and signs everybody out once; rolling certificates is F-73's subject.
+1. Settings for the deploy command (never committed). The subscription id is `az account show --query id -o tsv`. The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once (`[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`), keep it in a password manager, and never paste it in a chat.
+   ```powershell
+   $env:AZURE__SUBSCRIPTIONID = (az account show --query id -o tsv)
+   $env:AZURE__LOCATION = "brazilsouth"
+   $env:AZURE__RESOURCEGROUP = "simulab-staging"
+   ${env:Parameters__openiddict-client-secret} = "SECRET_VALUE"
+   ```
+   Git Bash: `export AZURE__SUBSCRIPTIONID=<subscription id> AZURE__LOCATION=brazilsouth AZURE__RESOURCEGROUP=simulab-staging`; a name with a hyphen cannot be exported there, so put `env 'Parameters__openiddict-client-secret=SECRET_VALUE'` in front of the command of step 3.
+2. The resource group (skip when it exists: `az group show -n simulab-staging`):
+   ```powershell
+   az group create -n simulab-staging -l brazilsouth
+   ```
+3. Deploy: the staging command of the table above. The Aspire CLI must have the version of the Aspire packages in `Directory.Packages.props` (`aspire --version`). The command prints its steps and ends with a summary; an empty output means it did not run (wrong folder, or a variable of step 1 missing).
+   ```powershell
+   aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
+   ```
+4. Learn the names: the Key Vault (`keyvault...`) is `VAULT_NAME` below, the PostgreSQL server (`postgres-...`) is the `<server>` of "Staging start and stop", and there are two storage accounts (`storageapi...`, `storageweb...`, one per host).
+   ```powershell
+   az resource list -g simulab-staging -o table
+   ```
+   An empty list after step 3 means nothing was deployed: read the deploy output, and `az deployment group list -g simulab-staging -o table`.
+5. Give yourself access to the vault's secrets (the owner of a subscription has no data access to a vault by default). The role takes a minute or two to reach the vault; a `Forbidden` at step 6 or later is solved by waiting and repeating.
+   ```powershell
+   az role assignment create --role "Key Vault Administrator" --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User --scope "$(az keyvault show -n VAULT_NAME -g simulab-staging --query id -o tsv)"
+   ```
+6. The key that encrypts the Data Protection key ring. Never delete or rotate it: every key in the ring becomes unreadable, every tester is signed out and every sent link dies (soft delete keeps a deleted one for 90 days).
+   ```powershell
+   az keyvault key create --vault-name VAULT_NAME -n dataprotection --kty RSA --size 2048 --ops wrapKey unwrapKey
+   ```
+7. The two OpenIddict certificates, created by the vault itself so the private key never touches a disk (the default policy is exportable, valid 12 months, with the key usages OpenIddict checks; the names are the configuration keys `OpenIddict:SigningCertificate` and `OpenIddict:EncryptionCertificate` with `--` for `:`). A certificate renewed by the vault is picked up at the next restart and signs everybody out once; rolling certificates is F-73's subject.
+   ```powershell
+   az keyvault certificate get-default-policy > policy.json
+   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--SigningCertificate -p "@policy.json"
+   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--EncryptionCertificate -p "@policy.json"
+   Remove-Item policy.json
+   ```
 8. The password of the seeded administrator `admin@simulab.local` (12+ characters, upper case, digit, symbol), from a hidden prompt so it never reaches the shell history:
-   - Git Bash: `read -rs -p "Admin password: " P; echo; az keyvault secret set --vault-name <vault> -n Identity--SeedAdmin--Password --value "$P" -o none; unset P`
-   - PowerShell 7: `$p = Read-Host -AsSecureString "Admin password"; az keyvault secret set --vault-name <vault> -n Identity--SeedAdmin--Password --value (ConvertFrom-SecureString $p -AsPlainText) -o none`
-9. Read the address of the ingress (F-64 BR6, D12): open the staging address once in a browser, then `az containerapp logs show -n web -g simulab-staging --type console --tail 100` and look for the warning `A forwarded header arrived from <address> and is ignored`. Do the same for `api` after step 10 (`-n api`): the two addresses may differ. Write them in `src/Hosts/Simulab.AppHost/appsettings.Staging.json` under `ForwardedHeaders:KnownProxies` (one address) or `ForwardedHeaders:KnownNetworks` (a range, only if the addresses change between restarts) and record what you measured in `## Delivery` of F-64. Never a guess.
+   ```powershell
+   $p = Read-Host -AsSecureString "Admin password"; az keyvault secret set --vault-name VAULT_NAME -n Identity--SeedAdmin--Password --value (ConvertFrom-SecureString $p -AsPlainText) -o none
+   ```
+   Git Bash: `read -rs -p "Admin password: " P; echo; az keyvault secret set --vault-name VAULT_NAME -n Identity--SeedAdmin--Password --value "$P" -o none; unset P`
+9. Read the address of the ingress (F-64 BR6, D12): open the staging address once in a browser, then read the log and look for the warning `A forwarded header arrived from <address> and is ignored`. Do the same for `api` after step 10 (`-n api`): the two addresses may differ. Write them in `src/Hosts/Simulab.AppHost/appsettings.Staging.json` under `ForwardedHeaders:KnownProxies` (one address) or `ForwardedHeaders:KnownNetworks` (a range, only if the addresses change between restarts) and record what you measured in `## Delivery` of F-64. Never a guess.
+   ```powershell
+   az containerapp logs show -n web -g simulab-staging --type console --tail 100
+   ```
 10. Deploy again (step 3). The apps restart with the certificates, the key and the proxy list. Check `https://<staging address>/api/v1/system/info`: it answers 200 with `"environment": "Staging"`.
+   ```powershell
+   az containerapp logs show -n api -g simulab-staging --type console --tail 50
+   ```
 
 The Api migrates the module schemas, roles and permissions and the OpenIddict client on start in Staging only (`Database__ApplyMigrationsOnStart=true`, F-64 BR5). **Production keeps the default (off) until F-65 decides how a release migrates; a production deploy without a migration step breaks nothing in the key ring** (it lives in a blob) **but starts on an empty database.**
 
