@@ -105,6 +105,9 @@
   <!-- Email (F-3) -->
   <ItemGroup>
     <PackageVersion Include="MailKit" Version="4.18.0" />
+    <!-- F-66: the cloud sender calls Azure Communication Services Email over HTTP with the Api's managed identity. -->
+    <PackageVersion Include="Azure.Communication.Email" Version="1.1.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.21.0" />
   </ItemGroup>
 
   <!-- UI -->

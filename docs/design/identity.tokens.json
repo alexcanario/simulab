@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Simulab visual identity, recorded from SimulabTheme (F-63). IdentityTokensTests keeps it equal to the theme.",
+  "color": {
+    "$type": "color",
+    "primary": {
+      "$description": "Brand blue: links, outlined buttons, the app name, the focus ring.",
+      "$value": { "colorSpace": "srgb", "components": [0.1294, 0.4275, 0.7098], "hex": "#216DB5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.3922, 0.6353, 0.8902], "hex": "#64A2E3" } } }
+    },
+    "primaryContrastText": {
+      "$description": "Text and icons on a filled primary surface.",
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "primaryDarken": {
+      "$description": "Hover tone of a filled primary surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.0941, 0.3451, 0.6275], "hex": "#1858A0" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.3137, 0.5882, 0.8627], "hex": "#5096DC" } } }
+    },
+    "primaryLighten": {
+      "$description": "Quiet tint of the primary: the role badge background.",
+      "$value": { "colorSpace": "srgb", "components": [0.9216, 0.9529, 0.9922], "hex": "#EBF3FD" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0863, 0.1451, 0.251], "hex": "#162540" } } }
+    },
+    "secondary": {
+      "$description": "Teal accent: secondary filled buttons.",
+      "$value": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" } } }
+    },
+    "secondaryContrastText": {
+      "$description": "Dark ink on a filled secondary surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "secondaryDarken": {
+      "$description": "Hover tone of a filled secondary surface (lighter, so the dark ink keeps its contrast).",
+      "$value": { "colorSpace": "srgb", "components": [0.1412, 0.6824, 0.6039], "hex": "#24AE9A" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.6824, 0.6039], "hex": "#24AE9A" } } }
+    },
+    "secondaryLighten": {
+      "$description": "Light tone derived from the secondary by MudBlazor; no component paints with it.",
+      "$value": { "colorSpace": "srgb", "components": [0.1216, 0.7569, 0.6706], "hex": "#1FC1AB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1216, 0.7569, 0.6706], "hex": "#1FC1AB" } } }
+    },
+    "tertiary": {
+      "$description": "Amber accent: highlights that are neither a success nor a warning.",
+      "$value": { "colorSpace": "srgb", "components": [0.9608, 0.6275, 0.1255], "hex": "#F5A020" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9608, 0.6275, 0.1255], "hex": "#F5A020" } } }
+    },
+    "tertiaryContrastText": {
+      "$description": "Dark ink on a filled tertiary surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "tertiaryDarken": {
+      "$description": "Dark tone derived from the tertiary by MudBlazor; no component paints with it.",
+      "$value": { "colorSpace": "srgb", "components": [0.8784, 0.5451, 0.0431], "hex": "#E08B0B" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8784, 0.5451, 0.0431], "hex": "#E08B0B" } } }
+    },
+    "tertiaryLighten": {
+      "$description": "Light tone derived from the tertiary by MudBlazor; no component paints with it.",
+      "$value": { "colorSpace": "srgb", "components": [0.9647, 0.6902, 0.2745], "hex": "#F6B046" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9647, 0.6902, 0.2745], "hex": "#F6B046" } } }
+    },
+    "info": {
+      "$description": "Informational messages (alerts, chips).",
+      "$value": { "colorSpace": "srgb", "components": [0.1412, 0.4706, 0.7725], "hex": "#2478C5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.4706, 0.7725], "hex": "#2478C5" } } }
+    },
+    "infoDarken": {
+      "$description": "Dark tone derived from the info colour by MudBlazor.",
+      "$value": { "colorSpace": "srgb", "components": [0.1176, 0.3882, 0.6431], "hex": "#1E63A4" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1176, 0.3882, 0.6431], "hex": "#1E63A4" } } }
+    },
+    "infoLighten": {
+      "$description": "Light tone derived from the info colour by MudBlazor.",
+      "$value": { "colorSpace": "srgb", "components": [0.2235, 0.549, 0.8588], "hex": "#398CDB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.2235, 0.549, 0.8588], "hex": "#398CDB" } } }
+    },
+    "success": {
+      "$description": "Success state: a saved or correct result.",
+      "$value": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" } } }
+    },
+    "successContrastText": {
+      "$description": "Dark ink on a filled success surface (alert, button).",
+      "$value": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "successDarken": {
+      "$description": "Hover tone of a filled success surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.1412, 0.6824, 0.6039], "hex": "#24AE9A" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.6824, 0.6039], "hex": "#24AE9A" } } }
+    },
+    "successLighten": {
+      "$description": "Light tone derived from the success colour by MudBlazor.",
+      "$value": { "colorSpace": "srgb", "components": [0.1216, 0.7569, 0.6706], "hex": "#1FC1AB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1216, 0.7569, 0.6706], "hex": "#1FC1AB" } } }
+    },
+    "warning": {
+      "$description": "Warning state: something needs attention but nothing failed.",
+      "$value": { "colorSpace": "srgb", "components": [0.851, 0.5451, 0.102], "hex": "#D98B1A" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.851, 0.5451, 0.102], "hex": "#D98B1A" } } }
+    },
+    "warningContrastText": {
+      "$description": "Dark ink on a filled warning surface (alert, button).",
+      "$value": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "warningDarken": {
+      "$description": "Hover tone of a filled warning surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.8118, 0.5176, 0.098], "hex": "#CF8419" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8118, 0.5176, 0.098], "hex": "#CF8419" } } }
+    },
+    "warningLighten": {
+      "$description": "Light tone derived from the warning colour by MudBlazor.",
+      "$value": { "colorSpace": "srgb", "components": [0.9059, 0.6078, 0.1961], "hex": "#E79B32" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9059, 0.6078, 0.1961], "hex": "#E79B32" } } }
+    },
+    "error": {
+      "$description": "Error state and destructive actions; also error text on the page.",
+      "$value": { "colorSpace": "srgb", "components": [0.7451, 0.2157, 0.2157], "hex": "#BE3737" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8784, 0.4235, 0.4235], "hex": "#E06C6C" } } }
+    },
+    "errorContrastText": {
+      "$description": "Text on a filled destructive button: white in light, dark ink in dark.",
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" } } }
+    },
+    "errorDarken": {
+      "$description": "Hover tone of a filled destructive button.",
+      "$value": { "colorSpace": "srgb", "components": [0.6196, 0.1804, 0.1804], "hex": "#9E2E2E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8706, 0.4078, 0.4078], "hex": "#DE6868" } } }
+    },
+    "errorLighten": {
+      "$description": "Light tone derived from the error colour by MudBlazor.",
+      "$value": { "colorSpace": "srgb", "components": [0.7961, 0.302, 0.302], "hex": "#CB4D4D" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.902, 0.5373, 0.5373], "hex": "#E68989" } } }
+    },
+    "textPrimary": {
+      "$description": "Body text and headings, on the page and on cards.",
+      "$value": { "colorSpace": "srgb", "components": [0.098, 0.1412, 0.2431], "hex": "#19243E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8784, 0.9098, 0.9725], "hex": "#E0E8F8" } } }
+    },
+    "textSecondary": {
+      "$description": "Helper text, captions and secondary labels.",
+      "$value": { "colorSpace": "srgb", "components": [0.2902, 0.3529, 0.4784], "hex": "#4A5A7A" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.4784, 0.5569, 0.6902], "hex": "#7A8EB0" } } }
+    },
+    "actionDefault": {
+      "$description": "Icon-only buttons and menu icons.",
+      "$value": { "colorSpace": "srgb", "components": [0.2902, 0.3529, 0.4784], "hex": "#4A5A7A" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.4784, 0.5569, 0.6902], "hex": "#7A8EB0" } } }
+    },
+    "background": {
+      "$description": "The page behind every card.",
+      "$value": { "colorSpace": "srgb", "components": [0.949, 0.9608, 0.9843], "hex": "#F2F5FB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0549, 0.0941, 0.1569], "hex": "#0E1828" } } }
+    },
+    "surface": {
+      "$description": "Cards, dialogs, menus and form panels.",
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0902, 0.1255, 0.2078], "hex": "#172035" } } }
+    },
+    "drawerBackground": {
+      "$description": "The navigation drawer.",
+      "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0353, 0.0784, 0.1333], "hex": "#091422" } } }
+    },
+    "drawerText": {
+      "$description": "Navigation labels on the drawer (translucent white).",
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.918, "hex": "#FFFFFFEA" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.498, "hex": "#FFFFFF7F" } } }
+    },
+    "drawerIcon": {
+      "$description": "Navigation icons on the drawer; the same ink as the drawer text.",
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.918, "hex": "#FFFFFFEA" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.498, "hex": "#FFFFFF7F" } } }
+    },
+    "appbarBackground": {
+      "$description": "The top app bar. Its text is MudBlazor's own white (70% white in dark), which the theme does not override.",
+      "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0353, 0.0784, 0.1333], "hex": "#091422" } } }
+    },
+    "linesInputs": {
+      "$description": "The border of every outlined field (a control boundary, 3:1 against the page and the surface).",
+      "$value": { "colorSpace": "srgb", "components": [0.4941, 0.5412, 0.6314], "hex": "#7E8AA1" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.3804, 0.4431, 0.5608], "hex": "#61718F" } } }
+    },
+    "tableLines": {
+      "$description": "Row lines of a data table (decorative).",
+      "$value": { "colorSpace": "srgb", "components": [0.8157, 0.8471, 0.9176], "hex": "#D0D8EA" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.149, 0.2, 0.3216], "hex": "#263352" } } }
+    },
+    "divider": {
+      "$description": "Dividers between sections (decorative).",
+      "$value": { "colorSpace": "srgb", "components": [0.8157, 0.8471, 0.9176], "hex": "#D0D8EA" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.149, 0.2, 0.3216], "hex": "#263352" } } }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "$type": "fontFamily",
+      "$value": ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+    },
+    "h1": {
+      "fontSize": { "$type": "dimension", "$value": { "value": 1.75, "unit": "rem" } },
+      "fontWeight": { "$type": "fontWeight", "$value": 700 },
+      "lineHeight": { "$type": "number", "$value": 1.2 }
+    },
+    "h2": {
+      "fontSize": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
+      "fontWeight": { "$type": "fontWeight", "$value": 600 },
+      "lineHeight": { "$type": "number", "$value": 1.3 }
+    },
+    "body1": {
+      "fontSize": { "$type": "dimension", "$value": { "value": 0.9375, "unit": "rem" } },
+      "lineHeight": { "$type": "number", "$value": 1.65 }
+    },
+    "body2": {
+      "fontSize": { "$type": "dimension", "$value": { "value": 0.8125, "unit": "rem" } },
+      "lineHeight": { "$type": "number", "$value": 1.5 }
+    },
+    "caption": {
+      "fontSize": { "$type": "dimension", "$value": { "value": 0.75, "unit": "rem" } }
+    }
+  },
+  "shape": {
+    "borderRadius": { "$type": "dimension", "$value": { "value": 10, "unit": "px" } }
+  },
+  "$extensions": {
+    "agile": {
+      "iconFamily": "Material Outlined",
+      "source": "file",
+      "sourceRef": "src/Hosts/Simulab.Web/Theme/SimulabTheme.cs",
+      "date": "2026-10-06"
+    }
+  }
+}
