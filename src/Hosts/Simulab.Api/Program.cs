@@ -26,6 +26,9 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("keyvau
     builder.Configuration.AddAzureKeyVaultSecrets("keyvault");
 }
 
+// F-64: the cloud database accepts only encrypted connections; its connection string says nothing about SSL.
+builder.Configuration.RequireDatabaseTls();
+
 builder.AddServiceDefaults();
 builder.AddAppDataProtection("simulab-api");
 builder.Services.AddOpenApi();
