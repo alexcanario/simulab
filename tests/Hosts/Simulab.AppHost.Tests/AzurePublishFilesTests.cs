@@ -156,6 +156,17 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         template.Should().NotContain("listKeys").And.NotContain("@secure");
     }
 
+    /// <summary>
+    /// F-64 validation: <c>aspire deploy</c> sends <c>location</c> to every Bicep template and Azure refuses the
+    /// deployment when the template does not declare it ("parameters were supplied, but do not correspond"). The
+    /// publish does not write it into the manifest, so only the template can be checked.
+    /// </summary>
+    [Fact]
+    public void Publish_Email_DeclaresTheLocationParameterTheDeployCommandSends()
+    {
+        EmailTemplate().Should().Contain("param location string");
+    }
+
     /// <summary>F-66 AC5 (BR1, BR9): the template is told the Api's identity and nothing else; no email secret or parameter exists.</summary>
     [Fact]
     public void Publish_Email_IsBoundToTheApiIdentityAndAsksForNoSecret()
