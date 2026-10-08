@@ -58,7 +58,7 @@ Screens follow the rules `ui` and `ui-project`; the detailed screen section and 
 - GET `/api/v1/exams/{examId}/editions/{editionId}/notice-subjects` (F-74) — each row gains `mappings: [{ "subjectId", "subjectName", "topicId", "topicName" }]`.
 - GET `/api/v1/catalog/subjects` and GET `/api/v1/catalog/subjects/{subjectId}/topics` (F-79) — each item gains `inUse` (BR10).
 - Error codes: `notice_subject.mapping_invalid`, `notice_subject.mapping_too_many`, `notice_subject.mapping_target_not_found`, `notice_subject.mapping_overlap`, `subject.in_use`, `topic.in_use`.
-- Table `catalog.notice_subject_mappings`: `id`, `tenant_id`, `notice_subject_id` (FK, cascade), `subject_id` (FK, restrict, nullable), `topic_id` (FK, restrict, nullable), audit columns, column comments; check constraint "exactly one of `subject_id`, `topic_id`"; unique index `ux_notice_subject_mappings_tenant_notice_subject_target` over (`tenant_id`, `notice_subject_id`, `subject_id`, `topic_id`) `NULLS NOT DISTINCT`; indexes on `subject_id` and `topic_id` for BR9.
+- Table `catalog.notice_subject_mappings`: `id`, `tenant_id`, `notice_subject_id` (FK, cascade), `subject_id` (FK, restrict, nullable), `topic_id` (FK, restrict, nullable), audit columns and soft delete (`TenantEntity`), column comments; check constraint "exactly one of `subject_id`, `topic_id`"; unique index `ux_notice_subject_mappings_tenant_notice_subject_target` over (`tenant_id`, `notice_subject_id`, `subject_id`, `topic_id`) `NULLS NOT DISTINCT` and filtered by `is_deleted = false`; indexes on `notice_subject_id`, `subject_id` and `topic_id` (BR9); check constraint `ck_notice_subject_mappings_one_target`.
 
 ## Screen
 Mockup: [`mockups/F-75-map-notice-subjects.html`](mockups/F-75-map-notice-subjects.html) (states, languages, light and dark). It shows only the F-75 deltas on the F-74 and F-79 screens, with enough of those screens around them; everything not named here stays as F-74 `## Screen` and the F-79 pages describe it.
@@ -225,7 +225,7 @@ New keys. `›` sits inside a resource format, so a language can change it. Reus
 - 2026-10-04 — No new package, production or tests — EF Core, the MudBlazor kit, xunit, bunit and Testcontainers.PostgreSql already cover it (owner, question 8).
 - 2026-10-04 — One table with nullable `subject_id` and `topic_id` and a check constraint, the topic entry storing only the topic — a topic move (F-79 BR10) needs no update of the mappings (Claude, technical).
 - 2026-10-04 — The overlap of BR4 is checked on save only, not on a topic move — refusing a move because of an edition's mapping would couple the taxonomy screens to every notice (Claude, technical).
-- 2026-10-04 — Mapping rows are link rows without soft delete: a save replaces them, and a deleted notice subject keeps them but they stop counting — they carry no history of their own, and keeping them lets an undeleted row come back mapped (Claude, technical).
+- 2026-10-08 — SUPERSEDED by change note 1: mapping rows were to be link rows without soft delete.
 - 2026-10-04 — At most 50 entries per notice subject — the widest real heading lists about 20 laws; a ceiling stops a runaway request (Claude, technical).
 - 2026-10-04 — The picker loads the whole taxonomy in one call (`GET /api/v1/catalog/taxonomy`) — the F-51 guard taxonomy is 23 subjects and 70 topics; not measured at larger sizes, revisit with E-9 imports (Claude, technical).
 - 2026-10-04 — Mapping lives in the `Catalog` module, `catalog` schema — epic decision; plain foreign keys inside one schema (Claude, epic decision).
@@ -234,6 +234,8 @@ New keys. `›` sits inside a resource format, so a language can change it. Reus
 - 2026-10-04 — The in-use reason does not say where the item is used; a "where used" view is captured as F-90 (owner, screen question 3).
 - 2026-10-04 — Field label "Abrange" / "Covers" and row marker "Não mapeada" / "Not mapped", as in `### UI texts` (owner, screen question 4).
 - 2026-10-04 — A row with many entries wraps its chips (no "more" collapse), and chips do not show the area — the widest real heading has about 20 entries; BR13 asks only for "Subject › Topic" (Claude, screen design).
+
+- 2026-10-08 — Design passes (`system-design`, `architect`) verified against the files. Accepted: save replaces the mapping by a diff (soft-delete dropped entries, keep unchanged, add new) in the same `SaveChanges` as the row; a shared `LiveNoticeSubjectMappings` query relies on the global soft-delete filters of `NoticeSubject` and `ExamEdition`; the BR4 rules class receives the saved mapping so an overlap made by a topic move is kept (AC6); it is named `NoticeSubjectMappingRules` (the glossary retires "Coverage"); `mapping_target_not_found` is `ErrorKind.Validation` (400); the 50 limit counts after dedup; `mappings` omitted or empty clears (BR7), so the API and the dialog change in the same commit; `inUse` is computed in the subject and topic save answers too; the new unique index violation (concurrent save) becomes a 409; routes keep their existing `/api/v1/catalog/exams/...` prefix (the item text omitted `/catalog`). Dropped: nothing. Owner stop: none besides change note 1 (owner, session 2026-10-08).
 
 ## Out of scope
 - AI suggestion of the closest topic or a new draft topic — epic E-9.
@@ -249,6 +251,7 @@ New keys. `›` sits inside a resource format, so a language can change it. Reus
 - (none)
 
 ## Change notes
+- 1 (2026-10-08, owner): `NoticeSubjectMapping` inherits `TenantEntity` (soft delete and tenant filter) instead of being a link row without soft delete, as `project.md` requires ("soft delete only", `User` the only exception). The unique index is filtered by `is_deleted = false` so a dropped entry can be added again; an index on `notice_subject_id` is added. Affects the table line of `## Screens and API` and the Decisions line of 2026-10-04 on link rows; AC15 still holds; no other criterion changes.
 
 ## Validation script
 <!-- Written at the end of build. -->
