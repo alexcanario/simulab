@@ -270,6 +270,23 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
         _files.Values.Should().NotContain(file => file.Contains("administratorLoginPassword: '"), "the password is a template parameter");
     }
 
+    /// <summary>
+    /// F-64 D21 (2026-10-08): the Redis container's password is a secret deploy-time parameter without a generated default,
+    /// so a <c>--clear-cache</c> deploy leaves the running container and the hosts with the same password.
+    /// </summary>
+    [Fact]
+    public void Publish_TakesTheRedisPasswordFromAParameterThatIsNeverGenerated()
+    {
+        using var manifest = System.Text.Json.JsonDocument.Parse(_files["manifest.json"]);
+        var resources = manifest.RootElement.GetProperty("resources");
+
+        var password = resources.GetProperty("redis-password").GetProperty("inputs").GetProperty("value");
+        password.GetProperty("secret").GetBoolean().Should().BeTrue();
+        password.TryGetProperty("default", out _).Should().BeFalse("a generated password is what left Redis with the old one");
+
+        resources.GetProperty("redis").GetProperty("connectionString").GetString().Should().Contain("{redis-password.value}");
+    }
+
     /// <summary>F-64 BR6, D12: the ingress addresses of the app host's configuration reach both hosts; with none, neither gets a setting.</summary>
     [Fact]
     public async Task Publish_PassesTheListedProxiesToBothHosts()

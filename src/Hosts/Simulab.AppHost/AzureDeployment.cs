@@ -52,9 +52,12 @@ internal static class AzureDeployment
 
         // Azure Cache for Redis cannot be stopped, only deleted. Staging is parked outside test windows and its Redis
         // holds only sessions, so it runs as a container in the environment; production uses the managed cache.
+        // F-64 D21 (2026-10-08): the container's password is a deploy-time parameter too. Generated, it changed with every
+        // `--clear-cache` deploy, the platform updated the secret but did not restart the running Redis, and the hosts failed
+        // with NOAUTH until it was restarted by hand. The owner keeps it in the vault as `deploy--RedisPassword`.
         IResourceBuilder<IResourceWithConnectionString> redis = environmentName == "Production"
             ? builder.AddAzureManagedRedis("redis")
-            : builder.AddRedis("redis");
+            : builder.AddRedis("redis", password: builder.AddParameter("redis-password", secret: true));
 
         return new CloudResources(database, redis, keyVault, apiKeys, webKeys);
     }
