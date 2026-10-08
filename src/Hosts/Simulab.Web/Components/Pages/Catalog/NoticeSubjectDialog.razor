@@ -1,5 +1,7 @@
 @* F-74, UC2-UC3: add or edit a notice subject. A simple entity, so a dialog (rule: ui-project). The Api runs every
-   rule (BR2 to BR5); the checks here are for comfort. *@
+   rule (BR2 to BR5); the checks here are for comfort.
+   F-75, UC2-UC3: the new field "Covers" - the canonical subjects and topics the row covers. The whole mapping is sent on
+   Save (BR7); the picks change the row only then. *@
 @using Simulab.Catalog.Contracts
 @using Simulab.Web.Services
 @inject IStringLocalizer<SharedResources> L
@@ -50,6 +52,30 @@
                           Autocomplete="off"
                           Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
                           Error="@_questionCountError" />
+
+            <AppMultiPickField Id="@CoversId"
+                               Label="@L["NoticeSubjects.Field.Covers"]"
+                               Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                               OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                               PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                               CountText="@CountText"
+                               ClearText="@L["Lookup.Clear"]"
+                               NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                               RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                               Groups="@BuildGroups()"
+                               Picked="@BuildItems()"
+                               OnToggle="@OnToggle"
+                               OnRemove="@OnRemovePick"
+                               OnClear="@OnClearPicks"
+                               State="_taxonomyState"
+                               LoadingText="@L["NoticeSubjects.Field.Covers.Loading"]"
+                               LoadFailedText="@L["NoticeSubjects.Field.Covers.LoadFailed"]"
+                               EmptyText="@L["NoticeSubjects.Field.Covers.EmptyTaxonomy"]"
+                               OnRetry="@LoadTaxonomyAsync"
+                               Hint="@CoversHint"
+                               Error="@_coversError"
+                               Disabled="_saving"
+                               Announcement="@_announcement" />
         </div>
     </DialogContent>
     <DialogActions>
@@ -58,6 +84,8 @@
 </MudDialog>
 
 @code {
+    private const string CoversId = "notice-subject-covers";
+
     [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
 
     /// <summary>The notice subject being edited; null to add one.</summary>
@@ -72,6 +100,20 @@
     /// <summary>Sends the request to the Api; the dialog stays open and shows the error when it fails.</summary>
     [Parameter, EditorRequired] public Func<SaveNoticeSubjectRequest, Task<ApiResult<NoticeSubjectResponse>>> Save { get; set; } = default!;
 
+    /// <summary>F-75: reads the taxonomy the Covers field picks from; called when the dialog opens, on try again and after a refusal.</summary>
+    [Parameter, EditorRequired] public Func<Task<ApiResult<IReadOnlyList<TaxonomySubjectResponse>>>> LoadTaxonomy { get; set; } = default!;
+
+    /// <summary>
+    /// One entry of the mapping as the dialog holds it: a whole subject (no topic) or one topic with the subject it sits
+    /// under now (BR8). The names are kept so the chip shows before, and without, the taxonomy.
+    /// </summary>
+    private sealed record Pick(Guid SubjectId, string SubjectName, Guid? TopicId, string? TopicName)
+    {
+        public bool IsWhole => TopicId is null;
+
+        public string Key => IsWhole ? WholeKey(SubjectId) : TopicKey(TopicId!.Value);
+    }
+
     private string? _group;
     private string? _label;
     private string? _questionCountText;
@@ -82,12 +124,24 @@
     private bool _saving;
     private bool _focusFirstField;
 
+    private List<Pick> _picks = [];
+    private HashSet<string> _initialKeys = [];
+    private IReadOnlyList<Pick> _savedPicks = [];
+    private IReadOnlyList<TaxonomySubjectResponse> _taxonomy = [];
+    private AppMultiPickState _taxonomyState = AppMultiPickState.Loading;
+    private string? _coversError;
+    private string? _coversErrorCode;
+    private HashSet<string> _goneKeys = [];
+    private string? _announcement;
+    private string? _pendingFocus;
+
     private string StartGroup => NoticeSubject is null ? Trimmed(InitialGroup) : Trimmed(NoticeSubject.Group);
 
     private bool HasChanges =>
         Trimmed(_group) != StartGroup
         || Trimmed(_label) != (NoticeSubject?.Label ?? string.Empty)
-        || Trimmed(_questionCountText) != (NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+        || Trimmed(_questionCountText) != (NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)
+        || !_picks.Select(pick => pick.Key).ToHashSet().SetEquals(_initialKeys);
 
     // BR7: in edit mode a group that differs from the saved one (case and accents do not count) sends the row to the
     // end of the new group, and the hint says so.
@@ -97,27 +151,72 @@
 
     private string GroupHint => GroupChanged ? L["NoticeSubjects.Field.Group.MoveNote"] : L["NoticeSubjects.Field.Group.Hint"];
 
+    private bool AtLimit => _picks.Count >= CatalogLimits.NoticeSubjectMappingMax;
+
+    private string CountText => L["NoticeSubjects.Field.Covers.Count", _picks.Count, CatalogLimits.NoticeSubjectMappingMax];
+
+    // The limit message replaces the hint while the 50 are picked.
+    private string CoversHint => AtLimit
+        ? L["NoticeSubjects.Field.Covers.LimitReached", CatalogLimits.NoticeSubjectMappingMax]
+        : L["NoticeSubjects.Field.Covers.Hint"];
+
+    private static string WholeKey(Guid subjectId) => $"s-{subjectId}";
+
+    private static string TopicKey(Guid topicId) => $"t-{topicId}";
+
     protected override void OnInitialized()
     {
         _group = StartGroup;
         _label = NoticeSubject?.Label ?? string.Empty;
         _questionCountText = NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture);
         _focusFirstField = true;
+
+        // The row's own chips: they show and can be removed before, and without, the taxonomy.
+        _picks =
+        [
+            .. (NoticeSubject?.Mappings ?? [])
+                .Select(mapping => new Pick(mapping.SubjectId, mapping.SubjectName, mapping.TopicId, mapping.TopicName))
+                .DistinctBy(pick => pick.Key)
+        ];
+        _savedPicks = [.. _picks];
+        _initialKeys = [.. _picks.Select(pick => pick.Key)];
     }
+
+    protected override Task OnInitializedAsync() => LoadTaxonomyAsync();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_focusFirstField)
+        if (_focusFirstField)
         {
-            return;
+            // Focus goes to the first field on open (rule: ui).
+            _focusFirstField = false;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", "notice-subject-group");
         }
 
-        // Focus goes to the first field on open (rule: ui).
-        _focusFirstField = false;
-        await JS.InvokeVoidAsync("simulabShell.focusElement", "notice-subject-group");
+        if (_pendingFocus is { } target)
+        {
+            _pendingFocus = null;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+        }
     }
 
     private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
+
+    private async Task LoadTaxonomyAsync()
+    {
+        _taxonomyState = AppMultiPickState.Loading;
+        var result = await LoadTaxonomy();
+        if (result is { IsSuccess: true, Value: { } taxonomy })
+        {
+            _taxonomy = taxonomy;
+            _taxonomyState = taxonomy.Count == 0 ? AppMultiPickState.Empty : AppMultiPickState.Ready;
+        }
+        else
+        {
+            _taxonomy = [];
+            _taxonomyState = AppMultiPickState.LoadFailed;
+        }
+    }
 
     private void OnGroupChanged(string? value)
     {
@@ -183,6 +282,227 @@
 
     private int? ParsedCount() => TryParseCount(_questionCountText, out var count) ? count : null;
 
+    // ---- Covers (F-75) ----
+
+    // BR4, compared with the SAVED mapping: an overlap a topic move made is never blocked here, only a new one.
+    private bool SavedOverlap(Guid subjectId) =>
+        _savedPicks.Any(pick => pick.IsWhole && pick.SubjectId == subjectId)
+        && _savedPicks.Any(pick => !pick.IsWhole && pick.SubjectId == subjectId);
+
+    private bool IsPicked(string key) => _picks.Any(pick => pick.Key == key);
+
+    private IReadOnlyList<AppMultiPickGroup> BuildGroups() =>
+        [
+            .. _taxonomy.Select(subject => new AppMultiPickGroup(
+                WholeKey(subject.Id),
+                subject.Name,
+                [WholeOption(subject), .. subject.Topics.Select(topic => TopicOption(subject, topic))]))
+        ];
+
+    private AppMultiPickOption WholeOption(TaxonomySubjectResponse subject)
+    {
+        var key = WholeKey(subject.Id);
+        var picked = IsPicked(key);
+        var blocked = !picked
+            && _picks.Any(pick => !pick.IsWhole && pick.SubjectId == subject.Id)
+            && !SavedOverlap(subject.Id);
+
+        return new AppMultiPickOption(
+            key,
+            subject.Name,
+            picked,
+            Disabled: blocked || (!picked && AtLimit),
+            Secondary: blocked ? L["NoticeSubjects.Covers.WholeBlocked"].Value : L["NoticeSubjects.Covers.WholeMarker"].Value,
+            IsGroupOption: true);
+    }
+
+    private AppMultiPickOption TopicOption(TaxonomySubjectResponse subject, TaxonomyTopicResponse topic)
+    {
+        var key = TopicKey(topic.Id);
+        var picked = IsPicked(key);
+        var covered = !picked
+            && _picks.Any(pick => pick.IsWhole && pick.SubjectId == subject.Id)
+            && !SavedOverlap(subject.Id);
+
+        return new AppMultiPickOption(
+            key,
+            topic.Name,
+            picked,
+            Disabled: covered || (!picked && AtLimit),
+            Secondary: covered ? L["NoticeSubjects.Covers.CoveredByWhole"].Value : null);
+    }
+
+    private IReadOnlyList<Pick> SortedPicks() => NoticeSubjectCoverText.Sort(_picks, pick => pick.SubjectName, pick => pick.TopicName);
+
+    private IReadOnlyList<AppMultiPickItem> BuildItems() =>
+        [
+            .. SortedPicks().Select(pick =>
+            {
+                var spoken = NoticeSubjectCoverText.Spoken(L, pick.SubjectName, pick.TopicName);
+                return pick.IsWhole
+                    ? new AppMultiPickItem(
+                        pick.Key,
+                        pick.SubjectName,
+                        spoken,
+                        AppIcons.Subjects,
+                        Secondary: L["NoticeSubjects.Covers.WholeMarker"].Value,
+                        Mark: MarkOf(pick))
+                    : new AppMultiPickItem(
+                        pick.Key,
+                        NoticeSubjectCoverText.Visible(L, pick.SubjectName, pick.TopicName),
+                        spoken,
+                        AppIcons.Topics,
+                        Mark: MarkOf(pick),
+                        SpokenText: spoken);
+            })
+        ];
+
+    // The marks of a refusal (Screen 2): a gone item, or a topic whose subject is picked whole.
+    private string? MarkOf(Pick pick)
+    {
+        if (_goneKeys.Contains(pick.Key))
+        {
+            return L["NoticeSubjects.Covers.Gone"].Value;
+        }
+
+        return _coversErrorCode == CatalogErrorCodes.NoticeSubjectMappingOverlap && IsOverlapping(pick)
+            ? L["NoticeSubjects.Covers.Overlaps"].Value
+            : null;
+    }
+
+    private bool IsOverlapping(Pick pick) =>
+        !pick.IsWhole && _picks.Any(other => other.IsWhole && other.SubjectId == pick.SubjectId);
+
+    private void OnToggle(string key)
+    {
+        if (_saving)
+        {
+            return;
+        }
+
+        if (_picks.Find(pick => pick.Key == key) is { } picked)
+        {
+            _picks.Remove(picked);
+            _goneKeys.Remove(key);
+            _announcement = L["NoticeSubjects.Covers.Removed", NoticeSubjectCoverText.Spoken(L, picked.SubjectName, picked.TopicName)];
+        }
+        else if (!AtLimit && FindInTaxonomy(key) is { } found)
+        {
+            _picks.Add(found);
+            _announcement = L["NoticeSubjects.Covers.Added", NoticeSubjectCoverText.Spoken(L, found.SubjectName, found.TopicName)];
+        }
+
+        AfterPicksChanged();
+    }
+
+    private Pick? FindInTaxonomy(string key)
+    {
+        foreach (var subject in _taxonomy)
+        {
+            if (WholeKey(subject.Id) == key)
+            {
+                return new Pick(subject.Id, subject.Name, null, null);
+            }
+
+            if (subject.Topics.FirstOrDefault(topic => TopicKey(topic.Id) == key) is { } topic)
+            {
+                return new Pick(subject.Id, subject.Name, topic.Id, topic.Name);
+            }
+        }
+
+        return null;
+    }
+
+    // Removing moves the focus to the next chip's remove button, else the previous one, else the search input.
+    private void OnRemovePick(string key)
+    {
+        if (_saving)
+        {
+            return;
+        }
+
+        var sorted = SortedPicks();
+        var index = sorted.ToList().FindIndex(pick => pick.Key == key);
+        if (index < 0)
+        {
+            return;
+        }
+
+        var removed = sorted[index];
+        _picks.RemoveAll(pick => pick.Key == key);
+        _goneKeys.Remove(key);
+        _announcement = L["NoticeSubjects.Covers.Removed", NoticeSubjectCoverText.Spoken(L, removed.SubjectName, removed.TopicName)];
+
+        var remaining = SortedPicks();
+        _pendingFocus = remaining.Count == 0
+            ? CoversId
+            : AppMultiPickField.RemoveButtonId(CoversId, remaining[Math.Min(index, remaining.Count - 1)].Key);
+        AfterPicksChanged();
+    }
+
+    private void OnClearPicks()
+    {
+        if (_saving)
+        {
+            return;
+        }
+
+        _picks.Clear();
+        _goneKeys.Clear();
+        _announcement = L["NoticeSubjects.Covers.Cleared"];
+        _pendingFocus = CoversId;
+        AfterPicksChanged();
+    }
+
+    // A refusal's message goes away once nothing it marks is left.
+    private void AfterPicksChanged()
+    {
+        var resolved = _coversErrorCode switch
+        {
+            CatalogErrorCodes.NoticeSubjectMappingOverlap => !_picks.Any(IsOverlapping),
+            CatalogErrorCodes.NoticeSubjectMappingTargetNotFound => _goneKeys.Count == 0,
+            null => false,
+            _ => true
+        };
+
+        if (resolved)
+        {
+            _coversError = null;
+            _coversErrorCode = null;
+        }
+    }
+
+    // After a refusal that depends on the taxonomy: read it again and bring each pick up to date with it (a topic that
+    // moved shows under its new subject); with markGone, a pick that is no longer there is marked.
+    private async Task RefreshAfterRefusalAsync(bool markGone)
+    {
+        await LoadTaxonomyAsync();
+        if (_taxonomyState != AppMultiPickState.Ready)
+        {
+            return;
+        }
+
+        var refreshed = new List<Pick>();
+        _goneKeys = [];
+        foreach (var pick in _picks)
+        {
+            if (FindInTaxonomy(pick.Key) is { } current)
+            {
+                refreshed.Add(current);
+            }
+            else
+            {
+                refreshed.Add(pick);
+                if (markGone)
+                {
+                    _goneKeys.Add(pick.Key);
+                }
+            }
+        }
+
+        _picks = refreshed;
+    }
+
     private async Task SaveAsync()
     {
         _groupError = GroupError(_group);
@@ -195,10 +515,18 @@
 
         _saving = true;
         _error = null;
+        _coversError = null;
+        _coversErrorCode = null;
 
-        // A blank group is "no group": the Api stores it as null (BR3).
+        // A blank group is "no group": the Api stores it as null (BR3). The mapping is sent whole (BR7): none picked is an
+        // empty list, which the Api reads as "not mapped".
         var group = Trimmed(_group);
-        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), ParsedCount()));
+        var mappings = SortedPicks()
+            .Select(pick => new NoticeSubjectMappingRequest(
+                pick.IsWhole ? pick.SubjectId : (Guid?)null,
+                pick.TopicId))
+            .ToList();
+        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), ParsedCount(), mappings));
 
         _saving = false;
         if (result.IsSuccess)
@@ -220,6 +548,21 @@
                 break;
             case CatalogErrorCodes.NoticeSubjectQuestionCountInvalid:
                 _questionCountError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.NoticeSubjectMappingOverlap:
+            case CatalogErrorCodes.NoticeSubjectMappingTargetNotFound:
+                // The taxonomy changed while the dialog was open: it is read again, and the marked chips say which.
+                _coversErrorCode = result.ErrorCode;
+                _coversError = Errors.For(result.ErrorCode);
+                await RefreshAfterRefusalAsync(markGone: result.ErrorCode == CatalogErrorCodes.NoticeSubjectMappingTargetNotFound);
+                _pendingFocus = CoversId;
+                break;
+            case CatalogErrorCodes.NoticeSubjectMappingTooMany:
+            case CatalogErrorCodes.NoticeSubjectMappingInvalid:
+                // Neither should arise from the screen: the message alone, under the field.
+                _coversErrorCode = result.ErrorCode;
+                _coversError = Errors.For(result.ErrorCode);
+                _pendingFocus = CoversId;
                 break;
             default:
                 _error = Errors.For(result.ErrorCode);

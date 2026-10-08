@@ -1,0 +1,410 @@
+@implements IAsyncDisposable
+@inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
+
+@* F-75: a search over a short list the page already holds, to pick several items at once, grouped (a subject and its
+   topics), the group itself pickable as the first option of its group. The picks show below as removable chips.
+   Same anatomy as AppTextField and AppLookupField - label above, hint or error below, both announced.
+   AppLookupField stays the single-pick field that asks a server. The page owns the picks: this field draws them and
+   says what was toggled or removed; the page answers by changing what it passes in.
+   The keys are handled twice: here, for what changes the page (focus, toggling, closing), and in shell.js, for what
+   must be decided before the server answers (the browser's own arrow, space and home/end behaviour). *@
+<div class="@RootClass" id="@RootId" data-app-multipick @onkeydown:stopPropagation="_open">
+    <label class="app-field-label" for="@Id">@Label</label>
+    <div class="app-mp-anchor">
+        <div class="app-mp-input">
+            <MudIcon Icon="@AppIcons.Search" Size="Size.Small" aria-hidden="true" />
+            <input type="text"
+                   id="@Id"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   aria-haspopup="listbox"
+                   aria-expanded="@(ListVisible ? "true" : "false")"
+                   aria-controls="@ListId"
+                   aria-describedby="@DescribedBy"
+                   aria-invalid="@(HasError ? "true" : null)"
+                   autocomplete="off"
+                   placeholder="@Placeholder"
+                   value="@_term"
+                   disabled="@InputDisabled"
+                   @oninput="OnInputAsync"
+                   @onclick="OpenAsync"
+                   @onkeydown="OnInputKeyDownAsync" />
+        </div>
+
+        @if (ListVisible)
+        {
+            var groups = VisibleGroups();
+            <div class="app-mp-list" role="listbox" id="@ListId" aria-multiselectable="true" aria-label="@OptionsLabel">
+                @if (groups.Count == 0)
+                {
+                    <div class="app-mp-empty" role="presentation">@L["Lookup.NoResults", _term]</div>
+                }
+
+                @foreach (var group in groups)
+                {
+                    <div class="app-mp-group" role="group" aria-label="@group.Name" @key="group.Key">
+                        @foreach (var option in group.Options)
+                        {
+                            <div role="option"
+                                 @key="option.Key"
+                                 id="@OptionId(Id, option.Key)"
+                                 tabindex="-1"
+                                 class="@OptionClass(option)"
+                                 aria-selected="@(option.Picked ? "true" : "false")"
+                                 aria-disabled="@(option.Disabled ? "true" : null)"
+                                 aria-describedby="@(string.IsNullOrEmpty(option.Secondary) ? null : SecondaryId(option))"
+                                 @onclick="@(() => ToggleAsync(option))"
+                                 @onkeydown="@((KeyboardEventArgs args) => OnOptionKeyDownAsync(args, option))">
+                                <span class="app-mp-check" aria-hidden="true"></span>
+                                <span class="app-mp-option-text">
+                                    <span class="app-mp-option-name">@option.Text</span>
+                                    @if (!string.IsNullOrEmpty(option.Secondary))
+                                    {
+                                        <span class="app-mp-option-secondary" id="@SecondaryId(option)">@option.Secondary</span>
+                                    }
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (State == AppMultiPickState.Loading)
+        {
+            <span class="app-field-hint app-mp-status">
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" aria-hidden="true" Class="app-mp-spinner" />
+                @LoadingText
+            </span>
+        }
+        else if (State == AppMultiPickState.LoadFailed)
+        {
+            <span class="app-field-error-text">
+                @LoadFailedText
+                <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => OnRetry.InvokeAsync())" Class="app-lookup-retry">@L["Common.TryAgain"]</MudButton>
+            </span>
+        }
+        else if (State == AppMultiPickState.Empty)
+        {
+            <span class="app-field-hint">@EmptyText</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+
+    <div class="app-mp-countline">
+        <span id="@CountId">@CountText</span>
+        @if (Picked.Count > 0)
+        {
+            <MudButton Variant="Variant.Text"
+                       Size="Size.Small"
+                       Disabled="Disabled"
+                       OnClick="@(() => OnClear.InvokeAsync())"
+                       Class="app-mp-clear">@ClearText</MudButton>
+        }
+    </div>
+
+    @if (Picked.Count > 0)
+    {
+        <ul class="app-mp-chips" aria-label="@PickedLabel">
+            @foreach (var item in Picked)
+            {
+                <li @key="item.Key">
+                    <AppChip Text="@item.Text"
+                             SpokenText="@item.SpokenText"
+                             Icon="@item.Icon"
+                             Secondary="@item.Secondary"
+                             Mark="@item.Mark"
+                             Remove="@ChipRemove(item)" />
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="app-mp-none">@NoneText</p>
+    }
+
+    <span class="app-visually-hidden" aria-live="polite">@(State == AppMultiPickState.LoadFailed ? LoadFailedText : _results)</span>
+    <span class="app-visually-hidden" aria-live="polite">@Announcement</span>
+</div>
+
+@code {
+    /// <summary>Id of the search input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>What the empty input invites the reader to type; it names the thing, so it has no default.</summary>
+    [Parameter, EditorRequired] public string Placeholder { get; set; } = string.Empty;
+
+    /// <summary>Names the popup list for a screen reader ("Taxonomy: subjects and topics").</summary>
+    [Parameter, EditorRequired] public string OptionsLabel { get; set; } = string.Empty;
+
+    /// <summary>Names the list of picked chips for a screen reader ("Picked items").</summary>
+    [Parameter, EditorRequired] public string PickedLabel { get; set; } = string.Empty;
+
+    /// <summary>The line under the input that counts the picks ("Picked: 3 of 50"), already translated.</summary>
+    [Parameter, EditorRequired] public string CountText { get; set; } = string.Empty;
+
+    /// <summary>The text of the button that removes every pick.</summary>
+    [Parameter, EditorRequired] public string ClearText { get; set; } = string.Empty;
+
+    /// <summary>What the chips area says while nothing is picked.</summary>
+    [Parameter, EditorRequired] public string NoneText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The wording of a chip's remove button and tooltip, from the item's name; it depends on the page ("Remove
+    /// Mathematics"), so it has no default.
+    /// </summary>
+    [Parameter, EditorRequired] public Func<AppMultiPickItem, string> RemoveLabelFor { get; set; } = default!;
+
+    /// <summary>Every option, grouped, with its state. The page recomputes it whenever a pick changes.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppMultiPickGroup> Groups { get; set; } = [];
+
+    /// <summary>The picks, in the order the page wants the chips drawn.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppMultiPickItem> Picked { get; set; } = [];
+
+    /// <summary>An option was toggled by a click, Space or Enter; the argument is its key.</summary>
+    [Parameter, EditorRequired] public EventCallback<string> OnToggle { get; set; }
+
+    /// <summary>A chip's remove button was pressed; the argument is the pick's key.</summary>
+    [Parameter, EditorRequired] public EventCallback<string> OnRemove { get; set; }
+
+    /// <summary>The clear button was pressed.</summary>
+    [Parameter, EditorRequired] public EventCallback OnClear { get; set; }
+
+    [Parameter] public AppMultiPickState State { get; set; } = AppMultiPickState.Ready;
+
+    /// <summary>Said in the description while <see cref="State"/> is Loading.</summary>
+    [Parameter] public string? LoadingText { get; set; }
+
+    /// <summary>Said in the description (in error style, with try again) while <see cref="State"/> is LoadFailed.</summary>
+    [Parameter] public string? LoadFailedText { get; set; }
+
+    /// <summary>Said in the description while <see cref="State"/> is Empty.</summary>
+    [Parameter] public string? EmptyText { get; set; }
+
+    /// <summary>Try again was pressed after a failed load.</summary>
+    [Parameter] public EventCallback OnRetry { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>True while the page saves: the input, the clear button and every remove button are disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>What the page announces politely after a toggle, a removal or a clear; the field announces the result count.</summary>
+    [Parameter] public string? Announcement { get; set; }
+
+    private string _term = string.Empty;
+    private bool _open;
+    private string? _focusId;
+    private string _results = string.Empty;
+    private DotNetObjectReference<AppMultiPickField>? _self;
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private bool InputDisabled => Disabled || State != AppMultiPickState.Ready;
+
+    private bool ListVisible => _open && !InputDisabled;
+
+    private string RootClass => HasError ? "app-field app-mp app-field-error" : "app-field app-mp";
+
+    private string RootId => $"{Id}-field";
+
+    private string ListId => $"{Id}-list";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private string CountId => $"{Id}-count";
+
+    private string DescribedBy => $"{DescriptionId} {CountId}";
+
+    /// <summary>The id of an option's element; a key is made of letters, digits and dashes, but is cleaned all the same.</summary>
+    public static string OptionId(string fieldId, string key) => $"{fieldId}-option-{Clean(key)}";
+
+    /// <summary>The id of a picked chip's remove button, so a page can move the focus to it.</summary>
+    public static string RemoveButtonId(string fieldId, string key) => $"{fieldId}-remove-{Clean(key)}";
+
+    private static string Clean(string key) =>
+        string.Concat(key.Select(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' ? character : '-'));
+
+    private string OptionId(AppMultiPickOption option) => OptionId(Id, option.Key);
+
+    private string SecondaryId(AppMultiPickOption option) => $"{OptionId(option)}-secondary";
+
+    private static string OptionClass(AppMultiPickOption option) =>
+        option.IsGroupOption ? "app-mp-option is-group" : "app-mp-option is-member";
+
+    private AppChipRemove ChipRemove(AppMultiPickItem item) =>
+        new(
+            RemoveLabelFor(item),
+            EventCallback.Factory.Create(this, () => OnRemove.InvokeAsync(item.Key)),
+            RemoveButtonId(Id, item.Key),
+            Disabled);
+
+    /// <summary>
+    /// Contains-match ignoring case and accents. A group whose name matches shows with all its options; otherwise it
+    /// shows only the options that match, plus its own option for context; a group with no match is left out.
+    /// </summary>
+    private IReadOnlyList<AppMultiPickGroup> VisibleGroups()
+    {
+        var term = AppSuggestField.Normalize(_term);
+        if (term.Length == 0)
+        {
+            return Groups;
+        }
+
+        var visible = new List<AppMultiPickGroup>();
+        foreach (var group in Groups)
+        {
+            if (AppSuggestField.Normalize(group.Name).Contains(term, StringComparison.Ordinal))
+            {
+                visible.Add(group);
+                continue;
+            }
+
+            var matching = group.Options
+                .Where(option => option.IsGroupOption || AppSuggestField.Normalize(option.Text).Contains(term, StringComparison.Ordinal))
+                .ToList();
+            if (matching.Any(option => !option.IsGroupOption))
+            {
+                visible.Add(group with { Options = matching });
+            }
+        }
+
+        return visible;
+    }
+
+    private List<AppMultiPickOption> FlatOptions() => [.. VisibleGroups().SelectMany(group => group.Options)];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusId is not { } target)
+        {
+            return;
+        }
+
+        _focusId = null;
+        await JS.InvokeVoidAsync("simulabShell.focusOption", target);
+    }
+
+    // The list opens on a click, on typing or on Arrow down - never on focus alone, so a field error under the input
+    // stays visible when a failed Save moves the focus here.
+    private async Task OpenAsync()
+    {
+        if (_open || InputDisabled)
+        {
+            return;
+        }
+
+        _open = true;
+        _self ??= DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("simulabShell.closeOnOutside", RootId, _self);
+    }
+
+    /// <summary>A pointer or focus landed outside the field while the list was open (called from shell.js).</summary>
+    [JSInvokable]
+    public Task CloseFromOutside() => InvokeAsync(() =>
+    {
+        _open = false;
+        StateHasChanged();
+    });
+
+    private async Task OnInputAsync(ChangeEventArgs args)
+    {
+        _term = args.Value?.ToString() ?? string.Empty;
+        await OpenAsync();
+
+        var count = VisibleGroups().Sum(group => group.Options.Count);
+        _results = count == 0 ? L["Lookup.NoResults", _term] : L["Lookup.Results", count];
+    }
+
+    private async Task OnInputKeyDownAsync(KeyboardEventArgs args)
+    {
+        switch (args.Key)
+        {
+            case "ArrowDown":
+                await OpenAsync();
+                if (FlatOptions().FirstOrDefault() is { } first)
+                {
+                    _focusId = OptionId(first);
+                }
+
+                break;
+            case "Escape":
+            case "Tab":
+                _open = false;
+                break;
+        }
+    }
+
+    private async Task OnOptionKeyDownAsync(KeyboardEventArgs args, AppMultiPickOption option)
+    {
+        var options = FlatOptions();
+        var index = options.FindIndex(candidate => candidate.Key == option.Key);
+        switch (args.Key)
+        {
+            case "ArrowDown":
+                if (index >= 0 && index < options.Count - 1)
+                {
+                    _focusId = OptionId(options[index + 1]);
+                }
+
+                break;
+            case "ArrowUp":
+                // Past the first option the focus goes back to the input.
+                _focusId = index > 0 ? OptionId(options[index - 1]) : Id;
+                break;
+            case "Home" when options.Count > 0:
+                _focusId = OptionId(options[0]);
+                break;
+            case "End" when options.Count > 0:
+                _focusId = OptionId(options[^1]);
+                break;
+            case " ":
+            case "Spacebar":
+            case "Enter":
+                await ToggleAsync(option);
+                break;
+            case "Escape":
+                _open = false;
+                _focusId = Id;
+                break;
+            case "Tab":
+                _open = false;
+                break;
+        }
+    }
+
+    // A disabled option stays in the list and in the arrow keys' path, so its reason is read; it just does nothing.
+    private async Task ToggleAsync(AppMultiPickOption option)
+    {
+        if (option.Disabled || Disabled)
+        {
+            return;
+        }
+
+        await OnToggle.InvokeAsync(option.Key);
+        _focusId = OptionId(option);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _self?.Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+}
