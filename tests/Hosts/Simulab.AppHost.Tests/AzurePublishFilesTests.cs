@@ -287,12 +287,13 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// F-64 D12: the committed Staging settings list the ingress address read on the first staging (the web logged
-    /// <c>::ffff:100.100.0.17</c>, 2026-10-07), as one proxy and no network. <c>aspire deploy</c> reads this file from the
+    /// F-64 D12 (2026-10-08): the ingress sends from several addresses of the environment's internal range (the hosts logged
+    /// <c>100.100.0.17</c>, <c>.41</c>, <c>.43</c> and <c>.186</c>), so the committed Staging settings list the network
+    /// <c>100.100.0.0/16</c> and no single proxy. <c>aspire deploy</c> reads this file from the
     /// app host's folder; the test reads it from the source tree because the publish test's content root does not have it.
     /// </summary>
     [Fact]
-    public void StagingSettings_ListTheIngressAddressMeasuredOnTheFirstStaging()
+    public void StagingSettings_ListTheIngressNetworkMeasuredOnStaging()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Simulab.slnx")))
@@ -305,8 +306,8 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             File.ReadAllText(Path.Combine(directory!.FullName, "src", "Hosts", "Simulab.AppHost", "appsettings.Staging.json")));
         var section = settings.RootElement.GetProperty("ForwardedHeaders");
 
-        section.GetProperty("KnownProxies").EnumerateArray().Select(address => address.GetString()).Should().Equal("100.100.0.17");
-        section.GetProperty("KnownNetworks").GetArrayLength().Should().Be(0);
+        section.GetProperty("KnownProxies").GetArrayLength().Should().Be(0);
+        section.GetProperty("KnownNetworks").EnumerateArray().Select(network => network.GetString()).Should().Equal("100.100.0.0/16");
     }
 
     /// <summary>
