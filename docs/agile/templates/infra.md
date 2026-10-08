@@ -40,20 +40,52 @@ GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_CLOUD_PROJECT, GCLOUD_PROJECT and GCP_PRO
 `other` is shown in the plan and not checked.
 An environment whose AppHost says `Deploy:Target` `aca` (Azure Container Apps, the profile's second recipe) needs Resource group, Region and Monthly budget filled (Azure__ResourceGroup, Azure__Location): the plan and the pipeline stop without them. Its URL and Check URL stay blank until the first deploy prints the generated address; fill them by hand then, or, for the client's own domain, write it as the URL (see "Custom domain" below).
 Monthly budget: the ceiling of one month's spend, a whole number in the billing currency of the subscription, or `none`; only an `aca` environment uses it (filled anywhere else it is reported as ignored). After the deploy command, whatever its exit code while the resource group exists, the plugin writes the budget `agile-monthly-ceiling` on that group with `az rest`: Owner and Contributor of the group get Azure's e-mail at 80 % and 100 % of the spend and at 100 % of the forecast (no e-mail address is written here), and nothing is stopped when it fires. A budget starts on the first day of the month it was created and keeps that date; `none` writes and deletes nothing, and the plan names a budget left from an earlier ceiling.
-Parking an `aca` environment (`/agile:publish <environment> --park`, `--resume` to bring it back; each shows its plan and waits for the owner's yes) sets every container app to minimum 0 and stops its PostgreSQL server, marked `agile-parked`; the registry, the log workspace and the storage keep costing (about 8.7 a month, measured 2026-10-06), an Azure SQL database pauses itself, and Azure starts a stopped server by itself after 7 days (park again). A deploy of a parked environment starts its database first.
+Parking an `aca` environment (`/agile:publish <environment> --park`, `--resume` to bring it back; each shows its plan and waits for the owner's yes) sets every container app to minimum 0 and stops its PostgreSQL server, marked `agile-parked`; the registry, the log workspace and the storage keep costing (about 8.7 a month, measured 2026-10-06), an Azure SQL database pauses itself, and Azure starts a stopped server by itself after 7 days (park again). A deploy of a parked environment starts its database first. The pipeline can park, resume and re-park on a schedule (`## Schedule` below).
 
 What an `aca` environment has cost this month is read on demand: `/agile:publish <environment> --cost` prints `Spend this month: <amount> <currency> of <ceiling> (<n> %)` from Azure Cost Management (the resource group, in the subscription's billing currency; the figures lag 8 to 24 hours), and `--plan` shows the same as `Spend:` after `Budget:`. A deploy, the pipeline and `/agile:status` never read it.
-Deleting an `aca` environment is deleting its resource group and then its budget (the budget outlives its group), both by hand in the client's subscription: `az rest --method delete --url "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.Consumption/budgets/agile-monthly-ceiling?api-version=2023-11-01"`.
+
+Whether the database backup of an `aca` environment can be restored is tested on demand: `/agile:publish <environment> --restore-drill` shows its plan (the server, its backup retention and earliest restore point, the throwaway server it would create), and after a yes restores the server's automatic backup into a throwaway `<server>-drill-<yymmddhhmm>` PostgreSQL server for a few minutes, checks it, reads the data with `psql` when the owner has it, and deletes the throwaway server, always. It is billed per hour until deleted; a drill that crashed leaves a `-drill-` server behind, which the next plan lists and the run removes first. A restore does not copy the firewall rules, server parameters, logins or database-level permissions: a real recovery restores into a new server, repoints the app's connection to it and recreates those. A deploy, the pipeline and `/agile:status` never run it.
+Deleting an `aca` environment is deleting its resource group and then its budget (the budget outlives its group), both by hand in the client's subscription; the budget is deleted with:
+
+```powershell
+az rest --method delete --url "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.Consumption/budgets/agile-monthly-ceiling?api-version=2023-11-01"
+```
+
+```bash
+az rest --method delete --url "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.Consumption/budgets/agile-monthly-ceiling?api-version=2023-11-01"
+```
+
 Custom domain: an `aca` environment answers on the client's own domain when its URL in `## Environments` is that domain (`https://app.client.com` or `https://client.com`); a blank URL or a generated `azurecontainerapps.io` address means none. `/agile:publish <environment>` (`--plan` shows it) and the pipeline read what Azure expects, resolve the client's DNS records and list the ones that are missing or wrong, each with its expected value (a subdomain: `CNAME <sub>` straight to the app's generated address, no proxy in between, and `TXT asuid.<sub>`; an apex: `A @` to the environment's static IP and `TXT asuid`; a CAA record on the root must allow `0 issue "digicert.com"`). The client creates them at their DNS provider, then the next deploy adds the domain, has Azure issue a free managed certificate and binds it, with no step in the Azure portal. Check URL may be the domain once it is bound.
 What to ask the client's administrator: locally, the owner as a guest in their tenant with the role Contributor on the subscription (plus Role Based Access Control Administrator limited to the roles the app's managed
 identities need, when the deploy creates role assignments; for an `aca` environment, which always creates them, Contributor plus Role Based Access Control Administrator on the subscription); for the pipeline, an app registration in their tenant with the same roles and a federated credential for `repo:<owner>/<repo>:environment:<environment>`.
 GitHub: set the variables AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID on the GitHub environment (variables, not secrets), and give each Azure environment a deployment protection rule: "Selected branches and tags"
-with the tag pattern `v*` only, and required reviewers on production. A manual run can start from any branch and gets the same federated subject: the protection rule is the boundary, the plugin's check only catches a mistake.
+with the tag pattern `v*` (plus the branch `main` for an environment in `## Schedule`), and required reviewers on production. A manual run can start from any branch and gets the same federated subject: the protection rule is the boundary, the plugin's check only catches a mistake.
 What to ask the administrator for the pipeline on AWS: an IAM role that trusts GitHub's OIDC provider for `repo:<owner>/<repo>:environment:<environment>`; set AWS_ROLE_ARN and AWS_REGION on the GitHub environment. On Google Cloud: a Workload Identity pool and provider and a service account
 (with resourcemanager.projects.get on the project); set GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT (and GCP_PROJECT_ID when the table has more than one project) on the GitHub environment. All variables, never secrets.
 -->
 | Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region | Monthly budget |
 |---|---|---|---|---|---|---|---|
+
+## Schedule
+<!--
+Optional. When an `aca` environment is parked, resumed or re-parked by the pipeline, so nobody has to type `/agile:publish <environment> --park`. One row per time; leave the table empty for no schedule.
+Action: `park` (what `--park` does), `resume` (what `--resume` does, then the Check URL is polled) or `re-park` (stops again a PostgreSQL server that Azure started on its 7th day, `Ready` and still marked `agile-parked`; a server that was resumed on purpose is left).
+When: a five-field cron (minute hour day-of-month month day-of-week). Minute and hour are numbers, a comma list is allowed, never `*` or a step; day of week is `*`, numbers 0 to 6 (Sunday is 0), ranges like 1-5 or a list. Timezone: an IANA name such as America/Sao_Paulo; blank is UTC.
+A `re-park` every day is the cheap guard against Azure's 7-day start of a server parked by hand; one environment never has two rows with the same When, and one When never has two timezones. The environment must be an `aca` environment with its `## Cloud accounts` row filled; `production` is never scheduled (it is promoted by hand and its required reviewers would hold the run).
+The plugin's `sync.js schedule` shows what the table renders and whether `.github/workflows/park.yml` matches it; `sync.js schedule write` writes `park.yml` (replacing it: the table is its source, edit the table and run the command again) and `.github/scripts/agile-park.js`. It needs the deploy pipeline (`sync.js pipeline write`) first. From the project root, with the folder of the installed plugin version:
+```powershell
+node "$env:USERPROFILE\.claude\plugins\cache\canary\agile\<version>\scripts\sync.js" schedule write
+```
+
+```bash
+node ~/.claude/plugins/cache/canary/agile/<version>/scripts/sync.js schedule write
+```
+The row on `main` is the owner's yes: the run asks nothing, prints its plan and then does it. GitHub fires a scheduled workflow on the default branch only, so add `main` to the deployment branches of each scheduled GitHub environment (Settings > Environments; the tag rule `v*` of the deploy stays).
+A run waits for a deploy of the same environment (same concurrency group; GitHub keeps one pending run per group, so a newer run cancels the pending one, which may be a deploy), takes about 10 minutes of Actions time (two runs a weekday are about 220 minutes a month), GitHub may delay it under load, and a public repository's schedule stops after 60 days without activity. A failed run is red; GitHub's own notification is the only alert.
+Example, weekdays: staging | park | 0 20 * * 1-5 | America/Sao_Paulo; staging | resume | 0 8 * * 1-5 | America/Sao_Paulo; staging | re-park | 0 3 * * * | America/Sao_Paulo.
+-->
+| Environment | Action | When | Timezone |
+|---|---|---|---|
 
 ## Expected secrets
 | Name | Used by | Kept in (per environment) |
@@ -77,11 +109,31 @@ What to ask the administrator for the pipeline on AWS: an IAM role that trusts G
 ## Code signing (a desktop app only)
 - Code signing: none
 - Signing account: <artifact-signing only: <tenant id>/<subscription id> of the Azure account that owns the signing account>
-- `none` (or no line) ships the Windows installer unsigned and Windows warns "Unknown publisher". A mode makes `vpk` sign Setup.exe, the app's files and Update.exe of every Windows release and beta, from one environment variable of the shell that runs `/agile:publish` (and `/agile:ship`, for the beta); the plugin passes only that one to `vpk`, so a variable left for another project never signs this one. The publish stops when the variable is unset. An app with no update source is signed too: the files of its `win-*` zips are signed by the same `vpk` (packed into a scratch folder, only the signed files are kept), so the project needs `vpk` as a local tool (`dotnet tool install vpk --version 1.2.161`; `/agile:publish` asks before installing it), and every `.exe` and `.dll` of the zip is checked. The Linux AppImage and the zips of non-Windows runtimes are never signed.
-  - `artifact-signing` (Microsoft's Artifact Signing, organizations in the USA, Canada, EU and UK, individuals in the USA and Canada): `VPK_AZURE_TRUSTED_SIGN_FILE` = absolute path of its `metadata.json`, outside the repository (`Endpoint`, `CodeSigningAccountName`, `CertificateProfileName`, and `"ExcludeCredentials": ["ManagedIdentityCredential", "SharedTokenCacheCredential", "VisualStudioCredential", "VisualStudioCodeCredential"]` so the signing uses the Azure CLI login below). The login lives in `<home>/.agile/azure/<tenant>/<subscription>`; log in once, in Git Bash: AZURE_CONFIG_DIR="<that folder>" az login --tenant <tenant>.
+- `none` (or no line) ships the Windows installer unsigned and Windows warns "Unknown publisher". A mode makes `vpk` sign Setup.exe, the app's files and Update.exe of every Windows release and beta, from one environment variable of the shell that runs `/agile:publish` (and `/agile:ship`, for the beta); the plugin passes only that one to `vpk`, so a variable left for another project never signs this one. The publish stops when the variable is unset. An app with no update source is signed too: the files of its `win-*` zips are signed by the same `vpk` (packed into a scratch folder, only the signed files are kept), so the project needs `vpk` as a local tool (installed by the first pair of blocks below; `/agile:publish` asks before installing it), and every `.exe` and `.dll` of the zip is checked. The Linux AppImage and the zips of non-Windows runtimes are never signed.
+  - `artifact-signing` (Microsoft's Artifact Signing, organizations in the USA, Canada, EU and UK, individuals in the USA and Canada): `VPK_AZURE_TRUSTED_SIGN_FILE` = absolute path of its `metadata.json`, outside the repository (`Endpoint`, `CodeSigningAccountName`, `CertificateProfileName`, and `"ExcludeCredentials": ["ManagedIdentityCredential", "SharedTokenCacheCredential", "VisualStudioCredential", "VisualStudioCodeCredential"]` so the signing uses the Azure CLI login below). The login lives in `<home>/.agile/azure/<tenant>/<subscription>`; log in once with the second pair of blocks below.
   - `signtool` (a certificate from a CA, on a token or a cloud HSM): `VPK_SIGN_PARAMS` = signtool's parameters, the certificate chosen by `/sha1 <thumbprint>` (or the token's CSP), with a timestamp: `/fd SHA256 /tr <the CA's timestamp URL> /td SHA256 /sha1 <thumbprint>`. Never `/p`, nor a token PIN in `/kc` (`[{{...}}]`): the publish refuses a secret on a command line.
   - `template` (a vendor's own signing tool): `VPK_SIGN_TEMPLATE` = its command with `{{file}}` (one file) or `{{file...}}` (several) where the file goes.
 - The certificate or the Artifact Signing account is kept in: <where; who renews it and when it expires>. The variable's value is never written here.
+
+Install `vpk` as a local tool of the project:
+
+```powershell
+dotnet tool install vpk --version 1.2.161
+```
+
+```bash
+dotnet tool install vpk --version 1.2.161
+```
+
+Log in once for `artifact-signing` (the variable is set for that command only):
+
+```powershell
+$env:AZURE_CONFIG_DIR = "<that folder>"; az login --tenant <tenant>; Remove-Item Env:AZURE_CONFIG_DIR
+```
+
+```bash
+AZURE_CONFIG_DIR="<that folder>" az login --tenant <tenant>
+```
 
 ## Release steps
 1. <step, or "no release process yet">
