@@ -7,6 +7,8 @@ severity: low
 ---
 # Exam scope column comment names values that do not exist
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. `ExamConfiguration.cs:45` gives the `catalog.exams.scope` column the comment "How far the exam reaches: Federal, State, Municipal, National or International."
 2. `ExamScope` has only `National`, `State` and `Municipal` (F-34 BR7).

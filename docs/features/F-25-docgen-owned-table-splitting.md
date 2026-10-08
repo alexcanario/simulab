@@ -7,6 +7,8 @@ version: 1
 ---
 # DocGen types sharing a table
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 An owned type mapped without `ToJson` (table splitting, `OwnsOne` stored in the owner's table) would still be rendered by
 DocGen as a second section with the owner's table name, like B-12 did for JSON. B-12 fixes only the JSON case, the one

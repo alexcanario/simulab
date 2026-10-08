@@ -12,6 +12,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.GoogleSignIn;
+using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Application.Totp;
 using Simulab.Identity.Contracts;
@@ -57,6 +58,12 @@ public static class TokenEndpoints
         if (request.IsRefreshTokenGrantType())
         {
             return await HandleRefreshGrantAsync(context, userManager, sessions, timeProvider, cancellationToken);
+        }
+
+        // F-53 BR10: no feature switch, the seeded administrator could never sign in without it.
+        if (request.GrantType == IdentityModule.PasswordChangeGrantType)
+        {
+            return await HandlePasswordChangeGrantAsync(context, request, sessions, timeProvider, cancellationToken);
         }
 
         if (request.GrantType == IdentityModule.TotpGrantType && TotpEnabled(context))
@@ -152,7 +159,7 @@ public static class TokenEndpoints
 
         // F-38 BR3: an address at its limit is refused before the challenge is read.
         var attempt = StartAttempt(context);
-        if (attempt.IsAtLimit())
+        if (await attempt.IsAtLimitAsync())
         {
             return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
         }
@@ -163,12 +170,66 @@ public static class TokenEndpoints
 
         if (result.IsSuccess)
         {
+            // F-53 BR3: the code was the last factor, but a marked account still owes a new password.
+            if (result.Value.User.MustChangePassword)
+            {
+                return await PasswordChangeRequiredAsync(
+                    context, result.Value.User, TotpSignInHandler.MethodOf(result.Value.Method), cancellationToken);
+            }
+
             return await IssueTokensAsync(result.Value.User, sessions, timeProvider, cancellationToken);
         }
 
         return Forbid(
             result.Error!.Code,
             result.Error.Code is IdentityErrorCodes.AccountLocked or IdentityErrorCodes.SignInRateLimited ? result.Error.Detail : null);
+    }
+
+    /// <summary>
+    /// F-53 BR4, BR6, BR7: the new-password step. An address at its limit is refused before the challenge is read;
+    /// the handler records its own events, since only it knows which account the challenge belonged to.
+    /// </summary>
+    private static async Task<IResult> HandlePasswordChangeGrantAsync(
+        HttpContext context,
+        OpenIddictRequest request,
+        IRefreshSessionStore sessions,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        var attempt = StartAttempt(context);
+        if (await attempt.IsAtLimitAsync())
+        {
+            return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
+        }
+
+        var handler = context.RequestServices.GetRequiredService<ForcedPasswordChangeHandler>();
+        var result = await handler.CompleteAsync(
+            (string?)request[TotpChallengeParameter], (string?)request[NewPasswordParameter], attempt, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return await IssueTokensAsync(result.Value, sessions, timeProvider, cancellationToken);
+        }
+
+        return Forbid(
+            result.Error!.Code,
+            result.Error.Code is IdentityErrorCodes.SignInRateLimited ? result.Error.Detail : null);
+    }
+
+    /// <summary>F-53 BR3: the answer of a marked account whose last factor was right: a challenge, no tokens.</summary>
+    private static async Task<IResult> PasswordChangeRequiredAsync(
+        HttpContext context,
+        User user,
+        AccountEventMethod method,
+        CancellationToken cancellationToken)
+    {
+        var challenge = await context.RequestServices.GetRequiredService<ForcedPasswordChangeHandler>()
+            .IssueChallengeAsync(user, method, cancellationToken);
+        return Forbid(IdentityErrorCodes.PasswordChangeRequired, parameters: new Dictionary<string, object?>
+        {
+            [TotpChallengeParameter] = challenge,
+            [Parameters.ExpiresIn] = (long)ForcedPasswordChangeHandler.ChallengeLifetime.TotalSeconds,
+        });
     }
 
     /// <summary>F-38: this request's side of the per-address limit, keyed by the client address (BR6, BR8).</summary>
@@ -197,7 +258,7 @@ public static class TokenEndpoints
         // no failure count, no account event and no lockout. A step that is not a failure takes the name out again.
         var attempt = StartAttempt(context);
         var typedName = request.Username ?? string.Empty;
-        if (!attempt.TryCount(typedName))
+        if (!await attempt.TryCountAsync(typedName))
         {
             return Forbid(IdentityErrorCodes.SignInRateLimited, SecondsOf(attempt.RetryAfter));
         }
@@ -234,7 +295,12 @@ public static class TokenEndpoints
         }
 
         // F-38 BR1, BR5: the password was right, so this account's name leaves the set from here on.
-        attempt.Clear(typedName);
+        // F-53 BR3: not for a marked account that goes on to a challenge: its password step hands out no tokens, and the
+        // change step clears the name. An account that is not active ends here as any other does, so it is released.
+        if (!user.MustChangePassword || user.Status != AccountStatus.Active)
+        {
+            await attempt.ClearAsync(typedName);
+        }
 
         if (user.Status != AccountStatus.Active)
         {
@@ -256,6 +322,13 @@ public static class TokenEndpoints
             });
         }
 
+        // F-53 BR3: the right password of a marked account issues no tokens, no event and no count reset; the
+        // change step does all three, as the code step does for a two-factor account.
+        if (user.MustChangePassword)
+        {
+            return await PasswordChangeRequiredAsync(context, user, AccountEventMethod.Password, cancellationToken);
+        }
+
         await userManager.ResetAccessFailedCountAsync(user);
 
         // F-21 BR3: the password was the last step, so this is the sign-in.
@@ -266,6 +339,9 @@ public static class TokenEndpoints
     /// <summary>The token-request and error-response parameter names of the code step (F-11).</summary>
     public const string TotpChallengeParameter = "challenge";
     public const string TotpCodeParameter = "code";
+
+    /// <summary>The token-request parameter of the new-password step (F-53); its challenge uses <see cref="TotpChallengeParameter"/>.</summary>
+    public const string NewPasswordParameter = "new_password";
 
     /// <summary>BR5: the presented refresh token is consumed exactly once; rotation issues a brand new pair.</summary>
     private static async Task<IResult> HandleRefreshGrantAsync(

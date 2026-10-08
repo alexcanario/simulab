@@ -3,10 +3,11 @@ using System.Xml.Linq;
 
 namespace Simulab.ArchitectureTests;
 
-/// <summary>F-60: the app version is one `&lt;Version&gt;` on Simulab.Api.csproj, and nowhere else.</summary>
+/// <summary>F-60: the app version is one `&lt;Version&gt;` in the root Directory.Build.props (every project inherits it), and nowhere else.</summary>
 public class AppVersionTests
 {
     private const string ApiProject = "src/Hosts/Simulab.Api/Simulab.Api.csproj";
+    private const string VersionFile = "Directory.Build.props";
 
     private static readonly string[] Roots = ["src", "tests", "tools"];
 
@@ -22,33 +23,33 @@ public class AppVersionTests
     private static bool CarriesVersion(string repositoryRoot, string relativePath) =>
         XDocument.Load(Path.Combine(repositoryRoot, relativePath)).Descendants("Version").Any();
 
-    private static IEnumerable<string> VersionOutsideTheApi(string repositoryRoot, IEnumerable<string> files) =>
-        files.Where(file => file != ApiProject && CarriesVersion(repositoryRoot, file));
+    private static IEnumerable<string> VersionInProjects(string repositoryRoot, IEnumerable<string> files) =>
+        files.Where(file => CarriesVersion(repositoryRoot, file));
 
     [Fact]
-    public void ApiProject_CarriesOneSemanticVersion()
+    public void RootProps_CarryOneSemanticVersion()
     {
         var root = SolutionAssemblies.RepositoryRoot();
 
-        var versions = XDocument.Load(Path.Combine(root, ApiProject)).Descendants("Version").ToList();
+        var versions = XDocument.Load(Path.Combine(root, VersionFile)).Descendants("Version").ToList();
 
-        versions.Should().ContainSingle(because: "the app version lives on Simulab.Api.csproj once");
+        versions.Should().ContainSingle(because: "the app version lives in Directory.Build.props once");
         versions[0].Value.Should().MatchRegex(@"^\d+\.\d+\.\d+$", "/agile:ship bumps it as MAJOR.MINOR.PATCH");
     }
 
     [Fact]
-    public void NoOtherProjectOrPropsFile_CarriesAVersion()
+    public void NoProjectOrNestedPropsFile_CarriesAVersion()
     {
         var root = SolutionAssemblies.RepositoryRoot();
         var files = BuildFiles(root);
 
         files.Should().HaveCountGreaterThan(20, "the rule must see the whole solution");
         files.Should().Contain(ApiProject);
-        VersionOutsideTheApi(root, files).Should().BeEmpty("only Simulab.Api.csproj carries the app version");
+        VersionInProjects(root, files).Should().BeEmpty("only the root Directory.Build.props carries the app version");
     }
 
     [Fact]
-    public void VersionOutsideTheApi_NamesTheOffendingFile()
+    public void VersionInProjects_NamesTheOffendingFile()
     {
         var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         Directory.CreateDirectory(root);
@@ -57,7 +58,7 @@ public class AppVersionTests
             File.WriteAllText(Path.Combine(root, "Offender.csproj"), "<Project><PropertyGroup><Version>1.0.0</Version></PropertyGroup></Project>");
             File.WriteAllText(Path.Combine(root, "Clean.props"), "<Project><PropertyGroup /></Project>");
 
-            VersionOutsideTheApi(root, ["Offender.csproj", "Clean.props"]).Should().Equal("Offender.csproj");
+            VersionInProjects(root, ["Offender.csproj", "Clean.props"]).Should().Equal("Offender.csproj");
         }
         finally
         {
@@ -72,7 +73,7 @@ public class AppVersionTests
 
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        var projectVersion = XDocument.Load(Path.Combine(SolutionAssemblies.RepositoryRoot(), ApiProject)).Descendants("Version").Single().Value;
+        var projectVersion = XDocument.Load(Path.Combine(SolutionAssemblies.RepositoryRoot(), VersionFile)).Descendants("Version").Single().Value;
 
         informational.Should().StartWith(projectVersion);
     }

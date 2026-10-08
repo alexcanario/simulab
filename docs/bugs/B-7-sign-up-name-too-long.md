@@ -7,6 +7,8 @@ severity: low
 ---
 # Sign-up accepts a name or email longer than the column
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Call `POST /api/v1/identity/registrations` directly with a `fullName` of 121 characters or more.
 2. `RegisterUserHandler` stores the trimmed name without a length check; the `users.full_name` column is 120 characters, so the insert fails and the answer is a 500 instead of a validation error.

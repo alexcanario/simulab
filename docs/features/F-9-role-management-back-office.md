@@ -7,6 +7,8 @@ version: 3
 ---
 # Role management back office
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Admin screens to create, edit and delete roles, set the permissions of each role and assign roles to users. Built with the UI kit. Needs /agile:screen.
 

@@ -7,6 +7,8 @@ severity: high
 ---
 # The Web never refreshes the access token nor notices a revoked session
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Sign in and leave the tab open for more than 15 minutes.
 2. Any call the Web makes to the Api with the stored access token fails (401): the token expired and was never refreshed.

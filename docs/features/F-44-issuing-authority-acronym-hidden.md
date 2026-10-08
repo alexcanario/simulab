@@ -7,6 +7,8 @@ version: 1
 ---
 # The issuing authority's acronym off the screen
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The issuing authority's **acronym leaves every screen**, admin and student: out of the dialog, the lists, the
 pickers, the delete confirmation and the student catalog, and the searches stop matching it. Every screen

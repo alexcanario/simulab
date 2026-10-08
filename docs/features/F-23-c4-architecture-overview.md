@@ -9,6 +9,8 @@ Autopilot: shipping
 
 # C4 architecture overview
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A one-page hand-written architecture overview in Mermaid: C4 context (students, curators, admins, Claude API, email) and containers (Web, Api, PostgreSQL, Redis, file storage). It sits beside the generated docs of F-15, outside `docs/architecture/`, which DocGen owns. Deferred from F-15 (2026-09-21): more useful once more modules exist (Catalog has shipped since).
 

@@ -7,6 +7,8 @@ version: 2
 ---
 # Sign-up and email verification
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Imports the Identity module skeleton from Simulae (User, ConsentRecord, email verification tokens) renamed to English. A visitor signs up with the 18+ self-declaration and consent records, verifies the email (IEmailSender, Mailpit in dev), can resend the verification, and reads the terms and privacy pages. Needs /agile:screen.
 

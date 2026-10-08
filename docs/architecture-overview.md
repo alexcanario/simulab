@@ -16,7 +16,7 @@ flowchart TB
     curator["<b>Curator</b><br/>[Person]<br/>Imports and<br/>reviews content"]
     admin["<b>Admin</b><br/>[Person]<br/>Catalog, users,<br/>roles, plans"]
     simulab["<b>Simulab</b><br/>[Software system]<br/>Practice exams<br/>and a study coach"]
-    email["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    email["<b>Email provider</b><br/>[SMTP or HTTPS]<br/>Mailpit locally, Azure Communication Services in the cloud"]
     claude["<b>Claude API</b><br/>[planned]<br/>Extraction, coach"]
     google["<b>Google</b><br/>[optional, off]<br/>Sign-in"]
     student -- "HTTPS" --> simulab
@@ -50,7 +50,7 @@ flowchart TB
         postgres[("<b>PostgreSQL</b><br/>[Database]<br/>One schema<br/>per module")]
         blob[("<b>File storage</b><br/>[Blob, planned]<br/>Azurite locally")]
     end
-    mailpit["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    mailpit["<b>Email provider</b><br/>[SMTP or HTTPS]<br/>Mailpit locally, Azure Communication Services in the cloud"]
     claude["<b>Claude API</b><br/>[planned]"]
     people -- "HTTPS" --> web
     web -- "JSON, tokens" --> api
@@ -76,6 +76,7 @@ flowchart TB
 - **Redis** — refresh-token sessions and the access-token revocation set (F-5), and the Web's server-side sessions (B-3).
 - **File storage** (planned) — blob containers behind `IFileStorage`, Azurite locally; added by the first feature that stores files.
 - **Claude API** (planned) — reached only through `IAiGateway`, which checks the plan and records usage and cost.
+- **In the cloud** (ADR-0002, F-62) — the same containers run on Azure Container Apps, Brazil South, with PostgreSQL Flexible Server, Key Vault and, in production, Azure Cache for Redis (staging keeps Redis as a container). These resources are added only when the app host publishes (`AzureDeployment.cs`), so they are not nodes of this diagram.
 - **Google** (optional) — sign-in with Google, off unless the OAuth client is configured (F-20); shown in the context diagram only.
 
 ## 3. Inside the Api

@@ -7,6 +7,8 @@ version: 1
 ---
 # My account and preferred language
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 My account page with the profile. The preferred language in the profile becomes the first culture source, before the cookie and the browser (ADR-0001 #28).
 

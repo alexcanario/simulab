@@ -7,6 +7,8 @@ version: 2
 ---
 # AI gateway
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Every AI call in Simulab goes through `IAiGateway`, which checks `IEntitlementService` and records usage and cost (`CLAUDE.md`, Stack; ADR-0001 #22). Neither interface exists in `src/` today, so no feature can call a model yet. This feature adds the `Ai` building block with the gateway, one real call to the Claude API, the entitlement check and the usage and cost record, plus a development-only diagnostics page to see it work. It unblocks F-40 (eval suite for model calls), which has nothing to evaluate until a real call exists.
 

@@ -8,6 +8,8 @@ Autopilot: shipping
 ---
 # The selected radio card's description is not pinned by a contrast test
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 Nothing is wrong on screen: the text reads. What is missing is the guard. F-43's retro sweep, which the new
 project rule asks for, went over every colour a `.app-*` rule paints and found one pair that no test holds:

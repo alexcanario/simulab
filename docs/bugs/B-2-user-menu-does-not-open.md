@@ -7,6 +7,8 @@ severity: high
 ---
 # The app bar's account menu does not open
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Sign in with any account.
 2. Click the account icon at the top right of the app bar.

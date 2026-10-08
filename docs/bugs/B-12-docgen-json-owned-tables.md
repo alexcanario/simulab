@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # DocGen lists JSON-owned types as extra tables
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 The generated docs from F-15 show `role_changes` three times. The first block is `RoleChange`; the other two are the
 owned `RoleChangeItem` (`Added` and `Removed`), which are stored in JSON columns with `ToJson`. Those two blocks list the

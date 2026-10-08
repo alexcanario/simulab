@@ -7,6 +7,8 @@ version: 1
 ---
 # Every Identity handler that writes twice commits once
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 F-30 puts the two sign-ups in one transaction. They are not alone: other paths of `Simulab.Identity.Application`
 write more than once in a request, each write its own committed transaction, so a failure between two of them

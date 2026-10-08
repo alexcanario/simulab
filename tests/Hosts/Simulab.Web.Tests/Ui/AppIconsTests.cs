@@ -38,6 +38,15 @@ public class AppIconsTests
         AppIcons.OpenInNew.Should().Be(Icons.Material.Outlined.OpenInNew);
     }
 
+    // F-74: the notice subjects section and the move pair of a sortable list.
+    [Fact]
+    public void AppIcons_NoticeSubjectsAndMovePair_AreTheOutlinedIconsTheItemNames()
+    {
+        AppIcons.NoticeSubjects.Should().Be(Icons.Material.Outlined.ListAlt);
+        AppIcons.MoveUp.Should().Be(Icons.Material.Outlined.ArrowUpward);
+        AppIcons.MoveDown.Should().Be(Icons.Material.Outlined.ArrowDownward);
+    }
+
     [Fact]
     public void AppIcons_SemanticNames_CoverTheKitActions()
     {

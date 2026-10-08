@@ -7,6 +7,8 @@ version: 1
 ---
 # Catalog browsing for students
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The student-facing half of the catalog: a signed-in student searches published exams and filters by assessment type, exam board, year and scope, then opens an exam and sees its published editions. It is how a student finds the exam they are preparing for, and the read side every simulator will call. Needs /agile:screen.
 

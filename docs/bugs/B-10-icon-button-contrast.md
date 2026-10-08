@@ -11,6 +11,8 @@ Same status flow as a feature. Approval is needed only when the expected behavio
 -->
 # Icon buttons below 3:1 contrast
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 Every icon-only button of the kit (row actions such as Edit, Delete and History, the filter chip's remove button) draws its icon in the theme token `ActionDefault`, which is under the 3:1 contrast WCAG 2.2 asks for icons: 1.94:1 in the dark theme (`#404E6A` on the surface `#172035`) and 2.97:1 in the light theme (`#8A96B0` on white). Present since F-1; measured on the kit gallery during the F-14 build (2026-09-21).
 1. Open `/dev/ui` in dark mode and look at the row actions of the table → the icons are barely visible.

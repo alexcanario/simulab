@@ -8,6 +8,8 @@ Autopilot: built
 ---
 # Link and unlink Google on the account page
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 A section on the Security page to link a Google account to an existing account, and to unlink it while keeping at least one way to sign in. Left out of F-20 by the owner on 2026-09-23: in F-20 the link happens only on the first Google sign-in whose verified email matches an account.
 

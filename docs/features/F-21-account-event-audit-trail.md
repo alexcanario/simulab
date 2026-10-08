@@ -7,6 +7,8 @@ version: 1
 ---
 # Account event audit trail
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Record account and security events (sign-in, failed sign-in, password change and reset, two-factor on/off, account erasure) so an Admin can trace them. Left out of F-14 (role change audit trail) by the owner on 2026-09-21; F-14 decides the pattern for role changes only.
 

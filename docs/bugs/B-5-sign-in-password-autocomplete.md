@@ -7,6 +7,8 @@ severity: low
 ---
 # The sign-in password field asks for a new password
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Open `/sign-in` and inspect the password field.
 2. It carries `autocomplete="new-password"` (the `AppPasswordField` default), so password managers offer to generate a password instead of filling the saved one.

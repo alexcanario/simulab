@@ -7,6 +7,8 @@ version: 2
 ---
 # Identity emails through the job queue
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Send the identity emails through a job table run by a hosted worker in the `Api` host, instead of inside the request (ADR-0001 #20). The queue arrives as a building block, `Simulab.Jobs`, with its own schema: the AI exam import will use the same table. The anonymous endpoints stop waiting for SMTP, so an unknown address and a real one answer in the same time, and a slow mail server no longer slows a page. Found by `/agile:review` on F-7 (2026-09-19).
 

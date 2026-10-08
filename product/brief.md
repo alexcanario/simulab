@@ -83,4 +83,4 @@ Candidates prepare with scattered PDFs of past exams and generic question banks.
 - **AI:** which provider, and for what: import, coach, recommendations. Limits per plan.
 - **Institutions:** will prep courses or schools have their own students and private question banks? This decides multi-tenancy.
 - **Teachers and graders:** Simulae planned teacher and grader roles. Are they part of Simulab, and when?
-- **Portugal:** which exams, and when.
+- **Portugal:** which exams. When: after v1 (owner, 2026-10-04). Data stays in Brazil South, no EU region (ADR-0003).

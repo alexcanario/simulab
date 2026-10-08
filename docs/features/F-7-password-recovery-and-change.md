@@ -7,6 +7,8 @@ version: 2
 ---
 # Password recovery and change
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 Forgot password (email link), reset password, expired and invalid link states, and change password for a signed-in user. Imported from Simulae and converted to the UI kit.
 

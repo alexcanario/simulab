@@ -7,6 +7,8 @@ severity: medium
 ---
 # Field hint text fails AA contrast in both themes
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 The hint under every kit field (`.app-field-hint`) is painted with MudBlazor's `text-disabled` token, which
 is translucent. Measured on screen at `/dev/ui` through the app host on 2026-09-24, on the card the fields

@@ -29,6 +29,18 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
     /// <summary>F-35: the papers actually applied, each under its exam and naming its board.</summary>
     public DbSet<ExamEdition> ExamEditions => Set<ExamEdition>();
 
+    /// <summary>F-79: the fixed list of areas a subject may belong to, seeded by a migration.</summary>
+    public DbSet<Area> Areas => Set<Area>();
+
+    /// <summary>F-79: the subjects of the canonical taxonomy.</summary>
+    public DbSet<Subject> Subjects => Set<Subject>();
+
+    /// <summary>F-79: the topics, each under its subject.</summary>
+    public DbSet<Topic> Topics => Set<Topic>();
+
+    /// <summary>F-74: the subjects each edition's notice names, grouped and ordered.</summary>
+    public DbSet<NoticeSubject> NoticeSubjects => Set<NoticeSubject>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -38,5 +50,9 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         modelBuilder.ApplyConfiguration(new IssuingAuthorityConfiguration());
         modelBuilder.ApplyConfiguration(new ExamConfiguration());
         modelBuilder.ApplyConfiguration(new ExamEditionConfiguration());
+        modelBuilder.ApplyConfiguration(new AreaConfiguration());
+        modelBuilder.ApplyConfiguration(new SubjectConfiguration());
+        modelBuilder.ApplyConfiguration(new TopicConfiguration());
+        modelBuilder.ApplyConfiguration(new NoticeSubjectConfiguration());
     }
 }

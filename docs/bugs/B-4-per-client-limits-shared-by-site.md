@@ -7,6 +7,8 @@ severity: high
 ---
 # Per-client limits are shared by the whole site
 
+Technical terms: [glossary](../glossary.md)
+
 ## What happens
 1. Every per-client limit (F-4 registration and resend, F-7 reset request, token check and reset) keys on `Connection.RemoteIpAddress` in `src/Modules/Identity/Simulab.Identity.Api/IdentityEndpoints.cs` (`ClientKey`).
 2. The Web calls the Api from the server (B-3), so the Api only ever sees the Web server's address.

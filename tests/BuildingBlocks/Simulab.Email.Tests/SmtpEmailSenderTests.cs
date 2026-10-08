@@ -33,7 +33,7 @@ public class SmtpEmailSenderTests(MailpitServer mailpit) : IClassFixture<Mailpit
     [Fact]
     public async Task Send_UnreachableServer_Throws()
     {
-        var sender = SenderFor(new EmailOptions { Host = "localhost", Port = 1 });
+        var sender = SenderFor(new EmailOptions { Host = "localhost", Port = 1, FromAddress = "no-reply@simulab.app" });
 
         var send = async () => await sender.SendAsync(
             new EmailMessage("student@example.com", "Subject", "<p>Body</p>"),

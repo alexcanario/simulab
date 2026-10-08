@@ -7,6 +7,8 @@ version: 2
 ---
 # infra.md holds the access details of the infrastructure
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 `docs/infra.md` gets one `## Access` table with every URI of the project (board, repository, releases, pipelines, Azure, Key Vault, cloud and local hosts, external consoles) and, for each one, how Claude signs in to it and where its credential is kept — never the credential's value. The owner's goal is that Claude can publish on the board and run pipelines without hunting for access. It also gets the `## Cloud accounts` table of the agile@canary template (one row per non-local environment), without which `/agile:publish` stops on any environment that declares a deploy command. Raised by the owner on 2026-10-03; `## Cloud accounts` added by change note v2.
 

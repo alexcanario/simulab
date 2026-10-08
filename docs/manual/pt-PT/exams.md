@@ -1,8 +1,8 @@
 ---
 page: exams
 locale: pt-PT
-features: [F-34, F-43, F-35, F-42]
-updated: 2026-10-02
+features: [F-34, F-43, F-35, F-42, F-57]
+updated: 2026-10-06
 ---
 # Exames
 
@@ -21,9 +21,10 @@ ecrã Exames. Para as restantes, a página não é encontrada.
    no título de uma coluna para ordenar por ela.
 3. Escreva na caixa de pesquisa para filtrar pelo nome. Acentos e maiúsculas não contam: "publica" encontra
    "Pública".
-4. Os três filtros acima da lista — entidade contratante, tipo de avaliação e abrangência — podem ser
+4. Os quatro filtros acima da lista — entidade contratante, tipo de avaliação, abrangência e estado — podem ser
    combinados. No filtro de entidade contratante, escreva duas letras do nome e escolha na lista que
-   aparece.
+   aparece. O filtro de estado abre com os 27 estados; escolher um lista só os exames estaduais desse estado,
+   publicados ou não, e define a abrangência como Estadual. Escolher outra abrangência esvazia o estado.
 
 ### Registar um exame
 1. Escolha **Adicionar**. O formulário abre numa página própria.

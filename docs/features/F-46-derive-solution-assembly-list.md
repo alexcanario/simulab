@@ -7,6 +7,8 @@ version: 1
 ---
 # The architecture rules see every production assembly by construction
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 `SolutionAssemblies.All` lists every production assembly by hand, and `ForbiddenReferencesTests.The_rules_see_every_production_assembly` pins it against a second list, also written by hand. Both have to be edited when a project is added, and neither is derived from `Simulab.slnx`: a new project silently escapes every rule built on `All` (forbidden references, table and column descriptions, the AI gateway boundary) while both lists agree with each other. This is the same class of drift F-45 removed from the DocGen tests, one level up. Derive the list from the projects in `Simulab.slnx` so a project that no rule sees fails the build. Raised while refining F-45 (2026-09-26).
 

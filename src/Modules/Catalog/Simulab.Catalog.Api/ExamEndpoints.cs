@@ -118,8 +118,16 @@ public static class ExamEndpoints
         string? sortBy = null,
         bool descending = false,
         string? assessmentTypeOrder = null,
-        string? scopeOrder = null) =>
-        Results.Ok(await queries.ListAsync(
+        string? scopeOrder = null,
+        string? state = null)
+    {
+        // F-57 BR6: unlike the enum filters, an unknown state is refused. Ignoring it would silently list every exam.
+        if (!StateFilter.TryRead(state, out var acronym))
+        {
+            return Problem(StateFilter.UnknownState);
+        }
+
+        return Results.Ok(await queries.ListAsync(
             new ExamListQuery(
                 page,
                 pageSize,
@@ -130,8 +138,10 @@ public static class ExamEndpoints
                 sortBy,
                 descending,
                 EnumOrder.Parse<AssessmentType>(assessmentTypeOrder),
-                EnumOrder.Parse<ExamScope>(scopeOrder)),
+                EnumOrder.Parse<ExamScope>(scopeOrder),
+                acronym),
             cancellationToken));
+    }
 
     private static async Task<IResult> FindAsync(Guid id, IExamQueries queries, CancellationToken cancellationToken)
     {

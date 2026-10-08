@@ -3,8 +3,9 @@ namespace Simulab.Catalog.Contracts;
 /// <summary>
 /// What the exam list asks the server for (F-34, BR14). <paramref name="Page"/> is zero-based and
 /// <paramref name="PageSize"/> is capped; <paramref name="SortBy"/> is one of <see cref="ExamSort"/> and
-/// anything else falls back to the name. The three filters combine with AND, and the two order lists are
-/// the caller's own order for the columns whose label is translated (B-15).
+/// anything else falls back to the name. The filters combine with AND, and the two order lists are
+/// the caller's own order for the columns whose label is translated (B-15). <paramref name="State"/> is the
+/// acronym of one of the 27 states (F-57 BR1, BR2): it lists only the <c>State</c> exams of that state.
 /// </summary>
 public sealed record ExamListQuery(
     int Page = 0,
@@ -16,7 +17,8 @@ public sealed record ExamListQuery(
     string? SortBy = null,
     bool Descending = false,
     IReadOnlyList<AssessmentType>? AssessmentTypeOrder = null,
-    IReadOnlyList<ExamScope>? ScopeOrder = null)
+    IReadOnlyList<ExamScope>? ScopeOrder = null,
+    string? State = null)
 {
     public const int DefaultPageSize = 25;
 

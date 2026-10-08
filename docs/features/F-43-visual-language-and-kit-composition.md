@@ -7,6 +7,8 @@ version: 1
 ---
 # Visual language and kit composition
 
+Technical terms: [glossary](../glossary.md)
+
 ## Summary
 The Simulab screens read as a single column of plain fields on an empty card, while Simulae's back office — whose
 palette Simulab already copied — reads as sectioned cards, multi-column form grids, radio cards, status chips and a

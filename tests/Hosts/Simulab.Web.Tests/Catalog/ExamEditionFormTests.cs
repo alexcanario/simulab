@@ -3,7 +3,6 @@ using System.Net;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Time.Testing;
 using Simulab.Catalog.Contracts;
 using Simulab.Web.Components.Pages.Catalog;
 using Simulab.Web.Components.Ui;
@@ -18,14 +17,6 @@ namespace Simulab.Web.Tests.Catalog;
 public sealed class ExamEditionFormTests : CatalogPageTestContext
 {
     private static readonly Guid SavedEditionId = Guid.Parse("0198f0a3-0000-7000-8000-0000000000f1");
-
-    private readonly FakeTimeProvider _clock = new(new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero));
-
-    public ExamEditionFormTests()
-    {
-        // BR4: the current year comes from the clock, so "next year" is 2027 whatever day the suite runs.
-        Services.AddSingleton<TimeProvider>(_clock);
-    }
 
     private static readonly ExamEditionResponse FullEdition = new(
         SavedEditionId,
@@ -82,14 +73,14 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
 
     // Render with real parameters (profile): the three section cards, every field in its card, Draft chosen.
     [Fact]
-    public void Render_Add_ShowsTheThreeSectionsTheirFieldsAndADraftStatus()
+    public void Render_Add_ShowsTheThreeSectionsAndTheSaveFirstCardTheirFieldsAndADraftStatus()
     {
         var page = RenderAdd();
         WaitForForm(page);
 
         page.Find("h1").TextContent.Should().Be("Add edition");
         page.FindComponents<AppSectionCard>().Select(section => section.Instance.Title).Should().Equal(
-            "Paper", "Notice and application", "Publication");
+            "Paper", "Notice and application", "Publication", "Notice subjects");
 
         var paper = page.Find("section[aria-labelledby='edition-section-paper-title']");
         paper.QuerySelectorAll("#edition-organizer").Should().ContainSingle();
@@ -167,8 +158,8 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
 
         page.Find("#edition-organizer").Input("ceb");
 
-        // The picker waits out its debounce on the injected clock, which this test froze for the year rule.
-        _clock.Advance(TimeSpan.FromMilliseconds(AppLookupField.DebounceMilliseconds + 100));
+        // BR4: the year rule reads the context's frozen clock (28 Sep 2026), and so does the picker's debounce.
+        AdvanceDebounce();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/catalog/organizers"
