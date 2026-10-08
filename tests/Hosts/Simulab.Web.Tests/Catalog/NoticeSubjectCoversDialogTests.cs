@@ -411,7 +411,7 @@ public sealed class NoticeSubjectCoversDialogTests : CatalogPageTestContext
 
     // BR4 and AC6: compared with the SAVED mapping, so an overlap a topic move created is never blocked.
     [Fact]
-    public void List_AnOverlapTheSavedMappingAlreadyHas_IsNeverBlocked()
+    public void List_AnOverlapTheSavedMappingAlreadyHas_IsKept_AndAnotherTopicOfThatSubjectIsBlocked()
     {
         SetTaxonomy(TaxonomyAfterTheMove());
         var row = AddRow("Direito", WholeEntry(MathId, "Matemática"), TopicEntry(MathId, "Matemática", PropositionsId, "Proposições"));
@@ -421,7 +421,9 @@ public sealed class NoticeSubjectCoversDialogTests : CatalogPageTestContext
 
         dialogs.Find(OptionId($"s-{MathId}")).GetAttribute("aria-disabled").Should().BeNull();
         dialogs.Find(OptionId($"t-{PropositionsId}")).GetAttribute("aria-disabled").Should().BeNull();
-        dialogs.Find(OptionId($"t-{FractionsId}")).GetAttribute("aria-disabled").Should().BeNull("the subject already overlapped before the save");
+        var fractions = dialogs.Find(OptionId($"t-{FractionsId}"));
+        fractions.GetAttribute("aria-disabled").Should().Be("true", "only the saved pair is kept: another topic of the whole subject would be a new overlap");
+        dialogs.Find($"#{fractions.GetAttribute("aria-describedby")}").TextContent.Should().Be("Already covered by the whole subject");
         dialogs.Find(OptionId($"t-{PropositionsId}")).Click();
         dialogs.WaitForAssertion(() => ChipTexts(dialogs).Should().Equal("Matemática | whole subject"));
     }

@@ -285,9 +285,10 @@
     // ---- Covers (F-75) ----
 
     // BR4, compared with the SAVED mapping: an overlap a topic move made is never blocked here, only a new one.
-    private bool SavedOverlap(Guid subjectId) =>
+    // Per topic, as the Api does: the pair (whole subject, this topic) must already be in the saved mapping.
+    private bool SavedOverlap(Guid subjectId, Guid topicId) =>
         _savedPicks.Any(pick => pick.IsWhole && pick.SubjectId == subjectId)
-        && _savedPicks.Any(pick => !pick.IsWhole && pick.SubjectId == subjectId);
+        && _savedPicks.Any(pick => pick.TopicId == topicId);
 
     private bool IsPicked(string key) => _picks.Any(pick => pick.Key == key);
 
@@ -304,8 +305,7 @@
         var key = WholeKey(subject.Id);
         var picked = IsPicked(key);
         var blocked = !picked
-            && _picks.Any(pick => !pick.IsWhole && pick.SubjectId == subject.Id)
-            && !SavedOverlap(subject.Id);
+            && _picks.Any(pick => !pick.IsWhole && pick.SubjectId == subject.Id && !SavedOverlap(subject.Id, pick.TopicId!.Value));
 
         return new AppMultiPickOption(
             key,
@@ -322,7 +322,7 @@
         var picked = IsPicked(key);
         var covered = !picked
             && _picks.Any(pick => pick.IsWhole && pick.SubjectId == subject.Id)
-            && !SavedOverlap(subject.Id);
+            && !SavedOverlap(subject.Id, topic.Id);
 
         return new AppMultiPickOption(
             key,
@@ -371,7 +371,9 @@
     }
 
     private bool IsOverlapping(Pick pick) =>
-        !pick.IsWhole && _picks.Any(other => other.IsWhole && other.SubjectId == pick.SubjectId);
+        !pick.IsWhole
+        && _picks.Any(other => other.IsWhole && other.SubjectId == pick.SubjectId)
+        && !SavedOverlap(pick.SubjectId, pick.TopicId!.Value);
 
     private void OnToggle(string key)
     {

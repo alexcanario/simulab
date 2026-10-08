@@ -37,20 +37,31 @@ window.simulabShell = {
     element.focus({ preventScroll: true });
     element.scrollIntoView({ block: "nearest" });
   },
-  // F-75: closes an open multi-pick list when a pointer or the focus lands outside it. The handler removes itself after
-  // the first outside event; one left over from a list closed another way only closes an already closed list.
+  // F-75: closes an open multi-pick list when a pointer or the focus lands outside it. One handler per field: opening
+  // again replaces the one left by a list closed another way, and the field removes it when it is disposed.
   closeOnOutside: function (rootId, reference) {
+    simulabShell.stopCloseOnOutside(rootId);
     var handler = function (event) {
       var root = document.getElementById(rootId);
       if (root && event.target instanceof Node && root.contains(event.target)) {
         return;
       }
-      document.removeEventListener("pointerdown", handler, true);
-      document.removeEventListener("focusin", handler, true);
+      simulabShell.stopCloseOnOutside(rootId);
       reference.invokeMethodAsync("CloseFromOutside").catch(function () { });
     };
+    simulabShell.outsideHandlers[rootId] = handler;
     document.addEventListener("pointerdown", handler, true);
     document.addEventListener("focusin", handler, true);
+  },
+  outsideHandlers: {},
+  stopCloseOnOutside: function (rootId) {
+    var handler = simulabShell.outsideHandlers[rootId];
+    if (!handler) {
+      return;
+    }
+    document.removeEventListener("pointerdown", handler, true);
+    document.removeEventListener("focusin", handler, true);
+    delete simulabShell.outsideHandlers[rootId];
   },
   // F-16: saves a file the circuit streamed (DotNetStreamReference); nothing is stored on the server.
   downloadFile: async function (fileName, contentType, streamReference) {

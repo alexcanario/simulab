@@ -1,7 +1,7 @@
 ---
 feature: F-75
 epic: Subject taxonomy
-status: building
+status: validating
 board: 119
 version: 1
 ---
@@ -237,6 +237,8 @@ New keys. `›` sits inside a resource format, so a language can change it. Reus
 
 - 2026-10-08 — Design passes (`system-design`, `architect`) verified against the files. Accepted: save replaces the mapping by a diff (soft-delete dropped entries, keep unchanged, add new) in the same `SaveChanges` as the row; a shared `LiveNoticeSubjectMappings` query relies on the global soft-delete filters of `NoticeSubject` and `ExamEdition`; the BR4 rules class receives the saved mapping so an overlap made by a topic move is kept (AC6); it is named `NoticeSubjectMappingRules` (the glossary retires "Coverage"); `mapping_target_not_found` is `ErrorKind.Validation` (400); the 50 limit counts after dedup; `mappings` omitted or empty clears (BR7), so the API and the dialog change in the same commit; `inUse` is computed in the subject and topic save answers too; the new unique index violation (concurrent save) becomes a 409; routes keep their existing `/api/v1/catalog/exams/...` prefix (the item text omitted `/catalog`). Dropped: nothing. Owner stop: none besides change note 1 (owner, session 2026-10-08).
 
+- 2026-10-08 — Independent review (reviewer agent): three major findings in the dialog (overlap comparison per subject instead of per topic, stale overlap marks, a test locking the mismatch) fixed and re-run green; two minor ones fixed (outside-click listeners now removed on dispose) or reworded (the Esc-stays-in-the-field guarantee is on screen in validation step 7, bUnit cannot see it) (Claude).
+
 ## Out of scope
 - AI suggestion of the closest topic or a new draft topic — epic E-9.
 - Aliases and lookup by alias — F-77.
@@ -276,7 +278,7 @@ Expected: the Aspire dashboard URL is printed and the Web is at https://localhos
 4. Map **Portuguese** and **Law** to the same topic (a law listed under two headings): both save. Go to **Content › Subjects** and open the subject of that topic, then back to the list: the subject you mapped whole in step 2 (map one again if you cleared it) has its **Delete** disabled and the tooltip says notice subjects map it; a subject with topics still says it has topics first. On the subject's page, the mapped topic has **Delete** disabled with its reason; an unmapped topic can still be deleted (do not delete seeded data: cancel the confirmation). Clear the mapping of the rows that use it: the Delete buttons enable again.
 5. Move a topic: on the subject page edit the mapped topic and move it to another subject. Back on the edition page its chip shows the new subject ("New subject › Topic") without editing the row.
 6. Switch the language to **pt-PT** and then **pt-BR**: the field, the hint, the chips, the messages and the tooltips are in that language (pt-BR: "Abrange", "Não mapeada", "disciplina inteira"). Light and dark theme: the chips, the Not mapped chip, the greyed options and the picked option stay readable.
-7. Keyboard only: Tab to **Covers**, Arrow down opens the list, Arrow up/down move through options (greyed ones included, they read their reason), Space or Enter toggles and keeps the list open, Home/End jump, Esc closes only the list; Tab goes to **Clear** and then to each chip's remove button (Enter removes it and focus moves to the next chip); a second Esc on a dialog with changes asks before discarding. A screen reader (if you use one) announces the number of results, each pick and each removal.
+7. Keyboard only: Tab to **Covers**, Arrow down opens the list, Arrow up/down move through options (greyed ones included, they read their reason), Space or Enter toggles and keeps the list open, Home/End jump, Esc closes only the list and the dialog stays open; Tab goes to **Clear** and then to each chip's remove button (Enter removes it and focus moves to the next chip); a second Esc on a dialog with changes asks before discarding. A screen reader (if you use one) announces the number of results, each pick and each removal.
 8. Permission check: sign in as a Student. `/admin/exams`, the edition page and `/admin/subjects` show Page not found, so none of this is reachable.
 
 ## Delivery

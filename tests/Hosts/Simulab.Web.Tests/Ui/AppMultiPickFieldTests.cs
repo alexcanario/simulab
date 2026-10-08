@@ -297,12 +297,12 @@ public sealed class AppMultiPickFieldTests : KitTestContext
     }
 
     [Fact]
-    public void Root_WhileTheListIsOpen_KeepsEscapeFromReachingTheDialogAroundIt()
+    public void Root_EscapeOnTheInputWithTheListOpen_ClosesTheList()
     {
         var field = RenderField();
         Open(field);
 
-        // The root stops the key only while the list is open, like AppSuggestField: a second Esc is the dialog's.
+        // That the key then stays out of the dialog (the root stops it only while the list is open) is checked on screen, step 7 of the validation script: bUnit cannot see it.
         field.Markup.Should().Contain("data-app-multipick");
         Press(field.Find("input#pick"), "Escape");
         field.FindAll("[role='listbox']").Should().BeEmpty();

@@ -401,10 +401,22 @@
         _focusId = OptionId(option);
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         _self?.Dispose();
 
-        return ValueTask.CompletedTask;
+        if (_self is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("simulabShell.stopCloseOnOutside", RootId);
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit is gone, and its page with it.
+        }
     }
 }
