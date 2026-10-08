@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Simulab.Web.Services;
+using Simulab.ServiceDefaults;
 
 namespace Simulab.Web.Tests;
 
@@ -73,5 +73,48 @@ public sealed class TrustedProxiesTests
         var result = await VisitorAddressAsync([], "127.0.0.1", "203.0.113.10");
 
         result.Should().Be((false, "127.0.0.1"));
+    }
+
+    /// <summary>F-64 AC5: the scheme the proxy forwarded, read the same way as the address.</summary>
+    private static async Task<string> SchemeAsync(Dictionary<string, string?> settings, string connection)
+    {
+        var options = new ForwardedHeadersOptions();
+        var enabled = TrustedProxies.Configure(options, new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
+
+        var context = new DefaultHttpContext();
+        context.Request.Scheme = "http";
+        context.Connection.RemoteIpAddress = IPAddress.Parse(connection);
+        context.Request.Headers["X-Forwarded-Proto"] = "https";
+        if (enabled)
+        {
+            var middleware = new ForwardedHeadersMiddleware(_ => Task.CompletedTask, NullLoggerFactory.Instance, Options.Create(options));
+            await middleware.Invoke(context);
+        }
+
+        return context.Request.Scheme;
+    }
+
+    [Fact]
+    public async Task ListedProxy_ForwardedProto_TheSchemeIsHttps()
+    {
+        var scheme = await SchemeAsync(new() { ["ForwardedHeaders:KnownProxies:0"] = "10.0.0.5" }, "10.0.0.5");
+
+        scheme.Should().Be("https");
+    }
+
+    [Fact]
+    public async Task UnlistedSender_ForwardedProto_TheSchemeStaysHttp()
+    {
+        var scheme = await SchemeAsync(new() { ["ForwardedHeaders:KnownProxies:0"] = "10.0.0.5" }, "198.51.100.20");
+
+        scheme.Should().Be("http");
+    }
+
+    [Fact]
+    public async Task NothingListed_ForwardedProto_TheSchemeStaysHttp()
+    {
+        var scheme = await SchemeAsync([], "127.0.0.1");
+
+        scheme.Should().Be("http");
     }
 }

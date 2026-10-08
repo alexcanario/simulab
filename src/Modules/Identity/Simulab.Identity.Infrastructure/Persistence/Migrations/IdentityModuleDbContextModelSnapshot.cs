@@ -1116,6 +1116,11 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                         .HasColumnName("lockout_end")
                         .HasComment("The account refuses sign-in until this instant, after too many failed attempts. Null when it is not locked.");
 
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("boolean")
+                        .HasColumnName("must_change_password")
+                        .HasComment("True when the person must pick a new password before signing in for real. Set on the seeded administrator and cleared by any password set.");
+
                     b.Property<string>("NormalizedEmail")
                         .IsRequired()
                         .HasMaxLength(254)

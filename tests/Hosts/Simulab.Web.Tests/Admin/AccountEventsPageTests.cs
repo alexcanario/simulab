@@ -162,7 +162,7 @@ public sealed class AccountEventsPageTests : AdminPageTestContext
             .QuerySelectorAll("button.app-row-action")
             .Single(button => button.GetAttribute("aria-label") == "Security events: bruno.lima@exemplo.com.br").Click();
 
-        navigation.Uri.Should().EndWith($"/admin/account-events?user={Bruno}");
+        users.WaitForAssertion(() => navigation.Uri.Should().EndWith($"/admin/account-events?user={Bruno}"));
     }
 
     // AC14: the page reads in the three languages; pt-PT is not a copy of pt-BR.

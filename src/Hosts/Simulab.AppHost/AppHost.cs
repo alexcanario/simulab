@@ -10,10 +10,13 @@ var environmentName = builder.Environment.EnvironmentName;
 IResourceBuilder<IResourceWithConnectionString> database;
 IResourceBuilder<IResourceWithConnectionString> redis;
 IResourceBuilder<MailPitContainerResource>? mailpit = null;
+AzureDeployment.CloudResources? cloud = null;
 
 if (publishing)
 {
-    (database, redis) = AzureDeployment.AddResources(builder, environmentName);
+    cloud = AzureDeployment.AddResources(builder, environmentName);
+    database = cloud.Database;
+    redis = cloud.Redis;
 }
 else
 {
@@ -63,9 +66,9 @@ if (mailpit is not null)
             $"smtp://{mailpit.GetEndpoint("smtp").Property(EndpointProperty.HostAndPort)}"));
 }
 
-if (publishing)
+if (cloud is not null)
 {
-    AzureDeployment.ConfigureHosts(builder, api, web, environmentName);
+    AzureDeployment.ConfigureHosts(builder, api, web, environmentName, cloud);
 }
 else
 {

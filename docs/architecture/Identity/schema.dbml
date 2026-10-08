@@ -293,6 +293,7 @@ Table users {
   is_adult_declared boolean [not null, note: 'The person declared at sign-up that they are 18 or older. Simulab takes the declaration; it does not check an age.']
   lockout_enabled boolean [not null, note: 'True when this account can be locked out after failed sign-ins. True for everyone.']
   lockout_end timestamptz [note: 'The account refuses sign-in until this instant, after too many failed attempts. Null when it is not locked.']
+  must_change_password boolean [not null, note: 'True when the person must pick a new password before signing in for real. Set on the seeded administrator and cleared by any password set.']
   normalized_email varchar(254) [not null, note: 'The address upper-cased, which is what the unique index compares: one account per address.']
   normalized_user_name varchar(254) [note: 'The sign-in name upper-cased, which is what the unique index compares.']
   password_hash text [note: 'The password, hashed by ASP.NET Identity. The password itself is never stored and cannot be recovered from this.']

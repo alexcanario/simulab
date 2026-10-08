@@ -13,6 +13,7 @@ Status flow: idea -> refining -> approved -> building -> validating -> done
 - refining: sections below filled during /agile:refine.
 - approved: set only after the product owner says "approve F-<number>" and Open questions is empty or deferred.
 - building / validating / done: set by /agile:build and /agile:ship.
+- blocked: set by `/agile:change <id> --block "<reason>"` from refining, approved, building or validating; the line `Blocked (<date>): <what stops it> — unblocked by <who> — returns to <status>` sits under the header and `--unblock` returns the item to that status.
 Remove these comments when the file leaves `idea`.
 -->
 # <Feature name>

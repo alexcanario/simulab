@@ -52,6 +52,19 @@
                             ValueChanged="OnScopeChangedAsync"
                             Options="ScopeOptions" />
 
+            @* F-57 BR4: the whole list of states that have something published opens on focus; typing narrows it
+               by name or acronym. Picking one sets the scope to State (BR3). *@
+            <AppLookupField Id="catalog-filter-state"
+                            Label="@L["Catalog.Filter.State"]"
+                            Placeholder="@L["Catalog.Filter.State.Placeholder"]"
+                            SearchAsync="SearchStatesAsync"
+                            MinChars="0"
+                            MaxItems="@BrazilianStates.All.Count"
+                            OpenOnFocus="true"
+                            Value="StateOption"
+                            ValueChanged="OnStateChangedAsync"
+                            Disabled="@(_optionsLoading || _optionsFailed)" />
+
             <AppSelectField TValue="Guid?"
                             Id="catalog-filter-organizer"
                             Label="@L["Catalog.Filter.Organizer"]"
@@ -134,12 +147,25 @@
     private ExamScope? _scope;
     private Guid? _organizerId;
     private int? _noticeYear;
+    private string? _stateAcronym;
     private IReadOnlyList<PublishedExamOrganizerResponse> _organizers = [];
     private IReadOnlyList<int> _noticeYears = [];
+    private IReadOnlyList<string> _states = [];
     private bool _optionsLoading = true;
     private bool _optionsFailed;
 
-    private bool HasFilters => _assessmentType is not null || _scope is not null || _organizerId is not null || _noticeYear is not null;
+    private bool HasFilters =>
+        _assessmentType is not null || _scope is not null || _organizerId is not null || _noticeYear is not null || _stateAcronym is not null;
+
+    private AppLookupOption? StateOption =>
+        BrazilianStates.FindByAcronym(_stateAcronym) is { } state ? ToOption(state) : null;
+
+    private static AppLookupOption ToOption(BrazilianState state) => new(Guid.Empty, state.DisplayName);
+
+    // F-57 BR4: only the states the Api says have a published State exam, in the list's order; the Api sends them so.
+    private Task<IReadOnlyList<AppLookupOption>> SearchStatesAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>(
+            [.. BrazilianStates.Search(term).Where(state => _states.Contains(state.Acronym)).Select(ToOption)]);
 
     // The empty state says which emptiness it is: nothing published, or nothing matching the filters. With a search
     // text the table asks for EmptySearchMessage instead.
@@ -187,6 +213,7 @@
         _scope = _state.Scope;
         _organizerId = _state.OrganizerId;
         _noticeYear = _state.NoticeYear;
+        _stateAcronym = _state.State;
         _queryString = CatalogQueryString.Build(_state);
     }
 
@@ -214,11 +241,13 @@
         {
             _organizers = filters.Organizers;
             _noticeYears = filters.NoticeYears;
+            _states = filters.States;
         }
         else
         {
             _organizers = [];
             _noticeYears = [];
+            _states = [];
             _optionsFailed = true;
         }
 
@@ -231,7 +260,7 @@
         }
     }
 
-    // BR6: a board or a year the loaded options do not know is dropped from the address and the list reloads without it.
+    // BR6: a board, a year or a state the loaded options do not know is dropped from the address and the list reloads without it.
     private async Task DropUnknownFiltersAsync()
     {
         var changed = false;
@@ -247,6 +276,12 @@
             changed = true;
         }
 
+        if (_stateAcronym is { } acronym && !_states.Contains(acronym))
+        {
+            _stateAcronym = null;
+            changed = true;
+        }
+
         if (changed)
         {
             await _table.ReloadFromFirstPageAsync();
@@ -258,7 +293,7 @@
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
         var result = await Api.ListPublishedExamsAsync(
             token,
-            new PublishedExamListQuery(query.Page, query.PageSize, query.Search, _assessmentType, _scope, _organizerId, _noticeYear),
+            new PublishedExamListQuery(query.Page, query.PageSize, query.Search, _assessmentType, _scope, _organizerId, _noticeYear, _stateAcronym),
             cancellationToken);
 
         if (!result.IsSuccess)
@@ -267,7 +302,7 @@
         }
 
         // BR13: after every load the address is rewritten from what was asked, without a history entry.
-        _state = new CatalogSearchState(query.Search, _assessmentType, _scope, _organizerId, _noticeYear, query.Page, query.PageSize);
+        _state = new CatalogSearchState(query.Search, _assessmentType, _scope, _organizerId, _noticeYear, query.Page, query.PageSize, _stateAcronym);
         _queryString = CatalogQueryString.Build(_state);
         await InvokeAsync(WriteAddress);
 
@@ -289,9 +324,29 @@
         return _table.ReloadFromFirstPageAsync();
     }
 
+    // F-57 BR3: any scope but State leaves no state to filter by.
     private Task OnScopeChangedAsync(ExamScope? value)
     {
         _scope = value;
+        if (value != ExamScope.State)
+        {
+            _stateAcronym = null;
+        }
+
+        return _table.ReloadFromFirstPageAsync();
+    }
+
+    // F-57 BR3: picking a state sets the scope to State; clearing it leaves the scope as it is.
+    private Task OnStateChangedAsync(AppLookupOption? value)
+    {
+        _stateAcronym = value is null
+            ? null
+            : BrazilianStates.All.FirstOrDefault(state => state.DisplayName == value.Text)?.Acronym;
+        if (_stateAcronym is not null)
+        {
+            _scope = ExamScope.State;
+        }
+
         return _table.ReloadFromFirstPageAsync();
     }
 
@@ -307,11 +362,12 @@
         return _table.ReloadFromFirstPageAsync();
     }
 
-    // It puts the four selects back to "All". The search text stays: the search box has its own clear button.
+    // It puts the filters back to "All" and empties the state. The search text stays: the search box has its own clear button.
     private Task ClearFiltersAsync()
     {
         _assessmentType = null;
         _scope = null;
+        _stateAcronym = null;
         _organizerId = null;
         _noticeYear = null;
         return _table.ReloadFromFirstPageAsync();

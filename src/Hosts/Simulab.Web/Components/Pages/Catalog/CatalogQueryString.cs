@@ -6,7 +6,7 @@ using Simulab.Web.Components.Ui;
 namespace Simulab.Web.Components.Pages.Catalog;
 
 /// <summary>
-/// The seven keys of <c>/catalog</c> and how they are read and written (F-36, BR13, BR6). Reading never fails: a value
+/// The eight keys of <c>/catalog</c> and how they are read and written (F-36, BR13, BR6). Reading never fails: a value
 /// that cannot be read is no filter, so a stale bookmark shows results, not an error. Writing leaves out every key at
 /// its default, so the plain list is just <c>/catalog</c>.
 /// </summary>
@@ -17,11 +17,12 @@ public static class CatalogQueryString
     public const string ScopeKey = "scope";
     public const string OrganizerIdKey = "organizerId";
     public const string NoticeYearKey = "noticeYear";
+    public const string StateKey = "state";
     public const string PageKey = "page";
     public const string PageSizeKey = "pageSize";
 
     private static readonly string[] Keys =
-        [SearchKey, AssessmentTypeKey, ScopeKey, OrganizerIdKey, NoticeYearKey, PageKey, PageSizeKey];
+        [SearchKey, AssessmentTypeKey, ScopeKey, OrganizerIdKey, NoticeYearKey, StateKey, PageKey, PageSizeKey];
 
     /// <summary>The state an address holds; an address with none of the keys gives the plain list.</summary>
     public static CatalogSearchState Parse(string uri)
@@ -43,7 +44,8 @@ public static class CatalogQueryString
             Guid.TryParse(values.GetValueOrDefault(OrganizerIdKey), out var organizerId) ? organizerId : null,
             int.TryParse(values.GetValueOrDefault(NoticeYearKey), NumberStyles.None, CultureInfo.InvariantCulture, out var year) ? year : null,
             page,
-            pageSize);
+            pageSize,
+            BrazilianStates.FindByAcronym(values.GetValueOrDefault(StateKey))?.Acronym); // F-57 BR6: an unknown state is no filter
     }
 
     /// <summary>The query string of a state ("?a=b&amp;c=d"), or an empty string when every key is at its default.</summary>
@@ -77,6 +79,11 @@ public static class CatalogQueryString
             parts.Add($"{NoticeYearKey}={year.ToString(CultureInfo.InvariantCulture)}");
         }
 
+        if (!string.IsNullOrEmpty(state.State))
+        {
+            parts.Add($"{StateKey}={Uri.EscapeDataString(state.State)}");
+        }
+
         if (state.Page > 0)
         {
             parts.Add($"{PageKey}={(state.Page + 1).ToString(CultureInfo.InvariantCulture)}");
@@ -91,7 +98,7 @@ public static class CatalogQueryString
     }
 
     /// <summary>
-    /// Only the seven keys of an address, as a query string: what the exam page carries so its links go back to the list
+    /// Only the eight keys of an address, as a query string: what the exam page carries so its links go back to the list
     /// as it was. Anything else in the address is dropped.
     /// </summary>
     public static string Carried(string uri) => Build(Parse(uri));

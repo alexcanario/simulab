@@ -96,6 +96,6 @@ public class ResetPasswordTests : IdentityPageTestContext
 
         page.Find("button.app-reset-password-submit").Click();
 
-        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith(ResetPassword.SignInAfterResetPath);
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith(ResetPassword.SignInAfterResetPath));
     }
 }

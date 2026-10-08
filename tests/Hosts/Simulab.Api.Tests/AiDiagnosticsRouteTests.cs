@@ -14,7 +14,13 @@ namespace Simulab.Api.Tests;
 public class AiDiagnosticsRouteTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private HttpClient ClientFor(string environment) =>
-        factory.WithWebHostBuilder(builder => builder.UseEnvironment(environment)).CreateClient();
+        factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment(environment);
+
+            // F-66 BR4: outside Development the Api refuses to start without the cloud email settings.
+            CloudSettings.Apply(builder);
+        }).CreateClient();
 
     [Theory]
     [InlineData("Production")]

@@ -69,6 +69,8 @@ public sealed class ResetPasswordHandler(
 
             // Our own token proved the mailbox; Identity's own reset token is only the key its API asks for.
             // The rules were checked above, so a failure here is not the visitor's password: a server error.
+            // F-53 BR8: any successful password set clears the mark; it travels in the same UPDATE as the password.
+            user.ClearPasswordChangeRequirement();
             var identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
             (await userManager.ResetPasswordAsync(user, identityToken, newPassword!)).ThrowIfFailed("Resetting the password");
 

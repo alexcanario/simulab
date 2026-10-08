@@ -73,14 +73,14 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
 
     // Render with real parameters (profile): the three section cards, every field in its card, Draft chosen.
     [Fact]
-    public void Render_Add_ShowsTheThreeSectionsTheirFieldsAndADraftStatus()
+    public void Render_Add_ShowsTheThreeSectionsAndTheSaveFirstCardTheirFieldsAndADraftStatus()
     {
         var page = RenderAdd();
         WaitForForm(page);
 
         page.Find("h1").TextContent.Should().Be("Add edition");
         page.FindComponents<AppSectionCard>().Select(section => section.Instance.Title).Should().Equal(
-            "Paper", "Notice and application", "Publication");
+            "Paper", "Notice and application", "Publication", "Notice subjects");
 
         var paper = page.Find("section[aria-labelledby='edition-section-paper-title']");
         paper.QuerySelectorAll("#edition-organizer").Should().ContainSingle();

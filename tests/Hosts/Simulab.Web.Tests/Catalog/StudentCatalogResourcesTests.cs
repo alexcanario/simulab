@@ -22,9 +22,20 @@ public sealed class StudentCatalogResourcesTests
         { "Catalog.Filter.Clear", "Clear filters", "Limpar filtros", "Limpar filtros" },
         {
             "Catalog.Filter.OptionsFailed",
-            "We could not load the board and year options. The rest of the search works.",
-            "Não foi possível carregar as opções de banca e ano. O resto da busca funciona.",
-            "Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona."
+            "We could not load the board, year and state options. The rest of the search works.",
+            "Não foi possível carregar as opções de banca, ano e estado. O resto da busca funciona.",
+            "Não foi possível carregar as opções de entidade organizadora, ano e estado. O resto da pesquisa funciona."
+        },
+        // F-57 AC10: the state filter on both lists, and the code the Api answers an unknown state with.
+        { "Catalog.Filter.State", "State", "Estado", "Estado" },
+        { "Catalog.Filter.State.Placeholder", "All states", "Todos os estados", "Todos os estados" },
+        { "Exams.Filter.State", "State", "Estado", "Estado" },
+        { "Exams.Filter.State.Placeholder", "All states", "Todos os estados", "Todos os estados" },
+        {
+            "exam.filter_unknown_state",
+            "Choose one of the 27 states of the list.",
+            "Escolha um dos 27 estados da lista.",
+            "Escolha um dos 27 estados da lista."
         },
         { "Catalog.Column.ContentLanguage", "Language", "Idioma", "Idioma" },
         { "Catalog.Column.Editions", "Editions", "Edições", "Edições" },

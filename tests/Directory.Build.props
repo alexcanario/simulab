@@ -18,6 +18,13 @@
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
+  <!-- B-24: each synchronous host start blocks a pool thread, 24 at once on a 24-core machine. With the default
+       minimum (the core count) the socket continuations and timers of those starts wait for the pool to grow,
+       and Npgsql's 15 s open timeout expires under load. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads" Value="256" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="AwesomeAssertions" />
     <Using Include="Xunit" />

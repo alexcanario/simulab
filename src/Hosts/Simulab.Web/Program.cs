@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Simulab.Identity.Contracts;
+using Simulab.ServiceDefaults;
 using Simulab.Web.Components;
 using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
@@ -11,6 +12,8 @@ using Simulab.Web.Services.Auth;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+// F-64 BR4: the key ring of a deployed host lives in a blob container, not in the container's file system.
+builder.AddAppDataProtection("simulab-web");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddUiKit();
@@ -127,7 +130,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     ];
 });
 
-// B-4 BR5: X-Forwarded-For only from the proxies the configuration lists (none in dev).
+// B-4 BR5, F-64 BR6: X-Forwarded-For and X-Forwarded-Proto only from the proxies the configuration lists (none in dev).
 var forwarded = new ForwardedHeadersOptions();
 var behindTrustedProxy = TrustedProxies.Configure(forwarded, builder.Configuration);
 
@@ -135,7 +138,12 @@ var app = builder.Build();
 
 if (behindTrustedProxy)
 {
+    app.UseUnlistedSenderLog(forwarded);
     app.UseForwardedHeaders(forwarded);
+}
+else if (!app.Environment.IsDevelopment())
+{
+    app.UseUnlistedProxyLog();
 }
 
 if (!app.Environment.IsDevelopment())

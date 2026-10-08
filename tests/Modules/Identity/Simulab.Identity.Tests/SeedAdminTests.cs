@@ -189,6 +189,68 @@ public sealed class SeedAdminTests
     // F-44 (owner, 2026-10-02): appsettings.Development.json is exempt on purpose — the owner keeps the local
     // admin's development password there so the app host seeds it without user secrets. The base file, which
     // every environment reads, still carries none.
+    [Fact]
+    public async Task Start_SwitchOn_CreatesTheAdminMarked()
+    {
+        await using var factory = await StartedAsync(Password, requirePasswordChange: true);
+
+        var user = await ReadAsync(factory, (context, users) => users.FindByEmailAsync(SeedAdmin.Email));
+
+        user!.MustChangePassword.Should().BeTrue("the seed marks the account it creates (F-53 BR2, AC2)");
+    }
+
+    [Fact]
+    public async Task Start_SwitchOff_CreatesTheAdminUnmarked()
+    {
+        await using var factory = await StartedAsync(Password, requirePasswordChange: false);
+
+        var user = await ReadAsync(factory, (context, users) => users.FindByEmailAsync(SeedAdmin.Email));
+
+        user!.Status.Should().Be(AccountStatus.Active, "the seed ran");
+        user.MustChangePassword.Should().BeFalse("the development password keeps working (F-53 BR2, AC3)");
+    }
+
+    [Fact]
+    public async Task Start_SwitchNotSet_TreatsItAsOn()
+    {
+        await using var factory = await StartedAsync(Password, requirePasswordChange: null);
+
+        var user = await ReadAsync(factory, (context, users) => users.FindByEmailAsync(SeedAdmin.Email));
+
+        user!.MustChangePassword.Should().BeTrue("a missing value means true (F-53 BR2, AC5)");
+    }
+
+    [Fact]
+    public async Task Ensure_ExistingUnmarkedAccountAndSwitchOn_StaysUnmarked()
+    {
+        await using var factory = await StartedAsync(Password, requirePasswordChange: false);
+
+        await factory.Services.EnsureSeedAdminAsync(Configure(Password, requirePasswordChange: true));
+
+        var user = await ReadAsync(factory, (context, users) => users.FindByEmailAsync(SeedAdmin.Email));
+        user!.Status.Should().Be(AccountStatus.Active, "the account is there");
+        user.MustChangePassword.Should().BeFalse("an existing account is never marked by the seed (F-53 BR2, AC4)");
+    }
+
+    [Fact]
+    public void Settings_DevelopmentFile_TurnsTheSwitchOff()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(ApiProjectFile("appsettings.json"), optional: false)
+            .AddJsonFile(ApiProjectFile("appsettings.Development.json"), optional: false)
+            .Build();
+
+        configuration.GetValue<bool?>(SeedAdmin.RequirePasswordChangeKey).Should().BeFalse("development keeps its password (F-53 AC5)");
+    }
+
+    [Fact]
+    public void Settings_BaseFile_CarriesNoValueForTheSwitch()
+    {
+        var configuration = new ConfigurationBuilder().AddJsonFile(ApiProjectFile("appsettings.json"), optional: false).Build();
+
+        configuration[SeedAdmin.RequirePasswordChangeKey].Should().BeNull("outside development the default, true, applies (F-53 AC5)");
+    }
+
     [Theory]
     [InlineData("appsettings.json")]
     public void Settings_CommittedFiles_CarryNoSeedAdminPassword(string file)
@@ -218,7 +280,11 @@ public sealed class SeedAdminTests
         logs.Entries.Should().NotContain(entry => entry.Message.Contains(Password));
     }
 
-    private static IdentityApiFactory NewFactory(string? password, bool migrateOnStart = true)
+    /// <summary>
+    /// F-53 AC5: every seed test sets the switch itself, the integration hosts run as Development. <c>false</c> unless a
+    /// test says otherwise, so the sign-in tests keep the account they always had; <c>null</c> leaves the key unset.
+    /// </summary>
+    private static IdentityApiFactory NewFactory(string? password, bool migrateOnStart = true, bool? requirePasswordChange = false)
     {
         var factory = new IdentityApiFactory();
         factory.ConfigureHost = builder =>
@@ -227,23 +293,28 @@ public sealed class SeedAdminTests
                 configuration.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     [SeedAdmin.PasswordKey] = password,
+                    [SeedAdmin.RequirePasswordChangeKey] = requirePasswordChange?.ToString(),
                     ["Database:ApplyMigrationsOnStart"] = migrateOnStart ? "true" : "false",
                 }));
         };
         return factory;
     }
 
-    private static async Task<IdentityApiFactory> StartedAsync(string? password)
+    private static async Task<IdentityApiFactory> StartedAsync(string? password, bool? requirePasswordChange = false)
     {
-        var factory = NewFactory(password);
+        var factory = NewFactory(password, requirePasswordChange: requirePasswordChange);
         await factory.PrepareAsync($"seed_admin_{Guid.NewGuid():N}");
         _ = factory.CreateClient();
         return factory;
     }
 
-    private static IConfiguration Configure(string? password) =>
+    private static IConfiguration Configure(string? password, bool? requirePasswordChange = false) =>
         new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { [SeedAdmin.PasswordKey] = password })
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [SeedAdmin.PasswordKey] = password,
+                [SeedAdmin.RequirePasswordChangeKey] = requirePasswordChange?.ToString(),
+            })
             .Build();
 
     /// <summary>A file of the Api project, found from the solution root (the test output folder does not carry it).</summary>

@@ -39,6 +39,13 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
             rows = rows.Where(row => row.Exam.Scope == scope);
         }
 
+        // F-57 BR2: a state filter lists the State exams that store this acronym, never a National or Municipal one.
+        if (BrazilianStates.FindByAcronym(sanitized.State) is { } state)
+        {
+            var acronym = state.Acronym;
+            rows = rows.Where(row => row.Exam.Scope == ExamScope.State && row.Exam.ScopeDetail == acronym);
+        }
+
         var total = await rows.CountAsync(cancellationToken);
 
         var items = await Select(rows.OrderBy(row => row.Exam.NormalizedName).ThenBy(row => row.Exam.Id))
@@ -112,9 +119,20 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
             .OrderByDescending(year => year)
             .ToListAsync(cancellationToken);
 
+        // F-57 BR4: the states that lead to a non-empty list, in the order of the approved list. An acronym the list
+        // does not know (a value saved before F-42) is no option: the filter could not name it.
+        var storedStates = await (
+                from edition in published
+                join exam in context.Exams on edition.ExamId equals exam.Id
+                where exam.Scope == ExamScope.State && exam.ScopeDetail != null
+                select exam.ScopeDetail!)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         return new PublishedExamFiltersResponse(
             [.. organizers.Select(organizer => new PublishedExamOrganizerResponse(organizer.Id, organizer.Name, organizer.Acronym))],
-            years);
+            years,
+            [.. BrazilianStates.All.Where(state => storedStates.Contains(state.Acronym)).Select(state => state.Acronym)]);
     }
 
     // The published exams with their issuing authority. The board and the year, when given, are terms of the

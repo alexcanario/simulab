@@ -12,17 +12,17 @@ public sealed class SignInAttempt(ClientRateLimiter limiter, string key, string?
     public TimeSpan RetryAfter { get; private set; }
 
     /// <summary>BR3: true, with <see cref="RetryAfter"/> set, while the address is at its limit. Reads nothing else.</summary>
-    public bool IsAtLimit()
+    public async Task<bool> IsAtLimitAsync()
     {
-        var check = limiter.CheckSignIn(key, IdentityRateLimits.SignInFailedAccountsPer15Minutes);
+        var check = await limiter.CheckSignInAsync(key, IdentityRateLimits.SignInFailedAccountsPer15Minutes);
         RetryAfter = check.RetryAfter;
         ReportFirstRefusal(check);
         return !check.Allowed;
     }
 
-    public bool TryCount(string accountName)
+    public async Task<bool> TryCountAsync(string accountName)
     {
-        var reservation = limiter.ReserveSignInName(
+        var reservation = await limiter.ReserveSignInNameAsync(
             key,
             Normalize(accountName),
             IdentityRateLimits.SignInFailedAccountsPer15Minutes,
@@ -42,7 +42,7 @@ public sealed class SignInAttempt(ClientRateLimiter limiter, string key, string?
         }
     }
 
-    public void Clear(string accountName) => limiter.ReleaseSignInName(key, Normalize(accountName));
+    public Task ClearAsync(string accountName) => limiter.ReleaseSignInNameAsync(key, Normalize(accountName));
 
     /// <summary>BR1: the typed name, trimmed and lower-cased.</summary>
     private static string Normalize(string? accountName) => (accountName ?? string.Empty).Trim().ToLowerInvariant();

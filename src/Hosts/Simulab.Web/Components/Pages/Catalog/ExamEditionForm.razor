@@ -167,6 +167,13 @@ else
                       PendingText="@L["Common.Checklist.Pending"]"
                       Checklist="AsideChecklist" />
     </div>
+
+    @* F-74, Screen 1: the notice subjects of the edition, in a card of their own below the whole layout and outside
+       the edition form - the edition's Save never saves one, and the aside keeps summarising only the edition. On a
+       new edition the section only says to save the edition first (AC17). *@
+    <MudPaper Class="app-form-card mt-4" Elevation="0">
+        <NoticeSubjectsSection ExamId="ExamId" EditionId="@_saved?.Id" />
+    </MudPaper>
 }
 
 @code {

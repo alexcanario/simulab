@@ -121,6 +121,11 @@ A signed-in user can end their relationship with Simulab on their own: the perso
 
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
+### F-59 - 2026-10-06
+- What: BR13 and AC11 - `UserErased` is published by the `account.erased` job, staged in the erasure transaction, after the commit; it is no longer published inline by the handler.
+- Why: a crash between the commit and the inline publish lost the event; the job is retried by the F-13 policy (F-59).
+- Affected: BR13, AC11 (the event arrives when the worker runs the job, at least once). BR10 and AC7 unchanged: the handler still revokes every session before the 204.
+- Re-approved: 2026-10-04 (owner, with F-59)
 <!--
 ### v2 — YYYY-MM-DD
 - What: <change>

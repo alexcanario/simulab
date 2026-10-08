@@ -7,7 +7,8 @@ public sealed record TokenResponse(
     [property: JsonPropertyName("access_token")] string? AccessToken,
     [property: JsonPropertyName("refresh_token")] string? RefreshToken,
     [property: JsonPropertyName("error")] string? Error,
-    [property: JsonPropertyName("error_description")] string? ErrorDescription);
+    [property: JsonPropertyName("error_description")] string? ErrorDescription,
+    [property: JsonPropertyName("challenge")] string? Challenge = null);
 
 /// <summary>Posts to the OpenIddict token endpoint the way the Web does: form-encoded, with the client credentials.</summary>
 public static class TokenClient

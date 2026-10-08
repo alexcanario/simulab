@@ -1,8 +1,8 @@
 ---
 page: index
 locale: en
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36]
-updated: 2026-09-29
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79]
+updated: 2026-10-04
 ---
 # Simulab
 
@@ -20,7 +20,7 @@ Pages are added here as each feature is released.
 
 | Area | What it is for | Status |
 |---|---|---|
-| Assessment catalog | Register the issuing authorities, organizers, exams and editions everything else hangs on (Admins) | Issuing authorities, organizers and exams available ([Issuing authorities](issuing-authorities.md), [Organizers](organizers.md), [Exams](exams.md)) and the editions of each exam ([Exam editions](exam-editions.md)); the student catalog, with search and filters, is available to everyone ([Catalog](catalog.md)) |
+| Assessment catalog | Register the issuing authorities, organizers, exams and editions everything else hangs on (Admins) | Issuing authorities, organizers and exams available ([Issuing authorities](issuing-authorities.md), [Organizers](organizers.md), [Exams](exams.md)) and the editions of each exam ([Exam editions](exam-editions.md)); the student catalog, with search and filters, is available to everyone ([Catalog](catalog.md)); the subjects and topics every content points at are kept by Admins ([Subjects and topics](subjects.md)) |
 | Exam Simulator | Take a real past exam with the same questions, order, time limit and scoring rules | Coming soon |
 | Question Bank Simulator | Build your own practice by subject, organizer, year or difficulty | Coming soon |
 | Performance | See your results over time, by subject and topic, and how far you are from the cut-off score | Coming soon |
@@ -50,4 +50,5 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Organizers](organizers.md): the exam boards, certifying bodies and universities that apply the papers (Admins)
 - [Exams](exams.md): the catalog's exams, with type, scope and language (Admins)
 - [Exam editions](exam-editions.md): the papers actually applied, with year, position and board (Admins)
+- [Subjects and topics](subjects.md): the shared list of what students study, with its areas (Admins)
 - [Catalog](catalog.md): search published exams, filter them and see the editions of each

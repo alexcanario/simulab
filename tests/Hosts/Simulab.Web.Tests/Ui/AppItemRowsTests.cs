@@ -44,6 +44,25 @@ public sealed class AppItemRowsTests : KitTestContext
             .Should().Equal("Edit 2026", "Edit 2023");
     }
 
+    // F-74: a list that sits under a heading is named by it.
+    [Fact]
+    public void Render_AriaLabelledBy_NamesTheListByItsHeading()
+    {
+        var rows = Render<AppItemRows<string>>(parameters => parameters
+            .Add(list => list.Items, ["2026"])
+            .Add(list => list.EmptyMessage, "No edition yet.")
+            .Add(list => list.AriaLabelledBy, "heading-1")
+            .Add(list => list.RowTemplate, (string item) => builder => builder.AddContent(0, item)));
+
+        rows.Find("ul").GetAttribute("aria-labelledby").Should().Be("heading-1");
+    }
+
+    [Fact]
+    public void Render_WithoutAriaLabelledBy_TheListCarriesNoSuchAttribute()
+    {
+        Render(["2026"]).Find("ul").HasAttribute("aria-labelledby").Should().BeFalse();
+    }
+
     [Fact]
     public void Render_WithoutActions_NoEmptyActionCellIsLeftBehind()
     {
