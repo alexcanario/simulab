@@ -217,6 +217,10 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 | Azure Cost Management | Azure Cost Management | Azure screen that shows what each resource really cost, by day. | Tela do Azure que mostra quanto cada recurso custou de verdade, por dia. |
 | Azure Budget | alerta de orçamento | Monthly spending limit on a subscription that emails an alert at set percentages; it does not stop anything. | Limite mensal de gasto na assinatura que manda alerta por e-mail em percentuais definidos; não desliga nada. |
 | Bicep | Bicep | Azure language for declaring cloud infrastructure as code. | Linguagem do Azure para declarar a infraestrutura de nuvem como código. |
+| managed identity | identidade gerenciada | An identity Azure gives to a resource, so it reaches other Azure services without a stored password. | Identidade que o Azure dá a um recurso, para ele acessar outros serviços do Azure sem senha guardada. |
+| Microsoft Entra ID | Microsoft Entra ID | Microsoft's sign-in service for people and resources in Azure. | Serviço de login da Microsoft para pessoas e recursos no Azure. |
+| blob storage | armazenamento de blobs | Azure storage for files; the hosts keep their Data Protection key ring there. | Armazenamento de arquivos do Azure; os hosts guardam ali o chaveiro do Data Protection. |
+| revision (container app) | revisão (container app) | One running version of a container app; a restart acts on the active revision. | Uma versão em execução de um container app; reiniciar atua na revisão ativa. |
 | GitHub Actions | GitHub Actions | GitHub's automation that builds, tests and deploys on each change. | Automação do GitHub que compila, testa e implanta a cada mudança. |
 | RBAC | RBAC (controle por papéis) | Role-based access control: permissions are given to roles, roles to users. | Controle de acesso por papéis: permissões vão para papéis, papéis para usuários. |
 | LGPD / GDPR | LGPD / RGPD | Brazilian / European data-protection laws behind erasure and data export. | Leis de proteção de dados do Brasil / da Europa que motivam a exclusão e a exportação de dados. |
