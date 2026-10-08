@@ -53,6 +53,31 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
         return new SubjectPageResponse(items, total);
     }
 
+    public async Task<IReadOnlyList<TaxonomySubjectResponse>> ListTaxonomyAsync(CancellationToken cancellationToken)
+    {
+        // Two flat queries sorted over the normalized name (accents and case ignored), grouped here: one round
+        // trip per table and no join to repeat the subject on every topic row.
+        var subjects = await context.Subjects
+            .AsNoTracking()
+            .OrderBy(subject => subject.NormalizedName)
+            .Select(subject => new { subject.Id, subject.Name })
+            .ToListAsync(cancellationToken);
+
+        var topics = (await context.Topics
+                .AsNoTracking()
+                .OrderBy(topic => topic.NormalizedName)
+                .Select(topic => new { topic.Id, topic.SubjectId, topic.Name })
+                .ToListAsync(cancellationToken))
+            .ToLookup(topic => topic.SubjectId);
+
+        return subjects
+            .Select(subject => new TaxonomySubjectResponse(
+                subject.Id,
+                subject.Name,
+                topics[subject.Id].Select(topic => new TaxonomyTopicResponse(topic.Id, topic.Name)).ToList()))
+            .ToList();
+    }
+
     public Task<SubjectResponse?> FindAsync(Guid id, CancellationToken cancellationToken) =>
         Project(context.Subjects.AsNoTracking().Where(subject => subject.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
@@ -63,5 +88,6 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
             subject.Name,
             subject.AreaId,
             context.Areas.Where(area => area.Id == subject.AreaId).Select(area => area.Code).FirstOrDefault(),
-            context.Topics.Count(topic => topic.SubjectId == subject.Id)));
+            context.Topics.Count(topic => topic.SubjectId == subject.Id),
+            context.LiveNoticeSubjectMappings.Any(mapping => mapping.SubjectId == subject.Id)));
 }

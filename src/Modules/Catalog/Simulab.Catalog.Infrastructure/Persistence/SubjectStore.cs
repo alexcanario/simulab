@@ -21,6 +21,9 @@ public sealed class SubjectStore(CatalogModuleDbContext context) : ISubjectStore
     public Task<bool> NameIsTakenAsync(string normalizedName, Guid? exceptId, CancellationToken cancellationToken) =>
         Others(exceptId).AnyAsync(subject => subject.NormalizedName == normalizedName, cancellationToken);
 
+    public Task<bool> IsMappedWholeAsync(Guid subjectId, CancellationToken cancellationToken) =>
+        context.LiveNoticeSubjectMappings.AnyAsync(mapping => mapping.SubjectId == subjectId, cancellationToken);
+
     public void Add(Subject subject) => context.Subjects.Add(subject);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE.

@@ -15,6 +15,10 @@ public sealed class TopicQueries(CatalogModuleDbContext context) : ITopicQueries
             .AsNoTracking()
             .Where(topic => topic.SubjectId == subjectId)
             .OrderBy(topic => topic.NormalizedName)
-            .Select(topic => new TopicResponse(topic.Id, topic.SubjectId, topic.Name))
+            .Select(topic => new TopicResponse(
+                topic.Id,
+                topic.SubjectId,
+                topic.Name,
+                context.LiveNoticeSubjectMappings.Any(mapping => mapping.TopicId == topic.Id)))
             .ToListAsync(cancellationToken);
 }

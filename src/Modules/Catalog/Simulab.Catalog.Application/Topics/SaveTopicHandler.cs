@@ -68,6 +68,11 @@ public sealed class SaveTopicHandler(ITopicStore store, ISubjectStore subjects)
             return Result.Failure<TopicResponse>(refused);
         }
 
-        return Result.Success(new TopicResponse(topic.Id, topic.SubjectId, topic.Name));
+        // A topic mapped by a live notice subject is in use: the answer says so, as the list does (BR10).
+        return Result.Success(new TopicResponse(
+            topic.Id,
+            topic.SubjectId,
+            topic.Name,
+            await store.IsMappedAsync(topic.Id, cancellationToken)));
     }
 }
