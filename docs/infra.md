@@ -41,7 +41,7 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 | staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo` | | |
 | production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo` | | |
 
-The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`brazilsouth`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
+The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
 
 ### First deploy of staging (F-64)
 The owner runs every command below in the owner's own subscription (F-64 BR10); nothing here is run by Claude, and each one that creates a resource is paid. Run them from the repository root (the worktree root when the item is not merged), in one PowerShell 7 terminal: the variables of step 1 live only in that terminal. Names in capitals (`VAULT_NAME`, `SECRET_VALUE`) are placeholders: replace the whole word, never paste it as it is. The sign-in and the subscription are the owner's: `az login`, then `az account set --subscription <subscription id>`.
@@ -50,11 +50,11 @@ Two rules while a deploy runs: start nothing else from the same folder (the app 
 
 The Api refuses to start until its certificates exist (F-64 BR4), so the first deploy ends with a healthy `web` and an `api` that restarts in a loop. That is expected: steps 5 to 8 give it what it needs, and the second deploy (step 10) starts it.
 
-1. Settings for the deploy command (never committed). The subscription id is `az account show --query id -o tsv`. The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once (`[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`) and never paste it in a chat. The vault does not exist before the first deploy, so the first time you type the value at a hidden prompt, and step 5 stores it in the vault (secret `deploy--OpenIddictClientSecret`); every later deploy reads it from there. The prefix `deploy--` is deliberate: a secret named like a configuration key the hosts read (for example `Authentication--OpenIddict--ClientSecret`) would win over the deploy value, because the vault source is added last. A lost value can still be read from the deployed `api` (`az containerapp secret show -n api -g simulab-staging --secret-name authentication--openiddict--clientsecret --query value -o tsv`).
+1. Settings for the deploy command (never committed). The subscription id is `az account show --query id -o tsv`. The OpenIddict client secret is asked as the parameter `openiddict-client-secret` and must be **the same value on every deploy** (both hosts share it): generate it once (`[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))`) and never paste it in a chat. The vault does not exist before the first deploy, so the first time you type the value at a hidden prompt, and step 5 stores it in the vault (secret `deploy--OpenIddictClientSecret`); every later deploy reads it from there. The prefix `deploy--` is deliberate: a secret named like a configuration key the hosts read (for example `Authentication--OpenIddict--ClientSecret`) would win over the deploy value, because the vault source is added last. A lost value can still be read from the deployed `api` (`az containerapp secret show -n api -g rg-simulab-staging --secret-name authentication--openiddict--clientsecret --query value -o tsv`).
    ```powershell
    $env:AZURE__SUBSCRIPTIONID = (az account show --query id -o tsv)
-   $env:AZURE__LOCATION = "brazilsouth"
-   $env:AZURE__RESOURCEGROUP = "simulab-staging"
+   $env:AZURE__LOCATION = "centralus"
+   $env:AZURE__RESOURCEGROUP = "rg-simulab-staging"
    ```
    First deploy (the vault does not exist yet): the value from the generator above, typed at a hidden prompt.
    ```powershell
@@ -72,10 +72,10 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
    ${env:Parameters__postgres-admin-user} = (az keyvault secret show --vault-name VAULT_NAME -n deploy--PostgresAdminUser --query value -o tsv)
    ${env:Parameters__postgres-admin-password} = (az keyvault secret show --vault-name VAULT_NAME -n deploy--PostgresAdminPassword --query value -o tsv)
    ```
-   Git Bash: `export AZURE__SUBSCRIPTIONID=<subscription id> AZURE__LOCATION=brazilsouth AZURE__RESOURCEGROUP=simulab-staging`; a name with a hyphen cannot be exported there, so put `env 'Parameters__openiddict-client-secret=SECRET_VALUE'` in front of the command of step 3.
-2. The resource group (skip when it exists: `az group show -n simulab-staging`):
+   Git Bash: `export AZURE__SUBSCRIPTIONID=<subscription id> AZURE__LOCATION=centralus AZURE__RESOURCEGROUP=rg-simulab-staging`; a name with a hyphen cannot be exported there, so put `env 'Parameters__openiddict-client-secret=SECRET_VALUE'` in front of the command of step 3.
+2. The resource group (skip when it exists: `az group show -n rg-simulab-staging`):
    ```powershell
-   az group create -n simulab-staging -l brazilsouth
+   az group create -n rg-simulab-staging -l centralus
    ```
 3. Deploy: the staging command of the table above. The Aspire CLI must have the version of the Aspire packages in `Directory.Packages.props` (`aspire --version`). The command prints its steps and ends with a summary; an empty output means it did not run (wrong folder, or a variable of step 1 missing).
    ```powershell
@@ -83,12 +83,12 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
    ```
 4. Learn the names: the Key Vault (`keyvault...`) is `VAULT_NAME` below, the PostgreSQL server (`postgres-...`) is the `<server>` of "Staging start and stop", and there are two storage accounts (`storageapi...`, `storageweb...`, one per host).
    ```powershell
-   az resource list -g simulab-staging -o table
+   az resource list -g rg-simulab-staging -o table
    ```
-   An empty list after step 3 means nothing was deployed: read the deploy output, and `az deployment group list -g simulab-staging -o table`.
+   An empty list after step 3 means nothing was deployed: read the deploy output, and `az deployment group list -g rg-simulab-staging -o table`.
 5. Give yourself access to the vault's secrets (the owner of a subscription has no data access to a vault by default). The role takes a minute or two to reach the vault; a `Forbidden` at step 6 or later is solved by waiting and repeating.
    ```powershell
-   az role assignment create --role "Key Vault Administrator" --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User --scope "$(az keyvault show -n VAULT_NAME -g simulab-staging --query id -o tsv)"
+   az role assignment create --role "Key Vault Administrator" --assignee-object-id "$(az ad signed-in-user show --query id -o tsv)" --assignee-principal-type User --scope "$(az keyvault show -n VAULT_NAME -g rg-simulab-staging --query id -o tsv)"
    ```
    Then store the deploy secret of step 1, the same value the first deploy used, so the next deploy can read it (hidden prompt):
    ```powershell
@@ -116,13 +116,13 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
    $p = Read-Host -AsSecureString "Admin password"; az keyvault secret set --vault-name VAULT_NAME -n Identity--SeedAdmin--Password --value (ConvertFrom-SecureString $p -AsPlainText) -o none
    ```
    Git Bash: `read -rs -p "Admin password: " P; echo; az keyvault secret set --vault-name VAULT_NAME -n Identity--SeedAdmin--Password --value "$P" -o none; unset P`
-9. Read the address of the ingress (F-64 BR6, D12): open the staging address once in a browser, then read the log and look for the warning `A forwarded header arrived from <address> and is ignored`. Do the same for `api` after step 10 (`-n api`): the two addresses may differ. Write them in `src/Hosts/Simulab.AppHost/appsettings.Staging.json` under `ForwardedHeaders:KnownProxies` (one address) or `ForwardedHeaders:KnownNetworks` (a range, only if the addresses change between restarts) and record what you measured in `## Delivery` of F-64. Never a guess.
+9. Read the address of the ingress (F-64 BR6, D12): open the staging address once in a browser, then read the log and look for the warning `A forwarded header arrived from <address> and is ignored`. Do the same for `api` after step 10 (`-n api`): the two addresses may differ. The ingress address changes between restarts, so staging lists the network, not one address: `src/Hosts/Simulab.AppHost/appsettings.Staging.json` has `ForwardedHeaders:KnownNetworks` = `100.100.0.0/16` (F-64 D22, measured). Use `KnownProxies` only for an address that does not change. Never a guess. (If the list is wrong the symptom is a 400 `ID2083` on `/connect/token`; the hosts' warning names the sender.)
    ```powershell
-   az containerapp logs show -n web -g simulab-staging --type console --tail 100
+   az containerapp logs show -n web -g rg-simulab-staging --type console --tail 100
    ```
 10. Deploy again (step 3). The apps restart with the certificates, the key and the proxy list. Check `https://<staging address>/api/v1/system/info`: it answers 200 with `"environment": "Staging"`.
    ```powershell
-   az containerapp logs show -n api -g simulab-staging --type console --tail 50
+   az containerapp logs show -n api -g rg-simulab-staging --type console --tail 50
    ```
 
 The Api migrates the module schemas, roles and permissions and the OpenIddict client on start in Staging only (`Database__ApplyMigrationsOnStart=true`, F-64 BR5). **Production keeps the default (off) until F-65 decides how a release migrates; a production deploy without a migration step breaks nothing in the key ring** (it lives in a blob) **but starts on an empty database.**
@@ -144,7 +144,7 @@ The Api migrates the module schemas, roles and permissions and the OpenIddict cl
   }
   ```
   `az rest --method put --url "/subscriptions/<subscription id>/providers/Microsoft.Consumption/budgets/simulab-monthly?api-version=2023-11-01" --body @budget.json`, then read it back with `az rest --method get --url` on the same address: both notifications must be there. The budget only warns; it stops nothing. `/agile:publish` writes its own budget on the resource group at 80 % and 100 % (a second, different one): deploy staging with the command of the table, not with `/agile:publish`, or accept both.
-- The measured cost (BR8) is read after one full test window followed by 7 parked days, in two periods: the days it ran and the parked days. Save as `cost.json` (dates are the period): `{ "type": "ActualCost", "timeframe": "Custom", "timePeriod": { "from": "2026-10-10T00:00:00Z", "to": "2026-10-16T23:59:59Z" }, "dataset": { "granularity": "None", "aggregation": { "totalCost": { "name": "Cost", "function": "Sum" } } } }`, then `az rest --method post --url "/subscriptions/<subscription id>/resourceGroups/simulab-staging/providers/Microsoft.CostManagement/query?api-version=2023-11-01" --body @cost.json`. The figures lag 8 to 24 hours behind the spend; the service answers 429 after a handful of queries in a minute. The monthly figure is running days × running cost per day + parked days × parked cost per day, with the number of test days a month the owner expects; plan B of ADR-0002 applies when it, plus the ADR's production estimate, is above US$ 80.
+- The measured cost (BR8) is read after one full test window followed by 7 parked days, in two periods: the days it ran and the parked days. Save as `cost.json` (dates are the period): `{ "type": "ActualCost", "timeframe": "Custom", "timePeriod": { "from": "2026-10-10T00:00:00Z", "to": "2026-10-16T23:59:59Z" }, "dataset": { "granularity": "None", "aggregation": { "totalCost": { "name": "Cost", "function": "Sum" } } } }`, then `az rest --method post --url "/subscriptions/<subscription id>/resourceGroups/rg-simulab-staging/providers/Microsoft.CostManagement/query?api-version=2023-11-01" --body @cost.json`. The figures lag 8 to 24 hours behind the spend; the service answers 429 after a handful of queries in a minute. The monthly figure is running days × running cost per day + parked days × parked cost per day, with the number of test days a month the owner expects; plan B of ADR-0002 applies when it, plus the ADR's production estimate, is above US$ 80.
 
 ### Staging start and stop (ADR-0002, BR3)
 Staging runs during test windows and is parked outside them. These commands are **declared, not yet run**: step 4 above gives the resource names (`<rg>` is the resource group of the environment, `<server>` its PostgreSQL server). A parked staging keeps its data: the key ring is a blob and the Redis container holds only sessions (they are lost on a park and testers sign in again).
@@ -186,8 +186,8 @@ Names only. None exists yet; each arrives with the feature that needs it.
 | `Email:Host`, `Email:Port`, `Email:UseStartTls`, `Email:UserName`, `Email:Password` | Api | the SMTP provider only: local Mailpit (`appsettings.Development.json` plus the app host SMTP connection string); not used in the cloud |
 | `AZURE_CLIENT_ID` | Api | not a secret. Client id of the Api's managed identity; Aspire sets it on the container app. The Azure sender signs in with that identity: no email key, connection string or client secret exists in any environment (F-66 BR1) |
 | `Jobs:WorkerEnabled` | Api | optional, defaults to true. The test host sets it to false and runs the jobs itself (F-13 BR13); a second Api replica may keep it true — the claim uses `FOR UPDATE SKIP LOCKED`, so no message is sent twice |
-| `ConnectionStrings:redis` | Api, Web | local: generated by the app host (TLS, password); cloud: Key Vault |
-| `Authentication:OpenIddict:ClientId` | Web | local: `appsettings.Development.json` (`simulab-web`); cloud: same value, not a secret |
+| `ConnectionStrings:redis` | Api, Web | local: generated by the app host (TLS, password); cloud: Key Vault. Since F-64 D21 the Redis container's password is the deploy parameter `redis-password`, the same on every deploy and kept by the owner in the vault as `deploy--RedisPassword` (32 letters and digits); a value Aspire generates again at each `--clear-cache` deploy leaves the hosts with the old one (`NOAUTH`). The platform updates the secret but does not restart a running Redis: restart its revision after a deploy that changes the password |
+| `Authentication:OpenIddict:ClientId` | Web | local: `appsettings.Development.json` (`simulab-web`); cloud: the same value, not a secret, set by the app host as `Authentication__OpenIddict__ClientId` (F-64 D23). Without it the Web sends no `client_id` and every sign-in fails with a 401 `invalid_client` ("The mandatory 'client_id' parameter is missing") |
 | `Authentication:OpenIddict:ClientSecret` | Api, Web | local: `appsettings.Development.json`, same value on both hosts; cloud: the AppHost parameter `openiddict-client-secret`, supplied at deploy time as the environment variable `Parameters__openiddict-client-secret` (F-62); the same value goes to both hosts |
 | `Identity:SeedAdmin:Password` | Api | the password of `admin@simulab.local` (F-52). Optional: without it nothing is seeded and the app starts normally. Local: the Api project's user secrets, or the development password the owner keeps in `appsettings.Development.json` (an accepted exception since F-44, 2026-10-02; the base `appsettings.json` carries none); cloud: Key Vault, as the environment variable `Identity__SeedAdmin__Password`. Never in a committed file other than that one; it must satisfy the password policy (12+ characters, upper case, digit, symbol) or the start fails |
 | `Identity:SeedAdmin:RequirePasswordChange` | Api | not a secret (F-53). Whether the seed marks `admin@simulab.local` "must change password" when it creates the account: the first sign-in then asks for a new password before anything else. Optional, defaults to true; `appsettings.Development.json` sets it to false so the development password keeps working. An account that already exists is never marked |

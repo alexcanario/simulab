@@ -89,6 +89,10 @@ Testers in Brazil use a running copy of the app on the internet, and the project
 
 - 2026-10-07 — D18 One storage account per host for the key ring (review of F-64, major): Aspire gives a referencing host its Blob, Table and Queue roles on the whole account, so the shared account of change note v2 let the Web read and overwrite the Api's `simulab-api.xml`. Two `Standard_LRS` accounts (`storage-api`, `storage-web`, a few cents) each with a container `keys`; the publish shows each host's role file naming its own account only, and a test pins it (Claude).
 - 2026-10-07 — D19 Accepted for staging, recorded not fixed (review of F-64, minor): the Web's Key Vault role (Crypto Service Encryption User) is vault-wide, so it could also wrap and unwrap with the key behind `OpenIddict--EncryptionCertificate`. Scoping a role to one key needs a hand-written Bicep role assignment; revisit at the production release (Claude). Also documented in `docs/infra.md`: a vault secret has the same key as an app host setting and wins over it, because the Key Vault source is added last.
+- 2026-10-08 — D20 The PostgreSQL login and password are deploy parameters (`postgres-admin-user`, `postgres-admin-password`), kept in the vault as `deploy--PostgresAdminUser` and `deploy--PostgresAdminPassword` (owner, after the first staging): values Aspire generates again at each `--clear-cache` deploy no longer matched the server (`28P01`).
+- 2026-10-08 — D21 The Redis container's password is the deploy parameter `redis-password` (vault `deploy--RedisPassword`), for the same reason as D20 (`NOAUTH` on both hosts). The platform does not restart a running Redis when its secret changes, so a deploy that changes it is followed by a restart of the revision.
+- 2026-10-08 — D22 Staging trusts the ingress network `100.100.0.0/16` (`ForwardedHeaders:KnownNetworks` in `appsettings.Staging.json`), not one address: the address of the ingress changes between restarts. Measured on the first staging; with none listed the Api answered 400 `ID2083`.
+- 2026-10-08 — D23 The cloud Web is told `Authentication__OpenIddict__ClientId=simulab-web` by the app host (Claude, found on the first staging): the Web has no `appsettings.Development.json` in the cloud, so it sent no `client_id` and every sign-in got a 401 `invalid_client` ("The mandatory 'client_id' parameter is missing"). Found by the Web logging the OAuth error code and description when the token endpoint answers 401. Regression test: `AzurePublishModelTests.Publish_TheWebIsToldTheClientIdTheApiSeeds`.
 
 ## Out of scope
 - Creating production (ADR-0002 #3: at the first release).
@@ -155,3 +159,9 @@ Built 2026-10-07 on `feature/F-64` (status `validating`). Not shipped: AC7 to AC
 - `docs/infra.md`: first-deploy, budget, cost, expected secrets; `docs/agile/profile.md`: one line naming the three deviations from the Azure recipe; `docs/glossary.md`: three technical terms.
 - Packages added (D8, change note v2): `Aspire.Hosting.Azure.Storage`, `Aspire.Azure.Storage.Blobs`, `Aspire.Azure.Security.KeyVault`, `Azure.Extensions.AspNetCore.DataProtection.Blobs`, `Azure.Extensions.AspNetCore.DataProtection.Keys`.
 - Precondition for F-65: a production deploy applies no migration (BR5); the Api writes its keys to a blob regardless.
+
+### First staging (2026-10-08, region `centralus`, group `rg-simulab-staging`)
+- Measured: the ingress network is `100.100.0.0/16` (D22). Cadastro and the confirmation e-mail work; the admin signs in after D23 (owner, on screen).
+- Found and fixed on the first staging: D20 (PostgreSQL login and password), D21 (Redis password), D22 (network), D23 (client id). Commits `0169200`, `9d81225`, `22e0230`, `9b55013`; `b66539e` makes the Web log the OAuth error on a 401.
+- Wrong diagnoses along the way, recorded so they are not repeated: "old hash in the database" and "the user's password" (both refuted by the log line of `b66539e`).
+- Still to do before `/agile:ship`: validation steps 4 to 8 (testers, persistence across stop/start, budget, cost) and the full suite.
