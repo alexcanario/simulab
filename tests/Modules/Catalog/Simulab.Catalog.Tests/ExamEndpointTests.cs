@@ -477,6 +477,47 @@ public sealed class ExamEndpointTests : CatalogApiTests
         found.Items.Should().ContainSingle(item => item.Id == wanted.Id);
     }
 
+    // F-57 AC3, AC7, AC8 (BR2, BR6): the back office lists the State exams of one state, published or not, whatever
+    // case or spaces the acronym comes in; a National exam and a Municipal one named after the state never match.
+    [Fact]
+    public async Task List_StateFilter_ListsOnlyTheStateExamsOfThatState()
+    {
+        var admin = await AdminAsync();
+        var authority = await AuthorityAsync(admin);
+        var minas = await CreateAsync(admin, Valid(authority.Id, scope: ExamScope.State, scopeDetail: "mg"));
+        var minasCertification = await CreateAsync(admin, Valid(
+            authority.Id, assessmentType: AssessmentType.Certification, scope: ExamScope.State, scopeDetail: "MG"));
+        await CreateAsync(admin, Valid(authority.Id, scope: ExamScope.State, scopeDetail: "SP"));
+        await CreateAsync(admin, Valid(authority.Id));
+        await CreateAsync(admin, Valid(authority.Id, scope: ExamScope.Municipal, scopeDetail: "Minas Gerais"));
+
+        foreach (var sent in new[] { "MG", "mg", "%20MG%20" })
+        {
+            var found = await ListAsync(admin, $"?issuingAuthorityId={authority.Id}&state={sent}");
+            found.Items.Select(item => item.Id).Should().BeEquivalentTo([minas.Id, minasCertification.Id], $"state={sent}");
+            found.Total.Should().Be(2);
+        }
+
+        (await ListAsync(admin, $"?issuingAuthorityId={authority.Id}&state=MG&assessmentType=Certification")).Items
+            .Should().ContainSingle().Which.Id.Should().Be(minasCertification.Id);
+        (await ListAsync(admin, $"?issuingAuthorityId={authority.Id}&state=MG&scope=National")).Items.Should().BeEmpty();
+        (await ListAsync(admin, $"?issuingAuthorityId={authority.Id}&state=")).Total.Should().Be(5, "a blank state is no filter");
+    }
+
+    // F-57 AC7 (BR6): an acronym off the list is refused, not ignored.
+    [Theory]
+    [InlineData("XX")]
+    [InlineData("Minas Gerais")]
+    public async Task List_StateOffTheList_IsRefusedWithItsCode(string sent)
+    {
+        var admin = await AdminAsync();
+
+        var response = await admin.GetAsync($"{Exams}?state={Uri.EscapeDataString(sent)}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.ExamFilterUnknownState);
+    }
+
     // BR14: a filter value the server cannot read is no filter, never an error page.
     [Fact]
     public async Task List_FilterValueThatIsNotOneOfTheNames_IsIgnored()

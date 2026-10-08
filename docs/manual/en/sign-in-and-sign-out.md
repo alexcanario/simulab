@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: en
-features: [F-5, B-3, F-7, F-11]
-updated: 2026-09-21
+features: [F-5, B-3, F-7, F-11, F-53]
+updated: 2026-10-06
 ---
 # Sign in and sign out
 
@@ -47,6 +47,13 @@ You stay signed in for up to 30 days on each device, even if you leave a page op
 
 ## With two-factor sign-in
 If you turned on two-factor sign-in, the page asks for the six-digit code from your authenticator app after your password, or one of your recovery codes. See [Two-factor sign-in](two-factor.md).
+
+## When you must choose a new password
+The first administrator account of a new installation is created with a password that whoever set the installation up knows. The first time you sign in with it, the page shows **Choose a new password** instead of taking you into the app (after the two-factor code, when that is on).
+1. Type a new password and type it again to confirm. It needs at least 12 characters, with an uppercase letter, a digit and a symbol, and it must differ from the current one.
+2. Select **Save and sign in**. You are signed in with the new password, and any other session of the account ends.
+
+If the page says *The sign-in took too long. Enter your password again.*, you waited more than five minutes: select **Cancel** or sign in again from the start. Select **Cancel** at any time to go back to the password step; nothing changes until you save.
 
 ## Related pages
 - [Create an account](create-account.md)

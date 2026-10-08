@@ -131,6 +131,9 @@
   <data name="SignIn.RecoveryCode.Required" xml:space="preserve"><value>Digite um código de recuperação.</value></data>
   <data name="SignIn.Code.Rejected" xml:space="preserve"><value>O código não foi aceito. Digite sua senha de novo para tentar outra vez.</value></data>
   <data name="SignIn.Code.Expired" xml:space="preserve"><value>O login demorou demais. Digite sua senha de novo.</value></data>
+  <data name="SignIn.PasswordChange.Title" xml:space="preserve"><value>Escolha uma nova senha</value></data>
+  <data name="SignIn.PasswordChange.Subtitle" xml:space="preserve"><value>Esta conta foi criada com uma senha que outra pessoa conhece. Escolha uma só sua para continuar.</value></data>
+  <data name="SignIn.PasswordChange.Submit" xml:space="preserve"><value>Salvar e entrar</value></data>
   <data name="Security.Title" xml:space="preserve"><value>Segurança</value></data>
   <data name="Security.LoadFailed" xml:space="preserve"><value>Não foi possível carregar suas configurações de segurança.</value></data>
   <data name="Security.Activity.Title" xml:space="preserve"><value>Atividade recente</value></data>

@@ -61,6 +61,18 @@ public sealed class FakeAuthApi : HttpMessageHandler
     /// <summary>F-11: the form bodies the <c>totp</c> grant received, in order.</summary>
     public List<string> TotpForms { get; } = [];
 
+    /// <summary>F-53: when true, the password grant (without two-factor) answers <c>password_change.required</c> with a challenge.</summary>
+    public bool RequirePasswordChange { get; set; }
+
+    /// <summary>F-53: when true, the <c>totp</c> grant answers <c>password_change.required</c> with a challenge instead of tokens.</summary>
+    public bool TotpNeedsPasswordChange { get; set; }
+
+    /// <summary>F-53: what the <c>password_change</c> grant answers; null issues a token pair.</summary>
+    public string? PasswordChangeError { get; set; }
+
+    /// <summary>F-53: the form bodies the <c>password_change</c> grant received, in order.</summary>
+    public List<string> PasswordChangeForms { get; } = [];
+
     /// <summary>F-38: the error the password grant answers with (for example the per-address limit); null follows the other settings.</summary>
     public string? PasswordError { get; set; }
 
@@ -98,6 +110,20 @@ public sealed class FakeAuthApi : HttpMessageHandler
                 request.Headers.TryGetValues(ClientAddressHeaders.Address, out var address) ? address.Single() : null,
                 request.Headers.TryGetValues(ClientAddressHeaders.Secret, out var secret) ? secret.Single() : null));
 
+            // F-53: checked first, "grant_type=password" is a prefix of it.
+            if (body.Contains("grant_type=password_change", StringComparison.Ordinal))
+            {
+                PasswordChangeForms.Add(body);
+                return PasswordChangeError is null
+                    ? Json(new { access_token = "access-change", refresh_token = "refresh-change", expires_in = 900 })
+                    : Json(new { error = PasswordChangeError }, HttpStatusCode.BadRequest);
+            }
+
+            if (RequirePasswordChange && !RequireTotp && body.Contains("grant_type=password&", StringComparison.Ordinal))
+            {
+                return Json(new { error = IdentityErrorCodes.PasswordChangeRequired, challenge = "change-1", expires_in = 300 }, HttpStatusCode.BadRequest);
+            }
+
             if (PasswordError is not null && body.Contains("grant_type=password", StringComparison.Ordinal))
             {
                 return Json(new { error = PasswordError, error_description = PasswordErrorDescription }, HttpStatusCode.BadRequest);
@@ -126,6 +152,11 @@ public sealed class FakeAuthApi : HttpMessageHandler
             if (form.Contains("grant_type=totp", StringComparison.Ordinal))
             {
                 TotpForms.Add(form);
+                if (TotpNeedsPasswordChange)
+                {
+                    return Json(new { error = IdentityErrorCodes.PasswordChangeRequired, challenge = "change-1", expires_in = 300 }, HttpStatusCode.BadRequest);
+                }
+
                 return TotpError is null
                     ? Json(new { access_token = "access-totp", refresh_token = "refresh-totp", expires_in = 900 })
                     : Json(new { error = TotpError, error_description = TotpErrorDescription }, HttpStatusCode.BadRequest);

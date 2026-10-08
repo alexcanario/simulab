@@ -1,0 +1,21 @@
+# Security findings
+
+Written by `scan.js` (never a secret value). Triage with `node scan.js accept <id> --status accepted|false-positive|fixed --reason "<text>"`; a row keeps its status across runs.
+
+| id | severity | tool | rule | where | status | reason | who | date |
+|---|---|---|---|---|---|---|---|---|
+| 037e50e2 | critical | gitleaks | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/DataExportTests.cs:296 | false-positive | Literal test password in a DataExportTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| 09d7e8f7 | critical | gitleaks | generic-api-key | src/Hosts/Simulab.Api/appsettings.Development.json:26 | false-positive | Dev-only value in appsettings.Development.json, used only by the local app host; cloud values come from the vault (owner, 2026-10-08) | owner | 2026-10-08 |
+| 34b50b0c | critical | gitleaks (history) | generic-api-key | tests/Hosts/Simulab.AppHost.Tests/AzurePublishFilesTests.cs:279 @d825c3f | false-positive | Test code that asserts the redis-password parameter has no default; the match is the word 'password', no value (owner, 2026-10-08) | owner | 2026-10-08 |
+| 4cec6a1e | critical | gitleaks (history) | generic-api-key | src/Hosts/Simulab.Api/appsettings.Development.json:15 @06cb1f1 | false-positive | Dev-only value in appsettings.Development.json, used only by the local app host; cloud values come from the vault (owner, 2026-10-08) | owner | 2026-10-08 |
+| 5a3d4116 | critical | gitleaks | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/DataExportTests.cs:290 | false-positive | Literal test password in a DataExportTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| 5ead3988 | critical | gitleaks (history) | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/AccountEventTrailTests.cs:129 @598ed1e | false-positive | Literal test password in an AccountEventTrailTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| 79f426e1 | critical | gitleaks | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/AccountEventTrailTests.cs:184 | false-positive | Literal test password in an AccountEventTrailTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| b009229c | critical | gitleaks (history) | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/DataExportTests.cs:290 @dcffc21 | false-positive | Literal test password in a DataExportTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| b1877051 | critical | gitleaks (history) | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/DataExportTests.cs:296 @dcffc21 | false-positive | Literal test password in a DataExportTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| e29626b5 | critical | gitleaks | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/AccountEventTrailTests.cs:129 | false-positive | Literal test password in an AccountEventTrailTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| e4a8e234 | critical | gitleaks | generic-api-key | tests/Hosts/Simulab.AppHost.Tests/AzurePublishFilesTests.cs:358 | false-positive | Public Azure built-in role definition id (Key Vault Secrets User), not a credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| ebec4059 | critical | gitleaks (history) | generic-api-key | src/Hosts/Simulab.Api/appsettings.Development.json:15 @f3613c9 | false-positive | Dev-only value in appsettings.Development.json, used only by the local app host; cloud values come from the vault (owner, 2026-10-08) | owner | 2026-10-08 |
+| f26a01c2 | critical | gitleaks (history) | generic-api-key | tests/Modules/Identity/Simulab.Identity.Tests/AccountEventTrailTests.cs:184 @598ed1e | false-positive | Literal test password in an AccountEventTrailTests fixture; no real credential (owner, 2026-10-08) | owner | 2026-10-08 |
+| 298f77f8 | medium | semgrep | unsafe-path-combine | tools/Simulab.DocGen/GeneratedDocs.cs:47 | open |  |  | 2026-10-08 |
+| 8b22e1a8 | medium | semgrep | unsafe-path-combine | tools/Simulab.DocGen/GeneratedDocs.cs:16 | open |  |  | 2026-10-08 |

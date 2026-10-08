@@ -42,6 +42,13 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
             exams = exams.Where(exam => exam.Scope == scope);
         }
 
+        // F-57 BR2: a state filter lists the State exams that store this acronym, never a National or Municipal one.
+        if (BrazilianStates.FindByAcronym(sanitized.State) is { } state)
+        {
+            var acronym = state.Acronym;
+            exams = exams.Where(exam => exam.Scope == ExamScope.State && exam.ScopeDetail == acronym);
+        }
+
         var total = await exams.CountAsync(cancellationToken);
 
         var items = await Select(Sort(exams, sanitized))

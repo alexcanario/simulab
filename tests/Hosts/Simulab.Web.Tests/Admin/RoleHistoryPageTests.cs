@@ -163,7 +163,7 @@ public sealed class RoleHistoryPageTests : AdminPageTestContext
         roles.FindAll("tbody tr").Single(row => row.TextContent.Contains("Support", StringComparison.Ordinal))
             .QuerySelectorAll("button.app-row-action").Single(button => button.GetAttribute("aria-label") == "History: Support").Click();
 
-        navigation.Uri.Should().EndWith($"/admin/role-history?role={Support.Id}");
+        roles.WaitForAssertion(() => navigation.Uri.Should().EndWith($"/admin/role-history?role={Support.Id}"));
 
         navigation.NavigateTo("/admin/users");
         var users = Render<Users>();
@@ -171,6 +171,6 @@ public sealed class RoleHistoryPageTests : AdminPageTestContext
         users.FindAll("tbody tr").Single(row => row.TextContent.Contains("bruno.lima", StringComparison.Ordinal))
             .QuerySelectorAll("button.app-row-action").Single(button => button.GetAttribute("aria-label") == "History: bruno.lima@exemplo.com.br").Click();
 
-        navigation.Uri.Should().EndWith($"/admin/role-history?user={Bruno}");
+        users.WaitForAssertion(() => navigation.Uri.Should().EndWith($"/admin/role-history?user={Bruno}"));
     }
 }

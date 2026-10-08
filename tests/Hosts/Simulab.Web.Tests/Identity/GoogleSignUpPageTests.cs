@@ -167,7 +167,7 @@ public sealed class GoogleSignUpPageTests : IdentityPageTestContext
         page.WaitForAssertion(() => page.Markup.Should().Contain("An account with this email address already exists."));
         Tickets.TryPeek(ticket, out _).Should().BeFalse();
         page.FindAll("button").Single(button => button.TextContent.Trim() == "Continue with Google").Click();
-        Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath);
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith(GoogleAccountEndpoints.StartPath));
     }
 
     // A refusal the visitor can fix keeps the ticket, so the page can be sent again.
@@ -191,7 +191,7 @@ public sealed class GoogleSignUpPageTests : IdentityPageTestContext
 
         page.Find("button.app-google-sign-up-cancel").Click();
 
-        Navigation.Uri.Should().EndWith("/sign-in");
+        page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/sign-in"));
         Tickets.TryPeek(ticket, out _).Should().BeFalse();
         Api.GoogleRegistrations.Should().BeEmpty();
     }

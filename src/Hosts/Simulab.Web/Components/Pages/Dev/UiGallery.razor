@@ -1,4 +1,5 @@
 @page "/dev/ui"
+@using Simulab.Catalog.Contracts
 @inject IStringLocalizer<SharedResources> L
 @inject IStringLocalizer<IdentityResources> I
 @inject IHostEnvironment Environment
@@ -78,6 +79,15 @@
                    OnEdit="@(() => Done(L["Common.Edit"]))"
                    OnDelete="@(() => DeleteAsync(_sample))"
                    DeleteDisabledReason="@L["Gallery.RowActions.DeleteDisabledReason"]" />
+    @* F-74: the move pair of a sortable list, before Edit and Delete. The first row cannot go up; the pair stays
+       visible and the tooltip says why. *@
+    <AppRowActions ItemName="@SampleName(3)"
+                   IdPrefix="gallery-row-move"
+                   OnMoveUp="@(() => Done(L["Common.MoveUp"]))"
+                   MoveUpDisabledReason="@L["NoticeSubjects.MoveUp.DisabledFirst"]"
+                   OnMoveDown="@(() => Done(L["Common.MoveDown"]))"
+                   OnEdit="@(() => Done(L["Common.Edit"]))"
+                   OnDelete="@(() => DeleteAsync(_sample))" />
 </section>
 
 <section id="gallery-states" class="gallery-section">
@@ -170,6 +180,28 @@
                         MinChars="0" MaxItems="@Simulab.Catalog.Contracts.BrazilianStates.All.Count" OpenOnFocus="true"
                         SearchAsync="GalleryStatesAsync" Value="@_stateValue"
                         ValueChanged="@(value => _stateValue = value)" />
+    </MudPaper>
+</section>
+
+@* F-74: free text that suggests what was typed before; a pick is never required. *@
+<section id="gallery-suggest-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.SuggestField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.SuggestField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppSuggestField Id="gallery-suggest" Label="@L["NoticeSubjects.Field.Group"]"
+                         Placeholder="@L["NoticeSubjects.Field.Group.Placeholder"]"
+                         Hint="@L["NoticeSubjects.Field.Group.Hint"]"
+                         Suggestions="@_suggestions"
+                         SuggestionsLabel="@L["NoticeSubjects.Field.Group.Suggestions"]"
+                         MaxLength="CatalogLimits.NoticeSubjectGroupMaxLength"
+                         Value="@_suggestValue"
+                         ValueChanged="@(value => _suggestValue = value)" />
+
+        <AppSuggestField Id="gallery-suggest-error" Label="@L["NoticeSubjects.Field.Group"]"
+                         Error="@L["notice_subject.group_too_long"].Value"
+                         Suggestions="@_suggestions"
+                         SuggestionsLabel="@L["NoticeSubjects.Field.Group.Suggestions"]"
+                         Value="@("")" />
     </MudPaper>
 </section>
 
@@ -432,6 +464,9 @@
     private DateOnly? _dateEmpty;
     private DateOnly? _dateFilled = new DateOnly(2026, 6, 14);
     private readonly DateOnly? _dateDisabled = new DateOnly(2026, 6, 14);
+
+    private string? _suggestValue;
+    private static readonly IReadOnlyList<string> _suggestions = ["Conhecimentos Básicos", "Conhecimentos Específicos"];
 
     private AppLookupOption? _lookupValue;
     private AppLookupOption? _stateValue;

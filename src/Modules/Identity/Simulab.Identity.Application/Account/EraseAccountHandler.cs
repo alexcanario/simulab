@@ -4,7 +4,6 @@ using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Sessions;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
-using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.Identity.Application.Account;
@@ -20,7 +19,7 @@ public sealed class EraseAccountHandler(
     IRoleAdministrationStore roleStore,
     IRefreshSessionStore sessions,
     IErasureMailer mailer,
-    IIntegrationEventPublisher events,
+    IErasureFollowUp followUp,
     IAccountEventLog accountEvents,
     TimeProvider timeProvider)
 {
@@ -70,11 +69,9 @@ public sealed class EraseAccountHandler(
             return Result.Failure(erased.Error!);
         }
 
-        // BR10: every device of this account stops, the caller's included.
+        // BR10: every device of this account stops, the caller's included. F-59 BR3: the staged job revokes
+        // again and publishes UserErased, so a crash from here on still ends the sessions and tells the system.
         await sessions.RevokeAllAsync(userId, cancellationToken: cancellationToken);
-
-        // BR13: after the data changed, so a consumer never sees an account that is still there.
-        await events.PublishAsync(new UserErased(userId, erasedAt), cancellationToken);
 
         return Result.Success();
     }
@@ -111,6 +108,9 @@ public sealed class EraseAccountHandler(
         // BR12 through F-13 BR2: the farewell email is staged on this very transaction. An erasure that
         // rolls back below takes the job with it, and no job row outlives the address it was written for.
         await mailer.SendAccountErasedAsync(address, erasedAt, locale, cancellationToken);
+
+        // F-59 BR1: same transaction, same rule: a rollback below takes the follow-up job along.
+        followUp.StageAccountErased(userId, erasedAt);
 
         await store.SaveChangesAsync(cancellationToken);
 

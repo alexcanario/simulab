@@ -76,6 +76,15 @@ public static class IdentityErrorCodes
     /// </summary>
     public const string TotpRequired = "mfa_required";
 
+    /// <summary>
+    /// F-53 BR3: the password (and the code, when two-factor is on) was right and the account must change its password.
+    /// An OAuth <c>error</c> of the token endpoint, not a failure the user reads: the sign-in page moves to the new-password step.
+    /// </summary>
+    public const string PasswordChangeRequired = "password_change.required";
+
+    /// <summary>F-53 BR6: the password-change challenge is expired, unknown, spent, of the other kind, or no longer fits the account.</summary>
+    public const string PasswordChangeChallengeInvalid = "password_change.challenge_invalid";
+
     public const string TotpCodeInvalid = "totp.code_invalid";
     public const string TotpChallengeInvalid = "totp.challenge_invalid";
     public const string TotpAlreadyEnabled = "totp.already_enabled";

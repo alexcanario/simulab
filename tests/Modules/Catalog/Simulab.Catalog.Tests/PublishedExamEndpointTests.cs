@@ -247,6 +247,100 @@ public sealed class PublishedExamEndpointTests : CatalogApiTests
         (await ListAsync(student, $"search={Uri.EscapeDataString($"ceara {token}")}")).Items.Should().BeEmpty();
     }
 
+    // F-57 AC1, AC6, AC7, AC8 (BR2, BR5, BR6): a state lists only the State exams stored with that acronym, whatever
+    // case or spaces it comes in; a National exam and a Municipal one whose city is the state's name never match; the
+    // state combines with the other filters; the interface other modules call answers the same.
+    [Fact]
+    public async Task List_StateFilter_ListsOnlyTheStateExamsOfThatState()
+    {
+        var admin = await AdminAsync();
+        var student = await StudentAsync();
+        var token = Token();
+        var authority = await AuthorityAsync(admin, $"Orgao {token}");
+        var board = await BoardAsync(admin);
+        var saoPaulo = await ExamAsync(admin, authority.Id, $"Exame SP {token}", scope: ExamScope.State, detail: "SP");
+        var rio = await ExamAsync(admin, authority.Id, $"Exame RJ {token}", scope: ExamScope.State, detail: "RJ");
+        var national = await ExamAsync(admin, authority.Id, $"Exame Nacional {token}");
+        var municipal = await ExamAsync(admin, authority.Id, $"Exame Municipal {token}", scope: ExamScope.Municipal, detail: "São Paulo");
+        var certification = await ExamAsync(
+            admin, authority.Id, $"Certificacao SP {token}", AssessmentType.Certification, ExamScope.State, "SP");
+        foreach (var exam in new[] { saoPaulo, rio, national, municipal, certification })
+        {
+            await EditionAsync(admin, exam.Id, board.Id, 2025, "Published");
+        }
+
+        foreach (var sent in new[] { "SP", "sp", "%20SP%20" })
+        {
+            var found = await ListAsync(student, Search(token, $"&state={sent}"));
+            found.Items.Select(item => item.Id).Should().BeEquivalentTo([saoPaulo.Id, certification.Id], $"state={sent}");
+        }
+
+        (await ListAsync(student, Search(token, "&state=RJ"))).Items.Should().ContainSingle().Which.Id.Should().Be(rio.Id);
+        (await ListAsync(student, Search(token, "&state=SP&assessmentType=Certification"))).Items
+            .Should().ContainSingle().Which.Id.Should().Be(certification.Id);
+        (await ListAsync(student, Search($"Certificacao {token}", "&state=SP"))).Items
+            .Should().ContainSingle().Which.Id.Should().Be(certification.Id);
+        (await ListAsync(student, Search(token, "&state=SP&scope=National"))).Items
+            .Should().BeEmpty("a National scope and a state cannot both hold");
+        (await ListAsync(student, Search(token, "&state="))).Total.Should().Be(5, "a blank state is no filter");
+
+        await using var container = Factory.Services.CreateAsyncScope();
+        var queries = container.ServiceProvider.GetRequiredService<IPublishedExamQueries>();
+        var direct = await queries.ListAsync(new PublishedExamListQuery(Search: token, State: "sp"), CancellationToken.None);
+        direct.Items.Select(item => item.Id).Should().BeEquivalentTo([saoPaulo.Id, certification.Id]);
+    }
+
+    // F-57 AC7 (BR6): an acronym off the list is refused, not ignored, because ignoring it would list every exam.
+    [Theory]
+    [InlineData("XX")]
+    [InlineData("Sao Paulo")]
+    [InlineData("SPP")]
+    public async Task List_StateOffTheList_IsRefusedWithItsCode(string sent)
+    {
+        var student = await StudentAsync();
+
+        var response = await student.GetAsync($"{Published}?state={Uri.EscapeDataString(sent)}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(CatalogErrorCodes.ExamFilterUnknownState);
+        CatalogErrorCodes.ExamFilterUnknownState.Should().Be("exam.filter_unknown_state");
+    }
+
+    // F-57 AC2 (BR4): only the states with a published State exam are offered, in the order of the approved list;
+    // a state whose only exam is a draft, or whose exam is National, is not.
+    [Fact]
+    public async Task Filters_OfferOnlyTheStatesWithAPublishedStateExam_InListOrder()
+    {
+        var admin = await AdminAsync();
+        var student = await StudentAsync();
+        var token = Token();
+        var authority = await AuthorityAsync(admin, $"Orgao {token}");
+        var board = await BoardAsync(admin);
+        var tocantins = await ExamAsync(admin, authority.Id, $"Exame TO {token}", scope: ExamScope.State, detail: "TO");
+        var acre = await ExamAsync(admin, authority.Id, $"Exame AC {token}", scope: ExamScope.State, detail: "ac");
+        var draftOnly = await ExamAsync(admin, authority.Id, $"Exame RR {token}", scope: ExamScope.State, detail: "RR");
+        var unpublished = await ExamAsync(admin, authority.Id, $"Exame RO {token}", scope: ExamScope.State, detail: "RO");
+        var national = await ExamAsync(admin, authority.Id, $"Exame Nacional {token}");
+        await EditionAsync(admin, tocantins.Id, board.Id, 2025, "Published");
+        await EditionAsync(admin, tocantins.Id, board.Id, 2024, "Published");
+        await EditionAsync(admin, acre.Id, board.Id, 2025, "Published");
+        await EditionAsync(admin, draftOnly.Id, board.Id, 2025, "Draft");
+        await EditionAsync(admin, national.Id, board.Id, 2025, "Published");
+        _ = unpublished;
+
+        var filters = (await student.GetFromJsonAsync<PublishedExamFiltersResponse>(Filters, AppJson.Options))!;
+
+        filters.States.Should().Contain(["AC", "TO"]);
+        filters.States.Should().NotContain(["RR", "RO"], "a draft-only or an edition-less State exam leads to an empty list");
+        filters.States.Should().OnlyHaveUniqueItems();
+        var order = BrazilianStates.All.Select(state => state.Acronym).ToList();
+        filters.States.Select(acronym => order.IndexOf(acronym)).Should().BeInAscendingOrder().And.NotContain(-1);
+
+        await using var container = Factory.Services.CreateAsyncScope();
+        var direct = await container.ServiceProvider.GetRequiredService<IPublishedExamQueries>().FiltersAsync(CancellationToken.None);
+        direct.States.Should().Equal(filters.States);
+    }
+
     // AC7: only boards and years that name a published edition are offered.
     [Fact]
     public async Task Filters_OfferOnlyWhatHasAPublishedEdition()

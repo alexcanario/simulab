@@ -114,7 +114,7 @@ public static class GoogleSignInEndpoints
         ArgumentNullException.ThrowIfNull(request);
 
         // BR10: the same per-client-address budget as the password sign-up; both count on it.
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.RegistrationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }

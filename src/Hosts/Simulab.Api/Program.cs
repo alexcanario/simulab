@@ -12,13 +12,25 @@ using Simulab.Identity.Api.Authorization;
 using Simulab.Identity.Infrastructure;
 using Simulab.Jobs;
 using Simulab.Persistence;
+using Simulab.ServiceDefaults;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
 using Simulab.SharedKernel.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// F-64 BR7: in the cloud the secrets (the seeded admin password, the OpenIddict certificates) are read from Key Vault
+// as configuration, before anything below reads it. A local run has no vault and changes nothing.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("keyvault")))
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("keyvault");
+}
+
+// F-64: the cloud database accepts only encrypted connections; its connection string says nothing about SSL.
+builder.Configuration.RequireDatabaseTls();
+
 builder.AddServiceDefaults();
+builder.AddAppDataProtection("simulab-api");
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(options => AppJson.Configure(options.SerializerOptions));
@@ -27,7 +39,10 @@ builder.Services.ConfigureHttpJsonOptions(options => AppJson.Configure(options.S
 builder.Services.AddAppDatabase(builder.Configuration.GetConnectionString("simulab")
     ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 builder.Services.AddModulePersistence();
-builder.Services.AddEmailSender(builder.Configuration, builder.Configuration.GetConnectionString("mailpit"));
+builder.Services.AddEmailSender(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("mailpit"),
+    cloudEnvironment: !builder.Environment.IsDevelopment());
 builder.Services.AddIntegrationEvents();
 
 // The one door to a model (F-41, BR1). Without a key the host still starts and every call fails with
@@ -73,7 +88,22 @@ builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.Authen
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityAuthorization();
 
+// F-64 BR6: X-Forwarded-For and X-Forwarded-Proto only from the proxies the configuration lists (none in dev).
+// Behind the cloud ingress the request arrives as http; OpenIddict refuses it unless the scheme is believed.
+var forwarded = new ForwardedHeadersOptions();
+var behindTrustedProxy = TrustedProxies.Configure(forwarded, builder.Configuration);
+
 var app = builder.Build();
+
+if (behindTrustedProxy)
+{
+    app.UseUnlistedSenderLog(forwarded);
+    app.UseForwardedHeaders(forwarded);
+}
+else if (!app.Environment.IsDevelopment())
+{
+    app.UseUnlistedProxyLog();
+}
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();

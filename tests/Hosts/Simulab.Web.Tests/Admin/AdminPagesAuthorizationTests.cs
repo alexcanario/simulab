@@ -28,7 +28,10 @@ public sealed class AdminPagesAuthorizationTests
         ["Exams"] = CatalogPermissions.Manage,
         ["ExamForm"] = CatalogPermissions.Manage,
         // F-35 BR18: the edition page has two routes (adding and editing) and the same gate as the exam page.
-        ["ExamEditionForm"] = CatalogPermissions.Manage
+        ["ExamEditionForm"] = CatalogPermissions.Manage,
+        // F-79 BR15: the subject list and the subject's own page share the one catalog gate.
+        ["Subjects"] = CatalogPermissions.Manage,
+        ["SubjectDetail"] = CatalogPermissions.Manage
     };
 
     // F-36 BR10 and AC12: the student catalog is behind catalog.browse, never catalog.manage: a back office account

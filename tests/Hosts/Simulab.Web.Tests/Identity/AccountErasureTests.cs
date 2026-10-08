@@ -72,7 +72,7 @@ public sealed class AccountErasureTests : IdentityPageTestContext
 
         Type(dialogs, "Estudar#2026!");
 
-        dialogs.Find("button.app-erase-confirm").HasAttribute("disabled").Should().BeFalse();
+        dialogs.WaitForAssertion(() => dialogs.Find("button.app-erase-confirm").HasAttribute("disabled").Should().BeFalse());
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public sealed class AccountErasureTests : IdentityPageTestContext
 
         dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Your account was created with Google and has no password yet."));
         dialogs.FindAll("button").Single(button => button.TextContent.Trim() == "Create a password").Click();
-        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password");
+        dialogs.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("/forgot-password"));
     }
 
     [Fact]

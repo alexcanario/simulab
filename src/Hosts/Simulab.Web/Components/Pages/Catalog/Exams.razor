@@ -57,6 +57,17 @@
                             Value="_scope"
                             ValueChanged="OnScopeFilterChangedAsync"
                             Options="ScopeFilterOptions" />
+
+            @* F-57 BR4: the editor sees the same 27 states as the form, in the same order. *@
+            <AppLookupField Id="exams-filter-state"
+                            Label="@L["Exams.Filter.State"]"
+                            Placeholder="@L["Exams.Filter.State.Placeholder"]"
+                            SearchAsync="SearchStatesAsync"
+                            MinChars="0"
+                            MaxItems="@BrazilianStates.All.Count"
+                            OpenOnFocus="true"
+                            Value="StateOption"
+                            ValueChanged="OnStateFilterChangedAsync" />
         </div>
     </ToolBarContent>
     <Columns>
@@ -98,9 +109,18 @@
     private AppLookupOption? _authority;
     private AssessmentType? _assessmentType;
     private ExamScope? _scope;
+    private string? _stateAcronym;
     private string? _error;
 
-    private bool HasFilters => _authority is not null || _assessmentType is not null || _scope is not null;
+    private bool HasFilters => _authority is not null || _assessmentType is not null || _scope is not null || _stateAcronym is not null;
+
+    private AppLookupOption? StateOption =>
+        BrazilianStates.FindByAcronym(_stateAcronym) is { } state ? ToOption(state) : null;
+
+    private static AppLookupOption ToOption(BrazilianState state) => new(Guid.Empty, state.DisplayName);
+
+    private static Task<IReadOnlyList<AppLookupOption>> SearchStatesAsync(string term, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AppLookupOption>>([.. BrazilianStates.Search(term).Select(ToOption)]);
 
     // The empty state says which emptiness it is: nothing in the catalog, or nothing matching the filters.
     private string EmptyMessage => HasFilters ? L["Exams.Empty.Filters"] : L["Exams.Empty"];
@@ -142,7 +162,8 @@
                 sortBy,
                 query.Descending,
                 sortBy == ExamSort.AssessmentType ? ExamText.AssessmentTypeOrder(L) : null,
-                sortBy == ExamSort.Scope ? ExamText.ScopeOrder(L) : null),
+                sortBy == ExamSort.Scope ? ExamText.ScopeOrder(L) : null,
+                _stateAcronym),
             cancellationToken);
 
         if (!result.IsSuccess)
@@ -196,9 +217,29 @@
         return _table.ReloadAsync();
     }
 
+    // F-57 BR3: any scope but State leaves no state to filter by.
     private Task OnScopeFilterChangedAsync(ExamScope? value)
     {
         _scope = value;
+        if (value != ExamScope.State)
+        {
+            _stateAcronym = null;
+        }
+
+        return _table.ReloadAsync();
+    }
+
+    // F-57 BR3: picking a state sets the scope to State; clearing it leaves the scope as it is.
+    private Task OnStateFilterChangedAsync(AppLookupOption? value)
+    {
+        _stateAcronym = value is null
+            ? null
+            : BrazilianStates.All.FirstOrDefault(state => state.DisplayName == value.Text)?.Acronym;
+        if (_stateAcronym is not null)
+        {
+            _scope = ExamScope.State;
+        }
+
         return _table.ReloadAsync();
     }
 

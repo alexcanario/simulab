@@ -24,6 +24,8 @@ public sealed class ErrorCodeTextTests
             + "and a page the caller may not open shows the ordinary Not Found page (F-6).",
         ["mfa_required"] = "the password step's answer when two-factor is on; read as a flow signal by "
             + "AuthClient.NeedsTotpCode and turned into the code step, never displayed (F-11 BR9).",
+        ["password_change.required"] = "the password (or code) step's answer for an account that must change its password; read as a "
+            + "flow signal by AuthClient.NeedsPasswordChange and turned into the new-password step, never displayed (F-53 BR3).",
     };
 
     [Fact]

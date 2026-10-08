@@ -14,13 +14,68 @@
 @inject CodeStepTickets CodeSteps
 @inject NavigationManager Navigation
 
-<PageTitle>@I["SignIn.Title"] — @L["App.Name"]</PageTitle>
+<PageTitle>@(_changeChallenge is null ? I["SignIn.Title"] : I["SignIn.PasswordChange.Title"]) — @L["App.Name"]</PageTitle>
 
 <div class="app-auth-card">
-    <h1 class="app-auth-title">@I["SignIn.Title"]</h1>
-    <p class="app-auth-subtitle">@(_challenge is null ? I["SignIn.Subtitle"] : _useRecoveryCode ? I["SignIn.RecoveryCode.Subtitle"] : I["SignIn.Code.Subtitle"])</p>
+    <h1 class="app-auth-title">@(_changeChallenge is null ? I["SignIn.Title"] : I["SignIn.PasswordChange.Title"])</h1>
+    <p class="app-auth-subtitle">@(_changeChallenge is not null ? I["SignIn.PasswordChange.Subtitle"] : _challenge is null ? I["SignIn.Subtitle"] : _useRecoveryCode ? I["SignIn.RecoveryCode.Subtitle"] : I["SignIn.Code.Subtitle"])</p>
 
-    @if (_challenge is not null)
+    @if (_changeChallenge is not null)
+    {
+        @* F-53 UC2: the third step, after the password (and the code). Its challenge and its error area are its own. *@
+        @if (_changeError is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@Errors.For(_changeError)" />
+        }
+
+        <AppPasswordField Id="sign-in-new-password"
+                          Autocomplete="PasswordAutocomplete.NewPassword"
+                          Label="@I["ResetPassword.NewPassword.Label"]"
+                          Hint="@I["SignUp.Password.Hint"]"
+                          ShowLabel="@I["SignUp.Password.Show"]"
+                          HideLabel="@I["SignUp.Password.Hide"]"
+                          Required="true"
+                          Disabled="_submitting"
+                          Error="@_newPasswordError"
+                          Value="@_newPassword"
+                          ValueChanged="@(value => { _newPassword = value; _newPasswordError = null; })" />
+
+        <AppPasswordStrength Password="@_newPassword" TextFor="StrengthText" />
+
+        <AppPasswordField Id="sign-in-confirm-password"
+                          Autocomplete="PasswordAutocomplete.NewPassword"
+                          Label="@I["ResetPassword.ConfirmPassword.Label"]"
+                          ShowLabel="@I["SignUp.Password.Show"]"
+                          HideLabel="@I["SignUp.Password.Hide"]"
+                          Required="true"
+                          Disabled="_submitting"
+                          Error="@_confirmPasswordError"
+                          Value="@_confirmPassword"
+                          ValueChanged="@(value => { _confirmPassword = value; _confirmPasswordError = null; })" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Size="Size.Large"
+                   Disabled="_submitting"
+                   OnClick="SubmitPasswordChangeAsync"
+                   Class="app-sign-in-change-submit">
+            @if (_submitting)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                <span role="status">@I["SignIn.Submitting"]</span>
+            }
+            else
+            {
+                @I["SignIn.PasswordChange.Submit"]
+            }
+        </MudButton>
+
+        <MudButton Variant="Variant.Text" FullWidth="true" Disabled="_submitting" OnClick="CancelPasswordChange" Class="app-sign-in-change-cancel mt-2">
+            @L["Common.Cancel"]
+        </MudButton>
+    }
+    else if (_challenge is not null)
     {
         @* F-11 UC3, UC4: the second step. The challenge lives in this page's state, never in the URL. *@
         <AppTextField TValue="string"
@@ -198,6 +253,14 @@
     private string? _codeFailure;
     private bool _useRecoveryCode;
 
+    // F-53: the new-password step. Its challenge is separate from the code step's, as the Api keeps two kinds.
+    private string? _changeChallenge;
+    private string? _newPassword;
+    private string? _confirmPassword;
+    private string? _newPasswordError;
+    private string? _confirmPasswordError;
+    private string? _changeError;
+
     protected override async Task OnInitializedAsync()
     {
         if (AuthState is not null && (await AuthState).User.Identity?.IsAuthenticated == true)
@@ -263,6 +326,13 @@
             return;
         }
 
+        if (result.NeedsPasswordChange)
+        {
+            // F-53 BR3: the password was right and the account must choose a new one; no tokens yet.
+            EnterPasswordChange(result.Challenge!);
+            return;
+        }
+
         if (!result.IsSuccess)
         {
             ShowFailure(result);
@@ -271,6 +341,85 @@
 
         await FinishAsync(result);
     }
+
+    private void EnterPasswordChange(string challenge)
+    {
+        _challenge = null;
+        _code = null;
+        _changeChallenge = challenge;
+        _newPassword = null;
+        _confirmPassword = null;
+        _newPasswordError = null;
+        _confirmPasswordError = null;
+        _changeError = null;
+    }
+
+    /// <summary>
+    /// F-53 UC2, BR4 to BR7: trades the challenge and the new password for the tokens. A refused password keeps the
+    /// challenge, so the user types another; any other refusal ends it and goes back to the password with the reason.
+    /// </summary>
+    private async Task SubmitPasswordChangeAsync()
+    {
+        _newPasswordError = string.IsNullOrEmpty(_newPassword) ? I["SignUp.Password.Required"].Value : null;
+        _confirmPasswordError = string.IsNullOrEmpty(_confirmPassword)
+            ? I["SignUp.ConfirmPassword.Required"].Value
+            : _confirmPassword != _newPassword ? I["SignUp.ConfirmPassword.Mismatch"].Value : null;
+        if (_newPasswordError is not null || _confirmPasswordError is not null)
+        {
+            return;
+        }
+
+        _submitting = true;
+        _changeError = null;
+        var result = await Auth.CompletePasswordChangeAsync(_changeChallenge!, _newPassword!, Visitor.Address);
+        _submitting = false;
+
+        if (result.IsSuccess)
+        {
+            await FinishAsync(result);
+            return;
+        }
+
+        switch (result.ErrorCode)
+        {
+            case IdentityErrorCodes.PasswordChangeTooWeak or IdentityErrorCodes.PasswordChangeSameAsCurrent:
+                _newPasswordError = Errors.For(result.ErrorCode);
+                _newPassword = null;
+                _confirmPassword = null;
+                break;
+            case IdentityErrorCodes.PasswordChangeChallengeInvalid:
+                LeavePasswordChange();
+                _codeFailure = Errors.For(result.ErrorCode);
+                break;
+            case IdentityErrorCodes.SignInRateLimited:
+                LeavePasswordChange();
+                ShowFailure(result);
+                break;
+            default:
+                _changeError = result.ErrorCode;
+                break;
+        }
+    }
+
+    /// <summary>Back to the password form. The challenge is simply dropped; it expires on its own (BR3).</summary>
+    private void CancelPasswordChange()
+    {
+        LeavePasswordChange();
+        _codeFailure = null;
+    }
+
+    private void LeavePasswordChange()
+    {
+        _changeChallenge = null;
+        _newPassword = null;
+        _confirmPassword = null;
+        _newPasswordError = null;
+        _confirmPasswordError = null;
+        _changeError = null;
+    }
+
+    private string StrengthText(PasswordStrength strength) =>
+        I["SignUp.Password.Strength", I[$"SignUp.Password.Strength.{strength}"]];
 
     /// <summary>
     /// F-11 UC3, UC4, BR9: trades the challenge and the code for the tokens. The challenge is spent whatever the
@@ -291,6 +440,13 @@
         if (result.IsSuccess)
         {
             await FinishAsync(result);
+            return;
+        }
+
+        if (result.NeedsPasswordChange)
+        {
+            // F-53 BR3: both factors were right and the account must choose a new password.
+            EnterPasswordChange(result.Challenge!);
             return;
         }
 
