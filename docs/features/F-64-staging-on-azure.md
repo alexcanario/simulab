@@ -1,7 +1,7 @@
 ---
 feature: F-64
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 103
 version: 2
 ---
@@ -129,7 +129,7 @@ Needed to validate: an Azure subscription with billing, signed in with `az` on t
 8. Park staging when the window ends (UC3) and tell me when it is done.
 
 ## Delivery
-Built 2026-10-07 on `feature/F-64` (status `validating`). Not shipped: AC7 to AC10 need the owner's Azure subscription (validation script).
+Built 2026-10-07 on `feature/F-64`, validated on the real staging by the owner (AC7 to AC10, 2026-10-08) and shipped 2026-10-08 as merge `143d7d6` (app version 0.19.0, board #103). Full suite at the ship: 2395 tests, 0 failures, 115 s (slowest Identity and Catalog, 1 m 49 s); build 24 s, 0 new warnings; `docs` gate green. Security scan: 13 critical findings triaged as false positive by the owner (test passwords, dev-only values, a public Azure role id), 2 medium in `tools/Simulab.DocGen` left open (not in this item). No manual page: the item changes no screen or text (AC11). The pt-BR runbook `artifacts/staging-commands.md` is committed on the owner's request (it is a Portuguese file in a repository that is otherwise English).
 
 ### Criterion → test
 | Criterion | Test(s) |
