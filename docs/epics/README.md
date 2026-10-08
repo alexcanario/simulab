@@ -1,12 +1,14 @@
 # Epics
 
+Technical terms: [glossary](../glossary.md)
+
 Created on the board at bootstrap (2026-09-17). Each epic gets its own file `docs/epics/<slug>.md` when `/agile:epic` breaks it into features. Board: GitHub Issues + Projects `alexcanario/simulab`.
 
 | Order | Epic | Slug | Board id | Status |
 |---|---|---|---|---|
 | 1 | Foundation and identity | `foundation-and-identity` | 690 | agreed (F-1 to F-11) |
 | 2 | Assessment catalog | `assessment-catalog` | 691 | draft (F-33 to F-37) |
-| 3 | Subject taxonomy | `subject-taxonomy` | 692 (GitHub #3) | draft (F-51, F-74 to F-79) |
+| 3 | Subject taxonomy | `subject-taxonomy` | 692 (GitHub #3) | agreed (F-51, F-74 to F-79) |
 | 4 | Question bank | `question-bank` | 693 | idea |
 | 5 | Question Bank Simulator | `question-bank-simulator` | 694 | idea |
 | 6 | Exam Simulator | `exam-simulator` | 695 | idea |
@@ -19,5 +21,6 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 | — | Parental consent for minors | `parental-consent-for-minors` | 702 | idea, not ordered |
 | — | Institutions | `institutions` | 703 | idea, not ordered |
 | — | Portugal exams | `portugal-exams` | 704 | idea, not ordered |
+| — | Cloud hosting and operations | `cloud-hosting-and-operations` | GitHub #138 | idea, not ordered (F-62, F-64 to F-68, F-81, F-82, F-87, F-88) |
 
 The order of epics 2 to 6 and 9 is a proposal for the brief's open note "first release order"; the owner may change it.

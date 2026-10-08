@@ -213,7 +213,7 @@ public static class IdentityEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "register"), IdentityRateLimits.RegistrationsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.RegistrationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -268,7 +268,7 @@ public static class IdentityEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "resend"), IdentityRateLimits.ResendsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "resend"), IdentityRateLimits.ResendsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.VerificationRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -288,7 +288,7 @@ public static class IdentityEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset-request"), IdentityRateLimits.PasswordResetRequestsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "password-reset-request"), IdentityRateLimits.PasswordResetRequestsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -308,7 +308,7 @@ public static class IdentityEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }
@@ -331,7 +331,7 @@ public static class IdentityEndpoints
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!rateLimiter.TryAcquire(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
+        if (!await rateLimiter.TryAcquireAsync(clientAddress.KeyFor(context, "password-reset"), IdentityRateLimits.PasswordResetsPerHour, IdentityRateLimits.Window))
         {
             return Problem(new Error(IdentityErrorCodes.PasswordResetRateLimited, ErrorKind.BusinessRule), StatusCodes.Status429TooManyRequests);
         }

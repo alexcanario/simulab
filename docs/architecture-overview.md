@@ -16,7 +16,7 @@ flowchart TB
     curator["<b>Curator</b><br/>[Person]<br/>Imports and<br/>reviews content"]
     admin["<b>Admin</b><br/>[Person]<br/>Catalog, users,<br/>roles, plans"]
     simulab["<b>Simulab</b><br/>[Software system]<br/>Practice exams<br/>and a study coach"]
-    email["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    email["<b>Email provider</b><br/>[SMTP or HTTPS]<br/>Mailpit locally, Azure Communication Services in the cloud"]
     claude["<b>Claude API</b><br/>[planned]<br/>Extraction, coach"]
     google["<b>Google</b><br/>[optional, off]<br/>Sign-in"]
     student -- "HTTPS" --> simulab
@@ -50,7 +50,7 @@ flowchart TB
         postgres[("<b>PostgreSQL</b><br/>[Database]<br/>One schema<br/>per module")]
         blob[("<b>File storage</b><br/>[Blob, planned]<br/>Azurite locally")]
     end
-    mailpit["<b>Email provider</b><br/>[SMTP]<br/>Mailpit locally"]
+    mailpit["<b>Email provider</b><br/>[SMTP or HTTPS]<br/>Mailpit locally, Azure Communication Services in the cloud"]
     claude["<b>Claude API</b><br/>[planned]"]
     people -- "HTTPS" --> web
     web -- "JSON, tokens" --> api

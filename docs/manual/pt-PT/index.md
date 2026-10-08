@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36]
-updated: 2026-09-29
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79]
+updated: 2026-10-04
 ---
 # Simulab
 
@@ -20,7 +20,7 @@ As páginas são acrescentadas aqui à medida que cada funcionalidade é lançad
 
 | Área | Para que serve | Estado |
 |---|---|---|
-| Catálogo de avaliações | Registar as entidades contratantes, as entidades organizadoras, os exames e as edições em que tudo o resto assenta (Administradores) | Entidades contratantes, entidades organizadoras e exames disponíveis ([Entidades contratantes](issuing-authorities.md), [Entidades organizadoras](organizers.md), [Exames](exams.md)) e as edições de cada exame ([Edições de um exame](exam-editions.md)); o catálogo do estudante, com pesquisa e filtros, está disponível para todos ([Catálogo](catalog.md)) |
+| Catálogo de avaliações | Registar as entidades contratantes, as entidades organizadoras, os exames e as edições em que tudo o resto assenta (Administradores) | Entidades contratantes, entidades organizadoras e exames disponíveis ([Entidades contratantes](issuing-authorities.md), [Entidades organizadoras](organizers.md), [Exames](exams.md)) e as edições de cada exame ([Edições de um exame](exam-editions.md)); o catálogo do estudante, com pesquisa e filtros, está disponível para todos ([Catálogo](catalog.md)); as disciplinas e os tópicos a que todo o conteúdo aponta são mantidos pelos Administradores ([Disciplinas e tópicos](subjects.md)) |
 | Simulação de prova | Fazer uma prova anterior real, com as mesmas questões, ordem, tempo e regras de pontuação | Brevemente |
 | Simulação personalizada | Criar o seu treino por disciplina, entidade organizadora, ano ou dificuldade | Brevemente |
 | Desempenho | Ver os seus resultados ao longo do tempo, por disciplina e tópico, e a distância até à nota mínima | Brevemente |
@@ -50,4 +50,5 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Entidades organizadoras](organizers.md): os júris, entidades certificadoras e universidades que aplicam as provas (Administradores)
 - [Exames](exams.md): os exames do catálogo, com tipo, abrangência e idioma (Administradores)
 - [Edições de um exame](exam-editions.md): as provas efetivamente aplicadas, com ano, posto de trabalho e entidade (Administradores)
+- [Disciplinas e tópicos](subjects.md): a lista única do que o aluno estuda, com as suas áreas (Administradores)
 - [Catálogo](catalog.md): pesquisar exames publicados, filtrar e ver as edições de cada um

@@ -51,6 +51,12 @@ public static class AppIcons
 
     /// <summary>F-34: the exams of the assessment catalog.</summary>
     public const string Exams = Icons.Material.Outlined.Description;
+
+    /// <summary>F-79: the subjects of the taxonomy.</summary>
+    public const string Subjects = Icons.Material.Outlined.MenuBook;
+
+    /// <summary>F-79: the topics under a subject.</summary>
+    public const string Topics = Icons.Material.Outlined.Bookmarks;
     public const string Security = Icons.Material.Outlined.Security;
 
     /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>
@@ -89,4 +95,13 @@ public static class AppIcons
 
     /// <summary>F-36: a link that opens another site in a new tab.</summary>
     public const string OpenInNew = Icons.Material.Outlined.OpenInNew;
+
+    /// <summary>F-74: the subjects of an edition, as its notice lists them.</summary>
+    public const string NoticeSubjects = Icons.Material.Outlined.ListAlt;
+
+    /// <summary>F-74: moves a row of a sortable list up.</summary>
+    public const string MoveUp = Icons.Material.Outlined.ArrowUpward;
+
+    /// <summary>F-74: moves a row of a sortable list down.</summary>
+    public const string MoveDown = Icons.Material.Outlined.ArrowDownward;
 }

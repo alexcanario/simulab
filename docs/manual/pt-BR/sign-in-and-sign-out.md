@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-BR
-features: [F-5, B-3, F-7, F-11]
-updated: 2026-09-21
+features: [F-5, B-3, F-7, F-11, F-53]
+updated: 2026-10-06
 ---
 # Entrar e sair
 
@@ -47,6 +47,13 @@ Você fica conectado por até 30 dias em cada dispositivo, mesmo deixando uma p�
 
 ## Com a verificação em duas etapas
 Se você ativou a verificação em duas etapas, depois da senha a página pede o código de seis dígitos do seu aplicativo autenticador, ou um dos seus códigos de recuperação. Veja [Verificação em duas etapas](two-factor.md).
+
+## Quando você precisa escolher uma nova senha
+A conta de administrador inicial de uma instalação nova é criada com uma senha que quem montou a instalação conhece. No primeiro login com ela, a página mostra **Escolha uma nova senha** em vez de levar você ao app (depois do código de duas etapas, quando está ligado).
+1. Digite uma nova senha e repita para confirmar. Ela precisa de pelo menos 12 caracteres, com letra maiúscula, número e símbolo, e ser diferente da atual.
+2. Selecione **Salvar e entrar**. Você entra com a nova senha, e qualquer outra sessão da conta é encerrada.
+
+Se a página disser *O login demorou demais. Digite sua senha de novo.*, você passou de cinco minutos: selecione **Cancelar** ou entre de novo desde o início. Selecione **Cancelar** a qualquer momento para voltar à etapa da senha; nada muda até você salvar.
 
 ## Páginas relacionadas
 - [Criar uma conta](create-account.md)
