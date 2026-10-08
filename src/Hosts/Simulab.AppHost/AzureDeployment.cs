@@ -159,8 +159,11 @@ internal static class AzureDeployment
                 app.Template.Scale.MaxReplicas = 1;
             });
 
+        // The cloud Web has no appsettings.Development.json, so the client id it sends to the token endpoint comes from
+        // here; it is the id the Api seeds (IdentityModule.WebClientId) and is not a secret.
         web.WithExternalHttpEndpoints()
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+            .WithEnvironment("Authentication__OpenIddict__ClientId", "simulab-web")
             .WithEnvironment("Authentication__OpenIddict__ClientSecret", openIddictSecret)
             .PublishAsAzureContainerApp((_, app) =>
             {
