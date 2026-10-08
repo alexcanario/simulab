@@ -5,8 +5,9 @@ namespace Simulab.AppHost.Tests;
 
 /// <summary>
 /// F-62 AC6: the deploy command runs the Aspire CLI, and a CLI and packages on different versions fail
-/// (profile, "Deploy recipe": "Run completed without returning a backchannel"). So every Aspire package, the
-/// AppHost SDK and the MailPit toolkit carry one version.
+/// (profile, "Deploy recipe": "Run completed without returning a backchannel"). So every <c>Aspire.*</c> package and the
+/// AppHost SDK carry one version. The MailPit community toolkit is left out (F-64, 2026-10-07): it is released on its own
+/// schedule (no 13.6.1 on nuget.org) and runs only in the local app host, never in the deploy.
 /// </summary>
 public class AspireVersionTests
 {
@@ -27,8 +28,7 @@ public class AspireVersionTests
         var root = RepositoryRoot();
         var versions = XDocument.Load(Path.Combine(root, "Directory.Packages.props"))
             .Descendants("PackageVersion")
-            .Where(package => ((string?)package.Attribute("Include"))?.StartsWith("Aspire.", StringComparison.Ordinal) == true
-                || (string?)package.Attribute("Include") == "CommunityToolkit.Aspire.Hosting.MailPit")
+            .Where(package => ((string?)package.Attribute("Include"))?.StartsWith("Aspire.", StringComparison.Ordinal) == true)
             .ToDictionary(package => (string)package.Attribute("Include")!, package => (string)package.Attribute("Version")!);
 
         var sdk = Regex.Match(File.ReadAllText(Path.Combine(root, "src", "Hosts", "Simulab.AppHost", "Simulab.AppHost.csproj")),
@@ -36,7 +36,6 @@ public class AspireVersionTests
         sdk.Success.Should().BeTrue("the AppHost project uses the Aspire SDK");
         versions["Aspire.AppHost.Sdk"] = sdk.Groups["version"].Value;
 
-        versions.Should().ContainKey("CommunityToolkit.Aspire.Hosting.MailPit");
         versions.Values.Distinct().Should().ContainSingle(
             because: "the CLI and every Aspire package must be on one version; found " +
                      string.Join(", ", versions.Select(pair => $"{pair.Key} {pair.Value}")));
