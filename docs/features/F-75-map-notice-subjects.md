@@ -254,7 +254,30 @@ New keys. `›` sits inside a resource format, so a language can change it. Reus
 - 1 (2026-10-08, owner): `NoticeSubjectMapping` inherits `TenantEntity` (soft delete and tenant filter) instead of being a link row without soft delete, as `project.md` requires ("soft delete only", `User` the only exception). The unique index is filtered by `is_deleted = false` so a dropped entry can be added again; an index on `notice_subject_id` is added. Affects the table line of `## Screens and API` and the Decisions line of 2026-10-04 on link rows; AC15 still holds; no other criterion changes.
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: the app host started from this worktree, an Admin account signed in by you, and an edition with a few notice subjects. The F-51 guard taxonomy (23 subjects, 70 topics) is already in the database by migration, so the Covers list has content. Claude did not start the app host (it starts the local PostgreSQL, Redis and Mailpit containers, which needs your yes) and does not enter credentials; the two commands below were not run by Claude for that reason. Close any app host running from another checkout first: two hosts fight for the same ports. The migration `AddNoticeSubjectMappings` is applied at start (Development), in a database of this item.
+
+Git Bash, from `D:/wt/simulab/f-75-map-notice-subjects`:
+
+```bash
+Database__Name=simulab_f75 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+PowerShell 7, from the same folder:
+
+```powershell
+$env:Database__Name = "simulab_f75"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+Expected: the Aspire dashboard URL is printed and the Web is at https://localhost:7125, with no `fail` line while the migrations apply. To repeat, stop it (Ctrl+C) and run it again.
+
+1. Sign in as `admin@simulab.local`. Open **Exams**, an exam, then an edition. If its **Notice subjects** card is empty, add three rows (`Portuguese`, `Math`, `Law`). Every row shows the chip **Not mapped** (warning colour) under its name, and the footer says "3 subjects are not mapped yet." The edition still saves and publishes.
+2. Edit **Math**. After the number of questions there is the field **Covers** with the hint and "Picked: 0 of 50". Click the field or press Arrow down: the list opens with every subject, each starting with its whole-subject option ("whole subject") followed by its topics. Type a few letters of a subject (accents and case do not matter): the list filters; a subject whose name matches shows all its topics. Pick one subject whole and one topic of **another** subject; the list stays open, a check mark shows the picks, and the chips below read "Subject · whole subject" and "Subject › Topic". Save: the snackbar says "Notice subject saved.", the row shows both chips (subject first, then its topics) and the footer now says 2 subjects are not mapped.
+3. Edit **Math** again and try the comfort rules: with a subject picked whole, its topics are greyed with "Already covered by the whole subject"; remove that subject's chip (its X button), pick one of its topics, and now its whole-subject option is greyed with "Remove its picked topics to pick the whole subject". **Clear** removes every chip; with nothing picked the dialog says "Nothing picked: the subject stays not mapped." Pick one subject again and Save; then edit and Save with everything cleared: the row goes back to **Not mapped**.
+4. Map **Portuguese** and **Law** to the same topic (a law listed under two headings): both save. Go to **Content › Subjects** and open the subject of that topic, then back to the list: the subject you mapped whole in step 2 (map one again if you cleared it) has its **Delete** disabled and the tooltip says notice subjects map it; a subject with topics still says it has topics first. On the subject's page, the mapped topic has **Delete** disabled with its reason; an unmapped topic can still be deleted (do not delete seeded data: cancel the confirmation). Clear the mapping of the rows that use it: the Delete buttons enable again.
+5. Move a topic: on the subject page edit the mapped topic and move it to another subject. Back on the edition page its chip shows the new subject ("New subject › Topic") without editing the row.
+6. Switch the language to **pt-PT** and then **pt-BR**: the field, the hint, the chips, the messages and the tooltips are in that language (pt-BR: "Abrange", "Não mapeada", "disciplina inteira"). Light and dark theme: the chips, the Not mapped chip, the greyed options and the picked option stay readable.
+7. Keyboard only: Tab to **Covers**, Arrow down opens the list, Arrow up/down move through options (greyed ones included, they read their reason), Space or Enter toggles and keeps the list open, Home/End jump, Esc closes only the list; Tab goes to **Clear** and then to each chip's remove button (Enter removes it and focus moves to the next chip); a second Esc on a dialog with changes asks before discarding. A screen reader (if you use one) announces the number of results, each pick and each removal.
+8. Permission check: sign in as a Student. `/admin/exams`, the edition page and `/admin/subjects` show Page not found, so none of this is reachable.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
