@@ -51,8 +51,11 @@ file sealed record TokenResponseBody(
 /// Talks to the Api's OpenIddict token endpoint the way BR1 describes it: form-encoded, with the
 /// confidential client's own credentials, never the browser (F-5, decision 2).
 /// </summary>
-public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions> options)
+public sealed partial class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions> options, ILogger<AuthClient>? logger = null)
 {
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The token endpoint refused this host's own client credentials (401): error {Error}, {Description}.")]
+    private static partial void LogClientRefused(ILogger logger, string? error, string? description);
+
     public Task<TokenResult> SignInAsync(string email, string password, string? visitorAddress = null, CancellationToken cancellationToken = default) =>
         RequestAsync(
             new Dictionary<string, string>
@@ -176,6 +179,13 @@ public sealed class AuthClient(HttpClient http, IOptions<OpenIddictClientOptions
 
             using var response = await http.SendAsync(request, cancellationToken);
             var body = await response.Content.ReadFromJsonAsync<TokenResponseBody>(cancellationToken: cancellationToken);
+
+            // F-64 (2026-10-08): a 401 here is never the visitor's password (that answers 400); it says the Api did not accept
+            // this host's client id and secret. The page only shows a generic message, so the cause goes to the log.
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && logger is not null)
+            {
+                LogClientRefused(logger, body?.Error, body?.ErrorDescription);
+            }
 
             if (body?.Error is not null)
             {

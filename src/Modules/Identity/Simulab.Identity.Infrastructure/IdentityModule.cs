@@ -241,9 +241,19 @@ public static class IdentityModule
                 options.SetAccessTokenLifetime(TokenLifetimes.AccessToken);
                 options.SetRefreshTokenLifetime(TokenLifetimes.RefreshToken);
 
-                // Development-only certificates (F-5, decision: staging/production stay `planned`, docs/infra.md).
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
+                // Development keeps the development certificates (F-5); every other environment loads its own from
+                // configuration and refuses to start without them (F-64 BR4, D10).
+                if (isDevelopment)
+                {
+                    options.AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    var (signing, encryption) = OpenIddictCertificates.Load(configuration);
+                    options.AddSigningCertificate(signing)
+                        .AddEncryptionCertificate(encryption);
+                }
 
                 // Custom endpoint below (TokenEndpoints.cs) does the actual credential check; OpenIddict
                 // only validates the protocol shape and the client before passing the request through.

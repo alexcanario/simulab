@@ -5,6 +5,10 @@
 @description('Principal id of the Api managed identity. Not named principalId: Aspire fills that name with the deploying account.')
 param apiPrincipalId string
 
+#disable-next-line no-unused-params
+@description('Filled by `aspire deploy` on every template, declared or not; the deployment is refused when it is missing here. Unused: Communication Services resources live in "global".')
+param location string = resourceGroup().location
+
 @description('Where the services keep their data at rest (F-66 BR8, ADR-0003). Both resources must use the same value.')
 param dataLocation string = 'Brazil'
 
