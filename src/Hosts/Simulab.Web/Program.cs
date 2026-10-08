@@ -138,6 +138,7 @@ var app = builder.Build();
 
 if (behindTrustedProxy)
 {
+    app.UseUnlistedSenderLog(forwarded);
     app.UseForwardedHeaders(forwarded);
 }
 else if (!app.Environment.IsDevelopment())

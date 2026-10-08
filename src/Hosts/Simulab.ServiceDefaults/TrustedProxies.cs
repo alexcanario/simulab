@@ -75,6 +75,49 @@ public static class TrustedProxies
         });
     }
 
+    private const int MaxLoggedSenders = 16;
+
+    /// <summary>
+    /// F-64 D12, owner's choice on 2026-10-08: with proxies listed, a forwarded header from an address that is NOT listed is
+    /// also logged, once per address (at most <see cref="MaxLoggedSenders"/>), so the owner reads the ingress address the
+    /// host really sees (the Api's internal ingress is not the Web's) instead of guessing. The header is still ignored.
+    /// Registered before <c>UseForwardedHeaders</c>, which would otherwise consume the sender's address.
+    /// </summary>
+    public static IApplicationBuilder UseUnlistedSenderLog(this IApplicationBuilder app, ForwardedHeadersOptions listed)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(listed);
+
+        var seen = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
+        return app.Use((context, next) =>
+        {
+            var headers = context.Request.Headers;
+            var sender = context.Connection.RemoteIpAddress;
+            if (sender is not null
+                && (headers.ContainsKey("X-Forwarded-For") || headers.ContainsKey("X-Forwarded-Proto"))
+                && !IsListed(listed, sender)
+                && seen.Count < MaxLoggedSenders
+                && seen.TryAdd(sender.ToString(), 0))
+            {
+                context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(TrustedProxies)).LogWarning(
+                    "A forwarded header arrived from {Address}, which is not in {Section}:KnownProxies or {Section}:KnownNetworks, and is ignored: if it is the cloud ingress, list it.",
+                    sender,
+                    SectionName,
+                    SectionName);
+            }
+
+            return next(context);
+        });
+    }
+
+    /// <summary>The framework compares an IPv4 address that arrived as <c>::ffff:a.b.c.d</c> in both forms; so does this.</summary>
+    private static bool IsListed(ForwardedHeadersOptions options, IPAddress sender)
+    {
+        var candidates = sender.IsIPv4MappedToIPv6 ? new[] { sender, sender.MapToIPv4() } : new[] { sender };
+        return candidates.Any(candidate =>
+            options.KnownProxies.Contains(candidate) || options.KnownIPNetworks.Any(network => network.Contains(candidate)));
+    }
+
     private static InvalidOperationException Invalid(string key, string value) =>
         new($"The configuration '{SectionName}:{key}' has '{value}', which is not an IP address or network.");
 }

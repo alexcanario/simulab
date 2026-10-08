@@ -96,7 +96,8 @@ public sealed class ForwardedHeadersHostTests(ApiFactory factory) : IClassFixtur
         answer.Should().Contain("ID2083");
     }
 
-    private static async Task<List<RecordedLogEntry>> WarningsAfterAsync(ApiFactory factory, string environment, bool proxyListed, int requests)
+    private static async Task<List<RecordedLogEntry>> WarningsAfterAsync(
+        ApiFactory factory, string environment, bool proxyListed, int requests, string sender = "10.0.0.9")
     {
         var logs = new RecordingLoggerProvider();
         await using var host = factory.WithWebHostBuilder(builder =>
@@ -110,7 +111,7 @@ public sealed class ForwardedHeadersHostTests(ApiFactory factory) : IClassFixtur
             }
 
             builder.ConfigureTestServices(services =>
-                services.AddSingleton<IStartupFilter>(new FixedRemoteAddress(IPAddress.Parse("10.0.0.9"))));
+                services.AddSingleton<IStartupFilter>(new FixedRemoteAddress(IPAddress.Parse(sender))));
         });
         using var client = host.CreateClient();
 
@@ -134,13 +135,49 @@ public sealed class ForwardedHeadersHostTests(ApiFactory factory) : IClassFixtur
         entries.Should().ContainSingle().Which.Message.Should().Contain("10.0.0.9").And.Contain("KnownProxies");
     }
 
-    [Theory]
-    [InlineData("Staging", true)]
-    [InlineData("Development", false)]
-    public async Task ProxyListedOrDevelopment_NothingIsLogged(string environment, bool proxyListed)
+    [Fact]
+    public async Task Development_NothingIsLogged()
     {
         // The Development host also needs no cloud settings, which Apply only adds: harmless there.
-        var entries = await WarningsAfterAsync(factory, environment, proxyListed, requests: 1);
+        var entries = await WarningsAfterAsync(factory, "Development", proxyListed: false, requests: 1);
+
+        entries.Should().BeEmpty();
+    }
+
+    /// <summary>The rule of presence for the next test: the listed proxy itself is believed and never logged.</summary>
+    [Fact]
+    public async Task ProxyListed_ForwardedHeaderFromTheListedSender_NothingIsLogged()
+    {
+        var entries = await WarningsAfterAsync(factory, "Staging", proxyListed: true, requests: 2, sender: Proxy);
+
+        entries.Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// F-64 D12 (2026-10-08): with a proxy listed, a header from another address is ignored AND logged once with that address,
+    /// so the owner can read the Api's own ingress address instead of emptying the list to measure it.
+    /// </summary>
+    [Fact]
+    public async Task ProxyListed_ForwardedHeaderFromAnUnlistedSender_IsLoggedOnceWithTheAddress()
+    {
+        var entries = await WarningsAfterAsync(factory, "Staging", proxyListed: true, requests: 3);
+
+        entries.Should().ContainSingle().Which.Message.Should().Contain("10.0.0.9").And.Contain("not in").And.Contain("KnownProxies");
+    }
+
+    [Fact]
+    public async Task ProxyListed_ForwardedHeaderFromAnUnlistedMappedAddress_IsLoggedInItsOwnForm()
+    {
+        var entries = await WarningsAfterAsync(factory, "Staging", proxyListed: true, requests: 1, sender: "::ffff:100.100.0.17");
+
+        entries.Should().ContainSingle().Which.Message.Should().Contain("100.100.0.17");
+    }
+
+    [Fact]
+    public async Task ProxyListedAsIpv4_ForwardedHeaderFromTheMappedForm_IsBelievedAndNotLogged()
+    {
+        // The Container Apps ingress reached the Web as ::ffff:100.100.0.17 while the setting lists 100.100.0.17.
+        var entries = await WarningsAfterAsync(factory, "Staging", proxyListed: true, requests: 1, sender: "::ffff:10.0.0.5");
 
         entries.Should().BeEmpty();
     }
