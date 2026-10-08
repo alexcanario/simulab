@@ -112,6 +112,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` The ship gate keeps only the names of failing tests (`tail(r.out, 25)` in `gate.js`), so the 24 identical failure messages of F-51 were lost and the cause needed a refinement round to reproduce; keep the first failure message of each failing project in the gate output | B-24 | |
 | ⏳ | agile | `[generic]` `literal-guard.js` blocked a `sed -i` on a test file but let a `python - <<'EOF'` script rewrite `SeedAdminTests.cs` (exit 0, 76 insertions in the diff): extend the guard to a script that opens and writes a repository file (`open(...,'w')`, `Path.write_text`, `Set-Content`, `File.WriteAllText`) | F-53 | |
 | ⏳ | agile | `[generic]` Refinement: a business rule that says a step "does not do Y" (clear a counter, renew a stamp) is checked against every helper that does Y before the file is approved; BR3 of F-53 said the step did not clear the failure count, and `SecondFactor.VerifyAsync` (shared with the account page) does, which only the build design pass found and cost a change note | F-53 | |
+| ⏳ | agile | `[generic]` score 6/6: before proposing to delete data or redo a configuration for an error with no visible reason, make the code log the refusal's reason; without that log line write `cause not verified`. On the first staging a 401 at `/connect/token` got two wrong diagnoses ("old hash in the database", "the user's password") and a fix that would have deleted rows; the log line added in `b66539e` (`error invalid_client, The mandatory 'client_id' parameter is missing`) named the cause in one deploy | F-64 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -997,3 +998,10 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
 - Proposed: an idea for `## Cloud accounts` in `docs/infra.md`; not captured, F-68 (change note v2) already delivers it. DocGen tools catalogue not captured; glossary sweep deferred.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-08 - F-64 Staging runs on Azure for testers in Brazil
+- Lesson 1 (project rule, `project.md`, applied, score 3/8): stable deploy parameters for every login or password a service keeps. Evidence: after `aspire deploy --clear-cache` the Api logged `28P01 password authentication failed` (PostgreSQL) and `NOAUTH Authentication required` (Redis); fixed by D20 and D21.
+- Lesson 2 (idea, owner's pick, score 4/7): a setting the Web needs in the cloud had no source in the publish; `docs/infra.md` said "cloud: same value" but only `appsettings.Development.json` held `Authentication:OpenIddict:ClientId`, so every sign-in got 401 `invalid_client`. The fix is a test, captured as an idea.
+- Lesson 3 (plugin note, score 6/6, `plugin: agile [generic]`): log the refusal reason before proposing a destructive fix (see the plugin notes table).
+- Ship incident: after the lock probe failed (`mv ...: Device or resource busy`) the `git worktree remove` ran anyway in the same command; it unregistered the worktree and left an empty, locked folder on disk. A failed probe must stop the step.
+- Build and suite: 2395 tests green in 115 s, 24 s build, 0 new warnings (`gate.js ship`); scan GREEN after 13 false positives triaged by the owner.
