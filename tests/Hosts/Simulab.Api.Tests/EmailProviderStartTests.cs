@@ -25,7 +25,11 @@ public class EmailProviderStartTests(ApiFactory factory) : IClassFixture<ApiFact
     [InlineData("Production")]
     public void Start_CloudWithSmtp_RefusesAndNamesTheProvider(string environment)
     {
-        using var host = factory.WithWebHostBuilder(builder => builder.UseEnvironment(environment));
+        using var host = factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment(environment);
+            CloudSettings.ApplyCertificates(builder);
+        });
 
         var start = () => host.Services.GetRequiredService<IOptions<EmailOptions>>().Value;
 
@@ -40,7 +44,7 @@ public class EmailProviderStartTests(ApiFactory factory) : IClassFixture<ApiFact
         using var host = factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
-            CloudEmailSettings.Apply(builder);
+            CloudSettings.Apply(builder);
             builder.UseSetting("Email:AzureCommunicationServices:Endpoint", string.Empty);
         });
 
@@ -58,7 +62,7 @@ public class EmailProviderStartTests(ApiFactory factory) : IClassFixture<ApiFact
         using var host = factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
-            CloudEmailSettings.Apply(builder);
+            CloudSettings.Apply(builder);
         });
         using var scope = host.Services.CreateScope();
 

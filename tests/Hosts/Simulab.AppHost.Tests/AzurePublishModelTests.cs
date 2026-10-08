@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Azure;
 using Aspire.Hosting.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Simulab.AppHost.Tests;
 
@@ -54,6 +55,26 @@ public class AzurePublishModelTests
 
         context.EnvironmentVariables.Keys.Should().NotContain(
             ["Email__Provider", "Email__AzureCommunicationServices__Endpoint", "Email__FromAddress"]);
+    }
+
+    /// <summary>F-64: the cloud Web has no appsettings.Development.json, so the client id it sends to the token endpoint comes from the deploy.</summary>
+    [Fact]
+    public async Task Publish_TheWebIsToldTheClientIdTheApiSeeds()
+    {
+        await using var builder = await PublishBuilderAsync("Staging");
+
+        var web = builder.Resources.Single(resource => resource.Name == "web");
+        var options = new DistributedApplicationExecutionContextOptions(DistributedApplicationOperation.Publish)
+        {
+            Services = builder.Services.BuildServiceProvider(),
+        };
+
+        var result = await ExecutionConfigurationBuilder.Create(web)
+            .WithEnvironmentVariablesConfig()
+            .BuildAsync(new DistributedApplicationExecutionContext(options));
+
+        result.EnvironmentVariables.ToDictionary(pair => pair.Key, pair => pair.Value)
+            .Should().Contain("Authentication__OpenIddict__ClientId", "simulab-web");
     }
 
     [Fact]

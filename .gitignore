@@ -488,3 +488,20 @@ $RECYCLE.BIN/
 .env.*
 !.env.example
 aspire-output/
+*.ck
+
+# Local settings and secrets (use user secrets or environment variables)
+appsettings.*.local.json
+
+# Signing material
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+
+# Claude Code: local only. `.claude/rules/` and `.claude/agile/` ARE committed.
+.claude/settings.local.json
+
+# Security scan raw reports (the triaged `docs/security/findings.md` is committed)
+.claude/agile/scan/raw/
