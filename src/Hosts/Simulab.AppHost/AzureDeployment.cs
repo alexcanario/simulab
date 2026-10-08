@@ -29,8 +29,15 @@ internal static class AzureDeployment
         // registry here (change note v2 of F-62).
         builder.AddAzureContainerAppEnvironment("cae");
 
-        // Secrets the deployed hosts read from Key Vault; the PostgreSQL password is generated and stored there.
+        // Secrets the deployed hosts read from Key Vault; the PostgreSQL connection string is stored there.
         var keyVault = builder.AddAzureKeyVault("keyvault");
+
+        // F-64 D20 (2026-10-08): the server's administrator login and password are deploy-time parameters, the same value
+        // on every deploy. Left to Aspire they are generated again by every `aspire deploy --clear-cache`, while a server
+        // never changes its login: the Api then signed in with a login the server did not know (28P01). The owner keeps
+        // both in the vault as `deploy--PostgresAdminUser` / `deploy--PostgresAdminPassword` (docs/infra.md).
+        var databaseUser = builder.AddParameter("postgres-admin-user");
+        var databasePassword = builder.AddParameter("postgres-admin-password", secret: true);
 
         // F-64 D9 (change note v2): the Data Protection key ring of each host is a blob, so a restart, a deploy or a park does
         // not lose it. One storage account per host (a few cents): Aspire gives a referencing host its roles on the whole
@@ -39,7 +46,9 @@ internal static class AzureDeployment
         var webKeys = AddKeyStorage(builder, "storage-web");
 
         IResourceBuilder<IResourceWithConnectionString> database =
-            builder.AddAzurePostgresFlexibleServer("postgres").WithPasswordAuthentication(keyVault).AddDatabase("simulab");
+            builder.AddAzurePostgresFlexibleServer("postgres")
+                .WithPasswordAuthentication(keyVault, databaseUser, databasePassword)
+                .AddDatabase("simulab");
 
         // Azure Cache for Redis cannot be stopped, only deleted. Staging is parked outside test windows and its Redis
         // holds only sessions, so it runs as a container in the environment; production uses the managed cache.
