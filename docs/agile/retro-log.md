@@ -991,3 +991,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Lesson 2 (not applied, owner's pick): the ship assumes the IDE is closed, but the worktree lock probe failed (`mv ...: Device or resource busy`, twice) with Visual Studio Insiders and VS Code open; the holder was not identified (no process had the path in its command line), cause not verified. The rule on `git worktree remove` in `project.md` already asks for Visual Studio to be closed, so no new line and no plugin note.
 - Lesson 3 (nothing): four documentation files were first written through a `python` heredoc, which the workflow forbids; it was caught before the commit and redone with the edit tool. The rule exists, so there is nothing to add.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-06 - Sync with agile@canary 0.21.0
+- From 0.17.0 to 0.21.0. Copied: `.claude/rules/agile/output-style.md` (questions as a `❓` block when no card), `docs/agile/templates/infra.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.md`, `docs/agile/workflow.pt-BR.md`. Merged without conflicts: `docs/agile/profile.md` (custom domain on Azure Container Apps; "Simulab specifics" kept). Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged), build files (no upstream change).
+- Baseline: present. Docs command: already declared (`dotnet run --project tools/Simulab.DocGen`). Plugin notes marked: none delivered.
+- Proposed: an idea for `## Cloud accounts` in `docs/infra.md`; not captured, F-68 (change note v2) already delivers it. DocGen tools catalogue not captured; glossary sweep deferred.
+- Build and suite not run: only Markdown changed.
