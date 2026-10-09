@@ -2,7 +2,7 @@
 bug: B-25
 feature: F-65
 epic: Cloud hosting and operations
-status: refining
+status: approved
 board: 158
 severity: medium
 ---
@@ -64,6 +64,7 @@ The setup command builds the subject the repository really presents, asking GitH
 - 2026-10-09: fallback to the plain prefix when the answer is empty — the endpoint's documented answer for a repository without the immutable subject is not settled by the docs read; the fallback costs one line. Not reproduced against such a repository.
 - 2026-10-09: the test stays a text check of `docs/infra.md`, as F-65 built it; it does not call GitHub or Azure.
 - 2026-10-09: no question to the owner: the cause is confirmed, the fix is one command and its test, no new package, no schema, no screen, no permission.
+- 2026-10-09: owner approved B-25 ("aprovo B-25").
 
 ## Out of scope
 - Changing the two live credentials: already correct since 2026-10-09.
