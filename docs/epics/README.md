@@ -31,16 +31,21 @@ Agreed with the owner on 2026-10-09. Each item is scored 0 to 10 for its importa
 
 | Step | Item | Score | Why now |
 |---|---|---|---|
-| 1 | F-93 Users' data in Azure Central US meets LGPD and GDPR | 9 | Central US is real (owner, 2026-10-09); ADR-0003 says Brazil South; F-71 depends on it |
-| 2 | F-71 Privacy policy names where data lives and who processes it | 7 | Required before real users |
-| 3 | F-85 Existing users accept a new legal document version | 7 | Required before the first environment with real users |
-| 4 | F-73 Shared OpenIddict keys across Api replicas | 7 | Staging runs on development certificates |
-| 5 | F-76 Syllabus for students | 7 | First student-visible value of the taxonomy; F-75 is done |
-| 6 | F-78 Notice subjects of the municipal guard editions | 6 | Real data for testers |
-| 7 | E-4 Question bank (`/agile:epic`) | 10 | Next block of the product core |
-| 8 | F-65 A GitHub Actions workflow deploys a release | 6 | Automates the manual deploy |
-| 9 | F-40 Eval suite for model calls | 5 | Must exist before any E-9 item (rises to 8 then) |
-| 10 | E-5 Question Bank Simulator, then E-6 Exam Simulator | 9 | The product the student uses |
+Steps 1 to 3 release the staging to testers: real people's data must not go into it before them.
+
+| Step | Item | Score | Releases testers | Why now |
+|---|---|---|---|---|
+| 1 | F-93 Users' data in Azure Central US meets LGPD and GDPR | 9 | yes | Central US is real (owner, 2026-10-09); ADR-0003 says Brazil South; F-71 depends on it |
+| 2 | F-71 Privacy policy names where data lives and who processes it | 8 | yes | The privacy policy must name the region and the processors before real users |
+| 3 | F-85 Existing users accept a new legal document version | 8 | yes | F-71 changes the policy version; users already signed up must see it |
+| 4 | F-94 Every setting a host requires has a source in the publish | 6 | no | The next missing setting fails the build, not the staging (F-64 retro) |
+| 5 | F-76 Syllabus for students | 7 | no | First student-visible value of the taxonomy; F-75 is done |
+| 6 | F-78 Notice subjects of the municipal guard editions | 6 | no | Real data for testers to look at |
+| 7 | E-4 Question bank (`/agile:epic`) | 10 | no | Next block of the product core |
+| 8 | F-65 A GitHub Actions workflow deploys a release | 6 | no | Automates the manual deploy |
+| 9 | F-73 Shared OpenIddict keys across Api replicas | 5 | no | One replica works; a park already signs testers out (`docs/infra.md`) |
+| 10 | F-40 Eval suite for model calls | 5 | no | Must exist before any E-9 item (rises to 8 then) |
+| 11 | E-5 Question Bank Simulator, then E-6 Exam Simulator | 9 | no | The product the student uses |
 
 Remaining items, by score:
 
