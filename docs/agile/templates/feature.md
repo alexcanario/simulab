@@ -51,6 +51,13 @@ Technical terms: [glossary](../glossary.md)
 - AC1 Given <context>, when <action>, then <result>.
 - AC<n> All new texts appear in pt-BR, pt-PT and en.
 
+## Criterion → test
+<!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC<n> | pending |
+
 ## Decisions
 <!-- date — decision — reason. Technical decisions made by Claude are recorded here too. -->
 - <YYYY-MM-DD> — <decision> — <reason>
