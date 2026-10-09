@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Hosts\Simulab.AppHost\Simulab.AppHost.csproj" />
+    <!-- F-94: the options classes the two hosts bind are read by reflection to find the settings they require. -->
+    <ProjectReference Include="..\..\..\src\Hosts\Simulab.Api\Simulab.Api.csproj" />
+    <ProjectReference Include="..\..\..\src\Hosts\Simulab.Web\Simulab.Web.csproj" />
   </ItemGroup>
 
 </Project>

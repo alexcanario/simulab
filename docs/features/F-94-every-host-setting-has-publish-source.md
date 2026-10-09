@@ -69,16 +69,16 @@ A key a host needs outside Development that no publish value and no committed ho
 ## Criterion → test
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | `SettingsSourceCheckTests.Check_KeyWithNoSource_IsReportedWithHostEnvironmentAndKey`, `Check_SeveralMissingKeys_AreAllReported`, `Check_KeyWithAnEmptyValue_HasNoSource`; real model: validation step 2 |
+| AC2 | `RequiredSettingsTests.Publish_EveryRequiredSettingHasASource` (Staging, Production) |
+| AC3 | `RequiredSettingsTests.Options_EveryRequiredOptionIsNamedByAHostOrExempt`, `RequiredOptionsScannerTests.Find_RequiredPropertyWithNoDefault_IsReportedWithItsKey` |
+| AC4 | `RequiredOptionsScannerTests.Find_RequiredPropertyWithADefault_IsNotReported` |
+| AC5 | `OpenIddictClientStartTests.Start_OutsideDevelopmentWithoutClientId_RefusesAndNamesTheKey`, `Start_OutsideDevelopmentWithoutClientSecret_RefusesAndNamesTheKey` |
+| AC6 | `OpenIddictClientStartTests.Start_InDevelopmentWithTheCommittedSettings_Starts`, `DevPagesHostTests.Get_GalleryInDevelopment_RendersEverySection` |
+| AC7 | `SettingsSourceCheckTests.Check_KeyVaultKey_IsNotVerifiedAndDoesNotFail` |
+| AC8 | `RequiredSettingsTests.Options_TheScanFindsTheKnownClassesAndAKeyPerHost`, `Catalog_EveryNamedOptionsClassExists` |
+| AC9 | `SettingsSourceCheckTests` (fakes); the real check seen failing with the `ClientId` line of `AzureDeployment.cs` removed (validation step 2) |
+| AC10 | no UI text added; the missing-key test of the full suite |
 
 ## Decisions
 - 2026-10-09 — Approved by the owner ("aprovo F-94") — gate 1.
