@@ -1,7 +1,7 @@
 ---
 feature: F-93
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 139
 version: 2
 ---
@@ -121,7 +121,43 @@ The tests live in `tests/Simulab.ArchitectureTests/`, beside `InfraAccessTests`,
 - Re-approved: 2026-10-09 (owner chose option A and approved v2).
 
 ## Validation script
-Written at the end of build.
+Needed to validate: nothing beyond reading the files in the worktree `D:\wt\simulab\f-93-lgpd-gdpr-data` (owner; in place now). No app host and no sign-in: the item changes documents and tests only.
+
+1. Read the ADR: open `docs/decisions/ADR-0004-data-region-central-us.md`. → It opens with the draft notice ("Draft: not reviewed by a lawyer ... not legal advice"), names `centralus`, lists options A, B and C and says Claude recommended A (7.2 against 5.2) and you chose C. Decision 6 lists when it is reopened.
+2. Read the legal basis (decision 3 of the ADR). → One block for users in Brazil and one for users in the EU, each source with the date it was read. Three lines say `basis not in place` or "scope not confirmed" (Microsoft for Brazil, Microsoft for the EU, Anthropic for Brazil), each with an **Action** and an **Owner** (you). Say whether the actions and the owner are right.
+3. AC8, `docs/infra.md` no longer names Brazil South. Run from the worktree root.
+   Git Bash:
+   ```bash
+   grep -n -i "brazil south\|brazilsouth" docs/infra.md; echo "rc=$?"
+   ```
+   PowerShell 7:
+   ```powershell
+   (Select-String -Path docs\infra.md -Pattern 'Brazil South','brazilsouth' | Measure-Object).Count
+   ```
+   → Git Bash prints only `rc=1` (no match); PowerShell prints `0`. Repeat after any edit of the file.
+4. AC9, no code changed. From the worktree root.
+   Git Bash:
+   ```bash
+   git diff --name-only main...HEAD | grep -c '^src/'
+   ```
+   PowerShell 7:
+   ```powershell
+   (git diff --name-only main...HEAD | Where-Object { $_ -like 'src/*' } | Measure-Object).Count
+   ```
+   → `0` in both (Git Bash prints `0` and exits 1, which is `grep -c` saying nothing matched). The only code-folder files in the diff are the two test files under `tests/Simulab.ArchitectureTests/`.
+5. Read the register: open `docs/privacy/data-processing-register.md`. → Draft notice first; a "Personal data" table with 10 rows (Account, Two-factor secret, Consent evidence, Account events, Role changes, One-time tokens, Sessions, Emails in the job queue, Audit columns, Application logs) and a "Processors" table with Microsoft Azure, Microsoft Azure (Communication Services) and Anthropic. Each row ends with a source file. Check that no row claims more than you know (for example a retention period) and that "Application logs" says `not verified`.
+6. Read the notes: ADR-0002 and ADR-0003 each start with a note naming ADR-0004; ADR-0003 decisions 3 to 5 are unchanged. → Both notes are there; the old text is not rewritten.
+7. The tests. Stop any app host first. From the worktree root.
+   Git Bash:
+   ```bash
+   dotnet test tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj
+   ```
+   PowerShell 7:
+   ```powershell
+   dotnet test tests\Simulab.ArchitectureTests\Simulab.ArchitectureTests.csproj
+   ```
+   → `Passed!  - Failed: 0, Passed: 209, Skipped: 0, Total: 209`.
+8. Decision for you: `/agile:ship F-93` merges this item. Before it, the lines marked `basis not in place` stay as the lawyer's and your open actions; they are not a reason to hold the merge, but real users' data must not reach staging or production until they are settled (D12).
 
 ## Delivery
 Filled by `/agile:ship`.
