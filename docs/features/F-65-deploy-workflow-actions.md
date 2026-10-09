@@ -1,7 +1,7 @@
 ---
 feature: F-65
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 104
 version: 2
 ---
@@ -80,7 +80,9 @@ None. The only interface is GitHub's "Run workflow" form and its approval button
 - 2026-10-04 — Glossary: added the technical terms "federated credential", "GitHub environment", "required reviewer" and "workflow_dispatch" (Claude, technical).
 - 2026-10-09 — Change note v2 (build start): F-64 shipped with three more deploy parameters, so the workflow carries them as GitHub environment secrets (`POSTGRES_ADMIN_PASSWORD`, `REDIS_PASSWORD`) and a variable (`POSTGRES_ADMIN_USER`) next to `OPENIDDICT_CLIENT_SECRET`; reading them from the vault was refused because the vault does not exist at an environment's first deploy and it would need a data role for the OIDC identity (owner, question at build). The Aspire packages are 13.6.1 (the CLI is pinned to that, read from `Directory.Packages.props` by the test), and the location is `centralus`, a GitHub environment variable `AZURE_LOCATION`.
 - 2026-10-09 — Two deploy steps, one per environment, each the literal command of `docs/infra.md` with `if: inputs.environment == '...'`: the command names the environment in its own case (`-e Staging`) and its output folder, so a single templated step could not be compared character for character with the file (AC4) (Claude, technical).
-- 2026-10-09 — Seen, not done here: `docs/infra.md` says production keeps `Database__ApplyMigrationsOnStart` off "until F-65 decides how a release migrates". F-65's rules do not cover it; it is captured as an idea at the end of the build (Claude, technical).
+- 2026-10-09 — Seen, not done here: `docs/infra.md` says production keeps `Database__ApplyMigrationsOnStart` off "until F-65 decides how a release migrates". F-65's rules do not cover it; it is captured as F-111 (board #157) (Claude, technical).
+- 2026-10-09 — Setup run by Claude on the owner's authorization: app registration `simulab-deploy`, both federated credentials, Contributor and Role Based Access Control Administrator on `rg-simulab-staging`, both GitHub environments with their ref policies (production with the owner as reviewer) and the seven staging variables. The three secrets were set by the owner. `CHECK_URL` is the Web root, not `/api/v1/system/info`: measured on the staging, the Web answers 200 on `/` and 404 there, and the Api ingress is internal (Claude, technical; `docs/infra.md` corrected).
+- 2026-10-09 — Validated by the owner ("validado"); the merge was authorized with `/agile:ship F-65`. Validation steps 3 to 6 (real runs of the workflow) need the merge, so they are the first runs after it.
 
 ## Criterion → test
 | Criterion | Test |
@@ -119,6 +121,11 @@ Needed to validate: the provisioned staging environment (F-64, done, in place no
 6. Production's approval (no Azure resource group exists for it, so stop at the gate): create a tag with the owner's authorization, run `gh workflow run deploy.yml --ref <tag> -f environment=production`; the run shows "Waiting" for review. Reject it. Expected: the run ends without the "Sign in to Azure" step ever starting. (AC10)
 
 Keyboard pass and language switch do not apply: the item has no screen.
+
+## Delivery
+Built 2026-10-09 on `feature/F-65`, validated by the owner and shipped 2026-10-09 as merge `e567077` (app version 0.22.0, board #104). Full suite at the ship: 2619 tests, 0 failures (slowest projects Catalog 2 m 9 s and Identity 2 m 7 s), build 25 s, 0 new warnings; `docs` gate green; security scan green (13 false positives triaged earlier, 2 medium in `tools/Simulab.DocGen` left open). New package: `YamlDotNet` 18.1.0 (tests only). No manual page: the item changes no screen or text (AC11). Glossary: 2 rows added (app registration, service principal).
+- Not proven by a test or run before the merge: AC3 (a production run on `main` refused), AC7 (the check wait), AC9 (a staging deploy) and AC10 (production approval gate). They are validation steps 3 to 6 and can only run once `deploy.yml` is on `main`.
+- Follow-up: F-111 (a release migrates the production database).
 
 ## Out of scope
 - Parking and starting staging from a workflow — F-81.
