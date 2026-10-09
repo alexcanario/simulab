@@ -1,5 +1,5 @@
 {
-  "version": "0.40.0",
+  "version": "0.41.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "64d2516a691af738",
@@ -21,9 +21,9 @@
     "docs/agile/templates/infra.md": "3258595aa75e72c6",
     "docs/agile/templates/manual-page.md": "4a2863b0b4805ba5",
     "docs/agile/templates/project-claude.md": "055f0256e3f5b846",
-    "docs/agile/workflow.md": "0b1cc9ae68a6540c",
+    "docs/agile/workflow.md": "f923e49bb948895c",
     "docs/agile/workflow-examples.md": "5adcd71bf98229b9",
-    "docs/agile/workflow.pt-BR.md": "a318cb1ec1fb0c59",
+    "docs/agile/workflow.pt-BR.md": "32675fd8def2b8b1",
     "docs/agile/workflow-examples.pt-BR.md": "a014f7ac99eae20a",
     "docs/agile/profile.md": "49fd12f3637e1942",
     ".editorconfig": "3e4b965db9964dcd",

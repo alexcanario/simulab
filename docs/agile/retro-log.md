@@ -1034,3 +1034,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - score 3/5 — the AppHost started from Visual Studio Insiders logged `Container runtime 'docker' could not be found` while `dcp.exe info` from a terminal printed `"installed":true,"running":true`; cause not verified (Visual Studio's PATH suspected). Went to `CLAUDE.md`, "Project-specific rules".
 - ⏳ plugin: agile [generic] score 4/2 — a whitespace-only uncommitted diff is shown at ship precondition 2, with the validation question. Went to the plugin notes table.
 - Suite: 2578 tests in 190 s, inside the 5 min budget; Identity and Catalog take about 3 min each.
+
+## 2026-10-09 - Sync with agile@canary 0.41.0
+- From 0.40.0 to 0.41.0. Copied (2): manual `workflow.md` and `workflow.pt-BR.md` (new row: digest handed to Explore and Plan subagents). Left alone: `git.md` and `profile.md` (edited, upstream unchanged); manual build files (upstream unchanged).
+- Proposed and not built: DocGen tool catalogue (not offered, no item). Glossary sweep not run.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked done: none.
+- Build and suite not run: only Markdown changed.
