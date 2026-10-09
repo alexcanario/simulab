@@ -168,7 +168,7 @@ What each GitHub environment holds (nothing about Azure is a secret: the sign-in
 | `AZURE_LOCATION`, `AZURE_RESOURCE_GROUP` | variable | `centralus`, `rg-simulab-staging` (production: its own group, at the first release) |
 | `POSTGRES_ADMIN_USER` | variable | the login of the first deploy (vault `deploy--PostgresAdminUser`) |
 | `OPENIDDICT_CLIENT_SECRET`, `POSTGRES_ADMIN_PASSWORD`, `REDIS_PASSWORD` | secret | the same values every deploy has used (vault `deploy--OpenIddictClientSecret`, `deploy--PostgresAdminPassword`, `deploy--RedisPassword`); production has a managed Redis, so its `REDIS_PASSWORD` is only a placeholder |
-| `CHECK_URL` | variable | optional: `https://<staging address>/api/v1/system/info`; when set, the run waits up to 5 minutes for HTTP 200 |
+| `CHECK_URL` | variable | optional: `https://<web address>/` (the Web answers 200 there, measured 2026-10-09; the Api's ingress is internal and `/api/v1/system/info` on the Web is a 404); when set, the run waits up to 5 minutes for HTTP 200 |
 
 One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `az login` and `gh auth login`, from any folder (the files it writes are removed at the end). Nothing is stored in GitHub that can sign in to Azure by itself: the federated credential accepts only a run of this repository inside the named environment.
 1. The app registration, its service principal and one federated credential per environment (production's can wait for the first release):
@@ -206,7 +206,7 @@ One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `
    gh variable set AZURE_LOCATION --env staging --repo alexcanario/simulab --body centralus
    gh variable set AZURE_RESOURCE_GROUP --env staging --repo alexcanario/simulab --body rg-simulab-staging
    gh variable set POSTGRES_ADMIN_USER --env staging --repo alexcanario/simulab --body <the login of the first deploy>
-   gh variable set CHECK_URL --env staging --repo alexcanario/simulab --body https://<staging address>/api/v1/system/info
+   gh variable set CHECK_URL --env staging --repo alexcanario/simulab --body https://<web address>/
    ```
 5. The three secrets: each command asks for the value at a hidden prompt, so it never reaches the shell history. Use the values the first deploy used (step 1 of "First deploy of staging"; they are also in the vault):
    ```powershell
