@@ -1,7 +1,7 @@
 ---
 feature: F-112
 epic: Cloud hosting and operations
-status: refining
+status: approved
 board: 159
 version: 1
 ---
