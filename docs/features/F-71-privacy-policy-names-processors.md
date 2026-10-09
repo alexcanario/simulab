@@ -1,7 +1,7 @@
 ---
 feature: F-71
 epic: Foundation and identity
-status: approved
+status: building
 board: 113
 version: 1
 ---
@@ -66,6 +66,17 @@ Content added to the privacy policy in `2026-v2` (D2, D3):
 - AC5 Given the public `/privacy` page in each of the three UI locales, when it opens through the app host, then it shows version `2026-v2`, the draft notice and the new sections. (UC1) — validation script.
 - AC6 Localization: the policy text exists in pt-BR, pt-PT and en; no UI resource key is added, and the missing-key test stays green.
 
+## Criterion → test
+
+| Criterion | Test |
+|---|---|
+| AC1 | `PrivacyPolicyContentTests.Current_IsVersionTwoAndStillADraft` (x3 locales), `LegalDocumentEndpointTests.GetLegalDocument_ReturnsTheCurrentVersionInTheRequestLanguage` |
+| AC2 | `PrivacyPolicyContentTests.Manifest_KeepsVersionOneAndItsFile` (x3) |
+| AC3 | `PrivacyPolicyContentTests.Current_NamesTheRegionTheProcessorsAndTheTransferBasis`, `Current_ListsThreeProcessorsInATable`, `VersionTwo_StartsWithTheFourSectionsOfVersionOne` (x3) |
+| AC4 | `RegistrationEndpointTests.Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored`, `Register_Valid_...` consent assertions with `SignUpForm.TermsVersion` / `PrivacyVersion` |
+| AC5 | validation step 2 (app host checked by Claude: `/privacy` shows 2026-v2, the draft notice and sections 5 to 9, en) |
+| AC6 | no resource key added; the existing missing-key test is unchanged |
+
 ## Decisions
 - D1 (owner, 2026-10-04) Claude drafts the text in the three locales and it ships marked as a draft (`isPlaceholder: true`). Reason: the build does not wait for the lawyer; removing the draft mark after review is a small later change.
 - D2 (owner, 2026-10-04) The email processor is named SendGrid, the provider `docs/infra.md` plans. Reason: a named processor is clearer to the data subject than a category. F-66's `## Start` carries a line: if it picks another provider, it updates the privacy policy with a new version.
@@ -75,6 +86,12 @@ Content added to the privacy policy in `2026-v2` (D2, D3):
 - D6 (Claude, 2026-10-04) Technical: the content tests read the real content folder (copied to the test output), so a missing locale or a version mismatch fails the build. `SignUpForm.CurrentVersion` is split into a terms version and a privacy version.
 - D7 (Claude, 2026-10-04) Technical: the pt-PT text uses European Portuguese ("RGPD", "subcontratante") and the pt-BR text Brazilian Portuguese ("LGPD", "operador"), not one copied from the other.
 - D8 (Claude, 2026-10-04) Not included: Google as a processor (Google sign-in is off in v1, CLAUDE.md), GitHub and the CI (no personal data of users). Reason: the policy lists only who processes users' personal data today.
+- D9 (Claude, 2026-10-09) BR5 sources, read from each provider's own published terms on the build date:
+  - Anthropic: [Data Processing Addendum](https://www.anthropic.com/legal/data-processing-addendum) (effective 2025-02-24): EU SCCs Module Two and Three incorporated; it does not mention the Data Privacy Framework or the LGPD. [Privacy policy](https://www.anthropic.com/legal/privacy) (effective 2026-09-10), section 11: "In the case of Brazil, we will rely on standard contractual clauses (SCCs)" approved by the ANPD. The text therefore names SCCs only, and no DPF certification.
+  - SendGrid (Twilio): [Data Protection Addendum](https://www.twilio.com/en-us/legal/data-protection-addendum) (updated 2026-04-09), Schedule 3: Twilio Inc. self-certified under the EU-US DPF (first in the order of precedence), then EU SCCs (2021/914), then the Brazil SCCs; its BCRs do not cover SendGrid. The text names the DPF with the SCCs as the fallback for the EU, and the ANPD SCCs for Brazil.
+  - Microsoft Azure: no transfer basis written. The data-residency page lists Brazil South in the Brazil geo and says copies between regions stay within a geo; the DPA text itself (a .docx) was not read, so the policy states only where the data is stored. To verify: the DPA's transfer clauses and whether support or telemetry access leaves Brazil.
+- D10 (Claude, 2026-10-09) The ANPD SCCs named for Anthropic and SendGrid in the Brazil section come from their published statements (Anthropic privacy policy section 11, Twilio DPA Schedule 3 section 2.7); no signed contract was seen.
+- D11 (Claude, 2026-10-09) Security scan of this branch ends `BLOCKED: 12 critical, 0 high open`; every finding is `generic-api-key` in files this item does not touch (tests of Identity, `appsettings.Development.json`, `AzurePublishFilesTests.cs`), plus two medium in DocGen. Left for the owner's triage.
 - **This text is Claude's reading of public sources, not legal advice** (as in ADR-0003).
 
 ## Out of scope
@@ -90,5 +107,15 @@ Content added to the privacy policy in `2026-v2` (D2, D3):
 ## Change notes
 
 ## Validation script
+Needed to validate: nothing beyond the local app host, in place now. Data: the AppHost's own volumes (no database change in this item).
+
+1. Start the app host from the item's worktree (stop any other app host first).
+   PowerShell: `cd D:\wt\simulab\f-71-privacy-policy-names; dotnet run --project src/Hosts/Simulab.AppHost`
+   Git Bash: `cd /d/wt/simulab/f-71-privacy-policy-names && dotnet run --project src/Hosts/Simulab.AppHost`
+2. Open the Web URL from the dashboard, then `/privacy` in English. Expect: "Version 2026-v2, effective 10/9/2026", the draft notice, sections 1 to 9, and a table with Microsoft Azure, Anthropic and SendGrid (Twilio).
+3. Switch the language to pt-BR, then pt-PT. Expect the same structure in each: "Quem trata seus dados por nós" (pt-BR) with LGPD and "operadoras"; "Quem trata os seus dados por nós" (pt-PT) with RGPD and "subcontratantes" written as in D7. Read the three texts as the person they address.
+4. Open `/terms`: still version 2026-v1, unchanged.
+5. Open the sign-up page and accept both documents. Expect the privacy link to open the 2026-v2 text and the sign-up to be accepted (no "outdated version" message).
+6. Keyboard only: on `/privacy`, Tab reaches the language switch and the footer links; the table is readable at a narrow window.
 
 ## Delivery
