@@ -7,6 +7,8 @@ date: 2026-10-04
 
 Technical terms: [glossary](../glossary.md)
 
+> **Decisions 1 and 2 replaced by [ADR-0004](ADR-0004-data-region-central-us.md) (2026-10-09):** the region of record is Azure Central US for staging and production, and the Art. 45 basis for storage in Brazil no longer covers where the data is stored. Decisions 3 to 5 (reopen triggers, F-71 and F-72, Portugal after v1) stand. The text below is the record of 2026-10-04 and is not rewritten.
+
 ## Context
 ADR-0001 deferred "Portugal: which exams and when; EU region for GDPR", and `docs/infra.md` carried the line "An EU region for Portuguese users (GDPR) is a deferred decision". ADR-0002 hosts every environment in Azure Container Apps, Brazil South, and left the EU region to F-67.
 
