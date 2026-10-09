@@ -1,7 +1,7 @@
 ---
 feature: F-68
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 107
 version: 2
 ---
@@ -143,3 +143,10 @@ Needed to validate: nothing. The app host is not involved (documentation and tes
 - Why: the owner asked for it; `/agile:publish` (agile@canary 0.4.0) stops on an environment that declares a deploy command and has no row, and staging and production declare one since F-62.
 - Affected: Summary, Start, UC4, BR8, BR9, AC7, AC8, `## Approved list`; other criteria unchanged.
 - Re-approved: 2026-10-04
+
+## Delivery
+- Branch `feature/F-68`, merged into `main` with `--no-ff` as `ebee97a` (board #107). App version 0.21.0.
+- Tests: full suite `agile gate GREEN` after the last code commit, 2598 passed, 0 failed, 119 s (build 24 s); `Simulab.ArchitectureTests` 201 passed, 20 of them in `InfraAccessTests`. Security scan `agile scan GREEN` (two medium findings in `tools/Simulab.DocGen/GeneratedDocs.cs` predate the item).
+- Files: `docs/infra.md` (`## Access`, `## Cloud accounts`, deploy paragraph corrected, measured times), `docs/decisions/ADR-0002-host.md` (note on #6), `.claude/rules/agile/project.md` (`## Access to the infrastructure`), `docs/glossary.md` (4 technical terms), `tests/Simulab.ArchitectureTests/InfraAccessTests.cs`.
+- App manual: not updated, no visible behavior changed. Technical docs: `gate.js docs` GREEN, 0 files changed.
+- Left for F-64: the `Monthly budget` column of the plugin's `## Cloud accounts` template, and the tenant, subscription and resource group ids.
