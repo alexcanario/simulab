@@ -16,5 +16,9 @@ internal static class GallerySections
         "gallery-item-rows",
         // F-36 BR13: the optional parameters of the table, the truncated text and the page header.
         "gallery-kit-parameters",
+        // F-74: free text with suggestions.
+        "gallery-suggest-field",
+        // F-75: the read-only chip and the multi-pick field.
+        "gallery-chip", "gallery-multi-pick-field",
     ];
 }

@@ -8,10 +8,12 @@ version: 1
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
 Status flow: idea -> refining -> approved -> building -> validating -> done
+- cancelled: exit from idea or refining only, as a duplicate; the file stays, with "Duplicate of <id> (<date>): <where the improvement went>" under the header.
 - idea: title, summary and start only (/agile:idea, /agile:epic).
 - refining: sections below filled during /agile:refine.
 - approved: set only after the product owner says "approve F-<number>" and Open questions is empty or deferred.
 - building / validating / done: set by /agile:build and /agile:ship.
+- blocked: set by `/agile:change <id> --block "<reason>"` from refining, approved, building or validating; the line `Blocked (<date>): <what stops it> — unblocked by <who> — returns to <status>` sits under the header and `--unblock` returns the item to that status.
 Remove these comments when the file leaves `idea`.
 -->
 # <Feature name>
@@ -48,6 +50,13 @@ Technical terms: [glossary](../glossary.md)
 <!-- Given / When / Then. Each one is covered by a test. Always include the localization criterion. -->
 - AC1 Given <context>, when <action>, then <result>.
 - AC<n> All new texts appear in pt-BR, pt-PT and en.
+
+## Criterion → test
+<!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC<n> | pending |
 
 ## Decisions
 <!-- date — decision — reason. Technical decisions made by Claude are recorded here too. -->

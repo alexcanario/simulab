@@ -1,0 +1,225 @@
+@page "/admin/subjects"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Manage)]
+@layout MainLayout
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+
+@* F-79, UC1 to UC4: the subjects of the taxonomy. The list-plus-dialog pattern of /admin/issuing-authorities,
+   with an area filter and a topic count. A subject's topics are on its own page (UC5). *@
+<AppPageHeader Title="@L["Subjects.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="SubjectResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["Subjects.Search.Placeholder"]"
+              EmptyMessage="@(_area is null ? L["Subjects.Empty"] : L["Subjects.Empty.Filters"])"
+              EmptySearchMessage="@(term => L["Subjects.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <ToolBarContent>
+        <div class="app-table-filters">
+            <AppSelectField TValue="Guid?"
+                            Id="subjects-filter-area"
+                            Label="@L["Subjects.Filter.Area"]"
+                            Value="_area"
+                            ValueChanged="OnAreaFilterChangedAsync"
+                            Options="AreaFilterOptions" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        @* A name is up to 150 characters, so the cell truncates and the full name is the tooltip. It opens the
+           subject's page, where its topics are. *@
+        <PropertyColumn T="SubjectResponse" TProperty="string" Property="row => row.Name" Title="@L["Subjects.Column.Name"]" Sortable="false">
+            <CellTemplate>
+                <AppLink Href="@($"/admin/subjects/{context.Item.Id}")">
+                    <AppTruncatedText Text="@context.Item.Name" MaxWidth="26rem" />
+                </AppLink>
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn T="SubjectResponse" Title="@L["Subjects.Column.Area"]" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.AreaCode is { } code)
+                {
+                    @AreaText.Name(L, code)
+                }
+                else
+                {
+                    <span class="app-muted">@L["Subjects.NoArea"]</span>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn T="SubjectResponse" TProperty="int" Property="row => row.TopicCount" Title="@L["Subjects.Column.Topics"]" Sortable="false" />
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@context.Name"
+                       OnEdit="@(() => EditAsync(context))"
+                       OnDelete="@(() => DeleteAsync(context))"
+                       DeleteDisabledReason="@DeleteDisabledReason(context)" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    /// <summary>The filter's "no area" choice: an empty id, which no area ever has.</summary>
+    internal static readonly Guid NoAreaFilter = Guid.Empty;
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<SubjectResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private IReadOnlyList<AreaResponse> _areas = [];
+    private Guid? _area;
+    private string? _error;
+
+    private IReadOnlyList<AppSelectOption<Guid?>> AreaFilterOptions =>
+        [
+            new(null, L["Common.Filter.All"]),
+            new(NoAreaFilter, L["Subjects.NoArea"]),
+            .. _areas.Select(area => new AppSelectOption<Guid?>(area.Id, AreaText.Name(L, area.Code)))
+        ];
+
+    // F-79 BR9 then F-75 BR10: topics are refused first (subject.has_topics), then a mapping (subject.in_use).
+    private string? DeleteDisabledReason(SubjectResponse subject) =>
+        subject.TopicCount > 0
+            ? L["Subjects.Delete.DisabledHasTopics"].Value
+            : subject.InUse ? L["Subjects.Delete.DisabledInUse"].Value : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Subjects.Title"], href: null, disabled: true)
+        ];
+
+        // The seeded list is small and fixed: it feeds the filter and the dialog's select.
+        if (await TokenAsync() is { } token && (await Api.ListAreasAsync(token)) is { IsSuccess: true, Value: { } areas })
+        {
+            _areas = areas;
+        }
+    }
+
+    private async Task<AppTablePage<SubjectResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var withoutArea = _area == NoAreaFilter;
+        var result = await Api.ListSubjectsAsync(
+            token,
+            new SubjectListQuery(
+                query.Page,
+                query.PageSize,
+                query.Search,
+                withoutArea ? null : _area,
+                withoutArea),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Subjects failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<SubjectResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    private Task OnAreaFilterChangedAsync(Guid? value)
+    {
+        _area = value;
+        return _table.ReloadAsync();
+    }
+
+    private Task AddAsync() => OpenAsync(null);
+
+    private Task EditAsync(SubjectResponse subject) => OpenAsync(subject);
+
+    private async Task OpenAsync(SubjectResponse? subject)
+    {
+        _error = null;
+        if (await TokenAsync() is null)
+        {
+            _error = Errors.For(ErrorText.UnexpectedCode);
+            return;
+        }
+
+        var parameters = new DialogParameters<SubjectDialog>
+        {
+            { dialog => dialog.Subject, subject },
+            { dialog => dialog.Areas, _areas },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<SubjectResponse>(ErrorText.UnexpectedCode)
+                    : subject is null
+                        ? await Api.CreateSubjectAsync(fresh, request)
+                        : await Api.UpdateSubjectAsync(fresh, subject.Id, request)
+            }
+        };
+
+        var title = subject is null ? L["Subjects.Dialog.AddTitle"] : L["Subjects.Dialog.EditTitle"];
+
+        var dialog = await Dialogs.ShowAsync<SubjectDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add(L["Subjects.Saved"], Severity.Success);
+            await _table.ReloadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(SubjectResponse subject)
+    {
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, subject.Name, L["Subjects.Delete.Message", subject.Name]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteSubjectAsync(token, subject.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["Subjects.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // A topic was added since the list was loaded (BR8), a notice subject now maps the subject (subject.in_use,
+            // F-75 BR9), or another curator deleted it.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        await _table.ReloadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

@@ -48,6 +48,30 @@ public static class CatalogLimits
     /// <summary>How many digits the notice year input accepts (F-35, BR4).</summary>
     public const int ExamEditionNoticeYearDigits = 4;
 
+    /// <summary>The subject's name (F-79, BR3): one name as typed, not translated.</summary>
+    public const int SubjectNameMaxLength = 150;
+
+    /// <summary>The topic's name, inside its subject (F-79, BR6).</summary>
+    public const int TopicNameMaxLength = 200;
+
+    /// <summary>The stable code of a seeded area (F-79, BR1).</summary>
+    public const int AreaCodeMaxLength = 40;
+
+    /// <summary>A notice subject's label, as the notice names it (F-74, BR2).</summary>
+    public const int NoticeSubjectLabelMaxLength = 200;
+
+    /// <summary>A notice subject's group, as the notice names it (F-74, BR3).</summary>
+    public const int NoticeSubjectGroupMaxLength = 100;
+
+    /// <summary>The fewest questions a notice subject may state (F-74, BR4).</summary>
+    public const int NoticeSubjectQuestionCountMin = 1;
+
+    /// <summary>The most questions a notice subject may state (F-74, BR4).</summary>
+    public const int NoticeSubjectQuestionCountMax = 500;
+
+    /// <summary>The most entries a notice subject's mapping may hold (F-75, BR1).</summary>
+    public const int NoticeSubjectMappingMax = 50;
+
     /// <summary>The shortest a name may be (BR8).</summary>
     public const int NameMinLength = 2;
 }

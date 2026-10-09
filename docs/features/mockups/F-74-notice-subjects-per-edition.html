@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-74 - Notice subjects per edition (mockup)</title>
+<style>
+/* ===========================================================================
+   F-74 mockup:
+   1. the "Notice subjects" section on /admin/exams/{examId}/editions/{id}, with its add/edit dialog
+   2. the edition delete confirmation on /admin/exams/{id} (BR10, changed text)
+   Visual language of the F-35 mockup. Every colour is a SimulabTheme token; no new colour.
+   No identity tokens file exists yet: the tokens are SimulabTheme's (MudBlazor palette).
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius-sm: 6px; --app-radius-md: 10px; --app-radius-lg: 14px;
+
+  /* PaletteLight */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E; --warning: #D98B1A;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.92); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  /* PaletteDark */
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E; --warning: #D98B1A;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.92); --appbar: #091422; --appbar-text: #FFFFFF;
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: block; flex-shrink: 0; }
+a { color: inherit; }
+button { font: inherit; }
+:is(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-direction: column; gap: var(--app-space-1); padding: var(--app-space-2) var(--app-space-4); background: var(--surface); border-bottom: 1px dashed var(--divider); }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.demo-label { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer; border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note { display: inline-block; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); border: 1px dashed var(--divider); border-radius: 20px; padding: 0 var(--app-space-2); margin-bottom: var(--app-space-2); }
+.demo-note-plain { text-transform: none; letter-spacing: 0; font-weight: 600; }
+
+/* ---- app shell ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); overflow-y: auto; }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: var(--app-radius-sm); font-size: var(--app-font-sm); cursor: pointer; }
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-breadcrumbs a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+
+/* ---- layout ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); }
+.app-form-card + .app-form-card, .app-form-layout + .app-form-card { margin-top: var(--app-space-4); }
+
+/* ---- AppSectionCard ---- */
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); margin-bottom: var(--app-space-4); }
+.app-section-card:last-child { margin-bottom: 0; }
+.app-section-card-title { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-lg); font-weight: 600; }
+.app-section-card-icon { color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin: var(--app-space-1) 0 var(--app-space-4); }
+.app-section-note { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-2) 0 var(--app-space-1); }
+
+/* ---- stub of the F-35 edition form ---- */
+.stub-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--app-space-3) var(--app-space-4); }
+.stub-field { margin-bottom: var(--app-space-1); }
+.stub-value { height: 42px; display: flex; align-items: center; padding: 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); font-size: var(--app-font-md); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.stub-value.empty { color: var(--text-secondary); }
+
+/* ---- fields ---- */
+.app-form-grid { display: grid; gap: var(--app-space-3) var(--app-space-4); }
+.app-form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 599.98px) { .app-form-grid-2, .stub-grid { grid-template-columns: minmax(0, 1fr); } }
+.app-field { position: relative; margin-bottom: var(--app-space-4); }
+.app-form-grid .app-field { margin-bottom: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input { display: flex; align-items: center; gap: var(--app-space-2); height: 42px; padding: 0 var(--app-space-1) 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); background: var(--surface); color: var(--text-primary); }
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.app-field-input input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-hint, .app-field-error-text { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+.app-field-count { width: 50%; }
+@media (max-width: 599.98px) { .app-field-count { width: 100%; } }
+
+/* ---- suggestions listbox (AppLookupField look) ---- */
+.app-lookup-list { position: absolute; left: 0; right: 0; top: 70px; z-index: 25; list-style: none; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-sm); box-shadow: 0 6px 20px rgba(20,40,100,.18); max-height: 240px; overflow-y: auto; padding: var(--app-space-1) 0; }
+.app-lookup-list li { padding: var(--app-space-2) var(--app-space-3); font-size: var(--app-font-sm); cursor: pointer; }
+.app-lookup-list li:hover, .app-lookup-list li:focus { background: var(--primary-lighten); outline: none; }
+
+/* ---- icon buttons + tooltip ---- */
+.app-icon-button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.app-icon-button:hover { background: var(--background); }
+.app-icon-button[disabled] { cursor: not-allowed; opacity: .45; }
+.app-icon-button.is-destructive { color: var(--error); }
+.tip { position: relative; display: inline-flex; }
+.tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--surface); font-size: var(--app-font-xs); line-height: 1.4; padding: 2px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 30; }
+.tip:hover::after, .tip:focus-within::after { opacity: 1; }
+
+/* ---- AppAlert ---- */
+.app-alert { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm); background: var(--error); color: var(--error-contrast); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); }
+
+/* ---- buttons ---- */
+.app-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+.app-button { font-size: var(--app-font-md); font-weight: 600; cursor: pointer; text-decoration: none; min-height: 40px; padding: 0 var(--app-space-5); border-radius: var(--app-radius-sm); display: inline-flex; align-items: center; gap: var(--app-space-2); }
+.app-button-text { border: 0; background: transparent; color: var(--text-primary); }
+.app-button-filled { border: 0; background: var(--primary); color: var(--primary-contrast); }
+.app-button-outlined { border: 1px solid var(--primary); background: transparent; color: var(--primary); padding: 0 var(--app-space-4); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-danger { border: 0; background: var(--error); color: var(--error-contrast); }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppFormAside ---- */
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-aside-row:last-of-type { border-bottom: 0; }
+.app-aside-row dt { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-aside-row dd { text-align: right; overflow-wrap: anywhere; }
+
+/* ---- AppItemRows + AppRowActions + AppStatusChip ---- */
+.app-item-rows-list { list-style: none; border: 1px solid var(--divider); border-radius: var(--app-radius-sm); }
+.app-item-row { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-2) var(--app-space-2) var(--app-space-3); border-bottom: 1px solid var(--divider); }
+.app-item-row:last-child { border-bottom: 0; }
+.app-item-row:hover { background: var(--background); }
+.app-item-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--app-space-3); }
+.app-item-row-label { font-weight: 600; font-size: var(--app-font-sm); }
+.app-item-row-sep { color: var(--text-secondary); }
+.app-item-row-meta { font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-item-rows-empty { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-4); border: 1px dashed var(--divider); border-radius: var(--app-radius-sm); text-align: center; }
+.app-row-actions { display: flex; align-items: center; gap: var(--app-space-1); flex-shrink: 0; }
+.app-row-actions-gap { width: 1px; height: 20px; background: var(--divider); margin: 0 var(--app-space-1); }
+.app-status-chip { display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 0 10px; border: 1px solid var(--divider); border-radius: 20px; background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; line-height: 1.8; }
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-success .app-status-chip-dot { background: var(--success); }
+
+/* AppTruncatedText */
+.app-truncated { min-width: 0; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ---- notice subjects (composition of kit parts; no new token) ---- */
+.ns-group + .ns-group { margin-top: var(--app-space-4); }
+.ns-group-title { font-size: var(--app-font-sm); font-weight: 700; color: var(--text-primary); margin-bottom: var(--app-space-2); }
+.ns-count { flex: none; min-width: 6.5rem; text-align: right; font-size: var(--app-font-sm); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.ns-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--app-space-3); margin-top: var(--app-space-3); }
+.ns-total { font-size: var(--app-font-sm); text-align: right; }
+.ns-total-sum { font-weight: 700; display: block; }
+.ns-total-unstated { color: var(--text-secondary); display: block; }
+
+/* overflow menu (MudMenu, closed in the mockup) */
+.app-menu { position: absolute; right: 0; top: 36px; z-index: 40; list-style: none; min-width: 12rem; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-sm); box-shadow: 0 6px 20px rgba(20,40,100,.18); padding: var(--app-space-1) 0; }
+.app-menu li { display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-3); font-size: var(--app-font-sm); cursor: pointer; }
+.app-menu li:hover, .app-menu li:focus { background: var(--primary-lighten); outline: none; }
+.app-menu-wrap { position: relative; display: inline-flex; }
+
+/* ---- states ---- */
+.app-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); color: var(--text-secondary); }
+.app-state-inline { padding: var(--app-space-5) var(--app-space-4); border-style: dashed; }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state .is-error { color: var(--error); }
+
+/* ---- dialogs (MudDialog / AppConfirmDialog) ---- */
+.app-overlay { position: fixed; inset: 0; background: rgba(9,20,34,.55); display: flex; align-items: center; justify-content: center; z-index: 60; padding: var(--app-space-4); }
+.app-overlay.is-top { z-index: 65; }
+.app-dialog { width: 100%; max-width: 30rem; background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); padding: var(--app-space-5); box-shadow: 0 10px 40px rgba(0,0,0,.35); max-height: calc(100vh - 32px); overflow-y: auto; }
+.app-dialog-wide { max-width: 38rem; }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 700; margin-bottom: var(--app-space-4); }
+.app-dialog-message { font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+.app-dialog-actions .app-button { min-height: 40px; padding-top: 6px; padding-bottom: 6px; text-align: left; }
+
+/* ---- snackbar ---- */
+.app-snackbar { position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 70; display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm); background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25); }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; screen</span>
+    <button type="button" data-screen="edition">1 &middot; Edition page: notice subjects</button>
+    <button type="button" data-screen="exam">2 &middot; Exam page: delete an edition (BR10)</button>
+  </div>
+  <div class="demo-row" id="demo-states-1"></div>
+  <div class="demo-row" id="demo-states-2"></div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; row actions</span>
+    <button type="button" data-rowmode="ext">A &middot; Move pair before edit and delete (kit extension)</button>
+    <button type="button" data-rowmode="kit">B &middot; AppRowActions as it is (3 visible + More)</button>
+  </div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; language</span>
+    <button type="button" data-lang="pt-BR">pt-BR</button>
+    <button type="button" data-lang="pt-PT">pt-PT</button>
+    <button type="button" data-lang="en">en</button>
+    <span class="demo-label" style="margin-left:12px">Demo &middot; theme</span>
+    <button type="button" data-theme-btn="light">Light</button>
+    <button type="button" data-theme-btn="dark">Dark</button>
+  </div>
+</div>
+
+<header class="appbar"><span class="brand">SIMULAB</span><span class="spacer"></span><span class="avatar">AC</span></header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main" id="drawer"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="dialog-root"></div>
+<div id="confirm-root"></div>
+<div id="snackbar-root"></div>
+<div class="app-visually-hidden" id="live" role="status" aria-live="polite"></div>
+
+<script>
+/* ===========================================================================
+   Texts: SharedResources keys in the three UI locales. Keys new or changed in F-74 are listed in the
+   item file's "UI texts" table; the rest are existing values copied from the .resx files.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Section.Administration": "Administration",
+    "Exams.Title": "Exams", "IssuingAuthorities.Title": "Issuing authorities", "Organizers.Title": "Organizers",
+    "Users.Title": "Users", "Roles.Title": "Roles",
+    "Exams.Form.EditTitle": "Edit exam", "Exams.Section.Identification": "Identification",
+    "Exams.Field.IssuingAuthority": "Issuing authority", "Exams.Field.Name": "Name",
+    "Common.Save": "Save", "Common.Saving": "Saving...", "Common.Cancel": "Cancel", "Common.Edit": "Edit", "Common.Delete": "Delete",
+    "Common.More": "More actions", "Common.Actions": "Actions", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "We could not load this list.", "Common.TryAgain": "Try again",
+    "Common.Delete.Title": "Delete item?", "Common.Delete.Confirm": "Delete {0}",
+    "Common.Discard.Title": "Discard changes?", "Common.Discard.Message": "You have unsaved changes. If you leave now, they will be lost.", "Common.Discard.Confirm": "Discard changes",
+    "Common.Summary.Title": "Summary",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "common.unexpected_error": "Something went wrong. Please try again.",
+    "exam_edition.not_found": "This edition no longer exists.",
+    "ExamEditions.Section.Title": "Editions",
+    "ExamEditions.Section.Subtitle": "Each paper actually applied, with its year, position and board. Newest first.",
+    "ExamEditions.Status.Draft": "Draft", "ExamEditions.Status.Published": "Published",
+    "ExamEditions.Delete.Object": "edition {0}",
+    "ExamEditions.Deleted": "Edition deleted.",
+    "ExamEditions.Delete.DisabledPublished": "Set it back to Draft before deleting it.",
+    "ExamEditions.Form.AddTitle": "Add edition", "ExamEditions.Form.EditTitle": "Edit edition",
+    "ExamEditions.Section.Paper": "Paper", "ExamEditions.Section.Notice": "Notice and application", "ExamEditions.Section.Publication": "Publication",
+    "ExamEditions.Field.Exam": "Exam", "ExamEditions.Field.Organizer": "Board", "ExamEditions.Field.NoticeYear": "Notice year",
+    "ExamEditions.Field.Position": "Position", "ExamEditions.Field.NoticeReference": "Notice reference", "ExamEditions.Field.Status": "Status",
+    /* F-74 changed */
+    "ExamEditions.Delete.Message": "The edition {0} leaves the exam {1}, with its notice subjects. The same year, position and board cannot be added to this exam again.",
+    /* F-74 new */
+    "Common.MoveUp": "Move up", "Common.MoveDown": "Move down",
+    "NoticeSubjects.Section.Title": "Notice subjects",
+    "NoticeSubjects.Section.Subtitle": "The syllabus as the notice states it: each subject under its group, in the notice's order, with its number of questions.",
+    "NoticeSubjects.Section.SaveEditionFirst": "Save the edition first. Its notice subjects are added here.",
+    "NoticeSubjects.Empty": "This edition has no notice subject yet.",
+    "NoticeSubjects.Group.None": "No group",
+    "NoticeSubjects.Row.Questions.One": "1 question", "NoticeSubjects.Row.Questions.Many": "{0} questions",
+    "NoticeSubjects.Row.NoCount.Spoken": "number of questions not stated",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Already first in its group", "NoticeSubjects.MoveDown.DisabledLast": "Already last in its group",
+    "NoticeSubjects.Moved": "{0} moved to position {1} of {2} in {3}.", "NoticeSubjects.Moved.NoGroup": "{0} moved to position {1} of {2}.",
+    "NoticeSubjects.Total.One": "Stated in the notice: 1 question in total", "NoticeSubjects.Total.Many": "Stated in the notice: {0} questions in total",
+    "NoticeSubjects.Total.None": "No subject states its number of questions.",
+    "NoticeSubjects.Total.Unstated.One": "1 subject has no number and is left out of the sum.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} subjects have no number and are left out of the sum.",
+    "NoticeSubjects.Form.AddTitle": "Add notice subject", "NoticeSubjects.Form.EditTitle": "Edit notice subject",
+    "NoticeSubjects.Field.Group": "Group", "NoticeSubjects.Field.Group.Placeholder": "E.g.: Basic knowledge",
+    "NoticeSubjects.Field.Group.Hint": "How the notice groups its subjects. Pick a group already used or type a new one; leave it empty when the notice has no groups. At most 100 characters.",
+    "NoticeSubjects.Field.Group.MoveNote": "Changing the group moves the subject to the end of the new group.",
+    "NoticeSubjects.Field.Group.Suggestions": "Groups already used in this edition",
+    "NoticeSubjects.Field.Label": "Subject", "NoticeSubjects.Field.Label.Placeholder": "E.g.: Portuguese language",
+    "NoticeSubjects.Field.Label.Hint": "As the notice names it. From 2 to 200 characters.",
+    "NoticeSubjects.Field.QuestionCount": "Number of questions", "NoticeSubjects.Field.QuestionCount.Placeholder": "E.g.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "From 1 to 500. Leave it empty when the notice does not say.",
+    "NoticeSubjects.Saved": "Notice subject saved.", "NoticeSubjects.Deleted": "Notice subject deleted.",
+    "NoticeSubjects.Delete.Object": "subject {0}",
+    "NoticeSubjects.Delete.Message": "The subject {0} leaves this edition's notice. It can be added again later.",
+    "notice_subject.not_found": "This subject is no longer in the edition. The list was reloaded.",
+    "notice_subject.label_required": "Type the subject as the notice names it.",
+    "notice_subject.label_too_short": "The subject needs at least 2 characters.",
+    "notice_subject.label_too_long": "The subject is too long: at most 200 characters.",
+    "notice_subject.group_too_long": "The group is too long: at most 100 characters.",
+    "notice_subject.question_count_invalid": "Type a whole number from 1 to 500, or leave it empty.",
+    "notice_subject.duplicate": "This group already has a subject with this name (capitals and accents do not count).",
+    "notice_subject.move_invalid": "This subject cannot move that way. The list was reloaded."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames", "IssuingAuthorities.Title": "Órgãos contratantes", "Organizers.Title": "Bancas",
+    "Users.Title": "Usuários", "Roles.Title": "Papéis",
+    "Exams.Form.EditTitle": "Editar exame", "Exams.Section.Identification": "Identificação",
+    "Exams.Field.IssuingAuthority": "Órgão contratante", "Exams.Field.Name": "Nome",
+    "Common.Save": "Salvar", "Common.Saving": "Salvando...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Excluir",
+    "Common.More": "Mais ações", "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Delete.Title": "Excluir item?", "Common.Delete.Confirm": "Excluir {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Você tem alterações não salvas. Se sair agora, elas serão perdidas.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.Summary.Title": "Resumo",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "common.unexpected_error": "Algo deu errado. Tente novamente.",
+    "exam_edition.not_found": "Esta edição não existe mais.",
+    "ExamEditions.Section.Title": "Edições",
+    "ExamEditions.Section.Subtitle": "Cada prova efetivamente aplicada, com ano, cargo e banca. As mais recentes primeiro.",
+    "ExamEditions.Status.Draft": "Rascunho", "ExamEditions.Status.Published": "Publicada",
+    "ExamEditions.Delete.Object": "edição {0}",
+    "ExamEditions.Deleted": "Edição excluída.",
+    "ExamEditions.Delete.DisabledPublished": "Volte para Rascunho antes de excluir.",
+    "ExamEditions.Form.AddTitle": "Adicionar edição", "ExamEditions.Form.EditTitle": "Editar edição",
+    "ExamEditions.Section.Paper": "Prova", "ExamEditions.Section.Notice": "Edital e aplicação", "ExamEditions.Section.Publication": "Publicação",
+    "ExamEditions.Field.Exam": "Exame", "ExamEditions.Field.Organizer": "Banca", "ExamEditions.Field.NoticeYear": "Ano do edital",
+    "ExamEditions.Field.Position": "Cargo", "ExamEditions.Field.NoticeReference": "Identificação do edital", "ExamEditions.Field.Status": "Situação",
+    "ExamEditions.Delete.Message": "A edição {0} sai do exame {1}, com as disciplinas do edital dela. O mesmo ano, cargo e banca não poderão ser adicionados de novo a este exame.",
+    "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo",
+    "NoticeSubjects.Section.Title": "Disciplinas do edital",
+    "NoticeSubjects.Section.Subtitle": "O conteúdo como o edital o apresenta: cada disciplina sob o seu grupo, na ordem do edital, com o número de questões.",
+    "NoticeSubjects.Section.SaveEditionFirst": "Salve a edição primeiro. As disciplinas do edital são adicionadas aqui.",
+    "NoticeSubjects.Empty": "Esta edição ainda não tem disciplinas do edital.",
+    "NoticeSubjects.Group.None": "Sem grupo",
+    "NoticeSubjects.Row.Questions.One": "1 questão", "NoticeSubjects.Row.Questions.Many": "{0} questões",
+    "NoticeSubjects.Row.NoCount.Spoken": "número de questões não informado",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Já é a primeira do grupo", "NoticeSubjects.MoveDown.DisabledLast": "Já é a última do grupo",
+    "NoticeSubjects.Moved": "{0} foi para a posição {1} de {2} em {3}.", "NoticeSubjects.Moved.NoGroup": "{0} foi para a posição {1} de {2}.",
+    "NoticeSubjects.Total.One": "Total informado no edital: 1 questão", "NoticeSubjects.Total.Many": "Total informado no edital: {0} questões",
+    "NoticeSubjects.Total.None": "Nenhuma disciplina informa o número de questões.",
+    "NoticeSubjects.Total.Unstated.One": "1 disciplina sem número fica fora da soma.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} disciplinas sem número ficam fora da soma.",
+    "NoticeSubjects.Form.AddTitle": "Adicionar disciplina do edital", "NoticeSubjects.Form.EditTitle": "Editar disciplina do edital",
+    "NoticeSubjects.Field.Group": "Grupo", "NoticeSubjects.Field.Group.Placeholder": "Ex.: Conhecimentos Básicos",
+    "NoticeSubjects.Field.Group.Hint": "Como o edital agrupa as disciplinas. Escolha um grupo já usado ou digite um novo; deixe vazio se o edital não agrupa. Até 100 caracteres.",
+    "NoticeSubjects.Field.Group.MoveNote": "Ao trocar de grupo, a disciplina vai para o fim do novo grupo.",
+    "NoticeSubjects.Field.Group.Suggestions": "Grupos já usados nesta edição",
+    "NoticeSubjects.Field.Label": "Disciplina", "NoticeSubjects.Field.Label.Placeholder": "Ex.: Língua Portuguesa",
+    "NoticeSubjects.Field.Label.Hint": "Como o edital a nomeia. De 2 a 200 caracteres.",
+    "NoticeSubjects.Field.QuestionCount": "Número de questões", "NoticeSubjects.Field.QuestionCount.Placeholder": "Ex.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "De 1 a 500. Deixe vazio se o edital não informa.",
+    "NoticeSubjects.Saved": "Disciplina do edital salva.", "NoticeSubjects.Deleted": "Disciplina do edital excluída.",
+    "NoticeSubjects.Delete.Object": "disciplina {0}",
+    "NoticeSubjects.Delete.Message": "A disciplina {0} sai do edital desta edição. Ela pode ser adicionada de novo depois.",
+    "notice_subject.not_found": "Esta disciplina não está mais na edição. A lista foi recarregada.",
+    "notice_subject.label_required": "Informe a disciplina como o edital a nomeia.",
+    "notice_subject.label_too_short": "A disciplina precisa de ao menos 2 caracteres.",
+    "notice_subject.label_too_long": "A disciplina é longa demais: no máximo 200 caracteres.",
+    "notice_subject.group_too_long": "O grupo é longo demais: no máximo 100 caracteres.",
+    "notice_subject.question_count_invalid": "Informe um número inteiro de 1 a 500, ou deixe vazio.",
+    "notice_subject.duplicate": "Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam).",
+    "notice_subject.move_invalid": "Esta disciplina não pode ir nessa direção. A lista foi recarregada."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames", "IssuingAuthorities.Title": "Entidades contratantes", "Organizers.Title": "Entidades organizadoras",
+    "Users.Title": "Utilizadores", "Roles.Title": "Perfis",
+    "Exams.Form.EditTitle": "Editar exame", "Exams.Section.Identification": "Identificação",
+    "Exams.Field.IssuingAuthority": "Entidade contratante", "Exams.Field.Name": "Nome",
+    "Common.Save": "Guardar", "Common.Saving": "A guardar...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Eliminar",
+    "Common.More": "Mais ações", "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente",
+    "Common.Delete.Title": "Eliminar item?", "Common.Delete.Confirm": "Eliminar {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Tem alterações por guardar. Se sair agora, vai perdê-las.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.Summary.Title": "Resumo",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "common.unexpected_error": "Ocorreu um erro. Tente novamente.",
+    "exam_edition.not_found": "Esta edição já não existe.",
+    "ExamEditions.Section.Title": "Edições",
+    "ExamEditions.Section.Subtitle": "Cada prova efetivamente aplicada, com ano, posto de trabalho e entidade organizadora. As mais recentes primeiro.",
+    "ExamEditions.Status.Draft": "Rascunho", "ExamEditions.Status.Published": "Publicada",
+    "ExamEditions.Delete.Object": "edição {0}",
+    "ExamEditions.Deleted": "Edição eliminada.",
+    "ExamEditions.Delete.DisabledPublished": "Volte a colocar em Rascunho antes de eliminar.",
+    "ExamEditions.Form.AddTitle": "Adicionar edição", "ExamEditions.Form.EditTitle": "Editar edição",
+    "ExamEditions.Section.Paper": "Prova", "ExamEditions.Section.Notice": "Aviso e aplicação", "ExamEditions.Section.Publication": "Publicação",
+    "ExamEditions.Field.Exam": "Exame", "ExamEditions.Field.Organizer": "Entidade organizadora", "ExamEditions.Field.NoticeYear": "Ano do aviso",
+    "ExamEditions.Field.Position": "Posto de trabalho", "ExamEditions.Field.NoticeReference": "Referência do aviso", "ExamEditions.Field.Status": "Estado",
+    "ExamEditions.Delete.Message": "A edição {0} sai do exame {1}, com as disciplinas do aviso. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame.",
+    "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo",
+    "NoticeSubjects.Section.Title": "Disciplinas do aviso",
+    "NoticeSubjects.Section.Subtitle": "O conteúdo tal como o aviso o apresenta: cada disciplina sob o seu grupo, pela ordem do aviso, com o número de questões.",
+    "NoticeSubjects.Section.SaveEditionFirst": "Guarde primeiro a edição. As disciplinas do aviso são adicionadas aqui.",
+    "NoticeSubjects.Empty": "Esta edição ainda não tem disciplinas do aviso.",
+    "NoticeSubjects.Group.None": "Sem grupo",
+    "NoticeSubjects.Row.Questions.One": "1 questão", "NoticeSubjects.Row.Questions.Many": "{0} questões",
+    "NoticeSubjects.Row.NoCount.Spoken": "número de questões não indicado",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Já é a primeira do grupo", "NoticeSubjects.MoveDown.DisabledLast": "Já é a última do grupo",
+    "NoticeSubjects.Moved": "{0} passou para a posição {1} de {2} em {3}.", "NoticeSubjects.Moved.NoGroup": "{0} passou para a posição {1} de {2}.",
+    "NoticeSubjects.Total.One": "Total indicado no aviso: 1 questão", "NoticeSubjects.Total.Many": "Total indicado no aviso: {0} questões",
+    "NoticeSubjects.Total.None": "Nenhuma disciplina indica o número de questões.",
+    "NoticeSubjects.Total.Unstated.One": "1 disciplina sem número fica fora da soma.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} disciplinas sem número ficam fora da soma.",
+    "NoticeSubjects.Form.AddTitle": "Adicionar disciplina do aviso", "NoticeSubjects.Form.EditTitle": "Editar disciplina do aviso",
+    "NoticeSubjects.Field.Group": "Grupo", "NoticeSubjects.Field.Group.Placeholder": "Ex.: Conhecimentos gerais",
+    "NoticeSubjects.Field.Group.Hint": "Como o aviso agrupa as disciplinas. Escolha um grupo já usado ou escreva um novo; deixe vazio se o aviso não agrupa. No máximo 100 caracteres.",
+    "NoticeSubjects.Field.Group.MoveNote": "Ao mudar de grupo, a disciplina passa para o fim do novo grupo.",
+    "NoticeSubjects.Field.Group.Suggestions": "Grupos já usados nesta edição",
+    "NoticeSubjects.Field.Label": "Disciplina", "NoticeSubjects.Field.Label.Placeholder": "Ex.: Língua Portuguesa",
+    "NoticeSubjects.Field.Label.Hint": "Tal como o aviso a designa. De 2 a 200 caracteres.",
+    "NoticeSubjects.Field.QuestionCount": "Número de questões", "NoticeSubjects.Field.QuestionCount.Placeholder": "Ex.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "De 1 a 500. Deixe vazio se o aviso não o indica.",
+    "NoticeSubjects.Saved": "Disciplina do aviso guardada.", "NoticeSubjects.Deleted": "Disciplina do aviso eliminada.",
+    "NoticeSubjects.Delete.Object": "disciplina {0}",
+    "NoticeSubjects.Delete.Message": "A disciplina {0} sai do aviso desta edição. Pode voltar a ser adicionada mais tarde.",
+    "notice_subject.not_found": "Esta disciplina já não está na edição. A lista foi recarregada.",
+    "notice_subject.label_required": "Indique a disciplina tal como o aviso a designa.",
+    "notice_subject.label_too_short": "A disciplina precisa de pelo menos 2 caracteres.",
+    "notice_subject.label_too_long": "A disciplina é demasiado longa: no máximo 200 caracteres.",
+    "notice_subject.group_too_long": "O grupo é demasiado longo: no máximo 100 caracteres.",
+    "notice_subject.question_count_invalid": "Indique um número inteiro de 1 a 500, ou deixe vazio.",
+    "notice_subject.duplicate": "Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam).",
+    "notice_subject.move_invalid": "Esta disciplina não pode ir nesse sentido. A lista foi recarregada."
+  }
+};
+
+/* ---- icons: Material Outlined paths, named as AppIcons constants (MoveUp, MoveDown, NoticeSubjects are new) ---- */
+const ICONS = {
+  Exams: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z",
+  IssuingAuthorities: "M1 21h12v2H1v-2zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83L5.24 8.07zM12.32 1l5.66 5.66-2.83 2.83-5.66-5.66L12.32 1zM3.83 9.48l5.66 5.66-2.83 2.83L1 12.31l2.83-2.83z",
+  Organizers: "M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z",
+  Users: "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 1.9 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+  Roles: "M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm6 9c0 4-2.6 7.8-6 8.9C8.6 18.8 6 15 6 11V6.3l6-2.2 6 2.2V11z",
+  Editions: "M17 10H7v2h10v-2zm2-7h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zm-5-5H7v2h7v-2z",
+  Notice: "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z",
+  View: "M12 6a9.77 9.77 0 0 1 8.82 5.5A9.77 9.77 0 0 1 12 17a9.77 9.77 0 0 1-8.82-5.5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z",
+  NoticeSubjects: "M19 5v14H5V5h14m1.1-2H3.9c-.5 0-.9.4-.9.9v16.2c0 .4.4.9.9.9h16.2c.4 0 .9-.5.9-.9V3.9c0-.5-.5-.9-.9-.9zM11 7h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2z",
+  MoveUp: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+  MoveDown: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+  Edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83a1 1 0 0 0 0-1.41z",
+  Delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  More: "M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",
+  Add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  Error: "M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z",
+  Retry: "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  Check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+};
+const icon = (name, size = 20, cls = "") =>
+  `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="${ICONS[name]}"/></svg>`;
+
+/* ---- sample data: the Manaus municipal guard 2026 edition (illustrative rows, not the real notice) ---- */
+const EXAM = { name: "Concurso Público Prefeitura de Manaus - Guarda Municipal", authority: "Prefeitura Municipal de Manaus (PMM)" };
+const EDITION = { year: 2026, position: "Guarda Municipal de 3ª Classe", board: "Instituto Consulplan (CONSULPLAN)", ref: "Edital nº 01/2026", status: "Published" };
+const B = "Conhecimentos Básicos", E = "Conhecimentos Específicos";
+const GROUPED = [
+  { id: 1, g: B, l: "Língua Portuguesa", n: 15 },
+  { id: 2, g: B, l: "Raciocínio Lógico-Matemático", n: 10 },
+  { id: 3, g: B, l: "Noções de Informática", n: 5 },
+  { id: 4, g: B, l: "Conhecimentos Gerais sobre o Estado do Amazonas e o Município de Manaus: história, geografia, economia, cultura e atualidades", n: null },
+  { id: 5, g: E, l: "Lei Orgânica do Município de Manaus", n: 10 },
+  { id: 6, g: E, l: "Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014)", n: 5 },
+  { id: 7, g: E, l: "Noções de Direito Constitucional", n: 5 }
+];
+const UNGROUPED = [
+  { id: 11, g: null, l: "Língua Portuguesa", n: 20 },
+  { id: 12, g: null, l: "Teoria Musical", n: 20 },
+  { id: 13, g: null, l: "História da Música", n: 10 },
+  { id: 14, g: null, l: "Percepção Musical", n: null }
+];
+const MIXED = [
+  { id: 21, g: B, l: "Língua Portuguesa", n: 15 },
+  { id: 22, g: B, l: "Raciocínio Lógico-Matemático", n: 10 },
+  { id: 23, g: null, l: "Ética no Serviço Público", n: 5 },
+  { id: 24, g: null, l: "Legislação Aplicada à Guarda Municipal", n: null },
+  { id: 25, g: E, l: "Noções de Direito Penal", n: 10 },
+  { id: 26, g: E, l: "Direitos Humanos", n: null }
+];
+const EDITIONS = [
+  { id: 1, label: "2026 · Guarda Municipal de 3ª Classe · CONSULPLAN", status: "Published" },
+  { id: 2, label: "2026 · Guarda Municipal Músico · CONSULPLAN", status: "Draft" },
+  { id: 3, label: "2021 · Guarda Municipal de 3ª Classe · IDECAN", status: "Published" },
+  { id: 4, label: "2019 · IBADE", status: "Draft" }
+];
+
+const STATES = {
+  edition: [
+    ["Section", [["unsaved", "Unsaved edition"], ["loading", "Loading"], ["loaderror", "Load error"], ["empty", "Empty"],
+                 ["grouped", "Grouped + row without number"], ["ungrouped", "No group at all"], ["mixed", "Groups + No group"],
+                 ["allnone", "No number anywhere"], ["moved", "After a move"], ["refused", "Move refused (stale list)"],
+                 ["confirm", "Delete confirmation"], ["deleted", "Deleted"], ["denied", "Permission denied"]]],
+    ["Dialog", [["d-add", "Add"], ["d-suggest", "Group suggestions"], ["d-edit", "Edit"], ["d-moved", "Edit, group changed (BR7)"],
+                ["d-saving", "Saving"], ["d-validation", "Validation errors"], ["d-duplicate", "Duplicate (409)"],
+                ["d-server", "Server error"], ["d-discard", "Unsaved changes"], ["d-saved", "Saved"]]]
+  ],
+  exam: [["Edition delete", [["ready", "Editions list"], ["confirm", "Delete confirmation (new text)"], ["deleted", "Deleted"]]]]
+};
+
+const S = {
+  screen: "edition", lang: "pt-BR", theme: "light", rowMode: "ext",
+  state: { edition: "grouped", exam: "confirm" },
+  load: "ready", rows: [], alert: null, dlg: null, confirm: null, snack: null, note: null,
+  editions: [], returnFocus: null, nextId: 100
+};
+
+const $ = (id) => document.getElementById(id);
+const t = (key, ...args) => {
+  let s = (TEXTS[S.lang] && TEXTS[S.lang][key]) || key;
+  args.forEach((a, i) => { s = s.split(`{${i}}`).join(a); });
+  return s;
+};
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fmt = (n) => new Intl.NumberFormat(S.lang).format(n);
+const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+const clone = (a) => a.map(r => ({ ...r }));
+const itemName = (r) => r.g ? `${r.l}, ${r.g}` : r.l;
+
+/* BR6: groups in the order of their first row; "no group" is one group */
+function groupsOf(rows) {
+  const out = [], map = new Map();
+  rows.forEach(r => {
+    const k = norm(r.g);
+    if (!map.has(k)) { const grp = { key: k, label: r.g ? r.g.trim() : null, rows: [] }; map.set(k, grp); out.push(grp); }
+    map.get(k).rows.push(r);
+  });
+  return out;
+}
+
+/* ===================================================================== */
+/* Screen 1: edition page                                                 */
+/* ===================================================================== */
+function setEditionState(st) {
+  S.state.edition = st;
+  S.load = "ready"; S.rows = clone(GROUPED); S.alert = null; S.dlg = null; S.confirm = null; S.snack = null; S.note = null;
+  switch (st) {
+    case "unsaved": S.load = "unsaved"; S.rows = []; break;
+    case "loading": S.load = "loading"; break;
+    case "loaderror": S.load = "error"; break;
+    case "empty": S.rows = []; break;
+    case "ungrouped": S.rows = clone(UNGROUPED); break;
+    case "mixed": S.rows = clone(MIXED); break;
+    case "allnone": S.rows = clone(UNGROUPED).map(r => ({ ...r, n: null })); break;
+    case "moved": move(2, "up", false); break;
+    case "refused": S.alert = "notice_subject.move_invalid"; break;
+    case "confirm": S.confirm = { kind: "delete", id: 3 }; break;
+    case "deleted": S.rows = S.rows.filter(r => r.id !== 3); S.snack = "NoticeSubjects.Deleted"; break;
+    case "d-add": openDialog("add"); break;
+    case "d-suggest": openDialog("add"); S.dlg.group = "con"; S.dlg.sugOpen = true; S.dlg.dirty = true; break;
+    case "d-edit": openDialog("edit", 2); break;
+    case "d-moved": openDialog("edit", 3); S.dlg.group = E; S.dlg.dirty = true; break;
+    case "d-saving": openDialog("add"); Object.assign(S.dlg, { group: E, label: "Noções de Direito Penal", count: "5", saving: true, dirty: true }); break;
+    case "d-validation": openDialog("add"); Object.assign(S.dlg, { group: B, label: "L", count: "501", dirty: true }); validateAll(); break;
+    case "d-duplicate": openDialog("add"); Object.assign(S.dlg, { group: "conhecimentos basicos", label: "lingua portuguesa", count: "15", dirty: true, alert: "notice_subject.duplicate" }); break;
+    case "d-server": openDialog("edit", 2); Object.assign(S.dlg, { count: "12", dirty: true, alert: "common.unexpected_error" }); break;
+    case "d-discard": openDialog("add"); Object.assign(S.dlg, { group: E, label: "Direitos Humanos", dirty: true }); S.confirm = { kind: "discard" }; break;
+    case "d-saved": S.rows.push({ id: 8, g: E, l: "Noções de Direito Penal", n: 5 }); S.snack = "NoticeSubjects.Saved"; break;
+  }
+}
+
+function crumbsHtml(current) {
+  return `<nav class="app-breadcrumbs" aria-label="Breadcrumb">
+    <span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span>
+    <a tabindex="0">${esc(t("Exams.Title"))}</a><span aria-hidden="true"> / </span>
+    <a tabindex="0">${esc(EXAM.name)}</a><span aria-hidden="true"> / </span>
+    <span aria-current="page">${esc(current)}</span></nav>`;
+}
+
+function editionHtml() {
+  if (S.state.edition === "denied") return deniedHtml();
+  const unsaved = S.load === "unsaved";
+  const title = unsaved ? t("ExamEditions.Form.AddTitle") : t("ExamEditions.Form.EditTitle");
+  const current = unsaved ? t("ExamEditions.Form.AddTitle") : `${EDITION.year} · ${EDITION.position}`;
+  const stub = (k, v) => `<div class="stub-field"><span class="app-field-label">${esc(t(k))}</span><div class="stub-value ${v ? "" : "empty"}">${esc(v || "")}</div></div>`;
+  const sec = (ic, k, body) => `<section class="app-section-card"><h2 class="app-section-card-title">${icon(ic, 20, "app-section-card-icon")}<span>${esc(t(k))}</span></h2><div style="margin-top:12px">${body}</div></section>`;
+  const asideRow = (k, v) => `<div class="app-aside-row"><dt>${esc(t(k))}</dt><dd>${esc(v)}</dd></div>`;
+  return `
+  <div class="app-page-header">${crumbsHtml(current)}<h1 class="app-page-title">${esc(title)}</h1></div>
+  <div class="app-form-layout">
+    <div class="app-form-card">
+      <span class="demo-note">Demo: the F-35 edition form, unchanged (shortened)</span>
+      ${sec("Exams", "ExamEditions.Section.Paper", `<div class="stub-grid">${stub("ExamEditions.Field.Organizer", unsaved ? "" : EDITION.board)}${stub("ExamEditions.Field.NoticeYear", unsaved ? "" : String(EDITION.year))}</div>`)}
+      ${sec("Notice", "ExamEditions.Section.Notice", `<div class="stub-grid">${stub("ExamEditions.Field.NoticeReference", unsaved ? "" : EDITION.ref)}</div>`)}
+      ${sec("View", "ExamEditions.Section.Publication", `<div class="stub-grid">${stub("ExamEditions.Field.Status", t("ExamEditions.Status." + (unsaved ? "Draft" : EDITION.status)))}</div>`)}
+      <div class="app-form-actions">
+        <button type="button" class="app-button app-button-text">${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-filled">${esc(t("Common.Save"))}</button>
+      </div>
+    </div>
+    <aside class="app-form-aside" aria-labelledby="edition-aside-title">
+      <h2 class="app-form-aside-title" id="edition-aside-title">${esc(t("Common.Summary.Title"))}</h2>
+      <dl>${asideRow("ExamEditions.Field.Exam", EXAM.name)}${asideRow("ExamEditions.Field.Status", t("ExamEditions.Status." + (unsaved ? "Draft" : EDITION.status)))}</dl>
+    </aside>
+  </div>
+
+  <!-- F-74: NoticeSubjectsSection, full width below the layout, outside the edition form -->
+  <div class="app-form-card">
+    <section class="app-section-card" id="edition-section-notice-subjects" aria-labelledby="edition-section-notice-subjects-title">
+      <h2 class="app-section-card-title" id="edition-section-notice-subjects-title">${icon("NoticeSubjects", 20, "app-section-card-icon")}<span>${esc(t("NoticeSubjects.Section.Title"))}</span></h2>
+      <p class="app-section-card-subtitle">${esc(t("NoticeSubjects.Section.Subtitle"))}</p>
+      <div id="ns-body">${sectionBodyHtml()}</div>
+    </section>
+  </div>`;
+}
+
+function sectionBodyHtml() {
+  if (S.load === "unsaved") return `<p class="app-section-note">${esc(t("NoticeSubjects.Section.SaveEditionFirst"))}</p>`;
+  if (S.load === "loading") return `<div class="app-state app-state-inline" role="status" aria-live="polite"><span class="app-spinner" style="color:var(--primary)" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+  if (S.load === "error") return `
+    <div class="app-state app-state-inline" role="alert">
+      ${icon("Error", 36, "is-error")}<p>${esc(t("Common.LoadFailed"))}</p>
+      <button type="button" class="app-button app-button-outlined" data-action="retry">${icon("Retry", 18)}${esc(t("Common.TryAgain"))}</button>
+    </div>`;
+  const alert = S.alert ? `<div class="app-alert" role="alert">${icon("Error", 20)}<span>${esc(t(S.alert))}</span></div>` : "";
+  const note = S.note ? `<span class="demo-note demo-note-plain">Demo: the screen reader hears "${esc(S.note)}"</span>` : "";
+  const kitNote = S.rowMode === "kit" && S.rows.length ? `<span class="demo-note demo-note-plain">Demo: option B - "Move down" sits in "More actions"; a menu item cannot be shown disabled with its reason today.</span>` : "";
+  let lists;
+  if (S.rows.length === 0) {
+    lists = `<div class="app-item-rows"><p class="app-item-rows-empty">${esc(t("NoticeSubjects.Empty"))}</p></div>`;
+  } else {
+    const groups = groupsOf(S.rows);
+    const onlyNone = groups.length === 1 && groups[0].label === null;
+    lists = groups.map((grp, gi) => {
+      const hid = `ns-group-${gi}`;
+      const heading = onlyNone ? "" : `<h3 class="ns-group-title" id="${hid}">${esc(grp.label ?? t("NoticeSubjects.Group.None"))}</h3>`;
+      const labelAttr = onlyNone ? `aria-labelledby="edition-section-notice-subjects-title"` : `aria-labelledby="${hid}"`;
+      return `<div class="ns-group">${heading}
+        <div class="app-item-rows"><ul class="app-item-rows-list" ${labelAttr}>
+          ${grp.rows.map((r, i) => rowHtml(r, i, grp.rows.length)).join("")}
+        </ul></div></div>`;
+    }).join("");
+  }
+  return `${alert}${note}${kitNote}${lists}
+    <div class="ns-footer">
+      <button type="button" class="app-button app-button-outlined" id="ns-add" data-action="add">${icon("Add", 18)}${esc(t("NoticeSubjects.Form.AddTitle"))}</button>
+      ${S.rows.length ? totalHtml() : ""}
+    </div>`;
+}
+
+function totalHtml() {
+  const stated = S.rows.filter(r => r.n != null);
+  const sum = stated.reduce((a, r) => a + r.n, 0);
+  const unstated = S.rows.length - stated.length;
+  const first = stated.length
+    ? t(sum === 1 ? "NoticeSubjects.Total.One" : "NoticeSubjects.Total.Many", fmt(sum))
+    : t("NoticeSubjects.Total.None");
+  const second = stated.length && unstated
+    ? t(unstated === 1 ? "NoticeSubjects.Total.Unstated.One" : "NoticeSubjects.Total.Unstated.Many", fmt(unstated)) : "";
+  return `<p class="ns-total"><span class="ns-total-sum">${esc(first)}</span>${second ? `<span class="ns-total-unstated">${esc(second)}</span>` : ""}</p>`;
+}
+
+function countHtml(r) {
+  if (r.n == null) return `<span class="ns-count"><span aria-hidden="true">—</span><span class="app-visually-hidden">${esc(t("NoticeSubjects.Row.NoCount.Spoken"))}</span></span>`;
+  return `<span class="ns-count">${esc(r.n === 1 ? t("NoticeSubjects.Row.Questions.One") : t("NoticeSubjects.Row.Questions.Many", fmt(r.n)))}</span>`;
+}
+
+function iconBtn({ action, id, ic, label, tip, name, disabled, destructive }) {
+  return `<span class="tip" data-tip="${esc(tip || label)}"><button type="button" class="app-icon-button ${destructive ? "is-destructive" : ""}"
+    data-action="${action}" data-id="${id}" aria-label="${esc(t("Common.ActionOnItem", label, name))}" ${disabled ? "disabled" : ""}>${icon(ic, 18)}</button></span>`;
+}
+
+function rowHtml(r, i, count) {
+  const first = i === 0, last = i === count - 1, name = itemName(r);
+  const up = iconBtn({ action: "move-up", id: r.id, ic: "MoveUp", label: t("Common.MoveUp"), name, disabled: first,
+    tip: first ? t("NoticeSubjects.MoveUp.DisabledFirst") : null });
+  const down = iconBtn({ action: "move-down", id: r.id, ic: "MoveDown", label: t("Common.MoveDown"), name, disabled: last,
+    tip: last ? t("NoticeSubjects.MoveDown.DisabledLast") : null });
+  const edit = iconBtn({ action: "edit", id: r.id, ic: "Edit", label: t("Common.Edit"), name });
+  const del = iconBtn({ action: "delete", id: r.id, ic: "Delete", label: t("Common.Delete"), name, destructive: true });
+  const actions = S.rowMode === "ext"
+    ? `${up}${down}<span class="app-row-actions-gap" aria-hidden="true"></span>${edit}${del}`
+    : `${edit}${del}${up}<span class="tip" data-tip="${esc(t("Common.More"))}"><button type="button" class="app-icon-button" aria-haspopup="menu" aria-expanded="false"
+        aria-label="${esc(t("Common.ActionOnItem", t("Common.More"), name))}">${icon("More", 18)}</button></span>`;
+  return `<li class="app-item-row" data-row="${r.id}">
+    <div class="app-item-row-content">
+      <span class="app-item-row-label app-truncated" title="${esc(r.l)}">${esc(r.l)}</span>
+      ${countHtml(r)}
+    </div>
+    <div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">${actions}</div>
+  </li>`;
+}
+
+/* BR6: swap with the neighbour in the same group */
+function move(id, dir, announce = true) {
+  const grp = groupsOf(S.rows).find(g => g.rows.some(r => r.id === id));
+  const idx = grp.rows.findIndex(r => r.id === id);
+  const j = dir === "up" ? idx - 1 : idx + 1;
+  if (j < 0 || j >= grp.rows.length) { S.alert = "notice_subject.move_invalid"; return; }
+  const a = S.rows.indexOf(grp.rows[idx]), b = S.rows.indexOf(grp.rows[j]);
+  [S.rows[a], S.rows[b]] = [S.rows[b], S.rows[a]];
+  S.alert = null;
+  const r = S.rows[b];
+  const msg = r.g ? t("NoticeSubjects.Moved", r.l, String(j + 1), String(grp.rows.length), r.g)
+                  : t("NoticeSubjects.Moved.NoGroup", r.l, String(j + 1), String(grp.rows.length));
+  S.note = msg;
+  if (announce) { $("live").textContent = ""; setTimeout(() => { $("live").textContent = msg; }, 50); }
+}
+
+/* ===================================================================== */
+/* Dialog: add / edit                                                     */
+/* ===================================================================== */
+function openDialog(mode, id) {
+  const r = id ? S.rows.find(x => x.id === id) : null;
+  S.dlg = { mode, id: r ? r.id : null, group: r ? (r.g || "") : "", label: r ? r.l : "", count: r && r.n != null ? String(r.n) : "",
+            savedGroup: r ? (r.g || "") : "", errors: {}, alert: null, saving: false, dirty: false, sugOpen: false };
+}
+
+function checkField(f) {
+  const d = S.dlg;
+  if (f === "label") {
+    const v = d.label.trim();
+    d.errors.label = v.length === 0 ? "notice_subject.label_required" : v.length < 2 ? "notice_subject.label_too_short" : v.length > 200 ? "notice_subject.label_too_long" : null;
+  }
+  if (f === "group") d.errors.group = d.group.trim().length > 100 ? "notice_subject.group_too_long" : null;
+  if (f === "count") {
+    const v = d.count.trim();
+    d.errors.count = !v || (/^\d+$/.test(v) && +v >= 1 && +v <= 500) ? null : "notice_subject.question_count_invalid";
+  }
+}
+function validateAll() { ["group", "label", "count"].forEach(checkField); return Object.values(S.dlg.errors).some(Boolean); }
+
+function suggestions() {
+  const d = S.dlg, term = norm(d.group);
+  const used = []; const seen = new Set();
+  S.rows.forEach(r => { if (r.g && !seen.has(norm(r.g))) { seen.add(norm(r.g)); used.push(r.g); } });
+  return used.filter(g => !term || norm(g).includes(term));
+}
+
+function describe(errKey, hint) {
+  return errKey ? `<span class="app-field-error-text">${esc(t(errKey))}</span>` : `<span class="app-field-hint">${esc(hint)}</span>`;
+}
+
+function groupFieldHtml() {
+  const d = S.dlg, id = "notice-subject-group", err = d.errors.group;
+  const changed = d.mode === "edit" && norm(d.group) !== norm(d.savedGroup);
+  const sugs = suggestions();
+  const open = d.sugOpen && sugs.length > 0;
+  const list = open ? `<ul class="app-lookup-list" role="listbox" id="${id}-list" aria-label="${esc(t("NoticeSubjects.Field.Group.Suggestions"))}">
+      ${sugs.map(g => `<li role="option" tabindex="-1" data-action="pick-group" data-value="${esc(g)}">${esc(g)}</li>`).join("")}</ul>` : "";
+  return `<div class="app-field ${err ? "app-field-error" : ""}" id="wrap-${id}">
+    <label class="app-field-label" for="${id}">${esc(t("NoticeSubjects.Field.Group"))}</label>
+    <div class="app-field-input">
+      <input type="text" id="${id}" data-field="group" value="${esc(d.group)}" maxlength="100" autocomplete="off"
+        role="combobox" aria-autocomplete="list" aria-expanded="${open}" aria-controls="${id}-list" aria-haspopup="listbox"
+        placeholder="${esc(t("NoticeSubjects.Field.Group.Placeholder"))}" aria-describedby="${id}-description" ${err ? 'aria-invalid="true"' : ""} ${d.saving ? "disabled" : ""}>
+    </div>
+    ${list}
+    <span id="${id}-description" class="app-field-description">${describe(err, changed ? t("NoticeSubjects.Field.Group.MoveNote") : t("NoticeSubjects.Field.Group.Hint"))}</span>
+  </div>`;
+}
+
+function textFieldHtml({ id, field, labelKey, required, placeholderKey, hintKey, maxlength, numeric, cls = "" }) {
+  const d = S.dlg, err = d.errors[field];
+  return `<div class="app-field ${cls} ${err ? "app-field-error" : ""}" id="wrap-${id}">
+    <label class="app-field-label" for="${id}">${esc(t(labelKey))}${required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>
+    <div class="app-field-input">
+      <input type="${numeric ? "number" : "text"}" id="${id}" data-field="${field}" value="${esc(d[field])}" autocomplete="off"
+        ${maxlength ? `maxlength="${maxlength}"` : ""} ${numeric ? 'inputmode="numeric" min="1" max="500" step="1"' : ""}
+        placeholder="${esc(t(placeholderKey))}" aria-describedby="${id}-description"
+        ${required ? 'aria-required="true"' : ""} ${err ? 'aria-invalid="true"' : ""} ${d.saving ? "disabled" : ""}>
+    </div>
+    <span id="${id}-description" class="app-field-description">${describe(err, t(hintKey))}</span>
+  </div>`;
+}
+
+function dialogHtml() {
+  const d = S.dlg;
+  if (!d) return "";
+  return `<div class="app-overlay">
+    <div class="app-dialog app-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="ns-dlg-title" id="ns-dialog">
+      <h2 class="app-dialog-title" id="ns-dlg-title">${esc(t(d.mode === "add" ? "NoticeSubjects.Form.AddTitle" : "NoticeSubjects.Form.EditTitle"))}</h2>
+      ${d.alert ? `<div class="app-alert" role="alert" id="ns-dlg-alert">${icon("Error", 20)}<span>${esc(t(d.alert))}</span></div>` : ""}
+      ${groupFieldHtml()}
+      ${textFieldHtml({ id: "notice-subject-label", field: "label", labelKey: "NoticeSubjects.Field.Label", required: true,
+          placeholderKey: "NoticeSubjects.Field.Label.Placeholder", hintKey: "NoticeSubjects.Field.Label.Hint", maxlength: 200 })}
+      ${textFieldHtml({ id: "notice-subject-question-count", field: "count", labelKey: "NoticeSubjects.Field.QuestionCount", numeric: true, cls: "app-field-count",
+          placeholderKey: "NoticeSubjects.Field.QuestionCount.Placeholder", hintKey: "NoticeSubjects.Field.QuestionCount.Hint" })}
+      <div class="app-dialog-actions">
+        <button type="button" class="app-button app-button-text" data-action="dlg-cancel" ${d.saving ? "disabled" : ""}>${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-filled" data-action="dlg-save" ${d.saving ? "disabled" : ""}>
+          ${d.saving ? `<span class="app-spinner" aria-hidden="true"></span><span role="status">${esc(t("Common.Saving"))}</span>` : esc(t("Common.Save"))}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveDialog() {
+  const d = S.dlg;
+  if (validateAll()) {
+    renderDialog();
+    const firstErr = ["group", "label", "count"].find(f => d.errors[f]);
+    ({ group: $("notice-subject-group"), label: $("notice-subject-label"), count: $("notice-subject-question-count") })[firstErr]?.focus();
+    return;
+  }
+  const g = d.group.trim() || null, l = d.label.trim();
+  const dup = S.rows.some(r => r.id !== d.id && norm(r.g) === norm(g) && norm(r.l) === norm(l));
+  if (dup) { d.alert = "notice_subject.duplicate"; renderDialog(); $("ns-dlg-alert")?.focus(); return; }
+  d.alert = null; d.saving = true; renderDialog();
+  setTimeout(() => {
+    const n = d.count.trim() ? Number(d.count) : null;
+    let id = d.id;
+    if (d.mode === "add") { id = S.nextId++; insertLastInGroup({ id, g, l, n }); }
+    else {
+      const r = S.rows.find(x => x.id === d.id);
+      if (norm(r.g) !== norm(g)) { S.rows.splice(S.rows.indexOf(r), 1); insertLastInGroup({ id, g, l, n }); } /* BR7 */
+      else Object.assign(r, { g, l, n });                                                                     /* AC9: position kept */
+    }
+    S.dlg = null; S.snack = "NoticeSubjects.Saved"; S.note = null; S.state.edition = "d-saved";
+    render(); document.querySelector(`[data-action="edit"][data-id="${id}"]`)?.focus();
+  }, 1000);
+}
+
+/* BR6: a new row goes last in its group, last in the edition when the group is new */
+function insertLastInGroup(row) {
+  let at = -1;
+  S.rows.forEach((r, i) => { if (norm(r.g) === norm(row.g)) at = i; });
+  if (at < 0) S.rows.push(row); else S.rows.splice(at + 1, 0, row);
+}
+
+function closeDialog() {
+  S.dlg = null; S.confirm = null; render();
+  if (S.returnFocus) document.querySelector(S.returnFocus)?.focus();
+}
+function cancelDialog() {
+  if (S.dlg.saving) return;
+  if (S.dlg.dirty) { S.confirm = { kind: "discard" }; renderConfirm(); return; }
+  closeDialog();
+}
+
+/* ===================================================================== */
+/* Screen 2: exam page, edition delete (BR10)                             */
+/* ===================================================================== */
+function setExamState(st) {
+  S.state.exam = st; S.editions = EDITIONS.map(e => ({ ...e })); S.dlg = null; S.confirm = null; S.snack = null;
+  if (st === "confirm") S.confirm = { kind: "edition", id: 2 };
+  if (st === "deleted") { S.editions = S.editions.filter(e => e.id !== 2); S.snack = "ExamEditions.Deleted"; }
+}
+
+function examHtml() {
+  const chip = (s) => `<span class="app-status-chip ${s === "Published" ? "app-status-chip-success" : ""}"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("ExamEditions.Status." + s))}</span>`;
+  return `
+  <div class="app-page-header">
+    <nav class="app-breadcrumbs" aria-label="Breadcrumb"><span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span><a tabindex="0">${esc(t("Exams.Title"))}</a><span aria-hidden="true"> / </span><span aria-current="page">${esc(EXAM.name)}</span></nav>
+    <h1 class="app-page-title">${esc(t("Exams.Form.EditTitle"))}</h1>
+  </div>
+  <span class="demo-note">Demo: the F-35 exam page; only the delete confirmation text changes</span>
+  <div class="app-form-card">
+    <section class="app-section-card" aria-labelledby="exam-section-editions-title">
+      <h2 class="app-section-card-title" id="exam-section-editions-title">${icon("Editions", 20, "app-section-card-icon")}<span>${esc(t("ExamEditions.Section.Title"))}</span></h2>
+      <p class="app-section-card-subtitle">${esc(t("ExamEditions.Section.Subtitle"))}</p>
+      <ul class="app-item-rows-list">${S.editions.map(e => `
+        <li class="app-item-row">
+          <div class="app-item-row-content" style="flex-wrap:wrap"><span class="app-item-row-label">${esc(e.label)}</span>${chip(e.status)}</div>
+          <div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">
+            ${iconBtn({ action: "noop", id: e.id, ic: "Edit", label: t("Common.Edit"), name: e.label })}
+            ${iconBtn({ action: "edition-delete", id: e.id, ic: "Delete", label: t("Common.Delete"), name: e.label, destructive: true,
+                disabled: e.status === "Published", tip: e.status === "Published" ? t("ExamEditions.Delete.DisabledPublished") : null })}
+          </div>
+        </li>`).join("")}</ul>
+      <div style="margin-top:12px"><a class="app-button app-button-outlined" href="#" data-action="noop">${icon("Add", 18)}${esc(t("ExamEditions.Form.AddTitle"))}</a></div>
+    </section>
+  </div>`;
+}
+
+/* ===================================================================== */
+/* shared                                                                 */
+/* ===================================================================== */
+function deniedHtml() {
+  return `<div class="app-state">${icon("Error", 40)}<h1 class="app-state-title">${esc(t("NotFound.Title"))}</h1><p>${esc(t("NotFound.Message"))}</p></div>`;
+}
+
+function navHtml() {
+  const link = (ic, key, current) => `<span class="nav-link" ${current ? 'aria-current="page"' : ""}>${icon(ic, 20)}<span>${esc(t(key))}</span></span>`;
+  return `<span class="nav-section">${esc(t("Nav.Section.Content"))}</span>
+    ${link("Exams", "Exams.Title", true)}${link("IssuingAuthorities", "IssuingAuthorities.Title")}${link("Organizers", "Organizers.Title")}
+    <span class="nav-section">${esc(t("Nav.Section.Administration"))}</span>${link("Users", "Users.Title")}${link("Roles", "Roles.Title")}`;
+}
+
+function confirmHtml() {
+  const c = S.confirm;
+  if (!c) return "";
+  let title, message, confirm;
+  if (c.kind === "delete") {
+    const r = S.rows.find(x => x.id === c.id);
+    title = t("Common.Delete.Title");
+    message = t("NoticeSubjects.Delete.Message", r.l);
+    confirm = t("Common.Delete.Confirm", t("NoticeSubjects.Delete.Object", r.l));
+  } else if (c.kind === "edition") {
+    const e = S.editions.find(x => x.id === c.id);
+    title = t("Common.Delete.Title");
+    message = t("ExamEditions.Delete.Message", e.label, EXAM.name);
+    confirm = t("Common.Delete.Confirm", t("ExamEditions.Delete.Object", e.label));
+  } else {
+    title = t("Common.Discard.Title"); message = t("Common.Discard.Message"); confirm = t("Common.Discard.Confirm");
+  }
+  return `<div class="app-overlay is-top">
+    <div class="app-dialog" role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-message">
+      <h2 class="app-dialog-title" id="cf-title">${esc(title)}</h2>
+      <p class="app-dialog-message" id="cf-message">${esc(message)}</p>
+      <div class="app-dialog-actions">
+        <button type="button" class="app-button app-button-text" data-action="cf-cancel" id="cf-cancel">${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-danger" data-action="cf-confirm">${esc(confirm)}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+let snackTimer = null;
+function renderSnack() {
+  $("snackbar-root").innerHTML = S.snack ? `<div class="app-snackbar" role="status">${icon("Check", 18)}<span>${esc(t(S.snack))}</span></div>` : "";
+  clearTimeout(snackTimer);
+  if (S.snack) snackTimer = setTimeout(() => { S.snack = null; $("snackbar-root").innerHTML = ""; }, 4000);
+}
+
+function renderDemo() {
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === S.screen)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeBtn === S.theme)));
+  document.querySelectorAll("[data-rowmode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.rowmode === S.rowMode)));
+  const groups = STATES[S.screen];
+  ["demo-states-1", "demo-states-2"].forEach((rid, i) => {
+    const g = groups[i];
+    $(rid).innerHTML = g ? `<span class="demo-label">Demo &middot; ${g[0]}</span>` +
+      g[1].map(([k, label]) => `<button type="button" data-state="${k}" aria-pressed="${S.state[S.screen] === k}">${label}</button>`).join("") : "";
+    $(rid).hidden = !g;
+  });
+}
+
+function renderDialog() { $("dialog-root").innerHTML = dialogHtml(); }
+function renderConfirm() { $("confirm-root").innerHTML = confirmHtml(); if (S.confirm) $("cf-cancel")?.focus(); }
+function renderSection() { const b = $("ns-body"); if (b) b.innerHTML = sectionBodyHtml(); }
+
+function render() {
+  document.documentElement.lang = S.lang;
+  document.documentElement.dataset.theme = S.theme;
+  renderDemo();
+  $("drawer").innerHTML = navHtml();
+  $("main").innerHTML = S.screen === "edition" ? editionHtml() : examHtml();
+  renderDialog();
+  renderConfirm();
+  renderSnack();
+}
+
+function setState(st) {
+  if (S.screen === "edition") setEditionState(st); else setExamState(st);
+  render();
+  if (S.dlg && !S.confirm) {
+    if (S.state.edition === "d-validation") $("notice-subject-label")?.focus();
+    else if (S.state.edition === "d-duplicate") $("ns-dlg-alert")?.focus();
+    else $("notice-subject-group")?.focus();
+  }
+}
+
+/* ---- events ---- */
+document.addEventListener("click", (ev) => {
+  const demo = ev.target.closest(".demo button");
+  if (demo) {
+    if (demo.dataset.screen) { S.screen = demo.dataset.screen; setState(S.state[S.screen]); return; }
+    if (demo.dataset.state) { setState(demo.dataset.state); return; }
+    if (demo.dataset.lang) { S.lang = demo.dataset.lang; if (S.note) S.note = null; render(); return; }
+    if (demo.dataset.themeBtn) { S.theme = demo.dataset.themeBtn; render(); return; }
+    if (demo.dataset.rowmode) { S.rowMode = demo.dataset.rowmode; render(); return; }
+  }
+  const el = ev.target.closest("[data-action]");
+  if (!el) {
+    if (S.dlg && S.dlg.sugOpen && !ev.target.closest("#wrap-notice-subject-group")) { S.dlg.sugOpen = false; refreshGroup(); }
+    return;
+  }
+  ev.preventDefault();
+  const a = el.dataset.action, id = Number(el.dataset.id);
+  switch (a) {
+    case "retry": S.load = "ready"; S.state.edition = "grouped"; render(); break;
+    case "add": S.returnFocus = "#ns-add"; openDialog("add"); renderDialog(); $("notice-subject-group")?.focus(); break;
+    case "edit": S.returnFocus = `[data-action="edit"][data-id="${id}"]`; openDialog("edit", id); renderDialog(); $("notice-subject-group")?.focus(); break;
+    case "move-up": case "move-down": {
+      const dir = a === "move-up" ? "up" : "down";
+      move(id, dir); renderSection();
+      const same = document.querySelector(`[data-action="${a}"][data-id="${id}"]`);
+      const other = document.querySelector(`[data-action="${a === "move-up" ? "move-down" : "move-up"}"][data-id="${id}"]`);
+      (same && !same.disabled ? same : other)?.focus();
+      break;
+    }
+    case "delete": S.returnFocus = `[data-action="delete"][data-id="${id}"]`; S.confirm = { kind: "delete", id }; renderConfirm(); break;
+    case "edition-delete": S.returnFocus = `[data-action="edition-delete"][data-id="${id}"]`; S.confirm = { kind: "edition", id }; renderConfirm(); break;
+    case "cf-cancel":
+      S.confirm = null; renderConfirm();
+      if (S.dlg) $("notice-subject-group")?.focus(); else if (S.returnFocus) document.querySelector(S.returnFocus)?.focus();
+      break;
+    case "cf-confirm": {
+      const c = S.confirm; S.confirm = null;
+      if (c.kind === "discard") { closeDialog(); break; }
+      if (c.kind === "delete") {
+        const grpRows = S.rows; const idx = grpRows.findIndex(r => r.id === c.id);
+        S.rows.splice(idx, 1); S.snack = "NoticeSubjects.Deleted"; S.note = null; S.state.edition = "deleted"; render();
+        const next = S.rows[idx] || S.rows[idx - 1];
+        (next ? document.querySelector(`[data-action="edit"][data-id="${next.id}"]`) : $("ns-add"))?.focus();
+      } else {
+        S.editions = S.editions.filter(e => e.id !== c.id); S.snack = "ExamEditions.Deleted"; S.state.exam = "deleted"; render();
+      }
+      break;
+    }
+    case "dlg-cancel": cancelDialog(); break;
+    case "dlg-save": saveDialog(); break;
+    case "pick-group":
+      S.dlg.group = el.dataset.value; S.dlg.sugOpen = false; S.dlg.dirty = true; checkField("group"); refreshGroup(); $("notice-subject-group")?.focus(); break;
+  }
+});
+
+function refreshGroup() {
+  const w = $("wrap-notice-subject-group"); if (!w) return;
+  const input = $("notice-subject-group"), focused = document.activeElement === input, pos = input ? input.selectionStart : null;
+  w.outerHTML = groupFieldHtml();
+  if (focused) { const i = $("notice-subject-group"); i.focus(); if (pos != null) i.setSelectionRange(pos, pos); }
+}
+function refreshField(field) {
+  const map = { label: ["notice-subject-label", "NoticeSubjects.Field.Label.Hint"], count: ["notice-subject-question-count", "NoticeSubjects.Field.QuestionCount.Hint"] };
+  if (field === "group") { refreshGroup(); return; }
+  const [id, hint] = map[field]; const err = S.dlg.errors[field];
+  $("wrap-" + id).classList.toggle("app-field-error", !!err);
+  const input = $(id); if (err) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid");
+  $(id + "-description").innerHTML = describe(err, t(hint));
+}
+
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (!S.dlg || !el.dataset.field) return;
+  S.dlg[el.dataset.field] = el.value; S.dlg.dirty = true;
+  if (el.dataset.field === "group") { S.dlg.sugOpen = true; refreshGroup(); }
+});
+document.addEventListener("focusout", (ev) => {
+  const el = ev.target;
+  if (!S.dlg || !el.dataset || !el.dataset.field) return;
+  if (el.dataset.field === "group" && ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest("#wrap-notice-subject-group")) return;
+  checkField(el.dataset.field);
+  if (el.dataset.field === "group") { S.dlg.sugOpen = false; }
+  refreshField(el.dataset.field);
+});
+
+document.addEventListener("keydown", (ev) => {
+  const el = ev.target;
+  if (ev.key === "Escape") {
+    if (S.confirm) { ev.preventDefault(); document.querySelector('[data-action="cf-cancel"]')?.click(); return; }
+    if (S.dlg && S.dlg.sugOpen) { ev.preventDefault(); S.dlg.sugOpen = false; refreshGroup(); $("notice-subject-group")?.focus(); return; }
+    if (S.dlg) { ev.preventDefault(); cancelDialog(); return; }
+  }
+  if (el.id === "notice-subject-group" && ev.key === "ArrowDown") {
+    ev.preventDefault();
+    if (!S.dlg.sugOpen) { S.dlg.sugOpen = true; refreshGroup(); }
+    document.querySelector('#notice-subject-group-list [role="option"]')?.focus();
+  }
+  if (el.getAttribute && el.getAttribute("role") === "option") {
+    if (ev.key === "Enter") { ev.preventDefault(); el.click(); }
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+      ev.preventDefault();
+      const sib = ev.key === "ArrowDown" ? el.nextElementSibling : el.previousElementSibling;
+      (sib || (ev.key === "ArrowUp" ? $("notice-subject-group") : null))?.focus();
+    }
+  }
+  if (S.dlg && ev.key === "Enter" && el.tagName === "INPUT" && el.id !== "notice-subject-group") { ev.preventDefault(); saveDialog(); }
+});
+
+setExamState("confirm");
+setEditionState("grouped");
+render();
+</script>
+</body>
+</html>

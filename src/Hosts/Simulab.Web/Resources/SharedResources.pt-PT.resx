@@ -298,6 +298,7 @@
   <data name="data_export.current_password_invalid" xml:space="preserve"><value>A palavra-passe atual não está correta.</value></data>
   <data name="totp.code_invalid" xml:space="preserve"><value>O código não está correto ou já foi usado.</value></data>
   <data name="totp.challenge_invalid" xml:space="preserve"><value>O início de sessão demorou demasiado. Introduza novamente a palavra-passe.</value></data>
+  <data name="password_change.challenge_invalid" xml:space="preserve"><value>O início de sessão demorou demasiado. Introduza novamente a palavra-passe.</value></data>
   <data name="totp.already_enabled" xml:space="preserve"><value>A verificação em dois passos já está ativa.</value></data>
   <data name="totp.not_enabled" xml:space="preserve"><value>A verificação em dois passos não está ativa.</value></data>
   <data name="totp.current_password_invalid" xml:space="preserve"><value>A palavra-passe atual não está correta.</value></data>
@@ -413,6 +414,8 @@
   <data name="Exams.Filter.IssuingAuthority" xml:space="preserve"><value>Entidade contratante</value></data>
   <data name="Exams.Filter.AssessmentType" xml:space="preserve"><value>Tipo de avaliação</value></data>
   <data name="Exams.Filter.Scope" xml:space="preserve"><value>Abrangência</value></data>
+  <data name="Exams.Filter.State" xml:space="preserve"><value>Estado</value></data>
+  <data name="Exams.Filter.State.Placeholder" xml:space="preserve"><value>Todos os estados</value></data>
   <data name="Exams.Form.AddTitle" xml:space="preserve"><value>Adicionar exame</value></data>
   <data name="Exams.Form.EditTitle" xml:space="preserve"><value>Editar exame</value></data>
   <data name="Exams.Field.IssuingAuthority" xml:space="preserve"><value>Entidade contratante</value></data>
@@ -466,6 +469,7 @@
   <data name="exam.scope_detail_required" xml:space="preserve"><value>Indique onde este exame se aplica.</value></data>
   <data name="exam.scope_detail_too_long" xml:space="preserve"><value>Este campo é demasiado longo: no máximo 120 caracteres.</value></data>
   <data name="exam.scope_detail_unknown_state" xml:space="preserve"><value>Escolha um dos 27 estados da lista.</value></data>
+  <data name="exam.filter_unknown_state" xml:space="preserve"><value>Escolha um dos 27 estados da lista.</value></data>
   <data name="exam.content_language_invalid" xml:space="preserve"><value>Escolha o idioma do conteúdo.</value></data>
   <data name="Nav.IssuingAuthorities" xml:space="preserve"><value>Entidades contratantes</value></data>
   <data name="IssuingAuthorities.Title" xml:space="preserve"><value>Entidades contratantes</value></data>
@@ -500,7 +504,7 @@
   <data name="ExamEditions.Status.Draft.Description" xml:space="preserve"><value>Fica apenas na administração. Os alunos não a veem.</value></data>
   <data name="ExamEditions.Status.Published.Description" xml:space="preserve"><value>Disponível para os alunos no catálogo. Volte a Rascunho antes de a eliminar.</value></data>
   <data name="ExamEditions.Delete.Object" xml:space="preserve"><value>edição {0}</value></data>
-  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>A edição {0} sai do exame {1}. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame.</value></data>
+  <data name="ExamEditions.Delete.Message" xml:space="preserve"><value>A edição {0} sai do exame {1}, com as disciplinas do aviso. O mesmo ano, posto de trabalho e entidade organizadora não poderão voltar a ser adicionados a este exame.</value></data>
   <data name="ExamEditions.Deleted" xml:space="preserve"><value>Edição eliminada.</value></data>
   <data name="ExamEditions.Delete.DisabledPublished" xml:space="preserve"><value>Volte a colocar em Rascunho antes de eliminar.</value></data>
   <data name="ExamEditions.Form.AddTitle" xml:space="preserve"><value>Adicionar edição</value></data>
@@ -561,7 +565,9 @@
   <data name="Catalog.Filter.Organizer" xml:space="preserve"><value>Entidade organizadora</value></data>
   <data name="Catalog.Filter.NoticeYear" xml:space="preserve"><value>Ano do aviso</value></data>
   <data name="Catalog.Filter.Clear" xml:space="preserve"><value>Limpar filtros</value></data>
-  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>Não foi possível carregar as opções de entidade organizadora e ano. O resto da pesquisa funciona.</value></data>
+  <data name="Catalog.Filter.OptionsFailed" xml:space="preserve"><value>Não foi possível carregar as opções de entidade organizadora, ano e estado. O resto da pesquisa funciona.</value></data>
+  <data name="Catalog.Filter.State" xml:space="preserve"><value>Estado</value></data>
+  <data name="Catalog.Filter.State.Placeholder" xml:space="preserve"><value>Todos os estados</value></data>
   <data name="Catalog.Column.ContentLanguage" xml:space="preserve"><value>Idioma</value></data>
   <data name="Catalog.Column.Editions" xml:space="preserve"><value>Edições</value></data>
   <data name="Catalog.Column.LatestYear" xml:space="preserve"><value>Último ano</value></data>
@@ -580,4 +586,143 @@
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Aviso oficial, {0}, abre num novo separador</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parâmetros para uma página que guarda o estado no endereço</value></data>
   <data name="Gallery.KitParameters.Hint" xml:space="preserve"><value>Uma ligação truncada com o idioma, um título de página que é conteúdo e uma tabela que começa de uma pesquisa, uma página e um tamanho de página.</value></data>
+  <data name="Nav.Subjects" xml:space="preserve"><value>Disciplinas</value></data>
+  <data name="Subjects.Title" xml:space="preserve"><value>Disciplinas</value></data>
+  <data name="Subjects.Search.Placeholder" xml:space="preserve"><value>Pesquisar por nome</value></data>
+  <data name="Subjects.Empty" xml:space="preserve"><value>Ainda não há nenhuma disciplina registada.</value></data>
+  <data name="Subjects.Empty.Filters" xml:space="preserve"><value>Nenhuma disciplina corresponde à área escolhida.</value></data>
+  <data name="Subjects.Empty.Search" xml:space="preserve"><value>Nenhuma disciplina corresponde a "{0}".</value></data>
+  <data name="Subjects.Filter.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Column.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Subjects.Column.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Column.Topics" xml:space="preserve"><value>Tópicos</value></data>
+  <data name="Subjects.NoArea" xml:space="preserve"><value>Sem área</value></data>
+  <data name="Subjects.Delete.DisabledHasTopics" xml:space="preserve"><value>Esta disciplina tem tópicos. Elimine-os primeiro, na página da disciplina.</value></data>
+  <data name="Subjects.Delete.Message" xml:space="preserve"><value>{0} sai da taxonomia e deixa de aparecer em qualquer lado da aplicação.</value></data>
+  <data name="Subjects.Saved" xml:space="preserve"><value>Disciplina guardada.</value></data>
+  <data name="Subjects.Deleted" xml:space="preserve"><value>Disciplina eliminada.</value></data>
+  <data name="Subjects.Dialog.AddTitle" xml:space="preserve"><value>Adicionar disciplina</value></data>
+  <data name="Subjects.Dialog.EditTitle" xml:space="preserve"><value>Editar disciplina</value></data>
+  <data name="Subjects.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Subjects.Field.Name.Help" xml:space="preserve"><value>Como o aluno a vai ver, por exemplo Direito Constitucional. De 2 a 150 carateres.</value></data>
+  <data name="Subjects.Field.Area" xml:space="preserve"><value>Área</value></data>
+  <data name="Subjects.Field.Area.Help" xml:space="preserve"><value>Opcional. Agrupa a disciplina com outras semelhantes.</value></data>
+  <data name="Subjects.BackToList" xml:space="preserve"><value>Voltar às disciplinas</value></data>
+  <data name="Topics.Section.Title" xml:space="preserve"><value>Tópicos</value></data>
+  <data name="Topics.Section.Subtitle" xml:space="preserve"><value>O que se estuda dentro desta disciplina, por ordem alfabética.</value></data>
+  <data name="Topics.Empty" xml:space="preserve"><value>Ainda não há tópicos.</value></data>
+  <data name="Topics.Dialog.AddTitle" xml:space="preserve"><value>Adicionar tópico</value></data>
+  <data name="Topics.Dialog.EditTitle" xml:space="preserve"><value>Editar tópico</value></data>
+  <data name="Topics.Saved" xml:space="preserve"><value>Tópico guardado.</value></data>
+  <data name="Topics.Deleted" xml:space="preserve"><value>Tópico eliminado.</value></data>
+  <data name="Topics.Delete.Message" xml:space="preserve"><value>{0} sai da disciplina {1} e deixa de aparecer em qualquer lado da aplicação.</value></data>
+  <data name="Topics.Field.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="Topics.Field.Name.Help" xml:space="preserve"><value>Por exemplo Crase. De 2 a 200 carateres, único dentro da disciplina.</value></data>
+  <data name="Topics.Field.Subject" xml:space="preserve"><value>Disciplina</value></data>
+  <data name="Topics.Field.Subject.Placeholder" xml:space="preserve"><value>Escreva 2 letras para pesquisar</value></data>
+  <data name="Topics.Field.Subject.Help" xml:space="preserve"><value>Escolha outra disciplina para mover o tópico.</value></data>
+  <data name="Area.Languages" xml:space="preserve"><value>Linguagens</value></data>
+  <data name="Area.Mathematics" xml:space="preserve"><value>Matemática</value></data>
+  <data name="Area.LogicalReasoning" xml:space="preserve"><value>Raciocínio Lógico</value></data>
+  <data name="Area.NaturalSciences" xml:space="preserve"><value>Ciências da Natureza</value></data>
+  <data name="Area.HumanSciences" xml:space="preserve"><value>Ciências Humanas</value></data>
+  <data name="Area.Law" xml:space="preserve"><value>Direito</value></data>
+  <data name="Area.InformationTechnology" xml:space="preserve"><value>Tecnologias de Informação</value></data>
+  <data name="Area.Administration" xml:space="preserve"><value>Administração e Gestão</value></data>
+  <data name="Area.SpecificKnowledge" xml:space="preserve"><value>Conhecimentos Específicos</value></data>
+  <data name="subject.not_found" xml:space="preserve"><value>Esta disciplina já não existe. Atualize a lista.</value></data>
+  <data name="subject.name_required" xml:space="preserve"><value>Indique um nome com pelo menos 2 carateres.</value></data>
+  <data name="subject.name_too_long" xml:space="preserve"><value>O nome é demasiado longo. Use no máximo 150 carateres.</value></data>
+  <data name="subject.name_taken" xml:space="preserve"><value>Outra disciplina já tem este nome, mesmo que tenha sido eliminada. Escolha um nome diferente.</value></data>
+  <data name="subject.area_invalid" xml:space="preserve"><value>Esta área não está na lista. Escolha uma das áreas oferecidas.</value></data>
+  <data name="subject.has_topics" xml:space="preserve"><value>Esta disciplina tem tópicos. Elimine-os primeiro, na página da disciplina.</value></data>
+  <data name="topic.not_found" xml:space="preserve"><value>Este tópico já não existe. Atualize a lista.</value></data>
+  <data name="topic.name_required" xml:space="preserve"><value>Indique um nome com pelo menos 2 carateres.</value></data>
+  <data name="topic.name_too_long" xml:space="preserve"><value>O nome é demasiado longo. Use no máximo 200 carateres.</value></data>
+  <data name="topic.name_taken" xml:space="preserve"><value>Esta disciplina já tem um tópico com este nome, mesmo que tenha sido eliminado. Escolha um nome diferente.</value></data>
+  <data name="Common.MoveUp" xml:space="preserve"><value>Mover para cima</value></data>
+  <data name="Common.MoveDown" xml:space="preserve"><value>Mover para baixo</value></data>
+  <data name="Gallery.Section.SuggestField" xml:space="preserve"><value>Texto livre com sugestões</value></data>
+  <data name="Gallery.SuggestField.Hint" xml:space="preserve"><value>O leitor escreve qualquer texto; as sugestões só poupam escrita. Casam sem distinguir maiúsculas e acentos. Vazio, escrito, erro e a lista de sugestões.</value></data>
+  <data name="NoticeSubjects.Section.Title" xml:space="preserve"><value>Disciplinas do aviso</value></data>
+  <data name="NoticeSubjects.Section.Subtitle" xml:space="preserve"><value>O conteúdo tal como o aviso o apresenta: cada disciplina sob o seu grupo, pela ordem do aviso, com o número de questões.</value></data>
+  <data name="NoticeSubjects.Section.SaveEditionFirst" xml:space="preserve"><value>Guarde primeiro a edição. As disciplinas do aviso são adicionadas aqui.</value></data>
+  <data name="NoticeSubjects.Empty" xml:space="preserve"><value>Esta edição ainda não tem disciplinas do aviso.</value></data>
+  <data name="NoticeSubjects.Group.None" xml:space="preserve"><value>Sem grupo</value></data>
+  <data name="NoticeSubjects.Row.Questions.One" xml:space="preserve"><value>1 questão</value></data>
+  <data name="NoticeSubjects.Row.Questions.Many" xml:space="preserve"><value>{0} questões</value></data>
+  <data name="NoticeSubjects.Row.NoCount.Spoken" xml:space="preserve"><value>número de questões não indicado</value></data>
+  <data name="NoticeSubjects.MoveUp.DisabledFirst" xml:space="preserve"><value>Já é a primeira do grupo</value></data>
+  <data name="NoticeSubjects.MoveDown.DisabledLast" xml:space="preserve"><value>Já é a última do grupo</value></data>
+  <data name="NoticeSubjects.Moved" xml:space="preserve"><value>{0} passou para a posição {1} de {2} em {3}.</value></data>
+  <data name="NoticeSubjects.Moved.NoGroup" xml:space="preserve"><value>{0} passou para a posição {1} de {2}.</value></data>
+  <data name="NoticeSubjects.Total.One" xml:space="preserve"><value>Total indicado no aviso: 1 questão</value></data>
+  <data name="NoticeSubjects.Total.Many" xml:space="preserve"><value>Total indicado no aviso: {0} questões</value></data>
+  <data name="NoticeSubjects.Total.None" xml:space="preserve"><value>Nenhuma disciplina indica o número de questões.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.One" xml:space="preserve"><value>1 disciplina sem número fica fora da soma.</value></data>
+  <data name="NoticeSubjects.Total.Unstated.Many" xml:space="preserve"><value>{0} disciplinas sem número ficam fora da soma.</value></data>
+  <data name="NoticeSubjects.Form.AddTitle" xml:space="preserve"><value>Adicionar disciplina do aviso</value></data>
+  <data name="NoticeSubjects.Form.EditTitle" xml:space="preserve"><value>Editar disciplina do aviso</value></data>
+  <data name="NoticeSubjects.Field.Group" xml:space="preserve"><value>Grupo</value></data>
+  <data name="NoticeSubjects.Field.Group.Placeholder" xml:space="preserve"><value>Ex.: Conhecimentos gerais</value></data>
+  <data name="NoticeSubjects.Field.Group.Hint" xml:space="preserve"><value>Como o aviso agrupa as disciplinas. Escolha um grupo já usado ou escreva um novo; deixe vazio se o aviso não agrupa. No máximo 100 caracteres.</value></data>
+  <data name="NoticeSubjects.Field.Group.MoveNote" xml:space="preserve"><value>Ao mudar de grupo, a disciplina passa para o fim do novo grupo.</value></data>
+  <data name="NoticeSubjects.Field.Group.Suggestions" xml:space="preserve"><value>Grupos já usados nesta edição</value></data>
+  <data name="NoticeSubjects.Field.Label" xml:space="preserve"><value>Disciplina</value></data>
+  <data name="NoticeSubjects.Field.Label.Placeholder" xml:space="preserve"><value>Ex.: Língua Portuguesa</value></data>
+  <data name="NoticeSubjects.Field.Label.Hint" xml:space="preserve"><value>Tal como o aviso a designa. De 2 a 200 caracteres.</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount" xml:space="preserve"><value>Número de questões</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Placeholder" xml:space="preserve"><value>Ex.: 10</value></data>
+  <data name="NoticeSubjects.Field.QuestionCount.Hint" xml:space="preserve"><value>De 1 a 500. Deixe vazio se o aviso não o indica.</value></data>
+  <data name="NoticeSubjects.Saved" xml:space="preserve"><value>Disciplina do aviso guardada.</value></data>
+  <data name="NoticeSubjects.Deleted" xml:space="preserve"><value>Disciplina do aviso eliminada.</value></data>
+  <data name="NoticeSubjects.Delete.Object" xml:space="preserve"><value>disciplina {0}</value></data>
+  <data name="NoticeSubjects.Delete.Message" xml:space="preserve"><value>A disciplina {0} sai do aviso desta edição. Pode voltar a ser adicionada mais tarde.</value></data>
+  <data name="notice_subject.not_found" xml:space="preserve"><value>Esta disciplina já não está na edição. A lista foi recarregada.</value></data>
+  <data name="notice_subject.label_required" xml:space="preserve"><value>Indique a disciplina tal como o aviso a designa.</value></data>
+  <data name="notice_subject.label_too_short" xml:space="preserve"><value>A disciplina precisa de pelo menos 2 caracteres.</value></data>
+  <data name="notice_subject.label_too_long" xml:space="preserve"><value>A disciplina é demasiado longa: no máximo 200 caracteres.</value></data>
+  <data name="notice_subject.group_too_long" xml:space="preserve"><value>O grupo é demasiado longo: no máximo 100 caracteres.</value></data>
+  <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Indique um número inteiro de 1 a 500, ou deixe vazio.</value></data>
+  <data name="notice_subject.duplicate" xml:space="preserve"><value>Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam).</value></data>
+  <data name="notice_subject.move_invalid" xml:space="preserve"><value>Esta disciplina não pode ir nesse sentido. A lista foi recarregada.</value></data>
+  <data name="Common.RemoveItem" xml:space="preserve"><value>Retirar {0}</value></data>
+  <data name="NoticeSubjects.Field.Covers" xml:space="preserve"><value>Abrange</value></data>
+  <data name="NoticeSubjects.Field.Covers.Placeholder" xml:space="preserve"><value>Pesquise uma disciplina ou um tópico</value></data>
+  <data name="NoticeSubjects.Field.Covers.Hint" xml:space="preserve"><value>Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do aviso abrange: escolha uma disciplina inteira ou apenas alguns dos seus tópicos. No máximo 50 itens.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Options" xml:space="preserve"><value>Taxonomia: disciplinas e tópicos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Picked" xml:space="preserve"><value>Itens escolhidos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Count" xml:space="preserve"><value>Escolhidos: {0} de {1}</value></data>
+  <data name="NoticeSubjects.Field.Covers.None" xml:space="preserve"><value>Nada escolhido: a disciplina fica sem mapeamento.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Loading" xml:space="preserve"><value>A carregar a taxonomia...</value></data>
+  <data name="NoticeSubjects.Field.Covers.LoadFailed" xml:space="preserve"><value>Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui.</value></data>
+  <data name="NoticeSubjects.Field.Covers.EmptyTaxonomy" xml:space="preserve"><value>A taxonomia ainda não tem disciplinas. Registe-as em Conteúdo › Disciplinas.</value></data>
+  <data name="NoticeSubjects.Field.Covers.LimitReached" xml:space="preserve"><value>Limite de {0} itens atingido. Retire um para escolher outro.</value></data>
+  <data name="NoticeSubjects.Covers.WholeMarker" xml:space="preserve"><value>disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Topic" xml:space="preserve"><value>{0} › {1}</value></data>
+  <data name="NoticeSubjects.Covers.Topic.Spoken" xml:space="preserve"><value>{1}, tópico de {0}</value></data>
+  <data name="NoticeSubjects.Covers.CoveredByWhole" xml:space="preserve"><value>Já abrangido pela disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.WholeBlocked" xml:space="preserve"><value>Retire os tópicos dela já escolhidos para escolher a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Added" xml:space="preserve"><value>Escolhido: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Removed" xml:space="preserve"><value>Retirado: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Cleared" xml:space="preserve"><value>Todos os itens foram retirados.</value></data>
+  <data name="NoticeSubjects.Covers.Overlaps" xml:space="preserve"><value>repete a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Gone" xml:space="preserve"><value>já não existe na taxonomia</value></data>
+  <data name="NoticeSubjects.Row.NotMapped" xml:space="preserve"><value>Não mapeada</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.One" xml:space="preserve"><value>1 disciplina ainda não está mapeada.</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} disciplinas ainda não estão mapeadas.</value></data>
+  <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar.</value></data>
+  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar.</value></data>
+  <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo.</value></data>
+  <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>No máximo 50 itens por disciplina do aviso.</value></data>
+  <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente.</value></data>
+  <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira.</value></data>
+  <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente.</value></data>
+  <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada.</value></data>
+  <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada.</value></data>
+  <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
+  <data name="Gallery.Chip.Hint" xml:space="preserve"><value>Uma etiqueta só de leitura com ícone e texto secundário opcionais, um estado assinalado e um botão de retirar opcional. Só recebe o foco se tiver o botão.</value></data>
+  <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de escolha múltipla</value></data>
+  <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Pesquisa numa lista local curta, agrupada, e escolhe vários itens; as escolhas aparecem abaixo como chips removíveis.</value></data>
+  <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruta</value></data>
 </root>

@@ -19,9 +19,15 @@ public static class SeedAdmin
     public const string PasswordKey = "Identity:SeedAdmin:Password";
 
     /// <summary>
+    /// F-53 BR2: whether the seed marks the account it creates as "must change password". A missing value means
+    /// true; <c>appsettings.Development.json</c> sets it to false, so the development password keeps working.
+    /// </summary>
+    public const string RequirePasswordChangeKey = "Identity:SeedAdmin:RequirePasswordChange";
+
+    /// <summary>
     /// Creates <see cref="Email"/> with the Admin role when <see cref="PasswordKey"/> is configured (BR3).
     /// The roles and permissions are ensured first (BR6): a release does not run them with the migrations.
-    /// An existing account keeps its password, status and two-factor state and only gains the role (BR5).
+    /// An existing account keeps its password, status, two-factor state and mark, and only gains the role (BR5).
     /// The password is never logged and never part of an exception message (BR3, BR4).
     /// </summary>
     public static async Task EnsureSeedAdminAsync(
@@ -50,6 +56,12 @@ public static class SeedAdmin
         {
             user = new User { Id = Guid.CreateVersion7(), UserName = Email, Email = Email, FullName = DisplayName };
             user.VerifyEmail(time.GetUtcNow());
+
+            // F-53 BR2: only an account the seed creates is marked; an existing one is never touched (F-52 BR5).
+            if (configuration.GetValue<bool?>(RequirePasswordChangeKey) ?? true)
+            {
+                user.RequirePasswordChange();
+            }
 
             var created = await users.CreateAsync(user, password);
             if (!created.Succeeded)

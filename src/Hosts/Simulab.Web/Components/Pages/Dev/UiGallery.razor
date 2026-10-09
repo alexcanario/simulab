@@ -1,4 +1,5 @@
 @page "/dev/ui"
+@using Simulab.Catalog.Contracts
 @inject IStringLocalizer<SharedResources> L
 @inject IStringLocalizer<IdentityResources> I
 @inject IHostEnvironment Environment
@@ -78,6 +79,15 @@
                    OnEdit="@(() => Done(L["Common.Edit"]))"
                    OnDelete="@(() => DeleteAsync(_sample))"
                    DeleteDisabledReason="@L["Gallery.RowActions.DeleteDisabledReason"]" />
+    @* F-74: the move pair of a sortable list, before Edit and Delete. The first row cannot go up; the pair stays
+       visible and the tooltip says why. *@
+    <AppRowActions ItemName="@SampleName(3)"
+                   IdPrefix="gallery-row-move"
+                   OnMoveUp="@(() => Done(L["Common.MoveUp"]))"
+                   MoveUpDisabledReason="@L["NoticeSubjects.MoveUp.DisabledFirst"]"
+                   OnMoveDown="@(() => Done(L["Common.MoveDown"]))"
+                   OnEdit="@(() => Done(L["Common.Edit"]))"
+                   OnDelete="@(() => DeleteAsync(_sample))" />
 </section>
 
 <section id="gallery-states" class="gallery-section">
@@ -170,6 +180,156 @@
                         MinChars="0" MaxItems="@Simulab.Catalog.Contracts.BrazilianStates.All.Count" OpenOnFocus="true"
                         SearchAsync="GalleryStatesAsync" Value="@_stateValue"
                         ValueChanged="@(value => _stateValue = value)" />
+    </MudPaper>
+</section>
+
+@* F-74: free text that suggests what was typed before; a pick is never required. *@
+<section id="gallery-suggest-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.SuggestField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.SuggestField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppSuggestField Id="gallery-suggest" Label="@L["NoticeSubjects.Field.Group"]"
+                         Placeholder="@L["NoticeSubjects.Field.Group.Placeholder"]"
+                         Hint="@L["NoticeSubjects.Field.Group.Hint"]"
+                         Suggestions="@_suggestions"
+                         SuggestionsLabel="@L["NoticeSubjects.Field.Group.Suggestions"]"
+                         MaxLength="CatalogLimits.NoticeSubjectGroupMaxLength"
+                         Value="@_suggestValue"
+                         ValueChanged="@(value => _suggestValue = value)" />
+
+        <AppSuggestField Id="gallery-suggest-error" Label="@L["NoticeSubjects.Field.Group"]"
+                         Error="@L["notice_subject.group_too_long"].Value"
+                         Suggestions="@_suggestions"
+                         SuggestionsLabel="@L["NoticeSubjects.Field.Group.Suggestions"]"
+                         Value="@("")" />
+    </MudPaper>
+</section>
+
+@* F-75: the read-only label chip. Plain, with an icon and secondary text, a topic form with a spoken text, marked, and removable. *@
+<section id="gallery-chip" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Chip"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Chip.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <ul class="app-chip-list" aria-label="@L["Gallery.Section.Chip"]">
+            <li><AppChip Text="Citrus" /></li>
+            <li><AppChip Text="Citrus" Icon="@AppIcons.Subjects" Secondary="@L["NoticeSubjects.Covers.WholeMarker"].Value" /></li>
+            <li>
+                <AppChip Text="@L["NoticeSubjects.Covers.Topic", "Citrus", "Lemon"].Value"
+                         SpokenText="@L["NoticeSubjects.Covers.Topic.Spoken", "Citrus", "Lemon"].Value"
+                         Icon="@AppIcons.Topics" />
+            </li>
+            <li>
+                <AppChip Text="@L["NoticeSubjects.Covers.Topic", "Citrus", "Lemon"].Value"
+                         SpokenText="@L["NoticeSubjects.Covers.Topic.Spoken", "Citrus", "Lemon"].Value"
+                         Icon="@AppIcons.Topics"
+                         Mark="@L["NoticeSubjects.Covers.Overlaps"].Value" />
+            </li>
+            <li>
+                <AppChip Text="Berries"
+                         Icon="@AppIcons.Subjects"
+                         Secondary="@L["NoticeSubjects.Covers.WholeMarker"].Value"
+                         Remove="@GalleryChipRemove("Berries")" />
+            </li>
+            <li>
+                <AppChip Text="Berries"
+                         Icon="@AppIcons.Subjects"
+                         Mark="@L["NoticeSubjects.Covers.Gone"].Value"
+                         Remove="@GalleryChipRemove("Berries")" />
+            </li>
+        </ul>
+    </MudPaper>
+</section>
+
+@* F-75: search a short local list, grouped, and pick several. The first field is live; the others are its states: the
+   taxonomy loading, failing to load, empty, and a refusal under the field. *@
+<section id="gallery-multi-pick-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.MultiPickField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.MultiPickField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppMultiPickField Id="gallery-pick"
+                           Label="@L["Gallery.MultiPickField.Label"]"
+                           Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                           OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                           PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                           CountText="@L["NoticeSubjects.Field.Covers.Count", _pickItems.Count, GalleryPickMax]"
+                           ClearText="@L["Lookup.Clear"]"
+                           NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                           RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                           Groups="@GalleryPickGroups()"
+                           Picked="@GalleryPickPicked()"
+                           OnToggle="@TogglePick"
+                           OnRemove="@RemovePick"
+                           OnClear="@ClearPicks"
+                           Hint="@L["NoticeSubjects.Field.Covers.Hint"]"
+                           Announcement="@_pickAnnouncement" />
+
+        <AppMultiPickField Id="gallery-pick-loading"
+                           Label="@L["Gallery.MultiPickField.Label"]"
+                           Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                           OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                           PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                           CountText="@L["NoticeSubjects.Field.Covers.Count", 0, GalleryPickMax]"
+                           ClearText="@L["Lookup.Clear"]"
+                           NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                           RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                           Groups="@(Array.Empty<AppMultiPickGroup>())"
+                           Picked="@(Array.Empty<AppMultiPickItem>())"
+                           OnToggle="@TogglePick"
+                           OnRemove="@RemovePick"
+                           OnClear="@ClearPicks"
+                           State="AppMultiPickState.Loading"
+                           LoadingText="@L["NoticeSubjects.Field.Covers.Loading"]" />
+
+        <AppMultiPickField Id="gallery-pick-failed"
+                           Label="@L["Gallery.MultiPickField.Label"]"
+                           Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                           OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                           PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                           CountText="@L["NoticeSubjects.Field.Covers.Count", 0, GalleryPickMax]"
+                           ClearText="@L["Lookup.Clear"]"
+                           NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                           RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                           Groups="@(Array.Empty<AppMultiPickGroup>())"
+                           Picked="@(Array.Empty<AppMultiPickItem>())"
+                           OnToggle="@TogglePick"
+                           OnRemove="@RemovePick"
+                           OnClear="@ClearPicks"
+                           State="AppMultiPickState.LoadFailed"
+                           LoadFailedText="@L["NoticeSubjects.Field.Covers.LoadFailed"]"
+                           OnRetry="@(() => Done(L["Common.TryAgain"]))" />
+
+        <AppMultiPickField Id="gallery-pick-empty"
+                           Label="@L["Gallery.MultiPickField.Label"]"
+                           Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                           OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                           PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                           CountText="@L["NoticeSubjects.Field.Covers.Count", 0, GalleryPickMax]"
+                           ClearText="@L["Lookup.Clear"]"
+                           NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                           RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                           Groups="@(Array.Empty<AppMultiPickGroup>())"
+                           Picked="@(Array.Empty<AppMultiPickItem>())"
+                           OnToggle="@TogglePick"
+                           OnRemove="@RemovePick"
+                           OnClear="@ClearPicks"
+                           State="AppMultiPickState.Empty"
+                           EmptyText="@L["NoticeSubjects.Field.Covers.EmptyTaxonomy"]" />
+
+        <AppMultiPickField Id="gallery-pick-error"
+                           Label="@L["Gallery.MultiPickField.Label"]"
+                           Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
+                           OptionsLabel="@L["NoticeSubjects.Field.Covers.Options"]"
+                           PickedLabel="@L["NoticeSubjects.Field.Covers.Picked"]"
+                           CountText="@L["NoticeSubjects.Field.Covers.Count", 1, GalleryPickMax]"
+                           ClearText="@L["Lookup.Clear"]"
+                           NoneText="@L["NoticeSubjects.Field.Covers.None"]"
+                           RemoveLabelFor="@(item => L["Common.RemoveItem", item.Name].Value)"
+                           Groups="@(Array.Empty<AppMultiPickGroup>())"
+                           Picked="@GalleryPickMarked()"
+                           OnToggle="@TogglePick"
+                           OnRemove="@RemovePick"
+                           OnClear="@ClearPicks"
+                           Error="@L["notice_subject.mapping_overlap"].Value" />
     </MudPaper>
 </section>
 
@@ -432,6 +592,95 @@
     private DateOnly? _dateEmpty;
     private DateOnly? _dateFilled = new DateOnly(2026, 6, 14);
     private readonly DateOnly? _dateDisabled = new DateOnly(2026, 6, 14);
+
+    private string? _suggestValue;
+    private static readonly IReadOnlyList<string> _suggestions = ["Conhecimentos Básicos", "Conhecimentos Específicos"];
+
+    // F-75: the chip and the multi-pick field. The sample is a tiny grouped list; the keys are what the field hands back.
+    private const int GalleryPickMax = 50;
+
+    private sealed record PickSample(string Name, string[] Topics);
+
+    private static readonly PickSample[] _pickSamples =
+    [
+        new("Citrus", ["Orange", "Lemon"]),
+        new("Berries", ["Strawberry", "Blueberry"]),
+        new("Apple", [])
+    ];
+
+    private readonly Dictionary<string, AppMultiPickItem> _pickItems = new() { ["t-Citrus-Lemon"] = GalleryTopicItem("Citrus", "Lemon") };
+    private string? _pickAnnouncement;
+
+    private static string GalleryWholeKey(string group) => $"s-{group}";
+
+    private static string GalleryTopicKey(string group, string topic) => $"t-{group}-{topic}";
+
+    private static AppMultiPickItem GalleryTopicItem(string group, string topic) =>
+        new(GalleryTopicKey(group, topic), $"{group} › {topic}", $"{topic}, {group}", AppIcons.Topics);
+
+    private AppChipRemove GalleryChipRemove(string name) =>
+        new(L["Common.RemoveItem", name].Value, EventCallback.Factory.Create(this, () => Done(L["Common.RemoveItem", name].Value)));
+
+    private IReadOnlyList<AppMultiPickGroup> GalleryPickGroups() =>
+        [
+            .. _pickSamples.Select(sample => new AppMultiPickGroup(
+                GalleryWholeKey(sample.Name),
+                sample.Name,
+                [
+                    new AppMultiPickOption(
+                        GalleryWholeKey(sample.Name),
+                        sample.Name,
+                        _pickItems.ContainsKey(GalleryWholeKey(sample.Name)),
+                        Secondary: L["NoticeSubjects.Covers.WholeMarker"].Value,
+                        IsGroupOption: true),
+                    .. sample.Topics.Select(topic => new AppMultiPickOption(
+                        GalleryTopicKey(sample.Name, topic),
+                        topic,
+                        _pickItems.ContainsKey(GalleryTopicKey(sample.Name, topic))))
+                ]))
+        ];
+
+    private IReadOnlyList<AppMultiPickItem> GalleryPickPicked() => [.. _pickItems.Values.OrderBy(item => item.Text, StringComparer.Ordinal)];
+
+    private IReadOnlyList<AppMultiPickItem> GalleryPickMarked() =>
+        [GalleryTopicItem("Citrus", "Lemon") with { Mark = L["NoticeSubjects.Covers.Overlaps"].Value }];
+
+    private void TogglePick(string key)
+    {
+        if (_pickItems.Remove(key, out var removed))
+        {
+            _pickAnnouncement = L["NoticeSubjects.Covers.Removed", removed.Name];
+            return;
+        }
+
+        foreach (var sample in _pickSamples)
+        {
+            if (key == GalleryWholeKey(sample.Name))
+            {
+                _pickItems[key] = new AppMultiPickItem(
+                    key, sample.Name, sample.Name, AppIcons.Subjects, Secondary: L["NoticeSubjects.Covers.WholeMarker"].Value);
+            }
+            else if (sample.Topics.FirstOrDefault(topic => GalleryTopicKey(sample.Name, topic) == key) is { } picked)
+            {
+                _pickItems[key] = GalleryTopicItem(sample.Name, picked);
+            }
+            else
+            {
+                continue;
+            }
+
+            _pickAnnouncement = L["NoticeSubjects.Covers.Added", _pickItems[key].Name];
+            return;
+        }
+    }
+
+    private void RemovePick(string key) => TogglePick(key);
+
+    private void ClearPicks()
+    {
+        _pickItems.Clear();
+        _pickAnnouncement = L["NoticeSubjects.Covers.Cleared"];
+    }
 
     private AppLookupOption? _lookupValue;
     private AppLookupOption? _stateValue;

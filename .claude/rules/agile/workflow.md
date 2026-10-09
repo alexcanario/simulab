@@ -1,12 +1,12 @@
 # Workflow
 
 - The chat is where ideas mature; the disk is the source of truth. Every decision that matters ends in a file with a `status:` header.
-- Status flow: `idea → refining → approved → building → validating → done`. Never skip a status.
+- Status flow: `idea → refining → approved → building → validating → done`; `cancelled` only from `idea`/`refining`, as a duplicate; `blocked` is a side status (`/agile:change <id> --block|--unblock`, "Blocked" in `conventions.md`). Never skip a status.
 - No production code before the item is `approved`. Reading code to refine is fine; writing it is not.
 - Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not. In `/agile:autopilot` it is the "Aprovo <id>" answer at stop 1, or the `--assume` flag for that item: assumed answers are recorded in `## Decisions` and shown at validation.
 - Every epic, feature and bug says how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and who provides each, the suggested path, what can run beside it. Unknown is written as unknown, never guessed.
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
-- WIP limit: one item in `building` or `validating` per checkout. A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
+- WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot). A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
 - `/agile:refine` creates the item's branch and worktree before writing anything; every document of that item (file, cause, mockup) is written there, never in another item's checkout.
 - Confirm the item at the start of the session. Other items only get registered, never executed.
 - Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`.
@@ -22,6 +22,7 @@
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
 - An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back; never a partial or inline `--body` (it replaces the whole body).
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
+- Exception: the app host of the item's worktree (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()`, or the project's own knob set for the worktree); data shared with another checkout needs the owner's yes, once per item.
 - End every step with: what changed (files), what is next, who acts next.
 - Quote real command output for builds and tests (counts, duration). Never paraphrase a result.
-- Write files (code, tests, docs) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.
+- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.

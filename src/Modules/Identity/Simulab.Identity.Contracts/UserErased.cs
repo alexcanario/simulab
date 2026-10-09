@@ -7,6 +7,8 @@ namespace Simulab.Identity.Contracts;
 /// data; a module that keeps anything about the user anonymizes it when it sees this.
 /// <paramref name="UserId"/> stays valid as the pseudonym the unidentified records hang from
 /// (ADR-0001 #9): it is a key, never a person.
+/// It is published by the <c>account.erased</c> job after the erasure commits (F-59), at least once: a
+/// consumer must accept the same event twice.
 /// </summary>
 /// <param name="UserId">The account that was erased.</param>
 /// <param name="ErasedAt">When the erasure was recorded.</param>

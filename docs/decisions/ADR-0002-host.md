@@ -5,6 +5,8 @@ date: 2026-10-03
 ---
 # ADR-0002: Host — Azure Container Apps, Brazil South
 
+Technical terms: [glossary](../glossary.md)
+
 ## Context
 ADR-0001 #5 and #32 name Azure Container Apps as the planned target, created only near the first release so that no environment costs money before there is something to publish. `docs/infra.md` lists `staging` and `production` as `planned` with no deploy command. Before the first testers need a staging environment the project must know where it runs, what it costs per month and with which command (F-62).
 
@@ -38,7 +40,7 @@ All figures are estimates from retail prices, not measured; F-64 measures the re
 3. **Production** has its deploy command declared and is created only at the first release (ADR-0001 #5). Until then it costs nothing.
 4. **Cost ceiling: US$ 80 per month** for staging and production together. With production created and staging parked the estimate is about 85 (70-75 plus about 12), slightly above the ceiling; with both running it is about 140, well above it. The first release therefore starts with the ceiling already at risk, and F-64's measurement decides whether it holds. **Plan B applies when the monthly cost measured by F-64 is above the ceiling**: one Linux VM running staging and production as two Docker Compose environments (option B).
 5. In the cloud the `api` keeps at least one replica and the `web` runs at most one replica and may go to zero.
-6. The deploy command is Aspire's: `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`. The Azure subscription, resource group and location come from environment variables, never from a committed file. The AppHost declares the Azure resources only when it publishes; a local run is unchanged and needs no Azure sign-in.
+6. The deploy command is Aspire's: `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e <Environment> -o artifacts/deploy/<environment> --clear-cache --non-interactive --nologo`. The Azure subscription, resource group and location come from environment variables, never from a committed file. (Note, F-68, 2026-10-09: the tenant and subscription ids are identifiers, not secrets, and are recorded in the `## Cloud accounts` table of `docs/infra.md`, which `/agile:publish` reads; the deploy command still takes them from the environment, and no credential is committed.) The AppHost declares the Azure resources only when it publishes; a local run is unchanged and needs no Azure sign-in.
 7. This ADR overrides the profile's Docker Compose deploy recipe for Simulab; the recipe stays as plan B.
 8. The CI workflow (`.github/workflows/ci.yml`) builds and tests on every pull request and push to `main`, with no deploy step. The deploy workflow is F-65: GitHub Actions signs in to Azure with OIDC (a federated credential, so no cloud secret is stored in GitHub), uses one GitHub environment per target, and asks for approval before production.
 

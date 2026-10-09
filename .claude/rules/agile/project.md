@@ -50,7 +50,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Files go through `IFileStorage`, in private containers. Never a public blob URL; never a path on local disk.
 - Email goes through `IEmailSender`, with templates in the three languages, chosen by the user's language.
 - When an effect moves out of the request (an email, an event, long work), re-read every test that asserted it instead of only making it compile: an assertion that "nothing was sent" passes for free once the effect is deferred (F-13).
-- A test host pins every configuration key a developer's user secrets can feed (`Identity:SeedAdmin:Password`, F-52): `SimulabApiFactory` and the `Simulab.Api.Tests` `ApiFactory` both set it empty (F-38).
+- A test host pins every configuration key a developer's user secrets can feed (`Identity:SeedAdmin:Password`, F-52, and `Ai:ApiKey`, F-41): `SimulabApiFactory` and the `Simulab.Api.Tests` `ApiFactory` both set them empty (F-38, F-56). `ApiTestHostPinTests` reads the test sources and fails on a host that forgets one, and on any direct use of `WebApplicationFactory<Program>` in a project that references the Api.
 
 ## Exam sessions
 - Every answer is saved on the server as it is given. A lost Blazor circuit must not lose answers or time: the timer lives on the server (Redis), never in the browser.
@@ -71,7 +71,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## UI tests
 - An item whose product is a guard (a test that exists to catch a mistake) is seen failing on that very mistake before it ships, and that step goes into the validation script (F-22).
 - bUnit tests of MudBlazor components inherit `KitTestContext` (async disposal); never `await InvokeAsync` around a call that returns a dialog result.
-- After a click whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after `Click()` (F-8).
+- After a click, a typed value or a fill whose handler awaits (an Api call, `Task.Yield`), assert what follows with `WaitForAssertion`, never on the line after it, blank line or not (F-8, B-22).
+- A stress loop of parallel test processes runs on a copy of the build output under the worktree's `bin/` (git-ignored), never on `bin/Debug` (the Stop gate rebuilds it) and never outside the repository (stylesheet tests need it); count the `Passed!`/`Failed!` lines and treat a missing one as a failure (B-22).
 - A colour token a screen relies on has its contrast ratio asserted over the theme (`ThemeContrastTests`), not only measured on screen once (F-10).
 - A contrast failure of a theme token is fixed in the palette, with `ThemeContrastTests` holding the numbers; patching the screen that showed it is debt, not a fix (B-8).
 - Read a rendered colour only after the theme transition settles (0.25 s in MudBlazor): a value read right after the theme switch is still the old colour (B-8). With the browser pane hidden, transitions never finish: inject `* { transition: none !important }` before measuring (F-17).
@@ -90,6 +91,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - An exemption exists only if the detector would flag that file without it; otherwise it is a negative control asserting the detector leaves it alone. A list that never fires tells the next reader those files carry the defect (F-39).
 - A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
 - A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
+- A sweep for a pattern across the solution takes its list of places from the guard test run before the fix, not from a hand-made grep: the refinement of B-23 listed nine places and the guard found a tenth (B-23).
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.
@@ -99,6 +101,10 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 ## Talking to the owner
 - A technical term used with the owner for the first time gets a row in `## Technical terms` of `docs/glossary.md` (term, pt-BR word, meaning) in the same step (F-8).
 - A validation script step that needs a terminal gives the command for Git Bash and for PowerShell 7, each run by Claude before handing over, with the expected output (B-4).
+
+## Access to the infrastructure
+- A step that needs an access listed in the `## Access` table of `docs/infra.md` (the board, a pipeline, Azure) runs the row's `Check` first. When it fails, stop that step, quote the error, and ask the owner to run the row's `Claude signs in with` command; try no other path (F-68).
+- `docs/infra.md` never holds a credential value (the repository is public); it points to where the credential is kept. The `Credential kept in` cell is one of the forms the table's guard test allows (F-68).
 
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
@@ -112,4 +118,10 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - Every item lives in its own worktree (`D:\wt\simulab\f-<n>-<desc>`, `D:\wt\simulab\b-<n>-<desc>`, root as in the `Worktrees:` line of `CLAUDE.md`, `<desc>` being up to 20 characters of the slug cut at a hyphen); a worktree created before sync 0.0.63 keeps its `<type>-<n>` name until its merge. The main checkout stays on `main` and is used only to merge (B-13, B-14).
 - After stopping an app host started by hand (outside `preview_start`), confirm with `netstat -ano` that its ports are free: a `Simulab.AppHost.exe` can outlive the killed process tree and lock the build output of the ship gate (B-15).
 - A test that holds a load (`TaskCompletionSource`, an endless delay) never `await`s the call that started it: that call ends only when the load does. Start it with `_ = ...`, assert, then release the load. One such test hung the full suite while passing alone (F-50).
+- To restart or stop one app host resource, run `aspire resource <name> restart|stop --apphost <AppHost csproj>`: clicking in the dashboard through the browser pane picked the wrong menu twice, while the command restarted the `api` and its process id changed (F-54).
 - A page that turns into the edit form after saving calls `StateHasChanged(); await Task.Yield();` before `NavigateTo(..., replace: true)`: the `NavigationLock` of `AppFormActions` reads `HasChanges` from the last render and would ask to discard what was just saved (F-35).
+- A test project that starts a `WebApplicationFactory` keeps `ThreadPoolMinimumTests` (it asserts `ThreadPool.GetMinThreads` is at least 256) and relies on the `System.Threading.ThreadPool.MinThreads` option in `tests/Directory.Build.props`: each synchronous host start blocks a pool thread, and under load Npgsql's 15 s open timeout expires. Add the guard to every new project of that kind (B-24).
+- A test named for an event or a state change asserts that event or state itself; an assertion that cannot fail (an id not empty) does not count, and the review reads each "records X" test for it (F-53).
+- A test of the app host's model never calls `GetEnvironmentVariableValuesAsync` (obsolete, and in a run-mode model it resolves endpoint references that have no port yet, so it hung the project for more than 500 s): read the environment with `EnvironmentOfAsync` of `AppHostModelTests` (the Publish operation), or, to prove a key is absent in run mode, invoke the resource's `EnvironmentCallbackAnnotation` callbacks into an `EnvironmentCallbackContext` and read the keys; 25 tests then ran in 4 s (F-66).
+- In staging and production, every login or password a service keeps (the PostgreSQL administrator, the Redis password) is a fixed deploy parameter held in the vault as `deploy--<Name>`, never a value Aspire generates again at each deploy: a `--clear-cache` deploy changed them and the Api logged `28P01` and `NOAUTH` (F-64, D20 and D21).
+- A merge conflict is resolved with Edit, never a script, and before `git commit` a check that fails on a match runs (`grep -q '^<<<<<<<' <file> && exit 1`): a `grep -c` chained with `&&` exits 0 and the commit carried the markers (F-65, `2cead5d`, fixed in `b2043c6`).

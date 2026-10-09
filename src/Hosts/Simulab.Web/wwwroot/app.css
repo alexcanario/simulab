@@ -456,6 +456,83 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* ---- Notice subjects of an edition (F-74): kit parts composed, no new colour. ---- */
+
+.app-notice-subjects-group + .app-notice-subjects-group {
+    margin-top: var(--app-space-4);
+}
+
+.app-notice-subjects-group-title {
+    margin: 0 0 var(--app-space-2);
+}
+
+.app-notice-subject-row {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    min-width: 0;
+}
+
+/* F-75: two lines in the content column - the label, then what the row covers (chips) or "Not mapped". */
+.app-notice-subject-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--app-space-1);
+}
+
+.app-notice-subject-main .app-truncate-host {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.app-notice-subject-count {
+    flex: none;
+    align-self: flex-start;
+    min-width: 6.5rem;
+    padding-top: 1px;
+    text-align: right;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-notice-subjects-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-3);
+}
+
+.app-notice-subjects-total {
+    margin: 0;
+    font-size: var(--app-font-sm);
+    text-align: right;
+}
+
+.app-notice-subjects-total-sum {
+    display: block;
+    font-weight: 700;
+}
+
+.app-notice-subjects-total-unstated {
+    display: block;
+}
+
+/* F-75: the right side of the footer stacks the sum and, below it, how many rows are not mapped yet. */
+.app-notice-subjects-summary {
+    text-align: right;
+}
+
+.app-notice-subjects-unmapped {
+    margin: 0;
+    font-size: var(--app-font-sm);
+}
+
 /* ---- Form + read-only aside layout (F-43, BR1, BR4): the reference screen's two-column page. ---- */
 
 .app-form-layout {
@@ -832,14 +909,273 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     vertical-align: middle;
 }
 
+/* The read-only chip (F-75 AppChip). A list of them (.app-chip-list, .app-mp-chips) spaces them with its own gap. */
 .app-chip {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
     margin: 2px var(--app-space-1) 2px 0;
     padding: 2px 10px;
     border: 1px solid var(--mud-palette-divider);
     border-radius: 12px;
+    background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
     font-size: var(--app-font-xs);
+    line-height: 1.35;
+}
+
+.app-chip .app-chip-icon {
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-chip-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-chip-secondary {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-chip.is-removable {
+    padding-right: 2px;
+}
+
+/* A chip the Api refused: the border and the text say it, and the words say why (never the colour alone). */
+.app-chip.is-marked {
+    border-color: var(--mud-palette-error);
+    border-width: 2px;
+}
+
+.app-chip-mark {
+    color: var(--mud-palette-error);
+    font-weight: 700;
+}
+
+/* The remove button is 24 px inside a 28 px chip (rule ui: a target is at least 24 px). */
+.app-chip .app-chip-remove {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    color: var(--mud-palette-action-default);
+}
+
+.app-chip-list,
+.app-mp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-1) 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-chip-list .app-chip,
+.app-mp-chips .app-chip {
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Multi-pick field (F-75): a search over a short local list, grouped, to pick several. Built from the field anatomy
+   of AppTextField (label above, description below) with a listbox popup under the input.
+   --------------------------------------------------------------------------- */
+.app-mp-anchor {
+    position: relative;
+}
+
+.app-mp-input {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    height: 42px;
+    padding: 0 var(--app-space-3);
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-sm);
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+}
+
+.app-mp-input:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-field-error .app-mp-input {
+    border-color: var(--mud-palette-error);
+}
+
+.app-mp-input .mud-icon-root {
+    flex: none;
+    color: var(--mud-palette-action-default);
+}
+
+.app-mp-input input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: var(--app-font-base);
+}
+
+.app-mp-input input::placeholder {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-input input:disabled {
+    cursor: not-allowed;
+}
+
+.app-mp-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 25;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--app-space-1) 0;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-sm);
+    background: var(--mud-palette-surface);
+    box-shadow: var(--mud-elevation-8);
+}
+
+.app-mp-group + .app-mp-group {
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.app-mp-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+    min-height: 36px;
+    padding: 7px var(--app-space-3);
+    cursor: pointer;
+    font-size: var(--app-font-sm);
+    line-height: 1.4;
+}
+
+.app-mp-option.is-member {
+    padding-left: var(--app-space-7);
+}
+
+.app-mp-option.is-group .app-mp-option-name {
+    font-weight: 700;
+}
+
+.app-mp-option:hover,
+.app-mp-option:focus {
+    background: var(--mud-palette-primary-lighten);
+}
+
+.app-mp-option:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.app-mp-option[aria-selected="true"] {
+    background: var(--mud-palette-primary-lighten);
+}
+
+.app-mp-option[aria-disabled="true"] {
+    cursor: not-allowed;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-option[aria-disabled="true"]:hover,
+.app-mp-option[aria-disabled="true"]:focus {
+    background: transparent;
+}
+
+/* The check box is drawn here: a picked option fills it and shows a check mark made of two borders. */
+.app-mp-check {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 2px solid var(--mud-palette-lines-inputs);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-mp-option[aria-selected="true"] .app-mp-check {
+    background: var(--mud-palette-primary);
+    border-color: var(--mud-palette-primary);
+}
+
+.app-mp-option[aria-selected="true"] .app-mp-check::after {
+    content: "";
+    width: 8px;
+    height: 4px;
+    margin-top: -2px;
+    border-left: 2px solid var(--mud-palette-primary-text);
+    border-bottom: 2px solid var(--mud-palette-primary-text);
+    transform: rotate(-45deg);
+}
+
+.app-mp-option[aria-disabled="true"] .app-mp-check {
+    border-style: dashed;
+}
+
+.app-mp-option-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.app-mp-option-secondary {
+    display: block;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-empty {
+    padding: var(--app-space-3);
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-status {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+}
+
+.app-mp-status .app-mp-spinner {
+    width: 12px;
+    height: 12px;
+}
+
+.app-mp-countline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--app-space-2);
+    min-height: 28px;
+    margin-top: var(--app-space-2);
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-chips {
+    margin-top: var(--app-space-1);
+}
+
+.app-mp-none {
+    margin: var(--app-space-1) 0 0;
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
 }
 
 .app-muted {

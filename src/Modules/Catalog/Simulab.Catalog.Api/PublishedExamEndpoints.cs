@@ -41,8 +41,16 @@ public static class PublishedExamEndpoints
         string? assessmentType = null,
         string? scope = null,
         string? organizerId = null,
-        string? noticeYear = null) =>
-        Results.Ok(await queries.ListAsync(
+        string? noticeYear = null,
+        string? state = null)
+    {
+        // F-57 BR6: unlike the other filters, an unknown state is refused. Ignoring it would silently list every exam.
+        if (!StateFilter.TryRead(state, out var acronym))
+        {
+            return Problem(StateFilter.UnknownState);
+        }
+
+        return Results.Ok(await queries.ListAsync(
             new PublishedExamListQuery(
                 page,
                 pageSize,
@@ -50,8 +58,10 @@ public static class PublishedExamEndpoints
                 ParseEnum<AssessmentType>(assessmentType),
                 ParseEnum<ExamScope>(scope),
                 Guid.TryParse(organizerId, out var organizer) ? organizer : null,
-                int.TryParse(noticeYear, out var year) ? year : null),
+                int.TryParse(noticeYear, out var year) ? year : null,
+                acronym),
             cancellationToken));
+    }
 
     private static async Task<IResult> FindAsync(Guid id, IPublishedExamQueries queries, CancellationToken cancellationToken)
     {

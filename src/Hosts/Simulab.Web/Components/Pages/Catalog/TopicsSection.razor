@@ -1,0 +1,210 @@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject CatalogApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+@inject IJSRuntime JS
+
+@* F-79 UC5 to UC8: the topics of a subject on its own page. Add and edit are dialogs (a name, and a subject on
+   an edit), delete asks first. The order is the Api's: alphabetical (BR11). *@
+<AppSectionCard Id="subject-section-topics"
+                Title="@L["Topics.Section.Title"]"
+                Icon="@AppIcons.Topics"
+                Subtitle="@L["Topics.Section.Subtitle"]">
+    @if (_error is not null)
+    {
+        <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+    }
+
+    @if (_loading)
+    {
+        <AppLoadingState />
+    }
+    else if (_loadFailed)
+    {
+        <AppErrorState OnRetry="LoadAsync" />
+    }
+    else
+    {
+        <AppItemRows TItem="TopicResponse" Items="_topics" EmptyMessage="@L["Topics.Empty"]">
+            <RowTemplate Context="topic">
+                <AppTruncatedText Text="@topic.Name" MaxWidth="32rem" />
+            </RowTemplate>
+            <Actions Context="topic">
+                @* The wrapper is what the focus moves to after a delete: it lands on the row's Edit button. *@
+                <div id="@ActionsId(topic)">
+                    <AppRowActions ItemName="@topic.Name"
+                                   OnEdit="@(() => OpenAsync(topic))"
+                                   OnDelete="@(() => DeleteAsync(topic))"
+                                   DeleteDisabledReason="@(topic.InUse ? L["Topics.Delete.DisabledInUse"].Value : null)" />
+                </div>
+            </Actions>
+        </AppItemRows>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   StartIcon="@AppIcons.Add"
+                   Class="mt-3"
+                   id="@AddButtonId"
+                   OnClick="@(() => OpenAsync(null))">@L["Topics.Dialog.AddTitle"]</MudButton>
+    }
+</AppSectionCard>
+
+@code {
+    private const string AddButtonId = "topic-add";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The subject whose topics are listed.</summary>
+    [Parameter, EditorRequired] public Guid SubjectId { get; set; }
+
+    /// <summary>The subject's name: the picker's starting value on an edit and the delete confirmation's text.</summary>
+    [Parameter, EditorRequired] public string SubjectName { get; set; } = string.Empty;
+
+    private IReadOnlyList<TopicResponse> _topics = [];
+    private Guid? _loadedFor;
+    private string? _error;
+    private string? _pendingFocus;
+    private bool _loading;
+    private bool _loadFailed;
+
+    private static string ActionsId(TopicResponse topic) => $"topic-actions-{topic.Id}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == SubjectId)
+        {
+            return;
+        }
+
+        _loadedFor = SubjectId;
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _loadFailed = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListTopicsAsync(token, SubjectId);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } topics })
+        {
+            _topics = topics;
+        }
+        else
+        {
+            _topics = [];
+            _loadFailed = true;
+        }
+    }
+
+    private async Task OpenAsync(TopicResponse? topic)
+    {
+        _error = null;
+        if (await TokenAsync() is null)
+        {
+            _error = Errors.For(ErrorText.UnexpectedCode);
+            return;
+        }
+
+        var parameters = new DialogParameters<TopicDialog>
+        {
+            { dialog => dialog.Topic, topic },
+            { dialog => dialog.CurrentSubject, new AppLookupOption(SubjectId, SubjectName) },
+            { dialog => dialog.SearchSubjectsAsync, SearchSubjectsAsync },
+            {
+                dialog => dialog.Save,
+                // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<TopicResponse>(ErrorText.UnexpectedCode)
+                    : topic is null
+                        ? await Api.CreateTopicAsync(fresh, SubjectId, request)
+                        : await Api.UpdateTopicAsync(fresh, topic.Id, request)
+            }
+        };
+
+        var title = topic is null ? L["Topics.Dialog.AddTitle"] : L["Topics.Dialog.EditTitle"];
+
+        var dialog = await Dialogs.ShowAsync<TopicDialog>(title, parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            // A move takes the topic out of this section: the list is read again either way (AC11).
+            Snackbar.Add(L["Topics.Saved"], Severity.Success);
+            await LoadAsync();
+        }
+    }
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchSubjectsAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListSubjectsAsync(
+            token,
+            new SubjectListQuery(0, AppLookupField.MaxCandidates, term),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Subjects failed to load: {result.ErrorCode}.");
+        }
+
+        return [.. result.Value!.Items.Select(subject => new AppLookupOption(subject.Id, subject.Name))];
+    }
+
+    private async Task DeleteAsync(TopicResponse topic)
+    {
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, topic.Name, L["Topics.Delete.Message", topic.Name, SubjectName]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteTopicAsync(token, topic.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["Topics.Deleted"], Severity.Success);
+            var index = _topics.ToList().FindIndex(candidate => candidate.Id == topic.Id);
+            await LoadAsync();
+            // Focus goes to the next row's Edit button; with no row after it, to the add button.
+            _pendingFocus = index >= 0 && index < _topics.Count ? ActionsId(_topics[index]) : AddButtonId;
+            return;
+        }
+
+        // 404: another curator deleted it since the list loaded. The alert says so and the list is read again.
+        _error = Errors.For(result?.ErrorCode);
+        await LoadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private static readonly DialogOptions DialogOptions = new()
+    {
+        CloseOnEscapeKey = false,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+}

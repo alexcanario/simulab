@@ -73,7 +73,9 @@ public sealed class AccountErasureTests : IdentityApiTests
         // AC2: the old address and password open nothing.
         (await TokenClient.SignInAsync(client, email, SignUpForm.ValidPassword)).Error.Should().Be(IdentityErrorCodes.InvalidCredentials);
 
-        // AC11: published once, with the erased account and the instant.
+        // AC11 (F-59 BR6): published once by the account.erased job, with the erased account and the instant.
+        Erased.Events.Should().BeEmpty();
+        await RunJobsAsync();
         Erased.Events.Should().ContainSingle();
         Erased.Events[0].UserId.Should().Be(userId);
         Erased.Events[0].ErasedAt.Should().Be(Factory.Clock.GetUtcNow());
@@ -302,12 +304,13 @@ public sealed class AccountErasureTests : IdentityApiTests
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await ErasedRowAsync(userId)).Status.Should().Be(AccountStatus.Erased);
-        Erased.Events.Should().ContainSingle();
+        Erased.Events.Should().BeEmpty();
 
         // F-13: the farewell email is a job now. The worker's failure does not touch the erasure, and
         // the message is tried again instead of being lost.
         await RunJobsAsync();
         Emails.Count.Should().Be(0);
+        Erased.Events.Should().ContainSingle(); // the event job is a job of its own: the failed email does not hold it
         (await PendingJobCountAsync()).Should().Be(1);
 
         Factory.Clock.Advance(JobPolicy.BackoffAfter(1));
