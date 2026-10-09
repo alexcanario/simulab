@@ -134,6 +134,8 @@
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <!-- F-65: the deploy workflow tests read deploy.yml as YAML (MIT, approved by the owner 2026-10-04). Test projects only. -->
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
 </Project>
