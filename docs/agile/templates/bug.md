@@ -7,6 +7,7 @@ severity: low | medium | high | critical
 ---
 <!--
 One short file per bug. Save as: docs/bugs/B-<number>-<slug>.md
+With an external ticket (`/agile:idea bug --ticket PRJ-123`): the id is the ticket's, `bug: PRJ-123`, the file docs/bugs/PRJ-123-<slug>.md, and an optional header line `ticket-url: <URL>` right after `board:`.
 Same status flow as a feature, including `cancelled` (a duplicate, from idea or refining only) and `blocked` (see `templates/feature.md`). Approval is needed only when the expected behavior is a product decision.
 -->
 # <Bug title>

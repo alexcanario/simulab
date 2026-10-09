@@ -7,6 +7,7 @@ version: 1
 ---
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
+With an external ticket (`/agile:idea feature --ticket PRJ-123`): the id is the ticket's, `feature: PRJ-123`, the file docs/features/PRJ-123-<slug>.md, and an optional header line `ticket-url: <URL>` right after `board:`.
 Status flow: idea -> refining -> approved -> building -> validating -> done
 - cancelled: exit from idea or refining only, as a duplicate; the file stays, with "Duplicate of <id> (<date>): <where the improvement went>" under the header.
 - idea: title, summary and start only (/agile:idea, /agile:epic).

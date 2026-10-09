@@ -1,7 +1,7 @@
 # Git
 
-- The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/F-<n>` or `bug/B-<n>`.
-- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item.
+- The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/F-<n>` or `bug/B-<n>` (`feature/<id>` / `bug/<id>` when the item took a ticket id).
+- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item. With `- Merge: pr` in `CLAUDE.md` it authorizes only the push of the item branch and the pull request; the owner merges on the PR.
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
@@ -16,6 +16,6 @@
 - Merge with `--no-ff` and a message that references the item and the board id.
 - After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
-- Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables.
+- Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables. A hook refuses a commit, a push or a `gh`/`az` body that carries one; fake test data takes `agile:allow-secret` on its line.
 - `.claude/agile/warnings-baseline.json` is committed; build output, `bin/`, `obj/` and IDE folders are not.
 - Generated files (migrations, snapshots, OpenAPI documents) are committed with the change that produced them.

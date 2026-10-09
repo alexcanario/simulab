@@ -9,7 +9,7 @@
 - WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot). A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
 - `/agile:refine` creates the item's branch and worktree before writing anything; every document of that item (file, cause, mockup) is written there, never in another item's checkout.
 - Confirm the item at the start of the session. Other items only get registered, never executed.
-- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`.
+- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's own merge on the PR, and the ship stops at "PR open".
 - Verify premises in the code before asking. Never ask what the code already answers.
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.

@@ -3240,3 +3240,123 @@ Claude: Conferência de tela (desktop, sessão Windows): iniciando Toolbox.Deskt
 A conferência pode apertar um botão pela árvore de automação do próprio app, porque isso não depende de qual janela está em foco. Ela nunca envia mouse ou tecla sintéticos: eles cairiam na janela da frente, em geral a sua IDE. Em Linux ou macOS, ou sem sessão de desktop, o relatório diz que a tela inteira vai para o seu roteiro de validação.
 
 Um critério de teclado (Enter, Espaço, Alt+Seta) numa tela Avalonia vira teste headless, não fica para você; e todo componente que mostra texto do usuário ou do Core ganha um estado de texto longo: na galeria e num teste de quebra.
+
+### 14.89 O ship abre um pull request e você faz o merge
+
+O `CLAUDE.md` do acme-shop tem `- Merge: pr`, porque a branch principal é protegida. A F-12 está validada:
+
+```
+> validado
+> /agile:ship F-12
+Claude: F-12 — Exportar o relatório mensal em CSV [validating]
+        Verificação completa: agile gate GREEN (212 passaram, 0 falharam, 1 min 48 s). Scan GREEN. Manual atualizado. Versão 0.7.0 -> 0.8.0.
+        O origin é github.com e merge commit é permitido. ## Delivery e status: done estão na branch.
+        Enviei feature/F-12. PR #31 aberto: corpo = resumo, roteiro de validação como checklist, "Validated by the owner on 2026-10-09 (chat)",
+        tabela critério -> teste, a última linha do gate, Closes #12. Gravei "PR: #31" no arquivo do item e enviei de novo.
+        PR #31 open: merge it on GitHub when you are ready
+```
+
+Digitar ship autorizou só o pull request. Você lê o diff no celular e aperta "Create a merge commit". Outro item pode ser construído nesse meio-tempo: o próximo início de sessão diz
+
+```
+Waiting on PR: F-12 #31 MERGED — close not run: /agile:ship F-12
+```
+
+```
+> /agile:ship F-12
+Claude: F-12 — Exportar o relatório mensal em CSV [done]
+        O PR #31 está MERGED (commit de merge 4e1c0aa). Checkout principal: pull --ff-only, 0 0 contra o remoto, o commit de merge não está vazio.
+        Branch remota: já apagada pelo GitHub. Worktree D:/wt/acme-shop/f-12-csv-export removida, branch local apagada.
+        Board #12 fechado, Status Done (lido de volta). Nada foi commitado na main: done e Delivery vieram com o PR.
+        Retro: 1 lição proposta.
+```
+
+Se a F-13 tivesse ido para a main enquanto o PR #31 esperava, e as duas tivessem incrementado a versão, o GitHub mostraria o PR em conflito ("dirty") e você não conseguiria mesclar; o segundo `/agile:ship F-12` então mesclaria a main na branch, rodaria o gate de novo, incrementaria a versão a partir da da main, enviaria e diria `PR #31 open` outra vez, com o mesmo número. Se você tivesse fechado o PR sem merge, o item voltaria para `validating` e a linha `PR:` seria removida. O GitHub não deixa você aprovar o próprio PR: se a regra da branch exige aprovação, o bypass de admin, uma segunda conta ou um bot ficam por sua conta.
+
+### 14.90 Um segredo é barrado na porta, antes de sair da sessão
+
+No acme-shop, o Claude termina a F-14 (uma conexão com o banco de relatórios) e faz o commit num comando só, como sempre:
+
+```
+Claude: git add src/Acme.Reports/appsettings.json && git commit -m "feat(F-14): connect to the reporting database"
+        [agile secret-guard] Possible secret in the commit: src/Acme.Reports/appsettings.json:7 (password).
+        Remove it, or name the setting instead (${DB_PASSWORD}, <password>); for fake test data put agile:allow-secret in a comment on that line. The value is not shown here.
+        If this is a mistake, ask the owner; with a yes, repeat the command ending with the comment  # agile:secret-ok
+Claude: O commit foi recusado: a linha 7 tem a senha real do banco de relatórios. Nada foi commitado.
+        Movi a senha para os user secrets (ConnectionStrings:Reporting) e deixei `Password=<password>` no arquivo. Commitando de novo.
+```
+
+A guarda lê o que o comando está prestes a commitar, mesmo quando `git add` e `git commit` são um comando só e nada está preparado (staged) ainda. Ela nomeia o arquivo, a linha e o tipo de segredo, e nunca imprime o valor. A mesma porta vigia o `git push` (os commits que o remoto ainda não tem) e o texto de `gh issue|pr create|edit|comment`, `gh release create|edit` e `az boards work-item create|update`, inline ou vindo de um arquivo:
+
+```
+Claude: gh issue create --title "Login fails" --body-file body.md
+        [agile secret-guard] Possible secret in the body of gh issue create: body.md:3 (GitHub token).
+Claude: O relato cita um token do log. Troquei por `<token>` e criei a issue.
+```
+
+Um fixture de teste que precisa de uma chave falsa leva `agile:allow-secret` num comentário da própria linha:
+
+```
+var fakeKey = "AKIA<the fake key>"; // agile:allow-secret
+```
+
+O marcador fica no código, então o revisor vê cada exceção no diff. Marcadores de lugar (`<password>`, `${DB_PASSWORD}`, `changeme`) passam sozinhos; `var password = request.Password;` é código que lê uma senha, não um segredo, e também passa. Se o segredo já está num commit que não foi enviado, o push é recusado e a mensagem diz que reescrever esse commit precisa do seu sim: nada sofre force-push. A guarda é uma checagem barata em cada porta; o scan antes do ship (gitleaks e semgrep) continua lendo o projeto inteiro e o histórico. Só projetos agile são vigiados, e qualquer dúvida (um diff acima de 4 MB, um comando que ela não consegue ler) deixa a chamada passar.
+
+
+### 14.91 O id do ticket do cliente é o id do item
+
+O acme-shop corrige bugs que chegam como tickets do Jira. Você quer que o ticket, a branch e a worktree tenham o mesmo nome:
+
+```
+> /agile:idea bug --ticket PRJ-123 --url https://acme.atlassian.net/browse/PRJ-123 "Erro ao salvar um pedido sem linhas"
+Claude: No similar item (31 items read).
+        Card: qual épico? Pedidos (Recomendado) / Novo épico / Sem épico
+> Pedidos
+Claude: PRJ-123 — Erro ao salvar um pedido sem linhas [idea]
+        Criei docs/bugs/PRJ-123-crash-saving-order.md com ticket-url, board #44. Nenhum número B-<n> foi usado.
+```
+
+O mesmo ticket não vira um segundo item, e um id errado não escreve nada:
+
+```
+> /agile:idea bug --ticket PRJ-123 "Erro em pedido vazio, de novo"
+Claude: PRJ-123 já é um item: PRJ-123 — Erro ao salvar um pedido sem linhas [idea]. Nada foi escrito.
+        Trabalho novo no mesmo ticket é /agile:change PRJ-123; outro ticket tem o próprio id.
+> /agile:idea bug --ticket B-12 "Total errado"
+Claude: B-12 não é um id de ticket: um id de ticket é uma chave de dois ou mais caracteres (uma letra, depois letras, dígitos ou _),
+        um hífen e dígitos, como PRJ-123 ou TFS-4521. Nada foi escrito.
+```
+
+Daí em diante cada passo leva o nome do ticket:
+
+```
+> /agile:refine PRJ-123
+Claude: PRJ-123 — Erro ao salvar um pedido sem linhas [idea]
+        Worktree: D:/wt/acme-shop/b-prj-123-crash-saving-order, branch bug/PRJ-123
+```
+
+Os commits ficam `fix(PRJ-123): rejeitar pedido sem linhas`, a mensagem do merge cita `bug/PRJ-123` e as notas da versão listam `Bug PRJ-123`. Itens sem `--ticket` (F-12, B-3) seguem numerados e funcionam como antes.
+
+### 14.92 Um projeto muito atrasado é avisado de quanto, e o que chegou é lido em blocos
+
+O acme-shop sincronizou pela última vez com o plugin em 0.28.0; o plugin agora está em 0.46.0. O sync continua indo direto para a versão atual (ele compara cada arquivo com o texto de hoje, nunca versão por versão), mas, passando de 2 versões menores, o relatório diz quanto falta e agrupa o que tem versão pela série menor em que chegou:
+
+```
+> /agile:sync
+Claude: 0.28.0 -> 0.46.0: 18 versões menores atrás; o sync vai direto para 0.46.0. O que chegou, por versão:
+
+        0.30 (1 capacidade, 0 notas)
+          - Database password: o AppHost declara um banco sem parâmetro de senha ...
+        0.35 (0 capacidades, 1 nota)
+          - linha 14 do retro-log: "gate.js lê o stdin ..." (#25), entregue na 0.35.0
+        Antes da sua versão registrada 0.28.0 (ainda pendente)
+          - DocGen: documentação técnica gerada a partir do código ...
+
+        Arquivos, uma tabela por estado (nada data um arquivo, então não são agrupados):
+        | arquivo                           | estado | proposta |
+        | .claude/rules/agile/git.md        | update | copiar: ... |
+        | docs/agile/workflow.md            | edited | mesclar: ... |
+        Aprove as linhas, uma a uma ou "ok" para todas.
+```
+
+Um projeto com até 2 versões menores de atraso, ou cujo `.claude/agile/sync.json` não registra versão, recebe exatamente o relatório de antes: sem aviso e sem blocos. A aprovação não muda: um OK por linha, não um por bloco.
