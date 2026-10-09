@@ -149,8 +149,8 @@ public sealed class AccountErasureTests : IdentityApiTests
             .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
             .SingleAsync(record => record.UserId == userId));
         consent.IpAddress.Should().BeNull();
-        consent.TermsVersion.Should().Be(SignUpForm.CurrentVersion);
-        consent.PrivacyVersion.Should().Be(SignUpForm.CurrentVersion);
+        consent.TermsVersion.Should().Be(SignUpForm.TermsVersion);
+        consent.PrivacyVersion.Should().Be(SignUpForm.PrivacyVersion);
         consent.DeclaresAdult.Should().BeTrue();
     }
 

@@ -30,8 +30,8 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
         user.FullName.Should().Be("Ana Ribeiro");
 
         var consent = await QueryAsync(context => context.ConsentRecords.SingleAsync(c => c.UserId == user.Id));
-        consent.TermsVersion.Should().Be(SignUpForm.CurrentVersion);
-        consent.PrivacyVersion.Should().Be(SignUpForm.CurrentVersion);
+        consent.TermsVersion.Should().Be(SignUpForm.TermsVersion);
+        consent.PrivacyVersion.Should().Be(SignUpForm.PrivacyVersion);
         consent.DeclaresAdult.Should().BeTrue();
         consent.Locale.Should().Be("pt-BR");
         consent.AcceptedAt.Should().Be(Factory.Clock.GetUtcNow());
@@ -165,6 +165,25 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
         var privacyBody = await PostAsync(client, Route, SignUpForm.Valid() with { PrivacyVersion = "2025-v9" }, HttpStatusCode.Conflict);
 
         CodeOf(privacyBody).Should().Be(IdentityErrorCodes.TermsVersionOutdated);
+    }
+
+    // AC4: the privacy text that was current before F-71 is outdated now; the terms text is not.
+    [Fact]
+    public async Task Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored()
+    {
+        var client = Factory.CreateClient("en");
+
+        var body = await PostAsync(client, Route, SignUpForm.Valid() with { PrivacyVersion = "2026-v1" }, HttpStatusCode.Conflict);
+
+        CodeOf(body).Should().Be(IdentityErrorCodes.TermsVersionOutdated);
+
+        var request = SignUpForm.Valid($"ana.v2.{Guid.CreateVersion7():N}@exemplo.com");
+        await PostAsync(client, Route, request with { TermsVersion = "2026-v1", PrivacyVersion = "2026-v2" }, HttpStatusCode.Accepted);
+
+        var user = await QueryAsync(context => context.Users.SingleAsync(u => u.Email == request.Email));
+        var consent = await QueryAsync(context => context.ConsentRecords.SingleAsync(c => c.UserId == user.Id));
+        consent.PrivacyVersion.Should().Be("2026-v2");
+        consent.TermsVersion.Should().Be("2026-v1");
     }
 
     [Fact]
