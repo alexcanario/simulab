@@ -26,6 +26,18 @@ public abstract class SubjectsTestContext : CatalogPageTestContext
     protected static readonly SubjectResponse Loose = new(
         Guid.Parse("0198f0a3-0000-7000-8000-0000000000a3"), "Atualidades", null, null, 0);
 
+    /// <summary>F-75 BR10: a subject without topics that a live notice subject maps whole; the Api says so in <c>InUse</c>.</summary>
+    protected static readonly SubjectResponse Mapped = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-0000000000a4"), "Raciocínio Lógico", Languages.Id, "Languages", 0, InUse: true);
+
+    /// <summary>F-75 BR9/BR10: a subject that has a topic and is also mapped whole; the topic reason comes first.</summary>
+    protected static readonly SubjectResponse MappedWithTopics = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-0000000000a5"), "Matemática", Languages.Id, "Languages", 1, InUse: true);
+
+    /// <summary>F-75 BR10: a topic that a live notice subject maps.</summary>
+    protected static readonly TopicResponse MappedTopic = new(
+        Guid.Parse("0198f0a3-0000-7000-8000-0000000000b3"), Portuguese.Id, "Ortografia", InUse: true);
+
     protected static readonly TopicResponse Crase = new(Guid.Parse("0198f0a3-0000-7000-8000-0000000000b1"), Portuguese.Id, "Crase");
 
     protected static readonly TopicResponse Punctuation = new(Guid.Parse("0198f0a3-0000-7000-8000-0000000000b2"), Portuguese.Id, "Pontuação");

@@ -39,7 +39,8 @@
                 <div id="@ActionsId(topic)">
                     <AppRowActions ItemName="@topic.Name"
                                    OnEdit="@(() => OpenAsync(topic))"
-                                   OnDelete="@(() => DeleteAsync(topic))" />
+                                   OnDelete="@(() => DeleteAsync(topic))"
+                                   DeleteDisabledReason="@(topic.InUse ? L["Topics.Delete.DisabledInUse"].Value : null)" />
                 </div>
             </Actions>
         </AppItemRows>

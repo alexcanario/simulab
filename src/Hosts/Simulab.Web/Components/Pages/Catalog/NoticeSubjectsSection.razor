@@ -88,20 +88,29 @@
 
                 @if (_rows.Count > 0)
                 {
-                    <p class="app-notice-subjects-total">
-                        @if (_statedCount == 0)
-                        {
-                            <span>@L["NoticeSubjects.Total.None"]</span>
-                        }
-                        else
-                        {
-                            <span class="app-notice-subjects-total-sum">@TotalText</span>
-                            @if (_unstatedCount > 0)
+                    <div class="app-notice-subjects-summary">
+                        <p class="app-notice-subjects-total">
+                            @if (_statedCount == 0)
                             {
-                                <span class="app-notice-subjects-total-unstated app-muted">@UnstatedText</span>
+                                <span>@L["NoticeSubjects.Total.None"]</span>
                             }
+                            else
+                            {
+                                <span class="app-notice-subjects-total-sum">@TotalText</span>
+                                @if (_unstatedCount > 0)
+                                {
+                                    <span class="app-notice-subjects-total-unstated app-muted">@UnstatedText</span>
+                                }
+                            }
+                        </p>
+
+                        @* F-75 AC10: how many rows still have no mapping, in secondary text, only above zero. Plain text,
+                           not live; nothing is blocked (BR2). *@
+                        @if (_unmappedCount > 0)
+                        {
+                            <p class="app-notice-subjects-unmapped app-muted">@UnmappedText</p>
                         }
-                    </p>
+                    </div>
                 }
             </div>
 
@@ -132,6 +141,7 @@
     private int _statedCount;
     private long _statedSum;
     private int _unstatedCount;
+    private int _unmappedCount;
     private Guid? _loadedFor;
     private Guid? _movingId;
     private string? _error;
@@ -149,6 +159,10 @@
     private string UnstatedText => _unstatedCount == 1
         ? L["NoticeSubjects.Total.Unstated.One"]
         : L["NoticeSubjects.Total.Unstated.Many", _unstatedCount.ToString("N0", CultureInfo.CurrentCulture)];
+
+    private string UnmappedText => _unmappedCount == 1
+        ? L["NoticeSubjects.Total.Unmapped.One"]
+        : L["NoticeSubjects.Total.Unmapped.Many", _unmappedCount.ToString("N0", CultureInfo.CurrentCulture)];
 
     private static string HeadingId(int index) => $"notice-subjects-group-{index}";
 
@@ -242,6 +256,9 @@
         _statedCount = stated.Count;
         _statedSum = stated.Sum(row => (long)row.QuestionCount!.Value);
         _unstatedCount = rows.Count - stated.Count;
+
+        // F-75 BR2: a row with no entry is "not mapped"; a Mappings the Api left out reads as empty.
+        _unmappedCount = rows.Count(row => row.Mappings is not { Count: > 0 });
     }
 
     private RenderFragment RowContent(NoticeSubjectResponse row) => builder =>
@@ -249,28 +266,39 @@
         builder.OpenElement(0, "div");
         builder.AddAttribute(1, "class", "app-notice-subject-row");
 
-        builder.OpenComponent<AppTruncatedText>(2);
-        builder.AddAttribute(3, nameof(AppTruncatedText.Text), row.Label);
-        builder.AddAttribute(4, nameof(AppTruncatedText.MaxWidth), "100%");
+        // F-75: two lines in the content column - the label, then what the row covers (or "Not mapped").
+        builder.OpenElement(2, "div");
+        builder.AddAttribute(3, "class", "app-notice-subject-main");
+
+        builder.OpenComponent<AppTruncatedText>(4);
+        builder.AddAttribute(5, nameof(AppTruncatedText.Text), row.Label);
+        builder.AddAttribute(6, nameof(AppTruncatedText.MaxWidth), "100%");
         builder.CloseComponent();
 
-        builder.OpenElement(5, "span");
-        builder.AddAttribute(6, "class", "app-notice-subject-count");
+        builder.OpenComponent<NoticeSubjectCoverChips>(7);
+        builder.AddAttribute(8, nameof(NoticeSubjectCoverChips.Mappings), row.Mappings);
+        builder.AddAttribute(9, nameof(NoticeSubjectCoverChips.Label), row.Label);
+        builder.CloseComponent();
+
+        builder.CloseElement();
+
+        builder.OpenElement(10, "span");
+        builder.AddAttribute(11, "class", "app-notice-subject-count");
         if (row.QuestionCount is { } count)
         {
             var formatted = count.ToString("N0", CultureInfo.CurrentCulture);
-            builder.AddContent(7, count == 1 ? L["NoticeSubjects.Row.Questions.One"].Value : L["NoticeSubjects.Row.Questions.Many", formatted].Value);
+            builder.AddContent(12, count == 1 ? L["NoticeSubjects.Row.Questions.One"].Value : L["NoticeSubjects.Row.Questions.Many", formatted].Value);
         }
         else
         {
             // The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead.
-            builder.OpenElement(8, "span");
-            builder.AddAttribute(9, "aria-hidden", "true");
-            builder.AddContent(10, "—");
+            builder.OpenElement(13, "span");
+            builder.AddAttribute(14, "aria-hidden", "true");
+            builder.AddContent(15, "—");
             builder.CloseElement();
-            builder.OpenElement(11, "span");
-            builder.AddAttribute(12, "class", "app-visually-hidden");
-            builder.AddContent(13, L["NoticeSubjects.Row.NoCount.Spoken"].Value);
+            builder.OpenElement(16, "span");
+            builder.AddAttribute(17, "class", "app-visually-hidden");
+            builder.AddContent(18, L["NoticeSubjects.Row.NoCount.Spoken"].Value);
             builder.CloseElement();
         }
 
@@ -295,6 +323,8 @@
             { dialog => dialog.NoticeSubject, row },
             { dialog => dialog.Groups, DistinctGroups() },
             { dialog => dialog.InitialGroup, _lastAddedGroup },
+            // F-75: the taxonomy the Covers field picks from, read once when the dialog opens (and again on a refusal).
+            { dialog => dialog.LoadTaxonomy, LoadTaxonomyAsync },
             {
                 dialog => dialog.Save,
                 // A fresh token at Save time, never the one read when the dialog opened (it may have expired).
@@ -326,6 +356,12 @@
         // The row may have changed group (BR7): the focus follows it wherever it is now.
         _pendingFocus = $"{ActionsId(saved)}-{AppRowActions.EditKey}";
     }
+
+    // A fresh token at each call, never the one read when the dialog opened (it may have expired).
+    private async Task<ApiResult<IReadOnlyList<TaxonomySubjectResponse>>> LoadTaxonomyAsync() =>
+        await TokenAsync() is not { } fresh
+            ? ApiResult.Failed<IReadOnlyList<TaxonomySubjectResponse>>(ErrorText.UnexpectedCode)
+            : await Api.GetTaxonomyAsync(fresh);
 
     // The suggestions of the group field: the distinct groups of the edition, in display order, first spelling wins.
     private IReadOnlyList<string> DistinctGroups() =>

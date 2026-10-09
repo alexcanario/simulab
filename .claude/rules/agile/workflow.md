@@ -22,6 +22,7 @@
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
 - An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back; never a partial or inline `--body` (it replaces the whole body).
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
+- Exception: the app host of the item's worktree (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()`, or the project's own knob set for the worktree); data shared with another checkout needs the owner's yes, once per item.
 - End every step with: what changed (files), what is next, who acts next.
 - Quote real command output for builds and tests (counts, duration). Never paraphrase a result.
-- Write files (code, tests, docs) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.
+- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.

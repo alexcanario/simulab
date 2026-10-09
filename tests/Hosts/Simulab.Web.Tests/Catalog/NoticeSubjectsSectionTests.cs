@@ -455,8 +455,9 @@ public sealed class NoticeSubjectsSectionTests : CatalogPageTestContext
         section.Find("#notice-subject-add").Click();
 
         WaitForDialog(dialogs);
+        // F-75 AC1: the dialog gains the Covers field after the number of questions (UC2), so a fourth input follows.
         dialogs.FindAll("input[id^='notice-subject-']").Select(input => input.Id).Should()
-            .Equal("notice-subject-group", "notice-subject-label", "notice-subject-question-count");
+            .Equal("notice-subject-group", "notice-subject-label", "notice-subject-question-count", "notice-subject-covers");
         var group = dialogs.Find("#notice-subject-group");
         group.GetAttribute("role").Should().Be("combobox");
         group.GetAttribute("aria-autocomplete").Should().Be("list");

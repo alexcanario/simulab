@@ -69,6 +69,9 @@ public static class CatalogLimits
     /// <summary>The most questions a notice subject may state (F-74, BR4).</summary>
     public const int NoticeSubjectQuestionCountMax = 500;
 
+    /// <summary>The most entries a notice subject's mapping may hold (F-75, BR1).</summary>
+    public const int NoticeSubjectMappingMax = 50;
+
     /// <summary>The shortest a name may be (BR8).</summary>
     public const int NameMinLength = 2;
 }

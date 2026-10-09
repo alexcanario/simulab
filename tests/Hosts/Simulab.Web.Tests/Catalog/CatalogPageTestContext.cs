@@ -123,6 +123,18 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>The notice subjects the fake holds (F-74), in display order: the test sets it, the writes change it.</summary>
         public List<NoticeSubjectResponse> NoticeSubjects { get; } = [];
 
+        /// <summary>When set, every write waits for it before it is answered (F-75: the screen while a save is in flight).</summary>
+        public TaskCompletionSource? WriteGate { get; set; }
+
+        /// <summary>The live subjects and topics the Covers field picks from (F-75), in the order the Api would answer.</summary>
+        public List<TaxonomySubjectResponse> Taxonomy { get; } = [];
+
+        /// <summary>When set, reading the taxonomy answers this problem (F-75: the picker's load error).</summary>
+        public (HttpStatusCode Status, string Code)? TaxonomyFailure { get; set; }
+
+        /// <summary>How many times the taxonomy was read: once per dialog opening, and again after a refusal that needs it.</summary>
+        public int TaxonomyReads => Received.Count(call => call.Method == HttpMethod.Get && call.Path == "/api/v1/catalog/taxonomy");
+
         /// <summary>When set, listing an edition's notice subjects answers this problem (F-74: the section's load error).</summary>
         public (HttpStatusCode Status, string Code)? ListNoticeSubjectsFailure { get; set; }
 
@@ -143,9 +155,22 @@ public abstract class CatalogPageTestContext : KitTestContext
             var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             Received.Add((request.Method, path, request.RequestUri.Query, body));
 
+            // A test that must look at the screen while a save is in flight holds the write here, then lets it go.
+            if (request.Method != HttpMethod.Get && WriteGate is { } gate)
+            {
+                await gate.Task;
+            }
+
             if (Custom?.Invoke(request.Method, path, request.RequestUri.Query, body) is { } custom)
             {
                 return custom;
+            }
+
+            if (path == "/api/v1/catalog/taxonomy" && request.Method == HttpMethod.Get)
+            {
+                return TaxonomyFailure is { } taxonomyRefused
+                    ? Problem(taxonomyRefused)
+                    : Json<IReadOnlyList<TaxonomySubjectResponse>>([.. Taxonomy]);
             }
 
             var subjectRoute = System.Text.RegularExpressions.Regex.Match(
@@ -361,7 +386,8 @@ public abstract class CatalogPageTestContext : KitTestContext
             if (!idGroup.Success)
             {
                 var request = Read<SaveNoticeSubjectRequest>(body);
-                var created = new NoticeSubjectResponse(Guid.CreateVersion7(), editionId, Blank(request.Group), request.Label!, request.QuestionCount);
+                var created = new NoticeSubjectResponse(
+                    Guid.CreateVersion7(), editionId, Blank(request.Group), request.Label!, request.QuestionCount, Resolve(request.Mappings));
                 InsertLastInGroup(created);
                 return Json(created, HttpStatusCode.Created);
             }
@@ -394,7 +420,13 @@ public abstract class CatalogPageTestContext : KitTestContext
             if (method == HttpMethod.Put)
             {
                 var request = Read<SaveNoticeSubjectRequest>(body);
-                var updated = existing with { Group = Blank(request.Group), Label = request.Label!, QuestionCount = request.QuestionCount };
+                var updated = existing with
+                {
+                    Group = Blank(request.Group),
+                    Label = request.Label!,
+                    QuestionCount = request.QuestionCount,
+                    Mappings = Resolve(request.Mappings)
+                };
                 if (AppSuggestField.Normalize(updated.Group) == AppSuggestField.Normalize(existing.Group))
                 {
                     NoticeSubjects[NoticeSubjects.IndexOf(existing)] = updated;
@@ -411,6 +443,21 @@ public abstract class CatalogPageTestContext : KitTestContext
             NoticeSubjects.Remove(existing);
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
+
+        // F-75 BR7: a save replaces the whole mapping. The Api answers each entry with the names it joins from the
+        // taxonomy; the fake looks them up in the same list the picker was given. The rules (BR1 to BR5) are the Api's.
+        private IReadOnlyList<NoticeSubjectMappingResponse> Resolve(IReadOnlyList<NoticeSubjectMappingRequest>? requested) =>
+            [.. (requested ?? []).Select(entry =>
+            {
+                if (entry.TopicId is { } topicId)
+                {
+                    var owner = Taxonomy.First(subject => subject.Topics.Any(topic => topic.Id == topicId));
+                    return new NoticeSubjectMappingResponse(owner.Id, owner.Name, topicId, owner.Topics.First(topic => topic.Id == topicId).Name);
+                }
+
+                var whole = Taxonomy.First(subject => subject.Id == entry.SubjectId);
+                return new NoticeSubjectMappingResponse(whole.Id, whole.Name, null, null);
+            })];
 
         private static string? Blank(string? group) => string.IsNullOrWhiteSpace(group) ? null : group.Trim();
 

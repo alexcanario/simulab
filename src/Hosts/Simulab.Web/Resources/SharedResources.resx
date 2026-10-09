@@ -686,4 +686,43 @@
   <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Type a whole number from 1 to 500, or leave it empty.</value></data>
   <data name="notice_subject.duplicate" xml:space="preserve"><value>This group already has a subject with this name (capitals and accents do not count).</value></data>
   <data name="notice_subject.move_invalid" xml:space="preserve"><value>This subject cannot move that way. The list was reloaded.</value></data>
+  <data name="Common.RemoveItem" xml:space="preserve"><value>Remove {0}</value></data>
+  <data name="NoticeSubjects.Field.Covers" xml:space="preserve"><value>Covers</value></data>
+  <data name="NoticeSubjects.Field.Covers.Placeholder" xml:space="preserve"><value>Search a subject or a topic</value></data>
+  <data name="NoticeSubjects.Field.Covers.Hint" xml:space="preserve"><value>Optional. The taxonomy subjects and topics this notice subject covers: pick a whole subject or only some of its topics. At most 50 items.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Options" xml:space="preserve"><value>Taxonomy: subjects and topics</value></data>
+  <data name="NoticeSubjects.Field.Covers.Picked" xml:space="preserve"><value>Picked items</value></data>
+  <data name="NoticeSubjects.Field.Covers.Count" xml:space="preserve"><value>Picked: {0} of {1}</value></data>
+  <data name="NoticeSubjects.Field.Covers.None" xml:space="preserve"><value>Nothing picked: the subject stays not mapped.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Loading" xml:space="preserve"><value>Loading the taxonomy...</value></data>
+  <data name="NoticeSubjects.Field.Covers.LoadFailed" xml:space="preserve"><value>The taxonomy could not be loaded. The items already picked stay here.</value></data>
+  <data name="NoticeSubjects.Field.Covers.EmptyTaxonomy" xml:space="preserve"><value>The taxonomy has no subject yet. Add them under Content › Subjects.</value></data>
+  <data name="NoticeSubjects.Field.Covers.LimitReached" xml:space="preserve"><value>Limit of {0} items reached. Remove one to pick another.</value></data>
+  <data name="NoticeSubjects.Covers.WholeMarker" xml:space="preserve"><value>whole subject</value></data>
+  <data name="NoticeSubjects.Covers.Topic" xml:space="preserve"><value>{0} › {1}</value></data>
+  <data name="NoticeSubjects.Covers.Topic.Spoken" xml:space="preserve"><value>{1}, topic of {0}</value></data>
+  <data name="NoticeSubjects.Covers.CoveredByWhole" xml:space="preserve"><value>Already covered by the whole subject</value></data>
+  <data name="NoticeSubjects.Covers.WholeBlocked" xml:space="preserve"><value>Remove its picked topics to pick the whole subject</value></data>
+  <data name="NoticeSubjects.Covers.Added" xml:space="preserve"><value>Picked: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Removed" xml:space="preserve"><value>Removed: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Cleared" xml:space="preserve"><value>All items were removed.</value></data>
+  <data name="NoticeSubjects.Covers.Overlaps" xml:space="preserve"><value>repeats the whole subject</value></data>
+  <data name="NoticeSubjects.Covers.Gone" xml:space="preserve"><value>no longer in the taxonomy</value></data>
+  <data name="NoticeSubjects.Row.NotMapped" xml:space="preserve"><value>Not mapped</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.One" xml:space="preserve"><value>1 subject is not mapped yet.</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} subjects are not mapped yet.</value></data>
+  <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Notice subjects map this whole subject. Remove it from their mappings before deleting it.</value></data>
+  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Notice subjects map this topic. Remove it from their mappings before deleting it.</value></data>
+  <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>One of the picked items is not valid. Remove it and pick it again.</value></data>
+  <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>At most 50 items per notice subject.</value></data>
+  <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again.</value></data>
+  <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>A topic cannot be picked together with its whole subject; the items are marked below. Remove the topic or the whole subject.</value></data>
+  <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Someone else saved this notice subject at the same time. Save again.</value></data>
+  <data name="subject.in_use" xml:space="preserve"><value>Notice subjects map this subject, so it cannot be deleted. The list was reloaded.</value></data>
+  <data name="topic.in_use" xml:space="preserve"><value>Notice subjects map this topic, so it cannot be deleted. The list was reloaded.</value></data>
+  <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
+  <data name="Gallery.Chip.Hint" xml:space="preserve"><value>A read-only label with an optional icon and secondary text, a marked state and an optional remove button. It is not focusable unless it has the button.</value></data>
+  <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Multi-pick field</value></data>
+  <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Search a short local list, grouped, and pick several items; the picks show below as removable chips.</value></data>
+  <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruit</value></data>
 </root>
