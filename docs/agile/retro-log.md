@@ -118,6 +118,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 5/5: before committing a merge, `feature-ship` precondition 2 and `feature-build` check for conflict markers with a command that fails on a match (F-65: a scripted resolution chained by `&&` after `grep -c` committed `<<<<<<< HEAD`, `2cead5d`) | F-65 | |
 | ⏳ | agile | `[generic]` score 6/6: `feature-build` re-reads the Delivery and Decisions of the items named in `## Start` (Depends on / Waits on) against the item's rules and criteria before the plan (F-65: F-64 added three deploy parameters after approval, change note v2) | F-65 | |
 | ⏳ | agile | `[generic]` score 6/5: `feature-build` step 17b merges the main branch into an item branch that is behind it before the scan, so findings already triaged on main are not asked again (F-71: branch 303 commits behind; the scan said `Triaged: none`, after the merge `Triaged: 13 false positive`) | F-71 | |
+| ⏳ | agile | `[generic]` score 4/3: when the plan of an item assumes the state of an item that is not `done` (F-93 BR/D7: "F-71 is building and takes a change note afterwards"), `feature-refinement` writes it in `Waits on (to start)` with the fallback if that item ships first; F-71 reached `done` before the F-93 build, step 3b stopped it, and the cost was change note v2 and a new item (F-112); no evidence yet of a second case | F-93 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1054,3 +1055,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 ## 2026-10-09 - F-71 Privacy policy names where data lives and who processes it
 - Lesson 1 (score 6/5): an item branch far behind main repeats a security triage already done on main; `feature-build` should merge main before the scan. Went to: plugin note `agile [generic]` in the table above.
 - Open, not a lesson: the Microsoft DPA transfer basis for Azure was not verified (F-71 D9).
+
+## 2026-10-09 - F-93 Users' data in Azure Central US meets LGPD and GDPR
+- Lesson 1 (score 2/7): `Simulab.Api.Tests.EmailProviderStartTests.Start_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey(environment: "Production")` failed 2 of 4 full runs of the ship gate with an `ObjectDisposedException` at host start (gate logs `20261009-171617-327-ship.log` and `20261009-172519-142-ship.log`), and passed 3 of 3 alone (`Passed! Total: 7`). Cause not verified. Went to: the owner types `/agile:change B-19` with this evidence (B-19, full suite flaky under parallel load, is `approved`); no new item.
+- Lesson 2 (score 4/3): a plan that assumes the state of an item that is not `done` stops the build when that item ships first. Went to: plugin note `agile [generic]` in the table above.
+- Not applied (score 2/2): "Central US is in no file" was said at `/agile:idea` after a search of the main checkout only, and a search of a worktree path that no longer existed was not noticed. Cause not verified. Went to: nothing.
+- Suite: 2643 tests, 135 s test run and 27 s build, inside the 5 min budget.
