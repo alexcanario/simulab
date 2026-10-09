@@ -221,8 +221,13 @@ public class DeployWorkflowTests
     {
         var infra = InfraText();
 
-        infra.Should().Contain("az ad app create").And.Contain("az ad app federated-credential create")
-            .And.Contain("repo:alexcanario/simulab:environment:$environment");
+        infra.Should().Contain("az ad app create").And.Contain("az ad app federated-credential create");
+
+        // B-25: the subject is built from the prefix GitHub presents for this repository (numeric ids), not typed by hand.
+        infra.Should().Contain("gh api repos/alexcanario/simulab/actions/oidc/customization/sub --jq .sub_claim_prefix")
+            .And.Contain("subject = \"${prefix}:environment:$environment\"")
+            .And.Contain("$prefix = \"repo:alexcanario/simulab\"")
+            .And.NotContain("subject = \"repo:alexcanario/simulab:environment:$environment\"");
         infra.Should().Contain("Contributor").And.Contain("Role Based Access Control Administrator");
         infra.Should().Contain("environments/staging").And.Contain("environments/production")
             .And.Contain("deployment-branch-policies").And.Contain("reviewers");
