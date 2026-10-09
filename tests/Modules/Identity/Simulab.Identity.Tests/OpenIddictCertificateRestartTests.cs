@@ -65,6 +65,82 @@ public sealed class OpenIddictCertificateRestartTests
         (await ProfileStatusAsync(second, accessToken)).Should().Be(HttpStatusCode.OK);
     }
 
+    /// <summary>F-73 AC2 (UC2): what keeps a student signed in across a deploy is the refresh token, not the 15-minute access token.</summary>
+    [Fact]
+    public async Task Restart_SameCertificates_TheRefreshTokenIssuedBeforeIsRedeemed()
+    {
+        var certificates = TestCertificates.Create();
+        string connectionString;
+        string refreshToken;
+
+        await using (var first = StagingHost(certificates))
+        {
+            await first.PrepareAsync(nameof(Restart_SameCertificates_TheRefreshTokenIssuedBeforeIsRedeemed));
+            var user = await TestAccounts.CreateAsync(first.Services);
+            using var client = Https(first);
+            var token = await TokenClient.SignInAsync(client, user.Email!, TestAccounts.ValidPassword);
+            refreshToken = token.RefreshToken!;
+            connectionString = first.ConnectionString;
+        }
+
+        await using var second = StagingHost(certificates);
+        await second.PrepareExistingAsync(connectionString);
+        using var secondClient = Https(second);
+
+        var renewed = await TokenClient.RefreshAsync(secondClient, refreshToken);
+
+        renewed.AccessToken.Should().NotBeNull($"{renewed.Error}: {renewed.ErrorDescription}");
+    }
+
+    /// <summary>
+    /// F-73 AC1 (UC1, BR1): two replicas running at the same time, on the same database, with the same certificates: the
+    /// second accepts what the first issued, and redeems its refresh token.
+    /// </summary>
+    [Fact]
+    public async Task TwoReplicas_SameCertificates_TheSecondAcceptsTheAccessTokenAndRedeemsTheRefreshToken()
+    {
+        var certificates = TestCertificates.Create();
+
+        await using var first = StagingHost(certificates);
+        await first.PrepareAsync(nameof(TwoReplicas_SameCertificates_TheSecondAcceptsTheAccessTokenAndRedeemsTheRefreshToken));
+        await using var second = StagingHost(certificates);
+        await second.PrepareExistingAsync(first.ConnectionString);
+
+        var user = await TestAccounts.CreateAsync(first.Services);
+        using var firstClient = Https(first);
+        var token = await TokenClient.SignInAsync(firstClient, user.Email!, TestAccounts.ValidPassword);
+        token.AccessToken.Should().NotBeNull($"{token.Error}: {token.ErrorDescription}");
+
+        (await ProfileStatusAsync(second, token.AccessToken!)).Should().Be(HttpStatusCode.OK);
+
+        using var secondClient = Https(second);
+        var renewed = await TokenClient.RefreshAsync(secondClient, token.RefreshToken!);
+        renewed.AccessToken.Should().NotBeNull($"{renewed.Error}: {renewed.ErrorDescription}");
+    }
+
+    /// <summary>
+    /// F-73 AC3 (BR1): the control of the test above. Two replicas that differ only in the signing certificate: the second
+    /// refuses the first one's access token, so the test above cannot pass by accident.
+    /// </summary>
+    [Fact]
+    public async Task TwoReplicas_OtherSigningCertificate_TheSecondRefusesTheAccessToken()
+    {
+        var certificates = TestCertificates.Create();
+        var otherSigning = certificates with { Signing = TestCertificates.Create().Signing };
+
+        await using var first = StagingHost(certificates);
+        await first.PrepareAsync(nameof(TwoReplicas_OtherSigningCertificate_TheSecondRefusesTheAccessToken));
+        await using var second = StagingHost(otherSigning);
+        await second.PrepareExistingAsync(first.ConnectionString);
+
+        var user = await TestAccounts.CreateAsync(first.Services);
+        using var firstClient = Https(first);
+        var token = await TokenClient.SignInAsync(firstClient, user.Email!, TestAccounts.ValidPassword);
+
+        (await ProfileStatusAsync(first, token.AccessToken!)).Should().Be(HttpStatusCode.OK, "the control only means something if the token was good");
+        (await ProfileStatusAsync(second, token.AccessToken!)).Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     [Fact]
     public async Task Restart_OtherCertificates_TheTokenIssuedBeforeIsRefused()
     {

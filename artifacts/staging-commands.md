@@ -128,13 +128,12 @@ az keyvault key create --vault-name $vault -n dataprotection --kty RSA --size 20
 ```powershell
 az keyvault certificate list --vault-name $vault --query "[].name" -o tsv
 ```
-Se `OpenIddict--SigningCertificate` e `OpenIddict--EncryptionCertificate` não aparecerem:
+Se `OpenIddict--SigningCertificate` e `OpenIddict--EncryptionCertificate` não aparecerem (F-73: política versionada, 24 meses, uma por papel; rode na raiz do repositório):
 ```powershell
-az keyvault certificate get-default-policy > policy.json
-az keyvault certificate create --vault-name $vault -n OpenIddict--SigningCertificate -p "@policy.json"
-az keyvault certificate create --vault-name $vault -n OpenIddict--EncryptionCertificate -p "@policy.json"
-Remove-Item policy.json
+az keyvault certificate create --vault-name $vault -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+az keyvault certificate create --vault-name $vault -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
 ```
+Se os certificados já existem (criados antes com a política padrão de 12 meses), os mesmos dois comandos criam uma nova versão de cada um; reinicie o `api` logo depois (todos saem do sistema uma vez).
 
 ### 1.10 Senha do admin@simulab.local
 O texto entre aspas do `Read-Host` é só o rótulo. A senha você digita depois, no campo oculto (12+ caracteres, maiúscula, dígito, símbolo).
@@ -375,6 +374,18 @@ az ad app federated-credential list --id $appId --query "[].{name:name,subject:s
 Esperado: o subject da lista igual ao da mensagem de erro. Repita a execução (5.1). A credencial `github-production` já foi ajustada do mesmo jeito.
 
 ---
+
+## Duas réplicas do Api (F-73; testar que um token vale em qualquer réplica)
+Precisa de `$rg` (`rg-simulab-staging`). O Api publicado tem `minReplicas: 1` e `maxReplicas: 2`; para o teste, suba o mínimo para 2 e depois volte.
+```powershell
+az containerapp update -n api -g $rg --min-replicas 2
+az containerapp replica list -n api -g $rg --query "[].name" -o tsv
+```
+A segunda linha deve listar duas réplicas. Use o app por uns minutos no navegador (ao menos 20 requisições) sem ser desconectado. Depois do teste:
+```powershell
+az containerapp update -n api -g $rg --min-replicas 1
+az containerapp replica list -n api -g $rg --query "[].name" -o tsv
+```
 
 ## Resolução de problemas
 
