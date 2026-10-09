@@ -1,7 +1,7 @@
 ---
 feature: F-94
 epic: Cloud hosting and operations
-status: approved
+status: building
 board: 140
 version: 1
 ---
@@ -65,6 +65,20 @@ A key a host needs outside Development that no publish value and no committed ho
 - AC8 (BR8) Given a scan that finds fewer than the known options classes, when the test runs, then it fails.
 - AC9 (BR9) The unit tests of the detection rules were seen failing on a fake model with a missing key before the real check was wired.
 - AC10 Localization: no UI text is added; the missing-key test stays green.
+
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
 
 ## Decisions
 - 2026-10-09 — Approved by the owner ("aprovo F-94") — gate 1.
