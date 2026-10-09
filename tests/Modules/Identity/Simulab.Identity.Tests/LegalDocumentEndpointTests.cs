@@ -9,13 +9,14 @@ namespace Simulab.Identity.Tests;
 public sealed class LegalDocumentEndpointTests : IdentityApiTests
 {
     [Theory]
-    [InlineData("terms", "en", "Terms of use")]
-    [InlineData("terms", "pt-BR", "Termos de Uso")]
-    [InlineData("terms", "pt-PT", "Termos de Utilização")]
-    [InlineData("privacy", "en", "Privacy policy")]
-    [InlineData("privacy", "pt-BR", "Política de Privacidade")]
-    [InlineData("privacy", "pt-PT", "Política de Privacidade")]
-    public async Task GetLegalDocument_ReturnsTheCurrentVersionInTheRequestLanguage(string topic, string locale, string title)
+    [InlineData("terms", "en", "Terms of use", "2026-v1", "2026-09-17")]
+    [InlineData("terms", "pt-BR", "Termos de Uso", "2026-v1", "2026-09-17")]
+    [InlineData("terms", "pt-PT", "Termos de Utilização", "2026-v1", "2026-09-17")]
+    [InlineData("privacy", "en", "Privacy policy", "2026-v2", "2026-10-09")]
+    [InlineData("privacy", "pt-BR", "Política de Privacidade", "2026-v2", "2026-10-09")]
+    [InlineData("privacy", "pt-PT", "Política de Privacidade", "2026-v2", "2026-10-09")]
+    public async Task GetLegalDocument_ReturnsTheCurrentVersionInTheRequestLanguage(
+        string topic, string locale, string title, string version, string effectiveDate)
     {
         var response = await Client(locale).GetAsync($"/api/v1/identity/legal-documents/{topic}");
 
@@ -24,8 +25,8 @@ public sealed class LegalDocumentEndpointTests : IdentityApiTests
 
         document!.Title.Should().Be(title);
         document.Locale.Should().Be(locale);
-        document.Version.Should().Be(SignUpForm.CurrentVersion);
-        document.EffectiveDate.Should().Be(new DateOnly(2026, 9, 17));
+        document.Version.Should().Be(version);
+        document.EffectiveDate.Should().Be(DateOnly.Parse(effectiveDate, System.Globalization.CultureInfo.InvariantCulture));
         // The page shows the title from the manifest, so the body starts at its first section.
         document.BodyHtml.Should().Contain("<h2>").And.NotContain("<h1>");
         // AC12: the texts that ship are drafts until the owner replaces them.
