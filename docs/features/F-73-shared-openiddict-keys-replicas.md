@@ -72,15 +72,15 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
+| AC1 | OpenIddictCertificateRestartTests.TwoReplicas_SameCertificates_TheSecondAcceptsTheAccessTokenAndRedeemsTheRefreshToken |
+| AC2 | OpenIddictCertificateRestartTests.Restart_SameCertificates_TheRefreshTokenIssuedBeforeIsRedeemed |
+| AC3 | OpenIddictCertificateRestartTests.TwoReplicas_OtherSigningCertificate_TheSecondRefusesTheAccessToken |
 | AC4 | pending |
 | AC5 | OpenIddictCertificateStartTests.Start_CertificateCannotDoItsJob_RefusesNamingTheSettingAndTheReason (10 cases) |
 | AC6 | AzurePublishFilesTests.Publish_CarriesNoOpenIddictCertificate |
 | AC7 | AzurePublishFilesTests.Publish_KeepsTheApiAwakeAtMostTwiceAndTheWebAtMostOnce |
-| AC8 | pending |
-| AC9 | pending |
+| AC8 | OpenIddictCertificatePolicyTests.Policy_AsksForASelfSignedExportableRsaCertificateOfTwoYearsWithItsRoleUsage (2 cases) |
+| AC9 | OpenIddictCertificatePolicyTests.Infra_CreatesTheCertificatesFromTheCommittedPoliciesAndDocumentsTheRenewal; review at ship |
 | AC10 | pending |
 | AC11 | pending |
 

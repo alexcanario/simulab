@@ -1,0 +1,22 @@
+{
+  "issuerParameters": {
+    "name": "Self"
+  },
+  "keyProperties": {
+    "exportable": true,
+    "keySize": 2048,
+    "keyType": "RSA",
+    "reuseKey": false
+  },
+  "lifetimeActions": [],
+  "secretProperties": {
+    "contentType": "application/x-pkcs12"
+  },
+  "x509CertificateProperties": {
+    "keyUsage": [
+      "keyEncipherment"
+    ],
+    "subject": "CN=simulab-openiddict-encryption",
+    "validityInMonths": 24
+  }
+}

@@ -104,13 +104,12 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
    ```powershell
    az keyvault key create --vault-name VAULT_NAME -n dataprotection --kty RSA --size 2048 --ops wrapKey unwrapKey
    ```
-7. The two OpenIddict certificates, created by the vault itself so the private key never touches a disk (the default policy is exportable, valid 12 months, with the key usages OpenIddict checks; the names are the configuration keys `OpenIddict:SigningCertificate` and `OpenIddict:EncryptionCertificate` with `--` for `:`). A certificate renewed by the vault is picked up at the next restart and signs everybody out once; rolling certificates is F-73's subject.
+7. The two OpenIddict certificates, created by the vault itself so the private key never touches a disk, from the policies committed in `src/Hosts/Simulab.AppHost/keyvault/` (F-73 BR5: self-signed, RSA 2048, exportable, valid 24 months, the key usage OpenIddict needs for each role, no automatic renewal; the names are the configuration keys `OpenIddict:SigningCertificate` and `OpenIddict:EncryptionCertificate` with `--` for `:`). Run it from the repository root, once per environment, before the second deploy. Every Api replica and every new revision reads the same two certificates, so a token issued by one replica is accepted by the others (the Api runs 1 to 2 replicas, F-73 BR6).
    ```powershell
-   az keyvault certificate get-default-policy > policy.json
-   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--SigningCertificate -p "@policy.json"
-   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--EncryptionCertificate -p "@policy.json"
-   Remove-Item policy.json
+   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name VAULT_NAME -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
    ```
+   **Renewing the OpenIddict certificates** (F-73 BR7, by hand, before the 24 months end; the Api refuses to start with an expired one and the log names it): run the same two commands again, which add a new version of each certificate, then redeploy or restart the `api` so every replica reads them. The renewal signs every user out once; rotating without sign-out is F-84. The Api's start also refuses a certificate that has no private key, lacks its key usage or is outside its validity period (F-73 BR3).
 8. The password of the seeded administrator `admin@simulab.local` (12+ characters, upper case, digit, symbol), from a hidden prompt so it never reaches the shell history:
    ```powershell
    $p = Read-Host -AsSecureString "Admin password"; az keyvault secret set --vault-name VAULT_NAME -n Identity--SeedAdmin--Password --value (ConvertFrom-SecureString $p -AsPlainText) -o none
@@ -327,7 +326,7 @@ To turn it off again: `dotnet user-secrets remove "Google:ClientId" --project sr
 
 The Web keeps its short-lived sign-in tickets in memory (`SignInTicketStore`, `GoogleSignUpTickets`, `CodeStepTickets`, all on `SingleUseTickets<T>`): it runs as **one instance**. A second Web instance needs them moved to Redis first, or a sign-in that lands on the other instance finds no ticket.
 
-The Api is capped at **one replica** in the publish model (`minReplicas: 1`, `maxReplicas: 1`, F-54 BR7): OpenIddict signs tokens with development certificates per machine, so a token from one replica is rejected by another (F-73 shares the keys and lifts the cap). The rate limits already count in Redis and hold at any replica count. The setting `Identity:RateLimit:Namespace` exists for tests only (it gives each test host its own counters); it must stay unset in every deployed environment, or each replica would count alone again.
+The Api is capped at **two replicas** in the publish model (`minReplicas: 1`, `maxReplicas: 2`, F-73 BR6; F-54 had it at one): every replica and every revision signs and encrypts with the same two Key Vault certificates (step 7 of "First deploy of staging"), so a token issued by one replica is accepted by the others. Raising the cap is a one-line change in `AzureDeployment.cs`. The rate limits already count in Redis and hold at any replica count. The setting `Identity:RateLimit:Namespace` exists for tests only (it gives each test host its own counters); it must stay unset in every deployed environment, or each replica would count alone again.
 
 ## The first Admin (F-9, BR11)
 Every new account gets `Student` automatically (F-6), and roles are given on the back office screen `/admin/users` (F-9) by someone who already manages roles. The very first Admin of an installation has nobody to give it, so it is inserted directly against the module's database, once:
