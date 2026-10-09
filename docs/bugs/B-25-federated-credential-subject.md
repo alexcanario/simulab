@@ -2,7 +2,7 @@
 bug: B-25
 feature: F-65
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 158
 severity: medium
 ---
@@ -82,4 +82,6 @@ The setup command builds the subject the repository really presents, asking GitH
 
 ## Delivery
 - Branch: bug/B-25
-- Merge: <commit>
+- Merge: 6fee541 (app version 0.23.1)
+- Tests: full suite green, 2,635 passed, 0 failed (`gate.js ship`, 2026-10-09); `DeployWorkflowTests` 21 passed. Scan: `agile scan GREEN`.
+- Manual: no visible behavior changed, no page updated. Changed docs: `docs/infra.md` (deploy setup, step 1) and `artifacts/staging-commands.md` (Part 5.4).
