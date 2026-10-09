@@ -1,7 +1,7 @@
 ---
 feature: F-73
 epic: Foundation and identity
-status: approved
+status: building
 board: 115
 version: 2
 ---
@@ -68,6 +68,21 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 - AC9 (BR5, BR7) `docs/infra.md` step 7 uses the committed policy instead of `get-default-policy`, and declares the renew command and its effect (everybody signed out once); the row of `OpenIddict:SigningCertificate` and `OpenIddict:EncryptionCertificate` stays accurate. (review at ship)
 - AC10 (localization) No UI text is added or changed; the missing-key test stays green. (test)
 - AC11 (UC1, UC2) In staging with two Api replicas running, a signed-in tester keeps working across many requests and across a redeploy of the Api. (validation script)
+
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
 
 ## Decisions
 - 2026-10-04 — The certificates reach the Api as Key Vault secret references in Container Apps, not through the Key Vault SDK in the Api nor through Data Protection — owner; no new package, no managed-identity code in the Api, and no coupling with F-64's Data Protection keys.
