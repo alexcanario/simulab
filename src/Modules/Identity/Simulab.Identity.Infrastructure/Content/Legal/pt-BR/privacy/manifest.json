@@ -1,5 +1,5 @@
 {
-  "currentVersion": "2026-v2",
+  "currentVersion": "2026-v3",
   "versions": [
     {
       "version": "2026-v1",
@@ -12,6 +12,13 @@
       "version": "2026-v2",
       "effectiveDate": "2026-10-09",
       "file": "2026-v2.md",
+      "title": "Política de Privacidade",
+      "isPlaceholder": true
+    },
+    {
+      "version": "2026-v3",
+      "effectiveDate": "2026-10-09",
+      "file": "2026-v3.md",
       "title": "Política de Privacidade",
       "isPlaceholder": true
     }

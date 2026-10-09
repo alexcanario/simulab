@@ -9,7 +9,7 @@ updated: 2026-10-09
 Crie sua conta no Simulab com seu e-mail e depois confirme o endereço pela mensagem que enviamos.
 
 ## Quem pode usar
-Qualquer pessoa com 18 anos ou mais. Para ler os Termos de Uso e a Política de Privacidade não é preciso ter conta. A Política de Privacidade informa onde seus dados ficam (Microsoft Azure, Brazil South), quais empresas os tratam por nós (Microsoft Azure, Anthropic, SendGrid) e em que base legal eles saem do seu país. Ela ainda é um rascunho.
+Qualquer pessoa com 18 anos ou mais. Para ler os Termos de Uso e a Política de Privacidade não é preciso ter conta. A Política de Privacidade informa onde seus dados ficam (Microsoft Azure, Central US), quais empresas os tratam por nós (Microsoft Azure, Microsoft Azure Communication Services, Anthropic) e em que base legal eles saem do seu país. Ela ainda é um rascunho.
 
 ## Como fazer
 ### Criar sua conta
