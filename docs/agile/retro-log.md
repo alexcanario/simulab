@@ -1016,6 +1016,6 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 ## 2026-10-09 - Sync with agile@canary 0.37.0
 - From 0.32.0 to 0.37.0. Copied (7): rules `definition-of-done`, `workflow`; templates `feature`, `infra`, `project-claude`; manual `workflow.md` and `workflow.pt-BR.md`. Merged (1, no conflict): `docs/agile/profile.md` (SQLite pooling, FakeTimeProvider and MudBlazor debounce, endpoint status codes, Local services). Left alone: `git.md` (edited, plugin unchanged), build files (only comments differ).
 - Proposed and not built: DocGen tool catalogue (not offered, no item); `## Cloud accounts` (F-68 covers it).
-- Baseline: present. Docs command: already declared (DocGen). Glossary: technical-term rows and link lines not checked.
+- Baseline: present. Docs command: already declared (DocGen). Glossary: `Meaning (pt-BR)` column present; every document already has its `Technical terms:` link; 12 technical-term rows added after the sync commit (keyword sweep, not a full read; `docs/manual/` not scanned).
 - Plugin notes marked done (8): issues 89 and 93.
 - Build and suite not run: only Markdown changed.
