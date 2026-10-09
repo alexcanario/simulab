@@ -1,15 +1,15 @@
 ---
 page: create-account
 locale: pt-PT
-features: [F-4]
-updated: 2026-09-18
+features: [F-4, F-71]
+updated: 2026-10-09
 ---
 # Criar uma conta
 
 Crie a sua conta no Simulab com o seu e-mail e depois confirme o endereço através da mensagem que enviamos.
 
 ## Quem pode utilizar
-Qualquer pessoa com 18 anos ou mais. Para ler os Termos de Utilização e a Política de Privacidade não é preciso ter conta.
+Qualquer pessoa com 18 anos ou mais. Para ler os Termos de Utilização e a Política de Privacidade não é preciso ter conta. A Política de Privacidade indica onde ficam os seus dados (Microsoft Azure, Brazil South), que empresas os tratam por nós (Microsoft Azure, Anthropic, SendGrid) e em que base legal saem do seu país. Ainda é um rascunho.
 
 ## Como fazer
 ### Criar a sua conta

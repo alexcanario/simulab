@@ -73,7 +73,7 @@ Content added to the privacy policy in `2026-v2` (D2, D3):
 | AC1 | `PrivacyPolicyContentTests.Current_IsVersionTwoAndStillADraft` (x3 locales), `LegalDocumentEndpointTests.GetLegalDocument_ReturnsTheCurrentVersionInTheRequestLanguage` |
 | AC2 | `PrivacyPolicyContentTests.Manifest_KeepsVersionOneAndItsFile` (x3) |
 | AC3 | `PrivacyPolicyContentTests.Current_NamesTheRegionTheProcessorsAndTheTransferBasis`, `Current_ListsThreeProcessorsInATable`, `VersionTwo_StartsWithTheFourSectionsOfVersionOne` (x3) |
-| AC4 | `RegistrationEndpointTests.Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored`, `Register_Valid_...` consent assertions with `SignUpForm.TermsVersion` / `PrivacyVersion` |
+| AC4 | `RegistrationEndpointTests.Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored`, `Register_ValidForm_CreatesPendingUserConsentAndToken` (consent assertions with `SignUpForm.TermsVersion` / `PrivacyVersion`) |
 | AC5 | validation step 2 (app host checked by Claude: `/privacy` shows 2026-v2, the draft notice and sections 5 to 9, en) |
 | AC6 | no resource key added; the existing missing-key test is unchanged |
 

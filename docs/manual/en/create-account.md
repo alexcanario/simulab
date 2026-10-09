@@ -1,15 +1,15 @@
 ---
 page: create-account
 locale: en
-features: [F-4]
-updated: 2026-09-18
+features: [F-4, F-71]
+updated: 2026-10-09
 ---
 # Create an account
 
 Create your Simulab account with your email address, then confirm the address from the message we send you.
 
 ## Who can use it
-Anyone aged 18 or older. You do not need an account to read the terms of use or the privacy policy.
+Anyone aged 18 or older. You do not need an account to read the terms of use or the privacy policy. The privacy policy says where your data is stored (Microsoft Azure, Brazil South), which companies process it for us (Microsoft Azure, Anthropic, SendGrid) and on what legal basis it leaves your country. It is still a draft.
 
 ## How to
 ### Create your account
