@@ -331,6 +331,51 @@ Se aparecer `meu-ip`: `az postgres flexible-server firewall-rule delete -g $rg -
 
 ---
 
+## Parte 5. Deploy pelo GitHub Actions (F-65, workflow `deploy.yml`)
+
+A partir da F-65 o staging pode ser publicado sem o seu terminal: o GitHub entra no Azure por OIDC (nenhuma senha do Azure fica guardada) e roda o mesmo `aspire deploy` da Parte 2. O primeiro deploy por esse caminho passou em 09/10/2026 (execução 37951156063, 4 min 23 s, `main` no commit `3df5bac`). O que o workflow usa (já criado, não repita):
+- Azure: registro de aplicativo `simulab-deploy` (`e6d8ec88-f4fb-4e21-b1b6-0170348843c7`) com credenciais federadas `github-staging` e `github-production`, e os papéis Contributor e Role Based Access Control Administrator só no grupo `rg-simulab-staging`.
+- GitHub: ambientes `staging` (aceita `main` e tags `v*`) e `production` (só tags `v*`, você como aprovador). No `staging`: variáveis `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_LOCATION`, `AZURE_RESOURCE_GROUP`, `POSTGRES_ADMIN_USER`, `CHECK_URL` (a raiz do Web) e segredos `OPENIDDICT_CLIENT_SECRET`, `POSTGRES_ADMIN_PASSWORD`, `REDIS_PASSWORD`.
+
+### 5.1 Publicar o `main` no staging e acompanhar
+```powershell
+gh workflow run deploy.yml --repo alexcanario/simulab --ref main -f environment=staging
+$run = gh run list --repo alexcanario/simulab --workflow deploy.yml --limit 1 --json databaseId -q '.[0].databaseId'
+gh run watch $run --repo alexcanario/simulab --exit-status --interval 30
+```
+Esperado: todos os passos com `✓` (o de produção aparece como `-`, pulado) e, no fim, `✓ main deploy`. O passo "Wait for the check URL" espera até 5 minutos pelo HTTP 200 da raiz do Web. O resumo da execução (aba Summary no GitHub) mostra ambiente, ref e commit. Não rode build nem testes no seu worktree por causa disso: o deploy roda no GitHub, não na sua máquina.
+
+### 5.2 Publicar uma tag no staging ou na produção
+```powershell
+gh workflow run deploy.yml --repo alexcanario/simulab --ref v0.22.0 -f environment=staging
+```
+Esperado: o mesmo que 5.1. Para `production`, troque o ambiente: a execução fica em "Waiting" até você aprovar no GitHub (Actions → a execução → Review deployments); se rejeitar, ela termina sem nunca entrar no Azure. Produção só aceita tag `v*` (um `--ref main` é recusado). Uma tag criada antes da F-65 não tem o `deploy.yml` e não pode ser publicada assim.
+
+### 5.3 Conferir os segredos e as variáveis do ambiente (só nomes)
+```powershell
+gh secret list --env staging --repo alexcanario/simulab
+gh variable list --env staging --repo alexcanario/simulab
+```
+Esperado: três segredos e sete variáveis. Para trocar um segredo (o valor tem de ser o mesmo que o vault guarda, ou o servidor desalinha, ver "PostgreSQL desalinhado"):
+```powershell
+$vault = (az keyvault list -g rg-simulab-staging --query "[0].name" -o tsv)
+gh secret set REDIS_PASSWORD --env staging --repo alexcanario/simulab --body (az keyvault secret show --vault-name $vault -n deploy--RedisPassword --query value -o tsv)
+```
+
+### 5.4 Se o login do Azure falhar com `AADSTS700213`
+Foi o que aconteceu na primeira tentativa. O GitHub desta conta apresenta o repositório com ids numéricos (`repo:alexcanario@3664703/simulab@1397573907:environment:staging`), e a credencial federada tinha o nome em texto. O comando de configuração de `docs/infra.md` agora pergunta o prefixo ao GitHub (B-25); para corrigir uma credencial já criada, use o mesmo prefixo (o texto exato também aparece na anotação da execução que falhou, `gh run view <id> --repo alexcanario/simulab`):
+```powershell
+$appId = "e6d8ec88-f4fb-4e21-b1b6-0170348843c7"
+$prefix = gh api repos/alexcanario/simulab/actions/oidc/customization/sub --jq .sub_claim_prefix
+@{ name = "github-staging"; issuer = "https://token.actions.githubusercontent.com"; subject = "${prefix}:environment:staging"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content fc-staging.json
+az ad app federated-credential update --id $appId --federated-credential-id github-staging --parameters "@fc-staging.json"
+Remove-Item fc-staging.json
+az ad app federated-credential list --id $appId --query "[].{name:name,subject:subject}" -o table
+```
+Esperado: o subject da lista igual ao da mensagem de erro. Repita a execução (5.1). A credencial `github-production` já foi ajustada do mesmo jeito.
+
+---
+
 ## Resolução de problemas
 
 Cada linha vem de algo que aconteceu de verdade nesta sessão. "Não verificado" quer dizer que a causa é provável, mas não foi confirmada.
@@ -349,6 +394,7 @@ Cada linha vem de algo que aconteceu de verdade nesta sessão. "Não verificado"
 | `MaxNumberOfRegionalEnvironmentsInSubExceeded` | A assinatura só admite 1 ambiente de Container Apps por região; um em `ScheduledForDelete` ainda conta | Espere a exclusão terminar (`az containerapp env list`) |
 | `Forbidden` ao usar o vault | O papel do passo 1.6 ainda não propagou | Espere 1 a 2 minutos e repita |
 | `unrecognized arguments: -n ...` ou `the following arguments are required: --server-name/-s` em `firewall-rule` | Neste subcomando o servidor é `--server-name` e `--name`/`-n` é o nome da regra (confirmado em 08/10/2026) | `firewall-rule create -g $rg --server-name $server --name meu-ip --start-ip-address ... --end-ip-address ...` |
+| Workflow `deploy`: `AADSTS700213: No matching federated identity record found for presented assertion subject` | O subject da credencial federada não é o que o GitHub apresenta (nesta conta ele traz ids numéricos) | Parte 5.4: copie o subject da mensagem para a credencial |
 | Rótulo do `Read-Host` com a senha escrita | A senha ficou no histórico do terminal | O texto entre aspas é só o rótulo; digite a senha no campo oculto |
 
 ### O app no ar não funciona (login "Algo deu errado", páginas com erro)

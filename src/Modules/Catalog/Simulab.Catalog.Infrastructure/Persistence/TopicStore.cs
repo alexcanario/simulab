@@ -27,6 +27,9 @@ public sealed class TopicStore(CatalogModuleDbContext context) : ITopicStore
     public Task<bool> SubjectHasTopicsAsync(Guid subjectId, CancellationToken cancellationToken) =>
         context.Topics.AnyAsync(topic => topic.SubjectId == subjectId, cancellationToken);
 
+    public Task<bool> IsMappedAsync(Guid topicId, CancellationToken cancellationToken) =>
+        context.LiveNoticeSubjectMappings.AnyAsync(mapping => mapping.TopicId == topicId, cancellationToken);
+
     public void Add(Topic topic) => context.Topics.Add(topic);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE.

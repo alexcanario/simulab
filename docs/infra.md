@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-03
+updated: 2026-10-09
 ---
 # Infra
 
@@ -38,10 +38,10 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 | Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in | Deploy command | Check URL | Version (deployed on) |
 |---|---|---|---|---|---|---|---|
 | local | provisioned | printed by the app host | app host | user secrets | not declared | | |
-| staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo` | | |
-| production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo` | | |
+| staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `gh workflow run deploy.yml --ref <main or a tag v*> -f environment=staging` | | |
+| production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `gh workflow run deploy.yml --ref <tag v*> -f environment=production` | | |
 
-The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
+The Deploy command is the deploy workflow (F-65, "Deploy workflow" below); the `aspire deploy` line it runs for each environment is listed there. The `aspire deploy` command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; the tenant and subscription ids are not secrets and are recorded in "Cloud accounts" (F-68), but the command still reads them from the environment, and no credential is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
 
 ### First deploy of staging (F-64)
 The owner runs every command below in the owner's own subscription (F-64 BR10); nothing here is run by Claude, and each one that creates a resource is paid. Run them from the repository root (the worktree root when the item is not merged), in one PowerShell 7 terminal: the variables of step 1 live only in that terminal. Names in capitals (`VAULT_NAME`, `SECRET_VALUE`) are placeholders: replace the whole word, never paste it as it is. The sign-in and the subscription are the owner's: `az login`, then `az account set --subscription <subscription id>`.
@@ -152,6 +152,73 @@ Staging runs during test windows and is parked outside them. These commands are 
 - Start: `az postgres flexible-server start -g <rg> -n <server>`, then `az containerapp update -n redis -g <rg> --min-replicas 1`, `-n api --min-replicas 1`, `-n web --min-replicas 0 --max-replicas 1` (the `web` wakes on the first request).
 - Production is not created until the first release and is never parked.
 
+### Deploy workflow (F-65)
+`.github/workflows/deploy.yml` deploys the ref a run is started on. It starts only by hand: GitHub → Actions → `deploy` → Run workflow, choosing `main` or a tag `v*` as the ref and `staging` or `production` as the environment; or `gh workflow run deploy.yml --ref <ref> -f environment=<environment>`. Staging accepts `main` or a tag `v*`; production only a tag `v*` and waits for the owner's approval in GitHub before it signs in to Azure. A tag created before the workflow was merged has no `deploy.yml` and cannot be deployed this way. Only one deploy per environment runs at a time.
+
+What the workflow runs for each environment (the Aspire CLI installed at the version of the `Aspire.*` packages; a test compares this file with the workflow):
+```
+aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
+aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo
+```
+
+What each GitHub environment holds (nothing about Azure is a secret: the sign-in is OIDC):
+| Name | Kind | Value |
+|---|---|---|
+| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | variable | the app registration of step 1 and the subscription |
+| `AZURE_LOCATION`, `AZURE_RESOURCE_GROUP` | variable | `centralus`, `rg-simulab-staging` (production: its own group, at the first release) |
+| `POSTGRES_ADMIN_USER` | variable | the login of the first deploy (vault `deploy--PostgresAdminUser`) |
+| `OPENIDDICT_CLIENT_SECRET`, `POSTGRES_ADMIN_PASSWORD`, `REDIS_PASSWORD` | secret | the same values every deploy has used (vault `deploy--OpenIddictClientSecret`, `deploy--PostgresAdminPassword`, `deploy--RedisPassword`); production has a managed Redis, so its `REDIS_PASSWORD` is only a placeholder |
+| `CHECK_URL` | variable | optional: `https://<web address>/` (the Web answers 200 there, measured 2026-10-09; the Api's ingress is internal and `/api/v1/system/info` on the Web is a 404); when set, the run waits up to 5 minutes for HTTP 200 |
+
+One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `az login` and `gh auth login`, from any folder (the files it writes are removed at the end). Nothing is stored in GitHub that can sign in to Azure by itself: the federated credential accepts only a run of this repository inside the named environment.
+1. The app registration, its service principal and one federated credential per environment (production's can wait for the first release):
+   ```powershell
+   $sub = az account show --query id -o tsv
+   $tenant = az account show --query tenantId -o tsv
+   $appId = az ad app create --display-name simulab-deploy --query appId -o tsv
+   az ad sp create --id $appId
+   $prefix = gh api repos/alexcanario/simulab/actions/oidc/customization/sub --jq .sub_claim_prefix
+   if (-not $prefix) { $prefix = "repo:alexcanario/simulab" }
+   foreach ($environment in "staging", "production") {
+     @{ name = "github-$environment"; issuer = "https://token.actions.githubusercontent.com"; subject = "${prefix}:environment:$environment"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content "federated-$environment.json"
+     az ad app federated-credential create --id $appId --parameters "@federated-$environment.json"
+     Remove-Item "federated-$environment.json"
+   }
+   ```
+   The subject prefix is asked from GitHub because the sign-in presents the one the repository really uses: this repository uses numeric ids (measured 2026-10-09, `repo:alexcanario@3664703/simulab@1397573907:environment:staging`), and the first run failed with `AADSTS700213` when the credentials carried the plain form (B-25). The plain prefix is only the fallback for a repository whose answer has no `sub_claim_prefix`. When a run still fails that way, compare the subject in the error annotation (`gh run view <id>`) with `az ad app federated-credential list --id $appId --query "[].subject"` and correct the credential with `az ad app federated-credential update`.
+2. The roles, scoped to the environment's resource group only (the deploy creates role assignments for the apps' managed identities, hence the second role). Repeat for production with its own group once it exists:
+   ```powershell
+   $scope = "/subscriptions/$sub/resourceGroups/rg-simulab-staging"
+   az role assignment create --assignee $appId --role Contributor --scope $scope
+   az role assignment create --assignee $appId --role "Role Based Access Control Administrator" --scope $scope
+   ```
+3. The GitHub environments, with the ref policy of the rule (staging: `main` and tags `v*`; production: tags `v*` and the owner as the required reviewer):
+   ```powershell
+   $ownerId = gh api users/alexcanario --jq .id
+   '{"deployment_branch_policy":{"protected_branches":false,"custom_branch_policies":true}}' | gh api -X PUT repos/alexcanario/simulab/environments/staging --input -
+   "{`"reviewers`":[{`"type`":`"User`",`"id`":$ownerId}],`"deployment_branch_policy`":{`"protected_branches`":false,`"custom_branch_policies`":true}}" | gh api -X PUT repos/alexcanario/simulab/environments/production --input -
+   gh api -X POST repos/alexcanario/simulab/environments/staging/deployment-branch-policies -f name=main -f type=branch
+   gh api -X POST repos/alexcanario/simulab/environments/staging/deployment-branch-policies -f name='v*' -f type=tag
+   gh api -X POST repos/alexcanario/simulab/environments/production/deployment-branch-policies -f name='v*' -f type=tag
+   ```
+4. The variables of the table above, for staging (production gets its own at the first release):
+   ```powershell
+   gh variable set AZURE_CLIENT_ID --env staging --repo alexcanario/simulab --body $appId
+   gh variable set AZURE_TENANT_ID --env staging --repo alexcanario/simulab --body $tenant
+   gh variable set AZURE_SUBSCRIPTION_ID --env staging --repo alexcanario/simulab --body $sub
+   gh variable set AZURE_LOCATION --env staging --repo alexcanario/simulab --body centralus
+   gh variable set AZURE_RESOURCE_GROUP --env staging --repo alexcanario/simulab --body rg-simulab-staging
+   gh variable set POSTGRES_ADMIN_USER --env staging --repo alexcanario/simulab --body <the login of the first deploy>
+   gh variable set CHECK_URL --env staging --repo alexcanario/simulab --body https://<web address>/
+   ```
+5. The three secrets: each command asks for the value at a hidden prompt, so it never reaches the shell history. Use the values the first deploy used (step 1 of "First deploy of staging"; they are also in the vault):
+   ```powershell
+   gh secret set OPENIDDICT_CLIENT_SECRET --env staging --repo alexcanario/simulab
+   gh secret set POSTGRES_ADMIN_PASSWORD --env staging --repo alexcanario/simulab
+   gh secret set REDIS_PASSWORD --env staging --repo alexcanario/simulab
+   ```
+6. Read it back: `gh api repos/alexcanario/simulab/environments` lists both environments, production with a reviewer; `gh variable list --env staging --repo alexcanario/simulab` lists the variables.
+
 ### What the deploy creates for email (F-66)
 `aspire deploy` creates, from `src/Hosts/Simulab.AppHost/Bicep/email.bicep`: an Email Communication Service and its Azure-managed domain (sender `DoNotReply@<id>.azurecomm.net`, display name `Simulab`), a Communication Service linked to that domain, both with data location Brazil (ADR-0003), and one role assignment, "Communication and Email Service Owner" on the Communication Service alone, for the Api's managed identity alone (a custom send-only role would need `roleDefinitions/write`, which the deploying account does not have). No manual step and no secret. Staging and production send through it over its HTTP API; any recipient is allowed. The Azure-managed domain has low sending limits, which Simulab's own domain (F-87) lifts; bounces and spam reports are F-88. The processor of the emails is Microsoft (Azure Communication Services).
 
@@ -162,8 +229,48 @@ Data region: every user's data, Portuguese users included, is hosted in Brazil S
 |---|---|---|
 | Git remote | provisioned | GitHub, repository `alexcanario/simulab` |
 | CI (build + tests on pull requests and `main`, no deploy stages; F-62) | provisioned | GitHub Actions, `.github/workflows/ci.yml` |
-| Deploy workflow (OIDC sign-in, GitHub environments, approval for production) | planned | GitHub Actions, F-65 |
+| Deploy workflow (OIDC sign-in, GitHub environments, approval for production) | provisioned | GitHub Actions, `.github/workflows/deploy.yml` (F-65); the one-time setup is "Deploy workflow" above |
 | Board | provisioned | GitHub Issues + Projects, repository `alexcanario/simulab` |
+
+## Access
+Every URI of the project, how Claude signs in to it and where its credential is kept (F-68). This repository is public: the table holds a pointer to where a credential is kept and never a credential value. Before a board or pipeline operation Claude runs the row's `Check`; when it fails, Claude stops, quotes the error and asks the owner to run the row's `Claude signs in with` command. `Credential kept in` is one of: `none`, `gh keyring`, `az login`, `Key Vault: <secret name>`, `user secrets: <key>`, `app host`, `owner only`. A `planned` row has `—` as URI until its item fills it. The local hosts keep their details in "Run locally"; the rows below point to them.
+
+| What | Status | URI | Claude signs in with | Check | Credential kept in |
+|---|---|---|---|---|---|
+| Repository | provisioned | `https://github.com/alexcanario/simulab` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Board: issues | provisioned | `https://github.com/alexcanario/simulab/issues` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Board: project | provisioned | `https://github.com/users/alexcanario/projects/11` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Releases | provisioned | `https://github.com/alexcanario/simulab/releases` | `gh auth login` | `gh auth status` | `gh keyring` |
+| CI pipeline (GitHub Actions) | provisioned | `https://github.com/alexcanario/simulab/actions/workflows/ci.yml` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Deploy pipeline (GitHub Actions) | planned | — | `gh auth login` | `gh auth status` | `gh keyring` |
+| Azure portal and subscription | provisioned | `https://portal.azure.com` | `az login` | `az account show` | `az login` |
+| Key Vault | planned | — | `az login` | `az account show` | `az login` |
+| Staging Web | planned | — | `none` | — | `none` |
+| Staging Api | planned | — | `none` | — | `none` |
+| Production Web | planned | — | `none` | — | `none` |
+| Production Api | planned | — | `none` | — | `none` |
+| Local Web | provisioned | `https://localhost:7125` | `none` | — | `none` |
+| Local UI kit gallery | provisioned | `https://localhost:7125/dev/ui` | `none` | — | `none` |
+| Local Api | provisioned | `https://localhost:7287` | `none` | — | `none` |
+| Local OpenAPI document | provisioned | `https://localhost:7287/openapi/v1.json` | `none` | — | `none` |
+| Local token endpoint | provisioned | `https://localhost:7287/connect/token` | `none` | — | `none` |
+| Local Aspire dashboard | provisioned | `https://localhost:17162` | `none` | — | `app host` |
+| Local Mailpit | provisioned | linked from the dashboard (its port changes on each start) | `none` | — | `none` |
+| Local PostgreSQL | provisioned | `127.0.0.1:5432` (see "Run locally") | `none` | — | `app host` |
+| Local Redis | provisioned | connection string generated by the app host | `none` | — | `app host` |
+| Claude API console | provisioned | `https://console.anthropic.com` | `owner only` | — | `user secrets: Ai:ApiKey` |
+| Google Cloud console (OAuth client, F-20) | provisioned | `https://console.cloud.google.com/apis/credentials` | `owner only` | — | `user secrets: Google:ClientSecret` |
+| Former board (Azure Boards) | retired | `https://dev.azure.com/acanariopt/simulab` | `none` | — | `none` |
+
+The former board's items were migrated to GitHub (the "Migrado de AB#..." notes on the migrated issues); whether that Azure DevOps project still exists is not verified.
+
+## Cloud accounts
+One row per non-local environment of "Environments": the client's cloud account its deploy lands in (agile@canary template). Tenant and subscription ids are identifiers, not secrets, so they are committed here; no secret ever goes in this file. An id that is not known yet stays **empty** (not `—` or `TBD`): `/agile:publish` then stops with "has no Tenant: fill it with the client's tenant id" instead of failing on a placeholder. A filled Tenant or Subscription is a GUID. They come from the administrator of the client's cloud account (the owner, for Simulab); F-64's first deploy brings them.
+
+| Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region |
+|---|---|---|---|---|---|---|
+| staging | Simulab | azure | | | | brazilsouth |
+| production | Simulab | azure | | | | brazilsouth |
 
 ## Expected secrets
 Names only. None exists yet; each arrives with the feature that needs it.
@@ -238,8 +345,8 @@ The Web picks up the change on the next page load, at most a minute after its la
 ## Measured times
 | What | Budget | Last measured (date) |
 |---|---|---|
-| Full build | | 24 s, 0 new warnings (2026-10-08, F-64). Earlier, F-66: 23 s; F-63: 17 s; F-59: 23 s; F-57: 17 s; B-24: B-24: 28 s |
-| Full test suite | < 5 min | 2395 tests in 115 s, slowest projects 1 m 49 s (Identity and Catalog), 24 s build (2026-10-08, F-64). Before: 2350 tests in 89 s, slowest projects 1 m 24 s (Identity) and 1 m 21 s (Catalog), 23 s build (2026-10-06, F-66). Earlier, F-63: 2323 tests in 88 s, slowest projects 1 m 23 s (Identity) and 1 m 22 s (Catalog), 17 s build. Earlier, F-59: 2312 tests in 105 s, slowest projects 1 m 40 s (Identity) and 1 m 32 s (Catalog), 23 s build. Earlier, F-57: 2307 tests in 92 s, slowest projects 1 m 27 s (Identity) and 1 m 26 s (Catalog), 17 s build (2026-10-06, F-57). Earlier, B-24: 2219 tests in 116 s, slowest project 1 m 48 s (Identity, projects run in parallel, machine shared with other sessions), 28 s build. Earlier, F-54: 2215 tests in 76 s. Earlier, F-51: 2198 tests in 141 s; its first full run failed 24 Identity tests, the same project alone passed 408 of 408 and a second full run was green |
+| Full build | | 25 s, 0 new warnings (2026-10-09, F-65). Earlier, F-68: 18 s; F-75: 43 s; F-64: 24 s; F-66: 23 s; F-63: 17 s; F-59: 23 s; F-57: 17 s; B-24: B-24: 28 s |
+| Full test suite | < 5 min | 2619 tests, 0 failures, slowest projects 2 m 9 s (Catalog) and 2 m 7 s (Identity), 25 s build (2026-10-09, F-65; the total wall time was not timed). Before: 2598 tests in 124 s, slowest projects 2 m (Identity and Catalog), 18 s build (2026-10-09, F-68). Before: 2578 tests in 196 s, slowest projects 3 m 4 s (Identity and Catalog), 43 s build (2026-10-09, F-75). Before: 2395 tests in 115 s, slowest projects 1 m 49 s (Identity and Catalog), 24 s build (2026-10-08, F-64). Before: 2350 tests in 89 s, slowest projects 1 m 24 s (Identity) and 1 m 21 s (Catalog), 23 s build (2026-10-06, F-66). Earlier, F-63: 2323 tests in 88 s, slowest projects 1 m 23 s (Identity) and 1 m 22 s (Catalog), 17 s build. Earlier, F-59: 2312 tests in 105 s, slowest projects 1 m 40 s (Identity) and 1 m 32 s (Catalog), 23 s build. Earlier, F-57: 2307 tests in 92 s, slowest projects 1 m 27 s (Identity) and 1 m 26 s (Catalog), 17 s build (2026-10-06, F-57). Earlier, B-24: 2219 tests in 116 s, slowest project 1 m 48 s (Identity, projects run in parallel, machine shared with other sessions), 28 s build. Earlier, F-54: 2215 tests in 76 s. Earlier, F-51: 2198 tests in 141 s; its first full run failed 24 Identity tests, the same project alone passed 408 of 408 and a second full run was green |
 
 Until B-19 the suite was not reliably green under its own parallel load: 2 of 3 full runs failed on a test the
 change had nothing to do with. B-19 did not close it: on 2026-10-05 (F-51) one full run failed 24 Identity tests

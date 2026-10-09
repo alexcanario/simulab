@@ -1,10 +1,17 @@
 {
-  "currentVersion": "2026-v1",
+  "currentVersion": "2026-v2",
   "versions": [
     {
       "version": "2026-v1",
       "effectiveDate": "2026-09-17",
       "file": "2026-v1.md",
+      "title": "Privacy policy",
+      "isPlaceholder": true
+    },
+    {
+      "version": "2026-v2",
+      "effectiveDate": "2026-10-09",
+      "file": "2026-v2.md",
       "title": "Privacy policy",
       "isPlaceholder": true
     }

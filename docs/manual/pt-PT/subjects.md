@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: pt-PT
-features: [F-79, F-51]
-updated: 2026-10-05
+features: [F-79, F-51, F-75]
+updated: 2026-10-09
 ---
 # Disciplinas e tópicos
 
@@ -41,7 +41,10 @@ como estava e só os tópicos em falta são acrescentados nela.
 ### Eliminar uma disciplina
 1. Uma disciplina que ainda tem tópicos não pode ser eliminada: o botão Eliminar fica desativado, e ao apontar
    para ele aparece o motivo. Elimine primeiro os tópicos, na página da disciplina.
-2. Sem tópicos, escolha **Eliminar** na linha dela e confirme. A disciplina sai da lista. O nome dela continua
+2. Uma disciplina mapeada inteira por disciplinas do aviso (ver [Edições de um exame](exam-editions.md)) também
+   não pode ser eliminada: o botão Eliminar fica desativado e explica o motivo. Retire-a primeiro desses
+   mapeamentos. Quando a disciplina tem tópicos, é esse o motivo apresentado.
+3. Sem tópicos e sem mapeamento, escolha **Eliminar** na linha dela e confirme. A disciplina sai da lista. O nome dela continua
    ocupado, para ninguém registar uma segunda com o mesmo nome por engano.
 
 ### Trabalhar com os tópicos de uma disciplina
@@ -50,6 +53,9 @@ como estava e só os tópicos em falta são acrescentados nela.
 3. Escolha **Editar** num tópico para o renomear. Para o mover para outra disciplina, pesquise e escolha essa
    disciplina na mesma janela.
 4. Escolha **Eliminar** num tópico e confirme. Ele sai da página, e a contagem de tópicos da disciplina desce um.
+   Um tópico mapeado por disciplinas do aviso não pode ser eliminado: o botão Eliminar fica desativado e explica
+   o motivo. Um mapeamento que só existe numa disciplina do aviso eliminada ou numa edição eliminada não conta.
+5. Mover um tópico mapeado para outra disciplina é permitido: as disciplinas do aviso que o mapeiam acompanham-no.
 
 ## Campos
 | Campo | O que é | Regras |
@@ -70,6 +76,9 @@ Os nomes aparecem exatamente como foram escritos, em todos os idiomas da aplica�
 | O nome é demasiado longo. Use no máximo 150 carateres. / Use no máximo 200 carateres. | O nome passa do limite. | Encurte o nome. |
 | Esta área não está na lista. Escolha uma das áreas oferecidas. | A área não é uma da lista fixa. | Escolha uma área da lista, ou nenhuma. |
 | Esta disciplina tem tópicos. Elimine-os primeiro, na página da disciplina. | A disciplina ainda tem pelo menos um tópico. | Abra a disciplina, elimine os tópicos e volte. |
+| Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar. | Aparece no Eliminar desativado: disciplinas do aviso mapeiam a disciplina inteira. | Retire-a dessas disciplinas do aviso e depois elimine. |
+| Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar. | Aparece no Eliminar desativado: disciplinas do aviso mapeiam o tópico. | Retire-o dessas disciplinas do aviso e depois elimine. |
+| Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada. / Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada. | Alguém a mapeou com o seu ecrã aberto. | Retire primeiro o mapeamento. |
 | Esta disciplina já não existe. Atualize a lista. | Alguém eliminou a disciplina enquanto o seu ecrã estava aberto. | Recarregue a página. |
 | Este tópico já não existe. Atualize a lista. | Alguém eliminou o tópico enquanto o seu ecrã estava aberto. | Recarregue a página. |
 | Página não encontrada | A sua conta não gere o catálogo. | Fale com um administrador se achar que devia. |

@@ -18,5 +18,7 @@ internal static class GallerySections
         "gallery-kit-parameters",
         // F-74: free text with suggestions.
         "gallery-suggest-field",
+        // F-75: the read-only chip and the multi-pick field.
+        "gallery-chip", "gallery-multi-pick-field",
     ];
 }

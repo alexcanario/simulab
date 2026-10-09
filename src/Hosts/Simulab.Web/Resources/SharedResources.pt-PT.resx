@@ -686,4 +686,43 @@
   <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Indique um número inteiro de 1 a 500, ou deixe vazio.</value></data>
   <data name="notice_subject.duplicate" xml:space="preserve"><value>Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam).</value></data>
   <data name="notice_subject.move_invalid" xml:space="preserve"><value>Esta disciplina não pode ir nesse sentido. A lista foi recarregada.</value></data>
+  <data name="Common.RemoveItem" xml:space="preserve"><value>Retirar {0}</value></data>
+  <data name="NoticeSubjects.Field.Covers" xml:space="preserve"><value>Abrange</value></data>
+  <data name="NoticeSubjects.Field.Covers.Placeholder" xml:space="preserve"><value>Pesquise uma disciplina ou um tópico</value></data>
+  <data name="NoticeSubjects.Field.Covers.Hint" xml:space="preserve"><value>Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do aviso abrange: escolha uma disciplina inteira ou apenas alguns dos seus tópicos. No máximo 50 itens.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Options" xml:space="preserve"><value>Taxonomia: disciplinas e tópicos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Picked" xml:space="preserve"><value>Itens escolhidos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Count" xml:space="preserve"><value>Escolhidos: {0} de {1}</value></data>
+  <data name="NoticeSubjects.Field.Covers.None" xml:space="preserve"><value>Nada escolhido: a disciplina fica sem mapeamento.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Loading" xml:space="preserve"><value>A carregar a taxonomia...</value></data>
+  <data name="NoticeSubjects.Field.Covers.LoadFailed" xml:space="preserve"><value>Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui.</value></data>
+  <data name="NoticeSubjects.Field.Covers.EmptyTaxonomy" xml:space="preserve"><value>A taxonomia ainda não tem disciplinas. Registe-as em Conteúdo › Disciplinas.</value></data>
+  <data name="NoticeSubjects.Field.Covers.LimitReached" xml:space="preserve"><value>Limite de {0} itens atingido. Retire um para escolher outro.</value></data>
+  <data name="NoticeSubjects.Covers.WholeMarker" xml:space="preserve"><value>disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Topic" xml:space="preserve"><value>{0} › {1}</value></data>
+  <data name="NoticeSubjects.Covers.Topic.Spoken" xml:space="preserve"><value>{1}, tópico de {0}</value></data>
+  <data name="NoticeSubjects.Covers.CoveredByWhole" xml:space="preserve"><value>Já abrangido pela disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.WholeBlocked" xml:space="preserve"><value>Retire os tópicos dela já escolhidos para escolher a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Added" xml:space="preserve"><value>Escolhido: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Removed" xml:space="preserve"><value>Retirado: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Cleared" xml:space="preserve"><value>Todos os itens foram retirados.</value></data>
+  <data name="NoticeSubjects.Covers.Overlaps" xml:space="preserve"><value>repete a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Gone" xml:space="preserve"><value>já não existe na taxonomia</value></data>
+  <data name="NoticeSubjects.Row.NotMapped" xml:space="preserve"><value>Não mapeada</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.One" xml:space="preserve"><value>1 disciplina ainda não está mapeada.</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} disciplinas ainda não estão mapeadas.</value></data>
+  <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar.</value></data>
+  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar.</value></data>
+  <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo.</value></data>
+  <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>No máximo 50 itens por disciplina do aviso.</value></data>
+  <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente.</value></data>
+  <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira.</value></data>
+  <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente.</value></data>
+  <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada.</value></data>
+  <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada.</value></data>
+  <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
+  <data name="Gallery.Chip.Hint" xml:space="preserve"><value>Uma etiqueta só de leitura com ícone e texto secundário opcionais, um estado assinalado e um botão de retirar opcional. Só recebe o foco se tiver o botão.</value></data>
+  <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de escolha múltipla</value></data>
+  <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Pesquisa numa lista local curta, agrupada, e escolhe vários itens; as escolhas aparecem abaixo como chips removíveis.</value></data>
+  <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruta</value></data>
 </root>

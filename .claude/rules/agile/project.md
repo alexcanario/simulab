@@ -102,6 +102,10 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A technical term used with the owner for the first time gets a row in `## Technical terms` of `docs/glossary.md` (term, pt-BR word, meaning) in the same step (F-8).
 - A validation script step that needs a terminal gives the command for Git Bash and for PowerShell 7, each run by Claude before handing over, with the expected output (B-4).
 
+## Access to the infrastructure
+- A step that needs an access listed in the `## Access` table of `docs/infra.md` (the board, a pipeline, Azure) runs the row's `Check` first. When it fails, stop that step, quote the error, and ask the owner to run the row's `Claude signs in with` command; try no other path (F-68).
+- `docs/infra.md` never holds a credential value (the repository is public); it points to where the credential is kept. The `Credential kept in` cell is one of the forms the table's guard test allows (F-68).
+
 ## Sessions and retro
 - One Claude session per checkout. A second session (refine, retro, ship of another item) runs in its own worktree; never switch branches under a running session.
 - A command that writes to the main checkout (`/agile:sync`, `/agile:retro`, a merge) starts by proving no other session is writing there: `git status` twice, a few seconds apart, and `git log -1`. A working tree that changes between the two reads, or a commit that appeared without this session making it, stops the command and goes to the owner (sync 0.0.63).
@@ -120,3 +124,4 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A test named for an event or a state change asserts that event or state itself; an assertion that cannot fail (an id not empty) does not count, and the review reads each "records X" test for it (F-53).
 - A test of the app host's model never calls `GetEnvironmentVariableValuesAsync` (obsolete, and in a run-mode model it resolves endpoint references that have no port yet, so it hung the project for more than 500 s): read the environment with `EnvironmentOfAsync` of `AppHostModelTests` (the Publish operation), or, to prove a key is absent in run mode, invoke the resource's `EnvironmentCallbackAnnotation` callbacks into an `EnvironmentCallbackContext` and read the keys; 25 tests then ran in 4 s (F-66).
 - In staging and production, every login or password a service keeps (the PostgreSQL administrator, the Redis password) is a fixed deploy parameter held in the vault as `deploy--<Name>`, never a value Aspire generates again at each deploy: a `--clear-cache` deploy changed them and the Api logged `28P01` and `NOAUTH` (F-64, D20 and D21).
+- A merge conflict is resolved with Edit, never a script, and before `git commit` a check that fails on a match runs (`grep -q '^<<<<<<<' <file> && exit 1`): a `grep -c` chained with `&&` exits 0 and the commit carried the markers (F-65, `2cead5d`, fixed in `b2043c6`).
