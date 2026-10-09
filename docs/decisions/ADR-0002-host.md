@@ -7,6 +7,8 @@ date: 2026-10-03
 
 Technical terms: [glossary](../glossary.md)
 
+> **Region replaced by [ADR-0004](ADR-0004-data-region-central-us.md) (2026-10-09):** decision 1 names Brazil South; the region of record is Azure Central US for staging and production. The rest of this ADR (host, parking, cost ceiling, deploy command) stands. The text below is the record of 2026-10-03 and is not rewritten.
+
 ## Context
 ADR-0001 #5 and #32 name Azure Container Apps as the planned target, created only near the first release so that no environment costs money before there is something to publish. `docs/infra.md` lists `staging` and `production` as `planned` with no deploy command. Before the first testers need a staging environment the project must know where it runs, what it costs per month and with which command (F-62).
 
