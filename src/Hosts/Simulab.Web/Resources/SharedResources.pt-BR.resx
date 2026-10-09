@@ -686,4 +686,43 @@
   <data name="notice_subject.question_count_invalid" xml:space="preserve"><value>Informe um número inteiro de 1 a 500, ou deixe vazio.</value></data>
   <data name="notice_subject.duplicate" xml:space="preserve"><value>Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam).</value></data>
   <data name="notice_subject.move_invalid" xml:space="preserve"><value>Esta disciplina não pode ir nessa direção. A lista foi recarregada.</value></data>
+  <data name="Common.RemoveItem" xml:space="preserve"><value>Remover {0}</value></data>
+  <data name="NoticeSubjects.Field.Covers" xml:space="preserve"><value>Abrange</value></data>
+  <data name="NoticeSubjects.Field.Covers.Placeholder" xml:space="preserve"><value>Busque uma disciplina ou um tópico</value></data>
+  <data name="NoticeSubjects.Field.Covers.Hint" xml:space="preserve"><value>Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do edital cobre: escolha uma disciplina inteira ou só alguns tópicos dela. Até 50 itens.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Options" xml:space="preserve"><value>Taxonomia: disciplinas e tópicos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Picked" xml:space="preserve"><value>Itens escolhidos</value></data>
+  <data name="NoticeSubjects.Field.Covers.Count" xml:space="preserve"><value>Escolhidos: {0} de {1}</value></data>
+  <data name="NoticeSubjects.Field.Covers.None" xml:space="preserve"><value>Nada escolhido: a disciplina fica não mapeada.</value></data>
+  <data name="NoticeSubjects.Field.Covers.Loading" xml:space="preserve"><value>Carregando a taxonomia...</value></data>
+  <data name="NoticeSubjects.Field.Covers.LoadFailed" xml:space="preserve"><value>Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui.</value></data>
+  <data name="NoticeSubjects.Field.Covers.EmptyTaxonomy" xml:space="preserve"><value>A taxonomia ainda não tem disciplinas. Cadastre-as em Conteúdo › Disciplinas.</value></data>
+  <data name="NoticeSubjects.Field.Covers.LimitReached" xml:space="preserve"><value>Limite de {0} itens atingido. Remova um para escolher outro.</value></data>
+  <data name="NoticeSubjects.Covers.WholeMarker" xml:space="preserve"><value>disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Topic" xml:space="preserve"><value>{0} › {1}</value></data>
+  <data name="NoticeSubjects.Covers.Topic.Spoken" xml:space="preserve"><value>{1}, tópico de {0}</value></data>
+  <data name="NoticeSubjects.Covers.CoveredByWhole" xml:space="preserve"><value>Já coberto pela disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.WholeBlocked" xml:space="preserve"><value>Remova os tópicos dela já escolhidos para escolher a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Added" xml:space="preserve"><value>Escolhido: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Removed" xml:space="preserve"><value>Removido: {0}.</value></data>
+  <data name="NoticeSubjects.Covers.Cleared" xml:space="preserve"><value>Todos os itens foram removidos.</value></data>
+  <data name="NoticeSubjects.Covers.Overlaps" xml:space="preserve"><value>repete a disciplina inteira</value></data>
+  <data name="NoticeSubjects.Covers.Gone" xml:space="preserve"><value>não existe mais na taxonomia</value></data>
+  <data name="NoticeSubjects.Row.NotMapped" xml:space="preserve"><value>Não mapeada</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.One" xml:space="preserve"><value>1 disciplina ainda não está mapeada.</value></data>
+  <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} disciplinas ainda não estão mapeadas.</value></data>
+  <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Disciplinas do edital estão mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de excluir.</value></data>
+  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Disciplinas do edital estão mapeadas para este tópico. Retire-o desses mapeamentos antes de excluir.</value></data>
+  <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>Um dos itens escolhidos não é válido. Remova-o e escolha de novo.</value></data>
+  <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>No máximo 50 itens por disciplina do edital.</value></data>
+  <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos não existe mais na taxonomia; ele está marcado abaixo. Remova-o e salve de novo.</value></data>
+  <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido junto com a disciplina inteira dele; os itens estão marcados abaixo. Remova o tópico ou a disciplina inteira.</value></data>
+  <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa salvou esta disciplina ao mesmo tempo. Salve de novo.</value></data>
+  <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada.</value></data>
+  <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do edital e não pode ser excluído. A lista foi recarregada.</value></data>
+  <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
+  <data name="Gallery.Chip.Hint" xml:space="preserve"><value>Um rótulo somente de leitura com ícone e texto secundário opcionais, um estado marcado e um botão de remover opcional. Só recebe foco se tiver o botão.</value></data>
+  <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de múltipla escolha</value></data>
+  <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Busca em uma lista local curta, agrupada, e escolhe vários itens; as escolhas aparecem abaixo como chips removíveis.</value></data>
+  <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruta</value></data>
 </root>

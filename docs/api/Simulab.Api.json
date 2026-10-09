@@ -1879,6 +1879,19 @@
         }
       }
     },
+    "/api/v1/catalog/taxonomy": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "GetTaxonomy",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/catalog/subjects": {
       "get": {
         "tags": [
@@ -2259,6 +2272,28 @@
         },
         "description": "What a move sends (F-74, UC4). The direction travels as text so an unknown or missing value gets its own\r\n400 code, `notice_subject.move_invalid`, instead of an uncoded deserialization failure."
       },
+      "NoticeSubjectMappingRequest": {
+        "type": "object",
+        "properties": {
+          "subjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The canonical subject covered whole, or null when the entry is a topic.",
+            "format": "uuid"
+          },
+          "topicId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The canonical topic covered, or null when the entry is a whole subject.",
+            "format": "uuid"
+          }
+        },
+        "description": "One entry of a notice subject's mapping (F-75, BR1): a whole canonical subject or one canonical topic,\r\nexactly one of the two. Both ids are nullable in the contract so a missing one is a validation error with\r\na code, never a silent default."
+      },
       "PasswordResetTokenCheckRequest": {
         "required": [
           "token"
@@ -2559,6 +2594,16 @@
             ],
             "description": "The number of questions the notice states, 1 to 500; null when it does not say (BR4).",
             "format": "int32"
+          },
+          "mappings": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/NoticeSubjectMappingRequest"
+            },
+            "description": "The full mapping of the row (F-75, BR7): a save replaces it. Null or empty means not mapped (BR2), so a\r\nrequest that leaves the field out clears the mapping."
           }
         },
         "description": "What the notice subject dialog sends (F-74, UC2 and UC3). Every field is optional in the contract so a\r\nmissing one is a validation error with a code, never a silent default."

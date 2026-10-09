@@ -88,4 +88,25 @@ public static class CatalogErrorCodes
 
     /// <summary>F-74 BR6: the row is first or last in its group, or the direction is not up or down.</summary>
     public const string NoticeSubjectMoveInvalid = "notice_subject.move_invalid";
+
+    /// <summary>F-75 BR1: an entry names both a subject and a topic, or neither.</summary>
+    public const string NoticeSubjectMappingInvalid = "notice_subject.mapping_invalid";
+
+    /// <summary>F-75 BR1: more than 50 distinct entries.</summary>
+    public const string NoticeSubjectMappingTooMany = "notice_subject.mapping_too_many";
+
+    /// <summary>F-75 BR3: an entry points at a subject or topic that does not exist or was deleted.</summary>
+    public const string NoticeSubjectMappingTargetNotFound = "notice_subject.mapping_target_not_found";
+
+    /// <summary>F-75 BR4: a topic is mapped together with its own whole subject.</summary>
+    public const string NoticeSubjectMappingOverlap = "notice_subject.mapping_overlap";
+
+    /// <summary>F-75: two saves of one row added the same entry at once; the second one is refused and may be retried.</summary>
+    public const string NoticeSubjectMappingConflict = "notice_subject.mapping_conflict";
+
+    /// <summary>F-75 BR9: a live notice subject maps this whole subject, so it cannot be deleted.</summary>
+    public const string SubjectInUse = "subject.in_use";
+
+    /// <summary>F-75 BR9: a live notice subject maps this topic, so it cannot be deleted.</summary>
+    public const string TopicInUse = "topic.in_use";
 }

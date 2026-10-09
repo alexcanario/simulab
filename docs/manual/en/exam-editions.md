@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: en
-features: [F-35, F-74]
-updated: 2026-10-04
+features: [F-35, F-74, F-75]
+updated: 2026-10-09
 ---
 # Exam editions
 
@@ -78,12 +78,25 @@ In the **Notice subjects** card, below the edition form, you record the subjects
 - **Edit** opens the same dialog filled in. Changing the group moves the subject to the end of the new group; changing only the name or the number keeps its position.
 - **Delete** asks for confirmation and removes the subject from the edition. It can be added again later.
 
+### Map a notice subject to the taxonomy
+A notice names its subjects in its own words ("Raciocínio Lógico-Matemático"). The **Covers** field says which [subjects and topics](subjects.md) of Simulab's shared list that heading means, so every edition speaks the same vocabulary.
+1. Choose **Edit** on the notice subject (or fill it in while adding one).
+2. In **Covers**, click the field or press Arrow down. The list shows every subject, each one starting with its "whole subject" option, followed by its topics. Type to filter: capitals and accents do not matter, and a subject whose name matches shows all its topics.
+3. Pick a whole subject when the heading covers all of it, or only the topics it covers. The list stays open so you can pick several; each pick shows below as a chip ("Subject · whole subject" or "Subject › Topic"), and the counter says how many you picked out of 50.
+4. Remove a pick with the X of its chip, or every pick with **Clear the selection**. Choose **Save**.
+
+- While a subject is picked whole, its topics are greyed: the whole subject already covers them. While some of its topics are picked, the whole-subject option is greyed: remove those topics first. Pointing at a greyed option says why.
+- The same subject or topic may be picked by several notice subjects of one edition, for a law the notice lists under two headings.
+- Mapping is optional. A row with nothing picked shows the chip **Not mapped**, and the footer counts the rows not mapped yet. The edition can still be saved and published.
+- When a curator moves a mapped topic to another subject, the row shows it under its new subject without being edited.
+
 ### Notice subject fields
 | Field | Meaning | Rules |
 |---|---|---|
 | Group | The heading under which the notice lists the subject | Optional, up to 100 characters. Empty is "No group" |
 | Subject | The subject as the notice names it | Required, 2 to 200 characters |
 | Number of questions | How many questions the notice gives the subject | Optional, whole number from 1 to 500 |
+| Covers | The taxonomy subjects and topics the notice subject covers | Optional, at most 50 items. A topic cannot be picked together with its own whole subject |
 
 In one edition, a subject name cannot repeat inside the same group (capitals and accents do not count; "no group" is one group). A deleted subject does not count.
 
@@ -98,9 +111,17 @@ In one edition, a subject name cannot repeat inside the same group (capitals and
 | This group already has a subject with this name (capitals and accents do not count). | The same subject is already in the group. | Change the name or the group. |
 | This subject is no longer in the edition. The list was reloaded. | Someone deleted it while your screen was open. | Check the refreshed list. |
 | This subject cannot move that way. The list was reloaded. | Someone else already moved it. | Check the current order. |
+| Limit of 50 items reached. Remove one to pick another. | Covers already has 50 picks. | Remove a pick first. |
+| At most 50 items per notice subject. | The save sent more than 50 picks. | Remove picks and save again. |
+| A topic cannot be picked together with its whole subject; the items are marked below. Remove the topic or the whole subject. | A topic and its own whole subject were picked together. | Remove one of the marked chips. |
+| One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again. | Someone deleted a picked subject or topic while your screen was open. | Remove the marked chip and save. |
+| One of the picked items is not valid. Remove it and pick it again. | A pick could not be read. | Remove it and pick it again. |
+| Someone else saved this notice subject at the same time. Save again. | Two people saved the same row at once. | Save again. |
+| The taxonomy could not be loaded. The items already picked stay here. | The list of subjects did not load. | Reload the page and try again. |
 
 ## Related pages
 - [Exams](exams.md): the exams in the catalog (Admins)
 - [Organizers](organizers.md): the boards an edition names (Admins)
+- [Subjects and topics](subjects.md): the shared list a notice subject is mapped to (Admins)
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Simulab](index.md)
