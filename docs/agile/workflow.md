@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.32.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.37.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -42,7 +42,7 @@ Contents
 | Validate each feature on screen | Implements, tests and hands over a validation script |
 | Authorize merges (typing `/agile:ship <id>` is the authorization) | Merges, removes the branch and worktree, updates the board and the app manual, runs the retro |
 
-Subagents are the exception: a fresh-context reviewer for risky changes, two read-only passes before the code of a heavier item (`system-design` proposes the slice, the contracts and the data; `architect` reviews that proposal), two producing roles for screens (`ux-designer` designs one, `frontend` implements the mockup you approved), or parallel work that does not touch the same files. They are named jobs, not a chain of roles per feature, and none of them talks to you: the conversation is always with Claude, which reads what an agent wrote or proposed before following it. One writer at a time in a folder, and the two passes write nothing at all.
+Subagents are the exception: a fresh-context reviewer for risky changes, two read-only passes before the code of a heavier item (`system-design` proposes the slice, the contracts and the data; `architect` reviews that proposal), two producing roles for screens (`ux-designer` designs one, `frontend` implements the mockup you approved), or parallel work that does not touch the same files. They are named jobs, not a chain of roles per feature, and none of them talks to you: the conversation is always with Claude, which reads what an agent wrote or proposed before following it. One writer at a time in a folder, and the two passes write nothing at all. Every agent works in the item's worktree: Claude's brief gives it the worktree as an absolute path, every other path absolute inside it, and the list `Other items in progress: <id> → <worktree path>` taken from `git worktree list`; the agent passes the worktree as the folder of every search, reads another item's status only from that item's own worktree (or says it is unknown), and the `reviewer` reads the code around the diff there too. A search left in the main checkout once reported types committed on the item branch as missing; now a hook refuses it (section 9).
 
 **Models.** The model is chosen per activity, on purpose: the independent review, the design and architecture passes and the screen design run on the strongest model, code searches on the smallest, screen implementation and bulk mechanical work that the tests verify on a mid model, and the main session on the model you pick. Each agent (`reviewer`, `system-design`, `architect`, `ux-designer`, `frontend`) declares its default model; your project overrides it in the "Models" section of `CLAUDE.md` (quiz question 34), never by editing the plugin.
 
@@ -89,6 +89,8 @@ For a desktop app, question 2f follows 2a2 when 2a2 chose an API, with the same 
 
 For a site that needs a mobile app from day one, question 2 first weighs the shape of the brief: when the API is the main consumer or there are several business areas, it recommends `mobile` (on `monolith`, or `modular-monolith`); when the product is a site with screens over simple data, or a public site, it recommends `web-app` or `website` and question 2e follows, right after 2 (after 2c for `website`): **a mobile app from day one: no · yes, MAUI Blazor Hybrid · yes, MAUI XAML**. The recommendation comes from the brief: no app named → no; an app named → Hybrid, so the site's screens are born where the app will reuse them. The app lives in this repository and solution; an app in its own repository is still started by its own bootstrap (question 2d). With yes, Claude lists the brief's features numbered in the same message, grouped as the brief groups them and all ticked (never a public section of a `website`); you answer "ok" or the numbers to untick. The bootstrap then adds `<App>.Contracts` and, with Hybrid, `<App>.Shared` (a Razor Class Library whose components have no `@page` and no render mode, with texts in every language of the app), both covered by the architecture and layout tests; it does **not** add the app's projects, the `Complement:` line or a second `<Version>`: those come with the epic's first item, so `/agile:sync` never asks for an app version before the app exists. The board proposal gains one epic "Mobile app" (`docs/epics/mobile-app.md`, with the list you approved written whole) whose ideas are "Mobile foundation" first, then one "<X> on mobile" per ticked feature; the site's own idea for each ticked feature says its screen is a component in `Shared` (Hybrid) and its rule or query a class in `Features/`, and with Hybrid the UI kit lives in `Shared` too. ADR-0001 records the answer. "No" leaves the bootstrap exactly as it was. Example 14.34.
 
+When question 3 is "containers + Aspire" and the skeleton has an AppHost, question 3a follows it: **fixed local services: yes · no**, yes recommended. Without it the database container gets a new host port on every `aspire run`, so a DataGrip or pgAdmin connection you saved stops working, and the password Aspire generates is one nobody knows. Yes covers every container the AppHost declares (today the database): its image's default port (PostgreSQL 5432, SQL Server 1433, or the next free one when the port is in use on this machine, which Claude checks first; you accept it or type another), a password parameter `<resource>-password` that the bootstrap generates and stores in the AppHost's user secrets (the value is never printed in the chat, never written to a file of the repository), and `WithDataVolume()`, so the data survives a restart. With more than one API in the solution, a free start (such as 5100) is proposed too and each API takes the next port in the order of the solution, `https` at that port + 1000. The answer is `- Local services: fixed` (or `none`) under `Profile:` in `CLAUDE.md`, and a yes also writes `## Local services` in `docs/infra.md`: each service's port, the user-secrets key of its password and its volume, never a value, and how to reset the volume (the image applies the password only when its data is created, so a changed password needs the volume removed, and the data in it is lost). You read the password with `dotnet user-secrets`, and a clone on another machine sets its own. A worktree runs on the same fixed ports but with its own volume, so one app host at a time. Deployed environments do not change: nothing of this runs in publish mode. A project bootstrapped before this has `/agile:sync` propose a "Fixed local services" item while it has an AppHost and neither `- Local services:` line; `none` declines it, and an AppHost that already pins them only needs `- Local services: fixed` written. Example 14.81.
+
 When the brief names an existing code base to reuse and you give Claude access, it reads that code (never edits it) and uses what it finds as reasons. After round 8 comes one **closing question** — "which domain concept worries you most, or did the quiz not touch?" — because the core vocabulary of a domain (a taxonomy, an entitlement model, a scoring rule) rarely fits a fixed question list. What it raises is decided like any quiz question and recorded in ADR-0001.
 
 Outputs, all in English:
@@ -131,9 +133,9 @@ stateDiagram-v2
 | `idea` | Captured from the chat with `/agile:idea`. Title, 2-3 lines and how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and from whom, the suggested path, what can run beside it. What nobody said is written as unknown. A cause it names comes with its evidence (the command and the output line that shows it); without one, `## Start` says `Cause not verified: measure it at /agile:refine`, with the symptom seen. For a feature or bug, before anything is created Claude asks where it lives: one question with the epic it suggests first (an open epic whose goal fits, with the reason), then "New epic" and "No epic"; a new epic is created only after your yes, on the board and as `docs/epics/<slug>.md` (status `draft`). `/agile:epic` and a text that is itself an epic ask nothing. | Claude |
 | `refining` | `/agile:refine` (an answer that turns something into a later item becomes an idea through the same procedure as `/agile:idea`: template, board, next number; an answer that folds an existing open item's scope into this one instead first checks that item — `git worktree list` for its folder and its file or issue for its status. Any status beyond `idea` anywhere blocks an automatic fold: Claude names the other item's status and worktree path and you decide, fold anyway (recorded in `## Decisions` with the reason) or drop it and leave the other item untouched. Still `idea` everywhere, with no worktree: it folds in exactly as before, no new question): before anything is written, Claude creates the item's branch and its own worktree — a folder outside the repository whose full path it tells you — and everything this item produces (the feature file, the cause of a bug, the mockup) is written there, on its branch; an item file not yet committed is moved in and no longer exists where it was created. No checkout is switched, so a session sitting in another item's folder can no longer leave this item's documents on that item's branch. Then Claude reads the related code and checks in today's code every premise about how something already behaves (an earlier item's file is not proof: a later bug may have moved it), every premise about how a library stores or protects data in the library's source or docs, a query-performance premise with `EXPLAIN` on the test container, and a premise a library's docs and source both leave open by reproducing it in a scratch project against a test container (source read raw, never summarized) — a premise that nothing uses a feature is checked by its effect, not by the callers of one helper. A bug whose cause lives only in an unmerged item's branch says so in `## Cause` and waits for that merge before branching. Then Claude asks every open question in one round, as quiz cards grouped by topic (rules, permissions, states, screens, data, packages, scope) with the recommended option first; in a terminal the same questions come as a numbered list. The round includes the new packages the item needs, for the code **and for the tests**, with versions checked against the registry at that moment, so your yes is given once and not in the middle of the build. You answer; at most one follow-up round. A list you approved or edited in the chat (a catalogue, a set of options, numbered choices) is written whole into the item's `## Approved list`, in the approved order with your edits applied, and the file never says "the list shown in the refinement"; before asking for your approval Claude re-reads the file for phrases that send the reader to the chat, and pastes the list in where it finds one. An item whose output is visual (a diagram, a generated page) is prototyped and seen at real size in the viewer it is meant for before you approve it. An authentication or account-linking item gets the independent review (`/agile:review`) on this file, before you approve it. A new or complex screen is designed by the `ux-designer` agent (`/agile:screen`), which never talks to you: Claude reads what it wrote and asks its open points as its own. The feature file is committed on the item's branch, in its worktree. | Claude |
 | `approved` | You approve the feature file after reading it. Open questions block approval. **Gate 1.** | You |
-| `building` | `/agile:build`: first it finds the item's worktree by its branch and says `Worktree of <id>: <path> [<branch>]` (`(created now)` when an older item had none); the status and the clean-tree check are read there, never in the main checkout, and it continues in that worktree — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree and in the foreground, so the Stop gate never builds files it is still writing. The plan lists what the screen removes; Claude removes it before the call (the tests of each removed type first, then the files and what points at them: usings, imports, registrations), because the agent cannot delete a file and never leaves a stub. The agent adapts test helpers, contexts and fixtures freely, and changes an existing assertion only under a named approved criterion. It starts its report with `Nothing here was built or run.` and lists the existing tests that assert what it changed, the removals it needs from Claude and the assumptions it could not verify. Claude then runs the whole suite (the gate's `ship` mode) before reading its files and quotes the real counts, reads every file it names, fixes the failures itself in one planned round and runs the suite again; the agent is not called again. Claude answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). The build report closes the hand-off in one block (example 14.76). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host: tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
-| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. A step that a fix made wrong is corrected with `/agile:script <id> <what changed>`, without a change note. **Gate 2.** | You |
-| `done` | `/agile:ship`: full test suite, app version bumped, merge — typing the command is your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
+| `building` | `/agile:build`: first it finds the item's worktree by its branch and says `Worktree of <id>: <path> [<branch>]` (`(created now)` when an older item had none); the status and the clean-tree check are read there, never in the main checkout, and it continues in that worktree — code and tests for what changed. When the item creates a project, an API contract, a message between modules or a schema change, two read-only passes run before the plan: `system-design` proposes the slice, the contracts, the data and the risks, and `architect` reviews that proposal against the profile and the checks your project really has. They write nothing; Claude verifies both against the files, writes the plan from them and records in `## Decisions` what it accepted and dropped. A thin CRUD skips both. When the item has a mockup you approved, the screen and its tests are written by the `frontend` agent, alone in that worktree and in the foreground, so the Stop gate never builds files it is still writing. The plan lists what the screen removes; Claude removes it before the call (the tests of each removed type first, then the files and what points at them: usings, imports, registrations), because the agent cannot delete a file and never leaves a stub. The agent adapts test helpers, contexts and fixtures freely, and changes an existing assertion only under a named approved criterion. It starts its report with `Nothing here was built or run.` and lists the existing tests that assert what it changed, the removals it needs from Claude and the assumptions it could not verify. Claude then runs the whole suite (the gate's `ship` mode) before reading its files and quotes the real counts, reads every file it names, fixes the failures itself in one planned round and runs the suite again; the agent is not called again. Claude answers its stops or brings you the ones that are decisions (a pattern the kit lacks, a contract that does not exist). The build report closes the hand-off in one block (example 14.76). Domain, API and migrations stay with Claude. Before copying an existing pattern, Claude checks whether an open item exists to remove it and, if so, lets you choose between following it now or recording the copy as debt. Before the coverage table Claude opens the screen through the app host, started from the item's worktree in a background shell and opened in the preview by its URL (no launch configuration is edited), and stops it before its turn ends. When the data is the item's own (an AppHost data volume with no name, or your project's own database knob set for the worktree) it asks nothing; data shared with the main checkout or another worktree needs your yes, once per item, recorded in `## Decisions`. Tests do not see how the component library renders its states (an active link with no contrast, a link that is not a link). Claude reads the page as text; a screenshot is only for a visual check and never while a dialog is open (a timed-out screenshot can drop a Blazor Server circuit and the dialog with it). An accessibility claim the screen section marks `unverified (gallery DOM)` is checked in the rendered markup and corrected. Keyboard checks stay in your validation script. Claude never changes state (sign-ups, counted requests, data) in an app host it did not start: it asks first, or uses data no one else uses and says which. A screen behind sign-in is not checked by Claude, whose rules forbid typing passwords: it says so, checks what needs no account (the route, the 401, the redirect) and puts the signed-in flow in your validation script. Only one feature can be here. | Claude |
+| `validating` | Claude hands over a validation script (≤ 8 steps). You try it on screen. A step that needs a terminal gives the command for Git Bash and for PowerShell 7, with the expected output and how to repeat it, and Claude has already run both. The start step says whose data the app runs on: its own volume (an AppHost data volume with no name: nothing to set), your project's own knob set to `<database>_f<n>` (`_b<n>` for a bug) in both shells, or a plain warning that the local database is shared and the item's migration lands there (example 14.82). A step that asks you to change code names the file, where the lines go and the exact failure to expect, and a step that compiles tells you to stop the app host first (a running host locks `bin/`: `MSB3027`). A step that a fix made wrong is corrected with `/agile:script <id> <what changed>`, without a change note. **Gate 2.** | You |
+| `done` | `/agile:ship`: full test suite, `## Criterion → test` checked (a `pending` row or a test not found stops it), app version bumped, merge — typing the command is your go-ahead (**Gate 3**), board updated, app manual updated, retro. | Claude |
 | `cancelled` | An exit, not a step: only from `idea` or `refining`, only as a duplicate, chosen at the card `/agile:refine` shows when it finds a similar item (below). The file stays with `status: cancelled` and the line `Duplicate of <id> (<date>): <where the improvement went>`, so its number is never reused; the session status and the backlog head ignore it. On GitHub the issue is closed as a duplicate of the other and its project item archived (never Done: that would show undelivered work as delivered); on Azure Boards the state is `Removed`; with no board its row in `docs/agile/backlog.md` is struck through. | You, at the card |
 | `blocked` | A side status, not a step: something outside the work stops the item (a decision, another item, a provider, your own check). `/agile:change <id> --block "<reason>"` sets it from `refining`, `approved`, `building` or `validating`, never from `idea`, `done`, `cancelled` or `blocked`. It needs the reason and who unblocks it (`unknown` is not accepted for either; Claude asks for the missing part and changes nothing). The file says `status: blocked` and, under it, `Blocked (<date>): <what stops it> — unblocked by <who> — returns to <status>`; `## Decisions` gets a line. The item keeps its worktree and branch, holds no WIP slot, and nothing is committed, merged or switched (on a dirty tree Claude says `/agile:pause` writes the `wip` commit). `/agile:build`, `/agile:ship`, `/agile:refine`, `/agile:autopilot` and `/agile:screen` stop on it after the item line, name the reason and print `/agile:change <id> --unblock`; nothing is approved while it is blocked. `--unblock` returns the item to the status named in `returns to`, removes the line and the board mark, and writes the pair line to `## Decisions`; back to `building` or `validating` it is refused while another item is in one of them in that checkout (it names it; `--unblock --worktree` is your OK for parallel work). On the board the GitHub label (or Azure tag) `blocked` is added and the Status field is left alone; with no board, its row in `docs/agile/backlog.md` gets `blocked: <reason>`. `/agile:status` and the session start show a `Blocked:` line per blocked item (id, title, reason, who unblocks it, where it returns to); the line that comes from `## Start` is now called `Waits on:`. | You, with `/agile:change` |
 
@@ -143,7 +145,7 @@ stateDiagram-v2
 
 Small fixes found during validation are done right away, without leaving `validating`.
 
-Before handing over the validation script, Claude shows a **criterion → test** table: every acceptance criterion points to its tests, or is explicitly left to the validation script. The test must go through the path a user reaches (page, endpoint, the handler that calls the code): a method written for a criterion that nothing in the app calls is a gap, even when its own test passes. When an effect leaves the request (an email or an event moves to a queue), every test that asserted it is re-read: "nothing was sent" passes for free once nothing is sent right away. A flaky test is reproduced in a loop (clean build before each run) and its fix proven by the same loop, N green in a row; a test of generated output counts each section, exactly once.
+Before handing over the validation script, Claude keeps a **`## Criterion → test`** section in the feature file, after `## Acceptance criteria`: a two-column table, written when the build starts with every row `pending`, and a row is filled in the same commit that adds its test. Every acceptance criterion points to its tests, or to `validation step <n>` when it can only be checked on screen (the step is in the validation script); no row stays `pending` at the end. Because it lives in the file, a compaction, a pause or a new session still knows which criteria have no test, and `/agile:ship` checks it (14.83). A bug has no such section: its `## Regression test` plays that part. The test must go through the path a user reaches (page, endpoint, the handler that calls the code): a method written for a criterion that nothing in the app calls is a gap, even when its own test passes. When an effect leaves the request (an email or an event moves to a queue), every test that asserted it is re-read: "nothing was sent" passes for free once nothing is sent right away. A flaky test is reproduced in a loop (clean build before each run) and its fix proven by the same loop, N green in a row; a test of generated output counts each section, exactly once.
 
 ### The same path in one run: `/agile:autopilot`
 
@@ -172,7 +174,7 @@ sequenceDiagram
 | Stop | What you get | How you answer | What follows |
 |---|---|---|---|
 | 1 — questions | Every open question as cards (recommended option first), the new packages with license and version, the **draft acceptance criteria** written from the recommended options, and for an item with a new or complex screen the **HTML mockup** built from the same options. The last card: "Approve F-n with these answers and criteria?" | Pick the answers and "Aprovo F-n". Any other answer is a follow-up round, never an approval. | The item file is filled with your answers and set to `approved`; the build starts in the same run. If a screen answer differs from the recommendation, the mockup is regenerated and the run stops once more for the screen only. |
-| 2 — validation | Files, tests with real numbers, the criterion → test table, the reviewer's findings (it runs by itself when the change is risky: authentication, permissions, data, contracts, money, more than ~400 lines), what `--assume` assumed, the validation script. | "validado e autorizo o merge de F-n" — or "validado" alone — or the defect you found. | With the merge named: full suite, app manual in three languages, `merge --no-ff`, board, retro, `done`, without asking again. "validado" alone: the item stays in `validating` until `/agile:ship F-n`. A defect: fixed, then stop 2 again. |
+| 2 — validation | Files, tests with real numbers, the `## Criterion → test` section, the reviewer's findings (it runs by itself when the change is risky: authentication, permissions, data, contracts, money, more than ~400 lines), what `--assume` assumed, the validation script. | "validado e autorizo o merge de F-n" — or "validado" alone — or the defect you found. | With the merge named: full suite, app manual in three languages, `merge --no-ff`, board, retro, `done`, without asking again. "validado" alone: the item stays in `validating` until `/agile:ship F-n`. A defect: fixed, then stop 2 again. |
 
 `--assume` skips stop 1: every question gets its recommended option, recorded in `## Decisions` as `assumed by autopilot` with its reason, and the flag counts as your approval for that item. It never assumes a new package — when the item needs one, stop 1 happens with that question only. The mockup, when there is one, is then shown at stop 2.
 
@@ -186,7 +188,7 @@ The run keeps an `Autopilot:` line in the item file (`refined`, `stop 1`, `appro
 |---|---|---|
 | `/agile:discuss` | An idea with several possible directions, or doubts only you can answer | `docs/discussions/D-<n>-<slug>.md` (options, decisions, parked points) and the items captured as `idea` |
 | `/agile:epic` | A new epic to plan | `docs/epics/<slug>.md` with prioritized, session-sized features, what each depends on and waits on, an execution plan (order, suggested path, what runs in parallel) and what waits outside the epic; each feature captured as `idea`. On a `web-app`/`website`, a mobile app epic follows the `mobile-client` complement (section 12) |
-| `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults |
+| `/agile:screen` | A feature in `refining` with a new or complex screen | The `ux-designer` agent writes the detailed screen section in the feature file and an HTML mockup (every state, three languages; a new colour only after its contrast is computed on every surface, in both themes), alone in the item's worktree; Claude reads both, sends you the mockup as a file (never through a server), asks the agent's open points with its own questions, and you approve the screen together with the feature. In the build, the `frontend` agent implements that approved mockup and the tests of that screen. The mockup's colors, fonts and radius come from `docs/design/identity.tokens.json`; a project without one is told so in the agent's open points, and the mockup uses the library defaults. What a library component announces (a role, an `aria-*` state) is not taken from its docs: the agent marks it `unverified (gallery DOM)`, Claude checks it in the dev-only gallery's rendered markup and corrects the section, and with no gallery yet the build checks it |
 | `/agile:review` | A risky change (authentication, permissions, tenant isolation, data, contracts, money, or more than ~400 lines), before validation | Findings by severity from a read-only reviewer with fresh context; confirmed blockers are fixed before you validate |
 | `/agile:publish` | After one or more ships, when you want the app version on `main` as a release | A `dotnet publish` package of the profile's deployable project(s) in `artifacts/publish/v<Version>/` with one `.zip` each (a mobile head: a signed Android `.aab`), the notes in `docs/releases/v<Version>.md` (and `v<Version>-store.md`, the store checklist, for a mobile head), an annotated tag `v<Version>`, both pushed, and a GitHub Release with the notes. Typing it is the authorization. With an environment named (`/agile:publish production [v<x.y.z>]`) it then deploys that release by the command `docs/infra.md` declares for the environment (see "Deploying" below); `/agile:publish <environment> --park` and `--resume` stop and bring back an Azure Container Apps environment (see "Parking an Azure Container Apps environment"). `/agile:publish --beta` only reruns a desktop app's beta of `main` when the ship's beta step failed (see "Desktop updates") |
 
@@ -269,7 +271,7 @@ Each deployable project sets `ContainerRepository` and `ContainerImageTag` (`$(V
 ## 6. Changing your mind
 
 - **Before approval:** change anything. It is just conversation.
-- **During build:** `/agile:change` adds a **change note** to the feature file (what changed, why, which acceptance criteria are affected). You re-approve only those criteria. Work continues.
+- **During build:** `/agile:change` adds a **change note** to the feature file (what changed, why, which acceptance criteria are affected). You re-approve only those criteria, and their rows in `## Criterion → test` go back to `pending` (a new criterion gets a row, a dropped one loses its row). Work continues.
 - **Stuck on something outside the work:** `/agile:change <id> --block "<reason>"` sets the status `blocked` and `--unblock` brings the item back to the status it left (14.67).
 - **After ship:** it is a new feature or a bug, captured with `/agile:idea`.
 - **Wrong premise found** (for example, "the screen already has this field" and it does not): Claude stops and asks before coding around it.
@@ -297,6 +299,7 @@ board: <work item id>
 ## Business rules
 ## Screens and API
 ## Acceptance criteria
+## Criterion → test (written by /agile:build)
 ## Decisions (date — decision — reason)
 ## Out of scope
 ## Open questions
@@ -324,9 +327,10 @@ Hooks run outside the model. They are Node scripts (no bash) and do nothing in a
 | When | What happens |
 |---|---|
 | **Session start** | Shows the branch, the item in progress, the backlog head, approved files with open questions, and uncommitted work in **every** worktree. When the session comes back from a compaction or a resume, it adds the resume block below. |
-| **Compaction** (`/compact`, or automatic when the context fills) | `status.js compact` prints the resume block, and Claude Code adds it to what the summary must keep: for each item in `building` or `validating`, its id, title, status, branch and worktree, its last `## Paused` note and the next step (from the note, else from the status). Nothing is printed when no item is in progress. |
+| **Compaction** (`/compact`, or automatic when the context fills) | `status.js compact` prints the resume block, and Claude Code adds it to what the summary must keep: for each item in `building` or `validating`, its id, title, status, branch and worktree, its last `## Paused` note and the next step (from the note, else from the status), and a fourth line, `Criteria with no test: AC2, AC4 (2 of 5)` read from the item file (`none (5)` when every row is filled, `no section` for a bug or an item built before the section existed). Nothing is printed when no item is in progress. |
 | **Every commit** | A guard refuses a `git commit` on the main branch in two cases: an item branch (`feature/F-<n>`, `bug/B-<n>`) is unmerged and checked out nowhere — the sign that an IDE switched the branch behind the session — or the commit carries an item file that is not `done` (refining, approved, building, validating), which belongs on the item branch. Claude tells you and switches back; if the commit really belongs on the main branch, you say so and Claude repeats it ending with the comment `# agile:main-ok`. |
 | **Every shell command** | A second guard warns before a Bash or PowerShell command writes a repository file through the command's own text instead of the Write and Edit tools — a heredoc, `echo`/`printf`, a PowerShell `Set-Content`/`Out-File`/`Add-Content`, a Python `open(..., 'w'/'a')`, an inline Node or `.js` write whose literal carries a backslash, an escaped quote or an embedded newline, or a `sed -i` on a tracked file — or edits a GitHub issue or PR with an inline `--body`/`-b` instead of a whole one from a file. It exits 2 naming the rule and the file or command; a path outside the repository (temp, the session's scratchpad) and the plugin's own generated files (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) are silent. With your yes, Claude repeats the command ending with the comment `# agile:literal-ok`. |
+| **Every file tool of a plugin agent** | A third guard refuses a Read, Glob, Grep, Write, Edit, MultiEdit or NotebookEdit made from inside one of the plugin's agents (`frontend`, `ux-designer`, `system-design`, `architect`, `reviewer`) when its target — the file, or the folder of a search; a search with no folder runs in the session's folder — is in the main checkout of your project while an item worktree (`feature/F-<n>`, `bug/B-<n>`) exists. It exits 2 naming the item worktrees and telling the agent to repeat the call with one of them as the path. Claude Code names these agents `agile:<name>` (measured); Claude's own calls, built-in agents (Explore, general-purpose), a project's own agent with the same bare name, a target inside a worktree or outside the repository, a project with no item worktree and a repository with no `docs/agile/` are never refused, and any doubt lets the call through. The only bypass, with your yes, is restarting Claude Code with `AGILE_HOOKS=off`, which turns off every agile hook (the commit guard and the gate too). |
 | **Every edit** | Nothing is built. The edited file is only remembered, under the git root it belongs to — so an edit inside a worktree is gated in that worktree, not in the folder where the session started. |
 | **End of turn** (only if code changed, or a document a test cites) | Rebuilds the changed projects (`--no-incremental`) and runs only the test projects that reference them, directly or indirectly. It never runs the whole suite. |
 | **Ship** | `gate.js ship`: full rebuild, full suite, architecture tests; then no tracked file may be left changed (a generated file the run rewrote is committed with the item), and the evals run when the project has them: `evals/compare.js` compares the result with the baseline and its exit code is the verdict (a drop or a missing case fails the ship; a partial run, or a run of another model or ablation than the baseline's, is "not measured" and stops it). After the app manual, `gate.js docs` runs the docs command the repository declares — or, with nothing declared, the single `tools/*.DocGen` it finds (below). Before the docs commit Claude reads the item's diff under `docs/` (outside `docs/manual/`) and adds a glossary row, on the item branch, for each technical term it brings with no row; the report says `Glossary: N rows added: <terms>` or `Glossary: nothing missing`. |
@@ -360,6 +364,7 @@ Details:
 - **Known limit.** Only edits made with the editing tools are tracked. Changes made by a shell command (`dotnet format`, a merge) are caught at ship.
 - `AGILE_HOOKS=off` disables the hooks for a session.
 - `AGILE_TESTCMD_TIMEOUT` (1800 s) caps the `testCommand` of an `engine: msbuild` repository, as `AGILE_DOCS_TIMEOUT` caps the docs command.
+- **A command past its limit is ended whole** (0.37.0, #150). The docs command and check, the `restoreCommand` and the `testCommand` run inside a small helper (`scripts/run-limited.js`) that handles the deadline while the shell is still alive and ends every process the command started (`taskkill /T` on Windows; on Linux and macOS the command runs in its own process group and the group is killed). Before, only the shell died: the build tool it had started kept running, held the folder, and the ship's worktree removal then failed. A `restoreCommand` past its limit now says `restore ran longer than 1800 s (AGILE_TESTCMD_TIMEOUT)` instead of `restore failed`. If the tree could not be ended, the verdict is the same RED and one line is added: `a process the command started may still be running`.
 - `AGILE_GATE_LOCK_WAIT` (120 s) is how long `ship`, `baseline` and `stop` by hand wait for another run of the same folder; `AGILE_GATE_LOCK_RETRY_SECS` (15 s) is the pause before a locked build is tried once more.
 
 ## 10. Board
@@ -623,7 +628,7 @@ tests/
 
 Shared rules live in `rules/core/` and are copied to `.claude/rules/agile/` at bootstrap: `workflow`, `naming`, `git`, `definition-of-done` and `output-style` are always loaded; `i18n` and `api-contracts` load only when Claude works on code files, `ui` only on screen files (`.razor`, `.xaml`), and `build-config` only on project and build files. One rule per line, at most 30 lines per file. Core rules are generic: they hold for every profile. Anything that depends on a profile, a stack or a UI library lives in the profile file, in `templates/dotnet/` or in a rule scoped by file type, and the plugin applies it to every profile it concerns.
 
-**Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
+**Rules the build checks.** Bootstrap copies `templates/dotnet/` to the solution root, in every profile: `Directory.Build.props` (shared settings, code style enforced in the build, `NeutralLanguage` `en` for the neutral resource set, and `net10.0`, the LTS release; `net11.0` is a one-line change when the project chooses it), `Directory.Packages.props` (every package version in one place), `.editorconfig` (the owner's rules: naming, braces on every block, pattern matching, expression-bodied members, formatting), `BannedSymbols.txt` (forbidden APIs such as `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) and `global.json`. A broken rule becomes a build warning, and the gate fails on new warnings — so the rule holds even when nobody remembers to read it. `TreatWarningsAsErrors` stays off. When a retro lesson can be checked by the build, it goes there first.
 
 **Stack lessons.** A lesson from a real item that depends on the stack goes to the rule scoped to those files or to the profiles it concerns, never to an always-loaded rule. Examples from the first app: `api-contracts` says a custom middleware resolves an optional dependency inside the branch that needs it (an `InvokeAsync` parameter is resolved on every request) and that a client asks the API for the user's claims instead of decoding its access token (it may be encrypted); `build-config` says a version-dependent investigation reads the version resolved in `obj/project.assets.json`, not the pinned one; the profiles with an Aspire AppHost say code reaches Redis, PostgreSQL or a broker through the Aspire client integration, because local resources run with TLS by default, and that the generated `ServiceDefaults` turns off retries for POST (a retried POST replays single-use tokens); the profiles with a Blazor UI say that, with Interactive Server, state that changes during a session lives in a server-side store keyed by an id in the cookie, because a circuit cannot rewrite the cookie; and the test strategy of the profiles says a bUnit test waits for what an async click handler does (`WaitForAssertion`), and a test host created per test class clears its Npgsql pool on dispose, or the test database runs out of connections; and, with Interactive Server, data from the first request that a circuit needs (the visitor's address, a header) is read in `App` and passed to the interactive root, because a circuit has no `HttpContext`; the profiles with bUnit also say every new page and dialog gets a test that renders it, because a Razor attribute mistake compiles (a string parameter without `@` is literal text); the profiles with EF Core say the delete that closes a unit of work goes outside the `try` that handles its failure, because a failed save keeps the entry `Deleted`; with ASP.NET Core Identity, only the last step of a multi-step sign-in clears the failure count; and in `modular-monolith` a row a request must not lose (a queued job, an outbox message) is written by the same save as the data that justifies it. `api-contracts` also says an anonymous endpoint that must give the same answer on every path runs every input check before the lookup that tells the paths apart. The profiles with a Blazor UI also say a page that peeks a single-use ticket (an invite, a confirmation link) in `OnInitialized` sees it twice — prerender runs before the interactive circuit — so it reads the ticket there but spends it only on success, and a ticket that must not be replayed is bound to the browser with an HttpOnly cookie, never carried by the URL alone; and, for a project with the technical-docs generator, the data dictionary shows the `WHERE` clause of a partial index next to it. The test strategy of every profile also says the SDK template still generates xUnit 2.x, where `TestContext.Current.CancellationToken` does not exist: that member is v3, and adopting v3 is a decision that gets pinned and written down.
 
@@ -658,7 +663,7 @@ Then run `/agile:sync` in the project. Claude shows a table of what changed and 
 
 **One folder per item.** Every item gets its own worktree — a separate folder outside the repository (the root is the `Worktrees:` line of `CLAUDE.md`, asked at bootstrap — recommended `D:\wt\<repository>`, or `C:\wt\<repository>` without a D: drive; without the line, `<repository parent>/wt/<repository>/`, and `/agile:sync` offers the line. The folder is `f-<n>-<desc>` or `b-<n>-<desc>`, `<desc>` being up to 20 characters of the slug, cut at a hyphen: `f-3-exam-board`. Kept short because of Windows path limits; a worktree created before this keeps its `<type>-<n>` name until the merge) — created by `/agile:refine` before it writes anything and used until the merge. That is what keeps an item's documents on its own branch: a session working in another item's folder used to write the feature file and the mockup there, and they ended up on an unrelated branch. The build reuses that folder and never makes a second one.
 
-**Two items in parallel.** The default is still one item at a time in `building`. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work: it lifts the one-at-a-time limit (and, for an item approved before this existed, creates the missing folder). Claude first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. One writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. Previewing the app host from a worktree points the launch configuration at its absolute path temporarily, restored to the main checkout's path once the preview ends. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
+**Two items in parallel.** The default is still one item at a time in `building`. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work: it lifts the one-at-a-time limit (and, for an item approved before this existed, creates the missing folder). Claude first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. One writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. The app host of a worktree is started from that worktree in a background shell and opened in the preview by its URL; no launch configuration is pointed at a worktree. Anything a step starts inside a worktree (an app host, a server, a watcher) is stopped by that step, so nothing holds the folder at ship; a mockup is shown to you as a file, never through a server. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
 
 ## 14. Worked examples
 
@@ -1630,7 +1635,7 @@ With the catalogue chosen, bootstrap copies `ModelToolAttribute.cs` into the pro
 public Task<Answer> GetOfficialAnswerAsync([Description("The question id.")] Guid questionId)
 ```
 
-At the next ship, `docs/architecture/tools.md` gains a row per tool and a section with its input schema. When a tool is added without saying who may call it, the ship stops:
+At the next ship, `docs/architecture/tools.md` gains a row per tool and a section with its input schema; while no method carries the attribute yet, it says `0 tools.`, and an app without the attribute gets no `tools.md`. The name the model sees is the method's, minus a trailing `Async` only when the method returns a `Task`, a `ValueTask` or an `IAsyncEnumerable<T>` (`GetOfficialAnswerAsync` above becomes `GetOfficialAnswer`; a `GetExamAsync` that returns a `string` keeps its name). When a tool is added without saying who may call it, the ship stops:
 
 ```
 > /agile:ship F-30
@@ -3640,13 +3645,180 @@ Claude: staging: v0.2.0 deployed · previous v0.1.0 · check http://localhost:50
 
 The web container is now `shop-web:0.2.0`, the database container kept its data and its password, and the cookie from `v0.1.0` is still accepted, because the keys volume was not touched. `docker compose logs` on the web service shows the request log; there is no dashboard container. Production, with its own `deploy/production.env` and port, runs beside staging on the same host with its own containers and volumes.
 
+### 14.81 A database that keeps its address, its password and its data
+
+Acme's shop is bootstrapped with Aspire and PostgreSQL. In round 1, right after question 3, Claude asks:
+
+```
+Claude: Question 3a, fixed local services: the database keeps its port, its password and its data from one aspire run to the next?
+        a) yes: port 5432, password in the AppHost's user secrets, a data volume
+        b) no: the AppHost as the recipes write it (a new port on every run)
+        Recommended: a) yes. Reason: a DataGrip connection you save once keeps working, and the data survives a restart.
+        Port 5432 is free on this machine.
+You: ok.
+```
+
+With the skeleton written, the report says what was done, never the password:
+
+```
+Claude: Fixed local services, from the profile's "Local services (fixed ports and passwords)":
+   Acme.AppHost/Program.cs   postgres on port 5432 outside publish mode, password parameter postgres-password, WithDataVolume()
+   user secrets of the AppHost   Parameters:postgres-password set (random, 35 characters; its value is not shown)
+   docs/infra.md   ## Local services: postgres · 5432 · Parameters:postgres-password · the volume ending in -postgres-data
+   CLAUDE.md   - Local services: fixed
+   Deployed environments are unchanged.
+```
+
+You read the password once, on this machine, and save the DataGrip connection with host `localhost`, port 5432 and the user `postgres`:
+
+```powershell
+dotnet user-secrets list --project src/Acme.AppHost
+```
+
+```bash
+dotnet user-secrets list --project src/Acme.AppHost
+```
+
+The next day `aspire run` starts the database on the same port, with the same password and yesterday's rows. If you want another password, change the secret and remove the volume named in `docs/infra.md` (the data in it is lost), or the database refuses the new one with `password authentication failed`. A second machine, or a fresh clone, sets its own value with `dotnet user-secrets set` before the first `aspire run`; until then the resources that use the password stay `Waiting`.
+
+A project bootstrapped last month has an AppHost and no such line, so `/agile:sync` lists it:
+
+```
+Claude: New in this version: Fixed local services (- Local services: fixed | none in CLAUDE.md).
+        Item to capture: "Fixed local services", which builds the profile's "Local services (fixed ports and passwords)"; "- Local services: none" declines it and stops this note.
+```
+
+### 14.82 The item's own data, and an agent kept in the worktree
+
+F-12 adds a `Discount` column to Acme's orders, built in its worktree `D:\wt\shop\f-12-order-discount` while the main checkout stays on `main`. The first line of the validation script depends on where the project keeps its local data. Three projects, three start steps.
+
+The AppHost declares `WithDataVolume()` with no name (the profiles write it that way): the volume name carries the AppHost's path, so the worktree already has its own database.
+
+```
+1. Start the app from the worktree: aspire run in D:\wt\shop\f-12-order-discount.
+   Data: this worktree has its own volume (the AppHost's data volume has no name); nothing to set.
+   The migration of F-12 lands only there; the main checkout's database is untouched.
+```
+
+The project names its volume and keeps its own knob in `docs/infra.md` (`Database__Name`):
+
+```
+1. Stop any app host you have running, then start the app from the worktree on a database of its own:
+```
+
+```powershell
+$env:Database__Name = "shop_f12"
+aspire run
+```
+
+```bash
+export Database__Name="shop_f12"
+aspire run
+```
+
+```
+   Expected: the dashboard lists the database shop_f12. Repeat: the same two lines in a new terminal.
+```
+
+The project has neither:
+
+```
+1. Start the app from the worktree: aspire run.
+   Warning: the local database is shared with the main checkout; the migration of F-12 lands there
+   (recorded in ## Decisions with your yes of today).
+```
+
+A step that asks you to change code says where and what fails, and a step that compiles stops the host first:
+
+```
+5. Stop the app host (Ctrl+C in its terminal). In src/Shop/Orders/Order.cs, inside the class Order, after the
+   property Total, add: public decimal Discount { get; init; } = -1m;
+   Run the tests: OrderTests.Discount_cannot_be_negative fails with "Discount must be zero or more".
+   Remove the line again.
+```
+
+During the same build, the `reviewer` agent once searched with no folder. The guard sent it back:
+
+```
+[agile agent-guard] Grep from the `reviewer` agent targets the main checkout (D:/dev/shop), not an item's worktree.
+The item's code and status live in its worktree: D:/wt/shop/f-12-order-discount [feature/F-12].
+Repeat the call with the item's worktree (or a folder inside it) as the path; never report something as missing from a search rooted elsewhere.
+Bypass, only with the owner's yes: restart Claude Code with AGILE_HOOKS=off (this turns off every agile hook).
+```
+
+The agent repeated the search in the worktree and found `Order.Discount`; you see only its findings.
+### 14.83 Which criteria still have no test
+
+F-14 is `building` and has five acceptance criteria. When the build starts, Claude adds the section to the feature file with every row `pending`, and each commit that adds a test fills its row. Halfway, the file says:
+
+```
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | ExamFeesPage_Open_ShowsFees |
+| AC2 | pending |
+| AC3 | CreateExamFee_Negative_Returns422 |
+| AC4 | pending |
+| AC5 | validation step 6 |
+```
+
+The conversation is compacted. The summary keeps the resume block, which now has a fourth line:
+
+```
+Resume F-14 Exam fees — building [feature/F-14] D:/wt/examprep/f-14-exam-fees
+  Paused: no pause note
+  Next: continue `/agile:build F-14` from the last commit on feature/F-14 (git log in D:/wt/examprep/f-14-exam-fees)
+  Criteria with no test: AC2, AC4 (2 of 5)
+```
+
+The session that continues goes straight to AC2 and AC4 without rereading the code. The line says `none (5)` when every row is filled, and `no section` for a bug or for an item built before the section existed.
+
+Then you change a criterion mid-build:
+
+```
+> /agile:change F-14 AC3 must also refuse a fee of zero
+Claude: AC3 changes (Given a negative fee, then 422 becomes Given a fee below one, then 422).
+        Its row in ## Criterion → test goes back to pending; AC1, AC2, AC4 and AC5 are untouched.
+```
+
+At the end of the build every row is filled, and on the day you ship, Claude checks the file instead of trusting the report. This ship has a gap:
+
+```
+> /agile:ship F-14
+Claude: F-14 — Exam fees [validating]
+        Criterion → test: stopped before the merge.
+        AC4 is still pending; AC2 names ExamFeeTests.Refund_Partial, which is in no test project.
+        Add the tests, or tell me to move a criterion to the validation script (validation step <n>, recorded in ## Decisions).
+```
+
+An older feature without the section prints `Criterion → test: no section (built before this rule)` and the ship goes on; a bug prints nothing.
+
+### 14.84 A test run that hangs no longer leaves its tool running
+
+The `legacy-shop` repository is `engine: msbuild`, and its `testCommand` runs a suite through `vstest.console.exe`. One day the suite hangs. At the end of the ship the gate has waited its 1800 seconds:
+
+```
+> /agile:ship F-31
+Claude: F-31 — Refund by e-mail [validating]
+        agile gate RED: tests timed out (vstest.console.exe LegacyShop.Tests.dll) — full output: C:/Users/you/AppData/Local/Temp/agile-canary/gate-logs/20261009-1815-ship.log
+        tests ran longer than 1800 s (AGILE_TESTCMD_TIMEOUT): vstest.console.exe LegacyShop.Tests.dll
+```
+
+Before 0.37.0 only the shell was stopped here: `vstest.console.exe` kept running, and when you fixed the suite and shipped again the worktree removal failed with the folder in use. Now the gate ended the whole tree before it printed the verdict, so the folder is free and the next ship starts clean. If Windows had refused to end it, the same RED would carry one more line:
+
+```
+        a process the command started may still be running
+```
+
+That line is the cue to look in the Task Manager for a leftover `vstest.console.exe` or `testhost.exe` before shipping again.
+
 ## 15. Quick reference
 
 You only type the commands below. Each one loads a skill with the full procedure (for example, `/agile:bootstrap` loads `bootstrap-quiz`); the skills are hidden from the `/` menu and Claude loads them.
 
 | Command | Use |
 |---|---|
-| `/agile:bootstrap` | Quiz from the brief (a mobile app also asks 2g, a staff backoffice) → `CLAUDE.md`, ADR, profile, skeleton |
+| `/agile:bootstrap` | Quiz from the brief (a mobile app also asks 2g, a staff backoffice; an Aspire app asks 3a, fixed local ports and passwords) → `CLAUDE.md`, ADR, profile, skeleton |
 | `/agile:discuss "<idea>"` | Explore an idea: options, decisions, items captured |
 | `/agile:epic "<name>"` | Break an epic into prioritized features |
 | `/agile:idea "<text>"` | Capture an epic, feature or bug, unrefined, after looking for a similar item (improve it instead, or capture anyway) |
@@ -3683,7 +3855,7 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:idea` | You thought of something mid-work and want it on the board without stopping | 14.2, 14.5, 14.48 |
 | `/agile:refine` | An item is an idea and you are ready to answer its questions and approve it | 14.2, 14.16 |
 | `/agile:screen` | The feature has a new or complex screen; simple forms and lists do not need it | 14.8, 14.40 |
-| `/agile:build` | The item is approved; `--worktree` only when a second item must run while another is building | 14.2, 14.9, 14.46 |
+| `/agile:build` | The item is approved; `--worktree` only when a second item must run while another is building | 14.2, 14.9, 14.46, 14.82 |
 | `/agile:review` | A change is risky (data, money, permissions) and you want eyes with no context before validating | 14.8 |
 | `/agile:change` | You changed your mind on an approved or building item; a done item gets a new item instead; something outside the work stops the item (`--block`) | 14.3, 14.40, 14.67 |
 | `/agile:script` | A step of the validation script is wrong or outdated after a fix; a text that changes a criterion goes to `/agile:change` instead | 14.62 |

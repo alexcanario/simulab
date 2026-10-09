@@ -25,6 +25,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/catalog/subjects/{id}` | FindSubject | 200 |
 | `GET` | `/api/v1/catalog/subjects/{subjectId}/topics` | ListTopics | 200 |
 | `GET` | `/api/v1/catalog/subjects` | ListSubjects | 200 |
+| `GET` | `/api/v1/catalog/taxonomy` | GetTaxonomy | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move` | MoveNoticeSubject | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` | CreateNoticeSubject | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions` | CreateExamEdition | 200 |

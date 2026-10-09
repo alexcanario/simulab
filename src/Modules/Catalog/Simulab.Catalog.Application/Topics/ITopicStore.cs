@@ -18,6 +18,9 @@ public interface ITopicStore
     /// <summary>True when the subject has at least one topic that was not deleted (BR8).</summary>
     Task<bool> SubjectHasTopicsAsync(Guid subjectId, CancellationToken cancellationToken);
 
+    /// <summary>True when a live notice subject maps this topic (F-75, BR9).</summary>
+    Task<bool> IsMappedAsync(Guid topicId, CancellationToken cancellationToken);
+
     void Add(Topic topic);
 
     /// <summary>Soft-deletes the topic: the interceptor turns the removal into a flag.</summary>

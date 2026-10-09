@@ -2,7 +2,7 @@
 
 An item is `done` only when every line is true. "Almost" is `validating`.
 
-- Every acceptance criterion maps to at least one test, shown in a `criterion → test` table. A criterion checked only on screen is in the validation script.
+- Every acceptance criterion maps to at least one test, kept in the item's `## Criterion → test`, every row filled at ship. A criterion checked only on screen is in the validation script.
 - A bug has a regression test that was seen failing before the fix.
 - The build has no new warnings (the gate compares with the committed baseline). Accepting a new warning needs the owner's yes.
 - No open critical or high security finding: the scan (`scan.js`) ends `agile scan GREEN`, or the owner accepted each finding with a reason in `docs/security/findings.md`.

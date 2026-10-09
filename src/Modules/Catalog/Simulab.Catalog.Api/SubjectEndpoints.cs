@@ -29,6 +29,11 @@ public static class SubjectEndpoints
             .MapGet(string.Empty, ListAreasAsync)
             .WithName("ListAreas");
 
+        group.MapGroup("/taxonomy")
+            .RequireAuthorization(policy)
+            .MapGet(string.Empty, GetTaxonomyAsync)
+            .WithName("GetTaxonomy");
+
         var subjects = group.MapGroup("/subjects").RequireAuthorization(policy);
         subjects.MapGet(string.Empty, ListSubjectsAsync).WithName("ListSubjects");
         subjects.MapGet("/{id:guid}", FindSubjectAsync).WithName("FindSubject");
@@ -47,6 +52,9 @@ public static class SubjectEndpoints
 
     private static async Task<IResult> ListAreasAsync(ISubjectQueries queries, CancellationToken cancellationToken) =>
         Results.Ok(await queries.ListAreasAsync(cancellationToken));
+
+    private static async Task<IResult> GetTaxonomyAsync(ISubjectQueries queries, CancellationToken cancellationToken) =>
+        Results.Ok(await queries.ListTaxonomyAsync(cancellationToken));
 
     private static async Task<IResult> ListSubjectsAsync(
         ISubjectQueries queries,

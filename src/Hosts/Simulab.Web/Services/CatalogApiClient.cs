@@ -353,6 +353,14 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{NoticeSubjectsRoute(examId, editionId)}/{noticeSubjectId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-75: every live subject with its live topics, alphabetical, for the mapping picker (one call per dialog opening).</summary>
+    public Task<ApiResult<IReadOnlyList<TaxonomySubjectResponse>>> GetTaxonomyAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<TaxonomySubjectResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/taxonomy"), accessToken),
+            cancellationToken);
+
     private static string NoticeSubjectsRoute(Guid examId, Guid editionId) =>
         $"{Base}/exams/{examId}/editions/{editionId}/notice-subjects";
 

@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.32.0 (rascunho). English: [en](workflow.md).
+> Versão 0.37.0 (rascunho). English: [en](workflow.md).
 
 Sumário
 1. Conceitos em dois minutos
@@ -42,7 +42,7 @@ Sumário
 | Valida cada feature na tela | Implementa, testa e entrega um roteiro de validação |
 | Autoriza os merges (digitar `/agile:ship <id>` é a autorização) | Faz o merge, remove a branch e a worktree, atualiza o board e o manual da app, conduz a retro |
 
-Subagentes são exceção: um revisor com contexto limpo para mudanças arriscadas, duas passagens somente leitura antes do código de um item mais pesado (`system-design` propõe o corte, os contratos e os dados; `architect` revisa essa proposta), dois papéis que produzem telas (`ux-designer` desenha, `frontend` implementa o mockup que você aprovou), ou trabalho paralelo que não mexe nos mesmos arquivos. São funções com nome, não uma cadeia de papéis por feature, e nenhuma delas fala com você: a conversa é sempre com o Claude, que lê o que o agente escreveu ou propôs antes de seguir. Um escritor por vez em cada pasta, e as duas passagens não escrevem nada.
+Subagentes são exceção: um revisor com contexto limpo para mudanças arriscadas, duas passagens somente leitura antes do código de um item mais pesado (`system-design` propõe o corte, os contratos e os dados; `architect` revisa essa proposta), dois papéis que produzem telas (`ux-designer` desenha, `frontend` implementa o mockup que você aprovou), ou trabalho paralelo que não mexe nos mesmos arquivos. São funções com nome, não uma cadeia de papéis por feature, e nenhuma delas fala com você: a conversa é sempre com o Claude, que lê o que o agente escreveu ou propôs antes de seguir. Um escritor por vez em cada pasta, e as duas passagens não escrevem nada. Todo agente trabalha na worktree do item: o pedido do Claude entrega a worktree como caminho absoluto, todos os outros caminhos absolutos dentro dela, e a lista `Other items in progress: <id> → <caminho da worktree>` tirada do `git worktree list`; o agente passa a worktree como pasta de toda busca, lê o status de outro item só na worktree daquele item (ou diz que é desconhecido), e o `reviewer` lê ali também o código em volta do diff. Uma busca que ficou no checkout principal já relatou como inexistentes tipos commitados na branch do item; agora um hook a recusa (seção 9).
 
 **Modelos.** O modelo é escolhido por atividade, de propósito: a revisão independente, as passagens de desenho e arquitetura e o desenho de tela rodam no modelo mais forte, as buscas no código no menor, a implementação da tela e o trabalho mecânico em volume que os testes conferem num modelo intermediário, e a sessão principal no modelo que você escolher. Cada agente (`reviewer`, `system-design`, `architect`, `ux-designer`, `frontend`) declara o seu modelo padrão; o seu projeto troca esse modelo na seção "Models" do `CLAUDE.md` (pergunta 34 do quiz), nunca editando o plugin.
 
@@ -89,6 +89,8 @@ Para um app desktop, a pergunta 2f vem depois da 2a2 quando a 2a2 escolheu uma A
 
 Para um site que precisa de um app mobile desde o primeiro dia, a pergunta 2 pesa antes a forma do brief: quando a API é a principal consumidora ou há várias áreas de negócio, ela recomenda `mobile` (sobre `monolith`, ou `modular-monolith`); quando o produto é um site com telas sobre dados simples, ou um site público, ela recomenda `web-app` ou `website` e vem a pergunta 2e, logo depois da 2 (depois da 2c no `website`): **um app mobile desde o início: não · sim, MAUI Blazor Hybrid · sim, MAUI XAML**. A recomendação vem do brief: nenhum app citado → não; um app citado → Hybrid, para que as telas do site já nasçam onde o app vai reaproveitá-las. O app mora neste repositório e nesta solução; um app em repositório próprio continua começando pelo bootstrap dele (pergunta 2d). Com sim, o Claude lista as funcionalidades do brief numeradas na mesma mensagem, agrupadas como o brief agrupa e todas marcadas (nunca uma seção pública de um `website`); você responde "ok" ou os números para desmarcar. O bootstrap então acrescenta `<App>.Contracts` e, com Hybrid, `<App>.Shared` (uma Razor Class Library cujos componentes não têm `@page` nem render mode, com textos em todos os idiomas do app), os dois cobertos pelos testes de arquitetura e de layout; ele **não** acrescenta os projetos do app, a linha `Complement:` nem um segundo `<Version>`: isso vem com o primeiro item do épico, então o `/agile:sync` nunca pede a versão do app antes de o app existir. A proposta do quadro ganha um épico "Mobile app" (`docs/epics/mobile-app.md`, com a lista que você aprovou escrita inteira) cujas ideias são "Mobile foundation" primeiro e depois um "<X> on mobile" por funcionalidade marcada; a ideia do próprio site para cada funcionalidade marcada diz que a tela dela é um componente no `Shared` (Hybrid) e a regra ou consulta uma classe em `Features/`, e com Hybrid o kit de UI também mora no `Shared`. O ADR-0001 registra a resposta. "Não" deixa o bootstrap exatamente como era. Exemplo 14.34.
 
+Quando a pergunta 3 é "containers + Aspire" e o esqueleto tem um AppHost, a pergunta 3a vem logo depois: **serviços locais fixos: sim · não**, com sim recomendado. Sem isso o container do banco ganha uma porta nova no host a cada `aspire run`, a conexão que você salvou no DataGrip ou no pgAdmin deixa de funcionar, e a senha que o Aspire gera é uma que ninguém conhece. Sim vale para todo container que o AppHost declara (hoje o banco): a porta padrão da imagem (PostgreSQL 5432, SQL Server 1433, ou a próxima livre quando a porta já está em uso nesta máquina, o que o Claude confere antes; você aceita ou digita outra), um parâmetro de senha `<recurso>-password` que o bootstrap gera e guarda nos user secrets do AppHost (o valor nunca é impresso no chat nem escrito em arquivo do repositório) e `WithDataVolume()`, para que os dados sobrevivam a um reinício. Com mais de uma API na solução, o Claude propõe também um começo livre (como 5100) e cada API recebe a porta seguinte, na ordem da solução, com o `https` nessa porta + 1000. A resposta vira `- Local services: fixed` (ou `none`) sob `Profile:` no `CLAUDE.md`, e um sim também escreve `## Local services` no `docs/infra.md`: porta de cada serviço, a chave dos user secrets da senha e o volume, nunca um valor, e como zerar o volume (a imagem só aplica a senha quando cria os dados; trocar a senha exige remover o volume, e os dados dele se perdem). Você lê a senha com `dotnet user-secrets`, e um clone em outra máquina define a sua. Um worktree roda nas mesmas portas fixas mas com volume próprio, então um app host por vez. Os ambientes publicados não mudam: nada disso roda em modo publish. Um projeto criado antes disso recebe do `/agile:sync` a proposta de um item "Fixed local services" enquanto tiver um AppHost e nenhuma das linhas `- Local services:`; `none` recusa, e um AppHost que já fixa tudo só precisa que `- Local services: fixed` seja escrita. Exemplo 14.81.
+
 Quando o brief cita uma base de código existente para reaproveitar e você dá acesso a ela, o Claude lê esse código (nunca edita) e usa o que encontra como motivo das recomendações. Depois da rodada 8 vem uma **pergunta de fechamento** — "qual conceito do domínio mais preocupa você, ou o quiz não tocou?" — porque o vocabulário central de um domínio (uma taxonomia, um modelo de entitlement, uma regra de pontuação) raramente cabe numa lista fixa de perguntas. O que ela levantar é decidido como qualquer pergunta do quiz e registrado na ADR-0001.
 
 Saídas, todas em inglês:
@@ -131,9 +133,9 @@ stateDiagram-v2
 | `idea` | Registrada a partir da conversa com `/agile:idea`. Título, 2 ou 3 linhas e como ela começa (`## Start`): do que depende, pelo que espera para começar, o que só a validação precisa (nunca bloqueia) e de quem, o caminho sugerido, o que pode rodar ao lado. O que ninguém disse fica escrito como desconhecido. Uma causa citada vem com a evidência (o comando e a linha da saída que a mostra); sem ela, o `## Start` diz `Cause not verified: measure it at /agile:refine`, com o sintoma visto. Para uma feature ou bug, antes de criar qualquer coisa o Claude pergunta onde ela mora: uma pergunta com o épico que ele sugere primeiro (um épico aberto cujo objetivo serve, com o motivo), depois "Novo épico" e "Sem épico"; um épico novo só é criado depois do seu sim, no board e como `docs/epics/<slug>.md` (status `draft`). O `/agile:epic` e um texto que já é um épico não perguntam nada. | Claude |
 | `refining` | `/agile:refine` (uma resposta que transforma algo num item para depois vira ideia pelo mesmo procedimento do `/agile:idea`: template, board, próximo número; uma resposta que junta o escopo de um item aberto já existente a este, em vez disso, primeiro confere aquele item — `git worktree list` procurando a pasta dele e o arquivo ou issue dele para o `status`. Qualquer status além de `idea` em qualquer lugar bloqueia a junção automática: o Claude nomeia o status e o caminho da worktree do outro item e você decide, juntar mesmo assim (registrado em `## Decisions` com o motivo) ou descartar a junção e deixar o outro item intocado. Ainda `idea` em todo lugar, sem worktree: a junção acontece como antes, sem pergunta nova): antes de escrever qualquer coisa, o Claude cria a branch do item e a worktree dele — uma pasta fora do repositório, cujo caminho completo ele te diz — e tudo o que este item produz (o arquivo da feature, a causa de um bug, o mockup) é escrito ali, na branch dele; um arquivo de item ainda não commitado é movido para lá e deixa de existir onde foi criado. Nenhum checkout é trocado, então uma sessão que está na pasta de outro item não consegue mais deixar os documentos deste na branch daquele. Depois o Claude lê o código relacionado, confere no código de hoje cada premissa sobre como algo já funciona (o arquivo de um item antigo não é prova: um bug posterior pode ter mudado aquilo), confere no código ou na documentação da biblioteca cada premissa sobre como ela guarda ou protege dados, uma premissa de performance de consulta com `EXPLAIN` no test container, e uma premissa que a documentação e o código da biblioteca deixam em aberto reproduzindo-a num projeto descartável contra um test container (fonte lido cru, nunca resumido) — uma premissa de que nada usa um recurso é conferida pelo efeito, não pelas chamadas de um helper. Um bug cuja causa só existe na branch de um item sem merge diz isso em `## Cause` e espera esse merge antes de criar a própria branch. Depois o Claude faz todas as perguntas abertas numa rodada, como cartões de quiz agrupados por tema (regras, permissões, estados, telas, dados, pacotes, escopo) com a opção recomendada primeiro; num terminal as mesmas perguntas vêm como lista numerada. A rodada inclui os pacotes novos de que o item precisa, para o código **e para os testes**, com as versões conferidas no registro naquele momento, para que o seu sim seja dado uma vez e não no meio do build. Você responde; no máximo mais uma rodada. Uma lista que você aprovou ou editou no chat (um catálogo, um conjunto de opções, escolhas numeradas) é escrita inteira na seção `## Approved list` do item, na ordem aprovada e com as suas edições aplicadas, e o arquivo nunca diz "a lista mostrada na refinação"; antes de pedir a sua aprovação o Claude relê o arquivo atrás de frases que mandam o leitor para o chat e cola a lista onde achar uma. Um item cuja saída é visual (um diagrama, uma página gerada) é prototipado e visto em tamanho real no visualizador de destino antes de você aprovar. Um item de autenticação ou de vínculo de contas recebe a revisão independente (`/agile:review`) neste arquivo, antes da sua aprovação. Uma tela nova ou complexa é desenhada pelo agente `ux-designer` (`/agile:screen`), que nunca fala com você: o Claude lê o que ele escreveu e faz como suas as perguntas abertas dele. O arquivo da feature é commitado na branch do item, dentro da worktree dele. | Claude |
 | `approved` | Você aprova o arquivo da feature depois de lê-lo. Perguntas em aberto impedem a aprovação. **Portão 1.** | Você |
-| `building` | `/agile:build`: primeiro acha a worktree do item pela branch e diz `Worktree of <id>: <caminho> [<branch>]` (`(created now)` quando um item antigo não tinha); o status e a checagem de árvore limpa são lidos ali, nunca no checkout principal, e continua nessa worktree — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree e em primeiro plano, para o gate do Stop nunca compilar arquivos que ele ainda está escrevendo. O plano lista o que a tela remove; o Claude remove antes da chamada (primeiro os testes de cada tipo removido, depois os arquivos e o que aponta para eles: usings, imports, registros), porque o agente não apaga arquivo e nunca deixa um toco. O agente adapta helpers, contextos e fixtures de teste à vontade, e muda a asserção de um teste existente só sob um critério aprovado que ele nomeia. Ele abre o relatório com `Nothing here was built or run.` e lista os testes existentes que afirmam o que ele mudou, as remoções que precisa do Claude e as suposições que não pôde verificar. Depois o Claude roda a suíte inteira (o modo `ship` do gate) antes de ler os arquivos dele e cita os números reais, lê cada arquivo que ele citou, conserta as falhas ele mesmo numa rodada planejada e roda a suíte de novo; o agente não é chamado outra vez. O Claude responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). O relatório do build fecha o repasse num bloco só (exemplo 14.76). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host: os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
-| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. Um passo que uma correção deixou errado se corrige com `/agile:script <id> <o que mudou>`, sem nota de mudança. **Portão 2.** | Você |
-| `done` | `/agile:ship`: suíte completa, versão da app incrementada, merge — digitar o comando é o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
+| `building` | `/agile:build`: primeiro acha a worktree do item pela branch e diz `Worktree of <id>: <caminho> [<branch>]` (`(created now)` quando um item antigo não tinha); o status e a checagem de árvore limpa são lidos ali, nunca no checkout principal, e continua nessa worktree — código e testes do que mudou. Quando o item cria um projeto, um contrato de API, uma mensagem entre módulos ou muda o schema, duas passagens somente leitura rodam antes do plano: o `system-design` propõe o corte, os contratos, os dados e os riscos, e o `architect` revisa essa proposta contra o perfil e as conferências que o seu projeto realmente tem. Elas não escrevem nada; o Claude confere as duas nos arquivos, escreve o plano a partir delas e registra em `## Decisions` o que aceitou e o que descartou. Um CRUD fino não passa por nenhuma das duas. Quando o item tem um mockup que você aprovou, a tela e os testes dela são escritos pelo agente `frontend`, sozinho nessa worktree e em primeiro plano, para o gate do Stop nunca compilar arquivos que ele ainda está escrevendo. O plano lista o que a tela remove; o Claude remove antes da chamada (primeiro os testes de cada tipo removido, depois os arquivos e o que aponta para eles: usings, imports, registros), porque o agente não apaga arquivo e nunca deixa um toco. O agente adapta helpers, contextos e fixtures de teste à vontade, e muda a asserção de um teste existente só sob um critério aprovado que ele nomeia. Ele abre o relatório com `Nothing here was built or run.` e lista os testes existentes que afirmam o que ele mudou, as remoções que precisa do Claude e as suposições que não pôde verificar. Depois o Claude roda a suíte inteira (o modo `ship` do gate) antes de ler os arquivos dele e cita os números reais, lê cada arquivo que ele citou, conserta as falhas ele mesmo numa rodada planejada e roda a suíte de novo; o agente não é chamado outra vez. O Claude responde as paradas dele ou te traz as que são decisão (um padrão que falta no kit, um contrato que não existe). O relatório do build fecha o repasse num bloco só (exemplo 14.76). Domínio, API e migrações continuam com o Claude. Antes de copiar um padrão já existente, o Claude confere se há um item aberto para removê-lo e, se houver, deixa você escolher entre seguir o padrão agora ou registrar a cópia como dívida. Antes da tabela de cobertura o Claude abre a tela pelo app host, iniciado a partir da worktree do item num shell em segundo plano e aberto na pré-visualização pela URL (nenhuma configuração de execução é editada), e o para antes de terminar a vez dele. Quando os dados são do próprio item (um volume de dados do AppHost sem nome, ou a chave de banco do seu próprio projeto ajustada para a worktree) ele não pergunta nada; dados compartilhados com o checkout principal ou com outra worktree precisam do seu sim, uma vez por item, registrado em `## Decisions`. Os testes não enxergam como a biblioteca de componentes desenha os seus estados (um link ativo sem contraste, um link que não é link). O Claude lê a página como texto; um screenshot é só para conferência visual e nunca com um diálogo aberto (um screenshot que estoura o tempo pode derrubar o circuito do Blazor Server, e o diálogo junto). Uma afirmação de acessibilidade que a seção de tela marca `unverified (gallery DOM)` é conferida na marcação renderizada e corrigida. As conferências por teclado ficam no seu roteiro de validação. O Claude nunca muda estado (cadastros, requisições contadas, dados) num app host que ele não abriu: pergunta antes, ou usa dados que ninguém mais usa e diz quais. Uma tela atrás de login não é conferida pelo Claude, cujas regras proíbem digitar senha: ele diz isso, confere o que não pede conta (a rota, o 401, o redirecionamento) e põe o fluxo logado no seu roteiro de validação. Só uma feature pode estar aqui. | Claude |
+| `validating` | O Claude entrega um roteiro de validação (até 8 passos). Você testa na tela. Um passo que precisa de terminal traz o comando para Git Bash e para PowerShell 7, com a saída esperada e como repetir, e o Claude já rodou os dois. O passo de partida diz em que dados o app roda: o volume próprio (um volume de dados do AppHost sem nome: nada a ajustar), a chave do seu próprio projeto com `<banco>_f<n>` (`_b<n>` para um bug) nos dois shells, ou um aviso claro de que o banco local é compartilhado e a migração do item cai nele (exemplo 14.82). Um passo que pede para você mudar código nomeia o arquivo, onde vão as linhas e a falha exata a esperar, e um passo que compila manda parar o app host antes (um host rodando trava o `bin/`: `MSB3027`). Um passo que uma correção deixou errado se corrige com `/agile:script <id> <o que mudou>`, sem nota de mudança. **Portão 2.** | Você |
+| `done` | `/agile:ship`: suíte completa, `## Criterion → test` conferida (uma linha `pending` ou um teste não encontrado o interrompe), versão da app incrementada, merge — digitar o comando é o seu OK (**Portão 3**), board e manual da app atualizados, retro. | Claude |
 | `cancelled` | Uma saída, não uma etapa: só a partir de `idea` ou `refining`, só como duplicata, escolhida no card que o `/agile:refine` mostra ao achar um item parecido (abaixo). O arquivo fica com `status: cancelled` e a linha `Duplicate of <id> (<data>): <onde a melhoria foi parar>`, então o número nunca é reaproveitado; o status da sessão e o início do backlog o ignoram. No GitHub o issue é fechado como duplicata do outro e o item do projeto é arquivado (nunca Done: isso mostraria trabalho não entregue como entregue); no Azure Boards o estado é `Removed`; sem board a linha de `docs/agile/backlog.md` é riscada. | Você, no card |
 | `blocked` | Um status lateral, não uma etapa: algo fora do trabalho trava o item (uma decisão, outro item, um fornecedor, uma checagem sua). `/agile:change <id> --block "<motivo>"` o define a partir de `refining`, `approved`, `building` ou `validating`, nunca de `idea`, `done`, `cancelled` ou `blocked`. Pede o motivo e quem destrava (`unknown` não é aceito em nenhum dos dois; o Claude pergunta a parte que falta e não muda nada). O arquivo diz `status: blocked` e, logo abaixo, `Blocked (<data>): <o que trava> — unblocked by <quem> — returns to <status>`; o `## Decisions` ganha uma linha. O item mantém a worktree e a branch, não ocupa vaga de WIP, e nada é commitado, mesclado ou trocado (com a árvore suja o Claude diz que o `/agile:pause` faz o commit `wip`). `/agile:build`, `/agile:ship`, `/agile:refine`, `/agile:autopilot` e `/agile:screen` param nele depois da linha do item, dizem o motivo e imprimem `/agile:change <id> --unblock`; nada é aprovado enquanto está bloqueado. `--unblock` devolve o item ao status de `returns to`, remove a linha e a marca do board e grava no `## Decisions` a linha do par; de volta a `building` ou `validating` é recusado enquanto outro item estiver em um deles naquele checkout (ele o nomeia; `--unblock --worktree` é o seu OK para trabalho em paralelo). No board entra o label (ou tag no Azure) `blocked` e o campo Status fica como está; sem board, a linha em `docs/agile/backlog.md` ganha `blocked: <motivo>`. O `/agile:status` e o início da sessão mostram uma linha `Blocked:` por item bloqueado (id, título, motivo, quem destrava, para onde volta); a linha que vem do `## Start` agora se chama `Waits on:`. | Você, com `/agile:change` |
 
@@ -143,7 +145,7 @@ stateDiagram-v2
 
 Pequenas correções encontradas na validação são feitas na hora, sem sair de `validating`.
 
-Antes de entregar o roteiro de validação, o Claude mostra uma tabela **critério → teste**: cada critério de aceite aponta para os seus testes, ou fica explicitamente para o roteiro de validação. O teste precisa passar pelo caminho que o usuário usa (página, endpoint, o handler que chama o código): um método escrito para um critério que nada na app chama é uma lacuna, mesmo que o seu próprio teste passe. Quando um efeito sai da requisição (um e-mail ou um evento passa a ir por fila), todo teste que o conferia é relido: "nada foi enviado" passa de graça quando nada é enviado na hora. Um teste instável é reproduzido num laço (build limpo antes de cada rodada) e a correção é provada pelo mesmo laço, N verdes seguidos; um teste de saída gerada conta cada seção, exatamente uma vez.
+Antes de entregar o roteiro de validação, o Claude mantém no arquivo da feature a seção **`## Criterion → test`**, depois de `## Acceptance criteria`: uma tabela de duas colunas, escrita quando o build começa com todas as linhas `pending`; a linha é preenchida no mesmo commit que traz o seu teste. Cada critério de aceite aponta para os seus testes, ou para `validation step <n>` quando só se confere na tela (o passo está no roteiro de validação); no fim, nenhuma linha fica `pending`. Como vive no arquivo, uma compactação, uma pausa ou uma sessão nova ainda sabe quais critérios não têm teste, e o `/agile:ship` a confere (14.83). Um bug não tem essa seção: o `## Regression test` faz esse papel. O teste precisa passar pelo caminho que o usuário usa (página, endpoint, o handler que chama o código): um método escrito para um critério que nada na app chama é uma lacuna, mesmo que o seu próprio teste passe. Quando um efeito sai da requisição (um e-mail ou um evento passa a ir por fila), todo teste que o conferia é relido: "nada foi enviado" passa de graça quando nada é enviado na hora. Um teste instável é reproduzido num laço (build limpo antes de cada rodada) e a correção é provada pelo mesmo laço, N verdes seguidos; um teste de saída gerada conta cada seção, exatamente uma vez.
 
 ### O mesmo caminho numa execução só: `/agile:autopilot`
 
@@ -172,7 +174,7 @@ sequenceDiagram
 | Parada | O que você recebe | Como você responde | O que vem depois |
 |---|---|---|---|
 | 1 — perguntas | Todas as perguntas em aberto como cartões (a opção recomendada primeiro), os pacotes novos com licença e versão, os **critérios de aceite em rascunho** escritos a partir das opções recomendadas e, para um item com tela nova ou complexa, o **mockup HTML** feito com as mesmas opções. O último cartão: "Aprovar F-n com estas respostas e critérios?" | Escolha as respostas e "Aprovo F-n". Qualquer outra resposta é uma rodada de acompanhamento, nunca uma aprovação. | O arquivo do item é preenchido com as suas respostas e vai para `approved`; o build começa na mesma execução. Se uma resposta de tela difere da recomendação, o mockup é refeito e a execução para mais uma vez, só para a tela. |
-| 2 — validação | Arquivos, testes com números reais, a tabela critério → teste, os achados do revisor (ele roda sozinho quando a mudança é arriscada: autenticação, permissões, dados, contratos, dinheiro, mais de ~400 linhas), o que o `--assume` assumiu, o roteiro de validação. | "validado e autorizo o merge de F-n" — ou só "validado" — ou o defeito que você achou. | Com o merge nomeado: suíte completa, manual da app nos três idiomas, `merge --no-ff`, board, retro, `done`, sem perguntar de novo. Só "validado": o item fica em `validating` até o `/agile:ship F-n`. Um defeito: corrigido, e a parada 2 de novo. |
+| 2 — validação | Arquivos, testes com números reais, a seção `## Criterion → test`, os achados do revisor (ele roda sozinho quando a mudança é arriscada: autenticação, permissões, dados, contratos, dinheiro, mais de ~400 linhas), o que o `--assume` assumiu, o roteiro de validação. | "validado e autorizo o merge de F-n" — ou só "validado" — ou o defeito que você achou. | Com o merge nomeado: suíte completa, manual da app nos três idiomas, `merge --no-ff`, board, retro, `done`, sem perguntar de novo. Só "validado": o item fica em `validating` até o `/agile:ship F-n`. Um defeito: corrigido, e a parada 2 de novo. |
 
 O `--assume` pula a parada 1: cada pergunta recebe a opção recomendada, registrada em `## Decisions` como `assumed by autopilot` com o motivo, e a flag vale como a sua aprovação daquele item. Ele nunca assume um pacote novo — quando o item precisa de um, a parada 1 acontece só com essa pergunta. O mockup, quando houver, aparece então na parada 2.
 
@@ -186,7 +188,7 @@ A execução mantém uma linha `Autopilot:` no arquivo do item (`refined`, `stop
 |---|---|---|
 | `/agile:discuss` | Uma ideia com vários caminhos possíveis, ou dúvidas que só você responde | `docs/discussions/D-<n>-<slug>.md` (opções, decisões, pontos adiados) e os itens registrados como `idea` |
 | `/agile:epic` | Um épico novo para planejar | `docs/epics/<slug>.md` com features priorizadas, cada uma cabendo numa sessão, do que cada uma depende e pelo que espera, um plano de execução (ordem, caminho sugerido, o que roda em paralelo) e o que o épico espera de fora; cada feature registrada como `idea`. Num `web-app`/`website`, um épico de app mobile segue o complemento `mobile-client` (seção 12) |
-| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela. As cores, fontes e raio do mockup vêm de `docs/design/identity.tokens.json`; num projeto sem esse arquivo, os pontos em aberto do agente avisam e o mockup usa os padrões da biblioteca |
+| `/agile:screen` | Uma feature em `refining` com tela nova ou complexa | O agente `ux-designer` escreve a seção de tela detalhada no arquivo da feature e um mockup HTML (todos os estados, três idiomas; uma cor nova só depois de calcular o contraste dela em toda superfície, nos dois temas), sozinho na worktree do item; o Claude lê os dois, te envia o mockup como arquivo (nunca por um servidor), faz como suas as perguntas abertas do agente, e você aprova a tela junto com a feature. No build, o agente `frontend` implementa esse mockup aprovado e os testes daquela tela. As cores, fontes e raio do mockup vêm de `docs/design/identity.tokens.json`; num projeto sem esse arquivo, os pontos em aberto do agente avisam e o mockup usa os padrões da biblioteca. O que um componente da biblioteca anuncia (um papel, um estado `aria-*`) não é tirado da documentação dele: o agente marca `unverified (gallery DOM)`, o Claude confere na marcação renderizada da galeria de desenvolvimento e corrige a seção, e sem galeria ainda quem confere é o build |
 | `/agile:review` | Uma mudança arriscada (autenticação, permissões, isolamento por tenant, dados, contratos, dinheiro, ou mais de ~400 linhas), antes da validação | Achados por gravidade de um revisor só de leitura e com contexto limpo; os bloqueadores confirmados são corrigidos antes de você validar |
 | `/agile:publish` | Depois de um ou mais ships, quando você quer a versão do app que está na `main` como um release | Um pacote `dotnet publish` do(s) projeto(s) publicável(is) do perfil em `artifacts/publish/v<Versão>/`, com um `.zip` cada (um head mobile: um `.aab` Android assinado; o site de um app Hybrid: também os dois pacotes NuGet dele), as notas em `docs/releases/v<Versão>.md` (e `v<Versão>-store.md`, o checklist das lojas, para um head mobile), uma tag anotada `v<Versão>`, as duas enviadas ao remoto e um GitHub Release com as notas. Digitar o comando é a autorização. Com um ambiente nomeado (`/agile:publish production [v<x.y.z>]`), ele depois implanta esse release pelo comando que o `docs/infra.md` declara para o ambiente (veja "Fazendo deploy" abaixo); `/agile:publish <ambiente> --park` e `--resume` estacionam e trazem de volta um ambiente Azure Container Apps (veja "Estacionando um ambiente Azure Container Apps"). `/agile:publish --beta` só refaz o beta da `main` de um app desktop quando o passo beta do ship falhou (veja "Atualizações do desktop") |
 
@@ -269,7 +271,7 @@ Cada projeto publicável define `ContainerRepository` e `ContainerImageTag` (`$(
 ## 6. Mudando de ideia
 
 - **Antes da aprovação:** mude o que quiser. É só conversa.
-- **Durante o build:** o `/agile:change` acrescenta uma **nota de mudança** ao arquivo da feature (o que mudou, por quê e quais critérios de aceite são afetados). Você reaprova só esses critérios, e o trabalho continua.
+- **Durante o build:** o `/agile:change` acrescenta uma **nota de mudança** ao arquivo da feature (o que mudou, por quê e quais critérios de aceite são afetados). Você reaprova só esses critérios, as linhas deles em `## Criterion → test` voltam a `pending` (um critério novo ganha linha, um removido perde a sua) e o trabalho continua.
 - **Travado por algo fora do trabalho:** `/agile:change <id> --block "<motivo>"` põe o item em `blocked` e `--unblock` o devolve ao status que deixou (14.67).
 - **Depois do ship:** é uma feature nova ou um bug, registrado com `/agile:idea`.
 - **Premissa errada descoberta** (por exemplo, "a tela já tem esse campo" e não tem): o Claude para e pergunta antes de contornar o problema no código.
@@ -297,6 +299,7 @@ board: <id do work item>
 ## Business rules
 ## Screens and API
 ## Acceptance criteria
+## Criterion → test (escrita pelo /agile:build)
 ## Decisions (date — decision — reason)
 ## Out of scope
 ## Open questions
@@ -326,9 +329,10 @@ Os hooks rodam fora do modelo. São scripts Node (sem bash) e não fazem nada em
 | Quando | O que acontece |
 |---|---|
 | **Início da sessão** | Mostra a branch, o item em andamento, o topo do backlog, os arquivos aprovados com perguntas em aberto e o trabalho sem commit em **todas** as worktrees. Quando a sessão volta de uma compactação ou de um resume, acrescenta o bloco de retomada abaixo. |
-| **Compactação** (`/compact`, ou automática quando o contexto enche) | `status.js compact` imprime o bloco de retomada, e o Claude Code o junta ao que o resumo tem de manter: para cada item em `building` ou `validating`, o id, o título, o status, a branch e a worktree, a última nota `## Paused` e o próximo passo (da nota, senão do status). Sem item em andamento, não imprime nada. |
+| **Compactação** (`/compact`, ou automática quando o contexto enche) | `status.js compact` imprime o bloco de retomada, e o Claude Code o junta ao que o resumo tem de manter: para cada item em `building` ou `validating`, o id, o título, o status, a branch e a worktree, a última nota `## Paused` e o próximo passo (da nota, senão do status), mais uma quarta linha, `Criteria with no test: AC2, AC4 (2 of 5)`, lida do arquivo do item (`none (5)` quando toda linha está preenchida, `no section` para um bug ou um item feito antes da seção existir). Sem item em andamento, não imprime nada. |
 | **A cada commit** | Uma guarda recusa um `git commit` na branch principal em dois casos: uma branch de item (`feature/F-<n>`, `bug/B-<n>`) está sem merge e não está aberta em nenhum lugar — o sinal de que uma IDE trocou a branch por trás da sessão — ou o commit carrega o arquivo de um item que não está `done` (refining, approved, building, validating), que pertence à branch do item. O Claude avisa você e volta para a branch certa; se o commit for mesmo da branch principal, você confirma e o Claude repete o comando terminando com o comentário `# agile:main-ok`. |
 | **A cada comando de shell** | Uma segunda guarda avisa antes que um comando Bash ou PowerShell escreva um arquivo do repositório pelo texto do próprio comando em vez das ferramentas Write e Edit — um heredoc, `echo`/`printf`, um `Set-Content`/`Out-File`/`Add-Content` do PowerShell, um `open(..., 'w'/'a')` do Python, uma escrita inline em Node ou `.js` cujo literal traz uma barra invertida, uma aspa escapada ou uma quebra de linha embutida, ou um `sed -i` num arquivo versionado — ou edite uma issue ou PR do GitHub com um `--body`/`-b` inline em vez de um corpo inteiro a partir de um arquivo. Termina com código 2, nomeando a regra e o arquivo ou comando; um caminho fora do repositório (temp, o scratchpad da sessão) e os arquivos gerados do próprio plugin (`warnings-baseline.json`, `.claude/agile/sync.json`, `scripts/delivered.json`, `.claude/agile/sync-base/**`) ficam em silêncio. Com o seu sim, o Claude repete o comando terminando com o comentário `# agile:literal-ok`. |
+| **A cada ferramenta de arquivo de um agente do plugin** | Uma terceira guarda recusa um Read, Glob, Grep, Write, Edit, MultiEdit ou NotebookEdit feito de dentro de um dos agentes do plugin (`frontend`, `ux-designer`, `system-design`, `architect`, `reviewer`) quando o alvo — o arquivo, ou a pasta de uma busca; uma busca sem pasta roda na pasta da sessão — está no checkout principal do seu projeto enquanto existe uma worktree de item (`feature/F-<n>`, `bug/B-<n>`). Termina com código 2 nomeando as worktrees de item e mandando o agente repetir a chamada com uma delas como caminho. O Claude Code chama esses agentes de `agile:<nome>` (medido); as chamadas do próprio Claude, os agentes embutidos (Explore, general-purpose), um agente do próprio projeto com o mesmo nome sem prefixo, um alvo dentro de uma worktree ou fora do repositório, um projeto sem worktree de item e um repositório sem `docs/agile/` nunca são recusados, e qualquer dúvida deixa a chamada passar. O único desvio, com o seu sim, é reiniciar o Claude Code com `AGILE_HOOKS=off`, o que desliga todos os hooks do agile (a guarda de commit e o gate também). |
 | **A cada edição** | Nada é compilado. O arquivo editado só é anotado, sob a raiz git a que pertence — assim, uma edição dentro de uma worktree é verificada naquela worktree, e não na pasta onde a sessão começou. |
 | **Fim do turno** (só se houve mudança de código, ou de um documento que um teste cita) | Recompila os projetos alterados (`--no-incremental`) e roda só os projetos de teste que os referenciam, direta ou indiretamente. Nunca roda a suíte inteira. |
 | **Ship** | `gate.js ship`: rebuild completo, suíte completa e testes de arquitetura; depois nenhum arquivo versionado pode ficar alterado (um arquivo gerado que a execução reescreveu é commitado com o item), e as evals rodam quando o projeto as tem: `evals/compare.js` compara o resultado com a base e o código de saída dele é o veredito (uma queda ou um caso ausente reprova o ship; uma execução parcial, ou de outro modelo ou outra ablação que a da base, é "não medida" e o interrompe). Depois do manual da app, `gate.js docs` roda o comando de docs que o repositório declara — ou, sem nada declarado, o único `tools/*.DocGen` que encontrar (abaixo). Antes do commit de docs o Claude lê o diff do item em `docs/` (fora de `docs/manual/`) e acrescenta uma linha de glossário, na branch do item, para cada termo técnico novo sem linha; o relatório diz `Glossário: N linhas acrescentadas: <termos>` ou `Glossário: nada faltando`. |
@@ -362,6 +366,7 @@ Detalhes:
 - **Limite conhecido.** Só as edições feitas com as ferramentas de edição são rastreadas. Mudanças feitas por comando de shell (`dotnet format`, um merge) são pegas no ship.
 - `AGILE_HOOKS=off` desliga os hooks em uma sessão.
 - `AGILE_TESTCMD_TIMEOUT` (1800 s) limita o `testCommand` de um repositório com `engine: msbuild`, como o `AGILE_DOCS_TIMEOUT` limita o comando de docs.
+- **Um comando que passa do limite é encerrado inteiro** (0.37.0, #150). O comando e o check de docs, o `restoreCommand` e o `testCommand` rodam dentro de um pequeno auxiliar (`scripts/run-limited.js`) que trata o prazo enquanto o shell ainda está vivo e encerra todo processo que o comando começou (`taskkill /T` no Windows; no Linux e no macOS o comando roda no seu próprio grupo de processos e o grupo é morto). Antes, só o shell morria: a ferramenta de build que ele tinha iniciado continuava rodando, segurava a pasta, e a remoção do worktree no ship falhava. Um `restoreCommand` que passa do limite agora diz `restore ran longer than 1800 s (AGILE_TESTCMD_TIMEOUT)` em vez de `restore failed`. Se a árvore não pôde ser encerrada, o veredito é o mesmo RED e uma linha é acrescentada: `a process the command started may still be running`.
 - `AGILE_GATE_LOCK_WAIT` (120 s) é quanto `ship`, `baseline` e `stop` à mão esperam por outra rodada da mesma pasta; `AGILE_GATE_LOCK_RETRY_SECS` (15 s) é a pausa antes de um build travado ser tentado mais uma vez.
 
 ## 10. Board
@@ -625,7 +630,7 @@ tests/
 
 As regras comuns ficam em `rules/core/` e são copiadas para `.claude/rules/agile/` no bootstrap: `workflow`, `naming`, `git`, `definition-of-done` e `output-style` são sempre carregadas; `i18n` e `api-contracts` só são carregadas quando o Claude trabalha em arquivos de código, `ui` só em arquivos de tela (`.razor`, `.xaml`), e `build-config` só em arquivos de projeto e de build. Uma regra por linha, no máximo 30 linhas por arquivo. As regras core são genéricas: valem para todos os perfis. O que depende de um perfil, de uma stack ou de uma biblioteca de UI fica no arquivo do perfil, em `templates/dotnet/` ou numa regra limitada por tipo de arquivo, e o plugin aplica isso a todos os perfis a que diz respeito.
 
-**Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
+**Regras que o build confere.** O bootstrap copia `templates/dotnet/` para a raiz da solução, em todos os perfis: `Directory.Build.props` (configurações comuns, estilo de código cobrado no build, `NeutralLanguage` `en` para o conjunto de recursos neutro, e `net10.0`, a versão LTS; `net11.0` é a troca de uma linha quando o projeto escolher), `Directory.Packages.props` (todas as versões de pacote em um só lugar), `.editorconfig` (as regras do dono: nomes, chaves em todo bloco, pattern matching, membros com corpo de expressão, formatação), `BannedSymbols.txt` (APIs proibidas, como `new JsonSerializerOptions`, `DateTime.Now`, `Thread.Sleep`) e `global.json`. Uma regra quebrada vira aviso de build, e o gate reprova avisos novos — assim a regra vale mesmo quando ninguém lembra de ler. O `TreatWarningsAsErrors` fica desligado. Quando uma lição de retro pode ser conferida pelo build, ela vai para lá primeiro.
 
 **Lições da stack.** Uma lição de um item real que depende da stack vai para a regra restrita àqueles arquivos ou para os perfis a que diz respeito, nunca para uma regra sempre carregada. Exemplos da primeira app: a `api-contracts` diz que um middleware próprio resolve uma dependência opcional dentro do ramo que precisa dela (um parâmetro do `InvokeAsync` é resolvido em toda requisição) e que um cliente pede à API os claims do usuário em vez de decodificar o seu access token (ele pode ser criptografado); a `build-config` diz que uma investigação que depende de versão lê a versão resolvida em `obj/project.assets.json`, não a fixada; os perfis com AppHost do Aspire dizem que o código chega a Redis, PostgreSQL ou a um broker pela integração de cliente do Aspire, porque os recursos locais rodam com TLS por padrão, e que o `ServiceDefaults` gerado desliga as novas tentativas de POST (um POST repetido reusa tokens de uso único); os perfis com UI Blazor dizem que, no Interactive Server, estado que muda durante a sessão fica num store no servidor, com a chave num id do cookie, porque um circuito não consegue reescrever o cookie; e a estratégia de testes dos perfis diz que um teste bUnit espera o que um handler assíncrono de clique faz (`WaitForAssertion`), e que um host de teste criado por classe de teste limpa o pool do Npgsql ao ser descartado, senão o banco de teste fica sem conexões; e, no Interactive Server, um dado da primeira requisição que o circuito vai precisar (o endereço do visitante, um cabeçalho) é lido no `App` e passado ao componente raiz interativo, porque o circuito não tem `HttpContext`; os perfis com bUnit também dizem que toda página e diálogo novo ganha um teste que o renderiza, porque um erro de atributo Razor compila (um parâmetro string sem `@` vira texto literal); os perfis com EF Core dizem que o delete que fecha uma unidade de trabalho fica fora do `try` que trata a falha dela, porque um save que falhou mantém a entrada como `Deleted`; com ASP.NET Core Identity, só o último passo de um login em vários passos zera a contagem de falhas; e no `modular-monolith` uma linha que a requisição não pode perder (um job na fila, uma mensagem de outbox) é gravada pelo mesmo save dos dados que a justificam. A `api-contracts` também diz que um endpoint anônimo que precisa dar a mesma resposta em todos os caminhos faz todas as conferências de entrada antes da consulta que diferencia esses caminhos. Os perfis com UI Blazor também dizem que uma página que espia um ticket de uso único (um convite, um link de confirmação) no `OnInitialized` o vê duas vezes — o prerender roda antes do circuito interativo — então lê o ticket ali mas só o consome no sucesso, e um ticket que não pode ser reaproveitado fica preso ao navegador por um cookie HttpOnly, nunca só pela URL; e, num projeto com o gerador de documentação técnica, o dicionário de dados mostra a cláusula `WHERE` de um índice parcial ao lado dele. A estratégia de testes de todo perfil também diz que o template do SDK ainda gera xUnit 2.x, onde `TestContext.Current.CancellationToken` não existe: esse membro é da v3, e adotar a v3 é uma decisão que fica fixada e escrita.
 
@@ -660,7 +665,7 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 
 **Uma pasta por item.** Cada item ganha a própria worktree — uma pasta separada, fora do repositório (a raiz é a linha `Worktrees:` do `CLAUDE.md`, perguntada no bootstrap — recomendação `D:\wt\<repositório>`, ou `C:\wt\<repositório>` sem drive D:; sem a linha, `<pasta pai do repositório>/wt/<repositório>/`, e o `/agile:sync` propõe a linha. A pasta é `f-<n>-<desc>` ou `b-<n>-<desc>`, com `<desc>` = até 20 caracteres do slug, cortado num hífen: `f-3-exam-board`. Curta por causa do limite de caminho do Windows; uma worktree criada antes mantém o nome `<tipo>-<n>` até o merge) — criada pelo `/agile:refine` antes de ele escrever qualquer coisa e usada até o merge. É isso que mantém os documentos de um item na branch dele: uma sessão trabalhando na pasta de outro item escrevia ali o arquivo da feature e o mockup, e eles acabavam numa branch que não era a deles. O build reaproveita essa pasta e nunca cria uma segunda.
 
-**Dois itens em paralelo.** O padrão continua sendo um item por vez em `building`. Quando você quiser mesmo um segundo item andando — uma feature longa numa sessão e um bug em outra — digite `/agile:build <id> --worktree`. A flag é o seu pedido de trabalho em paralelo: ela libera o limite de um por vez (e, para um item aprovado antes desta mudança, cria a pasta que falta). Antes, o Claude diz se os dois itens podem colidir (mesmo schema de módulo, mesma tela, mesmo contrato) e recomenda fazer em sequência quando colidem. Um escritor por worktree. O status do item fica nessa worktree até o merge, e o `/agile:status` e o início de sessão leem todas as worktrees. Só um app host roda por vez (as portas colidem); arquivos locais ignorados pelo git não vêm junto. Uma pré-visualização do app host a partir de uma worktree aponta a configuração de execução para o caminho absoluto dela temporariamente, restaurada para o caminho do checkout principal ao fim da pré-visualização. No ship, a checagem completa roda na worktree e o merge no checkout principal; depois do merge a worktree e a branch são removidas, nunca com `--force` sem perguntar, e o outro item em andamento é atualizado com a branch principal. Limite recomendado: dois itens — você valida cada um na tela, e esse é o gargalo de verdade.
+**Dois itens em paralelo.** O padrão continua sendo um item por vez em `building`. Quando você quiser mesmo um segundo item andando — uma feature longa numa sessão e um bug em outra — digite `/agile:build <id> --worktree`. A flag é o seu pedido de trabalho em paralelo: ela libera o limite de um por vez (e, para um item aprovado antes desta mudança, cria a pasta que falta). Antes, o Claude diz se os dois itens podem colidir (mesmo schema de módulo, mesma tela, mesmo contrato) e recomenda fazer em sequência quando colidem. Um escritor por worktree. O status do item fica nessa worktree até o merge, e o `/agile:status` e o início de sessão leem todas as worktrees. Só um app host roda por vez (as portas colidem); arquivos locais ignorados pelo git não vêm junto. O app host de uma worktree é iniciado a partir dela num shell em segundo plano e aberto na pré-visualização pela URL; nenhuma configuração de execução aponta para uma worktree. O que um passo inicia dentro de uma worktree (um app host, um servidor, um watcher) é parado por esse mesmo passo, para nada segurar a pasta no ship; um mockup é mostrado a você como arquivo, nunca por um servidor. No ship, a checagem completa roda na worktree e o merge no checkout principal; depois do merge a worktree e a branch são removidas, nunca com `--force` sem perguntar, e o outro item em andamento é atualizado com a branch principal. Limite recomendado: dois itens — você valida cada um na tela, e esse é o gargalo de verdade.
 
 ## 14. Exemplos de workflow
 
@@ -1635,7 +1640,7 @@ Com o catálogo escolhido, o bootstrap copia o `ModelToolAttribute.cs` para o pr
 public Task<Answer> GetOfficialAnswerAsync([Description("The question id.")] Guid questionId)
 ```
 
-No ship seguinte, o `docs/architecture/tools.md` ganha uma linha por tool e uma seção com o schema de entrada dela. Quando uma tool é adicionada sem dizer quem pode chamá-la, o ship para:
+No ship seguinte, o `docs/architecture/tools.md` ganha uma linha por tool e uma seção com o schema de entrada dela; enquanto nenhum método tem o atributo, ele diz `0 tools.`, e uma app sem o atributo não ganha `tools.md`. O nome que o modelo vê é o do método, sem o `Async` final só quando o método devolve `Task`, `ValueTask` ou `IAsyncEnumerable<T>` (o `GetOfficialAnswerAsync` acima vira `GetOfficialAnswer`; um `GetExamAsync` que devolve `string` mantém o nome). Quando uma tool é adicionada sem dizer quem pode chamá-la, o ship para:
 
 ```
 > /agile:ship F-30
@@ -3648,13 +3653,180 @@ Claude: staging: v0.2.0 deployed · previous v0.1.0 · check http://localhost:50
 
 O contêiner web agora é `shop-web:0.2.0`, o contêiner do banco manteve os dados e a senha, e o cookie da `v0.1.0` continua aceito, porque o volume das chaves não foi tocado. `docker compose logs` no serviço web mostra o log das requisições; não há contêiner de dashboard. A produção, com o próprio `deploy/production.env` e a própria porta, roda ao lado do staging no mesmo host, com contêineres e volumes próprios.
 
+### 14.81 Um banco que mantém o endereço, a senha e os dados
+
+A loja da Acme é criada com Aspire e PostgreSQL. Na rodada 1, logo depois da pergunta 3, o Claude pergunta:
+
+```
+Claude: Pergunta 3a, serviços locais fixos: o banco mantém porta, senha e dados de um aspire run para o seguinte?
+        a) sim: porta 5432, senha nos user secrets do AppHost, um volume de dados
+        b) não: o AppHost como as receitas o escrevem (porta nova a cada execução)
+        Recomendado: a) sim. Motivo: a conexão que você salva uma vez no DataGrip continua valendo e os dados sobrevivem a um reinício.
+        A porta 5432 está livre nesta máquina.
+Você: ok.
+```
+
+Com o esqueleto escrito, o relatório diz o que foi feito, nunca a senha:
+
+```
+Claude: Serviços locais fixos, a partir do bloco "Local services (fixed ports and passwords)" do perfil:
+   Acme.AppHost/Program.cs   postgres na porta 5432 fora do modo publish, parâmetro de senha postgres-password, WithDataVolume()
+   user secrets do AppHost   Parameters:postgres-password definido (aleatório, 35 caracteres; o valor não é mostrado)
+   docs/infra.md   ## Local services: postgres · 5432 · Parameters:postgres-password · o volume que termina em -postgres-data
+   CLAUDE.md   - Local services: fixed
+   Os ambientes publicados não mudam.
+```
+
+Você lê a senha uma vez, nesta máquina, e salva a conexão do DataGrip com host `localhost`, porta 5432 e usuário `postgres`:
+
+```powershell
+dotnet user-secrets list --project src/Acme.AppHost
+```
+
+```bash
+dotnet user-secrets list --project src/Acme.AppHost
+```
+
+No dia seguinte o `aspire run` sobe o banco na mesma porta, com a mesma senha e as linhas de ontem. Se quiser outra senha, troque o segredo e remova o volume citado no `docs/infra.md` (os dados dele se perdem), senão o banco recusa a nova com `password authentication failed`. Uma segunda máquina, ou um clone novo, define o seu valor com `dotnet user-secrets set` antes do primeiro `aspire run`; até lá os recursos que usam a senha ficam em `Waiting`.
+
+Um projeto criado no mês passado tem um AppHost e nenhuma dessas linhas, então o `/agile:sync` o lista:
+
+```
+Claude: Novo nesta versão: Fixed local services (- Local services: fixed | none no CLAUDE.md).
+        Item a registrar: "Fixed local services", que constrói o bloco "Local services (fixed ports and passwords)" do perfil; "- Local services: none" recusa e encerra este aviso.
+```
+
+### 14.82 Os dados do próprio item, e um agente mantido na worktree
+
+O F-12 acrescenta uma coluna `Discount` aos pedidos da Acme, construído na worktree `D:\wt\shop\f-12-order-discount` enquanto o checkout principal fica no `main`. A primeira linha do roteiro de validação depende de onde o projeto guarda os dados locais. Três projetos, três passos de partida.
+
+O AppHost declara `WithDataVolume()` sem nome (os perfis escrevem assim): o nome do volume carrega o caminho do AppHost, então a worktree já tem o seu próprio banco.
+
+```
+1. Inicie o app a partir da worktree: aspire run em D:\wt\shop\f-12-order-discount.
+   Dados: esta worktree tem o seu próprio volume (o volume de dados do AppHost não tem nome); nada a ajustar.
+   A migração do F-12 cai só ali; o banco do checkout principal não é tocado.
+```
+
+O projeto dá nome ao volume e mantém a sua própria chave em `docs/infra.md` (`Database__Name`):
+
+```
+1. Pare qualquer app host que esteja rodando e inicie o app a partir da worktree, num banco só dela:
+```
+
+```powershell
+$env:Database__Name = "shop_f12"
+aspire run
+```
+
+```bash
+export Database__Name="shop_f12"
+aspire run
+```
+
+```
+   Esperado: o dashboard lista o banco shop_f12. Para repetir: as mesmas duas linhas num terminal novo.
+```
+
+O projeto não tem nenhum dos dois:
+
+```
+1. Inicie o app a partir da worktree: aspire run.
+   Aviso: o banco local é compartilhado com o checkout principal; a migração do F-12 cai nele
+   (registrado em ## Decisions com o seu sim de hoje).
+```
+
+Um passo que pede para você mudar código diz onde e o que falha, e um passo que compila para o host antes:
+
+```
+5. Pare o app host (Ctrl+C no terminal dele). Em src/Shop/Orders/Order.cs, dentro da classe Order, depois da
+   propriedade Total, acrescente: public decimal Discount { get; init; } = -1m;
+   Rode os testes: OrderTests.Discount_cannot_be_negative falha com "Discount must be zero or more".
+   Remova a linha de novo.
+```
+
+No mesmo build, o agente `reviewer` uma vez buscou sem pasta. A guarda o mandou de volta:
+
+```
+[agile agent-guard] Grep from the `reviewer` agent targets the main checkout (D:/dev/shop), not an item's worktree.
+The item's code and status live in its worktree: D:/wt/shop/f-12-order-discount [feature/F-12].
+Repeat the call with the item's worktree (or a folder inside it) as the path; never report something as missing from a search rooted elsewhere.
+Bypass, only with the owner's yes: restart Claude Code with AGILE_HOOKS=off (this turns off every agile hook).
+```
+
+O agente repetiu a busca na worktree e achou `Order.Discount`; você vê só os achados dele.
+### 14.83 Quais critérios ainda não têm teste
+
+O F-14 está em `building` e tem cinco critérios de aceite. Quando o build começa, o Claude acrescenta a seção ao arquivo da feature com todas as linhas `pending`, e cada commit que traz um teste preenche a sua linha. No meio do caminho, o arquivo diz:
+
+```
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | ExamFeesPage_Open_ShowsFees |
+| AC2 | pending |
+| AC3 | CreateExamFee_Negative_Returns422 |
+| AC4 | pending |
+| AC5 | validation step 6 |
+```
+
+A conversa é compactada. O resumo guarda o bloco de retomada, que agora tem uma quarta linha:
+
+```
+Resume F-14 Exam fees — building [feature/F-14] D:/wt/examprep/f-14-exam-fees
+  Paused: no pause note
+  Next: continue `/agile:build F-14` from the last commit on feature/F-14 (git log in D:/wt/examprep/f-14-exam-fees)
+  Criteria with no test: AC2, AC4 (2 of 5)
+```
+
+A sessão que continua vai direto ao AC2 e ao AC4, sem reler o código. A linha diz `none (5)` quando toda linha está preenchida, e `no section` para um bug ou um item feito antes da seção existir.
+
+Depois você muda um critério no meio do build:
+
+```
+> /agile:change F-14 o AC3 também deve recusar uma taxa de zero
+Claude: o AC3 muda (Dada uma taxa negativa, então 422 vira Dada uma taxa abaixo de um, então 422).
+        A linha dele em ## Criterion → test volta a pending; AC1, AC2, AC4 e AC5 ficam como estão.
+```
+
+No fim do build toda linha está preenchida, e no dia do ship o Claude confere o arquivo em vez de confiar no relatório. Este ship tem uma lacuna:
+
+```
+> /agile:ship F-14
+Claude: F-14 — Exam fees [validating]
+        Criterion → test: parei antes do merge.
+        O AC4 ainda está pending; o AC2 cita ExamFeeTests.Refund_Partial, que não está em nenhum projeto de teste.
+        Acrescente os testes, ou me diga para mover um critério ao roteiro de validação (validation step <n>, registrado em ## Decisions).
+```
+
+Uma feature antiga, sem a seção, imprime `Criterion → test: no section (built before this rule)` e o ship segue; um bug não imprime nada.
+
+### 14.84 Uma suíte que trava não deixa mais a ferramenta rodando
+
+O repositório `legacy-shop` é `engine: msbuild`, e o `testCommand` dele roda uma suíte pelo `vstest.console.exe`. Um dia a suíte trava. No fim do ship o gate já esperou os 1800 segundos:
+
+```
+> /agile:ship F-31
+Claude: F-31 — Refund by e-mail [validating]
+        agile gate RED: tests timed out (vstest.console.exe LegacyShop.Tests.dll) — full output: C:/Users/you/AppData/Local/Temp/agile-canary/gate-logs/20261009-1815-ship.log
+        tests ran longer than 1800 s (AGILE_TESTCMD_TIMEOUT): vstest.console.exe LegacyShop.Tests.dll
+```
+
+Antes da 0.37.0 só o shell era parado aqui: o `vstest.console.exe` continuava rodando, e quando você consertava a suíte e dava ship de novo a remoção do worktree falhava com a pasta em uso. Agora o gate encerrou a árvore inteira antes de imprimir o veredito, então a pasta está livre e o próximo ship começa limpo. Se o Windows tivesse recusado encerrar, o mesmo RED traria mais uma linha:
+
+```
+        a process the command started may still be running
+```
+
+Essa linha é o aviso para procurar no Gerenciador de Tarefas um `vstest.console.exe` ou `testhost.exe` sobrando antes de dar ship de novo.
+
 ## 15. Referência rápida
 
 Você só digita os comandos abaixo. Cada um carrega uma skill com o procedimento completo (por exemplo, `/agile:bootstrap` carrega a `bootstrap-quiz`); as skills ficam ocultas do menu `/` e é o Claude quem as carrega.
 
 | Comando | Uso |
 |---|---|
-| `/agile:bootstrap` | Quiz a partir do brief (um app mobile também faz a 2g, um backoffice da equipe) → `CLAUDE.md`, ADR, perfil e esqueleto |
+| `/agile:bootstrap` | Quiz a partir do brief (um app mobile também faz a 2g, um backoffice da equipe; um app com Aspire faz a 3a, portas e senhas locais fixas) → `CLAUDE.md`, ADR, perfil e esqueleto |
 | `/agile:discuss "<ideia>"` | Explora uma ideia: opções, decisões, itens registrados |
 | `/agile:epic "<nome>"` | Quebra um épico em features priorizadas |
 | `/agile:idea "<texto>"` | Registra um épico, feature ou bug, sem refinamento, depois de procurar um item parecido (melhorá-lo em vez disso, ou registrar mesmo assim) |
@@ -3691,7 +3863,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:idea` | Você pensou em algo no meio do trabalho e quer no quadro sem parar | 14.2, 14.5, 14.48 |
 | `/agile:refine` | Um item é uma ideia e você está pronto para responder às perguntas dele e aprová-lo | 14.2, 14.16 |
 | `/agile:screen` | A feature tem uma tela nova ou complexa; formulários e listas simples não precisam | 14.8, 14.40 |
-| `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9, 14.46 |
+| `/agile:build` | O item está aprovado; `--worktree` só quando um segundo item precisa rodar enquanto outro está em build | 14.2, 14.9, 14.46, 14.82 |
 | `/agile:review` | Uma mudança é arriscada (dados, dinheiro, permissões) e você quer olhos sem contexto antes de validar | 14.8 |
 | `/agile:change` | Você mudou de ideia num item aprovado ou em build; um item done ganha um item novo; algo fora do trabalho trava o item (`--block`) | 14.3, 14.40, 14.67 |
 | `/agile:script` | Um passo do roteiro de validação está errado ou velho depois de uma correção; um texto que muda um critério vai para o `/agile:change` | 14.62 |
