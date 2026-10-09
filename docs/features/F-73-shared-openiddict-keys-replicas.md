@@ -76,9 +76,9 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 | AC2 | pending |
 | AC3 | pending |
 | AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
+| AC5 | OpenIddictCertificateStartTests.Start_CertificateCannotDoItsJob_RefusesNamingTheSettingAndTheReason (10 cases) |
+| AC6 | AzurePublishFilesTests.Publish_CarriesNoOpenIddictCertificate |
+| AC7 | AzurePublishFilesTests.Publish_KeepsTheApiAwakeAtMostTwiceAndTheWebAtMostOnce |
 | AC8 | pending |
 | AC9 | pending |
 | AC10 | pending |
