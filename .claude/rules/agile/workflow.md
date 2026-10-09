@@ -25,4 +25,4 @@
 - Exception: the app host of the item's worktree (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()`, or the project's own knob set for the worktree); data shared with another checkout needs the owner's yes, once per item.
 - End every step with: what changed (files), what is next, who acts next.
 - Quote real command output for builds and tests (counts, duration). Never paraphrase a result.
-- Write files (code, tests, docs) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.
+- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.
