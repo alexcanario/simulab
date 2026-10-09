@@ -1,7 +1,7 @@
 ---
 feature: F-112
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 159
 version: 1
 ---
@@ -115,4 +115,15 @@ Content of sections 5 to 9 of `2026-v3` (D1, D2, D3):
 ## Change notes
 
 ## Validation script
-(written at build)
+Needed to validate: nothing beyond the local app host, in place now. Data: the AppHost's own volumes (no database change in this item). Stop any other app host first.
+
+1. Start the app host from the item's worktree.
+   PowerShell: `cd D:\wt\simulab\f-112-privacy-policy-real; dotnet run --project src/Hosts/Simulab.AppHost`
+   Git Bash: `cd /d/wt/simulab/f-112-privacy-policy-real && dotnet run --project src/Hosts/Simulab.AppHost`
+2. Open the Web URL from the dashboard, then `/privacy` in English. Expect: "Version 2026-v3, effective 10/9/2026", the draft notice, sections 1 to 9, and a table with Microsoft Azure (Central US), Microsoft Azure Communication Services (Brazil) and Anthropic ("Today no data of yours is sent to it"). The words "Brazil South" and "SendGrid" appear nowhere.
+3. Switch the language to pt-BR, then pt-PT. Expect the same structure: "Onde seus dados ficam" / "Quem trata seus dados por nós" with LGPD and "operadoras" (pt-BR); "Onde ficam os seus dados" / "Quem trata os seus dados por nós" with RGPD-style wording and "subcontratantes" (pt-PT). Read each text as the person it addresses.
+4. Read sections 7 and 8 as the owner and as the future lawyer: do they say only what ADR-0004 and the register support? Section 7 says Microsoft's certification scope for the hosting service is not confirmed; section 8 says the ANPD clauses are being put in place and the service holds test accounts only. Say whether this wording is right to publish as a draft.
+5. Open `/terms`: still version 2026-v1, unchanged.
+6. Open the sign-up page, accept both documents and register a test account (use a throwaway address; the mail catcher shows the email). Expect the privacy link to open the 2026-v3 text and the sign-up to be accepted, with no "outdated version" message.
+7. Keyboard only: on `/privacy`, Tab reaches the language switch and the footer links; the table is readable at a narrow window.
+8. Read the manual page `docs/manual/en/create-account.md` (line 12) and its pt-BR and pt-PT twins: they name Central US and the three companies.
