@@ -9,7 +9,7 @@ namespace Simulab.Web.Tests;
 public class DevPagesHostTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
     private HttpClient ClientFor(string environment) =>
-        factory.WithWebHostBuilder(builder => builder.UseEnvironment(environment))
+        factory.WithWebHostBuilder(builder => builder.UseEnvironment(environment).WithDeployedClient())
             .CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
     [Theory]
