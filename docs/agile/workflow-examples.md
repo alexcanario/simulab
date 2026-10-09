@@ -3234,3 +3234,123 @@ Claude: Screen check (desktop, Windows session): starting Toolbox.Desktop from t
 The check may press a button through the app's own automation tree, because that does not depend on which window has focus. It never sends a synthetic mouse or key: that would land in whatever window is in front, usually your IDE. On Linux or macOS, or with no desktop session, the report says the whole screen goes to your validation script.
 
 A keyboard criterion (Enter, Space, Alt+Arrow) on an Avalonia screen is written as a headless test, not left to you; and every component that shows user or Core text gets a long-text state: in the gallery and in a wrap test.
+
+### 14.89 The ship opens a pull request and you merge it yourself
+
+The `CLAUDE.md` of acme-shop has `- Merge: pr`, because its main branch is protected. F-12 is validated:
+
+```
+> validado
+> /agile:ship F-12
+Claude: F-12 — Export the monthly report as CSV [validating]
+        Full check: agile gate GREEN (212 passed, 0 failed, 1 m 48 s). Scan GREEN. Manual updated. Version 0.7.0 -> 0.8.0.
+        origin is github.com and merge commits are allowed. ## Delivery and status: done are in the branch.
+        Pushed feature/F-12. PR #31 opened: body = summary, validation script as a checklist, "Validated by the owner on 2026-10-09 (chat)",
+        the criterion -> test table, the gate's last line, Closes #12. Recorded "PR: #31" in the item file and pushed again.
+        PR #31 open: merge it on GitHub when you are ready
+```
+
+Typing ship authorized the pull request only. You read the diff on your phone and press "Create a merge commit". Another item can be built meanwhile: the next session start says
+
+```
+Waiting on PR: F-12 #31 MERGED — close not run: /agile:ship F-12
+```
+
+```
+> /agile:ship F-12
+Claude: F-12 — Export the monthly report as CSV [done]
+        PR #31 is MERGED (merge commit 4e1c0aa). Main checkout: pull --ff-only, 0 0 against the remote, the merge commit is not empty.
+        Remote branch: already deleted by GitHub. Worktree D:/wt/acme-shop/f-12-csv-export removed, local branch deleted.
+        Board #12 closed, Status Done (read back). Nothing was committed on main: done and Delivery came with the PR.
+        Retro: 1 lesson proposed.
+```
+
+Had F-13 shipped to main while PR #31 waited, and both bumped the version, GitHub would show the PR in conflict ("dirty") and you could not merge it; the second `/agile:ship F-12` would then merge main into the branch, run the gate again, bump the version from main's, push, and say `PR #31 open` again, with the same number. Had you closed the PR without merging, the item would go back to `validating` and the `PR:` line would be removed. GitHub does not let you approve your own PR: if the branch rule demands an approval, the admin bypass, a second account or a bot is yours to arrange.
+
+### 14.90 A secret is stopped at the door, before it leaves the session
+
+In acme-shop, Claude finishes F-14 (a connection to the reporting database) and commits it in one command, the way it always does:
+
+```
+Claude: git add src/Acme.Reports/appsettings.json && git commit -m "feat(F-14): connect to the reporting database"
+        [agile secret-guard] Possible secret in the commit: src/Acme.Reports/appsettings.json:7 (password).
+        Remove it, or name the setting instead (${DB_PASSWORD}, <password>); for fake test data put agile:allow-secret in a comment on that line. The value is not shown here.
+        If this is a mistake, ask the owner; with a yes, repeat the command ending with the comment  # agile:secret-ok
+Claude: The commit was refused: line 7 holds the real password of the reporting database. Nothing was committed.
+        I moved it to the user secrets (ConnectionStrings:Reporting) and left `Password=<password>` in the file. Committing again.
+```
+
+The guard reads what the command is about to commit, even when `git add` and `git commit` are one command and nothing is staged yet. It names the file, the line and the kind of secret, and never prints the value. The same door guards `git push` (the commits the remote does not have yet) and the text of `gh issue|pr create|edit|comment`, `gh release create|edit` and `az boards work-item create|update`, inline or from a file:
+
+```
+Claude: gh issue create --title "Login fails" --body-file body.md
+        [agile secret-guard] Possible secret in the body of gh issue create: body.md:3 (GitHub token).
+Claude: The report quotes a token from the log. I replaced it with `<token>` and created the issue.
+```
+
+A test fixture that needs a fake key carries `agile:allow-secret` in a comment on that very line:
+
+```
+var fakeKey = "AKIA<the fake key>"; // agile:allow-secret
+```
+
+The marker stays in the code, so the reviewer sees every exception in the diff. Placeholders (`<password>`, `${DB_PASSWORD}`, `changeme`) pass on their own; `var password = request.Password;` is code that reads a password, not a secret, and passes too. If the secret is already in a commit that was not pushed, the push is refused and the message says that rewriting that commit needs your yes: nothing is force-pushed. The guard is a cheap check at each door; the scan before the ship (gitleaks and semgrep) still reads the whole project and its history. Only agile projects are guarded, and any doubt (a diff over 4 MB, a command it cannot read) lets the call through.
+
+
+### 14.91 A client's ticket id is the item id
+
+acme-shop fixes bugs that arrive as Jira tickets. You want the ticket, the branch and the worktree to share one name:
+
+```
+> /agile:idea bug --ticket PRJ-123 --url https://acme.atlassian.net/browse/PRJ-123 "Crash when saving an order with no lines"
+Claude: No similar item (31 items read).
+        Card: which epic? Orders (Recommended) / New epic / No epic
+> Orders
+Claude: PRJ-123 — Crash when saving an order with no lines [idea]
+        Created docs/bugs/PRJ-123-crash-saving-order.md with ticket-url, board #44. No B-<n> number was taken.
+```
+
+The same ticket cannot become a second item, and a wrong id writes nothing:
+
+```
+> /agile:idea bug --ticket PRJ-123 "Crash on an empty order, again"
+Claude: PRJ-123 is already an item: PRJ-123 — Crash when saving an order with no lines [idea]. Nothing was written.
+        New work on the same ticket is /agile:change PRJ-123; another ticket has its own id.
+> /agile:idea bug --ticket B-12 "Wrong total"
+Claude: B-12 is not a ticket id: a ticket id is a key of two or more characters (a letter, then letters, digits or _),
+        a hyphen and digits, like PRJ-123 or TFS-4521. Nothing was written.
+```
+
+From here every step carries the ticket's name:
+
+```
+> /agile:refine PRJ-123
+Claude: PRJ-123 — Crash when saving an order with no lines [idea]
+        Worktree: D:/wt/acme-shop/b-prj-123-crash-saving-order, branch bug/PRJ-123
+```
+
+Commits read `fix(PRJ-123): reject an order with no lines`, the merge message names `bug/PRJ-123`, and the release notes list `Bug PRJ-123`. Items without `--ticket` (F-12, B-3) are numbered and work as before.
+
+### 14.92 A project far behind is told how far, and what arrived is read in blocks
+
+acme-shop last synced when the plugin was 0.28.0; the plugin is now 0.46.0. The sync still goes straight to the current version (it compares each file with today's text, never version by version), but past 2 minor versions the report says how far, and groups what has a version by the minor series it arrived in:
+
+```
+> /agile:sync
+Claude: 0.28.0 -> 0.46.0: 18 minor versions behind; the sync goes straight to 0.46.0. What arrived, by version:
+
+        0.30 (1 capability, 0 notes)
+          - Database password: the AppHost declares a database with no password parameter ...
+        0.35 (0 capabilities, 1 note)
+          - retro-log line 14: "gate.js reads stdin ..." (#25), delivered in 0.35.0
+        Before your recorded version 0.28.0 (still pending)
+          - DocGen: technical documentation generated from the code ...
+
+        Files, one table by state (nothing dates a file, so these are not grouped):
+        | file                              | state  | proposal |
+        | .claude/rules/agile/git.md        | update | copy: ... |
+        | docs/agile/workflow.md            | edited | merge: ... |
+        Approve the rows, one by one or "ok" for all.
+```
+
+A project 2 minor versions behind or less, or whose `.claude/agile/sync.json` records no version, gets exactly the report it got before: no warning, no blocks. The approval does not change: one OK per row, not one per block.

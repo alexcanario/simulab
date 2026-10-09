@@ -14,6 +14,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Three gates: feature approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate).
 - Ask before: pushing or merging to `<main branch>` outside a ship, touching shared databases, deleting data, anything outside this repository.
 - Worktrees: `<root from quiz 28c, e.g. D:\wt\<repo>>` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
+- Merge: `<direct | pr from quiz 28d>` — `pr`: `/agile:ship` opens a pull request and the owner merges it; a second `/agile:ship` closes the item.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.

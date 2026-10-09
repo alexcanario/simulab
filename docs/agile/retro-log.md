@@ -1081,3 +1081,8 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 ## 2026-10-09 - F-112 The privacy policy names the real region and email service
 - The public text, the register, the manual and the test pins have to change together when a region or processor changes; F-93 left this for the retro ("nothing enforces it") and F-112 touched four places by hand: score 1/6, project rule added to `.claude/rules/agile/project.md`. A test that fails when they diverge was left out (it needs an item).
 - An acceptance criterion that forbids a term ("names neither Brazil South nor SendGrid") contradicted the planned sentence that said what the old version named; caught while writing the text, reworded without the old names (D9): score 0/2, nothing done.
+
+## 2026-10-09 - Sync with agile@canary 0.46.0
+- From 0.42.0 to 0.46.0 (4 minor versions). Copied: `naming.md`, `workflow.md`, the `bug`, `feature` and `project-claude` templates, the four `docs/agile/workflow*` manuals. Merged by hand: `.claude/rules/agile/git.md` (kept the project's "Stage files by name" line; took the ticket-id, `Merge: pr` and secret-hook text). Left alone: `docs/agile/profile.md` (edited, upstream unchanged) and the build files (no upstream change).
+- Declined or not offered: DocGen tool catalogue and Azure login `agile-deploy.js` rows are the two plugin notes already logged above (false positives); no item captured. Baseline present, docs command already declared, no plugin notes delivered, glossary already complete (not rescanned).
+- `CLAUDE.md` has no `Merge:` line; the new template line is not added (direct merge stays the default).

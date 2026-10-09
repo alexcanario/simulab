@@ -14,6 +14,6 @@
 - Tests: class `<Subject>Tests`, method `Method_Scenario_Expected`.
 - Database: `snake_case` tables and columns, plural tables, one schema per module. Index names say what they protect (`ux_exam_boards_tenant_acronym`).
 - Routes: lowercase kebab-case plural nouns. Error codes and resource keys: `snake_case` with a dot (`exam_board.acronym_taken`).
-- Ids in docs and branches: `F-<n>`, `B-<n>`, `D-<n>`. Slugs are lowercase English words joined by `-`, at most 5.
+- Ids in docs and branches: `F-<n>`, `B-<n>`, `D-<n>`, or an external ticket id (`PRJ-123`: two or more key characters, a hyphen, digits). Slugs are lowercase English words joined by `-`, at most 5.
 - Folders and worktrees have short names (worktrees `f-<n>-<desc>`, `<desc>` ≤ 20 characters): Windows paths break at 260 characters.
 - The vocabulary architecture test enforces this in every assembly, UI and API included. A new Portuguese term found twice goes into its forbidden list.
