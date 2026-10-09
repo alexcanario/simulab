@@ -3,7 +3,7 @@ feature: F-93
 epic: Cloud hosting and operations
 status: approved
 board: 139
-version: 1
+version: 2
 ---
 # Users' data in Azure Central US meets LGPD and GDPR
 
@@ -18,8 +18,8 @@ Simulab hosts users' data in Azure Central US (Iowa, United States) for staging 
 - Depends on: F-67 (done, the region decision record in ADR-0003); F-64 (done, the staging in Central US); F-66 (done, the email service).
 - Waits on (to start): nothing. The lawyer's review is not a start condition: it only removes the draft mark later — owner.
 - Needed to validate: nothing beyond reading the files in the worktree — owner.
-- Suggested path: `/agile:build`. It runs before F-71 merges: F-71's policy text names Brazil South and gets a change note afterwards (D7).
-- Parallel with: F-71 is `building` in its own worktree and this item edits none of its files; F-85 and F-72 stay untouched.
+- Suggested path: `/agile:build`. F-112 (the published privacy policy `2026-v3`) depends on this item and runs after it (D7).
+- Parallel with: nothing in progress touches the same files; F-85 and F-72 stay untouched.
 
 ## What already exists (checked 2026-10-09)
 - Staging runs in `centralus`, resource group `rg-simulab-staging`, since 2026-10-08 (`docs/features/F-64-staging-on-azure.md`, "First staging"; `docs/infra.md` deploy commands set `AZURE__LOCATION=centralus` and the workflow variable `AZURE_LOCATION` is `centralus`). Production does not exist yet.
@@ -27,7 +27,7 @@ Simulab hosts users' data in Azure Central US (Iowa, United States) for staging 
 - The email service of F-66 (Azure Communication Services) is created with data location Brazil (`docs/infra.md`, email Bicep paragraph) while the rest of staging is in Central US.
 - Personal data held today (from the code): `User` (full name, email through Identity, preferred language, adult declaration, TOTP secret encrypted), `ConsentRecord` (terms and privacy versions, locale, accepted-at, IP address), account events, role changes, one-time tokens (email verification, password reset), sessions in Redis. The data rights features exist: erasure (F-10) and download of my data (F-16), both `done`.
 - Processors in use or planned: Microsoft Azure (hosting, database, cache, storage, key vault, email), Anthropic (Claude API behind `IAiGateway`; the coach is not built, so no user content reaches it today — not verified in code at this refinement).
-- F-71 (`building`) writes the privacy policy `2026-v2` naming Brazil South and, as an approved list, Azure, Anthropic and SendGrid; it is now out of date in two ways (the region, and the email provider is Azure Communication Services, F-66).
+- F-71 is `done` (version 0.23.0, merge `665b24f`): the published privacy policy `2026-v2` names Brazil South and, as an approved list, Azure, Anthropic and SendGrid. It is out of date in two ways: the region, and the email provider is Azure Communication Services (F-66).
 - ADR-0003 decision 3 lists when the region decision is reopened (the adequacy decision for Brazil changes, a court invalidates it, a product reason asks for EU hosting). A hosting cost is not one of them, which is why a new ADR is needed rather than a note.
 
 ## Goal
@@ -93,14 +93,14 @@ The tests live in `tests/Simulab.ArchitectureTests/`, beside `InfraAccessTests`,
 - 2026-10-09 (D4) — The legal basis is written now and marked as a draft until a lawyer reviews it, the same criterion as F-71 D1 (owner). Nothing waits on the review.
 - 2026-10-09 (D5) — Technical: the tests are content checks in `tests/Simulab.ArchitectureTests/` (markers, headings, columns, the names of the ADRs). They are not the region-consistency guard the owner left out (D3). Decided by Claude, no product impact.
 - 2026-10-09 (D6) — Technical: the ADR is `ADR-0004-data-region-central-us.md` (next free number, rechecked at build) and the register is `docs/privacy/data-processing-register.md`; a new folder `docs/privacy/` is the place for privacy documents that are not the policy text, which stays in the Identity content folder (F-4 BR14).
-- 2026-10-09 (D7) — F-71 is `building` and names Brazil South and SendGrid. This item edits none of its files. When ADR-0004 is accepted, the owner types `/agile:change F-71` so the policy text names the real region, the real email service and the transfer bases of ADR-0004 (same rule as F-71 BR5: bases from the providers' published terms). The execution order in `docs/epics/README.md` already puts F-93 before F-71 and F-85.
+- 2026-10-09 (D7, replaced in v2 on 2026-10-09) — F-71 is `done` and its published policy `2026-v2` names Brazil South and SendGrid. A `done` item takes no change note, so this item edits none of F-71's files and a new item, F-112, publishes the policy `2026-v3` with the real region, the real email service and the transfer bases of ADR-0004 (same rule as F-71 BR5: bases from the providers' published terms). F-112 depends on this item. The execution order in `docs/epics/README.md` still puts F-93 first.
 - 2026-10-09 (D8) — Sources read for this refinement, not legal advice: [Mayer Brown, end of the grace period for the ANPD standard contractual clauses](https://www.mayerbrown.com/en/insights/publications/2025/08/end-of-grace-period-implementation-of-brazils-standard-contractual-clauses-in-international-transfers-of-personal-data) (Resolution CD/ANPD 19/2024 published 2024-08-23; the 12-month period ended on 2025-08-23; no recognition of foreign clauses as equivalent had been granted in the sources read); [Microsoft Trust Center, EU standard contractual clauses](https://www.microsoft.com/en-us/TrustCenter/Compliance/EU-Model-Clauses) (clauses offered through the data protection addendum for Azure). Not verified: whether Microsoft offers the ANPD standard clauses, the current scope of its Data Privacy Framework certification, and the current text of the data protection addendum. The build reads the providers' own published documents and records the version and the date (BR3, BR4).
 
 ## Out of scope
 - Moving staging or production to another region; any change of code, Bicep or database (BR9).
 - A test that compares the region in `docs/infra.md`, the Bicep and the ADR (D3).
 - The data protection officer's contact (LGPD Art. 41) and the incident notification procedure (LGPD Art. 48, GDPR Art. 33).
-- The privacy policy text and its draft notice: F-71, with a change note after this item (D7). New acceptance of the policy by existing users: F-85.
+- The privacy policy text and its draft notice: F-112, after this item (D7). New acceptance of the policy by existing users: F-85.
 - The EU representative (GDPR Art. 27) and Portugal: F-72, after v1.
 - Production email with the product's own domain (F-87), bounces and complaints (F-88).
 - A rule or a test that forces the register to be updated whenever a feature adds a processor: proposed at the retro, not built here.
@@ -109,6 +109,12 @@ The tests live in `tests/Simulab.ArchitectureTests/`, beside `InfraAccessTests`,
 - (none)
 
 ## Change notes
+
+### v2 — 2026-10-09
+- What: the correction of the published privacy policy leaves this item's follow-up and becomes a new item, F-112 (policy `2026-v3`), which depends on this one.
+- Why: F-71 reached `done` and was merged (`665b24f`, version 0.23.0) before this build started; a `done` item takes no change note, so the premise of D7 was false.
+- Affected: D7, `## Start` (Suggested path, Parallel with), `## What already exists` (the F-71 bullet), `## Out of scope` (the policy line). No business rule or acceptance criterion changes; `## Criterion → test` is unchanged.
+- Re-approved: 2026-10-09 (owner chose option A and approved v2).
 
 ## Validation script
 Written at the end of build.
