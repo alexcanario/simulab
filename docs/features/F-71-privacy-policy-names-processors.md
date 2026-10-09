@@ -1,7 +1,7 @@
 ---
 feature: F-71
 epic: Foundation and identity
-status: building
+status: validating
 board: 113
 version: 1
 ---
