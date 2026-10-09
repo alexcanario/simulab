@@ -84,9 +84,9 @@ Content of sections 5 to 9 of `2026-v3` (D1, D2, D3):
 | AC3 | `PrivacyPolicyContentTests.Current_NamesTheRealRegionAndProcessors`, `Current_NamesNeitherTheOldRegionNorTheOldEmailProvider` (x3) |
 | AC4 | `PrivacyPolicyContentTests.Current_ListsThreeProcessorsInATable`, `Current_SaysAnthropicReceivesNothingToday` (x3) |
 | AC5 | `PrivacyPolicyContentTests.VersionThree_StartsWithTheFourSectionsOfVersionOne`, `Current_SaysSafeguardsAreBeingPutInPlace` (x3) |
-| AC6 | `RegistrationEndpointTests.Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored` (with `SignUpForm.PrivacyVersion`) |
+| AC6 | `RegistrationEndpointTests.Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored` (x2: `2026-v1`, `2026-v2`; the accepted sign-up stores `2026-v3`) |
 | AC7 | validation steps 2 to 4 (app host checked by Claude) |
-| AC8 | `PrivacyPolicyContentTests.Manual_NamesTheRealRegionAndProcessors` (x3) |
+| AC8 | `PrivacyManualTests.CreateAccount_NamesTheRealRegionAndProcessors` (x3, in `Simulab.ArchitectureTests`) |
 | AC9 | no resource key added; the existing missing-key test is unchanged |
 
 ## Decisions
@@ -97,6 +97,8 @@ Content of sections 5 to 9 of `2026-v3` (D1, D2, D3):
 - D5 (Claude, 2026-10-09) Technical: the content tests that pinned `2026-v2` now pin `2026-v3`; `SignUpForm.PrivacyVersion` becomes `2026-v3`. `PrivacyPolicyContentTests` gains the cases of AC3 to AC5 and AC8, with one marker per locale for the Anthropic and "being put in place" sentences. pt-PT keeps European Portuguese ("RGPD", "subcontratantes") and pt-BR Brazilian ("LGPD", "operadoras"), as in F-71 D7.
 - D6 (Claude, 2026-10-09) Technical: no data migration. `ConsentRecord` rows of `2026-v2` stay as evidence; staging holds test accounts only (ADR-0004). Asking existing users to accept `2026-v3` is F-85.
 - D7 (Claude, 2026-10-09) Technical: no new package, route, resource key or schema change; `docs/glossary.md` needs no new word.
+- D8 (Claude, 2026-10-09) Build: sources read for D4 on the build date. [Microsoft, Data Privacy Framework covered entities](https://www.microsoft.com/en-us/privacy/microsoft-data-privacy-framework-covered-entities) ("Last Updated: September 2026"): all U.S. subsidiaries using the Microsoft brand name are covered; no product or service is named, Azure included. The official list (dataprivacyframework.gov) is a dynamic search the tooling could not read, and the text of the Microsoft addendum (a .docx) was not read; no Microsoft source offering the ANPD clauses was found. So section 7 says Microsoft states it complies for the companies using its brand and offers the EU clauses in its addendum (source: F-93 D8, Microsoft Trust Center), and that scope for the hosting service is not confirmed; section 8 says the ANPD clauses are being put in place. The owner's actions in ADR-0004 decision 3 stay open.
+- D9 (Claude, 2026-10-09) Build: section 9 says the new version replaces `2026-v2` "which named another region and another email company", without the old names, so that the negative test of AC3 holds for the whole text.
 - **This text is Claude's reading of public sources, not legal advice** (as in ADR-0003 and ADR-0004).
 
 ## Out of scope

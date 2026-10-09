@@ -12,9 +12,9 @@ public sealed class LegalDocumentEndpointTests : IdentityApiTests
     [InlineData("terms", "en", "Terms of use", "2026-v1", "2026-09-17")]
     [InlineData("terms", "pt-BR", "Termos de Uso", "2026-v1", "2026-09-17")]
     [InlineData("terms", "pt-PT", "Termos de Utilização", "2026-v1", "2026-09-17")]
-    [InlineData("privacy", "en", "Privacy policy", "2026-v2", "2026-10-09")]
-    [InlineData("privacy", "pt-BR", "Política de Privacidade", "2026-v2", "2026-10-09")]
-    [InlineData("privacy", "pt-PT", "Política de Privacidade", "2026-v2", "2026-10-09")]
+    [InlineData("privacy", "en", "Privacy policy", "2026-v3", "2026-10-09")]
+    [InlineData("privacy", "pt-BR", "Política de Privacidade", "2026-v3", "2026-10-09")]
+    [InlineData("privacy", "pt-PT", "Política de Privacidade", "2026-v3", "2026-10-09")]
     public async Task GetLegalDocument_ReturnsTheCurrentVersionInTheRequestLanguage(
         string topic, string locale, string title, string version, string effectiveDate)
     {

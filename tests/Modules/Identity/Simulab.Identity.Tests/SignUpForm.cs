@@ -11,8 +11,8 @@ public static class SignUpForm
     /// <summary>The terms version that ships in the content folder (F-71 BR7: unchanged).</summary>
     public const string TermsVersion = "2026-v1";
 
-    /// <summary>The privacy version that ships in the content folder (F-71 BR1).</summary>
-    public const string PrivacyVersion = "2026-v2";
+    /// <summary>The privacy version that ships in the content folder (F-112 BR1).</summary>
+    public const string PrivacyVersion = "2026-v3";
 
     public static RegisterRequest Valid(string? email = null) => new(
         email ?? $"ana.{Guid.CreateVersion7():N}@exemplo.com",
