@@ -183,6 +183,7 @@ One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `
      Remove-Item "federated-$environment.json"
    }
    ```
+   Measured 2026-10-09 on this repository: GitHub presents the subject with numeric ids, `repo:alexcanario@3664703/simulab@1397573907:environment:staging`, and the first run failed with `AADSTS700213` until the credentials used that text (`az ad app federated-credential update`). When a run fails that way, copy the subject from the error annotation (`gh run view <id>`); the subject written above is the plain form, which this repository's runs do not use.
 2. The roles, scoped to the environment's resource group only (the deploy creates role assignments for the apps' managed identities, hence the second role). Repeat for production with its own group once it exists:
    ```powershell
    $scope = "/subscriptions/$sub/resourceGroups/rg-simulab-staging"
