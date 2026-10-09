@@ -1,7 +1,7 @@
 ---
 feature: F-68
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 107
 version: 2
 ---
@@ -113,6 +113,19 @@ Rows of the `## Cloud accounts` table, in order (change note v2, 2026-10-04). Em
 - 2026-10-09 — Build started: the branch was merged with `main` (24 commits) with no conflict before the first edit. The plugin's `## Cloud accounts` template has an eighth column, `Monthly budget` (agile@canary 0.39.0), that BR8 does not list; the table has the seven columns BR8 and AC7 fix. Only an `aca` environment reads it, and F-64's first deploy is what decides a budget — so it is left to that item to add the column. Technical choice, to be confirmed at validation.
 - 2026-10-09 — The `## Access` and `## Cloud accounts` sections sit after "Code hosting, CI and board" and before "Expected secrets" in `docs/infra.md`; the two project rules are a new `## Access to the infrastructure` section of `.claude/rules/agile/project.md`. Technical choice.
 - 2026-10-09 — Guard tests live in `tests/Simulab.ArchitectureTests/InfraAccessTests.cs`; the parsers (`Section`, `FirstTable`, `CredentialProblems`, `CloudAccountProblems`) are `internal` so negative-control tests prove a literal password, a `TBD` tenant and an unknown cloud are caught, and the real-file tests assert their own inputs are not empty. Technical choice.
+
+## Validation script
+Needed to validate: nothing. The app host is not involved (documentation and tests only); work in the item's worktree `D:\wt\simulab\f-68-infra-file-holds`.
+
+1. Open `docs/infra.md` and find `## Access` (after "Code hosting, CI and board"). Expect 24 rows with the six columns `What`, `Status`, `URI`, `Claude signs in with`, `Check`, `Credential kept in`; the four `Staging`/`Production` rows, `Deploy pipeline` and `Key Vault` are `planned` with `—` as URI.
+2. In the same table read the `Credential kept in` column. Expect only pointers (`gh keyring`, `az login`, `app host`, `user secrets: <key>`, `owner only`, `none`) and no password or key anywhere in the file.
+3. Find `## Cloud accounts`. Expect two rows, `staging` and `production`, `Simulab`, `azure`, empty Tenant, Subscription and Resource group, region `brazilsouth`. Confirm the choice of leaving out the plugin template's eighth column, `Monthly budget` (see `## Decisions`, 2026-10-09).
+4. Read `.claude/rules/agile/project.md`, section `## Access to the infrastructure` (two lines), and the note at the end of item 6 in `docs/decisions/ADR-0002-host.md`.
+5. Run the guard tests (stop any app host first).
+   - PowerShell 7: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~InfraAccessTests"`
+   - Git Bash: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~InfraAccessTests"`
+   Expect `Passed!  - Failed: 0, Passed: 20, Skipped: 0, Total: 20`.
+6. See the guard fail on the mistake it exists for. In `docs/infra.md`, in the `Local PostgreSQL` row of `## Access`, replace the last cell `app host` (with its backticks) by `postgres`, and run the command of step 5. Expect `Failed: 1` (`Infra_AccessTable_CredentialCellsAreOnlyPointers`) with the message `row 'Local PostgreSQL': 'Credential kept in' is not a pointer`. Undo the edit: PowerShell 7 and Git Bash, `git checkout -- docs/infra.md`.
 
 ## Out of scope
 - Creating the Key Vault, the pipelines or the cloud hosts (F-64, F-65).
