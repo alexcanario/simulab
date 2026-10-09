@@ -1,7 +1,7 @@
 ---
 feature: F-71
 epic: Foundation and identity
-status: validating
+status: done
 board: 113
 version: 1
 ---
@@ -119,3 +119,7 @@ Needed to validate: nothing beyond the local app host, in place now. Data: the A
 6. Keyboard only: on `/privacy`, Tab reaches the language switch and the footer links; the table is readable at a narrow window.
 
 ## Delivery
+- Branch `feature/F-71`, merge commit 665b24f (board #113). App version 0.23.0.
+- Tests: full suite green, 0 failed (Identity 488, Catalog 512, Web 1229, Architecture 201, Api 47, AppHost 57); new `PrivacyPolicyContentTests` (12 cases) and `Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored`.
+- Scan: `agile scan GREEN` (13 false positive and 3 accepted by the owner, 2026-10-09).
+- Manual: `create-account` in pt-BR, pt-PT and en.
