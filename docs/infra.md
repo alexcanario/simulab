@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-03
+updated: 2026-10-09
 ---
 # Infra
 
@@ -41,7 +41,7 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 | staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo` | | |
 | production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo` | | |
 
-The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; nothing about the subscription is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
+The deploy command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; the tenant and subscription ids are not secrets and are recorded in "Cloud accounts" (F-68), but the command still reads them from the environment, and no credential is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
 
 ### First deploy of staging (F-64)
 The owner runs every command below in the owner's own subscription (F-64 BR10); nothing here is run by Claude, and each one that creates a resource is paid. Run them from the repository root (the worktree root when the item is not merged), in one PowerShell 7 terminal: the variables of step 1 live only in that terminal. Names in capitals (`VAULT_NAME`, `SECRET_VALUE`) are placeholders: replace the whole word, never paste it as it is. The sign-in and the subscription are the owner's: `az login`, then `az account set --subscription <subscription id>`.
@@ -164,6 +164,46 @@ Data region: every user's data, Portuguese users included, is hosted in Brazil S
 | CI (build + tests on pull requests and `main`, no deploy stages; F-62) | provisioned | GitHub Actions, `.github/workflows/ci.yml` |
 | Deploy workflow (OIDC sign-in, GitHub environments, approval for production) | planned | GitHub Actions, F-65 |
 | Board | provisioned | GitHub Issues + Projects, repository `alexcanario/simulab` |
+
+## Access
+Every URI of the project, how Claude signs in to it and where its credential is kept (F-68). This repository is public: the table holds a pointer to where a credential is kept and never a credential value. Before a board or pipeline operation Claude runs the row's `Check`; when it fails, Claude stops, quotes the error and asks the owner to run the row's `Claude signs in with` command. `Credential kept in` is one of: `none`, `gh keyring`, `az login`, `Key Vault: <secret name>`, `user secrets: <key>`, `app host`, `owner only`. A `planned` row has `—` as URI until its item fills it. The local hosts keep their details in "Run locally"; the rows below point to them.
+
+| What | Status | URI | Claude signs in with | Check | Credential kept in |
+|---|---|---|---|---|---|
+| Repository | provisioned | `https://github.com/alexcanario/simulab` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Board: issues | provisioned | `https://github.com/alexcanario/simulab/issues` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Board: project | provisioned | `https://github.com/users/alexcanario/projects/11` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Releases | provisioned | `https://github.com/alexcanario/simulab/releases` | `gh auth login` | `gh auth status` | `gh keyring` |
+| CI pipeline (GitHub Actions) | provisioned | `https://github.com/alexcanario/simulab/actions/workflows/ci.yml` | `gh auth login` | `gh auth status` | `gh keyring` |
+| Deploy pipeline (GitHub Actions) | planned | — | `gh auth login` | `gh auth status` | `gh keyring` |
+| Azure portal and subscription | provisioned | `https://portal.azure.com` | `az login` | `az account show` | `az login` |
+| Key Vault | planned | — | `az login` | `az account show` | `az login` |
+| Staging Web | planned | — | `none` | — | `none` |
+| Staging Api | planned | — | `none` | — | `none` |
+| Production Web | planned | — | `none` | — | `none` |
+| Production Api | planned | — | `none` | — | `none` |
+| Local Web | provisioned | `https://localhost:7125` | `none` | — | `none` |
+| Local UI kit gallery | provisioned | `https://localhost:7125/dev/ui` | `none` | — | `none` |
+| Local Api | provisioned | `https://localhost:7287` | `none` | — | `none` |
+| Local OpenAPI document | provisioned | `https://localhost:7287/openapi/v1.json` | `none` | — | `none` |
+| Local token endpoint | provisioned | `https://localhost:7287/connect/token` | `none` | — | `none` |
+| Local Aspire dashboard | provisioned | `https://localhost:17162` | `none` | — | `app host` |
+| Local Mailpit | provisioned | linked from the dashboard (its port changes on each start) | `none` | — | `none` |
+| Local PostgreSQL | provisioned | `127.0.0.1:5432` (see "Run locally") | `none` | — | `app host` |
+| Local Redis | provisioned | connection string generated by the app host | `none` | — | `app host` |
+| Claude API console | provisioned | `https://console.anthropic.com` | `owner only` | — | `user secrets: Ai:ApiKey` |
+| Google Cloud console (OAuth client, F-20) | provisioned | `https://console.cloud.google.com/apis/credentials` | `owner only` | — | `user secrets: Google:ClientSecret` |
+| Former board (Azure Boards) | retired | `https://dev.azure.com/acanariopt/simulab` | `none` | — | `none` |
+
+The former board's items were migrated to GitHub (the "Migrado de AB#..." notes on the migrated issues); whether that Azure DevOps project still exists is not verified.
+
+## Cloud accounts
+One row per non-local environment of "Environments": the client's cloud account its deploy lands in (agile@canary template). Tenant and subscription ids are identifiers, not secrets, so they are committed here; no secret ever goes in this file. An id that is not known yet stays **empty** (not `—` or `TBD`): `/agile:publish` then stops with "has no Tenant: fill it with the client's tenant id" instead of failing on a placeholder. A filled Tenant or Subscription is a GUID. They come from the administrator of the client's cloud account (the owner, for Simulab); F-64's first deploy brings them.
+
+| Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region |
+|---|---|---|---|---|---|---|
+| staging | Simulab | azure | | | | brazilsouth |
+| production | Simulab | azure | | | | brazilsouth |
 
 ## Expected secrets
 Names only. None exists yet; each arrives with the feature that needs it.

@@ -1,7 +1,7 @@
 ---
 feature: F-68
 epic: Cloud hosting and operations
-status: approved
+status: building
 board: 107
 version: 2
 ---
@@ -52,6 +52,18 @@ Claude reaches the board, the pipelines, the Key Vault and the hosts through CLI
 - AC7 Given `docs/infra.md`, when the test reads it, then it finds `## Cloud accounts` with the seven columns of BR8 in order and exactly one row for each non-local environment listed in `## Environments`.
 - AC8 Given a `## Cloud accounts` row, when the test reads it, then `Cloud` is one of `azure`, `aws`, `gcp`, `other`, `none`, and `Tenant` and `Subscription or account` are each empty or a GUID; a name or a placeholder (`TBD`, `—`) fails the test and names the row.
 
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | `InfraAccessTests.Infra_AccessSection_HasTheSixColumnsInOrder` |
+| AC2 | `InfraAccessTests.Infra_AccessTable_HasEveryApprovedRowInOrderWithAKnownStatus` |
+| AC3 | `InfraAccessTests.Infra_AccessTable_CredentialCellsAreOnlyPointers`; guard proven by `CredentialProblems_ALiteralPassword_NamesTheRowAndNotTheValue` and `CredentialProblems_EachAllowedPointer_IsAccepted` |
+| AC4 | `InfraAccessTests.Infra_AccessTable_APlannedRowHasNoUri` |
+| AC5 | `InfraAccessTests.ProjectRules_StateTheFailedCheckRuleAndTheNoCredentialRule` |
+| AC6 | no UI text changed; the missing-key tests of the full suite stay green (gate) |
+| AC7 | `InfraAccessTests.Infra_CloudAccounts_HasTheSevenColumnsAndOneRowPerNonLocalEnvironment` |
+| AC8 | `InfraAccessTests.Infra_CloudAccounts_CloudIsKnownAndIdsAreEmptyOrGuids`; guard proven by `CloudAccountProblems_APlaceholderOrNameAsTenant_NamesTheRow`, `CloudAccountProblems_AnEmptyIdAndAGuid_AreAccepted`, `CloudAccountProblems_AnUnknownCloud_NamesTheRow` |
+
 ## Approved list
 ### Access rows
 Rows of the `## Access` table, in order (the owner asked for every URI of the project, 2026-10-03). Status verified on disk and with `gh`/`az` on 2026-10-03; rows 5 and 6 corrected by change note v2 (2026-10-04).
@@ -98,6 +110,9 @@ Rows of the `## Cloud accounts` table, in order (change note v2, 2026-10-04). Em
 - 2026-10-04 — Unknown ids are left empty, not `—` or `TBD` — the plugin's reader (`templates/dotnet/workflows/agile-deploy.js` `cloudRowProblem`) reports an empty Tenant as "has no Tenant: fill it with the client's tenant id", while any other text fails as "must be a GUID". Technical choice.
 - 2026-10-04 — Tenant and subscription ids are committed — they are identifiers, not secrets (template note); ADR-0002 #6 gets a note and the deploy paragraph of `## Environments` is corrected, since both said the subscription never comes from a committed file. Owner's approval of change note v2.
 - 2026-10-04 — Client `Simulab`, Cloud `azure`, Region `brazilsouth` — ADR-0002 and `## Environments` (Azure Container Apps, Brazil South); the owner is the account's administrator. Owner's approval of change note v2.
+- 2026-10-09 — Build started: the branch was merged with `main` (24 commits) with no conflict before the first edit. The plugin's `## Cloud accounts` template has an eighth column, `Monthly budget` (agile@canary 0.39.0), that BR8 does not list; the table has the seven columns BR8 and AC7 fix. Only an `aca` environment reads it, and F-64's first deploy is what decides a budget — so it is left to that item to add the column. Technical choice, to be confirmed at validation.
+- 2026-10-09 — The `## Access` and `## Cloud accounts` sections sit after "Code hosting, CI and board" and before "Expected secrets" in `docs/infra.md`; the two project rules are a new `## Access to the infrastructure` section of `.claude/rules/agile/project.md`. Technical choice.
+- 2026-10-09 — Guard tests live in `tests/Simulab.ArchitectureTests/InfraAccessTests.cs`; the parsers (`Section`, `FirstTable`, `CredentialProblems`, `CloudAccountProblems`) are `internal` so negative-control tests prove a literal password, a `TBD` tenant and an unknown cloud are caught, and the real-file tests assert their own inputs are not empty. Technical choice.
 
 ## Out of scope
 - Creating the Key Vault, the pipelines or the cloud hosts (F-64, F-65).
