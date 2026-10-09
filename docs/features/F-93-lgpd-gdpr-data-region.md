@@ -1,7 +1,7 @@
 ---
 feature: F-93
 epic: Cloud hosting and operations
-status: refining
+status: approved
 board: 139
 version: 1
 ---
