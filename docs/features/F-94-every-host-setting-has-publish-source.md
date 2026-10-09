@@ -1,7 +1,7 @@
 ---
 feature: F-94
 epic: Cloud hosting and operations
-status: refining
+status: approved
 board: 140
 version: 1
 ---
@@ -67,6 +67,7 @@ A key a host needs outside Development that no publish value and no committed ho
 - AC10 Localization: no UI text is added; the missing-key test stays green.
 
 ## Decisions
+- 2026-10-09 — Approved by the owner ("aprovo F-94") — gate 1.
 - 2026-10-09 — Declare the requirement on the options classes (`[Required]`, `ValidateOnStart`) plus a short explicit list for what is read outside options — owner's choice (recommended); a new required option fails the build alone, and the host also refuses to start. Rejected: a list only (a key nobody adds escapes), and booting the real hosts (needs database and Redis, over the 2 min budget).
 - 2026-10-09 — Key Vault secrets are listed and not verified — owner's choice (recommended); the model cannot see the vault and the Api already refuses to start without the certificates.
 - 2026-10-09 — The check lives in `Simulab.AppHost.Tests`, which gains project references to the Api and the Web to read their options types — Claude; the publish model is only reachable there, and the architecture tests are forbidden to reference the AppHost. Fallback if the references clash with Aspire's generated `Projects` types: load the two assemblies by name from the build output, as `SolutionAssemblies` does.
