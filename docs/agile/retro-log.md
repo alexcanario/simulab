@@ -1067,3 +1067,7 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Proposed and not built: DocGen tool catalogue and the Cloud accounts check in `agile-deploy.js` (no item captured). Glossary sweep not run.
 - Baseline: present. Docs command: already declared (DocGen). Plugin notes marked done: none.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-09 - Sync with agile@canary 0.42.0: two capability notes with a false premise
+- ⏳ plugin: agile [generic] score 4/3 — `sync.js plan` lists "DocGen tool catalogue" as missing although `tools/Simulab.DocGen` already has it (F-49, merge `1003885`, `docs/architecture/tools.md` committed with 0 tools) and `docgen.json` has `"tools": true`; the note should not fire once the catalogue exists, only say that no tool is offered yet. F-61 and F-69 were closed on 2026-10-04 for the same reason. Went to the plugin notes table.
+- ⏳ plugin: agile [generic] score 3/3 — `sync.js plan` lists "Azure login in the deploy pipeline" as missing with "replaces .github/scripts/agile-deploy.js", but this project has no `.github/scripts/` and its `deploy.yml` (F-65, `azure/login@v3` at line 63) never calls that script; the check should not fire when the script is absent. Not verified: what the plugin's `agile-deploy.js` would add to this `deploy.yml`. Owner chose a note and no item on 2026-10-09. Went to the plugin notes table.
