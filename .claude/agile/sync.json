@@ -1,5 +1,5 @@
 {
-  "version": "0.41.0",
+  "version": "0.42.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "64d2516a691af738",
@@ -8,7 +8,7 @@
     ".claude/rules/agile/i18n.md": "ca2f724be59e5725",
     ".claude/rules/agile/naming.md": "fc2e25a61f4f7add",
     ".claude/rules/agile/output-style.md": "db8b345c1bce0d16",
-    ".claude/rules/agile/ui.md": "861be9e716402376",
+    ".claude/rules/agile/ui.md": "9e6d7db1fef0e860",
     ".claude/rules/agile/workflow.md": "a78f98cc08a12d65",
     "docs/agile/templates/adr.md": "7966479df8ae029e",
     "docs/agile/templates/backlog.md": "0b4e4c24e120b738",
@@ -21,11 +21,11 @@
     "docs/agile/templates/infra.md": "3258595aa75e72c6",
     "docs/agile/templates/manual-page.md": "4a2863b0b4805ba5",
     "docs/agile/templates/project-claude.md": "055f0256e3f5b846",
-    "docs/agile/workflow.md": "f923e49bb948895c",
-    "docs/agile/workflow-examples.md": "5adcd71bf98229b9",
-    "docs/agile/workflow.pt-BR.md": "32675fd8def2b8b1",
-    "docs/agile/workflow-examples.pt-BR.md": "a014f7ac99eae20a",
-    "docs/agile/profile.md": "49fd12f3637e1942",
+    "docs/agile/workflow.md": "b0004b31d895127a",
+    "docs/agile/workflow-examples.md": "3311b6971b7a5532",
+    "docs/agile/workflow.pt-BR.md": "8cea35f131146edc",
+    "docs/agile/workflow-examples.pt-BR.md": "3a5a12b403134354",
+    "docs/agile/profile.md": "c4b7a03b914e72bc",
     ".editorconfig": "3e4b965db9964dcd",
     "BannedSymbols.txt": "3949fcbfeb3d446c",
     "Directory.Build.props": "8f6ec25f0916f1b8",
@@ -33,6 +33,7 @@
     ".gitattributes": "9d81860e0f43eb02",
     ".gitignore": "6f890260bb4fc4ca",
     "global.json": "b48d6da8fa62c0da",
-    "tests/Directory.Build.props": "ce5fa4c25ae4980c"
+    "tests/Directory.Build.props": "ce5fa4c25ae4980c",
+    ".github/workflows/deploy.yml": "fb91a1233ef6117f"
   }
 }

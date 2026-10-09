@@ -3222,3 +3222,21 @@ Claude: F-14 — Download the report as CSV [approved]
 ```
 
 O build não escolhe a correção por você (escrever o método na F-14 ou esperar outro item): isso é uma nota de mudança, decisão sua, e o build recomeça depois dela. "Needed to validate" nunca para um build, e um build retomado de `building` pula essa checagem.
+
+### 14.88 Uma tela de desktop é conferida na janela real, sem clicar por coordenada
+
+Um item `desktop` com cabeça Avalonia chega ao fim do build. O painel do navegador não dirige um app desktop, então o passo 12 não o usa:
+
+```
+> /agile:build F-12
+Claude: Conferência de tela (desktop, sessão Windows): iniciando Toolbox.Desktop pela worktree e lendo a janela pelo UI Automation.
+        Janela "Conexões": filtros presentes, o DataGrid tem 0 filhos enquanto o rodapé diz "3 de 3 conexões".
+        Achado: o tema do DataGrid não está incluído (avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml), a grade desenhou preta.
+        Corrigido, com um teste headless que lê as linhas da grade. Tema escuro: alternado pelo botão de Configurações (UIA Invoke), mesmo resultado.
+        Fora do alcance desta conferência, então vai para o seu roteiro de validação: ordem de tabulação, as setas e o Esc dentro do menu da linha.
+        Processo encerrado. Nenhum mouse ou tecla foi enviado, e nada foi capturado por coordenada de tela.
+```
+
+A conferência pode apertar um botão pela árvore de automação do próprio app, porque isso não depende de qual janela está em foco. Ela nunca envia mouse ou tecla sintéticos: eles cairiam na janela da frente, em geral a sua IDE. Em Linux ou macOS, ou sem sessão de desktop, o relatório diz que a tela inteira vai para o seu roteiro de validação.
+
+Um critério de teclado (Enter, Espaço, Alt+Seta) numa tela Avalonia vira teste headless, não fica para você; e todo componente que mostra texto do usuário ou do Core ganha um estado de texto longo: na galeria e num teste de quebra.

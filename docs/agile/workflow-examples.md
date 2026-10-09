@@ -3216,3 +3216,21 @@ Claude: F-14 — Download the report as CSV [approved]
 ```
 
 The build does not choose the fix for you (write the method in F-14, or wait for another item): that is a change note, your decision, and the build starts again after it. "Needed to validate" never stops a build, and a build resumed from `building` skips this check.
+
+### 14.88 A desktop screen is checked in its real window, without clicking by coordinates
+
+A `desktop` item with an Avalonia head reaches the end of its build. The browser pane cannot drive a desktop app, so step 12 does not use it:
+
+```
+> /agile:build F-12
+Claude: Screen check (desktop, Windows session): starting Toolbox.Desktop from the worktree, reading the window through UI Automation.
+        Window "Connections": filters present, DataGrid has 0 children while the footer says "3 of 3 connections".
+        Found: the DataGrid theme is not included (avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml), the grid drew black.
+        Fixed, and added a headless test that reads the grid's rows. Dark theme: switched through the Settings button (UIA Invoke), same result.
+        Not reached by this check, so it goes to your validation script: tab order, the arrows and Esc inside the row menu.
+        Process stopped. No mouse or key was sent, and nothing was captured by screen coordinates.
+```
+
+The check may press a button through the app's own automation tree, because that does not depend on which window has focus. It never sends a synthetic mouse or key: that would land in whatever window is in front, usually your IDE. On Linux or macOS, or with no desktop session, the report says the whole screen goes to your validation script.
+
+A keyboard criterion (Enter, Space, Alt+Arrow) on an Avalonia screen is written as a headless test, not left to you; and every component that shows user or Core text gets a long-text state: in the gallery and in a wrap test.

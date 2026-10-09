@@ -1061,3 +1061,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Lesson 2 (score 4/3): a plan that assumes the state of an item that is not `done` stops the build when that item ships first. Went to: plugin note `agile [generic]` in the table above.
 - Not applied (score 2/2): "Central US is in no file" was said at `/agile:idea` after a search of the main checkout only, and a search of a worktree path that no longer existed was not noticed. Cause not verified. Went to: nothing.
 - Suite: 2643 tests, 135 s test run and 27 s build, inside the 5 min budget.
+
+## 2026-10-09 - Sync with agile@canary 0.42.0
+- From 0.41.0 to 0.42.0. Copied (5): rule `ui.md` (long-text state for components that show user or Core text) and the manual `workflow.md`, `workflow-examples.md` and their pt-BR copies. Merged (1): `profile.md` (one line: long-text test in bUnit, no conflict). Left alone: `git.md` (edited, upstream unchanged); manual build files (upstream unchanged).
+- Proposed and not built: DocGen tool catalogue and the Cloud accounts check in `agile-deploy.js` (no item captured). Glossary sweep not run.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked done: none.
+- Build and suite not run: only Markdown changed.
