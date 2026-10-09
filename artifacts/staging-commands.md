@@ -363,10 +363,11 @@ gh secret set REDIS_PASSWORD --env staging --repo alexcanario/simulab --body (az
 ```
 
 ### 5.4 Se o login do Azure falhar com `AADSTS700213`
-Foi o que aconteceu na primeira tentativa. O GitHub desta conta apresenta o repositório com ids numéricos (`repo:alexcanario@3664703/simulab@1397573907:environment:staging`), e a credencial federada tinha o nome em texto. Leia o subject exato na anotação da execução que falhou (`gh run view <id> --repo alexcanario/simulab`) e ponha o mesmo texto na credencial:
+Foi o que aconteceu na primeira tentativa. O GitHub desta conta apresenta o repositório com ids numéricos (`repo:alexcanario@3664703/simulab@1397573907:environment:staging`), e a credencial federada tinha o nome em texto. O comando de configuração de `docs/infra.md` agora pergunta o prefixo ao GitHub (B-25); para corrigir uma credencial já criada, use o mesmo prefixo (o texto exato também aparece na anotação da execução que falhou, `gh run view <id> --repo alexcanario/simulab`):
 ```powershell
 $appId = "e6d8ec88-f4fb-4e21-b1b6-0170348843c7"
-@{ name = "github-staging"; issuer = "https://token.actions.githubusercontent.com"; subject = "repo:alexcanario@3664703/simulab@1397573907:environment:staging"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content fc-staging.json
+$prefix = gh api repos/alexcanario/simulab/actions/oidc/customization/sub --jq .sub_claim_prefix
+@{ name = "github-staging"; issuer = "https://token.actions.githubusercontent.com"; subject = "${prefix}:environment:staging"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content fc-staging.json
 az ad app federated-credential update --id $appId --federated-credential-id github-staging --parameters "@fc-staging.json"
 Remove-Item fc-staging.json
 az ad app federated-credential list --id $appId --query "[].{name:name,subject:subject}" -o table

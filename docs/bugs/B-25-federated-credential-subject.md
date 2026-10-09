@@ -2,7 +2,7 @@
 bug: B-25
 feature: F-65
 epic: Cloud hosting and operations
-status: approved
+status: validating
 board: 158
 severity: medium
 ---
@@ -49,7 +49,7 @@ The setup command builds the subject the repository really presents, asking GitH
 | Criterion | Test |
 |---|---|
 | AC1 | `Infra_HasTheSetupCommands_AndTheDeployWorkflowRowIsProvisioned` |
-| AC2 | `Infra_HasTheSetupCommands_AndTheDeployWorkflowRowIsProvisioned` |
+| AC2 | `Infra_HasTheSetupCommands_AndTheDeployWorkflowRowIsProvisioned` (the fallback line) |
 | AC3 | validation script step 2 (read on screen) |
 | AC4 | validation script step 3 (read on screen) |
 

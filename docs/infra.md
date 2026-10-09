@@ -177,13 +177,15 @@ One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `
    $tenant = az account show --query tenantId -o tsv
    $appId = az ad app create --display-name simulab-deploy --query appId -o tsv
    az ad sp create --id $appId
+   $prefix = gh api repos/alexcanario/simulab/actions/oidc/customization/sub --jq .sub_claim_prefix
+   if (-not $prefix) { $prefix = "repo:alexcanario/simulab" }
    foreach ($environment in "staging", "production") {
-     @{ name = "github-$environment"; issuer = "https://token.actions.githubusercontent.com"; subject = "repo:alexcanario/simulab:environment:$environment"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content "federated-$environment.json"
+     @{ name = "github-$environment"; issuer = "https://token.actions.githubusercontent.com"; subject = "${prefix}:environment:$environment"; audiences = @("api://AzureADTokenExchange") } | ConvertTo-Json | Set-Content "federated-$environment.json"
      az ad app federated-credential create --id $appId --parameters "@federated-$environment.json"
      Remove-Item "federated-$environment.json"
    }
    ```
-   Measured 2026-10-09 on this repository: GitHub presents the subject with numeric ids, `repo:alexcanario@3664703/simulab@1397573907:environment:staging`, and the first run failed with `AADSTS700213` until the credentials used that text (`az ad app federated-credential update`). When a run fails that way, copy the subject from the error annotation (`gh run view <id>`); the subject written above is the plain form, which this repository's runs do not use.
+   The subject prefix is asked from GitHub because the sign-in presents the one the repository really uses: this repository uses numeric ids (measured 2026-10-09, `repo:alexcanario@3664703/simulab@1397573907:environment:staging`), and the first run failed with `AADSTS700213` when the credentials carried the plain form (B-25). The plain prefix is only the fallback for a repository whose answer has no `sub_claim_prefix`. When a run still fails that way, compare the subject in the error annotation (`gh run view <id>`) with `az ad app federated-credential list --id $appId --query "[].subject"` and correct the credential with `az ad app federated-credential update`.
 2. The roles, scoped to the environment's resource group only (the deploy creates role assignments for the apps' managed identities, hence the second role). Repeat for production with its own group once it exists:
    ```powershell
    $scope = "/subscriptions/$sub/resourceGroups/rg-simulab-staging"
