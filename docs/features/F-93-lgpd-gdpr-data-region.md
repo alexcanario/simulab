@@ -1,7 +1,7 @@
 ---
 feature: F-93
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 139
 version: 2
 ---
@@ -160,4 +160,9 @@ Needed to validate: nothing beyond reading the files in the worktree `D:\wt\simu
 8. Decision for you: `/agile:ship F-93` merges this item. Before it, the lines marked `basis not in place` stay as the lawyer's and your open actions; they are not a reason to hold the merge, but real users' data must not reach staging or production until they are settled (D12).
 
 ## Delivery
-Filled by `/agile:ship`.
+- Branch: `feature/F-93` (deleted; never pushed).
+- Merge: `a06d53c`, app version 0.24.0.
+- Tests: 2643 passed, 0 failed (full suite, 135 s test run, 27 s build, 0 new warnings); `Simulab.ArchitectureTests` 209, of which 8 are new (`DataRegionDocumentsTests`, `DataProcessingRegisterTests`). Security scan `agile scan GREEN`. The first and third full runs of the ship failed on `EmailProviderStartTests` (`Production` case, `ObjectDisposedException` at host start), unrelated to this item, 3 of 3 green alone and green on the other two runs.
+- Manual pages: none (no visible behavior changed).
+- Documents: `docs/decisions/ADR-0004-data-region-central-us.md`, `docs/privacy/data-processing-register.md`, notes in ADR-0002 and ADR-0003, `docs/infra.md`, `docs/architecture-overview.md`, `product/brief.md`, three glossary rows plus the data protection addendum row.
+- Open actions (owner, in ADR-0004 decision 3): obtain or confirm the ANPD standard clauses with Microsoft and with Anthropic; read the Data Privacy Framework listing and the Microsoft addendum text; a lawyer's review removes the draft notice. Follow-up: F-112 (the privacy policy `2026-v3`).
