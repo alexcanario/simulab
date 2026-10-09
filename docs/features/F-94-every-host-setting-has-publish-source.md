@@ -1,7 +1,7 @@
 ---
 feature: F-94
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 140
 version: 1
 ---
@@ -89,6 +89,12 @@ A key a host needs outside Development that no publish value and no committed ho
 - 2026-10-09 — The host's `appsettings` files are read from the project folder through Aspire's project metadata — Claude; the summary's "app host's `appsettings.<Environment>.json`" is not a source for the hosts (see What already exists).
 - 2026-10-09 — The four `Identity:*Url` keys are on the explicit list although they have a development default — Claude; the default is a localhost link, silently wrong in the cloud.
 - 2026-10-09 — No new package — Claude; the test uses the packages `Simulab.AppHost.Tests` already has.
+- 2026-10-09 — Build: the open premise is settled. The publish model exposes `ConnectionStrings__*`, `DataProtection__KeyVaultKeyId`, `Identity__*Url`, `Email__*` and `services__api__https__0` for both Staging and Production; no key needed the `Infrastructure` source. The test project references `Simulab.Api` and `Simulab.Web` directly and compiles, so the fallback of the decision above was not needed — Claude.
+- 2026-10-09 — Build: today only `EmailOptions` (`FromAddress`) and `OpenIddictClientOptions` have a `[Required]` property with no default, so `ExemptOptionTypes` is empty and the explicit list carries the raw reads — Claude.
+- 2026-10-09 — Build: the Web test hosts started outside Development (`DevPagesHostTests`, `ShellHostTests`) now supply the client through `DeployedClientSettings.WithDeployedClient()`, as the deploy does; no assertion changed — Claude.
+- 2026-10-09 — Build: `OpenIddictClientStartTests` use one factory per test. With the fixture of the class, the second failing start got an `ObjectDisposedException` instead of the validation error under the load of the full suite (seen once in the gate) — Claude.
+- 2026-10-09 — Build: `Simulab.Api.Tests.EmailProviderStartTests.Start_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey(Production)` (F-66) failed with the same `ObjectDisposedException` in 2 of 4 runs of the full gate, and passed alone in every run (3 runs of the project, 8 concurrent runs of the class). Its code is untouched by this item; it is the same shared-fixture pattern. Out of scope: reported as an idea, not fixed here — Claude.
+- 2026-10-09 — Build: `/agile:review` not run; the production change is two data annotations and `ValidateOnStart` on one options class, and the rest is test code. The owner may still ask for it — Claude.
 
 ## Out of scope
 - Settings required only while a switch is on (Google, TOTP), BR7.
@@ -105,8 +111,38 @@ A key a host needs outside Development that no publish value and no committed ho
 ## Validation script
 Needed to validate: nothing. No screen, so no app host and no sign-in.
 
-1. In the item's worktree, run the check. Git Bash and PowerShell 7 take the same command:
-   `dotnet test tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj --filter "FullyQualifiedName~RequiredSettings"`
-   Expected: `Failed: 0`, with the count reported by the build.
-2. Make it fail on purpose: in `src/Hosts/Simulab.AppHost/AzureDeployment.cs`, comment out the line `.WithEnvironment("Authentication__OpenIddict__ClientId", "simulab-web")` and repeat step 1. Expected: a failure naming the Web, Staging and `Authentication:OpenIddict:ClientId`.
-3. Undo the edit (`git checkout src/Hosts/Simulab.AppHost/AzureDeployment.cs`) and repeat step 1: green again.
+Stop the app host of any other checkout first (a running host locks `bin/`). Work in the item's worktree `D:\wt\simulab\f-94-every-host-setting`.
+
+1. Run the check on the publish model of Staging and Production:
+
+   ```powershell
+   dotnet test tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj --filter "FullyQualifiedName~RequiredSettingsTests"
+   ```
+
+   ```bash
+   dotnet test tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj --filter "FullyQualifiedName~RequiredSettingsTests"
+   ```
+
+   Expected: `Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5`.
+2. Make it fail on purpose: in `src/Hosts/Simulab.AppHost/AzureDeployment.cs`, in the `web.WithExternalHttpEndpoints()` chain of `ConfigureHosts`, put `//` in front of the line `.WithEnvironment("Authentication__OpenIddict__ClientId", "simulab-web")` and repeat step 1. Expected: `Failed: 2`, with a message naming `Web Staging` (and `Web Production`) and `'Authentication:OpenIddict:ClientId'`.
+3. Undo the edit and repeat step 1: green again.
+
+   ```powershell
+   git checkout src/Hosts/Simulab.AppHost/AzureDeployment.cs
+   ```
+
+   ```bash
+   git checkout src/Hosts/Simulab.AppHost/AzureDeployment.cs
+   ```
+
+4. Check that the Web itself refuses to start without the client (AC5, AC6):
+
+   ```powershell
+   dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --filter "FullyQualifiedName~OpenIddictClientStartTests"
+   ```
+
+   ```bash
+   dotnet test tests/Hosts/Simulab.Web.Tests/Simulab.Web.Tests.csproj --filter "FullyQualifiedName~OpenIddictClientStartTests"
+   ```
+
+   Expected: `Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5`.
