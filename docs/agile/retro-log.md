@@ -1077,3 +1077,7 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Premise re-check when a dependency merged between approval and build: ⏳ plugin: agile [generic] score 6/4 — second case after F-93; evidence: `IdentityModule.cs:244-257` already loaded the certificates from configuration (F-64) when the F-73 build started, so change note v2 cut the scope. Merged into the existing note in "Plugin notes — status" (the F-93 row); no project rule.
 - Possibly flaky test, not reproduced (`EmailProviderStartTests.Start_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey(Production)` failed once in a full run, 3 of 3 green alone and in the next full run; cause not verified): score 0/2, nothing done.
 - Two extra full gate runs (about 4 minutes each) because main moved twice during the ship (docs commits of another session): score 2/2, nothing done.
+
+## 2026-10-09 - F-112 The privacy policy names the real region and email service
+- The public text, the register, the manual and the test pins have to change together when a region or processor changes; F-93 left this for the retro ("nothing enforces it") and F-112 touched four places by hand: score 1/6, project rule added to `.claude/rules/agile/project.md`. A test that fails when they diverge was left out (it needs an item).
+- An acceptance criterion that forbids a term ("names neither Brazil South nor SendGrid") contradicted the planned sentence that said what the old version named; caught while writing the text, reworded without the old names (D9): score 0/2, nothing done.
