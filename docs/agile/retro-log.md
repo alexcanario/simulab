@@ -115,6 +115,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 6/6: before proposing to delete data or redo a configuration for an error with no visible reason, make the code log the refusal's reason; without that log line write `cause not verified`. On the first staging a 401 at `/connect/token` got two wrong diagnoses ("old hash in the database", "the user's password") and a fix that would have deleted rows; the log line added in `b66539e` (`error invalid_client, The mandatory 'client_id' parameter is missing`) named the cause in one deploy | F-64 | |
 | ⏳ | agile | `[generic]` score 7/4: before `worktree.js remove`, the ship moves the session's working directory to the main checkout and names any Terminal tab whose cwd is inside the worktree; the F-75 removal ended `agile worktree HELD` four times (session cwd, the owner's Terminal tab, a reopened Visual Studio; `handle.exe` found no holder) | F-75 | |
 | ⏳ | agile | `[generic]` score 4/2: at ship precondition 2, a whitespace-only uncommitted diff is shown with the validation question, so the worktree removal does not stop on it later (F-75: one IDE blank line cost an extra owner question) | F-75 | |
+| ⏳ | agile | `[generic]` score 5/5: before committing a merge, `feature-ship` precondition 2 and `feature-build` check for conflict markers with a command that fails on a match (F-65: a scripted resolution chained by `&&` after `grep -c` committed `<<<<<<< HEAD`, `2cead5d`) | F-65 | |
+| ⏳ | agile | `[generic]` score 6/6: `feature-build` re-reads the Delivery and Decisions of the items named in `## Start` (Depends on / Waits on) against the item's rules and criteria before the plan (F-65: F-64 added three deploy parameters after approval, change note v2) | F-65 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1028,6 +1030,13 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Baseline: present. Docs command: already declared (DocGen). Glossary: `Meaning (pt-BR)` column present; every document has its `Technical terms:` link; keyword sweep of `docs/infra.md` found no missing technical-term rows (not a full read).
 - Plugin notes marked done (5): issue 92.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-09 - F-65 A GitHub Actions workflow deploys a release
+- score 5/5 — resolving the `docs/infra.md` merge conflict with a script (Python is not installed) chained by `&&` after `grep -c`, which exits 0 on a match: commit `2cead5d` carried `<<<<<<< HEAD`, fixed in `b2043c6` before the merge. Went to `.claude/rules/agile/project.md` (resolve with Edit; a check that fails on a match before `git commit`).
+- ⏳ plugin: agile [generic] score 5/5 — the same lesson as a plugin note: the merge step of `feature-ship` (precondition 2) and `feature-build` should check for conflict markers with a command that fails on a match before committing a merge. Went to the plugin notes table.
+- ⏳ plugin: agile [generic] score 6/6 — F-64 added `postgres-admin-user`, `postgres-admin-password` and `redis-password` after F-65 was approved, so BR5 and AC2 were false at build (change note v2). `feature-build` should re-read the Delivery and Decisions of every item named in `## Start` "Depends on" / "Waits on" against the item's rules and criteria before the plan. Went to the plugin notes table.
+- Not kept: the documented `CHECK_URL` was wrong for the Web (200 on `/`, 404 on `/api/v1/system/info`), corrected in `docs/infra.md`; a one-off.
+- Suite: 2619 tests, 0 failures, slowest projects 2 m 9 s (Catalog) and 2 m 7 s (Identity); build 25 s.
 
 ## 2026-10-09 - F-75 Map notice subjects to the canonical taxonomy
 - ⏳ plugin: agile [generic] score 7/4 — the ship moves the session's working directory out of the worktree and names Terminal tabs inside it before `worktree.js remove`; the F-75 removal ended `agile worktree HELD` four times. Went to the plugin notes table.
