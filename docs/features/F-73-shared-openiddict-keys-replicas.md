@@ -1,7 +1,7 @@
 ---
 feature: F-73
 epic: Foundation and identity
-status: validating
+status: done
 board: 115
 version: 2
 ---
@@ -168,4 +168,7 @@ rg=rg-simulab-staging; vault=$(az keyvault list -g "$rg" --query "[0].name" -o t
 ## Delivery
 - Branch: feature/F-73
 - Built (2026-10-09): `maxReplicas: 2` for the Api (`AzureDeployment.cs`); `OpenIddictCertificates` also refuses a certificate without private key, without its key usage or outside its validity (5 minutes of skew); policies `src/Hosts/Simulab.AppHost/keyvault/openiddict-{signing,encryption}-policy.json`; two-replica tests in `OpenIddictCertificateRestartTests`; `docs/infra.md` step 7, renewal and replica text; `artifacts/staging-commands.md`.
-- Gate: `agile gate GREEN` (full suite: 2,652 tests passed, 0 failed; build 26 s, tests 194 s; Identity.Tests alone took 3 m 3 s, over the 2-minute integration budget, as before this item). Scan: `agile scan GREEN` (one false positive triaged by the owner). Independent review: approve, six minor findings, five fixed, one recorded as not verified.
+- Gate: `agile gate GREEN` (full suite: 2,660 tests passed, 0 failed in the ship run; build 27 s, tests 154 s; Identity.Tests alone took 2 m 26 s, over the 2-minute integration budget, as before this item). Scan: `agile scan GREEN` (one false positive triaged by the owner). Independent review: approve, six minor findings, five fixed, one recorded as not verified.
+- Merged (2026-10-09): merge commit `ecc2a65` on `main`, version 0.25.0, board #115. The first ship run failed once on `EmailProviderStartTests.Start_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey(Production)` (a test F-73 does not touch); it passed 3 of 3 in isolation and the next full run was green. Reported as a possible flaky test.
+- Manual: not changed (no visible behavior; the user stays signed in across replicas and deploys). Glossary: 2 rows added (PKCS#12, key usage).
+- Not verified at ship: the Key Vault and staging steps of the validation script ran with the owner, who said it passed.
