@@ -76,7 +76,7 @@ flowchart TB
 - **Redis** — refresh-token sessions and the access-token revocation set (F-5), and the Web's server-side sessions (B-3).
 - **File storage** (planned) — blob containers behind `IFileStorage`, Azurite locally; added by the first feature that stores files.
 - **Claude API** (planned) — reached only through `IAiGateway`, which checks the plan and records usage and cost.
-- **In the cloud** (ADR-0002, F-62) — the same containers run on Azure Container Apps, Brazil South, with PostgreSQL Flexible Server, Key Vault and, in production, Azure Cache for Redis (staging keeps Redis as a container). These resources are added only when the app host publishes (`AzureDeployment.cs`), so they are not nodes of this diagram.
+- **In the cloud** (ADR-0002, F-62) — the same containers run on Azure Container Apps, Central US (ADR-0004), with PostgreSQL Flexible Server, Key Vault and, in production, Azure Cache for Redis (staging keeps Redis as a container). These resources are added only when the app host publishes (`AzureDeployment.cs`), so they are not nodes of this diagram.
 - **Google** (optional) — sign-in with Google, off unless the OAuth client is configured (F-20); shown in the context diagram only.
 
 ## 3. Inside the Api

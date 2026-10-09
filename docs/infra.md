@@ -38,8 +38,8 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 | Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in | Deploy command | Check URL | Version (deployed on) |
 |---|---|---|---|---|---|---|---|
 | local | provisioned | printed by the app host | app host | user secrets | not declared | | |
-| staging | planned | — | Azure Container Apps, Brazil South (ADR-0002); parked outside test windows | Azure Key Vault | `gh workflow run deploy.yml --ref <main or a tag v*> -f environment=staging` | | |
-| production | planned | — | Azure Container Apps, Brazil South (ADR-0002); created at the first release; approval required | Azure Key Vault | `gh workflow run deploy.yml --ref <tag v*> -f environment=production` | | |
+| staging | planned | — | Azure Container Apps, Central US (ADR-0002, region by ADR-0004); parked outside test windows | Azure Key Vault | `gh workflow run deploy.yml --ref <main or a tag v*> -f environment=staging` | | |
+| production | planned | — | Azure Container Apps, Central US (ADR-0002, region by ADR-0004); created at the first release; approval required | Azure Key Vault | `gh workflow run deploy.yml --ref <tag v*> -f environment=production` | | |
 
 The Deploy command is the deploy workflow (F-65, "Deploy workflow" below); the `aspire deploy` line it runs for each environment is listed there. The `aspire deploy` command needs the Aspire CLI on the same version as the Aspire packages (`Directory.Packages.props`), an Azure sign-in, and `AZURE__SUBSCRIPTIONID`, `AZURE__LOCATION` (`centralus`) and `AZURE__RESOURCEGROUP` in the environment; the tenant and subscription ids are not secrets and are recorded in "Cloud accounts" (F-68), but the command still reads them from the environment, and no credential is committed. The secret parameters it asks for are listed in "Expected secrets". To see what it would create without Azure: `aspire publish --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/publish/staging --non-interactive --nologo` (the Bicep files land under the ignored `artifacts/`).
 
@@ -218,9 +218,9 @@ One-time setup. The owner runs it in one PowerShell 7 terminal, signed in with `
 6. Read it back: `gh api repos/alexcanario/simulab/environments` lists both environments, production with a reviewer; `gh variable list --env staging --repo alexcanario/simulab` lists the variables.
 
 ### What the deploy creates for email (F-66)
-`aspire deploy` creates, from `src/Hosts/Simulab.AppHost/Bicep/email.bicep`: an Email Communication Service and its Azure-managed domain (sender `DoNotReply@<id>.azurecomm.net`, display name `Simulab`), a Communication Service linked to that domain, both with data location Brazil (ADR-0003), and one role assignment, "Communication and Email Service Owner" on the Communication Service alone, for the Api's managed identity alone (a custom send-only role would need `roleDefinitions/write`, which the deploying account does not have). No manual step and no secret. Staging and production send through it over its HTTP API; any recipient is allowed. The Azure-managed domain has low sending limits, which Simulab's own domain (F-87) lifts; bounces and spam reports are F-88. The processor of the emails is Microsoft (Azure Communication Services).
+`aspire deploy` creates, from `src/Hosts/Simulab.AppHost/Bicep/email.bicep`: an Email Communication Service and its Azure-managed domain (sender `DoNotReply@<id>.azurecomm.net`, display name `Simulab`), a Communication Service linked to that domain, both with data location Brazil (F-66; the rest of the environment is in Central US, ADR-0004), and one role assignment, "Communication and Email Service Owner" on the Communication Service alone, for the Api's managed identity alone (a custom send-only role would need `roleDefinitions/write`, which the deploying account does not have). No manual step and no secret. Staging and production send through it over its HTTP API; any recipient is allowed. The Azure-managed domain has low sending limits, which Simulab's own domain (F-87) lifts; bounces and spam reports are F-88. The processor of the emails is Microsoft (Azure Communication Services).
 
-Data region: every user's data, Portuguese users included, is hosted in Brazil South; Brazil is adequate under Art. 45 GDPR, so no EU region is planned (ADR-0003, with the triggers that reopen it).
+Data region: every user's data is hosted in Azure Central US (`centralus`), staging and production, except the email service, whose data location is Brazil (ADR-0004, with the legal basis for users in Brazil and in the EU, the lines that are `basis not in place`, and the triggers that reopen it). What personal data is held and where: `docs/privacy/data-processing-register.md`. No real person's data goes to staging or production while a basis in ADR-0004 is `not in place`.
 
 ## Code hosting, CI and board
 | What | Status | Where |
@@ -267,8 +267,8 @@ One row per non-local environment of "Environments": the client's cloud account 
 
 | Environment | Client | Cloud | Tenant | Subscription or account | Resource group | Region |
 |---|---|---|---|---|---|---|
-| staging | Simulab | azure | | | | brazilsouth |
-| production | Simulab | azure | | | | brazilsouth |
+| staging | Simulab | azure | | | | centralus |
+| production | Simulab | azure | | | | centralus |
 
 ## Expected secrets
 Names only. None exists yet; each arrives with the feature that needs it.

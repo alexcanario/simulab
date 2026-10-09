@@ -1,7 +1,7 @@
 ---
 feature: F-93
 epic: Cloud hosting and operations
-status: approved
+status: building
 board: 139
 version: 2
 ---
@@ -95,6 +95,10 @@ The tests live in `tests/Simulab.ArchitectureTests/`, beside `InfraAccessTests`,
 - 2026-10-09 (D6) — Technical: the ADR is `ADR-0004-data-region-central-us.md` (next free number, rechecked at build) and the register is `docs/privacy/data-processing-register.md`; a new folder `docs/privacy/` is the place for privacy documents that are not the policy text, which stays in the Identity content folder (F-4 BR14).
 - 2026-10-09 (D7, replaced in v2 on 2026-10-09) — F-71 is `done` and its published policy `2026-v2` names Brazil South and SendGrid. A `done` item takes no change note, so this item edits none of F-71's files and a new item, F-112, publishes the policy `2026-v3` with the real region, the real email service and the transfer bases of ADR-0004 (same rule as F-71 BR5: bases from the providers' published terms). F-112 depends on this item. The execution order in `docs/epics/README.md` still puts F-93 first.
 - 2026-10-09 (D8) — Sources read for this refinement, not legal advice: [Mayer Brown, end of the grace period for the ANPD standard contractual clauses](https://www.mayerbrown.com/en/insights/publications/2025/08/end-of-grace-period-implementation-of-brazils-standard-contractual-clauses-in-international-transfers-of-personal-data) (Resolution CD/ANPD 19/2024 published 2024-08-23; the 12-month period ended on 2025-08-23; no recognition of foreign clauses as equivalent had been granted in the sources read); [Microsoft Trust Center, EU standard contractual clauses](https://www.microsoft.com/en-us/TrustCenter/Compliance/EU-Model-Clauses) (clauses offered through the data protection addendum for Azure). Not verified: whether Microsoft offers the ANPD standard clauses, the current scope of its Data Privacy Framework certification, and the current text of the data protection addendum. The build reads the providers' own published documents and records the version and the date (BR3, BR4).
+
+- 2026-10-09 (D10) — Build: besides `docs/infra.md` (BR8), two other current statements named Brazil South as the data region and were corrected: `docs/architecture-overview.md` (cloud paragraph) and `product/brief.md` (the Portugal line). ADR-0001 keeps its lines (record of 2026-09/10, same rule as ADR-0002 and ADR-0003). `docs/glossary.md` got three technical-term rows (data processing register, international transfer, data protection officer).
+- 2026-10-09 (D11) — Build: sources read on the build date for BR3 and BR4 (what was read, what was not). Read: Microsoft's Data Privacy Framework page (it names no product and does not name Azure; "Last Updated: September 2026"); the index page of Microsoft's Products and Services Data Protection Addendum (English edition May 2026; the document itself, a .docx, was not read); Anthropic's privacy-center article on its addendum (March 2026; names only the EU standard clauses). Not found: any Microsoft or Anthropic source offering the ANPD standard clauses. Not read: dataprivacyframework.gov, the text of either addendum. So the Brazil line is `basis not in place` for Microsoft and Anthropic, and the EU line for Microsoft is "stated, scope not confirmed", each with an action and an owner in ADR-0004.
+- 2026-10-09 (D12) — Build: real users' data must not reach the staging or production while the Brazil line is `basis not in place`. ADR-0004 and `docs/infra.md` say so; it is the owner's rule to keep, since nothing in the app enforces it.
 
 ## Out of scope
 - Moving staging or production to another region; any change of code, Bicep or database (BR9).
