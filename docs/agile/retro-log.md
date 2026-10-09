@@ -113,6 +113,8 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` `literal-guard.js` blocked a `sed -i` on a test file but let a `python - <<'EOF'` script rewrite `SeedAdminTests.cs` (exit 0, 76 insertions in the diff): extend the guard to a script that opens and writes a repository file (`open(...,'w')`, `Path.write_text`, `Set-Content`, `File.WriteAllText`) | F-53 | |
 | ⏳ | agile | `[generic]` Refinement: a business rule that says a step "does not do Y" (clear a counter, renew a stamp) is checked against every helper that does Y before the file is approved; BR3 of F-53 said the step did not clear the failure count, and `SecondFactor.VerifyAsync` (shared with the account page) does, which only the build design pass found and cost a change note | F-53 | |
 | ⏳ | agile | `[generic]` score 6/6: before proposing to delete data or redo a configuration for an error with no visible reason, make the code log the refusal's reason; without that log line write `cause not verified`. On the first staging a 401 at `/connect/token` got two wrong diagnoses ("old hash in the database", "the user's password") and a fix that would have deleted rows; the log line added in `b66539e` (`error invalid_client, The mandatory 'client_id' parameter is missing`) named the cause in one deploy | F-64 | |
+| ⏳ | agile | `[generic]` score 7/4: before `worktree.js remove`, the ship moves the session's working directory to the main checkout and names any Terminal tab whose cwd is inside the worktree; the F-75 removal ended `agile worktree HELD` four times (session cwd, the owner's Terminal tab, a reopened Visual Studio; `handle.exe` found no holder) | F-75 | |
+| ⏳ | agile | `[generic]` score 4/2: at ship precondition 2, a whitespace-only uncommitted diff is shown with the validation question, so the worktree removal does not stop on it later (F-75: one IDE blank line cost an extra owner question) | F-75 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1019,3 +1021,9 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Baseline: present. Docs command: already declared (DocGen). Glossary: `Meaning (pt-BR)` column present; every document already has its `Technical terms:` link; 12 technical-term rows added after the sync commit (keyword sweep, not a full read; `docs/manual/` not scanned).
 - Plugin notes marked done (8): issues 89 and 93.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-09 - F-75 Map notice subjects to the canonical taxonomy
+- ⏳ plugin: agile [generic] score 7/4 — the ship moves the session's working directory out of the worktree and names Terminal tabs inside it before `worktree.js remove`; the F-75 removal ended `agile worktree HELD` four times. Went to the plugin notes table.
+- score 3/5 — the AppHost started from Visual Studio Insiders logged `Container runtime 'docker' could not be found` while `dcp.exe info` from a terminal printed `"installed":true,"running":true`; cause not verified (Visual Studio's PATH suspected). Went to `CLAUDE.md`, "Project-specific rules".
+- ⏳ plugin: agile [generic] score 4/2 — a whitespace-only uncommitted diff is shown at ship precondition 2, with the validation question. Went to the plugin notes table.
+- Suite: 2578 tests in 190 s, inside the 5 min budget; Identity and Catalog take about 3 min each.
