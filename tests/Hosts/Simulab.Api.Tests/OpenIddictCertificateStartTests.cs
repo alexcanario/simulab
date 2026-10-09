@@ -92,7 +92,7 @@ public class OpenIddictCertificateStartTests(ApiFactory factory) : IClassFixture
         });
 
         var message = start.Should().Throw<InvalidOperationException>().WithMessage($"*{key}*{reason}*").Which.Message;
-        message.Should().NotContain(bad[..40]);
+        message.Should().NotContain(bad[100..140]).And.NotContain(bad[^40..]);
     }
 
     private static string BadCertificate(string key, string flaw)

@@ -16,11 +16,14 @@ internal static class OpenIddictCertificates
     internal const string SigningKey = "OpenIddict:SigningCertificate";
     internal const string EncryptionKey = "OpenIddict:EncryptionCertificate";
 
-    internal static (X509Certificate2 Signing, X509Certificate2 Encryption) Load(IConfiguration configuration, TimeProvider? clock = null)
+    /// <summary>A replica whose clock runs a little behind the vault's must not refuse a certificate created a moment ago.</summary>
+    private static readonly TimeSpan ClockSkew = TimeSpan.FromMinutes(5);
+
+    internal static (X509Certificate2 Signing, X509Certificate2 Encryption) Load(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
-        var now = (clock ?? TimeProvider.System).GetUtcNow();
+        var now = TimeProvider.System.GetUtcNow();
         return (
             Read(configuration, SigningKey, X509KeyUsageFlags.DigitalSignature, "digital signature", now),
             Read(configuration, EncryptionKey, X509KeyUsageFlags.KeyEncipherment, "key encipherment", now));
@@ -57,7 +60,7 @@ internal static class OpenIddictCertificates
             throw new InvalidOperationException($"'{key}' lacks the key usage '{usageName}' that its role needs (docs/infra.md: create it with the committed policy).");
         }
 
-        if (now < certificate.NotBefore)
+        if (now + ClockSkew < certificate.NotBefore)
         {
             throw new InvalidOperationException($"'{key}' is not valid yet (valid from {certificate.NotBefore.ToUniversalTime():yyyy-MM-dd} UTC).");
         }

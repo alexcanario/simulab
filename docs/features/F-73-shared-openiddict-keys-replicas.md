@@ -1,7 +1,7 @@
 ---
 feature: F-73
 epic: Foundation and identity
-status: building
+status: validating
 board: 115
 version: 2
 ---
@@ -75,14 +75,14 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 | AC1 | OpenIddictCertificateRestartTests.TwoReplicas_SameCertificates_TheSecondAcceptsTheAccessTokenAndRedeemsTheRefreshToken |
 | AC2 | OpenIddictCertificateRestartTests.Restart_SameCertificates_TheRefreshTokenIssuedBeforeIsRedeemed |
 | AC3 | OpenIddictCertificateRestartTests.TwoReplicas_OtherSigningCertificate_TheSecondRefusesTheAccessToken |
-| AC4 | pending |
+| AC4 | existing sign-in and token tests of Simulab.Identity.Tests, unchanged (Development keeps the development certificates) |
 | AC5 | OpenIddictCertificateStartTests.Start_CertificateCannotDoItsJob_RefusesNamingTheSettingAndTheReason (10 cases) |
 | AC6 | AzurePublishFilesTests.Publish_CarriesNoOpenIddictCertificate |
 | AC7 | AzurePublishFilesTests.Publish_KeepsTheApiAwakeAtMostTwiceAndTheWebAtMostOnce |
 | AC8 | OpenIddictCertificatePolicyTests.Policy_AsksForASelfSignedExportableRsaCertificateOfTwoYearsWithItsRoleUsage (2 cases) |
 | AC9 | OpenIddictCertificatePolicyTests.Infra_CreatesTheCertificatesFromTheCommittedPoliciesAndDocumentsTheRenewal; review at ship |
-| AC10 | pending |
-| AC11 | pending |
+| AC10 | no resource file changed; Simulab.Web.Tests Localization/ErrorCodeTextCheckTests and the missing-key checks stay green |
+| AC11 | validation steps 3 to 5 |
 
 ## Decisions
 - 2026-10-04 — The certificates reach the Api as Key Vault secret references in Container Apps, not through the Key Vault SDK in the Api nor through Data Protection — owner; no new package, no managed-identity code in the Api, and no coupling with F-64's Data Protection keys.
@@ -98,6 +98,11 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 - 2026-10-04 — Approved by the owner ("aprovo F-73"); the build waits for F-54's merge, the validation for F-64's staging — owner.
 - 2026-10-04 — The app manual is not changed (no visible behavior changes beyond staying signed in) — technical.
 - 2026-10-09 — The build stopped on a false premise: F-64 (done) already loads the certificates from configuration and refuses to start without them. Owner chose option a (reduce F-73 to what is missing); see change note v2.
+- 2026-10-09 — The decision of 2026-10-04 about Container Apps secret references is superseded by change note v2: the Api reads the vault as configuration (F-64) — owner (option a).
+- 2026-10-09 — The checks of BR3 are strict about the key usage: a certificate with no key usage extension at all is refused, as BR3 says ("lacks its key usage"), although OpenIddict alone would accept it; the not-before check allows 5 minutes of clock skew — technical (independent review).
+- 2026-10-09 — The policies carry no `lifetimeActions`, so the vault never renews on its own (BR7); the PFX without a private key for the test is written with `System.Formats.Asn1`, because `Pkcs12Builder` needs a package the solution does not reference — technical.
+- 2026-10-09 — Not verified: whether Key Vault adds a default lifetime action when `lifetimeActions` is empty, whether the staging seeds (migrations, roles, OpenIddict client) survive two replicas starting at the same moment, and whether the Azure CLI accepts these policy files; validation steps 1 and 3 show all three — technical (review).
+- 2026-10-09 — The security scan blocked on `39bbef85` (a public Azure role id in a F-64 test); the owner triaged it as a false positive — owner.
 - 2026-10-09 — Parallel build with F-93 (validating) confirmed by the owner; only `docs/infra.md` is shared. The branch was brought up to date with `main` before the first line of code.
 
 ## Out of scope
@@ -118,12 +123,49 @@ Every Api replica, and every new revision after a deploy or a restart, must acce
 - Re-approved: 2026-10-09 ("aprovo F-73").
 
 ## Validation script
-1. With staging running (F-64), run the two create commands of `docs/infra.md` step 7 (now with the committed policy) against its Key Vault → both certificates are listed by `az keyvault certificate list --vault-name <vault>` (a certificate created earlier with the default policy is created again as a new version).
-2. Deploy with the declared staging command → the deploy finishes; in the portal, the `api` container app shows scale 1 to 2 and the Api starts (no certificate error in its log).
-3. Set the `api` minimum to 2 for the test (`az containerapp update -n api -g <rg> --min-replicas 2`) → two replicas running.
+Needed to validate: the staging environment running (F-64), in place now: unknown, the owner confirms; the commands below were not run by Claude (they change the shared Azure staging) and are the ones kept in `artifacts/staging-commands.md` (part 1.9 and "Duas réplicas do Api").
+
+Before step 1, set the names (PowerShell 7 / Git Bash):
+```powershell
+$rg = "rg-simulab-staging"; $vault = az keyvault list -g $rg --query "[0].name" -o tsv
+```
+```bash
+rg=rg-simulab-staging; vault=$(az keyvault list -g "$rg" --query "[0].name" -o tsv)
+```
+1. From the repository root, create the two certificates with the committed policies (a certificate that already exists gets a new version, which signs everybody out once) → each command prints the certificate with `"status": "completed"` or `inProgress`; then the listing shows both names.
+   ```powershell
+   az keyvault certificate create --vault-name $vault -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name $vault -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list --vault-name $vault --query "[].name" -o tsv
+   ```
+   ```bash
+   az keyvault certificate create --vault-name "$vault" -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name "$vault" -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list --vault-name "$vault" --query "[].name" -o tsv
+   ```
+2. Deploy with the declared staging command (`docs/infra.md`, part 2 of `artifacts/staging-commands.md`) → the deploy finishes; the `api` log shows no certificate error (a refusal names the key and the reason); the portal shows the `api` scale as 1 to 2.
+3. Raise the minimum to 2 → two replica names are listed. If one replica restarts once while they start together, say so: the seeds of staging run on every start and a race between them is not verified.
+   ```powershell
+   az containerapp update -n api -g $rg --min-replicas 2
+   az containerapp replica list -n api -g $rg --query "[].name" -o tsv
+   ```
+   ```bash
+   az containerapp update -n api -g "$rg" --min-replicas 2
+   az containerapp replica list -n api -g "$rg" --query "[].name" -o tsv
+   ```
 4. Sign in on the staging Web and use the app for a few minutes (open exams, change pages, at least 20 requests) → no sign-out, no error page.
 5. Deploy again with the same command (a new revision) and keep using the app in the same browser → still signed in, no sign-in page.
-6. Set the minimum back (`--min-replicas 1`) → one replica running.
+6. Set the minimum back → one replica name is listed.
+   ```powershell
+   az containerapp update -n api -g $rg --min-replicas 1
+   az containerapp replica list -n api -g $rg --query "[].name" -o tsv
+   ```
+   ```bash
+   az containerapp update -n api -g "$rg" --min-replicas 1
+   az containerapp replica list -n api -g "$rg" --query "[].name" -o tsv
+   ```
 
 ## Delivery
 - Branch: feature/F-73
+- Built (2026-10-09): `maxReplicas: 2` for the Api (`AzureDeployment.cs`); `OpenIddictCertificates` also refuses a certificate without private key, without its key usage or outside its validity (5 minutes of skew); policies `src/Hosts/Simulab.AppHost/keyvault/openiddict-{signing,encryption}-policy.json`; two-replica tests in `OpenIddictCertificateRestartTests`; `docs/infra.md` step 7, renewal and replica text; `artifacts/staging-commands.md`.
+- Gate: `agile gate GREEN` (full suite: 2,652 tests passed, 0 failed; build 26 s, tests 194 s; Identity.Tests alone took 3 m 3 s, over the 2-minute integration budget, as before this item). Scan: `agile scan GREEN` (one false positive triaged by the owner). Independent review: approve, six minor findings, five fixed, one recorded as not verified.
