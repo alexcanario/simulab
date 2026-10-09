@@ -1,7 +1,7 @@
 ---
 feature: F-94
 epic: Cloud hosting and operations
-status: idea
+status: refining
 board: 140
 version: 1
 ---
