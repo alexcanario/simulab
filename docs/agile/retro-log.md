@@ -117,6 +117,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 4/2: at ship precondition 2, a whitespace-only uncommitted diff is shown with the validation question, so the worktree removal does not stop on it later (F-75: one IDE blank line cost an extra owner question) | F-75 | |
 | ⏳ | agile | `[generic]` score 5/5: before committing a merge, `feature-ship` precondition 2 and `feature-build` check for conflict markers with a command that fails on a match (F-65: a scripted resolution chained by `&&` after `grep -c` committed `<<<<<<< HEAD`, `2cead5d`) | F-65 | |
 | ⏳ | agile | `[generic]` score 6/6: `feature-build` re-reads the Delivery and Decisions of the items named in `## Start` (Depends on / Waits on) against the item's rules and criteria before the plan (F-65: F-64 added three deploy parameters after approval, change note v2) | F-65 | |
+| ⏳ | agile | `[generic]` score 6/5: `feature-build` step 17b merges the main branch into an item branch that is behind it before the scan, so findings already triaged on main are not asked again (F-71: branch 303 commits behind; the scan said `Triaged: none`, after the merge `Triaged: 13 false positive`) | F-71 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1049,3 +1050,7 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Proposed and not built: DocGen tool catalogue (not offered, no item). Glossary sweep not run.
 - Baseline: present. Docs command: already declared (DocGen). Plugin notes marked done: none.
 - Build and suite not run: only Markdown changed.
+
+## 2026-10-09 - F-71 Privacy policy names where data lives and who processes it
+- Lesson 1 (score 6/5): an item branch far behind main repeats a security triage already done on main; `feature-build` should merge main before the scan. Went to: plugin note `agile [generic]` in the table above.
+- Open, not a lesson: the Microsoft DPA transfer basis for Azure was not verified (F-71 D9).
