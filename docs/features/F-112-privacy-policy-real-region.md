@@ -1,7 +1,7 @@
 ---
 feature: F-112
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 159
 version: 1
 ---
@@ -127,3 +127,11 @@ Needed to validate: nothing beyond the local app host, in place now. Data: the A
 6. Open the sign-up page, accept both documents and register a test account (use a throwaway address; the mail catcher shows the email). Expect the privacy link to open the 2026-v3 text and the sign-up to be accepted, with no "outdated version" message.
 7. Keyboard only: on `/privacy`, Tab reaches the language switch and the footer links; the table is readable at a narrow window.
 8. Read the manual page `docs/manual/en/create-account.md` (line 12) and its pt-BR and pt-PT twins: they name Central US and the three companies.
+
+## Delivery
+- Branch `feature/F-112` (deleted; never pushed), merge commit `160d977` (board #159). App version 0.26.0.
+- Tests: full suite green, 0 failed (Identity 501, Catalog 512, Web 1229, Architecture 212, Api 57, AppHost 61, Jobs 25, Persistence 25, Email 16, Ai 10, ApiResults 13, SharedKernel 12); build 26 s, suite 123 s, 0 new warnings. New: `PrivacyManualTests` (3 cases), the `2026-v3` cases of `PrivacyPolicyContentTests`, and `Register_PreviousPrivacyVersion_IsRefusedAndTheCurrentOnesAreStored` now covers `2026-v1` and `2026-v2`.
+- Scan: `agile scan GREEN` (14 false positive).
+- Manual: `create-account` in pt-BR, pt-PT and en.
+- Glossary: nothing missing.
+- Open actions (owner, ADR-0004 decision 3, unchanged): obtain or confirm the ANPD standard clauses with Microsoft and Anthropic; read the Data Privacy Framework listing and the Microsoft addendum text; a lawyer's review removes the draft mark. Follow-up: F-85 (signed-in users accept `2026-v3`).
