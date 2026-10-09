@@ -79,8 +79,8 @@ A person reading the repository (the owner, a lawyer, a future developer) learns
 | AC5 | `DataProcessingRegisterTests.Register_HasBothTablesAndEveryRowCitesItsSource` |
 | AC6 | `DataProcessingRegisterTests.Processors_NameAzureAnthropicAndTheEmailServiceWithTheirRegion` |
 | AC7 | `DataRegionDocumentsTests.AdrAndRegister_OpenWithTheDraftNotice` |
-| AC8 | validation step 2 (search of `docs/infra.md`, run by Claude and shown to the owner) |
-| AC9 | validation step 3 (`git diff --stat` against the main branch shows documents only) |
+| AC8 | validation step 3 (search of `docs/infra.md`, run by Claude and by the owner) |
+| AC9 | validation step 4 (the diff against the main branch has no file under `src/`) |
 | AC10 | no resource key added; the existing missing-key test is unchanged |
 
 The tests live in `tests/Simulab.ArchitectureTests/`, beside `InfraAccessTests`, and read the files by path from the repository root. They check structure and wording markers, not the truth of the legal text.
