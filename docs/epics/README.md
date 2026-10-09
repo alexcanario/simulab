@@ -31,21 +31,22 @@ Agreed with the owner on 2026-10-09. Each item is scored 0 to 10 for its importa
 
 | Step | Item | Score | Why now |
 |---|---|---|---|
-Steps 1 to 3 release the staging to testers: real people's data must not go into it before them.
+"Releases testers" marks the functionality testers need to have something worth testing: a student practices questions and sees the result (owner, 2026-10-09). Today a tester can only sign up, browse the catalog and use the back office. Steps 1 to 3 are not functionality, but they come first because real people's data must not reach the staging before them.
 
 | Step | Item | Score | Releases testers | Why now |
 |---|---|---|---|---|
-| 1 | F-93 Users' data in Azure Central US meets LGPD and GDPR | 9 | yes | Central US is real (owner, 2026-10-09); ADR-0003 says Brazil South; F-71 depends on it |
-| 2 | F-71 Privacy policy names where data lives and who processes it | 8 | yes | The privacy policy must name the region and the processors before real users |
-| 3 | F-85 Existing users accept a new legal document version | 8 | yes | F-71 changes the policy version; users already signed up must see it |
-| 4 | F-94 Every setting a host requires has a source in the publish | 6 | no | The next missing setting fails the build, not the staging (F-64 retro) |
-| 5 | F-76 Syllabus for students | 7 | no | First student-visible value of the taxonomy; F-75 is done |
-| 6 | F-78 Notice subjects of the municipal guard editions | 6 | no | Real data for testers to look at |
-| 7 | E-4 Question bank (`/agile:epic`) | 10 | no | Next block of the product core |
-| 8 | F-65 A GitHub Actions workflow deploys a release | 6 | no | Automates the manual deploy |
-| 9 | F-73 Shared OpenIddict keys across Api replicas | 5 | no | One replica works; a park already signs testers out (`docs/infra.md`) |
-| 10 | F-40 Eval suite for model calls | 5 | no | Must exist before any E-9 item (rises to 8 then) |
-| 11 | E-5 Question Bank Simulator, then E-6 Exam Simulator | 9 | no | The product the student uses |
+| 1 | F-93 Users' data in Azure Central US meets LGPD and GDPR | 9 | no | Central US is real (owner, 2026-10-09); ADR-0003 says Brazil South; F-71 depends on it |
+| 2 | F-71 Privacy policy names where data lives and who processes it | 8 | no | The privacy policy must name the region and the processors before real users |
+| 3 | F-85 Existing users accept a new legal document version | 8 | no | F-71 changes the policy version; users already signed up must see it |
+| 4 | E-4 Question bank (`/agile:epic`) | 10 | yes | Without questions there is nothing to practice |
+| 5 | E-5 Question Bank Simulator | 10 | yes | The first practice loop a tester can run |
+| 6 | F-76 Syllabus for students | 7 | no | First student-visible value of the taxonomy; F-75 is done |
+| 7 | F-78 Notice subjects of the municipal guard editions | 6 | no | Real syllabus for the editions testers see |
+| 8 | E-6 Exam Simulator | 9 | yes | The brief's success measure: "felt like the real exam" |
+| 9 | F-94 Every setting a host requires has a source in the publish | 6 | no | The next missing setting fails the build, not the staging (F-64 retro) |
+| 10 | F-65 A GitHub Actions workflow deploys a release | 6 | no | Automates the manual deploy |
+| 11 | F-73 Shared OpenIddict keys across Api replicas | 5 | no | One replica works; a park already signs testers out (`docs/infra.md`) |
+| 12 | F-40 Eval suite for model calls | 5 | no | Must exist before any E-9 item (rises to 8 then) |
 
 Remaining items, by score:
 
