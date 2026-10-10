@@ -3354,3 +3354,50 @@ Claude: 0.28.0 -> 0.46.0: 18 minor versions behind; the sync goes straight to 0.
 ```
 
 A project 2 minor versions behind or less, or whose `.claude/agile/sync.json` records no version, gets exactly the report it got before: no warning, no blocks. The approval does not change: one OK per row, not one per block.
+
+### 14.93 The tests come first and are locked while the item builds
+
+F-12 of acme-shop, an order total, is approved. The build does not write the tests along with the code: it runs a test phase, locks the tests at a commit, and only then writes the code.
+
+```
+> /agile:build F-12
+Claude: F-12 — Order total [approved]
+        Worktree of F-12: D:/wt/acme-shop/f-12-order-total [feature/F-12]
+        Test phase: 3 tests for AC1-AC3, and the skeleton of Order (signatures that throw NotImplementedException).
+        Tests: Failed: 3, Passed: 0 — each fails at Order.Add or Order.Total, in the skeleton; none is a compile error.
+        test(F-12): order total acceptance tests committed.
+        Tests locked: 9f89899c0d1e... (1 file); unlocks: 0
+        The line is in docs/features/F-12-order-total.md, under ## Criterion → test.
+```
+
+From then on a hook refuses every write of that file, from the edit tools and from the shell, and a history rewrite (a rebase, an amend, a hard reset) on the item's branch:
+
+```
+Claude: [agile test-lock] this command writes tests/Orders.Tests/OrderTests.cs, locked by the acceptance
+        tests of F-12 (commit 9f89899): the code is made to satisfy them, never the reverse.
+        If the test is wrong, stop and ask the owner.
+```
+
+If the test really is wrong, the build stops and asks you; the session never unlocks alone:
+
+```
+Claude: ❓ A locked test looks wrong
+        AC2 expects the total without tax, and the rule BR2 says it includes it.
+        a) Unlock and rewrite the test
+        b) Keep the test and fix the code
+        Recommendation: a). Reason: the rule in the file says the total includes tax; the test contradicts it.
+> a
+Claude: Tests unlocked: F-12 (AC2 contradicted BR2; owner chose to rewrite); unlocks: 1.
+        Rewritten, committed, locked again: Tests locked: 3b7c21aa4e90... (1 file); unlocks: 1
+        Written in ## Decisions: tests unlocked (AC2 contradicted BR2).
+```
+
+At the ship, the lock is checked again: the files equal the lock commit, and every unlock has its line in `## Decisions`. A changed file, an unlock with no decision, or a lock file that was lost stops the ship like a red build:
+
+```
+> /agile:ship F-12
+Claude: Tests lock: 3b7c21aa4e90... (1 files) unchanged — F-12; unlocks: 1
+          unlock: 2026-10-10T14:02:11Z AC2 contradicted BR2; owner chose to rewrite
+```
+
+The tests of a screen that the `frontend` agent writes with the approved mockup are not locked. A project that reaches the ship with no lock (an item built before this rule) prints `Tests lock: none (built before this rule)` and goes on.

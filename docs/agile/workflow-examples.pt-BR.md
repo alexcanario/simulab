@@ -3360,3 +3360,50 @@ Claude: 0.28.0 -> 0.46.0: 18 versões menores atrás; o sync vai direto para 0.4
 ```
 
 Um projeto com até 2 versões menores de atraso, ou cujo `.claude/agile/sync.json` não registra versão, recebe exatamente o relatório de antes: sem aviso e sem blocos. A aprovação não muda: um OK por linha, não um por bloco.
+
+### 14.93 Os testes vêm primeiro e ficam travados enquanto o item é construído
+
+O F-12 da acme-shop, o total de um pedido, está aprovado. O build não escreve os testes junto com o código: ele roda uma fase de testes, trava os testes num commit e só então escreve o código.
+
+```
+> /agile:build F-12
+Claude: F-12 — Order total [approved]
+        Worktree of F-12: D:/wt/acme-shop/f-12-order-total [feature/F-12]
+        Fase de testes: 3 testes para AC1-AC3 e o esqueleto de Order (assinaturas que lançam NotImplementedException).
+        Testes: Failed: 3, Passed: 0 — cada um falha em Order.Add ou Order.Total, no esqueleto; nenhum é erro de compilação.
+        test(F-12): testes de aceite do total do pedido commitados.
+        Tests locked: 9f89899c0d1e... (1 file); unlocks: 0
+        A linha está em docs/features/F-12-order-total.md, sob ## Criterion → test.
+```
+
+Daí em diante um hook recusa toda escrita nesse arquivo, pelas ferramentas de edição e pelo shell, e uma reescrita de histórico (rebase, amend, reset hard) na branch do item:
+
+```
+Claude: [agile test-lock] this command writes tests/Orders.Tests/OrderTests.cs, locked by the acceptance
+        tests of F-12 (commit 9f89899): the code is made to satisfy them, never the reverse.
+        If the test is wrong, stop and ask the owner.
+```
+
+Se o teste está mesmo errado, o build para e pergunta a você; a sessão nunca destrava sozinha:
+
+```
+Claude: ❓ Um teste travado parece errado
+        O AC2 espera o total sem imposto, e a regra BR2 diz que inclui.
+        a) Destravar e reescrever o teste
+        b) Manter o teste e corrigir o código
+        Recomendação: a). Motivo: a regra do arquivo diz que o total inclui imposto; o teste a contradiz.
+> a
+Claude: Tests unlocked: F-12 (AC2 contradiz BR2; o dono escolheu reescrever); unlocks: 1.
+        Reescrito, commitado, travado de novo: Tests locked: 3b7c21aa4e90... (1 file); unlocks: 1
+        Escrito em ## Decisions: tests unlocked (AC2 contradiz BR2).
+```
+
+No ship, o lock é conferido de novo: os arquivos são iguais ao commit do lock e cada destravamento tem a sua linha em `## Decisions`. Um arquivo alterado, um destravamento sem decisão ou um arquivo de lock perdido para o ship como um build vermelho:
+
+```
+> /agile:ship F-12
+Claude: Tests lock: 3b7c21aa4e90... (1 files) unchanged — F-12; unlocks: 1
+          unlock: 2026-10-10T14:02:11Z AC2 contradiz BR2; o dono escolheu reescrever
+```
+
+Os testes de uma tela que o agente `frontend` escreve com o mockup aprovado não são travados. Um item que chega ao ship sem lock (construído antes desta regra) imprime `Tests lock: none (built before this rule)` e segue.

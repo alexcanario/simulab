@@ -41,6 +41,8 @@ Technical terms: [glossary](../glossary.md)
 <!-- The test that fails before the fix and passes after it. One per occurrence fixed. -->
 - <Test name> — <project>
 
+<!-- test-lock.js lock (/agile:build, once the test is committed and failing) writes `Tests locked: <sha> (<n> files); unlocks: <n>` itself, right under the heading of this section. -->
+
 ## Open questions
 - (none)
 

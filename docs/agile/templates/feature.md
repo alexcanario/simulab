@@ -59,6 +59,8 @@ Technical terms: [glossary](../glossary.md)
 | AC1 | pending |
 | AC<n> | pending |
 
+<!-- test-lock.js lock (the test phase of /agile:build) writes `Tests locked: <sha> (<n> files); unlocks: <n>` itself, right under the heading of this section. -->
+
 ## Decisions
 <!-- date — decision — reason. Technical decisions made by Claude are recorded here too. -->
 - <YYYY-MM-DD> — <decision> — <reason>

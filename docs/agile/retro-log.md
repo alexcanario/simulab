@@ -1088,6 +1088,13 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Declined or not offered: DocGen tool catalogue and Azure login `agile-deploy.js` rows are the two plugin notes already logged above (false positives); no item captured. Baseline present, docs command already declared, no plugin notes delivered, glossary already complete (not rescanned).
 - `CLAUDE.md` has no `Merge:` line; the new template line is not added (direct merge stays the default).
 
+## 2026-10-10 - Sync with agile@canary 0.47.0
+- From 0.46.0 to 0.47.0. Copied (6): the `bug` and `feature` templates (a comment says `test-lock.js` writes the `Tests locked:` line itself) and the four `docs/agile/workflow*` manuals (tests first and locked, #139: new section, hook row, example 14.93). Left alone: `git.md` and `profile.md` (edited, upstream unchanged); manual build files (upstream unchanged).
+- Ran with F-94 in `validating` in its own worktree (owner said yes); the sync touched only the main checkout.
+- Not offered again: DocGen tool catalogue and Azure login `agile-deploy.js` rows, the two false positives already logged on 2026-10-09; no item captured.
+- Glossary: column and `Technical terms:` link lines already complete in all 142 item files, ADRs, epics, discussions and releases; 2 rows added (Azure Container Registry, DNS). The sweep was by a term list, not a full read.
+- Baseline present, docs command already declared, no plugin notes delivered, `CLAUDE.md` 600 words. Build and suite not run: only Markdown changed.
+
 ## 2026-10-10 - F-94 Every setting a host requires has a source in the publish
 - Lesson 1 (score 4/7): a test that asserts the exception of a failed `WebApplicationFactory` start is racy; the framework sometimes raises `ObjectDisposedException` from `DeferredHost.StartAsync` (evidence: the F-94 ship gate log, 2 of 5 runs; F-93 and B-26 saw it on `EmailProviderStartTests`). Applied: project rule in `.claude/rules/agile/project.md`; plugin note `[stack: Microsoft.AspNetCore.Mvc.Testing]` in the table above; sweep of the tests found `EmailProviderStartTests` and `OpenIddictCertificateStartTests` (both `Simulab.Api.Tests`), added to B-26 instead of a second bug.
 - Lesson 2 (score 1/3), not applied: the first fix of that flake (one factory per test) was a guess proved by isolated runs and the full gate failed again twice; the loop of `feature-build` step 9 already says it, the cause is read from the stack before the fix.
