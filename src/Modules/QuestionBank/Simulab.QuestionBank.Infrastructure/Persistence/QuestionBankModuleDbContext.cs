@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Simulab.Persistence;
 using Simulab.QuestionBank.Domain.Entities;
+using Simulab.QuestionBank.Infrastructure.Persistence.Configurations;
 using Simulab.SharedKernel.Security;
 
 namespace Simulab.QuestionBank.Infrastructure.Persistence;
@@ -23,4 +24,13 @@ public sealed class QuestionBankModuleDbContext(
 
     /// <summary>F-95: the options of the questions, in position order.</summary>
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.ApplyConfiguration(new QuestionConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
+    }
 }

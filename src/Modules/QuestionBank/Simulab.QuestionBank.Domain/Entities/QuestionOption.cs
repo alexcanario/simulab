@@ -13,9 +13,8 @@ public sealed class QuestionOption : TenantEntity
     {
     }
 
-    internal QuestionOption(Guid questionId, int position, string textHtml, bool isCorrect)
+    internal QuestionOption(int position, string textHtml, bool isCorrect)
     {
-        QuestionId = questionId;
         Position = position;
         TextHtml = textHtml;
         IsCorrect = isCorrect;
@@ -31,4 +30,10 @@ public sealed class QuestionOption : TenantEntity
 
     /// <summary>True for the answer key.</summary>
     public bool IsCorrect { get; private set; }
+
+    internal void Set(string textHtml, bool isCorrect)
+    {
+        TextHtml = textHtml;
+        IsCorrect = isCorrect;
+    }
 }

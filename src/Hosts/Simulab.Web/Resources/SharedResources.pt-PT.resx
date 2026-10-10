@@ -199,6 +199,9 @@
   <data name="Permission.catalog.manage.Description" xml:space="preserve"><value>Criar, editar e eliminar entidades organizadoras e tudo o resto do catálogo de provas.</value></data>
   <data name="Permission.catalog.browse.Name" xml:space="preserve"><value>Consultar o catálogo</value></data>
   <data name="Permission.catalog.browse.Description" xml:space="preserve"><value>Pesquisar os exames publicados e ver as edições publicadas no catálogo do estudante.</value></data>
+  <data name="PermissionGroup.questions" xml:space="preserve"><value>Banco de questões</value></data>
+  <data name="Permission.questions.manage.Name" xml:space="preserve"><value>Gerir o banco de questões</value></data>
+  <data name="Permission.questions.manage.Description" xml:space="preserve"><value>Escrever, editar, publicar, pré-visualizar e eliminar as questões do banco.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Estado</value></data>
@@ -712,14 +715,29 @@
   <data name="NoticeSubjects.Total.Unmapped.One" xml:space="preserve"><value>1 disciplina ainda não está mapeada.</value></data>
   <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} disciplinas ainda não estão mapeadas.</value></data>
   <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar.</value></data>
-  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar.</value></data>
+  <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Há disciplinas do aviso mapeadas para este tópico ou questões que o usam. Retire essas ligações antes de o eliminar.</value></data>
   <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo.</value></data>
   <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>No máximo 50 itens por disciplina do aviso.</value></data>
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente.</value></data>
   <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira.</value></data>
   <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente.</value></data>
   <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada.</value></data>
-  <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada.</value></data>
+  <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso ou é usado por questões e não pode ser eliminado. A lista foi recarregada.</value></data>
+  <data name="question.not_found" xml:space="preserve"><value>Esta questão já não existe.</value></data>
+  <data name="question.topic_not_found" xml:space="preserve"><value>O tópico já não existe. Escolha outro.</value></data>
+  <data name="question.statement_required" xml:space="preserve"><value>Escreva o enunciado.</value></data>
+  <data name="question.statement_too_long" xml:space="preserve"><value>O enunciado excede 10 000 caracteres.</value></data>
+  <data name="question.base_text_too_long" xml:space="preserve"><value>O texto de apoio excede 20 000 caracteres.</value></data>
+  <data name="question.explanation_too_long" xml:space="preserve"><value>A explicação excede 10 000 caracteres.</value></data>
+  <data name="question.option_too_long" xml:space="preserve"><value>Uma opção excede 2 000 caracteres.</value></data>
+  <data name="question.options_count" xml:space="preserve"><value>Uma questão é publicada com 2 a 5 opções.</value></data>
+  <data name="question.option_text_required" xml:space="preserve"><value>Todas as opções precisam de texto.</value></data>
+  <data name="question.key_invalid" xml:space="preserve"><value>Assinale exatamente uma opção como correta.</value></data>
+  <data name="question.difficulty_invalid" xml:space="preserve"><value>A dificuldade é um número de 1 a 5, ou vazia.</value></data>
+  <data name="question.content_language_invalid" xml:space="preserve"><value>Escolha um dos idiomas suportados.</value></data>
+  <data name="question.delete_requires_draft" xml:space="preserve"><value>Só um rascunho pode ser eliminado. Retire primeiro a publicação.</value></data>
+  <data name="question.already_published" xml:space="preserve"><value>Esta questão já está publicada.</value></data>
+  <data name="question.not_published" xml:space="preserve"><value>Esta questão não está publicada.</value></data>
   <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
   <data name="Gallery.Chip.Hint" xml:space="preserve"><value>Uma etiqueta só de leitura com ícone e texto secundário opcionais, um estado assinalado e um botão de retirar opcional. Só recebe o foco se tiver o botão.</value></data>
   <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de escolha múltipla</value></data>

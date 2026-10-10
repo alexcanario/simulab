@@ -61,7 +61,7 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Plano de estudos | Plano de estudos | `StudyPlan` | The coach's plan toward a target exam and date | O plano do coach rumo a uma prova-alvo e uma data |
 | Prova-alvo | Prova-alvo | `TargetExam` | The exam and date a student prepares for | A prova e a data para as quais o aluno se prepara |
 | Enunciado | Enunciado | `Statement` | The text of a question that asks what the student must answer; stored as sanitized HTML (F-95) | O texto da questão que diz o que o aluno deve responder; guardado como HTML sanitizado (F-95) |
-| Alternativa | Alternativa | `QuestionOption` | One choice of a single-choice question, in a fixed position (letters A to E); exactly one is correct (F-95) | Uma das escolhas de uma questão de escolha única, em posição fixa (letras A a E); exatamente uma é correta (F-95) |
+| Alternativa | Opção | `QuestionOption` | One choice of a single-choice question, in a fixed position (letters A to E); exactly one is correct (F-95) | Uma das escolhas de uma questão de escolha única, em posição fixa (letras A a E); exatamente uma é correta (F-95) |
 | Estado da questão | Estado da questão | `QuestionStatus` (`Draft` / `Published`) | Whether a question is still being written or is ready to be served; `InReview` joins with F-105 (F-95) | Se a questão ainda está sendo escrita ou está pronta para ser servida; "Em revisão" entra com a F-105 (F-95) |
 | Estudante | Estudante | `Student` | Role: practices and follows progress | Papel: pratica e acompanha o progresso |
 | Curador | Curador | `Curator` | Role: imports, reviews, writes and publishes content | Papel: importa, revisa, escreve e publica conteúdo |

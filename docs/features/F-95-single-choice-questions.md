@@ -319,6 +319,9 @@ Settled on 2026-10-10 and recorded in `## Decisions`: difficulty direction (1 ea
 - AC18 All new texts appear in pt-BR, pt-PT and en, including every error code text.
 
 ## Criterion → test
+
+Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `QuestionEndpointTests.Create_TopicLanguageAndStatement_IsStoredAsDraft_AndListedWithItsTopicAndSubject`, `QuestionTests.Create_ValidContent_IsADraftOfTypeSingleChoice` |
