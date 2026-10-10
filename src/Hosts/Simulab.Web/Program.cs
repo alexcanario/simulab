@@ -45,10 +45,7 @@ builder.Services.AddSingleton<SessionRefreshGate>();
 builder.Services.AddScoped<WebSessionTokenAccessor>();
 builder.Services.AddScoped<AuthenticationStateProvider, SessionRevalidatingStateProvider>();
 // F-94 BR6: a host without its client id or secret refuses to start and names the key.
-builder.Services.AddOptions<OpenIddictClientOptions>()
-    .Bind(builder.Configuration.GetSection(OpenIddictClientOptions.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+builder.Services.AddOpenIddictClientOptions(builder.Configuration);
 var authentication = builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

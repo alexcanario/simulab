@@ -1,41 +1,41 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Simulab.Web.Services.Auth;
 
 namespace Simulab.Web.Tests;
 
 /// <summary>
 /// F-94 BR6: the Web refuses to start outside Development without the client id and secret it sends to the token
 /// endpoint, and names the key. Before, it started and every sign-in got a 401 <c>invalid_client</c> (F-64 staging).
-/// Each test has its own factory: a host that fails to start disposes what it shares, and a fixture shared by the class
-/// would hand the next test a disposed service provider.
+/// The refusal is checked on the registration the host uses, through <see cref="IStartupValidator"/>, which is what the
+/// host runs at start: a failed start of a <c>WebApplicationFactory</c> sometimes ends in an
+/// <see cref="ObjectDisposedException"/> raised inside the framework, so it cannot carry an assertion.
 /// </summary>
 public class OpenIddictClientStartTests
 {
-    private static WebApplicationFactory<Program> FactoryFor(string environment, string? clientId, string? clientSecret) =>
-        new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-        {
-            builder.UseEnvironment(environment);
-            // Pinned, so a variable of the machine running the test changes nothing.
-            builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["Authentication:OpenIddict:ClientId"] = clientId,
-                    ["Authentication:OpenIddict:ClientSecret"] = clientSecret,
-                }));
-        });
+    private static void ValidateAtStart(string? clientId, string? clientSecret)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Authentication:OpenIddict:ClientId"] = clientId,
+                ["Authentication:OpenIddict:ClientSecret"] = clientSecret,
+            })
+            .Build();
+        using var provider = new ServiceCollection().AddOpenIddictClientOptions(configuration).BuildServiceProvider();
+
+        provider.GetRequiredService<IStartupValidator>().Validate();
+    }
 
     /// <summary>AC5.</summary>
-    [Theory]
-    [InlineData("Staging")]
-    [InlineData("Production")]
-    public void Start_OutsideDevelopmentWithoutClientId_RefusesAndNamesTheKey(string environment)
+    [Fact]
+    public void Start_WithoutClientId_RefusesAndNamesTheKey()
     {
-        using var factory = FactoryFor(environment, clientId: null, clientSecret: "a-secret");
-
-        var start = () => factory.CreateClient();
+        var start = () => ValidateAtStart(clientId: null, clientSecret: "a-secret");
 
         start.Should().Throw<OptionsValidationException>()
             .Which.Message.Should().Contain("Authentication:OpenIddict:ClientId");
@@ -43,20 +43,28 @@ public class OpenIddictClientStartTests
 
     /// <summary>AC5: the secret is checked the same way.</summary>
     [Fact]
-    public void Start_OutsideDevelopmentWithoutClientSecret_RefusesAndNamesTheKey()
+    public void Start_WithoutClientSecret_RefusesAndNamesTheKey()
     {
-        using var factory = FactoryFor("Staging", clientId: "simulab-web", clientSecret: null);
-
-        var start = () => factory.CreateClient();
+        var start = () => ValidateAtStart(clientId: "simulab-web", clientSecret: null);
 
         start.Should().Throw<OptionsValidationException>()
             .Which.Message.Should().Contain("Authentication:OpenIddict:ClientSecret");
     }
 
     [Fact]
-    public void Start_OutsideDevelopmentWithBothKeys_Starts()
+    public void Start_WithBothKeys_Passes()
     {
-        using var factory = FactoryFor("Staging", clientId: "simulab-web", clientSecret: "a-secret");
+        var start = () => ValidateAtStart(clientId: "simulab-web", clientSecret: "a-secret");
+
+        start.Should().NotThrow();
+    }
+
+    /// <summary>The real host, outside Development, starts when the deploy supplies both keys.</summary>
+    [Fact]
+    public void Host_OutsideDevelopmentWithBothKeys_Starts()
+    {
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            builder.UseEnvironment("Staging").WithDeployedClient());
 
         using var client = factory.CreateClient();
 
@@ -65,7 +73,7 @@ public class OpenIddictClientStartTests
 
     /// <summary>AC6: Development takes both keys from <c>appsettings.Development.json</c>, so it needs no setting of its own.</summary>
     [Fact]
-    public void Start_InDevelopmentWithTheCommittedSettings_Starts()
+    public void Host_InDevelopmentWithTheCommittedSettings_Starts()
     {
         using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder.UseEnvironment(Environments.Development));
 
