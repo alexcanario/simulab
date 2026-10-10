@@ -403,5 +403,9 @@ Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
 ## Validation script
 <!-- Written at the end of build. -->
 
+## Events
+
+- 2026-10-10 test-fail — 1 new warning(s): CA1822 in src/Modules/QuestionBank/Simulab.QuestionBank.Application/Content/QuestionHtmlSanitizer.cs, 1 red
+
 ## Delivery
 <!-- Filled by /agile:ship. -->
