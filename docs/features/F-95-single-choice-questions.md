@@ -1,7 +1,7 @@
 ---
 feature: F-95
 epic: Question bank
-status: refining
+status: approved
 board: 141
 version: 1
 ---
@@ -367,6 +367,7 @@ Settled on 2026-10-10 and recorded in `## Decisions`: difficulty direction (1 ea
 - 2026-10-10 — The Api problem for `question.option_text_required` and `question.option_too_long` carries the option `position`; the client pre-checks both, so the section-level message is only a fallback (Claude).
 - 2026-10-10 — `topic.in_use` and `Topics.Delete.DisabledInUse` are reworded to "notice subjects or questions use this topic" in the three languages; `TopicResponse.InUse` stays one flag (Claude).
 - 2026-10-10 — `MudRadio` is used directly in the option rows; a second use in another page promotes it to an `AppRadio` kit component (Claude).
+- 2026-10-10 — F-95 approved ("aprovo F-95"), with the screen (`docs/features/mockups/F-95-single-choice-questions.html`) and the two new packages `HtmlSanitizer` and `Blazored.TextEditor` (owner).
 - 2026-10-10 — Vocabulary: pt-BR "Alternativa" / pt-PT "Opção"; pt-BR "Despublicar" / pt-PT "Retirar publicação"; the glossary rows are added at build (Claude).
 
 ## Out of scope
