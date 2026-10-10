@@ -743,4 +743,132 @@
   <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de múltipla escolha</value></data>
   <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Busca em uma lista local curta, agrupada, e escolhe vários itens; as escolhas aparecem abaixo como chips removíveis.</value></data>
   <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruta</value></data>
+  <data name="Nav.Questions" xml:space="preserve"><value>Questões</value></data>
+  <data name="Questions.Title" xml:space="preserve"><value>Questões</value></data>
+  <data name="Questions.Search.Placeholder" xml:space="preserve"><value>Pesquisar no enunciado</value></data>
+  <data name="Questions.Filter.Status" xml:space="preserve"><value>Situação</value></data>
+  <data name="Questions.Status.Draft" xml:space="preserve"><value>Rascunho</value></data>
+  <data name="Questions.Status.Published" xml:space="preserve"><value>Publicada</value></data>
+  <data name="Questions.Column.Statement" xml:space="preserve"><value>Enunciado</value></data>
+  <data name="Questions.Column.Topic" xml:space="preserve"><value>Tópico</value></data>
+  <data name="Questions.Column.Difficulty" xml:space="preserve"><value>Dificuldade</value></data>
+  <data name="Questions.Column.Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Questions.Column.Status" xml:space="preserve"><value>Situação</value></data>
+  <data name="Questions.Empty" xml:space="preserve"><value>Nenhuma questão no banco ainda.</value></data>
+  <data name="Questions.Empty.Filters" xml:space="preserve"><value>Nenhuma questão corresponde ao filtro escolhido.</value></data>
+  <data name="Questions.Empty.Search" xml:space="preserve"><value>Nenhuma questão corresponde a "{0}".</value></data>
+  <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Não definida</value></data>
+  <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>Dificuldade não definida</value></data>
+  <data name="Questions.Row.Name" xml:space="preserve"><value>questão "{0}"</value></data>
+  <data name="Questions.Action.Publish" xml:space="preserve"><value>Publicar</value></data>
+  <data name="Questions.Action.Unpublish" xml:space="preserve"><value>Despublicar</value></data>
+  <data name="Questions.Action.Preview" xml:space="preserve"><value>Visualizar como aluno</value></data>
+  <data name="Questions.Delete.DisabledPublished" xml:space="preserve"><value>Esta questão está publicada. Despublique-a antes de excluir.</value></data>
+  <data name="Questions.Delete.Object" xml:space="preserve"><value>esta questão</value></data>
+  <data name="Questions.Delete.Message" xml:space="preserve"><value>O rascunho sai do banco e deixa de aparecer no app. O tópico permanece.</value></data>
+  <data name="Questions.Deleted" xml:space="preserve"><value>Questão excluída.</value></data>
+  <data name="Questions.Saved" xml:space="preserve"><value>Questão salva.</value></data>
+  <data name="Questions.Published" xml:space="preserve"><value>Questão publicada.</value></data>
+  <data name="Questions.Unpublished" xml:space="preserve"><value>Questão despublicada. Voltou a ser rascunho.</value></data>
+  <data name="Questions.BackToList" xml:space="preserve"><value>Voltar para as questões</value></data>
+  <data name="Questions.Form.AddTitle" xml:space="preserve"><value>Adicionar questão</value></data>
+  <data name="Questions.Form.EditTitle" xml:space="preserve"><value>Editar questão</value></data>
+  <data name="Questions.Section.Classification" xml:space="preserve"><value>Classificação</value></data>
+  <data name="Questions.Section.Classification.Subtitle" xml:space="preserve"><value>Onde a questão fica na taxonomia, seu idioma e sua dificuldade.</value></data>
+  <data name="Questions.Field.Subject" xml:space="preserve"><value>Disciplina</value></data>
+  <data name="Questions.Field.Subject.Placeholder" xml:space="preserve"><value>Nome da disciplina</value></data>
+  <data name="Questions.Field.Subject.Hint" xml:space="preserve"><value>Escolha a disciplina para listar seus tópicos.</value></data>
+  <data name="Questions.Field.Topic" xml:space="preserve"><value>Tópico</value></data>
+  <data name="Questions.Field.Topic.Placeholder" xml:space="preserve"><value>Nome do tópico</value></data>
+  <data name="Questions.Field.Topic.Hint" xml:space="preserve"><value>Só tópicos da disciplina escolhida.</value></data>
+  <data name="Questions.Field.Topic.DisabledHint" xml:space="preserve"><value>Escolha uma disciplina primeiro.</value></data>
+  <data name="Questions.Field.Topic.Required" xml:space="preserve"><value>Escolha o tópico.</value></data>
+  <data name="Questions.Field.ContentLanguage" xml:space="preserve"><value>Idioma do conteúdo</value></data>
+  <data name="Questions.Field.ContentLanguage.Hint" xml:space="preserve"><value>O idioma em que a questão está escrita. O conteúdo nunca é traduzido.</value></data>
+  <data name="Questions.Field.Difficulty" xml:space="preserve"><value>Dificuldade</value></data>
+  <data name="Questions.Field.Difficulty.Hint" xml:space="preserve"><value>De 1 (mais fácil) a 5 (mais difícil). Opcional.</value></data>
+  <data name="Questions.Section.Statement" xml:space="preserve"><value>Enunciado</value></data>
+  <data name="Questions.Section.Statement.Subtitle" xml:space="preserve"><value>O que se pede ao aluno. Formatação, listas e links são mantidos; imagens vêm depois.</value></data>
+  <data name="Questions.Field.Statement" xml:space="preserve"><value>Enunciado</value></data>
+  <data name="Questions.Field.Statement.Placeholder" xml:space="preserve"><value>Escreva o enunciado</value></data>
+  <data name="Questions.Field.Statement.Hint" xml:space="preserve"><value>Até 10.000 caracteres.</value></data>
+  <data name="Questions.Section.BaseText" xml:space="preserve"><value>Texto-base</value></data>
+  <data name="Questions.Section.BaseText.Subtitle" xml:space="preserve"><value>Um texto a que a questão se refere, mostrado antes do enunciado. Opcional.</value></data>
+  <data name="Questions.Field.BaseText" xml:space="preserve"><value>Texto-base</value></data>
+  <data name="Questions.Field.BaseText.Placeholder" xml:space="preserve"><value>Cole ou escreva o texto-base</value></data>
+  <data name="Questions.Field.BaseText.Hint" xml:space="preserve"><value>Até 20.000 caracteres.</value></data>
+  <data name="Questions.Section.Options" xml:space="preserve"><value>Alternativas</value></data>
+  <data name="Questions.Section.Options.Subtitle" xml:space="preserve"><value>De 2 a 5 alternativas para publicar. As letras seguem a ordem; marque a correta.</value></data>
+  <data name="Questions.Options.Correct.Label" xml:space="preserve"><value>Alternativa correta</value></data>
+  <data name="Questions.Options.MarkCorrect" xml:space="preserve"><value>Marcar {0} como correta</value></data>
+  <data name="Questions.Options.Letter" xml:space="preserve"><value>alternativa {0}</value></data>
+  <data name="Questions.Options.Field" xml:space="preserve"><value>Texto da alternativa {0}</value></data>
+  <data name="Questions.Options.Field.Placeholder" xml:space="preserve"><value>Texto da alternativa</value></data>
+  <data name="Questions.Options.Add" xml:space="preserve"><value>Adicionar alternativa</value></data>
+  <data name="Questions.Options.Add.DisabledMax" xml:space="preserve"><value>Uma questão tem no máximo 5 alternativas.</value></data>
+  <data name="Questions.Options.Count" xml:space="preserve"><value>{0} de 5 alternativas</value></data>
+  <data name="Questions.Options.Empty" xml:space="preserve"><value>Nenhuma alternativa ainda. Um rascunho pode ser salvo sem alternativas; publicar exige de 2 a 5.</value></data>
+  <data name="Questions.Options.MoveUp.DisabledFirst" xml:space="preserve"><value>Já é a primeira alternativa.</value></data>
+  <data name="Questions.Options.MoveDown.DisabledLast" xml:space="preserve"><value>Já é a última alternativa.</value></data>
+  <data name="Questions.Options.Moved" xml:space="preserve"><value>Alternativa movida para a posição {0} de {1}.</value></data>
+  <data name="Questions.Options.Removed" xml:space="preserve"><value>Alternativa removida. Restam {0}.</value></data>
+  <data name="Questions.Section.Explanation" xml:space="preserve"><value>Explicação</value></data>
+  <data name="Questions.Section.Explanation.Subtitle" xml:space="preserve"><value>Por que o gabarito está certo. Opcional; aparece junto do gabarito.</value></data>
+  <data name="Questions.Field.Explanation" xml:space="preserve"><value>Explicação</value></data>
+  <data name="Questions.Field.Explanation.Placeholder" xml:space="preserve"><value>Explique a resposta</value></data>
+  <data name="Questions.Field.Explanation.Hint" xml:space="preserve"><value>Até 10.000 caracteres.</value></data>
+  <data name="Questions.Form.Aside.Title" xml:space="preserve"><value>Resumo</value></data>
+  <data name="Questions.Form.Aside.Status" xml:space="preserve"><value>Situação</value></data>
+  <data name="Questions.Form.Aside.Options" xml:space="preserve"><value>Alternativas</value></data>
+  <data name="Questions.Form.Aside.Checklist" xml:space="preserve"><value>Antes de publicar</value></data>
+  <data name="Questions.Checklist.Topic" xml:space="preserve"><value>Tópico</value></data>
+  <data name="Questions.Checklist.Language" xml:space="preserve"><value>Idioma do conteúdo</value></data>
+  <data name="Questions.Checklist.Statement" xml:space="preserve"><value>Enunciado</value></data>
+  <data name="Questions.Checklist.OptionsCount" xml:space="preserve"><value>De 2 a 5 alternativas</value></data>
+  <data name="Questions.Checklist.OptionsText" xml:space="preserve"><value>Toda alternativa tem texto</value></data>
+  <data name="Questions.Checklist.Key" xml:space="preserve"><value>Exatamente uma alternativa correta</value></data>
+  <data name="Questions.Section.Publication" xml:space="preserve"><value>Publicação</value></data>
+  <data name="Questions.Section.Publication.Subtitle" xml:space="preserve"><value>Um rascunho só aparece aqui. Uma questão publicada está pronta para o banco e precisa continuar completa.</value></data>
+  <data name="Questions.Publication.SaveFirst" xml:space="preserve"><value>Salve a questão primeiro para visualizar ou publicar.</value></data>
+  <data name="Questions.Publication.Draft" xml:space="preserve"><value>Rascunho. Não aparece fora do back office.</value></data>
+  <data name="Questions.Publication.Published" xml:space="preserve"><value>Publicada. Edições valem na hora e precisam mantê-la completa.</value></data>
+  <data name="Questions.Publication.Publish.DisabledIncomplete" xml:space="preserve"><value>Complete a lista "Antes de publicar" primeiro.</value></data>
+  <data name="Questions.Publication.Publish.DisabledUnsaved" xml:space="preserve"><value>Salve suas alterações primeiro.</value></data>
+  <data name="Questions.Preview.Title" xml:space="preserve"><value>Visualização</value></data>
+  <data name="Questions.Preview.UnsavedNote" xml:space="preserve"><value>Mostrando a versão salva. Alterações não salvas não aparecem.</value></data>
+  <data name="Questions.Preview.Options" xml:space="preserve"><value>Alternativas</value></data>
+  <data name="Questions.Preview.ShowAnswer" xml:space="preserve"><value>Mostrar resposta</value></data>
+  <data name="Questions.Preview.HideAnswer" xml:space="preserve"><value>Ocultar resposta</value></data>
+  <data name="Questions.Preview.Answer" xml:space="preserve"><value>Resposta</value></data>
+  <data name="Questions.Preview.CorrectAnswer" xml:space="preserve"><value>Resposta correta</value></data>
+  <data name="Questions.Preview.NoKey" xml:space="preserve"><value>Este rascunho ainda não tem alternativa correta marcada.</value></data>
+  <data name="Questions.Preview.Explanation" xml:space="preserve"><value>Explicação</value></data>
+  <data name="Questions.Preview.NoExplanation" xml:space="preserve"><value>Sem explicação.</value></data>
+  <data name="RichText.Toolbar" xml:space="preserve"><value>Formatação</value></data>
+  <data name="RichText.Bold" xml:space="preserve"><value>Negrito (Ctrl+B)</value></data>
+  <data name="RichText.Italic" xml:space="preserve"><value>Itálico (Ctrl+I)</value></data>
+  <data name="RichText.Underline" xml:space="preserve"><value>Sublinhado (Ctrl+U)</value></data>
+  <data name="RichText.Strikethrough" xml:space="preserve"><value>Tachado</value></data>
+  <data name="RichText.Superscript" xml:space="preserve"><value>Sobrescrito</value></data>
+  <data name="RichText.Subscript" xml:space="preserve"><value>Subscrito</value></data>
+  <data name="RichText.BulletList" xml:space="preserve"><value>Lista com marcadores</value></data>
+  <data name="RichText.NumberedList" xml:space="preserve"><value>Lista numerada</value></data>
+  <data name="RichText.Quote" xml:space="preserve"><value>Citação</value></data>
+  <data name="RichText.Link" xml:space="preserve"><value>Link</value></data>
+  <data name="RichText.Link.Url" xml:space="preserve"><value>Endereço (https://…)</value></data>
+  <data name="RichText.Link.Invalid" xml:space="preserve"><value>Só endereços http e https.</value></data>
+  <data name="RichText.Link.Insert" xml:space="preserve"><value>Inserir link</value></data>
+  <data name="RichText.ClearFormatting" xml:space="preserve"><value>Limpar formatação</value></data>
+  <data name="RichText.Hint.Keyboard" xml:space="preserve"><value>Tab sai do editor.</value></data>
+  <data name="Gallery.Section.RichText" xml:space="preserve"><value>Campo de texto formatado</value></data>
+  <data name="Gallery.RichText.Hint" xml:space="preserve"><value>Um editor visual para texto formatado, com o rótulo, a dica e o erro de todo campo do kit. Use Tab para entrar em um campo e ver o anel de foco.</value></data>
+  <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Vazio</value></data>
+  <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.RichText.Error" xml:space="preserve"><value>Erro</value></data>
+  <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Desabilitado</value></data>
+  <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compacto (linha de alternativa)</value></data>
+  <data name="Gallery.RichText.LongText" xml:space="preserve"><value>Texto longo</value></data>
+  <data name="Gallery.RichText.OptionRow" xml:space="preserve"><value>Linha de alternativa: letra, rádio, editor compacto, mover e remover</value></data>
+  <data name="Gallery.RichText.Sample" xml:space="preserve"><value>&lt;p&gt;Um enunciado &lt;strong&gt;formatado&lt;/strong&gt; com H&lt;sub&gt;2&lt;/sub&gt;O e 10&lt;sup&gt;3&lt;/sup&gt;.&lt;/p&gt;</value></data>
+  <data name="Gallery.RichText.LongSample" xml:space="preserve"><value>&lt;p&gt;Um parágrafo longo que continua para mostrar que o campo cresce com o texto e o quebra, junto de uma palavra sem nenhuma quebra: Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico.&lt;/p&gt;</value></data>
 </root>

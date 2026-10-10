@@ -7,6 +7,8 @@
     <base href="/" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
+    @* F-95: the visual editor's own styles, hosted by the app (never a CDN); app.css overrides them with the theme. *@
+    <link rel="stylesheet" href="@Assets["lib/quill/quill.snow.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Simulab.Web.styles.css"]" />
     <ImportMap />
@@ -19,6 +21,10 @@
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="@Assets["js/shell.js"]"></script>
+    @* F-95: Quill 2 (hosted in wwwroot), the Blazored.TextEditor adapter, then the kit's own editor script. *@
+    <script src="@Assets["lib/quill/quill.js"]"></script>
+    <script src="@Assets["_content/Blazored.TextEditor/Blazored-BlazorQuill.js"]"></script>
+    <script src="@Assets["js/rich-text.js"]"></script>
 </body>
 
 </html>

@@ -104,4 +104,34 @@ public static class AppIcons
 
     /// <summary>F-74: moves a row of a sortable list down.</summary>
     public const string MoveDown = Icons.Material.Outlined.ArrowDownward;
+
+    /// <summary>F-95: the question bank, its menu item and the statement section.</summary>
+    public const string Questions = Icons.Material.Outlined.Quiz;
+
+    /// <summary>F-95: the base text a question refers to.</summary>
+    public const string BaseText = Icons.Material.Outlined.Notes;
+
+    /// <summary>F-95: the options of a question, one of them the key.</summary>
+    public const string Options = Icons.Material.Outlined.RadioButtonChecked;
+
+    /// <summary>F-95: why the key is right.</summary>
+    public const string Explanation = Icons.Material.Outlined.Info;
+
+    /// <summary>F-95: makes a draft available to the bank.</summary>
+    public const string Publish = Icons.Material.Outlined.Publish;
+
+    /// <summary>F-95: takes a published question back to a draft.</summary>
+    public const string Unpublish = Icons.Material.Outlined.Unpublished;
+
+    /// <summary>F-95: the rich text field's toolbar.</summary>
+    public const string FormatBold = Icons.Material.Outlined.FormatBold;
+    public const string FormatItalic = Icons.Material.Outlined.FormatItalic;
+    public const string FormatUnderline = Icons.Material.Outlined.FormatUnderlined;
+    public const string FormatStrikethrough = Icons.Material.Outlined.FormatStrikethrough;
+    public const string Superscript = Icons.Material.Outlined.Superscript;
+    public const string Subscript = Icons.Material.Outlined.Subscript;
+    public const string BulletList = Icons.Material.Outlined.FormatListBulleted;
+    public const string NumberedList = Icons.Material.Outlined.FormatListNumbered;
+    public const string Quote = Icons.Material.Outlined.FormatQuote;
+    public const string ClearFormatting = Icons.Material.Outlined.FormatClear;
 }

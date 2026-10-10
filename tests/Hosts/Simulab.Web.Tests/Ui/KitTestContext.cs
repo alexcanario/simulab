@@ -22,6 +22,10 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     /// lookup field moves it with <see cref="AdvanceDebounce"/> instead of waiting for 300 ms of wall clock.</summary>
     protected FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 9, 28, 12, 0, 0, TimeSpan.Zero));
 
+    /// <summary>F-95: the visual editor of every rich text field, swapped for a fake. A test types into it with
+    /// <see cref="FakeRichTextEditorBridge.TypeAsync"/> and reads what the fields asked of it.</summary>
+    protected FakeRichTextEditorBridge RichText { get; } = new();
+
     protected KitTestContext()
     {
         CultureInfo.CurrentUICulture = new CultureInfo("en");
@@ -29,6 +33,7 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         Services.AddLocalization();
         Services.AddSingleton<TimeProvider>(Clock);
         Services.AddUiKit();
+        Services.AddSingleton<IRichTextEditorBridge>(RichText);
         JSInterop.Mode = JSRuntimeMode.Loose;
 
         // B-19: the kit's search and lookup fields debounce for 300 ms on MudBlazor's own real timer

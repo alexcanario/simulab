@@ -406,6 +406,7 @@ Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
 ## Events
 
 - 2026-10-10 test-fail — 1 new warning(s): CA1822 in src/Modules/QuestionBank/Simulab.QuestionBank.Application/Content/QuestionHtmlSanitizer.cs, 1 red
+- 2026-10-10 test-fail — build failed (Simulab.slnx), 3 reds
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
