@@ -1,7 +1,7 @@
 ---
 feature: F-95
 epic: Question bank
-status: building
+status: validating
 board: 141
 version: 1
 ---
@@ -331,17 +331,17 @@ Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
 | AC5 | `QuestionPublicationEndpointTests.Publish_NoKeyOrTwoKeys_IsRefusedWithKeyInvalid`, `QuestionPublicationEndpointTests.Publish_CompleteDraft_BecomesPublished` |
 | AC6 | `QuestionPublicationEndpointTests.Unpublish_ReturnsToDraft_WithTheSameContent`, `QuestionPublicationEndpointTests.Publish_AlreadyPublished_Is409AlreadyPublished`, `QuestionPublicationEndpointTests.Unpublish_Draft_Is409NotPublished` |
 | AC7 | `QuestionEndpointTests.Update_Published_StatementChange_StaysPublishedWithTheNewSanitizedText`, `QuestionEndpointTests.Update_Published_LeavingOneOption_IsRefused_AndTheStoredQuestionIsUnchanged`, `QuestionTests.Update_Published_LeavingOneOption_IsRefused_AndNothingChanges` |
-| AC8 | `QuestionEndpointTests.Delete_Draft_LeavesTheList_AndSoftDeletesTheQuestionAndItsOptions`, `QuestionEndpointTests.Delete_Published_IsRefusedWithDeleteRequiresDraft`; screen part (disabled action with its reason): pending (screen test) |
-| AC9 | `TopicDeleteGuardTests` (draft, published, list flag, after delete, move); screen part (disabled action with its reason): pending (screen test) |
-| AC10 | `QuestionEndpointTests.EveryEndpoint_WithoutThePermission_AnswersForbidden`, `QuestionEndpointTests.ACurator_HasThePermission_WithoutBeingAnAdmin`; menu and page: pending (screen test) |
+| AC8 | `QuestionEndpointTests.Delete_Draft_LeavesTheList_AndSoftDeletesTheQuestionAndItsOptions`, `QuestionEndpointTests.Delete_Published_IsRefusedWithDeleteRequiresDraft`; screen: `QuestionsPageTests.Row_Published_DeleteIsDisabledWithTheReason_AndADraftCanBeDeleted` |
+| AC9 | `TopicDeleteGuardTests` (draft, published, list flag, after delete, move); screen: `SubjectDetailInUsePageTests.Load_TopicMapped_HasItsDeleteDisabledWithTheInUseReason` |
+| AC10 | `QuestionEndpointTests.EveryEndpoint_WithoutThePermission_AnswersForbidden`, `QuestionEndpointTests.ACurator_HasThePermission_WithoutBeingAnAdmin`; menu and page: `NavigationItemsTests.Visible_QuestionsItem_NeedsQuestionsManageAndNothingElseOpensIt`, `AdminPagesAuthorizationTests.EveryAdminPage_RequiresItsModulesPermission`; the seeded Admin holds it: `SeedAdminTests.Start_SeededAccount_HoldsEveryDeclaredPermissionThroughAdmin` |
 | AC11 | `QuestionEndpointTests.List_FiltersByStatusAndSearchesTheStatementIgnoringCaseAndAccents`, `QuestionEndpointTests.List_IsPagedNewestFirst`, `QuestionEndpointTests.List_UnknownStatus_IsIgnored` |
-| AC12 | pending (screen test) |
+| AC12 | `QuestionFormTests.Preview_ShowsTheStoredQuestionWithTheKeyHiddenUntilShowAnswer`, `QuestionPreviewDialogTests` (order, letters A to C, key hidden until reveal, icon, text and border) |
 | AC13 | `QuestionEndpointTests.Create_DifficultyOutsideTheRange_IsRefused`, `QuestionEndpointTests.Create_DifficultyInsideTheRangeOrEmpty_IsAccepted` |
-| AC14 | `QuestionEndpointTests.Create_UnsupportedLanguage_IsRefused_AndALowercaseOneIsStoredCanonical`; preselected UI language: pending (screen test) |
+| AC14 | `QuestionEndpointTests.Create_UnsupportedLanguage_IsRefused_AndALowercaseOneIsStoredCanonical`; preselected UI language: `QuestionFormTests.Add_PreselectsTheUiLanguage` |
 | AC15 | `QuestionEndpointTests.Create_OverTheLimit_IsRefusedWithEachFieldsOwnCode`, `QuestionEndpointTests.Create_TextAtTheLimit_IsStoredWhole`, `QuestionTests.Create_StatementOverTheLimit_IsRefused` |
-| AC16 | pending (`ModuleBoundaryTests`, `SolutionLayoutTests`, `VocabularyTests` and `ArchitectureOverviewTests` once the module is registered in them) |
-| AC17 | validation step |
-| AC18 | pending (`ErrorCodeTextTests`, the missing-key test and `RoleResourcesTests` over the new keys) |
+| AC16 | `ModuleBoundaryTests` (the `QuestionBank` module in every theory), `SolutionLayoutTests`, `VocabularyTests`, `ArchitectureOverviewTests` |
+| AC17 | `AppRichTextFieldTests` (name, state, language and error announcement as far as bUnit reaches); keyboard and focus: validation step 4 |
+| AC18 | `ErrorCodeTextTests`, `ResourceParityTests`, `RoleResourcesTests` over the new keys |
 
 
 ## Decisions
@@ -381,6 +381,9 @@ Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
 - 2026-10-10 — List query parameter is `search` (as Catalog), an unknown `status` value is ignored, a null `Options` array is an empty one, an empty option text is allowed on a draft (system-design open points 2, 3, 7, 8) (Claude).
 - 2026-10-10 — The sanitizer is a concrete class in Application (no interface with one implementation); wrappers it does not allow (`span`, `div`, `h1`) keep their text, `script`, `style`, `iframe`, `object`, `embed`, `svg` and `math` lose it (Claude).
 - 2026-10-10 — DocGen's route area name joins hyphenated segments in PascalCase (`question-bank` becomes `QuestionBank`, beside its model folder); no existing area has a hyphen, so no current folder moves; one unit test in `RouteMapDocTests` (architect) (Claude).
+- 2026-10-10 — Quill 2.0.3 downloaded from the npm registry on the owner's yes (tarball of about 0.75 MB, `quill.js`, `quill.snow.css` and its LICENSE copied to `wwwroot/lib/quill/`), as the decision of "hosted by the app" asked; the Blazored.TextEditor adapter does not ship Quill (owner, 2026-10-10).
+- 2026-10-10 — Found on the real page, not in bUnit (the editor is a fake there): the adapter's `createQuill` registers `QuillBlotFormatter` and throws without it, so no editor was built; its own `quill-blot-formatter.min.js` is now loaded before the adapter. Editable attributes (`role`, `aria-*`, `lang`), the roving toolbar, the radio names and the keyboard bindings were then read from the DOM (Claude).
+- 2026-10-10 — The toolbar buttons are drawn by Blazor with `AppIcons` and carry a native `title`, instead of registering SVGs over Quill's icons and wrapping them in `MudTooltip`: the same one-family result with less reliance on Quill internals (frontend agent, accepted by Claude).
 - 2026-10-10 — Registration sweep also carries the resource keys `Permission.questions.manage.Name`, `.Description` and `PermissionGroup.questions` in the three languages, `ThreadPoolMinimumTests` in the new test project, and table and column comments (architect) (Claude).
 
 ## Out of scope
@@ -401,7 +404,26 @@ Tests locked: 6592781d7c702e6a5789f76423d53cccbf2b2789 (8 files); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: the local app host (`dotnet run` of the AppHost), in place now; the owner provides the sign-in (the development administrator of `appsettings.Development.json`, `admin@simulab.local`). The data is this worktree's own volume (an unnamed `WithDataVolume()` in the AppHost): nothing of the main checkout is touched, and the seeded subjects and topics are there.
+
+1. Start the app host from this worktree and open the Web address the Aspire dashboard shows. Sign in as the administrator.
+
+   PowerShell 7:
+   ```powershell
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the dashboard lists `api` and `web` as running; "Content" in the side menu shows "Questions" after "Subjects" (AC10).
+2. Language and permission (AC10, AC18): switch to pt-BR in the app bar: the menu reads "Questões" and every text of the next steps is Portuguese. Sign up a new account in another private window and sign in: it has no "Questions" item, and `/admin/questions` shows the not-found page.
+3. Write a draft (AC1, AC2, AC14): Questions, Add. The language is preselected with the UI language. Pick subject "Ortografia e Pontuação" and topic "Pontuação". Type a statement, make one word bold, add a link `https://example.com`. Add three options, type a text in each, mark one as correct, save. Expected: "Question saved", the address becomes `/admin/questions/<id>`, the aside lists the checklist as done.
+4. Keyboard only, no mouse (AC17): from the title, Tab to Subject, Topic, Language, Difficulty, then the Statement toolbar: it is one stop, Left and Right move between its buttons, Tab enters the editor, Ctrl+B toggles bold, and Tab leaves the editor (no trap). In the options, the radio is one stop for the group (arrows choose), Move up, Move down and Remove are reachable, Add option focuses the new editor. Clear the statement and press Save: the error summary takes the focus and the editor's error is read out.
+5. Safe content (AC3): in the link dialog of the statement type `javascript:alert(1)` and confirm: the dialog refuses it with "Only http and https addresses". Save and reload: the link of step 3 is still there.
+6. Publish, preview, unpublish (AC5, AC6, AC12): in the Publication card, Preview as a student: base text (if any), statement and options A to C, answer hidden. "Show answer" marks the correct option and shows the explanation or "No explanation". Close, Publish: snackbar, chip says Published. Edit the statement and save: it stays published. Unpublish: back to a draft.
+7. List and guards (AC8, AC9, AC11): Questions: the row shows excerpt, topic with subject, status. Search "pontuacao" (no accent) finds it; the status filter works. Publish it again: its delete button is disabled with the reason. Subjects, "Ortografia e Pontuação": the delete of topic "Pontuação" is disabled with the reason while the question exists. Unpublish and delete the question: the topic can be deleted again (do not delete it if you want to keep it).
+8. Stop the app host (Ctrl+C) before building again.
 
 ## Events
 
