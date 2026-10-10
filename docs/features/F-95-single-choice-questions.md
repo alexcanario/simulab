@@ -1,7 +1,7 @@
 ---
 feature: F-95
 epic: Question bank
-status: approved
+status: building
 board: 141
 version: 1
 ---
@@ -339,6 +339,7 @@ Settled on 2026-10-10 and recorded in `## Decisions`: difficulty direction (1 ea
 | AC16 | pending |
 | AC17 | pending |
 | AC18 | pending |
+
 
 ## Decisions
 - 2026-10-09 — New module `QuestionBank`, five projects, references `Topic` by id through `Catalog.Contracts`; only `Draft` and `Published`; first release cut F-95 to F-99 (owner, epic decisions).
