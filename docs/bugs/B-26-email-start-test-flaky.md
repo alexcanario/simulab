@@ -24,6 +24,11 @@ Cause not confirmed for this class: measure it at `/agile:refine`. What F-94 lea
 - Parallel with: any item that does not touch `tests/Hosts/Simulab.Api.Tests`.
 - Related: B-19 (done) fixed other tests that lose races under the parallel load of the full suite; this one has another cause and was not on its list.
 
+## Same pattern elsewhere (sweep of the F-94 retro, 2026-10-10)
+- `tests/Hosts/Simulab.Api.Tests/EmailProviderStartTests.cs`: 2 tests assert `Throw<OptionsValidationException>` on a failed start (`Start_CloudWithSmtp_RefusesAndNamesTheProvider`, `Start_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey`).
+- `tests/Hosts/Simulab.Api.Tests/OpenIddictCertificateStartTests.cs`: 5 asserts of `Throw<InvalidOperationException>` on `host.Services` of a start that must fail (lines 41, 51, 65, 94).
+- The rule that came out of F-94 is in `.claude/rules/agile/project.md`: check the registration without a host, assert only a successful real start.
+
 ## Expected
 The start tests of the Api host give the same result alone and in the full suite.
 
