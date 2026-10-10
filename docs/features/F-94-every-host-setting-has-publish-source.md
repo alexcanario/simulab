@@ -1,7 +1,7 @@
 ---
 feature: F-94
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 140
 version: 1
 ---
@@ -146,3 +146,10 @@ Stop the app host of any other checkout first (a running host locks `bin/`). Wor
    ```
 
    Expected: `Passed!  - Failed: 0, Passed: 5, Skipped: 0, Total: 5`.
+
+## Delivery
+- Shipped 2026-10-10 as app version 0.27.0. Branch `feature/F-94`, merge commit `d05bfe3` (board #140).
+- Full suite: 2,697 tests passed, 0 failed (`gate.js ship`: 2 m 14 s, inside the 5 min budget; slowest projects Catalog 1 m 43 s, Identity 1 m 49 s); architecture tests 212; no new warnings. Security scan `agile scan GREEN` (2 medium findings in `tools/Simulab.DocGen`, older than this item).
+- New tests: `RequiredSettingsTests` (4, one theory over Staging and Production), `SettingsSourceCheckTests` and `RequiredOptionsScannerTests` in `Simulab.AppHost.Tests`; `OpenIddictClientStartTests` (5) in `Simulab.Web.Tests`.
+- Docs: `DocGen --check` green (0 files changed). App manual: not updated, no visible behavior changed. `docs/infra.md` and the glossary (3 rows: ValidateOnStart, publish model, service discovery) updated.
+- Found and not fixed here: `EmailProviderStartTests` (F-66) fails at random with `ObjectDisposedException` at a failed host start (B-26, board #160).

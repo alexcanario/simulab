@@ -14,7 +14,7 @@ Technical terms: [glossary](../glossary.md)
 
 Evidence: the gate logs `C:\Users\alexc\AppData\Local\Temp\agile-canary\gate-logs\20261009-2220*-ship.log` (the 2nd and 3rd runs; the 4th was green). Message line: `Expected a <Microsoft.Extensions.Options.OptionsValidationException> to be thrown, but found <System.ObjectDisposedException>` at `GetRequiredService` in `EmailProviderStartTests`.
 
-Cause not verified: measure it at `/agile:refine`. The suspicion is that the class shares one `ApiFactory` through `IClassFixture<ApiFactory>`, and a host whose start fails disposes what it shares. F-94 hit the same symptom in its own `OpenIddictClientStartTests` and removed it by giving each test its own factory.
+Cause not confirmed for this class: measure it at `/agile:refine`. What F-94 learned (2026-10-10): the same `ObjectDisposedException` hit its own `OpenIddictClientStartTests` in a fixture-free version too, with the stack inside `WebApplicationFactory.DeferredHost.StartAsync`. So the suspicion that the shared `IClassFixture<ApiFactory>` is the cause is wrong or incomplete: a start that fails (here `ValidateOnStart`) sometimes surfaces as `ObjectDisposedException` from the framework instead of the validation error. F-94 stopped asserting on a failed host start and checks the registration with `IStartupValidator`. F-93 saw the same failure on this test (`docs/infra.md`, Measured times).
 
 ## Start
 - Depends on: nothing.
