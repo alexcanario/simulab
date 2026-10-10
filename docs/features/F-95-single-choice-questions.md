@@ -321,24 +321,24 @@ Settled on 2026-10-10 and recorded in `## Decisions`: difficulty direction (1 ea
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
+| AC1 | `QuestionEndpointTests.Create_TopicLanguageAndStatement_IsStoredAsDraft_AndListedWithItsTopicAndSubject`, `QuestionTests.Create_ValidContent_IsADraftOfTypeSingleChoice` |
+| AC2 | `QuestionEndpointTests.Create_EmptyStatement_IsRefused`, `QuestionEndpointTests.Create_DraftWithNoOptionsAndNoKey_IsAccepted`, `QuestionTests.Create_StatementEmptyAfterTags_IsRefused`, `QuestionHtmlSanitizerTests.Sanitize_NothingButEmptyTags_HasNoPlainText` |
+| AC3 | `QuestionHtmlSanitizerTests` (script, event attribute, javascript link, data image, allowed markup, allow-list pin), `QuestionEndpointTests.Create_HostileHtmlInEveryField_IsStrippedAndTheAllowedMarkupSurvives` |
+| AC4 | `QuestionEndpointTests.Create_SixOptions_IsRefusedWithOptionsCount`, `QuestionPublicationEndpointTests.Publish_OneOption_IsRefusedWithOptionsCount`, `QuestionPublicationEndpointTests.Publish_EmptyOptionText_IsRefusedWithOptionTextRequired` |
+| AC5 | `QuestionPublicationEndpointTests.Publish_NoKeyOrTwoKeys_IsRefusedWithKeyInvalid`, `QuestionPublicationEndpointTests.Publish_CompleteDraft_BecomesPublished` |
+| AC6 | `QuestionPublicationEndpointTests.Unpublish_ReturnsToDraft_WithTheSameContent`, `QuestionPublicationEndpointTests.Publish_AlreadyPublished_Is409AlreadyPublished`, `QuestionPublicationEndpointTests.Unpublish_Draft_Is409NotPublished` |
+| AC7 | `QuestionEndpointTests.Update_Published_StatementChange_StaysPublishedWithTheNewSanitizedText`, `QuestionEndpointTests.Update_Published_LeavingOneOption_IsRefused_AndTheStoredQuestionIsUnchanged`, `QuestionTests.Update_Published_LeavingOneOption_IsRefused_AndNothingChanges` |
+| AC8 | `QuestionEndpointTests.Delete_Draft_LeavesTheList_AndSoftDeletesTheQuestionAndItsOptions`, `QuestionEndpointTests.Delete_Published_IsRefusedWithDeleteRequiresDraft`; screen part (disabled action with its reason): pending (screen test) |
+| AC9 | `TopicDeleteGuardTests` (draft, published, list flag, after delete, move); screen part (disabled action with its reason): pending (screen test) |
+| AC10 | `QuestionEndpointTests.EveryEndpoint_WithoutThePermission_AnswersForbidden`, `QuestionEndpointTests.ACurator_HasThePermission_WithoutBeingAnAdmin`; menu and page: pending (screen test) |
+| AC11 | `QuestionEndpointTests.List_FiltersByStatusAndSearchesTheStatementIgnoringCaseAndAccents`, `QuestionEndpointTests.List_IsPagedNewestFirst`, `QuestionEndpointTests.List_UnknownStatus_IsIgnored` |
+| AC12 | pending (screen test) |
+| AC13 | `QuestionEndpointTests.Create_DifficultyOutsideTheRange_IsRefused`, `QuestionEndpointTests.Create_DifficultyInsideTheRangeOrEmpty_IsAccepted` |
+| AC14 | `QuestionEndpointTests.Create_UnsupportedLanguage_IsRefused_AndALowercaseOneIsStoredCanonical`; preselected UI language: pending (screen test) |
+| AC15 | `QuestionEndpointTests.Create_OverTheLimit_IsRefusedWithEachFieldsOwnCode`, `QuestionEndpointTests.Create_TextAtTheLimit_IsStoredWhole`, `QuestionTests.Create_StatementOverTheLimit_IsRefused` |
+| AC16 | pending (`ModuleBoundaryTests`, `SolutionLayoutTests`, `VocabularyTests` and `ArchitectureOverviewTests` once the module is registered in them) |
+| AC17 | validation step |
+| AC18 | pending (`ErrorCodeTextTests`, the missing-key test and `RoleResourcesTests` over the new keys) |
 
 
 ## Decisions

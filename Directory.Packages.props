@@ -77,6 +77,8 @@
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="10.0.12" />
     <PackageVersion Include="Markdig" Version="1.3.2" />
+    <!-- F-95: the allow-list sanitizer behind every question text (BR8). MIT; approved with the item. -->
+    <PackageVersion Include="HtmlSanitizer" Version="9.2.1039" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3" />
   </ItemGroup>
 
