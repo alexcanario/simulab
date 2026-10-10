@@ -47,6 +47,10 @@ public sealed partial class QuestionHtmlSanitizer
 
     private const string LinkRel = "noopener noreferrer";
 
+    // The allow-list this instance applies: always the one list of BR8b, held per instance so a handler's
+    // sanitizer is a value it owns and never a global switch.
+    private readonly IReadOnlyList<string> _allowedTags = Allowed;
+
     /// <summary>The tags a stored text may hold (BR8).</summary>
     public static IReadOnlyList<string> AllowedTags => Allowed;
 
@@ -122,11 +126,11 @@ public sealed partial class QuestionHtmlSanitizer
         }
     }
 
-    private static string SanitizeAllowList(string html)
+    private string SanitizeAllowList(string html)
     {
         var options = new HtmlSanitizerOptions
         {
-            AllowedTags = new HashSet<string>(Allowed, StringComparer.OrdinalIgnoreCase),
+            AllowedTags = new HashSet<string>(_allowedTags, StringComparer.OrdinalIgnoreCase),
             AllowedAttributes = new HashSet<string>(["href"], StringComparer.OrdinalIgnoreCase),
             AllowedSchemes = new HashSet<string>(["http", "https"], StringComparer.OrdinalIgnoreCase),
             AllowedCssProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
