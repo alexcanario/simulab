@@ -1,7 +1,7 @@
 ---
 bug: B-26
 feature: F-66
-status: validating
+status: done
 board: 160
 severity: medium
 ---
@@ -128,5 +128,7 @@ git diff main --stat
 - Proof of AC6 (2026-10-11, `gate.js ship`, full rebuild before each run): 5 runs, 5 × `agile gate GREEN`. Per run, the Api project 58 passed, the Email project 19 passed, architecture 219 passed, 0 failed everywhere. An earlier loop of 5 was red on one architecture test of my own helper (see `## Decisions`), fixed and the loop redone from zero.
 - Not reproduced: the race itself never failed here (96 of 96 starts right, see `## Cause`); the proof is the removal of the failed start from both tests, plus 5 green runs against a baseline of 2 red in 4.
 - Security scan: `agile scan GREEN` (2 medium `unsafe-path-combine` in `tools/Simulab.DocGen`, not touched by this item and not blocking).
-- Branch: bug/B-26
-- Merge: <commit>
+- Ship gate (2026-10-11, `gate.js ship` in the worktree, after the last code commit): 2929 tests, 0 failed, build 31 s, test run 131 s, 0 warnings in the baseline; Api project 58, Email project 19, architecture 219. Version 0.28.0 -> 0.28.1.
+- Manual: no page changed (a test-only fix, no visible behavior). `docs/infra.md` measured times updated; glossary rows added: `IStartupValidator`, `DeferredHost`.
+- Branch: bug/B-26 (never pushed; removed after the merge)
+- Merge: 1dd88e9
