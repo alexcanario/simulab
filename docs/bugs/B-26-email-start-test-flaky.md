@@ -1,7 +1,7 @@
 ---
 bug: B-26
 feature: F-66
-status: building
+status: validating
 board: 160
 severity: medium
 ---
@@ -67,6 +67,14 @@ Test-only; no file under `src/` changes.
 Tests locked: 41d3ff33bc0b54c216fcab676d2d567ab8fb4b89 (2 files); unlocks: 1
 
 - `Simulab.Api.Tests.EmailProviderStartTests` (AC1 to AC3, the replaced tests) and `Simulab.Email.Tests.EmailProviderRegistrationTests` (AC4, AC5).
+- Criterion → test:
+  - AC1 `EmailProviderStartTests.Validator_CloudWithSmtp_RefusesAndNamesTheProvider` (Staging, Production)
+  - AC2 `EmailProviderStartTests.Validator_CloudWithAzureButNoEndpoint_RefusesAndNamesTheKey` (Staging, Production)
+  - AC3 `EmailProviderStartTests.Validator_DevelopmentWithSmtp_Passes`
+  - AC4 `EmailProviderRegistrationTests.StartupValidator_CloudWithSmtp_ThrowsAndNamesTheProvider` and `StartupValidator_CloudWithAzureButNoEndpoint_ThrowsAndNamesTheKey`
+  - AC5 `EmailProviderRegistrationTests.StartupValidator_CloudWithEveryKey_DoesNotThrow`
+  - AC6 the loop of `## Delivery` (5 runs of `gate.js ship`, each with a rebuild)
+  - AC7 `git diff main --stat`: three files, two under `tests/` and this one
 - "Seen failing before the fix": the race cannot be forced alone (96 of 96 starts gave the right exception, see `## Cause`), so the evidence is the baseline of 2 red in 4 gate runs of 2026-10-09 (stack in `## Cause`) and the AC6 loop. The build says so in `## Delivery` instead of pretending a forced failure.
 
 ## Decisions
@@ -114,7 +122,11 @@ git diff main --stat
 
 - 2026-10-11 question — asked 3, from context 0
 - 2026-10-11 blocked — test wrong: the helper took WebApplicationFactory<Program>, which the F-56 architecture test refuses; it takes the host's IServiceProvider instead
+- 2026-10-11 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.ApiTestHostPinTests.ApiTestProjects_NeverUseTheFactoryDirectly, 5 reds
 
 ## Delivery
+- Proof of AC6 (2026-10-11, `gate.js ship`, full rebuild before each run): 5 runs, 5 × `agile gate GREEN`. Per run, the Api project 58 passed, the Email project 19 passed, architecture 219 passed, 0 failed everywhere. An earlier loop of 5 was red on one architecture test of my own helper (see `## Decisions`), fixed and the loop redone from zero.
+- Not reproduced: the race itself never failed here (96 of 96 starts right, see `## Cause`); the proof is the removal of the failed start from both tests, plus 5 green runs against a baseline of 2 red in 4.
+- Security scan: `agile scan GREEN` (2 medium `unsafe-path-combine` in `tools/Simulab.DocGen`, not touched by this item and not blocking).
 - Branch: bug/B-26
 - Merge: <commit>
