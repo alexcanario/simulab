@@ -637,6 +637,98 @@
     </div>
 </section>
 
+@* F-95: the rich text field in every state, and once the option row the question form builds from it. The editor
+   is the browser's: a screen reader and the keyboard are checked here, not in a unit test. *@
+<section id="gallery-rich-text" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.RichText"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.RichText.Hint"] @L["RichText.Hint.Keyboard"]</MudText>
+    <div class="gallery-form">
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Empty"]</MudText>
+        <AppRichTextField Id="gallery-rt-empty"
+                          Label="@L["Questions.Field.Statement"]"
+                          Placeholder="@L["Questions.Field.Statement.Placeholder"]"
+                          Hint="@L["Questions.Field.Statement.Hint"]"
+                          Required="true"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@_richEmpty"
+                          ValueChanged="@((string? value) => _richEmpty = value)" />
+
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Filled"]</MudText>
+        <AppRichTextField Id="gallery-rt-filled"
+                          Label="@L["Questions.Field.Explanation"]"
+                          Placeholder="@L["Questions.Field.Explanation.Placeholder"]"
+                          Hint="@L["Questions.Field.Explanation.Hint"]"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@_richFilled"
+                          ValueChanged="@((string? value) => _richFilled = value)" />
+
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Error"]</MudText>
+        <AppRichTextField Id="gallery-rt-error"
+                          Label="@L["Questions.Field.Statement"]"
+                          Placeholder="@L["Questions.Field.Statement.Placeholder"]"
+                          Required="true"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Error="@ErrorText.For("question.statement_required")" />
+
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Disabled"]</MudText>
+        <AppRichTextField Id="gallery-rt-disabled"
+                          Label="@L["Questions.Field.Statement"]"
+                          Placeholder="@L["Questions.Field.Statement.Placeholder"]"
+                          Disabled="true"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@L["Gallery.RichText.Sample"].Value" />
+
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Compact"]</MudText>
+        <AppRichTextField Id="gallery-rt-compact"
+                          Label="@L["Questions.Options.Field", "A"]"
+                          LabelVisuallyHidden="true"
+                          Placeholder="@L["Questions.Options.Field.Placeholder"]"
+                          Compact="true"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@_richCompact"
+                          ValueChanged="@((string? value) => _richCompact = value)" />
+
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.LongText"]</MudText>
+        <AppRichTextField Id="gallery-rt-long"
+                          Label="@L["Questions.Field.BaseText"]"
+                          Placeholder="@L["Questions.Field.BaseText.Placeholder"]"
+                          Hint="@L["Questions.Field.BaseText.Hint"]"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@L["Gallery.RichText.LongSample"].Value" />
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Gallery.RichText.OptionRow"]</MudText>
+        <MudRadioGroup T="int?" Value="_richKey" ValueChanged="@((int? value) => _richKey = value)"
+                       aria-label="@L["Questions.Options.Correct.Label"]">
+            <AppItemRows TItem="int" Items="_richPositions" EmptyMessage="@L["Questions.Options.Empty"]">
+                <RowTemplate Context="position">
+                    <div class="app-option-row">
+                        <span class="app-option-letter">@QuestionLetter(position)</span>
+                        <span class="app-option-radio">
+                            <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary">
+                                <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", QuestionLetter(position)]</span>
+                            </MudRadio>
+                        </span>
+                        <AppRichTextField Id="@($"gallery-rt-option-{position}")"
+                                          Label="@L["Questions.Options.Field", QuestionLetter(position)]"
+                                          LabelVisuallyHidden="true"
+                                          Placeholder="@L["Questions.Options.Field.Placeholder"]"
+                                          Compact="true"
+                                          Lang="@CultureInfo.CurrentUICulture.Name" />
+                    </div>
+                </RowTemplate>
+                <Actions Context="position">
+                    <AppRowActions ItemName="@L["Questions.Options.Letter", QuestionLetter(position)]"
+                                   OnMoveUp="@(() => Done(L["Common.MoveUp"]))"
+                                   MoveUpDisabledReason="@(position == 0 ? L["Questions.Options.MoveUp.DisabledFirst"].Value : null)"
+                                   OnMoveDown="@(() => Done(L["Common.MoveDown"]))"
+                                   MoveDownDisabledReason="@(position == _richPositions.Count - 1 ? L["Questions.Options.MoveDown.DisabledLast"].Value : null)"
+                                   OnDelete="@(() => Done(L["Common.Delete"]))" />
+                </Actions>
+            </AppItemRows>
+        </MudRadioGroup>
+    </div>
+</section>
+
 @* F-36 BR13: the optional parameters a page that keeps its state in the address uses. Without them each component
    renders as before (the sections above). *@
 <section id="gallery-kit-parameters" class="gallery-section">
@@ -718,6 +810,15 @@
     private string? _scopeDetail;
 
     private static readonly IReadOnlyList<string> _editions = ["Edital 01/2026", "Edital 02/2023"];
+
+    // F-95: the rich text field. Each sample holds the HTML its editor last reported.
+    private string? _richEmpty;
+    private string? _richFilled;
+    private string? _richCompact;
+    private int? _richKey = 1;
+    private static readonly IReadOnlyList<int> _richPositions = [0, 1, 2];
+
+    private static string QuestionLetter(int position) => ((char)('A' + position)).ToString();
 
     private IReadOnlyList<AppRadioCardOption<string>> ScopeCards =>
     [
@@ -939,6 +1040,7 @@
         _source = new GallerySource(CreateSample, SourceDelay);
         _sample = CreateSample(1);
         _kindTextValue = SampleName(1);
+        _richFilled = L["Gallery.RichText.Sample"].Value;
         _breadcrumbs = [new BreadcrumbItem(L["Gallery.Breadcrumb.Dev"], href: null, disabled: true), new BreadcrumbItem(L["Gallery.Title"], href: null, disabled: true)];
         _moreActions =
         [

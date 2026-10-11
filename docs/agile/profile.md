@@ -8,7 +8,8 @@ One deployable, several business modules with clear boundaries. Each module is *
 | Module | Shape | Origin |
 |---|---|---|
 | Identity | five projects | Simulae `Identity` |
-| Catalog | five projects | Simulae `ContentCatalog` (organizers, exams, editions, taxonomy, question bank). One module for the three epics that fill it — Assessment catalog (691), Subject taxonomy (692) and Question bank (693): they share invariants and transactions, and splitting them would put `Contracts` between things that change together (owner, 2026-09-20) |
+| Catalog | five projects | Simulae `ContentCatalog` (organizers, exams, editions, taxonomy). One module for the two epics that fill it — Assessment catalog (691) and Subject taxonomy (692): they share invariants and transactions (owner, 2026-09-20). The question bank is not here: it is its own module below (ADR-0005, owner, 2026-10-09) |
+| QuestionBank | five projects | Simulae `Question` and `ConfigurationBase` (F-95). Schema `question_bank`. Points at a catalog `Topic` by id and never by foreign key; it reads topic and subject names through `Catalog.Contracts` (`ITopicDirectory`) and tells the catalog which topics it uses by implementing `ITopicUsageCheck`, so the catalog never references it (ADR-0005) |
 | ExamEngine | five projects | Simulae `ExamEngine` (simulators, scoring, timer) |
 | Plans | five projects | Simulae `Billing` (plans, assignments, promo codes, usage meter, `IEntitlementService`) |
 | New modules (import, analytics, recommendations, coach) | one project + `Contracts`, unless refinement shows a rich domain | new |

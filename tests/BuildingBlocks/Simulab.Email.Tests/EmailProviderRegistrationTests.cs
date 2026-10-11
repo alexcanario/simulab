@@ -91,6 +91,40 @@ public class EmailProviderRegistrationTests
         read.Should().Throw<OptionsValidationException>().Which.Message.Should().Contain("Email:AzureCommunicationServices:Endpoint");
     }
 
+    // B-26 AC4 and AC5: IOptions<T>.Value validates on read, which does not prove the refusal runs at start.
+    // IStartupValidator is what the host runs for ValidateOnStart, so these prove the registration itself.
+    [Fact]
+    public void StartupValidator_CloudWithSmtp_ThrowsAndNamesTheProvider()
+    {
+        var settings = new Dictionary<string, string?> { ["Email:FromAddress"] = "no-reply@simulab.app" };
+        using var services = Build(settings, cloudEnvironment: true);
+
+        var start = () => services.GetRequiredService<IStartupValidator>().Validate();
+
+        start.Should().Throw<OptionsValidationException>().Which.Message.Should().Contain("Email:Provider");
+    }
+
+    [Fact]
+    public void StartupValidator_CloudWithAzureButNoEndpoint_ThrowsAndNamesTheKey()
+    {
+        using var services = Build(Acs(endpoint: string.Empty), cloudEnvironment: true);
+
+        var start = () => services.GetRequiredService<IStartupValidator>().Validate();
+
+        start.Should().Throw<OptionsValidationException>().Which.Message
+            .Should().Contain("Email:AzureCommunicationServices:Endpoint");
+    }
+
+    [Fact]
+    public void StartupValidator_CloudWithEveryKey_DoesNotThrow()
+    {
+        using var services = Build(Acs(), cloudEnvironment: true);
+
+        var start = () => services.GetRequiredService<IStartupValidator>().Validate();
+
+        start.Should().NotThrow();
+    }
+
     [Fact]
     public void Validate_CloudWithEveryKey_Passes()
     {

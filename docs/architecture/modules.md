@@ -36,6 +36,13 @@ flowchart LR
     subgraph Modules_Plans["Modules/Plans"]
         Simulab_Plans_Contracts["Simulab.Plans.Contracts"]
     end
+    subgraph Modules_QuestionBank["Modules/QuestionBank"]
+        Simulab_QuestionBank_Api["Simulab.QuestionBank.Api"]
+        Simulab_QuestionBank_Application["Simulab.QuestionBank.Application"]
+        Simulab_QuestionBank_Contracts["Simulab.QuestionBank.Contracts"]
+        Simulab_QuestionBank_Domain["Simulab.QuestionBank.Domain"]
+        Simulab_QuestionBank_Infrastructure["Simulab.QuestionBank.Infrastructure"]
+    end
     Simulab_Ai --> Simulab_Ai_Contracts
     Simulab_Ai --> Simulab_Persistence
     Simulab_Ai --> Simulab_Plans_Contracts
@@ -45,6 +52,7 @@ flowchart LR
     Simulab_Api --> Simulab_Email
     Simulab_Api --> Simulab_Identity_Api
     Simulab_Api --> Simulab_Persistence
+    Simulab_Api --> Simulab_QuestionBank_Api
     Simulab_Api --> Simulab_ServiceDefaults
     Simulab_Api --> Simulab_SharedKernel
     Simulab_ApiResults --> Simulab_SharedKernel
@@ -77,8 +85,22 @@ flowchart LR
     Simulab_Jobs --> Simulab_Persistence
     Simulab_Persistence --> Simulab_SharedKernel
     Simulab_Plans_Contracts --> Simulab_SharedKernel
+    Simulab_QuestionBank_Api --> Simulab_ApiResults
+    Simulab_QuestionBank_Api --> Simulab_Identity_Contracts
+    Simulab_QuestionBank_Api --> Simulab_QuestionBank_Application
+    Simulab_QuestionBank_Api --> Simulab_QuestionBank_Infrastructure
+    Simulab_QuestionBank_Application --> Simulab_QuestionBank_Contracts
+    Simulab_QuestionBank_Application --> Simulab_QuestionBank_Domain
+    Simulab_QuestionBank_Contracts --> Simulab_SharedKernel
+    Simulab_QuestionBank_Domain --> Simulab_Identity_Contracts
+    Simulab_QuestionBank_Domain --> Simulab_QuestionBank_Contracts
+    Simulab_QuestionBank_Domain --> Simulab_SharedKernel
+    Simulab_QuestionBank_Infrastructure --> Simulab_Catalog_Contracts
+    Simulab_QuestionBank_Infrastructure --> Simulab_Persistence
+    Simulab_QuestionBank_Infrastructure --> Simulab_QuestionBank_Application
     Simulab_Web --> Simulab_Ai_Contracts
     Simulab_Web --> Simulab_Catalog_Contracts
     Simulab_Web --> Simulab_Identity_Contracts
+    Simulab_Web --> Simulab_QuestionBank_Contracts
     Simulab_Web --> Simulab_ServiceDefaults
 ```

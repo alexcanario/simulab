@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Routing;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Ui;
 
@@ -75,13 +76,39 @@ public class NavigationItemsTests
     {
         // F-33, BR4; F-34: the Content section holds the catalog screens, each behind the one permission of
         // its module. Only the exam list is in the menu; its form page is reached from the list.
+        // F-95 AC10 (BR14): the question list is the last item, behind the question bank's own permission.
         NavigationItems.All.Where(item => item.Section == NavigationSection.Content)
             .Select(item => (item.Route, item.RequiredPermission))
             .Should().Equal(
                 ("/admin/organizers", CatalogPermissions.Manage),
                 ("/admin/issuing-authorities", CatalogPermissions.Manage),
                 ("/admin/exams", CatalogPermissions.Manage),
-                ("/admin/subjects", CatalogPermissions.Manage));
+                ("/admin/subjects", CatalogPermissions.Manage),
+                ("/admin/questions", QuestionBankPermissions.Manage));
+    }
+
+    // F-95 AC10: the menu item is shown with questions.manage and absent without it, even for a catalog manager.
+    [Fact]
+    public void Visible_QuestionsItem_NeedsQuestionsManageAndNothingElseOpensIt()
+    {
+        var withQuestions = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, permission => permission == QuestionBankPermissions.Manage);
+        var withCatalogOnly = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, permission => permission == CatalogPermissions.Manage);
+        var withNothing = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, NoPermissions);
+
+        withQuestions.Select(item => item.Route).Should().Equal("/", "/admin/questions");
+        NavigationItems.Sections(withQuestions).Select(section => section.Key).Should().Equal(NavigationSection.Content);
+        withCatalogOnly.Select(item => item.Route).Should().NotContain("/admin/questions");
+        withNothing.Select(item => item.Route).Should().NotContain("/admin/questions");
+    }
+
+    [Fact]
+    public void All_QuestionsItem_UsesTheQuestionsIconAndTheNavQuestionsText()
+    {
+        var item = NavigationItems.All.Single(candidate => candidate.Route == "/admin/questions");
+
+        item.Icon.Should().Be(AppIcons.Questions);
+        item.ResourceKey.Should().Be("Nav.Questions");
+        item.IsActive("admin/questions/new").Should().BeTrue("the form pages keep the item current");
     }
 
     [Fact]

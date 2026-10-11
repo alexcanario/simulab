@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- Design-time only: the migrations of this module are created from this project. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.QuestionBank.Application\Simulab.QuestionBank.Application.csproj" />
+    <!-- Catalog.Contracts only: ITopicDirectory (topic and subject names) and ITopicUsageCheck (the delete guard, BR13). -->
+    <ProjectReference Include="..\..\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,62 @@
+@* The formatting toolbar of AppRichTextField (F-95): one tab stop, buttons that name themselves. The editor in the
+   browser drives the keys (Left, Right, Home, End), the formats and aria-pressed; this draws the buttons so the
+   names, the icons and the order come from the kit and not from the editor's own markup. *@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-rt-toolbar" role="toolbar" aria-label="@L["RichText.Toolbar"]" aria-controls="@EditorId" aria-orientation="horizontal">
+    @for (var group = 0; group < Groups.Count; group++)
+    {
+        @if (group > 0)
+        {
+            <span class="app-rt-sep" aria-hidden="true"></span>
+        }
+
+        @foreach (var tool in Groups[group])
+        {
+            <button type="button"
+                    class="app-rt-btn"
+                    data-format="@tool.Format"
+                    data-value="@tool.Value"
+                    aria-label="@L[tool.TextKey]"
+                    aria-pressed="@(tool.Toggles ? "false" : null)"
+                    title="@L[tool.TextKey]"
+                    tabindex="@(ReferenceEquals(tool, Groups[0][0]) ? "0" : "-1")"
+                    disabled="@Disabled">
+                <MudIcon Icon="@tool.Icon" Size="Size.Small" aria-hidden="true" />
+            </button>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>The kit's formats; they match the Api sanitizer's allow-list (F-95 BR8).</summary>
+    private sealed record Tool(string Format, string? Value, string Icon, string TextKey, bool Toggles = true);
+
+    private static readonly Tool Bold = new("bold", null, AppIcons.FormatBold, "RichText.Bold");
+    private static readonly Tool Italic = new("italic", null, AppIcons.FormatItalic, "RichText.Italic");
+    private static readonly Tool Underline = new("underline", null, AppIcons.FormatUnderline, "RichText.Underline");
+    private static readonly Tool Strike = new("strike", null, AppIcons.FormatStrikethrough, "RichText.Strikethrough");
+    private static readonly Tool Superscript = new("script", "super", AppIcons.Superscript, "RichText.Superscript");
+    private static readonly Tool Subscript = new("script", "sub", AppIcons.Subscript, "RichText.Subscript");
+    private static readonly Tool Bullets = new("list", "bullet", AppIcons.BulletList, "RichText.BulletList");
+    private static readonly Tool Numbers = new("list", "ordered", AppIcons.NumberedList, "RichText.NumberedList");
+    private static readonly Tool Quote = new("blockquote", null, AppIcons.Quote, "RichText.Quote");
+    private static readonly Tool Link = new("link", null, AppIcons.Link, "RichText.Link");
+    private static readonly Tool Clean = new("clean", null, AppIcons.ClearFormatting, "RichText.ClearFormatting", Toggles: false);
+
+    private static readonly IReadOnlyList<IReadOnlyList<Tool>> FullGroups =
+        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Bullets, Numbers, Quote], [Link], [Clean]];
+
+    // A compact field is an option: a phrase, so block formats (lists, quote) would break the lettered list.
+    private static readonly IReadOnlyList<IReadOnlyList<Tool>> CompactGroups =
+        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Link], [Clean]];
+
+    /// <summary>The id of the editable region this toolbar controls (<c>aria-controls</c>).</summary>
+    [Parameter, EditorRequired] public string EditorId { get; set; } = string.Empty;
+
+    [Parameter] public bool Compact { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    private IReadOnlyList<IReadOnlyList<Tool>> Groups => Compact ? CompactGroups : FullGroups;
+}

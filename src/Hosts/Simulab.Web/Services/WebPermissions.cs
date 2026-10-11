@@ -1,4 +1,5 @@
 using Simulab.Catalog.Contracts;
+using Simulab.QuestionBank.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Security;
 
@@ -15,7 +16,8 @@ public static class WebPermissions
     public static readonly IReadOnlyList<PermissionCatalog> Catalogs =
     [
         new("identity", IdentityPermissions.All),
-        new(CatalogPermissions.ModuleName, CatalogPermissions.All)
+        new(CatalogPermissions.ModuleName, CatalogPermissions.All),
+        new(QuestionBankPermissions.ModuleName, QuestionBankPermissions.All)
     ];
 
     public static readonly IReadOnlyList<string> All =

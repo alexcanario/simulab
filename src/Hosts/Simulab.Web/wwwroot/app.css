@@ -1561,3 +1561,321 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-table-filters .app-field-label {
     white-space: nowrap;
 }
+
+/* ---------------------------------------------------------------------------
+   Rich text field (F-95): the kit's AppRichTextField around the Quill 2 editor. The editor's own styles
+   (lib/quill/quill.snow.css) are overridden here with the theme's variables, so there is no literal colour.
+   --------------------------------------------------------------------------- */
+.app-rt-frame {
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-md);
+    background: var(--mud-palette-surface);
+    overflow: hidden;
+}
+
+/* The same 2px primary ring every outlined field takes on focus. */
+.app-rt-frame:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-field-error .app-rt-frame {
+    border-color: var(--mud-palette-error);
+}
+
+.app-rich-text-disabled .app-rt-frame {
+    opacity: 0.55;
+}
+
+.app-rt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: var(--app-space-1) var(--app-space-2);
+}
+
+.app-rt-sep {
+    align-self: stretch;
+    width: 1px;
+    margin: 0 var(--app-space-1);
+    background: var(--mud-palette-divider);
+}
+
+/* Quill's snow theme paints its own toolbar and buttons; these rules put them on the theme. */
+.app-rt-frame .ql-toolbar.ql-snow {
+    border: 0;
+    border-bottom: 1px solid var(--mud-palette-divider);
+    padding: 0;
+    font-family: inherit;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn {
+    float: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--app-radius-sm);
+    background: transparent;
+    color: var(--mud-palette-action-default);
+    cursor: pointer;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn svg {
+    float: none;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn:hover {
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-action-default);
+}
+
+/* Pressed is the primary text on its lighten tone (4.79:1 light, 5.70:1 dark); the state is also aria-pressed. */
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn[aria-pressed="true"] {
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-primary);
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.app-rt-frame .ql-container.ql-snow {
+    border: 0;
+    font-family: inherit;
+    font-size: var(--app-font-md);
+}
+
+/* The editable grows with its content: no inner scroll, long words wrap. 7.5rem and 2.5rem are the editor's
+   own minimum heights, which no step of the spacing scale covers. */
+.app-rt-frame .ql-editor {
+    min-height: 7.5rem;
+    padding: var(--app-space-2) var(--app-space-3);
+    overflow-wrap: anywhere;
+    color: var(--mud-palette-text-primary);
+    font-size: var(--app-font-md);
+    line-height: 1.65;
+}
+
+.app-rich-text-compact .ql-editor {
+    min-height: 2.5rem;
+    padding: 6px var(--app-space-3);
+}
+
+.app-rt-frame .ql-editor.ql-blank::before {
+    left: var(--app-space-3);
+    right: var(--app-space-3);
+    color: var(--mud-palette-text-secondary);
+    font-style: normal;
+}
+
+.app-rt-frame .ql-editor blockquote {
+    border-left: 3px solid var(--mud-palette-lines-inputs);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Option rows of the question form: letter badge, radio, compact editor, move and remove. ---- */
+.app-option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+    min-width: 0;
+}
+
+.app-option-row .app-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+/* A circle with the letter: the primary text on its lighten tone, a pair the theme tests already measure. */
+.app-option-letter {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    border-radius: var(--app-radius-pill);
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-text-primary);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+}
+
+.app-option-radio {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.app-options-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-3);
+}
+
+.app-options-count {
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Publication card of the question form. ---- */
+.app-publication-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--app-space-3);
+    font-size: var(--app-font-sm);
+}
+
+.app-publication-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-2);
+    margin-top: var(--app-space-4);
+}
+
+.app-publication-reason {
+    margin: var(--app-space-2) 0 0;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- The question as a student reads it (preview dialog): stored HTML, so the look is all here (BR8). ---- */
+.app-question-content {
+    overflow-wrap: anywhere;
+}
+
+.app-question-content p {
+    margin: 0;
+}
+
+.app-question-content p + p {
+    margin-top: var(--app-space-2);
+}
+
+.app-question-content a {
+    color: var(--mud-palette-primary);
+    text-decoration: underline;
+}
+
+.app-question-content blockquote {
+    margin: var(--app-space-2) 0;
+    padding-left: var(--app-space-3);
+    border-left: 3px solid var(--mud-palette-lines-inputs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-question-content ul,
+.app-question-content ol {
+    margin: var(--app-space-2) 0;
+    padding-left: var(--app-space-5);
+}
+
+.app-question-content table {
+    display: block;
+    max-width: 100%;
+    margin: var(--app-space-2) 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.app-question-content th,
+.app-question-content td {
+    padding: 2px var(--app-space-2);
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.app-question-content th {
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+    text-align: left;
+}
+
+.app-question-base {
+    margin-bottom: var(--app-space-4);
+    padding: var(--app-space-3) var(--app-space-4);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-sm);
+}
+
+.app-question-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+    margin: var(--app-space-4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-question-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    padding: var(--app-space-2) var(--app-space-3);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+}
+
+/* The key is a 2px success border (3.33:1 light, 4.88:1 dark on the surface) beside an icon and a text. */
+.app-question-option.is-correct {
+    border: 2px solid var(--mud-palette-success);
+}
+
+.app-question-option .app-option-letter {
+    margin-top: 0;
+}
+
+.app-question-option-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-correct-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    margin-top: var(--app-space-1);
+    font-size: var(--app-font-xs);
+    font-weight: 700;
+}
+
+.app-preview-actions {
+    margin-top: var(--app-space-4);
+}
+
+.app-preview-answer {
+    margin-top: var(--app-space-4);
+    padding-top: var(--app-space-4);
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.app-preview-heading {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-preview-no-key {
+    margin: 0 0 var(--app-space-3);
+    font-size: var(--app-font-sm);
+}
