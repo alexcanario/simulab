@@ -1,6 +1,6 @@
 ---
 page: <slug>
-locale: pt-BR | pt-PT | en
+locale: <locale>
 features: [F-<number>]
 updated: <YYYY-MM-DD>
 ---

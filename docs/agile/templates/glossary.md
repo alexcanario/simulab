@@ -8,9 +8,9 @@ The UI labels come from resource files, not from this file.
 -->
 # Glossary
 
-| Business term (pt-BR) | pt-PT | English identifier | Meaning | Meaning (pt-BR) |
-|---|---|---|---|---|
-| Questão | Questão | `Question` | An item a student answers, of one of the supported types | Um item que o aluno responde, de um dos tipos suportados |
+| Business term (pt-BR) | English identifier | Meaning | Meaning (pt-BR) |
+|---|---|---|---|
+| Questão | `Question` | An item a student answers, of one of the supported types | Um item que o aluno responde, de um dos tipos suportados |
 
 ## Technical terms
 Terms used in documents, reports, reviews and item files. They are not identifiers. The pt-BR column is the word to use when talking to the owner.

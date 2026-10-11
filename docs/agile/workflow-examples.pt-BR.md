@@ -1,6 +1,6 @@
 # agile@canary — Exemplos de workflow (pt-BR)
 
-> Parte do [manual](workflow.pt-BR.md). English: [en](workflow-examples.md).
+> Parte do [manual](workflow.pt-BR.md).
 
 ## 14. Exemplos de workflow
 
@@ -3676,3 +3676,139 @@ Claude: ...
 ```
 
 A linha diz o que a entrega liberou (o F-13 saiu do bloqueio na mesma hora) e o quanto falta da primeira versão. Um projeto que nunca digitou `/agile:order` vê `Order: sem lista (/agile:order cria).` e nada é escrito.
+
+### 14.101 Em quais idiomas o manual da app é escrito: `Manual locales`
+
+O acme-shop é um projeto novo. Na rodada 5 do `/agile:bootstrap`, depois dos idiomas da UI, o Claude pergunta pelo manual:
+
+```
+> /agile:bootstrap
+Claude: ❓ Em quais idiomas o manual do app será escrito?
+        a) pt-BR   b) pt-PT   c) en   d) outras tags (vários podem ser escolhidos; o primeiro é a referência)
+        Recomendação: pt-BR. Motivo: só o que você vai ler e manter; cada idioma extra é traduzido a cada ship.
+> a, c
+Claude: CLAUDE.md em "## Languages": - Manual locales: pt-BR, en
+        docs/manual/pt-BR/index.md e docs/manual/en/index.md (locale: pt-BR e locale: en); nenhuma outra pasta.
+```
+
+A lista não tem relação com a pergunta 20: a app pode continuar saindo com a UI em três idiomas. Algumas features depois você decide que o manual também precisa de espanhol, edita a linha para `- Manual locales: pt-BR, en, es` e dá o ship do próximo item:
+
+```
+> /agile:ship F-9
+Claude: Manual: adicionando es, 7 páginas a partir de pt-BR
+        docs/manual/es/ escrito a partir de docs/manual/pt-BR/ (mesmos slugs, locale: es).
+        Commit isolado: docs(F-9): add es to the app manual
+        Depois as páginas do próprio F-9, em pt-BR, en e es.
+```
+
+Um projeto antigo não tem a linha, só as pastas `pt-BR`, `pt-PT` e `en`. O ship dele trabalha com as três e diz uma vez que a linha falta; o `/agile:sync` propõe a linha. O relatório do sync para esse projeto traz a chave `manualLocales`:
+
+```
+"manualLocales": { "line": null, "found": ["pt-BR", "pt-PT", "en"], "proposed": "pt-BR, pt-PT, en" }
+```
+
+```
+> /agile:sync
+Claude: | arquivo | estado | o que proponho |
+        | manual locales | sem linha | escrever `- Manual locales: pt-BR, pt-PT, en` (substitui a linha `- App manual:`) |
+        Posso escrever?
+> ok
+Claude: Escrito em "## Languages". Nenhuma página do manual foi tocada.
+```
+
+Tire `pt-PT` dessa linha e o próximo ship deixa `docs/manual/pt-PT/` como está e avisa uma vez: `docs/manual/pt-PT não está em Manual locales: mantido como está`. Nada é apagado.
+
+### 14.102 Os idiomas do manual do plugin: o `workflow.md` antigo e a linha do `CLAUDE.md`
+
+O acme-shop foi bootstrapped antes de o plugin ligar só o pt-BR em `docs/manual/languages.json`: ele tem `docs/agile/workflow.md` e `docs/agile/workflow-examples.md` (em inglês), e a linha `Workflow:` do `CLAUDE.md` aponta para o primeiro. Depois de atualizar o plugin e reiniciar, você digita o sync:
+
+```
+> /agile:sync
+Claude: 0.55.0 -> 0.56.0. Plano:
+        | Arquivo | Estado | Proposta |
+        | docs/agile/workflow.pt-BR.md | new | copiar |
+        | docs/agile/workflow-examples.pt-BR.md | new | copiar |
+        | docs/agile/workflow-examples.md | aposentado | o plugin não mantém mais o manual em en; a cópia fica como está (apague se não quiser) |
+        | docs/agile/workflow.md | aposentado | o plugin não mantém mais o manual em en; a cópia fica como está (apague se não quiser) |
+        | CLAUDE.md | linha Workflow | trocar docs/agile/workflow.md por docs/agile/workflow.pt-BR.md? (ok ou não) |
+        Aplico? (ok ou não)
+> ok
+Claude: Copiei os dois arquivos pt-BR. Os dois antigos ficam como estão; troquei só a linha Workflow: do CLAUDE.md.
+        Commit proposto: chore: sync with agile@canary 0.56.0
+```
+
+O relatório do plano é o que o script imprime, na chave `manualCopies`:
+
+```json
+{
+ "retired": [
+  { "file": "docs/agile/workflow-examples.md", "locale": "en" },
+  { "file": "docs/agile/workflow.md", "locale": "en" }
+ ],
+ "pointer": { "from": "docs/agile/workflow.md", "to": "docs/agile/workflow.pt-BR.md" }
+}
+```
+
+Um projeto que nunca teve esses dois arquivos não vê nenhuma das duas linhas, e uma linha `Manual locales: en, pt-BR` no `CLAUDE.md` não muda nada disso: o manual da app e o manual do plugin são configurações separadas. Com `/agile:version` o Claude lê então o cabeçalho de `workflow.pt-BR.md`; antes do sync, num projeto que só tem o `workflow.md`, ele lê o desse.
+
+### 14.103 Em quais idiomas as telas da app são escritas: `UI locales`
+
+A acme-shop é um projeto novo. Na rodada 5 do `/agile:bootstrap`, a pergunta 20 pede os idiomas da UI:
+
+```
+> /agile:bootstrap
+Claude: ❓ Em quais idiomas o app terá textos de tela?
+        a) pt-BR e en   b) pt-PT   c) outras tags (vários podem ser escolhidos; a ordem da resposta é a ordem da linha, o primeiro é o idioma base)
+        Recomendação: pt-BR, en. Motivo: cada idioma extra é um conjunto de textos a escrever e manter em toda tela; o primeiro da lista é o idioma base do app.
+> a
+Claude: CLAUDE.md em "## Languages": - UI locales: pt-BR, en
+        Directory.Build.props: <NeutralLanguage>pt-BR</NeutralLanguage>
+        Resources/: App.resx (pt-BR, o arquivo neutro) e App.en.resx; nenhum App.pt-BR.resx.
+```
+
+Algumas features depois a app precisa de espanhol. Você edita a linha para `- UI locales: pt-BR, en, es` e começa o próximo item. Antes do trabalho do próprio item, o build atualiza o idioma novo em um commit só dele (esta é a saída da execução real num projeto de teste com quatro chaves):
+
+```
+> /agile:build F-9
+Claude: UI: adicionando es, 4 chaves em 1 arquivo
+        src/App/Resources/App.es.resx escrito a partir do arquivo neutro (mesmas chaves e placeholders).
+        Commit só dele: feat(F-9): add es UI texts
+        Depois o trabalho do F-9, com cada texto novo em pt-BR, en e es.
+```
+
+Um projeto antigo não tem a linha `- UI locales:`. O build dele trabalha com `pt-BR, pt-PT, en`, os três que o plugin exigia antes da lista, e avisa uma vez que a linha falta; o `/agile:sync` a propõe. O relatório do sync desse projeto traz a chave `uiLocales` (impressa pelo script no projeto de teste):
+
+```
+"uiLocales": { "line": null, "proposed": "pt-BR, pt-PT, en" }
+```
+
+```
+> /agile:sync
+Claude: | arquivo | estado | o que proponho |
+        | ui locales | sem linha | escrever `- UI locales: pt-BR, pt-PT, en` |
+        Posso escrever?
+> ok
+Claude: Escrito em "## Languages". Nenhum arquivo de recursos foi tocado.
+```
+
+Um projeto que já tem a linha, mesmo na forma antiga com texto depois da lista (`- UI locales: pt-BR, pt-PT, en. No hardcoded UI strings...`), não ganha linha na tabela nem reescrita. Tire `pt-PT` da linha e o próximo build deixa os arquivos `.pt-PT.resx` como estão e avisa uma vez: `pt-PT UI texts não estão em UI locales: mantidos como estão`. Nada é apagado, e o seletor de idioma deixa de oferecer `pt-PT`.
+
+### 14.104 A lista de caixas da ordem: `/agile:order` mostra o que marcar
+
+Com os mesmos quatro itens em aberto do exemplo 14.100 (o acme-shop; o exemplo 14.104 é este), o `/agile:order` mostra na conversa a lista de caixas em vez da tabela. Você marca as que já implementou enquanto lê, no app do Claude (a saída abaixo é a do script no projeto de teste):
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 4 items, 11 delivered
+        - [ ] 1. B-2 — Total errado em reembolsos [approved]
+        - [ ] 2. F-12 — Export results to CSV [building] — unlocks F-13 (unblocks)
+        - [ ] 3. F-14 — Print layout [approved]
+        - [ ] 4. F-13 — Share by link [blocked] — waits on F-12
+        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+        First release (shop): 0 of 2 delivered; missing: F-12, F-13
+        Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
+        Commit proposto: chore(order): refresh the ordered list
+        Autoriza o commit na main?
+```
+
+O mesmo texto está em `docs/agile/order.md`, na seção `## Checklist`, entre a tabela e o `## Summary`; a tabela continua no arquivo. A linha de cada item traz o número da tabela, o id, o título e o status, e depois `waits on` e `unlocks` só quando a célula tem algo. Marcar uma caixa no chat não muda status, ordem nem arquivo: o script nunca grava `[x]` nem lê uma caixa de volta, e uma nova execução (ou o ship, que atualiza o arquivo) recomeça com todas vazias. Um arquivo escrito por uma versão antiga ganha a seção na primeira execução, num diff só dela.

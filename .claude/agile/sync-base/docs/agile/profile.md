@@ -18,7 +18,7 @@ src/
       Features/<Feature>/        vertical slice: endpoint, request/response, handler, validator
       Domain/                    entities and value objects that carry rules
       Data/                      DbContext (own schema), Configurations/, Migrations/
-      Resources/                 <Module>.resx + pt-BR, pt-PT, en
+      Resources/                 <Module>.resx + the locales of UI locales:
       <Module>Module.cs          AddXxxModule() / MapXxxEndpoints()
     <App>.<Module>.Contracts/    what other modules may see: DTOs, query interfaces, integration events
 tests/

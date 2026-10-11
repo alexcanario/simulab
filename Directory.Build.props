@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- The app ships in pt-BR, pt-PT and en: cultures must work everywhere, containers included. -->
+    <!-- The app ships in the locales of the UI locales line of CLAUDE.md: cultures must work everywhere, containers included. -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <NeutralLanguage>en</NeutralLanguage>
     <Deterministic>true</Deterministic>

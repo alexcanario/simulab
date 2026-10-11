@@ -3,7 +3,7 @@
 A study coach that runs realistic practice exams (public service exams, certifications, university entrance exams, ENEM) and tells each student what to study next.
 
 ## Working agreement
-- Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
+- Workflow: agile@canary — see `docs/agile/workflow.pt-BR.md`. One feature in progress at a time.
 - Plugins: agile
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
@@ -25,7 +25,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 ## Languages
 - UI locales: pt-BR, pt-PT, en. No hardcoded UI strings; resource files per module; `IStringLocalizer`.
 - Question content is not translated; each exam and question carries its own language.
-- App manual: `docs/manual/<locale>/`, updated when each feature ships.
+- Manual locales: pt-BR, pt-PT, en. App manual: `docs/manual/<locale>/`, updated when each feature ships.
 
 ## Commands
 - Build: `dotnet build Simulab.slnx`

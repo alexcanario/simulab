@@ -8,7 +8,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 <One-sentence description from product/brief.md.>
 
 ## Working agreement
-- Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
+- Workflow: agile@canary — see `docs/agile/workflow.pt-BR.md`. One feature in progress at a time.
 - Plugins: agile (short names, comma-separated; another plugin's adoption appends its own; a retro plugin note names one of them as `plugin: <name>`).
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate).
@@ -33,8 +33,9 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Messaging: <none | in-process | broker>. Auth: <provider>. RBAC: <yes | no>. Entitlements: <yes | no>. Multi-tenancy: <yes | no>.
 
 ## Languages
-- UI locales: pt-BR, pt-PT, en. No hardcoded UI strings; resource files per module; `IStringLocalizer`.
-- App manual: `docs/manual/<locale>/`, updated when each feature ships.
+- UI locales: pt-BR, en
+- No hardcoded UI strings; resource files per module; `IStringLocalizer`.
+- Manual locales: pt-BR
 
 ## Commands
 - Build: `<build command>`
