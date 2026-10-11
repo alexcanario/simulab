@@ -1148,3 +1148,6 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `docs/agile/workflow.md` and `workflow-examples.md` (en), retired by the plugin; the copy stays as is. Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged on 2026-10-09 and 2026-10-11).
 - Glossary: column, "Technical terms" section and link lines already present; nothing added.
 - Baseline present, docs command already declared, no plugin notes delivered, `CLAUDE.md` 640 words. Build and suite not run: only Markdown and one XML comment changed.
+
+## 2026-10-11 - Order checklist as a widget
+- Lesson: a click on a `- [ ]` box of `docs/agile/order.md` in the file pane edits the file on disk (`git diff` showed `[x]` on rows 1 and 2), and the chat does not render boxes; the owner asked for clickable boxes, view only. Score plugin 1 / project 3 (one occurrence, no evidence beyond this session). Went to `.claude/rules/agile/project.md` as one line: show the script's checklist also as a `show_widget` widget, same lines and order, nothing written.
