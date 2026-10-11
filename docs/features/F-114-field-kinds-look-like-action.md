@@ -1,7 +1,7 @@
 ---
 feature: F-114
 epic: Foundation and identity
-status: refining
+status: approved
 board: 162
 version: 1
 ---
