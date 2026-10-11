@@ -1,4 +1,4 @@
-| AC14 | AppSelectFieldTests.Render_Loading_ShowsAProgressInsteadOfTheArrow; AppSelectFieldTests.Render_ByDefault_HasNoProgress || AC13 | SelectFieldResourcesTests.Key_HasATextInTheLanguage; ResourceParityTests || AC12 | UiGalleryFieldKindsTests (three kinds, nine states); UiGalleryTests and DevPagesHostTests iterate GallerySections.All; validation step (light and dark) || AC11 | the existing page tests of the 10 pages, unchanged (full suite) || AC10 | AppSelectFieldTests.Keyboard_ArrowDownOpens_EscapeCloses_EnterPicks; validation step (Esc inside a real dialog) || AC9 | ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces (the arrow is painted in ActionDefault, already asserted on surface and background in both themes) || AC8 | AppSelectFieldTests.Render_Disabled_DisablesTheInputAndKeepsTheHint; AppSelectFieldTests.Render_WithAnError_ShowsItInsteadOfTheHintAndKeepsTheArrow || AC7 | AppLookupFieldTests.Render_WithALeadingIcon_StillShowsTheMagnifier; AppLookupFieldTests (the existing defaults tests) || AC6 | AppSelectFieldTests.Render_WithALeadingIcon_StillShowsTheArrow || AC5 | AppSelectFieldTests.Pick_AnOption_RaisesValueChangedOnceWithItsValue; AppSelectFieldTests.Pick_TheAllChoice_GivesNull || AC4 | AppSelectFieldTests.Focus_WhileShowingTheAllChoice_ListsEveryOption || AC3 | AppSelectFieldTests.Type_NarrowsTheListIgnoringCaseAndAccents; AppSelectFieldTests.Type_WithNoMatch_ShowsTheNoResultsMessage || AC2 | AppSelectFieldTests.Focus_OpensTheWholeList || AC1 | AppSelectFieldTests.Render_ShowsTheExpandArrowAndAnInputThatAcceptsTyping |---
+---
 feature: F-114
 epic: Foundation and identity
 status: building
@@ -156,22 +156,25 @@ Existing keys reused by the section: `Subjects.Field.Area`, `Subjects.Field.Area
 - AC14 Given `AppSelectField` with `Loading=true`, when it is rendered, then a 16 px progress replaces the arrow and the list shows `SelectField.Loading`; with `Loading=false` (the default) nothing changes and no call site is edited (v2).
 
 ## Criterion → test
+
+Tests locked: 2ab9b4b70f5bda418a1f2e3b355e89ae46781cc0 (3 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | AppSelectFieldTests.Render_ShowsTheExpandArrowAndAnInputThatAcceptsTyping |
+| AC2 | AppSelectFieldTests.Focus_OpensTheWholeList |
+| AC3 | AppSelectFieldTests.Type_NarrowsTheListIgnoringCaseAndAccents; AppSelectFieldTests.Type_WithNoMatch_ShowsTheNoResultsMessage |
+| AC4 | AppSelectFieldTests.Focus_WhileShowingTheAllChoice_ListsEveryOption |
+| AC5 | AppSelectFieldTests.Pick_AnOption_RaisesValueChangedOnceWithItsValue; AppSelectFieldTests.Pick_TheAllChoice_GivesNull |
+| AC6 | AppSelectFieldTests.Render_WithALeadingIcon_StillShowsTheArrow |
+| AC7 | AppLookupFieldTests.Render_WithALeadingIcon_StillShowsTheMagnifier; AppLookupFieldTests (the existing defaults tests) |
+| AC8 | AppSelectFieldTests.Render_Disabled_DisablesTheInputAndKeepsTheHint; AppSelectFieldTests.Render_WithAnError_ShowsItInsteadOfTheHintAndKeepsTheArrow |
+| AC9 | ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces (the arrow is painted in ActionDefault, already asserted on surface and background in both themes) |
+| AC10 | AppSelectFieldTests.Keyboard_ArrowDownOpens_EscapeCloses_EnterPicks; validation step (Esc inside a real dialog) |
+| AC11 | the existing page tests of the 10 pages, unchanged (full suite) |
+| AC12 | UiGalleryFieldKindsTests (three kinds, nine states); UiGalleryTests and DevPagesHostTests iterate GallerySections.All; validation step (light and dark) |
+| AC13 | SelectFieldResourcesTests.Key_HasATextInTheLanguage; ResourceParityTests |
+| AC14 | AppSelectFieldTests.Render_Loading_ShowsAProgressInsteadOfTheArrow; AppSelectFieldTests.Render_ByDefault_HasNoProgress |
 
 ## Decisions
 - 2026-10-11 — Rule of the field kind: the arrow is for any list the page holds whole, whatever its source; the magnifier is for what needs typing and the server — the owner chose the recommended option ("seta se a lista abre antes de digitar") — reading of 2026-10-11: none of the seven database lists has a search endpoint, so the D-3 literal "database = lookup with server search" would cost new endpoints for lists of some tens of rows. The caps of the roles, authors and organizers lists are not measured; the 100-item ceiling is the Api page cap, a convention.
