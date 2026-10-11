@@ -2166,6 +2166,208 @@
           }
         }
       }
+    },
+    "/api/v1/question-bank/questions": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListQuestions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "CreateQuestion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "FindQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "UpdateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "DeleteQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/publish": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "PublishQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/unpublish": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "UnpublishQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2654,6 +2856,86 @@
         },
         "description": "What the add and the edit dialog send (F-33, UC2 and UC3). The kind travels as text, not as the enum,\r\nso a caller that sends an unknown kind gets 400 `organizer.kind_invalid` (BR7) instead of an\r\nuncoded deserialization failure."
       },
+      "SaveQuestionOptionRequest": {
+        "type": "object",
+        "properties": {
+          "textHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The option text as HTML written by a person; the Api sanitizes it (BR8)."
+          },
+          "isCorrect": {
+            "type": "boolean",
+            "description": "True for the option that is the answer key.",
+            "default": false
+          }
+        },
+        "description": "One option of a question as the form sends it. Its position is its index in the array (BR5), so the\r\norder the curator sees is the order that is stored."
+      },
+      "SaveQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The topic the question belongs to. Required (BR3).",
+            "format": "uuid"
+          },
+          "contentLanguage": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of the app's languages, canonicalized (BR7). Required."
+          },
+          "statementHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "What the student is asked. Required, not empty once its tags are removed (BR3)."
+          },
+          "baseTextHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "A text the question refers to, shown before the statement. Optional."
+          },
+          "explanationHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Why the key is right. Optional."
+          },
+          "difficulty": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "A whole number from 1 to 5, or null (BR6).",
+            "format": "int32"
+          },
+          "options": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SaveQuestionOptionRequest"
+            },
+            "description": "The options in order; null counts as none (BR3)."
+          }
+        },
+        "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."
+      },
       "SaveRoleRequest": {
         "required": [
           "name",
@@ -2828,6 +3110,9 @@
     },
     {
       "name": "Catalog"
+    },
+    {
+      "name": "QuestionBank"
     }
   ]
 }

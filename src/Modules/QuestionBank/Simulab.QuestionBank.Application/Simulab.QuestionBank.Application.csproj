@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- BR8: the one place that decides what HTML is safe to store. -->
+    <PackageReference Include="HtmlSanitizer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.QuestionBank.Contracts\Simulab.QuestionBank.Contracts.csproj" />
+    <ProjectReference Include="..\Simulab.QuestionBank.Domain\Simulab.QuestionBank.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

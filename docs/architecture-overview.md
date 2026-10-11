@@ -71,8 +71,8 @@ flowchart TB
 ```
 
 - **Web** — every screen, in pt-BR, pt-PT and en. Talks to the Api only over `/api/v1`; keeps each browser's tokens in Redis (B-3).
-- **Api** — the modules (Identity, Catalog), the OpenIddict token endpoint and the job worker that sends the emails (F-13).
-- **PostgreSQL** — one database, one schema per module: `identity`, `catalog`, `jobs`.
+- **Api** — the modules (Identity, Catalog, QuestionBank), the OpenIddict token endpoint and the job worker that sends the emails (F-13).
+- **PostgreSQL** — one database, one schema per module: `identity`, `catalog`, `question_bank`, `jobs`.
 - **Redis** — refresh-token sessions and the access-token revocation set (F-5), and the Web's server-side sessions (B-3).
 - **File storage** (planned) — blob containers behind `IFileStorage`, Azurite locally; added by the first feature that stores files.
 - **Claude API** (planned) — reached only through `IAiGateway`, which checks the plan and records usage and cost.

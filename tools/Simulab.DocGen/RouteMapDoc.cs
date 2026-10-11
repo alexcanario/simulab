@@ -87,8 +87,11 @@ internal static partial class RouteMapDoc
             : null;
     }
 
+    // A hyphenated area (`question-bank`) joins in Pascal case, the folder name of its model (`QuestionBank`),
+    // so the routes and the schema of one module sit in one folder.
     private static string Capitalize(string text) =>
-        text.Length == 0 ? text : char.ToUpperInvariant(text[0]) + text[1..].Replace('-', ' ');
+        string.Concat(text.Split('-', StringSplitOptions.RemoveEmptyEntries)
+            .Select(word => char.ToUpperInvariant(word[0]) + word[1..]));
 
     [GeneratedRegex(@"^(openapi|.*\.Api)(_v1)?\.json$", RegexOptions.IgnoreCase)]
     private static partial Regex DocumentName();

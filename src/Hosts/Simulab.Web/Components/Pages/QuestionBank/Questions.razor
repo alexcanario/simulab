@@ -1,0 +1,237 @@
+@page "/admin/questions"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-95, UC5 to UC7: every question, searched by a word of its statement, filtered by status and paged on the
+   server, newest first (BR15). Add and edit are a page of their own, not a dialog: the question is a complex
+   entity (rule: ui-project). The other filters are F-100. *@
+<AppPageHeader Title="@L["Questions.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="QuestionListItemResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["Questions.Search.Placeholder"]"
+              EmptyMessage="@EmptyMessage"
+              EmptySearchMessage="@(term => L["Questions.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <ToolBarContent>
+        <div class="app-table-filters">
+            <AppSelectField TValue="QuestionStatus?"
+                            Id="questions-filter-status"
+                            Label="@L["Questions.Filter.Status"]"
+                            Value="_status"
+                            ValueChanged="OnStatusFilterChangedAsync"
+                            Options="StatusFilterOptions" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        @* The order is newest first (BR15): no column sorts. The excerpt is the plain statement cut by the Api; the
+           whole of it is the tooltip, and it is marked with the question's own language. *@
+        <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.StatementExcerpt"
+                        Title="@L["Questions.Column.Statement"]" Sortable="false">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.StatementExcerpt" MaxWidth="26rem" Lang="@context.Item.ContentLanguage" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.TopicName"
+                        Title="@L["Questions.Column.Topic"]" Sortable="false">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.TopicName" MaxWidth="14rem" />
+                <span class="app-cell-secondary"><AppTruncatedText Text="@context.Item.SubjectName" MaxWidth="14rem" /></span>
+            </CellTemplate>
+        </PropertyColumn>
+        <AppNumberColumn TItem="QuestionListItemResponse" TProperty="int?" Property="row => row.Difficulty"
+                         Title="@L["Questions.Column.Difficulty"]" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.Difficulty is { } difficulty)
+                {
+                    <span>@difficulty.ToString(CultureInfo.CurrentCulture)</span>
+                }
+                else
+                {
+                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
+                    <span aria-hidden="true">—</span>
+                    <span class="app-visually-hidden">@L["Questions.Difficulty.NotSet.Spoken"]</span>
+                }
+            </CellTemplate>
+        </AppNumberColumn>
+        <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.ContentLanguage"
+                        Title="@L["Questions.Column.Language"]" Sortable="false">
+            <CellTemplate>
+                <span lang="@context.Item.ContentLanguage">@QuestionText.LanguageName(context.Item.ContentLanguage)</span>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="QuestionListItemResponse" TProperty="QuestionStatus" Property="row => row.Status"
+                        Title="@L["Questions.Column.Status"]" Sortable="false">
+            <CellTemplate>
+                <AppStatusChip Text="@QuestionText.StatusName(L, context.Item.Status)"
+                               Tone="QuestionText.StatusTone(context.Item.Status)" />
+            </CellTemplate>
+        </PropertyColumn>
+    </Columns>
+    <RowActions>
+        @* BR11: a published question is not deleted; the button says why. Publish and unpublish are reversible
+           (BR12), so they ask for no confirmation. *@
+        <AppRowActions ItemName="@ItemName(context)"
+                       IdPrefix="@ActionsId(context)"
+                       OnEdit="@(() => Edit(context))"
+                       OnDelete="@(() => DeleteAsync(context))"
+                       DeleteDisabledReason="@(context.Status == QuestionStatus.Published ? L["Questions.Delete.DisabledPublished"].Value : null)"
+                       MoreActions="@PublicationActions(context)" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<QuestionListItemResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private QuestionStatus? _status;
+    private string? _error;
+
+    // The empty state says which emptiness it is: nothing in the bank, or nothing matching the status filter.
+    private string EmptyMessage => _status is not null ? L["Questions.Empty.Filters"] : L["Questions.Empty"];
+
+    private IReadOnlyList<AppSelectOption<QuestionStatus?>> StatusFilterOptions =>
+    [
+        new(null, L["Common.Filter.All"]),
+        new(QuestionStatus.Draft, L["Questions.Status.Draft"]),
+        new(QuestionStatus.Published, L["Questions.Status.Published"])
+    ];
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Questions.Title"], href: null, disabled: true)
+        ];
+
+    private static string ActionsId(QuestionListItemResponse question) => $"question-actions-{question.Id}";
+
+    // The excerpt is cut at 60 characters so the accessible name of three buttons per row stays short.
+    private string ItemName(QuestionListItemResponse question) =>
+        L["Questions.Row.Name", QuestionHtml.Excerpt(question.StatementExcerpt, QuestionText.RowNameLength)];
+
+    private IReadOnlyList<AppRowAction> PublicationActions(QuestionListItemResponse question) =>
+        question.Status == QuestionStatus.Published
+            ?
+            [
+                new AppRowAction(
+                    L["Questions.Action.Unpublish"], AppIcons.Unpublish, () => SetPublicationAsync(question, publish: false),
+                    Key: "unpublish")
+            ]
+            :
+            [
+                new AppRowAction(
+                    L["Questions.Action.Publish"], AppIcons.Publish, () => SetPublicationAsync(question, publish: true),
+                    Key: "publish")
+            ];
+
+    /// <summary>The list is searched, filtered and paged by the server (BR15).</summary>
+    private async Task<AppTablePage<QuestionListItemResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListQuestionsAsync(
+            token,
+            new QuestionListQuery(query.Page, query.PageSize, query.Search, _status),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Questions failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<QuestionListItemResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // A change of the filter reloads from the first page, as a new search does.
+    private Task OnStatusFilterChangedAsync(QuestionStatus? value)
+    {
+        _status = value;
+        return _table.ReloadFromFirstPageAsync();
+    }
+
+    private void AddAsync() => Navigation.NavigateTo("/admin/questions/new");
+
+    private void Edit(QuestionListItemResponse question) => Navigation.NavigateTo($"/admin/questions/{question.Id}");
+
+    private async Task SetPublicationAsync(QuestionListItemResponse question, bool publish)
+    {
+        _error = null;
+        var token = await TokenAsync();
+        var result = token is null
+            ? null
+            : publish
+                ? await Api.PublishQuestionAsync(token, question.Id)
+                : await Api.UnpublishQuestionAsync(token, question.Id);
+
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(publish ? L["Questions.Published"] : L["Questions.Unpublished"], Severity.Success);
+        }
+        else
+        {
+            // 400 while the question is incomplete (BR4): the curator completes it on its page. 409 when another
+            // curator changed it first; 404 when it is gone.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        // The row menu calls this delegate itself, not an EventCallback of the page, so the page is not
+        // re-rendered for it: say so, or the alert above the table never appears.
+        await InvokeAsync(StateHasChanged);
+        await _table.ReloadAsync();
+    }
+
+    private async Task DeleteAsync(QuestionListItemResponse question)
+    {
+        _error = null;
+
+        // The statement is not quoted in the button: it can be thousands of characters.
+        if (!await Confirm.ConfirmDeleteAsync(L, L["Questions.Delete.Object"], L["Questions.Delete.Message"]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteQuestionAsync(token, question.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["Questions.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // 409 when it was published meanwhile, 404 when another curator deleted it first.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        await _table.ReloadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

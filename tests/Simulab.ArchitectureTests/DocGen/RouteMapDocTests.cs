@@ -23,7 +23,7 @@ public class RouteMapDocTests
 
         var maps = RouteMapDoc.Render(Root).ToDictionary(m => m.Area, m => m.Text);
 
-        maps.Keys.Should().Equal("Catalog", "Identity", "System");
+        maps.Keys.Should().Equal("Catalog", "Identity", "QuestionBank", "System");
         var text = string.Concat(maps.Values);
         foreach (var (verb, route) in operations)
         {
@@ -47,5 +47,14 @@ public class RouteMapDocTests
 
         RouteMapDoc.Render(Open, "a.json").Single().Text.Should().Contain("| `GET` | `/api/v1/exams` | ListExams | 200 |\n").And.NotContain("Auth");
         RouteMapDoc.Render(Secured, "a.json").Single().Text.Should().Contain("| `GET` | `/api/v1/exams` | ListExams | 200 | yes |\n");
+    }
+
+    // F-95: a hyphenated route area joins in Pascal case, the folder name of its model, not "Question bank".
+    [Fact]
+    public void Render_JoinsAHyphenatedAreaInPascalCase()
+    {
+        const string Document = """{ "paths": { "/api/v1/question-bank/questions": { "get": { "operationId": "ListQuestions", "responses": { "200": {} } } } } }""";
+
+        RouteMapDoc.Render(Document, "a.json").Single().Area.Should().Be("QuestionBank");
     }
 }

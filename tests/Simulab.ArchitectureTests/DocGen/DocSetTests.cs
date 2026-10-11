@@ -21,6 +21,7 @@ public class DocSetTests
             "Catalog/data-dictionary.md", "Catalog/routes.md", "Catalog/schema.dbml",
             "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
             "Jobs/data-dictionary.md", "Jobs/schema.dbml",
+            "QuestionBank/data-dictionary.md", "QuestionBank/routes.md", "QuestionBank/schema.dbml",
             "README.md", "System/routes.md", "modules.md", "tools.md");
         foreach (var file in generated.Keys.Where(f => f != "README.md"))
         {

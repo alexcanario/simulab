@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Components.Pages.Admin;
 using Simulab.Web.Services;
@@ -31,7 +32,11 @@ public sealed class AdminPagesAuthorizationTests
         ["ExamEditionForm"] = CatalogPermissions.Manage,
         // F-79 BR15: the subject list and the subject's own page share the one catalog gate.
         ["Subjects"] = CatalogPermissions.Manage,
-        ["SubjectDetail"] = CatalogPermissions.Manage
+        ["SubjectDetail"] = CatalogPermissions.Manage,
+        // F-95 AC10 (BR14): the question list and the question form (two routes) ask for the question bank's permission,
+        // never the catalog's and never a role name.
+        ["Questions"] = QuestionBankPermissions.Manage,
+        ["QuestionForm"] = QuestionBankPermissions.Manage
     };
 
     // F-36 BR10 and AC12: the student catalog is behind catalog.browse, never catalog.manage: a back office account

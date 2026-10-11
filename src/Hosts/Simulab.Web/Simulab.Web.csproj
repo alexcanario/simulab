@@ -14,11 +14,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <!-- B-3: server-side web sessions. The Aspire client integration trusts the local container's TLS certificate. -->
     <PackageReference Include="Aspire.StackExchange.Redis" />
+    <!-- F-95: the visual editor (Quill 2) behind AppRichTextField, the only component that knows it. -->
+    <PackageReference Include="Blazored.TextEditor" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\QuestionBank\Simulab.QuestionBank.Contracts\Simulab.QuestionBank.Contracts.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Ai.Contracts\Simulab.Ai.Contracts.csproj" />
     <ProjectReference Include="..\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
   </ItemGroup>
