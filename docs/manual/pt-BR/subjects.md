@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: pt-BR
-features: [F-79, F-51, F-75]
-updated: 2026-10-09
+features: [F-79, F-51, F-75, F-95]
+updated: 2026-10-11
 ---
 # Disciplinas e tópicos
 
@@ -53,8 +53,10 @@ como estava e só os tópicos que faltam são acrescentados nela.
 3. Escolha **Editar** em um tópico para renomeá-lo. Para movê-lo para outra disciplina, busque e escolha essa
    disciplina na mesma janela.
 4. Escolha **Excluir** em um tópico e confirme. Ele sai da página, e a contagem de tópicos da disciplina diminui em um.
-   Um tópico mapeado por disciplinas do edital não pode ser excluído: o botão Excluir fica desabilitado e explica
-   o motivo. Um mapeamento que só existe numa disciplina do edital excluída ou numa edição excluída não conta.
+   Um tópico mapeado por disciplinas do edital, ou usado por uma questão (rascunho ou publicada), não pode ser
+   excluído: o botão Excluir fica desabilitado e explica o motivo. Um mapeamento que só existe numa disciplina do
+   edital excluída ou numa edição excluída não conta, nem uma questão excluída. Exclua ou mude as questões
+   primeiro (veja [Questões](questions.md)).
 5. Mover um tópico mapeado para outra disciplina é permitido: as disciplinas do edital que o mapeiam o acompanham.
 
 ## Campos
@@ -77,8 +79,8 @@ Os nomes aparecem exatamente como foram digitados, em todos os idiomas do app.
 | Esta área não está na lista. Escolha uma das áreas oferecidas. | A área não é uma da lista fixa. | Escolha uma área da lista, ou nenhuma. |
 | Esta disciplina tem tópicos. Exclua-os primeiro, na página da disciplina. | A disciplina ainda tem ao menos um tópico. | Abra a disciplina, exclua os tópicos e volte. |
 | Disciplinas do edital estão mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de excluir. | Aparece no Excluir desabilitado: disciplinas do edital mapeiam a disciplina inteira. | Retire-a dessas disciplinas do edital e depois exclua. |
-| Disciplinas do edital estão mapeadas para este tópico. Retire-o desses mapeamentos antes de excluir. | Aparece no Excluir desabilitado: disciplinas do edital mapeiam o tópico. | Retire-o dessas disciplinas do edital e depois exclua. |
-| Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada. / Este tópico está mapeado em disciplinas do edital e não pode ser excluído. A lista foi recarregada. | Alguém a mapeou com a sua tela aberta. | Retire o mapeamento primeiro. |
+| Disciplinas do edital estão mapeadas para este tópico ou há questões que o usam. Desfaça esses vínculos antes de excluir. | Aparece no Excluir desabilitado: disciplinas do edital mapeiam o tópico ou uma questão o usa. | Retire-o dessas disciplinas do edital e exclua ou mude as questões; depois exclua o tópico. |
+| Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada. / Este tópico está mapeado em disciplinas do edital ou é usado por questões e não pode ser excluído. A lista foi recarregada. | Alguém a mapeou, ou escreveu uma questão no tópico, com a sua tela aberta. | Retire o mapeamento ou as questões primeiro. |
 | Esta disciplina não existe mais. Atualize a lista. | Alguém excluiu a disciplina enquanto a sua tela estava aberta. | Recarregue a página. |
 | Este tópico não existe mais. Atualize a lista. | Alguém excluiu o tópico enquanto a sua tela estava aberta. | Recarregue a página. |
 | Página não encontrada | Sua conta não gerencia o catálogo. | Fale com um administrador se achar que deveria. |

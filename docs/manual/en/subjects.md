@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: en
-features: [F-79, F-51, F-75]
-updated: 2026-10-09
+features: [F-79, F-51, F-75, F-95]
+updated: 2026-10-11
 ---
 # Subjects and topics
 
@@ -54,8 +54,10 @@ it is kept as it was and only the missing topics are added under it.
 3. Choose **Edit** on a topic to rename it. To move it to another subject, search and pick that subject in
    the same window.
 4. Choose **Delete** on a topic and confirm. It leaves the page, and the subject's topic count drops by one.
-   A topic that notice subjects map cannot be deleted: its Delete button is disabled and says so. A mapping
-   kept only by a deleted notice subject or a deleted edition does not count.
+   A topic that notice subjects map, or that a question uses (draft or published), cannot be deleted: its
+   Delete button is disabled and says so. A mapping kept only by a deleted notice subject or a deleted edition
+   does not count, and neither does a deleted question. Delete or move the questions first (see
+   [Questions](questions.md)).
 5. Moving a mapped topic to another subject is allowed: the notice subjects that map it follow it.
 
 ## Fields
@@ -78,8 +80,8 @@ Names are shown exactly as typed, in every language of the app.
 | This area is not on the list. Pick one of the areas offered. | The area is not one of the fixed list. | Pick an area from the list, or none. |
 | This subject has topics. Delete them first, on the subject's page. | The subject still has at least one topic. | Open the subject, delete its topics and come back. |
 | Notice subjects map this whole subject. Remove it from their mappings before deleting it. | Shown on the disabled Delete: notice subjects map the subject whole. | Remove it from those notice subjects, then delete. |
-| Notice subjects map this topic. Remove it from their mappings before deleting it. | Shown on the disabled Delete: notice subjects map the topic. | Remove it from those notice subjects, then delete. |
-| Notice subjects map this subject, so it cannot be deleted. The list was reloaded. / Notice subjects map this topic, so it cannot be deleted. The list was reloaded. | Someone mapped it while your screen was open. | Remove the mapping first. |
+| Notice subjects map this topic or questions use it. Remove those links before deleting it. | Shown on the disabled Delete: notice subjects map the topic or a question uses it. | Remove it from those notice subjects and delete or change the questions, then delete. |
+| Notice subjects map this subject, so it cannot be deleted. The list was reloaded. / Notice subjects map this topic or questions use it, so it cannot be deleted. The list was reloaded. | Someone mapped it or wrote a question on it while your screen was open. | Remove the mapping or the questions first. |
 | This subject no longer exists. Refresh the list. | Someone deleted the subject while your screen was open. | Reload the page. |
 | This topic no longer exists. Refresh the list. | Someone deleted the topic while your screen was open. | Reload the page. |
 | Page not found | Your account does not manage the catalog. | Talk to an admin if you think it should. |
