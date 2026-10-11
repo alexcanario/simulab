@@ -26,7 +26,7 @@ Technical terms: [glossary](../glossary.md)
 
 ## Start
 <!-- What this item needs before it can start, and how to run it. Filled when the item is created, confirmed at refinement. -->
-- Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository — or "nothing">
+- Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository as `<owner>/<repo>#<n>`; while an id is not delivered, the approved item is blocked by itself and released when it ships — or "nothing">
 - Waits on (to start): <what stops the work from starting and is not an item: an owner decision, a person or team, an access, an environment — who provides it — or "nothing">
 - Needed to validate: <what only the validation needs (a real clone, an environment, a person or device) — who provides it — or "nothing"; never blocks a start or an approval>
 - Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (small and clear) | `/agile:discuss` first (open direction) | `/agile:screen` during refinement>
@@ -85,6 +85,9 @@ Technical terms: [glossary](../glossary.md)
 ## Validation script
 <!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
 1. <Step> → <expected result>
+
+## Events
+<!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
