@@ -1,7 +1,7 @@
 ---
 bug: B-26
 feature: F-66
-status: refining
+status: approved
 board: 160
 severity: medium
 ---
@@ -71,6 +71,8 @@ Test-only; no file under `src/` changes.
 - 2026-10-11 — Coverage of the Api wiring: the tests start the host successfully and call the validator the host registered, instead of provoking a failed start. It keeps F-66 AC2/AC4 proven at the host without a framework race and without a production change. Owner chose the recommended option.
 - 2026-10-11 — Proof: 5 consecutive green full-gate runs with a clean build before each, as B-19. No architecture test that forbids asserting on a failed start: the project rule in `.claude/rules/agile/project.md` exists, the sweep found only these two tests, and such a test would pull in the five certificate tests. Owner chose the recommended option.
 - 2026-10-11 — Technical (no product impact): no new package; `ApiFactory` and its `IClassFixture` stay as they are (F-94 showed the fixture is not the cause); no new permission, screen or message.
+
+- 2026-10-11 — Approved by the owner ("aprovo B-26"), no open question.
 
 ## Out of scope
 - The five `OpenIddictCertificateStartTests` and any other test not named above.
