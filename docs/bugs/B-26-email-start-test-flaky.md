@@ -1,7 +1,7 @@
 ---
 bug: B-26
 feature: F-66
-status: approved
+status: building
 board: 160
 severity: medium
 ---
