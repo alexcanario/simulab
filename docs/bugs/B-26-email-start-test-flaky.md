@@ -64,7 +64,7 @@ Test-only; no file under `src/` changes.
 
 ## Regression test
 
-Tests locked: cd4c81024b8ea373a19e1d678fd0d7babb51b989 (2 files); unlocks: 0
+Tests locked: 41d3ff33bc0b54c216fcab676d2d567ab8fb4b89 (2 files); unlocks: 1
 
 - `Simulab.Api.Tests.EmailProviderStartTests` (AC1 to AC3, the replaced tests) and `Simulab.Email.Tests.EmailProviderRegistrationTests` (AC4, AC5).
 - "Seen failing before the fix": the race cannot be forced alone (96 of 96 starts gave the right exception, see `## Cause`), so the evidence is the baseline of 2 red in 4 gate runs of 2026-10-09 (stack in `## Cause`) and the AC6 loop. The build says so in `## Delivery` instead of pretending a forced failure.
