@@ -1,7 +1,7 @@
 ---
 feature: F-114
 epic: Foundation and identity
-status: building
+status: validating
 board: 162
 version: 2
 ---
@@ -210,6 +210,25 @@ Tests locked: 5a36f00a64081e230f5be0de7141ed51efd56010 (3 files); unlocks: 1
 - Re-approved: 2026-10-11 (owner, "Aprovo").
 
 ## Validation script
+Needed to validate: the local app host, a browser, light and dark theme and a keyboard — you; in place now. The kit change is visible without sign-in on `/dev/ui`; steps 5 and 6 need the local administrator you already use. The app host of this worktree runs on its own data volume (`WithDataVolume()` with no name), so nothing is shared with another checkout. Stop any other app host first (one at a time).
+
+1. Start the app host from this worktree (stop it with Ctrl+C when you finish):
+   ```powershell
+   Set-Location D:\wt\simulab\f-114-field-kinds-look
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   cd /d/wt/simulab/f-114-field-kinds-look
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Open the `web` resource from the Aspire dashboard, then go to `/dev/ui` and scroll to "Field kinds" (also reachable as `/dev/ui#gallery-field-kinds`).
+2. Three columns: "Arrow combobox", "Magnifier lookup", "Free text". Expect the arrow at the end of every combobox (none of them looks like a plain text box), the magnifier at the start of every lookup, and nine captioned states (empty, with value, disabled, error, long text, loading, open list, no results, leading icon); the free-text column says "This kind has no such state." where it has none.
+3. Click the first combobox ("Area", showing "All"): the whole list opens, "All" first, and the arrow turns up. Type `mat` and `MATE`: the list narrows ignoring case; type `zzz`: one line "No option matches ..." appears. Pick an option: the field shows its text and the list closes. Pick "All" again: the field returns to "All".
+4. Leading icon with arrow ("Leading icon" state, Content language): the globe at the start and the arrow at the end are both drawn, vertically centred with the text, and the focus ring and the error border (the "Error" state) go round the whole field with no gap. If something is cut or misaligned, say it: the fallback is the arrow alone (BR5).
+5. Keyboard only, on a combobox: Tab lands on the field (a single stop, the arrow is skipped); Arrow-down opens the list; Arrow keys move; Enter picks; Esc closes the list. Then sign in, open Subjects, "New subject" (the dialog has the "Area" field): open its list and press Esc once. Expect the list to close and the dialog to stay open; a second Esc closes the dialog.
+6. Real pages: on Subjects, the "Area" filter and on Catalog search, the type and scope filters open on focus, filter by typing and keep "All" as the first item; a page of the app that had an issuing-authority or organizer lookup still shows the magnifier.
+7. Switch to dark (the moon in the app bar) and to Portuguese: the arrow and the icons stay visible against the card and the page, the hint and error texts are in Portuguese, and screen-reader names (tooltip of the arrow) read "Mostrar as opções" / "Ocultar as opções".
+8. Disabled and loading: the "Disabled" combobox is muted and does not open; the "Loading" one shows a small progress where the arrow would be.
 
 ## Events
 
@@ -217,5 +236,6 @@ Tests locked: 5a36f00a64081e230f5be0de7141ed51efd56010 (3 files); unlocks: 1
 - 2026-10-11 override — Arrow x leading icon — chose "try both in the kit" over "arrow wins"
 - 2026-10-11 change — v2: screen design approved; AC7, AC12, AC13 changed, AC14 added
 - 2026-10-11 blocked — test wrong: CA1859 warning in helper; keyboard test cannot run in bUnit (MudBlazor key handling is a JS interceptor); disabled assertion corrected to the library's mud-disabled wrapper
+- 2026-10-11 test-fail — 1 new warning(s): CA1859 in tests/Hosts/Simulab.Web.Tests/Ui/AppSelectFieldTests.cs, 2 reds
 
 ## Delivery
