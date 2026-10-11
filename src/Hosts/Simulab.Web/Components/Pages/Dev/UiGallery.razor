@@ -150,6 +150,164 @@
     </MudPaper>
 </section>
 
+@* F-114 BR1, BR8: the look says the action. One column per kind, each with the states it has; the fields are live, so
+   "Open list" and "No results" are reached by focusing and typing the sample term beside the caption. *@
+<section id="gallery-field-kinds" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.FieldKinds"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.FieldKinds.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4">
+        <AppFormGrid Columns="3">
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.FieldKinds.Select"]</MudText>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Empty"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-empty" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Value="@_kindSelectEmpty" ValueChanged="@(value => _kindSelectEmpty = value)" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.WithValue"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-value" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Value="@_kindSelectValue" ValueChanged="@(value => _kindSelectValue = value)" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Disabled"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-disabled" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Value="@KindAreaLaw" Disabled="true" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Error"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-error" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Error="@L["subject.area_invalid"].Value" Value="@string.Empty" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LongText"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-long" Label="@L["Subjects.Field.Area"]"
+                                Options="@KindAreaOptions" Error="@L["Exams.Field.IssuingAuthority.Hint"].Value"
+                                Value="@KindAreaLong" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Loading"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-loading" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Loading="true" Value="@string.Empty" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Open"] <code>Tab</code></p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-open" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Value="@_kindSelectOpen" ValueChanged="@(value => _kindSelectOpen = value)" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.NoResults"] <code>zzz</code></p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-noresults" Label="@L["Subjects.Field.Area"]"
+                                Hint="@L["Subjects.Field.Area.Help"]" Options="@KindAreaOptions"
+                                Value="@_kindSelectNoResults" ValueChanged="@(value => _kindSelectNoResults = value)" />
+
+                @* BR5: the leading icon and the arrow together. *@
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LeadingIcon"]</p>
+                <AppSelectField TValue="string" Id="gallery-kind-select-icon" Label="@L["Exams.Field.ContentLanguage"]"
+                                LeadingIcon="@AppIcons.Language" Required="true" Options="@_selectOptions"
+                                Value="@_selectValue" ValueChanged="@(value => _selectValue = value)" />
+            </div>
+
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.FieldKinds.Lookup"]</MudText>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Empty"]</p>
+                <AppLookupField Id="gallery-kind-lookup-empty" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                SearchAsync="GalleryLookupAsync" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.WithValue"]</p>
+                <AppLookupField Id="gallery-kind-lookup-value" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                Hint="@L["Exams.Field.IssuingAuthority.Hint"]"
+                                SearchAsync="GalleryLookupAsync" Value="@_kindLookupValue"
+                                ValueChanged="@(value => _kindLookupValue = value)" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Disabled"]</p>
+                <AppLookupField Id="gallery-kind-lookup-disabled" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                SearchAsync="GalleryLookupAsync" Value="@GalleryLookupOptions[1]" Disabled="true" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Error"]</p>
+                <AppLookupField Id="gallery-kind-lookup-error" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                Error="@L["exam.issuing_authority_required"].Value" SearchAsync="GalleryLookupAsync" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LongText"]</p>
+                <AppLookupField Id="gallery-kind-lookup-long" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                Error="@L["Exams.Field.IssuingAuthority.Hint"].Value"
+                                SearchAsync="GalleryLookupAsync" Value="@GalleryLookupOptions[0]" />
+
+                @* The server search takes a moment: the sample answers after 1.5 s so the wait can be seen. *@
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Loading"] <code>fun</code></p>
+                <AppLookupField Id="gallery-kind-lookup-loading" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                SearchAsync="GallerySlowLookupAsync" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Open"] <code>fun</code></p>
+                <AppLookupField Id="gallery-kind-lookup-open" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                SearchAsync="GalleryLookupAsync" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.NoResults"] <code>zzz</code></p>
+                <AppLookupField Id="gallery-kind-lookup-noresults" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]" Required="true"
+                                SearchAsync="GalleryLookupAsync" />
+
+                @* The parameter is ignored: the magnifier stays (AC7). *@
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LeadingIcon"]</p>
+                <AppLookupField Id="gallery-kind-lookup-icon" Label="@L["Exams.Field.IssuingAuthority"]"
+                                Placeholder="@L["Exams.Field.IssuingAuthority.Placeholder"]"
+                                LeadingIcon="@AppIcons.IssuingAuthorities" SearchAsync="GalleryLookupAsync" />
+            </div>
+
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.FieldKinds.Text"]</MudText>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Empty"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-empty" Label="@L["Exams.Field.Name"]"
+                              Placeholder="@L["Exams.Field.Name.Placeholder"]" Hint="@L["Exams.Field.Name.Hint"]"
+                              Required="true" Autocomplete="off" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.WithValue"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-value" Label="@L["Exams.Field.Name"]"
+                              Placeholder="@L["Exams.Field.Name.Placeholder"]" Hint="@L["Exams.Field.Name.Hint"]"
+                              Required="true" Autocomplete="off"
+                              Value="@_kindTextValue" ValueChanged="@(value => _kindTextValue = value)" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Disabled"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-disabled" Label="@L["Exams.Field.Name"]"
+                              Hint="@L["Exams.Field.Name.Hint"]" Required="true" Autocomplete="off"
+                              Value="@SampleName(1)" Disabled="true" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Error"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-error" Label="@L["Exams.Field.Name"]"
+                              Placeholder="@L["Exams.Field.Name.Placeholder"]" Required="true" Autocomplete="off"
+                              Error="@L["exam.name_required"].Value" Value="@string.Empty" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LongText"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-long" Label="@L["Exams.Field.Name"]"
+                              Required="true" Autocomplete="off" Error="@L["Exams.Field.IssuingAuthority.Hint"].Value"
+                              Value="@KindTextLong" />
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Loading"]</p>
+                <p class="gallery-state-na">@L["Gallery.FieldKinds.State.NotApplicable"]</p>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Open"]</p>
+                <p class="gallery-state-na">@L["Gallery.FieldKinds.State.NotApplicable"]</p>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.NoResults"]</p>
+                <p class="gallery-state-na">@L["Gallery.FieldKinds.State.NotApplicable"]</p>
+
+                <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.LeadingIcon"]</p>
+                <AppTextField TValue="string" Id="gallery-kind-text-icon" Label="@L["Exams.Field.Name"]"
+                              LeadingIcon="@AppIcons.Exams" Placeholder="@L["Exams.Field.Name.Placeholder"]"
+                              Required="true" Autocomplete="off" />
+            </div>
+        </AppFormGrid>
+    </MudPaper>
+</section>
+
 @* The section id never repeats a field id below it: two nodes with one id break every label and
    aria-describedby that points at it (found on screen, F-34). *@
 <section id="gallery-lookups" class="gallery-section">
@@ -783,6 +941,36 @@
         _pickAnnouncement = L["NoticeSubjects.Covers.Cleared"];
     }
 
+    // F-114: the field kinds section. The areas are the subject dialog's own list, the first option is the "all"
+    // choice of a filter (BR4) and the last is an option wider than the field, so its wrapping can be seen.
+    private const string KindAreaLaw = "Law";
+    private const string KindAreaLong = "Long";
+    private string? _kindSelectEmpty = string.Empty;
+    private string? _kindSelectValue = "Mathematics";
+    private string? _kindSelectOpen = string.Empty;
+    private string? _kindSelectNoResults = string.Empty;
+    private AppLookupOption? _kindLookupValue = GalleryLookupOptions[1];
+    private string? _kindTextValue;
+
+    private string KindTextLong =>
+        string.Join(' ', L["Gallery.Table.SampleName", 1], L["Exams.Field.IssuingAuthority.Hint"]);
+
+    private IReadOnlyList<AppSelectOption<string>> KindAreaOptions =>
+    [
+        new(string.Empty, L["Common.Filter.All"]),
+        new("none", L["Subjects.NoArea"]),
+        new("Languages", L["Area.Languages"]),
+        new("Mathematics", L["Area.Mathematics"]),
+        new("LogicalReasoning", L["Area.LogicalReasoning"]),
+        new("NaturalSciences", L["Area.NaturalSciences"]),
+        new("HumanSciences", L["Area.HumanSciences"]),
+        new(KindAreaLaw, L["Area.Law"]),
+        new("InformationTechnology", L["Area.InformationTechnology"]),
+        new("Administration", L["Area.Administration"]),
+        new("SpecificKnowledge", L["Area.SpecificKnowledge"]),
+        new(KindAreaLong, string.Join(", ", L["Area.SpecificKnowledge"], L["Area.Law"], L["Area.Administration"], L["Area.HumanSciences"], L["Area.InformationTechnology"]))
+    ];
+
     private AppLookupOption? _lookupValue;
     private AppLookupOption? _stateValue;
     private AppLookupOption? _filterLookup;
@@ -804,6 +992,14 @@
     private static Task<IReadOnlyList<AppLookupOption>> GalleryLookupAsync(string term, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<AppLookupOption>>(
             [.. GalleryLookupOptions.Where(option => option.Text.Contains(term, StringComparison.OrdinalIgnoreCase))]);
+
+    // F-114: a server search that takes a moment, so the field kinds section can show the wait.
+    private static async Task<IReadOnlyList<AppLookupOption>> GallerySlowLookupAsync(string term, CancellationToken cancellationToken)
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(1500), cancellationToken);
+
+        return await GalleryLookupAsync(term, cancellationToken);
+    }
 
     private static Task<IReadOnlyList<AppLookupOption>> GalleryStatesAsync(string term, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<AppLookupOption>>(
@@ -843,6 +1039,7 @@
 
         _source = new GallerySource(CreateSample, SourceDelay);
         _sample = CreateSample(1);
+        _kindTextValue = SampleName(1);
         _richFilled = L["Gallery.RichText.Sample"].Value;
         _breadcrumbs = [new BreadcrumbItem(L["Gallery.Breadcrumb.Dev"], href: null, disabled: true), new BreadcrumbItem(L["Gallery.Title"], href: null, disabled: true)];
         _moreActions =

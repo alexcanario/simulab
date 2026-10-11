@@ -403,6 +403,26 @@
   <data name="Lookup.Hint.MinChars" xml:space="preserve"><value>Type at least {0} characters</value></data>
   <data name="Lookup.Results" xml:space="preserve"><value>Results: {0}</value></data>
   <data name="Lookup.NoResults" xml:space="preserve"><value>Nothing found for "{0}".</value></data>
+  <data name="SelectField.Expand" xml:space="preserve"><value>Show the options</value></data>
+  <data name="SelectField.Collapse" xml:space="preserve"><value>Hide the options</value></data>
+  <data name="SelectField.NoResults" xml:space="preserve"><value>No option matches "{0}".</value></data>
+  <data name="SelectField.Results" xml:space="preserve"><value>Options: {0}</value></data>
+  <data name="SelectField.Loading" xml:space="preserve"><value>Loading the options...</value></data>
+  <data name="Gallery.Section.FieldKinds" xml:space="preserve"><value>Field kinds</value></data>
+  <data name="Gallery.FieldKinds.Hint" xml:space="preserve"><value>The look says the action: an arrow at the end opens the list before you type and narrows it as you type; a magnifier at the start needs typing first, and the server answers; a plain field is free text.</value></data>
+  <data name="Gallery.FieldKinds.Select" xml:space="preserve"><value>Arrow combobox (AppSelectField)</value></data>
+  <data name="Gallery.FieldKinds.Lookup" xml:space="preserve"><value>Magnifier lookup (AppLookupField)</value></data>
+  <data name="Gallery.FieldKinds.Text" xml:space="preserve"><value>Free text (AppTextField)</value></data>
+  <data name="Gallery.FieldKinds.State.Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Gallery.FieldKinds.State.WithValue" xml:space="preserve"><value>With value</value></data>
+  <data name="Gallery.FieldKinds.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Gallery.FieldKinds.State.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Gallery.FieldKinds.State.LongText" xml:space="preserve"><value>Long text</value></data>
+  <data name="Gallery.FieldKinds.State.Loading" xml:space="preserve"><value>Loading</value></data>
+  <data name="Gallery.FieldKinds.State.Open" xml:space="preserve"><value>Open list</value></data>
+  <data name="Gallery.FieldKinds.State.NoResults" xml:space="preserve"><value>No results</value></data>
+  <data name="Gallery.FieldKinds.State.LeadingIcon" xml:space="preserve"><value>Leading icon</value></data>
+  <data name="Gallery.FieldKinds.State.NotApplicable" xml:space="preserve"><value>This kind has no such state.</value></data>
   <data name="Lookup.LoadFailed" xml:space="preserve"><value>The search failed.</value></data>
   <data name="Lookup.Clear" xml:space="preserve"><value>Clear the selection</value></data>
   <data name="Exams.Title" xml:space="preserve"><value>Exams</value></data>
