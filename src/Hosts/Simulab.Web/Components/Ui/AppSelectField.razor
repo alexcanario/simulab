@@ -167,6 +167,10 @@
             ? L["SelectField.NoResults", _lastTerm]
             : L["SelectField.Results", found.Count];
 
+        // The library re-renders its own list when the search returns, not this wrapper: without this the live
+        // region keeps the count of the previous term (found on screen, typing "MATEMA": it kept "Options: 12").
+        _ = InvokeAsync(StateHasChanged);
+
         return Task.FromResult<IEnumerable<AppSelectOption<TValue>>>(found);
     }
 
