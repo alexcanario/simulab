@@ -431,7 +431,7 @@ Needed to validate: the local app host (`dotnet run` of the AppHost), in place n
 - 2026-10-10 test-fail — build failed (Simulab.slnx), 3 reds
 
 ## Delivery
-- Shipped 2026-10-11 as app version 0.28.0. Branch `feature/F-95`, merge commit recorded below after the merge (board #141).
+- Shipped 2026-10-11 as app version 0.28.0. Branch `feature/F-95`, merge commit `5f14925` (board #141).
 - Full suite: 2,925 tests passed, 0 failed (`gate.js ship`: build 24 s, tests 2 m 28 s, inside the 5 min budget; slowest projects Catalog 2 m 23 s, Identity 2 m 20 s, QuestionBank 1 m 51 s); architecture tests 219; no new warnings. Security scan `agile scan GREEN` (2 medium findings in `tools/Simulab.DocGen`, older than this item). Test lock `6592781` unchanged, 0 unlocks.
 - New tests: `Simulab.QuestionBank.Tests` (98: sanitizer, question rules, endpoints, publication, topic delete guard, initial migration); 5 test classes of the screens and the kit field in `Simulab.Web.Tests` (about 120); the Identity tests that count every module's permissions now include `questions.manage`.
 - Docs: `DocGen --check` green (0 files changed after the item's own regeneration), ADR-0005, profile table corrected, architecture overview updated. App manual: new page `questions.md` and `subjects.md`, `index.md` in pt-BR, pt-PT and en. Glossary: 3 rows added (allow-list, foreign key, Quill) on top of the 4 written during refinement.
