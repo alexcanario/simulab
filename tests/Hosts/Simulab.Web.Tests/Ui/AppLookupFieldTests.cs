@@ -137,6 +137,23 @@ public sealed class AppLookupFieldTests : KitTestContext
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
 
+    // F-114 AC7: the magnifier says "type first, the server answers"; a leading icon no longer takes its place.
+    [Fact]
+    public void Render_WithALeadingIcon_StillShowsTheMagnifier()
+    {
+        var field = Render<AppLookupField>(parameters => parameters
+            .Add(component => component.Id, "lookup")
+            .Add(component => component.Label, "Issuing authority")
+            .Add(component => component.Placeholder, "Name or acronym")
+            .Add(component => component.SearchAsync, Found)
+            .Add(component => component.LeadingIcon, AppIcons.Scope));
+
+        var start = field.Find(".mud-input-adornment-start");
+        start.InnerHtml.Should().Contain(AppIcons.Search);
+        start.InnerHtml.Should().NotContain(AppIcons.Scope);
+        field.Find(".app-field-description").TextContent.Should().Contain("Type at least 2 characters");
+    }
+
     // F-42: a search over the catalog keeps its defaults - nothing opens before the reader types, and the list is cut at 20.
     [Fact]
     public void Render_ByDefault_DoesNotOpenOnFocus_AndShowsAtMostTwentyCandidates()

@@ -1,7 +1,7 @@
----
+| AC14 | AppSelectFieldTests.Render_Loading_ShowsAProgressInsteadOfTheArrow; AppSelectFieldTests.Render_ByDefault_HasNoProgress || AC13 | SelectFieldResourcesTests.Key_HasATextInTheLanguage; ResourceParityTests || AC12 | UiGalleryFieldKindsTests (three kinds, nine states); UiGalleryTests and DevPagesHostTests iterate GallerySections.All; validation step (light and dark) || AC11 | the existing page tests of the 10 pages, unchanged (full suite) || AC10 | AppSelectFieldTests.Keyboard_ArrowDownOpens_EscapeCloses_EnterPicks; validation step (Esc inside a real dialog) || AC9 | ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces (the arrow is painted in ActionDefault, already asserted on surface and background in both themes) || AC8 | AppSelectFieldTests.Render_Disabled_DisablesTheInputAndKeepsTheHint; AppSelectFieldTests.Render_WithAnError_ShowsItInsteadOfTheHintAndKeepsTheArrow || AC7 | AppLookupFieldTests.Render_WithALeadingIcon_StillShowsTheMagnifier; AppLookupFieldTests (the existing defaults tests) || AC6 | AppSelectFieldTests.Render_WithALeadingIcon_StillShowsTheArrow || AC5 | AppSelectFieldTests.Pick_AnOption_RaisesValueChangedOnceWithItsValue; AppSelectFieldTests.Pick_TheAllChoice_GivesNull || AC4 | AppSelectFieldTests.Focus_WhileShowingTheAllChoice_ListsEveryOption || AC3 | AppSelectFieldTests.Type_NarrowsTheListIgnoringCaseAndAccents; AppSelectFieldTests.Type_WithNoMatch_ShowsTheNoResultsMessage || AC2 | AppSelectFieldTests.Focus_OpensTheWholeList || AC1 | AppSelectFieldTests.Render_ShowsTheExpandArrowAndAnInputThatAcceptsTyping |---
 feature: F-114
 epic: Foundation and identity
-status: approved
+status: building
 board: 162
 version: 2
 ---

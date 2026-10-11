@@ -63,6 +63,9 @@
     /// meaning of its own; the label does.</summary>
     [Parameter] public string? LeadingIcon { get; set; }
 
+    /// <summary>F-114 AC14: the page is still fetching the options. Skeleton: the behavior comes with the build.</summary>
+    [Parameter] public bool Loading { get; set; }
+
     private bool HasError => !string.IsNullOrEmpty(Error);
 
     private string LabelId => $"{Id}-label";

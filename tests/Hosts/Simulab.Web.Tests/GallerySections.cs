@@ -20,5 +20,7 @@ internal static class GallerySections
         "gallery-suggest-field",
         // F-75: the read-only chip and the multi-pick field.
         "gallery-chip", "gallery-multi-pick-field",
+        // F-114: the three field kinds and their states.
+        "gallery-field-kinds",
     ];
 }
