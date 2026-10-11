@@ -58,5 +58,5 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 - Modules and pages never read plan columns; they ask `IEntitlementService`.
 - Never reference MassTransit, RabbitMQ or FluentAssertions.
 - Screens follow the rules `ui` (core) and `ui-project` (Simulab choices): UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
-- If the AppHost says the container runtime cannot be found while Docker Desktop is running, start it from a terminal (`dotnet run --project src/Hosts/Simulab.AppHost`); Visual Studio Insiders did not find `docker` on 2026-10-09, cause not verified.
+- If the AppHost says the container runtime cannot be found while Docker Desktop is running, the IDE inherited a stale `PATH` without `...\DockerDesktop\resources\bin` (verified 2026-10-11: the entry was in the user `PATH` in the registry but missing from `explorer.exe`, `devenv.exe` and the AppHost it started). Restart `explorer.exe` (or sign out and in), reopen Visual Studio from it and check `docker version` in its terminal; until then, start the AppHost from a terminal (`dotnet run --project src/Hosts/Simulab.AppHost`).
 - Redis: always through `Aspire.StackExchange.Redis` (`builder.AddRedisClient(...)`), never a plain `ConnectionMultiplexer.Connect` — the local container uses TLS by default and a plain client cannot trust its dev certificate.
