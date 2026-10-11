@@ -20,7 +20,7 @@ Technical terms: [glossary](../glossary.md)
 
 ## Start
 <!-- What this bug needs before it can be fixed, and how to run it. Filled when the bug is created, confirmed at refinement. -->
-- Depends on: <items that must be done first — or "nothing">
+- Depends on: <items that must be done first: B-/F- ids or `<owner>/<repo>#<n>`; while one is not delivered, the approved item is blocked by itself and released when it ships — or "nothing">
 - Waits on (to start): <what stops the fix from starting: an owner decision, a person or team, access to data or an environment to reproduce it — who provides it — or "nothing">
 - Needed to validate: <what only the validation needs (data, an environment, a person or device) — who provides it — or "nothing"; never blocks a start or an approval>
 - Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (cause clear, fix small)>
@@ -48,6 +48,9 @@ Technical terms: [glossary](../glossary.md)
 
 ## Validation script
 1. <Step> → <expected result>
+
+## Events
+<!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->
 
 ## Delivery
 - Branch: <bug/B-<number>>

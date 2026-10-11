@@ -3401,3 +3401,194 @@ Claude: Tests lock: 3b7c21aa4e90... (1 files) unchanged — F-12; unlocks: 1
 ```
 
 The tests of a screen that the `frontend` agent writes with the approved mockup are not locked. A project that reaches the ship with no lock (an item built before this rule) prints `Tests lock: none (built before this rule)` and goes on.
+
+### 14.94 The board is read in pt-BR, the file stays in English
+
+acme-shop keeps its item files in English (for example `docs/features/F-12-export-exam-board-csv.md`); the GitHub board is what you read. From this version, what the plugin writes there is pt-BR.
+
+```
+> /agile:idea feature "export the exam board list to CSV"
+Claude: F-12 — Export the exam board list to CSV [idea]
+        File: docs/features/F-12-export-exam-board-csv.md (English)
+        Board: issue #31, title "Exportar a lista de bancas para CSV", body in pt-BR
+```
+
+What the issue shows (the body is the whole file, rendered again at each write):
+
+```
+## Resumo
+Exportar a lista de bancas examinadoras para CSV, a partir da tela de bancas.
+
+## Início
+- Depende de: nada.
+
+Original (English): docs/features/F-12-export-exam-board-csv.md
+```
+
+At the ship, the evidence comment is pt-BR too, and with `Merge: pr` the pull request is `F-12 — Exportar a lista de bancas para CSV`, with the summary and the validation checklist in pt-BR. Commits and the merge message stay English. An item that already had an English body on the board keeps it until the plugin next sends it whole (for example `/agile:script F-9`). An Azure Boards project gets the same text without accents (`Resumo`, `Criterios de aceite`).
+
+### 14.95 An item records what happened to it, and the retro counts it
+
+F-12 of acme-shop, an order total, goes through its cycle. Nobody asks Claude to write down what happens: the item file collects it, one line each, in `## Events`, right before `## Delivery`. The gate writes its own line when a red streak ends; unlocking a test writes its own too:
+
+```
+## Events
+
+- 2026-10-10 question — asked 4, from context 0
+- 2026-10-10 override — Total with tax — chose "per line" over "on the sum"
+- 2026-10-10 test-fail — build failed (src/Orders/Order.cs), 2 reds
+- 2026-10-11 blocked — test wrong: AC2 contradicted BR2
+- 2026-10-11 rework — reviewer: tax rounded per item, not on the sum
+- 2026-10-11 rework — reviewer: tax rounded per item again, in the export
+- 2026-10-11 question — asked 1, from context 0
+```
+
+The two reds of the gate are one `test-fail` line: it opened at the first red stop, closed at the next green, and names the cause of the first one. At the ship, the report counts the file and compares it with the last five shipped items:
+
+```
+> /agile:ship F-12
+Claude: ...
+        Events: override 1, question 2 (asked 5, from context 0), assumed 0, rework 2, test-fail 1, blocked 1, change 0, correction 0, stop 0
+        Last 5 shipped (5 items): override 0.2, question 1.8, rework 0.6, test-fail 0.4, blocked 0.2
+```
+
+The retro starts from those two lines, and an event line is the evidence its scores ask for:
+
+```
+Claude: Lesson 1 (score plugin 7 / project 8): a rule that holds across totals, tax and rounding was
+        decided in the chat and not in the file. Evidence: the two `rework` lines of 2026-10-11 name the
+        same cause (where the tax is rounded): seen twice in one item.
+```
+
+A repository with no item file (this plugin's own, with no `docs/agile`) writes nothing, and `events.js add` says so; so does the main checkout of a project, where the item file is only a copy:
+
+```
+agile events: no item file for F-12 in D:/dev/acme-shop (docs/features or docs/bugs): nothing was written
+agile events: this worktree is on main, not on the branch of F-12: nothing was written (run it from the item's worktree)
+```
+
+### 14.96 The autopilot boards at the stage the item is on
+
+acme-shop has F-12 approved by hand yesterday (`/agile:refine F-12`, then "Aprovo F-12") and F-13 still an idea. The flag goes on the command that fits the item.
+
+```
+> /agile:build F-12 --autopilot
+Claude: F-12 — Export the exam board list to CSV [approved]
+        Worktree of F-12: D:/dev/wt/acme-shop/f-12-export-exam [feature/F-12]
+        Boards at the build: no question round. Autopilot: approved.
+        ...
+        STOP 2 — F-12 [validating]. Tests: 41 passed, 0 failed. Answer "validado e autorizo o merge de F-12"
+        to ship, "validado" alone to stop here.
+```
+
+The wrong command is seen before anything happens: F-13 is an idea, so the build does not take it.
+
+```
+> /agile:build F-13 --autopilot
+Claude: F-13 — Import the exam list [idea]
+        F-13 is idea: /agile:refine F-13 --autopilot boards at this status
+```
+
+No branch, worktree, file or board change was made. Typed again on the item after the validation, the same command shows stop 2 and ships nothing:
+
+```
+> /agile:autopilot F-12
+Claude: F-12 — Export the exam board list to CSV [validating]
+        Autopilot: line said approved; the item is validating, rewritten to stop 2.
+        STOP 2 — files, tests, ## Criterion → test, validation script (shown again).
+        Nothing ships until you write "validado e autorizo o merge de F-12".
+```
+
+### 14.97 The epic's features go one at a time, each through the autopilot
+
+acme-shop has the epic "exam board" agreed, with three features: F-20 (the list), F-21 (the CSV export, depends on F-20) and F-22 (the print layout, plan path `/agile:discuss` first).
+
+```
+> /agile:epic "exam board" --autopilot
+Claude: Epic exam-board [agreed]: 0/3 done. Queue: F-20, F-21, F-22.
+        F-20 — Exam board list [idea]
+        ...
+        STOP 1 — F-20: question round (3 questions, recommendations first).
+```
+
+You answer, approve F-20 and validate it. Only the merge sentence ships it, and F-21 starts in the same run:
+
+```
+> validado e autorizo o merge de F-20
+Claude: F-20 shipped (0.31.0). Retro skipped: 2 lesson candidates appended to ## Retro notes of the epic.
+        Epic exam-board: Autopilot: F-21 stop 1 (2026-10-12). 1/3 done.
+        F-21 — Export the exam board list to CSV [idea]
+        STOP 1 — F-21: question round (2 questions; it answers from what F-20 decided).
+```
+
+"validado" alone ends the run, and the same command resumes it:
+
+```
+> validado
+Claude: Run ended at F-21 [validating]. Nothing was merged. 1/3 done, Autopilot: F-21 stop 2.
+        Resume: /agile:epic "exam board" --autopilot   (or /agile:ship F-21)
+```
+
+F-22's plan path is `/agile:discuss` first, so the run never starts it by itself:
+
+```
+> /agile:epic "exam board" --autopilot
+Claude: F-21 shipped earlier; 2/3 done.
+        Run ended before F-22: its plan path is /agile:discuss first. Run /agile:discuss on the print layout,
+        change its path in docs/epics/exam-board.md, then type this command again.
+```
+
+After the last feature ships, the epic retro counts first and proposes at most three lessons:
+
+```
+Claude: Epic exam-board: 3/3 done.
+        Events (3 items): override 1, question 4 (asked 7, from context 0), assumed 0, rework 1, test-fail 2, blocked 0, change 0, correction 1, stop 2
+        Last 5 shipped (5 items): override 0.4, question 1.6, rework 0.2 ...
+        1. plugin 4 / project 6 — a resource key was missing in pt-BR in two features: add it to the project rules. Approve?
+```
+
+Only the approved lessons are applied; then the epic is `done` and its `Autopilot:` line is removed.
+
+### 14.98 F-13 waits for F-12 to ship, and releases itself
+
+F-12 (Bank sync) is `building` in its worktree. F-13 (Card limit) says `- Depends on: F-12` in its `## Start`, and its refinement has just ended:
+
+```
+> aprovo F-13
+Claude: F-13 approved, then blocked: it depends on F-12 (building, D:/dev/wt/app/f-12-bank-sync); it releases itself at the first command after F-12 ships.
+        status: blocked, "Blocked (2026-10-12): depends on F-12 (building) — unblocked by the delivery of F-12 — returns to approved",
+        the approval and the block in ## Decisions, one blocked event, label `blocked` on the issue (the Status field stays Ready).
+```
+
+Typing a command on F-13 before F-12 ships stops after the item line and writes nothing; `--unblock` is refused too:
+
+```
+> /agile:build F-13
+Claude: F-13 — Card limit [blocked]
+        Worktree of F-13: D:/dev/wt/app/f-13-card-limit [feature/F-13]
+        F-13 is blocked: it depends on F-12 (building, D:/dev/wt/app/f-12-bank-sync); it releases itself at the first command after F-12 ships.
+> /agile:change F-13 --unblock
+Claude: F-13 — Card limit [blocked]
+        Refused: F-12 is not delivered yet (building). If F-13 no longer needs F-12, fix its Depends on with /agile:change F-13 <what changed>.
+```
+
+F-12 ships. Its report has one more line, read-only (F-14 depends on F-12 and on F-15):
+
+```
+> /agile:ship F-12
+Claude: ...
+        Dependents: F-13 free (released at its next command); F-14 waits on F-15 (building)
+```
+
+The next session starts with `Ready to release: F-13 Card limit — the first command on it releases it`. Nothing was written in F-13's worktree yet: the release happens when you touch it, and the command goes on:
+
+```
+> /agile:build F-13
+Claude: F-13 — Card limit [blocked]
+        Worktree of F-13: D:/dev/wt/app/f-13-card-limit [feature/F-13]
+        F-12 was delivered: F-13 is back to approved (the Blocked line and the label removed,
+        "2026-10-14: blocked (depends on F-12 (building)), unblocked (F-12 delivered)" in ## Decisions).
+        ...
+```
+
+Delivered means `status: done` on the main branch: with `Merge: pr`, F-12 still waiting on its pull request is not delivered yet. An `idea` or `refining` item is never blocked this way (it only shows `Waits on:`), and an item you blocked by hand (14.67) is never released by itself.
