@@ -63,6 +63,9 @@ Test-only; no file under `src/` changes.
 - Duplicates: none to fix; the rule is implemented once and its other tests already live in `Simulab.Email.Tests`.
 
 ## Regression test
+
+Tests locked: cd4c81024b8ea373a19e1d678fd0d7babb51b989 (2 files); unlocks: 0
+
 - `Simulab.Api.Tests.EmailProviderStartTests` (AC1 to AC3, the replaced tests) and `Simulab.Email.Tests.EmailProviderRegistrationTests` (AC4, AC5).
 - "Seen failing before the fix": the race cannot be forced alone (96 of 96 starts gave the right exception, see `## Cause`), so the evidence is the baseline of 2 red in 4 gate runs of 2026-10-09 (stack in `## Cause`) and the AC6 loop. The build says so in `## Delivery` instead of pretending a forced failure.
 
@@ -73,6 +76,7 @@ Test-only; no file under `src/` changes.
 - 2026-10-11 — Technical (no product impact): no new package; `ApiFactory` and its `IClassFixture` stay as they are (F-94 showed the fixture is not the cause); no new permission, screen or message.
 
 - 2026-10-11 — Approved by the owner ("aprovo B-26"), no open question.
+- 2026-10-11: tests unlocked (the helper of `EmailProviderStartTests` took `WebApplicationFactory<Program>`, which `ApiTestHostPinTests.ApiTestProjects_NeverUseTheFactoryDirectly` refuses; all 5 gate runs of the first loop were red on that one test and nothing else). It takes `IServiceProvider` now. Owner chose the recommended option. No criterion changed.
 
 ## Out of scope
 - The five `OpenIddictCertificateStartTests` and any other test not named above.
@@ -109,6 +113,7 @@ git diff main --stat
 ## Events
 
 - 2026-10-11 question — asked 3, from context 0
+- 2026-10-11 blocked — test wrong: the helper took WebApplicationFactory<Program>, which the F-56 architecture test refuses; it takes the host's IServiceProvider instead
 
 ## Delivery
 - Branch: bug/B-26
