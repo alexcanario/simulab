@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
+    <ProjectReference Include="..\Simulab.QuestionBank.Application\Simulab.QuestionBank.Application.csproj" />
+    <!-- Infrastructure is referenced for composition only (AddQuestionBankModule), per the profile. -->
+    <ProjectReference Include="..\Simulab.QuestionBank.Infrastructure\Simulab.QuestionBank.Infrastructure.csproj" />
+    <!-- Contracts only, for the "Permission:" policy name every module's endpoints are guarded by. -->
+    <ProjectReference Include="..\..\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

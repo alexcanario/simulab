@@ -29,7 +29,7 @@ public sealed class SubjectDetailInUsePageTests : SubjectsTestContext
         page.Find("button[aria-label='Delete: Crase']").HasAttribute("disabled").Should().BeFalse();
         page.FindComponents<AppRowActions>().Single(actions => actions.Instance.ItemName == "Ortografia")
             .Instance.DeleteDisabledReason
-            .Should().Be("Notice subjects map this topic. Remove it from their mappings before deleting it.");
+            .Should().Be("Notice subjects map this topic or questions use it. Remove those links before deleting it.");
         page.FindComponents<AppRowActions>().Single(actions => actions.Instance.ItemName == "Crase")
             .Instance.DeleteDisabledReason.Should().BeNull();
     }
@@ -48,7 +48,7 @@ public sealed class SubjectDetailInUsePageTests : SubjectsTestContext
         providers.Dialogs.WaitForAssertion(() => providers.Dialogs.Markup.Should().Contain("Crase"));
         providers.Dialogs.Find(".app-confirm-ok").Click();
 
-        page.WaitForAssertion(() => page.Markup.Should().Contain("Notice subjects map this topic, so it cannot be deleted. The list was reloaded."));
+        page.WaitForAssertion(() => page.Markup.Should().Contain("Notice subjects map this topic or questions use it, so it cannot be deleted. The list was reloaded."));
         page.WaitForAssertion(() => TopicReads.Should().BeGreaterThan(reads));
         page.FindAll(".app-item-row").Should().HaveCount(2);
     }

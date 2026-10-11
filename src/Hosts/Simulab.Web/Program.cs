@@ -24,6 +24,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 // F-33: the Catalog module's own typed client, same base address from service discovery.
 builder.Services.AddHttpClient<CatalogApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
+// F-95: the QuestionBank module's own typed client, same base address from service discovery.
+builder.Services.AddHttpClient<QuestionBankApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 // F-41 (v2): the Development-only diagnostics route. The client is registered everywhere; the route it
 // calls is mapped only in Development, and the page that uses it renders only there (BR9).
 builder.Services.AddHttpClient<AiApiClient>(client => client.BaseAddress = new Uri("https+http://api"));

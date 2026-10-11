@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- The entities validate against the module's own limits and answer with its own error codes. -->
+    <ProjectReference Include="..\Simulab.QuestionBank.Contracts\Simulab.QuestionBank.Contracts.csproj" />
+    <!-- SupportedLanguages, the one list of the app's languages (BR7). A module may read another module's Contracts. -->
+    <ProjectReference Include="..\..\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

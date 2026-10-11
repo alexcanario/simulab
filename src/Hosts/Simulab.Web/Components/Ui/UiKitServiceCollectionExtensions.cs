@@ -22,6 +22,8 @@ public static class UiKitServiceCollectionExtensions
         services.AddTransient<MudLocalizer, SharedResourcesMudLocalizer>();
         services.AddScoped<IConfirmService, ConfirmService>();
         services.AddScoped<ErrorText>();
+        // F-95: the rich text field's only door to the visual editor in the browser.
+        services.AddScoped<IRichTextEditorBridge, JsRichTextEditorBridge>();
         services.AddScoped<ThemeState>();
         services.AddScoped<PreferenceWriter>();
         return services;

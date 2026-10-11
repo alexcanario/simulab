@@ -20,5 +20,7 @@ internal static class GallerySections
         "gallery-suggest-field",
         // F-75: the read-only chip and the multi-pick field.
         "gallery-chip", "gallery-multi-pick-field",
+        // F-95: the rich text field in every state, and the option row built from it.
+        "gallery-rich-text",
     ];
 }

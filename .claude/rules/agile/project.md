@@ -92,6 +92,8 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - A test that starts a `BackgroundService` waits for its effect before `StopAsync`: `StartAsync` only queues `ExecuteAsync` with `Task.Run` and the stopping token, so an immediate stop can drop it unrun (B-19).
 - A test whose subject is "nothing happened" carries one assertion that proves the code under test ran at all; otherwise it passes hardest when the code never executed (B-19).
 - A sweep for a pattern across the solution takes its list of places from the guard test run before the fix, not from a hand-made grep: the refinement of B-23 listed nine places and the guard found a tenth (B-23).
+- A kit component that wraps a JavaScript library is opened once on the real page, through the app host, before the item is handed over, and the check reads the DOM the library built (`.ql-editor` for Quill): the bUnit tests use a fake of the bridge, so 1,357 green Web tests proved nothing about the editor, and the adapter's `createQuill` threw for the missing `QuillBlotFormatter` script so no editor existed at all (F-95).
+- A page state set inside a handler that a child component calls as a plain delegate (a row menu entry, `MoreActions`) is followed by `await InvokeAsync(StateHasChanged)`: it is not an `EventCallback` of the page, so nothing re-renders it, and the alert above the table never appeared (F-95, `Publish_RefusedAsIncomplete_ShowsTheCodesTextInTheTopAlert`). The brief of the `frontend` agent names this and the save-then-navigate rule of F-35.
 
 ## Packages
 - Versions live in `Directory.Packages.props` only. A `PackageReference` never has `Version=`.

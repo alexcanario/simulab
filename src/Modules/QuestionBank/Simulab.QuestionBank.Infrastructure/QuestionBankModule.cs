@@ -1,0 +1,54 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Simulab.Catalog.Contracts;
+using Simulab.Identity.Contracts;
+using Simulab.Persistence;
+using Simulab.QuestionBank.Application.Content;
+using Simulab.QuestionBank.Application.Questions;
+using Simulab.QuestionBank.Contracts;
+using Simulab.QuestionBank.Infrastructure.Persistence;
+using Simulab.SharedKernel.Security;
+
+namespace Simulab.QuestionBank.Infrastructure;
+
+/// <summary>Everything the QuestionBank module needs, registered by the host in one call (F-95).</summary>
+public static class QuestionBankModule
+{
+    public static IServiceCollection AddQuestionBankModule(this IServiceCollection services, string connectionString)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddDbContext<QuestionBankModuleDbContext>((provider, options) =>
+            ((DbContextOptionsBuilder<QuestionBankModuleDbContext>)options)
+                .UseNpgsql(connectionString, npgsql => npgsql.UseModuleHistoryTable(QuestionBankModuleDbContext.SchemaName))
+                .UseModuleConventions(provider));
+
+        // BR14: the names this module defines. Identity owns the table and seeds the union it finds here;
+        // questions.manage starts with the curators, and Admin gets everything anyway.
+        services.AddSingleton(new PermissionCatalog(
+            QuestionBankPermissions.ModuleName,
+            QuestionBankPermissions.All,
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                [QuestionBankPermissions.Manage] = [IdentityRoles.Curator]
+            }));
+
+        services.AddSingleton<QuestionHtmlSanitizer>();
+
+        services.AddScoped<IQuestionStore, QuestionStore>();
+        services.AddScoped<IQuestionQueries, QuestionQueries>();
+        services.AddScoped<SaveQuestionHandler>();
+        services.AddScoped<PublishQuestionHandler>();
+        services.AddScoped<UnpublishQuestionHandler>();
+        services.AddScoped<DeleteQuestionHandler>();
+
+        // BR13: the catalog asks this check before it deletes a topic.
+        services.AddScoped<ITopicUsageCheck, QuestionTopicUsageCheck>();
+
+        return services;
+    }
+
+    /// <summary>Applies this module's migrations. Development does it at start; a release does it from the pipeline.</summary>
+    public static Task MigrateQuestionBankModuleAsync(this IServiceProvider services, CancellationToken cancellationToken = default) =>
+        services.MigrateModuleAsync<QuestionBankModuleDbContext>(cancellationToken);
+}
