@@ -38,16 +38,15 @@
 | 32 | F-92 | An admin requires a user to change their password | idea | Foundation and identity | - | - |
 | 33 | F-111 | A release migrates the production database | idea | Cloud hosting and operations | - | - |
 | 34 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
-| 35 | F-114 | Field kinds look like what they do | validating | Foundation and identity | - | - |
-| 36 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
-| 37 | F-101 | Annul a question | idea | Question bank | F-98 | - |
-| 38 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-96, F-97 | - |
-| 39 | F-103 | Images in questions | idea | Question bank | F-89 | - |
-| 40 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-96, F-97 | - |
+| 35 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
+| 36 | F-101 | Annul a question | idea | Question bank | F-98 | - |
+| 37 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-96, F-97 | - |
+| 38 | F-103 | Images in questions | idea | Question bank | F-89 | - |
+| 39 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-96, F-97 | - |
 
 ## Summary
 
-- Delivered: 100
+- Delivered: 101
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
 - First release (question-bank): 1 of 5 delivered; missing: F-96, F-97, F-98, F-99

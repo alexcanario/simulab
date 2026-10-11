@@ -1,7 +1,7 @@
 ---
 feature: F-114
 epic: Foundation and identity
-status: validating
+status: done
 board: 162
 version: 2
 ---
@@ -239,3 +239,9 @@ Needed to validate: the local app host, a browser, light and dark theme and a ke
 - 2026-10-11 test-fail — 1 new warning(s): CA1859 in tests/Hosts/Simulab.Web.Tests/Ui/AppSelectFieldTests.cs, 2 reds
 
 ## Delivery
+- Branch: `feature/F-114` (merged and removed, never pushed). Merge commit: `3484822` on `main`. App version: 0.28.1 -> 0.29.0.
+- Tests at ship (`gate.js ship`, after merging `main` into the branch): Web 1442, Catalog 512, Identity 501, QuestionBank 98, AppHost 80, Api 58, ArchitectureTests 219, Jobs 25, Persistence 25, Email 19, Ai 10, ApiResults 13, SharedKernel 12; 0 failed; `agile gate GREEN`. Scan: `agile scan GREEN` (two medium findings in `tools/Simulab.DocGen`, older than this item).
+- Criteria: AC1-AC14 mapped in `## Criterion → test`; AC10's keys and AC12's light/dark look were checked by the owner on screen (validation steps 5 and 4-7).
+- Kit: `AppSelectField` is a filterable combobox with an arrow (optional `Loading`); `AppLookupField` ignores `LeadingIcon`; `AppIcons.Expand` and `Collapse`; gallery section `gallery-field-kinds`; rule "What each field kind looks like" in `ui-project.md`; 20 resource keys in the three languages; glossary rows `live region` and `lookup field`.
+- App manual: no page names the control, so none changed (searched `docs/manual/*`).
+- Found on screen during the build: the list's live region kept the previous count until the wrapper re-rendered, and the kind titles used the huge `h3` size; both fixed.
