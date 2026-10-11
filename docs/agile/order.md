@@ -4,45 +4,89 @@
 
 | # | Id | Title | Status | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|
-| 1 | F-96 | Questions from a past exam edition | idea | Question bank | - | F-99, F-110 |
-| 2 | F-97 | True/false questions | idea | Question bank | - | F-99, F-110 |
-| 3 | F-98 | Question versions and answer key changes | idea | Question bank | - | F-101 |
-| 4 | F-76 | Syllabus for students | refining | Subject taxonomy | - | - |
-| 5 | F-100 | Find questions in the back office | idea | Question bank | - | - |
-| 6 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
-| 7 | F-102 | Shared base text | idea | Question bank | - | - |
-| 8 | F-104 | Multiple-answer questions | idea | Question bank | - | - |
-| 9 | F-105 | Review before publishing | idea | Question bank | - | - |
-| 10 | F-78 | Notice subjects of the municipal guard editions | refining | Subject taxonomy | - | - |
-| 11 | F-108 | Short-answer questions | idea | Question bank | - | - |
-| 12 | F-106 | Matching questions | idea | Question bank | - | - |
-| 13 | F-107 | Fill-in-the-blanks questions | idea | Question bank | - | - |
-| 14 | F-109 | Open-answer and essay questions | idea | Question bank | - | - |
-| 15 | F-40 | Eval suite for model calls | idea | Foundation and identity | - | - |
-| 16 | F-61 | DocGen lists every tool offered to a model | idea | Foundation and identity | - | - |
-| 17 | F-69 | DocGen tool catalogue | idea | Foundation and identity | - | - |
-| 18 | F-70 | Record the visual identity | idea | Foundation and identity | - | - |
-| 19 | F-72 | EU representative before selling in Portugal | idea | Foundation and identity | - | - |
-| 20 | F-80 | Back-office exam search matches authority and state | idea | Assessment catalog | - | - |
-| 21 | F-81 | Park and start staging from a GitHub Actions workflow | idea | Cloud hosting and operations | - | - |
-| 22 | F-82 | Update the CI workflow actions to current majors | idea | Cloud hosting and operations | - | - |
-| 23 | F-83 | The stylesheet paints colours from the identity tokens | idea | Foundation and identity | - | - |
-| 24 | F-84 | Rotate the OpenIddict certificates without signing users out | idea | Foundation and identity | - | - |
-| 25 | F-85 | Existing users accept a new legal document version | idea | Foundation and identity | - | - |
-| 26 | F-86 | Copy notice subjects from another edition | approved | Subject taxonomy | - | - |
-| 27 | F-87 | Production emails leave from our own domain | idea | Cloud hosting and operations | - | - |
-| 28 | F-88 | Handle bounced and spam-flagged emails | idea | Cloud hosting and operations | - | - |
-| 29 | F-89 | Upload the notice PDF of an edition | approved | Assessment catalog | - | F-103 |
-| 30 | F-90 | Where a subject or topic is used | idea | Subject taxonomy | - | - |
-| 31 | F-91 | Glossary sweep of technical terms | idea | Foundation and identity | - | - |
-| 32 | F-92 | An admin requires a user to change their password | idea | Foundation and identity | - | - |
-| 33 | F-111 | A release migrates the production database | idea | Cloud hosting and operations | - | - |
-| 34 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
-| 35 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
-| 36 | F-101 | Annul a question | idea | Question bank | F-98 | - |
-| 37 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-96, F-97 | - |
-| 38 | F-103 | Images in questions | idea | Question bank | F-89 | - |
-| 39 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-96, F-97 | - |
+| 1 | B-27 | AppLookupField live region may keep the previous count after a search | idea | Foundation and identity | - | - |
+| 2 | F-96 | Questions from a past exam edition | idea | Question bank | - | F-99, F-110 |
+| 3 | F-97 | True/false questions | idea | Question bank | - | F-99, F-110 |
+| 4 | F-98 | Question versions and answer key changes | idea | Question bank | - | F-101 |
+| 5 | F-76 | Syllabus for students | refining | Subject taxonomy | - | - |
+| 6 | F-100 | Find questions in the back office | idea | Question bank | - | - |
+| 7 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
+| 8 | F-102 | Shared base text | idea | Question bank | - | - |
+| 9 | F-104 | Multiple-answer questions | idea | Question bank | - | - |
+| 10 | F-105 | Review before publishing | idea | Question bank | - | - |
+| 11 | F-78 | Notice subjects of the municipal guard editions | refining | Subject taxonomy | - | - |
+| 12 | F-108 | Short-answer questions | idea | Question bank | - | - |
+| 13 | F-106 | Matching questions | idea | Question bank | - | - |
+| 14 | F-107 | Fill-in-the-blanks questions | idea | Question bank | - | - |
+| 15 | F-109 | Open-answer and essay questions | idea | Question bank | - | - |
+| 16 | F-40 | Eval suite for model calls | idea | Foundation and identity | - | - |
+| 17 | F-61 | DocGen lists every tool offered to a model | idea | Foundation and identity | - | - |
+| 18 | F-69 | DocGen tool catalogue | idea | Foundation and identity | - | - |
+| 19 | F-70 | Record the visual identity | idea | Foundation and identity | - | - |
+| 20 | F-72 | EU representative before selling in Portugal | idea | Foundation and identity | - | - |
+| 21 | F-80 | Back-office exam search matches authority and state | idea | Assessment catalog | - | - |
+| 22 | F-81 | Park and start staging from a GitHub Actions workflow | idea | Cloud hosting and operations | - | - |
+| 23 | F-82 | Update the CI workflow actions to current majors | idea | Cloud hosting and operations | - | - |
+| 24 | F-83 | The stylesheet paints colours from the identity tokens | idea | Foundation and identity | - | - |
+| 25 | F-84 | Rotate the OpenIddict certificates without signing users out | idea | Foundation and identity | - | - |
+| 26 | F-85 | Existing users accept a new legal document version | idea | Foundation and identity | - | - |
+| 27 | F-86 | Copy notice subjects from another edition | approved | Subject taxonomy | - | - |
+| 28 | F-87 | Production emails leave from our own domain | idea | Cloud hosting and operations | - | - |
+| 29 | F-88 | Handle bounced and spam-flagged emails | idea | Cloud hosting and operations | - | - |
+| 30 | F-89 | Upload the notice PDF of an edition | approved | Assessment catalog | - | F-103 |
+| 31 | F-90 | Where a subject or topic is used | idea | Subject taxonomy | - | - |
+| 32 | F-91 | Glossary sweep of technical terms | idea | Foundation and identity | - | - |
+| 33 | F-92 | An admin requires a user to change their password | idea | Foundation and identity | - | - |
+| 34 | F-111 | A release migrates the production database | idea | Cloud hosting and operations | - | - |
+| 35 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
+| 36 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
+| 37 | F-101 | Annul a question | idea | Question bank | F-98 | - |
+| 38 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-96, F-97 | - |
+| 39 | F-103 | Images in questions | idea | Question bank | F-89 | - |
+| 40 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-96, F-97 | - |
+
+## Checklist
+
+- [ ] 1. B-27 — AppLookupField live region may keep the previous count after a search [idea]
+- [ ] 2. F-96 — Questions from a past exam edition [idea] — unlocks F-99, F-110
+- [ ] 3. F-97 — True/false questions [idea] — unlocks F-99, F-110
+- [ ] 4. F-98 — Question versions and answer key changes [idea] — unlocks F-101
+- [ ] 5. F-76 — Syllabus for students [refining]
+- [ ] 6. F-100 — Find questions in the back office [idea]
+- [ ] 7. F-77 — Subject and topic aliases [approved]
+- [ ] 8. F-102 — Shared base text [idea]
+- [ ] 9. F-104 — Multiple-answer questions [idea]
+- [ ] 10. F-105 — Review before publishing [idea]
+- [ ] 11. F-78 — Notice subjects of the municipal guard editions [refining]
+- [ ] 12. F-108 — Short-answer questions [idea]
+- [ ] 13. F-106 — Matching questions [idea]
+- [ ] 14. F-107 — Fill-in-the-blanks questions [idea]
+- [ ] 15. F-109 — Open-answer and essay questions [idea]
+- [ ] 16. F-40 — Eval suite for model calls [idea]
+- [ ] 17. F-61 — DocGen lists every tool offered to a model [idea]
+- [ ] 18. F-69 — DocGen tool catalogue [idea]
+- [ ] 19. F-70 — Record the visual identity [idea]
+- [ ] 20. F-72 — EU representative before selling in Portugal [idea]
+- [ ] 21. F-80 — Back-office exam search matches authority and state [idea]
+- [ ] 22. F-81 — Park and start staging from a GitHub Actions workflow [idea]
+- [ ] 23. F-82 — Update the CI workflow actions to current majors [idea]
+- [ ] 24. F-83 — The stylesheet paints colours from the identity tokens [idea]
+- [ ] 25. F-84 — Rotate the OpenIddict certificates without signing users out [idea]
+- [ ] 26. F-85 — Existing users accept a new legal document version [idea]
+- [ ] 27. F-86 — Copy notice subjects from another edition [approved]
+- [ ] 28. F-87 — Production emails leave from our own domain [idea]
+- [ ] 29. F-88 — Handle bounced and spam-flagged emails [idea]
+- [ ] 30. F-89 — Upload the notice PDF of an edition [approved] — unlocks F-103
+- [ ] 31. F-90 — Where a subject or topic is used [idea]
+- [ ] 32. F-91 — Glossary sweep of technical terms [idea]
+- [ ] 33. F-92 — An admin requires a user to change their password [idea]
+- [ ] 34. F-111 — A release migrates the production database [idea]
+- [ ] 35. F-113 — Table button in the rich text editor [idea]
+- [ ] 36. F-115 — One test helper for every module's permissions [idea]
+- [ ] 37. F-101 — Annul a question [idea] — waits on F-98
+- [ ] 38. F-99 — Transcribe the paper of an edition [idea] — waits on F-96, F-97
+- [ ] 39. F-103 — Images in questions [idea] — waits on F-89
+- [ ] 40. F-110 — Sample questions of the municipal guard editions [idea] — waits on F-96, F-97
 
 ## Summary
 
