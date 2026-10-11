@@ -37,7 +37,7 @@ Technical terms: [glossary](../glossary.md)
 | <decision / access / environment / team> | F-<n> | <person or team> | <owner or Claude> |
 
 ## First release cut
-<!-- Which features must be done before the first release. -->
+<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. -->
 
 ## Out of scope
 - <Item>

@@ -3598,3 +3598,81 @@ Claude: F-13 — Card limit [blocked]
 ```
 
 Entregue quer dizer `status: done` na branch principal: com `Merge: pr`, F-12 ainda esperando o pull request não está entregue. Um item em `idea` ou `refining` nunca é bloqueado assim (só mostra `Waits on:`), e um item que você bloqueou à mão (14.67) nunca se libera sozinho.
+
+### 14.99 Arquivando o que está finalizado: `/agile:compact`
+
+O acme-shop entregou 36 itens e o retro-log tem 32 entradas, 6.400 palavras. O início da sessão imprimiu uma linha (ela só avisa; nada se move):
+
+```
+Compact: 36 finished items (~74800 words), retro-log 6400 words: /agile:compact
+```
+
+Entre features, você digita o comando e lê o plano:
+
+```
+> /agile:compact
+Claude: Plano, nada foi escrito ainda:
+        | Item | Título | Status | De → para | Palavras |
+        | F-1 | Sign in | done | docs/features/F-1-sign-in.md → docs/archive/F-1-sign-in.md | 2.140 |
+        | ... mais 34: F-2 a F-31, B-1 a B-4 | | | | |
+        Mockups que vão junto: 3 (docs/archive/mockups/)
+        Ficam: F-32 (done, uma worktree segura a branch: o pull request está aberto), F-33 (approved), F-34 (idea)
+        Retro-log: 21 das 32 entradas movem; as 10 mais recentes ficam, e uma entrada antiga fica pela nota ⏳ aberta
+        Links reescritos: docs/agile/backlog.md 29, docs/epics/shop.md 6
+        Palavras que uma sessão relê: 82.900 → 8.700
+        Aplico este plano? (ok / deixa)
+> ok
+Claude: agile compact APPLIED: 35 items, 3 mockups, 21 retro-log entries, 35 links; nothing was committed
+        git status --short: 35 renomeados, docs/archive/INDEX.md e docs/archive/retro-log.md novos,
+        docs/agile/backlog.md, docs/epics/shop.md e docs/agile/retro-log.md modificados
+        Commit proposto: chore: archive 35 finished items and 21 retro-log entries (/agile:compact)
+        Autoriza o commit na main?
+> ok
+Claude: Commitado. Rodar de novo não encontra nada para mover.
+```
+
+O que o arquivo muda depois: um bug novo ganha `B-5`, porque `B-1` a `B-4` só estão no índice e os números deles continuam tomados; e uma ideia posterior encontra o assunto já entregue no índice, sem abrir nenhum arquivo arquivado:
+
+```
+> /agile:idea "baixar os resultados em um arquivo CSV"
+Claude: Item parecido: F-12 — Export results to CSV [done], lido de docs/archive/INDEX.md.
+        Already delivered in F-12 (0.14.0). Crio um item novo mesmo assim, ou deixo?
+```
+
+Com um item em `building`, o mesmo comando para e não move nada:
+
+```
+> /agile:compact
+Claude: F-33 está em building em D:/dev/wt/acme-shop/f-33-print-layout: o compact roda entre features.
+        Nada foi movido. Termine ou pause o F-33 e digite o comando de novo.
+```
+
+### 14.100 A ordem do que implementar: `/agile:order`
+
+O acme-shop tem quatro itens em aberto: F-12 (Must, em construção), F-13 (bloqueado até o F-12 ser entregue), F-14 (Should) e B-2, um bug. O épico `shop` lista `F-12, F-13` em `## First release cut`. Você digita o comando uma vez:
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 4 items, 11 delivered
+        | # | Id | Título | Status | Épico | Depende de | Libera |
+        | 1 | B-2 | Total errado em reembolsos | approved | - | - | - |
+        | 2 | F-12 | Export results to CSV | building | shop | - | F-13 (unblocks), first release of shop |
+        | 3 | F-14 | Print layout | approved | shop | - | - |
+        | 4 | F-13 | Share by link | blocked | shop | F-12 | - |
+        First release (shop): 0 of 2 delivered; missing: F-12, F-13
+        Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
+        Commit proposto: chore(order): refresh the ordered list
+        Autoriza o commit na main?
+> ok
+Claude: Commitado. Daqui em diante o ship atualiza este arquivo a cada entrega.
+```
+
+O B-2 vem primeiro: um bug vai antes das features do nível dele. O F-13 fica um nível abaixo do F-12 porque espera por ele. Quando você entrega o F-12, o ship atualiza o arquivo no commit que põe o F-12 em `done` e reporta uma linha:
+
+```
+> /agile:ship F-12
+Claude: ...
+        Order: F-13 liberado; primeira versão (shop): falta 1.
+```
+
+A linha diz o que a entrega liberou (o F-13 saiu do bloqueio na mesma hora) e o quanto falta da primeira versão. Um projeto que nunca digitou `/agile:order` vê `Order: sem lista (/agile:order cria).` e nada é escrito.

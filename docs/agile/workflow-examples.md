@@ -3592,3 +3592,81 @@ Claude: F-13 — Card limit [blocked]
 ```
 
 Delivered means `status: done` on the main branch: with `Merge: pr`, F-12 still waiting on its pull request is not delivered yet. An `idea` or `refining` item is never blocked this way (it only shows `Waits on:`), and an item you blocked by hand (14.67) is never released by itself.
+
+### 14.99 Archiving what is finished: `/agile:compact`
+
+acme-shop has delivered 36 items and its retro log holds 32 entries, 6,400 words. The session start printed one line (it only tells; nothing moves):
+
+```
+Compact: 36 finished items (~74800 words), retro-log 6400 words: /agile:compact
+```
+
+Between features, you type the command and read the plan:
+
+```
+> /agile:compact
+Claude: Plan, nothing written yet:
+        | Item | Title | Status | From → to | Words |
+        | F-1 | Sign in | done | docs/features/F-1-sign-in.md → docs/archive/F-1-sign-in.md | 2,140 |
+        | ... 34 more: F-2 to F-31, B-1 to B-4 | | | | |
+        Mockups that go with them: 3 (docs/archive/mockups/)
+        Stays: F-32 (done, a worktree holds its branch: its pull request is open), F-33 (approved), F-34 (idea)
+        Retro log: 21 of 32 entries move; the 10 most recent stay, and one old entry stays for its open ⏳ note
+        Links rewritten: docs/agile/backlog.md 29, docs/epics/shop.md 6
+        Words a session rereads: 82,900 → 8,700
+        Apply this plan? (ok / leave it)
+> ok
+Claude: agile compact APPLIED: 35 items, 3 mockups, 21 retro-log entries, 35 links; nothing was committed
+        git status --short: 35 renamed, docs/archive/INDEX.md and docs/archive/retro-log.md new,
+        docs/agile/backlog.md, docs/epics/shop.md and docs/agile/retro-log.md modified
+        Proposed commit: chore: archive 35 finished items and 21 retro-log entries (/agile:compact)
+        Authorize the commit on main?
+> ok
+Claude: Committed. A rerun finds nothing to move.
+```
+
+What the archive changes afterwards: a new bug takes `B-5`, because `B-1` to `B-4` are only in the index and their numbers are taken; and a later idea finds a delivered subject in the index, with no archived file opened:
+
+```
+> /agile:idea "download the results as a CSV file"
+Claude: Similar item: F-12 — Export results to CSV [done], read from docs/archive/INDEX.md.
+        Already delivered in F-12 (0.14.0). Create a new item anyway, or leave it?
+```
+
+With an item in `building`, the same command stops and moves nothing:
+
+```
+> /agile:compact
+Claude: F-33 is building in D:/dev/wt/acme-shop/f-33-print-layout: compact runs between features.
+        Nothing was moved. Finish or pause F-33, then type the command again.
+```
+
+### 14.100 The order of what to implement: `/agile:order`
+
+acme-shop has four open items: F-12 (Must, building), F-13 (blocked until F-12 is delivered), F-14 (Should) and B-2, a bug. The epic `shop` lists `F-12, F-13` under `## First release cut`. You type the command once:
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 4 items, 11 delivered
+        | # | Id | Title | Status | Epic | Depends on | Unlocks |
+        | 1 | B-2 | Wrong total on refunds | approved | - | - | - |
+        | 2 | F-12 | Export results to CSV | building | shop | - | F-13 (unblocks), first release of shop |
+        | 3 | F-14 | Print layout | approved | shop | - | - |
+        | 4 | F-13 | Share by link | blocked | shop | F-12 | - |
+        First release (shop): 0 of 2 delivered; missing: F-12, F-13
+        Written from 4 items. git status --short: docs/agile/order.md new
+        Proposed commit: chore(order): refresh the ordered list
+        Authorize the commit on main?
+> ok
+Claude: Committed. From now on the ship refreshes this file after each delivery.
+```
+
+B-2 comes first: a bug goes before the features of its level. F-13 is one level below F-12 because it waits on it. When you ship F-12, the ship refreshes the file in the commit that sets F-12 `done` and reports one line:
+
+```
+> /agile:ship F-12
+Claude: ...
+        Order: F-13 unlocked; first release (shop): 1 missing.
+```
+
+The line says what the delivery unlocked (F-13 was released from its block at the same time) and how far the first release is. A project that never typed `/agile:order` sees `Order: no list (/agile:order creates it).` and nothing is written.
