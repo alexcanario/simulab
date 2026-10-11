@@ -157,7 +157,7 @@ Existing keys reused by the section: `Subjects.Field.Area`, `Subjects.Field.Area
 
 ## Criterion → test
 
-Tests locked: 2ab9b4b70f5bda418a1f2e3b355e89ae46781cc0 (3 files); unlocks: 0
+Tests locked: 5a36f00a64081e230f5be0de7141ed51efd56010 (3 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
@@ -170,7 +170,7 @@ Tests locked: 2ab9b4b70f5bda418a1f2e3b355e89ae46781cc0 (3 files); unlocks: 0
 | AC7 | AppLookupFieldTests.Render_WithALeadingIcon_StillShowsTheMagnifier; AppLookupFieldTests (the existing defaults tests) |
 | AC8 | AppSelectFieldTests.Render_Disabled_DisablesTheInputAndKeepsTheHint; AppSelectFieldTests.Render_WithAnError_ShowsItInsteadOfTheHintAndKeepsTheArrow |
 | AC9 | ThemeContrastTests.ActionIcon_ReadsAtNonTextMinimumOnItsSurfaces (the arrow is painted in ActionDefault, already asserted on surface and background in both themes) |
-| AC10 | AppSelectFieldTests.Keyboard_ArrowDownOpens_EscapeCloses_EnterPicks; validation step (Esc inside a real dialog) |
+| AC10 | AppSelectFieldTests.Render_TheArrowIsNotATabStop (one Tab stop, combobox role in AC1); validation step 5 (arrow-down, arrow keys, Enter, Esc inside a real dialog: bUnit cannot drive MudBlazor's JS key interceptor) |
 | AC11 | the existing page tests of the 10 pages, unchanged (full suite) |
 | AC12 | UiGalleryFieldKindsTests (three kinds, nine states); UiGalleryTests and DevPagesHostTests iterate GallerySections.All; validation step (light and dark) |
 | AC13 | SelectFieldResourcesTests.Key_HasATextInTheLanguage; ResourceParityTests |
@@ -187,6 +187,8 @@ Tests locked: 2ab9b4b70f5bda418a1f2e3b355e89ae46781cc0 (3 files); unlocks: 0
 - 2026-10-11 — Screen, open point 1 (icon + arrow): try both in the gallery, fall back to the arrow alone — the owner chose the recommended option (BR5 unchanged).
 - 2026-10-11 — Screen, open point 2: `AppSelectField` gets an optional `Loading` bool (default false); the 7 database lists may opt in later — the owner chose the recommended option (AC14).
 - 2026-10-11 — Screen, open point 3: `AppLookupField` ignores `LeadingIcon` and always shows the magnifier; the parameter stays so call sites compile — the owner chose the recommended option (AC7). Call sites that pass `LeadingIcon` to a lookup lose the icon.
+- 2026-10-11 — tests unlocked (owner, "Destravar e reescrever"): `AppSelectFieldTests` had a CA1859 warning in its helper, a keyboard test bUnit cannot run (MudBlazor's keys go through a JS interceptor; a probe test showed Esc and Enter change nothing), and a disabled assertion the library does not satisfy (it mutes the arrow through `mud-disabled` on the input, not a `disabled` attribute on the button). The keyboard keys moved to the validation script; the code was not changed to satisfy a test.
+- 2026-10-11 — Build: `aria-controls` is left out of the combobox (the library gives its list no id to point at, and a dangling id fails axe); the live samples of the open-list and no-results states carry a literal sample term next to the caption.
 - 2026-10-11 — Screen, open points 4 and 5: `SelectField.Results` and `.Loading` belong to AC13; the gallery shows the live field with a caption for the open and no-results states — the owner chose the recommended option. Point 6 (content is not translated): no change.
 
 ## Out of scope
@@ -214,5 +216,6 @@ Tests locked: 2ab9b4b70f5bda418a1f2e3b355e89ae46781cc0 (3 files); unlocks: 0
 - 2026-10-11 question — asked 4, from context 2
 - 2026-10-11 override — Arrow x leading icon — chose "try both in the kit" over "arrow wins"
 - 2026-10-11 change — v2: screen design approved; AC7, AC12, AC13 changed, AC14 added
+- 2026-10-11 blocked — test wrong: CA1859 warning in helper; keyboard test cannot run in bUnit (MudBlazor key handling is a JS interceptor); disabled assertion corrected to the library's mud-disabled wrapper
 
 ## Delivery

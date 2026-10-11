@@ -104,4 +104,10 @@ public static class AppIcons
 
     /// <summary>F-74: moves a row of a sortable list down.</summary>
     public const string MoveDown = Icons.Material.Outlined.ArrowDownward;
+
+    /// <summary>F-114: the arrow at the end of a list field, closed. The library default is the Filled family.</summary>
+    public const string Expand = Icons.Material.Outlined.ArrowDropDown;
+
+    /// <summary>F-114: the same arrow while the list is open.</summary>
+    public const string Collapse = Icons.Material.Outlined.ArrowDropUp;
 }

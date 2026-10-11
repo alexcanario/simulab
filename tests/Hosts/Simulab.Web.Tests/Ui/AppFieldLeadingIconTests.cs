@@ -58,6 +58,7 @@ public sealed class AppFieldLeadingIconTests : KitTestContext
             .Add(select => select.LeadingIcon, AppIcons.Scope)
             .Add(select => select.Options, [new AppSelectOption<string>("National", "National")]));
 
-        field.Find(".mud-input-adornment-start").Should().NotBeNull();
+        // F-114 AC6/BR5: the kit draws the icon itself so the library's one slot can hold the arrow.
+        field.Find(".app-select-leading").GetAttribute("aria-hidden").Should().Be("true");
     }
 }

@@ -1,5 +1,8 @@
-@* One select field everywhere, laid out like AppTextField: label above, required marker, hint or error below (rule: ui). *@
+@* One list field everywhere (F-114): the page holds the whole list, the arrow at the end says it opens before the reader
+   types, and typing narrows it in memory. Laid out like AppTextField: label above, required marker, hint or error
+   below (rule: ui). A list that needs typing first, answered by the server, is AppLookupField. *@
 @typeparam TValue
+@inject IStringLocalizer<SharedResources> L
 
 <div class="app-field @(HasError ? "app-field-error" : null)">
     <label class="app-field-label" id="@LabelId" for="@Id">
@@ -9,23 +12,51 @@
             <span class="app-field-required" aria-hidden="true">*</span>
         }
     </label>
-    <MudSelect T="TValue"
-               Value="Value"
-               ValueChanged="OnValueChanged"
-               Variant="Variant.Outlined"
-               Margin="Margin.Dense"
-               AnchorOrigin="Origin.BottomLeft"
-               Disabled="Disabled"
-               Error="HasError"
-               ToStringFunc="TextOf"
-               Adornment="@(LeadingIcon is null ? Adornment.None : Adornment.Start)"
-               AdornmentIcon="@LeadingIcon"
-               UserAttributes="@Attributes">
-        @foreach (var option in Options)
+    @* Esc closes the list and stops here, so a dialog around the field stays open; with the list closed it goes on
+       to the dialog as usual. The handler is empty on purpose: the modifier needs one to take effect. *@
+    <div class="app-select @(LeadingIcon is null ? null : "app-select-has-icon") @(Loading ? "app-select-loading" : null) @(Disabled ? "app-select-disabled" : null)"
+         @onkeydown="OnKeyDown" @onkeydown:stopPropagation="_open">
+        @if (LeadingIcon is not null)
         {
-            <MudSelectItem T="TValue" Value="@option.Value"><span lang="@option.Lang">@option.Text</span></MudSelectItem>
+            @* BR5: drawn by the kit over the input's left padding; the library has one adornment slot and the arrow uses it. *@
+            <MudIcon Icon="@LeadingIcon" Class="app-select-leading" aria-hidden="true" />
         }
-    </MudSelect>
+        <MudAutocomplete T="AppSelectOption<TValue>"
+                         Value="SelectedOption"
+                         ValueChanged="OnValueChanged"
+                         SearchFunc="SearchOptionsAsync"
+                         ToStringFunc="TextOf"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         MinCharacters="0"
+                         MaxItems="@Math.Max(Options.Count, 1)"
+                         OpenOnFocus="true"
+                         Clearable="false"
+                         CoerceText="true"
+                         Disabled="Disabled"
+                         Error="HasError"
+                         OpenChanged="OnOpenChanged"
+                         Adornment="@(Loading ? Adornment.None : Adornment.End)"
+                         AdornmentIcon="@(_open ? AppIcons.Collapse : AppIcons.Expand)"
+                         OpenIcon="@AppIcons.Expand"
+                         CloseIcon="@AppIcons.Collapse"
+                         AdornmentAriaLabel="@(_open ? L["SelectField.Collapse"] : L["SelectField.Expand"])"
+                         UserAttributes="@Attributes">
+            <ItemTemplate>
+                <span class="app-select-option" lang="@context.Lang">@context.Text</span>
+            </ItemTemplate>
+            <NoItemsTemplate>
+                <div class="app-select-message">@(Loading ? L["SelectField.Loading"] : L["SelectField.NoResults", _lastTerm])</div>
+            </NoItemsTemplate>
+        </MudAutocomplete>
+        @if (Loading)
+        {
+            @* Page still fetching the options: a small progress where the arrow would be (AC14). *@
+            <span class="app-select-progress" aria-hidden="true">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
+            </span>
+        }
+    </div>
     <span id="@DescriptionId" class="app-field-description">
         @if (HasError)
         {
@@ -36,6 +67,7 @@
             <span class="app-field-hint">@Hint</span>
         }
     </span>
+    <span class="app-visually-hidden" aria-live="polite">@_announcement</span>
 </div>
 
 @code {
@@ -63,8 +95,13 @@
     /// meaning of its own; the label does.</summary>
     [Parameter] public string? LeadingIcon { get; set; }
 
-    /// <summary>F-114 AC14: the page is still fetching the options. Skeleton: the behavior comes with the build.</summary>
+    /// <summary>F-114 AC14: the page is still fetching the options. A progress takes the arrow's place and the list
+    /// says so. Default false: no call site has to change.</summary>
     [Parameter] public bool Loading { get; set; }
+
+    private string _lastTerm = string.Empty;
+    private bool _open;
+    private string _announcement = string.Empty;
 
     private bool HasError => !string.IsNullOrEmpty(Error);
 
@@ -72,21 +109,93 @@
 
     private string DescriptionId => $"{Id}-description";
 
+    private AppSelectOption<TValue>? SelectedOption =>
+        Options.FirstOrDefault(option => EqualityComparer<TValue>.Default.Equals(option.Value, Value));
+
+    // The same set AppLookupField writes: MudBlazor 9.9 renders a plain text input for the autocomplete, so the
+    // combobox role and its state are written here, once, and every picker announces itself the same way (rule: ui).
+    // aria-controls is left out: the library draws the list in its own popover and gives it no id to point at.
     private Dictionary<string, object?> Attributes => new()
     {
         ["id"] = Id,
+        ["role"] = "combobox",
+        ["aria-expanded"] = _open ? "true" : "false",
+        ["aria-autocomplete"] = "list",
+        ["aria-haspopup"] = "listbox",
         ["aria-labelledby"] = LabelId,
         ["aria-describedby"] = DescriptionId,
         ["aria-invalid"] = HasError ? "true" : null,
-        ["aria-required"] = Required ? "true" : null
+        ["aria-required"] = Required ? "true" : null,
+        ["autocomplete"] = "off"
     };
 
-    private string TextOf(TValue? value) =>
-        Options.FirstOrDefault(option => EqualityComparer<TValue>.Default.Equals(option.Value, value))?.Text ?? string.Empty;
+    private static string TextOf(AppSelectOption<TValue>? option) => option?.Text ?? string.Empty;
 
-    private Task OnValueChanged(TValue? value)
+    private Task OnOpenChanged(bool open)
     {
-        Value = value;
-        return ValueChanged.InvokeAsync(value);
+        _open = open;
+
+        return Task.CompletedTask;
+    }
+
+    private static void OnKeyDown(KeyboardEventArgs _)
+    {
+    }
+
+    // In memory, ignoring case and accents. BR4: while the input still shows the selected option's text (the "All"
+    // of a filter), that text is not a term, so focusing the field lists every option.
+    private Task<IEnumerable<AppSelectOption<TValue>>> SearchOptionsAsync(string? term, CancellationToken cancellationToken)
+    {
+        _lastTerm = term ?? string.Empty;
+
+        if (Loading)
+        {
+            _announcement = L["SelectField.Loading"];
+
+            return Task.FromResult<IEnumerable<AppSelectOption<TValue>>>([]);
+        }
+
+        var narrows = _lastTerm.Length > 0 && !string.Equals(_lastTerm, SelectedOption?.Text, StringComparison.Ordinal);
+        IReadOnlyList<AppSelectOption<TValue>> found = Options;
+        if (narrows)
+        {
+            var folded = Fold(_lastTerm);
+            found = [.. Options.Where(option => Fold(option.Text).Contains(folded, StringComparison.OrdinalIgnoreCase))];
+        }
+
+        _announcement = found.Count == 0
+            ? L["SelectField.NoResults", _lastTerm]
+            : L["SelectField.Results", found.Count];
+
+        return Task.FromResult<IEnumerable<AppSelectOption<TValue>>>(found);
+    }
+
+    private static string Fold(string text)
+    {
+        var decomposed = text.Normalize(System.Text.NormalizationForm.FormD);
+        var builder = new System.Text.StringBuilder(decomposed.Length);
+        foreach (var character in decomposed)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(character) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(character);
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    // One pick, one ValueChanged. A null option is the library clearing the text, not a choice: the empty choice of
+    // a filter is a real first option with a null value.
+    private Task OnValueChanged(AppSelectOption<TValue>? option)
+    {
+        if (option is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = option.Value;
+
+        return ValueChanged.InvokeAsync(option.Value);
     }
 }

@@ -400,6 +400,26 @@
   <data name="Lookup.Hint.MinChars" xml:space="preserve"><value>Escreva pelo menos {0} caracteres</value></data>
   <data name="Lookup.Results" xml:space="preserve"><value>Resultados: {0}</value></data>
   <data name="Lookup.NoResults" xml:space="preserve"><value>Nada encontrado para "{0}".</value></data>
+  <data name="SelectField.Expand" xml:space="preserve"><value>Mostrar as opções</value></data>
+  <data name="SelectField.Collapse" xml:space="preserve"><value>Ocultar as opções</value></data>
+  <data name="SelectField.NoResults" xml:space="preserve"><value>Nenhuma opção corresponde a "{0}".</value></data>
+  <data name="SelectField.Results" xml:space="preserve"><value>Opções: {0}</value></data>
+  <data name="SelectField.Loading" xml:space="preserve"><value>A carregar as opções...</value></data>
+  <data name="Gallery.Section.FieldKinds" xml:space="preserve"><value>Tipos de campo</value></data>
+  <data name="Gallery.FieldKinds.Hint" xml:space="preserve"><value>O aspeto diz a ação: a seta no fim abre a lista antes de escrever e estreita-a à medida que se escreve; a lupa no início pede que se escreva primeiro, e o servidor responde; um campo simples é texto livre.</value></data>
+  <data name="Gallery.FieldKinds.Select" xml:space="preserve"><value>Caixa de combinação com seta (AppSelectField)</value></data>
+  <data name="Gallery.FieldKinds.Lookup" xml:space="preserve"><value>Pesquisa com lupa (AppLookupField)</value></data>
+  <data name="Gallery.FieldKinds.Text" xml:space="preserve"><value>Texto livre (AppTextField)</value></data>
+  <data name="Gallery.FieldKinds.State.Empty" xml:space="preserve"><value>Vazio</value></data>
+  <data name="Gallery.FieldKinds.State.WithValue" xml:space="preserve"><value>Com valor</value></data>
+  <data name="Gallery.FieldKinds.State.Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Gallery.FieldKinds.State.Error" xml:space="preserve"><value>Erro</value></data>
+  <data name="Gallery.FieldKinds.State.LongText" xml:space="preserve"><value>Texto longo</value></data>
+  <data name="Gallery.FieldKinds.State.Loading" xml:space="preserve"><value>A carregar</value></data>
+  <data name="Gallery.FieldKinds.State.Open" xml:space="preserve"><value>Lista aberta</value></data>
+  <data name="Gallery.FieldKinds.State.NoResults" xml:space="preserve"><value>Sem resultados</value></data>
+  <data name="Gallery.FieldKinds.State.LeadingIcon" xml:space="preserve"><value>Ícone no campo</value></data>
+  <data name="Gallery.FieldKinds.State.NotApplicable" xml:space="preserve"><value>Este tipo não tem esse estado.</value></data>
   <data name="Lookup.LoadFailed" xml:space="preserve"><value>A pesquisa falhou.</value></data>
   <data name="Lookup.Clear" xml:space="preserve"><value>Limpar a seleção</value></data>
   <data name="Exams.Title" xml:space="preserve"><value>Exames</value></data>
