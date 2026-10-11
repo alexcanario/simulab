@@ -137,6 +137,9 @@ public sealed class AppLookupFieldTests : KitTestContext
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
 
+    private static IEnumerable<string> PathData(string svg) =>
+        System.Text.RegularExpressions.Regex.Matches(svg, "\\bd=\"([^\"]+)\"").Select(match => match.Groups[1].Value);
+
     // F-114 AC7: the magnifier says "type first, the server answers"; a leading icon no longer takes its place.
     [Fact]
     public void Render_WithALeadingIcon_StillShowsTheMagnifier()
@@ -149,8 +152,9 @@ public sealed class AppLookupFieldTests : KitTestContext
             .Add(component => component.LeadingIcon, AppIcons.Scope));
 
         var start = field.Find(".mud-input-adornment-start");
-        start.InnerHtml.Should().Contain(AppIcons.Search);
-        start.InnerHtml.Should().NotContain(AppIcons.Scope);
+        var drawn = start.QuerySelectorAll("path").Select(path => path.GetAttribute("d")).ToList();
+        PathData(AppIcons.Search).Should().OnlyContain(data => drawn.Contains(data), "the magnifier is drawn");
+        PathData(AppIcons.Scope).Where(data => data != "M0 0h24v24H0V0z").Should().NotContain(data => drawn.Contains(data), "the leading icon is ignored");
         field.Find(".app-field-description").TextContent.Should().Contain("Type at least 2 characters");
     }
 
