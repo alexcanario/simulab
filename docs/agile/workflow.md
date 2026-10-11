@@ -1,6 +1,6 @@
 # agile@canary — Manual (en)
 
-> Version 0.52.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
+> Version 0.54.0 (draft). Português: [pt-BR](workflow.pt-BR.md).
 
 Contents
 1. Concepts in two minutes
@@ -693,6 +693,10 @@ Then run `/agile:sync` in the project. Claude shows a table of what changed and 
 
 **Two items in parallel.** The default is still one item at a time in `building`. When you really want a second one running — a long feature in one session and a bug in another — type `/agile:build <id> --worktree`. The flag is your request for parallel work: it lifts the one-at-a-time limit (and, for an item approved before this existed, creates the missing folder). Claude first tells you whether the two items can collide (same module schema, same screen, same contract) and recommends sequence when they do. One writer per worktree. The item status lives in that worktree until the merge, and `/agile:status` and the session start read every worktree. Only one app host runs at a time (the ports collide); ignored local files are not carried over. The app host of a worktree is started from that worktree in a background shell and opened in the preview by its URL; no launch configuration is pointed at a worktree. Anything a step starts inside a worktree (an app host, a server, a watcher) is stopped by that step, so nothing holds the folder at ship; a mockup is shown to you as a file, never through a server. On ship, the full check runs in the worktree and the merge in the main checkout; after the merge the worktree and the branch are removed, never with `--force` without asking, and the other item in progress is brought up to date. Recommended limit: two items — you validate each one on screen, and that is the real bottleneck.
 
+**Rereading less (#165).** Every delivered item stays in `docs/features/` and `docs/bugs/`, and every retro adds an entry to `docs/agile/retro-log.md`, so what a session rereads only grows (the "Similar items" search of `/agile:idea` and `/agile:refine` reads every item). `/agile:compact` moves what is finished to `docs/archive/` and leaves one index row per item in `docs/archive/INDEX.md`. It runs only when you type it, between features: it shows a table (what moves, what stays and why, the links it rewrites, the words before and after), waits for your ok, moves the files with `git mv` and proposes the commit; it never commits by itself. Moved: the items that are `done` or `cancelled` and that no worktree holds (with their mockups), and the old entries of the retro log (the 10 most recent stay, and so does every entry that still holds an open ⏳ note). Never moved: ADRs, the glossary, discussions, epics, items in any other status, the table "Plugin notes — status". It stops and moves nothing when an item is `building` or `validating`, when a file it would change has uncommitted edits, or off the main branch. Links to a moved file are rewritten; a plain-text mention of its old path is not. Numbers stay taken: the next `F-` / `B-` number and the uniqueness of a ticket id count the index rows, and "Similar items" reads the rows instead of the files (a delivered subject is still answered `Already delivered in F-<n>`). When the finished items pass 20,000 words, or the retro log 6,000, the session start and `/agile:status` print one `Compact:` line; it only tells you, nothing moves. A rerun finds nothing to move, and `/agile:sync` never touches `docs/archive/`. Example 14.99.
+
+**An ordered list of what to implement (#166).** `/agile:order` writes `docs/agile/order.md`: the open items (`idea` to `validating`, `blocked` included) in the order they should be implemented, with what each one depends on and what its delivery unlocks. The order is the rule of the epic's execution plan, nothing more: dependencies first (an item sits one level below its undelivered dependencies), then a bug before a feature, Must, Should, Could, then size S, M, L, then the id. The `Unlocks` column names the items that wait on it (`F-13 (unblocks)` when this is the last thing a `blocked` item waits on) and `first release of <epic>` when it is the last id of that epic's `## First release cut`, which is read as a list of ids (`F-12, F-13, F-14`; a range or prose is not read). The footer counts what was delivered, says how far each first release is (one line per epic, no global MVP; publishing stays `/agile:publish`) and lists the items that are ready to be released. A cycle is listed last, in its own group. The file is written by a script and never edited by hand; it carries no date, so a second run changes nothing. `/agile:order` always writes it, shows the table and proposes the commit `chore(order): refresh the ordered list` without making it. From then on `/agile:ship` refreshes the file in the commit that sets the item `done` and prints one `Order:` line: what the delivery unlocked and how far the first release is. A project that never typed `/agile:order` gets no file and one line. A block, a change note, an approval or a new idea do not regenerate it, and `/agile:sync` and `/agile:compact` never touch it.
+
 ## 14. Worked examples
 
 The worked examples have their own file, [the examples file](workflow-examples.md). They are numbered 14.1, 14.2, … and every "example 14.n" in this manual means the one with that number there.
@@ -717,6 +721,8 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:retro` | Turn lessons into rules or skills |
 | `/agile:pause [note]` | Stop for now: wip commit on the item branch and a note of where we stopped |
 | `/agile:status` | Feature in progress, backlog head, open questions, what is blocked and on whom |
+| `/agile:compact` | Move the finished items (`done`, `cancelled`) and the old retro-log entries to `docs/archive/`, leaving an index row per item: shows the plan, asks your ok, applies with `git mv` and proposes the commit; refuses while an item is building or validating |
+| `/agile:order` | Write `docs/agile/order.md`: the open items in the order to implement, what each waits on and what its delivery unlocks, the first release of each epic; proposes the commit; from then on the ship keeps it current |
 | `/agile:sync` | After a plugin update: refresh the project's copies of rules, templates, workflow (the manual and its worked examples) and profile; reports the capabilities the project lacks, such as the "Staff backoffice" and the "Staff audit log" of a `mobile` project; a project more than 2 minor versions behind is told so and sees those capabilities and the delivered notes grouped by the minor series they arrived in (the files stay one table by state, nothing dates them), and the sync still goes straight to the current version |
 | `/agile:identity` | Record the app's visual identity (a file, a website, an image or three questions) in `docs/design/`, or review the one recorded |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | One item, from the stage its status gives (`idea` or `refining` at refinement, `approved` or `building` at the build, `validating` at stop 2) to done in a single run with two stops: the questions (your answers approve it) and the validation script ("validado e autorizo o merge de F-n" ships it; "validado" alone stops at validating). `--assume` skips the questions except new packages |
@@ -748,6 +754,8 @@ You only type the commands below. Each one loads a skill with the full procedure
 | `/agile:retro` | After a ship or at the end of a session, to keep at most 3 lessons as rules; with an item id or `session` to pick the source | 14.37, 14.40 |
 | `/agile:pause` | You are stopping for now; nothing stays only on disk | 14.6, 14.40 |
 | `/agile:status` | At the start of a session, or to see what is blocked and on whom | 14.6, 14.20 |
+| `/agile:compact` | The session start or `/agile:status` printed `Compact:`, or the backlog and the retro log have grown; between features | 14.99 |
+| `/agile:order` | You want to see what to refine or build next and why the rest waits; once, then the ship keeps the file current | 14.100 |
 | `/agile:sync` | After a plugin update, before the next item | 14.10, 14.54, 14.86, 14.92 |
 | `/agile:identity` | The app has screens and no visual identity recorded, or you want to review the one there is | 14.22 |
 | `/agile:autopilot` | A small, well-understood item you want in one run with two stops; `--assume` when the recommendations are fine with you | 14.13 |
@@ -1026,6 +1034,34 @@ flowchart TD
     G2 --> H["sync.js record; retro-log entry"]
     H --> I{"Authorize the commit on main?"}
     I -->|yes| J(["chore: sync with agile@canary <version>"])
+```
+
+### /agile:compact
+```mermaid
+flowchart TD
+    A["Between features: no item building or validating,<br/>main branch, files to change committed?"] -->|no| A1(["Names the item or the file; nothing moved"])
+    A -->|yes| B["compact.js plan: items, mockups, retro-log entries,<br/>links per file, words before and after"]
+    B -->|nothing to move| B1(["Says so"])
+    B --> C{"Your ok on the table"}
+    C -->|no| C1(["Nothing written"])
+    C -->|ok| D["compact.js apply: git mv, INDEX.md, retro-log.md in the archive,<br/>links rewritten, pointer line in the live retro log"]
+    D --> E["git status shown, commit proposed"]
+    E --> F{"Authorize the commit on main?"}
+    F -->|yes| G(["chore: archive n finished items and m retro-log entries"])
+```
+
+### /agile:order
+```mermaid
+flowchart TD
+    A["Main checkout, main branch, docs/features or docs/bugs?"] -->|no| A1(["REFUSED: the reason; nothing written"])
+    A -->|yes| B["order.js write: levels, bug, Must/Should/Could, size, id;<br/>Unlocks, cut as ids, cycles last"]
+    B --> C["docs/agile/order.md written, or UNCHANGED"]
+    C --> D["Table shown, git status shown, commit proposed"]
+    D --> E{"Authorize the commit on main?"}
+    E -->|yes| F(["chore(order): refresh the ordered list"])
+    G["/agile:ship: status done set"] --> H{"order.md exists?"}
+    H -->|no| H1(["Order: no list"])
+    H -->|yes| I["order.js refresh: the item counted as delivered;<br/>one Order: line, committed with the item"]
 ```
 
 ### /agile:identity

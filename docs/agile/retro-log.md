@@ -1106,3 +1106,10 @@ From 0.4.0 to 0.7.0, run on a clean main; no item `building` or `validating` (F-
 - Not offered again: DocGen tool catalogue and Azure login `agile-deploy.js` rows, the two false positives already logged on 2026-10-09; no item captured.
 - Glossary: column and `Technical terms:` link lines already present in all 151 documents; no term rows added (the check was by link line, not a full read of terms).
 - Baseline present, docs command already declared, no plugin notes delivered, `CLAUDE.md` 600 words. Build and suite not run: only Markdown changed.
+
+## 2026-10-11 - Sync with agile@canary 0.54.0
+- From 0.52.0 to 0.54.0. Copied (5): the `epic` template (the "First release cut" comment now asks for comma-separated ids, read by `order.js`) and the four `docs/agile/workflow*` manuals (`/agile:compact` #165, `/agile:order` #166, examples 14.99 and 14.100). Left alone: `git.md` and `profile.md` (edited, upstream unchanged); manual build files (upstream unchanged).
+- Ran with F-95 in `validating` in its own worktree; the sync touched only the main checkout.
+- Not offered again: DocGen tool catalogue and Azure login `agile-deploy.js` rows, the two false positives already logged on 2026-10-09; no item captured.
+- Glossary: column, "Technical terms" section and `Technical terms:` link lines already present; nothing added.
+- Baseline present, docs command already declared, no plugin notes delivered, `CLAUDE.md` 640 words. Build and suite not run: only Markdown changed.
