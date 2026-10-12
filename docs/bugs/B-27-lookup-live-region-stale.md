@@ -64,6 +64,8 @@ Tests locked: e39e41049f58bfa75e1b99b1bad9a953a8608dfa (2 files); unlocks: 1
 
 - 2026-10-12: tests unlocked (owner, build): the lookup test used three equal options and Blazor rejects duplicate keys once the field re-renders; only the test data changed (ids), not the assertions.
 
+- 2026-10-12: at ship the gate was red from main's `db6ebb1d` (resources renamed `simulab-api`, `simulab-web`, `simulab-mailpit`, `simulab-redis`). The rename also broke the app (the Web resolves `https+http://api`, both hosts call `AddRedisClient("redis")`, the Api reads `ConnectionStrings:mailpit`). Owner asked to fix the tests; the fix is in `AppHost.cs`: resource names back to `api`, `web`, `mailpit`, `redis`, the container names stay `simulab-*`. The AppHost and architecture tests pass unchanged. Outside this bug's scope, shipped with it on the owner's request.
+
 ## Out of scope
 - A guard test over the kit's sources (decided above); `AppSelectField` (done in F-114); `AppMultiPickField` and `AppDataTable` (not affected).
 
