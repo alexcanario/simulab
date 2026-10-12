@@ -1,7 +1,7 @@
 ---
 bug: B-27
 feature: F-34
-status: building
+status: validating
 board: 164
 severity: low
 epic: Foundation and identity
@@ -52,7 +52,7 @@ Duplicates (the same defect in another file, the same shape):
 
 ## Regression test
 
-Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
+Tests locked: e39e41049f58bfa75e1b99b1bad9a953a8608dfa (2 files); unlocks: 1
 
 - One test per fixed component (`AppLookupFieldTests`, `AppSuggestFieldTests` in `tests/Hosts/Simulab.Web.Tests/Ui/`), seen failing before the fix: the search runs and the test reads the markup the wrapper last rendered, without forcing a render (a bare `WaitForAssertion` that re-renders is what hid the defect in F-114). The way to observe "no render happened" (render count of the wrapper, or the markup captured before the assertion) is settled at build with a throwaway probe before the test is locked.
 - Criterion 4 is a validation step, not a test: bUnit does not drive MudBlazor's own re-render.
@@ -71,7 +71,15 @@ Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
 - (none)
 
 ## Validation script
-1. (written at build)
+Needed to validate: a browser on `/dev/ui` (nothing else; in place now).
+
+1. Stop any app host of this worktree, then start it with its own database. Git Bash: `Database__Name=simulab_b27 dotnet run --project src/Hosts/Simulab.AppHost`. PowerShell 7: `$env:Database__Name = "simulab_b27"; dotnet run --project src/Hosts/Simulab.AppHost`. Open `https://localhost:7125/dev/ui`. The data is the shared PostgreSQL server, database `simulab_b27` (the gallery needs no data).
+2. (AC1, AC4) In the section of the lookup fields, click the "Issuing authority" field with the empty value and type `ni`. Wait a second. In the browser console run `document.querySelector('#gallery-kind-lookup-empty').closest('.app-field').querySelector('[aria-live]').textContent`. Expected: `Results: 2`.
+3. With the list still open, keep typing so the text becomes `nic` (select all and type `nic` if the first letters were replaced). Run the same line again. Expected: `Results: 1` (before the fix it still said `Results: 2`).
+4. Type `zzz`. Run the same line. Expected: `Nothing found for "zzz".`
+5. (AC2) In the gallery, use the lookup field that fails on purpose (`#gallery-lookup-failing`) and type two letters, then two more. Expected: the line "The search failed." with a "Try again" button appears under the field right after each search, with no other click.
+6. (AC3) In the gallery section of the suggest field (`#gallery-suggest`), type `c`, run the same console line with `#gallery-suggest` in place of the id, then type `o`. Expected: the span holds the count of the latest text each time.
+7. Keyboard only: Tab to the lookup, type `ni`, arrow down and Enter. Expected: the value is chosen and the live region keeps reading the last count.
 
 ## Events
 
@@ -79,3 +87,6 @@ Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
 - 2026-10-12 blocked — test wrong: test data used three equal options; Blazor rejects duplicate keys once the field re-renders
 
 ## Delivery
+- Fix: `AppLookupField.RequestRender()` (`_ = InvokeAsync(StateHasChanged)`) after `_announcement` on the success and failure paths; the same call in `AppSuggestField.SearchSuggestionsAsync`.
+- Tests: `AppLookupFieldTests.Search_Twice_TheLiveRegionHoldsTheCountOfTheSecondSearch`, `Search_SecondOneFails_ShowsTheFailureWithoutAnotherRender`, `AppSuggestFieldTests.Typing_Twice_TheLiveRegionHoldsTheCountOfTheSecondText`; seen failing before the fix (3 failed, 25 passed), green after. Gate: `agile gate GREEN` (Web 1445 passed, whole suite green). Scan: `agile scan GREEN`.
+- On screen (AppHost, `/dev/ui`, `gallery-kind-lookup-empty`): `ni` read `Results: 2`; after `ci` the span read `Results: 1` with the list open.
