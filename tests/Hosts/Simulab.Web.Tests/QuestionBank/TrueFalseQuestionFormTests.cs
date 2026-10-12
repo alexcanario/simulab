@@ -78,7 +78,7 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-TrueFalse").GetAttribute("aria-checked").Should().Be("false");
         page.Find("#question-type-TrueFalse").TextContent.Should().Contain("True/false");
         Headings(page).Should().Contain("Options").And.NotContain("Answer key");
-        page.FindAll("#question-section-true-false-key").Should().BeEmpty();
+        page.FindAll("#question-section-true-false-key-title").Should().BeEmpty();
     }
 
     // AC10, BR9: choosing true/false replaces the options section with the answer key section.
@@ -91,12 +91,12 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
 
         page.WaitForAssertion(() => Headings(page).Should().Equal(
             "Classification", "Origin", "Statement", "Base text", "Answer key", "Explanation", "Publication"));
-        page.FindAll("#question-section-options").Should().BeEmpty();
+        page.FindAll("#question-section-options-title").Should().BeEmpty();
         page.Find("#question-true-false-key").GetAttribute("role").Should().Be("radiogroup");
         page.Find("#question-true-false-key-True").TextContent.Should().Contain("True");
         page.Find("#question-true-false-key-False").TextContent.Should().Contain("False");
         page.FindAll("#question-true-false-key [aria-checked='true']").Should().BeEmpty("a draft may have no key");
-        page.Find("#question-section-true-false-key").TextContent.Should()
+        page.Find("#question-true-false-key-description").TextContent.Should()
             .Contain("scoring rules of the edition");
     }
 
@@ -124,10 +124,10 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
         await TypeAsync(page, "question-option-0", "<p>Opção A</p>");
 
         page.Find("#question-type-TrueFalse").Click();
-        page.WaitForAssertion(() => page.FindAll("#question-section-options").Should().BeEmpty());
+        page.WaitForAssertion(() => page.FindAll("#question-section-options-title").Should().BeEmpty());
         page.Find("#question-type-SingleChoice").Click();
 
-        page.WaitForAssertion(() => page.FindAll("#question-section-options").Should().ContainSingle());
+        page.WaitForAssertion(() => page.FindAll("#question-section-options-title").Should().ContainSingle());
         WaitForEditors(page, "question-option-0");
         RichText.Editors["question-option-0"].Html.Should().Be("<p>Opção A</p>");
     }
@@ -219,7 +219,7 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
         page.Markup.Should().Contain("The type cannot be changed after the question is created.");
         page.Find("#question-true-false-key-False").GetAttribute("aria-checked").Should().Be("true");
         page.Find("#question-true-false-key-True").GetAttribute("aria-checked").Should().Be("false");
-        page.FindAll("#question-section-options").Should().BeEmpty();
+        page.FindAll("#question-section-options-title").Should().BeEmpty();
     }
 
     [Fact]
@@ -231,8 +231,8 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
 
         page.WaitForAssertion(() => page.FindAll("#question-type-value").Should().ContainSingle());
         page.Find("#question-type-value").TextContent.Should().Contain("Single choice");
-        page.FindAll("#question-section-options").Should().ContainSingle();
-        page.FindAll("#question-section-true-false-key").Should().BeEmpty();
+        page.FindAll("#question-section-options-title").Should().ContainSingle();
+        page.FindAll("#question-section-true-false-key-title").Should().BeEmpty();
     }
 
     // The publish checklist: the three option items are one "Answer key set" for this type.
@@ -281,7 +281,7 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
 
         page.WaitForAssertion(() => page.Find("#question-true-false-key-description .app-field-error-text")
             .TextContent.Should().Contain("Set the answer key"));
-        page.Find("#question-error-summary").TextContent.Should().Contain("Set the answer key");
+        page.Find("#question-error-summary").TextContent.Should().Contain("Correct answer");
         page.Find("#question-true-false-key").GetAttribute("aria-invalid").Should().Be("true");
     }
 
