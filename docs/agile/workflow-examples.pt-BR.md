@@ -676,6 +676,8 @@ An item that is not done is committed on its own branch ...
 Claude: Criando a feature/F-8 a partir da main e fazendo o commit lá.
 ```
 
+A guarda também lê o que o mesmo comando vai levar: um commit escrito na mesma linha de um `git add` do arquivo do item (ou de uma pasta, ou de tudo), e um commit que nomeia o arquivo, recebem a mesma recusa, com a mesma mensagem.
+
 Quando um commit é mesmo da main com um item aberto (uma nota de retro, por exemplo), o Claude pergunta, e com o seu sim repete o comando terminando com `# agile:main-ok`. Um commit de retro carrega só regras, `CLAUDE.md`, templates e o retro-log; uma lição que precisa de código vira item, para que o código passe pelo gate na branch dele.
 
 **O comando de docs mexeu num arquivo que não é dele.** Num repositório adotado cujo `.claude/agile/build.json` declara um mapa do código, o passo `gate.js docs` do ship o roda depois da verificação completa verde:
@@ -3812,3 +3814,82 @@ Claude: agile order WRITTEN: 4 items, 11 delivered
 ```
 
 O mesmo texto está em `docs/agile/order.md`, na seção `## Checklist`, entre a tabela e o `## Summary`; a tabela continua no arquivo. A linha de cada item traz o número da tabela, o id, o título e o status, e depois `waits on` e `unlocks` só quando a célula tem algo. Marcar uma caixa no chat não muda status, ordem nem arquivo: o script nunca grava `[x]` nem lê uma caixa de volta, e uma nova execução (ou o ship, que atualiza o arquivo) recomeça com todas vazias. Um arquivo escrito por uma versão antiga ganha a seção na primeira execução, num diff só dela.
+
+### 14.105 A lista de caixas da ordem como widget: `/agile:order` no app
+
+Com os mesmos quatro itens em aberto do exemplo 14.104, numa sessão do app do Claude que oferece a ferramenta `show_widget`, o `/agile:order` mostra a lista como um widget interativo em vez de colar as linhas `- [ ]`. O widget é montado a partir do JSON que o script imprime (`order.js checklist --json`, que não grava nada); o Claude não redigita nenhuma linha:
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 4 items, 11 delivered
+        [widget] Ordem de implementação
+          ☐ 1. B-2   Total errado em reembolsos            approved
+          ☐ 2. F-12  Export results to CSV                 building   unlocks F-13 (unblocks)
+          ☐ 3. F-14  Print layout                          approved
+          ☐ 4. F-13  Share by link                         blocked    waits on F-12
+          0 de 4 marcados    [Limpar marcas]
+          Só visual: nada é gravado e as marcas somem ao recarregar.
+        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+        Não marque as caixas ao abrir docs/agile/order.md no painel de arquivos do app: lá o clique grava no arquivo.
+        First release (shop): 0 of 2 delivered; missing: F-12, F-13
+        Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
+        Commit proposto: chore(order): refresh the ordered list
+        Autoriza o commit na main?
+```
+
+A saída de `order.js checklist --json` no projeto de teste, de onde o widget sai:
+
+```
+{
+  "items": [
+    {
+      "n": 1,
+      "id": "B-2",
+      "title": "Total errado em reembolsos",
+      "status": "approved",
+      "epic": "shop",
+      "waitsOn": [],
+      "unlocks": [],
+      "cycle": false
+    },
+    {
+      "n": 2,
+      "id": "F-12",
+      "title": "Export results to CSV",
+      "status": "building",
+      "epic": "shop",
+      "waitsOn": [],
+      "unlocks": [
+        "F-13 (unblocks)"
+      ],
+      "cycle": false
+    },
+    {
+      "n": 3,
+      "id": "F-14",
+      "title": "Print layout",
+      "status": "approved",
+      "epic": "shop",
+      "waitsOn": [],
+      "unlocks": [],
+      "cycle": false
+    },
+    {
+      "n": 4,
+      "id": "F-13",
+      "title": "Share by link",
+      "status": "blocked",
+      "epic": "shop",
+      "waitsOn": [
+        "F-12"
+      ],
+      "unlocks": [],
+      "cycle": false
+    }
+  ],
+  "listed": 4,
+  "delivered": 11
+}
+```
+
+Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` ou recarregar as desmarca. Nada vai para o arquivo: `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.

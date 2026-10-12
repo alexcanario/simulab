@@ -1151,3 +1151,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 
 ## 2026-10-11 - Order checklist as a widget
 - Lesson: a click on a `- [ ]` box of `docs/agile/order.md` in the file pane edits the file on disk (`git diff` showed `[x]` on rows 1 and 2), and the chat does not render boxes; the owner asked for clickable boxes, view only. Score plugin 1 / project 3 (one occurrence, no evidence beyond this session). Went to `.claude/rules/agile/project.md` as one line: show the script's checklist also as a `show_widget` widget, same lines and order, nothing written.
+
+## 2026-10-12 - Sync with agile@canary 0.60.1
+- From 0.59.0 to 0.60.1. Copied (2): `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (`record` wrote `.claude/agile/sync.json`). Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
+- Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
+- Baseline present, docs command already declared, no plugin notes delivered, glossary unchanged, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
