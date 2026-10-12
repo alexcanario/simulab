@@ -15,9 +15,10 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence;
 public sealed class QuestionQueries(
     QuestionBankModuleDbContext context,
     ITopicDirectory topics,
+    ISubjectDirectory subjects,
     IExamEditionDirectory editions) : IQuestionQueries
 {
-    /// <summary>The most editions the origin lookup returns (F-96, BR9).</summary>
+    /// <summary>The most editions or subjects one lookup returns (F-96 BR9, B-28 BR1).</summary>
     private const int LookupMaxTake = 20;
 
     public async Task<QuestionPageResponse> ListAsync(QuestionListQuery query, CancellationToken cancellationToken)
@@ -130,6 +131,26 @@ public sealed class QuestionQueries(
             .. (await editions.SearchAsync(search, Math.Clamp(take, 1, LookupMaxTake), cancellationToken))
                 .Select(ToLookup)
         ];
+
+    public async Task<IReadOnlyList<SubjectLookupResponse>> SearchSubjectsAsync(
+        string? search,
+        int take,
+        CancellationToken cancellationToken) =>
+        [
+            .. (await subjects.SearchAsync(search, Math.Clamp(take, 1, LookupMaxTake), cancellationToken))
+                .Select(subject => new SubjectLookupResponse(subject.Id, subject.Name))
+        ];
+
+    public async Task<IReadOnlyList<TopicLookupResponse>?> ListSubjectTopicsAsync(
+        Guid subjectId,
+        CancellationToken cancellationToken)
+    {
+        var found = await subjects.ListTopicsAsync(subjectId, cancellationToken);
+
+        return found is null
+            ? null
+            : [.. found.Select(topic => new TopicLookupResponse(topic.Id, topic.Name))];
+    }
 
     public async Task<ExamEditionLookupResponse?> FindEditionAsync(
         Guid examEditionId,

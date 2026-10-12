@@ -55,4 +55,7 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-96 BR3: a live question of the edition already has this number.</summary>
     public const string QuestionPaperNumberTaken = "question.paper_number_taken";
+
+    /// <summary>B-28 BR2: the subject whose topics were asked for is unknown or deleted.</summary>
+    public const string QuestionSubjectNotFound = "question.subject_not_found";
 }
