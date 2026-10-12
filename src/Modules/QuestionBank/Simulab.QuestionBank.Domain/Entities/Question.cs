@@ -47,6 +47,15 @@ public sealed class Question : TenantEntity
 
     public int? Difficulty { get; private set; }
 
+    /// <summary>The past edition the question came from; held by id, never by a foreign key (F-96, BR1). Null means authored.</summary>
+    public Guid? ExamEditionId { get; private set; }
+
+    /// <summary>The question's number in the paper, from 1 to 500; set exactly when there is an edition (F-96, BR2).</summary>
+    public int? PaperNumber { get; private set; }
+
+    /// <summary>The notice subject of that edition the question belongs to, when it has one (F-96, BR2).</summary>
+    public Guid? NoticeSubjectId { get; private set; }
+
     /// <summary>The options in position order.</summary>
     public IReadOnlyList<QuestionOption> Options => _options;
 

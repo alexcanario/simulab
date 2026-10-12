@@ -109,4 +109,10 @@ public static class CatalogErrorCodes
 
     /// <summary>F-75 BR9: a live notice subject maps this topic, so it cannot be deleted.</summary>
     public const string TopicInUse = "topic.in_use";
+
+    /// <summary>F-96 BR8: a live question points at this edition, so it cannot be deleted. Carries no count.</summary>
+    public const string ExamEditionHasQuestions = "exam_edition.has_questions";
+
+    /// <summary>F-96 BR8: a live question points at this notice subject, so it cannot be deleted. Carries no count.</summary>
+    public const string NoticeSubjectHasQuestions = "notice_subject.has_questions";
 }

@@ -96,23 +96,23 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
+| AC1 | AddQuestionOriginMigrationTests.Up_AddsTheOriginColumnsCheckAndIndexes_AndKeepsEveryExistingQuestionAuthored |
+| AC2 | QuestionOriginEndpointTests.Create_WithEditionNumberAndNoticeSubject_StoresItAndReturnsTheOriginParts; QuestionOriginEndpointTests.List_CarriesTheOriginOfAQuestionFromAnEdition |
+| AC3 | QuestionOriginEndpointTests.Create_WithNoOriginFields_StoresAnAuthoredQuestion; AddQuestionOriginMigrationTests.Up_AddsTheOriginColumnsCheckAndIndexes_AndKeepsEveryExistingQuestionAuthored |
+| AC4 | QuestionOriginEndpointTests: Create_WithAnEditionAndNoNumber_IsRefusedWithPaperNumberRequired, Create_WithANumberOutsideOneToFiveHundred_IsRefusedWithPaperNumberInvalid, Create_WithTheBoundaryNumbers_IsStored, Create_WithANumberAndNoEdition_IsRefusedWithOriginRequiresEdition, Create_WithANoticeSubjectAndNoEdition_IsRefusedWithOriginRequiresEdition; AddQuestionOriginMigrationTests.TheDatabase_RefusesANumberOrASubjectWithNoEdition_AndAnEditionWithNoNumber |
+| AC5 | QuestionOriginEndpointTests: Create_WithAnUnknownEdition_IsRefusedWithExamEditionNotFound, Create_WithADeletedEdition_IsRefusedWithExamEditionNotFound, Create_WithANoticeSubjectOfAnotherEdition_IsRefusedWithNoticeSubjectNotFound, Create_WithADeletedNoticeSubject_IsRefusedWithNoticeSubjectNotFound |
+| AC6 | PaperNumberUniquenessTests (5 tests); AddQuestionOriginMigrationTests.TheDatabase_RefusesARepeatedNumberInAnEdition_ButNotAnotherEditionOrADeletedRow |
+| AC7 | QuestionOriginEndpointTests: Update_OfAPublishedQuestion_ChangesTheNumberMovesTheEditionAndClearsTheOrigin, Update_ClearingOnlyTheNoticeSubject_KeepsTheEditionAndTheNumber |
+| AC8 | QuestionOriginEndpointTests.PublishQuestion_FromADraftEdition_Succeeds_AndKeepsTheOrigin |
+| AC9 | OriginDeleteGuardTests: DeleteEdition_WithALiveQuestion_IsRefusedWithHasQuestions_AndSucceedsOnceTheyAreGone, DeleteEdition_WithAPublishedQuestion_IsRefusedWithHasQuestions, DeleteEdition_AfterTheOriginIsCleared_Succeeds |
+| AC10 | OriginDeleteGuardTests: DeleteNoticeSubject_WithALiveQuestion_IsRefusedWithHasQuestions_AndSucceedsOnceTheSubjectIsCleared, DeleteNoticeSubject_AfterTheQuestionIsDeleted_Succeeds, DeleteNoticeSubject_NoQuestionPointsAt_Succeeds_WhileASiblingIsGuarded |
+| AC11 | EditionLookupEndpointTests: Search_FindsEditionsOfAnyStatus_ByExamNameAcronymOrYear, Search_IgnoresCaseOfTheText, Search_ReturnsAtMostTwentyEditions, FindEdition_ReturnsTheLookupItem_AndAnUnknownOneIs404, NoticeSubjects_ComeInDisplayOrder_AndAnUnknownEditionIs404 |
+| AC12 | EditionLookupEndpointTests: EditionQuestions_ArePagedInPaperOrder_WithoutTheDeletedOnes, EditionQuestions_OfAnUnknownEdition_Is404 |
+| AC13 | EditionLookupEndpointTests: EveryRoute_WithoutTheManagePermission_IsForbidden, EveryRoute_ForACuratorWithNoCatalogPermission_Answers200; QuestionOriginEndpointTests.Create_WithAnOriginAsACuratorWithNoCatalogPermission_Succeeds |
 | AC14 | pending |
 | AC15 | pending |
 | AC16 | pending |
-| AC17 | pending |
+| AC17 | ModuleBoundaryTests (existing: Application_ReferencesItsOwnDomainAndContractsOnly, EveryLayer_ReachesAnotherModuleOnlyThroughItsContracts), run again at the end |
 | AC18 | pending |
 
 ## Decisions
@@ -133,6 +133,15 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 - 2026-10-12 — No new package — Claude; nothing here needs one.
 - 2026-10-12 — F-96 approved ("aprovo F-96"), with no new package and no mockup (owner).
 - 2026-10-12 — Design passes (`system-design`, then `architect`) are asked at the build: the item adds a contract between modules, a schema change and a unique index — Claude.
+
+- 2026-10-12 — Design passes ran (`system-design`, then `architect`) and were verified against the files (module-boundary test, `TopicUsageChecks`, `IQuestionQueries`, `IQuestionStore`): no owner stop, no new package, no catalog migration — Claude.
+- 2026-10-12 — Precision of BR3: the unique index is filtered by `is_deleted = false AND exam_edition_id IS NOT NULL`; without the second clause `NULLS NOT DISTINCT` makes every authored question collide — Claude, architect finding.
+- 2026-10-12 — `ix_questions_notice_subject` is added next to the edition index, because `INoticeSubjectUsageCheck` (AC10) filters by it — Claude.
+- 2026-10-12 — The four edition read routes are methods of `IQuestionQueries`, implemented in `QuestionQueries` over `IExamEditionDirectory` (as `ITopicDirectory` today), so `Application` and `Api` get no new module reference; responses are records in `QuestionBank.Contracts` with optional ids `= null`; the edition status travels as a string because a contracts project references the shared kernel only — Claude, architect finding.
+- 2026-10-12 — BR11 in the response: when the edition does not resolve, `Origin` stays non-null with ids and paper number and empty names (`NoticeYear` null); screens build no line when the exam name is empty — Claude, the same stance `QuestionQueries` takes for a topic.
+- 2026-10-12 — A duplicate number is pre-checked (`IsPaperNumberTakenAsync`) and the `23505` translation stays as the race fallback, like the catalog's stores — Claude.
+- 2026-10-12 — The three usage checks share a small static helper that takes the `InUseAsync` delegate; no base interface in `Contracts` — Claude.
+- 2026-10-12 — The number field is `AppTextField` with `int?` and `InputType.Number`; no `AppNumberField` is added — Claude, verified at `ExamEditionForm.razor:77-82`.
 
 ## Out of scope
 - Filters by edition, organizer or notice subject on the question list — F-100.

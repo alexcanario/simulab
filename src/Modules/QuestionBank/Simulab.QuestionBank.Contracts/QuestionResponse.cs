@@ -17,4 +17,5 @@ public sealed record QuestionResponse(
     string? BaseTextHtml,
     string? ExplanationHtml,
     int? Difficulty,
-    IReadOnlyList<QuestionOptionResponse> Options);
+    IReadOnlyList<QuestionOptionResponse> Options,
+    QuestionOriginResponse? Origin = null);

@@ -77,6 +77,11 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(question => question.Difficulty)
             .HasComment("From 1 (easiest) to 5 (hardest). Empty when not set.");
 
+        // Skeleton of the test phase (F-96): not mapped until the migration lands.
+        builder.Ignore(question => question.ExamEditionId);
+        builder.Ignore(question => question.PaperNumber);
+        builder.Ignore(question => question.NoticeSubjectId);
+
         builder.HasMany(question => question.Options)
             .WithOne()
             .HasForeignKey(option => option.QuestionId)
