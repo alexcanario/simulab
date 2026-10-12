@@ -928,4 +928,25 @@
   <data name="question.paper_number_taken" xml:space="preserve"><value>Número já usado nesta edição.</value></data>
   <data name="exam_edition.has_questions" xml:space="preserve"><value>Há questões do banco que vieram desta edição, então ela não pode ser excluída.</value></data>
   <data name="notice_subject.has_questions" xml:space="preserve"><value>Há questões do banco ligadas a esta disciplina do edital, então ela não pode ser excluída.</value></data>
+  <data name="Questions.Field.Type" xml:space="preserve"><value>Tipo de questão</value></data>
+  <data name="Questions.Type.SingleChoice" xml:space="preserve"><value>Múltipla escolha</value></data>
+  <data name="Questions.Type.SingleChoice.Description" xml:space="preserve"><value>Um enunciado com duas a cinco alternativas; só uma é correta.</value></data>
+  <data name="Questions.Type.TrueFalse" xml:space="preserve"><value>Certo/errado</value></data>
+  <data name="Questions.Type.TrueFalse.Description" xml:space="preserve"><value>Um enunciado que o aluno julga como certo ou errado.</value></data>
+  <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>O tipo não pode ser alterado depois que a questão é criada.</value></data>
+  <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Gabarito</value></data>
+  <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Marque o enunciado como certo ou errado. Só é exigido para publicar.</value></data>
+  <data name="Questions.TrueFalseKey.Label" xml:space="preserve"><value>Resposta correta</value></data>
+  <data name="Questions.TrueFalseKey.Hint" xml:space="preserve"><value>A penalidade por resposta errada vem das regras de pontuação da edição, nunca da questão.</value></data>
+  <data name="Questions.TrueFalse.True" xml:space="preserve"><value>Certo</value></data>
+  <data name="Questions.TrueFalse.False" xml:space="preserve"><value>Errado</value></data>
+  <data name="Questions.Preview.Answers" xml:space="preserve"><value>Respostas</value></data>
+  <data name="Questions.Preview.NoKey.TrueFalse" xml:space="preserve"><value>Este rascunho ainda não tem gabarito.</value></data>
+  <data name="Questions.Checklist.TrueFalseKey" xml:space="preserve"><value>Gabarito definido</value></data>
+  <data name="Questions.Form.Aside.Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Questions.Column.Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="question.type_changed" xml:space="preserve"><value>O tipo de uma questão não pode ser alterado.</value></data>
+  <data name="question.options_not_allowed" xml:space="preserve"><value>Uma questão certo/errado não tem alternativas.</value></data>
+  <data name="question.key_not_allowed" xml:space="preserve"><value>Uma questão de múltipla escolha não tem gabarito certo/errado.</value></data>
+  <data name="question.true_false_key_required" xml:space="preserve"><value>Defina o gabarito (certo ou errado) para publicar.</value></data>
 </root>

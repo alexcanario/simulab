@@ -1,0 +1,29 @@
+using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
+
+namespace Simulab.QuestionBank.Domain;
+
+/// <summary>
+/// The key of a single-choice question: from two to five options once published, exactly one marked correct
+/// (F-95, BR3 and BR4). A true/false key written to it is refused (F-97, BR3).
+/// </summary>
+/// <param name="Written">The options as written.</param>
+/// <param name="TrueFalseWritten">A true/false key that came with them; always a refusal.</param>
+public sealed record SingleChoiceKey(IReadOnlyList<OptionDraft> Written, bool? TrueFalseWritten = null) : AnswerKey
+{
+    public override QuestionType Type => QuestionType.SingleChoice;
+
+    public override IReadOnlyList<OptionDraft> Options => Written;
+
+    public override bool? TrueFalseValue => null;
+
+    public override OptionFault? Check(bool published)
+    {
+        if (TrueFalseWritten is not null)
+        {
+            return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
+        }
+
+        return QuestionRules.CheckOptions(Written, published);
+    }
+}

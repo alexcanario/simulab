@@ -111,6 +111,12 @@
                                Tone="QuestionText.StatusTone(context.Item.Status)" />
             </CellTemplate>
         </PropertyColumn>
+        @* F-97 BR8: how the question is answered, as a label (it is not a state). Filtering by type is F-100. *@
+        <TemplateColumn T="QuestionListItemResponse" Title="@L["Questions.Column.Type"]" Sortable="false">
+            <CellTemplate>
+                <span class="app-cell-nowrap"><AppChip Text="@QuestionText.TypeName(L, context.Item.Type)" /></span>
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <RowActions>
         @* BR11: a published question is not deleted; the button says why. Publish and unpublish are reversible

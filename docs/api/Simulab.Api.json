@@ -2703,6 +2703,13 @@
         },
         "description": "Asks whether a reset link still works, without using it (F-7, decision: the page checks on load)."
       },
+      "QuestionType": {
+        "enum": [
+          "SingleChoice",
+          "TrueFalse",
+          null
+        ]
+      },
       "RegenerateRecoveryCodesRequest": {
         "required": [
           "code"
@@ -3150,6 +3157,24 @@
             ],
             "description": "A notice subject of that edition, or null (F-96, BR2).",
             "format": "uuid"
+          },
+          "type": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The type, chosen when the question is created; null on a create means single choice, and on an update it\r\nmust be null or the stored type (F-97, BR2).",
+                "$ref": "#/components/schemas/QuestionType"
+              }
+            ]
+          },
+          "trueFalseKey": {
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "The key of a true/false question: true is \"certo\", false \"errado\", null not set yet (F-97, BR1)."
           }
         },
         "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."

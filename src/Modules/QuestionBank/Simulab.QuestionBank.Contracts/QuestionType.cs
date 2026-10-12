@@ -4,5 +4,8 @@ namespace Simulab.QuestionBank.Contracts;
 public enum QuestionType
 {
     /// <summary>One statement, two to five options, exactly one correct.</summary>
-    SingleChoice
+    SingleChoice,
+
+    /// <summary>One statement and one answer key: true ("certo") or false ("errado"). It has no options (F-97).</summary>
+    TrueFalse
 }

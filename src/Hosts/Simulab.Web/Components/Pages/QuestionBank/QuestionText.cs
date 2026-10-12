@@ -20,6 +20,14 @@ public static class QuestionText
         return status == QuestionStatus.Published ? l["Questions.Status.Published"] : l["Questions.Status.Draft"];
     }
 
+    /// <summary>The name of a question type in the curator's language (F-97, BR8).</summary>
+    public static string TypeName(IStringLocalizer<SharedResources> l, QuestionType type)
+    {
+        ArgumentNullException.ThrowIfNull(l);
+
+        return type == QuestionType.TrueFalse ? l["Questions.Type.TrueFalse"] : l["Questions.Type.SingleChoice"];
+    }
+
     /// <summary>A draft is a plain label; a published question is the healthy state.</summary>
     public static AppStatusTone StatusTone(QuestionStatus status) =>
         status == QuestionStatus.Published ? AppStatusTone.Success : AppStatusTone.Neutral;

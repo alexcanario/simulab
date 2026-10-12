@@ -30,7 +30,8 @@ Table questions {
   statement_text varchar(10000) [not null, note: 'The statement without tags. The list excerpt reads it; derived on every write.']
   status varchar(40) [not null, note: 'Where the question is in its life: Draft or Published.']
   topic_id uuid [not null, note: 'The catalog topic the question belongs to. Held by id; there is no foreign key to the catalog.']
-  type varchar(40) [not null, note: 'How the question is answered: SingleChoice.']
+  true_false_key boolean [note: 'The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question.']
+  type varchar(40) [not null, note: 'How the question is answered: SingleChoice or TrueFalse.']
 
   indexes {
     exam_edition_id [name: 'ix_questions_exam_edition']

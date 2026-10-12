@@ -14,6 +14,11 @@ namespace Simulab.QuestionBank.Contracts;
 /// <param name="ExamEditionId">The past edition the question came from; null with no number and no notice subject means authored (F-96, BR1).</param>
 /// <param name="PaperNumber">The question's number in that paper, from 1 to 500; required with an edition (F-96, BR2).</param>
 /// <param name="NoticeSubjectId">A notice subject of that edition, or null (F-96, BR2).</param>
+/// <param name="Type">
+/// The type, chosen when the question is created; null on a create means single choice, and on an update it
+/// must be null or the stored type (F-97, BR2).
+/// </param>
+/// <param name="TrueFalseKey">The key of a true/false question: true is "certo", false "errado", null not set yet (F-97, BR1).</param>
 public sealed record SaveQuestionRequest(
     Guid? TopicId = null,
     string? ContentLanguage = null,
@@ -24,4 +29,6 @@ public sealed record SaveQuestionRequest(
     IReadOnlyList<SaveQuestionOptionRequest>? Options = null,
     Guid? ExamEditionId = null,
     int? PaperNumber = null,
-    Guid? NoticeSubjectId = null);
+    Guid? NoticeSubjectId = null,
+    QuestionType? Type = null,
+    bool? TrueFalseKey = null);

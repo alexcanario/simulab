@@ -54,6 +54,7 @@ public sealed class QuestionQueries(
                 question.Difficulty,
                 question.ContentLanguage,
                 question.Status,
+                question.Type,
                 question.ExamEditionId,
                 question.PaperNumber,
                 question.NoticeSubjectId
@@ -81,6 +82,7 @@ public sealed class QuestionQueries(
                     row.Difficulty,
                     row.ContentLanguage,
                     row.Status,
+                    row.Type,
                     origins.Build(row.ExamEditionId, row.PaperNumber, row.NoticeSubjectId));
             })
             .ToList();
@@ -120,7 +122,8 @@ public sealed class QuestionQueries(
                     .OrderBy(option => option.Position)
                     .Select(option => new QuestionOptionResponse(option.Position, option.TextHtml, option.IsCorrect))
             ],
-            origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId));
+            origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId),
+            question.TrueFalseKey);
     }
 
     public async Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(

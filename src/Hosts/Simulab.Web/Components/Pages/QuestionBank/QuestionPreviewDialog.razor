@@ -30,6 +30,30 @@
 
             <div class="app-question-content" id="question-preview-statement">@((MarkupString)Question.StatementHtml)</div>
 
+            @if (IsTrueFalse)
+            {
+                @* F-97 BR7: the two answers a student judges between, as inert labelled text. *@
+                <ul class="app-question-options" id="question-preview-true-false" aria-label="@L["Questions.Preview.Answers"]">
+                    @foreach (var answer in new[] { true, false })
+                    {
+                        var marked = _revealed && Question.TrueFalseKey == answer;
+                        <li class="@(marked ? "app-question-option is-correct" : "app-question-option")">
+                            <div class="app-question-option-body">
+                                <div class="app-question-content">@(answer ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])</div>
+                                @if (marked)
+                                {
+                                    <span class="app-correct-label">
+                                        <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+                                        @L["Questions.Preview.CorrectAnswer"]
+                                    </span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
             <ol class="app-question-options" aria-label="@L["Questions.Preview.Options"]">
                 @foreach (var option in _options)
                 {
@@ -51,6 +75,7 @@
                     </li>
                 }
             </ol>
+            }
         </div>
 
         <div class="app-preview-actions">
@@ -68,9 +93,9 @@
             {
                 <section class="app-preview-answer" role="region" aria-labelledby="question-preview-answer-heading">
                     <h3 class="app-preview-heading" id="question-preview-answer-heading">@L["Questions.Preview.Answer"]</h3>
-                    @if (!_options.Any(option => option.IsCorrect))
+                    @if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(option => option.IsCorrect))
                     {
-                        <p class="app-preview-no-key">@L["Questions.Preview.NoKey"]</p>
+                        <p class="app-preview-no-key">@(IsTrueFalse ? L["Questions.Preview.NoKey.TrueFalse"] : L["Questions.Preview.NoKey"])</p>
                     }
 
                     <h4 class="app-preview-heading">@L["Questions.Preview.Explanation"]</h4>
@@ -102,6 +127,8 @@
 
     private IReadOnlyList<QuestionOptionResponse> _options = [];
     private bool _revealed;
+
+    private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
 
     protected override void OnParametersSet() =>
         _options = [.. Question.Options.OrderBy(option => option.Position)];
