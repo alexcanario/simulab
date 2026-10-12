@@ -1,7 +1,7 @@
 ---
 bug: B-28
 feature: F-95
-status: idea
+status: refining
 board: 165
 severity: high
 epic: Question bank
