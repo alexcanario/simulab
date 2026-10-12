@@ -1,3 +1,5 @@
+using Simulab.QuestionBank.Contracts;
+
 namespace Simulab.QuestionBank.Domain;
 
 /// <summary>
@@ -14,6 +16,8 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="ExamEditionId">The past edition the question came from; null or empty means authored (F-96).</param>
 /// <param name="PaperNumber">The number in that paper; required with an edition, 1 to 500 (F-96, BR2).</param>
 /// <param name="NoticeSubjectId">The notice subject of that edition, when the question has one (F-96, BR2).</param>
+/// <param name="Type">How the question is answered; fixed when the question is created (F-97, BR2).</param>
+/// <param name="TrueFalseKey">The key of a true/false question; null when not set. Refused on any other type (F-97, BR3).</param>
 public sealed record QuestionContent(
     Guid? TopicId,
     string? ContentLanguage,
@@ -24,4 +28,6 @@ public sealed record QuestionContent(
     IReadOnlyList<OptionDraft> Options,
     Guid? ExamEditionId = null,
     int? PaperNumber = null,
-    Guid? NoticeSubjectId = null);
+    Guid? NoticeSubjectId = null,
+    QuestionType Type = QuestionType.SingleChoice,
+    bool? TrueFalseKey = null);

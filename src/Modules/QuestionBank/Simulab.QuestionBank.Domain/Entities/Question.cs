@@ -56,6 +56,9 @@ public sealed class Question : TenantEntity
     /// <summary>The notice subject of that edition the question belongs to, when it has one (F-96, BR2).</summary>
     public Guid? NoticeSubjectId { get; private set; }
 
+    /// <summary>The key of a true/false question: true is "certo", false "errado", null not set (F-97, BR1).</summary>
+    public bool? TrueFalseKey { get; private set; }
+
     /// <summary>The options in position order.</summary>
     public IReadOnlyList<QuestionOption> Options => _options;
 

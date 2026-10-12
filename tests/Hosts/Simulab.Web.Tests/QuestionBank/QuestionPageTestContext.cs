@@ -366,6 +366,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 question.Difficulty,
                 question.ContentLanguage,
                 question.Status,
+                question.Type,
                 question.Origin);
 
         private HttpResponseMessage Find(Guid id)
@@ -408,7 +409,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
             }
 
-            var updated = Build(id, Read<SaveQuestionRequest>(body), existing.Status);
+            var updated = Build(id, Read<SaveQuestionRequest>(body), existing.Status, existing.Type);
             Questions[Questions.IndexOf(existing)] = updated;
 
             return Json(updated);
@@ -458,14 +459,14 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
         // The Api joins the topic and subject names and sanitizes every text; the fake does both in the smallest way
         // that lets a test see "the stored text replaces what the editor held".
-        private QuestionResponse Build(Guid id, SaveQuestionRequest request, QuestionStatus status)
+        private QuestionResponse Build(Guid id, SaveQuestionRequest request, QuestionStatus status, QuestionType? stored = null)
         {
             var topic = Topics.First(candidate => candidate.Id == request.TopicId);
             var subject = Subjects.First(candidate => candidate.Id == topic.SubjectId);
 
             return new QuestionResponse(
                 id,
-                QuestionType.SingleChoice,
+                stored ?? request.Type ?? QuestionType.SingleChoice,
                 status,
                 topic.Id,
                 topic.Name,
@@ -478,7 +479,8 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 request.Difficulty,
                 [.. (request.Options ?? []).Select((option, position) =>
                     new QuestionOptionResponse(position, Sanitize(option.TextHtml) ?? string.Empty, option.IsCorrect))],
-                OriginOf(request));
+                OriginOf(request),
+                request.TrueFalseKey);
         }
 
         // The Api reads the origin parts from the edition; the fake does it from the editions the test seeded.

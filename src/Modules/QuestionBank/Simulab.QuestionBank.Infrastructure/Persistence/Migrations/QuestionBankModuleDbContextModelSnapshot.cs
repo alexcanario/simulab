@@ -133,12 +133,17 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasColumnName("topic_id")
                         .HasComment("The catalog topic the question belongs to. Held by id; there is no foreign key to the catalog.");
 
+                    b.Property<bool?>("TrueFalseKey")
+                        .HasColumnType("boolean")
+                        .HasColumnName("true_false_key")
+                        .HasComment("The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question.");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("type")
-                        .HasComment("How the question is answered: SingleChoice.");
+                        .HasComment("How the question is answered: SingleChoice or TrueFalse.");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -179,6 +184,8 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                             t.HasCheckConstraint("ck_questions_difficulty_range", "difficulty IS NULL OR difficulty BETWEEN 1 AND 5");
 
                             t.HasCheckConstraint("ck_questions_origin", "(exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL) OR (exam_edition_id IS NOT NULL AND paper_number IS NOT NULL AND paper_number BETWEEN 1 AND 500)");
+
+                            t.HasCheckConstraint("ck_questions_true_false_key", "true_false_key IS NULL OR type = 'TrueFalse'");
                         });
                 });
 

@@ -89,21 +89,21 @@ No mockup (owner, 2026-10-12): one new control inside the form of F-95, drawn wi
 <!-- Written by /agile:build at its start. -->
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
+| AC1 | `TrueFalseQuestionEndpointTests.Create_TrueFalseWithNoKey_IsStoredAsADraftOfThatType_AndListedWithIt`; `TrueFalseQuestionTests.Create_TrueFalseWithNoKey_IsADraftWithNoOptionsAndNoKey`; `TrueFalseQuestionFormTests.Add_TrueFalseWithNoKey_SavesADraftWithANullKey` |
+| AC2 | `TrueFalseQuestionEndpointTests.Create_TrueFalseWithOptions_IsRefusedWithOptionsNotAllowed_AndNothingIsStored`; `TrueFalseQuestionEndpointTests.Create_SingleChoiceWithAKey_IsRefusedWithKeyNotAllowed_AndNothingIsStored`; `TrueFalseQuestionTests.Create_TrueFalseWithOptions_IsRefusedWithOptionsNotAllowed`; `TrueFalseQuestionTests.Create_SingleChoiceWithAKey_IsRefusedWithKeyNotAllowed` |
+| AC3 | `TrueFalseQuestionEndpointTests.Publish_TrueFalseWithNoKey_IsRefusedWithTrueFalseKeyRequired`; `TrueFalseQuestionEndpointTests.Publish_TrueFalseWithAKey_BecomesPublished`; `TrueFalseQuestionTests.Publish_TrueFalseWithNoKey_IsRefusedWithTrueFalseKeyRequired` |
+| AC4 | `TrueFalseQuestionEndpointTests.Update_PublishedTrueFalse_ChangingTheKey_StaysPublishedWithTheNewKey`; `TrueFalseQuestionEndpointTests.Update_PublishedTrueFalse_ClearingTheKey_IsRefused_AndTheStoredQuestionIsUnchanged`; `TrueFalseQuestionTests.Update_PublishedTrueFalse_ClearingTheKey_IsRefused_AndTheStoredQuestionIsUnchanged` |
+| AC5 | `TrueFalseQuestionEndpointTests.Create_WithNoType_IsSingleChoice_WithNoKey`; `TrueFalseQuestionTests.Create_ContentWithNoType_IsSingleChoiceWithNoKey`; the F-95 and F-96 test classes, run unedited |
+| AC6 | `TrueFalseQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndTheStoredQuestionIsUnchanged`; `TrueFalseQuestionEndpointTests.Update_NamingItsOwnType_IsAccepted`; `TrueFalseQuestionTests.Update_WithAnotherType_IsRefusedWithTypeChanged_AndNothingChanges` |
+| AC7 | `TrueFalseQuestionEndpointTests.Create_TrueFalse_SanitizesTheHtmlOfTheTextFields`; `TrueFalseQuestionEndpointTests.Create_TrueFalse_StatementOverItsLimitDifficultyOutOfRangeAndEmptyStatement_AreRefused`; `TrueFalseQuestionEndpointTests.Create_TrueFalse_WithAPaperNumberAlreadyTaken_IsRefusedWithPaperNumberTaken`; `TrueFalseQuestionEndpointTests.Delete_PublishedTrueFalse_IsRefused_AndADraftIsDeleted`; `TrueFalseQuestionEndpointTests.DeleteTopic_WithOnlyATrueFalseQuestion_IsRefusedWithTopicInUse` |
+| AC8 | `TrueFalseQuestionTests.TheEntityAndTheContracts_CarryNoPenaltyWeightOrScore`; `TrueFalseQuestionEndpointTests.TheQuestionsTable_HasTheKeyAndNoPenaltyWeightOrScoreColumn`; `AddTrueFalseKeyMigrationTests.Up_AddsTheKeyColumnAndItsCheck_AndKeepsEveryExistingQuestionWithItsTypeAndNoKey` |
+| AC9 | `TrueFalseQuestionEndpointTests.List_QuestionsOfBothTypes_NameTheTypeOfEachRow`; `TrueFalseQuestionPreviewAndListTests.List_NamesTheTypeOfEachRowInATextChip` |
+| AC10 | `TrueFalseQuestionFormTests.Add_OffersTheTwoTypesWithSingleChoicePreselected_AndShowsTheOptionsSection`; `TrueFalseQuestionFormTests.Add_ChoosingTrueFalse_ReplacesTheOptionsWithTheAnswerKeySection_WithNoKeyPreselected`; `TrueFalseQuestionFormTests.Add_GoingToTrueFalseAndBack_BringsTheTypedOptionsBack`; `TrueFalseQuestionFormTests.Add_TrueFalseWithAKey_SavesAsADraftOfThatTypeWithItsKeyAndNoOptions`; `TrueFalseQuestionFormTests.Add_TrueFalseAfterTypingOptions_DoesNotSendTheOptions`; `TrueFalseQuestionFormTests.Edit_TrueFalse_ShowsTheTypeAsAReadOnlyValueWithItsHint_AndTheStoredKey` |
+| AC11 | `TrueFalseQuestionPreviewAndListTests.Preview_TrueFalse_ShowsBaseTextStatementAndTheTwoAnswersAsInertText`; `TrueFalseQuestionPreviewAndListTests.Preview_TrueFalse_BeforeShowAnswer_HidesTheKeyAndTheExplanation`; `TrueFalseQuestionPreviewAndListTests.Preview_TrueFalse_ShowAnswer_MarksTheKeyWithIconTextAndBorder_AndShowsTheExplanation` |
+| AC12 | `TrueFalseQuestionEndpointTests.CreateAndUpdate_OfATrueFalseQuestion_WithoutThePermission_AnswerForbidden` |
+| AC13 | `AddTrueFalseKeyMigrationTests.Up_AddsTheKeyColumnAndItsCheck_AndKeepsEveryExistingQuestionWithItsTypeAndNoKey`; `AddTrueFalseKeyMigrationTests.TheDatabase_RefusesAKeyOnASingleChoiceRow_ButAcceptsOneOnATrueFalseRowAndNoneAnywhere` |
+| AC14 | `TrueFalseQuestionFormTests.Add_TrueFalseKeyControl_IsANamedRadioGroupWithOneTabStop` (structure); `TrueFalseQuestionFormTests.Edit_PublishedTrueFalse_WhenTheApiRefusesTheMissingKey_TheErrorIsOnTheKeyCardAndInTheSummary` (error text); keyboard pass and announcement: validation step 3 |
+| AC15 | `TrueFalseQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords` |
 
 ## Decisions
 - 2026-10-12 — The item is size M and not "small and clear": F-95 left no type seam (`Question.Create` fixes `SingleChoice`, the form and preview only draw options), so this item builds the pattern — Claude, verified in `Question.cs`, `SaveQuestionRequest.cs`, `QuestionForm.razor`.
@@ -115,6 +115,8 @@ No mockup (owner, 2026-10-12): one new control inside the form of F-95, drawn wi
 - 2026-10-12 — Sending options to a true/false question, or a key to a single-choice one, is refused, never ignored — silent dropping would hide a client bug and break the answer-is-what-was-stored rule of F-95 BR8.
 - 2026-10-12 — The answer labels follow the UI language, not the question's content language: "Certo/Errado" in pt-BR and pt-PT, "True/False" in en — resources are per UI locale (ADR-0001 #27 translates no question content, and these are interface words); revisit if a student practices in another language than their UI.
 - 2026-10-12 — No new package — the item needs nothing the solution lacks.
+- 2026-10-12 — Design passes (`system-design`, `architect`), verified against the files. Accepted: the answer key becomes a domain unit (`AnswerKey` with `SingleChoiceKey` and `TrueFalseKey`, one file each, one `From(type, options, key)` switch and a polymorphic `Check`) so `Question.Apply` and `Publish` hold no per-type branch; `QuestionContent` carries `Type` and `TrueFalseKey` as trailing optional members (F-95 and F-96 tests compile unedited); the options/key shape refusals live in the key's `Check` (the entity is the authority), the handler only answers 409 `question.type_changed` before the shape checks; `Check` returns the existing `OptionFault` (position null for the key); one migration `AddTrueFalseKey` carries the column, its comment, the check and the `Type` column comment (`SingleChoice or TrueFalse`, `EnumColumnCommentTests`); "sends options" means `Options.Count > 0` (the F-95 form sends `[]`). Dropped: the default `Type = SingleChoice` on `QuestionListItemResponse` (api-contracts: no struct defaults; it is a required member placed before `Origin`); extracting two child components for the answer sections (one new type does not justify it). The type field sits inside the Classification section card, not in a section of its own, so the F-95 test of the section list stays as it is.
+- 2026-10-12 — The list's "Type" column is the last one and a read-only `AppChip` (text), not the column after the statement and an `AppStatusChip` the screen section sketched — Claude: the F-95 list tests read cells by index (1 to 5) and count the neutral status chips, and AC5 says they stay unedited; the type is a label, not a state. Moving it next to the statement is a one-line change plus the column indexes of those tests, if the owner prefers it at validation.
 
 ## Out of scope
 - The wrong-answer penalty, weight and scoring of annulled questions — epic E-6 with the edition's scoring rules (owner, 2026-10-09).
