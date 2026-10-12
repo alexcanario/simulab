@@ -131,6 +131,17 @@ public sealed class QuestionQueries(
                 .Select(ToLookup)
         ];
 
+    public Task<IReadOnlyList<SubjectLookupResponse>> SearchSubjectsAsync(
+        string? search,
+        int take,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
+    public Task<IReadOnlyList<TopicLookupResponse>?> ListSubjectTopicsAsync(
+        Guid subjectId,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<ExamEditionLookupResponse?> FindEditionAsync(
         Guid examEditionId,
         CancellationToken cancellationToken)

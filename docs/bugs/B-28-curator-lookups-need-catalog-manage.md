@@ -1,7 +1,8 @@
 ---
 bug: B-28
 feature: F-95
-status: approved
+status: building
+Autopilot: approved
 board: 165
 severity: high
 epic: Question bank

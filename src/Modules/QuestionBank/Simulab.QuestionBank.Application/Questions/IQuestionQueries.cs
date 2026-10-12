@@ -20,6 +20,18 @@ public interface IQuestionQueries
         int take,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Live subjects whose name contains <paramref name="search"/> (case and accents ignored), by name, at most
+    /// <paramref name="take"/> (B-28, BR1).
+    /// </summary>
+    Task<IReadOnlyList<SubjectLookupResponse>> SearchSubjectsAsync(
+        string? search,
+        int take,
+        CancellationToken cancellationToken);
+
+    /// <summary>The live topics of a subject by name, or null when the subject is unknown or deleted (B-28, BR2).</summary>
+    Task<IReadOnlyList<TopicLookupResponse>?> ListSubjectTopicsAsync(Guid subjectId, CancellationToken cancellationToken);
+
     /// <summary>One edition for prefilling the form, or null when it does not exist or was deleted (F-96, BR9).</summary>
     Task<ExamEditionLookupResponse?> FindEditionAsync(Guid examEditionId, CancellationToken cancellationToken);
 

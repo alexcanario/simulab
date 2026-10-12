@@ -67,6 +67,7 @@ public static class CatalogModule
         services.AddScoped<ITopicStore, TopicStore>();
         services.AddScoped<ITopicQueries, TopicQueries>();
         services.AddScoped<ITopicDirectory, TopicDirectory>();
+        services.AddScoped<ISubjectDirectory, SubjectDirectory>();
         services.AddScoped<IExamEditionDirectory, ExamEditionDirectory>();
         services.AddScoped<SaveTopicHandler>();
         services.AddScoped<DeleteTopicHandler>();

@@ -121,6 +121,20 @@ public sealed class QuestionBankApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
 
+    /// <summary>B-28 BR1: subjects whose name contains the text, at most 20, by name.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<SubjectLookupResponse>>> SearchSubjectsAsync(
+        string accessToken,
+        string? search,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>B-28 BR2: the live topics of a subject by name.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<TopicLookupResponse>>> ListTopicsAsync(
+        string accessToken,
+        Guid subjectId,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
     /// <summary>F-96 BR9: one edition, to prefill the form when it opens from the edition page.</summary>
     public Task<QuestionBankResult<ExamEditionLookupResponse>> FindEditionAsync(
         string accessToken,

@@ -17,8 +17,8 @@ using Simulab.Web.Tests.Ui;
 namespace Simulab.Web.Tests.QuestionBank;
 
 /// <summary>
-/// F-95's back office pages, signed in as a curator holding <c>questions.manage</c>, with a fake Api behind both
-/// typed clients (the question bank and the catalog the form's pickers read). The test says what the Api answers
+/// F-95's back office pages, signed in as a curator holding <c>questions.manage</c>, with a fake Api behind the
+/// typed client of the question bank, whose lookups feed the form's pickers. The test says what the Api answers
 /// and reads what the page shows and what it sent; the rules themselves are the Api's and have their own tests.
 /// </summary>
 public abstract partial class QuestionPageTestContext : KitTestContext
@@ -115,9 +115,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
     protected QuestionPageTestContext()
     {
         var questionBankClient = new HttpClient(Api, disposeHandler: false) { BaseAddress = new Uri("https://api.test") };
-        var catalogClient = new HttpClient(Api, disposeHandler: false) { BaseAddress = new Uri("https://api.test") };
         Services.AddSingleton(new QuestionBankApiClient(questionBankClient));
-        Services.AddSingleton(new CatalogApiClient(catalogClient));
 
         var store = new InMemoryWebSessionStore();
         store.SaveAsync(
@@ -150,11 +148,16 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         return (Render<MudDialogProvider>(), Render<MudSnackbarProvider>());
     }
 
-    /// <summary>Answers the question bank routes and the catalog routes the pickers read, and records what it received.</summary>
+    /// <summary>
+    /// Answers the question bank routes, the pickers' lookups included, and records what it received. A route of
+    /// the catalog answers 403, as it does for a curator, so a page that reaches for one fails (B-28).
+    /// </summary>
     protected sealed partial class FakeQuestionBankApi : HttpMessageHandler
     {
         private const string QuestionsPath = "/api/v1/question-bank/questions";
         private const string EditionsPath = "/api/v1/question-bank/editions";
+        private const string SubjectsPath = "/api/v1/question-bank/subjects";
+        private const string CatalogPath = "/api/v1/catalog/";
 
         /// <summary>The stored questions, newest first: the test sets it, the writes change it.</summary>
         public List<QuestionResponse> Questions { get; } = [];
@@ -206,9 +209,14 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 await gate.Task;
             }
 
-            if (path.StartsWith("/api/v1/catalog/subjects", StringComparison.Ordinal))
+            if (path.StartsWith(CatalogPath, StringComparison.Ordinal))
             {
-                return HandleCatalog(path, query);
+                return Problem(HttpStatusCode.Forbidden, "identity.forbidden");
+            }
+
+            if (path.StartsWith(SubjectsPath, StringComparison.Ordinal))
+            {
+                return HandleSubjects(path, query);
             }
 
             if (path.StartsWith(EditionsPath, StringComparison.Ordinal))
@@ -289,23 +297,32 @@ public abstract partial class QuestionPageTestContext : KitTestContext
             return Json(new EditionQuestionPageResponse(items, ordered.Count));
         }
 
-        private HttpResponseMessage HandleCatalog(string path, string query)
+        private HttpResponseMessage HandleSubjects(string path, string query)
         {
-            var segments = path["/api/v1/catalog/subjects".Length..].Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var segments = path[SubjectsPath.Length..].Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
             if (segments.Length == 0)
             {
                 var term = System.Web.HttpUtility.ParseQueryString(query)["search"];
-                var found = Subjects
-                    .Where(subject => string.IsNullOrEmpty(term) || subject.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
 
-                return Json(new SubjectPageResponse(found, found.Count));
+                return Json(Subjects
+                    .Where(subject => string.IsNullOrEmpty(term) || subject.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .Take(20)
+                    .Select(subject => new SubjectLookupResponse(subject.Id, subject.Name))
+                    .ToList());
             }
 
             if (segments.Length == 2 && segments[1] == "topics")
             {
                 var subjectId = Guid.Parse(segments[0]);
-                return Json(Topics.Where(topic => topic.SubjectId == subjectId).ToList());
+                if (!Subjects.Exists(subject => subject.Id == subjectId))
+                {
+                    return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionSubjectNotFound);
+                }
+
+                return Json(Topics
+                    .Where(topic => topic.SubjectId == subjectId)
+                    .Select(topic => new TopicLookupResponse(topic.Id, topic.Name))
+                    .ToList());
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
