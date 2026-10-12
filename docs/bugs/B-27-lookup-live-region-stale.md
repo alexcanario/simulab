@@ -1,7 +1,7 @@
 ---
 bug: B-27
 feature: F-34
-status: validating
+status: done
 board: 164
 severity: low
 epic: Foundation and identity
@@ -93,3 +93,6 @@ Needed to validate: a browser on `/dev/ui` (nothing else; in place now).
 - Fix: `AppLookupField.RequestRender()` (`_ = InvokeAsync(StateHasChanged)`) after `_announcement` on the success and failure paths; the same call in `AppSuggestField.SearchSuggestionsAsync`.
 - Tests: `AppLookupFieldTests.Search_Twice_TheLiveRegionHoldsTheCountOfTheSecondSearch`, `Search_SecondOneFails_ShowsTheFailureWithoutAnotherRender`, `AppSuggestFieldTests.Typing_Twice_TheLiveRegionHoldsTheCountOfTheSecondText`; seen failing before the fix (3 failed, 25 passed), green after. Gate: `agile gate GREEN` (Web 1445 passed, whole suite green). Scan: `agile scan GREEN`.
 - On screen (AppHost, `/dev/ui`, `gallery-kind-lookup-empty`): `ni` read `Results: 2`; after `ci` the span read `Results: 1` with the list open.
+- Also shipped, on the owner's request: `AppHost.cs` resource names back to `api`, `web`, `mailpit`, `redis` (main's `db6ebb1d` had prefixed them and broke service discovery, `AddRedisClient("redis")` and 12 AppHost tests); container names stay `simulab-*`.
+- Branch `bug/B-27`, merge commit `c840abdf`, version 0.29.1. Ship gate: `agile gate GREEN` (Web 1445, AppHost 80, Api 58, Catalog 512, Identity 501, QuestionBank 98, Jobs 25; architecture 219). Scan `agile scan GREEN`, docs `agile docs GREEN`, test lock unchanged (1 unlock, recorded in Decisions).
+- Manual: no change (a screen reader announcement, no visible behavior).
