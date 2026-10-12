@@ -22,17 +22,17 @@ public sealed class EditionLookupEndpointTests : OriginApiTests
     {
         var admin = await AdminAsync();
         var marker = Marker();
-        var draft = await EditionAsync(admin, year: 2031, status: nameof(ExamEditionStatus.Draft), marker: marker);
-        var published = await EditionAsync(admin, year: 2032, status: nameof(ExamEditionStatus.Published), marker: Marker());
+        var draft = await EditionAsync(admin, year: 2015, status: nameof(ExamEditionStatus.Draft), marker: marker);
+        var published = await EditionAsync(admin, year: 2016, status: nameof(ExamEditionStatus.Published), marker: Marker());
 
         var byExam = await SearchAsync(admin, draft.ExamName);
         var byAcronym = await SearchAsync(admin, published.OrganizerAcronym);
-        var byYear = await SearchAsync(admin, "2031");
+        var byYear = await SearchAsync(admin, "2015");
 
         byExam.Should().ContainSingle().Which.Id.Should().Be(draft.Id);
         byExam[0].Status.Should().Be(nameof(ExamEditionStatus.Draft));
         byExam[0].OrganizerAcronym.Should().Be(draft.OrganizerAcronym);
-        byExam[0].NoticeYear.Should().Be(2031);
+        byExam[0].NoticeYear.Should().Be(2015);
         byAcronym.Should().ContainSingle().Which.Status.Should().Be(nameof(ExamEditionStatus.Published));
         byYear.Should().Contain(item => item.Id == draft.Id);
         byYear.Count.Should().BeLessThanOrEqualTo(20);
@@ -71,7 +71,7 @@ public sealed class EditionLookupEndpointTests : OriginApiTests
     public async Task FindEdition_ReturnsTheLookupItem_AndAnUnknownOneIs404()
     {
         var admin = await AdminAsync();
-        var edition = await EditionAsync(admin, year: 2029, position: "Analista");
+        var edition = await EditionAsync(admin, year: 2014, position: "Analista");
 
         var found = await admin.GetFromJsonAsync<ExamEditionLookupResponse>(
             $"{QuestionBank}/editions/{edition.Id}", AppJson.Options);
