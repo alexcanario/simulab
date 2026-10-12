@@ -1,5 +1,4 @@
 using Bunit;
-using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Pages.QuestionBank;
 
 namespace Simulab.Web.Tests.QuestionBank;
