@@ -87,6 +87,7 @@ Needed to validate: a browser on `/dev/ui` (nothing else; in place now).
 
 - 2026-10-12 question — asked 2, from context 3
 - 2026-10-12 blocked — test wrong: test data used three equal options; Blazor rejects duplicate keys once the field re-renders
+- 2026-10-12 test-fail — tests failed (Simulab.slnx): Simulab.AppHost.Tests.RequiredSettingsTests.Publish_EveryRequiredSettingHasASource(environm, 1 red
 
 ## Delivery
 - Fix: `AppLookupField.RequestRender()` (`_ = InvokeAsync(StateHasChanged)`) after `_announcement` on the success and failure paths; the same call in `AppSuggestField.SearchSuggestionsAsync`.
