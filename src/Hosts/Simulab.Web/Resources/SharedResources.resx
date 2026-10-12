@@ -928,4 +928,25 @@
   <data name="question.paper_number_taken" xml:space="preserve"><value>Number already used in this edition.</value></data>
   <data name="exam_edition.has_questions" xml:space="preserve"><value>Questions of the bank came from this edition, so it cannot be deleted.</value></data>
   <data name="notice_subject.has_questions" xml:space="preserve"><value>Questions of the bank belong to this notice subject, so it cannot be deleted.</value></data>
+  <data name="Questions.Field.Type" xml:space="preserve"><value>Question type</value></data>
+  <data name="Questions.Type.SingleChoice" xml:space="preserve"><value>Single choice</value></data>
+  <data name="Questions.Type.SingleChoice.Description" xml:space="preserve"><value>One statement with two to five options; exactly one is correct.</value></data>
+  <data name="Questions.Type.TrueFalse" xml:space="preserve"><value>True/false</value></data>
+  <data name="Questions.Type.TrueFalse.Description" xml:space="preserve"><value>One statement the student judges as true or false.</value></data>
+  <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>The type cannot be changed after the question is created.</value></data>
+  <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Answer key</value></data>
+  <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Mark the statement as true or false. Needed only to publish.</value></data>
+  <data name="Questions.TrueFalseKey.Label" xml:space="preserve"><value>Correct answer</value></data>
+  <data name="Questions.TrueFalseKey.Hint" xml:space="preserve"><value>The penalty for a wrong answer comes from the scoring rules of the edition, never from the question.</value></data>
+  <data name="Questions.TrueFalse.True" xml:space="preserve"><value>True</value></data>
+  <data name="Questions.TrueFalse.False" xml:space="preserve"><value>False</value></data>
+  <data name="Questions.Preview.Answers" xml:space="preserve"><value>Answers</value></data>
+  <data name="Questions.Preview.NoKey.TrueFalse" xml:space="preserve"><value>This draft has no answer key yet.</value></data>
+  <data name="Questions.Checklist.TrueFalseKey" xml:space="preserve"><value>Answer key set</value></data>
+  <data name="Questions.Form.Aside.Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Questions.Column.Type" xml:space="preserve"><value>Type</value></data>
+  <data name="question.type_changed" xml:space="preserve"><value>The type of a question cannot be changed.</value></data>
+  <data name="question.options_not_allowed" xml:space="preserve"><value>A true/false question has no options.</value></data>
+  <data name="question.key_not_allowed" xml:space="preserve"><value>A single-choice question has no true/false key.</value></data>
+  <data name="question.true_false_key_required" xml:space="preserve"><value>Set the answer key (true or false) to publish.</value></data>
 </root>

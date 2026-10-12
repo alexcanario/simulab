@@ -58,4 +58,16 @@ public static class QuestionBankErrorCodes
 
     /// <summary>B-28 BR2: the subject whose topics were asked for is unknown or deleted.</summary>
     public const string QuestionSubjectNotFound = "question.subject_not_found";
+
+    /// <summary>F-97 BR2: an update names another type than the stored one; the type never changes.</summary>
+    public const string QuestionTypeChanged = "question.type_changed";
+
+    /// <summary>F-97 BR3: a true/false question was sent options (a non-empty list); nothing is truncated or ignored.</summary>
+    public const string QuestionOptionsNotAllowed = "question.options_not_allowed";
+
+    /// <summary>F-97 BR3: a single-choice question was sent a true/false key.</summary>
+    public const string QuestionKeyNotAllowed = "question.key_not_allowed";
+
+    /// <summary>F-97 BR4: a published true/false question needs its key; a publish or an edit left it empty.</summary>
+    public const string QuestionTrueFalseKeyRequired = "question.true_false_key_required";
 }

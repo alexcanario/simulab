@@ -22,6 +22,9 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
     /// <summary>F-96 BR3: the unique number of a live question inside an edition.</summary>
     public const string PaperNumberIndex = "ux_questions_tenant_edition_paper_number";
 
+    /// <summary>F-97 BR1: only a true/false question carries a true/false key.</summary>
+    public const string TrueFalseKeyCheck = "ck_questions_true_false_key";
+
     public void Configure(EntityTypeBuilder<Question> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -38,6 +41,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                     OriginCheck,
                     "(exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL) OR "
                     + $"(exam_edition_id IS NOT NULL AND paper_number IS NOT NULL AND paper_number BETWEEN {QuestionLimits.PaperNumberMin} AND {QuestionLimits.PaperNumberMax})");
+                table.HasCheckConstraint(TrueFalseKeyCheck, "true_false_key IS NULL OR type = 'TrueFalse'");
             });
         builder.HasKey(question => question.Id);
 
@@ -45,7 +49,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice.");
+            .HasComment("How the question is answered: SingleChoice or TrueFalse.");
 
         builder.Property(question => question.Status)
             .HasConversion<string>()
@@ -97,6 +101,11 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
 
         builder.Property(question => question.NoticeSubjectId)
             .HasComment("The notice subject of that edition the question belongs to. Held by id; optional, and only with an edition.");
+
+        // F-97: the key of a true/false question is one nullable boolean, not two option rows. Null means not set
+        // yet, and is the only value a single-choice row can hold (the check above).
+        builder.Property(question => question.TrueFalseKey)
+            .HasComment("The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question.");
 
         builder.HasMany(question => question.Options)
             .WithOne()

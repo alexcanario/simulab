@@ -18,4 +18,5 @@ public sealed record QuestionResponse(
     string? ExplanationHtml,
     int? Difficulty,
     IReadOnlyList<QuestionOptionResponse> Options,
-    QuestionOriginResponse? Origin = null);
+    QuestionOriginResponse? Origin = null,
+    bool? TrueFalseKey = null);
