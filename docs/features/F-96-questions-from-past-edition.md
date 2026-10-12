@@ -1,7 +1,7 @@
 ---
 feature: F-96
 epic: Question bank
-status: refining
+status: approved
 board: 142
 version: 1
 ---
@@ -131,6 +131,7 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 - 2026-10-12 — Only `Catalog.Contracts` and `QuestionBank` change in the backend; no catalog migration — Claude; the catalog gains read contracts and two delete guards, not tables.
 - 2026-10-12 — A curator without `catalog.manage` cannot open the edition page, so the "Questions" section there is reached in practice by admins; a curator reaches the same questions through `/admin/questions` — Claude, consequence of BR12; the page's permission is not changed by this item.
 - 2026-10-12 — No new package — Claude; nothing here needs one.
+- 2026-10-12 — F-96 approved ("aprovo F-96"), with no new package and no mockup (owner).
 - 2026-10-12 — Design passes (`system-design`, then `architect`) are asked at the build: the item adds a contract between modules, a schema change and a unique index — Claude.
 
 ## Out of scope
