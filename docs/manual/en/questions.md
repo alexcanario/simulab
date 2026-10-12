@@ -1,14 +1,15 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96]
+features: [F-95, F-96, F-97]
 updated: 2026-10-12
 ---
 # Questions
 
 The question bank is where curators write the questions that exams and practice are built from. A question
 has a statement, an optional base text, from two to five options with one correct, an optional explanation, a
-difficulty, a topic and the language it is written in. This page covers single-choice questions.
+difficulty, a topic and the language it is written in. A question is either single choice or true/false
+(right or wrong); a true/false question has one answer key, true or false, instead of options.
 
 ## Who can use it
 An account with the permission "Manage the question bank". Curators and Admins have it. Everyone else gets
@@ -19,12 +20,14 @@ Page not found, and the menu has no Questions entry.
 1. Choose **Questions**, in the **Content** section of the side menu.
 2. The list shows the start of each statement, the topic with its subject, the source (the organizer, exam
    and year of the paper the question came from, with its number; a dash means the question is authored), the
-   difficulty, the language and the status, newest first.
+   difficulty, the language, the status and the type (single choice or true/false), newest first.
 3. Type in the search box to find a word of the statement. Case and accents do not matter.
 4. Use **Status** to show only drafts or only published questions.
 
 ### Write a question
-1. Choose **Add**.
+1. Choose **Add**. The first field, **Question type**, offers **Single choice** (the default) and
+   **True/false**. The type is chosen now and cannot be changed after the question is created; on a saved
+   question it is shown as a value.
 2. Pick the **subject**, then the **topic** (the topic list shows only the topics of that subject). The
    **content language** starts as your own language; change it to the language the question is written in.
    Add a **difficulty** from 1 (easiest) to 5 (hardest) if you want.
@@ -36,8 +39,13 @@ Page not found, and the menu has no Questions entry.
 6. Optionally write the **explanation**, shown with the answer key.
 7. Choose **Save**. The question is saved as a **draft** and the page becomes its edit page.
 
-A draft may be saved with no options and no correct one yet. The list "Before publishing", beside the form,
-shows what is still missing.
+For a **true/false** question the **Options** card is replaced by **Answer key**: choose **True** or
+**False** for the statement. The key is needed only to publish, so a draft may be saved without it. The
+penalty for a wrong answer is not part of the question: it comes from the scoring rules of the edition. If you
+change the type before saving, what you typed for the other type stays on the page but is not saved.
+
+A draft may be saved with no options and no correct one yet, or with no key. The list "Before publishing",
+beside the form, shows what is still missing; for a true/false question it has one item, "Answer key set".
 
 ### Record where a question came from
 A question from a past exam keeps the edition it came from, its number in that paper and, if you like, its
@@ -61,15 +69,16 @@ shown to people who also manage the question bank.
 ### Publish and unpublish
 1. Open the question and look at the **Publication** card, below the form.
 2. **Publish** is available when the question is saved and the checklist is complete: topic, language,
-   statement, two to five options, every option with text and exactly one correct. Choosing **Save** never
-   publishes.
+   statement, two to five options, every option with text and exactly one correct (for a true/false question:
+   the answer key set). Choosing **Save** never publishes.
 3. A published question can still be edited, but every edit must keep it complete.
 4. **Unpublish** takes it back to a draft with the same content.
 
 ### Preview as a student
 1. In the **Publication** card, choose **Preview as a student**.
-2. The window shows the base text, the statement and the options as a student will see them.
-3. Choose **Show answer** to see the correct option and the explanation. The preview always shows the saved
+2. The window shows the base text, the statement and the options as a student will see them; a true/false
+   question shows two lines, True and False.
+3. Choose **Show answer** to see the correct option (or the key) and the explanation. The preview always shows the saved
    version; save first to see your latest changes.
 
 ### Delete a question
@@ -79,6 +88,7 @@ shown to people who also manage the question bank.
 ## Fields
 | Field | Meaning | Rules |
 |---|---|---|
+| Question type | How the question is answered | Single choice or true/false. Chosen when the question is created; it cannot be changed afterwards |
 | Subject | Used to pick the topic | Required on screen; the question stores only its topic |
 | Topic | The topic the question belongs to | Required. A topic cannot be deleted while a question uses it |
 | Content language | The language the question is written in | Required, one of the app's languages. Content is never translated |
@@ -86,6 +96,7 @@ shown to people who also manage the question bank.
 | Statement | What the student is asked | Required, up to 10,000 characters |
 | Base text | A text the question refers to | Optional, up to 20,000 characters |
 | Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct. Each up to 2,000 characters |
+| Answer key | Whether the statement of a true/false question is true or false | Only for true/false. May be empty in a draft; required to publish. A published question cannot lose it |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
 | Edition | The past paper the question came from | Optional. With no edition the question is authored. An edition cannot be deleted while a question uses it |
 | Number in the paper | The question's position in the edition's paper | Required with an edition, a whole number from 1 to 500, unique among the edition's questions |
@@ -102,6 +113,9 @@ the question is saved, and the page shows what was kept.
 | A question is published with 2 to 5 options. | Fewer than two options, or more than five. | Add or remove options. |
 | Every option needs text. | A published question has an empty option. | Write the text or remove the option. |
 | Mark exactly one option as correct. | No correct option, or more than one. | Mark one. |
+| Set the answer key (true or false) to publish. | A true/false question has no key. | Choose True or False under Answer key. |
+| The type of a question cannot be changed. | A save named another type than the stored one. | Reload the page; create a new question for the other type. |
+| A true/false question has no options. / A single-choice question has no true/false key. | A save carried an answer the type does not have. | Reload the page and save again. |
 | Difficulty is a number from 1 to 5, or empty. | The difficulty is out of range. | Choose 1 to 5 or leave it empty. |
 | Choose one of the supported languages. | The language is not on the list. | Pick a language from the list. |
 | The topic no longer exists. Pick another. | The topic was deleted while you wrote. | Choose another topic. |
