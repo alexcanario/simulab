@@ -1,7 +1,7 @@
 ---
 feature: F-96
 epic: Question bank
-status: building
+status: validating
 board: 142
 version: 1
 ---
@@ -116,7 +116,7 @@ Tests locked: 8d6dfe986152df4732b61c8e5d790333a8c91e40 (6 files); unlocks: 1
 | AC15 | QuestionOriginTests (Web.Tests): Edit_OfAQuestionFromAnEdition_ShowsItsOriginAndTheSourceLineInTheAside, Edit_OfAnAuthoredQuestion_SaysAuthoredInTheAside, List_ShowsTheSourceLineAndTheNumber_AndADashWithHiddenTextForAnAuthoredQuestion, Preview_ShowsTheSourceLineAndTheNumberAboveTheStatement_ForAnOrigin, Preview_OfAnAuthoredQuestion_ShowsNoSourceLine |
 | AC16 | QuestionOriginTests (Web.Tests): Section_ListsTheQuestionsByNumber_WithTheirSubjectAndStatus, Section_WithNoQuestions_SaysSo, Section_OfAnEditionNotSavedYet_AsksToSaveFirst_AndHasNoAddButton, Section_AddQuestion_OpensTheFormWithTheEditionChosen, Section_EditAction_OpensTheQuestionOnItsOwnPage, Section_AsksTheServerForTheEditionsFirstPageOf25; ExamEditionQuestionsPermissionTests (both) |
 | AC17 | ModuleBoundaryTests (existing: Application_ReferencesItsOwnDomainAndContractsOnly, EveryLayer_ReachesAnotherModuleOnlyThroughItsContracts), run again at the end |
-| AC18 | pending |
+| AC18 | QuestionOriginResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords (19 texts and codes); ResourceParityTests (existing missing-key test) |
 
 ## Decisions
 - 2026-10-12 — The source line is organizer acronym, exam and year; position and notice reference stay on the edition — owner, refinement; it is what the brief note asks (source, organizer, year) and fits one line.
