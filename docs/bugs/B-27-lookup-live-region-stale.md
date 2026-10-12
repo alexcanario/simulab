@@ -51,6 +51,9 @@ Duplicates (the same defect in another file, the same shape):
 - No new component, no new parameter, no new resource key.
 
 ## Regression test
+
+Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
+
 - One test per fixed component (`AppLookupFieldTests`, `AppSuggestFieldTests` in `tests/Hosts/Simulab.Web.Tests/Ui/`), seen failing before the fix: the search runs and the test reads the markup the wrapper last rendered, without forcing a render (a bare `WaitForAssertion` that re-renders is what hid the defect in F-114). The way to observe "no render happened" (render count of the wrapper, or the markup captured before the assertion) is settled at build with a throwaway probe before the test is locked.
 - Criterion 4 is a validation step, not a test: bUnit does not drive MudBlazor's own re-render.
 
