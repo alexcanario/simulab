@@ -1,7 +1,7 @@
 ---
 bug: B-27
 feature: F-34
-status: idea
+status: refining
 board: 164
 severity: low
 epic: Foundation and identity
@@ -21,21 +21,46 @@ What F-114 already fixed: only `AppSelectField` (the new combobox). What is left
 - Depends on: nothing.
 - Waits on (to start): nothing.
 - Needed to validate: a browser on `/dev/ui` and, ideally, a screen reader or the DOM read of the `aria-live` span — you.
-- Suggested path: `/agile:refine B-27` to confirm the cause on screen first (type in a lookup of the gallery and read the `aria-live` span), then `/agile:build B-27`.
-- Parallel with: any item that does not edit `AppLookupField.razor`.
-- Cause not verified: measure it at `/agile:refine` with the symptom seen on `AppSelectField`.
+- Suggested path: `/agile:build B-27` (cause read in the code at refinement; the on-screen reading is the first build step).
+- Parallel with: any item that does not edit `AppLookupField.razor` or `AppSuggestField.razor`.
 
 ## Expected
-After every search the live region says the count (or "nothing found") of that search, never the previous one.
+After every search the live region says the count (or "nothing found") of that search, never the previous one; a failed search shows its "try again" message at once.
+
+Acceptance criteria:
+1. Given an `AppLookupField` that has announced "Results: N" for a term, when the reader types another term and the search returns, then the `aria-live` span holds the count of that second search (or "Nothing found for ..."), without any other render.
+2. Given an `AppLookupField` whose search throws, when the search returns, then the description shows "The search failed." with the "try again" button, without any other render.
+3. Given an `AppSuggestField` that has announced "<label>: N" for a text, when the reader types another text, then the `aria-live` span holds the count of that second text, without any other render.
+4. Given the gallery `/dev/ui` open through the app host, when a lookup is searched twice with different terms, then the DOM of the `aria-live` span read after each search shows that search's text (checked on screen, validation script).
 
 ## Cause
-Cause not verified for `AppLookupField`. The mechanism was confirmed on `AppSelectField` (F-114, 2026-10-11): the announcement is set in the library callback and the wrapper is not re-rendered; the fix there is `_ = InvokeAsync(StateHasChanged)` after setting it.
+Verified in today's code (2026-10-12; the files were last touched by F-114, F-74, F-42 and F-43):
+- `src/Hosts/Simulab.Web/Components/Ui/AppLookupField.razor:166-187`: `SearchOptionsAsync` is the `SearchFunc` of `MudAutocomplete` (line 16). It sets `_announcement` (lines 174-176, and 183 on a failed search) and `_searchFailed` (line 182) and returns without asking the wrapper to render. The library re-renders its own subtree when the search returns; the wrapper does not, so the `aria-live` span (line 71) and the description with the "try again" button (lines 54-61) keep the previous render until something else re-renders the field.
+- The mechanism is the one confirmed on screen for `AppSelectField` (F-114): `AppSelectField.razor:170-172` fixes it with `_ = InvokeAsync(StateHasChanged)` right after setting `_announcement`. `AppLookupField` has no such call.
+- Not yet read on screen for `AppLookupField` itself: the on-screen reading of the `aria-live` span is the first step of the validation script and of the build's check (the AppHost is not started at refinement).
+
+Duplicates (the same defect in another file, the same shape):
+- `src/Hosts/Simulab.Web/Components/Ui/AppSuggestField.razor:121-127`: `SearchSuggestionsAsync` is the `SearchFunc` (line 23), sets `_announcement` (line 124) and returns, with no render request. Same defect; the field is used by the notice group name (F-74/F-75).
+- `AppMultiPickField.razor:326-333`: `_results` is set in the wrapper's own `@oninput` handler, which re-renders the wrapper. Not affected.
+- `AppDataTable.razor:209` already calls `InvokeAsync(StateHasChanged)` after setting its announcement (F-50). Not affected.
+- `AppSelectField.razor:172`: fixed by F-114.
 
 ## Fix
-To be settled at refinement (the same call after setting `_announcement`, and a browser check).
+- `AppLookupField.SearchOptionsAsync`: after setting `_announcement` (success and failure paths), request a render with `_ = InvokeAsync(StateHasChanged)`, the call `AppSelectField` already has. The failure path matters too: without it the "search failed, try again" description may not appear.
+- `AppSuggestField.SearchSuggestionsAsync`: the same call after line 124.
+- No new component, no new parameter, no new resource key.
 
 ## Regression test
-- (to be written at build; bUnit cannot see the stale text, so the check is on the gallery's rendered DOM)
+- One test per fixed component (`AppLookupFieldTests`, `AppSuggestFieldTests` in `tests/Hosts/Simulab.Web.Tests/Ui/`), seen failing before the fix: the search runs and the test reads the markup the wrapper last rendered, without forcing a render (a bare `WaitForAssertion` that re-renders is what hid the defect in F-114). The way to observe "no render happened" (render count of the wrapper, or the markup captured before the assertion) is settled at build with a throwaway probe before the test is locked.
+- Criterion 4 is a validation step, not a test: bUnit does not drive MudBlazor's own re-render.
+
+## Decisions
+- 2026-10-12: fix `AppLookupField` and `AppSuggestField` in this item — owner chose "Corrigir os dois aqui" (the recommended one). Reason: same one-line defect, same project rule (F-114), leaving one keeps a known bug.
+- 2026-10-12: one regression test per component, no source-reading guard test — owner chose the recommended option. Reason: three components, a rule already in `project.md`; a guard that reads `.razor` text is fragile.
+- 2026-10-12: the failed-search path of `AppLookupField` is covered by the same fix (technical, no product impact): `_searchFailed` also changes inside the library callback.
+
+## Out of scope
+- A guard test over the kit's sources (decided above); `AppSelectField` (done in F-114); `AppMultiPickField` and `AppDataTable` (not affected).
 
 ## Open questions
 - (none)
@@ -44,5 +69,7 @@ To be settled at refinement (the same call after setting `_announcement`, and a 
 1. (written at build)
 
 ## Events
+
+- 2026-10-12 question — asked 2, from context 3
 
 ## Delivery
