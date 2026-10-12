@@ -77,6 +77,9 @@ Tests locked: a58d08450bced2dd2b862675a4fc9699aa2cab7f (3 files); unlocks: 0
 - 2026-10-12: the missing-topic dead end stays out of scope, not registered — owner chose "Fora do escopo, sem registrar" (the recommended one). Reason: creating a subject or topic from the form is a roles and screen decision; the owner asks when wanted.
 - 2026-10-12: subjects with no topic stay in the subject lookup — owner chose "Sim, igual a hoje" (the recommended one). Reason: the fix only changes who may call; hiding them would also change what the administrator sees.
 
+- 2026-10-12: `question.subject_not_found` goes to `ErrorCodeTextTests.NeverShown` instead of getting a UI text — Claude, technical. Reason: BR6/AC8 forbid a new UI key, and the form's lookup turns any failed read into the picker's own load error, so the code never reaches a person.
+- 2026-10-12: tests unlocked once (CA1822 on the `Field` helper of `QuestionFormLookupTests`, made `static`; no assertion changed) — owner agreed in the build card.
+
 ## Out of scope
 - Creating a subject or a topic from the question form, or giving `Curator` any catalog grant.
 - The edition page keeps `catalog.manage` (F-96 decision).
@@ -91,5 +94,6 @@ Written at the build (`/agile:build B-28`, with the commands for the owner). It 
 ## Events
 
 - 2026-10-12 question — asked 2, from context 0
+- 2026-10-12 blocked — test wrong: CA1822 on the helper Field: make it static, no assertion changes (owner agreed)
 
 ## Delivery

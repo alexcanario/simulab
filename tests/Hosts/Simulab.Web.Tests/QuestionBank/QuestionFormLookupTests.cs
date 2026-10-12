@@ -13,7 +13,7 @@ public sealed class QuestionFormLookupTests : QuestionPageTestContext
 {
     private const string CatalogPrefix = "/api/v1/catalog/";
 
-    private AppLookupField Field(IRenderedComponent<QuestionForm> page, string id) =>
+    private static AppLookupField Field(IRenderedComponent<QuestionForm> page, string id) =>
         page.FindComponents<AppLookupField>().Single(component => component.Instance.Id == id).Instance;
 
     // AC5
