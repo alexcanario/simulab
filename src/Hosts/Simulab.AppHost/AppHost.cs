@@ -26,6 +26,7 @@ else
 
     // One PostgreSQL server with the app database. The named volume keeps local data across restarts.
     var postgres = builder.AddPostgres("postgres", password: postgresPassword)
+        .WithContainerName("simulab-postgres")
         .WithDataVolume("simulab-postgres-data")
         .WithHostPort(5432);
 
@@ -35,20 +36,22 @@ else
     database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
 
     // Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
-    mailpit = builder.AddMailPit("mailpit");
+    mailpit = builder.AddMailPit("simulab-mailpit")
+        .WithContainerName("simulab-mailpit");
 
     // Refresh-token sessions and the access-token revocation set (F-5).
-    redis = builder.AddRedis("redis")
+    redis = builder.AddRedis("simulab-redis")
+        .WithContainerName("simulab-redis")
         .WithDataVolume("simulab-redis-data");
 }
 
-var api = builder.AddProject<Projects.Simulab_Api>("api")
+var api = builder.AddProject<Projects.Simulab_Api>("simulab-api")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(redis)
     .WaitFor(redis);
 
-var web = builder.AddProject<Projects.Simulab_Web>("web")
+var web = builder.AddProject<Projects.Simulab_Web>("simulab-web")
     .WithReference(api)
     .WaitFor(api)
     // B-3: each signed-in browser's tokens live here, not in its cookie.
