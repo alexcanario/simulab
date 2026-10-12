@@ -21,6 +21,12 @@ public static class QuestionLimits
     public const int DifficultyMin = 1;
     public const int DifficultyMax = 5;
 
+    /// <summary>The lowest number a question has in its paper (F-96, BR2).</summary>
+    public const int PaperNumberMin = 1;
+
+    /// <summary>The highest number a question has in its paper; the notice subject's question count shares the cap (F-96, BR2).</summary>
+    public const int PaperNumberMax = 500;
+
     /// <summary>How many characters of the plain statement the list shows (BR10).</summary>
     public const int ExcerptLength = 200;
 

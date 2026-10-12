@@ -94,6 +94,9 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 - AC18 All new texts and error codes appear in pt-BR, pt-PT and en, and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 8d6dfe986152df4732b61c8e5d790333a8c91e40 (6 files); unlocks: 1
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | AddQuestionOriginMigrationTests.Up_AddsTheOriginColumnsCheckAndIndexes_AndKeepsEveryExistingQuestionAuthored |
@@ -143,6 +146,9 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 - 2026-10-12 — The three usage checks share a small static helper that takes the `InUseAsync` delegate; no base interface in `Contracts` — Claude.
 - 2026-10-12 — The number field is `AppTextField` with `int?` and `InputType.Number`; no `AppNumberField` is added — Claude, verified at `ExamEditionForm.razor:77-82`.
 
+- 2026-10-12 — tests unlocked (two lookup tests used notice years 2031, 2032 and 2029, which the catalog refuses with `exam_edition.notice_year_invalid`; a test defect, not a criterion): `EditionLookupEndpointTests` rewritten with 2015, 2016 and 2014 — owner, "destravar e reescrever".
+- 2026-10-12 — The check `ck_questions_origin` needs `paper_number IS NOT NULL` besides the range: `NULL BETWEEN 1 AND 500` is unknown, which a check accepts, so an edition with no number would have passed (seen by the migration test) — Claude.
+
 ## Out of scope
 - Filters by edition, organizer or notice subject on the question list — F-100.
 - The transcription mode, with edition and notice subject kept and the number incremented — F-99.
@@ -164,5 +170,6 @@ No mockup: the screens reuse the patterns of F-95 and F-74 (epic: screen design 
 ## Events
 
 - 2026-10-12 question — asked 8, from context 0
+- 2026-10-12 blocked — test wrong: two tests used notice years 2031, 2032 and 2029, which the catalog refuses (exam_edition.notice_year_invalid); test defect, not a criterion
 
 ## Delivery

@@ -157,6 +157,28 @@ public sealed class Question : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionDifficultyInvalid, ErrorKind.Validation));
         }
 
+        // F-96 BR2: an edition needs a number from 1 to 500; a number or a notice subject needs an edition.
+        // An empty id counts as none, as the topic's does.
+        var editionId = content.ExamEditionId is { } id && id != Guid.Empty ? id : (Guid?)null;
+        var subjectId = content.NoticeSubjectId is { } subject && subject != Guid.Empty ? subject : (Guid?)null;
+        if (editionId is null && (content.PaperNumber is not null || subjectId is not null))
+        {
+            return Result.Failure(new Error(QuestionBankErrorCodes.QuestionOriginRequiresEdition, ErrorKind.Validation));
+        }
+
+        if (editionId is not null)
+        {
+            if (content.PaperNumber is not { } paperNumber)
+            {
+                return Result.Failure(new Error(QuestionBankErrorCodes.QuestionPaperNumberRequired, ErrorKind.Validation));
+            }
+
+            if (paperNumber < QuestionLimits.PaperNumberMin || paperNumber > QuestionLimits.PaperNumberMax)
+            {
+                return Result.Failure(new Error(QuestionBankErrorCodes.QuestionPaperNumberInvalid, ErrorKind.Validation));
+            }
+        }
+
         // BR4: editing a published question runs the publish check, so it cannot be made incomplete.
         var fault = QuestionRules.CheckOptions(content.Options, Status == QuestionStatus.Published);
         if (fault is not null)
@@ -173,6 +195,9 @@ public sealed class Question : TenantEntity
         BaseTextHtml = content.BaseText.IsEmpty ? null : content.BaseText.Html;
         ExplanationHtml = content.Explanation.IsEmpty ? null : content.Explanation.Html;
         Difficulty = content.Difficulty;
+        ExamEditionId = editionId;
+        PaperNumber = editionId is null ? null : content.PaperNumber;
+        NoticeSubjectId = subjectId;
         ReplaceOptions(content.Options);
 
         return Result.Success();

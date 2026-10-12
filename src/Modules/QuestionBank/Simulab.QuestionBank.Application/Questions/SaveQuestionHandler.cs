@@ -44,6 +44,22 @@ public sealed class SaveQuestionHandler(
             return Refused(new Error(QuestionBankErrorCodes.QuestionTopicNotFound, ErrorKind.NotFound));
         }
 
+        // F-96 BR2: an edition or a notice subject that is unknown, deleted or of another edition answers 404
+        // before anything about the content is judged, as the topic does.
+        if (request.ExamEditionId is { } editionId && editionId != Guid.Empty)
+        {
+            if (!await store.ExamEditionExistsAsync(editionId, cancellationToken))
+            {
+                return Refused(new Error(QuestionBankErrorCodes.QuestionExamEditionNotFound, ErrorKind.NotFound));
+            }
+
+            if (request.NoticeSubjectId is { } subjectId && subjectId != Guid.Empty
+                && !await store.NoticeSubjectBelongsToAsync(subjectId, editionId, cancellationToken))
+            {
+                return Refused(new Error(QuestionBankErrorCodes.QuestionNoticeSubjectNotFound, ErrorKind.NotFound));
+            }
+        }
+
         var drafts = (request.Options ?? [])
             .Select(option => new OptionDraft(sanitizer.Sanitize(option.TextHtml), option.IsCorrect))
             .ToList();
@@ -54,7 +70,10 @@ public sealed class SaveQuestionHandler(
             sanitizer.Sanitize(request.BaseTextHtml),
             sanitizer.Sanitize(request.ExplanationHtml),
             request.Difficulty,
-            drafts);
+            drafts,
+            request.ExamEditionId,
+            request.PaperNumber,
+            request.NoticeSubjectId);
 
         var question = existing;
         Result applied;
@@ -79,14 +98,25 @@ public sealed class SaveQuestionHandler(
             return Refused(applied.Error, position);
         }
 
-        if (existing is null)
+        // F-96 BR3: the number is unique among the live questions of the edition. The pre-check gives the
+        // normal answer; the unique index and its translation below catch two saves racing for one number.
+        if (question!.ExamEditionId is { } origin && question.PaperNumber is { } number
+            && await store.IsPaperNumberTakenAsync(origin, number, existing?.Id, cancellationToken))
         {
-            store.Add(question!);
+            return Refused(new Error(QuestionBankErrorCodes.QuestionPaperNumberTaken, ErrorKind.Conflict));
         }
 
-        await store.SaveChangesAsync(cancellationToken);
+        if (existing is null)
+        {
+            store.Add(question);
+        }
 
-        var saved = await queries.FindAsync(question!.Id, cancellationToken);
+        if (await store.TrySaveChangesAsync(cancellationToken) is { } refused)
+        {
+            return Refused(refused);
+        }
+
+        var saved = await queries.FindAsync(question.Id, cancellationToken);
 
         return saved is null
             ? Refused(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound))
