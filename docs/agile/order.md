@@ -4,7 +4,7 @@
 
 | # | Id | Title | Status | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|
-| 1 | F-96 | Questions from a past exam edition | idea | Question bank | - | F-99, F-110 |
+| 1 | B-28 | A curator without catalog.manage cannot search subjects and topics in the question form | idea | Question bank | - | - |
 | 2 | F-97 | True/false questions | idea | Question bank | - | F-99, F-110 |
 | 3 | F-98 | Question versions and answer key changes | idea | Question bank | - | F-101 |
 | 4 | F-76 | Syllabus for students | refining | Subject taxonomy | - | - |
@@ -40,13 +40,13 @@
 | 34 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
 | 35 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
 | 36 | F-101 | Annul a question | idea | Question bank | F-98 | - |
-| 37 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-96, F-97 | - |
+| 37 | F-99 | Transcribe the paper of an edition | idea | Question bank | F-97 | - |
 | 38 | F-103 | Images in questions | idea | Question bank | F-89 | - |
-| 39 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-96, F-97 | - |
+| 39 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | F-97 | - |
 
 ## Checklist
 
-- [ ] 1. F-96 — Questions from a past exam edition [idea] — unlocks F-99, F-110
+- [ ] 1. B-28 — A curator without catalog.manage cannot search subjects and topics in the question form [idea]
 - [ ] 2. F-97 — True/false questions [idea] — unlocks F-99, F-110
 - [ ] 3. F-98 — Question versions and answer key changes [idea] — unlocks F-101
 - [ ] 4. F-76 — Syllabus for students [refining]
@@ -82,14 +82,14 @@
 - [ ] 34. F-113 — Table button in the rich text editor [idea]
 - [ ] 35. F-115 — One test helper for every module's permissions [idea]
 - [ ] 36. F-101 — Annul a question [idea] — waits on F-98
-- [ ] 37. F-99 — Transcribe the paper of an edition [idea] — waits on F-96, F-97
+- [ ] 37. F-99 — Transcribe the paper of an edition [idea] — waits on F-97
 - [ ] 38. F-103 — Images in questions [idea] — waits on F-89
-- [ ] 39. F-110 — Sample questions of the municipal guard editions [idea] — waits on F-96, F-97
+- [ ] 39. F-110 — Sample questions of the municipal guard editions [idea] — waits on F-97
 
 ## Summary
 
-- Delivered: 102
+- Delivered: 103
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
-- First release (question-bank): 1 of 5 delivered; missing: F-96, F-97, F-98, F-99
+- First release (question-bank): 2 of 5 delivered; missing: F-97, F-98, F-99
 - First release (subject-taxonomy): 4 of 7 delivered; missing: F-76, F-77, F-78

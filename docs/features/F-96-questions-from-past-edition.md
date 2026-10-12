@@ -1,7 +1,7 @@
 ---
 feature: F-96
 epic: Question bank
-status: validating
+status: done
 board: 142
 version: 1
 ---
@@ -188,3 +188,8 @@ Stop the app host and, when done, drop the database: `DROP DATABASE simulab_f96;
 - 2026-10-12 test-fail — 2 new warning(s): IDE0051 in tests/Hosts/Simulab.Web.Tests/QuestionBank/QuestionOriginTests.cs; IDE0005 in tests/Hosts/S, 2 reds
 
 ## Delivery
+- Branch `feature/F-96`, merge commit `d261ccaa`, version 0.30.0 (board #142).
+- Ship gate `agile gate GREEN`: Web 1487, AppHost 80, Api 58, Catalog 512, Identity 501, QuestionBank 141, Jobs 25, Ai 10, Persistence 25, Email 19, ApiResults 13, SharedKernel 12; architecture 219. Scan `agile scan GREEN`, docs `agile docs GREEN`, test lock unchanged (1 unlock, recorded in Decisions).
+- Backend: `Catalog.Contracts` gains `IExamEditionDirectory`, `IExamEditionUsageCheck` and `INoticeSubjectUsageCheck`; `QuestionBank` stores the origin on `Question` (migration `AddQuestionOrigin`), serves four read routes under `/editions` and guards the edition and notice subject deletes.
+- Screens: Origin section of the question form, Source column of the list, source line in the preview, and the Questions section of the edition page.
+- Manual: `questions.md` and `exam-editions.md` in pt-BR, pt-PT and en.
