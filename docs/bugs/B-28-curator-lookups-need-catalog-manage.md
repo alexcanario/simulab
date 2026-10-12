@@ -63,7 +63,7 @@ Reproduced in the code at refinement (2026-10-12), not on a running host:
 
 ## Regression test
 
-Tests locked: a58d08450bced2dd2b862675a4fc9699aa2cab7f (3 files); unlocks: 0
+Tests locked: 75b2c28eb481fab328f37faf9e8dc37572fb39c6 (3 files); unlocks: 1
 
 - `SubjectLookupEndpointTests` in `tests/Modules/QuestionBank/Simulab.QuestionBank.Tests/`, the shape of `EditionLookupEndpointTests`: AC1 to AC4 (the curator's 200 with the seeded `Curator` is the one seen failing before the fix: the route does not exist, 404).
 - `QuestionFormTests` in `tests/Hosts/Simulab.Web.Tests/QuestionBank/`: AC5 and AC6, a fake handler records the paths and asserts that none starts with `/api/v1/catalog/` (fails before the fix: the form calls the catalog routes).

@@ -11,6 +11,8 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/question-bank/editions` | SearchQuestionEditions | 200 |
 | `GET` | `/api/v1/question-bank/questions/{id}` | FindQuestion | 200 |
 | `GET` | `/api/v1/question-bank/questions` | ListQuestions | 200 |
+| `GET` | `/api/v1/question-bank/subjects/{subjectId}/topics` | ListQuestionSubjectTopics | 200 |
+| `GET` | `/api/v1/question-bank/subjects` | SearchQuestionSubjects | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/publish` | PublishQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/unpublish` | UnpublishQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions` | CreateQuestion | 200 |
