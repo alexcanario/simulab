@@ -46,17 +46,17 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         topicCell.QuerySelector(".app-cell-secondary")!.TextContent.Should().Contain("Português");
 
         // A difficulty is a number; an empty one is a dash that is hidden from a screen reader and spoken instead.
-        CellsOf(page, 2)[0].Should().Contain("3");
-        var empty = page.FindAll("tbody tr")[1].QuerySelectorAll("td")[2];
+        CellsOf(page, 3)[0].Should().Contain("3");
+        var empty = page.FindAll("tbody tr")[1].QuerySelectorAll("td")[3];
         empty.QuerySelector("[aria-hidden='true']")!.TextContent.Should().Be("—");
         empty.QuerySelector(".app-visually-hidden")!.TextContent.Should().Be("No difficulty set");
 
         // The language is in its own name and marked with its own tag.
-        CellsOf(page, 3)[0].Should().Be("Português (Brasil)");
-        page.FindAll("tbody tr")[1].QuerySelectorAll("td")[3].QuerySelector("[lang]")!.GetAttribute("lang").Should().Be("pt-PT");
+        CellsOf(page, 4)[0].Should().Be("Português (Brasil)");
+        page.FindAll("tbody tr")[1].QuerySelectorAll("td")[4].QuerySelector("[lang]")!.GetAttribute("lang").Should().Be("pt-PT");
 
         // The status is a chip with text, in the tone the status means.
-        CellsOf(page, 4).Should().Equal("Draft", "Published");
+        CellsOf(page, 5).Should().Equal("Draft", "Published");
         page.FindAll(".app-status-chip-neutral").Should().ContainSingle();
         page.FindAll(".app-status-chip-success").Should().ContainSingle();
     }
@@ -116,7 +116,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
             && call.Query!.Contains("status=Published", StringComparison.Ordinal)
             && call.Query.Contains("page=0", StringComparison.Ordinal)));
         WaitForRows(page, 1);
-        CellsOf(page, 4).Should().Equal("Published");
+        CellsOf(page, 5).Should().Equal("Published");
     }
 
     // BR15: the list offers the status filter and the statement search, and nothing else (the rest is F-100).
@@ -285,7 +285,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
             call.Method == HttpMethod.Post && call.Path == $"/api/v1/question-bank/questions/{Draft.Id}/publish"));
         providers.Snackbars.WaitForAssertion(() => providers.Snackbars.Markup.Should().Contain("Question published."));
         providers.Dialogs.FindAll(".app-confirm-ok").Should().BeEmpty("publishing is reversible and asks nothing (BR12)");
-        page.WaitForAssertion(() => CellsOf(page, 4).Should().Equal("Published"));
+        page.WaitForAssertion(() => CellsOf(page, 5).Should().Equal("Published"));
     }
 
     [Fact]
@@ -301,7 +301,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Method == HttpMethod.Post && call.Path == $"/api/v1/question-bank/questions/{Published.Id}/unpublish"));
         providers.Snackbars.WaitForAssertion(() => providers.Snackbars.Markup.Should().Contain("Question unpublished. It is a draft again."));
-        page.WaitForAssertion(() => CellsOf(page, 4).Should().Equal("Draft"));
+        page.WaitForAssertion(() => CellsOf(page, 5).Should().Equal("Draft"));
     }
 
     // A publish refused because the question is incomplete shows the code's text; the curator completes it on its page.

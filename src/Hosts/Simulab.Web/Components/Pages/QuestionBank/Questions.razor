@@ -61,6 +61,28 @@
                 <span class="app-cell-secondary"><AppTruncatedText Text="@context.Item.SubjectName" MaxWidth="14rem" /></span>
             </CellTemplate>
         </PropertyColumn>
+        @* F-96 UC4: where the question came from, as the source line with its number under it; an authored
+           question shows a dash. Not sortable and not filterable: filters by origin are F-100. *@
+        <TemplateColumn T="QuestionListItemResponse" Title="@L["Questions.Column.Source"]" Sortable="false">
+            <CellTemplate>
+                @if (QuestionText.SourceLine(context.Item.Origin) is { } sourceLine)
+                {
+                    <AppTruncatedText Text="@sourceLine" MaxWidth="16rem" />
+                    <span class="app-cell-secondary">@L["Questions.Source.Number", context.Item.Origin!.PaperNumber]</span>
+                }
+                else if (context.Item.Origin is null)
+                {
+                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
+                    <span aria-hidden="true">—</span>
+                    <span class="app-visually-hidden">@L["Questions.Source.Authored"]</span>
+                }
+                else
+                {
+                    @* An edition that no longer resolves: the number is still the question's. *@
+                    <span class="app-cell-secondary">@L["Questions.Source.Number", context.Item.Origin.PaperNumber]</span>
+                }
+            </CellTemplate>
+        </TemplateColumn>
         <AppNumberColumn TItem="QuestionListItemResponse" TProperty="int?" Property="row => row.Difficulty"
                          Title="@L["Questions.Column.Difficulty"]" Sortable="false">
             <CellTemplate>

@@ -102,6 +102,50 @@ else
                 </AppFormGrid>
             </AppSectionCard>
 
+            @* F-96, UC1 and UC2: where a past-exam question came from. All three fields are optional together: an
+               empty section is an authored question. The lookups are routes of the question bank, so a curator
+               needs no catalog permission to fill them (BR9). *@
+            <AppSectionCard Id="question-section-origin"
+                            Title="@L["Questions.Section.Origin"]"
+                            Icon="@AppIcons.Editions"
+                            Subtitle="@L["Questions.Section.Origin.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppLookupField Id="question-edition"
+                                    Label="@L["Questions.Field.Edition"]"
+                                    Placeholder="@L["Questions.Field.Edition.Placeholder"]"
+                                    LeadingIcon="@AppIcons.Editions"
+                                    SearchAsync="SearchEditionsAsync"
+                                    MinChars="0"
+                                    OpenOnFocus="true"
+                                    Value="_edition"
+                                    ValueChanged="OnEditionChangedAsync"
+                                    Hint="@L["Questions.Field.Edition.Hint"]"
+                                    Error="@_editionError" />
+
+                    <AppTextField TValue="int?"
+                                  Id="question-paper-number"
+                                  Label="@L["Questions.Field.PaperNumber"]"
+                                  InputType="InputType.Number"
+                                  Value="_paperNumber"
+                                  ValueChanged="@((int? value) => OnPaperNumberChanged(value))"
+                                  Required="@(_edition is not null)"
+                                  Disabled="@(_edition is null)"
+                                  Hint="@(_edition is null ? L["Questions.Field.PaperNumber.DisabledHint"].Value : L["Questions.Field.PaperNumber.Hint"].Value)"
+                                  Error="@_paperNumberError" />
+
+                    <AppSelectField TValue="Guid?"
+                                    Id="question-notice-subject"
+                                    Label="@L["Questions.Field.NoticeSubject"]"
+                                    Value="_noticeSubjectId"
+                                    ValueChanged="@((Guid? value) => OnNoticeSubjectChanged(value))"
+                                    Options="NoticeSubjectOptions"
+                                    Disabled="@(_edition is null)"
+                                    Loading="_noticeSubjectsLoading"
+                                    Hint="@(_edition is null ? L["Questions.Field.NoticeSubject.DisabledHint"].Value : L["Questions.Field.NoticeSubject.Hint"].Value)"
+                                    Error="@_noticeSubjectError" />
+                </AppFormGrid>
+            </AppSectionCard>
+
             <AppSectionCard Id="question-section-statement"
                             Title="@L["Questions.Section.Statement"]"
                             Icon="@AppIcons.Questions"
@@ -333,6 +377,9 @@ else
     /// <summary>The question being edited; absent on /admin/questions/new.</summary>
     [Parameter] public Guid? Id { get; set; }
 
+    /// <summary>The edition chosen on the new form when it opens from the edition page (F-96, "Add question").</summary>
+    [SupplyParameterFromQuery(Name = "examEditionId")] public Guid? PreselectedEditionId { get; set; }
+
     private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
     private QuestionResponse? _saved;
     private AppLookupOption? _subject;
@@ -343,6 +390,18 @@ else
     private string _baseText = string.Empty;
     private string _explanation = string.Empty;
     private List<OptionDraft> _options = [];
+
+    // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
+    private AppLookupOption? _edition;
+    private int? _paperNumber;
+    private Guid? _noticeSubjectId;
+    private IReadOnlyList<NoticeSubjectLookupResponse> _noticeSubjects = [];
+    private bool _noticeSubjectsLoading;
+    private string? _editionError;
+    private string? _paperNumberError;
+    private string? _noticeSubjectError;
+    private Guid? _noticeSubjectsFor;
+    private bool _preselected;
 
     private string? _topicError;
     private string? _languageError;
@@ -430,7 +489,17 @@ else
         new(L["Questions.Field.Topic"], _topic?.Text),
         new(L["Questions.Field.ContentLanguage"], LanguageDone ? QuestionText.LanguageName(_contentLanguage!) : null),
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
+        new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
         new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value)
+    ];
+
+    // The notice subject select: the group is part of the text, since the kit select has no group headings.
+    private IReadOnlyList<AppSelectOption<Guid?>> NoticeSubjectOptions =>
+    [
+        new(null, L["Questions.NoticeSubject.None"]),
+        .. _noticeSubjects.Select(subject => new AppSelectOption<Guid?>(
+            subject.Id,
+            string.IsNullOrWhiteSpace(subject.Group) ? subject.Label : $"{subject.Group} · {subject.Label}"))
     ];
 
     // The reason Publish is disabled, said in words. Unsaved changes come first: publishing acts on what is stored.
@@ -450,6 +519,9 @@ else
             AddIfRefused(items, _topicError, "question-topic", L["Questions.Field.Topic"]);
             AddIfRefused(items, _languageError, "question-content-language", L["Questions.Field.ContentLanguage"]);
             AddIfRefused(items, _difficultyError, "question-difficulty", L["Questions.Field.Difficulty"]);
+            AddIfRefused(items, _editionError, "question-edition", L["Questions.Field.Edition"]);
+            AddIfRefused(items, _paperNumberError, "question-paper-number", L["Questions.Field.PaperNumber"]);
+            AddIfRefused(items, _noticeSubjectError, "question-notice-subject", L["Questions.Field.NoticeSubject"]);
             AddIfRefused(items, _statementError, "question-statement", L["Questions.Field.Statement"]);
             AddIfRefused(items, _baseTextError, "question-base-text", L["Questions.Field.BaseText"]);
             for (var index = 0; index < _options.Count; index++)
@@ -476,6 +548,9 @@ else
         _topic?.Id != _saved?.TopicId
         || (_contentLanguage ?? string.Empty) != (_saved?.ContentLanguage ?? DefaultLanguage)
         || _difficulty != _saved?.Difficulty
+        || _edition?.Id != _saved?.Origin?.ExamEditionId
+        || (_edition is not null && _paperNumber != _saved?.Origin?.PaperNumber)
+        || (_edition is not null && _noticeSubjectId != _saved?.Origin?.NoticeSubjectId)
         || Normalized(_statement) != Normalized(_saved?.StatementHtml)
         || Normalized(_baseText) != Normalized(_saved?.BaseTextHtml)
         || Normalized(_explanation) != Normalized(_saved?.ExplanationHtml)
@@ -510,12 +585,37 @@ else
     protected override async Task OnParametersSetAsync()
     {
         BuildBreadcrumbs();
-        if (Id is not { } id || _saved?.Id == id)
+        if (Id is not { } id)
+        {
+            await PreselectEditionAsync();
+            return;
+        }
+
+        if (_saved?.Id == id)
         {
             return;
         }
 
         await LoadAsync(id);
+    }
+
+    // The edition page's "Add question" opens the new form with its edition already chosen (UC3). An edition that
+    // cannot be read just leaves the field empty: the curator picks one, nothing breaks.
+    private async Task PreselectEditionAsync()
+    {
+        if (PreselectedEditionId is not { } editionId || _edition is not null || _preselected)
+        {
+            return;
+        }
+
+        _preselected = true;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindEditionAsync(token, editionId);
+        if (result is { IsSuccess: true, Value: { } edition })
+        {
+            _edition = EditionOption(edition);
+            await LoadNoticeSubjectsAsync(edition.Id);
+        }
     }
 
     private Task ReloadAsync() => Id is { } id ? LoadAsync(id) : Task.CompletedTask;
@@ -533,6 +633,7 @@ else
         {
             Apply(question);
             BuildBreadcrumbs();
+            await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
             return;
         }
 
@@ -549,6 +650,9 @@ else
         _topic = new AppLookupOption(question.TopicId, question.TopicName);
         _contentLanguage = question.ContentLanguage;
         _difficulty = question.Difficulty;
+        _edition = question.Origin is { } origin ? EditionOption(origin) : null;
+        _paperNumber = question.Origin?.PaperNumber;
+        _noticeSubjectId = question.Origin?.NoticeSubjectId;
         _statement = question.StatementHtml;
         _baseText = question.BaseTextHtml ?? string.Empty;
         _explanation = question.ExplanationHtml ?? string.Empty;
@@ -564,6 +668,7 @@ else
     {
         _topicError = _languageError = _difficultyError = _statementError = null;
         _baseTextError = _explanationError = _optionsError = _error = null;
+        _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
         foreach (var option in _options)
         {
@@ -650,6 +755,87 @@ else
     {
         _difficulty = value;
         _difficultyError = null;
+    }
+
+    // -- the origin (F-96) --------------------------------------------------------------------------------------
+
+    // The line the reader picks is the source line; the position, when there is one, tells look-alikes apart.
+    private static AppLookupOption EditionOption(ExamEditionLookupResponse edition) =>
+        new(
+            edition.Id,
+            QuestionText.SourceLine(edition.OrganizerAcronym, edition.ExamName, edition.NoticeYear) ?? edition.ExamName,
+            edition.Position);
+
+    // BR11: an edition that no longer resolves has no name; the field says so instead of showing an empty box.
+    private AppLookupOption EditionOption(QuestionOriginResponse origin) =>
+        new(
+            origin.ExamEditionId,
+            QuestionText.SourceLine(origin) ?? L["Questions.Source.Unresolved"].Value,
+            origin.Position);
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchEditionsAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.SearchEditionsAsync(token, term, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Editions failed to load: {result.ErrorCode}.");
+        }
+
+        return [.. result.Value!.Select(EditionOption)];
+    }
+
+    // Choosing another edition, or clearing it, clears the number and the notice subject (AC14): both belong to
+    // the edition that was there.
+    private async Task OnEditionChangedAsync(AppLookupOption? value)
+    {
+        if (value?.Id == _edition?.Id)
+        {
+            return;
+        }
+
+        _edition = value;
+        _paperNumber = null;
+        _noticeSubjectId = null;
+        _editionError = _paperNumberError = _noticeSubjectError = null;
+        await LoadNoticeSubjectsAsync(value?.Id);
+    }
+
+    private void OnPaperNumberChanged(int? value)
+    {
+        _paperNumber = value;
+        _paperNumberError = PaperNumberError();
+    }
+
+    private void OnNoticeSubjectChanged(Guid? value)
+    {
+        _noticeSubjectId = value;
+        _noticeSubjectError = null;
+    }
+
+    // The notice subjects of the chosen edition, in display order. A failure leaves the select empty and says so;
+    // the curator can still save without one (it is optional).
+    private async Task LoadNoticeSubjectsAsync(Guid? editionId)
+    {
+        if (editionId is null)
+        {
+            _noticeSubjects = [];
+            _noticeSubjectsFor = null;
+            return;
+        }
+
+        if (_noticeSubjectsFor == editionId)
+        {
+            return;
+        }
+
+        _noticeSubjectsLoading = true;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListNoticeSubjectsAsync(token, editionId.Value);
+        _noticeSubjectsLoading = false;
+
+        _noticeSubjects = result is { IsSuccess: true, Value: { } subjects } ? subjects : [];
+        _noticeSubjectsFor = editionId;
     }
 
     // -- the rich texts ---------------------------------------------------------------------------------------
@@ -769,6 +955,16 @@ else
             ? Errors.For(QuestionBankErrorCodes.QuestionBaseTextTooLong)
             : null;
 
+    // BR2: an edition needs a whole number from 1 to 500. Without an edition there is nothing to check.
+    private string? PaperNumberError() =>
+        _edition is null
+            ? null
+            : _paperNumber is not { } number
+                ? Errors.For(QuestionBankErrorCodes.QuestionPaperNumberRequired)
+                : number < QuestionLimits.PaperNumberMin || number > QuestionLimits.PaperNumberMax
+                    ? Errors.For(QuestionBankErrorCodes.QuestionPaperNumberInvalid)
+                    : null;
+
     private string? ExplanationError() =>
         _explanation.Length > QuestionLimits.ExplanationMaxLength
             ? Errors.For(QuestionBankErrorCodes.QuestionExplanationTooLong)
@@ -801,6 +997,9 @@ else
         _topicError = TopicError();
         _languageError = LanguageDone ? null : Errors.For(QuestionBankErrorCodes.QuestionContentLanguageInvalid);
         _difficultyError = null;
+        _editionError = null;
+        _paperNumberError = PaperNumberError();
+        _noticeSubjectError = null;
         _statementError = StatementError();
         _baseTextError = BaseTextError();
         _explanationError = ExplanationError();
@@ -831,7 +1030,10 @@ else
             QuestionHtml.NullIfBlank(_baseText),
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
-            [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))]);
+            [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))],
+            _edition?.Id,
+            _edition is null ? null : _paperNumber,
+            _edition is null ? null : _noticeSubjectId);
 
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
@@ -846,6 +1048,7 @@ else
             Apply(question);
             _publicationError = null;
             BuildBreadcrumbs();
+            await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
             Snackbar.Add(L["Questions.Saved"], Severity.Success);
             if (wasAdd)
             {
@@ -866,7 +1069,7 @@ else
 
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
-        || _baseTextError is not null || _explanationError is not null || _optionsError is not null
+        || _paperNumberError is not null || _baseTextError is not null || _explanationError is not null || _optionsError is not null
         || _options.Any(option => option.Error is not null);
 
     // A refusal belongs to the field that caused it, so the reader sees where to change something (BR16).
@@ -910,6 +1113,25 @@ else
                 break;
             case QuestionBankErrorCodes.QuestionContentLanguageInvalid:
                 _languageError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionExamEditionNotFound:
+                // The edition left the catalog since it was picked: clear it and the fields that hung from it.
+                _edition = null;
+                _paperNumber = null;
+                _noticeSubjectId = null;
+                _noticeSubjects = [];
+                _noticeSubjectsFor = null;
+                _editionError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionNoticeSubjectNotFound:
+                _noticeSubjectId = null;
+                _noticeSubjectError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionPaperNumberRequired:
+            case QuestionBankErrorCodes.QuestionPaperNumberInvalid:
+            case QuestionBankErrorCodes.QuestionOriginRequiresEdition:
+            case QuestionBankErrorCodes.QuestionPaperNumberTaken:
+                _paperNumberError = text;
                 break;
             case QuestionBankErrorCodes.QuestionTopicNotFound:
                 // The topic left the catalog since it was picked: clear it and make the reader choose again.

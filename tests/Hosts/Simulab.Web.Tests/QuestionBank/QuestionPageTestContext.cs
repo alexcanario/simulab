@@ -69,6 +69,47 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         null,
         [new(0, "<p>Antes do vocativo</p>", true), new(1, "<p>Depois do verbo</p>", false), new(2, "<p>Nunca</p>", false)]);
 
+    /// <summary>F-96: a past edition the origin lookup offers.</summary>
+    protected static readonly ExamEditionLookupResponse GuardEdition = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000e1"), "Guarda Municipal", "CONSULPLAN", 2024, "Guarda", "Published");
+
+    protected static readonly ExamEditionLookupResponse OtherEdition = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000e2"), "Professor de História", "FGV", 2023, null, "Draft");
+
+    protected static readonly NoticeSubjectLookupResponse Basic = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000f1"), "Basic knowledge", "Portuguese", 10);
+
+    protected static readonly NoticeSubjectLookupResponse Specific = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000f2"), "Specific knowledge", "Constitutional law", 10);
+
+    protected static readonly NoticeSubjectLookupResponse OtherSubject = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000f3"), "Basic knowledge", "History", 20);
+
+    /// <summary>A draft that came from the guard edition: number 12 under its first notice subject.</summary>
+    protected static readonly QuestionResponse FromGuard = Draft with
+    {
+        Id = Guid.Parse("0198f5a0-0000-7000-8000-000000000020"),
+        StatementHtml = "<p>Fiscal de posturas: qual a competência?</p>",
+        Origin = new QuestionOriginResponse(
+            GuardEdition.Id,
+            Guid.Parse("0198f5a0-0000-7000-8000-0000000000c1"),
+            GuardEdition.ExamName,
+            GuardEdition.OrganizerAcronym,
+            "Consulplan",
+            GuardEdition.NoticeYear,
+            GuardEdition.Position,
+            12,
+            Basic.Id,
+            Basic.Label)
+    };
+
+    protected static readonly QuestionResponse FromGuardSecond = FromGuard with
+    {
+        Id = Guid.Parse("0198f5a0-0000-7000-8000-000000000021"),
+        StatementHtml = "<p>Outra questão da mesma prova.</p>",
+        Origin = FromGuard.Origin! with { PaperNumber = 30, NoticeSubjectId = null, NoticeSubjectLabel = null }
+    };
+
     protected FakeQuestionBankApi Api { get; } = new();
 
     protected QuestionPageTestContext()
@@ -113,6 +154,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
     protected sealed partial class FakeQuestionBankApi : HttpMessageHandler
     {
         private const string QuestionsPath = "/api/v1/question-bank/questions";
+        private const string EditionsPath = "/api/v1/question-bank/editions";
 
         /// <summary>The stored questions, newest first: the test sets it, the writes change it.</summary>
         public List<QuestionResponse> Questions { get; } = [];
@@ -120,6 +162,12 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         public List<SubjectResponse> Subjects { get; } = [Portuguese, Law];
 
         public List<TopicResponse> Topics { get; } = [Crase, Punctuation, FundamentalRights];
+
+        /// <summary>F-96: the editions the origin lookup knows.</summary>
+        public List<ExamEditionLookupResponse> Editions { get; } = [];
+
+        /// <summary>F-96: the notice subjects of each edition, in display order.</summary>
+        public Dictionary<Guid, List<NoticeSubjectLookupResponse>> NoticeSubjects { get; } = [];
 
         /// <summary>When set, listing the questions answers this problem (the list's load error).</summary>
         public (HttpStatusCode Status, string Code)? ListFailure { get; set; }
@@ -163,6 +211,11 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return HandleCatalog(path, query);
             }
 
+            if (path.StartsWith(EditionsPath, StringComparison.Ordinal))
+            {
+                return HandleEditions(path, query);
+            }
+
             if (!path.StartsWith(QuestionsPath, StringComparison.Ordinal))
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -182,6 +235,58 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 (2, "POST") when segments[1] == "unpublish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Draft),
                 _ => new HttpResponseMessage(HttpStatusCode.NotFound)
             };
+        }
+
+        private HttpResponseMessage HandleEditions(string path, string query)
+        {
+            var segments = path[EditionsPath.Length..].Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 0)
+            {
+                var term = System.Web.HttpUtility.ParseQueryString(query)["search"];
+
+                return Json(Editions
+                    .Where(edition => string.IsNullOrEmpty(term)
+                        || edition.ExamName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                        || edition.OrganizerAcronym.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .Take(20)
+                    .ToList());
+            }
+
+            var editionId = Guid.Parse(segments[0]);
+            if (!Editions.Exists(edition => edition.Id == editionId))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionExamEditionNotFound);
+            }
+
+            if (segments.Length == 1)
+            {
+                return Json(Editions.Single(edition => edition.Id == editionId));
+            }
+
+            if (segments[1] == "notice-subjects")
+            {
+                return Json(NoticeSubjects.TryGetValue(editionId, out var subjects) ? subjects : []);
+            }
+
+            var parameters = System.Web.HttpUtility.ParseQueryString(query);
+            var size = int.Parse(parameters["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+            var page = int.Parse(parameters["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+            var ordered = Questions
+                .Where(question => question.Origin?.ExamEditionId == editionId)
+                .OrderBy(question => question.Origin!.PaperNumber)
+                .ToList();
+            var items = ordered.Skip(page * size).Take(size)
+                .Select(question => new EditionQuestionListItemResponse(
+                    question.Id,
+                    question.Origin!.PaperNumber,
+                    PlainText(question.StatementHtml),
+                    question.Origin.NoticeSubjectId,
+                    question.Origin.NoticeSubjectLabel,
+                    question.Status,
+                    question.ContentLanguage))
+                .ToList();
+
+            return Json(new EditionQuestionPageResponse(items, ordered.Count));
         }
 
         private HttpResponseMessage HandleCatalog(string path, string query)
@@ -243,7 +348,8 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 question.SubjectName,
                 question.Difficulty,
                 question.ContentLanguage,
-                question.Status);
+                question.Status,
+                question.Origin);
 
         private HttpResponseMessage Find(Guid id)
         {
@@ -354,7 +460,35 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 Sanitize(request.ExplanationHtml),
                 request.Difficulty,
                 [.. (request.Options ?? []).Select((option, position) =>
-                    new QuestionOptionResponse(position, Sanitize(option.TextHtml) ?? string.Empty, option.IsCorrect))]);
+                    new QuestionOptionResponse(position, Sanitize(option.TextHtml) ?? string.Empty, option.IsCorrect))],
+                OriginOf(request));
+        }
+
+        // The Api reads the origin parts from the edition; the fake does it from the editions the test seeded.
+        private QuestionOriginResponse? OriginOf(SaveQuestionRequest request)
+        {
+            if (request.ExamEditionId is not { } editionId)
+            {
+                return null;
+            }
+
+            var edition = Editions.Find(candidate => candidate.Id == editionId);
+            var label = request.NoticeSubjectId is { } subjectId
+                && NoticeSubjects.TryGetValue(editionId, out var subjects)
+                    ? subjects.Find(subject => subject.Id == subjectId)?.Label
+                    : null;
+
+            return new QuestionOriginResponse(
+                editionId,
+                Guid.Empty,
+                edition?.ExamName ?? string.Empty,
+                edition?.OrganizerAcronym ?? string.Empty,
+                edition?.OrganizerAcronym ?? string.Empty,
+                edition?.NoticeYear,
+                edition?.Position,
+                request.PaperNumber ?? 0,
+                request.NoticeSubjectId,
+                label);
         }
 
         private static string? Sanitize(string? html) =>

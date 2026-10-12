@@ -4,6 +4,7 @@
 @layout MainLayout
 @using Simulab.Catalog.Contracts
 @using Simulab.Identity.Contracts
+@using Simulab.QuestionBank.Contracts
 @using Simulab.Web.Localization
 @using Simulab.Web.Services
 @inject CatalogApiClient Api
@@ -174,6 +175,15 @@ else
     <MudPaper Class="app-form-card mt-4" Elevation="0">
         <NoticeSubjectsSection ExamId="ExamId" EditionId="@_saved?.Id" />
     </MudPaper>
+
+    @* F-96, UC3: the questions that came from this edition, in paper order. Rendered only for who also holds
+       questions.manage (BR12); the card is not drawn at all otherwise, so an admin with only catalog.manage sees
+       no empty frame. *@
+    <AuthorizeView Policy="@(PermissionPolicy.Prefix + QuestionBankPermissions.Manage)">
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <EditionQuestionsSection EditionId="@_saved?.Id" />
+        </MudPaper>
+    </AuthorizeView>
 }
 
 @code {

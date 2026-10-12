@@ -891,4 +891,41 @@
   <data name="Gallery.RichText.OptionRow" xml:space="preserve"><value>Option row: letter, radio, compact editor, move and remove</value></data>
   <data name="Gallery.RichText.Sample" xml:space="preserve"><value>&lt;p&gt;A &lt;strong&gt;formatted&lt;/strong&gt; statement with H&lt;sub&gt;2&lt;/sub&gt;O and 10&lt;sup&gt;3&lt;/sup&gt;.&lt;/p&gt;</value></data>
   <data name="Gallery.RichText.LongSample" xml:space="preserve"><value>&lt;p&gt;A long paragraph that keeps going to show that the field grows with its text and wraps it, together with a word that has no break at all: Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico.&lt;/p&gt;</value></data>
+  <data name="Questions.Section.Origin" xml:space="preserve"><value>Origin</value></data>
+  <data name="Questions.Section.Origin.Subtitle" xml:space="preserve"><value>The past exam edition the question came from. Leave it empty for a question you wrote.</value></data>
+  <data name="Questions.Field.Edition" xml:space="preserve"><value>Edition</value></data>
+  <data name="Questions.Field.Edition.Placeholder" xml:space="preserve"><value>Search by exam, organizer or year</value></data>
+  <data name="Questions.Field.Edition.Hint" xml:space="preserve"><value>Drafts and published editions are listed.</value></data>
+  <data name="Questions.Field.PaperNumber" xml:space="preserve"><value>Number in the paper</value></data>
+  <data name="Questions.Field.PaperNumber.Hint" xml:space="preserve"><value>From 1 to 500. Each number is used once per edition.</value></data>
+  <data name="Questions.Field.PaperNumber.DisabledHint" xml:space="preserve"><value>Choose an edition first.</value></data>
+  <data name="Questions.Field.NoticeSubject" xml:space="preserve"><value>Notice subject</value></data>
+  <data name="Questions.Field.NoticeSubject.Hint" xml:space="preserve"><value>Optional. The subjects of the chosen edition.</value></data>
+  <data name="Questions.Field.NoticeSubject.DisabledHint" xml:space="preserve"><value>Choose an edition first.</value></data>
+  <data name="Questions.NoticeSubject.None" xml:space="preserve"><value>None</value></data>
+  <data name="Questions.Form.Aside.Source" xml:space="preserve"><value>Source</value></data>
+  <data name="Questions.Source.Authored" xml:space="preserve"><value>Authored</value></data>
+  <data name="Questions.Source.Unresolved" xml:space="preserve"><value>Edition not available</value></data>
+  <data name="Questions.Source.Number" xml:space="preserve"><value>Question {0}</value></data>
+  <data name="Questions.Preview.Number" xml:space="preserve"><value>Question {0}</value></data>
+  <data name="Questions.Column.Source" xml:space="preserve"><value>Source</value></data>
+  <data name="EditionQuestions.Section.Title" xml:space="preserve"><value>Questions</value></data>
+  <data name="EditionQuestions.Section.Subtitle" xml:space="preserve"><value>The questions of the bank that came from this edition, in paper order.</value></data>
+  <data name="EditionQuestions.Section.SaveEditionFirst" xml:space="preserve"><value>Save the edition first to add its questions.</value></data>
+  <data name="EditionQuestions.Add" xml:space="preserve"><value>Add question</value></data>
+  <data name="EditionQuestions.Empty" xml:space="preserve"><value>No questions from this edition yet.</value></data>
+  <data name="EditionQuestions.Column.Number" xml:space="preserve"><value>No.</value></data>
+  <data name="EditionQuestions.Column.Statement" xml:space="preserve"><value>Statement</value></data>
+  <data name="EditionQuestions.Column.NoticeSubject" xml:space="preserve"><value>Notice subject</value></data>
+  <data name="EditionQuestions.Column.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="EditionQuestions.NoticeSubject.None" xml:space="preserve"><value>No notice subject</value></data>
+  <data name="EditionQuestions.Row.Name" xml:space="preserve"><value>question {0}</value></data>
+  <data name="question.exam_edition_not_found" xml:space="preserve"><value>The edition no longer exists. Pick another.</value></data>
+  <data name="question.notice_subject_not_found" xml:space="preserve"><value>The notice subject does not belong to this edition, or no longer exists.</value></data>
+  <data name="question.paper_number_required" xml:space="preserve"><value>Enter the number of the question in the paper.</value></data>
+  <data name="question.paper_number_invalid" xml:space="preserve"><value>The number is a whole number from 1 to 500.</value></data>
+  <data name="question.origin_requires_edition" xml:space="preserve"><value>Choose an edition to give a number or a notice subject.</value></data>
+  <data name="question.paper_number_taken" xml:space="preserve"><value>Number already used in this edition.</value></data>
+  <data name="exam_edition.has_questions" xml:space="preserve"><value>Questions of the bank came from this edition, so it cannot be deleted.</value></data>
+  <data name="notice_subject.has_questions" xml:space="preserve"><value>Questions of the bank belong to this notice subject, so it cannot be deleted.</value></data>
 </root>
