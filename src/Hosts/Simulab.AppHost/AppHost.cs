@@ -36,22 +36,24 @@ else
     database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
 
     // Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
-    mailpit = builder.AddMailPit("simulab-mailpit")
+    // The resource names (mailpit, redis, api, web) are what the hosts resolve: connection strings, service
+    // discovery ("https+http://api") and AddRedisClient("redis"). Only the container name is prefixed.
+    mailpit = builder.AddMailPit("mailpit")
         .WithContainerName("simulab-mailpit");
 
     // Refresh-token sessions and the access-token revocation set (F-5).
-    redis = builder.AddRedis("simulab-redis")
+    redis = builder.AddRedis("redis")
         .WithContainerName("simulab-redis")
         .WithDataVolume("simulab-redis-data");
 }
 
-var api = builder.AddProject<Projects.Simulab_Api>("simulab-api")
+var api = builder.AddProject<Projects.Simulab_Api>("api")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(redis)
     .WaitFor(redis);
 
-var web = builder.AddProject<Projects.Simulab_Web>("simulab-web")
+var web = builder.AddProject<Projects.Simulab_Web>("web")
     .WithReference(api)
     .WaitFor(api)
     // B-3: each signed-in browser's tokens live here, not in its cookie.

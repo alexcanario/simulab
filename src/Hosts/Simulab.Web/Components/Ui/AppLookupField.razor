@@ -174,6 +174,7 @@
             _announcement = options.Count == 0
                 ? L["Lookup.NoResults", _lastTerm]
                 : L["Lookup.Results", options.Count];
+            RequestRender();
 
             return options;
         }
@@ -181,10 +182,15 @@
         {
             _searchFailed = true;
             _announcement = L["Lookup.LoadFailed"];
+            RequestRender();
 
             return [];
         }
     }
+
+    // B-27: the library re-renders its own subtree when the search returns, not this wrapper, so the live region and
+    // the failure message would keep the previous search until something else rendered (F-114 found it on screen).
+    private void RequestRender() => _ = InvokeAsync(StateHasChanged);
 
     private Task RetryAsync()
     {

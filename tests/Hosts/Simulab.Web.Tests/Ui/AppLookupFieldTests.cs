@@ -169,6 +169,43 @@ public sealed class AppLookupFieldTests : KitTestContext
         autocomplete.MaxItems.Should().Be(AppLookupField.MaxCandidates).And.Be(20);
     }
 
+    // B-27 AC1: the second search leaves the list open, so nothing else re-renders the wrapper; the live region
+    // must still hold the count of that second search. No re-render is forced: the markup is read as it stands.
+    [Fact]
+    public void Search_Twice_TheLiveRegionHoldsTheCountOfTheSecondSearch()
+    {
+        Render<MudBlazor.MudPopoverProvider>();
+        var field = Render((term, cancellationToken) =>
+            Task.FromResult<IReadOnlyList<AppLookupOption>>(term.Length == 3
+                ? [Cebraspe]
+                : [Cebraspe, Cebraspe with { Id = Guid.NewGuid() }, Cebraspe with { Id = Guid.NewGuid() }]));
+        field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+
+        field.Find("#lookup").Input("cebr");
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 3"));
+    }
+
+    // B-27 AC2: a second search that throws shows the failure and the retry button at once.
+    [Fact]
+    public void Search_SecondOneFails_ShowsTheFailureWithoutAnotherRender()
+    {
+        Render<MudBlazor.MudPopoverProvider>();
+        var field = Render((term, cancellationToken) => term.Length == 3 ? Found(term, cancellationToken) : Broken(term, cancellationToken));
+        field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+
+        field.Find("#lookup").Input("cebr");
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
+        field.Markup.Should().Contain("Try again");
+    }
+
     // F-42: a short fixed list (the 27 states) opens on focus, with no minimum of characters and room for every item.
     [Fact]
     public void Render_ForAFixedList_OpensOnFocusWithoutATermAndKeepsEveryItem()
