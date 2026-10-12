@@ -1,7 +1,7 @@
 ---
 bug: B-27
 feature: F-34
-status: refining
+status: approved
 board: 164
 severity: low
 epic: Foundation and identity
