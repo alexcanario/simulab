@@ -446,10 +446,11 @@ No fim do build da F-14 (ela grava resultados e mexe nos dados dos alunos):
 
 ```
 Claude: Esta mudança mexe em dados de alunos. Rodando /agile:review antes da validação.
-| Gravidade  | Achado                                      | Veredito   | Ação                     |
-| bloqueador | O endpoint de resultados não confere o dono | confirmado | corrigido + teste        |
-| leve       | Mapeamento duplicado em ResultsPage         | confirmado | corrigido                |
-| grave      | "A nota pode ficar negativa"                | rejeitado  | a BR2 permite penalidade |
+| # | Gravidade  | Achado                                      | Veredito   | Ação                     |
+| 1 | bloqueador | O endpoint de resultados não confere o dono | confirmado | corrigido + teste        |
+| 2 | leve       | Mapeamento duplicado em ResultsPage         | confirmado | corrigido                |
+| 3 | grave      | "A nota pode ficar negativa"                | rejeitado  | a BR2 permite penalidade |
+Conferido sem achado: dados, contratos, localização; não conferido: nenhum.
 Critério → teste: AC1 a AC6 cobertos; AC7 (troca de idioma) no roteiro de validação.
 Status: validating. Roteiro de validação: ...
 ```
@@ -4016,3 +4017,120 @@ Como toda mensagem leva o conjunto inteiro, e nunca só o id que mudou, uma raja
 ```
 
 O custo é um turno do Claude por clique, cada um respondendo uma linha. O rodapé do widget diz `As marcas ficam salvas a cada clique, só nesta máquina, fora do Git.`; o `docs/agile/order.md` continua com todas as caixas vazias.
+
+### 14.109 Sem widget, a lista da ordem aparece num bloco de código com o motivo
+
+Antes, numa sessão em que a `show_widget` estava só nomeada (deferida), o Claude não a carregava e colava as linhas da lista soltas na conversa. O chat desenha `- [ ]` solto como caixas, e elas não clicam: você via uma lista que parecia o widget e não fazia nada. Agora a ferramenta deferida é carregada e o widget abre. Só quando a ferramenta não existe (um terminal, uma execução sem interface) ou a chamada falha, as linhas vêm num bloco de código, seguidas de uma linha com o motivo e de como marcar. A saída abaixo é a do script no projeto de teste, com um item em andamento e um que espera por ele:
+
+````
+> /agile:order
+Claude: agile order WRITTEN: 4 items, 0 delivered
+
+```
+- [ ] 1. B-2 — Total errado em reembolsos [approved]
+- [ ] 2. F-12 — Export results to CSV [building] — unlocks F-13
+- [ ] 3. F-14 — Print layout [approved]
+- [ ] 4. F-13 — Share by link [approved] — waits on F-12
+```
+
+sem show_widget nesta sessão
+diga "marque F-3" para marcar
+As marcas ficam salvas só nesta máquina, fora do Git: o widget salva a cada clique, ou diga "marque F-3".
+Não marque as caixas ao abrir docs/agile/order.md no painel de arquivos do app: lá o clique grava no arquivo.
+````
+
+Se a chamada da `show_widget` falhar, a linha do motivo é `o widget não abriu: <erro>` e o resto é igual. Dentro do bloco as caixas são texto: nada nele parece clicável e nenhuma frase pede para clicar. Para marcar, diga "marque F-3"; um tick salvo aparece como `- [x]` na próxima execução, e o `docs/agile/order.md` continua com todas as caixas vazias.
+
+### 14.110 O release roda no GitHub Actions: o Claude dispara o workflow e espera
+
+O projeto `shop` (perfil `web-app`, versão `0.4.0` na `main`) tem o `.github/workflows/release.yml`, escrito pelo `pipeline write` do `sync.js` junto com o pipeline de deploy. Digitar `/agile:publish` não empacota nada na sua máquina: o Claude confere o plano aqui (as paradas de hoje: árvore limpa, em dia com o `origin`, tag livre, uma versão), escreve as linhas do glossário e entrega o resto ao runner.
+
+```
+> /agile:publish
+Claude: Plano: v0.4.0 (primeiro release), 1 projeto: Shop.Web. O release roda no GitHub Actions (release.yml); depois dele o pipeline implanta v0.4.0 em staging.
+        Glossário: nada faltando.
+        Disparando Release (deploy=true) e esperando a run...
+        Release v0.4.0 feito no GitHub Actions.
+        Run:    https://github.com/acme/shop/actions/runs/4242
+        Release: https://github.com/acme/shop/releases/tag/v0.4.0
+        Pacotes: nenhum neste projeto. Deploy: a run dispara o Deploy de v0.4.0 em staging.
+```
+
+O que o script respondeu nessa execução (o relatório inteiro de `publish.js ci`, de um projeto de teste com `gh` simulado):
+
+```
+{
+  "ok": true,
+  "mode": "ci",
+  "version": "0.4.0",
+  "tag": "v0.4.0",
+  "steps": [
+    "dispatched Release (release.yml --ref main -f deploy=true)",
+    "run 4242: https://github.com/acme/shop/actions/runs/4242",
+    "main brought level with origin (the notes commit and v0.4.0)"
+  ],
+  "run": {
+    "id": 4242,
+    "url": "https://github.com/acme/shop/actions/runs/4242"
+  },
+  "release": "https://github.com/acme/shop/releases/tag/v0.4.0",
+  "pulled": true,
+  "ci": {
+    "workflow": ".github/workflows/release.yml",
+    "target": "staging",
+    "deploy": true,
+    "line": "the pipeline deploys v0.4.0 to staging after the release",
+    "dispatch": "gh workflow run release.yml --ref main -f deploy=true"
+  },
+  "warnings": []
+}
+```
+
+Quando o ambiente que você digita é o destino do pipeline, o Claude não deixa o deploy acontecer duas vezes: o disparo leva `deploy=false` e o deploy local que segue roda uma vez.
+
+```
+> /agile:publish staging
+Claude: ... deploy=false: staging is the pipeline's target and the local deploy follows, so it is not deployed twice
+        Disparando Release (deploy=false) e esperando a run...
+        Release v0.4.0 feito. Agora o deploy de v0.4.0 em staging, daqui, pelo Deploy command do docs/infra.md.
+```
+
+Um projeto cujo plano tem um head que o runner não empacota para antes de qualquer commit, tag ou disparo:
+
+```
+> /agile:publish
+Claude: Não dá para fazer esse release no GitHub Actions: release in CI does not cover Acme.Desktop (Velopack) yet: run /agile:publish --local
+        Nada foi escrito, commitado nem disparado. Para fazer o release aqui na sua máquina: /agile:publish --local
+```
+
+Pelo botão "Run workflow" do Actions o resultado é o mesmo (as notas commitadas, a tag anotada, o GitHub Release), sem o passo do glossário: o resumo da run diz `glossary not updated`. Uma `main` protegida que recusa o push do bot do Actions faz a run parar com a resposta do git, sem tag no `origin`, e o relatório diz qual regra relaxar ou que `/agile:publish --local` empurra como você.
+
+### 14.111 A revisão diz o que conferiu e deixa você escolher onde há escolha
+
+A F-1 do projeto `orders` (lista e criação de pedidos) está em `validating`, e a mudança mexe em permissões e em isolamento por tenant. O dono digita `/agile:review F-1`. O revisor devolve um relatório numerado: os achados, uma linha `Simplicity:`, as escolhas com custo, o que conferiu sem achado e o que não conferiu. O Claude confere cada bloqueador e grave no código e mostra a tabela com os números do relatório; a escolha com custo não entra na tabela, vira uma pergunta.
+
+```
+> /agile:review F-1
+Claude: F-1 · Orders list and create · validating
+        Todos os achados conferem com o código. Tabela para decidir:
+
+| # | Severidade | Achado                                                                    | Veredito   | Ação      |
+|---|------------|---------------------------------------------------------------------------|------------|-----------|
+| 1 | blocker    | POST /api/v1/orders sem RequireAuthorization nem checagem de orders:write | confirmado | corrigir  |
+| 2 | blocker    | OrdersStore.Add grava tudo no tenant fixo "t1"                            | confirmado | corrigir  |
+| 3 | major      | o id devolvido no 201 nunca é salvo na linha                              | confirmado | corrigir  |
+| 6 | major      | o teste Forbidden é Assert.True(true), nunca falha                        | confirmado | corrigir  |
+
+        Escolha com custo nº 9 (cache de 60 s no GET: um pedido novo pode levar até 1 min para aparecer):
+        - Sugestão do revisor (Recomendado): ler direto do store, sem cache. O item não pede desempenho e quem acabou de criar espera ver o pedido.
+        - B: manter o cache como está, aceitando o atraso.
+        - Manter como construído.
+
+        Conferido sem achado: contratos, localização, dados, simplicidade, regras além dos achados 1 e 2;
+        não conferido: lock de testes (o item não tem lock), o registro de DI do host (não há Program.cs na worktree).
+        Simplicity: none
+```
+
+Cada linha de `Conferido sem achado` vem do relatório do revisor com o que ele leu (`contracts: none — ambas as rotas sob /api/v1/orders, Guid? Id = null`); o relatório inteiro, com o que foi lido, vai para `## Decisions` numa linha `Review coverage`. Uma lista vazia de achados não é mais uma revisão rasa: ela vem com as verificações que o revisor fez. Você responde pelo número ("corrigir 1, 2 e 6"; "manter o cache"). A sessão nunca responde a escolha com custo por você, nem no `--autopilot`: lá o código fica como construído e as escolhas aparecem no segundo ponto de parada, com as opções.
+
+O diálogo acima é um trecho (4 dos 8 achados, em pt-BR) de uma execução real de `/agile:review F-1`, sem terminal interativo, sobre um projeto de teste com um endpoint sem autorização, um cache e áreas limpas; nenhum arquivo foi alterado.

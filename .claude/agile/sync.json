@@ -1,5 +1,5 @@
 {
-  "version": "0.63.1",
+  "version": "0.65.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "64d2516a691af738",
@@ -17,12 +17,12 @@
     "docs/agile/templates/discussion.md": "52c8d2c9d1e9e8ad",
     "docs/agile/templates/epic.md": "1c7b7402808e31ed",
     "docs/agile/templates/feature.md": "da97ec47dd7f8afc",
-    "docs/agile/templates/glossary.md": "37c2783725056d55",
+    "docs/agile/templates/glossary.md": "3ea980c915aa59f2",
     "docs/agile/templates/infra.md": "3258595aa75e72c6",
     "docs/agile/templates/manual-page.md": "9530df7334bc5df1",
     "docs/agile/templates/project-claude.md": "2beee3ca9d8fe8f9",
-    "docs/agile/workflow.pt-BR.md": "241bfa2b9bf04989",
-    "docs/agile/workflow-examples.pt-BR.md": "302ee2813a5fa22f",
+    "docs/agile/workflow.pt-BR.md": "9d90c07655658746",
+    "docs/agile/workflow-examples.pt-BR.md": "76d2d09eee2b8dd7",
     "docs/agile/profile.md": "f79fd4ca23d98830",
     ".editorconfig": "3e4b965db9964dcd",
     "BannedSymbols.txt": "3949fcbfeb3d446c",
