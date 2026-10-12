@@ -35,6 +35,7 @@ public sealed class QuestionBankApiClient(HttpClient http)
 {
     private const string Base = "/api/v1/question-bank/questions";
     private const string EditionsBase = "/api/v1/question-bank/editions";
+    private const string SubjectsBase = "/api/v1/question-bank/subjects";
 
     /// <summary>F-95 UC5: one page of questions, newest first, filtered by status and by a word of the statement.</summary>
     public Task<QuestionBankResult<QuestionPageResponse>> ListQuestionsAsync(
@@ -125,15 +126,26 @@ public sealed class QuestionBankApiClient(HttpClient http)
     public Task<QuestionBankResult<IReadOnlyList<SubjectLookupResponse>>> SearchSubjectsAsync(
         string accessToken,
         string? search,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        var route = SubjectsBase;
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            route += $"?search={Uri.EscapeDataString(search)}";
+        }
+
+        return SendAsync<IReadOnlyList<SubjectLookupResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
 
     /// <summary>B-28 BR2: the live topics of a subject by name.</summary>
     public Task<QuestionBankResult<IReadOnlyList<TopicLookupResponse>>> ListTopicsAsync(
         string accessToken,
         Guid subjectId,
         CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        SendAsync<IReadOnlyList<TopicLookupResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{SubjectsBase}/{subjectId}/topics"), accessToken),
+            cancellationToken);
 
     /// <summary>F-96 BR9: one edition, to prefill the form when it opens from the edition page.</summary>
     public Task<QuestionBankResult<ExamEditionLookupResponse>> FindEditionAsync(

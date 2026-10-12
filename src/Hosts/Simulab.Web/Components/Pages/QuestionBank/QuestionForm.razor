@@ -2,11 +2,9 @@
 @page "/admin/questions/{Id:guid}"
 @attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
 @layout MainLayout
-@using Simulab.Catalog.Contracts
 @using Simulab.QuestionBank.Contracts
 @using Simulab.Web.Services
 @inject QuestionBankApiClient Api
-@inject CatalogApiClient CatalogApi
 @inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
 @inject IStringLocalizer<SharedResources> L
 @inject ISnackbar Snackbar
@@ -689,17 +687,14 @@ else
     private async Task<IReadOnlyList<AppLookupOption>> SearchSubjectsAsync(string term, CancellationToken cancellationToken)
     {
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
-        var result = await CatalogApi.ListSubjectsAsync(
-            token,
-            new SubjectListQuery(0, AppLookupField.MaxCandidates, term),
-            cancellationToken);
+        var result = await Api.SearchSubjectsAsync(token, term, cancellationToken);
 
         if (!result.IsSuccess)
         {
             throw new InvalidOperationException($"Subjects failed to load: {result.ErrorCode}.");
         }
 
-        return [.. result.Value!.Items.Select(subject => new AppLookupOption(subject.Id, subject.Name))];
+        return [.. result.Value!.Select(subject => new AppLookupOption(subject.Id, subject.Name))];
     }
 
     // A subject has a short topic list: the Api answers all of it and the term narrows it here, ignoring case and accents.
@@ -711,7 +706,7 @@ else
         }
 
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
-        var result = await CatalogApi.ListTopicsAsync(token, subject.Id, cancellationToken);
+        var result = await Api.ListTopicsAsync(token, subject.Id, cancellationToken);
         if (!result.IsSuccess)
         {
             throw new InvalidOperationException($"Topics failed to load: {result.ErrorCode}.");
