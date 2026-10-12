@@ -1,8 +1,7 @@
 ---
 bug: B-28
 feature: F-95
-status: validating
-Autopilot: stop 2
+status: done
 board: 165
 severity: high
 epic: Question bank
@@ -120,3 +119,8 @@ Needed to validate: the local app host and an account that holds the `Curator` r
 - 2026-10-12 rework — reviewer minor: csproj comment names the directories
 
 ## Delivery
+- Branch: `bug/B-28`, merged `--no-ff` as `5ca3bed6` (board #165); app version 0.30.0 -> 0.30.1.
+- Tests: full suite `agile gate GREEN` in 210 s (Web 1489, Catalog 516, Identity 501, QuestionBank 149, AppHost 80, Api 58, Architecture 219, the others green); 14 new regression tests locked at `75b2c28e` (one logged unlock, the `Field` helper made static); `agile scan GREEN`; `DocGen --check` up to date.
+- Review: independent reviewer, no blocker or major; two minors fixed.
+- Manual: unchanged (the page already says a curator picks subject and topic; the behavior now matches it).
+- Validated on screen by the owner, 2026-10-12.
