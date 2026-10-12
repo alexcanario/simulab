@@ -176,7 +176,9 @@ public sealed class AppLookupFieldTests : KitTestContext
     {
         Render<MudBlazor.MudPopoverProvider>();
         var field = Render((term, cancellationToken) =>
-            Task.FromResult<IReadOnlyList<AppLookupOption>>(term.Length == 3 ? [Cebraspe] : [Cebraspe, Cebraspe, Cebraspe]));
+            Task.FromResult<IReadOnlyList<AppLookupOption>>(term.Length == 3
+                ? [Cebraspe]
+                : [Cebraspe, Cebraspe with { Id = Guid.NewGuid() }, Cebraspe with { Id = Guid.NewGuid() }]));
         field.Find("#lookup").Input("ceb");
         AdvanceDebounce();
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));

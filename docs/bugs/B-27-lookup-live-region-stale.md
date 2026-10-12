@@ -62,6 +62,8 @@ Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
 - 2026-10-12: one regression test per component, no source-reading guard test — owner chose the recommended option. Reason: three components, a rule already in `project.md`; a guard that reads `.razor` text is fragile.
 - 2026-10-12: the failed-search path of `AppLookupField` is covered by the same fix (technical, no product impact): `_searchFailed` also changes inside the library callback.
 
+- 2026-10-12: tests unlocked (owner, build): the lookup test used three equal options and Blazor rejects duplicate keys once the field re-renders; only the test data changed (ids), not the assertions.
+
 ## Out of scope
 - A guard test over the kit's sources (decided above); `AppSelectField` (done in F-114); `AppMultiPickField` and `AppDataTable` (not affected).
 
@@ -74,5 +76,6 @@ Tests locked: e252c37bae1d5607c10bc6f60af3e425400a833f (2 files); unlocks: 0
 ## Events
 
 - 2026-10-12 question — asked 2, from context 3
+- 2026-10-12 blocked — test wrong: test data used three equal options; Blazor rejects duplicate keys once the field re-renders
 
 ## Delivery
