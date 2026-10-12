@@ -3806,14 +3806,14 @@ Claude: agile order WRITTEN: 4 items, 11 delivered
         - [ ] 2. F-12 — Export results to CSV [building] — unlocks F-13 (unblocks)
         - [ ] 3. F-14 — Print layout [approved]
         - [ ] 4. F-13 — Share by link [blocked] — waits on F-12
-        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
         First release (shop): 0 of 2 delivered; missing: F-12, F-13
         Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
         Commit proposto: chore(order): refresh the ordered list
         Autoriza o commit na main?
 ```
 
-O mesmo texto está em `docs/agile/order.md`, na seção `## Checklist`, entre a tabela e o `## Summary`; a tabela continua no arquivo. A linha de cada item traz o número da tabela, o id, o título e o status, e depois `waits on` e `unlocks` só quando a célula tem algo. Marcar uma caixa no chat não muda status, ordem nem arquivo: o script nunca grava `[x]` nem lê uma caixa de volta, e uma nova execução (ou o ship, que atualiza o arquivo) recomeça com todas vazias. Um arquivo escrito por uma versão antiga ganha a seção na primeira execução, num diff só dela.
+O mesmo texto está em `docs/agile/order.md`, na seção `## Checklist`, entre a tabela e o `## Summary`; a tabela continua no arquivo. A linha de cada item traz o número da tabela, o id, o título e o status, e depois `waits on` e `unlocks` só quando a célula tem algo. No arquivo as caixas são sempre `[ ]`, e uma marca (que o exemplo 14.107 mostra salva) não muda status, ordem nem arquivo. Um arquivo escrito por uma versão antiga ganha a seção na primeira execução, num diff só dela.
 
 ### 14.105 A lista de caixas da ordem como widget: `/agile:order` no app
 
@@ -3827,9 +3827,9 @@ Claude: agile order WRITTEN: 4 items, 11 delivered
           ☐ 2. F-12  Export results to CSV                 building   unlocks F-13 (unblocks)
           ☐ 3. F-14  Print layout                          approved
           ☐ 4. F-13  Share by link                         blocked    waits on F-12
-          0 de 4 marcados    [Limpar marcas]
-          Só visual: nada é gravado e as marcas somem ao recarregar.
-        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+          0 de 4 marcados    [Limpar marcas] [Salvar marcas] [Salvar marcas]
+          As marcas ficam salvas só nesta máquina, fora do Git; use Salvar marcas.
+        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
         Não marque as caixas ao abrir docs/agile/order.md no painel de arquivos do app: lá o clique grava no arquivo.
         First release (shop): 0 of 2 delivered; missing: F-12, F-13
         Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
@@ -3850,7 +3850,8 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
       "epic": "shop",
       "waitsOn": [],
       "unlocks": [],
-      "cycle": false
+      "cycle": false,
+      "ticked": false
     },
     {
       "n": 2,
@@ -3862,7 +3863,8 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
       "unlocks": [
         "F-13 (unblocks)"
       ],
-      "cycle": false
+      "cycle": false,
+      "ticked": false
     },
     {
       "n": 3,
@@ -3872,7 +3874,8 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
       "epic": "shop",
       "waitsOn": [],
       "unlocks": [],
-      "cycle": false
+      "cycle": false,
+      "ticked": false
     },
     {
       "n": 4,
@@ -3884,7 +3887,8 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
         "F-12"
       ],
       "unlocks": [],
-      "cycle": false
+      "cycle": false,
+      "ticked": false
     }
   ],
   "listed": 4,
@@ -3892,7 +3896,7 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
 }
 ```
 
-Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` ou recarregar as desmarca. Nada vai para o arquivo: `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.
+Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` as desmarca na página; `Salvar marcas` manda a mensagem que grava o conjunto (exemplo 14.107). O `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [x]` e `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.
 
 ### 14.106 `/agile:order` na sessão do plugin: a lista sai dos issues e nada é gravado
 
@@ -3905,10 +3909,10 @@ Claude: [widget] Ordem de implementação
           ☐ 2. #11  Refine prints the item line             approved   unlocks #12
           ☐ 3. #12  Order shows what each item unlocks      idea       waits on #11
           ☐ 4. #15  Report mailed to the owner              idea       waits on #14 (parked)
-          0 de 4 marcados    [Limpar marcas]
+          0 de 4 marcados    [Limpar marcas] [Salvar marcas]
           Adiados (fora da ordem):
             #14  Weekly report of delivered items           idea       unlocks #15
-        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
         4 itens na ordem, 1 adiado, 2 entregues. Nada foi escrito e nenhum commit é proposto.
 ```
 
@@ -3948,3 +3952,43 @@ agile order SHOWN: 4 items, 1 parked, 2 delivered
 ```
 
 O que a lista lê: os issues com o rótulo `feature` ou `bug` são as linhas (o épico, rótulo `epic`, só dá nome ao grupo na coluna `Epic`); o status é a palavra depois de `Status:` na primeira linha do corpo; as dependências são os `#n` da linha `- Depends on:` de `## Start` (um `#n` entre crases não conta); entregue é issue fechado como concluído, e um fechado como não planejado aparece como `(cancelled)` e nunca sobe o nível. O item `#14` está `deferred`, então fica no grupo `## Parked`, sem posição e fora de qualquer `Unlocks` de uma linha da ordem; o `#15`, que depende dele, espera e mostra `#14 (parked)`: tirar o `#14` do adiamento é o que o libera. Se o `gh` não está logado ou falha, a saída é `agile order FAILED: <motivo>` e nenhuma lista parcial; fora do repositório do plugin é `REFUSED`, e num projeto o comando continua escrevendo `docs/agile/order.md` como no exemplo 14.104.
+
+### 14.107 As marcas da lista da ordem ficam salvas: o widget guarda e a próxima sessão as mostra
+
+Num projeto com quatro itens em aberto (B-2, F-12 em `building`, F-14 e F-13, que espera o F-12), você marca no widget o F-12 e o F-14 ("quero estes agora") e aperta `Salvar marcas`. O botão manda uma única mensagem e o Claude roda o script uma vez; nada mais é mostrado, nenhum `git status`, nenhum commit:
+
+```
+> /agile:order ticks F-12 F-14
+Claude: agile order TICKED: 2 ticks
+        Marcas salvas só nesta máquina, fora do Git.
+```
+
+Na sessão seguinte, `/agile:order` mostra as duas caixas já marcadas (no widget, riscadas e escurecidas, com o contador `2 de 4 marcados`; num terminal, as linhas abaixo, a saída do script no projeto de teste):
+
+```
+- [ ] 1. B-2 — Total errado em reembolsos [approved]
+- [x] 2. F-12 — Export results to CSV [building] — unlocks F-13
+- [x] 3. F-14 — Print layout [approved]
+- [ ] 4. F-13 — Share by link [approved] — waits on F-12
+```
+
+O arquivo das marcas é `agile-order-ticks.json`, dentro da pasta `.git` do projeto, e tem só os ids:
+
+```
+{
+  "version": 1,
+  "ticks": [
+    "F-12",
+    "F-14"
+  ]
+}
+```
+
+O `docs/agile/order.md` não muda: a seção `## Checklist` dele continua com todas as caixas `- [ ]`, então uma marca nunca aparece num `git status` nem num commit, e a máquina de outra pessoa (ou o seu outro clone) tem as marcas dela. Um id que não é um item em aberto da lista é recusado pelo nome e nada é gravado:
+
+```
+> /agile:order ticks F-9
+Claude: agile order REFUSED: F-9 is not an open listed item: nothing was written
+```
+
+Quando o F-12 for entregue, a marca dele é descartada na execução seguinte do `/agile:order` e some da lista; `Limpar marcas` seguido de `Salvar marcas` (ou `/agile:order ticks` sem ids) esvazia o conjunto. No repositório do plugin é igual, com os ids `#n`, e um issue `deferred` não pode ser marcado.
