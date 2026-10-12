@@ -51,6 +51,28 @@ else
                             Title="@L["Questions.Section.Classification"]"
                             Icon="@AppIcons.Topics"
                             Subtitle="@L["Questions.Section.Classification.Subtitle"]">
+                @* F-97, UC1 and BR2: the type is the first field. It is chosen when the question is created and read
+                   only afterwards: changing it would drop options or a key without saying so. *@
+                @if (IsEdit)
+                {
+                    <div class="app-field mb-4">
+                        <span class="app-field-label" id="question-type-label">@L["Questions.Field.Type"]</span>
+                        <span class="app-field-value" id="question-type-value">@QuestionText.TypeName(L, _type)</span>
+                        <span class="app-field-description"><span class="app-field-hint">@L["Questions.Type.ReadOnlyHint"]</span></span>
+                    </div>
+                }
+                else
+                {
+                    <AppRadioCards TValue="QuestionType?"
+                                   Id="question-type"
+                                   Label="@L["Questions.Field.Type"]"
+                                   Value="_type"
+                                   ValueChanged="@((QuestionType? value) => OnTypeChanged(value))"
+                                   Options="TypeCards"
+                                   Columns="2"
+                                   Required="true" />
+                }
+
                 <AppFormGrid Columns="2">
                     @* The question stores only the topic, so the Api does not ask for the subject; the screen does,
                        because the topic cannot be picked without it. *@
@@ -173,6 +195,27 @@ else
                                   Error="@_baseTextError" />
             </AppSectionCard>
 
+            @* F-97, BR9: the section that edits the answer is the one the type declares. The options typed for
+               single choice stay in the form while the other type is shown, and only the chosen type's are sent. *@
+            @if (IsTrueFalse)
+            {
+                <AppSectionCard Id="question-section-true-false-key"
+                                Title="@L["Questions.Section.TrueFalseKey"]"
+                                Icon="@AppIcons.Verified"
+                                Subtitle="@L["Questions.Section.TrueFalseKey.Subtitle"]">
+                    <AppRadioCards TValue="bool?"
+                                   Id="question-true-false-key"
+                                   Label="@L["Questions.TrueFalseKey.Label"]"
+                                   Value="_trueFalseKey"
+                                   ValueChanged="@((bool? value) => OnTrueFalseKeyChanged(value))"
+                                   Options="TrueFalseCards"
+                                   Columns="2"
+                                   Hint="@L["Questions.TrueFalseKey.Hint"]"
+                                   Error="@_trueFalseKeyError" />
+                </AppSectionCard>
+            }
+            else
+            {
             <AppSectionCard Id="question-section-options"
                             Title="@L["Questions.Section.Options"]"
                             Icon="@AppIcons.Options"
@@ -262,6 +305,7 @@ else
 
                 <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
             </AppSectionCard>
+            }
 
             <AppSectionCard Id="question-section-explanation"
                             Title="@L["Questions.Section.Explanation"]"
@@ -388,6 +432,9 @@ else
     private string _baseText = string.Empty;
     private string _explanation = string.Empty;
     private List<OptionDraft> _options = [];
+    private QuestionType _type = QuestionType.SingleChoice;
+    private bool? _trueFalseKey;
+    private string? _trueFalseKeyError;
 
     // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
     private AppLookupOption? _edition;
@@ -425,6 +472,20 @@ else
     private bool IsPublished => _saved?.Status == QuestionStatus.Published;
 
     private bool AtMaxOptions => _options.Count >= QuestionLimits.OptionsMax;
+
+    private bool IsTrueFalse => _type == QuestionType.TrueFalse;
+
+    private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
+    [
+        new(QuestionType.SingleChoice, L["Questions.Type.SingleChoice"], L["Questions.Type.SingleChoice.Description"], AppIcons.Options),
+        new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified)
+    ];
+
+    private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
+    [
+        new(true, L["Questions.TrueFalse.True"], string.Empty),
+        new(false, L["Questions.TrueFalse.False"], string.Empty)
+    ];
 
     private string Title => IsEdit || Id is not null ? L["Questions.Form.EditTitle"] : L["Questions.Form.AddTitle"];
 
@@ -467,17 +528,26 @@ else
 
     private bool KeyDone => _options.Count(option => option.IsCorrect) == 1;
 
+    // F-97: a true/false question has one key and no options, so the three option items are one.
+    private bool TrueFalseKeyDone => _trueFalseKey is not null;
+
     private bool ChecklistComplete =>
-        TopicDone && LanguageDone && StatementDone && OptionsCountDone && OptionsTextDone && KeyDone;
+        TopicDone && LanguageDone && StatementDone
+        && (IsTrueFalse ? TrueFalseKeyDone : OptionsCountDone && OptionsTextDone && KeyDone);
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
         new(L["Questions.Checklist.Topic"], TopicDone),
         new(L["Questions.Checklist.Language"], LanguageDone),
         new(L["Questions.Checklist.Statement"], StatementDone),
-        new(L["Questions.Checklist.OptionsCount"], OptionsCountDone),
-        new(L["Questions.Checklist.OptionsText"], OptionsTextDone),
-        new(L["Questions.Checklist.Key"], KeyDone)
+        .. IsTrueFalse
+            ? [new AppChecklistItem(L["Questions.Checklist.TrueFalseKey"], TrueFalseKeyDone)]
+            : new List<AppChecklistItem>
+            {
+                new(L["Questions.Checklist.OptionsCount"], OptionsCountDone),
+                new(L["Questions.Checklist.OptionsText"], OptionsTextDone),
+                new(L["Questions.Checklist.Key"], KeyDone)
+            }
     ];
 
     private IReadOnlyList<AppAsideRow> AsideRows =>
@@ -488,7 +558,9 @@ else
         new(L["Questions.Field.ContentLanguage"], LanguageDone ? QuestionText.LanguageName(_contentLanguage!) : null),
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
-        new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value)
+        IsTrueFalse
+            ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
+            : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value)
     ];
 
     // The notice subject select: the group is part of the text, since the kit select has no group headings.
@@ -528,6 +600,7 @@ else
             }
 
             AddIfRefused(items, _optionsError, AddOptionId, L["Questions.Section.Options"]);
+            AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
             AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
             return items;
         }
@@ -552,7 +625,13 @@ else
         || Normalized(_statement) != Normalized(_saved?.StatementHtml)
         || Normalized(_baseText) != Normalized(_saved?.BaseTextHtml)
         || Normalized(_explanation) != Normalized(_saved?.ExplanationHtml)
-        || OptionsChanged();
+        || AnswerChanged();
+
+    // The answer of the chosen type against what is stored; the other type's answer is not part of the question.
+    private bool AnswerChanged() =>
+        IsTrueFalse
+            ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
+            : OptionsChanged();
 
     private string DefaultLanguage => QuestionText.DefaultContentLanguage();
 
@@ -644,6 +723,8 @@ else
     private void Apply(QuestionResponse question)
     {
         _saved = question;
+        _type = question.Type;
+        _trueFalseKey = question.TrueFalseKey;
         _subject = new AppLookupOption(question.SubjectId, question.SubjectName);
         _topic = new AppLookupOption(question.TopicId, question.TopicName);
         _contentLanguage = question.ContentLanguage;
@@ -665,7 +746,7 @@ else
     private void ClearErrors()
     {
         _topicError = _languageError = _difficultyError = _statementError = null;
-        _baseTextError = _explanationError = _optionsError = _error = null;
+        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
         foreach (var option in _options)
@@ -750,6 +831,26 @@ else
     {
         _difficulty = value;
         _difficultyError = null;
+    }
+
+    // F-97 BR2: the type is a choice of a new question. The answers typed for the other type are kept, so a
+    // curator who picks the wrong card loses nothing, and only the chosen type's are sent.
+    private void OnTypeChanged(QuestionType? value)
+    {
+        if (value is not { } type || IsEdit)
+        {
+            return;
+        }
+
+        _type = type;
+        _optionsError = null;
+        _trueFalseKeyError = null;
+    }
+
+    private void OnTrueFalseKeyChanged(bool? value)
+    {
+        _trueFalseKey = value;
+        _trueFalseKeyError = null;
     }
 
     // -- the origin (F-96) --------------------------------------------------------------------------------------
@@ -998,12 +1099,16 @@ else
         _statementError = StatementError();
         _baseTextError = BaseTextError();
         _explanationError = ExplanationError();
+        // F-97: only the answer of the chosen type is judged; the other type's stays in the form, unsent.
         foreach (var option in _options)
         {
-            option.Error = OptionError(option, required: published);
+            option.Error = IsTrueFalse ? null : OptionError(option, required: published);
         }
 
-        _optionsError = published ? PublishedOptionsError() : null;
+        _optionsError = published && !IsTrueFalse ? PublishedOptionsError() : null;
+        _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
+            ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
+            : null;
 
         if (HasClientRefusal())
         {
@@ -1025,10 +1130,14 @@ else
             QuestionHtml.NullIfBlank(_baseText),
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
-            [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))],
+            IsTrueFalse
+                ? []
+                : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))],
             _edition?.Id,
             _edition is null ? null : _paperNumber,
-            _edition is null ? null : _noticeSubjectId);
+            _edition is null ? null : _noticeSubjectId,
+            _type,
+            IsTrueFalse ? _trueFalseKey : null);
 
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
@@ -1065,6 +1174,7 @@ else
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
         || _paperNumberError is not null || _baseTextError is not null || _explanationError is not null || _optionsError is not null
+        || _trueFalseKeyError is not null
         || _options.Any(option => option.Error is not null);
 
     // A refusal belongs to the field that caused it, so the reader sees where to change something (BR16).
@@ -1102,6 +1212,9 @@ else
             case QuestionBankErrorCodes.QuestionOptionsCount:
             case QuestionBankErrorCodes.QuestionKeyInvalid:
                 _optionsError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionTrueFalseKeyRequired:
+                _trueFalseKeyError = text;
                 break;
             case QuestionBankErrorCodes.QuestionDifficultyInvalid:
                 _difficultyError = text;

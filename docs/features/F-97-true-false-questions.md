@@ -87,7 +87,7 @@ No mockup (owner, 2026-10-12): one new control inside the form of F-95, drawn wi
 
 ## Criterion → test
 
-Tests locked: a7cdcd4074a2a15fee5909aa2bd795cf7b6aa201 (6 files); unlocks: 0
+Tests locked: d6c5cd247e9e5356090f52cb1a0f8f946733190d (6 files); unlocks: 1
 
 <!-- Written by /agile:build at its start. -->
 | Criterion | Test |
