@@ -1,7 +1,7 @@
 ---
 feature: F-97
 epic: Question bank
-status: refining
+status: approved
 board: 143
 version: 1
 ---
@@ -135,5 +135,6 @@ No mockup (owner, 2026-10-12): one new control inside the form of F-95, drawn wi
 ## Events
 
 - 2026-10-12 question — asked 4, from context 0
+- 2026-10-12 question — approved by owner
 
 ## Delivery
