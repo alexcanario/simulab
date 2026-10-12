@@ -3806,7 +3806,7 @@ Claude: agile order WRITTEN: 4 items, 11 delivered
         - [ ] 2. F-12 — Export results to CSV [building] — unlocks F-13 (unblocks)
         - [ ] 3. F-14 — Print layout [approved]
         - [ ] 4. F-13 — Share by link [blocked] — waits on F-12
-        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
+        As marcas ficam salvas só nesta máquina, fora do Git: o widget salva a cada clique, ou diga "marque F-3".
         First release (shop): 0 of 2 delivered; missing: F-12, F-13
         Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
         Commit proposto: chore(order): refresh the ordered list
@@ -3827,9 +3827,9 @@ Claude: agile order WRITTEN: 4 items, 11 delivered
           ☐ 2. F-12  Export results to CSV                 building   unlocks F-13 (unblocks)
           ☐ 3. F-14  Print layout                          approved
           ☐ 4. F-13  Share by link                         blocked    waits on F-12
-          0 de 4 marcados    [Limpar marcas] [Salvar marcas] [Salvar marcas]
-          As marcas ficam salvas só nesta máquina, fora do Git; use Salvar marcas.
-        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
+          0 de 4 marcados    [Limpar marcas]
+          As marcas ficam salvas a cada clique, só nesta máquina, fora do Git.
+        As marcas ficam salvas só nesta máquina, fora do Git: o widget salva a cada clique, ou diga "marque F-3".
         Não marque as caixas ao abrir docs/agile/order.md no painel de arquivos do app: lá o clique grava no arquivo.
         First release (shop): 0 of 2 delivered; missing: F-12, F-13
         Escrito a partir de 4 itens. git status --short: docs/agile/order.md novo
@@ -3896,7 +3896,7 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
 }
 ```
 
-Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` as desmarca na página; `Salvar marcas` manda a mensagem que grava o conjunto (exemplo 14.107). O `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [x]` e `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.
+Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` as desmarca na página; cada clique manda a mensagem que grava o conjunto (exemplos 14.107 e 14.108). O `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [x]` e `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.
 
 ### 14.106 `/agile:order` na sessão do plugin: a lista sai dos issues e nada é gravado
 
@@ -3909,10 +3909,10 @@ Claude: [widget] Ordem de implementação
           ☐ 2. #11  Refine prints the item line             approved   unlocks #12
           ☐ 3. #12  Order shows what each item unlocks      idea       waits on #11
           ☐ 4. #15  Report mailed to the owner              idea       waits on #14 (parked)
-          0 de 4 marcados    [Limpar marcas] [Salvar marcas]
+          0 de 4 marcados    [Limpar marcas]
           Adiados (fora da ordem):
             #14  Weekly report of delivered items           idea       unlocks #15
-        As marcas ficam salvas só nesta máquina, fora do Git: use Salvar marcas no widget ou diga "marque F-3".
+        As marcas ficam salvas só nesta máquina, fora do Git: o widget salva a cada clique, ou diga "marque F-3".
         4 itens na ordem, 1 adiado, 2 entregues. Nada foi escrito e nenhum commit é proposto.
 ```
 
@@ -3955,7 +3955,7 @@ O que a lista lê: os issues com o rótulo `feature` ou `bug` são as linhas (o 
 
 ### 14.107 As marcas da lista da ordem ficam salvas: o widget guarda e a próxima sessão as mostra
 
-Num projeto com quatro itens em aberto (B-2, F-12 em `building`, F-14 e F-13, que espera o F-12), você marca no widget o F-12 e o F-14 ("quero estes agora") e aperta `Salvar marcas`. O botão manda uma única mensagem e o Claude roda o script uma vez; nada mais é mostrado, nenhum `git status`, nenhum commit:
+Num projeto com quatro itens em aberto (B-2, F-12 em `building`, F-14 e F-13, que espera o F-12), você marca no widget o F-12 e o F-14 ("quero estes agora"). Cada clique manda uma mensagem com o conjunto inteiro (aqui, a do segundo clique) e o Claude roda o script uma vez por mensagem; nada mais é mostrado, nenhum `git status`, nenhum commit:
 
 ```
 > /agile:order ticks F-12 F-14
@@ -3991,4 +3991,28 @@ O `docs/agile/order.md` não muda: a seção `## Checklist` dele continua com to
 Claude: agile order REFUSED: F-9 is not an open listed item: nothing was written
 ```
 
-Quando o F-12 for entregue, a marca dele é descartada na execução seguinte do `/agile:order` e some da lista; `Limpar marcas` seguido de `Salvar marcas` (ou `/agile:order ticks` sem ids) esvazia o conjunto. No repositório do plugin é igual, com os ids `#n`, e um issue `deferred` não pode ser marcado.
+Quando o F-12 for entregue, a marca dele é descartada na execução seguinte do `/agile:order` e some da lista; `Limpar marcas` (ou `/agile:order ticks` sem ids) esvazia o conjunto. No repositório do plugin é igual, com os ids `#n`, e um issue `deferred` não pode ser marcado.
+
+### 14.108 O widget da ordem salva a cada clique: marcar e trocar de sessão não perde nada
+
+Antes, uma marca só ia para o disco quando você apertava um botão de salvar, e quem trocava de sessão sem apertar perdia tudo. Agora não há botão: cada clique numa caixa (e o `Limpar marcas`) manda na hora a mensagem com o conjunto inteiro das caixas marcadas, na ordem da lista, sem espera. Marcando F-12, F-14 e F-13, um clique de cada vez, a conversa recebe três mensagens e o Claude roda o script uma vez por mensagem, mostrando só a última linha:
+
+```
+> /agile:order ticks F-12
+Claude: agile order TICKED: 1 tick
+> /agile:order ticks F-12 F-14
+Claude: agile order TICKED: 2 ticks
+> /agile:order ticks F-12 F-14 F-13
+Claude: agile order TICKED: 3 ticks
+```
+
+Como toda mensagem leva o conjunto inteiro, e nunca só o id que mudou, uma rajada de cliques durante uma resposta em andamento termina sempre no que a última mensagem disse. Numa sessão nova, sem apertar nada, a lista aparece assim (a saída do script no projeto de teste):
+
+```
+- [ ] 1. B-2 — Total errado em reembolsos [approved]
+- [x] 2. F-12 — Export results to CSV [building] — unlocks F-13
+- [x] 3. F-14 — Print layout [approved]
+- [x] 4. F-13 — Share by link [approved] — waits on F-12
+```
+
+O custo é um turno do Claude por clique, cada um respondendo uma linha. O rodapé do widget diz `As marcas ficam salvas a cada clique, só nesta máquina, fora do Git.`; o `docs/agile/order.md` continua com todas as caixas vazias.

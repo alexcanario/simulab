@@ -1174,3 +1174,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - score 1/5: a test that builds an edition used notice years 2031, 2032 and 2029, which the catalog refuses (`exam_edition.notice_year_invalid`, line of the gate log); two locked tests needed an unlock and a question to the owner. Went to `.claude/rules/agile/project.md`.
 - score 6/5: a range `CHECK` with `BETWEEN` accepts a NULL; the migration test caught an edition with no number. Went to `.claude/rules/agile/project.md` and to the plugin note `[stack: PostgreSQL]` (row added above).
 - score 1/2 (not recommended, kept here only): the item file was rewritten once by a `node -e` string replace and came back corrupted (restored with `git checkout`, nothing lost). The rule already exists in `workflow.md` ("Write or edit files with the Write and Edit tools, never through a script's string literals"); no new rule.
+
+## 2026-10-12 - Sync with agile@canary 0.63.1
+- From 0.63.0 to 0.63.1. Copied (2): `docs/agile/workflow.pt-BR.md` (version line; the `/agile:order` widget saves ticks on every click, #177) and `docs/agile/workflow-examples.pt-BR.md` (example 14.108); `record` wrote `.claude/agile/sync.json`. Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
+- Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
+- Baseline present, docs command already declared, no plugin notes delivered, glossary not scanned, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
+- `Manual locales:` line still reads `pt-BR, pt-PT` in the plan while `docs/manual/` has `en` too (see the 0.63.0 plugin note); left for the owner.
