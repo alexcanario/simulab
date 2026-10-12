@@ -32,6 +32,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 - In a sign-in with more than one step, only the last step clears the failure count: a step that clears it gives unlimited tries to the next one (F-11).
 - A password, even a development-only one, is read from the user secrets or the environment, never from a committed settings file — one exception, the owner's: the local admin's development password in `appsettings.Development.json` (F-44, 2026-10-02). A non-secret development value (the OpenIddict client secret, the TOTP key) stays where `docs/infra.md` says (F-52).
 - Google sign-in and TOTP stay in the code, switched off by configuration. Do not delete them, and do not show their UI while off.
+- A screen that calls a permission-guarded route is validated with the least-privileged role that uses the screen, not only with the administrator (who holds every permission): B-28, the question form's subject and topic lookups answered 403 for the `Curator` and F-95 had been validated with the seeded admin.
 - Testing a race on an Identity unique index: turn off the `UserManager`'s own pre-check (`RequireUniqueEmail` for the email one) or test the translation directly against `DbUpdateException` — a lying `IUserDirectory` alone is not enough, and `AddLoginAsync` has no switch to turn its own check off (F-30).
 
 ## AI
