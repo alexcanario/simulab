@@ -1161,3 +1161,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.60.1 to 0.62.0. Copied (2): `docs/agile/workflow.pt-BR.md` (version line and `/agile:order` in the plugin session, #175) and `docs/agile/workflow-examples.pt-BR.md` (example 14.106); `record` wrote `.claude/agile/sync.json`. Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
 - Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
 - Baseline present, docs command already declared, no plugin notes delivered, glossary not scanned, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
+
+## 2026-10-12 - Sync with agile@canary 0.63.0
+- From 0.62.0 to 0.63.0. Copied (2): `docs/agile/workflow.pt-BR.md` (version line; `/agile:order` ticks saved per machine under `.git`, #176) and `docs/agile/workflow-examples.pt-BR.md` (example 14.107); `record` wrote `.claude/agile/sync.json`. Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
+- Not offered as items, declined by the owner: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
+- Baseline present, docs command already declared, no plugin notes delivered, glossary not scanned, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
+- plugin: agile - `sync.js plan` reported `manualLocales.line` as `["pt-BR","pt-PT"]` while `CLAUDE.md` says `- Manual locales: pt-BR, pt-PT, en. App manual: ...`; the `en` before the period was dropped (parse cause not verified). No `null`, so no row came of it.
