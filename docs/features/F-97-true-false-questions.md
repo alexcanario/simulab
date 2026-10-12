@@ -1,7 +1,7 @@
 ---
 feature: F-97
 epic: Question bank
-status: validating
+status: done
 board: 143
 version: 1
 ---
@@ -159,3 +159,8 @@ Stop the app host (Ctrl+C) and, when done, drop the database: `DROP DATABASE sim
 - 2026-10-12 test-fail — build blocked by a running process (src/Hosts/Simulab.Web/Simulab.Web.csproj), 2 reds
 
 ## Delivery
+- Branch `feature/F-97`, merge commit `1c0d4981`, version 0.31.0 (board #143).
+- Ship gate `agile gate GREEN`: Web 1535, AppHost 80, Api 58, Catalog 516, Identity 501, QuestionBank 198, Jobs 25, Ai 10, Persistence 25, Email 19, ApiResults 13, SharedKernel 12; architecture 219. Scan `agile scan GREEN`, docs `agile docs GREEN`, test lock unchanged (1 unlock, recorded in Decisions).
+- Backend: `QuestionType.TrueFalse`, one nullable `true_false_key` column with its check (migration `AddTrueFalseKey`), the answer key as a domain unit per type (`AnswerKey`, `SingleChoiceKey`, `TrueFalseKey`), 409 `question.type_changed` and three 400 codes; the request and responses gain `type` and `trueFalseKey`.
+- Screens: type field and Answer key section of the question form, true/false block of the preview, Type column (last) of the list.
+- Manual: `questions.md` in pt-BR, pt-PT and en.
