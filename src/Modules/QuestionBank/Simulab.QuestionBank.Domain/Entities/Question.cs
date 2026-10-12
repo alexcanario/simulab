@@ -87,6 +87,16 @@ public sealed class Question : TenantEntity
             : Result.Failure(new Error(QuestionBankErrorCodes.QuestionTypeChanged, ErrorKind.Conflict));
     }
 
+    /// <summary>
+    /// The version a save or a publish records now (F-98, BR2 to BR5), or success with null when none is made:
+    /// a draft never makes one; a published question makes one only when its versioned content differs from
+    /// <paramref name="latest"/> (the first publication makes version 1). A key that differs from the latest
+    /// version's needs <paramref name="changeReason"/>, 1 to 500 characters after trimming; a reason on any
+    /// other version is kept as its note and a reason where no version is made is ignored.
+    /// </summary>
+    public Result<QuestionVersion?> NextVersion(QuestionVersion? latest, string? changeReason) =>
+        throw new NotImplementedException();
+
     /// <summary>Draft to published; the status only (BR12).</summary>
     public Result Publish()
     {

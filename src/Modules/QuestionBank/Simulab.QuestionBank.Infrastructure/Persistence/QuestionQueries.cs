@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Text;
 
 namespace Simulab.QuestionBank.Infrastructure.Persistence;
@@ -125,6 +126,17 @@ public sealed class QuestionQueries(
             origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId),
             question.TrueFalseKey);
     }
+
+    public Task<IReadOnlyList<QuestionVersionListItemResponse>?> ListVersionsAsync(
+        Guid questionId,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
+    public Task<Result<QuestionVersionResponse>> FindVersionAsync(
+        Guid questionId,
+        int number,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
 
     public async Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(
         string? search,

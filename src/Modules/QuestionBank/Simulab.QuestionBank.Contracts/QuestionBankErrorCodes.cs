@@ -70,4 +70,16 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-97 BR4: a published true/false question needs its key; a publish or an edit left it empty.</summary>
     public const string QuestionTrueFalseKeyRequired = "question.true_false_key_required";
+
+    /// <summary>F-98 BR5: a save or a publish would create a version whose answer key changed and gave no reason.</summary>
+    public const string QuestionKeyChangeReasonRequired = "question.key_change_reason_required";
+
+    /// <summary>F-98 BR5: the reason of a change has more than 500 characters.</summary>
+    public const string QuestionChangeReasonTooLong = "question.change_reason_too_long";
+
+    /// <summary>F-98 BR8: the question has no version with that number.</summary>
+    public const string QuestionVersionNotFound = "question.version_not_found";
+
+    /// <summary>F-98 BR10: another save created the next version number first; reload and try again.</summary>
+    public const string QuestionVersionConflict = "question.version_conflict";
 }

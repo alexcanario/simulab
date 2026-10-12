@@ -51,6 +51,11 @@ public sealed class QuestionStore(
         return others.AnyAsync(cancellationToken);
     }
 
+    public Task<QuestionVersion?> FindLatestVersionAsync(Guid questionId, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
+    public void AddVersion(QuestionVersion version) => throw new NotImplementedException();
+
     public void Add(Question question) => context.Questions.Add(question);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE; the options loaded with

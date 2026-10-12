@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Application.Questions;
 
@@ -10,6 +11,23 @@ public interface IQuestionQueries
 
     /// <summary>The question with its options and key, or null when it does not exist or was deleted.</summary>
     Task<QuestionResponse?> FindAsync(Guid id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The versions of a question, newest first, with the highest number marked current (F-98, UC5), or null when
+    /// the question does not exist or was deleted. A question that was never published has an empty list.
+    /// </summary>
+    Task<IReadOnlyList<QuestionVersionListItemResponse>?> ListVersionsAsync(
+        Guid questionId,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// One version of a question (F-98, UC5). Fails with <c>question.not_found</c> when the question does not
+    /// exist or was deleted, and with <c>question.version_not_found</c> when it has no version with that number.
+    /// </summary>
+    Task<Result<QuestionVersionResponse>> FindVersionAsync(
+        Guid questionId,
+        int number,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Editions of any status the origin lookup offers, by exam name then notice year descending, at most

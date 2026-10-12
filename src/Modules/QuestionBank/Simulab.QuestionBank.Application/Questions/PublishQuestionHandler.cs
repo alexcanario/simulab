@@ -6,7 +6,10 @@ namespace Simulab.QuestionBank.Application.Questions;
 /// <summary>Publishes a complete draft; the status only (F-95, UC3, BR4, BR12).</summary>
 public sealed class PublishQuestionHandler(IQuestionStore store, IQuestionQueries queries)
 {
-    public async Task<Result<QuestionResponse>> HandleAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<QuestionResponse>> HandleAsync(
+        Guid id,
+        string? changeReason = null,
+        CancellationToken cancellationToken = default)
     {
         var question = await store.FindAsync(id, cancellationToken);
         if (question is null)

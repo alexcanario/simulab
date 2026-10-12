@@ -91,20 +91,20 @@ No mockup: the screens reuse the patterns of F-95 (epic: screen design "no"). If
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | `QuestionVersionEndpointTests.Publish_ACompleteDraft_RecordsVersionOne_AndSavingTheDraftBeforeRecordedNone`; `QuestionVersionTests.NextVersion_FirstPublication_MakesVersionOneWithTheStoredContent`, `NextVersion_OnADraft_MakesNothing` |
+| AC2 | `QuestionVersionEndpointTests.Save_AChangedStatementOnAPublishedQuestion_RecordsVersionTwo_AndVersionOneKeepsTheOldText`; `QuestionVersionTests.NextVersion_ChangedStatement_MakesTheNextNumber_AndTheLatestKeepsItsText` |
+| AC3 | `QuestionVersionEndpointTests.Save_SameContent_OrOnlyTopicDifficultyAndOrigin_RecordsNoVersion`; `QuestionVersionTests.NextVersion_SameContent_MakesNothing`, `NextVersion_OnlyTopicDifficultyAndOriginChanged_MakesNothing` |
+| AC4 | `QuestionVersionEndpointTests.Save_AKeyChangeWithNoReason_IsRefused_AndNothingIsStored`, `Save_AKeyChangeWithAReason_RecordsAVersionMarkedAsKeyChanged_WithTheReasonAndTheDate`; `QuestionVersionTests.NextVersion_KeyMoved_WithNoReason_IsRefusedWithKeyChangeReasonRequired`, `NextVersion_KeyMoved_WithAReason_MakesAVersionMarkedAsKeyChangedWithTheTrimmedReason` |
+| AC5 | `QuestionVersionEndpointTests.Save_AKeyChangeWithABlankOrOverLongReason_IsRefused_AndNothingIsStored`; `QuestionVersionTests.NextVersion_ReasonOfExactlyTheLimit_IsAccepted_AndOneMoreIsRefusedWithChangeReasonTooLong`, `NextVersion_ReasonWhoseTrimmedLengthIsTheLimit_IsAccepted` |
+| AC6 | `QuestionVersionEndpointTests.Save_AReorderThatMovesTheCorrectOption_IsAKeyChangeAndNeedsTheReason`; `QuestionVersionTests.NextVersion_ReorderThatMovesTheCorrectOption_IsAKeyChangeAndNeedsTheReason` |
+| AC7 | `QuestionVersionEndpointTests.Save_ATrueFalseKeyThatFlips_IsAKeyChangeAndNeedsTheReason`; `QuestionVersionTests.NextVersion_TrueFalseKeyFlipped_IsAKeyChangeAndNeedsTheReason` |
+| AC8 | `QuestionVersionEndpointTests.Save_AChangedStatementWithAReason_KeepsItAsANote_AndAnIdenticalSaveWithAReasonRecordsNothing`; `QuestionVersionTests.NextVersion_ChangedStatementWithAReason_KeepsTheReasonAsANote_AndTheKeyIsNotMarkedChanged`, `NextVersion_SameContentWithAReason_MakesNothing` |
+| AC9 | `QuestionVersionEndpointTests.Publish_AfterAnEditOfTheDraft_RecordsTheNextVersion_AndWithNoEditRecordsNone`, `Publish_AfterTheKeyChangedInTheDraft_NeedsTheReason_AndTheSecondTryWithItPublishes` |
+| AC10 | `QuestionVersionEndpointTests.Versions_ListNewestFirstWithTheCurrentOneMarked_AndAMissingNumberIsNotFound`, `Versions_OfAnotherQuestion_AreNotFound_AndAnUnknownQuestionAnswersQuestionNotFound`, `AVersion_StoresItsOptionsAsJsonWithPositionTextHtmlAndIsCorrect` |
+| AC11 | `QuestionVersionEndpointTests.BothVersionReads_WithoutThePermission_AnswerForbidden_AndACuratorReadsThem` (the absent History card: pending, screen test) |
+| AC12 | `QuestionVersionEndpointTests.Delete_ADraftThatHasVersions_LeavesTheVersionRowsWithTheirContent` |
+| AC13 | `AddQuestionVersionsMigrationTests.Up_GivesVersionOneToEachPublishedQuestionNotDeleted_AndToNoDraft`, `Up_CopiesTheLiveOptionsInPositionOrder_UnderTheNamesTheMappingReads` |
+| AC14 | `QuestionVersionRaceTests.Save_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndStoresNothingOfItself`, `Publish_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysADraft`; `QuestionVersionEndpointTests.TheDatabase_RefusesTwoVersionsWithTheSameNumberForOneQuestion` |
 | AC15 | pending |
 | AC16 | pending |
 | AC17 | pending |
@@ -123,6 +123,10 @@ No mockup: the screens reuse the patterns of F-95 (epic: screen design "no"). If
 - 2026-10-12 — The author is stored (audit column) but not shown by name — Identity contracts offer no user-name lookup and `users.manage` is not a curator permission; showing it needs a small new contract, left out of this item (see Out of scope).
 - 2026-10-12 — No new package — the snapshot, the JSON column and the tests use what the module already references.
 - 2026-10-12 — The glossary gets `QuestionVersion` and `AnswerKeyChange` before first use in code (naming rule).
+- 2026-10-12 (build) — Design passes (`system-design`, then `architect`) verified against the files; accepted: the entity takes the snapshot (`Question.NextVersion(latest, reason)`), the handlers supply the latest version and persist in the same `SaveChanges` as the content change (a version-index violation answers 409 `question.version_conflict` and rolls the content back too); `PublishQuestionHandler` moves to `TrySaveChangesAsync`; trailing optional `ChangeReason` and `CurrentVersion`; `QuestionOptionResponse` reused for the options of a version; foreign key `question_versions.question_id` → `questions` inside the module, `RESTRICT`, no navigation (a soft delete never removes the version rows); `ChangeReasonMaxLength = 500` in `QuestionLimits`.
+- 2026-10-12 (build) — Dropped / corrected from the passes: (1) the backfill excludes the soft-deleted option rows of live questions (`is_deleted = false`) and writes `[]` for a question with no option rows (a published true/false question), with the JSON member names equal to the CLR names EF writes; (2) the backfilled version 1 has `created_at = now()` (when the migration recorded it) and a `gen_random_uuid()` id; (3) an unknown or deleted question id answers 404 `question.not_found` on both reads, and `question.version_not_found` only for a number the known question does not have; (4) a reason longer than 500 characters is refused only when a version is created (a reason sent when no version is created is ignored, BR5); (5) the `question_versions.options` JSON column has no property behind it, so it joins `role_changes.added` and `role_changes.removed` in the expected list of `TableDescriptionTests.OnlyColumnsWithNoPropertyBehindThem_AreExempt` (an existing assertion changed by this item, on purpose); (6) the `type` column is kept on the version (an attempt reads the shape without a second read) and carries the comment of `questions.type`.
+- 2026-10-12 (build) — The refinement said F-97 was "validating, not merged"; it was merged (`1c0d4981`) and the item branch took `main` before the first edit. The version snapshots the key as `AnswerKey` shapes it (options for single choice, `TrueFalseKey` for true/false).
+- 2026-10-12 (build) — Change detection compares the sanitized HTML as stored: a later change of the sanitizer would make the next save of a published question create a version. Known and accepted; not a defect.
 
 ## Out of scope
 - Restoring an old version as the current one — an `idea` if the curators ask.

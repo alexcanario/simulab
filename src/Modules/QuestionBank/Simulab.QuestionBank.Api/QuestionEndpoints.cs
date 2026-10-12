@@ -87,7 +87,7 @@ public static class QuestionEndpoints
         PublishQuestionHandler handler,
         CancellationToken cancellationToken)
     {
-        var result = await handler.HandleAsync(id, cancellationToken);
+        var result = await handler.HandleAsync(id, null, cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }

@@ -1,0 +1,74 @@
+using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Entities;
+
+namespace Simulab.QuestionBank.Domain.Entities;
+
+/// <summary>
+/// An immutable snapshot of a published question (F-98, BR1): what students were shown and graded on, numbered
+/// from 1 for the question. A version is made by <see cref="Question.NextVersion"/> and never edited or
+/// deleted (BR6); the author and the date are the audit columns (BR7). Topic, difficulty and origin are catalog
+/// data and are not part of it.
+/// </summary>
+public sealed class QuestionVersion : TenantEntity
+{
+    private readonly List<QuestionVersionOption> _options = [];
+
+    // For EF.
+    private QuestionVersion()
+    {
+    }
+
+    internal QuestionVersion(
+        Guid questionId,
+        int number,
+        QuestionType type,
+        string contentLanguage,
+        string statementHtml,
+        string? baseTextHtml,
+        string? explanationHtml,
+        bool? trueFalseKey,
+        IEnumerable<QuestionVersionOption> options,
+        bool answerKeyChanged,
+        string? reason)
+    {
+        QuestionId = questionId;
+        Number = number;
+        Type = type;
+        ContentLanguage = contentLanguage;
+        StatementHtml = statementHtml;
+        BaseTextHtml = baseTextHtml;
+        ExplanationHtml = explanationHtml;
+        TrueFalseKey = trueFalseKey;
+        _options.AddRange(options);
+        AnswerKeyChanged = answerKeyChanged;
+        Reason = reason;
+    }
+
+    /// <summary>The question the version belongs to, held by id with no navigation back.</summary>
+    public Guid QuestionId { get; private set; }
+
+    /// <summary>1, 2, ...; unique for the question (BR7). The latest version is the highest number.</summary>
+    public int Number { get; private set; }
+
+    public QuestionType Type { get; private set; }
+
+    public string ContentLanguage { get; private set; } = string.Empty;
+
+    public string StatementHtml { get; private set; } = string.Empty;
+
+    public string? BaseTextHtml { get; private set; }
+
+    public string? ExplanationHtml { get; private set; }
+
+    /// <summary>The key of a true/false question; null for any other type.</summary>
+    public bool? TrueFalseKey { get; private set; }
+
+    /// <summary>The options in position order; empty for a true/false question.</summary>
+    public IReadOnlyList<QuestionVersionOption> Options => _options;
+
+    /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
+    public bool AnswerKeyChanged { get; private set; }
+
+    /// <summary>The reason the curator wrote, trimmed; always set when <see cref="AnswerKeyChanged"/> is (BR5).</summary>
+    public string? Reason { get; private set; }
+}
