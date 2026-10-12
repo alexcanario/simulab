@@ -156,5 +156,6 @@ Stop the app host (Ctrl+C) and, when done, drop the database: `DROP DATABASE sim
 - 2026-10-12 question — asked 4, from context 0
 - 2026-10-12 blocked — test wrong: four tests of TrueFalseQuestionFormTests looked up ids the section card does not render and the summary text; test defect, no criterion changes
 - 2026-10-12 question — asked 1, from context 0
+- 2026-10-12 test-fail — build blocked by a running process (src/Hosts/Simulab.Web/Simulab.Web.csproj), 2 reds
 
 ## Delivery
