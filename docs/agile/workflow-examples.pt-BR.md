@@ -3893,3 +3893,58 @@ A saída de `order.js checklist --json` no projeto de teste, de onde o widget sa
 ```
 
 Marcar duas caixas no widget risca e escurece as linhas e muda o contador para `2 de 4 marcados`; `Limpar marcas` ou recarregar as desmarca. Nada vai para o arquivo: `docs/agile/order.md` continua como o script o escreveu, com todas as caixas vazias. É no painel de arquivos do app que o clique numa caixa `- [ ]` grava `[x]` em `docs/agile/order.md` (o `git diff` mostra o arquivo alterado), por isso o Claude pede para não marcar lá. Num terminal, ou numa sessão sem `show_widget`, o `/agile:order` mostra as linhas `- [ ]` como no exemplo 14.104. O `/agile:ship` só atualiza o arquivo (a linha `Order:`) e nunca mostra o widget.
+
+### 14.106 `/agile:order` na sessão do plugin: a lista sai dos issues e nada é gravado
+
+No repositório do próprio plugin os itens são issues do GitHub, não arquivos em `docs/features`. Ali o `/agile:order` lê os issues com uma única chamada do `gh`, aplica a mesma regra de ordem de sempre e só mostra a lista: não escreve arquivo, não propõe commit e o ship do plugin não atualiza nada. O exemplo usa um repositório de teste com um épico (#10), dois itens dele, um bug, um item adiado (`deferred`) e um que depende dele:
+
+```
+> /agile:order
+Claude: [widget] Ordem de implementação
+          ☐ 1. #13  Ship misses the version in the README   idea
+          ☐ 2. #11  Refine prints the item line             approved   unlocks #12
+          ☐ 3. #12  Order shows what each item unlocks      idea       waits on #11
+          ☐ 4. #15  Report mailed to the owner              idea       waits on #14 (parked)
+          0 de 4 marcados    [Limpar marcas]
+          Adiados (fora da ordem):
+            #14  Weekly report of delivered items           idea       unlocks #15
+        As caixas são só para ver: nada é gravado e a próxima execução começa com todas vazias.
+        4 itens na ordem, 1 adiado, 2 entregues. Nada foi escrito e nenhum commit é proposto.
+```
+
+Num terminal, ou numa sessão sem `show_widget`, a saída é o texto do script, com as linhas `- [ ]` e o grupo `## Parked` depois delas (a saída do script no mesmo repositório de teste):
+
+```
+# Order of implementation
+
+| # | Id | Title | Status | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|
+| 1 | #13 | Ship misses the version in the README | idea | - | - | - |
+| 2 | #11 | Refine prints the item line | approved | #10 Item workflow | - | #12 |
+| 3 | #12 | Order shows what each item unlocks | idea | #10 Item workflow | #11 | - |
+| 4 | #15 | Report mailed to the owner | idea | - | #14 (parked) | - |
+
+## Checklist
+
+- [ ] 1. #13 — Ship misses the version in the README [idea]
+- [ ] 2. #11 — Refine prints the item line [approved] — unlocks #12
+- [ ] 3. #12 — Order shows what each item unlocks [idea] — waits on #11
+- [ ] 4. #15 — Report mailed to the owner [idea] — waits on #14 (parked)
+
+## Parked
+
+Open items labelled `deferred`: outside the order of implementation, with no position. What depends on one of them waits.
+
+| # | Id | Title | Status | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|
+| - | #14 | Weekly report of delivered items | idea | - | - | #15 |
+
+## Summary
+
+- Delivered: 2
+- Parked: 1
+
+agile order SHOWN: 4 items, 1 parked, 2 delivered
+```
+
+O que a lista lê: os issues com o rótulo `feature` ou `bug` são as linhas (o épico, rótulo `epic`, só dá nome ao grupo na coluna `Epic`); o status é a palavra depois de `Status:` na primeira linha do corpo; as dependências são os `#n` da linha `- Depends on:` de `## Start` (um `#n` entre crases não conta); entregue é issue fechado como concluído, e um fechado como não planejado aparece como `(cancelled)` e nunca sobe o nível. O item `#14` está `deferred`, então fica no grupo `## Parked`, sem posição e fora de qualquer `Unlocks` de uma linha da ordem; o `#15`, que depende dele, espera e mostra `#14 (parked)`: tirar o `#14` do adiamento é o que o libera. Se o `gh` não está logado ou falha, a saída é `agile order FAILED: <motivo>` e nenhuma lista parcial; fora do repositório do plugin é `REFUSED`, e num projeto o comando continua escrevendo `docs/agile/order.md` como no exemplo 14.104.

@@ -1156,3 +1156,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.59.0 to 0.60.1. Copied (2): `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (`record` wrote `.claude/agile/sync.json`). Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
 - Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
 - Baseline present, docs command already declared, no plugin notes delivered, glossary unchanged, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
+
+## 2026-10-12 - Sync with agile@canary 0.62.0
+- From 0.60.1 to 0.62.0. Copied (2): `docs/agile/workflow.pt-BR.md` (version line and `/agile:order` in the plugin session, #175) and `docs/agile/workflow-examples.pt-BR.md` (example 14.106); `record` wrote `.claude/agile/sync.json`. Merged: none. Left alone: `git.md` and `profile.md` (edited, plugin unchanged) and the manual build files (no difference).
+- Not offered as items: DocGen tool catalogue and Azure login `agile-deploy.js` (same two rows already logged).
+- Baseline present, docs command already declared, no plugin notes delivered, glossary not scanned, `CLAUDE.md` 645 words. Build and suite not run: only Markdown and `sync.json` changed.
