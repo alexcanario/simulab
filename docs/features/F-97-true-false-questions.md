@@ -1,7 +1,7 @@
 ---
 feature: F-97
 epic: Question bank
-status: building
+status: validating
 board: 143
 version: 1
 ---
@@ -136,11 +136,25 @@ Tests locked: d6c5cd247e9e5356090f52cb1a0f8f946733190d (6 files); unlocks: 1
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of the build. -->
+Needed to validate: the app host on its own database and the seeded subjects (F-37 seed) — in place now; nothing to provide. Stop any other app host first: it locks the build output.
+
+1. **Start the app.** From the worktree, with its own database so the migration `AddTrueFalseKey` never lands in the shared one.
+   - PowerShell 7: `$env:Database__Name = "simulab_f97"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Git Bash: `Database__Name=simulab_f97 dotnet run --project src/Hosts/Simulab.AppHost`
+   Expected: every resource reaches Running and the migration is applied with no `fail` line. Open Web at https://localhost:7125 and sign in with the seeded administrator (`SeedAdmin` of `src/Hosts/Simulab.Api/appsettings.Development.json`).
+2. **The type field.** Content > Questions > Add. The first field of **Classification** is "Question type" with two cards, "Single choice" (selected) and "True/false". Pick a subject and a topic. Choose "True/false": the **Options** card is replaced by **Answer key** with two cards, True and False, none selected, and a hint saying the penalty comes from the edition's scoring rules. The aside's checklist shows four items, the last "Answer key set", and a "Type" row.
+3. **Keyboard and announcement.** With the keyboard only, Tab to the answer key cards: one tab stop, arrows move between True and False, Space or Enter selects. Write a statement, leave the key empty and Save: a draft is saved. Open it, change nothing and choose Publish: it is disabled with the checklist reason. Select False, Save, then Publish: it becomes Published. (The refusal text "Set the answer key (true or false) to publish." appears on the card and in the error summary when the Api refuses a publish without a key.)
+4. **Read-only type.** On the saved question the type is a labelled value "True/false" with the hint "The type cannot be changed after the question is created." and no cards. Change the key to True and Save: it stays Published with the new key.
+5. **Back to single choice.** Add a new question, add two options with text, then choose "True/false" and back to "Single choice": the options you typed are still there. Save: it stores a single-choice question with its options.
+6. **Preview.** Open the true/false question and choose **Preview as a student**: the statement and two lines, True and False, as plain text. Choose "Show answer": the key line gets the icon, the text "Correct answer" and a border, and the explanation appears.
+7. **The list, languages and permission.** Content > Questions: the **Type** column (last) says "True/false" or "Single choice" in a label. Switch to Português (Brasil): the field, cards, hint and column read "Certo/errado", "Certo", "Errado", "Gabarito". Sign in as a Student: the questions pages are not offered.
+
+Stop the app host (Ctrl+C) and, when done, drop the database: `DROP DATABASE simulab_f97;` (server up, nobody connected).
 
 ## Events
 
 - 2026-10-12 question — asked 4, from context 0
 - 2026-10-12 blocked — test wrong: four tests of TrueFalseQuestionFormTests looked up ids the section card does not render and the summary text; test defect, no criterion changes
+- 2026-10-12 question — asked 1, from context 0
 
 ## Delivery
