@@ -7,7 +7,6 @@ using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Pages.Catalog;
 using Simulab.Web.Components.Pages.QuestionBank;
 using Simulab.Web.Components.Ui;
-using Simulab.Web.Tests.Ui;
 
 namespace Simulab.Web.Tests.QuestionBank;
 
@@ -42,14 +41,6 @@ public sealed class QuestionOriginTests : QuestionPageTestContext
 
     private static AppTextField<int?> NumberField(IRenderedComponent<QuestionForm> page) =>
         page.FindComponents<AppTextField<int?>>().Single(component => component.Instance.Id == "question-paper-number").Instance;
-
-    private static string AsideValue(IRenderedComponent<QuestionForm> page, string label)
-    {
-        var row = page.FindAll(".app-form-aside dt, .app-form-aside .app-aside-label")
-            .FirstOrDefault(element => element.TextContent.Trim() == label);
-
-        return row is null ? string.Empty : row.NextElementSibling!.TextContent.Trim();
-    }
 
     private void SeedGuard()
     {
@@ -375,8 +366,8 @@ public sealed class QuestionOriginTests : QuestionPageTestContext
 
         page.Find("#edition-question-add").Click();
 
-        Services.GetRequiredService<NavigationManager>().Uri
-            .Should().EndWith($"/admin/questions/new?examEditionId={GuardEdition.Id}");
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri
+            .Should().EndWith($"/admin/questions/new?examEditionId={GuardEdition.Id}"));
     }
 
     [Fact]
@@ -389,7 +380,8 @@ public sealed class QuestionOriginTests : QuestionPageTestContext
 
         page.Find($"#edition-question-actions-{FromGuard.Id}-edit").Click();
 
-        Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith($"/admin/questions/{FromGuard.Id}");
+        page.WaitForAssertion(() => Services.GetRequiredService<NavigationManager>().Uri
+            .Should().EndWith($"/admin/questions/{FromGuard.Id}"));
     }
 
     [Fact]

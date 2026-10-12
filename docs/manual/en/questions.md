@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: en
-features: [F-95]
-updated: 2026-10-11
+features: [F-95, F-96]
+updated: 2026-10-12
 ---
 # Questions
 
@@ -17,8 +17,9 @@ Page not found, and the menu has no Questions entry.
 ## How to
 ### See the questions
 1. Choose **Questions**, in the **Content** section of the side menu.
-2. The list shows the start of each statement, the topic with its subject, the difficulty, the language and
-   the status, newest first.
+2. The list shows the start of each statement, the topic with its subject, the source (the organizer, exam
+   and year of the paper the question came from, with its number; a dash means the question is authored), the
+   difficulty, the language and the status, newest first.
 3. Type in the search box to find a word of the statement. Case and accents do not matter.
 4. Use **Status** to show only drafts or only published questions.
 
@@ -37,6 +38,25 @@ Page not found, and the menu has no Questions entry.
 
 A draft may be saved with no options and no correct one yet. The list "Before publishing", beside the form,
 shows what is still missing.
+
+### Record where a question came from
+A question from a past exam keeps the edition it came from, its number in that paper and, if you like, its
+notice subject. A question with no edition is an authored question.
+1. In the **Origin** card, under **Edition**, type the exam, the organizer or the year and pick from the list.
+   Draft and published editions are listed; each shows the organizer's acronym, the exam and the year.
+2. Enter the **number in the paper**, from 1 to 500. It is required when there is an edition, and each number
+   is used once per edition: the number of a deleted (draft) question is free again.
+3. If you like, choose the **notice subject**, among those of the chosen edition.
+4. Choose **Save**. Changing the edition, or emptying it, clears the number and the notice subject.
+5. To make the question authored again, empty **Edition** and save. The number becomes free.
+
+An origin never stops you from publishing: a published question may come from an edition that is still a draft.
+The side of the form shows the **Source** (the "organizer · exam · year" line, or "Authored"), and the preview
+as a student shows it above the statement, with the number.
+
+The edition lists its questions too: on the edition page (**Exams**, the exam, **Edit** the edition) the
+**Questions** card shows, in paper order, the questions that came from it, with **Add question**. The card is
+shown to people who also manage the question bank.
 
 ### Publish and unpublish
 1. Open the question and look at the **Publication** card, below the form.
@@ -67,6 +87,9 @@ shows what is still missing.
 | Base text | A text the question refers to | Optional, up to 20,000 characters |
 | Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct. Each up to 2,000 characters |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
+| Edition | The past paper the question came from | Optional. With no edition the question is authored. An edition cannot be deleted while a question uses it |
+| Number in the paper | The question's position in the edition's paper | Required with an edition, a whole number from 1 to 500, unique among the edition's questions |
+| Notice subject | The subject of the edition's notice the question belongs to | Optional, only with an edition, and of that same edition. It cannot be deleted while a question uses it |
 
 Only plain formatting is kept: scripts, styles and any link that is not `http` or `https` are removed when
 the question is saved, and the page shows what was kept.
@@ -82,6 +105,12 @@ the question is saved, and the page shows what was kept.
 | Difficulty is a number from 1 to 5, or empty. | The difficulty is out of range. | Choose 1 to 5 or leave it empty. |
 | Choose one of the supported languages. | The language is not on the list. | Pick a language from the list. |
 | The topic no longer exists. Pick another. | The topic was deleted while you wrote. | Choose another topic. |
+| The edition no longer exists. Pick another. | The edition was deleted while you wrote. | Choose another edition. |
+| The notice subject does not belong to this edition, or no longer exists. | The subject was deleted or belongs to another edition. | Choose another subject or leave it empty. |
+| Enter the number of the question in the paper. | There is an edition and no number. | Type the number. |
+| The number is a whole number from 1 to 500. | The number is out of range. | Type a number from 1 to 500. |
+| Number already used in this edition. | Another question of the edition has this number. | Choose another number, or fix the other question. |
+| Choose an edition to give a number or a notice subject. | There is a number or a subject and no edition. | Choose the edition or empty the fields. |
 | Only a draft can be deleted. Unpublish the question first. | The question is published. | Unpublish it, then delete. |
 | This question is already published. / This question is not published. | Someone else changed it first. | Reload the page. |
 | This question no longer exists. | Someone deleted it while your screen was open. | Go back to the list. |
@@ -96,6 +125,7 @@ the question is saved, and the page shows what was kept.
 
 ## Related pages
 - [Subjects and topics](subjects.md): the subjects and topics a question points at
+- [Exam editions](exam-editions.md): the papers questions come from
 - [Roles and permissions](roles.md): who can manage the question bank
 - [Getting around](getting-around.md): menu, light and dark mode, language and keyboard
 - [Simulab](index.md)

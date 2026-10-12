@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95]
-updated: 2026-10-11
+features: [F-95, F-96]
+updated: 2026-10-12
 ---
 # Questões
 
@@ -17,8 +17,9 @@ veem Página não encontrada, e o menu não tem o item Questões.
 ## Como fazer
 ### Ver as questões
 1. Escolha **Questões**, na seção **Conteúdo** do menu lateral.
-2. A lista mostra o início de cada enunciado, o tópico com a disciplina, a dificuldade, o idioma e a situação,
-   da mais nova para a mais antiga.
+2. A lista mostra o início de cada enunciado, o tópico com a disciplina, a fonte (a banca, o exame e o ano da
+   prova de onde a questão veio, com o número dela; um traço quer dizer que a questão é autoral), a
+   dificuldade, o idioma e a situação, da mais nova para a mais antiga.
 3. Digite na caixa de busca para achar uma palavra do enunciado. Maiúsculas e acentos não importam.
 4. Use **Situação** para ver só rascunhos ou só questões publicadas.
 
@@ -37,6 +38,25 @@ veem Página não encontrada, e o menu não tem o item Questões.
 
 Um rascunho pode ser salvo sem alternativas e sem correta. A lista "Antes de publicar", ao lado do formulário,
 mostra o que ainda falta.
+
+### Registrar de onde a questão veio
+Uma questão de prova anterior guarda a edição de onde veio, o número dela na prova e, se quiser, a disciplina do
+edital. Uma questão sem edição é uma questão autoral.
+1. No cartão **Origem**, em **Edição**, digite o exame, a banca ou o ano e escolha na lista. Edições em
+   rascunho e publicadas aparecem; a lista mostra a sigla da banca, o exame e o ano.
+2. Informe o **número na prova**, de 1 a 500. Ele é obrigatório quando há edição, e cada número é usado uma vez
+   por edição: um número de uma questão excluída (rascunho) volta a ficar livre.
+3. Se quiser, escolha a **disciplina do edital**, entre as da edição escolhida.
+4. Escolha **Salvar**. Trocar a edição, ou esvaziá-la, limpa o número e a disciplina do edital.
+5. Para tornar a questão autoral de novo, esvazie a **Edição** e salve. O número fica livre.
+
+A origem não impede de publicar: uma questão publicada pode vir de uma edição ainda em rascunho. O lado direito
+do formulário mostra a **Fonte** (a linha "banca · exame · ano" ou "Autoral"), e a visualização como aluno a
+mostra acima do enunciado, com o número.
+
+A edição também lista as suas questões: na página da edição (**Exames**, o exame, **Editar** a edição) o cartão
+**Questões** mostra, na ordem da prova, as questões que vieram dela, com **Adicionar questão**. O cartão
+aparece para quem também gerencia o banco de questões.
 
 ### Publicar e despublicar
 1. Abra a questão e veja o cartão **Publicação**, abaixo do formulário.
@@ -62,6 +82,9 @@ mostra o que ainda falta.
 | Tópico | O tópico a que a questão pertence | Obrigatório. Um tópico não pode ser excluído enquanto uma questão o usa |
 | Idioma do conteúdo | O idioma em que a questão está escrita | Obrigatório, um dos idiomas do app. O conteúdo nunca é traduzido |
 | Dificuldade | Quão difícil é a questão | Opcional, um número inteiro de 1 a 5 |
+| Edição | A prova anterior de onde a questão veio | Opcional. Sem edição a questão é autoral. Uma edição não pode ser excluída enquanto uma questão a usa |
+| Número na prova | A posição da questão na prova da edição | Obrigatório com edição, um número inteiro de 1 a 500, único entre as questões da edição |
+| Disciplina do edital | A disciplina do edital da edição a que a questão pertence | Opcional, só com edição, e da mesma edição. Não pode ser excluída enquanto uma questão a usa |
 | Enunciado | O que se pede ao aluno | Obrigatório, até 10.000 caracteres |
 | Texto-base | Um texto a que a questão se refere | Opcional, até 20.000 caracteres |
 | Alternativas | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta. Cada uma até 2.000 caracteres |
@@ -81,6 +104,12 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | A dificuldade é um número de 1 a 5, ou vazia. | A dificuldade está fora da faixa. | Escolha de 1 a 5 ou deixe vazia. |
 | Escolha um dos idiomas suportados. | O idioma não está na lista. | Escolha um idioma da lista. |
 | O tópico não existe mais. Escolha outro. | O tópico foi excluído enquanto você escrevia. | Escolha outro tópico. |
+| A edição não existe mais. Escolha outra. | A edição foi excluída enquanto você escrevia. | Escolha outra edição. |
+| A disciplina do edital não pertence a esta edição ou não existe mais. | A disciplina foi excluída ou é de outra edição. | Escolha outra disciplina ou deixe vazio. |
+| Informe o número da questão na prova. | Há edição e falta o número. | Digite o número. |
+| O número é um inteiro de 1 a 500. | O número está fora da faixa. | Digite um número de 1 a 500. |
+| Número já usado nesta edição. | Outra questão da edição tem este número. | Escolha outro número, ou corrija a outra questão. |
+| Escolha uma edição para informar um número ou uma disciplina do edital. | Há número ou disciplina e nenhuma edição. | Escolha a edição ou esvazie os campos. |
 | Só um rascunho pode ser excluído. Despublique a questão primeiro. | A questão está publicada. | Despublique e depois exclua. |
 | Esta questão já está publicada. / Esta questão não está publicada. | Outra pessoa mudou antes de você. | Recarregue a página. |
 | Esta questão não existe mais. | Alguém a excluiu com a sua tela aberta. | Volte à lista. |
@@ -95,6 +124,7 @@ removidos ao salvar, e a página mostra o que foi mantido.
 
 ## Páginas relacionadas
 - [Disciplinas e tópicos](subjects.md): as disciplinas e os tópicos a que uma questão aponta
+- [Edições de um exame](exam-editions.md): as provas de onde as questões vêm
 - [Papéis e permissões](roles.md): quem pode gerenciar o banco de questões
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)

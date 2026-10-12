@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: en
-features: [F-35, F-74, F-75]
-updated: 2026-10-09
+features: [F-35, F-74, F-75, F-96]
+updated: 2026-10-12
 ---
 # Exam editions
 
@@ -61,6 +61,7 @@ An exam cannot have two editions with the same year, position and board; capital
 | This exam has editions. Delete its editions first. | An exam with editions cannot be deleted. | Delete the editions, then the exam. |
 | Some editions name this board. Change or delete those editions first. | A board in use cannot be deleted. | Change or delete those editions. |
 | This edition no longer exists. | Someone deleted it while your screen was open. | Go back to the exam. |
+| Questions of the bank came from this edition, so it cannot be deleted. | A question (draft or published) points at this edition. | Delete the questions or clear their edition, then delete the edition. |
 
 ## Notice subjects
 In the **Notice subjects** card, below the edition form, you record the subjects exactly as the notice states them: the group (for example "Basic knowledge"), the subject name and the number of questions. The card shows only once the edition is saved; on a new edition it asks you to save first. Each subject is saved by its own dialog or action: the edition's **Save** button never saves them. It works on Draft and Published editions.
@@ -119,7 +120,21 @@ In one edition, a subject name cannot repeat inside the same group (capitals and
 | Someone else saved this notice subject at the same time. Save again. | Two people saved the same row at once. | Save again. |
 | The taxonomy could not be loaded. The items already picked stay here. | The list of subjects did not load. | Reload the page and try again. |
 
+## Questions of the edition
+In the **Questions** card, below the notice subjects, you see the questions of the bank that came from this edition, in paper order: the number, the start of the statement, the notice subject and the status (draft or published), 25 per page. The card is shown only to people who also manage the question bank; on a new edition it asks you to save the edition first.
+
+1. Choose **Add question** to open the question form with this edition already chosen; enter the number in the paper.
+2. Choose **Edit** on a row to open the question on its own page. The question is changed there, not in this card.
+3. See [Questions](questions.md) to record the origin of a question.
+
+While a question of the bank points at the edition, the edition cannot be deleted; the same goes for a notice subject a question uses. In both cases the message gives the reason.
+
+| Message | What it means | What to do |
+|---|---|---|
+| Questions of the bank belong to this notice subject, so it cannot be deleted. | A question points at this subject. | Clear the subject on the question or delete the question, then delete the subject. |
+
 ## Related pages
+- [Questions](questions.md): the question bank and where each question came from
 - [Exams](exams.md): the exams in the catalog (Admins)
 - [Organizers](organizers.md): the boards an edition names (Admins)
 - [Subjects and topics](subjects.md): the shared list a notice subject is mapped to (Admins)

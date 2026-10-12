@@ -166,10 +166,25 @@ Tests locked: 8d6dfe986152df4732b61c8e5d790333a8c91e40 (6 files); unlocks: 1
 ## Change notes
 
 ## Validation script
+Needed to validate: the app host on its own database and one seeded edition (F-37 seed) — in place now; nothing to provide. Stop any other app host first: it locks the build output.
+
+1. **Start the app.** From the worktree, with its own database so the migration never lands in the shared one.
+   - PowerShell 7: `$env:Database__Name = "simulab_f96"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Git Bash: `Database__Name=simulab_f96 dotnet run --project src/Hosts/Simulab.AppHost`
+   Expected: the dashboard URL is printed, every resource reaches Running, and the migration `AddQuestionOrigin` is applied with no `fail` line. Open Web at https://localhost:7125 and sign in with the seeded administrator (`SeedAdmin` of `src/Hosts/Simulab.Api/appsettings.Development.json`).
+2. **The edition page.** Content > Exams, open a seeded exam, edit one of its editions (set it back to Draft and save if it is Published). Below the notice subjects a **Questions** card says "No questions from this edition yet." Add one notice subject ("Língua Portuguesa", group "Conhecimentos básicos") in the Notice subjects card.
+3. **Add a question from the edition.** In the Questions card choose **Add question**. The form opens with the **Origin** card showing the edition as `ACRONYM · Exam · Year`. Choose a subject and a topic, write a statement, add two options and mark one correct. Enter number **12**, pick the notice subject, choose **Save**. Expected: saved as a draft; the aside's **Source** row shows the line; back on the edition page the card lists question 12 with its subject and the Draft chip.
+4. **A repeated number.** Add another question to the same edition with number **12**. Expected: the number field says "Number already used in this edition.", the error summary takes the focus and nothing is saved. Change it to 13 and save.
+5. **The source line.** On the question, choose **Preview as a student**: the source line and "Question 12" sit above the statement. Open Content > Questions: the **Source** column shows the line with "Question 12"; an authored question shows a dash.
+6. **The guards.** On the edition page try to delete the edition from the exam's Editions card, then the notice subject from its card. Expected: both refused with "Questions of the bank came from this edition, so it cannot be deleted." and the notice subject message, and both stay. Clear the notice subject on question 12 (Origin > Notice subject: None, Save): the subject can now be deleted.
+7. **Keyboard, languages and permission.** Do step 3 again with the keyboard only (Tab through the Origin fields; the edition list opens with the arrow keys). Switch the language to Português (Brasil) and back: the card, labels and messages are translated. Sign in with an account that has no questions.manage (a Student): Questions is not in the menu and /admin/questions is "Page not found".
+
+Stop the app host and, when done, drop the database: `DROP DATABASE simulab_f96;` (server up, nobody connected).
 
 ## Events
 
 - 2026-10-12 question — asked 8, from context 0
 - 2026-10-12 blocked — test wrong: two tests used notice years 2031, 2032 and 2029, which the catalog refuses (exam_edition.notice_year_invalid); test defect, not a criterion
+- 2026-10-12 test-fail — 2 new warning(s): IDE0051 in tests/Hosts/Simulab.Web.Tests/QuestionBank/QuestionOriginTests.cs; IDE0005 in tests/Hosts/S, 2 reds
 
 ## Delivery
