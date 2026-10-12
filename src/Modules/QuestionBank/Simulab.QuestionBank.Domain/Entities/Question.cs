@@ -7,9 +7,10 @@ using Simulab.SharedKernel.Text;
 namespace Simulab.QuestionBank.Domain.Entities;
 
 /// <summary>
-/// A single-choice question in the bank (F-95, BR1 to BR12): a statement, an optional base text, from 0 to 5
-/// options with at most one marked as the key once published, an optional explanation, a difficulty, a topic and
-/// the language it is written in. Global data: <see cref="TenantEntity.TenantId"/> is null in v1.
+/// A question in the bank (F-95, BR1 to BR12): a statement, an optional base text, an answer key whose shape
+/// its <see cref="Type"/> decides (F-97: from 0 to 5 options with exactly one correct once published, or one
+/// true/false key), an optional explanation, a difficulty, a topic and the language it is written in. Global
+/// data: <see cref="TenantEntity.TenantId"/> is null in v1.
 /// <para>
 /// The rules answer with a <see cref="Result"/> and never throw. A refused edit leaves the entity as it was:
 /// the content is checked as a whole before anything is assigned (AC7).
@@ -64,14 +65,27 @@ public sealed class Question : TenantEntity
 
     public static Result<Question> Create(QuestionContent content)
     {
-        var question = new Question { Type = QuestionType.SingleChoice, Status = QuestionStatus.Draft };
+        ArgumentNullException.ThrowIfNull(content);
+
+        // F-97 BR2: the type is chosen here and never changes; content that names none is single choice.
+        var question = new Question { Type = content.Type, Status = QuestionStatus.Draft };
         var applied = question.Apply(content);
 
         return applied.IsFailure ? Result.Failure<Question>(applied.Error!) : Result.Success(question);
     }
 
-    /// <summary>Replaces the content; a published question must stay complete (BR4).</summary>
-    public Result Update(QuestionContent content) => Apply(content);
+    /// <summary>
+    /// Replaces the content; a published question must stay complete (BR4). Content of another type is
+    /// refused: the type is fixed when the question is created (F-97, BR2).
+    /// </summary>
+    public Result Update(QuestionContent content)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+
+        return content.Type == Type
+            ? Apply(content)
+            : Result.Failure(new Error(QuestionBankErrorCodes.QuestionTypeChanged, ErrorKind.Conflict));
+    }
 
     /// <summary>Draft to published; the status only (BR12).</summary>
     public Result Publish()
@@ -81,7 +95,7 @@ public sealed class Question : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionAlreadyPublished, ErrorKind.Conflict));
         }
 
-        var fault = QuestionRules.CheckOptions(Drafts(), published: true);
+        var fault = StoredKey().Check(published: true);
         if (fault is not null)
         {
             return Result.Failure(fault.Error);
@@ -118,6 +132,9 @@ public sealed class Question : TenantEntity
             .OrderBy(option => option.Position)
             .Select(option => new OptionDraft(new SanitizedHtml(option.TextHtml, option.TextHtml), option.IsCorrect))
             .ToList();
+
+    // The key as stored: the type decides what it is made of (F-97, BR9).
+    private AnswerKey StoredKey() => AnswerKey.From(Type, Drafts(), TrueFalseKey);
 
     private Result Apply(QuestionContent content)
     {
@@ -183,7 +200,8 @@ public sealed class Question : TenantEntity
         }
 
         // BR4: editing a published question runs the publish check, so it cannot be made incomplete.
-        var fault = QuestionRules.CheckOptions(content.Options, Status == QuestionStatus.Published);
+        var key = AnswerKey.From(Type, content.Options, content.TrueFalseKey);
+        var fault = key.Check(Status == QuestionStatus.Published);
         if (fault is not null)
         {
             return Result.Failure(fault.Error);
@@ -201,7 +219,8 @@ public sealed class Question : TenantEntity
         ExamEditionId = editionId;
         PaperNumber = editionId is null ? null : content.PaperNumber;
         NoticeSubjectId = subjectId;
-        ReplaceOptions(content.Options);
+        TrueFalseKey = key.TrueFalseValue;
+        ReplaceOptions(key.Options);
 
         return Result.Success();
     }

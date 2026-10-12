@@ -86,6 +86,9 @@ No mockup (owner, 2026-10-12): one new control inside the form of F-95, drawn wi
 - AC15 All new texts appear in pt-BR, pt-PT and en, including the four error code texts.
 
 ## Criterion → test
+
+Tests locked: a7cdcd4074a2a15fee5909aa2bd795cf7b6aa201 (6 files); unlocks: 0
+
 <!-- Written by /agile:build at its start. -->
 | Criterion | Test |
 | --- | --- |

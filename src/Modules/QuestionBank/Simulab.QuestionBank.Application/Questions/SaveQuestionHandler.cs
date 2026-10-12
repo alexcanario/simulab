@@ -37,6 +37,13 @@ public sealed class SaveQuestionHandler(
             return Refused(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound));
         }
 
+        // F-97 BR2: the type never changes. Naming another one is a 409 before anything else is judged, so the
+        // shape checks never answer 400 for a request that is really asking to change the type.
+        if (existing is not null && request.Type is { } named && named != existing.Type)
+        {
+            return Refused(new Error(QuestionBankErrorCodes.QuestionTypeChanged, ErrorKind.Conflict));
+        }
+
         // BR16: a topic that is unknown or deleted answers 404 before anything about the content is judged.
         if (request.TopicId is { } topicId && topicId != Guid.Empty
             && !await store.TopicExistsAsync(topicId, cancellationToken))
@@ -73,7 +80,9 @@ public sealed class SaveQuestionHandler(
             drafts,
             request.ExamEditionId,
             request.PaperNumber,
-            request.NoticeSubjectId);
+            request.NoticeSubjectId,
+            existing?.Type ?? request.Type ?? QuestionType.SingleChoice,
+            request.TrueFalseKey);
 
         var question = existing;
         Result applied;
