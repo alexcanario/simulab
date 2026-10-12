@@ -941,6 +941,16 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* A chip in a table cell holds a short label that must stay on one line: with overflow-wrap: anywhere the browser
+   sizes the column to one character and the label breaks letter by letter (F-97, the Type column). */
+.app-cell-nowrap .app-chip {
+    white-space: nowrap;
+}
+
+.app-cell-nowrap .app-chip-text {
+    overflow-wrap: normal;
+}
+
 .app-chip.is-removable {
     padding-right: 2px;
 }
