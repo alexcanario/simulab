@@ -24,6 +24,39 @@ public static class QuestionText
     public static AppStatusTone StatusTone(QuestionStatus status) =>
         status == QuestionStatus.Published ? AppStatusTone.Success : AppStatusTone.Neutral;
 
+    /// <summary>
+    /// The source line of a question from a past edition: organizer acronym, exam and year (F-96, BR7), or null
+    /// for an authored question and for an origin whose edition no longer resolves (BR11). The position and the
+    /// notice reference are not part of it.
+    /// </summary>
+    public static string? SourceLine(QuestionOriginResponse? origin)
+    {
+        return origin is null ? null : SourceLine(origin.OrganizerAcronym, origin.ExamName, origin.NoticeYear);
+    }
+
+    /// <summary>The same line from its parts, for the edition lookup; null when there is no exam name.</summary>
+    public static string? SourceLine(string? organizerAcronym, string? examName, int? noticeYear)
+    {
+        if (string.IsNullOrWhiteSpace(examName))
+        {
+            return null;
+        }
+
+        var parts = new List<string>(3);
+        if (!string.IsNullOrWhiteSpace(organizerAcronym))
+        {
+            parts.Add(organizerAcronym);
+        }
+
+        parts.Add(examName);
+        if (noticeYear is { } year)
+        {
+            parts.Add(year.ToString(CultureInfo.InvariantCulture));
+        }
+
+        return string.Join(" · ", parts);
+    }
+
     /// <summary>The letter of an option, A to E, from its position (BR5).</summary>
     public static string Letter(int position) => ((char)('A' + position)).ToString();
 

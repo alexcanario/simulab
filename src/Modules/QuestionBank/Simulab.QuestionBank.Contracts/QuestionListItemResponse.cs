@@ -10,6 +10,7 @@ namespace Simulab.QuestionBank.Contracts;
 /// <param name="Difficulty">From 1 to 5, or null.</param>
 /// <param name="ContentLanguage">The language the question is written in.</param>
 /// <param name="Status">Draft or Published.</param>
+/// <param name="Origin">Where the question came from, or null when it is authored (F-96).</param>
 public sealed record QuestionListItemResponse(
     Guid Id,
     string StatementExcerpt,
@@ -19,4 +20,5 @@ public sealed record QuestionListItemResponse(
     string SubjectName,
     int? Difficulty,
     string ContentLanguage,
-    QuestionStatus Status);
+    QuestionStatus Status,
+    QuestionOriginResponse? Origin = null);

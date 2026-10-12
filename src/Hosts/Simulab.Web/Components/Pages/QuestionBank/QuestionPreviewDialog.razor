@@ -12,6 +12,16 @@
             <AppAlert Severity="Severity.Info" Text="@L["Questions.Preview.UnsavedNote"]" Class="mb-4" />
         }
 
+        @* F-96 BR7: where the question came from, above the statement. A question without an edition shows nothing,
+           and so does one whose edition no longer resolves (BR11). *@
+        @if (QuestionText.SourceLine(Question.Origin) is { } sourceLine)
+        {
+            <p class="app-question-source" id="question-preview-source">
+                <span class="app-question-source-line">@sourceLine</span>
+                <span class="app-question-source-number">@L["Questions.Preview.Number", Question.Origin!.PaperNumber]</span>
+            </p>
+        }
+
         <div class="app-question-paper" lang="@Question.ContentLanguage">
             @if (!QuestionHtml.IsBlank(Question.BaseTextHtml))
             {

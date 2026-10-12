@@ -891,4 +891,41 @@
   <data name="Gallery.RichText.OptionRow" xml:space="preserve"><value>Linha de alternativa: letra, rádio, editor compacto, mover e remover</value></data>
   <data name="Gallery.RichText.Sample" xml:space="preserve"><value>&lt;p&gt;Um enunciado &lt;strong&gt;formatado&lt;/strong&gt; com H&lt;sub&gt;2&lt;/sub&gt;O e 10&lt;sup&gt;3&lt;/sup&gt;.&lt;/p&gt;</value></data>
   <data name="Gallery.RichText.LongSample" xml:space="preserve"><value>&lt;p&gt;Um parágrafo longo que continua para mostrar que o campo cresce com o texto e o quebra, junto de uma palavra sem nenhuma quebra: Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico.&lt;/p&gt;</value></data>
+  <data name="Questions.Section.Origin" xml:space="preserve"><value>Origem</value></data>
+  <data name="Questions.Section.Origin.Subtitle" xml:space="preserve"><value>A edição de prova anterior de onde a questão veio. Deixe vazio para uma questão escrita por você.</value></data>
+  <data name="Questions.Field.Edition" xml:space="preserve"><value>Edição</value></data>
+  <data name="Questions.Field.Edition.Placeholder" xml:space="preserve"><value>Busque por exame, banca ou ano</value></data>
+  <data name="Questions.Field.Edition.Hint" xml:space="preserve"><value>Edições em rascunho e publicadas aparecem na lista.</value></data>
+  <data name="Questions.Field.PaperNumber" xml:space="preserve"><value>Número na prova</value></data>
+  <data name="Questions.Field.PaperNumber.Hint" xml:space="preserve"><value>De 1 a 500. Cada número é usado uma vez por edição.</value></data>
+  <data name="Questions.Field.PaperNumber.DisabledHint" xml:space="preserve"><value>Escolha uma edição primeiro.</value></data>
+  <data name="Questions.Field.NoticeSubject" xml:space="preserve"><value>Disciplina do edital</value></data>
+  <data name="Questions.Field.NoticeSubject.Hint" xml:space="preserve"><value>Opcional. As disciplinas da edição escolhida.</value></data>
+  <data name="Questions.Field.NoticeSubject.DisabledHint" xml:space="preserve"><value>Escolha uma edição primeiro.</value></data>
+  <data name="Questions.NoticeSubject.None" xml:space="preserve"><value>Nenhuma</value></data>
+  <data name="Questions.Form.Aside.Source" xml:space="preserve"><value>Fonte</value></data>
+  <data name="Questions.Source.Authored" xml:space="preserve"><value>Autoral</value></data>
+  <data name="Questions.Source.Unresolved" xml:space="preserve"><value>Edição indisponível</value></data>
+  <data name="Questions.Source.Number" xml:space="preserve"><value>Questão {0}</value></data>
+  <data name="Questions.Preview.Number" xml:space="preserve"><value>Questão {0}</value></data>
+  <data name="Questions.Column.Source" xml:space="preserve"><value>Fonte</value></data>
+  <data name="EditionQuestions.Section.Title" xml:space="preserve"><value>Questões</value></data>
+  <data name="EditionQuestions.Section.Subtitle" xml:space="preserve"><value>As questões do banco que vieram desta edição, na ordem da prova.</value></data>
+  <data name="EditionQuestions.Section.SaveEditionFirst" xml:space="preserve"><value>Salve a edição primeiro para adicionar suas questões.</value></data>
+  <data name="EditionQuestions.Add" xml:space="preserve"><value>Adicionar questão</value></data>
+  <data name="EditionQuestions.Empty" xml:space="preserve"><value>Nenhuma questão desta edição ainda.</value></data>
+  <data name="EditionQuestions.Column.Number" xml:space="preserve"><value>Nº</value></data>
+  <data name="EditionQuestions.Column.Statement" xml:space="preserve"><value>Enunciado</value></data>
+  <data name="EditionQuestions.Column.NoticeSubject" xml:space="preserve"><value>Disciplina do edital</value></data>
+  <data name="EditionQuestions.Column.Status" xml:space="preserve"><value>Situação</value></data>
+  <data name="EditionQuestions.NoticeSubject.None" xml:space="preserve"><value>Sem disciplina do edital</value></data>
+  <data name="EditionQuestions.Row.Name" xml:space="preserve"><value>questão {0}</value></data>
+  <data name="question.exam_edition_not_found" xml:space="preserve"><value>A edição não existe mais. Escolha outra.</value></data>
+  <data name="question.notice_subject_not_found" xml:space="preserve"><value>A disciplina do edital não pertence a esta edição ou não existe mais.</value></data>
+  <data name="question.paper_number_required" xml:space="preserve"><value>Informe o número da questão na prova.</value></data>
+  <data name="question.paper_number_invalid" xml:space="preserve"><value>O número é um inteiro de 1 a 500.</value></data>
+  <data name="question.origin_requires_edition" xml:space="preserve"><value>Escolha uma edição para informar um número ou uma disciplina do edital.</value></data>
+  <data name="question.paper_number_taken" xml:space="preserve"><value>Número já usado nesta edição.</value></data>
+  <data name="exam_edition.has_questions" xml:space="preserve"><value>Há questões do banco que vieram desta edição, então ela não pode ser excluída.</value></data>
+  <data name="notice_subject.has_questions" xml:space="preserve"><value>Há questões do banco ligadas a esta disciplina do edital, então ela não pode ser excluída.</value></data>
 </root>

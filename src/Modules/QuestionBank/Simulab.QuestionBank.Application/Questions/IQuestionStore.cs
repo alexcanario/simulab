@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Domain.Entities;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Application.Questions;
 
@@ -14,10 +15,35 @@ public interface IQuestionStore
     /// <summary>True when a live topic with this id exists in the catalog (BR16).</summary>
     Task<bool> TopicExistsAsync(Guid topicId, CancellationToken cancellationToken);
 
+    /// <summary>True when an edition of any status with this id exists in the catalog and was not deleted (F-96, BR2).</summary>
+    Task<bool> ExamEditionExistsAsync(Guid examEditionId, CancellationToken cancellationToken);
+
+    /// <summary>True when a live notice subject with this id exists and belongs to that edition (F-96, BR2).</summary>
+    Task<bool> NoticeSubjectBelongsToAsync(
+        Guid noticeSubjectId,
+        Guid examEditionId,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// True when a live question other than <paramref name="exceptQuestionId"/> already has this number in the
+    /// edition (F-96, BR3). The unique index is the last line; this is the answer the form gets.
+    /// </summary>
+    Task<bool> IsPaperNumberTakenAsync(
+        Guid examEditionId,
+        int paperNumber,
+        Guid? exceptQuestionId,
+        CancellationToken cancellationToken);
+
     void Add(Question question);
 
     /// <summary>Soft-deletes the question and its options: the interceptor turns the removal into a flag (BR11).</summary>
     void Remove(Question question);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Saves, and answers the 409 of a number two saves raced for (F-96, BR3) instead of throwing; null when
+    /// the save went through. Any other database error propagates.
+    /// </summary>
+    Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -16,6 +16,7 @@ public static class QuestionBankEndpoints
         var group = endpoints.MapGroup("/question-bank").WithTags("QuestionBank");
 
         group.MapQuestionEndpoints();
+        group.MapExamEditionLookupEndpoints();
 
         return endpoints;
     }

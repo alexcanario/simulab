@@ -10,4 +10,31 @@ public interface IQuestionQueries
 
     /// <summary>The question with its options and key, or null when it does not exist or was deleted.</summary>
     Task<QuestionResponse?> FindAsync(Guid id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Editions of any status the origin lookup offers, by exam name then notice year descending, at most
+    /// <paramref name="take"/> (F-96, BR9).
+    /// </summary>
+    Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(
+        string? search,
+        int take,
+        CancellationToken cancellationToken);
+
+    /// <summary>One edition for prefilling the form, or null when it does not exist or was deleted (F-96, BR9).</summary>
+    Task<ExamEditionLookupResponse?> FindEditionAsync(Guid examEditionId, CancellationToken cancellationToken);
+
+    /// <summary>The notice subjects of an edition in display order, or null when the edition is unknown (F-96, BR9).</summary>
+    Task<IReadOnlyList<NoticeSubjectLookupResponse>?> ListNoticeSubjectsAsync(
+        Guid examEditionId,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// One page of the edition's live questions in paper order, drafts and published, or null when the edition
+    /// is unknown (F-96, BR10). <paramref name="page"/> is zero-based and the size is capped as the list's.
+    /// </summary>
+    Task<EditionQuestionPageResponse?> ListEditionQuestionsAsync(
+        Guid examEditionId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

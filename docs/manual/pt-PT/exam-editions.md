@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-PT
-features: [F-35, F-74, F-75]
-updated: 2026-10-09
+features: [F-35, F-74, F-75, F-96]
+updated: 2026-10-12
 ---
 # Edições de um exame
 
@@ -61,6 +61,7 @@ Um exame não pode ter duas edições com o mesmo ano, posto de trabalho e entid
 | Este exame tem edições. Elimine primeiro as edições. | Um exame com edições não pode ser eliminado. | Elimine as edições e depois o exame. |
 | Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições. | Uma entidade em uso não pode ser eliminada. | Altere ou elimine essas edições. |
 | Esta edição já não existe. | Alguém a eliminou com o seu ecrã aberto. | Volte ao exame. |
+| Há questões do banco que vieram desta edição, por isso não pode ser eliminada. | Uma questão (rascunho ou publicada) aponta para esta edição. | Elimine as questões ou esvazie a edição delas, e depois elimine a edição. |
 
 ## Disciplinas do aviso
 No cartão **Disciplinas do aviso**, abaixo do formulário da edição, regista as disciplinas tal como o aviso as apresenta: o grupo (por exemplo "Conhecimentos gerais"), o nome da disciplina e o número de questões. O cartão só aparece depois de a edição ser guardada; numa edição nova pede para guardar primeiro. Cada disciplina é guardada pelo seu próprio diálogo ou ação: o botão **Guardar** da edição nunca as guarda. Funciona em edições em rascunho e publicadas.
@@ -119,7 +120,21 @@ Na mesma edição, o nome da disciplina não pode repetir-se dentro do mesmo gru
 | Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente. | Duas pessoas guardaram a mesma linha ao mesmo tempo. | Guarde novamente. |
 | Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui. | A lista de disciplinas não carregou. | Recarregue a página e tente novamente. |
 
+## Questões da edição
+No cartão **Questões**, abaixo das disciplinas do aviso, aparecem as questões do banco que vieram desta edição, pela ordem da prova: o número, o início do enunciado, a disciplina do edital e o estado (rascunho ou publicada), 25 por página. O cartão só aparece a quem também gere o banco de questões; numa edição nova pede para guardar primeiro a edição.
+
+1. Escolha **Adicionar questão** para abrir o formulário de questão com esta edição já escolhida; indique o número na prova.
+2. Escolha **Editar** na linha para abrir a questão na própria página. A questão altera-se aí, não neste cartão.
+3. Veja [Questões](questions.md) para registar a origem de uma questão.
+
+Enquanto uma questão do banco aponta para a edição, a edição não pode ser eliminada; o mesmo vale para uma disciplina do edital que uma questão usa. Em ambos os casos a mensagem diz o motivo.
+
+| Mensagem | O que significa | O que fazer |
+|---|---|---|
+| Há questões do banco ligadas a esta disciplina do edital, por isso não pode ser eliminada. | Uma questão aponta para esta disciplina. | Esvazie a disciplina na questão ou elimine a questão, e depois elimine a disciplina. |
+
 ## Páginas relacionadas
+- [Questões](questions.md): o banco de questões e a origem de cada uma
 - [Exames](exams.md): os exames do catálogo (Administradores)
 - [Entidades organizadoras](organizers.md): as entidades que uma edição indica (Administradores)
 - [Disciplinas e tópicos](subjects.md): a lista comum para a qual uma disciplina do aviso é mapeada (Administradores)

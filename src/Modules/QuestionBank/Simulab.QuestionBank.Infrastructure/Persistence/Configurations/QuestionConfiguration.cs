@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Simulab.Persistence;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain.Entities;
 
@@ -15,6 +16,12 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
 {
     public const string DifficultyCheck = "ck_questions_difficulty_range";
 
+    /// <summary>F-96: the three origin columns are all null, or the edition and the number are both set.</summary>
+    public const string OriginCheck = "ck_questions_origin";
+
+    /// <summary>F-96 BR3: the unique number of a live question inside an edition.</summary>
+    public const string PaperNumberIndex = "ux_questions_tenant_edition_paper_number";
+
     public void Configure(EntityTypeBuilder<Question> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -27,6 +34,10 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                 table.HasCheckConstraint(
                     DifficultyCheck,
                     $"difficulty IS NULL OR difficulty BETWEEN {QuestionLimits.DifficultyMin} AND {QuestionLimits.DifficultyMax}");
+                table.HasCheckConstraint(
+                    OriginCheck,
+                    "(exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL) OR "
+                    + $"(exam_edition_id IS NOT NULL AND paper_number IS NOT NULL AND paper_number BETWEEN {QuestionLimits.PaperNumberMin} AND {QuestionLimits.PaperNumberMax})");
             });
         builder.HasKey(question => question.Id);
 
@@ -77,6 +88,16 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(question => question.Difficulty)
             .HasComment("From 1 (easiest) to 5 (hardest). Empty when not set.");
 
+        // F-96: the origin is three plain columns held by id, with no foreign key to the catalog (BR1).
+        builder.Property(question => question.ExamEditionId)
+            .HasComment("The past exam edition the question came from. Held by id; there is no foreign key to the catalog. Null means the question is authored.");
+
+        builder.Property(question => question.PaperNumber)
+            .HasComment("The number of the question in that edition's paper, from 1 to 500. Set exactly when exam_edition_id is.");
+
+        builder.Property(question => question.NoticeSubjectId)
+            .HasComment("The notice subject of that edition the question belongs to. Held by id; optional, and only with an edition.");
+
         builder.HasMany(question => question.Options)
             .WithOne()
             .HasForeignKey(option => option.QuestionId)
@@ -91,5 +112,19 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         // The list: a status filter, newest first.
         builder.HasIndex(question => new { question.Status, question.CreatedAt })
             .HasDatabaseName("ix_questions_status_created_at");
+
+        // F-96 BR3: within one edition a live question's number is unique. The second clause of the filter is
+        // needed because NULLS NOT DISTINCT would make every authored question (all three columns null) collide.
+        builder.HasIndex(question => new { question.TenantId, question.ExamEditionId, question.PaperNumber })
+            .HasDatabaseName(PaperNumberIndex)
+            .IsUniquePerTenant()
+            .HasFilter("is_deleted = false AND exam_edition_id IS NOT NULL");
+
+        // The edition delete guard and the edition's question list filter by the edition alone; the unique
+        // index cannot serve them because its first column is the tenant. The notice subject guard likewise.
+        builder.HasIndex(question => question.ExamEditionId)
+            .HasDatabaseName("ix_questions_exam_edition");
+        builder.HasIndex(question => question.NoticeSubjectId)
+            .HasDatabaseName("ix_questions_notice_subject");
     }
 }

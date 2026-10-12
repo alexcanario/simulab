@@ -69,6 +69,11 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasColumnName("difficulty")
                         .HasComment("From 1 (easiest) to 5 (hardest). Empty when not set.");
 
+                    b.Property<Guid?>("ExamEditionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exam_edition_id")
+                        .HasComment("The past exam edition the question came from. Held by id; there is no foreign key to the catalog. Null means the question is authored.");
+
                     b.Property<string>("ExplanationHtml")
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)")
@@ -86,6 +91,16 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(10000)")
                         .HasColumnName("normalized_statement")
                         .HasComment("The plain statement without case or accents. The list search reads it; derived on every write.");
+
+                    b.Property<Guid?>("NoticeSubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notice_subject_id")
+                        .HasComment("The notice subject of that edition the question belongs to. Held by id; optional, and only with an edition.");
+
+                    b.Property<int?>("PaperNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("paper_number")
+                        .HasComment("The number of the question in that edition's paper, from 1 to 500. Set exactly when exam_edition_id is.");
 
                     b.Property<string>("StatementHtml")
                         .IsRequired()
@@ -138,17 +153,32 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_questions");
 
+                    b.HasIndex("ExamEditionId")
+                        .HasDatabaseName("ix_questions_exam_edition");
+
+                    b.HasIndex("NoticeSubjectId")
+                        .HasDatabaseName("ix_questions_notice_subject");
+
                     b.HasIndex("TopicId")
                         .HasDatabaseName("ix_questions_topic");
 
                     b.HasIndex("Status", "CreatedAt")
                         .HasDatabaseName("ix_questions_status_created_at");
 
+                    b.HasIndex("TenantId", "ExamEditionId", "PaperNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_questions_tenant_edition_paper_number")
+                        .HasFilter("is_deleted = false AND exam_edition_id IS NOT NULL");
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("TenantId", "ExamEditionId", "PaperNumber"), false);
+
                     b.ToTable("questions", "question_bank", t =>
                         {
                             t.HasComment("A question of the bank, written by a curator. Its options are in question_options.");
 
                             t.HasCheckConstraint("ck_questions_difficulty_range", "difficulty IS NULL OR difficulty BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("ck_questions_origin", "(exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL) OR (exam_edition_id IS NOT NULL AND paper_number IS NOT NULL AND paper_number BETWEEN 1 AND 500)");
                         });
                 });
 

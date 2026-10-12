@@ -45,6 +45,10 @@ public static class QuestionBankModule
         // BR13: the catalog asks this check before it deletes a topic.
         services.AddScoped<ITopicUsageCheck, QuestionTopicUsageCheck>();
 
+        // F-96 BR8: and before it deletes an edition or one of its notice subjects.
+        services.AddScoped<IExamEditionUsageCheck, QuestionExamEditionUsageCheck>();
+        services.AddScoped<INoticeSubjectUsageCheck, QuestionNoticeSubjectUsageCheck>();
+
         return services;
     }
 

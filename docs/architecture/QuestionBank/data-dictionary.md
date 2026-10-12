@@ -39,9 +39,12 @@ Entity: `Question` — A question of the bank, written by a curator. Its options
 | deleted_at | timestamp with time zone | yes |  |  | When the row was deleted, in UTC. Null while it is not deleted. |
 | deleted_by | uuid | yes |  |  | Who deleted the row. Null while it is not deleted, or when no one was signed in. |
 | difficulty | integer | yes |  |  | From 1 (easiest) to 5 (hardest). Empty when not set. |
+| exam_edition_id | uuid | yes |  |  | The past exam edition the question came from. Held by id; there is no foreign key to the catalog. Null means the question is authored. |
 | explanation_html | character varying(10000) | yes |  |  | max 10000; Why the key is right, as sanitized HTML. Empty when there is none. |
 | is_deleted | boolean | no |  |  | True once the row was deleted. Rows are never removed; a global query filter hides the deleted ones. |
 | normalized_statement | character varying(10000) | no |  |  | max 10000; The plain statement without case or accents. The list search reads it; derived on every write. |
+| notice_subject_id | uuid | yes |  |  | The notice subject of that edition the question belongs to. Held by id; optional, and only with an edition. |
+| paper_number | integer | yes |  |  | The number of the question in that edition's paper, from 1 to 500. Set exactly when exam_edition_id is. |
 | statement_html | character varying(10000) | no |  |  | max 10000; The statement as sanitized HTML. |
 | statement_text | character varying(10000) | no |  |  | max 10000; The statement without tags. The list excerpt reads it; derived on every write. |
 | status | character varying(40) | no |  |  | max 40; Where the question is in its life: Draft or Published. |
@@ -52,5 +55,8 @@ Entity: `Question` — A question of the bank, written by a curator. Its options
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
 
 Indexes:
+- `ix_questions_exam_edition` on exam_edition_id
+- `ix_questions_notice_subject` on notice_subject_id
 - `ix_questions_status_created_at` on status, created_at
 - `ix_questions_topic` on topic_id
+- `ux_questions_tenant_edition_paper_number` on tenant_id, exam_edition_id, paper_number (unique, NULLS NOT DISTINCT, where is_deleted = false AND exam_edition_id IS NOT NULL)

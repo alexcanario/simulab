@@ -11,6 +11,9 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="Explanation">The explanation; empty when there is none.</param>
 /// <param name="Difficulty">1 to 5, or null.</param>
 /// <param name="Options">The options in order.</param>
+/// <param name="ExamEditionId">The past edition the question came from; null or empty means authored (F-96).</param>
+/// <param name="PaperNumber">The number in that paper; required with an edition, 1 to 500 (F-96, BR2).</param>
+/// <param name="NoticeSubjectId">The notice subject of that edition, when the question has one (F-96, BR2).</param>
 public sealed record QuestionContent(
     Guid? TopicId,
     string? ContentLanguage,
@@ -18,4 +21,7 @@ public sealed record QuestionContent(
     SanitizedHtml BaseText,
     SanitizedHtml Explanation,
     int? Difficulty,
-    IReadOnlyList<OptionDraft> Options);
+    IReadOnlyList<OptionDraft> Options,
+    Guid? ExamEditionId = null,
+    int? PaperNumber = null,
+    Guid? NoticeSubjectId = null);

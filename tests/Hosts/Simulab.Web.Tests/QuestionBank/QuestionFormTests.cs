@@ -86,7 +86,7 @@ public sealed class QuestionFormTests : QuestionPageTestContext
 
         page.Find("h1").TextContent.Should().Be("Add question");
         page.FindAll("section.app-section-card h2").Select(heading => heading.TextContent.Trim()).Should().Equal(
-            "Classification", "Statement", "Base text", "Options", "Explanation", "Publication");
+            "Classification", "Origin", "Statement", "Base text", "Options", "Explanation", "Publication");
 
         foreach (var id in new[] { "question-subject", "question-topic", "question-content-language", "question-difficulty" })
         {

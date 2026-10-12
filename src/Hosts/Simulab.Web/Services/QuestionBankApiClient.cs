@@ -34,6 +34,7 @@ public static class QuestionBankResult
 public sealed class QuestionBankApiClient(HttpClient http)
 {
     private const string Base = "/api/v1/question-bank/questions";
+    private const string EditionsBase = "/api/v1/question-bank/editions";
 
     /// <summary>F-95 UC5: one page of questions, newest first, filtered by status and by a word of the statement.</summary>
     public Task<QuestionBankResult<QuestionPageResponse>> ListQuestionsAsync(
@@ -103,6 +104,55 @@ public sealed class QuestionBankApiClient(HttpClient http)
         Guid questionId,
         CancellationToken cancellationToken = default) =>
         SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/{questionId}"), accessToken), cancellationToken);
+
+    /// <summary>F-96 BR9: editions of any status the origin lookup offers, at most 20, by exam then year.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<ExamEditionLookupResponse>>> SearchEditionsAsync(
+        string accessToken,
+        string? search,
+        CancellationToken cancellationToken = default)
+    {
+        var route = EditionsBase;
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            route += $"?search={Uri.EscapeDataString(search)}";
+        }
+
+        return SendAsync<IReadOnlyList<ExamEditionLookupResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
+    /// <summary>F-96 BR9: one edition, to prefill the form when it opens from the edition page.</summary>
+    public Task<QuestionBankResult<ExamEditionLookupResponse>> FindEditionAsync(
+        string accessToken,
+        Guid examEditionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<ExamEditionLookupResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{EditionsBase}/{examEditionId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-96 BR9: the notice subjects of an edition in display order.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<NoticeSubjectLookupResponse>>> ListNoticeSubjectsAsync(
+        string accessToken,
+        Guid examEditionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<NoticeSubjectLookupResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{EditionsBase}/{examEditionId}/notice-subjects"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-96 BR10: one page of an edition's questions in paper order; the page is zero-based.</summary>
+    public Task<QuestionBankResult<EditionQuestionPageResponse>> ListEditionQuestionsAsync(
+        string accessToken,
+        Guid examEditionId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var route = $"{EditionsBase}/{examEditionId}/questions"
+            + $"?page={page.ToString(CultureInfo.InvariantCulture)}&pageSize={pageSize.ToString(CultureInfo.InvariantCulture)}";
+
+        return SendAsync<EditionQuestionPageResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
 
     private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
         new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };

@@ -1756,6 +1756,20 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* ---- F-96: where the question came from, above the statement in the preview. ---- */
+.app-question-source {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-2);
+    margin: 0 0 var(--app-space-3);
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+}
+
+.app-question-source-line {
+    overflow-wrap: anywhere;
+}
+
 /* ---- The question as a student reads it (preview dialog): stored HTML, so the look is all here (BR8). ---- */
 .app-question-content {
     overflow-wrap: anywhere;

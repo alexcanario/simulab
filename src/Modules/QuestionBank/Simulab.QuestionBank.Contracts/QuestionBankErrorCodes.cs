@@ -37,4 +37,22 @@ public static class QuestionBankErrorCodes
 
     public const string QuestionAlreadyPublished = "question.already_published";
     public const string QuestionNotPublished = "question.not_published";
+
+    /// <summary>F-96 BR2: the edition is unknown or deleted.</summary>
+    public const string QuestionExamEditionNotFound = "question.exam_edition_not_found";
+
+    /// <summary>F-96 BR2: the notice subject is unknown, deleted or belongs to another edition.</summary>
+    public const string QuestionNoticeSubjectNotFound = "question.notice_subject_not_found";
+
+    /// <summary>F-96 BR2: an edition was given with no paper number.</summary>
+    public const string QuestionPaperNumberRequired = "question.paper_number_required";
+
+    /// <summary>F-96 BR2: the paper number is not a whole number from 1 to 500.</summary>
+    public const string QuestionPaperNumberInvalid = "question.paper_number_invalid";
+
+    /// <summary>F-96 BR2: a paper number or a notice subject was given with no edition.</summary>
+    public const string QuestionOriginRequiresEdition = "question.origin_requires_edition";
+
+    /// <summary>F-96 BR3: a live question of the edition already has this number.</summary>
+    public const string QuestionPaperNumberTaken = "question.paper_number_taken";
 }

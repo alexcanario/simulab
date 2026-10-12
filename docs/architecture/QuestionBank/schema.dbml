@@ -21,8 +21,11 @@ Table questions {
   base_text_html varchar(20000) [note: 'The text the question refers to, as sanitized HTML. Empty when there is none.']
   content_language varchar(16) [not null, note: 'The language the question is written in, such as pt-BR. Question content is never translated.']
   difficulty integer [note: 'From 1 (easiest) to 5 (hardest). Empty when not set.']
+  exam_edition_id uuid [note: 'The past exam edition the question came from. Held by id; there is no foreign key to the catalog. Null means the question is authored.']
   explanation_html varchar(10000) [note: 'Why the key is right, as sanitized HTML. Empty when there is none.']
   normalized_statement varchar(10000) [not null, note: 'The plain statement without case or accents. The list search reads it; derived on every write.']
+  notice_subject_id uuid [note: 'The notice subject of that edition the question belongs to. Held by id; optional, and only with an edition.']
+  paper_number integer [note: 'The number of the question in that edition\'s paper, from 1 to 500. Set exactly when exam_edition_id is.']
   statement_html varchar(10000) [not null, note: 'The statement as sanitized HTML.']
   statement_text varchar(10000) [not null, note: 'The statement without tags. The list excerpt reads it; derived on every write.']
   status varchar(40) [not null, note: 'Where the question is in its life: Draft or Published.']
@@ -30,6 +33,8 @@ Table questions {
   type varchar(40) [not null, note: 'How the question is answered: SingleChoice.']
 
   indexes {
+    exam_edition_id [name: 'ix_questions_exam_edition']
+    notice_subject_id [name: 'ix_questions_notice_subject']
     topic_id [name: 'ix_questions_topic']
   }
 
