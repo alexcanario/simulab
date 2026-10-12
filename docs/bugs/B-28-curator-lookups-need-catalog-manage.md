@@ -1,8 +1,8 @@
 ---
 bug: B-28
 feature: F-95
-status: building
-Autopilot: approved
+status: validating
+Autopilot: stop 2
 board: 165
 severity: high
 epic: Question bank
@@ -65,10 +65,19 @@ Reproduced in the code at refinement (2026-10-12), not on a running host:
 
 Tests locked: 75b2c28eb481fab328f37faf9e8dc37572fb39c6 (3 files); unlocks: 1
 
-- `SubjectLookupEndpointTests` in `tests/Modules/QuestionBank/Simulab.QuestionBank.Tests/`, the shape of `EditionLookupEndpointTests`: AC1 to AC4 (the curator's 200 with the seeded `Curator` is the one seen failing before the fix: the route does not exist, 404).
-- `QuestionFormTests` in `tests/Hosts/Simulab.Web.Tests/QuestionBank/`: AC5 and AC6, a fake handler records the paths and asserts that none starts with `/api/v1/catalog/` (fails before the fix: the form calls the catalog routes).
-- `SubjectDirectoryTests` in the catalog's test project: live subjects only, the normalized search, topics of a deleted subject are `null`. (BR3)
-- AC7 is a validation step, not a test; AC8 is the existing architecture and module-boundary tests plus the missing-key test, all green.
+Seen failing before the fix (commit `a58d0845`): the 8 route tests answered 404 (the route did not exist), the 4 directory tests threw the skeleton's `NotImplementedException`, the 2 form tests failed because the form still injected `CatalogApiClient` (the fake Api answers every catalog route 403, as for a curator). All green after (gate GREEN).
+
+| Criterion | Test |
+|---|---|
+| AC1 | `SubjectLookupEndpointTests.Search_ByACuratorWithNoCatalogPermission_AnswersTheMatchingSubjectsOnly_IgnoringCaseAndAccents`, `Search_ListsSubjectsByName_AtMostTwenty`, `Search_ListsASubjectWithNoTopic` |
+| AC2 | `SubjectLookupEndpointTests.Topics_ByACurator_AreTheLiveOnesByName_WithoutTheDeletedOne` |
+| AC3 | `SubjectLookupEndpointTests.Topics_OfAnUnknownSubject_Are404SubjectNotFound`, `Topics_OfADeletedSubject_Are404SubjectNotFound` |
+| AC4 | `SubjectLookupEndpointTests.EveryRoute_ForAStudent_Answers403`, `EveryRoute_ForAUserWithOnlyCatalogManage_Answers403` |
+| AC5 | `QuestionFormLookupTests.SubjectSearch_OffersWhatTheQuestionBankLookupReturned_AndCallsNoCatalogRoute`, `TopicSearch_OffersTheTopicsTheQuestionBankLookupReturned_AndCallsNoCatalogRoute` |
+| AC6 | `QuestionFormTests.Subject_ChangedOrCleared_ClearsTheTopic`, `Topic_IsDisabledUntilASubjectIsChosen_AndOffersOnlyThatSubjectsTopics` (existing, now served by the question bank fake) |
+| AC7 | validation step 4 to 6 |
+| AC8 | `ErrorCodeTextTests` (missing-key test), `Simulab.ArchitectureTests` (219 green); no `.resx` touched |
+| BR3 | `SubjectDirectoryTests` (4 tests: live only, normalized search, topics of a deleted subject are `null`) |
 
 ## Decisions
 - 2026-10-12: the lookups are routes of `QuestionBank` under `questions.manage`, fed by a directory contract of the catalog — owner, F-96 refinement and this bug's `## Expected`; granting `catalog.manage` to `Curator` is a roles decision bigger than this bug.
@@ -76,9 +85,10 @@ Tests locked: 75b2c28eb481fab328f37faf9e8dc37572fb39c6 (3 files); unlocks: 1
 - 2026-10-12: the topic lookup returns the subject's whole topic list and the form narrows it, as today — Claude, technical. Reason: a subject has a short topic list (`QuestionForm.razor:705`); no new parameter on the route.
 - 2026-10-12: the missing-topic dead end stays out of scope, not registered — owner chose "Fora do escopo, sem registrar" (the recommended one). Reason: creating a subject or topic from the form is a roles and screen decision; the owner asks when wanted.
 - 2026-10-12: subjects with no topic stay in the subject lookup — owner chose "Sim, igual a hoje" (the recommended one). Reason: the fix only changes who may call; hiding them would also change what the administrator sees.
-
 - 2026-10-12: `question.subject_not_found` goes to `ErrorCodeTextTests.NeverShown` instead of getting a UI text — Claude, technical. Reason: BR6/AC8 forbid a new UI key, and the form's lookup turns any failed read into the picker's own load error, so the code never reaches a person.
 - 2026-10-12: tests unlocked once (CA1822 on the `Field` helper of `QuestionFormLookupTests`, made `static`; no assertion changed) — owner agreed in the build card.
+
+- 2026-10-12: independent review (reviewer agent): no blocker, no major; two minors, both fixed — the comment of the `Catalog.Contracts` reference in `Simulab.QuestionBank.Infrastructure.csproj` now names the three directories, and the criterion map and validation script are committed.
 
 ## Out of scope
 - Creating a subject or a topic from the question form, or giving `Curator` any catalog grant.
@@ -89,11 +99,24 @@ Tests locked: 75b2c28eb481fab328f37faf9e8dc37572fb39c6 (3 files); unlocks: 1
 - (none)
 
 ## Validation script
-Written at the build (`/agile:build B-28`, with the commands for the owner). It will cover: sign in with the account that holds only `Curator`, open `/admin/questions/new`, search a subject, pick a topic, fill the question and save; then repeat as the administrator to see the same lists. (AC7)
+Needed to validate: the local app host and an account that holds the `Curator` role and no other (you create it in step 2; nothing else is needed).
+
+1. Start the app host from the worktree folder `D:\wt\simulab\b-28-curator-lookups-need`, with a database of its own (`simulab_b28`, on the shared PostgreSQL server; stop any other app host first, it locks `bin/`).
+   - Git Bash: `Database__Name=simulab_b28 dotnet run --project src/Hosts/Simulab.AppHost`
+   - PowerShell 7: `$env:Database__Name = "simulab_b28"; dotnet run --project src/Hosts/Simulab.AppHost`
+   Expected: the dashboard URL is printed; `https://localhost:7125/sign-in` opens (Claude ran this start and got 200 from the Web and the Api).
+2. Make the curator: open `/sign-up`, create `curador@exemplo.com`, open the verification link from Mailpit (linked in the dashboard). Then sign in as the seeded administrator `admin@simulab.local` (the development password is in `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin`), open `/admin/users`, edit the roles of `curador@exemplo.com` and keep only `Curator`. Sign out.
+3. Sign in as `curador@exemplo.com`. Expected: the Questions entry is in the menu.
+4. Open `/admin/questions/new`, click the Subject field and type `por`. Expected: candidates appear (for example "Aritmética e Proporcionalidade"; before the fix the list stayed empty). Pick one. (AC7)
+5. The Topic field is now enabled; open it. Expected: only that subject's topics, in name order ("Operações básicas", "Percentuais", ...). Type `regra` and see it narrow, ignoring case and accents. Pick one. (AC7)
+6. Fill the statement, two options, mark one correct and press Save. Expected: the draft is saved and opens at its own address. (AC7)
+7. Change the Subject to another one: the Topic clears and offers only the new subject's topics; clear the Subject: the Topic goes back to disabled. Keyboard only: Tab to the Subject, type, arrows and Enter to pick, Tab to the Topic and do the same. (AC6)
+8. Sign out, sign in as `admin@simulab.local`, open `/admin/questions/new`, repeat steps 4 and 5. Expected: the same lists as the curator saw.
 
 ## Events
 
 - 2026-10-12 question — asked 2, from context 0
 - 2026-10-12 blocked — test wrong: CA1822 on the helper Field: make it static, no assertion changes (owner agreed)
+- 2026-10-12 rework — reviewer minor: csproj comment names the directories
 
 ## Delivery

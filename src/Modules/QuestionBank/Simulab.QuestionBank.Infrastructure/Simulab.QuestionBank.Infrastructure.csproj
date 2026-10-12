@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Simulab.QuestionBank.Application\Simulab.QuestionBank.Application.csproj" />
-    <!-- Catalog.Contracts only: ITopicDirectory (topic and subject names) and ITopicUsageCheck (the delete guard, BR13). -->
+    <!-- Catalog.Contracts only: the directories (ITopicDirectory, ISubjectDirectory, IExamEditionDirectory) and ITopicUsageCheck (the delete guard, BR13). -->
     <ProjectReference Include="..\..\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
   </ItemGroup>
