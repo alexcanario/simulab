@@ -50,7 +50,8 @@ Entity: `Question` — A question of the bank, written by a curator. Its options
 | status | character varying(40) | no |  |  | max 40; Where the question is in its life: Draft or Published. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | topic_id | uuid | no |  |  | The catalog topic the question belongs to. Held by id; there is no foreign key to the catalog. |
-| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice. |
+| true_false_key | boolean | yes |  |  | The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question. |
+| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice or TrueFalse. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
 
