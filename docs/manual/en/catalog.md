@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: en
-features: [F-36, F-37, F-42, F-57]
-updated: 2026-10-06
+features: [F-36, F-37, F-42, F-57, F-76]
+updated: 2026-10-13
 ---
 # Catalog
 
@@ -31,6 +31,15 @@ The address of the page keeps your search, filters and page, so you can bookmark
 
 Exam content is shown in its own language and is never translated.
 
+### See an edition's syllabus
+1. On the exam's page, choose **Show syllabus** on the edition's row. The button says how many notice subjects the edition has.
+2. The syllabus opens under the row. The notice subjects appear in the notice's order, under the group heading when the notice groups them, each with its number of questions (a dash when the notice does not state it).
+3. Under each notice subject are the product's subjects and topics it covers, such as "Mathematics · whole subject" or "Logical Reasoning › Propositions". When there are none yet, the row says "Topics not mapped yet".
+4. At the end, the total of questions stated in the notice and how many notice subjects were left out of the sum because they state no number.
+5. Choose **Hide syllabus** to close it. Each edition opens and closes on its own, and several can be open at the same time.
+
+An edition with no notice subjects registered has no button and says its syllabus is not registered yet.
+
 ## What a new environment already has
 Every environment starts with the municipal guard exams, so the catalog is never empty at the beginning. Four exams appear for students, each with its published edition and the link to the official notice: Guarda Municipal of Curitiba (Instituto AOCP, notice 2025), Guarda Municipal of Manaus (Instituto Consulplan, 2026), Guarda Civil Municipal of Salvador (FGV, 2026) and Guarda Civil Municipal of Maceió (Copeve/Ufal, 2026). The exams of Recife and Goiânia are already registered but have no notice yet, so they stay in the administration until an Admin adds and publishes an edition. The published editions show no application date, because it was not confirmed on the official sites.
 
@@ -57,6 +66,8 @@ These rows are ordinary data: an Admin can edit or delete any of them and the ch
 | We could not load the board, year and state options. The rest of the search works. | The three lists of options failed to load. | Choose **Try again**, or keep searching without them. |
 | We could not load this exam. | The exam page failed to load. | Choose **Try again**. |
 | This exam no longer exists. | The exam does not exist, was removed or has nothing published. | Choose **Back to the catalog**. |
+| The syllabus of this edition is not registered yet. | The edition has no notice subjects registered. | Nothing; it appears when an Admin registers it. |
+| Topics not mapped yet | The notice subject has not been linked to the product's subjects and topics yet. | Nothing; it only says the list does not exist yet. |
 
 ## Related pages
 - [Getting around](getting-around.md)

@@ -90,14 +90,14 @@
                 {
                     <div class="app-notice-subjects-summary">
                         <p class="app-notice-subjects-total">
-                            @if (_statedCount == 0)
+                            @if (_totals.StatedCount == 0)
                             {
                                 <span>@L["NoticeSubjects.Total.None"]</span>
                             }
                             else
                             {
                                 <span class="app-notice-subjects-total-sum">@TotalText</span>
-                                @if (_unstatedCount > 0)
+                                @if (_totals.UnstatedCount > 0)
                                 {
                                     <span class="app-notice-subjects-total-unstated app-muted">@UnstatedText</span>
                                 }
@@ -125,8 +125,6 @@
     private const string MoveUp = "up";
     private const string MoveDown = "down";
 
-    private sealed record RowGroup(string? Label, IReadOnlyList<NoticeSubjectResponse> Rows);
-
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
     /// <summary>The exam the edition belongs to.</summary>
@@ -136,11 +134,9 @@
     [Parameter] public Guid? EditionId { get; set; }
 
     private IReadOnlyList<NoticeSubjectResponse> _rows = [];
-    private IReadOnlyList<RowGroup> _groups = [];
+    private IReadOnlyList<NoticeSubjectGroup> _groups = [];
     private bool _showHeadings;
-    private int _statedCount;
-    private long _statedSum;
-    private int _unstatedCount;
+    private NoticeSubjectTotals _totals = new(0, 0, 0);
     private int _unmappedCount;
     private Guid? _loadedFor;
     private Guid? _movingId;
@@ -152,13 +148,9 @@
     private bool _loading;
     private bool _loadFailed;
 
-    private string TotalText => _statedSum == 1
-        ? L["NoticeSubjects.Total.One"]
-        : L["NoticeSubjects.Total.Many", _statedSum.ToString("N0", CultureInfo.CurrentCulture)];
+    private string TotalText => NoticeSubjectGroups.TotalText(L, _totals);
 
-    private string UnstatedText => _unstatedCount == 1
-        ? L["NoticeSubjects.Total.Unstated.One"]
-        : L["NoticeSubjects.Total.Unstated.Many", _unstatedCount.ToString("N0", CultureInfo.CurrentCulture)];
+    private string UnstatedText => NoticeSubjectGroups.UnstatedText(L, _totals);
 
     private string UnmappedText => _unmappedCount == 1
         ? L["NoticeSubjects.Total.Unmapped.One"]
@@ -236,26 +228,10 @@
     private void Apply(IReadOnlyList<NoticeSubjectResponse> rows)
     {
         _rows = rows;
-        var groups = new List<(string Key, string? Label, List<NoticeSubjectResponse> Rows)>();
-        foreach (var row in rows)
-        {
-            var key = AppSuggestField.Normalize(row.Group);
-            if (groups.Count == 0 || groups[^1].Key != key)
-            {
-                groups.Add((key, string.IsNullOrWhiteSpace(row.Group) ? null : row.Group.Trim(), new List<NoticeSubjectResponse>()));
-            }
-
-            groups[^1].Rows.Add(row);
-        }
-
-        _groups = [.. groups.Select(group => new RowGroup(group.Label, group.Rows))];
+        _groups = NoticeSubjectGroups.Group(rows);
         // When every row has no group, no heading is drawn: "No group" over the whole list says nothing.
-        _showHeadings = _groups.Any(group => group.Label is not null);
-
-        var stated = rows.Where(row => row.QuestionCount is not null).ToList();
-        _statedCount = stated.Count;
-        _statedSum = stated.Sum(row => (long)row.QuestionCount!.Value);
-        _unstatedCount = rows.Count - stated.Count;
+        _showHeadings = NoticeSubjectGroups.ShowHeadings(_groups);
+        _totals = NoticeSubjectGroups.Totals(rows);
 
         // F-75 BR2: a row with no entry is "not mapped"; a Mappings the Api left out reads as empty.
         _unmappedCount = rows.Count(row => row.Mappings is not { Count: > 0 });

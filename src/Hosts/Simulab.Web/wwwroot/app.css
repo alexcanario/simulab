@@ -499,6 +499,102 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* F-76: the kit's open/close block and the student's syllabus built on it. */
+.app-disclosure-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    padding: var(--app-space-1) 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: var(--mud-palette-primary);
+    cursor: pointer;
+}
+
+.app-disclosure-button:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.app-disclosure-icon {
+    transition: transform 0.15s;
+}
+
+.app-disclosure-icon.is-open {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-disclosure-icon {
+        transition: none;
+    }
+}
+
+.app-disclosure-content {
+    margin-top: var(--app-space-2);
+}
+
+.app-syllabus {
+    margin-top: var(--app-space-2);
+}
+
+.app-syllabus-empty {
+    margin: var(--app-space-2) 0 0;
+    font-size: var(--app-font-sm);
+}
+
+.app-syllabus-group + .app-syllabus-group {
+    margin-top: var(--app-space-3);
+}
+
+.app-syllabus-group-title {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+}
+
+.app-syllabus-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.app-syllabus-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    padding: var(--app-space-2) 0;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-syllabus-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--app-space-1);
+}
+
+.app-syllabus-not-mapped {
+    font-size: var(--app-font-sm);
+}
+
+.app-syllabus-count {
+    flex: none;
+    min-width: 6.5rem;
+    text-align: right;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-syllabus-total {
+    margin: var(--app-space-3) 0 0;
+    font-size: var(--app-font-sm);
+}
+
 .app-notice-subjects-footer {
     display: flex;
     flex-wrap: wrap;
