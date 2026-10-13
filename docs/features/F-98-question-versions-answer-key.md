@@ -1,7 +1,7 @@
 ---
 feature: F-98
 epic: Question bank
-status: validating
+status: done
 board: 144
 version: 1
 ---
@@ -180,3 +180,12 @@ Whose data: the app runs on its own database `simulab_f98` in the shared local P
 - 2026-10-13 rework — review #1: a refused View is shown in the History card
 - 2026-10-13 rework — review #2: the store port says the latest version is not tracked
 - 2026-10-13 question — asked 1, from context 0
+
+## Delivery
+- Branch: feature/F-98
+- Merge: 8f74f923
+- Version: 0.32.0
+- Tests: 3,382 passed in 14 projects (QuestionBank 244 in 2 min 6 s, Web 1565 in 23 s, Identity 501, Catalog 516, Api 58, AppHost 80, ArchitectureTests 219, others 99); 0 failed; no new warnings; `agile scan GREEN`
+- Manual pages: docs/manual/en/questions.md, docs/manual/pt-BR/questions.md, docs/manual/pt-PT/questions.md
+
+Gate time: 3 passes, 7 min 46 s — ship 2 (6 min 7 s), scan 1 (1 min 39 s); 0 red

@@ -4,11 +4,11 @@
 
 | # | Id | Title | Status | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|
-| 1 | F-98 | Question versions and answer key changes | refining | Question bank | - | F-101 |
-| 2 | F-76 | Syllabus for students | refining | Subject taxonomy | - | - |
-| 3 | F-100 | Find questions in the back office | idea | Question bank | - | - |
+| 1 | F-76 | Syllabus for students | refining | Subject taxonomy | - | - |
+| 2 | F-100 | Find questions in the back office | idea | Question bank | - | - |
+| 3 | F-101 | Annul a question | idea | Question bank | - | - |
 | 4 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
-| 5 | F-99 | Transcribe the paper of an edition | idea | Question bank | - | - |
+| 5 | F-99 | Transcribe the paper of an edition | idea | Question bank | - | first release of question-bank |
 | 6 | F-102 | Shared base text | idea | Question bank | - | - |
 | 7 | F-104 | Multiple-answer questions | idea | Question bank | - | - |
 | 8 | F-105 | Review before publishing | idea | Question bank | - | - |
@@ -41,16 +41,15 @@
 | 35 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
 | 36 | F-116 | A GitHub Actions workflow publishes a release | idea | Cloud hosting and operations | - | - |
 | 37 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | Cloud hosting and operations | - | - |
-| 38 | F-101 | Annul a question | idea | Question bank | F-98 | - |
-| 39 | F-103 | Images in questions | idea | Question bank | F-89 | - |
+| 38 | F-103 | Images in questions | idea | Question bank | F-89 | - |
 
 ## Checklist
 
-- [ ] 1. F-98 — Question versions and answer key changes [refining] — unlocks F-101
-- [ ] 2. F-76 — Syllabus for students [refining]
-- [ ] 3. F-100 — Find questions in the back office [idea]
+- [ ] 1. F-76 — Syllabus for students [refining]
+- [ ] 2. F-100 — Find questions in the back office [idea]
+- [ ] 3. F-101 — Annul a question [idea]
 - [ ] 4. F-77 — Subject and topic aliases [approved]
-- [ ] 5. F-99 — Transcribe the paper of an edition [idea]
+- [ ] 5. F-99 — Transcribe the paper of an edition [idea] — unlocks first release of question-bank
 - [ ] 6. F-102 — Shared base text [idea]
 - [ ] 7. F-104 — Multiple-answer questions [idea]
 - [ ] 8. F-105 — Review before publishing [idea]
@@ -83,13 +82,12 @@
 - [ ] 35. F-115 — One test helper for every module's permissions [idea]
 - [ ] 36. F-116 — A GitHub Actions workflow publishes a release [idea]
 - [ ] 37. F-117 — The deploy pipeline checks the cloud account before it signs in [idea]
-- [ ] 38. F-101 — Annul a question [idea] — waits on F-98
-- [ ] 39. F-103 — Images in questions [idea] — waits on F-89
+- [ ] 38. F-103 — Images in questions [idea] — waits on F-89
 
 ## Summary
 
-- Delivered: 105
+- Delivered: 106
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
-- First release (question-bank): 3 of 5 delivered; missing: F-98, F-99
+- First release (question-bank): 4 of 5 delivered; missing: F-99
 - First release (subject-taxonomy): 4 of 7 delivered; missing: F-76, F-77, F-78
