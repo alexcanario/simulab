@@ -141,7 +141,7 @@ No mockup (owner, 2026-10-13); the text wireframes below are the design. A scree
 
 ## Criterion → test
 
-Tests locked: 31e3e147148bf33b1018e019099b0cebc4920947 (8 files); unlocks: 0
+Tests locked: be185550d1e1ce838691a64362794505691c2329 (8 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
