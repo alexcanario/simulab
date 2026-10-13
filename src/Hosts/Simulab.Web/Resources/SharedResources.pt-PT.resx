@@ -954,4 +954,26 @@
   <data name="question.options_not_allowed" xml:space="preserve"><value>Uma questão certo/errado não tem opções.</value></data>
   <data name="question.key_not_allowed" xml:space="preserve"><value>Uma questão de escolha múltipla não tem gabarito certo/errado.</value></data>
   <data name="question.true_false_key_required" xml:space="preserve"><value>Defina o gabarito (certo ou errado) para publicar.</value></data>
+  <data name="Questions.Section.History" xml:space="preserve"><value>Histórico</value></data>
+  <data name="Questions.Section.History.Subtitle" xml:space="preserve"><value>Todas as versões que esta questão teve desde a primeira publicação e porque é que a chave de respostas mudou.</value></data>
+  <data name="Questions.History.Empty" xml:space="preserve"><value>A primeira versão é registada quando a questão é publicada.</value></data>
+  <data name="Questions.History.Column.Version" xml:space="preserve"><value>Versão</value></data>
+  <data name="Questions.History.Column.Date" xml:space="preserve"><value>Registada em</value></data>
+  <data name="Questions.History.Column.Change" xml:space="preserve"><value>Alteração</value></data>
+  <data name="Questions.History.Column.Reason" xml:space="preserve"><value>Motivo</value></data>
+  <data name="Questions.History.Current" xml:space="preserve"><value>Atual</value></data>
+  <data name="Questions.History.Change.First" xml:space="preserve"><value>Primeira publicação</value></data>
+  <data name="Questions.History.Change.Edited" xml:space="preserve"><value>Conteúdo editado</value></data>
+  <data name="Questions.History.Change.KeyChanged" xml:space="preserve"><value>Chave de respostas alterada</value></data>
+  <data name="Questions.History.NoReason" xml:space="preserve"><value>Sem motivo</value></data>
+  <data name="Questions.History.Action.View" xml:space="preserve"><value>Ver versão</value></data>
+  <data name="Questions.History.Row.Name" xml:space="preserve"><value>Versão {0}</value></data>
+  <data name="Questions.History.Version.Title" xml:space="preserve"><value>Versão {0}</value></data>
+  <data name="Questions.History.Version.Note" xml:space="preserve"><value>Registada em {0}. É a questão como era apresentada e corrigida nesse momento; não pode ser editada.</value></data>
+  <data name="Questions.ChangeReason.Label" xml:space="preserve"><value>Motivo da alteração da chave de respostas</value></data>
+  <data name="Questions.ChangeReason.Hint" xml:space="preserve"><value>Diga porque é que a chave mudou, por exemplo um recurso aceite pela banca. Fica no histórico, até 500 carateres.</value></data>
+  <data name="question.key_change_reason_required" xml:space="preserve"><value>Escreva o motivo da alteração da chave de respostas.</value></data>
+  <data name="question.change_reason_too_long" xml:space="preserve"><value>O motivo é demasiado longo (no máximo 500 carateres).</value></data>
+  <data name="question.version_not_found" xml:space="preserve"><value>Esta versão não existe.</value></data>
+  <data name="question.version_conflict" xml:space="preserve"><value>Outra gravação alterou antes o histórico desta questão. Recarregue a página e tente novamente.</value></data>
 </root>

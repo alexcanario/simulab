@@ -1207,3 +1207,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Glossary: added "confirmation", "item decision", "project rule", "hidden fact" and "plugin gap" to `docs/glossary.md`; terms in items and ADRs not scanned.
 - Capabilities not captured, by the owner's choice: DocGen tool catalogue (no model tool yet), release pipeline (F-116), Azure login check (F-117; the last two already ideas under E-16).
 - Baseline present, docs command already declared, no plugin notes delivered, `CLAUDE.md` 645 words. Sync run with F-98 in `validating` in its own worktree. Build and suite not run: only Markdown and `sync.json` changed.
+
+## 2026-10-13 - F-98 Question versions and answer key changes
+- Events: override 0, question 1 (asked 1, from context 0), rework 2, test-fail 1, blocked 1, change 0. Shipped as 0.32.0 (merge `8f74f923`). Gate time: 3 passes, 7 min 46 s, 0 red.
+- score 2/6 (applied, `project.md`): a test of a date the audit interceptor wrote compares with `Factory.Clock`, the fixed clock of the Api test host, never the real one; two locked assertions used `DateTimeOffset.UtcNow` and cost one unlock (`blocked` event).
+- score 2/5 (not applied, owner's pick): a throwaway account for an app-host screen check needs `identity.users.status = 'Active'` and `email_verified_at` (not only `email_confirmed`), and `docker exec` needs `-i` to read a SQL file; sign-in was refused twice until both were set.
+- score 1/3 (not applied, not recommended): a refusal set after an await in a row-action delegate needs `InvokeAsync(StateHasChanged)`; `project.md` already has the line and the item's own bUnit test caught the miss before review.

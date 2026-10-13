@@ -190,6 +190,12 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         /// <summary>When set, every write waits for it before it is answered (the screen while a save is in flight).</summary>
         public TaskCompletionSource? WriteGate { get; set; }
 
+        /// <summary>F-98: the versions of each question, newest first: the test sets them.</summary>
+        public Dictionary<Guid, List<QuestionVersionResponse>> Versions { get; } = [];
+
+        /// <summary>F-98 BR5: when set, a publish with no reason in its body answers 400 <c>question.key_change_reason_required</c>.</summary>
+        public bool PublishNeedsReason { get; set; }
+
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
         public int ListCalls => Received.Count(call => call.Method == HttpMethod.Get && call.Path == QuestionsPath);
@@ -239,10 +245,50 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 (1, "GET") => Find(Guid.Parse(segments[0])),
                 (1, "PUT") => Update(Guid.Parse(segments[0]), body),
                 (1, "DELETE") => Delete(Guid.Parse(segments[0])),
+                (2, "GET") when segments[1] == "versions" => ListVersions(Guid.Parse(segments[0])),
+                (3, "GET") when segments[1] == "versions" => FindVersion(Guid.Parse(segments[0]), int.Parse(segments[2], System.Globalization.CultureInfo.InvariantCulture)),
+                (2, "POST") when segments[1] == "publish" && PublishNeedsReason && !HasReason(body) =>
+                    Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionKeyChangeReasonRequired),
                 (2, "POST") when segments[1] == "publish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Published),
                 (2, "POST") when segments[1] == "unpublish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Draft),
                 _ => new HttpResponseMessage(HttpStatusCode.NotFound)
             };
+        }
+
+        private static bool HasReason(string? body) =>
+            !string.IsNullOrWhiteSpace(body)
+            && !string.IsNullOrWhiteSpace(Read<PublishQuestionRequest>(body).ChangeReason);
+
+        private HttpResponseMessage ListVersions(Guid questionId)
+        {
+            if (!Questions.Exists(candidate => candidate.Id == questionId))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var versions = Versions.TryGetValue(questionId, out var found) ? found : [];
+            var ordered = versions.OrderByDescending(version => version.Number).ToList();
+
+            return Json(ordered
+                .Select((version, index) => new QuestionVersionListItemResponse(
+                    version.Id, version.Number, version.CreatedAt, version.AnswerKeyChanged, version.Reason, index == 0))
+                .ToList());
+        }
+
+        private HttpResponseMessage FindVersion(Guid questionId, int number)
+        {
+            if (!Questions.Exists(candidate => candidate.Id == questionId))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var version = Versions.TryGetValue(questionId, out var found)
+                ? found.Find(candidate => candidate.Number == number)
+                : null;
+
+            return version is null
+                ? Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionVersionNotFound)
+                : Json(version);
         }
 
         private HttpResponseMessage HandleEditions(string path, string query)

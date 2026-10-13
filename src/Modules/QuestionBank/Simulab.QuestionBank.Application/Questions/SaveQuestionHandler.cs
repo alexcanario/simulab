@@ -107,6 +107,24 @@ public sealed class SaveQuestionHandler(
             return Refused(applied.Error, position);
         }
 
+        // F-98 BR3 to BR5: a saved published question records a version when its versioned content differs
+        // from the latest one. A refusal here (the reason) happens before anything is written; the version goes
+        // in the same save as the content, so a lost race (BR10) rolls the content back with it.
+        if (existing is not null && question!.Status == QuestionStatus.Published)
+        {
+            var latest = await store.FindLatestVersionAsync(question.Id, cancellationToken);
+            var next = question.NextVersion(latest, request.ChangeReason);
+            if (next.IsFailure)
+            {
+                return Refused(next.Error!);
+            }
+
+            if (next.Value is { } version)
+            {
+                store.AddVersion(version);
+            }
+        }
+
         // F-96 BR3: the number is unique among the live questions of the edition. The pre-check gives the
         // normal answer; the unique index and its translation below catch two saves racing for one number.
         if (question!.ExamEditionId is { } origin && question.PaperNumber is { } number

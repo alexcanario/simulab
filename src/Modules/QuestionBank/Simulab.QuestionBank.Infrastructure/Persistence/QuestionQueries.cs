@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Text;
 
 namespace Simulab.QuestionBank.Infrastructure.Persistence;
@@ -104,6 +105,12 @@ public sealed class QuestionQueries(
         var topic = await topics.FindAsync(question.TopicId, cancellationToken);
         var origins = await OriginsAsync([(question.ExamEditionId, question.NoticeSubjectId)], cancellationToken);
 
+        // F-98 BR11: the latest version is the highest number; there is no column for it on the question.
+        var currentVersion = await context.QuestionVersions
+            .AsNoTracking()
+            .Where(version => version.QuestionId == question.Id)
+            .MaxAsync(version => (int?)version.Number, cancellationToken);
+
         return new QuestionResponse(
             question.Id,
             question.Type,
@@ -123,7 +130,72 @@ public sealed class QuestionQueries(
                     .Select(option => new QuestionOptionResponse(option.Position, option.TextHtml, option.IsCorrect))
             ],
             origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId),
-            question.TrueFalseKey);
+            question.TrueFalseKey,
+            currentVersion);
+    }
+
+    public async Task<IReadOnlyList<QuestionVersionListItemResponse>?> ListVersionsAsync(
+        Guid questionId,
+        CancellationToken cancellationToken)
+    {
+        // The question's own filter hides a deleted one, so its history is not read through the API either.
+        if (!await context.Questions.AsNoTracking().AnyAsync(question => question.Id == questionId, cancellationToken))
+        {
+            return null;
+        }
+
+        var rows = await context.QuestionVersions
+            .AsNoTracking()
+            .Where(version => version.QuestionId == questionId)
+            .OrderByDescending(version => version.Number)
+            .Select(version => new { version.Id, version.Number, version.CreatedAt, version.AnswerKeyChanged, version.Reason })
+            .ToListAsync(cancellationToken);
+
+        return
+        [
+            .. rows.Select((row, index) => new QuestionVersionListItemResponse(
+                row.Id, row.Number, row.CreatedAt, row.AnswerKeyChanged, row.Reason, index == 0))
+        ];
+    }
+
+    public async Task<Result<QuestionVersionResponse>> FindVersionAsync(
+        Guid questionId,
+        int number,
+        CancellationToken cancellationToken)
+    {
+        if (!await context.Questions.AsNoTracking().AnyAsync(question => question.Id == questionId, cancellationToken))
+        {
+            return Result.Failure<QuestionVersionResponse>(
+                new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound));
+        }
+
+        var version = await context.QuestionVersions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(row => row.QuestionId == questionId && row.Number == number, cancellationToken);
+        if (version is null)
+        {
+            return Result.Failure<QuestionVersionResponse>(
+                new Error(QuestionBankErrorCodes.QuestionVersionNotFound, ErrorKind.NotFound));
+        }
+
+        return Result.Success(new QuestionVersionResponse(
+            version.Id,
+            version.QuestionId,
+            version.Number,
+            version.Type,
+            version.ContentLanguage,
+            version.StatementHtml,
+            version.BaseTextHtml,
+            version.ExplanationHtml,
+            [
+                .. version.Options
+                    .OrderBy(option => option.Position)
+                    .Select(option => new QuestionOptionResponse(option.Position, option.TextHtml, option.IsCorrect))
+            ],
+            version.TrueFalseKey,
+            version.AnswerKeyChanged,
+            version.Reason,
+            version.CreatedAt));
     }
 
     public async Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(

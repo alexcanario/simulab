@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97]
-updated: 2026-10-12
+features: [F-95, F-96, F-97, F-98]
+updated: 2026-10-13
 ---
 # Questions
 
@@ -74,6 +74,31 @@ shown to people who also manage the question bank.
 3. A published question can still be edited, but every edit must keep it complete.
 4. **Unpublish** takes it back to a draft with the same content.
 
+### Versions and answer key changes
+Every state a published question was shown in is kept, so an exam attempt can always be tied to the exact text
+and key that graded it. The **History** card, below the **Publication** card, lists the versions of a saved
+question, newest first, with the date, what changed and the reason.
+1. The first time a question is published it becomes **version 1**, "First publication". A draft that was
+   never published has no version.
+2. Saving a published question records a new version only when what students see or are graded on changed:
+   the statement, the base text, the options and the key, the explanation or the language. Changing only the
+   topic, the difficulty or the origin does not. Saving with no change records nothing.
+3. If you unpublish, edit and publish again, a new version is recorded at the publish when the content differs
+   from the latest version.
+4. To change the answer key of a published question (after an appeal, for example), mark another option as
+   correct or flip True/False. A field **Reason for the answer key change** appears under the options (or the
+   key); it is required, up to 500 characters. **Save** records the version as "Answer key changed" with your
+   reason and the date. Moving the correct option by reordering counts as a key change.
+5. If the key changed while the question was a draft, **Publish** is refused the first time with "Write the
+   reason for the answer key change." The reason field appears in the **Publication** card; type it and choose
+   **Publish** again.
+6. In the **History** card, choose **View** on a row to open that version as it was recorded, read only. The
+   correct answer stays hidden until **Show answer**. The current version is marked **Current**.
+7. A draft that has versions can be deleted; its versions stay in the history, which is not shown once the
+   question is gone. A published question still cannot be deleted.
+
+Versions are never edited or removed. The name of the person who made a change is stored, but not shown yet.
+
 ### Preview as a student
 1. In the **Publication** card, choose **Preview as a student**.
 2. The window shows the base text, the statement and the options as a student will see them; a true/false
@@ -98,6 +123,7 @@ shown to people who also manage the question bank.
 | Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct. Each up to 2,000 characters |
 | Answer key | Whether the statement of a true/false question is true or false | Only for true/false. May be empty in a draft; required to publish. A published question cannot lose it |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
+| Reason for the answer key change | Why the key of a published question changed | Required when a save or a publish records a version whose key differs from the previous one; 1 to 500 characters. A reason on any other new version is kept as a note |
 | Edition | The past paper the question came from | Optional. With no edition the question is authored. An edition cannot be deleted while a question uses it |
 | Number in the paper | The question's position in the edition's paper | Required with an edition, a whole number from 1 to 500, unique among the edition's questions |
 | Notice subject | The subject of the edition's notice the question belongs to | Optional, only with an edition, and of that same edition. It cannot be deleted while a question uses it |
@@ -125,6 +151,10 @@ the question is saved, and the page shows what was kept.
 | The number is a whole number from 1 to 500. | The number is out of range. | Type a number from 1 to 500. |
 | Number already used in this edition. | Another question of the edition has this number. | Choose another number, or fix the other question. |
 | Choose an edition to give a number or a notice subject. | There is a number or a subject and no edition. | Choose the edition or empty the fields. |
+| Write the reason for the answer key change. | The key changed and no reason was given. | Type the reason, up to 500 characters, and save or publish again. |
+| The reason is too long (500 characters at most). | The reason has more than 500 characters. | Shorten it. |
+| This version does not exist. | The version was asked for by a number the question does not have. | Reload the page. |
+| Another save changed this question's history first. Reload the page and try again. | Two saves tried to record the same version number. | Reload the page and save again. |
 | Only a draft can be deleted. Unpublish the question first. | The question is published. | Unpublish it, then delete. |
 | This question is already published. / This question is not published. | Someone else changed it first. | Reload the page. |
 | This question no longer exists. | Someone deleted it while your screen was open. | Go back to the list. |

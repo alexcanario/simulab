@@ -2338,6 +2338,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PublishQuestionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -2359,6 +2375,64 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/versions": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListQuestionVersions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/versions/{number}": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "FindQuestionVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -2702,6 +2776,19 @@
           }
         },
         "description": "Asks whether a reset link still works, without using it (F-7, decision: the page checks on load)."
+      },
+      "PublishQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "changeReason": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Plain text, 1 to 500 characters after trimming; null or blank counts as missing."
+          }
+        },
+        "description": "The optional body of a publish (F-98, BR5): the reason for an answer key change that the publish records.\r\nA publish with no body is still valid; the reason is only needed when the publish creates a version whose\r\nkey differs from the latest one."
       },
       "QuestionType": {
         "enum": [
@@ -3175,6 +3262,13 @@
               "boolean"
             ],
             "description": "The key of a true/false question: true is \"certo\", false \"errado\", null not set yet (F-97, BR1)."
+          },
+          "changeReason": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Why the answer key changed (F-98, BR5): plain text, 1 to 500 characters after trimming. Required when the save\r\ncreates a version whose key differs from the latest one; kept as a note on any other version the save creates\r\nand ignored when it creates none."
           }
         },
         "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."

@@ -34,6 +34,16 @@ public interface IQuestionStore
         Guid? exceptQuestionId,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The version of the question with the highest number, or null when it has none (F-98, BR7). It is not
+    /// tracked: it is read to compare with and to take the next number from, never changed. The unique index is
+    /// the last line when two saves race.
+    /// </summary>
+    Task<QuestionVersion?> FindLatestVersionAsync(Guid questionId, CancellationToken cancellationToken);
+
+    /// <summary>Adds a version made by <see cref="Question.NextVersion"/>; it is written by the next save, with the content (F-98, BR3).</summary>
+    void AddVersion(QuestionVersion version);
+
     void Add(Question question);
 
     /// <summary>Soft-deletes the question and its options: the interceptor turns the removal into a flag (BR11).</summary>
@@ -42,8 +52,9 @@ public interface IQuestionStore
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Saves, and answers the 409 of a number two saves raced for (F-96, BR3) instead of throwing; null when
-    /// the save went through. Any other database error propagates.
+    /// Saves, and answers the 409 of a number two saves raced for (F-96, BR3) or of a version number two saves
+    /// raced for (F-98, BR10) instead of throwing; null when the save went through. Any other database error
+    /// propagates.
     /// </summary>
     Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken);
 }

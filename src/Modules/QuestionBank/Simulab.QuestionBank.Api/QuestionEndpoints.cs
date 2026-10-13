@@ -30,6 +30,8 @@ public static class QuestionEndpoints
         questions.MapPost("/{id:guid}/publish", PublishAsync).WithName("PublishQuestion");
         questions.MapPost("/{id:guid}/unpublish", UnpublishAsync).WithName("UnpublishQuestion");
         questions.MapDelete("/{id:guid}", DeleteAsync).WithName("DeleteQuestion");
+        questions.MapGet("/{id:guid}/versions", ListVersionsAsync).WithName("ListQuestionVersions");
+        questions.MapGet("/{id:guid}/versions/{number:int}", FindVersionAsync).WithName("FindQuestionVersion");
 
         return group;
     }
@@ -85,9 +87,11 @@ public static class QuestionEndpoints
     private static async Task<IResult> PublishAsync(
         Guid id,
         PublishQuestionHandler handler,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        PublishQuestionRequest? request = null)
     {
-        var result = await handler.HandleAsync(id, cancellationToken);
+        // F-98 BR5: the body is optional; a publish with none is the F-95 publish.
+        var result = await handler.HandleAsync(id, request?.ChangeReason, cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
@@ -110,6 +114,30 @@ public static class QuestionEndpoints
         var result = await handler.HandleAsync(id, cancellationToken);
 
         return result.IsSuccess ? Results.NoContent() : Problem(result.Error!);
+    }
+
+    // F-98 UC5, BR7: the history of a question, newest first; a read, so no paging (a question has few).
+    private static async Task<IResult> ListVersionsAsync(
+        Guid id,
+        IQuestionQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var versions = await queries.ListVersionsAsync(id, cancellationToken);
+
+        return versions is null
+            ? Problem(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound))
+            : Results.Ok(versions);
+    }
+
+    private static async Task<IResult> FindVersionAsync(
+        Guid id,
+        int number,
+        IQuestionQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var result = await queries.FindVersionAsync(id, number, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
 
     // The option a refusal is about travels as the problem's `position`, so the form marks the right row.

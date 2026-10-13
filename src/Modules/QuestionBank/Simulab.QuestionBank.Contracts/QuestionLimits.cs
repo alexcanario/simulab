@@ -32,4 +32,7 @@ public static class QuestionLimits
 
     /// <summary>The width of the content language column: a code such as pt-BR.</summary>
     public const int ContentLanguageMaxLength = 16;
+
+    /// <summary>The most characters the reason of a change may have, after trimming (F-98, BR5).</summary>
+    public const int ChangeReasonMaxLength = 500;
 }

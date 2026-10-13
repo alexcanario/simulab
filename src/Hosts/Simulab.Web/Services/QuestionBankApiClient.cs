@@ -81,13 +81,47 @@ public sealed class QuestionBankApiClient(HttpClient http)
         CancellationToken cancellationToken = default) =>
         SendAsync<QuestionResponse>(() => Authorized(WithJson(HttpMethod.Put, $"{Base}/{questionId}", body), accessToken), cancellationToken);
 
-    /// <summary>F-95 UC3: changes the status only; refused with 400 when the question is incomplete (BR4).</summary>
+    /// <summary>
+    /// F-95 UC3: publishes; refused with 400 when the question is incomplete (BR4). F-98 BR5: the publish may
+    /// record a version, and one whose key changed needs <paramref name="changeReason"/>; with none the call has
+    /// no body, as before.
+    /// </summary>
     public Task<QuestionBankResult<QuestionResponse>> PublishQuestionAsync(
         string accessToken,
         Guid questionId,
+        string? changeReason = null,
+        CancellationToken cancellationToken = default)
+    {
+        var route = $"{Base}/{questionId}/publish";
+
+        return SendAsync<QuestionResponse>(
+            () => Authorized(
+                string.IsNullOrWhiteSpace(changeReason)
+                    ? new HttpRequestMessage(HttpMethod.Post, route)
+                    : WithJson(HttpMethod.Post, route, new PublishQuestionRequest(changeReason)),
+                accessToken),
+            cancellationToken);
+    }
+
+    /// <summary>F-98 UC5: the history of a question, newest first; an empty list while it was never published.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<QuestionVersionListItemResponse>>> ListVersionsAsync(
+        string accessToken,
+        Guid questionId,
         CancellationToken cancellationToken = default) =>
-        SendAsync<QuestionResponse>(
-            () => Authorized(new HttpRequestMessage(HttpMethod.Post, $"{Base}/{questionId}/publish"), accessToken),
+        SendAsync<IReadOnlyList<QuestionVersionListItemResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/{questionId}/versions"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-98 UC5: one version as it was recorded; 404 when the question has no such number.</summary>
+    public Task<QuestionBankResult<QuestionVersionResponse>> GetVersionAsync(
+        string accessToken,
+        Guid questionId,
+        int number,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionVersionResponse>(
+            () => Authorized(
+                new HttpRequestMessage(HttpMethod.Get, $"{Base}/{questionId}/versions/{number.ToString(CultureInfo.InvariantCulture)}"),
+                accessToken),
             cancellationToken);
 
     /// <summary>F-95 UC4: back to a draft with the same content.</summary>

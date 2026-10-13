@@ -954,4 +954,26 @@
   <data name="question.options_not_allowed" xml:space="preserve"><value>A true/false question has no options.</value></data>
   <data name="question.key_not_allowed" xml:space="preserve"><value>A single-choice question has no true/false key.</value></data>
   <data name="question.true_false_key_required" xml:space="preserve"><value>Set the answer key (true or false) to publish.</value></data>
+  <data name="Questions.Section.History" xml:space="preserve"><value>History</value></data>
+  <data name="Questions.Section.History.Subtitle" xml:space="preserve"><value>Every version this question has had since it was first published, and why its answer key changed.</value></data>
+  <data name="Questions.History.Empty" xml:space="preserve"><value>The first version is recorded when the question is published.</value></data>
+  <data name="Questions.History.Column.Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Questions.History.Column.Date" xml:space="preserve"><value>Recorded on</value></data>
+  <data name="Questions.History.Column.Change" xml:space="preserve"><value>Change</value></data>
+  <data name="Questions.History.Column.Reason" xml:space="preserve"><value>Reason</value></data>
+  <data name="Questions.History.Current" xml:space="preserve"><value>Current</value></data>
+  <data name="Questions.History.Change.First" xml:space="preserve"><value>First publication</value></data>
+  <data name="Questions.History.Change.Edited" xml:space="preserve"><value>Content edited</value></data>
+  <data name="Questions.History.Change.KeyChanged" xml:space="preserve"><value>Answer key changed</value></data>
+  <data name="Questions.History.NoReason" xml:space="preserve"><value>No reason given</value></data>
+  <data name="Questions.History.Action.View" xml:space="preserve"><value>View version</value></data>
+  <data name="Questions.History.Row.Name" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Questions.History.Version.Title" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Questions.History.Version.Note" xml:space="preserve"><value>Recorded on {0}. This is the question as it was shown and graded then; it cannot be edited.</value></data>
+  <data name="Questions.ChangeReason.Label" xml:space="preserve"><value>Reason for the answer key change</value></data>
+  <data name="Questions.ChangeReason.Hint" xml:space="preserve"><value>Say why the key changed, for example an appeal the board accepted. It is kept in the history, up to 500 characters.</value></data>
+  <data name="question.key_change_reason_required" xml:space="preserve"><value>Write the reason for the answer key change.</value></data>
+  <data name="question.change_reason_too_long" xml:space="preserve"><value>The reason is too long (500 characters at most).</value></data>
+  <data name="question.version_not_found" xml:space="preserve"><value>This version does not exist.</value></data>
+  <data name="question.version_conflict" xml:space="preserve"><value>Another save changed this question's history first. Reload the page and try again.</value></data>
 </root>
