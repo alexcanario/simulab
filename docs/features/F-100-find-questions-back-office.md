@@ -1,7 +1,7 @@
 ---
 feature: F-100
 epic: Question bank
-status: refining
+status: approved
 board: 146
 version: 1
 ---
@@ -133,6 +133,7 @@ Filled at the build: one row per criterion.
 - 2026-10-13 — No extra filter (content language, authored versus from an edition) now, both go to F-118; no new package (owner, asked).
 - 2026-10-13 — The taxonomy and organizer lists are two small routes of `QuestionBank` guarded by `questions.manage`, and `Catalog.Contracts` gets the matching methods — the curator has no `catalog.manage`, and the module reads other modules only through contracts (Claude; F-96 BR9 and B-28 are the precedent).
 - 2026-10-13 — The address holds subject ids and topic ids separately, so a whole-subject pick stays "all topics" after a reload (Claude).
+- 2026-10-13 — F-100 approved ("aprovado f-100"), with no screen mockup and no new package (owner).
 - 2026-10-13 — No new index is promised: the build measures the filtered list with `EXPLAIN` on the test container with about 50,000 questions and adds an index on `(Type)`, `(Difficulty)` or `(ContentLanguage)` only if the measurement asks for it; not measured yet (Claude).
 
 ## Out of scope
