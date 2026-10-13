@@ -200,6 +200,21 @@ public sealed class Question : TenantEntity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Published to annulled (F-101, BR1 to BR4): the version this makes, a copy of <paramref name="latest"/> with
+    /// <see cref="QuestionVersion.Annulled"/> true and the trimmed <paramref name="reason"/>. Nothing changes when
+    /// it fails.
+    /// </summary>
+    public Result<QuestionVersion> Annul(QuestionVersion? latest, string? reason) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    /// Annulled to published (F-101, BR6): the version this makes, a copy of <paramref name="latest"/> with
+    /// <see cref="QuestionVersion.Annulled"/> false and the trimmed <paramref name="reason"/> as its note.
+    /// </summary>
+    public Result<QuestionVersion> Reinstate(QuestionVersion? latest, string? reason) =>
+        throw new NotImplementedException();
+
     /// <summary>Ok for a draft; <c>question.delete_requires_draft</c> for a published question (BR11).</summary>
     public Result EnsureDeletable() =>
         Status == QuestionStatus.Draft

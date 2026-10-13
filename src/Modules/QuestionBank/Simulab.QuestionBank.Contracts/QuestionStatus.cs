@@ -7,5 +7,11 @@ public enum QuestionStatus
     Draft,
 
     /// <summary>Complete and ready for the bank; it must stay complete when edited.</summary>
-    Published
+    Published,
+
+    /// <summary>
+    /// Annulled by the organizer (F-101): frozen, out of practice, still in the bank, its edition and its
+    /// history. Only a reinstatement leaves it. Appended last so a stored or sent value keeps its meaning.
+    /// </summary>
+    Annulled
 }

@@ -269,8 +269,70 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                     Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionKeyChangeReasonRequired),
                 (2, "POST") when segments[1] == "publish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Published),
                 (2, "POST") when segments[1] == "unpublish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Draft),
+                (2, "POST") when segments[1] == "annul" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: true),
+                (2, "POST") when segments[1] == "reinstate" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: false),
                 _ => new HttpResponseMessage(HttpStatusCode.NotFound)
             };
+        }
+
+        /// <summary>F-101: when set, an annul or a reinstate answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? AnnulmentFailure { get; set; }
+
+        // F-101: the Api's answer to an annulment or a reinstatement, with the reason it was given. It makes the
+        // version the Api would make, so the History card the page reloads shows it.
+        private HttpResponseMessage ChangeAnnulment(Guid id, string? body, bool annul)
+        {
+            if (AnnulmentFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var index = Questions.FindIndex(candidate => candidate.Id == id);
+            if (index < 0)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var reason = (annul ? Read<AnnulQuestionRequest>(body).Reason : Read<ReinstateQuestionRequest>(body).Reason)?.Trim();
+            if (string.IsNullOrEmpty(reason))
+            {
+                return Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionStatusReasonRequired);
+            }
+
+            var current = Questions[index];
+            var number = (current.CurrentVersion ?? 0) + 1;
+            var recorded = new DateTimeOffset(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
+            var changed = current with
+            {
+                Status = annul ? QuestionStatus.Annulled : QuestionStatus.Published,
+                CurrentVersion = number,
+                Annulment = annul ? new QuestionAnnulmentResponse(reason, recorded) : null
+            };
+            Questions[index] = changed;
+
+            if (!Versions.TryGetValue(id, out var versions))
+            {
+                versions = [];
+                Versions[id] = versions;
+            }
+
+            versions.Add(new QuestionVersionResponse(
+                Guid.CreateVersion7(),
+                id,
+                number,
+                current.Type,
+                current.ContentLanguage,
+                current.StatementHtml,
+                current.BaseTextHtml,
+                current.ExplanationHtml,
+                current.Options,
+                current.TrueFalseKey,
+                false,
+                reason,
+                recorded,
+                annul));
+
+            return Json(changed);
         }
 
         private static bool HasReason(string? body) =>
@@ -289,7 +351,14 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
             return Json(ordered
                 .Select((version, index) => new QuestionVersionListItemResponse(
-                    version.Id, version.Number, version.CreatedAt, version.AnswerKeyChanged, version.Reason, index == 0))
+                    version.Id,
+                    version.Number,
+                    version.CreatedAt,
+                    version.AnswerKeyChanged,
+                    version.Reason,
+                    index == 0,
+                    version.Annulled,
+                    !version.Annulled && index + 1 < ordered.Count && ordered[index + 1].Annulled))
                 .ToList());
         }
 

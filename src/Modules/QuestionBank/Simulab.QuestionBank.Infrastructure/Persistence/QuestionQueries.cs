@@ -191,7 +191,7 @@ public sealed class QuestionQueries(
         return
         [
             .. rows.Select((row, index) => new QuestionVersionListItemResponse(
-                row.Id, row.Number, row.CreatedAt, row.AnswerKeyChanged, row.Reason, index == 0))
+                row.Id, row.Number, row.CreatedAt, row.AnswerKeyChanged, row.Reason, index == 0, false, false))
         ];
     }
 
@@ -232,7 +232,8 @@ public sealed class QuestionQueries(
             version.TrueFalseKey,
             version.AnswerKeyChanged,
             version.Reason,
-            version.CreatedAt));
+            version.CreatedAt,
+            false));
     }
 
     public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>

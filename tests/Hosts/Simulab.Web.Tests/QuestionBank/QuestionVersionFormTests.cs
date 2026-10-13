@@ -21,7 +21,8 @@ public sealed class QuestionVersionFormTests : QuestionPageTestContext
         int number,
         bool keyChanged = false,
         string? reason = null,
-        string? statement = null) =>
+        string? statement = null,
+        bool annulled = false) =>
         new(
             Guid.Parse($"0198f5a0-0000-7000-8000-0000000009{number:00}"),
             question.Id,
@@ -35,7 +36,8 @@ public sealed class QuestionVersionFormTests : QuestionPageTestContext
             question.TrueFalseKey,
             keyChanged,
             reason,
-            Recorded.AddDays(number));
+            Recorded.AddDays(number),
+            annulled);
 
     private IRenderedComponent<QuestionForm> RenderEdit(Guid id) =>
         Render<QuestionForm>(parameters => parameters.Add(form => form.Id, id));

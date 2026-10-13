@@ -71,4 +71,10 @@ public sealed class QuestionVersion : TenantEntity
 
     /// <summary>The reason the curator wrote, trimmed; always set when <see cref="AnswerKeyChanged"/> is (BR5).</summary>
     public string? Reason { get; private set; }
+
+    /// <summary>
+    /// True when the question was annulled when this version was recorded (F-101, BR2). A reinstatement is
+    /// the first version after an annulled one with this false; it is derived, not stored.
+    /// </summary>
+    public bool Annulled { get; private set; }
 }

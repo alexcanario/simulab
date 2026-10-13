@@ -82,4 +82,19 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-98 BR10: another save created the next version number first; reload and try again.</summary>
     public const string QuestionVersionConflict = "question.version_conflict";
+
+    /// <summary>F-101 BR5: the question is annulled and frozen; save, publish, unpublish and delete are refused.</summary>
+    public const string QuestionAnnulled = "question.annulled";
+
+    /// <summary>F-101 BR1: the question is already annulled.</summary>
+    public const string QuestionAlreadyAnnulled = "question.already_annulled";
+
+    /// <summary>F-101 BR6: only an annulled question is reinstated.</summary>
+    public const string QuestionNotAnnulled = "question.not_annulled";
+
+    /// <summary>F-101 BR3: an annulment or a reinstatement has no reason (missing, blank or no body).</summary>
+    public const string QuestionStatusReasonRequired = "question.status_reason_required";
+
+    /// <summary>F-101 BR3: the reason of an annulment or a reinstatement has more than 500 characters.</summary>
+    public const string QuestionStatusReasonTooLong = "question.status_reason_too_long";
 }

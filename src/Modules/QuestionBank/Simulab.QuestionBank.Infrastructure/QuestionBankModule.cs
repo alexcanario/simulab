@@ -40,6 +40,8 @@ public static class QuestionBankModule
         services.AddScoped<SaveQuestionHandler>();
         services.AddScoped<PublishQuestionHandler>();
         services.AddScoped<UnpublishQuestionHandler>();
+        services.AddScoped<AnnulQuestionHandler>();
+        services.AddScoped<ReinstateQuestionHandler>();
         services.AddScoped<DeleteQuestionHandler>();
 
         // BR13: the catalog asks this check before it deletes a topic.

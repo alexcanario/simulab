@@ -142,24 +142,24 @@ No mockup (owner, 2026-10-13); the text wireframes below are the design. A scree
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
+| AC1 | `QuestionAnnulmentEndpointTests.Annul_APublishedQuestion_BecomesAnnulled_WithVersionTwoThatSaysSo`, `Annul_ATrueFalseQuestion_KeepsItsKeyInTheVersion`, `TheAnnulledFlag_IsStoredOnTheVersionRow`; `QuestionAnnulmentTests.Annul_APublishedQuestion_MakesTheNextVersionAnnulled_WithTheSameContentAndTheTrimmedReason`, `Annul_ATrueFalseQuestion_KeepsItsKey_AndChangesNothingButTheStatus` |
+| AC2 | `QuestionAnnulmentEndpointTests.Annul_ADraftOrADraftWithVersions_IsRefusedWithNotPublished_AndAnAnnulledOneWithAlreadyAnnulled`; `QuestionAnnulmentTests.Annul_ADraft_IsRefusedWithNotPublished_AndNothingChanges`, `Annul_AnAnnulledQuestion_IsRefusedWithAlreadyAnnulled`, `Annul_ADraftWithABlankReason_AnswersTheStatusFirst` |
+| AC3 | `QuestionAnnulmentEndpointTests.Annul_WithAMissingBlankOrOverLongReason_IsRefused_AndNothingIsStored`; `QuestionAnnulmentTests.Annul_WithAMissingOrBlankReason_IsRefusedWithStatusReasonRequired_AndStaysPublished`, `Annul_AReasonOfExactlyTheLimit_IsAccepted_AndOneMoreIsRefusedWithStatusReasonTooLong` |
+| AC4 | `QuestionAnnulmentEndpointTests.AnAnnulledQuestion_RefusesSavePublishUnpublishAndDelete_AndStillReads`; `QuestionAnnulmentTests.AnAnnulledQuestion_RefusesUpdatePublishUnpublishAndDelete_WithAnnulled` |
+| AC5 | `QuestionAnnulmentEndpointTests.Reinstate_AnAnnulledQuestion_IsPublishedAgain_AndCanBeEdited`; `QuestionAnnulmentTests.Reinstate_AnAnnulledQuestion_MakesTheNextVersionPublished_WithTheReasonAsNote`, `AReinstatedQuestion_CanBeEditedAgain_AndTheEditMakesTheNextVersion` |
+| AC6 | `QuestionAnnulmentEndpointTests.Reinstate_AQuestionThatIsNotAnnulled_IsRefused_AndTheReasonRulesAreTheSame`; `QuestionAnnulmentTests.Reinstate_AQuestionThatIsNotAnnulled_IsRefusedWithNotAnnulled`, `Reinstate_WithAMissingOrBlankReason_IsRefused_AndTheQuestionStaysAnnulled`, `Reinstate_AReasonOverTheLimit_IsRefusedWithStatusReasonTooLong` |
+| AC7 | `QuestionAnnulmentEndpointTests.Versions_TellTheAnnulmentFromTheReinstatement` |
+| AC8 | `QuestionAnnulmentRaceTests.Annul_WhenAnotherWriteTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysPublished`, `Reinstate_WhenAnotherWriteTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysAnnulled`, `Annul_WhenTheQuestionWasUnpublishedMeanwhile_AnswersVersionConflict_AndStoresNoVersion`, `Unpublish_WhenTheQuestionWasAnnulledMeanwhile_AnswersVersionConflict_AndTheQuestionStaysAnnulled`, `Delete_WhenTheQuestionWasPublishedMeanwhile_AnswersVersionConflict_AndTheQuestionIsNotDeleted`, `Save_WhenTheQuestionWasAnnulledMeanwhile_AnswersVersionConflict_AndTheContentIsNotWritten` |
+| AC9 | `QuestionAnnulmentEndpointTests.List_FilteredByStatus_FindsTheAnnulledQuestionOnlyUnderAnnulled` |
+| AC10 | `QuestionAnnulmentEndpointTests.AnAnnulledQuestion_KeepsItsPaperNumber_ItsTopicAndItsPlaceInTheEdition` |
+| AC11 | `QuestionAnnulmentEndpointTests.BothRoutes_WithoutThePermission_AnswerForbidden_AndACuratorUsesThem` (the page is behind `questions.manage`, F-95) |
+| AC12 | `AddQuestionAnnulmentMigrationTests.Up_KeepsEveryStoredStatus_AndGivesAnnulledFalseToEveryStoredVersion`, `TheDatabase_RefusesAnAnnulledVersionWithNoReason_AndOneThatIsAlsoAKeyChange`, `Down_TurnsAnnulledQuestionsBackIntoDrafts_AndDropsTheColumnAndTheChecks` |
+| AC13 | `QuestionAnnulmentFormTests.Publication_OnlyAPublishedQuestion_OffersAnnul`, `Annul_WithAnEmptyReason_IsRefusedInTheDialog_AndNothingIsSent`, `Annul_CancelledInTheDialog_SendsNothingAndLeavesTheQuestionPublished`, `Annul_WithAReason_SendsItTrimmed_AndTheFormBecomesFrozen`, `Annul_RefusedByTheApi_ShowsTheCodesTextInTheDialog_AndTheFormStaysEditable`, `Annul_WithUnsavedChanges_IsDisabledWithTheReasonInWords`, `AnAnnulledQuestion_OpensFrozen_WithTheReasonTheDateAndOnlyReinstateToLeave` |
+| AC14 | `QuestionAnnulmentFormTests.Reinstate_WithAReason_SendsItTrimmed_AndTheFormIsEditableAgain` |
+| AC15 | `QuestionAnnulmentFormTests.History_TheAnnulmentAndTheReinstatement_HaveTheirOwnLabelToneAndReason` |
+| AC16 | `QuestionAnnulmentListTests.Row_Annulled_ShowsTheAnnulledChipInTheErrorTone`, `Row_Annulled_HasNeitherPublishNorUnpublish_AndDeleteIsDisabledWithTheReason`, `Filter_ByAnnulled_SendsTheStatus_AndOnlyTheAnnulledRowStays`; `QuestionsPageTests.Filter_Status_OffersDraftPublishedAndAnnulled` |
+| AC17 | `QuestionAnnulmentPreviewTests.Preview_OfAnAnnulledQuestion_ShowsTheDateAndTheReasonAboveTheStatement` |
+| AC18 | `QuestionAnnulmentResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` (every key in each locale) |
 
 ## Decisions
 - 2026-10-13 — Annul uses the permission `questions.manage`, no new permission — as decided in F-98 (everything of the module is under it); no other role needs a different rule in v1 — confirmed: F-98.

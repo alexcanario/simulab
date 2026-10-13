@@ -82,6 +82,9 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
             .HasMaxLength(QuestionLimits.ChangeReasonMaxLength)
             .HasComment("Why the curator changed the answer key, or a note on the change. Always set when answer_key_changed is true.");
 
+        // Skeleton (F-101 test phase): the column and its migration come with the code.
+        builder.Ignore(version => version.Annulled);
+
         // BR1: the options are a copy read whole: a JSON column with no property behind it, so no comment can be
         // attached to it (the architecture test names this exemption).
         builder.OwnsMany(version => version.Options, options => options.ToJson("options"));
