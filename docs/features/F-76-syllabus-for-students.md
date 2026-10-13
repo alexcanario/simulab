@@ -1,7 +1,7 @@
 ---
 feature: F-76
 epic: Subject taxonomy
-status: validating
+status: done
 board: 120
 version: 1
 ---
@@ -130,3 +130,11 @@ Needed to validate: an exam with a published edition that has notice subjects (s
 - 2026-10-13 question — asked 4, from context 5
 - 2026-10-13 blocked — test wrong: remove an unused using that makes the gate fail with IDE0005
 - 2026-10-13 test-fail — 2 new warning(s): IDE0005 in tests/Modules/Catalog/Simulab.Catalog.Tests/PublishedExamListSyllabusTests.cs; IDE0005 in t, 1 red
+
+## Delivery
+
+Gate time: 6 passes, 14 min 3 s — turn 1 (45 s), ship 3 (9 min), scan 2 (4 min 18 s); 1 red
+- Branch: feature/F-76
+- Merge: d9ccfe91 (version 0.33.0)
+- Tests: full suite green after the merge of main, Web 1586, Catalog 522, QuestionBank 244, Identity 501, Architecture 219; 15 tests of this item; ship gate 9 min of the 14 min of passes
+- Manual pages: docs/manual/pt-BR/catalog.md, docs/manual/pt-PT/catalog.md, docs/manual/en/catalog.md
