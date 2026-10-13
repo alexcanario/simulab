@@ -1560,6 +1560,10 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    of squeezing the search (found on screen at 800 px). The library gives it a fixed height, so it also
    has to grow with its rows - otherwise the wrapped line lands on top of the table header. */
 .app-data-table .mud-toolbar {
+    /* The library's toolbar is `position: sticky` with no z-index, which is a stacking context of its own at the
+       lowest level: a filter popup inside it (F-100) was painted under the sticky header cells (z-index 2 and 3)
+       and its options mixed with the table's text (found on screen). */
+    z-index: 4;
     flex-wrap: wrap;
     row-gap: var(--app-space-3);
     height: auto;
@@ -1585,7 +1589,9 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 .app-table-filters-grid {
     flex: 1 1 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    /* auto-fit, not auto-fill: the tracks nobody uses collapse, so six filters share the whole line (measured on
+       a 1920 px screen: 191 px each with auto-fill, which kept two empty tracks, and about 255 px with auto-fit). */
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     justify-content: stretch;
     align-items: start;
     gap: var(--app-space-3);
