@@ -94,8 +94,79 @@ public sealed class Question : TenantEntity
     /// version's needs <paramref name="changeReason"/>, 1 to 500 characters after trimming; a reason on any
     /// other version is kept as its note and a reason where no version is made is ignored.
     /// </summary>
-    public Result<QuestionVersion?> NextVersion(QuestionVersion? latest, string? changeReason) =>
-        throw new NotImplementedException();
+    public Result<QuestionVersion?> NextVersion(QuestionVersion? latest, string? changeReason)
+    {
+        if (Status != QuestionStatus.Published)
+        {
+            return Result.Success<QuestionVersion?>(null);
+        }
+
+        var options = _options
+            .OrderBy(option => option.Position)
+            .Select(option => new QuestionVersionOption
+            {
+                Position = option.Position,
+                TextHtml = option.TextHtml,
+                IsCorrect = option.IsCorrect
+            })
+            .ToList();
+
+        // BR3: nothing differs from the latest version, so nothing is recorded and a reason is ignored (BR5).
+        if (latest is not null && SameVersionedContent(latest, options))
+        {
+            return Result.Success<QuestionVersion?>(null);
+        }
+
+        var reason = string.IsNullOrWhiteSpace(changeReason) ? null : changeReason.Trim();
+
+        // BR4: version 1 is never a key change; later ones are when the correct letter or the true/false value moved.
+        var keyChanged = latest is not null
+            && (latest.TrueFalseKey != TrueFalseKey
+                || latest.Options.FirstOrDefault(option => option.IsCorrect)?.Position
+                    != options.FirstOrDefault(option => option.IsCorrect)?.Position);
+
+        if (keyChanged && reason is null)
+        {
+            return Result.Failure<QuestionVersion?>(
+                new Error(QuestionBankErrorCodes.QuestionKeyChangeReasonRequired, ErrorKind.Validation));
+        }
+
+        if (reason is { Length: > QuestionLimits.ChangeReasonMaxLength })
+        {
+            return Result.Failure<QuestionVersion?>(
+                new Error(QuestionBankErrorCodes.QuestionChangeReasonTooLong, ErrorKind.Validation));
+        }
+
+        return Result.Success<QuestionVersion?>(new QuestionVersion(
+            Id,
+            (latest?.Number ?? 0) + 1,
+            Type,
+            ContentLanguage,
+            StatementHtml,
+            BaseTextHtml,
+            ExplanationHtml,
+            TrueFalseKey,
+            options,
+            keyChanged,
+            reason));
+    }
+
+    // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
+    // with their mark and the true/false key; topic, difficulty and origin are catalog data and never compared.
+    private bool SameVersionedContent(QuestionVersion version, List<QuestionVersionOption> options) =>
+        version.Type == Type
+        && version.ContentLanguage == ContentLanguage
+        && version.StatementHtml == StatementHtml
+        && version.BaseTextHtml == BaseTextHtml
+        && version.ExplanationHtml == ExplanationHtml
+        && version.TrueFalseKey == TrueFalseKey
+        && version.Options.Count == options.Count
+        && version.Options
+            .OrderBy(option => option.Position)
+            .Zip(options)
+            .All(pair => pair.First.Position == pair.Second.Position
+                && pair.First.TextHtml == pair.Second.TextHtml
+                && pair.First.IsCorrect == pair.Second.IsCorrect);
 
     /// <summary>Draft to published; the status only (BR12).</summary>
     public Result Publish()

@@ -51,10 +51,15 @@ public sealed class QuestionStore(
         return others.AnyAsync(cancellationToken);
     }
 
+    // Read only: the version is compared with, never changed.
     public Task<QuestionVersion?> FindLatestVersionAsync(Guid questionId, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        context.QuestionVersions
+            .AsNoTracking()
+            .Where(version => version.QuestionId == questionId)
+            .OrderByDescending(version => version.Number)
+            .FirstOrDefaultAsync(cancellationToken);
 
-    public void AddVersion(QuestionVersion version) => throw new NotImplementedException();
+    public void AddVersion(QuestionVersion version) => context.QuestionVersions.Add(version);
 
     public void Add(Question question) => context.Questions.Add(question);
 
