@@ -11,7 +11,7 @@
 - Confirm the item at the start of the session. Other items only get registered, never executed.
 - Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's own merge on the PR, and the ship stops at "PR open".
 - `/agile:epic "<name>" --autopilot` takes the epic's features one at a time, in plan order, each through the autopilot with its own two stops: the merge stays per item ("validado" alone ends the run), any owner-reserved stop ends it, and the same command resumes it.
-- Verify premises in the code before asking. Never ask what the code already answers.
+- Verify premises in the code before asking. Never ask what the code already answers; a decision a rule, an ADR or an earlier item answers is asked as a confirmation naming its source.
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.
 - A change of mind during build is a change note (`/agile:change`); only the affected criteria are re-approved.
