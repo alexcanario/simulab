@@ -23,6 +23,23 @@ public interface INoticeSubjectStore
         Guid? exceptId,
         CancellationToken cancellationToken);
 
+    /// <summary>The notice subject's live mapping entries, tracked so a save can drop some and keep the rest (F-75, BR7).</summary>
+    Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsAsync(Guid noticeSubjectId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Which of these subjects and topics exist and are not deleted, and each live topic's current subject
+    /// (F-75, BR3, BR4). An id that is not in the answer does not exist.
+    /// </summary>
+    Task<MappingTargets> FindLiveTargetsAsync(
+        IReadOnlyCollection<Guid> subjectIds,
+        IReadOnlyCollection<Guid> topicIds,
+        CancellationToken cancellationToken);
+
+    void AddMapping(NoticeSubjectMapping mapping);
+
+    /// <summary>Soft-deletes the entry: the interceptor turns the removal into a flag.</summary>
+    void RemoveMapping(NoticeSubjectMapping mapping);
+
     void Add(NoticeSubject subject);
 
     /// <summary>Soft-deletes the notice subject: the interceptor turns the removal into a flag (BR10).</summary>

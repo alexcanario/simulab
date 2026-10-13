@@ -24,8 +24,12 @@ public static class NoticeSubjectUniqueViolations
             return null;
         }
 
-        return violation.ConstraintName == NoticeSubjectConfiguration.UniqueIndex
-            ? new Error(CatalogErrorCodes.NoticeSubjectDuplicate, ErrorKind.Conflict)
-            : null;
+        // Two saves of one row at once can both add the same entry (F-75): the second is a conflict, not a 500.
+        return violation.ConstraintName switch
+        {
+            NoticeSubjectConfiguration.UniqueIndex => new Error(CatalogErrorCodes.NoticeSubjectDuplicate, ErrorKind.Conflict),
+            NoticeSubjectMappingConfiguration.UniqueIndex => new Error(CatalogErrorCodes.NoticeSubjectMappingConflict, ErrorKind.Conflict),
+            _ => null
+        };
     }
 }

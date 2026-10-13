@@ -26,6 +26,7 @@ else
 
     // One PostgreSQL server with the app database. The named volume keeps local data across restarts.
     var postgres = builder.AddPostgres("postgres", password: postgresPassword)
+        .WithContainerName("simulab-postgres")
         .WithDataVolume("simulab-postgres-data")
         .WithHostPort(5432);
 
@@ -35,10 +36,14 @@ else
     database = postgres.AddDatabase("simulab", builder.Configuration["Database:Name"] ?? "simulab");
 
     // Local SMTP capture: nothing leaves the machine, and the web UI shows every message.
-    mailpit = builder.AddMailPit("mailpit");
+    // The resource names (mailpit, redis, api, web) are what the hosts resolve: connection strings, service
+    // discovery ("https+http://api") and AddRedisClient("redis"). Only the container name is prefixed.
+    mailpit = builder.AddMailPit("mailpit")
+        .WithContainerName("simulab-mailpit");
 
     // Refresh-token sessions and the access-token revocation set (F-5).
     redis = builder.AddRedis("redis")
+        .WithContainerName("simulab-redis")
         .WithDataVolume("simulab-redis-data");
 }
 

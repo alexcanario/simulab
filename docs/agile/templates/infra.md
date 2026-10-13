@@ -19,6 +19,33 @@ Technical terms: [glossary](glossary.md)
 - Start: `<app host command>` → <URL>. Sign in as: <seed user and role; password kept in <where>>
 - Reset local data: `<command>`
 
+## Local services (only with `- Local services: fixed` in `CLAUDE.md`; delete the section otherwise)
+The containers of the AppHost keep their host port, password and data from one `aspire run` to the next. Never write a password here, only the key that holds it.
+| Service | Host port | Password (user-secrets key) | Volume |
+|---|---|---|---|
+| <postgres> | <5432> | `Parameters:<postgres-password>` | `<apphost>-<hash>-<postgres>-data` |
+Read the password (`dotnet user-secrets`):
+```powershell
+dotnet user-secrets list --project <AppHost project>
+```
+```bash
+dotnet user-secrets list --project <AppHost project>
+```
+A clone on another machine sets its own value:
+```powershell
+dotnet user-secrets set "Parameters:<postgres-password>" "<value>" --project <AppHost project>
+```
+```bash
+dotnet user-secrets set "Parameters:<postgres-password>" "<value>" --project <AppHost project>
+```
+Change a password: the image applies it only when its data is created, so remove the volume first (the data in it is lost), then set the new value:
+```powershell
+docker volume rm <volume>
+```
+```bash
+docker volume rm <volume>
+```
+
 ## Environments
 | Environment | Status (`provisioned` / `planned`) | URL | How it is deployed | Configuration and secrets live in | Deploy command | Check URL | Version (deployed on) |
 |---|---|---|---|---|---|---|---|

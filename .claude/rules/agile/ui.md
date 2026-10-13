@@ -18,7 +18,7 @@ paths:
 - A destructive action uses the kit confirmation dialog; the confirm button is the error color and names the action and the object, never "Yes" / "No".
 - Success is a snackbar, same position and duration everywhere. Validation errors sit next to the field; business and server errors are an alert at the top of the form.
 - API error codes become text through one helper (resource key = code). Never show a raw code, a status number or an exception message.
-- Every list has loading, empty (with the primary action) and error (with "try again") states.
+- Every list has loading, empty (with the primary action) and error (with "try again") states. Every component that shows user or Core text also has a long-text state (a message wider than the component), in the gallery and in a wrap test.
 - Forms: label above the field, required fields marked, validate on leaving the field and on submit, primary "Save" at the bottom right, then "Cancel" as text.
 - While saving, the primary button is disabled and shows progress. Leaving with unsaved changes asks for confirmation. Esc closes a dialog.
 - Page anatomy: a page header with title, breadcrumb and the primary action at the top right. One primary (filled) button per page; secondary outlined, tertiary text.

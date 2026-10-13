@@ -1,0 +1,42 @@
+@using Simulab.Catalog.Contracts
+@inject IStringLocalizer<SharedResources> L
+
+@* F-75 Screen 1, UC1: what a notice subject covers, under its label - read-only chips, or the "Not mapped" marker (BR2).
+   Every entry is shown (none hides behind a "more"), in the order of NoticeSubjectCoverText.Sort and not the Api's.
+   The chips link nowhere and take no focus (BR13). A topic is shown under its CURRENT subject (BR8); an overlap that a
+   later topic move made is shown as is: both chips, no marker (BR4). *@
+@if (Mappings is not { Count: > 0 } mappings)
+{
+    @* "Still to do", nothing is blocked: the tone is a warning, the text carries the meaning. *@
+    <AppStatusChip Text="@L["NoticeSubjects.Row.NotMapped"]" Tone="AppStatusTone.Warning" />
+}
+else
+{
+    <ul class="app-chip-list" aria-label="@($"{L["NoticeSubjects.Field.Covers"].Value}: {Label}")">
+        @foreach (var mapping in NoticeSubjectCoverText.Sort(mappings, entry => entry.SubjectName, entry => entry.TopicName))
+        {
+            <li @key="@($"{mapping.SubjectId}/{mapping.TopicId}")">
+                @if (mapping.TopicName is null)
+                {
+                    <AppChip Text="@mapping.SubjectName"
+                             Icon="@AppIcons.Subjects"
+                             Secondary="@L["NoticeSubjects.Covers.WholeMarker"].Value" />
+                }
+                else
+                {
+                    <AppChip Text="@NoticeSubjectCoverText.Visible(L, mapping.SubjectName, mapping.TopicName)"
+                             SpokenText="@NoticeSubjectCoverText.Spoken(L, mapping.SubjectName, mapping.TopicName)"
+                             Icon="@AppIcons.Topics" />
+                }
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    /// <summary>The row's entries; null or empty is "not mapped".</summary>
+    [Parameter] public IReadOnlyList<NoticeSubjectMappingResponse>? Mappings { get; set; }
+
+    /// <summary>The notice subject's label: the list is named "Covers: Label" for a screen reader.</summary>
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+}

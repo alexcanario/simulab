@@ -39,6 +39,13 @@
   <Folder Name="/src/Modules/Plans/">
     <Project Path="src/Modules/Plans/Simulab.Plans.Contracts/Simulab.Plans.Contracts.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/QuestionBank/">
+    <Project Path="src/Modules/QuestionBank/Simulab.QuestionBank.Api/Simulab.QuestionBank.Api.csproj" />
+    <Project Path="src/Modules/QuestionBank/Simulab.QuestionBank.Application/Simulab.QuestionBank.Application.csproj" />
+    <Project Path="src/Modules/QuestionBank/Simulab.QuestionBank.Contracts/Simulab.QuestionBank.Contracts.csproj" />
+    <Project Path="src/Modules/QuestionBank/Simulab.QuestionBank.Domain/Simulab.QuestionBank.Domain.csproj" />
+    <Project Path="src/Modules/QuestionBank/Simulab.QuestionBank.Infrastructure/Simulab.QuestionBank.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Simulab.ArchitectureTests/Simulab.ArchitectureTests.csproj" />
     <Project Path="tests/Simulab.Testing/Simulab.Testing.csproj" />
@@ -63,6 +70,9 @@
   </Folder>
   <Folder Name="/tests/Modules/Identity/">
     <Project Path="tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/QuestionBank/">
+    <Project Path="tests/Modules/QuestionBank/Simulab.QuestionBank.Tests/Simulab.QuestionBank.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Simulab.DocGen/Simulab.DocGen.csproj" />

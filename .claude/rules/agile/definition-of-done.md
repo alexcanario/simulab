@@ -2,13 +2,13 @@
 
 An item is `done` only when every line is true. "Almost" is `validating`.
 
-- Every acceptance criterion maps to at least one test, shown in a `criterion → test` table. A criterion checked only on screen is in the validation script.
+- Every acceptance criterion maps to at least one test, kept in the item's `## Criterion → test`, every row filled at ship. A criterion checked only on screen is in the validation script.
 - A bug has a regression test that was seen failing before the fix.
 - The build has no new warnings (the gate compares with the committed baseline). Accepting a new warning needs the owner's yes.
 - No open critical or high security finding: the scan (`scan.js`) ends `agile scan GREEN`, or the owner accepted each finding with a reason in `docs/security/findings.md`.
 - Affected tests are green at the end of every turn; the full suite and the architecture tests are green before merge.
 - Test time is inside the profile budget. An overrun is reported and becomes a retro finding.
-- Every UI text exists in pt-BR, pt-PT and en, and the missing-key test is green.
+- Every UI text exists in each locale of `UI locales:` and the missing-key test is green.
 - API changes follow the API contract rules: `/api/v1/`, stable error codes, nullable optional ids, shared JSON options, OpenAPI document returns 200.
 - Schema changes have a migration, and unique indexes over nullable tenant columns are `NULLS NOT DISTINCT`.
 - Permissions are checked by the endpoint and by the screen (menu, page and action), by permission and not by role name.

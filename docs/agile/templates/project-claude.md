@@ -8,12 +8,13 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 <One-sentence description from product/brief.md.>
 
 ## Working agreement
-- Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
+- Workflow: agile@canary — see `docs/agile/workflow.pt-BR.md`. One feature in progress at a time.
 - Plugins: agile (short names, comma-separated; another plugin's adoption appends its own; a retro plugin note names one of them as `plugin: <name>`).
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate).
 - Ask before: pushing or merging to `<main branch>` outside a ship, touching shared databases, deleting data, anything outside this repository.
 - Worktrees: `<root from quiz 28c, e.g. D:\wt\<repo>>` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
+- Merge: `<direct | pr from quiz 28d>` — `pr`: `/agile:ship` opens a pull request and the owner merges it; a second `/agile:ship` closes the item.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.
@@ -23,6 +24,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Offline: first (Optional: only on profile `mobile`, or `desktop` with an API, when quiz question 2f chose offline-first, or after an "Offline foundation" item on an online project; `mobile-client` apps write it under the `Complement:` line. Delete this line otherwise.)
 - Backoffice: staff | none (Optional: only on profile `mobile` with the backend in this solution, when quiz question 2g chose a staff backoffice or declined it, or after a "Backoffice foundation" item; `none` stops the `/agile:sync` note. Delete this line otherwise.)
 - Backoffice audit: on | none (Optional: only with `- Backoffice: staff`; `on` is written by the "Backoffice foundation" item, which includes the audit log, or by the later "Backoffice audit" item; `none` declines it and stops the `/agile:sync` note. Delete this line otherwise.)
+- Local services: fixed | none (Optional: only with an AppHost, when quiz question 3a chose fixed ports and passwords for the local run or declined them, or after a "Fixed local services" item; `none` stops the `/agile:sync` note. Delete this line otherwise.)
 - Decisions: `docs/decisions/` (start with ADR-0001).
 - Keep code simple: add structure only where the profile asks for it.
 
@@ -31,8 +33,9 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Messaging: <none | in-process | broker>. Auth: <provider>. RBAC: <yes | no>. Entitlements: <yes | no>. Multi-tenancy: <yes | no>.
 
 ## Languages
-- UI locales: pt-BR, pt-PT, en. No hardcoded UI strings; resource files per module; `IStringLocalizer`.
-- App manual: `docs/manual/<locale>/`, updated when each feature ships.
+- UI locales: pt-BR, en
+- No hardcoded UI strings; resource files per module; `IStringLocalizer`.
+- Manual locales: pt-BR
 
 ## Commands
 - Build: `<build command>`
@@ -42,6 +45,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Run locally: `<app host command>`
 
 ## Models
+A named model is for complex tasks: the plugin passes the mid model when no signal is present (`references/model-choice.md`); `always <model>` pins it for every call.
 - Independent review (`/agile:review`): <strongest available model>, passed on the call.
 - Design and architecture passes (`/agile:build`, agents `system-design` and `architect`): <strongest available model>, passed on the call.
 - Screen design (`/agile:screen`, agent `ux-designer`): <strongest available model>, passed on the call.

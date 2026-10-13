@@ -1,0 +1,70 @@
+@* F-75: a read-only label chip - a canonical subject or topic a notice subject covers. Not focusable (a click does
+   nothing); only its optional remove button is. The meaning is always in the text: the icon is decorative and a
+   marked chip says why in words, never by its border alone (WCAG 1.4.1). A list of chips is a ul with a li around
+   each chip, owned by the page. AppFilterChip keeps its own wording for a removable filter. *@
+
+<span class="@CssClass">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <MudIcon Icon="@Icon" Size="Size.Small" aria-hidden="true" Class="app-chip-icon" />
+    }
+    <span class="app-chip-text">
+        @if (SpokenText is not null)
+        {
+            @* The visible form ("Logic › Propositions") is a symbol to a screen reader: it hears the spoken one. *@
+            <span aria-hidden="true">@Text</span>
+            <span class="app-visually-hidden">@SpokenText</span>
+        }
+        else
+        {
+            @Text
+        }
+        @if (!string.IsNullOrEmpty(Secondary))
+        {
+            <span aria-hidden="true"> · </span>
+            <span class="app-visually-hidden">, </span>
+            <span class="app-chip-secondary">@Secondary</span>
+        }
+    </span>
+    @if (!string.IsNullOrEmpty(Mark))
+    {
+        <span class="app-chip-mark"><span class="app-visually-hidden">, </span>@Mark</span>
+    }
+    @if (Remove is { } remove)
+    {
+        <MudTooltip Text="@remove.Label">
+            <MudIconButton Icon="@AppIcons.Close"
+                           Size="Size.Small"
+                           id="@remove.ButtonId"
+                           aria-label="@remove.Label"
+                           Disabled="remove.Disabled"
+                           OnClick="@(() => remove.OnRemove.InvokeAsync())"
+                           Class="app-chip-remove" />
+        </MudTooltip>
+    }
+</span>
+
+@code {
+    /// <summary>What the chip shows, already translated or as typed (a name is content, never translated).</summary>
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+
+    /// <summary>What a screen reader hears in place of <see cref="Text"/>, when the visible form is a symbol.</summary>
+    [Parameter] public string? SpokenText { get; set; }
+
+    /// <summary>A decorative <see cref="AppIcons"/> constant before the text. It never carries meaning of its own.</summary>
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>A second, quieter piece of text after the main one ("whole subject").</summary>
+    [Parameter] public string? Secondary { get; set; }
+
+    /// <summary>The error state: the chip gets the error border and this text says why (an overlap, a gone item).</summary>
+    [Parameter] public string? Mark { get; set; }
+
+    /// <summary>The remove button, or null for a read-only chip.</summary>
+    [Parameter] public AppChipRemove? Remove { get; set; }
+
+    private string CssClass =>
+        "app-chip"
+        + (Remove is not null ? " is-removable" : string.Empty)
+        + (!string.IsNullOrEmpty(Mark) ? " is-marked" : string.Empty);
+}

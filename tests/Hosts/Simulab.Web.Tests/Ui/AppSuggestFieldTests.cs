@@ -107,6 +107,22 @@ public sealed class AppSuggestFieldTests : KitTestContext
         field.Find(".app-field-hint").TextContent.Should().Contain("How the notice groups its subjects.");
     }
 
+    // B-27 AC3: the second text leaves the list open, so nothing else re-renders the wrapper; the live region must
+    // still hold the count of that second text. No re-render is forced: the markup is read as it stands.
+    [Fact]
+    public void Typing_Twice_TheLiveRegionHoldsTheCountOfTheSecondText()
+    {
+        var field = RenderField();
+        field.Find("#suggest").Input("conhecimentos");
+        AdvanceDebounce();
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 2"));
+
+        field.Find("#suggest").Input("basicos");
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 1"));
+    }
+
     // A text that matches no suggestion is the value all the same: nothing is coerced to a pick.
     [Fact]
     public void Typing_ATextThatMatchesNoSuggestion_IsReportedAsTheValue()

@@ -43,6 +43,38 @@ public sealed class NoticeSubjectStore(CatalogModuleDbContext context) : INotice
         return (exceptId is { } id ? query.Where(subject => subject.Id != id) : query).AnyAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsAsync(
+        Guid noticeSubjectId,
+        CancellationToken cancellationToken) =>
+        await context.NoticeSubjectMappings
+            .Where(mapping => mapping.NoticeSubjectId == noticeSubjectId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<MappingTargets> FindLiveTargetsAsync(
+        IReadOnlyCollection<Guid> subjectIds,
+        IReadOnlyCollection<Guid> topicIds,
+        CancellationToken cancellationToken)
+    {
+        var subjects = await context.Subjects
+            .AsNoTracking()
+            .Where(subject => subjectIds.Contains(subject.Id))
+            .Select(subject => subject.Id)
+            .ToListAsync(cancellationToken);
+
+        var topics = await context.Topics
+            .AsNoTracking()
+            .Where(topic => topicIds.Contains(topic.Id))
+            .Select(topic => new { topic.Id, topic.SubjectId })
+            .ToListAsync(cancellationToken);
+
+        return new MappingTargets(subjects.ToHashSet(), topics.ToDictionary(topic => topic.Id, topic => topic.SubjectId));
+    }
+
+    public void AddMapping(NoticeSubjectMapping mapping) => context.NoticeSubjectMappings.Add(mapping);
+
+    // The audit and soft-delete interceptor turns this into a flag, never a DELETE.
+    public void RemoveMapping(NoticeSubjectMapping mapping) => context.NoticeSubjectMappings.Remove(mapping);
+
     public void Add(NoticeSubject subject) => context.NoticeSubjects.Add(subject);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE (BR10).

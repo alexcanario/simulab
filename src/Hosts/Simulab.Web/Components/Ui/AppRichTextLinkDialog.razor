@@ -1,0 +1,71 @@
+@* The address of a link in a rich text field (F-95). The kit's own small dialog instead of the editor's inline
+   tooltip, which has no label. Only http and https are accepted; a javascript: address is refused here and the
+   Api drops it anyway. *@
+@inject IStringLocalizer<SharedResources> L
+
+<MudDialog>
+    <DialogContent>
+        <div @onkeydown="OnKeyDown">
+            <AppTextField TValue="string"
+                          Id="richtext-link-url"
+                          Label="@L["RichText.Link.Url"]"
+                          Value="@_url"
+                          ValueChanged="@((string? value) => OnUrlChanged(value))"
+                          InputType="InputType.Url"
+                          Autocomplete="off"
+                          LeadingIcon="@AppIcons.Link"
+                          Error="@_error" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Class="app-link-dialog-cancel">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Insert" Class="app-link-dialog-insert">@L["RichText.Link.Insert"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The address of the link under the caret, when there is one.</summary>
+    [Parameter] public string? Url { get; set; }
+
+    private string? _url;
+    private string? _error;
+
+    /// <summary>True for an absolute http or https address: the only two the editor and the Api keep.</summary>
+    public static bool IsAllowed(string? value) =>
+        Uri.TryCreate(value?.Trim(), UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+    protected override void OnInitialized() => _url = Url ?? string.Empty;
+
+    private void OnUrlChanged(string? value)
+    {
+        _url = value;
+        _error = null;
+    }
+
+    private void Insert()
+    {
+        var value = _url?.Trim() ?? string.Empty;
+
+        // Empty on an existing link removes it; anything else must be an http or https address.
+        if (value.Length > 0 && !IsAllowed(value))
+        {
+            _error = L["RichText.Link.Invalid"];
+            return;
+        }
+
+        Dialog.Close(DialogResult.Ok(value));
+    }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private void OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            Insert();
+        }
+    }
+}

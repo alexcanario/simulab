@@ -21,6 +21,9 @@ public interface ISubjectStore
     /// </summary>
     Task<bool> NameIsTakenAsync(string normalizedName, Guid? exceptId, CancellationToken cancellationToken);
 
+    /// <summary>True when a live notice subject maps this subject as a whole subject (F-75, BR9).</summary>
+    Task<bool> IsMappedWholeAsync(Guid subjectId, CancellationToken cancellationToken);
+
     void Add(Subject subject);
 
     /// <summary>Soft-deletes the subject: the interceptor turns the removal into a flag.</summary>

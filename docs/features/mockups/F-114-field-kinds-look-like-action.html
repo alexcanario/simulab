@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-114 - Field kinds look like what they do (mockup, /dev/ui section)</title>
+<style>
+/* ===========================================================================
+   F-114 mockup - the new "Field kinds" section of the dev gallery /dev/ui.
+   Three columns: arrow combobox (AppSelectField), magnifier lookup (AppLookupField), free text (AppTextField).
+   The demo chrome switches the state of all three at once, the UI language and the theme.
+   Every colour is a token of docs/design/identity.tokens.json (light and dark). No new colour.
+   No external request: no web font, no icon font, no image. Icons are Material Outlined paths.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem; --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius: 10px;
+
+  /* identity.tokens.json - light */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.918); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --divider: #D0D8EA;
+  /* MudBlazor default disabled ink (no token: DESIGN.md "Colors the theme leaves at MudBlazor's default") */
+  --disabled-ink: rgba(0,0,0,0.38);
+}
+[data-theme="dark"] {
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.498); --appbar: #091422; --appbar-text: rgba(255,255,255,0.7);
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --divider: #263352;
+  --disabled-ink: rgba(255,255,255,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: var(--app-font-md); line-height: 1.65; background: var(--background); color: var(--text-primary); display: flex; flex-direction: column; }
+svg { display: block; flex-shrink: 0; fill: currentColor; }
+button { font: inherit; }
+:is(a, button, input, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+code { font-size: var(--app-font-xs); background: var(--background); border: 1px solid var(--divider); border-radius: 4px; padding: 0 4px; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-direction: column; gap: var(--app-space-1); padding: var(--app-space-2) var(--app-space-4); background: var(--surface); border-bottom: 1px dashed var(--divider); }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.demo-label { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer; border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note { font-size: var(--app-font-xs); color: var(--text-secondary); }
+
+/* ---- app shell ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.appbar .app-icon-button { color: var(--appbar-text); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); overflow-y: auto; }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: 6px; font-size: var(--app-font-sm); cursor: pointer; }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header (AppPageHeader) ---- */
+.app-page-header { margin-bottom: var(--app-space-5); display: flex; align-items: flex-end; gap: var(--app-space-4); flex-wrap: wrap; }
+.app-page-header-text { flex: 1; min-width: 0; }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+.intro { font-size: var(--app-font-md); margin-bottom: var(--app-space-5); }
+
+/* ---- gallery section ---- */
+.gallery-section { margin-bottom: var(--app-space-6); }
+.gallery-section h2 { font-size: var(--app-font-xl); font-weight: 600; line-height: 1.3; margin-bottom: var(--app-space-2); }
+.gallery-hint { font-size: var(--app-font-sm); color: var(--text-primary); margin-bottom: var(--app-space-3); max-width: 70rem; }
+.gallery-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius); padding: var(--app-space-4); }
+.app-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--app-space-5); }
+@media (max-width: 959.98px) { .app-form-grid { grid-template-columns: 1fr; } }
+.kind { min-width: 0; }
+.kind-title { font-size: var(--app-font-md); font-weight: 600; margin-bottom: var(--app-space-1); display: flex; align-items: center; gap: var(--app-space-2); }
+.kind-title svg { color: var(--action-default); }
+.kind-rule { font-size: var(--app-font-xs); color: var(--text-secondary); margin-bottom: var(--app-space-4); min-height: 2.9em; }
+.state-caption { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-bottom: var(--app-space-2); display: flex; align-items: center; gap: var(--app-space-2); }
+.state-caption::after { content: ""; flex: 1; border-top: 1px dashed var(--divider); }
+.not-applicable { font-size: var(--app-font-sm); color: var(--text-secondary); border: 1px dashed var(--divider); border-radius: var(--app-radius); padding: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.kind-note { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: calc(-1 * var(--app-space-2)); margin-bottom: var(--app-space-4); }
+
+/* ---- kit field anatomy (AppTextField / AppSelectField / AppLookupField share it) ---- */
+.app-field { position: relative; margin-bottom: var(--app-space-4); }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-input { display: flex; align-items: center; gap: var(--app-space-2); min-height: 40px; padding: 0 var(--app-space-1) 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius); background: transparent; color: var(--text-primary); }
+.app-input:focus-within { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.app-input input { flex: 1; min-width: 0; height: 38px; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); }
+.app-input input::placeholder { color: var(--text-secondary); opacity: 1; }
+.app-input-start { color: var(--action-default); width: 20px; height: 20px; }
+.app-input-end { display: inline-flex; align-items: center; gap: 0; }
+.app-input-button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.app-input-button:hover { background: var(--background); }
+.app-input-button svg { width: 24px; height: 24px; }
+.app-input-button.is-clear svg { width: 20px; height: 20px; }
+.app-input-progress { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--primary); border-right-color: transparent; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.app-field-error .app-input { border-color: var(--error); }
+.app-field-error .app-input:focus-within { box-shadow: inset 0 0 0 1px var(--error); border-color: var(--error); }
+.app-field-description { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: 5px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+.is-disabled .app-input { cursor: not-allowed; }
+.is-disabled .app-input input, .is-disabled .app-input-start, .is-disabled .app-input-button { color: var(--disabled-ink); cursor: not-allowed; }
+.is-disabled .app-input-button:hover { background: transparent; }
+
+/* ---- the open list (MudPopover + MudList, as the kit paints it) ---- */
+.app-listbox { list-style: none; position: absolute; left: 0; right: 0; top: calc(100% - 22px); z-index: 25; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius); box-shadow: 0 6px 20px rgba(9,20,34,.22); max-height: 300px; overflow-y: auto; padding: var(--app-space-1) 0; }
+.app-field.has-description .app-listbox { top: calc(100% - 22px); }
+.app-option { display: flex; flex-direction: column; gap: 2px; padding: 8px var(--app-space-3); min-height: 36px; cursor: pointer; font-size: var(--app-font-md); line-height: 1.4; overflow-wrap: anywhere; }
+.app-option:hover, .app-option[aria-selected="true"] { background: var(--primary-lighten); }
+.app-option[aria-selected="true"] { font-weight: 600; }
+.app-option.is-focused { outline: 2px solid var(--primary); outline-offset: -2px; }
+.app-option-secondary { font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-list-message { padding: var(--app-space-3) var(--app-space-4); font-size: var(--app-font-sm); color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-list-progress { display: flex; justify-content: center; padding: var(--app-space-3); }
+.app-icon-button { width: 40px; height: 40px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* keeps the open list of a column above the next state below it */
+.kind .app-field.is-open { z-index: 30; }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; state</span>
+    <span id="demo-states"></span>
+  </div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; language</span>
+    <button type="button" data-lang="pt-BR">pt-BR</button>
+    <button type="button" data-lang="pt-PT">pt-PT</button>
+    <button type="button" data-lang="en">en</button>
+    <span class="demo-label" style="margin-left:12px">Demo &middot; theme</span>
+    <button type="button" data-theme-btn="light">Light</button>
+    <button type="button" data-theme-btn="dark">Dark</button>
+    <span class="demo-note" style="margin-left:12px">The combobox and the lookup are live in "Empty" and "With value": focus, type, arrow keys, Enter, Esc. The other states are frozen.</span>
+  </div>
+</div>
+
+<header class="appbar">
+  <button type="button" class="app-icon-button" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+  <span class="brand">SIMULAB</span><span class="spacer"></span>
+  <button type="button" class="app-icon-button" id="theme-toggle" aria-label="Theme"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M9.37 5.51A7.35 7.35 0 0 0 9.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27A7.014 7.014 0 0 1 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></button>
+  <span class="avatar">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main">
+    <span class="nav-section" data-t="Nav.Section.Content"></span>
+    <a class="nav-link" href="#"><span data-t="Exams.Title"></span></a>
+    <a class="nav-link" href="#"><span data-t="Subjects.Title"></span></a>
+    <span class="nav-section" data-t="Gallery.Breadcrumb.Dev"></span>
+    <a class="nav-link" href="#" aria-current="page"><span data-t="Gallery.Title"></span></a>
+  </nav>
+  <main class="main" id="main">
+    <div class="app-page-header">
+      <div class="app-page-header-text">
+        <nav class="app-breadcrumbs" aria-label="Breadcrumb"><span data-t="Gallery.Breadcrumb.Dev"></span> &rsaquo; <span data-t="Gallery.Title"></span></nav>
+        <h1 class="app-page-title" data-t="Gallery.Title"></h1>
+      </div>
+    </div>
+    <p class="intro" data-t="Gallery.Intro"></p>
+
+    <section id="gallery-field-kinds" class="gallery-section">
+      <h2 data-t="Gallery.Section.FieldKinds"></h2>
+      <p class="gallery-hint" data-t="Gallery.FieldKinds.Hint"></p>
+      <div class="gallery-card">
+        <div class="app-form-grid" id="grid"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="app-visually-hidden" id="live" role="status" aria-live="polite"></div>
+
+<script>
+/* ===========================================================================
+   Texts: SharedResources keys in the three UI locales. Keys new in F-114 are the SelectField.* and
+   Gallery.FieldKinds.* ones (item file, "UI texts"); the rest are existing values copied from the .resx files.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Exams.Title": "Exams", "Subjects.Title": "Subjects",
+    "Gallery.Title": "UI kit gallery", "Gallery.Breadcrumb.Dev": "Dev",
+    "Gallery.Intro": "Every kit pattern, with sample data. Check it in light and dark mode, in each language and with the keyboard only.",
+    "Common.Filter.All": "All", "Common.Search": "Search",
+    "Subjects.Field.Area": "Area", "Subjects.Field.Area.Help": "Optional. Groups the subject with similar ones.", "Subjects.NoArea": "No area",
+    "Area.Law": "Law", "Area.Mathematics": "Mathematics", "Area.HumanSciences": "Human Sciences", "Area.Administration": "Administration and Management",
+    "Area.Portuguese": "Portuguese language", "Area.Informatics": "Informatics", "Area.Logic": "Logical reasoning", "Area.CurrentAffairs": "Current affairs",
+    "Area.LongSample": "Specific knowledge of the career: constitutional, administrative and tax law applied to municipal public management",
+    "Exams.Field.ContentLanguage": "Content language",
+    "Exams.Field.IssuingAuthority": "Issuing authority", "Exams.Field.IssuingAuthority.Placeholder": "Name",
+    "Exams.Field.IssuingAuthority.Hint": "The body that publishes the notice and sets the rules. The board that applies each paper belongs to the edition.",
+    "Exams.Field.Name": "Name", "Exams.Field.Name.Hint": "2 to 200 characters", "Exams.Field.Name.Placeholder": "E.g.: PMF 2026 Municipal Guard",
+    "Lookup.Hint.MinChars": "Type at least {0} characters", "Lookup.Results": "Results: {0}", "Lookup.NoResults": "Nothing found for \"{0}\".", "Lookup.Clear": "Clear the selection",
+    "exam.issuing_authority_required": "Choose the issuing authority.",
+    "exam.name_required": "Type the name of the exam.",
+    "subject.area_invalid": "This area no longer exists. Choose another one from the list or \"No area\".",
+    "Gallery.LongError": "This value could not be saved because the record was changed by someone else while you were editing it: reload the page, check the field again and pick the option that matches the notice before saving.",
+    /* F-114 new */
+    "SelectField.Expand": "Show the options", "SelectField.Collapse": "Hide the options",
+    "SelectField.NoResults": "No option matches \"{0}\".", "SelectField.Results": "Options: {0}", "SelectField.Loading": "Loading the options...",
+    "Gallery.Section.FieldKinds": "Field kinds",
+    "Gallery.FieldKinds.Hint": "The look says the action: an arrow at the end opens the list before you type and narrows it as you type; a magnifier at the start needs typing first, and the server answers; a plain field is free text.",
+    "Gallery.FieldKinds.Select": "Arrow combobox (AppSelectField)", "Gallery.FieldKinds.Lookup": "Magnifier lookup (AppLookupField)", "Gallery.FieldKinds.Text": "Free text (AppTextField)",
+    "Gallery.FieldKinds.Rule.Select": "A list the page holds whole (a fixed list or one database call, at most 100 items). Opens on focus; typing narrows it in memory.",
+    "Gallery.FieldKinds.Rule.Lookup": "A list that needs typing first: the server searches. Keeps the magnifier and the minimum of characters.",
+    "Gallery.FieldKinds.Rule.Text": "Free text. No list, no arrow, no magnifier; an optional decorative icon at the start.",
+    "Gallery.FieldKinds.State.Empty": "Empty", "Gallery.FieldKinds.State.WithValue": "With value", "Gallery.FieldKinds.State.Disabled": "Disabled",
+    "Gallery.FieldKinds.State.Error": "Error", "Gallery.FieldKinds.State.LongText": "Long text", "Gallery.FieldKinds.State.Loading": "Loading",
+    "Gallery.FieldKinds.State.Open": "Open list", "Gallery.FieldKinds.State.NoResults": "No results", "Gallery.FieldKinds.State.LeadingIcon": "Leading icon",
+    "Gallery.FieldKinds.State.NotApplicable": "This kind has no such state.",
+    "Gallery.FieldKinds.Note.TextLoading": "A free text field has no loading of its own: the form's loading state covers it.",
+    "Gallery.FieldKinds.Note.LookupIcon": "Today a leading icon replaces the magnifier on a lookup (F-43). Open point 3 of the screen design."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Exams.Title": "Exames", "Subjects.Title": "Disciplinas",
+    "Gallery.Title": "Galeria do kit de interface", "Gallery.Breadcrumb.Dev": "Dev",
+    "Gallery.Intro": "Todos os padrões do kit, com dados de exemplo. Confira no modo claro e no escuro, em cada idioma e usando só o teclado.",
+    "Common.Filter.All": "Todos", "Common.Search": "Pesquisar",
+    "Subjects.Field.Area": "Área", "Subjects.Field.Area.Help": "Opcional. Agrupa a disciplina com outras parecidas.", "Subjects.NoArea": "Sem área",
+    "Area.Law": "Direito", "Area.Mathematics": "Matemática", "Area.HumanSciences": "Ciências Humanas", "Area.Administration": "Administração e Gestão",
+    "Area.Portuguese": "Língua Portuguesa", "Area.Informatics": "Informática", "Area.Logic": "Raciocínio Lógico", "Area.CurrentAffairs": "Atualidades",
+    "Area.LongSample": "Conhecimentos específicos da carreira: direito constitucional, administrativo e tributário aplicados à gestão pública municipal",
+    "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Field.IssuingAuthority": "Órgão contratante", "Exams.Field.IssuingAuthority.Placeholder": "Nome",
+    "Exams.Field.IssuingAuthority.Hint": "O órgão que publica o edital e define as regras. A banca que aplica cada prova pertence à edição.",
+    "Exams.Field.Name": "Nome", "Exams.Field.Name.Hint": "De 2 a 200 caracteres", "Exams.Field.Name.Placeholder": "Ex.: Concurso PMF 2026 — Guarda Municipal",
+    "Lookup.Hint.MinChars": "Digite ao menos {0} caracteres", "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.Clear": "Limpar a seleção",
+    "exam.issuing_authority_required": "Escolha o órgão contratante.",
+    "exam.name_required": "Informe o nome do exame.",
+    "subject.area_invalid": "Esta área não existe mais. Escolha outra na lista ou \"Sem área\".",
+    "Gallery.LongError": "Este valor não pôde ser salvo porque o registro foi alterado por outra pessoa enquanto você editava: recarregue a página, confira o campo de novo e escolha a opção que corresponde ao edital antes de salvar.",
+    "SelectField.Expand": "Mostrar as opções", "SelectField.Collapse": "Ocultar as opções",
+    "SelectField.NoResults": "Nenhuma opção corresponde a \"{0}\".", "SelectField.Results": "Opções: {0}", "SelectField.Loading": "Carregando as opções...",
+    "Gallery.Section.FieldKinds": "Tipos de campo",
+    "Gallery.FieldKinds.Hint": "A aparência diz a ação: a seta no fim abre a lista antes de digitar e a estreita conforme se digita; a lupa no início pede que se digite primeiro, e o servidor responde; um campo simples é texto livre.",
+    "Gallery.FieldKinds.Select": "Caixa de combinação com seta (AppSelectField)", "Gallery.FieldKinds.Lookup": "Busca com lupa (AppLookupField)", "Gallery.FieldKinds.Text": "Texto livre (AppTextField)",
+    "Gallery.FieldKinds.Rule.Select": "Uma lista que a página tem inteira (fixa ou lida do banco em uma chamada, até 100 itens). Abre ao focar; digitar estreita em memória.",
+    "Gallery.FieldKinds.Rule.Lookup": "Uma lista que pede digitação primeiro: o servidor pesquisa. Mantém a lupa e o mínimo de caracteres.",
+    "Gallery.FieldKinds.Rule.Text": "Texto livre. Sem lista, sem seta, sem lupa; um ícone decorativo opcional no início.",
+    "Gallery.FieldKinds.State.Empty": "Vazio", "Gallery.FieldKinds.State.WithValue": "Com valor", "Gallery.FieldKinds.State.Disabled": "Desabilitado",
+    "Gallery.FieldKinds.State.Error": "Erro", "Gallery.FieldKinds.State.LongText": "Texto longo", "Gallery.FieldKinds.State.Loading": "Carregando",
+    "Gallery.FieldKinds.State.Open": "Lista aberta", "Gallery.FieldKinds.State.NoResults": "Sem resultados", "Gallery.FieldKinds.State.LeadingIcon": "Ícone no campo",
+    "Gallery.FieldKinds.State.NotApplicable": "Este tipo não tem esse estado.",
+    "Gallery.FieldKinds.Note.TextLoading": "Um campo de texto livre não tem carregamento próprio: o estado de carregamento do formulário o cobre.",
+    "Gallery.FieldKinds.Note.LookupIcon": "Hoje um ícone no campo substitui a lupa na busca (F-43). Ponto aberto 3 do desenho de tela."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Exams.Title": "Exames", "Subjects.Title": "Disciplinas",
+    "Gallery.Title": "Galeria do kit de interface", "Gallery.Breadcrumb.Dev": "Dev",
+    "Gallery.Intro": "Todos os padrões do kit, com dados de exemplo. Verifique no modo claro e no escuro, em cada idioma e apenas com o teclado.",
+    "Common.Filter.All": "Todos", "Common.Search": "Pesquisar",
+    "Subjects.Field.Area": "Área", "Subjects.Field.Area.Help": "Opcional. Agrupa a disciplina com outras semelhantes.", "Subjects.NoArea": "Sem área",
+    "Area.Law": "Direito", "Area.Mathematics": "Matemática", "Area.HumanSciences": "Ciências Humanas", "Area.Administration": "Administração e Gestão",
+    "Area.Portuguese": "Língua Portuguesa", "Area.Informatics": "Informática", "Area.Logic": "Raciocínio Lógico", "Area.CurrentAffairs": "Atualidades",
+    "Area.LongSample": "Conhecimentos específicos da carreira: direito constitucional, administrativo e fiscal aplicados à gestão pública municipal",
+    "Exams.Field.ContentLanguage": "Idioma do conteúdo",
+    "Exams.Field.IssuingAuthority": "Entidade contratante", "Exams.Field.IssuingAuthority.Placeholder": "Nome",
+    "Exams.Field.IssuingAuthority.Hint": "A entidade que publica o aviso e define as regras. A entidade que aplica cada prova pertence à edição.",
+    "Exams.Field.Name": "Nome", "Exams.Field.Name.Hint": "Entre 2 e 200 caracteres", "Exams.Field.Name.Placeholder": "Ex.: Concurso CM Lisboa 2026 — Polícia Municipal",
+    "Lookup.Hint.MinChars": "Escreva pelo menos {0} caracteres", "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.Clear": "Limpar a seleção",
+    "exam.issuing_authority_required": "Escolha a entidade contratante.",
+    "exam.name_required": "Indique o nome do exame.",
+    "subject.area_invalid": "Esta área já não existe. Escolha outra na lista ou \"Sem área\".",
+    "Gallery.LongError": "Este valor não pôde ser guardado porque o registo foi alterado por outra pessoa enquanto editava: recarregue a página, verifique o campo de novo e escolha a opção que corresponde ao aviso antes de guardar.",
+    "SelectField.Expand": "Mostrar as opções", "SelectField.Collapse": "Ocultar as opções",
+    "SelectField.NoResults": "Nenhuma opção corresponde a \"{0}\".", "SelectField.Results": "Opções: {0}", "SelectField.Loading": "A carregar as opções...",
+    "Gallery.Section.FieldKinds": "Tipos de campo",
+    "Gallery.FieldKinds.Hint": "O aspeto diz a ação: a seta no fim abre a lista antes de escrever e estreita-a à medida que se escreve; a lupa no início pede que se escreva primeiro, e o servidor responde; um campo simples é texto livre.",
+    "Gallery.FieldKinds.Select": "Caixa de combinação com seta (AppSelectField)", "Gallery.FieldKinds.Lookup": "Pesquisa com lupa (AppLookupField)", "Gallery.FieldKinds.Text": "Texto livre (AppTextField)",
+    "Gallery.FieldKinds.Rule.Select": "Uma lista que a página tem inteira (fixa ou lida da base de dados numa chamada, até 100 itens). Abre ao focar; escrever estreita-a em memória.",
+    "Gallery.FieldKinds.Rule.Lookup": "Uma lista que pede escrita primeiro: o servidor pesquisa. Mantém a lupa e o mínimo de caracteres.",
+    "Gallery.FieldKinds.Rule.Text": "Texto livre. Sem lista, sem seta, sem lupa; um ícone decorativo opcional no início.",
+    "Gallery.FieldKinds.State.Empty": "Vazio", "Gallery.FieldKinds.State.WithValue": "Com valor", "Gallery.FieldKinds.State.Disabled": "Desativado",
+    "Gallery.FieldKinds.State.Error": "Erro", "Gallery.FieldKinds.State.LongText": "Texto longo", "Gallery.FieldKinds.State.Loading": "A carregar",
+    "Gallery.FieldKinds.State.Open": "Lista aberta", "Gallery.FieldKinds.State.NoResults": "Sem resultados", "Gallery.FieldKinds.State.LeadingIcon": "Ícone no campo",
+    "Gallery.FieldKinds.State.NotApplicable": "Este tipo não tem esse estado.",
+    "Gallery.FieldKinds.Note.TextLoading": "Um campo de texto livre não tem carregamento próprio: o estado de carregamento do formulário cobre-o.",
+    "Gallery.FieldKinds.Note.LookupIcon": "Hoje um ícone no campo substitui a lupa na pesquisa (F-43). Ponto aberto 3 do desenho de ecrã."
+  }
+};
+
+/* Material Outlined paths (AppIcons): Expand = ArrowDropDown, Collapse = ArrowDropUp, Search, Close, Language, IssuingAuthorities = Gavel, Exams = Description */
+const ICON = {
+  expand: "M7 10l5 5 5-5z",
+  collapse: "M7 14l5-5 5 5z",
+  search: "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  close: "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  language: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
+  gavel: "M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.83 2.83-5.654-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z",
+  exams: "M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"
+};
+const svg = (name, size, cls) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" class="${cls || ""}" aria-hidden="true" focusable="false"><path d="${ICON[name]}"/></svg>`;
+
+/* Sample data. Areas are UI text (AreaText.Name(L, code), as on the subject pages); issuing authorities are content and are not translated. */
+const AREA_KEYS = ["Area.Law", "Area.Mathematics", "Area.HumanSciences", "Area.Administration", "Area.Portuguese", "Area.Informatics", "Area.Logic", "Area.CurrentAffairs"];
+const AUTHORITIES = [
+  { text: "Centro Brasileiro de Pesquisa em Avaliação e Seleção e de Promoção de Eventos (CEBRASPE)", secondary: "Exam board" },
+  { text: "Fundação Getulio Vargas (FGV)", secondary: "Exam board" },
+  { text: "Prefeitura Municipal de Guarulhos (PMG)", secondary: "Public body" },
+  { text: "Universidade de São Paulo (USP)", secondary: "University" }
+];
+const LANG_OPTIONS = [["pt-BR", "Português (Brasil)"], ["pt-PT", "Português (Portugal)"], ["en", "English"]];
+
+const STATES = ["Empty", "WithValue", "Disabled", "Error", "LongText", "Loading", "Open", "NoResults", "LeadingIcon"];
+let lang = "pt-BR", state = "Empty";
+const t = (key, ...args) => { let s = (TEXTS[lang] && TEXTS[lang][key]) || TEXTS.en[key] || key; args.forEach((a, i) => { s = s.split(`{${i}}`).join(a); }); return s; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fold = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/* ---- field renderers ---- */
+function fieldShell(o) {
+  const cls = ["app-field", o.error ? "app-field-error" : "", o.disabled ? "is-disabled" : "", o.open ? "is-open" : "", "has-description"].join(" ");
+  const req = o.required ? `<span class="app-field-required" aria-hidden="true">*</span>` : "";
+  const desc = o.error ? `<span class="app-field-error-text">${esc(o.error)}</span>` : (o.hint ? esc(o.hint) : "");
+  return `<div class="${cls}" data-kind="${o.kind}">
+    <label class="app-field-label" id="${o.id}-label" for="${o.id}">${esc(o.label)}${req}</label>
+    <div class="app-input">${o.start || ""}<input ${o.attrs} id="${o.id}" ${o.disabled ? "disabled" : ""} aria-labelledby="${o.id}-label" aria-describedby="${o.id}-description" ${o.error ? 'aria-invalid="true"' : ""} ${o.required ? 'aria-required="true"' : ""} autocomplete="off" value="${esc(o.value || "")}" placeholder="${esc(o.placeholder || "")}"><span class="app-input-end">${o.end || ""}</span></div>
+    <span id="${o.id}-description" class="app-field-description">${desc}</span>
+    ${o.list || ""}
+  </div>`;
+}
+
+function listbox(id, items, message) {
+  const rows = message ? `<li class="app-list-message" role="presentation">${message}</li>` :
+    items.map((it, i) => `<li role="option" id="${id}-opt-${i}" class="app-option ${it.selected ? "" : ""} ${it.focused ? "is-focused" : ""}" aria-selected="${it.selected ? "true" : "false"}" data-index="${i}"><span>${esc(it.text)}</span>${it.secondary ? `<span class="app-option-secondary">${esc(it.secondary)}</span>` : ""}</li>`).join("");
+  return `<ul class="app-listbox" role="listbox" id="${id}-list" aria-labelledby="${id}-label">${rows}</ul>`;
+}
+
+/* Arrow combobox (AppSelectField): the arrow is the library's end adornment button; the leading icon is drawn by the kit (BR5 prototype). */
+function selectField(o) {
+  const arrow = o.loading
+    ? `<span class="app-input-progress" role="status" aria-label="${esc(t("SelectField.Loading"))}"><span class="app-spinner"></span></span>`
+    : `<button type="button" class="app-input-button is-arrow" tabindex="-1" aria-label="${esc(t(o.open ? "SelectField.Collapse" : "SelectField.Expand"))}" ${o.disabled ? "disabled" : ""}>${svg(o.open ? "collapse" : "expand", 24)}</button>`;
+  const attrs = `type="text" role="combobox" aria-expanded="${o.open ? "true" : "false"}" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="${o.id}-list"`;
+  return fieldShell({ ...o, kind: "select", attrs, start: o.leading ? svg(o.leading, 20, "app-input-start") : "", end: arrow });
+}
+
+/* Magnifier lookup (AppLookupField): unchanged anatomy - magnifier at the start, clear button at the end when a value is set. */
+function lookupField(o) {
+  const clear = o.value && !o.disabled ? `<button type="button" class="app-input-button is-clear" aria-label="${esc(t("Lookup.Clear"))}">${svg("close", 20)}</button>` : "";
+  const attrs = `type="text" role="combobox" aria-expanded="${o.open ? "true" : "false"}" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="${o.id}-list"`;
+  return fieldShell({ ...o, kind: "lookup", attrs, start: svg(o.leading || "search", 20, "app-input-start"), end: clear });
+}
+
+/* Free text (AppTextField): plain; an optional decorative leading icon. */
+function textField(o) {
+  return fieldShell({ ...o, kind: "text", attrs: `type="text"`, start: o.leading ? svg(o.leading, 20, "app-input-start") : "", end: "" });
+}
+
+/* ---- the three columns for the current state ---- */
+function areaOptions(selectedKey) {
+  const all = [{ key: null, text: t("Common.Filter.All") }, { key: "none", text: t("Subjects.NoArea") }, ...AREA_KEYS.map(k => ({ key: k, text: t(k) }))];
+  return all.map(a => ({ ...a, selected: a.key === selectedKey }));
+}
+
+function renderSelect(s) {
+  const base = { id: "gallery-kind-select-" + s.toLowerCase(), label: t("Subjects.Field.Area"), hint: t("Subjects.Field.Area.Help"), required: false };
+  switch (s) {
+    case "Empty": return selectField({ ...base, value: t("Common.Filter.All"), live: true });
+    case "WithValue": return selectField({ ...base, value: t("Area.Mathematics"), live: true });
+    case "Disabled": return selectField({ ...base, value: t("Area.Law"), disabled: true });
+    case "Error": return selectField({ ...base, value: "", error: t("subject.area_invalid") });
+    case "LongText": return selectField({ ...base, value: t("Area.LongSample"), error: t("Gallery.LongError"), open: true,
+      list: listbox(base.id, [{ text: t("Area.Administration") }, { text: t("Area.LongSample"), selected: true }, { text: t("Area.CurrentAffairs") }]) });
+    case "Loading": return selectField({ ...base, value: "", loading: true, open: true, list: listbox(base.id, [], esc(t("SelectField.Loading"))) });
+    case "Open": { const opts = areaOptions(null); opts[0].focused = true;
+      return selectField({ ...base, value: t("Common.Filter.All"), open: true, list: listbox(base.id, opts) }); }
+    case "NoResults": return selectField({ ...base, value: "quim", open: true, list: listbox(base.id, [], esc(t("SelectField.NoResults", "quim"))) });
+    case "LeadingIcon": return selectField({ id: "gallery-kind-select-icon", label: t("Exams.Field.ContentLanguage"), value: LANG_OPTIONS.find(l => l[0] === lang)[1], leading: "language", required: true, hint: "" });
+  }
+}
+
+function renderLookup(s) {
+  const base = { id: "gallery-kind-lookup-" + s.toLowerCase(), label: t("Exams.Field.IssuingAuthority"), placeholder: t("Exams.Field.IssuingAuthority.Placeholder"), hint: t("Lookup.Hint.MinChars", 2), required: true };
+  switch (s) {
+    case "Empty": return lookupField({ ...base, value: "", live: true });
+    case "WithValue": return lookupField({ ...base, value: AUTHORITIES[1].text, hint: t("Exams.Field.IssuingAuthority.Hint"), live: true });
+    case "Disabled": return lookupField({ ...base, value: AUTHORITIES[1].text, disabled: true });
+    case "Error": return lookupField({ ...base, value: "", error: t("exam.issuing_authority_required") });
+    case "LongText": return lookupField({ ...base, value: AUTHORITIES[0].text, error: t("Gallery.LongError"), open: true,
+      list: listbox(base.id, [{ ...AUTHORITIES[0], selected: true }]) });
+    case "Loading": return lookupField({ ...base, value: "pre", open: true, list: `<ul class="app-listbox" role="listbox" id="${base.id}-list"><li class="app-list-progress" role="presentation"><span class="app-spinner"></span></li></ul>` });
+    case "Open": { const items = AUTHORITIES.filter(a => fold(a.text).includes("fun")); items[0].focused = true;
+      return lookupField({ ...base, value: "Fun", open: true, list: listbox(base.id, items) }); }
+    case "NoResults": return lookupField({ ...base, value: "Zelândia", open: true, list: listbox(base.id, [], esc(t("Lookup.NoResults", "Zelândia"))) });
+    case "LeadingIcon": return lookupField({ ...base, value: "", leading: "gavel" }) + `<p class="kind-note">${esc(t("Gallery.FieldKinds.Note.LookupIcon"))}</p>`;
+  }
+}
+
+function renderText(s) {
+  const base = { id: "gallery-kind-text-" + s.toLowerCase(), label: t("Exams.Field.Name"), placeholder: t("Exams.Field.Name.Placeholder"), hint: t("Exams.Field.Name.Hint"), required: true };
+  const sample = "Concurso PMF 2026 — Guarda Municipal";
+  switch (s) {
+    case "Empty": return textField({ ...base, value: "" });
+    case "WithValue": return textField({ ...base, value: sample });
+    case "Disabled": return textField({ ...base, value: sample, disabled: true });
+    case "Error": return textField({ ...base, value: "", error: t("exam.name_required") });
+    case "LongText": return textField({ ...base, value: "Concurso Público para Provimento de Cargos Efetivos do Quadro Permanente da Prefeitura Municipal de Florianópolis 2026 — Guarda Municipal", error: t("Gallery.LongError") });
+    case "Loading": return `<div class="not-applicable">${esc(t("Gallery.FieldKinds.State.NotApplicable"))} ${esc(t("Gallery.FieldKinds.Note.TextLoading"))}</div>`;
+    case "Open": case "NoResults": return `<div class="not-applicable">${esc(t("Gallery.FieldKinds.State.NotApplicable"))}</div>`;
+    case "LeadingIcon": return textField({ ...base, value: sample, leading: "exams" });
+  }
+}
+
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  const stateBar = document.getElementById("demo-states");
+  stateBar.innerHTML = STATES.map(s => `<button type="button" data-state="${s}" aria-pressed="${s === state}">${esc(t("Gallery.FieldKinds.State." + s))}</button>`).join(" ");
+  const caption = `<p class="state-caption">${esc(t("Gallery.FieldKinds.State." + state))}</p>`;
+  const col = (titleKey, icon, ruleKey, body) => `<div class="kind"><h3 class="kind-title">${svg(icon, 20)}<span>${esc(t(titleKey))}</span></h3><p class="kind-rule">${esc(t(ruleKey))}</p>${caption}${body}</div>`;
+  document.getElementById("grid").innerHTML =
+    col("Gallery.FieldKinds.Select", "expand", "Gallery.FieldKinds.Rule.Select", renderSelect(state)) +
+    col("Gallery.FieldKinds.Lookup", "search", "Gallery.FieldKinds.Rule.Lookup", renderLookup(state)) +
+    col("Gallery.FieldKinds.Text", "exams", "Gallery.FieldKinds.Rule.Text", renderText(state));
+  wireLive();
+}
+
+/* ---- live behaviour of the combobox and the lookup in "Empty" and "With value" (what the kit does) ---- */
+const live = document.getElementById("live");
+function announce(text) { live.textContent = ""; setTimeout(() => { live.textContent = text; }, 30); }
+
+function wireLive() {
+  if (state !== "Empty" && state !== "WithValue") return;
+
+  /* combobox: opens on focus with the whole list (BR4), narrows when the typed text differs from the selected option, Esc closes, blur restores */
+  const sel = document.querySelector('[data-kind="select"]');
+  if (sel) {
+    const input = sel.querySelector("input"), arrowBtn = sel.querySelector(".is-arrow");
+    let selectedKey = state === "WithValue" ? "Area.Mathematics" : null, focused = 0, open = false;
+    const selectedText = () => areaOptions(selectedKey).find(a => a.selected).text;
+    const visible = () => { const term = input.value; if (fold(term) === fold(selectedText()) || term === "") return areaOptions(selectedKey); return areaOptions(selectedKey).filter(a => fold(a.text).includes(fold(term))); };
+    const paint = () => {
+      sel.querySelector(".app-listbox")?.remove();
+      input.setAttribute("aria-expanded", open);
+      arrowBtn.innerHTML = svg(open ? "collapse" : "expand", 24);
+      arrowBtn.setAttribute("aria-label", t(open ? "SelectField.Collapse" : "SelectField.Expand"));
+      sel.classList.toggle("is-open", open);
+      if (!open) return;
+      const items = visible().map((a, i) => ({ ...a, focused: i === focused }));
+      sel.insertAdjacentHTML("beforeend", items.length ? listbox(input.id, items) : listbox(input.id, [], esc(t("SelectField.NoResults", input.value))));
+      if (items.length) input.setAttribute("aria-activedescendant", `${input.id}-opt-${focused}`); else input.removeAttribute("aria-activedescendant");
+      sel.querySelectorAll(".app-option").forEach(li => li.addEventListener("mousedown", e => { e.preventDefault(); pick(visible()[+li.dataset.index]); }));
+    };
+    const openList = () => { open = true; focused = Math.max(0, visible().findIndex(a => a.selected)); paint(); announce(t("SelectField.Results", visible().length)); };
+    const closeList = (restore) => { open = false; if (restore) input.value = selectedText(); paint(); };
+    const pick = (opt) => { if (!opt) return; selectedKey = opt.key; input.value = opt.text; closeList(false); };
+    input.addEventListener("focus", openList);
+    input.addEventListener("input", () => { open = true; focused = 0; paint(); const n = visible().length; announce(n ? t("SelectField.Results", n) : t("SelectField.NoResults", input.value)); });
+    input.addEventListener("keydown", e => {
+      const items = visible();
+      if (e.key === "ArrowDown") { e.preventDefault(); if (!open) openList(); else { focused = Math.min(items.length - 1, focused + 1); paint(); } }
+      else if (e.key === "ArrowUp") { e.preventDefault(); if (open) { focused = Math.max(0, focused - 1); paint(); } }
+      else if (e.key === "Home" && open) { e.preventDefault(); focused = 0; paint(); }
+      else if (e.key === "End" && open) { e.preventDefault(); focused = items.length - 1; paint(); }
+      else if (e.key === "Enter" && open) { e.preventDefault(); pick(items[focused]); }
+      else if (e.key === "Escape" && open) { e.preventDefault(); e.stopPropagation(); closeList(true); }
+    });
+    input.addEventListener("blur", () => setTimeout(() => closeList(true), 0));
+    arrowBtn.addEventListener("mousedown", e => { e.preventDefault(); if (open) closeList(true); else { input.focus(); if (!open) openList(); } });
+  }
+
+  /* lookup: nothing before 2 characters; then a 300 ms debounce, a progress ring, the results or "nothing found" */
+  const lk = document.querySelector('[data-kind="lookup"]');
+  if (lk) {
+    const input = lk.querySelector("input"); let timer, open = false, focused = 0, results = [];
+    const paint = (loading) => {
+      lk.querySelector(".app-listbox")?.remove(); input.setAttribute("aria-expanded", open); lk.classList.toggle("is-open", open);
+      if (!open) return;
+      if (loading) { lk.insertAdjacentHTML("beforeend", `<ul class="app-listbox" role="listbox" id="${input.id}-list"><li class="app-list-progress" role="presentation"><span class="app-spinner"></span></li></ul>`); return; }
+      lk.insertAdjacentHTML("beforeend", results.length ? listbox(input.id, results.map((r, i) => ({ ...r, focused: i === focused }))) : listbox(input.id, [], esc(t("Lookup.NoResults", input.value))));
+      lk.querySelectorAll(".app-option").forEach(li => li.addEventListener("mousedown", e => { e.preventDefault(); pick(results[+li.dataset.index]); }));
+    };
+    const pick = r => { input.value = r.text; open = false; paint(); render(); };
+    input.addEventListener("input", () => {
+      clearTimeout(timer); const term = input.value.trim();
+      if (term.length < 2) { open = false; paint(); return; }
+      open = true; paint(true);
+      timer = setTimeout(() => { results = AUTHORITIES.filter(a => fold(a.text).includes(fold(term))); focused = 0; paint(false); announce(results.length ? t("Lookup.Results", results.length) : t("Lookup.NoResults", term)); }, 300);
+    });
+    input.addEventListener("keydown", e => {
+      if (!open) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); focused = Math.min(results.length - 1, focused + 1); paint(false); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); focused = Math.max(0, focused - 1); paint(false); }
+      else if (e.key === "Enter") { e.preventDefault(); if (results[focused]) pick(results[focused]); }
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); open = false; paint(); }
+    });
+    input.addEventListener("blur", () => setTimeout(() => { open = false; paint(); }, 0));
+    lk.querySelector(".is-clear")?.addEventListener("click", () => { input.value = ""; input.focus(); state = "Empty"; render(); document.getElementById(lk.querySelector("input").id.replace("withvalue", "empty"))?.focus(); });
+  }
+}
+
+/* ---- demo chrome wiring ---- */
+document.getElementById("demo-states").addEventListener("click", e => { const b = e.target.closest("[data-state]"); if (b) { state = b.dataset.state; render(); } });
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => { lang = b.dataset.lang; render(); }));
+function setTheme(th) { document.documentElement.dataset.theme = th; document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", b.dataset.themeBtn === th)); }
+document.querySelectorAll("[data-theme-btn]").forEach(b => b.addEventListener("click", () => setTheme(b.dataset.themeBtn)));
+document.getElementById("theme-toggle").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+setTheme("light");
+render();
+</script>
+</body>
+</html>

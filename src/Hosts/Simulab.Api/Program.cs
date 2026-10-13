@@ -8,6 +8,8 @@ using Simulab.Catalog.Api;
 using Simulab.Catalog.Infrastructure;
 using Simulab.Email;
 using Simulab.Identity.Api;
+using Simulab.QuestionBank.Api;
+using Simulab.QuestionBank.Infrastructure;
 using Simulab.Identity.Api.Authorization;
 using Simulab.Identity.Infrastructure;
 using Simulab.Jobs;
@@ -81,6 +83,10 @@ builder.Services.AddIdentityModule(
 // container before EnsureRolesAndPermissionsAsync reads them (F-33, BR2).
 builder.Services.AddCatalogModule(
     builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
+// F-95: the QuestionBank module. After Catalog: it registers the topic usage check the catalog asks before
+// it deletes a topic, and its permission catalog joins the union Identity seeds.
+builder.Services.AddQuestionBankModule(
+    builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 
 builder.Services.AddSingleton<ClientRateLimiter>();
 builder.Services.AddSingleton<ClientAddress>();
@@ -130,6 +136,7 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
 
 v1.MapIdentityEndpoints();
 v1.MapCatalogEndpoints();
+v1.MapQuestionBankEndpoints();
 
 // F-41 (v2), AC9b: the diagnostics route exists only in Development. Outside it the route is never
 // mapped, so it answers 404 rather than being merely hidden.
@@ -149,6 +156,7 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
     await app.Services.MigrateJobsAsync();
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.MigrateCatalogModuleAsync();
+    await app.Services.MigrateQuestionBankModuleAsync();
     await app.Services.EnsureIdentityClientAsync(app.Configuration);
     await app.Services.EnsureRolesAndPermissionsAsync();
 }

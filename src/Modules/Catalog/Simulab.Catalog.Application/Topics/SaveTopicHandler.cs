@@ -10,7 +10,7 @@ namespace Simulab.Catalog.Application.Topics;
 /// (F-79, UC6, UC7, BR10). The subject must exist and the name must be free inside it; the unique index is the
 /// real guarantee.
 /// </summary>
-public sealed class SaveTopicHandler(ITopicStore store, ISubjectStore subjects)
+public sealed class SaveTopicHandler(ITopicStore store, ISubjectStore subjects, IEnumerable<ITopicUsageCheck> usageChecks)
 {
     /// <param name="subjectId">The subject from the route on a create; ignored on an update.</param>
     /// <param name="id">The topic to update, or null to create one.</param>
@@ -68,6 +68,11 @@ public sealed class SaveTopicHandler(ITopicStore store, ISubjectStore subjects)
             return Result.Failure<TopicResponse>(refused);
         }
 
-        return Result.Success(new TopicResponse(topic.Id, topic.SubjectId, topic.Name));
+        // A topic a live notice subject maps, or that another module says it uses, is in use: the answer says
+        // so, as the list does (BR10; F-95 BR13).
+        var inUse = await store.IsMappedAsync(topic.Id, cancellationToken)
+            || await TopicUsageChecks.AnyAsync(usageChecks, topic.Id, cancellationToken);
+
+        return Result.Success(new TopicResponse(topic.Id, topic.SubjectId, topic.Name, inUse));
     }
 }

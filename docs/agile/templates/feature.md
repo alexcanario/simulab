@@ -7,6 +7,7 @@ version: 1
 ---
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
+With an external ticket (`/agile:idea feature --ticket PRJ-123`): the id is the ticket's, `feature: PRJ-123`, the file docs/features/PRJ-123-<slug>.md, and an optional header line `ticket-url: <URL>` right after `board:`.
 Status flow: idea -> refining -> approved -> building -> validating -> done
 - cancelled: exit from idea or refining only, as a duplicate; the file stays, with "Duplicate of <id> (<date>): <where the improvement went>" under the header.
 - idea: title, summary and start only (/agile:idea, /agile:epic).
@@ -25,7 +26,7 @@ Technical terms: [glossary](../glossary.md)
 
 ## Start
 <!-- What this item needs before it can start, and how to run it. Filled when the item is created, confirmed at refinement. -->
-- Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository — or "nothing">
+- Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository as `<owner>/<repo>#<n>`; while an id is not delivered, the approved item is blocked by itself and released when it ships — or "nothing">
 - Waits on (to start): <what stops the work from starting and is not an item: an owner decision, a person or team, an access, an environment — who provides it — or "nothing">
 - Needed to validate: <what only the validation needs (a real clone, an environment, a person or device) — who provides it — or "nothing"; never blocks a start or an approval>
 - Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (small and clear) | `/agile:discuss` first (open direction) | `/agile:screen` during refinement>
@@ -49,11 +50,20 @@ Technical terms: [glossary](../glossary.md)
 ## Acceptance criteria
 <!-- Given / When / Then. Each one is covered by a test. Always include the localization criterion. -->
 - AC1 Given <context>, when <action>, then <result>.
-- AC<n> All new texts appear in pt-BR, pt-PT and en.
+- AC<n> All new texts appear in every locale of `UI locales:`.
+
+## Criterion → test
+<!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC<n> | pending |
+
+<!-- test-lock.js lock (the test phase of /agile:build) writes `Tests locked: <sha> (<n> files); unlocks: <n>` itself, right under the heading of this section. -->
 
 ## Decisions
-<!-- date — decision — reason. Technical decisions made by Claude are recorded here too. -->
-- <YYYY-MM-DD> — <decision> — <reason>
+<!-- date — decision — reason — source. Technical decisions made by Claude are recorded here too. The source: `asked`, `confirmed: <path or item id>` or `changed: <old rule> (<where>)` (references/decisions.md in the plugin). -->
+- <YYYY-MM-DD> — <decision> — <reason> — asked
 
 ## Out of scope
 - <Item>
@@ -75,6 +85,9 @@ Technical terms: [glossary](../glossary.md)
 ## Validation script
 <!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
 1. <Step> → <expected result>
+
+## Events
+<!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

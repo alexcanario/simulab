@@ -11,7 +11,10 @@ namespace Simulab.Catalog.Application.ExamEditions;
 /// with it, in the same save (F-74, BR10): both stores share the one scoped context, so it is one
 /// <c>SaveChanges</c> and one transaction.
 /// </summary>
-public sealed class DeleteExamEditionHandler(IExamEditionStore store, INoticeSubjectStore noticeSubjects)
+public sealed class DeleteExamEditionHandler(
+    IExamEditionStore store,
+    INoticeSubjectStore noticeSubjects,
+    IEnumerable<IExamEditionUsageCheck> usageChecks)
 {
     public async Task<Result> HandleAsync(Guid examId, Guid id, CancellationToken cancellationToken = default)
     {
@@ -25,6 +28,13 @@ public sealed class DeleteExamEditionHandler(IExamEditionStore store, INoticeSub
         if (allowed.IsFailure)
         {
             return allowed;
+        }
+
+        // F-96 BR8: a live question of any status points at this edition, so removing it would orphan its source.
+        if (await UsageChecks.AnyAsync(
+                usageChecks, edition.Id, (check, ids, token) => check.InUseAsync(ids, token), cancellationToken))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.ExamEditionHasQuestions, ErrorKind.Conflict));
         }
 
         foreach (var subject in await noticeSubjects.ListForEditionAsync(edition.Id, cancellationToken))

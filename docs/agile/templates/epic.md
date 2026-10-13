@@ -2,6 +2,7 @@
 epic: <slug>
 status: draft
 board: <work item id or ->
+# Autopilot: <id> <step> (<YYYY-MM-DD>)   <- optional; written inside this block by `/agile:epic --autopilot`, removed at the epic retro
 ---
 <!--
 One file per epic. Save as: docs/epics/<slug>.md
@@ -36,13 +37,16 @@ Technical terms: [glossary](../glossary.md)
 | <decision / access / environment / team> | F-<n> | <person or team> | <owner or Claude> |
 
 ## First release cut
-<!-- Which features must be done before the first release. -->
+<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. -->
 
 ## Out of scope
 - <Item>
 
 ## Decisions
 - <YYYY-MM-DD> — <decision> — <reason>
+
+## Retro notes
+<!-- Written by the ships of an `--autopilot` epic run: one line per lesson candidate, `<id>: <candidate>`, at most 3 each, unscored. Read by the epic retro, which scores them. -->
 
 ## Related
 - Discussions: <D-<n>>

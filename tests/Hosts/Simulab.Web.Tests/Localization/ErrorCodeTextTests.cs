@@ -26,6 +26,8 @@ public sealed class ErrorCodeTextTests
             + "AuthClient.NeedsTotpCode and turned into the code step, never displayed (F-11 BR9).",
         ["password_change.required"] = "the password (or code) step's answer for an account that must change its password; read as a "
             + "flow signal by AuthClient.NeedsPasswordChange and turned into the new-password step, never displayed (F-53 BR3).",
+        ["question.subject_not_found"] = "the topic lookup of a subject deleted while the form was open; the form's lookup "
+            + "treats any failed read as the picker's own load error and never maps the code to a text (B-28 BR6).",
     };
 
     [Fact]

@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -62,6 +63,52 @@ public class OpenIddictCertificateStartTests(ApiFactory factory) : IClassFixture
         });
 
         start.Should().Throw<InvalidOperationException>().WithMessage("*OpenIddict:SigningCertificate*PKCS#12*");
+    }
+
+    /// <summary>
+    /// F-73 AC5 (BR3): a certificate that loads but could not do its job stops the start too, one case per reason and
+    /// per key, and the message names the setting and the reason without any part of the value.
+    /// </summary>
+    [Theory]
+    [InlineData("OpenIddict:SigningCertificate", "NoPrivateKey", "no private key")]
+    [InlineData("OpenIddict:SigningCertificate", "WrongUsage", "digital signature")]
+    [InlineData("OpenIddict:SigningCertificate", "NoUsage", "digital signature")]
+    [InlineData("OpenIddict:SigningCertificate", "Expired", "expired")]
+    [InlineData("OpenIddict:SigningCertificate", "NotYetValid", "not valid yet")]
+    [InlineData("OpenIddict:EncryptionCertificate", "NoPrivateKey", "no private key")]
+    [InlineData("OpenIddict:EncryptionCertificate", "WrongUsage", "key encipherment")]
+    [InlineData("OpenIddict:EncryptionCertificate", "NoUsage", "key encipherment")]
+    [InlineData("OpenIddict:EncryptionCertificate", "Expired", "expired")]
+    [InlineData("OpenIddict:EncryptionCertificate", "NotYetValid", "not valid yet")]
+    public void Start_CertificateCannotDoItsJob_RefusesNamingTheSettingAndTheReason(string key, string flaw, string reason)
+    {
+        var good = TestCertificates.Create();
+        var bad = BadCertificate(key, flaw);
+
+        var start = Start("Staging", builder =>
+        {
+            builder.UseSetting("OpenIddict:SigningCertificate", key == "OpenIddict:SigningCertificate" ? bad : good.Signing);
+            builder.UseSetting("OpenIddict:EncryptionCertificate", key == "OpenIddict:EncryptionCertificate" ? bad : good.Encryption);
+        });
+
+        var message = start.Should().Throw<InvalidOperationException>().WithMessage($"*{key}*{reason}*").Which.Message;
+        message.Should().NotContain(bad[100..140]).And.NotContain(bad[^40..]);
+    }
+
+    private static string BadCertificate(string key, string flaw)
+    {
+        // The usage the role needs is the one a "wrong usage" certificate lacks: signing needs digital signature,
+        // encryption needs key encipherment.
+        var other = key == "OpenIddict:SigningCertificate" ? X509KeyUsageFlags.KeyEncipherment : X509KeyUsageFlags.DigitalSignature;
+        return flaw switch
+        {
+            "NoPrivateKey" => TestCertificates.CreateOne("flawed", withPrivateKey: false),
+            "WrongUsage" => TestCertificates.CreateOne("flawed", usage: other),
+            "NoUsage" => TestCertificates.CreateOne("flawed", usage: null),
+            "Expired" => TestCertificates.CreateOne("flawed", notBefore: DateTimeOffset.UtcNow.AddYears(-2), notAfter: DateTimeOffset.UtcNow.AddDays(-1)),
+            "NotYetValid" => TestCertificates.CreateOne("flawed", notBefore: DateTimeOffset.UtcNow.AddDays(1), notAfter: DateTimeOffset.UtcNow.AddYears(2)),
+            _ => throw new ArgumentOutOfRangeException(nameof(flaw)),
+        };
     }
 
     /// <summary>The rule of presence: with both certificates the host starts and OpenIddict holds them.</summary>
