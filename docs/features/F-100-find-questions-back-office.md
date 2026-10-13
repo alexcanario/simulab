@@ -1,7 +1,7 @@
 ---
 feature: F-100
 epic: Question bank
-status: approved
+status: building
 board: 146
 version: 1
 ---
@@ -115,10 +115,22 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 
 ## Criterion → test
 
-Filled at the build: one row per criterion.
-
 | Criterion | Test |
 | --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
 
 ## Decisions
 - 2026-10-13 — An unknown or malformed filter value is ignored, not refused — same as F-95 for `status`; a stale link still opens (confirmed: F-95 `## Decisions`, `List_UnknownStatus_IsIgnored`).
