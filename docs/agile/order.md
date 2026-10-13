@@ -4,91 +4,89 @@
 
 | # | Id | Title | Status | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|
-| 1 | F-100 | Find questions in the back office | validating | Question bank | - | F-118, F-119 |
-| 2 | F-101 | Annul a question | idea | Question bank | - | - |
-| 3 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
-| 4 | F-99 | Transcribe the paper of an edition | idea | Question bank | - | first release of question-bank |
-| 5 | F-102 | Shared base text | idea | Question bank | - | - |
-| 6 | F-104 | Multiple-answer questions | idea | Question bank | - | - |
-| 7 | F-105 | Review before publishing | idea | Question bank | - | - |
-| 8 | F-78 | Notice subjects of the municipal guard editions | refining | Subject taxonomy | - | - |
-| 9 | F-108 | Short-answer questions | idea | Question bank | - | - |
-| 10 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | - | - |
-| 11 | F-106 | Matching questions | idea | Question bank | - | - |
-| 12 | F-107 | Fill-in-the-blanks questions | idea | Question bank | - | - |
-| 13 | F-109 | Open-answer and essay questions | idea | Question bank | - | - |
-| 14 | F-40 | Eval suite for model calls | idea | Foundation and identity | - | - |
-| 15 | F-61 | DocGen lists every tool offered to a model | idea | Foundation and identity | - | - |
-| 16 | F-69 | DocGen tool catalogue | idea | Foundation and identity | - | - |
-| 17 | F-70 | Record the visual identity | idea | Foundation and identity | - | - |
-| 18 | F-72 | EU representative before selling in Portugal | idea | Foundation and identity | - | - |
-| 19 | F-80 | Back-office exam search matches authority and state | idea | Assessment catalog | - | - |
-| 20 | F-81 | Park and start staging from a GitHub Actions workflow | idea | Cloud hosting and operations | - | - |
-| 21 | F-82 | Update the CI workflow actions to current majors | idea | Cloud hosting and operations | - | - |
-| 22 | F-83 | The stylesheet paints colours from the identity tokens | idea | Foundation and identity | - | - |
-| 23 | F-84 | Rotate the OpenIddict certificates without signing users out | idea | Foundation and identity | - | - |
-| 24 | F-85 | Existing users accept a new legal document version | idea | Foundation and identity | - | - |
-| 25 | F-86 | Copy notice subjects from another edition | approved | Subject taxonomy | - | - |
-| 26 | F-87 | Production emails leave from our own domain | idea | Cloud hosting and operations | - | - |
-| 27 | F-88 | Handle bounced and spam-flagged emails | idea | Cloud hosting and operations | - | - |
-| 28 | F-89 | Upload the notice PDF of an edition | approved | Assessment catalog | - | F-103 |
-| 29 | F-90 | Where a subject or topic is used | idea | Subject taxonomy | - | - |
-| 30 | F-91 | Glossary sweep of technical terms | idea | Foundation and identity | - | - |
-| 31 | F-92 | An admin requires a user to change their password | idea | Foundation and identity | - | - |
-| 32 | F-111 | A release migrates the production database | idea | Cloud hosting and operations | - | - |
-| 33 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
-| 34 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
-| 35 | F-116 | A GitHub Actions workflow publishes a release | idea | Cloud hosting and operations | - | - |
-| 36 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | Cloud hosting and operations | - | - |
-| 37 | F-103 | Images in questions | idea | Question bank | F-89 | - |
-| 38 | F-118 | Sort and extra filters of the question list | idea | Question bank | F-100 | - |
-| 39 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | Question bank | F-100 | - |
+| 1 | F-101 | Annul a question | idea | Question bank | - | - |
+| 2 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
+| 3 | F-99 | Transcribe the paper of an edition | idea | Question bank | - | first release of question-bank |
+| 4 | F-102 | Shared base text | idea | Question bank | - | - |
+| 5 | F-104 | Multiple-answer questions | idea | Question bank | - | - |
+| 6 | F-105 | Review before publishing | idea | Question bank | - | - |
+| 7 | F-78 | Notice subjects of the municipal guard editions | refining | Subject taxonomy | - | - |
+| 8 | F-108 | Short-answer questions | idea | Question bank | - | - |
+| 9 | F-110 | Sample questions of the municipal guard editions | idea | Question bank | - | - |
+| 10 | F-106 | Matching questions | idea | Question bank | - | - |
+| 11 | F-107 | Fill-in-the-blanks questions | idea | Question bank | - | - |
+| 12 | F-109 | Open-answer and essay questions | idea | Question bank | - | - |
+| 13 | F-40 | Eval suite for model calls | idea | Foundation and identity | - | - |
+| 14 | F-61 | DocGen lists every tool offered to a model | idea | Foundation and identity | - | - |
+| 15 | F-69 | DocGen tool catalogue | idea | Foundation and identity | - | - |
+| 16 | F-70 | Record the visual identity | idea | Foundation and identity | - | - |
+| 17 | F-72 | EU representative before selling in Portugal | idea | Foundation and identity | - | - |
+| 18 | F-80 | Back-office exam search matches authority and state | idea | Assessment catalog | - | - |
+| 19 | F-81 | Park and start staging from a GitHub Actions workflow | idea | Cloud hosting and operations | - | - |
+| 20 | F-82 | Update the CI workflow actions to current majors | idea | Cloud hosting and operations | - | - |
+| 21 | F-83 | The stylesheet paints colours from the identity tokens | idea | Foundation and identity | - | - |
+| 22 | F-84 | Rotate the OpenIddict certificates without signing users out | idea | Foundation and identity | - | - |
+| 23 | F-85 | Existing users accept a new legal document version | idea | Foundation and identity | - | - |
+| 24 | F-86 | Copy notice subjects from another edition | approved | Subject taxonomy | - | - |
+| 25 | F-87 | Production emails leave from our own domain | idea | Cloud hosting and operations | - | - |
+| 26 | F-88 | Handle bounced and spam-flagged emails | idea | Cloud hosting and operations | - | - |
+| 27 | F-89 | Upload the notice PDF of an edition | approved | Assessment catalog | - | F-103 |
+| 28 | F-90 | Where a subject or topic is used | idea | Subject taxonomy | - | - |
+| 29 | F-91 | Glossary sweep of technical terms | idea | Foundation and identity | - | - |
+| 30 | F-92 | An admin requires a user to change their password | idea | Foundation and identity | - | - |
+| 31 | F-111 | A release migrates the production database | idea | Cloud hosting and operations | - | - |
+| 32 | F-113 | Table button in the rich text editor | idea | Question bank | - | - |
+| 33 | F-115 | One test helper for every module's permissions | idea | Foundation and identity | - | - |
+| 34 | F-116 | A GitHub Actions workflow publishes a release | idea | Cloud hosting and operations | - | - |
+| 35 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | Cloud hosting and operations | - | - |
+| 36 | F-118 | Sort and extra filters of the question list | idea | Question bank | - | - |
+| 37 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | Question bank | - | - |
+| 38 | F-103 | Images in questions | idea | Question bank | F-89 | - |
 
 ## Checklist
 
-- [ ] 1. F-100 — Find questions in the back office [validating] — unlocks F-118, F-119
-- [ ] 2. F-101 — Annul a question [idea]
-- [ ] 3. F-77 — Subject and topic aliases [approved]
-- [ ] 4. F-99 — Transcribe the paper of an edition [idea] — unlocks first release of question-bank
-- [ ] 5. F-102 — Shared base text [idea]
-- [ ] 6. F-104 — Multiple-answer questions [idea]
-- [ ] 7. F-105 — Review before publishing [idea]
-- [ ] 8. F-78 — Notice subjects of the municipal guard editions [refining]
-- [ ] 9. F-108 — Short-answer questions [idea]
-- [ ] 10. F-110 — Sample questions of the municipal guard editions [idea]
-- [ ] 11. F-106 — Matching questions [idea]
-- [ ] 12. F-107 — Fill-in-the-blanks questions [idea]
-- [ ] 13. F-109 — Open-answer and essay questions [idea]
-- [ ] 14. F-40 — Eval suite for model calls [idea]
-- [ ] 15. F-61 — DocGen lists every tool offered to a model [idea]
-- [ ] 16. F-69 — DocGen tool catalogue [idea]
-- [ ] 17. F-70 — Record the visual identity [idea]
-- [ ] 18. F-72 — EU representative before selling in Portugal [idea]
-- [ ] 19. F-80 — Back-office exam search matches authority and state [idea]
-- [ ] 20. F-81 — Park and start staging from a GitHub Actions workflow [idea]
-- [ ] 21. F-82 — Update the CI workflow actions to current majors [idea]
-- [ ] 22. F-83 — The stylesheet paints colours from the identity tokens [idea]
-- [ ] 23. F-84 — Rotate the OpenIddict certificates without signing users out [idea]
-- [ ] 24. F-85 — Existing users accept a new legal document version [idea]
-- [ ] 25. F-86 — Copy notice subjects from another edition [approved]
-- [ ] 26. F-87 — Production emails leave from our own domain [idea]
-- [ ] 27. F-88 — Handle bounced and spam-flagged emails [idea]
-- [ ] 28. F-89 — Upload the notice PDF of an edition [approved] — unlocks F-103
-- [ ] 29. F-90 — Where a subject or topic is used [idea]
-- [ ] 30. F-91 — Glossary sweep of technical terms [idea]
-- [ ] 31. F-92 — An admin requires a user to change their password [idea]
-- [ ] 32. F-111 — A release migrates the production database [idea]
-- [ ] 33. F-113 — Table button in the rich text editor [idea]
-- [ ] 34. F-115 — One test helper for every module's permissions [idea]
-- [ ] 35. F-116 — A GitHub Actions workflow publishes a release [idea]
-- [ ] 36. F-117 — The deploy pipeline checks the cloud account before it signs in [idea]
-- [ ] 37. F-103 — Images in questions [idea] — waits on F-89
-- [ ] 38. F-118 — Sort and extra filters of the question list [idea] — waits on F-100
-- [ ] 39. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — waits on F-100
+- [ ] 1. F-101 — Annul a question [idea]
+- [ ] 2. F-77 — Subject and topic aliases [approved]
+- [ ] 3. F-99 — Transcribe the paper of an edition [idea] — unlocks first release of question-bank
+- [ ] 4. F-102 — Shared base text [idea]
+- [ ] 5. F-104 — Multiple-answer questions [idea]
+- [ ] 6. F-105 — Review before publishing [idea]
+- [ ] 7. F-78 — Notice subjects of the municipal guard editions [refining]
+- [ ] 8. F-108 — Short-answer questions [idea]
+- [ ] 9. F-110 — Sample questions of the municipal guard editions [idea]
+- [ ] 10. F-106 — Matching questions [idea]
+- [ ] 11. F-107 — Fill-in-the-blanks questions [idea]
+- [ ] 12. F-109 — Open-answer and essay questions [idea]
+- [ ] 13. F-40 — Eval suite for model calls [idea]
+- [ ] 14. F-61 — DocGen lists every tool offered to a model [idea]
+- [ ] 15. F-69 — DocGen tool catalogue [idea]
+- [ ] 16. F-70 — Record the visual identity [idea]
+- [ ] 17. F-72 — EU representative before selling in Portugal [idea]
+- [ ] 18. F-80 — Back-office exam search matches authority and state [idea]
+- [ ] 19. F-81 — Park and start staging from a GitHub Actions workflow [idea]
+- [ ] 20. F-82 — Update the CI workflow actions to current majors [idea]
+- [ ] 21. F-83 — The stylesheet paints colours from the identity tokens [idea]
+- [ ] 22. F-84 — Rotate the OpenIddict certificates without signing users out [idea]
+- [ ] 23. F-85 — Existing users accept a new legal document version [idea]
+- [ ] 24. F-86 — Copy notice subjects from another edition [approved]
+- [ ] 25. F-87 — Production emails leave from our own domain [idea]
+- [ ] 26. F-88 — Handle bounced and spam-flagged emails [idea]
+- [ ] 27. F-89 — Upload the notice PDF of an edition [approved] — unlocks F-103
+- [ ] 28. F-90 — Where a subject or topic is used [idea]
+- [ ] 29. F-91 — Glossary sweep of technical terms [idea]
+- [ ] 30. F-92 — An admin requires a user to change their password [idea]
+- [ ] 31. F-111 — A release migrates the production database [idea]
+- [ ] 32. F-113 — Table button in the rich text editor [idea]
+- [ ] 33. F-115 — One test helper for every module's permissions [idea]
+- [ ] 34. F-116 — A GitHub Actions workflow publishes a release [idea]
+- [ ] 35. F-117 — The deploy pipeline checks the cloud account before it signs in [idea]
+- [ ] 36. F-118 — Sort and extra filters of the question list [idea]
+- [ ] 37. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea]
+- [ ] 38. F-103 — Images in questions [idea] — waits on F-89
 
 ## Summary
 
-- Delivered: 107
+- Delivered: 108
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
 - First release (question-bank): 4 of 5 delivered; missing: F-99

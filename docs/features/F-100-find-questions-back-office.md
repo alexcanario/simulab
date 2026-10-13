@@ -1,7 +1,7 @@
 ---
 feature: F-100
 epic: Question bank
-status: validating
+status: done
 board: 146
 version: 2
 ---
@@ -243,3 +243,14 @@ Needed to validate: the local app host with four questions of two subjects, two 
 - 2026-10-13 rework — review: item text table out of date
 - 2026-10-13 rework — review: two page tests kept a dummy await
 - 2026-10-13 test-fail — 2 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.401/Microsoft.Common.CurrentVersion.targets; MSB3026 in C:, 1 red
+
+## Delivery
+- Shipped 2026-10-13 as app version 0.34.0. Branch `feature/F-100`, merge commit `fabd305a` (board #146).
+- Full suite: 3,400 tests passed, 0 failed (`gate.js ship`, run twice, the second after the version bump: architecture 219, Web 1,651, QuestionBank 259, Catalog 528, Identity 501, Api 58, AppHost 80, the rest 85); no new warnings. Security scan `agile scan GREEN` (2 medium findings in `tools/Simulab.DocGen`, older than this item). Test lock `65fc466f`, one unlock (two test errors, no criterion changed).
+- New tests: `QuestionFilterEndpointTests` (14), `QuestionStatusNumberEndpointTests` (1), `QuestionFilterDirectoryTests` (6), and in the Web `QuestionsFilterPageTests` (22), `QuestionsFilterLayoutTests` (3), `QuestionListQueryStringTests`, `QuestionBankApiClientFilterTests`, `QuestionFilterResourcesTests`, `AppDataTableClearSearchTests`.
+- Docs: `DocGen --check` green (`routes.md` gained the two routes, `Simulab.Api.json` the filter parameters). App manual: `questions.md` in en, pt-BR and pt-PT. Glossary: 3 rows (Kestrel, request line, EXPLAIN).
+- Measured (AC13): 50,000 questions, every filtered list under 20 ms (count and page), no index added; numbers in `## Decisions`.
+- Found on screen during the validation and fixed in this item: the last filter spilled out of the card, its popup was painted under the table header (the library's sticky toolbar is its own stacking context), and the six filters left two empty grid tracks; the page now asks the layout for a wider content area (`app-page-wide`, up to 1800 px).
+- Not built here, captured: F-118 (ordering and extra filters), F-119 (a list that keeps its state in the address follows a menu click to the plain URL).
+
+Gate time: 9 passes, 17 min 45 s — turn 4 (3 min 4 s), ship 3 (11 min 19 s), scan 2 (3 min 22 s); 1 red
