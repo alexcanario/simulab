@@ -1,7 +1,7 @@
 ---
 feature: F-76
 epic: Subject taxonomy
-status: refining
+status: approved
 board: 120
 version: 1
 ---
