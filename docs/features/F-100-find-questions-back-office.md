@@ -242,3 +242,4 @@ Needed to validate: the local app host with four questions of two subjects, two 
 - 2026-10-13 rework — review: numeric status of F-95 had no test
 - 2026-10-13 rework — review: item text table out of date
 - 2026-10-13 rework — review: two page tests kept a dummy await
+- 2026-10-13 test-fail — 2 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.401/Microsoft.Common.CurrentVersion.targets; MSB3026 in C:, 1 red
