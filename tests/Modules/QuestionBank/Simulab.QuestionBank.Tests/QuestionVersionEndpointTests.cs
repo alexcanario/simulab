@@ -111,7 +111,7 @@ public sealed class QuestionVersionEndpointTests : OriginApiTests
         version.StatementHtml.Should().Be("<p>Qual é a capital da França? (rascunho)</p>");
         version.Options.Select(option => (option.Position, option.IsCorrect)).Should().Equal((0, true), (1, false));
         version.Options.Select(option => option.TextHtml).Should().Equal("<p>Paris</p>", "<p>Lyon</p>");
-        version.CreatedAt.Should().BeAfter(DateTimeOffset.UtcNow.AddMinutes(-5));
+        version.CreatedAt.Should().BeCloseTo(Factory.Clock.GetUtcNow(), TimeSpan.FromMinutes(5));
     }
 
     // BR7: the options are stored in the version's JSON column under the names the mapping reads back.
@@ -198,7 +198,7 @@ public sealed class QuestionVersionEndpointTests : OriginApiTests
         list[1].IsCurrent.Should().BeFalse();
         var version = await VersionAsync(admin, question.Id, 2);
         version.AnswerKeyChanged.Should().BeTrue();
-        version.CreatedAt.Should().BeAfter(DateTimeOffset.UtcNow.AddMinutes(-5));
+        version.CreatedAt.Should().BeCloseTo(Factory.Clock.GetUtcNow(), TimeSpan.FromMinutes(5));
         version.Options.Single(option => option.IsCorrect).TextHtml.Should().Be("<p>Lyon</p>");
     }
 
