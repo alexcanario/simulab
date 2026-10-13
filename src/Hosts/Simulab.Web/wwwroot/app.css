@@ -1575,7 +1575,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 /* A page that marks its content `.app-page-wide` (F-100: the question list) gets the layout's content area up to
    1800 px instead of 1280 px; the other pages keep the layout's own width. Under 1800 px of room it changes
    nothing: the container is as wide as the room. */
-.mud-container-maxwidth-large:has(> .app-page-wide) {
+.mud-container-maxwidth-lg:has(> .app-page-wide) {
     max-width: 1800px;
 }
 
