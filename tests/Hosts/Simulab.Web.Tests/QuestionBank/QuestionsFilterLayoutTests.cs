@@ -28,6 +28,20 @@ public sealed class QuestionsFilterLayoutTests : QuestionPageTestContext
         }
     }
 
+    // The wide content area is the page's root element, so the layout's container sees it as its direct child.
+    [Fact]
+    public void Page_RootAsksForTheWideContentArea_AndHoldsTheWholePage()
+    {
+        var page = Render<Questions>();
+        page.WaitForAssertion(() => page.FindAll(".app-page-wide").Should().ContainSingle());
+
+        var root = page.Find(".app-page-wide");
+
+        page.Markup.TrimStart().Should().StartWith("<div class=\"app-page-wide\"", "the marked element is the root of the page");
+        root.QuerySelector("h1").Should().NotBeNull();
+        root.QuerySelector(".app-table-filters-grid").Should().NotBeNull();
+    }
+
     [Fact]
     public void Edition_SaysWhatIsListed_NotThatZeroCharactersAreNeeded()
     {

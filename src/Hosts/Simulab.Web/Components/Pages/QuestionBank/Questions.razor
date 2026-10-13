@@ -15,7 +15,9 @@
    (BR15). Add and edit are a page of their own, not a dialog: the question is a complex entity (rule:
    ui-project). F-100: filtered by status, type, difficulty, subject and topic, organizer and edition; the picks
    live in the address (BR8) and each picker draws its own chips, so a filter is seen and removed where it is
-   chosen. The table's search box stays the table's own. *@
+   chosen. The table's search box stays the table's own. The page asks the layout for a wider content area
+   (app.css, .app-page-wide): six filters with names in them do not fit the 1280 px of the other pages. *@
+<div class="app-page-wide">
 <AppPageHeader Title="@L["Questions.Title"]"
                Breadcrumbs="_breadcrumbs"
                PrimaryActionText="@L["Common.Add"]"
@@ -237,6 +239,7 @@
                        MoreActions="@PublicationActions(context)" />
     </RowActions>
 </AppDataTable>
+</div>
 
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
