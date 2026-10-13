@@ -212,6 +212,12 @@ else
                                    Columns="2"
                                    Hint="@L["Questions.TrueFalseKey.Hint"]"
                                    Error="@_trueFalseKeyError" />
+
+                    @* F-98 BR5, AC16: the same reason field as the options section has. *@
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
                 </AppSectionCard>
             }
             else
@@ -304,6 +310,12 @@ else
                 </div>
 
                 <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+                @* F-98 BR5, AC16: a published question whose key is changing says why; the reason goes with Save. *@
+                @if (ShowChangeReason)
+                {
+                    @ChangeReasonField
+                }
             </AppSectionCard>
             }
 
@@ -404,15 +416,96 @@ else
                 {
                     <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
                 }
+
+                @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
+                   the Api refused the first click; the second click sends it. *@
+                @if (!IsPublished && _publishReasonRequired)
+                {
+                    <div class="app-publication-change-reason">
+                        <AppTextField TValue="string"
+                                      Id="@PublishReasonId"
+                                      Label="@L["Questions.ChangeReason.Label"]"
+                                      Hint="@L["Questions.ChangeReason.Hint"]"
+                                      Value="_publishReason"
+                                      ValueChanged="@((string? value) => OnPublishReasonChanged(value))"
+                                      Lines="3"
+                                      MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                                      Required="true"
+                                      Error="@_publishReasonError" />
+                    </div>
+                }
             }
         </AppSectionCard>
     </MudPaper>
+
+    @* F-98 UC5, AC15: every version the question has had, newest first. A version opens read only in the preview
+       dialog. The author is stored and not shown: no contract resolves a name. *@
+    @if (_saved is not null)
+    {
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <AppSectionCard Id="question-section-history"
+                            Title="@L["Questions.Section.History"]"
+                            Icon="@AppIcons.History"
+                            Subtitle="@L["Questions.Section.History.Subtitle"]">
+                <AppDataTable @ref="_history"
+                              TItem="QuestionVersionListItemResponse"
+                              LoadAsync="LoadHistoryAsync"
+                              Searchable="false"
+                              EmptyMessage="@L["Questions.History.Empty"]">
+                    <Columns>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Version"]" Sortable="false">
+                            <CellTemplate>
+                                <span class="app-cell-nowrap">
+                                    <span>@context.Item.Number.ToString(CultureInfo.CurrentCulture)</span>
+                                    @if (context.Item.IsCurrent)
+                                    {
+                                        <AppStatusChip Text="@L["Questions.History.Current"]" Tone="AppStatusTone.Info" />
+                                    }
+                                </span>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Date"]" Sortable="false">
+                            <CellTemplate>
+                                <span class="app-cell-nowrap">@context.Item.CreatedAt.ToString("g", CultureInfo.CurrentCulture)</span>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Change"]" Sortable="false">
+                            <CellTemplate>
+                                <AppStatusChip Text="@ChangeLabel(context.Item)" Tone="ChangeTone(context.Item)" />
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Reason"]" Sortable="false">
+                            <CellTemplate>
+                                @if (string.IsNullOrWhiteSpace(context.Item.Reason))
+                                {
+                                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
+                                    <span aria-hidden="true">—</span>
+                                    <span class="app-visually-hidden">@L["Questions.History.NoReason"]</span>
+                                }
+                                else
+                                {
+                                    <AppTruncatedText Text="@context.Item.Reason" MaxWidth="24rem" />
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <RowActions>
+                        <AppRowActions ItemName="@L["Questions.History.Row.Name", context.Number]"
+                                       IdPrefix="@HistoryActionsId(context.Number)"
+                                       MoreActions="@HistoryActions(context)" />
+                    </RowActions>
+                </AppDataTable>
+            </AppSectionCard>
+        </MudPaper>
+    }
 }
 
 @code {
     private const string ErrorSummaryId = "question-error-summary";
     private const string AddOptionId = "question-option-add";
     private const string PreviewButtonId = "question-preview";
+    private const string ChangeReasonId = "question-change-reason";
+    private const string PublishReasonId = "question-publish-reason";
 
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
@@ -459,6 +552,15 @@ else
     private string? _publicationError;
     private string? _announcement;
     private string? _pendingFocus;
+
+    // F-98: the reason of an answer key change, sent with Save (BR5), and the one a refused publish asks for.
+    private string _changeReason = string.Empty;
+    private string? _changeReasonError;
+    private bool _changeReasonForced;
+    private string _publishReason = string.Empty;
+    private string? _publishReasonError;
+    private bool _publishReasonRequired;
+    private AppDataTable<QuestionVersionListItemResponse>? _history;
 
     private bool _loading;
     private bool _loadFailed;
@@ -601,6 +703,7 @@ else
 
             AddIfRefused(items, _optionsError, AddOptionId, L["Questions.Section.Options"]);
             AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
+            AddIfRefused(items, _changeReasonError, ChangeReasonId, L["Questions.ChangeReason.Label"]);
             AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
             return items;
         }
@@ -632,6 +735,68 @@ else
         IsTrueFalse
             ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
             : OptionsChanged();
+
+    // F-98 BR4: the key of a published question differs from the stored one when the correct option moved (a
+    // reorder counts) or the true/false value did. Version 1 and drafts never need a reason.
+    private bool KeyChangeNeedsReason =>
+        IsPublished
+        && _saved is not null
+        && (IsTrueFalse ? _trueFalseKey != _saved.TrueFalseKey : CorrectPosition != StoredCorrectPosition);
+
+    private int? StoredCorrectPosition
+    {
+        get
+        {
+            var index = _saved?.Options.OrderBy(option => option.Position).ToList().FindIndex(option => option.IsCorrect) ?? -1;
+            return index >= 0 ? index : null;
+        }
+    }
+
+    // The field also shows when the Api asked for a reason the form did not expect (the stored key moved meanwhile).
+    private bool ShowChangeReason => KeyChangeNeedsReason || _changeReasonForced;
+
+    private RenderFragment ChangeReasonField =>
+        @<div class="app-change-reason">
+            <AppTextField TValue="string"
+                          Id="@ChangeReasonId"
+                          Label="@L["Questions.ChangeReason.Label"]"
+                          Hint="@L["Questions.ChangeReason.Hint"]"
+                          Value="_changeReason"
+                          ValueChanged="@((string? value) => OnChangeReasonChanged(value))"
+                          Lines="3"
+                          MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                          Required="true"
+                          Error="@_changeReasonError" />
+        </div>;
+
+    private void OnChangeReasonChanged(string? value)
+    {
+        _changeReason = value ?? string.Empty;
+        _changeReasonError = null;
+    }
+
+    private void OnPublishReasonChanged(string? value)
+    {
+        _publishReason = value ?? string.Empty;
+        _publishReasonError = null;
+    }
+
+    // The comfort check of the reason (BR5); the Api is the authority and runs the same one.
+    private string? ChangeReasonValidation()
+    {
+        if (!ShowChangeReason)
+        {
+            return null;
+        }
+
+        var reason = _changeReason.Trim();
+
+        return reason.Length == 0
+            ? Errors.For(QuestionBankErrorCodes.QuestionKeyChangeReasonRequired)
+            : reason.Length > QuestionLimits.ChangeReasonMaxLength
+                ? Errors.For(QuestionBankErrorCodes.QuestionChangeReasonTooLong)
+                : null;
+    }
 
     private string DefaultLanguage => QuestionText.DefaultContentLanguage();
 
@@ -740,11 +905,15 @@ else
             .. question.Options.OrderBy(option => option.Position)
                 .Select(option => new OptionDraft { Html = option.TextHtml, IsCorrect = option.IsCorrect })
         ];
+        // F-98: what was typed as a reason belonged to the save that just came back.
+        _changeReason = string.Empty;
+        _changeReasonForced = false;
         ClearErrors();
     }
 
     private void ClearErrors()
     {
+        _changeReasonError = null;
         _topicError = _languageError = _difficultyError = _statementError = null;
         _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
@@ -762,6 +931,96 @@ else
             new BreadcrumbItem(L["Questions.Title"], href: "/admin/questions"),
             new BreadcrumbItem(Title, href: null, disabled: true)
         ];
+
+    // -- history (F-98) ---------------------------------------------------------------------------------------
+
+    private static string HistoryActionsId(int number) => $"question-version-actions-{number}";
+
+    private string ChangeLabel(QuestionVersionListItemResponse version) =>
+        version.Number == 1
+            ? L["Questions.History.Change.First"]
+            : version.AnswerKeyChanged
+                ? L["Questions.History.Change.KeyChanged"]
+                : L["Questions.History.Change.Edited"];
+
+    // The key change is the one row a reader must notice; the first publication and an edit are plain labels.
+    private static AppStatusTone ChangeTone(QuestionVersionListItemResponse version) =>
+        version.Number > 1 && version.AnswerKeyChanged ? AppStatusTone.Warning : AppStatusTone.Neutral;
+
+    private IReadOnlyList<AppRowAction> HistoryActions(QuestionVersionListItemResponse version) =>
+    [
+        new AppRowAction(L["Questions.History.Action.View"], AppIcons.View, () => ViewVersionAsync(version), Key: "view")
+    ];
+
+    // A question has few versions: the Api answers all of them and the table pages them here.
+    private async Task<AppTablePage<QuestionVersionListItemResponse>> LoadHistoryAsync(
+        AppTableQuery query,
+        CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListVersionsAsync(token, _saved!.Id, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Versions failed to load: {result.ErrorCode}.");
+        }
+
+        var all = result.Value!;
+
+        return new AppTablePage<QuestionVersionListItemResponse>(
+            [.. all.Skip(query.Page * query.PageSize).Take(query.PageSize)],
+            all.Count);
+    }
+
+    private Task ReloadHistoryAsync() => _history is null ? Task.CompletedTask : _history.ReloadAsync();
+
+    // UC5: the version opens in the preview dialog, read only, from what was recorded then.
+    private async Task ViewVersionAsync(QuestionVersionListItemResponse row)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.GetVersionAsync(token, current.Id, row.Number);
+        if (result is not { IsSuccess: true, Value: { } version })
+        {
+            _publicationError = Errors.For(result?.ErrorCode);
+            return;
+        }
+
+        // The dialog draws a question: the version fills its content and the question's catalog data stays as
+        // it is (it is not part of a version, BR1).
+        var asQuestion = new QuestionResponse(
+            version.QuestionId,
+            version.Type,
+            QuestionStatus.Published,
+            current.TopicId,
+            current.TopicName,
+            current.SubjectId,
+            current.SubjectName,
+            version.ContentLanguage,
+            version.StatementHtml,
+            version.BaseTextHtml,
+            version.ExplanationHtml,
+            current.Difficulty,
+            version.Options,
+            TrueFalseKey: version.TrueFalseKey,
+            CurrentVersion: version.Number);
+        var parameters = new DialogParameters<QuestionPreviewDialog>
+        {
+            { dialog => dialog.Question, asQuestion },
+            { dialog => dialog.VersionRecordedAt, version.CreatedAt }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionPreviewDialog>(
+            L["Questions.History.Version.Title", version.Number], parameters, options);
+        await reference.Result;
+
+        _pendingFocus = $"{HistoryActionsId(row.Number)}-view";
+        StateHasChanged();
+    }
 
     // -- classification ---------------------------------------------------------------------------------------
 
@@ -1109,6 +1368,7 @@ else
         _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
             ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
             : null;
+        _changeReasonError = ChangeReasonValidation();
 
         if (HasClientRefusal())
         {
@@ -1137,7 +1397,8 @@ else
             _edition is null ? null : _paperNumber,
             _edition is null ? null : _noticeSubjectId,
             _type,
-            IsTrueFalse ? _trueFalseKey : null);
+            IsTrueFalse ? _trueFalseKey : null,
+            ShowChangeReason ? QuestionHtml.NullIfBlank(_changeReason.Trim()) : null);
 
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
@@ -1154,6 +1415,7 @@ else
             BuildBreadcrumbs();
             await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
             Snackbar.Add(L["Questions.Saved"], Severity.Success);
+            await ReloadHistoryAsync();
             if (wasAdd)
             {
                 // The page stays open as the edit form of the question that was just saved: previewing and
@@ -1174,7 +1436,7 @@ else
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
         || _paperNumberError is not null || _baseTextError is not null || _explanationError is not null || _optionsError is not null
-        || _trueFalseKeyError is not null
+        || _trueFalseKeyError is not null || _changeReasonError is not null
         || _options.Any(option => option.Error is not null);
 
     // A refusal belongs to the field that caused it, so the reader sees where to change something (BR16).
@@ -1215,6 +1477,17 @@ else
                 break;
             case QuestionBankErrorCodes.QuestionTrueFalseKeyRequired:
                 _trueFalseKeyError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionKeyChangeReasonRequired:
+            case QuestionBankErrorCodes.QuestionChangeReasonTooLong:
+                // F-98: the field is shown even when the form did not expect to need it (the key moved meanwhile).
+                _changeReasonForced = true;
+                _changeReasonError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionVersionConflict:
+                // BR10: another save recorded the next version first; the curator reloads and tries again.
+                _error = text;
+                fieldRefused = false;
                 break;
             case QuestionBankErrorCodes.QuestionDifficultyInvalid:
                 _difficultyError = text;
@@ -1278,20 +1551,37 @@ else
         }
 
         _publicationError = null;
+        _publishReasonError = null;
         _publishing = true;
 
+        // F-98 BR5: the reason goes along only once the Api asked for it (the field is visible then).
+        var reason = _publishReasonRequired ? QuestionHtml.NullIfBlank(_publishReason.Trim()) : null;
         var token = await TokenAsync();
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
             : publish
-                ? await Api.PublishQuestionAsync(token, current.Id)
+                ? await Api.PublishQuestionAsync(token, current.Id, reason)
                 : await Api.UnpublishQuestionAsync(token, current.Id);
 
         _publishing = false;
         if (result is { IsSuccess: true, Value: { } question })
         {
             _saved = question;
+            _publishReason = string.Empty;
+            _publishReasonRequired = false;
             Snackbar.Add(publish ? L["Questions.Published"] : L["Questions.Unpublished"], Severity.Success);
+            await ReloadHistoryAsync();
+            return;
+        }
+
+        // F-98 BR5, AC16: the key differs from the latest version's and no reason (or an over-long one) came:
+        // the card shows the field, focused, and the second click sends it.
+        if (result.ErrorCode is QuestionBankErrorCodes.QuestionKeyChangeReasonRequired
+            or QuestionBankErrorCodes.QuestionChangeReasonTooLong)
+        {
+            _publishReasonRequired = true;
+            _publishReasonError = Errors.For(result.ErrorCode);
+            _pendingFocus = PublishReasonId;
             return;
         }
 

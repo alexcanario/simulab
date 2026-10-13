@@ -104,13 +104,13 @@ Tests locked: de51e5bd97f5d9672511912d8dc5ce0518fb903a (4 files); unlocks: 1
 | AC8 | `QuestionVersionEndpointTests.Save_AChangedStatementWithAReason_KeepsItAsANote_AndAnIdenticalSaveWithAReasonRecordsNothing`; `QuestionVersionTests.NextVersion_ChangedStatementWithAReason_KeepsTheReasonAsANote_AndTheKeyIsNotMarkedChanged`, `NextVersion_SameContentWithAReason_MakesNothing` |
 | AC9 | `QuestionVersionEndpointTests.Publish_AfterAnEditOfTheDraft_RecordsTheNextVersion_AndWithNoEditRecordsNone`, `Publish_AfterTheKeyChangedInTheDraft_NeedsTheReason_AndTheSecondTryWithItPublishes` |
 | AC10 | `QuestionVersionEndpointTests.Versions_ListNewestFirstWithTheCurrentOneMarked_AndAMissingNumberIsNotFound`, `Versions_OfAnotherQuestion_AreNotFound_AndAnUnknownQuestionAnswersQuestionNotFound`, `AVersion_StoresItsOptionsAsJsonWithPositionTextHtmlAndIsCorrect` |
-| AC11 | `QuestionVersionEndpointTests.BothVersionReads_WithoutThePermission_AnswerForbidden_AndACuratorReadsThem` (the absent History card: pending, screen test) |
+| AC11 | `QuestionVersionEndpointTests.BothVersionReads_WithoutThePermission_AnswerForbidden_AndACuratorReadsThem` ; `QuestionVersionFormTests.History_ANewQuestion_HasNoHistoryCard` (the page itself is behind `questions.manage`, F-95) |
 | AC12 | `QuestionVersionEndpointTests.Delete_ADraftThatHasVersions_LeavesTheVersionRowsWithTheirContent` |
 | AC13 | `AddQuestionVersionsMigrationTests.Up_GivesVersionOneToEachPublishedQuestionNotDeleted_AndToNoDraft`, `Up_CopiesTheLiveOptionsInPositionOrder_UnderTheNamesTheMappingReads` |
 | AC14 | `QuestionVersionRaceTests.Save_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndStoresNothingOfItself`, `Publish_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysADraft`; `QuestionVersionEndpointTests.TheDatabase_RefusesTwoVersionsWithTheSameNumberForOneQuestion` |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
+| AC15 | `QuestionVersionFormTests.History_ListsTheVersionsNewestFirst_WithTheCurrentChipTheChangeLabelAndTheReason`, `History_TheKeyChangeRowCarriesTheWarningToneAndItsOwnWords`, `History_ANeverPublishedQuestion_ShowsTheEmptyText`, `History_View_OpensTheRecordedVersionReadOnly_WithTheKeyHiddenUntilShowAnswer`, `History_AfterAPublish_ReloadsTheList` |
+| AC16 | `QuestionVersionFormTests.Reason_OnAPublishedQuestionWithTheKeyUntouched_IsNotShown`, `Reason_WhenTheKeyOfAPublishedQuestionChanges_ShowsTheFieldAndRefusesSaveWithoutIt`, `Reason_Typed_IsSentWithSave_AndTheFieldGoesAwayOnceSaved`, `Reason_OverTheLimit_IsRefusedBeforeTheCall`, `Publish_RefusedForTheMissingReason_ShowsTheFieldInTheCard_AndTheSecondClickPublishes`, `ListPublish_RefusedForTheMissingReason_ShowsTheCodesTextInTheTopAlert`; `TrueFalseQuestionFormTests.Edit_PublishedTrueFalse_ChangingTheKey_SendsAPutWithTheNewKeyAndStaysPublished` |
+| AC17 | `QuestionVersionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` (every key in each locale) |
 
 ## Decisions
 - 2026-10-12 — Versioned content is the statement, base text, options, key, explanation and language; topic, difficulty and origin stay catalog data and make no version — owner chose it (question "what versions"), so reclassifying many questions does not flood the history.

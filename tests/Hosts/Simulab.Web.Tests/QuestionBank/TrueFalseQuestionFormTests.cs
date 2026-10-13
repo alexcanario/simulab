@@ -293,10 +293,16 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
         page.WaitForAssertion(() => page.FindAll("#question-type-value").Should().ContainSingle());
 
         await page.InvokeAsync(() => page.Find("#question-true-false-key-False").Click());
+        // F-98 AC16: the key of a published question is changing, so Save needs the reason.
+        page.WaitForElement("#question-change-reason");
+        await page.InvokeAsync(() => page.FindComponents<AppTextField<string>>()
+            .Single(field => field.Instance.Id == "question-change-reason")
+            .Instance.ValueChanged.InvokeAsync("Gabarito oficial retificado."));
         page.Find(".app-form-save").Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Put));
         var sent = Api.LastSaved(HttpMethod.Put);
+        sent.ChangeReason.Should().Be("Gabarito oficial retificado.");
         sent.TrueFalseKey.Should().BeFalse();
         sent.Type.Should().Be(QuestionType.TrueFalse);
         page.WaitForAssertion(() => Api.Questions.Single().Status.Should().Be(QuestionStatus.Published));
