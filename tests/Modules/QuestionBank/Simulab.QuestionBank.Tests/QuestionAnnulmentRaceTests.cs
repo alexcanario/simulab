@@ -20,13 +20,13 @@ namespace Simulab.QuestionBank.Tests;
 /// </summary>
 public sealed class QuestionAnnulmentRaceTests : QuestionBankApiTests
 {
-    private Task InsertCompetingVersionAsync(Guid questionId, int number) =>
+    private Task<int> InsertCompetingVersionAsync(Guid questionId, int number) =>
         QueryAsync(context => context.Database.ExecuteSqlInterpolatedAsync(
             $@"INSERT INTO question_bank.question_versions
                 (id, tenant_id, question_id, number, type, content_language, statement_html, options, answer_key_changed, created_at, is_deleted)
                VALUES ({Guid.CreateVersion7()}, NULL, {questionId}, {number}, 'SingleChoice', 'pt-BR', '<p>Concorrente.</p>', '[]'::jsonb, false, now(), false)"));
 
-    private Task SetStatusAsync(Guid questionId, string status) =>
+    private Task<int> SetStatusAsync(Guid questionId, string status) =>
         QueryAsync(context => context.Database.ExecuteSqlInterpolatedAsync(
             $"UPDATE question_bank.questions SET status = {status} WHERE id = {questionId}"));
 
