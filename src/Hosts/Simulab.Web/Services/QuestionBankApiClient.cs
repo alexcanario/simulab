@@ -113,6 +113,30 @@ public sealed class QuestionBankApiClient(HttpClient http)
             cancellationToken);
     }
 
+    /// <summary>F-101 UC1: annuls a published question; 400 without a reason, 409 for a draft or an annulled one.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> AnnulQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(
+                WithJson(HttpMethod.Post, $"{Base}/{questionId}/annul", new AnnulQuestionRequest(reason)),
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-101 UC2: takes an annulled question back to published; 409 when it is not annulled.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> ReinstateQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(
+                WithJson(HttpMethod.Post, $"{Base}/{questionId}/reinstate", new ReinstateQuestionRequest(reason)),
+                accessToken),
+            cancellationToken);
+
     /// <summary>F-98 UC5: the history of a question, newest first; an empty list while it was never published.</summary>
     public Task<QuestionBankResult<IReadOnlyList<QuestionVersionListItemResponse>>> ListVersionsAsync(
         string accessToken,

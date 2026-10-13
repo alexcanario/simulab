@@ -2445,6 +2445,86 @@
         }
       }
     },
+    "/api/v1/question-bank/questions/{id}/annul": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "AnnulQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AnnulQuestionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/reinstate": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ReinstateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ReinstateQuestionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/question-bank/questions/{id}/versions": {
       "get": {
         "tags": [
@@ -2724,6 +2804,19 @@
   },
   "components": {
     "schemas": {
+      "AnnulQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Plain text, 1 to 500 characters after trimming; null or blank counts as missing."
+          }
+        },
+        "description": "The body of an annulment (F-101, BR3): why the question is annulled. The body is optional on the wire so a\r\nmissing one is answered with the code of a missing reason, not with a framework error."
+      },
       "ChangePasswordRequest": {
         "required": [
           "currentPassword",
@@ -2947,6 +3040,19 @@
           }
         },
         "description": "What the sign-up form sends. The document versions are the ones the page showed, so the server can\r\nrefuse a form filled against texts that have since changed (BR5)."
+      },
+      "ReinstateQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Plain text, 1 to 500 characters after trimming; null or blank counts as missing."
+          }
+        },
+        "description": "The body of a reinstatement (F-101, BR6): why an annulled question is published again. The body is\r\noptional on the wire so a missing one is answered with the code of a missing reason."
       },
       "RequestPasswordResetRequest": {
         "required": [

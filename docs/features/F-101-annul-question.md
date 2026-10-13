@@ -140,6 +140,9 @@ No mockup (owner, 2026-10-13); the text wireframes below are the design. A scree
 - AC18 All new texts appear in every locale of `UI locales:`.
 
 ## Criterion → test
+
+Tests locked: 31e3e147148bf33b1018e019099b0cebc4920947 (8 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `QuestionAnnulmentEndpointTests.Annul_APublishedQuestion_BecomesAnnulled_WithVersionTwoThatSaysSo`, `Annul_ATrueFalseQuestion_KeepsItsKeyInTheVersion`, `TheAnnulledFlag_IsStoredOnTheVersionRow`; `QuestionAnnulmentTests.Annul_APublishedQuestion_MakesTheNextVersionAnnulled_WithTheSameContentAndTheTrimmedReason`, `Annul_ATrueFalseQuestion_KeepsItsKey_AndChangesNothingButTheStatus` |

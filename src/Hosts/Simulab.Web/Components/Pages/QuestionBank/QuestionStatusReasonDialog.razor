@@ -1,0 +1,104 @@
+@using Simulab.QuestionBank.Contracts
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+@* F-101 BR3: the reason of an annulment or a reinstatement. The dialog sends it through the caller's delegate, so a
+   refusal of the Api is shown here, where the reason is being typed, and only an accepted change closes it. *@
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body1" Class="mb-4">@Message</MudText>
+
+        @if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+        }
+
+        <AppTextField TValue="string"
+                      Id="question-status-reason"
+                      Label="@L["Questions.StatusReason.Label"]"
+                      Hint="@L["Questions.StatusReason.Hint"]"
+                      Value="_reason"
+                      ValueChanged="@((string? value) => OnReasonChanged(value))"
+                      Lines="3"
+                      MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                      Required="true"
+                      Error="@_reasonError" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="Cancel"
+                   Disabled="_busy"
+                   id="question-status-reason-cancel">@L["Questions.StatusReason.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="@(Destructive ? Color.Error : Color.Primary)"
+                   OnClick="ConfirmAsync"
+                   Disabled="_busy"
+                   id="question-status-reason-confirm">@ConfirmText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>What the action does, already translated.</summary>
+    [Parameter, EditorRequired] public string Message { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string ConfirmText { get; set; } = string.Empty;
+
+    [Parameter] public bool Destructive { get; set; }
+
+    /// <summary>Sends the trimmed reason; answers null when the change was made, else the Api's error code.</summary>
+    [Parameter, EditorRequired] public Func<string, Task<string?>> Submit { get; set; } = default!;
+
+    private string _reason = string.Empty;
+    private string? _reasonError;
+    private string? _error;
+    private bool _busy;
+
+    private void OnReasonChanged(string? value)
+    {
+        _reason = value ?? string.Empty;
+        _reasonError = null;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        var reason = _reason.Trim();
+
+        // The comfort check of the reason (BR3); the Api is the authority and runs the same one.
+        if (reason.Length == 0)
+        {
+            _reasonError = Errors.For(QuestionBankErrorCodes.QuestionStatusReasonRequired);
+            return;
+        }
+
+        if (reason.Length > QuestionLimits.ChangeReasonMaxLength)
+        {
+            _reasonError = Errors.For(QuestionBankErrorCodes.QuestionStatusReasonTooLong);
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+        var code = await Submit(reason);
+        _busy = false;
+
+        if (code is null)
+        {
+            Dialog.Close(DialogResult.Ok(true));
+            return;
+        }
+
+        // A reason the Api refused sits under the field; any other refusal (a race, a state) above it.
+        if (code is QuestionBankErrorCodes.QuestionStatusReasonRequired or QuestionBankErrorCodes.QuestionStatusReasonTooLong)
+        {
+            _reasonError = Errors.For(code);
+        }
+        else
+        {
+            _error = Errors.For(code);
+        }
+    }
+
+    private void Cancel() => Dialog.Cancel();
+}

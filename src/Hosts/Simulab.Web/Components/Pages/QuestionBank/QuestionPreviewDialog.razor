@@ -20,6 +20,16 @@
                       Class="mb-4" />
         }
 
+        @* F-101 UC3: an annulled question says when and why before anything else is read. *@
+        @if (Question.Annulment is { } annulment)
+        {
+            <div id="question-preview-annulment">
+                <AppAlert Severity="Severity.Warning"
+                          Text="@L["Questions.Preview.Annulled", annulment.AnnulledAt.ToString("g", CultureInfo.CurrentCulture), annulment.Reason].Value"
+                          Class="mb-4" />
+            </div>
+        }
+
         @* F-96 BR7: where the question came from, above the statement. A question without an edition shows nothing,
            and so does one whose edition no longer resolves (BR11). *@
         @if (QuestionText.SourceLine(Question.Origin) is { } sourceLine)

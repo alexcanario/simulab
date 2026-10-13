@@ -142,11 +142,17 @@ public sealed class QuestionQueries(
         var topic = await topics.FindAsync(question.TopicId, cancellationToken);
         var origins = await OriginsAsync([(question.ExamEditionId, question.NoticeSubjectId)], cancellationToken);
 
-        // F-98 BR11: the latest version is the highest number; there is no column for it on the question.
-        var currentVersion = await context.QuestionVersions
+        // F-98 BR11: the latest version is the highest number; there is no column for it on the question. One
+        // row is read, never the JSON options, and F-101 takes the annulment (BR2) from it.
+        var latest = await context.QuestionVersions
             .AsNoTracking()
             .Where(version => version.QuestionId == question.Id)
-            .MaxAsync(version => (int?)version.Number, cancellationToken);
+            .OrderByDescending(version => version.Number)
+            .Select(version => new { version.Number, version.Annulled, version.Reason, version.CreatedAt })
+            .FirstOrDefaultAsync(cancellationToken);
+        var annulment = question.Status == QuestionStatus.Annulled && latest is { Annulled: true, Reason: not null }
+            ? new QuestionAnnulmentResponse(latest.Reason, latest.CreatedAt)
+            : null;
 
         return new QuestionResponse(
             question.Id,
@@ -168,7 +174,8 @@ public sealed class QuestionQueries(
             ],
             origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId),
             question.TrueFalseKey,
-            currentVersion);
+            latest?.Number,
+            annulment);
     }
 
     public async Task<IReadOnlyList<QuestionVersionListItemResponse>?> ListVersionsAsync(
@@ -185,13 +192,30 @@ public sealed class QuestionQueries(
             .AsNoTracking()
             .Where(version => version.QuestionId == questionId)
             .OrderByDescending(version => version.Number)
-            .Select(version => new { version.Id, version.Number, version.CreatedAt, version.AnswerKeyChanged, version.Reason })
+            .Select(version => new
+            {
+                version.Id,
+                version.Number,
+                version.CreatedAt,
+                version.AnswerKeyChanged,
+                version.Reason,
+                version.Annulled
+            })
             .ToListAsync(cancellationToken);
 
+        // F-101 BR6: the rows come newest first, so the version below one is its predecessor; a version that
+        // is not annulled and follows an annulled one is the reinstatement.
         return
         [
             .. rows.Select((row, index) => new QuestionVersionListItemResponse(
-                row.Id, row.Number, row.CreatedAt, row.AnswerKeyChanged, row.Reason, index == 0, false, false))
+                row.Id,
+                row.Number,
+                row.CreatedAt,
+                row.AnswerKeyChanged,
+                row.Reason,
+                index == 0,
+                row.Annulled,
+                !row.Annulled && index + 1 < rows.Count && rows[index + 1].Annulled))
         ];
     }
 
@@ -233,7 +257,7 @@ public sealed class QuestionQueries(
             version.AnswerKeyChanged,
             version.Reason,
             version.CreatedAt,
-            false));
+            version.Annulled));
     }
 
     public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>

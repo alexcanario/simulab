@@ -235,7 +235,7 @@
                        IdPrefix="@ActionsId(context)"
                        OnEdit="@(() => Edit(context))"
                        OnDelete="@(() => DeleteAsync(context))"
-                       DeleteDisabledReason="@(context.Status == QuestionStatus.Published ? L["Questions.Delete.DisabledPublished"].Value : null)"
+                       DeleteDisabledReason="@DeleteDisabledReasonOf(context)"
                        MoreActions="@PublicationActions(context)" />
     </RowActions>
 </AppDataTable>
@@ -611,20 +611,33 @@
     private string ItemName(QuestionListItemResponse question) =>
         L["Questions.Row.Name", QuestionHtml.Excerpt(question.StatementExcerpt, QuestionText.RowNameLength)];
 
+    // F-101 BR5: an annulled question is frozen, so its row offers neither; it is reinstated on its own page.
     private IReadOnlyList<AppRowAction> PublicationActions(QuestionListItemResponse question) =>
-        question.Status == QuestionStatus.Published
-            ?
+        question.Status switch
+        {
+            QuestionStatus.Published =>
             [
                 new AppRowAction(
                     L["Questions.Action.Unpublish"], AppIcons.Unpublish, () => SetPublicationAsync(question, publish: false),
                     Key: "unpublish")
-            ]
-            :
+            ],
+            QuestionStatus.Annulled => [],
+            _ =>
             [
                 new AppRowAction(
                     L["Questions.Action.Publish"], AppIcons.Publish, () => SetPublicationAsync(question, publish: true),
                     Key: "publish")
-            ];
+            ]
+        };
+
+    // The reason a row's Delete is disabled, said in words: published and annulled questions are not deleted.
+    private string? DeleteDisabledReasonOf(QuestionListItemResponse question) =>
+        question.Status switch
+        {
+            QuestionStatus.Published => L["Questions.Delete.DisabledPublished"].Value,
+            QuestionStatus.Annulled => L["Questions.Delete.DisabledAnnulled"].Value,
+            _ => null
+        };
 
     /// <summary>The list is searched, filtered and paged by the server (BR15).</summary>
     private async Task<AppTablePage<QuestionListItemResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)

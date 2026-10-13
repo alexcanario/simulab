@@ -17,7 +17,13 @@ public static class QuestionText
     {
         ArgumentNullException.ThrowIfNull(l);
 
-        return status == QuestionStatus.Published ? l["Questions.Status.Published"] : l["Questions.Status.Draft"];
+        // Switch over the values, so a status added later is a compile warning here and not a silent "Draft".
+        return status switch
+        {
+            QuestionStatus.Published => l["Questions.Status.Published"],
+            QuestionStatus.Annulled => l["Questions.Status.Annulled"],
+            _ => l["Questions.Status.Draft"]
+        };
     }
 
     /// <summary>The name of a question type in the curator's language (F-97, BR8).</summary>
@@ -28,9 +34,14 @@ public static class QuestionText
         return type == QuestionType.TrueFalse ? l["Questions.Type.TrueFalse"] : l["Questions.Type.SingleChoice"];
     }
 
-    /// <summary>A draft is a plain label; a published question is the healthy state.</summary>
+    /// <summary>A draft is a plain label; a published question is the healthy state; an annulled one is cancelled.</summary>
     public static AppStatusTone StatusTone(QuestionStatus status) =>
-        status == QuestionStatus.Published ? AppStatusTone.Success : AppStatusTone.Neutral;
+        status switch
+        {
+            QuestionStatus.Published => AppStatusTone.Success,
+            QuestionStatus.Annulled => AppStatusTone.Error,
+            _ => AppStatusTone.Neutral
+        };
 
     /// <summary>
     /// The source line of a question from a past edition: organizer acronym, exam and year (F-96, BR7), or null

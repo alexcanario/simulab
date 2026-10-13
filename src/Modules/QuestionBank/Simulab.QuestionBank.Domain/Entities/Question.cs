@@ -82,6 +82,12 @@ public sealed class Question : TenantEntity
     {
         ArgumentNullException.ThrowIfNull(content);
 
+        // F-101 BR5: an annulled question is frozen; only a reinstatement leaves the state.
+        if (Status == QuestionStatus.Annulled)
+        {
+            return Result.Failure(Frozen());
+        }
+
         return content.Type == Type
             ? Apply(content)
             : Result.Failure(new Error(QuestionBankErrorCodes.QuestionTypeChanged, ErrorKind.Conflict));
@@ -171,6 +177,11 @@ public sealed class Question : TenantEntity
     /// <summary>Draft to published; the status only (BR12).</summary>
     public Result Publish()
     {
+        if (Status == QuestionStatus.Annulled)
+        {
+            return Result.Failure(Frozen());
+        }
+
         if (Status == QuestionStatus.Published)
         {
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionAlreadyPublished, ErrorKind.Conflict));
@@ -190,6 +201,11 @@ public sealed class Question : TenantEntity
     /// <summary>Published to draft; the content is untouched (BR12).</summary>
     public Result Unpublish()
     {
+        if (Status == QuestionStatus.Annulled)
+        {
+            return Result.Failure(Frozen());
+        }
+
         if (Status != QuestionStatus.Published)
         {
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionNotPublished, ErrorKind.Conflict));
@@ -205,21 +221,84 @@ public sealed class Question : TenantEntity
     /// <see cref="QuestionVersion.Annulled"/> true and the trimmed <paramref name="reason"/>. Nothing changes when
     /// it fails.
     /// </summary>
-    public Result<QuestionVersion> Annul(QuestionVersion? latest, string? reason) =>
-        throw new NotImplementedException();
+    public Result<QuestionVersion> Annul(QuestionVersion? latest, string? reason)
+    {
+        // BR1: the state is judged before the reason, as a publish judges its state first.
+        if (Status == QuestionStatus.Annulled)
+        {
+            return Result.Failure<QuestionVersion>(
+                new Error(QuestionBankErrorCodes.QuestionAlreadyAnnulled, ErrorKind.Conflict));
+        }
+
+        if (Status != QuestionStatus.Published || latest is null)
+        {
+            return Result.Failure<QuestionVersion>(
+                new Error(QuestionBankErrorCodes.QuestionNotPublished, ErrorKind.Conflict));
+        }
+
+        var checkedReason = StatusReason(reason);
+        if (checkedReason.IsFailure)
+        {
+            return Result.Failure<QuestionVersion>(checkedReason.Error!);
+        }
+
+        // Everything checked: the status changes only now, so a refusal leaves the question as it was.
+        Status = QuestionStatus.Annulled;
+
+        return Result.Success(latest.CopyAs(latest.Number + 1, annulled: true, checkedReason.Value!));
+    }
 
     /// <summary>
     /// Annulled to published (F-101, BR6): the version this makes, a copy of <paramref name="latest"/> with
     /// <see cref="QuestionVersion.Annulled"/> false and the trimmed <paramref name="reason"/> as its note.
     /// </summary>
-    public Result<QuestionVersion> Reinstate(QuestionVersion? latest, string? reason) =>
-        throw new NotImplementedException();
+    public Result<QuestionVersion> Reinstate(QuestionVersion? latest, string? reason)
+    {
+        if (Status != QuestionStatus.Annulled || latest is null)
+        {
+            return Result.Failure<QuestionVersion>(
+                new Error(QuestionBankErrorCodes.QuestionNotAnnulled, ErrorKind.Conflict));
+        }
 
-    /// <summary>Ok for a draft; <c>question.delete_requires_draft</c> for a published question (BR11).</summary>
+        var checkedReason = StatusReason(reason);
+        if (checkedReason.IsFailure)
+        {
+            return Result.Failure<QuestionVersion>(checkedReason.Error!);
+        }
+
+        Status = QuestionStatus.Published;
+
+        return Result.Success(latest.CopyAs(latest.Number + 1, annulled: false, checkedReason.Value!));
+    }
+
+    /// <summary>
+    /// Ok for a draft; <c>question.annulled</c> for an annulled question (F-101, BR5);
+    /// <c>question.delete_requires_draft</c> for a published question (BR11).
+    /// </summary>
     public Result EnsureDeletable() =>
-        Status == QuestionStatus.Draft
-            ? Result.Success()
-            : Result.Failure(new Error(QuestionBankErrorCodes.QuestionDeleteRequiresDraft, ErrorKind.Conflict));
+        Status switch
+        {
+            QuestionStatus.Draft => Result.Success(),
+            QuestionStatus.Annulled => Result.Failure(Frozen()),
+            _ => Result.Failure(new Error(QuestionBankErrorCodes.QuestionDeleteRequiresDraft, ErrorKind.Conflict))
+        };
+
+    private static Error Frozen() => new(QuestionBankErrorCodes.QuestionAnnulled, ErrorKind.Conflict);
+
+    // F-101 BR3: the reason of an annulment or a reinstatement, 1 to 500 characters once trimmed.
+    private static Result<string> StatusReason(string? reason)
+    {
+        var text = reason?.Trim();
+        if (string.IsNullOrEmpty(text))
+        {
+            return Result.Failure<string>(
+                new Error(QuestionBankErrorCodes.QuestionStatusReasonRequired, ErrorKind.Validation));
+        }
+
+        return text.Length > QuestionLimits.ChangeReasonMaxLength
+            ? Result.Failure<string>(new Error(QuestionBankErrorCodes.QuestionStatusReasonTooLong, ErrorKind.Validation))
+            : Result.Success(text);
+    }
 
     // The stored options as drafts, the shape the option rules read. An option whose text was empty once its
     // tags were removed is stored as "", so for these rules it is empty exactly when its HTML is.

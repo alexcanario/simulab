@@ -20,7 +20,11 @@ public sealed class UnpublishQuestionHandler(IQuestionStore store, IQuestionQuer
             return Result.Failure<QuestionResponse>(unpublished.Error!);
         }
 
-        await store.SaveChangesAsync(cancellationToken);
+        // F-101: the status is a concurrency token; an annulment that got there first answers 409.
+        if (await store.TrySaveChangesAsync(cancellationToken) is { } refused)
+        {
+            return Result.Failure<QuestionResponse>(refused);
+        }
 
         var saved = await queries.FindAsync(id, cancellationToken);
 

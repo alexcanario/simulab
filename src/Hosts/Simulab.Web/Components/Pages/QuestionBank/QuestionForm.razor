@@ -47,6 +47,14 @@ else
                 <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
             }
 
+            @* F-101 BR5: an annulled question is frozen; the way out is the Reinstate button of the card below. *@
+            @if (IsAnnulled)
+            {
+                <div id="question-annulled-alert">
+                    <AppAlert Severity="Severity.Warning" Text="@L["Questions.Annulled.Alert"]" Class="mb-4" />
+                </div>
+            }
+
             <AppSectionCard Id="question-section-classification"
                             Title="@L["Questions.Section.Classification"]"
                             Icon="@AppIcons.Topics"
@@ -84,6 +92,7 @@ else
                                     Value="_subject"
                                     ValueChanged="OnSubjectChanged"
                                     Required="true"
+                                    Disabled="IsAnnulled"
                                     Hint="@L["Questions.Field.Subject.Hint"]" />
 
                     <AppLookupField Id="question-topic"
@@ -96,7 +105,7 @@ else
                                     Value="_topic"
                                     ValueChanged="OnTopicChanged"
                                     Required="true"
-                                    Disabled="@(_subject is null)"
+                                    Disabled="@(_subject is null || IsAnnulled)"
                                     Hint="@(_subject is null ? L["Questions.Field.Topic.DisabledHint"].Value : L["Questions.Field.Topic.Hint"].Value)"
                                     Error="@_topicError" />
 
@@ -107,6 +116,7 @@ else
                                     ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
                                     Options="LanguageOptions"
                                     Required="true"
+                                    Disabled="IsAnnulled"
                                     LeadingIcon="@AppIcons.Language"
                                     Hint="@L["Questions.Field.ContentLanguage.Hint"]"
                                     Error="@_languageError" />
@@ -117,6 +127,7 @@ else
                                     Value="_difficulty"
                                     ValueChanged="@((int? value) => OnDifficultyChanged(value))"
                                     Options="DifficultyOptions"
+                                    Disabled="IsAnnulled"
                                     Hint="@L["Questions.Field.Difficulty.Hint"]"
                                     Error="@_difficultyError" />
                 </AppFormGrid>
@@ -139,6 +150,7 @@ else
                                     OpenOnFocus="true"
                                     Value="_edition"
                                     ValueChanged="OnEditionChangedAsync"
+                                    Disabled="IsAnnulled"
                                     Hint="@L["Questions.Field.Edition.Hint"]"
                                     Error="@_editionError" />
 
@@ -149,7 +161,7 @@ else
                                   Value="_paperNumber"
                                   ValueChanged="@((int? value) => OnPaperNumberChanged(value))"
                                   Required="@(_edition is not null)"
-                                  Disabled="@(_edition is null)"
+                                  Disabled="@(_edition is null || IsAnnulled)"
                                   Hint="@(_edition is null ? L["Questions.Field.PaperNumber.DisabledHint"].Value : L["Questions.Field.PaperNumber.Hint"].Value)"
                                   Error="@_paperNumberError" />
 
@@ -159,7 +171,7 @@ else
                                     Value="_noticeSubjectId"
                                     ValueChanged="@((Guid? value) => OnNoticeSubjectChanged(value))"
                                     Options="NoticeSubjectOptions"
-                                    Disabled="@(_edition is null)"
+                                    Disabled="@(_edition is null || IsAnnulled)"
                                     Loading="_noticeSubjectsLoading"
                                     Hint="@(_edition is null ? L["Questions.Field.NoticeSubject.DisabledHint"].Value : L["Questions.Field.NoticeSubject.Hint"].Value)"
                                     Error="@_noticeSubjectError" />
@@ -175,6 +187,7 @@ else
                                   Placeholder="@L["Questions.Field.Statement.Placeholder"]"
                                   Hint="@L["Questions.Field.Statement.Hint"]"
                                   Required="true"
+                                  Disabled="IsAnnulled"
                                   Lang="@_contentLanguage"
                                   Value="@_statement"
                                   ValueChanged="@((string? value) => OnStatementChanged(value))"
@@ -189,6 +202,7 @@ else
                                   Label="@L["Questions.Field.BaseText"]"
                                   Placeholder="@L["Questions.Field.BaseText.Placeholder"]"
                                   Hint="@L["Questions.Field.BaseText.Hint"]"
+                                  Disabled="IsAnnulled"
                                   Lang="@_contentLanguage"
                                   Value="@_baseText"
                                   ValueChanged="@((string? value) => OnBaseTextChanged(value))"
@@ -203,15 +217,26 @@ else
                                 Title="@L["Questions.Section.TrueFalseKey"]"
                                 Icon="@AppIcons.Verified"
                                 Subtitle="@L["Questions.Section.TrueFalseKey.Subtitle"]">
-                    <AppRadioCards TValue="bool?"
-                                   Id="question-true-false-key"
-                                   Label="@L["Questions.TrueFalseKey.Label"]"
-                                   Value="_trueFalseKey"
-                                   ValueChanged="@((bool? value) => OnTrueFalseKeyChanged(value))"
-                                   Options="TrueFalseCards"
-                                   Columns="2"
-                                   Hint="@L["Questions.TrueFalseKey.Hint"]"
-                                   Error="@_trueFalseKeyError" />
+                    @* F-101: the radio cards have no disabled state, so a frozen key is read as a value, as the type is. *@
+                    @if (IsAnnulled)
+                    {
+                        <div class="app-field mb-4">
+                            <span class="app-field-label" id="question-true-false-key-label">@L["Questions.TrueFalseKey.Label"]</span>
+                            <span class="app-field-value" id="question-true-false-key-value">@(_trueFalseKey == true ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <AppRadioCards TValue="bool?"
+                                       Id="question-true-false-key"
+                                       Label="@L["Questions.TrueFalseKey.Label"]"
+                                       Value="_trueFalseKey"
+                                       ValueChanged="@((bool? value) => OnTrueFalseKeyChanged(value))"
+                                       Options="TrueFalseCards"
+                                       Columns="2"
+                                       Hint="@L["Questions.TrueFalseKey.Hint"]"
+                                       Error="@_trueFalseKeyError" />
+                    }
 
                     @* F-98 BR5, AC16: the same reason field as the options section has. *@
                     @if (ShowChangeReason)
@@ -245,7 +270,7 @@ else
                             <div class="app-option-row">
                                 <span class="app-option-letter">@letter</span>
                                 <span class="app-option-radio">
-                                    <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary">
+                                    <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsAnnulled">
                                         <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
                                     </MudRadio>
                                 </span>
@@ -254,6 +279,7 @@ else
                                                   LabelVisuallyHidden="true"
                                                   Placeholder="@L["Questions.Options.Field.Placeholder"]"
                                                   Compact="true"
+                                                  Disabled="IsAnnulled"
                                                   AutoFocus="@option.FocusOnRender"
                                                   Lang="@_contentLanguage"
                                                   Value="@option.Html"
@@ -265,13 +291,16 @@ else
                             @{
                                 var index = _options.IndexOf(option);
                             }
-                            <AppRowActions ItemName="@L["Questions.Options.Letter", QuestionText.Letter(index)]"
-                                           IdPrefix="@ActionsId(index)"
-                                           OnMoveUp="@(() => Move(index, -1))"
-                                           MoveUpDisabledReason="@(index == 0 ? L["Questions.Options.MoveUp.DisabledFirst"].Value : null)"
-                                           OnMoveDown="@(() => Move(index, 1))"
-                                           MoveDownDisabledReason="@(index == _options.Count - 1 ? L["Questions.Options.MoveDown.DisabledLast"].Value : null)"
-                                           OnDelete="@(() => Remove(index))" />
+                            @if (!IsAnnulled)
+                            {
+                                <AppRowActions ItemName="@L["Questions.Options.Letter", QuestionText.Letter(index)]"
+                                               IdPrefix="@ActionsId(index)"
+                                               OnMoveUp="@(() => Move(index, -1))"
+                                               MoveUpDisabledReason="@(index == 0 ? L["Questions.Options.MoveUp.DisabledFirst"].Value : null)"
+                                               OnMoveDown="@(() => Move(index, 1))"
+                                               MoveDownDisabledReason="@(index == _options.Count - 1 ? L["Questions.Options.MoveDown.DisabledLast"].Value : null)"
+                                               OnDelete="@(() => Remove(index))" />
+                            }
                         </Actions>
                     </AppItemRows>
                 </MudRadioGroup>
@@ -286,7 +315,11 @@ else
                 </span>
 
                 <div class="app-options-footer">
-                    @if (AtMaxOptions)
+                    @if (IsAnnulled)
+                    {
+                        @* F-101: frozen; no button, only the count below. *@
+                    }
+                    else if (AtMaxOptions)
                     {
                         <MudTooltip Text="@L["Questions.Options.Add.DisabledMax"].Value">
                             <MudButton Variant="Variant.Outlined"
@@ -327,13 +360,18 @@ else
                                   Label="@L["Questions.Field.Explanation"]"
                                   Placeholder="@L["Questions.Field.Explanation.Placeholder"]"
                                   Hint="@L["Questions.Field.Explanation.Hint"]"
+                                  Disabled="IsAnnulled"
                                   Lang="@_contentLanguage"
                                   Value="@_explanation"
                                   ValueChanged="@((string? value) => OnExplanationChanged(value))"
                                   Error="@_explanationError" />
             </AppSectionCard>
 
-            <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+            @* F-101 BR5: a frozen form has nothing to save; Cancel's job is the "Back" of the page header. *@
+            @if (!IsAnnulled)
+            {
+                <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+            }
         </MudPaper>
 
         <AppFormAside Title="@L["Questions.Form.Aside.Title"]"
@@ -365,8 +403,17 @@ else
 
                 <div class="app-publication-row">
                     <AppStatusChip Text="@QuestionText.StatusName(L, _saved.Status)" Tone="QuestionText.StatusTone(_saved.Status)" />
-                    <span>@(IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"])</span>
+                    <span>@PublicationText</span>
                 </div>
+
+                @* F-101 UC3: when and why it was annulled, from the version that recorded it. *@
+                @if (IsAnnulled && _saved?.Annulment is { } annulment)
+                {
+                    <div class="app-publication-annulment">
+                        <p id="question-annulment-date">@L["Questions.Annulment.Date", annulment.AnnulledAt.ToString("g", CultureInfo.CurrentCulture)]</p>
+                        <p id="question-annulment-reason">@L["Questions.Annulment.Reason", annulment.Reason]</p>
+                    </div>
+                }
 
                 <div class="app-publication-actions">
                     <MudButton Variant="Variant.Outlined"
@@ -376,7 +423,16 @@ else
                                OnClick="PreviewAsync"
                                id="@PreviewButtonId">@L["Questions.Action.Preview"]</MudButton>
 
-                    @if (IsPublished)
+                    @if (IsAnnulled)
+                    {
+                        @* F-101 BR6: the only way out of the frozen state; the reason is asked in a dialog. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Retry"
+                                   OnClick="ReinstateAsync"
+                                   id="question-reinstate">@L["Questions.Action.Reinstate"]</MudButton>
+                    }
+                    else if (IsPublished)
                     {
                         <MudButton Variant="Variant.Outlined"
                                    Color="Color.Primary"
@@ -390,6 +446,15 @@ else
                             }
                             @L["Questions.Action.Unpublish"]
                         </MudButton>
+
+                        @* F-101 UC1: annulling acts on what is stored, so unsaved changes block it, with the reason said below. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   StartIcon="@AppIcons.Archive"
+                                   Disabled="@(_publishing || HasChanges)"
+                                   OnClick="AnnulAsync"
+                                   aria-describedby="@(HasChanges ? "question-annul-reason-hint" : null)"
+                                   id="question-annul">@L["Questions.Action.Annul"]</MudButton>
                     }
                     else
                     {
@@ -412,14 +477,18 @@ else
                 </div>
 
                 @* The reason is visible text, not a tooltip alone: a disabled button is not focusable. *@
-                @if (!IsPublished && PublishDisabledReason is not null)
+                @if (!IsPublished && !IsAnnulled && PublishDisabledReason is not null)
                 {
                     <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
+                }
+                else if (IsPublished && HasChanges)
+                {
+                    <p id="question-annul-reason-hint" class="app-publication-reason">@L["Questions.Publication.Publish.DisabledUnsaved"]</p>
                 }
 
                 @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
                    the Api refused the first click; the second click sends it. *@
-                @if (!IsPublished && _publishReasonRequired)
+                @if (!IsPublished && !IsAnnulled && _publishReasonRequired)
                 {
                     <div class="app-publication-change-reason">
                         <AppTextField TValue="string"
@@ -578,6 +647,14 @@ else
     private bool IsEdit => _saved is not null;
 
     private bool IsPublished => _saved?.Status == QuestionStatus.Published;
+
+    // F-101 BR5: an annulled question is frozen; the fields, the options and Save give way to Reinstate.
+    private bool IsAnnulled => _saved?.Status == QuestionStatus.Annulled;
+
+    private string PublicationText =>
+        IsAnnulled
+            ? L["Questions.Publication.Annulled"]
+            : IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"];
 
     private bool AtMaxOptions => _options.Count >= QuestionLimits.OptionsMax;
 
@@ -942,16 +1019,23 @@ else
 
     private static string HistoryActionsId(int number) => $"question-version-actions-{number}";
 
+    // F-101: an annulment and a reinstatement are told before the F-98 labels; they are never a key change.
     private string ChangeLabel(QuestionVersionListItemResponse version) =>
-        version.Number == 1
-            ? L["Questions.History.Change.First"]
-            : version.AnswerKeyChanged
-                ? L["Questions.History.Change.KeyChanged"]
-                : L["Questions.History.Change.Edited"];
+        version.Annulled
+            ? L["Questions.History.Change.Annulled"]
+            : version.Reinstated
+                ? L["Questions.History.Change.Reinstated"]
+                : version.Number == 1
+                    ? L["Questions.History.Change.First"]
+                    : version.AnswerKeyChanged
+                        ? L["Questions.History.Change.KeyChanged"]
+                        : L["Questions.History.Change.Edited"];
 
-    // The key change is the one row a reader must notice; the first publication and an edit are plain labels.
+    // The annulment and the key change are the rows a reader must notice; the rest are plain labels.
     private static AppStatusTone ChangeTone(QuestionVersionListItemResponse version) =>
-        version.Number > 1 && version.AnswerKeyChanged ? AppStatusTone.Warning : AppStatusTone.Neutral;
+        version.Annulled
+            ? AppStatusTone.Error
+            : version.Number > 1 && version.AnswerKeyChanged ? AppStatusTone.Warning : AppStatusTone.Neutral;
 
     private IReadOnlyList<AppRowAction> HistoryActions(QuestionVersionListItemResponse version) =>
     [
@@ -1598,6 +1682,65 @@ else
 
         // 400 while incomplete (BR4), 409 when it is already in that state, 404 when it is gone.
         _publicationError = Errors.For(result.ErrorCode);
+    }
+
+    private Task AnnulAsync() => ChangeAnnulmentAsync(annul: true);
+
+    private Task ReinstateAsync() => ChangeAnnulmentAsync(annul: false);
+
+    // F-101 UC1 and UC2: the reason is asked in a dialog that sends it itself, so a refusal of the Api is read
+    // where the curator is typing; only an accepted change closes it. The form keeps what was typed.
+    private async Task ChangeAnnulmentAsync(bool annul)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        _publicationError = null;
+        QuestionResponse? changed = null;
+
+        async Task<string?> SubmitAsync(string reason)
+        {
+            var token = await TokenAsync();
+            var result = token is null
+                ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+                : annul
+                    ? await Api.AnnulQuestionAsync(token, current.Id, reason)
+                    : await Api.ReinstateQuestionAsync(token, current.Id, reason);
+            if (result is { IsSuccess: true, Value: { } question })
+            {
+                changed = question;
+
+                return null;
+            }
+
+            return result.ErrorCode ?? ErrorText.UnexpectedCode;
+        }
+
+        var parameters = new DialogParameters<QuestionStatusReasonDialog>
+        {
+            { dialog => dialog.Message, annul ? L["Questions.Annul.Dialog.Message"].Value : L["Questions.Reinstate.Dialog.Message"].Value },
+            { dialog => dialog.ConfirmText, annul ? L["Questions.Action.Annul"].Value : L["Questions.Action.Reinstate"].Value },
+            { dialog => dialog.Destructive, annul },
+            { dialog => dialog.Submit, SubmitAsync }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionStatusReasonDialog>(
+            annul ? L["Questions.Annul.Dialog.Title"] : L["Questions.Reinstate.Dialog.Title"], parameters, options);
+        await reference.Result;
+
+        if (changed is { } question)
+        {
+            _saved = question;
+            Snackbar.Add(annul ? L["Questions.Annulled"] : L["Questions.Reinstated"], Severity.Success);
+            await ReloadHistoryAsync();
+        }
+
+        // Closed: the focus goes back to the button that opened the dialog, or to Preview when that one is gone.
+        _pendingFocus = changed is null ? (annul ? "question-annul" : "question-reinstate") : PreviewButtonId;
+        StateHasChanged();
     }
 
     private async Task PreviewAsync()
