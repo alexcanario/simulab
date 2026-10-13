@@ -65,6 +65,20 @@ public static class QuestionText
         return string.Join(" · ", parts);
     }
 
+    /// <summary>
+    /// The line the reader picks in an edition lookup: the source line, with the position under it when there is
+    /// one so look-alikes can be told apart (F-96; the form and the list's edition filter share it, F-100).
+    /// </summary>
+    public static AppLookupOption EditionOption(ExamEditionLookupResponse edition)
+    {
+        ArgumentNullException.ThrowIfNull(edition);
+
+        return new AppLookupOption(
+            edition.Id,
+            SourceLine(edition.OrganizerAcronym, edition.ExamName, edition.NoticeYear) ?? edition.ExamName,
+            edition.Position);
+    }
+
     /// <summary>The letter of an option, A to E, from its position (BR5).</summary>
     public static string Letter(int position) => ((char)('A' + position)).ToString();
 

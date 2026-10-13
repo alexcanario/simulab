@@ -775,7 +775,28 @@
   <data name="Questions.Column.Language" xml:space="preserve"><value>Language</value></data>
   <data name="Questions.Column.Status" xml:space="preserve"><value>Status</value></data>
   <data name="Questions.Empty" xml:space="preserve"><value>No question in the bank yet.</value></data>
-  <data name="Questions.Empty.Filters" xml:space="preserve"><value>No question matches the chosen filter.</value></data>
+  <data name="Questions.Empty.Filters" xml:space="preserve"><value>No question matches the chosen filters.</value></data>
+  <data name="Questions.Filter.Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Questions.Filter.Difficulty" xml:space="preserve"><value>Difficulty</value></data>
+  <data name="Questions.Filter.Subject" xml:space="preserve"><value>Subject and topic</value></data>
+  <data name="Questions.Filter.Organizer" xml:space="preserve"><value>Organizer</value></data>
+  <data name="Questions.Filter.Edition" xml:space="preserve"><value>Edition</value></data>
+  <data name="Questions.Filter.Status.Placeholder" xml:space="preserve"><value>Status name</value></data>
+  <data name="Questions.Filter.Type.Placeholder" xml:space="preserve"><value>Type name</value></data>
+  <data name="Questions.Filter.Difficulty.Placeholder" xml:space="preserve"><value>A number from 1 to 5</value></data>
+  <data name="Questions.Filter.Subject.Placeholder" xml:space="preserve"><value>Subject or topic name</value></data>
+  <data name="Questions.Filter.Organizer.Placeholder" xml:space="preserve"><value>Organizer name</value></data>
+  <data name="Questions.Filter.Edition.Placeholder" xml:space="preserve"><value>Exam, organizer or year</value></data>
+  <data name="Questions.Filter.Options" xml:space="preserve"><value>{0}: options</value></data>
+  <data name="Questions.Filter.Picked" xml:space="preserve"><value>{0}: picked</value></data>
+  <data name="Questions.Filter.Count" xml:space="preserve"><value>Picked: {0}</value></data>
+  <data name="Questions.Filter.None" xml:space="preserve"><value>No filter</value></data>
+  <data name="Questions.Filter.ClearField" xml:space="preserve"><value>Clear</value></data>
+  <data name="Questions.Filter.Clear" xml:space="preserve"><value>Clear all</value></data>
+  <data name="Questions.Filter.SubjectAll" xml:space="preserve"><value>{0} (all topics)</value></data>
+  <data name="Questions.Filter.Loading" xml:space="preserve"><value>Loading options…</value></data>
+  <data name="Questions.Filter.LoadFailed" xml:space="preserve"><value>The list of options did not load.</value></data>
+  <data name="Questions.Filter.Limit" xml:space="preserve"><value>Up to 100 subjects, topics and organizers can be picked together.</value></data>
   <data name="Questions.Empty.Search" xml:space="preserve"><value>No question matches "{0}".</value></data>
   <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Not set</value></data>
   <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>No difficulty set</value></data>

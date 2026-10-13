@@ -11,9 +11,11 @@
 @inject ErrorText Errors
 @inject NavigationManager Navigation
 
-@* F-95, UC5 to UC7: every question, searched by a word of its statement, filtered by status and paged on the
-   server, newest first (BR15). Add and edit are a page of their own, not a dialog: the question is a complex
-   entity (rule: ui-project). The other filters are F-100. *@
+@* F-95, UC5 to UC7: every question, searched by a word of its statement and paged on the server, newest first
+   (BR15). Add and edit are a page of their own, not a dialog: the question is a complex entity (rule:
+   ui-project). F-100: filtered by status, type, difficulty, subject and topic, organizer and edition; the picks
+   live in the address (BR8) and each picker draws its own chips, so a filter is seen and removed where it is
+   chosen. The table's search box stays the table's own. *@
 <AppPageHeader Title="@L["Questions.Title"]"
                Breadcrumbs="_breadcrumbs"
                PrimaryActionText="@L["Common.Add"]"
@@ -34,15 +36,119 @@
               EmptySearchMessage="@(term => L["Questions.Empty.Search", term].Value)"
               EmptyActionText="@L["Common.Add"]"
               EmptyActionIcon="@AppIcons.Add"
-              OnEmptyAction="AddAsync">
+              OnEmptyAction="AddAsync"
+              InitialSearch="@_initial.Search"
+              InitialPage="@_initial.Page"
+              InitialPageSize="@_initial.PageSize">
     <ToolBarContent>
         <div class="app-table-filters">
-            <AppSelectField TValue="QuestionStatus?"
-                            Id="questions-filter-status"
-                            Label="@L["Questions.Filter.Status"]"
-                            Value="_status"
-                            ValueChanged="OnStatusFilterChangedAsync"
-                            Options="StatusFilterOptions" />
+            <AppMultiPickField Id="questions-filter-status"
+                               Label="@L["Questions.Filter.Status"]"
+                               Placeholder="@L["Questions.Filter.Status.Placeholder"]"
+                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Status"]]"
+                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Status"]]"
+                               CountText="@CountOf(_state.Statuses?.Count ?? 0)"
+                               ClearText="@L["Questions.Filter.ClearField"]"
+                               NoneText="@L["Questions.Filter.None"]"
+                               RemoveLabelFor="@RemoveLabel"
+                               Groups="@StatusGroups()"
+                               Picked="@StatusItems()"
+                               OnToggle="@ToggleStatusAsync"
+                               OnRemove="@ToggleStatusAsync"
+                               OnClear="@(() => ChangeAsync(state => state with { Statuses = null }))" />
+
+            <AppMultiPickField Id="questions-filter-type"
+                               Label="@L["Questions.Filter.Type"]"
+                               Placeholder="@L["Questions.Filter.Type.Placeholder"]"
+                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Type"]]"
+                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Type"]]"
+                               CountText="@CountOf(_state.Types?.Count ?? 0)"
+                               ClearText="@L["Questions.Filter.ClearField"]"
+                               NoneText="@L["Questions.Filter.None"]"
+                               RemoveLabelFor="@RemoveLabel"
+                               Groups="@TypeGroups()"
+                               Picked="@TypeItems()"
+                               OnToggle="@ToggleTypeAsync"
+                               OnRemove="@ToggleTypeAsync"
+                               OnClear="@(() => ChangeAsync(state => state with { Types = null }))" />
+
+            <AppMultiPickField Id="questions-filter-difficulty"
+                               Label="@L["Questions.Filter.Difficulty"]"
+                               Placeholder="@L["Questions.Filter.Difficulty.Placeholder"]"
+                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Difficulty"]]"
+                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Difficulty"]]"
+                               CountText="@CountOf((_state.Difficulties?.Count ?? 0) + (_state.DifficultyNotSet ? 1 : 0))"
+                               ClearText="@L["Questions.Filter.ClearField"]"
+                               NoneText="@L["Questions.Filter.None"]"
+                               RemoveLabelFor="@RemoveLabel"
+                               Groups="@DifficultyGroups()"
+                               Picked="@DifficultyItems()"
+                               OnToggle="@ToggleDifficultyAsync"
+                               OnRemove="@ToggleDifficultyAsync"
+                               OnClear="@(() => ChangeAsync(state => state with { Difficulties = null, DifficultyNotSet = false }))" />
+
+            <AppMultiPickField Id="questions-filter-subject"
+                               Label="@L["Questions.Filter.Subject"]"
+                               Placeholder="@L["Questions.Filter.Subject.Placeholder"]"
+                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Subject"]]"
+                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Subject"]]"
+                               CountText="@CountOf((_state.SubjectIds?.Count ?? 0) + (_state.TopicIds?.Count ?? 0))"
+                               ClearText="@L["Questions.Filter.ClearField"]"
+                               NoneText="@L["Questions.Filter.None"]"
+                               RemoveLabelFor="@RemoveLabel"
+                               Groups="@SubjectGroups()"
+                               Picked="@SubjectItems()"
+                               OnToggle="@ToggleSubjectAsync"
+                               OnRemove="@ToggleSubjectAsync"
+                               OnClear="@(() => ChangeAsync(state => state with { SubjectIds = null, TopicIds = null }))"
+                               State="_taxonomyState"
+                               LoadingText="@L["Questions.Filter.Loading"]"
+                               LoadFailedText="@L["Questions.Filter.LoadFailed"]"
+                               EmptyText="@L["Questions.Filter.None"]"
+                               OnRetry="@LoadTaxonomyAsync"
+                               Hint="@(AtLimit ? L["Questions.Filter.Limit"].Value : null)" />
+
+            <AppMultiPickField Id="questions-filter-organizer"
+                               Label="@L["Questions.Filter.Organizer"]"
+                               Placeholder="@L["Questions.Filter.Organizer.Placeholder"]"
+                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Organizer"]]"
+                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Organizer"]]"
+                               CountText="@CountOf(_state.OrganizerIds?.Count ?? 0)"
+                               ClearText="@L["Questions.Filter.ClearField"]"
+                               NoneText="@L["Questions.Filter.None"]"
+                               RemoveLabelFor="@RemoveLabel"
+                               Groups="@OrganizerGroups()"
+                               Picked="@OrganizerItems()"
+                               OnToggle="@ToggleOrganizerAsync"
+                               OnRemove="@ToggleOrganizerAsync"
+                               OnClear="@(() => ChangeAsync(state => state with { OrganizerIds = null }))"
+                               State="_organizersState"
+                               LoadingText="@L["Questions.Filter.Loading"]"
+                               LoadFailedText="@L["Questions.Filter.LoadFailed"]"
+                               EmptyText="@L["Questions.Filter.None"]"
+                               OnRetry="@LoadOrganizersAsync"
+                               Hint="@(AtLimit ? L["Questions.Filter.Limit"].Value : null)" />
+
+            @* One edition, by search: the list of editions can be long, which a field that holds its whole list
+               does not suit (F-100 decision). *@
+            <AppLookupField Id="questions-filter-edition"
+                            Label="@L["Questions.Filter.Edition"]"
+                            Placeholder="@L["Questions.Filter.Edition.Placeholder"]"
+                            LeadingIcon="@AppIcons.Editions"
+                            SearchAsync="SearchEditionsAsync"
+                            MinChars="0"
+                            OpenOnFocus="true"
+                            Value="_edition"
+                            ValueChanged="OnEditionChangedAsync" />
+
+            @if (_state.HasFilters)
+            {
+                <MudButton id="questions-filter-clear"
+                           Variant="Variant.Text"
+                           Size="Size.Small"
+                           StartIcon="@AppIcons.ClearFilters"
+                           OnClick="ClearAllAsync">@L["Questions.Filter.Clear"]</MudButton>
+            }
         </div>
     </ToolBarContent>
     <Columns>
@@ -133,27 +239,360 @@
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
 
+    private const string ListRoute = "/admin/questions";
+
     private AppDataTable<QuestionListItemResponse> _table = default!;
     private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
-    private QuestionStatus? _status;
     private string? _error;
 
-    // The empty state says which emptiness it is: nothing in the bank, or nothing matching the status filter.
-    private string EmptyMessage => _status is not null ? L["Questions.Empty.Filters"] : L["Questions.Empty"];
+    // F-100 BR8: what the address held when the page opened (the table starts from it), and what it holds now.
+    private QuestionListState _initial = new();
+    private QuestionListState _state = new();
 
-    private IReadOnlyList<AppSelectOption<QuestionStatus?>> StatusFilterOptions =>
-    [
-        new(null, L["Common.Filter.All"]),
-        new(QuestionStatus.Draft, L["Questions.Status.Draft"]),
-        new(QuestionStatus.Published, L["Questions.Status.Published"])
-    ];
+    private IReadOnlyList<QuestionTaxonomySubjectResponse> _taxonomy = [];
+    private IReadOnlyList<OrganizerLookupResponse> _organizers = [];
+    private AppMultiPickState _taxonomyState = AppMultiPickState.Loading;
+    private AppMultiPickState _organizersState = AppMultiPickState.Loading;
+    private AppLookupOption? _edition;
+    private bool _editionNotFound;
 
-    protected override void OnInitialized() =>
+    // The empty state says which emptiness it is: nothing in the bank, or nothing matching the filters.
+    private string EmptyMessage => (_state with { Search = null }).HasFilters ? L["Questions.Empty.Filters"] : L["Questions.Empty"];
+
+    private bool AtLimit => _state.PickedIdCount >= QuestionListState.PickedIdLimit;
+
+    protected override void OnInitialized()
+    {
         _breadcrumbs =
         [
             new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
             new BreadcrumbItem(L["Questions.Title"], href: null, disabled: true)
         ];
+        _initial = QuestionListQueryString.Parse(Navigation.Uri);
+        _state = _initial;
+    }
+
+    // The lists the pickers offer load once the circuit is interactive, each on its own: one that fails shows its
+    // error and its try again, and the table of questions never waits for it.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Task.WhenAll(LoadTaxonomyAsync(), LoadOrganizersAsync(), LoadEditionAsync());
+
+        // AC10: a pick that no longer exists is dropped from the pickers, not shown as a broken chip; the Api
+        // would ignore it too. The table reloads only when something was dropped.
+        var pruned = Prune(_state);
+        var dropped = (pruned.SubjectIds?.Count ?? 0) != (_state.SubjectIds?.Count ?? 0)
+            || (pruned.TopicIds?.Count ?? 0) != (_state.TopicIds?.Count ?? 0)
+            || (pruned.OrganizerIds?.Count ?? 0) != (_state.OrganizerIds?.Count ?? 0)
+            || pruned.ExamEditionId != _state.ExamEditionId;
+        if (dropped)
+        {
+            _state = pruned;
+            SyncAddress();
+            await InvokeAsync(StateHasChanged);
+            await _table.ReloadFromFirstPageAsync();
+        }
+    }
+
+    private QuestionListState Prune(QuestionListState state)
+    {
+        if (_taxonomyState == AppMultiPickState.Ready)
+        {
+            var subjects = _taxonomy.Select(subject => subject.Id).ToHashSet();
+            var topics = _taxonomy.SelectMany(subject => subject.Topics).Select(topic => topic.Id).ToHashSet();
+            state = state with
+            {
+                SubjectIds = NullIfEmpty(state.SubjectIds?.Where(subjects.Contains).ToList()),
+                TopicIds = NullIfEmpty(state.TopicIds?.Where(topics.Contains).ToList())
+            };
+        }
+
+        if (_organizersState == AppMultiPickState.Ready)
+        {
+            var known = _organizers.Select(organizer => organizer.Id).ToHashSet();
+            state = state with { OrganizerIds = NullIfEmpty(state.OrganizerIds?.Where(known.Contains).ToList()) };
+        }
+
+        return _editionNotFound ? state with { ExamEditionId = null } : state;
+    }
+
+    private static List<T>? NullIfEmpty<T>(List<T>? values) => values is { Count: > 0 } ? values : null;
+
+    private async Task LoadTaxonomyAsync()
+    {
+        _taxonomyState = AppMultiPickState.Loading;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.GetTaxonomyAsync(token);
+        if (result is { IsSuccess: true })
+        {
+            _taxonomy = result.Value!;
+            _taxonomyState = _taxonomy.Count == 0 ? AppMultiPickState.Empty : AppMultiPickState.Ready;
+        }
+        else
+        {
+            _taxonomyState = AppMultiPickState.LoadFailed;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadOrganizersAsync()
+    {
+        _organizersState = AppMultiPickState.Loading;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListOrganizersAsync(token);
+        if (result is { IsSuccess: true })
+        {
+            _organizers = result.Value!;
+            _organizersState = _organizers.Count == 0 ? AppMultiPickState.Empty : AppMultiPickState.Ready;
+        }
+        else
+        {
+            _organizersState = AppMultiPickState.LoadFailed;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadEditionAsync()
+    {
+        if (_state.ExamEditionId is not { } editionId)
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindEditionAsync(token, editionId);
+        if (result is { IsSuccess: true })
+        {
+            _edition = QuestionText.EditionOption(result.Value!);
+        }
+        else if (result?.ErrorCode == QuestionBankErrorCodes.QuestionExamEditionNotFound)
+        {
+            _editionNotFound = true;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchEditionsAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.SearchEditionsAsync(token, term, cancellationToken);
+
+        return result.IsSuccess ? [.. result.Value!.Select(QuestionText.EditionOption)] : [];
+    }
+
+    // -- the pickers ---------------------------------------------------------------------------------------
+
+    private string CountOf(int picked) => L["Questions.Filter.Count", picked];
+
+    private string RemoveLabel(AppMultiPickItem item) => L["Common.RemoveItem", item.Name].Value;
+
+    private IReadOnlyList<AppMultiPickGroup> StatusGroups() =>
+    [
+        new("status", L["Questions.Filter.Status"],
+            [.. Enum.GetValues<QuestionStatus>().Select(status =>
+                new AppMultiPickOption(status.ToString(), QuestionText.StatusName(L, status), _state.Statuses?.Contains(status) == true))])
+    ];
+
+    private IReadOnlyList<AppMultiPickItem> StatusItems() =>
+        [.. (_state.Statuses ?? []).Select(status => new AppMultiPickItem(status.ToString(), QuestionText.StatusName(L, status), QuestionText.StatusName(L, status)))];
+
+    private IReadOnlyList<AppMultiPickGroup> TypeGroups() =>
+    [
+        new("type", L["Questions.Filter.Type"],
+            [.. Enum.GetValues<QuestionType>().Select(type =>
+                new AppMultiPickOption(type.ToString(), QuestionText.TypeName(L, type), _state.Types?.Contains(type) == true))])
+    ];
+
+    private IReadOnlyList<AppMultiPickItem> TypeItems() =>
+        [.. (_state.Types ?? []).Select(type => new AppMultiPickItem(type.ToString(), QuestionText.TypeName(L, type), QuestionText.TypeName(L, type)))];
+
+    private IReadOnlyList<AppMultiPickGroup> DifficultyGroups() =>
+    [
+        new("difficulty", L["Questions.Filter.Difficulty"],
+        [
+            .. Enumerable.Range(1, 5).Select(number =>
+                new AppMultiPickOption(number.ToString(CultureInfo.InvariantCulture), number.ToString(CultureInfo.CurrentCulture), _state.Difficulties?.Contains(number) == true)),
+            new AppMultiPickOption(QuestionListQueryString.DifficultyNone, L["Questions.Difficulty.NotSet"], _state.DifficultyNotSet)
+        ])
+    ];
+
+    private IReadOnlyList<AppMultiPickItem> DifficultyItems() =>
+    [
+        .. (_state.Difficulties ?? []).Select(number =>
+            new AppMultiPickItem(number.ToString(CultureInfo.InvariantCulture), number.ToString(CultureInfo.CurrentCulture), number.ToString(CultureInfo.CurrentCulture))),
+        .. _state.DifficultyNotSet
+            ? [new AppMultiPickItem(QuestionListQueryString.DifficultyNone, L["Questions.Difficulty.NotSet"], L["Questions.Difficulty.NotSet"])]
+            : Array.Empty<AppMultiPickItem>()
+    ];
+
+    private static string WholeKey(Guid subjectId) => $"s-{subjectId}";
+
+    private static string TopicKey(Guid topicId) => $"t-{topicId}";
+
+    private IReadOnlyList<AppMultiPickGroup> SubjectGroups() =>
+        [
+            .. _taxonomy.Select(subject => new AppMultiPickGroup(
+                WholeKey(subject.Id),
+                subject.Name,
+                [
+                    new AppMultiPickOption(
+                        WholeKey(subject.Id),
+                        subject.Name,
+                        _state.SubjectIds?.Contains(subject.Id) == true,
+                        Disabled: AtLimit && _state.SubjectIds?.Contains(subject.Id) != true,
+                        IsGroupOption: true),
+                    .. subject.Topics.Select(topic => new AppMultiPickOption(
+                        TopicKey(topic.Id),
+                        topic.Name,
+                        _state.TopicIds?.Contains(topic.Id) == true,
+                        Disabled: AtLimit && _state.TopicIds?.Contains(topic.Id) != true))
+                ]))
+        ];
+
+    // A whole subject says it means all its topics (AC2); a topic is its name with its subject under it.
+    private IReadOnlyList<AppMultiPickItem> SubjectItems() =>
+        [
+            .. _taxonomy.SelectMany(subject => new[]
+                {
+                    _state.SubjectIds?.Contains(subject.Id) == true
+                        ? new AppMultiPickItem(WholeKey(subject.Id), L["Questions.Filter.SubjectAll", subject.Name], subject.Name)
+                        : null
+                }
+                .Concat(subject.Topics
+                    .Where(topic => _state.TopicIds?.Contains(topic.Id) == true)
+                    .Select(topic => new AppMultiPickItem(TopicKey(topic.Id), topic.Name, topic.Name, Secondary: subject.Name)))
+                .OfType<AppMultiPickItem>())
+        ];
+
+    private IReadOnlyList<AppMultiPickGroup> OrganizerGroups() =>
+    [
+        new("organizer", L["Questions.Filter.Organizer"],
+            [.. _organizers.Select(organizer => new AppMultiPickOption(
+                organizer.Id.ToString(),
+                organizer.Acronym,
+                _state.OrganizerIds?.Contains(organizer.Id) == true,
+                Disabled: AtLimit && _state.OrganizerIds?.Contains(organizer.Id) != true,
+                Secondary: organizer.Name))])
+    ];
+
+    private IReadOnlyList<AppMultiPickItem> OrganizerItems() =>
+        [.. _organizers
+            .Where(organizer => _state.OrganizerIds?.Contains(organizer.Id) == true)
+            .Select(organizer => new AppMultiPickItem(organizer.Id.ToString(), organizer.Acronym, organizer.Acronym, Secondary: organizer.Name))];
+
+    // -- what a pick does ----------------------------------------------------------------------------------
+
+    private static List<T>? Toggled<T>(IReadOnlyList<T>? values, T value)
+    {
+        List<T> list = [.. values ?? []];
+        if (!list.Remove(value))
+        {
+            list.Add(value);
+        }
+
+        return list.Count == 0 ? null : list;
+    }
+
+    private Task ToggleStatusAsync(string key) =>
+        Enum.TryParse<QuestionStatus>(key, out var status)
+            ? ChangeAsync(state => state with { Statuses = Toggled(state.Statuses, status) })
+            : Task.CompletedTask;
+
+    private Task ToggleTypeAsync(string key) =>
+        Enum.TryParse<QuestionType>(key, out var type)
+            ? ChangeAsync(state => state with { Types = Toggled(state.Types, type) })
+            : Task.CompletedTask;
+
+    private Task ToggleDifficultyAsync(string key)
+    {
+        if (key == QuestionListQueryString.DifficultyNone)
+        {
+            return ChangeAsync(state => state with { DifficultyNotSet = !state.DifficultyNotSet });
+        }
+
+        return int.TryParse(key, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
+            ? ChangeAsync(state => state with { Difficulties = Toggled(state.Difficulties, number) })
+            : Task.CompletedTask;
+    }
+
+    // The two kinds of pick share one limit (BR11); a pick that would pass it is ignored, and the options say why.
+    private Task ToggleSubjectAsync(string key)
+    {
+        var isWhole = key.StartsWith("s-", StringComparison.Ordinal);
+        if (key.Length < 3 || !Guid.TryParse(key[2..], out var id))
+        {
+            return Task.CompletedTask;
+        }
+
+        return ChangeAsync(state =>
+        {
+            var removing = isWhole ? state.SubjectIds?.Contains(id) == true : state.TopicIds?.Contains(id) == true;
+            if (!removing && state.PickedIdCount >= QuestionListState.PickedIdLimit)
+            {
+                return state;
+            }
+
+            return isWhole
+                ? state with { SubjectIds = Toggled(state.SubjectIds, id) }
+                : state with { TopicIds = Toggled(state.TopicIds, id) };
+        });
+    }
+
+    private Task ToggleOrganizerAsync(string key) =>
+        Guid.TryParse(key, out var id)
+            ? ChangeAsync(state =>
+                state.OrganizerIds?.Contains(id) != true && state.PickedIdCount >= QuestionListState.PickedIdLimit
+                    ? state
+                    : state with { OrganizerIds = Toggled(state.OrganizerIds, id) })
+            : Task.CompletedTask;
+
+    private Task OnEditionChangedAsync(AppLookupOption? option)
+    {
+        _edition = option;
+
+        return ChangeAsync(state => state with { ExamEditionId = option?.Id });
+    }
+
+    // A change of any filter reloads from the first page, as a new search does, and is written to the address.
+    private async Task ChangeAsync(Func<QuestionListState, QuestionListState> change)
+    {
+        var next = change(_state) with { Page = 0 };
+        if (next == _state)
+        {
+            return;
+        }
+
+        _state = next;
+        SyncAddress();
+        await _table.ReloadFromFirstPageAsync();
+    }
+
+    // "Clear all": every filter and the table's search box (AC11).
+    private async Task ClearAllAsync()
+    {
+        _state = new QuestionListState(PageSize: _state.PageSize);
+        _edition = null;
+        SyncAddress();
+        await _table.ClearSearchAsync();
+    }
+
+    // BR8: the address is rewritten, never a new history entry, and only when it differs.
+    private void SyncAddress()
+    {
+        var target = Navigation.ToAbsoluteUri(ListRoute + QuestionListQueryString.Build(_state)).ToString();
+        if (!string.Equals(target, Navigation.Uri, StringComparison.Ordinal))
+        {
+            Navigation.NavigateTo(target, replace: true);
+        }
+    }
 
     private static string ActionsId(QuestionListItemResponse question) => $"question-actions-{question.Id}";
 
@@ -182,7 +621,7 @@
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
         var result = await Api.ListQuestionsAsync(
             token,
-            new QuestionListQuery(query.Page, query.PageSize, query.Search, _status is { } status ? [status] : null),
+            _state.ToQuery(query.Page, query.PageSize, query.Search),
             cancellationToken);
 
         if (!result.IsSuccess)
@@ -190,19 +629,19 @@
             throw new InvalidOperationException($"Questions failed to load: {result.ErrorCode}.");
         }
 
+        // The table owns the search, the page and the page size; the address and "Clear all" follow what it asked.
+        _state = _state with { Search = query.Search, Page = query.Page, PageSize = query.PageSize };
+        SyncAddress();
+        await InvokeAsync(StateHasChanged);
+
         return new AppTablePage<QuestionListItemResponse>(result.Value!.Items, result.Value.Total);
     }
 
-    // A change of the filter reloads from the first page, as a new search does.
-    private Task OnStatusFilterChangedAsync(QuestionStatus? value)
-    {
-        _status = value;
-        return _table.ReloadFromFirstPageAsync();
-    }
+    // The form is opened with the list's keys on its address, so Cancel brings the same list back (AC9).
+    private void AddAsync() => Navigation.NavigateTo("/admin/questions/new" + QuestionListQueryString.Build(_state));
 
-    private void AddAsync() => Navigation.NavigateTo("/admin/questions/new");
-
-    private void Edit(QuestionListItemResponse question) => Navigation.NavigateTo($"/admin/questions/{question.Id}");
+    private void Edit(QuestionListItemResponse question) =>
+        Navigation.NavigateTo($"/admin/questions/{question.Id}" + QuestionListQueryString.Build(_state));
 
     private async Task SetPublicationAsync(QuestionListItemResponse question, bool publish)
     {

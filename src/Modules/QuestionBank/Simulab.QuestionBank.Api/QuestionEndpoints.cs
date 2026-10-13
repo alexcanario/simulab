@@ -1,5 +1,7 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Simulab.Identity.Contracts;
 using Simulab.QuestionBank.Application.Questions;
@@ -36,23 +38,58 @@ public static class QuestionEndpoints
         return group;
     }
 
-    // A list is a read: a status that is not one of the two values is ignored, not an error (BR15).
+    // A list is a read: a value that is not understood is ignored, not an error (F-95 BR15, F-100 BR6). Every
+    // filter list is bound as strings and parsed here, because a typed array answers 400 on one bad value. The
+    // cap and the distinct are the query's own (QuestionListQuery.Sanitized).
     private static async Task<IResult> ListAsync(
         IQuestionQueries queries,
         CancellationToken cancellationToken,
         int page = 0,
         int pageSize = QuestionListQuery.DefaultPageSize,
         string? search = null,
-        string? status = null)
+        [FromQuery(Name = "status")] string[]? statuses = null,
+        [FromQuery(Name = "type")] string[]? types = null,
+        [FromQuery(Name = "difficulty")] string[]? difficulties = null,
+        [FromQuery(Name = "subject")] string[]? subjects = null,
+        [FromQuery(Name = "topic")] string[]? topics = null,
+        [FromQuery(Name = "organizer")] string[]? organizers = null,
+        string? edition = null)
     {
-        QuestionStatus? parsed = Enum.TryParse<QuestionStatus>(status, ignoreCase: true, out var value) && Enum.IsDefined(value)
-            ? value
-            : null;
+        var numbers = (difficulties ?? [])
+            .Select(value => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var number) ? number : (int?)null)
+            .OfType<int>()
+            .ToList();
+        var notSet = (difficulties ?? []).Any(value => string.Equals(value?.Trim(), "none", StringComparison.OrdinalIgnoreCase));
 
-        return Results.Ok(await queries.ListAsync(
-            new QuestionListQuery(page, pageSize, search, parsed is { } one ? [one] : null),
-            cancellationToken));
+        var query = new QuestionListQuery(
+            page,
+            pageSize,
+            search,
+            Enums<QuestionStatus>(statuses),
+            Enums<QuestionType>(types),
+            numbers,
+            notSet,
+            Guids(subjects),
+            Guids(topics),
+            Guids(organizers),
+            Guid.TryParse(edition, out var editionId) ? editionId : null);
+
+        return Results.Ok(await queries.ListAsync(query, cancellationToken));
     }
+
+    // A name in any case; a number that is a defined value still reads (status=1 has always meant Published).
+    private static List<TEnum> Enums<TEnum>(string[]? values)
+        where TEnum : struct, Enum =>
+        [
+            .. (values ?? [])
+                .Select(value => Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed) && Enum.IsDefined(parsed)
+                    ? parsed
+                    : (TEnum?)null)
+                .OfType<TEnum>()
+        ];
+
+    private static List<Guid> Guids(string[]? values) =>
+        [.. (values ?? []).Select(value => Guid.TryParse(value, out var id) ? id : (Guid?)null).OfType<Guid>()];
 
     private static async Task<IResult> FindAsync(Guid id, IQuestionQueries queries, CancellationToken cancellationToken)
     {

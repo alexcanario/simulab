@@ -38,10 +38,23 @@ public sealed record QuestionListQuery(
     /// <summary>The most values one filter list keeps (F-100 BR6); the rest is ignored.</summary>
     public const int MaxFilterValues = 100;
 
-    /// <summary>The same query with its numbers brought inside the allowed range.</summary>
+    /// <summary>
+    /// The same query with its numbers brought inside the allowed range and every list distinct and cut at
+    /// <see cref="MaxFilterValues"/>: the one place that holds the cap (F-100 BR6). A difficulty outside 1 to 5
+    /// is dropped.
+    /// </summary>
     public QuestionListQuery Sanitized() => this with
     {
         Page = Math.Max(Page, 0),
-        PageSize = Math.Clamp(PageSize, 1, MaxPageSize)
+        PageSize = Math.Clamp(PageSize, 1, MaxPageSize),
+        Statuses = Capped(Statuses),
+        Types = Capped(Types),
+        Difficulties = Capped(Difficulties?.Where(difficulty => difficulty is >= 1 and <= 5)),
+        SubjectIds = Capped(SubjectIds),
+        TopicIds = Capped(TopicIds),
+        OrganizerIds = Capped(OrganizerIds)
     };
+
+    private static List<T>? Capped<T>(IEnumerable<T>? values) =>
+        values is null ? null : [.. values.Distinct().Take(MaxFilterValues)];
 }

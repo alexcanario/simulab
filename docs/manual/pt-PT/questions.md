@@ -1,7 +1,7 @@
 ---
 page: questions
 locale: pt-PT
-features: [F-95, F-96, F-97, F-98]
+features: [F-95, F-96, F-97, F-98, F-100]
 updated: 2026-10-13
 ---
 # Questões
@@ -23,7 +23,21 @@ outras veem Página não encontrada, e o menu não tem o item Questões.
    dificuldade, o idioma, o estado e o tipo (escolha múltipla ou certo/errado), da mais recente para a mais
    antiga.
 3. Escreva na caixa de pesquisa para encontrar uma palavra do enunciado. Maiúsculas e acentos não contam.
-4. Use **Estado** para ver só rascunhos ou só questões publicadas.
+4. Restrinja a lista com os filtros acima da tabela. Cada um aceita vários valores; uma questão é mantida
+   quando corresponde a pelo menos um valor de cada filtro utilizado:
+   - **Estado**: rascunhos, questões publicadas ou ambos.
+   - **Tipo**: escolha múltipla, certo/errado ou ambos.
+   - **Dificuldade**: de 1 a 5, e **Não definida** para questões sem dificuldade.
+   - **Disciplina e tópico**: escolha uma disciplina inteira (vale todos os tópicos dela, mesmo os criados
+     mais tarde) ou tópicos avulsos.
+   - **Banca**: as bancas de cujas provas as questões vieram. Uma questão autoral não tem banca e fica de
+     fora enquanto este filtro estiver em uso.
+   - **Edição**: uma edição de prova; comece a escrever o exame, a banca ou o ano.
+5. Cada valor escolhido aparece como um chip por baixo do filtro; remova-o no **x**, ou use **Limpar** nesse
+   filtro. **Limpar tudo** remove todos os filtros e a pesquisa de uma só vez.
+6. É possível escolher até 100 disciplinas, tópicos e bancas no total.
+7. Os filtros ficam no endereço da página: abra uma questão, guarde ou cancele, e volta à mesma lista
+   filtrada, e pode enviar a ligação a outra pessoa.
 
 ### Escrever uma questão
 1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Escolha múltipla** (a predefinição)

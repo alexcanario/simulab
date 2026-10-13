@@ -1,7 +1,7 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98]
+features: [F-95, F-96, F-97, F-98, F-100]
 updated: 2026-10-13
 ---
 # Questions
@@ -22,7 +22,21 @@ Page not found, and the menu has no Questions entry.
    and year of the paper the question came from, with its number; a dash means the question is authored), the
    difficulty, the language, the status and the type (single choice or true/false), newest first.
 3. Type in the search box to find a word of the statement. Case and accents do not matter.
-4. Use **Status** to show only drafts or only published questions.
+4. Narrow the list with the filters above the table. Each one lets you pick several values; a question is
+   kept when it matches at least one value of every filter you used:
+   - **Status**: drafts, published questions, or both.
+   - **Type**: single choice, true/false, or both.
+   - **Difficulty**: 1 to 5, and **Not set** for questions with no difficulty.
+   - **Subject and topic**: pick a whole subject (it means all its topics, even topics added later) or
+     single topics.
+   - **Organizer**: the organizers whose past exams the questions came from. Authored questions have no
+     organizer and are left out while this filter is used.
+   - **Edition**: one past exam edition; start typing its exam, organizer or year.
+5. Every value you pick shows as a chip under its filter; remove it with its **x**, or use **Clear** on that
+   filter. **Clear all** removes every filter and the search at once.
+6. You can pick up to 100 subjects, topics and organizers in total.
+7. The filters are kept in the address of the page: open a question, save or cancel, and you come back to the
+   same filtered list, and you can send the link to someone else.
 
 ### Write a question
 1. Choose **Add**. The first field, **Question type**, offers **Single choice** (the default) and

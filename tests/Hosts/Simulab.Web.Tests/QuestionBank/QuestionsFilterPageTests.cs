@@ -144,7 +144,7 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         Pick(page, "questions-filter-difficulty", "5");
 
         page.WaitForAssertion(() => LastListQuery().Should().Contain("difficulty=none").And.Contain("difficulty=5"));
-        WaitForRows(page, 3);
+        WaitForRows(page, 1); // only the published question has difficulty 5; none of the three has no difficulty
         page.Find("#questions-filter-difficulty").Click();
         page.Find("#questions-filter-difficulty-option-none .app-mp-option-name").TextContent.Should().Be("Not set");
     }
@@ -247,7 +247,6 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
     public void Address_WithFilters_IsAppliedAndShownInThePickers()
     {
         Seed();
-        Api.Organizers.Add(Cebraspe);
         Navigation.NavigateTo($"/admin/questions?status=Published&type=TrueFalse&organizer={Cebraspe.Id}&difficulty=none&search=guarda");
 
         var page = RenderPage();
@@ -415,11 +414,12 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         Seed();
         Navigation.NavigateTo($"/admin/questions?status=Published&topic={Crase.Id}");
         var page = RenderPage();
-        WaitForRows(page, 3);
+        WaitForRows(page, 1); // the guard question: published, in the topic Crase
 
         page.Find(".app-primary-action").Click();
 
-        Navigation.Uri.Should().Contain("/admin/questions/new").And.Contain("status=Published").And.Contain($"topic={Crase.Id}");
+        page.WaitForAssertion(() =>
+            Navigation.Uri.Should().Contain("/admin/questions/new").And.Contain("status=Published").And.Contain($"topic={Crase.Id}"));
     }
 
     [Fact]
@@ -428,11 +428,12 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         Seed();
         Navigation.NavigateTo($"/admin/questions?status=Draft");
         var page = RenderPage();
-        WaitForRows(page, 3);
+        WaitForRows(page, 1); // the only draft left after the seed
 
         page.Find($"#question-actions-{Draft.Id}-edit").Click();
 
-        Navigation.Uri.Should().Contain($"/admin/questions/{Draft.Id}").And.Contain("status=Draft");
+        page.WaitForAssertion(() =>
+            Navigation.Uri.Should().Contain($"/admin/questions/{Draft.Id}").And.Contain("status=Draft"));
     }
 
     [Fact]
@@ -445,8 +446,11 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
 
         form.Find(".app-form-cancel").Click();
 
-        var target = new Uri(Navigation.Uri);
-        target.AbsolutePath.Should().Be("/admin/questions");
-        target.Query.Should().Contain("status=Draft").And.Contain($"topic={Crase.Id}").And.NotContain("utm");
+        form.WaitForAssertion(() =>
+        {
+            var target = new Uri(Navigation.Uri);
+            target.AbsolutePath.Should().Be("/admin/questions");
+            target.Query.Should().Contain("status=Draft").And.Contain($"topic={Crase.Id}").And.NotContain("utm");
+        });
     }
 }

@@ -18,6 +18,7 @@ public static class QuestionBankEndpoints
         group.MapQuestionEndpoints();
         group.MapExamEditionLookupEndpoints();
         group.MapSubjectLookupEndpoints();
+        group.MapQuestionFilterEndpoints();
 
         return endpoints;
     }

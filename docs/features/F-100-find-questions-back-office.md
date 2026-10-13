@@ -118,6 +118,9 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 
 ## Criterion → test
 
+Tests locked: 57b6567abb2a3d885b814475b67050013554a74f (7 files); unlocks: 0
+
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `QuestionFilterEndpointTests.List_ByTopics_KeepsOnlyTheQuestionsOfThePickedOnes`; screen: `QuestionsFilterPageTests.Filter_ATopic_IsSentAsTopic` |
@@ -163,6 +166,9 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 - 2026-10-13 — The reader of repeated query keys is shared with `CatalogQueryString` (second use) in one Web helper (architect).
 - 2026-10-13 — v2 change note: no second chip row, one page "Clear all" that also clears the search, 100 picked ids in total on the page (owner, asked).
 
+- 2026-10-13 — Measured (AC13, scratch run on the PostgreSQL test container, 50,000 questions, about 200 topics, 300 editions, half authored, 20 % true/false, 40 % no difficulty, `ANALYZE` done, `EXPLAIN (ANALYZE, BUFFERS)` of the count and of the page, newest first): no filter 11.8 / 13.9 ms; 2 topics 0.8 / 0.6; 30 topics 5.8 / 6.0; 150 editions 18.5 / 19.5; 300 editions 16.7 / 18.7; one edition 0.3 / 0.3; true/false + published 8.8 / 8.7; none or 5 9.8 / 10.6; 2 topics + search 0.7 / 0.6. Every case is far under the 300 ms budget, uses `ix_questions_topic` or `ix_questions_exam_edition` where a topic or an edition is picked, and the unfiltered cases are the sequential scan the list already had; no index is added (Claude). The scratch test was deleted; the numbers are from this run only.
+- 2026-10-13 — Tests unlocked twice with the owner's yes, both for errors of the tests themselves and none for a criterion: the order assertion of two tests compared with `OrdinalIgnoreCase` while the Api orders by the normalized name like the catalog list; and four expectations of `QuestionsFilterPageTests` (row counts the seed does not produce, a duplicated organizer, a URL read right after a click), found by running them (owner, asked).
+
 ## Out of scope
 - Sorting by column or by paper number — F-118.
 - Filter by content language and by origin (authored or from an edition) — F-118.
@@ -187,3 +193,4 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 - 2026-10-13 question — asked 12, from context 2
 - 2026-10-13 change — v2: no second chip row, page Clear all, 100 picked ids in total
 - 2026-10-13 question — asked 2, from context 0
+- 2026-10-13 blocked — test wrong: the order assertion of two tests used OrdinalIgnoreCase; the Api orders by the normalized name like the catalog list

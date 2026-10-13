@@ -775,7 +775,28 @@
   <data name="Questions.Column.Language" xml:space="preserve"><value>Idioma</value></data>
   <data name="Questions.Column.Status" xml:space="preserve"><value>Estado</value></data>
   <data name="Questions.Empty" xml:space="preserve"><value>Ainda não há questões no banco.</value></data>
-  <data name="Questions.Empty.Filters" xml:space="preserve"><value>Nenhuma questão corresponde ao filtro escolhido.</value></data>
+  <data name="Questions.Empty.Filters" xml:space="preserve"><value>Nenhuma questão corresponde aos filtros escolhidos.</value></data>
+  <data name="Questions.Filter.Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Questions.Filter.Difficulty" xml:space="preserve"><value>Dificuldade</value></data>
+  <data name="Questions.Filter.Subject" xml:space="preserve"><value>Disciplina e tópico</value></data>
+  <data name="Questions.Filter.Organizer" xml:space="preserve"><value>Banca</value></data>
+  <data name="Questions.Filter.Edition" xml:space="preserve"><value>Edição</value></data>
+  <data name="Questions.Filter.Status.Placeholder" xml:space="preserve"><value>Nome do estado</value></data>
+  <data name="Questions.Filter.Type.Placeholder" xml:space="preserve"><value>Nome do tipo</value></data>
+  <data name="Questions.Filter.Difficulty.Placeholder" xml:space="preserve"><value>Um número de 1 a 5</value></data>
+  <data name="Questions.Filter.Subject.Placeholder" xml:space="preserve"><value>Nome da disciplina ou do tópico</value></data>
+  <data name="Questions.Filter.Organizer.Placeholder" xml:space="preserve"><value>Nome da banca</value></data>
+  <data name="Questions.Filter.Edition.Placeholder" xml:space="preserve"><value>Concurso, banca ou ano</value></data>
+  <data name="Questions.Filter.Options" xml:space="preserve"><value>{0}: opções</value></data>
+  <data name="Questions.Filter.Picked" xml:space="preserve"><value>{0}: escolhidos</value></data>
+  <data name="Questions.Filter.Count" xml:space="preserve"><value>Escolhidos: {0}</value></data>
+  <data name="Questions.Filter.None" xml:space="preserve"><value>Sem filtro</value></data>
+  <data name="Questions.Filter.ClearField" xml:space="preserve"><value>Limpar</value></data>
+  <data name="Questions.Filter.Clear" xml:space="preserve"><value>Limpar tudo</value></data>
+  <data name="Questions.Filter.SubjectAll" xml:space="preserve"><value>{0} (todos os tópicos)</value></data>
+  <data name="Questions.Filter.Loading" xml:space="preserve"><value>A carregar opções…</value></data>
+  <data name="Questions.Filter.LoadFailed" xml:space="preserve"><value>A lista de opções não carregou.</value></data>
+  <data name="Questions.Filter.Limit" xml:space="preserve"><value>É possível escolher até 100 disciplinas, tópicos e bancas no total.</value></data>
   <data name="Questions.Empty.Search" xml:space="preserve"><value>Nenhuma questão corresponde a "{0}".</value></data>
   <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Não definida</value></data>
   <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>Dificuldade não definida</value></data>

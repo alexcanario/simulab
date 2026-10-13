@@ -103,13 +103,47 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
             .ToListAsync(cancellationToken);
     }
 
-    public Task<IReadOnlyList<OrganizerDirectoryEntry>> ListOrganizersAsync(CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+    public async Task<IReadOnlyList<OrganizerDirectoryEntry>> ListOrganizersAsync(CancellationToken cancellationToken) =>
+        await context.Organizers
+            .AsNoTracking()
+            .OrderBy(organizer => organizer.NormalizedAcronym)
+            .ThenBy(organizer => organizer.Id)
+            .Select(organizer => new OrganizerDirectoryEntry(organizer.Id, organizer.Acronym, organizer.Name))
+            .ToListAsync(cancellationToken);
 
-    public Task<IReadOnlyList<OrganizerEditionsDirectoryEntry>> ListOrganizerEditionsAsync(
+    public async Task<IReadOnlyList<OrganizerEditionsDirectoryEntry>> ListOrganizerEditionsAsync(
         IReadOnlyCollection<Guid> organizerIds,
-        CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(organizerIds);
+
+        if (organizerIds.Count == 0)
+        {
+            return [];
+        }
+
+        var ids = organizerIds.ToList();
+        var live = await context.Organizers
+            .AsNoTracking()
+            .Where(organizer => ids.Contains(organizer.Id))
+            .Select(organizer => organizer.Id)
+            .ToListAsync(cancellationToken);
+        if (live.Count == 0)
+        {
+            return [];
+        }
+
+        // The same joins as the edition lookups: an edition whose exam was deleted is not an edition of anyone.
+        var rows = (await (
+                from edition in context.ExamEditions.AsNoTracking()
+                join exam in context.Exams on edition.ExamId equals exam.Id
+                where live.Contains(edition.OrganizerId)
+                select new { edition.OrganizerId, edition.Id })
+            .ToListAsync(cancellationToken))
+            .ToLookup(row => row.OrganizerId, row => row.Id);
+
+        return [.. live.Select(id => new OrganizerEditionsDirectoryEntry(id, [.. rows[id]]))];
+    }
 
     // The years that begin with the digits typed; an empty range (1, 0) when the text is not a number of one to
     // four digits.

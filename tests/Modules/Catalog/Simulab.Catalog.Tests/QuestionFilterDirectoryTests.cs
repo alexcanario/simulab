@@ -102,7 +102,9 @@ public sealed class QuestionFilterDirectoryTests : CatalogApiTests
         var found = taxonomy.Single(entry => entry.Id == subject.Id);
         found.Topics.Select(topic => topic.Name).Should().Equal($"Crase {marker}", $"Pontuação {marker}");
         taxonomy.Single(entry => entry.Id == empty.Id).Topics.Should().BeEmpty();
-        taxonomy.Select(entry => entry.Name).Should().BeInAscendingOrder(StringComparer.OrdinalIgnoreCase);
+        // By the normalized name, as the catalog's own list: accents and case do not count.
+        taxonomy.Select(entry => entry.Name).Should().BeInAscendingOrder(
+            StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace));
     }
 
     [Fact]

@@ -303,7 +303,9 @@ public sealed class QuestionFilterEndpointTests : OriginApiTests
         found.Name.Should().Be($"Zzz Disciplina {marker}");
         found.Topics.Select(topic => topic.Name).Should().Equal($"Alfa {marker}", $"Beta {marker}");
         taxonomy.Single(item => item.Id == emptyId).Topics.Should().BeEmpty();
-        taxonomy.Select(item => item.Name).Should().BeInAscendingOrder(StringComparer.OrdinalIgnoreCase);
+        // By the normalized name, as the catalog's own list: accents and case do not count.
+        taxonomy.Select(item => item.Name).Should().BeInAscendingOrder(
+            StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace));
     }
 
     [Fact]
