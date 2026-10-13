@@ -447,6 +447,11 @@ else
                             Title="@L["Questions.Section.History"]"
                             Icon="@AppIcons.History"
                             Subtitle="@L["Questions.Section.History.Subtitle"]">
+                @if (_historyError is not null)
+                {
+                    <AppAlert Severity="Severity.Error" Text="@_historyError" Class="mb-4" />
+                }
+
                 <AppDataTable @ref="_history"
                               TItem="QuestionVersionListItemResponse"
                               LoadAsync="LoadHistoryAsync"
@@ -561,6 +566,7 @@ else
     private string? _publishReasonError;
     private bool _publishReasonRequired;
     private AppDataTable<QuestionVersionListItemResponse>? _history;
+    private string? _historyError;
 
     private bool _loading;
     private bool _loadFailed;
@@ -985,9 +991,15 @@ else
         var result = token is null ? null : await Api.GetVersionAsync(token, current.Id, row.Number);
         if (result is not { IsSuccess: true, Value: { } version })
         {
-            _publicationError = Errors.For(result?.ErrorCode);
+            // The refusal belongs to the History card the curator acted in, not to the Publication card.
+            _historyError = Errors.For(result?.ErrorCode);
+
+            // The row button calls this delegate itself, not an EventCallback of the page: say it changed.
+            await InvokeAsync(StateHasChanged);
             return;
         }
+
+        _historyError = null;
 
         // The dialog draws a question: the version fills its content and the question's catalog data stays as
         // it is (it is not part of a version, BR1).

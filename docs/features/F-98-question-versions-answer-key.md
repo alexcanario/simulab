@@ -1,7 +1,7 @@
 ---
 feature: F-98
 epic: Question bank
-status: building
+status: validating
 board: 144
 version: 1
 ---
@@ -108,7 +108,7 @@ Tests locked: de51e5bd97f5d9672511912d8dc5ce0518fb903a (4 files); unlocks: 1
 | AC12 | `QuestionVersionEndpointTests.Delete_ADraftThatHasVersions_LeavesTheVersionRowsWithTheirContent` |
 | AC13 | `AddQuestionVersionsMigrationTests.Up_GivesVersionOneToEachPublishedQuestionNotDeleted_AndToNoDraft`, `Up_CopiesTheLiveOptionsInPositionOrder_UnderTheNamesTheMappingReads` |
 | AC14 | `QuestionVersionRaceTests.Save_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndStoresNothingOfItself`, `Publish_WhenAnotherSaveTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysADraft`; `QuestionVersionEndpointTests.TheDatabase_RefusesTwoVersionsWithTheSameNumberForOneQuestion` |
-| AC15 | `QuestionVersionFormTests.History_ListsTheVersionsNewestFirst_WithTheCurrentChipTheChangeLabelAndTheReason`, `History_TheKeyChangeRowCarriesTheWarningToneAndItsOwnWords`, `History_ANeverPublishedQuestion_ShowsTheEmptyText`, `History_View_OpensTheRecordedVersionReadOnly_WithTheKeyHiddenUntilShowAnswer`, `History_AfterAPublish_ReloadsTheList` |
+| AC15 | `QuestionVersionFormTests.History_ViewOfAVersionThatIsGone_ShowsTheRefusalInsideTheHistoryCard`, `History_ListsTheVersionsNewestFirst_WithTheCurrentChipTheChangeLabelAndTheReason`, `History_TheKeyChangeRowCarriesTheWarningToneAndItsOwnWords`, `History_ANeverPublishedQuestion_ShowsTheEmptyText`, `History_View_OpensTheRecordedVersionReadOnly_WithTheKeyHiddenUntilShowAnswer`, `History_AfterAPublish_ReloadsTheList` |
 | AC16 | `QuestionVersionFormTests.Reason_OnAPublishedQuestionWithTheKeyUntouched_IsNotShown`, `Reason_WhenTheKeyOfAPublishedQuestionChanges_ShowsTheFieldAndRefusesSaveWithoutIt`, `Reason_Typed_IsSentWithSave_AndTheFieldGoesAwayOnceSaved`, `Reason_OverTheLimit_IsRefusedBeforeTheCall`, `Publish_RefusedForTheMissingReason_ShowsTheFieldInTheCard_AndTheSecondClickPublishes`, `ListPublish_RefusedForTheMissingReason_ShowsTheCodesTextInTheTopAlert`; `TrueFalseQuestionFormTests.Edit_PublishedTrueFalse_ChangingTheKey_SendsAPutWithTheNewKeyAndStaysPublished` |
 | AC17 | `QuestionVersionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` (every key in each locale) |
 
@@ -130,6 +130,9 @@ Tests locked: de51e5bd97f5d9672511912d8dc5ce0518fb903a (4 files); unlocks: 1
 - 2026-10-12 (build) — Dropped / corrected from the passes: (1) the backfill excludes the soft-deleted option rows of live questions (`is_deleted = false`) and writes `[]` for a question with no option rows (a published true/false question), with the JSON member names equal to the CLR names EF writes; (2) the backfilled version 1 has `created_at = now()` (when the migration recorded it) and a `gen_random_uuid()` id; (3) an unknown or deleted question id answers 404 `question.not_found` on both reads, and `question.version_not_found` only for a number the known question does not have; (4) a reason longer than 500 characters is refused only when a version is created (a reason sent when no version is created is ignored, BR5); (5) the `question_versions.options` JSON column has no property behind it, so it joins `role_changes.added` and `role_changes.removed` in the expected list of `TableDescriptionTests.OnlyColumnsWithNoPropertyBehindThem_AreExempt` (an existing assertion changed by this item, on purpose); (6) the `type` column is kept on the version (an attempt reads the shape without a second read) and carries the comment of `questions.type`.
 - 2026-10-12 (build) — The refinement said F-97 was "validating, not merged"; it was merged (`1c0d4981`) and the item branch took `main` before the first edit. The version snapshots the key as `AnswerKey` shapes it (options for single choice, `TrueFalseKey` for true/false).
 - 2026-10-13 (build) — tests unlocked (owner answered "unlock and fix"): two assertions of `QuestionVersionEndpointTests` compared `CreatedAt` with the real clock while the Api test host runs on a fixed `FakeTimeProvider`; they now compare with `Factory.Clock`. Also changed on purpose, outside the lock: `TrueFalseQuestionEndpointTests.Update_PublishedTrueFalse_ChangingTheKey_StaysPublishedWithTheNewKey` sends a `ChangeReason` (F-98 AC7 makes it required) and `InitialQuestionBankMigrationTests` expects `question_versions` among the tables.
+- 2026-10-13 (review) — #1 minor, fixed: a refused "View" of a version is shown inside the History card (`_historyError`), not in the Publication card; test `History_ViewOfAVersionThatIsGone_ShowsTheRefusalInsideTheHistoryCard`. #2 minor, fixed: `IQuestionStore.FindLatestVersionAsync` says the version is not tracked. #3 minor, accepted: the epic table row of F-98 (and of F-95 to F-97) reads `refining`/`idea`; the ship refreshes the table, as it did for the earlier items.
+- 2026-10-13 (review) — Review coverage: checked and fine — security (both reads under `questions.manage`, tenant and soft-delete filters on the version, reason trimmed and bounded), data (migration, backfill, indexes, checks, Down), contracts (routes, four codes, trailing optional members, regenerated OpenAPI), localization (22 keys in three locales), locks (diff of the four locked files empty), tests (every criterion through the path the user reaches; the race made deterministic), simplicity, rules. Read: `git diff fddff677..HEAD` and the surrounding module code. Not checked: nothing.
+- 2026-10-13 (app host) — The Web was opened through the app host of this worktree on its own database `simulab_f98` (Postgres container shared, database the item's): the migration applied on start, the signed-in History card listed two versions seeded by SQL (key change with its reason and "First publication"), "View" opened version 1 read only with the key behind "Show answer", and changing the correct option showed the reason field (500 characters, required). A test account (Curator) was made through `/sign-up` and activated in that database; the database was dropped afterwards. Not driven on screen: saving and publishing through the rich-text editors (covered by the bUnit and Api tests; the validation script has the owner do it).
 - 2026-10-12 (build) — Change detection compares the sanitized HTML as stored: a later change of the sanitizer would make the next save of a published question create a version. Known and accepted; not a defect.
 
 ## Out of scope
@@ -147,6 +150,33 @@ Tests locked: de51e5bd97f5d9672511912d8dc5ce0518fb903a (4 files); unlocks: 1
 ## Change notes
 <!-- Added by /agile:change during build. -->
 
+## Validation script
+Needed to validate: the local app host and one user with `questions.manage` (the seeded administrator `admin@simulab.local`) — owner; in place now.
+
+Whose data: the app runs on its own database `simulab_f98` in the shared local PostgreSQL container, so the migration of this item lands there and never in `simulab`. Close any other app host first.
+
+1. Start the app host from the item's worktree `D:\wt\simulab\f-98-question-versions` (the first start applies the new migration with no `fail` line in the console). Open https://localhost:7125 and sign in as `admin@simulab.local` → you land signed in.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f98"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f98 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Content → Questions → Add: pick a subject and topic (create them in Catalog if the database is empty), write a statement, two options with A correct, **Save** → the **History** card at the bottom of the page says "The first version is recorded when the question is published." Press **Publish** → the card lists version 1, "First publication", with the "Current" chip.
+3. Change the statement, **Save** → version 2 "Content edited" is current and version 1 is no longer. Save again with no change → no version 3. Change only the topic or the difficulty and save → still no new version.
+4. Mark option B as correct → the field "Reason for the answer key change" appears at the end of the Options section. **Save** with it empty → refused with "Write the reason for the answer key change.", nothing saved. Type a reason, **Save** → version 3 shows "Answer key changed" (warning tone) with your reason. On that row press **View** → the dialog "Version 1" (or the version you chose) opens read only with its recorded date; the correct answer stays hidden until "Show answer".
+5. **Unpublish**, mark option A correct again, **Save** (no reason is asked on a draft), **Publish** → refused; the Publication card now shows the reason field, focused. Type a reason and **Publish** again → published, a new version marked "Answer key changed".
+6. Add a true/false question with key "True", publish it, then flip the key to "False" → the reason field shows under the key; Save is refused without it and records version 2 with it.
+7. Switch the language to Português (pt-PT) with the language button → the History card, its columns and chips, and the reason field are in Portuguese; switch back to English.
+8. Keyboard only, on a published question: Tab to the option group, move the correct option with the arrow keys, Tab to the reason field and type, Tab to **Save** and press Space → the version is recorded; Tab to the **View** button of a history row and press Enter → the dialog opens, Esc closes it and the focus returns to that button.
+
 ## Events
 
 - 2026-10-13 blocked — test wrong: two assertions compared CreatedAt with the real clock; the API host runs on a fixed FakeTimeProvider (owner chose unlock and fix, 2026-10-13)
+- 2026-10-13 test-fail — 1 new warning(s): CA1865 in tests/Hosts/Simulab.Web.Tests/QuestionBank/QuestionVersionFormTests.cs, 1 red
+- 2026-10-13 rework — review #1: a refused View is shown in the History card
+- 2026-10-13 rework — review #2: the store port says the latest version is not tracked
+- 2026-10-13 question — asked 1, from context 0

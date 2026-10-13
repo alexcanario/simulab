@@ -35,8 +35,9 @@ public interface IQuestionStore
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// The version of the question with the highest number, tracked, or null when it has none (F-98, BR7). The
-    /// number the next version takes is read from it; the unique index is the last line when two saves race.
+    /// The version of the question with the highest number, or null when it has none (F-98, BR7). It is not
+    /// tracked: it is read to compare with and to take the next number from, never changed. The unique index is
+    /// the last line when two saves race.
     /// </summary>
     Task<QuestionVersion?> FindLatestVersionAsync(Guid questionId, CancellationToken cancellationToken);
 

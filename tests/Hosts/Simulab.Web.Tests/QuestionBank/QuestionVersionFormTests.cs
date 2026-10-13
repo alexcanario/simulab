@@ -145,6 +145,25 @@ public sealed class QuestionVersionFormTests : QuestionPageTestContext
             call.Path == $"/api/v1/question-bank/questions/{Published.Id}/versions/1");
     }
 
+    // A version that cannot be read says so inside the History card, not in the Publication card.
+    [Fact]
+    public void History_ViewOfAVersionThatIsGone_ShowsTheRefusalInsideTheHistoryCard()
+    {
+        RenderProviders();
+        Api.Questions.Add(Published with { CurrentVersion = 1 });
+        Api.Versions[Published.Id] = [VersionOf(Published, 1)];
+        var page = RenderEdit(Published.Id);
+        WaitForEditors(page, "question-statement");
+        page.WaitForElement("#question-version-actions-1-view");
+        Api.Versions.Clear();
+
+        page.Find("#question-version-actions-1-view").Click();
+
+        page.WaitForAssertion(() => page.Find(HistoryCard).TextContent.Should().Contain("This version does not exist."));
+        page.Find("section[aria-labelledby='question-section-publication-title']").TextContent.Should()
+            .NotContain("This version does not exist.");
+    }
+
     // AC16, BR5: a published question whose key is not touched has no reason field.
     [Fact]
     public void Reason_OnAPublishedQuestionWithTheKeyUntouched_IsNotShown()
