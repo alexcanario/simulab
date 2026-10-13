@@ -81,6 +81,12 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
                     edition.AppliedOn))
             .ToListAsync(cancellationToken);
 
+        // F-76 BR1: the syllabus of every published edition above, in one read for all of them. A draft edition
+        // is not in the list, so its notice subjects are never asked for.
+        var syllabi = await new NoticeSubjectQueries(context)
+            .ListByEditionsAsync([.. editions.Select(edition => edition.Id)], cancellationToken);
+        editions = [.. editions.Select(edition => edition with { NoticeSubjects = syllabi.GetValueOrDefault(edition.Id) ?? [] })];
+
         return new PublishedExamDetailResponse(
             exam.Id,
             exam.Name,

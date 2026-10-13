@@ -81,6 +81,10 @@ else
                                 </AppLink>
                             }
                         </div>
+                        @* F-76: the edition's syllabus, closed until the student opens it. *@
+                        <EditionSyllabus EditionId="edition.Id"
+                                         Rows="edition.NoticeSubjects"
+                                         ContentLanguage="@_exam.ContentLanguage" />
                     </RowTemplate>
                 </AppItemRows>
             </AppSectionCard>

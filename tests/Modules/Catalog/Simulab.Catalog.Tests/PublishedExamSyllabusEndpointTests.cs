@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using Simulab.Catalog.Contracts;
-using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Catalog.Tests;

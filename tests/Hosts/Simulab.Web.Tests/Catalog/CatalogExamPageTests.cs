@@ -114,7 +114,8 @@ public sealed class CatalogExamPageTests : StudentCatalogTestContext
         var row = page.Find("li.app-item-row");
         row.TextContent.Should().Contain("2023").And.Contain("Fundacao Getulio Vargas (FGV)").And.NotContain("Applied on");
         row.QuerySelectorAll("a").Should().BeEmpty();
-        row.QuerySelectorAll(".app-muted").Should().BeEmpty();
+        // F-76 BR3: the "syllabus not registered" note is its own line under the facts, so only the facts line is checked here.
+        row.QuerySelectorAll(".d-flex .app-muted").Should().BeEmpty();
         row.QuerySelectorAll("[aria-hidden=true]").Should().ContainSingle();
     }
 

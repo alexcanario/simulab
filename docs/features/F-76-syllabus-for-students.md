@@ -53,7 +53,7 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 - Kit: a small `AppDisclosure` component (a button with `aria-expanded` and `aria-controls`, `AppIcons.Expand` turning when open, the content below), documented in the kit's rules like the others. The group-run logic and the sum text move to a shared helper used by both the admin section and this page (extract, do not copy).
 - `GET /api/v1/catalog/published-exams/{id}` (unchanged route): `PublishedExamEditionResponse` gains `noticeSubjects: NoticeSubjectResponse[]` (empty when none; the existing type, display order, mappings included). No other endpoint changes; OpenAPI document returns 200.
 - Data: no new table, column or migration.
-- Resource keys (pt-BR, pt-PT, en), neutral names to settle at the build: `Catalog.Syllabus.Show.One` / `.Many` (button, with the count), `Catalog.Syllabus.Hide`, `Catalog.Syllabus.NotRegistered`, `Catalog.Syllabus.NotMapped`, `Catalog.Syllabus.Questions.One` / `.Many` / `.Unstated` (with its spoken form). The group none heading, the total lines and the cover text reuse the `NoticeSubjects.*` keys.
+- Resource keys (pt-BR, pt-PT, en): `Catalog.Syllabus.Show.One` / `.Many` (button, with the count), `Catalog.Syllabus.Hide`, `Catalog.Syllabus.NotRegistered`, `Catalog.Syllabus.NotMapped`. The group none heading, the total lines, the number of questions (and its spoken "not stated") and the cover text reuse the `NoticeSubjects.*` keys.
 - States of the syllabus block, in the page's own states: no new loading or error state, because it arrives with the exam; if the exam fails to load the page shows what F-36 already shows.
 - Accessibility: the button is the first focus stop of the block and keeps its place when it opens; its accessible name changes with its state (`Show` / `Hide`); each group is a heading level under the section's heading; the cover list is a list; "not stated" has a spoken text, not only a dash.
 
@@ -70,6 +70,9 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 - AC10 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 808521e898327fbebb9f17a6503e46d1b926d41d (2 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | PublishedExamSyllabusEndpointTests.Find_PublishedEdition_CarriesItsNoticeSubjectsInDisplayOrderWithTheirMappings; CatalogExamSyllabusTests.Open_ShowsTheRowsInOrderUnderOneHeadingPerGroupWithTheirNumbers; CatalogExamSyllabusTests.Open_NoRowHasAGroup_NoHeadingIsDrawn |
@@ -80,8 +83,8 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 | AC6 | CatalogExamSyllabusTests.Render_TheSyllabusIsClosedAndTheButtonSaysHowManySubjects; CatalogExamSyllabusTests.Toggle_OpensOneEditionAtATime_LeavesTheOtherAsItWas_AndTheNameFollowsTheState; CatalogExamSyllabusTests.Open_TheButtonControlsTheBlockItOpens |
 | AC7 | PublishedExamSyllabusEndpointTests.Find_DraftEdition_NeverCarriesItsNoticeSubjects; PublishedExamSyllabusEndpointTests.Find_DeletedNoticeSubject_IsNotReturned |
 | AC8 | PublishedExamSyllabusEndpointTests.Find_TopicMovedToAnotherSubject_ShowsTheNewSubject |
-| AC9 | pending |
-| AC10 | pending |
+| AC9 | PublishedExamListSyllabusTests.List_CarriesNoNoticeSubjects |
+| AC10 | CatalogSyllabusResourcesTests.EveryNewText_ExistsInTheThreeLanguages; CatalogSyllabusResourcesTests.EveryNewText_KeepsEveryPlaceholderInEveryLanguage (and the existing parity test) |
 
 ## Decisions
 - 2026-10-06 — Pause the refinement until F-75 is approved — this item only shows what F-75 defines; refining first would risk a change note — asked (owner, question 1).
@@ -96,6 +99,7 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 - 2026-10-13 — The contract reuses `NoticeSubjectResponse` — the same shape the back office reads, no second type to keep equal — decided by Claude (technical).
 - 2026-10-13 — The query reads the notice subjects and mappings of all the exam's published editions in the same fixed number of queries (not per edition, not per row), extending `NoticeSubjectQueries` — the F-75 note about never reading one query per row — decided by Claude (technical).
 - 2026-10-13 — Reuse `catalog.browse`; draft editions never show (F-36 BR1); names are content and not translated; no new packages (production and tests) — confirmed: F-36 BR1, BR10 and `docs/features/F-36-catalog-browsing-for-students.md`; no package is needed, the kit, bunit and the test containers already cover it.
+- 2026-10-13: tests unlocked (an unused `using` in `PublishedExamSyllabusEndpointTests.cs` failed the gate with IDE0005; one line removed, owner agreed) — asked
 
 ## Out of scope
 - Searching or filtering the catalog by subject or topic ("exams that cover Fractions"): a later item if the owner wants it; not registered now.
@@ -110,3 +114,5 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 ## Events
 
 - 2026-10-13 question — asked 4, from context 5
+- 2026-10-13 blocked — test wrong: remove an unused using that makes the gate fail with IDE0005
+- 2026-10-13 test-fail — 2 new warning(s): IDE0005 in tests/Modules/Catalog/Simulab.Catalog.Tests/PublishedExamListSyllabusTests.cs; IDE0005 in t, 1 red

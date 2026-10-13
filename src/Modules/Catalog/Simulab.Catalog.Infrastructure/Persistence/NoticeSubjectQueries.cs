@@ -30,6 +30,25 @@ public sealed class NoticeSubjectQueries(CatalogModuleDbContext context) : INoti
         return rows.Count == 0 ? null : rows[0];
     }
 
+    /// <summary>
+    /// The notice subjects of several editions at once, each edition's list in display order (F-76): the same fixed
+    /// number of queries whatever the number of editions or rows. An edition with none has no key.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<Guid, IReadOnlyList<NoticeSubjectResponse>>> ListByEditionsAsync(
+        IReadOnlyCollection<Guid> examEditionIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(examEditionIds);
+
+        var rows = await WithMappingsAsync(
+            context.NoticeSubjects.Where(subject => examEditionIds.Contains(subject.ExamEditionId)),
+            cancellationToken);
+
+        return rows
+            .GroupBy(row => row.ExamEditionId)
+            .ToDictionary(group => group.Key, group => (IReadOnlyList<NoticeSubjectResponse>)[.. group]);
+    }
+
     private async Task<IReadOnlyList<NoticeSubjectResponse>> WithMappingsAsync(
         IQueryable<Domain.Entities.NoticeSubject> subjects,
         CancellationToken cancellationToken)

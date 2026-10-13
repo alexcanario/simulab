@@ -605,6 +605,11 @@
   <data name="Catalog.BackToCatalog" xml:space="preserve"><value>Voltar para o catálogo</value></data>
   <data name="Catalog.Editions.Subtitle" xml:space="preserve"><value>Cada prova aplicada, da mais recente para a mais antiga. O edital oficial traz as regras completas.</value></data>
   <data name="Catalog.Editions.Empty" xml:space="preserve"><value>Este exame não tem edições publicadas.</value></data>
+  <data name="Catalog.Syllabus.Show.One" xml:space="preserve"><value>Ver conteúdo programático (1 disciplina)</value></data>
+  <data name="Catalog.Syllabus.Show.Many" xml:space="preserve"><value>Ver conteúdo programático ({0} disciplinas)</value></data>
+  <data name="Catalog.Syllabus.Hide" xml:space="preserve"><value>Ocultar conteúdo programático</value></data>
+  <data name="Catalog.Syllabus.NotRegistered" xml:space="preserve"><value>O conteúdo programático desta edição ainda não foi cadastrado.</value></data>
+  <data name="Catalog.Syllabus.NotMapped" xml:space="preserve"><value>Tópicos ainda não mapeados</value></data>
   <data name="Catalog.Editions.NoticeLink" xml:space="preserve"><value>Edital oficial</value></data>
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Edital oficial, {0}, abre em uma nova aba</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parâmetros para uma página que guarda o estado no endereço</value></data>
