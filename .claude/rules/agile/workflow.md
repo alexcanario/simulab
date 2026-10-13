@@ -15,6 +15,7 @@
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.
 - A change of mind during build is a change note (`/agile:change`); only the affected criteria are re-approved.
+- An item the session judges too large for one session is proposed in smaller parts at refinement and at the build's plan, the owner approves the cut (`references/item-size.md`).
 - Stay inside the item's scope. Anything extra you notice becomes an `idea` and is reported, not built.
 - When a solution has several moving parts, also offer the simpler version with its trade-off. The owner decides.
 - Show the first artifact of a repeated pattern before replicating it.

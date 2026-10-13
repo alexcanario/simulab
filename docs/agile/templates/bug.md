@@ -37,6 +37,10 @@ Technical terms: [glossary](../glossary.md)
 <!-- What changes. Keep it minimal. -->
 <!-- If duplicates were listed above: which are fixed here, which are deferred and why. -->
 
+## Docs
+<!-- Only when the fix changes a flow, a contract or a setting a technical page already describes (references/tech-pages.md): `- <kind>: update docs/<folder>/<slug>.md#<section> — <what changes>`. A bug never lists `new`. No page is touched: `- none — <reason>`. -->
+- none — <reason>
+
 ## Regression test
 <!-- The test that fails before the fix and passes after it. One per occurrence fixed. -->
 - <Test name> — <project>

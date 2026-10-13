@@ -4260,3 +4260,151 @@ Gate time: 1 pass, 3 s — ship 1 (3 s), sealed 1 (3 s saved); 0 red
 ```
 
 As duas saídas acima são a saída real de `gate.js ship` rodado duas vezes e de `gate-passes.js summary F-12` sobre um projeto de teste com a solução `Shop.slnx` e o item F-12 na branch `feature/F-12`; a primeira rodada imprimiu as mesmas linhas `built` e `tested` sem a linha `sealed:`.
+
+### 14.116 O architect diz o que conferiu e deixa a escolha com custo para você
+
+A F-2 do projeto de pedidos troca o campo `Notes` por `NoteText` (máximo de 500 caracteres) e cria um resumo por tenant. Muda o schema e cria uma rota, então o `/agile:build F-2` roda as duas passagens somente leitura antes do plano. O Claude diz o modelo da chamada e, depois que o `architect` devolve o relatório, confere cada linha nos arquivos. Antes desta versão, o relatório era uma tabela de quatro colunas (`Severity`, `What`, `Why it matters`, `What to do instead`): nove linhas (três bloqueadores, três graves, três leves), sem número, sem dizer o que foi conferido e sem separar nenhuma escolha. Agora o relatório vem assim (trecho, no inglês do agente):
+
+```
+## Findings
+| # | Check | Severity | What | Why it matters | What to do instead |
+| 1 | data | blocker | ... Any of the ~40 notes over 500 characters loses its text ... | ... against BR4 ... | write 002 with the guard as the first statement, as a real stop ... |
+| 2 | scope | minor | Some parts of the proposal reopen what the item file already settles ... | The owner gets questions that are already answered ... | Remove Risk 2's and Risk 6's alternatives from the proposal ... |
+
+## Trade-offs
+| # | The choice | As proposed | Alternative | Architect's pick and why |
+| 3 | The list cache after a create (Risk 5) | Leave `OrdersCache` alone. The summary is current right away, and the list can be up to 60 s old. | Clear the tenant's cache entry on create. The list and the summary match, but the POST handler becomes coupled to `OrdersCache` ... | **Recommended: as proposed.** The 60 s staleness is a choice F-1 already wrote down (`src/Orders/OrdersCache.cs:3`) ... |
+
+## Checked and fine
+- layout: none. Everything stays in `src/Orders/` (`Orders.csproj:1`, a single web project with no package references). ...
+- rules: none. Read `.claude/rules/agile/api.md`: `/api/v1/orders/summary` is under `/api/v1/` and declares `.RequireAuthorization()` ...
+- contracts: none. Adding `string? NoteText = null` at the end of `CreateOrder` (`OrdersEndpoints.cs:3`) is additive. ...
+- simplicity: none. Read `OrdersStore.cs`, `OrdersCache.cs` and `OrdersEndpoints.cs`. ...
+
+## Not checked
+Not checked: none
+```
+
+Os números 1 a 3 são uma só sequência, achados primeiro. As quatro conferências sem achado dizem o que foi lido (arquivo, rota, contagem): uma lista vazia deixa de poder ser confundida com uma revisão rasa. A conferência que teve achado (`data` e `scope`) não se repete ali. Para você, o Claude resume numa linha:
+
+```
+Conferido sem achado: layout, rules, contracts, simplicity. Não conferido: nenhum.
+```
+
+e grava em `## Decisions` uma linha `Design coverage` com a lista inteira e o que foi lido. A escolha 3 não é um defeito: o resumo fica sempre atual e a lista, com cache de 60 segundos, pode ficar atrás. Quem decide é você, e ela chega como cartão, com a sugestão do `architect` primeiro, na mesma rodada das paradas que só o dono resolve (pacote de banco, tenant fixo, projeto de testes):
+
+```
+> ❓ Pergunta 4 — Cache da lista (60s) ficar fora de sincronia com o resumo
+> a) Deixar como está — nenhum critério deste item compara lista com resumo.
+> b) Limpar a entrada do cache do tenant a cada create, para os dois baterem sempre.
+> Recomendação: a) Motivo: essa escolha de cache já é do F-1; mexer nela agora é mudança fora do que este item pede.
+```
+
+A sua resposta vira uma linha `design trade-off 3 ... owner chose as proposed | alternative` em `## Decisions`, e o plano dos 8 passos parte dela. No `/agile:autopilot` e com `--assume` nada disso para a corrida: ela segue a sugestão do `architect`, grava a linha como `assumed by autopilot` e o stop 2 lista a escolha com as duas opções e a que foi seguida; mudar depois é uma nota de mudança. Um achado que quebra o arquivo do item, uma regra, o perfil ou uma conferência do projeto nunca entra como escolha com custo: o Claude o move para os achados, com a gravidade da quebra.
+
+As saídas acima são o relatório e as mensagens reais de uma execução de `/agile:build F-2` com o plugin da branch (modelo opus, 35 turnos, US$ 1,23) sobre um projeto de teste com a F-1 entregue e a F-2 aprovada; a mesma execução com o plugin anterior produziu a tabela de quatro colunas descrita no início (US$ 1,15, 38 turnos).
+
+### 14.117 O item lista as páginas técnicas que toca, o build as escreve e o ship confere cada uma
+
+A F-1 do acme-shop, o resumo do dia, acrescenta um comportamento (a dona abre o resumo e vê os totais) e dois campos num contrato que já tem página. No refinamento o Claude escreve em `## Docs` do arquivo do item uma linha por página, e é isso que você lê junto com o resto antes de aprovar:
+
+```
+## Docs
+- flow: new docs/flows/order-summary.md — the owner opens the summary and sees the day's totals
+- reference: update docs/reference/orders-api.md#Fields — the summary adds `total` and `count`
+```
+
+Um bug que muda esse fluxo depois lista só `update`; uma página `new` num bug é recusada. Um item que não toca nenhuma página diz `- none — <motivo>`. No build, as páginas são escritas junto com o código, a partir de `docs/agile/templates/tech-page.md`, e o Claude roda a conferência antes de passar o item para `validating`. Com a página de fluxo ainda por escrever, a página de referência existe mas nenhum índice foi escrito:
+
+```
+RED: docs/flows/order-summary.md: the page does not exist
+RED: docs/reference/orders-api.md: docs/reference.md is not current (run techdocs.js index)
+```
+
+Cada linha `RED:` nomeia a página e o que falta; o ship para do mesmo jeito que para num gate vermelho. Com a página de fluxo escrita e os índices gerados, a mesma conferência fecha:
+
+```
+agile techdocs INDEX WRITTEN: 2 file(s)
+agile techdocs GREEN: 2 page(s)
+```
+
+Uma segunda geração não muda nada (`agile techdocs INDEX UNCHANGED`), porque o índice é derivado do cabeçalho das páginas, sem data nem commit. O arquivo que a dona ou o time abre, `docs/flows.md`, começa com uma linha que diz que é gerado e que ninguém o edita à mão, e tem uma tabela `Page | Summary | Items` com uma linha por página, ordenada pelo título: o título da página como link para `flows/order-summary.md`, o resumo do cabeçalho e `F-1` na coluna dos itens.
+
+As saídas acima são as que o `techdocs.js` imprimiu sobre um projeto de teste com o item F-1 e as duas páginas deste exemplo. O ship repete `index` e `check`, commita as páginas e os índices com o manual e diz `Technical pages: 2`.
+
+### 14.118 Um item grande demais para uma sessão é cortado no refinamento, e o build para antes de escrever código
+
+A F-1 do acme-shop, a área de gestão de pedidos, descreve num só resumo cinco coisas que se usam sozinhas, cada uma com tela e dados próprios: a lista com filtros, a exportação em CSV, o e-mail a cada mudança de status, a aprovação de um gerente e a trilha de auditoria. No refinamento o Claude lê o código antes de perguntar qualquer coisa, julga o tamanho (pelos sinais, sem contar nada) e mostra o corte, depois um cartão:
+
+```
+F-1 — Order management area [refining]
+
+Proposta de corte (parte 1 é o próprio F-1, reduzido):
+| Parte  | Título                          | Tamanho | Depende de |
+| 1 (F-1)| Order management area           | M       | -          |
+| 2      | Order status notification e-mails | S     | F-1        |
+| 3      | Order approval workflow         | M       | F-1        |
+| 4      | Order audit trail               | S       | F-1        |
+
+Como seguir com o tamanho do F-1?
+a) Dividir como proposto (Recomendado)
+b) Manter inteiro
+c) Outro corte (descreva)
+```
+
+Com "dividir", o F-1 continua com o mesmo id, a mesma branch e o mesmo épico, com o escopo reduzido à lista e à exportação, e a decisão fica em `## Decisions` (`size L judged, split as proposed`). As outras três partes viram ideias novas no mesmo épico, cada uma com `Depends on: F-1` e, no começo do `## Summary`, `Split from F-1 (2026-10-13)`; a tabela do épico ganha uma linha por parte e o plano de execução também. O refinamento segue com as perguntas já do F-1 reduzido.
+
+No build o mesmo julgamento roda de novo, no plano do passo 5, depois das passadas de design e antes do primeiro teste. Um item aprovado antes da regra, cujo plano passa por três módulos com contrato e migração próprios, para sem escrever uma linha:
+
+```
+Build parado: o plano aciona o sinal de item grande (L) antes da primeira linha de código.
+F-2 fica inteiro ou é cortado em partes antes de continuar o build?
+a) Dividir como proposto: F-2 fica só com a fatura (Billing); dois itens novos, dependentes de F-2.
+b) Manter inteiro: grava "size L judged, kept whole" e o build segue com os três módulos.
+```
+
+"Manter inteiro" grava a linha em `## Decisions` com o motivo e o build segue sem perguntar o tamanho de novo; "dividir" passa pelo `/agile:change` (nota de mudança com cada critério que saiu e o id que o recebe). Com `/agile:autopilot F-3 --assume` o corte nunca é assumido: a execução para na proposta com a frase `--assume não decide corte de item — essa pergunta é sempre do dono`.
+
+As saídas acima são as mensagens reais de três execuções não interativas com o plugin da branch, sobre projetos de teste: o refinamento da F-1 (modelo opus, US$ 0,74 até o cartão), o build da F-2 (US$ 1,48 até a parada) e o autopilot da F-3 com `--assume` (US$ 0,59).
+
+### 14.119 Toda tela ganha um wireframe em texto, e só a tela complexa leva também o mockup HTML
+
+A F-1 do acme-shop, o resumo do dia, cria uma tela. No refinamento, junto com as perguntas, o Claude escreve em `## Screens and API` do arquivo um bloco `### Wireframe` com a tela inteira, e você lê o desenho antes de aprovar, no mesmo arquivo:
+
+```
+## Screens and API
+- /summary — the day's totals
+
+### Wireframe: Order summary
++--------------------------------------+
+| Order summary          [Today v]     |
+|--------------------------------------|
+| Orders      12        [new]          |
+| Total       US$ 1,240 [new]          |
+| [ Export ]                           |
++--------------------------------------+
+```
+
+`[new]` marca o que o item acrescenta. Se a feature só acrescentasse um campo a uma tela que já existe, o desenho seria o da tela inteira com `[new]` no campo, para quem lê ver onde ele fica. Uma tela simples, como esta, fica só com o texto. Esta aqui tem vários estados (vazio, carregando, erro), então é complexa pela mesma linha do `/agile:screen`: ela também ganha o mockup HTML, e o `## Docs` lista a página de fluxo que vai guardar os dois.
+
+No build, o Claude copia o desenho inteiro para a seção `## Wireframe` da página de fluxo e, como existe mockup, acrescenta a linha `Mockup:` com o caminho. Enquanto a página só tem `## Trigger` e `## Steps`, a conferência para:
+
+```
+RED: docs/flows/order-summary.md: no "Wireframe" section (the item draws a screen)
+```
+
+Com o desenho copiado mas sem a linha do mockup, ela ainda para, nomeando o arquivo que falta:
+
+```
+RED: docs/flows/order-summary.md: does not link the mockup docs/features/mockups/F-1-order-summary.html
+```
+
+Com as duas coisas na página, fecha:
+
+```
+agile techdocs GREEN: 1 page(s)
+```
+
+Quem abre `docs/flows/order-summary.md` num wiki vê a tela desenhada na hora; o HTML, que o wiki não abre, fica a um link de distância. Um bug que muda o layout depois lista `update docs/flows/order-summary.md#Wireframe`, e o Claude corrige o desenho na mesma página.
+
+As saídas acima são as que o `techdocs.js` imprimiu sobre um projeto de teste com o item F-1, a página de fluxo e o mockup deste exemplo.

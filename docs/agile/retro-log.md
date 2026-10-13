@@ -1228,3 +1228,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - score 4/6 (applied, `project.md`): a bUnit page test derives each row count from the seeded list and each order assertion uses the comparer of the producing query, before the lock (one unlock, event `blocked`, for four locked assertions). Sweep of the existing page tests: their literal counts all pass, so a wrong one would already fail; no hit to fix.
 - score 5/3 (applied, plugin note `plugin: agile [generic]`): the Stop gate counts a locked build output as 86 new warnings and writes a `test-fail`; it should name the process that holds the folder.
 - score 2/3 (not applied, not recommended): a popup inside the library's sticky toolbar is painted under the table header (the toolbar is its own stacking context); fixed in `app.css` with the reason in a comment.
+
+## 2026-10-13 - Sync with agile@canary 0.74.0
+- From 0.70.0 to 0.74.0 (4 minor versions). Copied: `tech-page.md` (new), `definition-of-done.md`, `workflow.md`, templates `feature.md`, `bug.md`, `glossary.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Left alone: `git.md` and `profile.md` (edited, plugin unchanged), manual build files (plugin unchanged).
+- Glossary: 9 technical-term rows added (technical page, flow/how-to/reference/architecture page, size L, split, wireframe, mockup); 2 definitions widened (trade-off, checked and fine). Technical-term sweep of ADRs, items and bugs: not run.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none.
+- Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+- Note: the script read `Manual locales:` as `pt-BR, pt-PT` while `docs/manual/` also holds `en`.

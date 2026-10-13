@@ -47,6 +47,20 @@ Technical terms: [glossary](../glossary.md)
 - <METHOD> /api/v1/<resource> — <purpose>
 - Error codes: `<area>.<error>`
 
+<!-- One block per screen the item adds or changes (a page, dialog, window or mobile screen; none for a command or an API alone). The whole screen, main state first, `[new]` / `[changed]` on what the item touches, 60 columns at most; the build copies it into the flow page. -->
+### Wireframe: <screen name>
+```text
++------------------------------+
+| <Screen title>               |
+| [ Field ____________ ] [new] |
++------------------------------+
+```
+
+## Docs
+<!-- Written at refinement (references/tech-pages.md): one line per technical page the item touches, or `- none — <reason>`. Kinds: flow (behavior added or changed), how-to (a way of working), reference (a contract or a setting), architecture (a module or an external dependency). The build writes the pages with the code; the ship checks each one and refreshes the index of each theme. -->
+- flow: new docs/flows/<slug>.md — <why>
+- <kind>: update docs/<folder>/<slug>.md#<section> — <what changes>
+
 ## Acceptance criteria
 <!-- Given / When / Then. Each one is covered by a test. Always include the localization criterion. -->
 - AC1 Given <context>, when <action>, then <result>.
