@@ -45,6 +45,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Run locally: `<app host command>`
 
 ## Models
+A named model is for complex tasks: the plugin passes the mid model when no signal is present (`references/model-choice.md`); `always <model>` pins it for every call.
 - Independent review (`/agile:review`): <strongest available model>, passed on the call.
 - Design and architecture passes (`/agile:build`, agents `system-design` and `architect`): <strongest available model>, passed on the call.
 - Screen design (`/agile:screen`, agent `ux-designer`): <strongest available model>, passed on the call.

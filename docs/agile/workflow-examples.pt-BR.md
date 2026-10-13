@@ -2170,12 +2170,20 @@ Um dia depois, o upload de um release é cortado no meio por uma conexão que ca
 > /agile:publish
 Claude: v2.2.0 tagueada e enviada. vpk upload to clinica-sorriso/reception-releases failed (win-x64): connection reset;
    o release v2.2.0 fica com Reception-2.2.0-full.nupkg, e os apps instalados não veem atualização até que o
-   releases.win.json seja anexado (o vpk o envia por último). Para refazer:
-   gh release delete-asset v2.2.0 Reception-2.2.0-full.nupkg --repo clinica-sorriso/reception-releases --yes
-   dotnet vpk upload github --repoUrl https://github.com/clinica-sorriso/reception-releases --token "$(gh auth token)" --merge --tag v2.2.0 -o artifacts/publish/v2.2.0/velopack/win-x64
+   releases.win.json seja anexado (o vpk o envia por último). Para refazer, rode estes dois comandos, na ordem:
 ```
 
-O token da última linha é o seu próprio login do `gh`, lido quando o comando roda; ele nunca aparece no chat. Os PCs da segunda clínica se atualizam por delta assim que o release está completo; um PC que abre o app mais de 60 vezes por hora atrás de um mesmo endereço do escritório vê uma checagem falhar no log e tenta de novo na próxima abertura.
+```powershell
+gh release delete-asset v2.2.0 Reception-2.2.0-full.nupkg --repo clinica-sorriso/reception-releases --yes
+dotnet vpk upload github --repoUrl https://github.com/clinica-sorriso/reception-releases --token "$(gh auth token)" --merge --tag v2.2.0 -o artifacts/publish/v2.2.0/velopack/win-x64
+```
+
+```bash
+gh release delete-asset v2.2.0 Reception-2.2.0-full.nupkg --repo clinica-sorriso/reception-releases --yes
+dotnet vpk upload github --repoUrl https://github.com/clinica-sorriso/reception-releases --token "$(gh auth token)" --merge --tag v2.2.0 -o artifacts/publish/v2.2.0/velopack/win-x64
+```
+
+O token do segundo comando é o seu próprio login do `gh`, lido quando o comando roda; ele nunca aparece no chat. Os PCs da segunda clínica se atualizam por delta assim que o release está completo; um PC que abre o app mais de 60 vezes por hora atrás de um mesmo endereço do escritório vê uma checagem falhar no log e tenta de novo na próxima abertura.
 
 ### 14.54 A equipe gerencia os dados que o app mostra
 
@@ -3626,7 +3634,7 @@ Claude: Plano, nada foi escrito ainda:
         Aplico este plano? (ok / deixa)
 > ok
 Claude: agile compact APPLIED: 35 items, 3 mockups, 21 retro-log entries, 35 links; nothing was committed
-        git status --short: 35 renomeados, docs/archive/INDEX.md e docs/archive/retro-log.md novos,
+        Status da árvore: 35 renomeados, docs/archive/INDEX.md e docs/archive/retro-log.md novos,
         docs/agile/backlog.md, docs/epics/shop.md e docs/agile/retro-log.md modificados
         Commit proposto: chore: archive 35 finished items and 21 retro-log entries (/agile:compact)
         Autoriza o commit na main?
@@ -4134,3 +4142,121 @@ Claude: F-1 · Orders list and create · validating
 Cada linha de `Conferido sem achado` vem do relatório do revisor com o que ele leu (`contracts: none — ambas as rotas sob /api/v1/orders, Guid? Id = null`); o relatório inteiro, com o que foi lido, vai para `## Decisions` numa linha `Review coverage`. Uma lista vazia de achados não é mais uma revisão rasa: ela vem com as verificações que o revisor fez. Você responde pelo número ("corrigir 1, 2 e 6"; "manter o cache"). A sessão nunca responde a escolha com custo por você, nem no `--autopilot`: lá o código fica como construído e as escolhas aparecem no segundo ponto de parada, com as opções.
 
 O diálogo acima é um trecho (4 dos 8 achados, em pt-BR) de uma execução real de `/agile:review F-1`, sem terminal interativo, sobre um projeto de teste com um endpoint sem autorização, um cache e áreas limpas; nenhum arquivo foi alterado.
+
+### 14.112 Uma regra que já responde vira confirmação com a fonte, e no ship as decisões são classificadas
+
+O projeto `invoicing` tem em `.claude/rules/agile/project.md` duas regras: "Money is rounded half-up to cents (F-12, 2026-10-07)" e "Every list endpoint paginates with page and size (F-8, 2026-10-01)". A F-2 (desconto percentual na fatura) tem uma pergunta aberta, "como arredondar o total com desconto?". Antes, o Claude via que a regra respondia e não perguntava: dizia "não vou perguntar de novo, só registrar", e você só descobria no fim. Agora a decisão é perguntada num cartão de confirmação, antes dos cartões de tema, com a fonte:
+
+```
+> /agile:refine F-2
+Claude: F-2 · Invoice total with a percentage discount · refining
+        Duas regras do projeto já respondem parte do que o arquivo deixa em aberto:
+
+> Confirmação 1
+> O total com desconto é arredondado para cima a partir de 0,5 centavo (round half-up),
+> como decidido em project.md (regra válida desde F-12). Continua valendo aqui?
+> a) Sim (Recomendado)   b) Não, mudar
+
+> Confirmação 2
+> A listagem de faturas pagina por page e size, como decidido em project.md (F-8). Continua valendo aqui?
+> a) Sim (Recomendado)   b) Não, mudar
+
+        Depois, os cartões de tema (regras de negócio, permissões, estados, telas, pacotes, fora do escopo).
+```
+
+Você responde "ok" e o arquivo termina assim: as duas respostas Sim entram em `## Decisions` com a fonte e o evento diz quantas perguntas o contexto já respondeu.
+
+```
+## Decisions
+- 2026-10-12 — Money is rounded half-up to cents — the project rule answers it — confirmed: .claude/rules/agile/project.md
+- 2026-10-12 — The invoice list paginates by page and size — the project rule answers it — confirmed: .claude/rules/agile/project.md
+- 2026-10-12 — The discount is a whole number from 0 to 100 — keeps validation simple — asked
+
+## Events
+- 2026-10-12 question — asked 8, from context 2
+```
+
+No ship da F-3 (exportar faturas para CSV), a retro lê as `## Decisions` do item e as classifica por tipo. A F-3 tem uma decisão que mudou a regra de paginação ("o export não pagina: faz streaming"), um fato que só quem leu o código sabe (o export lê a view `invoice_audit`, nunca a tabela, que guarda faturas apagadas) e uma lacuna do plugin (o refinamento não perguntou quem lê o arquivo exportado). A regra de paginação já tinha sido quebrada de novo dentro do mesmo item (eventos `correction`, `rework` e `test-fail`), então a retro não propõe outra linha:
+
+```
+> /agile:retro F-3
+Claude: Decisões do F-3, classificadas (as já confirmadas não entram de novo):
+
+| # | Decision                                   | Kind        | Destination                                  | Source                                      |
+|---|--------------------------------------------|-------------|----------------------------------------------|---------------------------------------------|
+| 1 | O export não pagina, faz streaming         | project rule| um teste que separa lista de export primeiro | changed: Every list endpoint paginates (project.md) |
+| 2 | O export lê a view invoice_audit           | hidden fact | .claude/rules/agile/export-project.md        | asked                                       |
+| 3 | O refinamento não perguntou quem lê o CSV  | plugin gap  | docs/agile/retro-log.md, nota ⏳ plugin: agile | asked                                       |
+Item decisions: 2, stay in the item
+
+        1. score plugin 8 / project 8 — a regra quebrou de novo no mesmo item (correction, rework, test-fail):
+           não uma linha nova; um teste de arquitetura primeiro, e a linha antiga fica até ele existir.
+        2. score plugin 7 / project 3 — nota de plugin.
+        3. score plugin 3 / project 6 — fato escondido, carregado só quando alguém lê a pasta do export.
+```
+
+Com o seu OK, o fato escondido é escrito pelo `rule-line.js`, com a fonte, num arquivo que só carrega quando a pasta do export é lida, e a linha antiga de paginação fica onde estava:
+
+```
+---
+paths:
+  - "src/**/Export*/**"
+---
+# Project rules
+
+- The export reads the invoice_audit view, never the invoices table — the table keeps soft-deleted rows the view filters out (F-3, 2026-10-12)
+```
+
+O diálogo acima é um trecho (em pt-BR, abreviado) de duas execuções reais, `/agile:refine F-2` e `/agile:retro F-3` com o plugin da branch, sobre um projeto de teste com as regras e o item F-3 descritos; a mesma `/agile:refine F-2` com a 0.65.0 não perguntou a regra, e a mesma `/agile:retro F-3` propôs uma linha nova na regra de paginação, sem tipo nem fonte. Custo de cada execução: de US$ 0,22 a US$ 1,26.
+
+### 14.113 O modelo mais forte só entra quando a tarefa é complexa, e a linha do projeto continua mandando
+
+Antes de chamar `system-design`, `architect`, `reviewer` ou `ux-designer`, o Claude lê a régua (`references/model-choice.md`), diz uma linha `Model:` com o motivo e passa o modelo na chamada. Sem nenhum sinal de risco a chamada vai no modelo intermediário; com um sinal, ou na dúvida, no mais forte. Dois itens de um projeto de teste, o F-2 (uma coluna opcional `Note` na tabela de pedidos) e o F-3 (um webhook de pagamento com assinatura):
+
+```
+> /agile:build F-2
+Claude: Model: sonnet (no signal)
+        (system-design e architect chamados com model sonnet)
+
+> /agile:build F-3
+Claude: Model: opus (signal: a webhook, a public API contract)
+        (system-design e architect chamados com model opus)
+```
+
+A linha "Models" do `CLAUDE.md` do projeto continua valendo. Com `Design and architecture passes: always opus`, o F-2 também roda no modelo mais forte, e a linha vira `Model: opus (project line: always opus)`. Com `Design and architecture passes: sonnet`, o F-3 roda em `sonnet` apesar do sinal, porque o plugin nunca passa um modelo acima do que a linha nomeia. Na revisão (`/agile:review`) o mesmo vale: um diff de duas linhas num arquivo de recurso roda o `reviewer` em `sonnet`; um diff que mexe em permissão e tenant, em `opus`. Na tela (`/agile:screen`), uma lista que repete o padrão do kit vai em `sonnet`; um estado novo, um componente fora do kit e uma ação destrutiva com confirmação vão em `opus`.
+
+O diálogo acima é um trecho (abreviado) de execuções reais de `/agile:build F-2`, `/agile:build F-3`, `/agile:review` e `/agile:screen` com o plugin da branch, sobre um projeto de teste; os modelos são os `model` lidos das chamadas do agente.
+
+### 14.114 O ship imprime quanto tempo o item gastou no gate, e nada é cortado por isso
+
+A F-12 do acme-shop, o total do pedido, passou por nove rodadas do gate e do scan enquanto era construída e validada. Ninguém escreveu esses números: cada script anotou a sua rodada, em segundos, num caderno local (`agile-gate-passes.jsonl`, dentro da pasta `.git`), vermelhas incluídas. No ship, o `gate-passes.js summary F-12` soma o que o caderno guardou do item, imprime uma linha só e a escreve em `## Delivery`:
+
+```
+Gate time: 9 passes, 14 min 52 s — turn 5 (4 min 4 s), ship 2 (6 min 2 s), baseline 1 (3 min 10 s), scan 1 (1 min 36 s); 2 red
+```
+
+O relatório do ship mostra a linha ao lado de `Events:`, exatamente como o script a imprimiu, e o `/agile:retro` a lê primeiro: é a evidência para a pergunta "o ciclo deste item foi caro?". As linhas da F-12 saem do caderno e as de outros itens ficam; rodar o resumo de novo diz `Gate time: no pass recorded` e não escreve nada. A linha só mede: nenhuma rodada deixa de acontecer por causa dela.
+
+A linha acima é a saída real de `gate-passes.js summary F-12` sobre um caderno de teste com as nove rodadas (cinco `turn`, dois `ship` e um deles vermelho, um `baseline`, um `scan`); `## Delivery` do arquivo do item ficou com a mesma linha e o caderno ficou sem linhas.
+
+### 14.115 A mesma árvore verde não roda o gate de novo, e `--fresh` roda de propósito
+
+A F-12 do acme-shop, o total do pedido, terminou o build com o gate verde. O ship vai rodar o gate de novo, mas nada do código mudou entre uma rodada e outra. A primeira rodada é inteira e guarda um selo da árvore (o conteúdo dos arquivos, sem `bin/`, `obj/` e sem o arquivo do próprio item); a segunda reconhece a mesma árvore e não compila nem testa nada:
+
+```
+sealed: gate green on this tree at 2026-10-13T11:09:27.894Z, 3 s not spent; --fresh runs it again
+sdk 11.0.100-rc.1.26425.128 (.)
+built Shop.slnx (2 s)
+tested Shop.slnx (1 s)
+agile gate GREEN
+```
+
+A linha `sealed:` vem antes e diz quantos segundos não foram gastos; os totais são os da rodada selada e o veredito é o de uma rodada real, com código de saída 0. Nada foi escrito: nem o baseline, nem o `docs/security/findings.md`, nem um evento de sequência vermelha. O ship aceita essa rodada como o GREEN do ship, porque o script a provou sobre a mesma árvore. O scan funciona igual, com um prazo: o selo dele vale 24 horas, porque uma vulnerabilidade publicada depois precisa ser achada.
+
+Qualquer outro arquivo mudado invalida o selo, um byte que seja; o arquivo do próprio item não, porque o ciclo o escreve entre o scan do build e o do ship. Quando o dono não confia num resultado selado (a suíte é instável, um pacote flutua), `gate.js ship --fresh` e `scan.js run --fresh` rodam inteiros e a rodada verde troca o selo. No ship, `gate-passes.js summary F-12` conta cada acerto, fora do que foi gasto:
+
+```
+Gate time: 1 pass, 3 s — ship 1 (3 s), sealed 1 (3 s saved); 0 red
+```
+
+As duas saídas acima são a saída real de `gate.js ship` rodado duas vezes e de `gate-passes.js summary F-12` sobre um projeto de teste com a solução `Shop.slnx` e o item F-12 na branch `feature/F-12`; a primeira rodada imprimiu as mesmas linhas `built` e `tested` sem a linha `sealed:`.
