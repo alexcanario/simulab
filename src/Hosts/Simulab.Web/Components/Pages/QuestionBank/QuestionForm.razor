@@ -1699,6 +1699,11 @@ else
 
         _publicationError = null;
         QuestionResponse? changed = null;
+        Task<string?>? inFlight = null;
+
+        // The dialog may be closed (Esc, backdrop) while the call is still running; the answer of that call is
+        // awaited below, so a change the Api made is never lost to the screen (review finding 1).
+        Task<string?> Send(string reason) => inFlight = SubmitAsync(reason);
 
         async Task<string?> SubmitAsync(string reason)
         {
@@ -1723,13 +1728,17 @@ else
             { dialog => dialog.Message, annul ? L["Questions.Annul.Dialog.Message"].Value : L["Questions.Reinstate.Dialog.Message"].Value },
             { dialog => dialog.ConfirmText, annul ? L["Questions.Action.Annul"].Value : L["Questions.Action.Reinstate"].Value },
             { dialog => dialog.Destructive, annul },
-            { dialog => dialog.Submit, SubmitAsync }
+            { dialog => dialog.Submit, Send }
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
 
         var reference = await Dialogs.ShowAsync<QuestionStatusReasonDialog>(
             annul ? L["Questions.Annul.Dialog.Title"] : L["Questions.Reinstate.Dialog.Title"], parameters, options);
         await reference.Result;
+        if (inFlight is not null)
+        {
+            await inFlight;
+        }
 
         if (changed is { } question)
         {

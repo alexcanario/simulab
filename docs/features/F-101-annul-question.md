@@ -154,13 +154,13 @@ Tests locked: be185550d1e1ce838691a64362794505691c2329 (8 files); unlocks: 1
 | AC7 | `QuestionAnnulmentEndpointTests.Versions_TellTheAnnulmentFromTheReinstatement` |
 | AC8 | `QuestionAnnulmentRaceTests.Annul_WhenAnotherWriteTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysPublished`, `Reinstate_WhenAnotherWriteTookTheNextNumberFirst_AnswersVersionConflict_AndTheQuestionStaysAnnulled`, `Annul_WhenTheQuestionWasUnpublishedMeanwhile_AnswersVersionConflict_AndStoresNoVersion`, `Unpublish_WhenTheQuestionWasAnnulledMeanwhile_AnswersVersionConflict_AndTheQuestionStaysAnnulled`, `Delete_WhenTheQuestionWasPublishedMeanwhile_AnswersVersionConflict_AndTheQuestionIsNotDeleted`, `Save_WhenTheQuestionWasAnnulledMeanwhile_AnswersVersionConflict_AndTheContentIsNotWritten` |
 | AC9 | `QuestionAnnulmentEndpointTests.List_FilteredByStatus_FindsTheAnnulledQuestionOnlyUnderAnnulled` |
-| AC10 | `QuestionAnnulmentEndpointTests.AnAnnulledQuestion_KeepsItsPaperNumber_ItsTopicAndItsPlaceInTheEdition` |
+| AC10 | `QuestionAnnulmentEndpointTests.AnAnnulledQuestion_KeepsItsPaperNumber_ItsTopicAndItsPlaceInTheEdition`; `AnnulledQuestionUsageGuardTests.DeleteEdition_WithAnAnnulledQuestion_IsRefusedWithHasQuestions`, `DeleteNoticeSubject_WithAnAnnulledQuestion_IsRefusedWithHasQuestions` |
 | AC11 | `QuestionAnnulmentEndpointTests.BothRoutes_WithoutThePermission_AnswerForbidden_AndACuratorUsesThem` (the page is behind `questions.manage`, F-95) |
 | AC12 | `AddQuestionAnnulmentMigrationTests.Up_KeepsEveryStoredStatus_AndGivesAnnulledFalseToEveryStoredVersion`, `TheDatabase_RefusesAnAnnulledVersionWithNoReason_AndOneThatIsAlsoAKeyChange`, `Down_TurnsAnnulledQuestionsBackIntoDrafts_AndDropsTheColumnAndTheChecks` |
 | AC13 | `QuestionAnnulmentFormTests.Publication_OnlyAPublishedQuestion_OffersAnnul`, `Annul_WithAnEmptyReason_IsRefusedInTheDialog_AndNothingIsSent`, `Annul_CancelledInTheDialog_SendsNothingAndLeavesTheQuestionPublished`, `Annul_WithAReason_SendsItTrimmed_AndTheFormBecomesFrozen`, `Annul_RefusedByTheApi_ShowsTheCodesTextInTheDialog_AndTheFormStaysEditable`, `Annul_WithUnsavedChanges_IsDisabledWithTheReasonInWords`, `AnAnnulledQuestion_OpensFrozen_WithTheReasonTheDateAndOnlyReinstateToLeave` |
 | AC14 | `QuestionAnnulmentFormTests.Reinstate_WithAReason_SendsItTrimmed_AndTheFormIsEditableAgain` |
 | AC15 | `QuestionAnnulmentFormTests.History_TheAnnulmentAndTheReinstatement_HaveTheirOwnLabelToneAndReason` |
-| AC16 | `QuestionAnnulmentListTests.Row_Annulled_ShowsTheAnnulledChipInTheErrorTone`, `Row_Annulled_HasNeitherPublishNorUnpublish_AndDeleteIsDisabledWithTheReason`, `Filter_ByAnnulled_SendsTheStatus_AndOnlyTheAnnulledRowStays`; `QuestionsPageTests.Filter_Status_OffersDraftPublishedAndAnnulled` |
+| AC16 | `QuestionAnnulmentListTests.Row_Annulled_ShowsTheAnnulledChipInTheErrorTone`, `Row_Annulled_HasNeitherPublishNorUnpublish_AndDeleteIsDisabledWithTheReason`, `Filter_ByAnnulled_SendsTheStatus_AndOnlyTheAnnulledRowStays`; `QuestionsPageTests.Filter_Status_OffersDraftPublishedAndAnnulled`; `QuestionStatusTextTests.EveryStatus_HasItsOwnName_AndOnlyTheDraftIsNeutral` |
 | AC17 | `QuestionAnnulmentPreviewTests.Preview_OfAnAnnulledQuestion_ShowsTheDateAndTheReasonAboveTheStatement` |
 | AC18 | `QuestionAnnulmentResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` (every key in each locale) |
 
@@ -185,6 +185,9 @@ Tests locked: be185550d1e1ce838691a64362794505691c2329 (8 files); unlocks: 1
 - 2026-10-13 (build) — Design trade-off 8 `Status` as a concurrency token — owner chose as proposed (yes). Consequence recorded here because it changes existing routes: a save, unpublish or delete that loses a race on the status now answers 409 `question.version_conflict` instead of last-writer-wins; `QuestionStore.TrySaveChangesAsync` also catches `DbUpdateConcurrencyException` (clears the tracker, returns that code) and `UnpublishQuestionHandler` and `DeleteQuestionHandler` move to it.
 - 2026-10-13 (build) — Design trade-off 9 `Down` of `AddQuestionAnnulment` — owner chose as proposed: it first sets `status = 'Draft'` where `status = 'Annulled'`, then drops the checks and the column, so the old binary still reads every row and the questions stay out of practice.
 - 2026-10-13 (build) — tests unlocked (owner answered "unlock and fix"): two helper methods of `QuestionAnnulmentRaceTests` raised new CA1859 warnings; only their return types changed to `Task<int>`, no assertion moved, then locked again.
+- 2026-10-13 (review) — #1 minor, fixed: the dialog's call is awaited even when Esc closed the dialog, so the form never keeps a stale status. #2 minor, fixed: progress on the confirm button. #3 minor, fixed: comment corrected and `QuestionStatusTextTests` reads every enum value. #4 minor, fixed: `AnnulledQuestionUsageGuardTests` (a new file; the locked one was not edited). #5 minor, accepted: the race test named `Delete_WhenTheQuestionWasPublishedMeanwhile_...` sets "Annulled"; renaming needs an unlock for a name only. #6 minor, accepted: `IQuestionStore.SaveChangesAsync` has no production caller now, but the locked race tests of F-98 and F-101 call it on the real store from their fakes; deleting it needs an unlock of both and is left as an `idea`. #7 is the scan below. Review coverage: security, data, contracts, localization, locks, rules, correctness read; not run by the reviewer: build and tests (the full gate ran before the review fixes: 3,475 passed in 13 projects, 0 failed, 0 warnings; the three tests added after the review passed in their projects).
+- 2026-10-13 (app host) — The Web was opened through the app host of this worktree on its own database `simulab_f101`: the migration applied on start, the signed-in administrator annulled a published question (the empty reason was refused in the dialog, the reason was trimmed, the alert, the chip, the date and the reason showed, 9 inputs and 5 rich-text fields were disabled, no editable editor, no Save, only Reinstate), reinstated it (History: 3 rows, "Reinstated" first), and annulled a second one: the list showed the red chip "Annulled", the row had only Edit and a disabled Delete, and the status filter offered Draft, Published and Annulled. The status chip dot measures 5.7:1 on white and its text 16:1. Not driven on screen: saving and publishing through the rich-text editors (the questions were seeded by SQL), the pt-PT switch and the keyboard pass (the validation script has the owner do them), the Curator role (the Api test `BothRoutes_WithoutThePermission_AnswerForbidden_AndACuratorUsesThem` covers it).
+- 2026-10-13 (scan) — `agile scan BLOCKED: 0 critical, 9 high open`: nine advisories on transitive packages `System.Security.Cryptography.Xml` and `...Pkcs` (10.0.0, 10.0.10, 10.0.11) in 20 projects, first seen today; this item changes no package. Waiting for the owner's triage (fix by a package bump, or accept with a reason).
 - 2026-10-13 (build) — The glossary gets `Annulled`, `Annulment` and `Reinstate` before first use in code; the test for the status column comment (`EnumColumnCommentTests`) and the migration test with its `Down` round trip are part of the item.
 
 ## Out of scope
@@ -203,7 +206,27 @@ Tests locked: be185550d1e1ce838691a64362794505691c2329 (8 files); unlocks: 1
 <!-- Added by /agile:change during build. -->
 
 ## Validation script
-<!-- Written at the end of build. -->
+Needed to validate: the local app host and one user with `questions.manage` (the seeded administrator `admin@simulab.local`) — owner; in place now.
+
+Whose data: the app runs on its own database `simulab_f101` in the shared local PostgreSQL volume, so the migration of this item lands there and never in `simulab`. That database still holds three questions from Claude's check (one annulled, one published, one draft, topic "Crase F101"); use them or write your own. Close any other app host first.
+
+1. Start the app host from the item's worktree `D:\wt\simulab\f-101-annul-question` (the first start applies `AddQuestionAnnulment` with no `fail` line in the console). Open https://localhost:7125 and sign in as `admin@simulab.local` → you land signed in.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f101"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f101 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Content → Questions, open a **Published** question (or add one: statement, two options with A correct, **Save**, **Publish**). In the Publication card press **Annul question** → a dialog "Annul this question?" asks for a reason. Press **Annul** with the field empty → "Write the reason." and nothing is sent. Type a reason and press **Annul** → a yellow alert says the question is annulled and cannot be edited, the card shows the chip "Annulled", "Annulled on <date>" and your reason, every field and option is read only, there is no Save, Unpublish or Publish, and the only action besides the preview is **Reinstate question**; the History card has a new first row "Annulled" in red with your reason.
+3. Back to the list (Content → Questions): the question shows the chip "Annulled"; open the **Status** filter → it offers Draft, Published and Annulled, and picking Annulled leaves only annulled questions. Its row menu has no Publish or Unpublish, and Delete is disabled with "This question is annulled and cannot be deleted."
+4. On the annulled question press **Preview as a student** → above the statement a note says "Annulled on <date>: <your reason>".
+5. Press **Reinstate question**, type a reason, confirm → the alert goes away, the card says "Published", the fields are editable again and Save is back; History has a new first row "Reinstated" with that reason. Then change the statement without saving → **Annul question** is disabled and the card says "Save your changes first."; **Save**, and annulling is possible again.
+6. Switch the language to Português (pt-PT) with the language button → the card, the dialog, the chips and the History labels are in Portuguese; switch back to English.
+7. Keyboard only, on a published question: Tab to **Annul question** and press Enter → the dialog opens; type a reason, Tab to **Annul**, press Enter → the question is annulled and the focus lands on **Preview as a student**; Tab to **Reinstate question**, Enter, Esc → the dialog closes with nothing changed and the focus returns to the Reinstate button.
+8. Sign in as a user without `questions.manage` (a Student account made at `/sign-up`) and open `/admin/questions` → Page not found, as before; nothing about annulment is reachable.
 
 ## Events
 
@@ -212,6 +235,10 @@ Tests locked: be185550d1e1ce838691a64362794505691c2329 (8 files); unlocks: 1
 - 2026-10-13 override — none: both design trade-offs answered as recommended
 - 2026-10-13 correction — the override event above was written in error: both design trade-offs were answered as recommended
 - 2026-10-13 blocked — test wrong: two helper methods of QuestionAnnulmentRaceTests triggered new CA1859 warnings; only their return types change
+- 2026-10-13 rework — review #1: an Esc during the call no longer loses the Api's answer
+- 2026-10-13 rework — review #2: progress on the dialog's confirm button
+- 2026-10-13 rework — review #3: status text and tone pinned by a test over the enum values
+- 2026-10-13 rework — review #4: edition and notice subject delete refused for an annulled question, tested
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

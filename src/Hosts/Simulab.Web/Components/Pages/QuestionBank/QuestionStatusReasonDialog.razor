@@ -33,7 +33,13 @@
                    Color="@(Destructive ? Color.Error : Color.Primary)"
                    OnClick="ConfirmAsync"
                    Disabled="_busy"
-                   id="question-status-reason-confirm">@ConfirmText</MudButton>
+                   id="question-status-reason-confirm">
+            @if (_busy)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+            }
+            @ConfirmText
+        </MudButton>
     </DialogActions>
 </MudDialog>
 

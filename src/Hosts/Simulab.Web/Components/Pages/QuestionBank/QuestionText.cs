@@ -17,7 +17,8 @@ public static class QuestionText
     {
         ArgumentNullException.ThrowIfNull(l);
 
-        // Switch over the values, so a status added later is a compile warning here and not a silent "Draft".
+        // Each status is named here; the last arm is the draft's, so a status added later is mapped in this switch
+        // (its test reads the enum values) and not left to read as "Draft".
         return status switch
         {
             QuestionStatus.Published => l["Questions.Status.Published"],
