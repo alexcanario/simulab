@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97]
-updated: 2026-10-12
+features: [F-95, F-96, F-97, F-98]
+updated: 2026-10-13
 ---
 # Questões
 
@@ -74,6 +74,32 @@ aparece para quem também gerencia o banco de questões.
 3. Uma questão publicada ainda pode ser editada, mas toda edição precisa mantê-la completa.
 4. **Despublicar** devolve a questão a rascunho com o mesmo conteúdo.
 
+### Versões e trocas de gabarito
+Todo estado em que uma questão publicada foi exibida fica guardado, de modo que uma tentativa de prova sempre
+possa ser ligada ao texto e ao gabarito exatos que a corrigiram. O cartão **Histórico**, abaixo do cartão
+**Publicação**, lista as versões de uma questão salva, da mais nova para a mais antiga, com a data, o que
+mudou e o motivo.
+1. Na primeira vez que a questão é publicada, ela vira a **versão 1**, "Primeira publicação". Um rascunho que
+   nunca foi publicado não tem versão.
+2. Salvar uma questão publicada registra uma nova versão somente quando mudou o que o aluno vê ou como é
+   corrigido: o enunciado, o texto-base, as alternativas e o gabarito, a explicação ou o idioma. Mudar só o
+   tópico, a dificuldade ou a origem não registra. Salvar sem mudança não registra nada.
+3. Se você despublica, edita e publica de novo, uma nova versão é registrada na publicação quando o conteúdo
+   difere da última versão.
+4. Para trocar o gabarito de uma questão publicada (após um recurso, por exemplo), marque outra alternativa
+   como correta ou inverta Certo/Errado. Aparece o campo **Motivo da troca de gabarito** sob as alternativas
+   (ou sob o gabarito); ele é obrigatório, até 500 caracteres. **Salvar** registra a versão como "Gabarito
+   alterado" com o seu motivo e a data. Mover a alternativa correta por reordenação também conta como troca.
+5. Se o gabarito mudou enquanto a questão era rascunho, **Publicar** é recusado na primeira vez com "Escreva o
+   motivo da troca de gabarito." O campo de motivo aparece no cartão **Publicação**; digite-o e escolha
+   **Publicar** de novo.
+6. No cartão **Histórico**, escolha **Ver** numa linha para abrir aquela versão como foi registrada, só para
+   leitura. A resposta correta fica oculta até **Mostrar resposta**. A versão atual leva a marca **Atual**.
+7. Um rascunho que tem versões pode ser excluído; as versões ficam guardadas, e o histórico não é mais exibido
+   depois que a questão some. Uma questão publicada continua sem poder ser excluída.
+
+Versões nunca são editadas nem removidas. O nome de quem fez a mudança é guardado, mas ainda não é exibido.
+
 ### Visualizar como aluno
 1. No cartão **Publicação**, escolha **Visualizar como aluno**.
 2. A janela mostra o texto-base, o enunciado e as alternativas como o aluno vai ver; uma questão certo/errado
@@ -101,6 +127,7 @@ aparece para quem também gerencia o banco de questões.
 | Alternativas | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta. Cada uma até 2.000 caracteres |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não pode perdê-lo |
 | Explicação | Por que o gabarito está certo | Opcional, até 10.000 caracteres |
+| Motivo da troca de gabarito | Por que o gabarito de uma questão publicada mudou | Obrigatório quando um salvamento ou uma publicação registra uma versão cujo gabarito difere da anterior; de 1 a 500 caracteres. Um motivo em qualquer outra versão nova fica como nota |
 
 Só a formatação simples é mantida: scripts, estilos e qualquer link que não seja `http` ou `https` são
 removidos ao salvar, e a página mostra o que foi mantido.
@@ -125,6 +152,10 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | O número é um inteiro de 1 a 500. | O número está fora da faixa. | Digite um número de 1 a 500. |
 | Número já usado nesta edição. | Outra questão da edição tem este número. | Escolha outro número, ou corrija a outra questão. |
 | Escolha uma edição para informar um número ou uma disciplina do edital. | Há número ou disciplina e nenhuma edição. | Escolha a edição ou esvazie os campos. |
+| Escreva o motivo da troca de gabarito. | O gabarito mudou e nenhum motivo foi informado. | Digite o motivo, até 500 caracteres, e salve ou publique de novo. |
+| O motivo é longo demais (no máximo 500 caracteres). | O motivo tem mais de 500 caracteres. | Encurte-o. |
+| Esta versão não existe. | Pediu-se a versão por um número que a questão não tem. | Recarregue a página. |
+| Outra gravação alterou o histórico desta questão antes. Recarregue a página e tente de novo. | Dois salvamentos tentaram registrar o mesmo número de versão. | Recarregue a página e salve de novo. |
 | Só um rascunho pode ser excluído. Despublique a questão primeiro. | A questão está publicada. | Despublique e depois exclua. |
 | Esta questão já está publicada. / Esta questão não está publicada. | Outra pessoa mudou antes de você. | Recarregue a página. |
 | Esta questão não existe mais. | Alguém a excluiu com a sua tela aberta. | Volte à lista. |
