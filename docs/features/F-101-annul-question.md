@@ -178,6 +178,10 @@ No mockup (owner, 2026-10-13); the text wireframes below are the design. A scree
 - 2026-10-13 — Tone of the annulled chip is `Error` (the kit's "cancelled"), with the contrast already asserted by `ThemeContrastTests` — Claude.
 - 2026-10-13 — No new package, permission, setting or job; the glossary gets `Annulled` and `Reinstate` rows before first use in code (naming rule), and the row `AnnulledQuestion` keeps its meaning — Claude.
 - 2026-10-13 — No data is migrated: stored statuses stay valid and the new column defaults to false — Claude, from the code.
+- 2026-10-13 (build) — Design passes (`system-design`, then `architect`, opus) verified against the files; accepted: `Question.Annul(latest, reason)` and `Reinstate(latest, reason)` return the next version (a copy of the latest with new option instances, `AnswerKeyChanged` false) and change the status only after every check; the frozen guard sits in `Publish`, `Unpublish`, `Update` and `EnsureDeletable` and, in the handler, right after the not-found check of `SaveQuestionHandler` so the answer is 409 and not a topic 404; handlers shaped like `PublishQuestionHandler`; the status is checked before the reason (409 before 400); `QuestionResponse.Annulment` and the version list's `Reinstated` are read in `QuestionQueries` from the latest version row; migration `AddQuestionAnnulment` with the two checks as constants beside `ReasonCheck` and no `HasDefaultValue`; the Web freezes the form with `Disabled` fields plus the alert, a read-only value for a true/false key (`AppRadioCards` has no `Disabled`), Annul and Reinstate disabled while the form has unsaved changes (reason in words), one `QuestionStatusReasonDialog`, icons `AppIcons.Error`/`Archive` for annul and `Retry` for reinstate, `MaxLength` read from `QuestionLimits.ChangeReasonMaxLength`.
+- 2026-10-13 (build) — Design trade-off 8 `Status` as a concurrency token — owner chose as proposed (yes). Consequence recorded here because it changes existing routes: a save, unpublish or delete that loses a race on the status now answers 409 `question.version_conflict` instead of last-writer-wins; `QuestionStore.TrySaveChangesAsync` also catches `DbUpdateConcurrencyException` (clears the tracker, returns that code) and `UnpublishQuestionHandler` and `DeleteQuestionHandler` move to it.
+- 2026-10-13 (build) — Design trade-off 9 `Down` of `AddQuestionAnnulment` — owner chose as proposed: it first sets `status = 'Draft'` where `status = 'Annulled'`, then drops the checks and the column, so the old binary still reads every row and the questions stay out of practice.
+- 2026-10-13 (build) — The glossary gets `Annulled`, `Annulment` and `Reinstate` before first use in code; the test for the status column comment (`EnumColumnCommentTests`) and the migration test with its `Down` round trip are part of the item.
 
 ## Out of scope
 - How an annulled question is scored in an edition simulation, and practice itself — epics E-5 and E-6.
@@ -200,6 +204,9 @@ No mockup (owner, 2026-10-13); the text wireframes below are the design. A scree
 ## Events
 
 - 2026-10-13 question — asked 4, from context 4
+- 2026-10-13 question — asked 2, from context 0
+- 2026-10-13 override — none: both design trade-offs answered as recommended
+- 2026-10-13 correction — the override event above was written in error: both design trade-offs were answered as recommended
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
