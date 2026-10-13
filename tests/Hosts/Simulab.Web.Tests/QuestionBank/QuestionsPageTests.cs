@@ -101,7 +101,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
     }
 
     [Fact]
-    public async Task Filter_ByStatus_ReloadsTheListFromTheFirstPageWithThatStatus()
+    public void Filter_ByStatus_ReloadsTheListFromTheFirstPageWithThatStatus()
     {
         SeedTwo();
         var page = RenderPage();
@@ -117,7 +117,6 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
             && call.Query.Contains("page=0", StringComparison.Ordinal)));
         WaitForRows(page, 1);
         CellsOf(page, 5).Should().Equal("Published");
-        await Task.CompletedTask;
     }
 
     // F-95 BR15 read with F-100: the status filter offers Draft and Published, in that order.
@@ -145,7 +144,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
     }
 
     [Fact]
-    public async Task Load_NothingMatchesTheStatusFilter_SaysSoInsteadOfTheBankIsEmpty()
+    public void Load_NothingMatchesTheStatusFilter_SaysSoInsteadOfTheBankIsEmpty()
     {
         Api.Questions.Add(Draft);
         var page = RenderPage();
@@ -155,7 +154,6 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         page.Find("#questions-filter-status-option-Published").Click();
 
         page.WaitForAssertion(() => page.Markup.Should().Contain("No question matches the chosen filters."));
-        await Task.CompletedTask;
     }
 
     [Fact]

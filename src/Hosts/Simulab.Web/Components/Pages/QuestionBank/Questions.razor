@@ -376,6 +376,12 @@
         {
             _editionNotFound = true;
         }
+        else
+        {
+            // The lookup failed for another reason: the filter still applies, so the field shows it (and can clear
+            // it) instead of restricting the list by a value nobody sees.
+            _edition = new AppLookupOption(editionId, L["Questions.Source.Unresolved"].Value);
+        }
 
         await InvokeAsync(StateHasChanged);
     }

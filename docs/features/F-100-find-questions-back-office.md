@@ -1,7 +1,7 @@
 ---
 feature: F-100
 epic: Question bank
-status: building
+status: validating
 board: 146
 version: 2
 ---
@@ -81,14 +81,25 @@ No mockup: the epic marks this item "Screen design: no" and it reuses kit parts 
 | `Questions.Filter.Subject` | Subject and topic | Disciplina e tópico | Disciplina e tópico |
 | `Questions.Filter.Organizer` | Organizer | Banca | Banca |
 | `Questions.Filter.Edition` | Edition | Edição | Edição |
+| `Questions.Filter.Status.Placeholder` | Status name | Nome da situação | Nome do estado |
+| `Questions.Filter.Type.Placeholder` | Type name | Nome do tipo | Nome do tipo |
+| `Questions.Filter.Difficulty.Placeholder` | A number from 1 to 5 | Um número de 1 a 5 | Um número de 1 a 5 |
+| `Questions.Filter.Subject.Placeholder` | Subject or topic name | Nome da disciplina ou do tópico | Nome da disciplina ou do tópico |
+| `Questions.Filter.Organizer.Placeholder` | Organizer name | Nome da banca | Nome da banca |
+| `Questions.Filter.Edition.Placeholder` | Exam, organizer or year | Concurso, banca ou ano | Concurso, banca ou ano |
+| `Questions.Filter.Options` | {0}: options | {0}: opções | {0}: opções |
+| `Questions.Filter.Picked` | {0}: picked | {0}: escolhidos | {0}: escolhidos |
+| `Questions.Filter.Count` | Picked: {0} | Escolhidos: {0} | Escolhidos: {0} |
+| `Questions.Filter.None` | No filter | Sem filtro | Sem filtro |
+| `Questions.Filter.ClearField` | Clear | Limpar | Limpar |
 | `Questions.Filter.Clear` | Clear all | Limpar tudo | Limpar tudo |
-| `Questions.Filter.Active` | Active filters | Filtros ativos | Filtros ativos |
 | `Questions.Filter.SubjectAll` | {0} (all topics) | {0} (todos os tópicos) | {0} (todos os tópicos) |
-| `Questions.Filter.Difficulty.NotSet` | Not set | Não definida | Não definida |
+| `Questions.Filter.Loading` | Loading options… | Carregando opções… | A carregar opções… |
 | `Questions.Filter.LoadFailed` | The list of options did not load. | A lista de opções não carregou. | A lista de opções não carregou. |
+| `Questions.Filter.Limit` | Up to 100 subjects, topics and organizers can be picked together. | Dá para escolher até 100 disciplinas, tópicos e bancas ao todo. | É possível escolher até 100 disciplinas, tópicos e bancas no total. |
 | `Questions.Empty.Filters` (changed) | No question matches the chosen filters. | Nenhuma questão corresponde aos filtros escolhidos. | Nenhuma questão corresponde aos filtros escolhidos. |
 
-Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Filter.All`, `Common.Table.*`, `Lookup.*`, the type names the Source and Type columns already show. The three-language table is completed at the build for every key it adds; `ResourceParityTests` guards it.
+Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Questions.Type.*`, `Questions.Difficulty.NotSet`, `Questions.Source.Unresolved` (an edition that could not be read), `Common.RemoveItem`, `Common.TryAgain`, `Common.Table.*`, `Lookup.*`. `ResourceParityTests` and `QuestionFilterResourcesTests` guard the table.
 
 ## Approved list
 1. Status — multi, `Draft` and `Published`.
@@ -118,7 +129,7 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 
 ## Criterion → test
 
-Tests locked: 57b6567abb2a3d885b814475b67050013554a74f (7 files); unlocks: 0
+Tests locked: 65fc466fe5ca28dacc84413ac7975f6c0f70c1fc (7 files); unlocks: 1
 
 
 | Criterion | Test |
@@ -130,7 +141,7 @@ Tests locked: 57b6567abb2a3d885b814475b67050013554a74f (7 files); unlocks: 0
 | AC5 | `QuestionFilterEndpointTests.List_ByTypeAndStatus_KeepsWhatMatchesEveryFilter`; screen: `QuestionsFilterPageTests.Filter_TypeAndStatus_AreSentAsRepeatedKeys_FromTheFirstPage`, `QuestionsPageTests.Filter_ByStatus_ReloadsTheListFromTheFirstPageWithThatStatus` |
 | AC6 | `QuestionFilterEndpointTests.List_ByDifficultyNoneAndFive_KeepsBothOfThem`; screen: `QuestionsFilterPageTests.Filter_DifficultyNotSetAndFive_AreSentAsNoneAndFive` |
 | AC7 | `QuestionFilterEndpointTests.List_FiltersAndSearchTogether_AreNewestFirstAndPaged`; screen: `QuestionsFilterPageTests.Filter_AndSearch_AreSentTogether` |
-| AC8 | `QuestionFilterEndpointTests.List_ValuesThatAreNotUnderstood_AreIgnored`, `QuestionFilterEndpointTests.Lookups_WithoutThePermission_AnswerForbidden`, `QuestionFilterEndpointTests.Taxonomy_ListsEverySubjectWithItsTopicsByName_ForACuratorWithNoCatalogPermission`, `QuestionFilterEndpointTests.Organizers_ListsEveryLiveOrganizerByAcronym_ForACuratorWithNoCatalogPermission` |
+| AC8 | `QuestionFilterEndpointTests.List_ValuesThatAreNotUnderstood_AreIgnored`, `QuestionStatusNumberEndpointTests.List_StatusGivenAsItsNumber_MeansThatStatus`, `QuestionFilterEndpointTests.Lookups_WithoutThePermission_AnswerForbidden`, `QuestionFilterEndpointTests.Taxonomy_ListsEverySubjectWithItsTopicsByName_ForACuratorWithNoCatalogPermission`, `QuestionFilterEndpointTests.Organizers_ListsEveryLiveOrganizerByAcronym_ForACuratorWithNoCatalogPermission` |
 | AC9 | `QuestionListQueryStringTests` (read, write, round trip, carried keys); screen: `QuestionsFilterPageTests.Filter_IsWrittenToTheAddress`, `QuestionsFilterPageTests.Address_WithFilters_IsAppliedAndShownInThePickers`, `QuestionsFilterPageTests.Add_FromAFilteredList_CarriesTheFiltersToTheForm`, `QuestionsFilterPageTests.Edit_FromAFilteredList_CarriesTheFiltersToTheForm`, `QuestionsFilterPageTests.Form_Cancel_ReturnsToTheListWithTheFiltersItWasOpenedWith` |
 | AC10 | `QuestionFilterEndpointTests.List_IdsThatNothingHas_AreDropped`; screen: `QuestionsFilterPageTests.Address_WithATopicThatNoLongerExists_LoadsAndDropsIt` |
 | AC11 | `QuestionsFilterPageTests.Chips_OnePerPickedValue_AndRemovingOneReloadsWithoutIt`, `QuestionsFilterPageTests.ClearAll_RemovesEveryFilterAndTheSearch_AndHidesItself`, `QuestionsFilterPageTests.ClearAll_IsShownWhileOnlyTheSearchIsSet`, `AppDataTableClearSearchTests` |
@@ -167,7 +178,14 @@ Tests locked: 57b6567abb2a3d885b814475b67050013554a74f (7 files); unlocks: 0
 - 2026-10-13 — v2 change note: no second chip row, one page "Clear all" that also clears the search, 100 picked ids in total on the page (owner, asked).
 
 - 2026-10-13 — Measured (AC13, scratch run on the PostgreSQL test container, 50,000 questions, about 200 topics, 300 editions, half authored, 20 % true/false, 40 % no difficulty, `ANALYZE` done, `EXPLAIN (ANALYZE, BUFFERS)` of the count and of the page, newest first): no filter 11.8 / 13.9 ms; 2 topics 0.8 / 0.6; 30 topics 5.8 / 6.0; 150 editions 18.5 / 19.5; 300 editions 16.7 / 18.7; one edition 0.3 / 0.3; true/false + published 8.8 / 8.7; none or 5 9.8 / 10.6; 2 topics + search 0.7 / 0.6. Every case is far under the 300 ms budget, uses `ix_questions_topic` or `ix_questions_exam_edition` where a topic or an edition is picked, and the unfiltered cases are the sequential scan the list already had; no index is added (Claude). The scratch test was deleted; the numbers are from this run only.
-- 2026-10-13 — Tests unlocked twice with the owner's yes, both for errors of the tests themselves and none for a criterion: the order assertion of two tests compared with `OrdinalIgnoreCase` while the Api orders by the normalized name like the catalog list; and four expectations of `QuestionsFilterPageTests` (row counts the seed does not produce, a duplicated organizer, a URL read right after a click), found by running them (owner, asked).
+- 2026-10-13 — Tests unlocked once (one `unlock`, the owner said yes to two cards while it was open), for errors of the tests themselves and none for a criterion: the order assertion of two tests compared with `OrdinalIgnoreCase` while the Api orders by the normalized name like the catalog list; and expectations of `QuestionsFilterPageTests` (row counts the seed does not produce, a duplicated organizer, a URL read right after a click, found by `UiTestTimingTests`). Locked again at `65fc466f` (owner, asked).
+
+- 2026-10-13 — Review finding 1 (minor): the page reads the address only when created, so a menu click to the plain URL leaves the filters in place — accepted as a new item F-119 (the catalog list has it since F-36); not fixed here (Claude; shown to the owner in the build report).
+- 2026-10-13 — Review finding 2 (minor): a failed edition lookup left the edition filter applied but invisible — fixed: the field shows "Edition not available" with the filter, so it can be cleared (Claude).
+- 2026-10-13 — Review finding 3 (minor): the numeric status of F-95 had no test — fixed: `QuestionStatusNumberEndpointTests` (Claude).
+- 2026-10-13 — Review finding 4 (minor): the item's text table did not match the built keys — fixed (Claude).
+- 2026-10-13 — Review finding 5 (minor): two page tests kept `async` with a dummy await — fixed (Claude).
+- 2026-10-13 — Review coverage (opus reviewer, read the diff of 42 files, the item file, profile, rules and the lock): checked and fine: security (both routes under `questions.manage`, lenient string parsing, 100-value cap, no secrets), data (no migration; new directory methods under the soft-delete filters and the exam join), contracts (routes, unique operation ids, OpenAPI and routes docs regenerated, no new error code), localization (22 keys in 3 locales, reused keys exist), locks (no locked path changed after `65fc466f`; the one unlock matches its Decisions line), tests (exact id sets, every criterion mapped), rules (module boundaries through `Contracts`, one type per file, English names, `Contains` never skipped); not checked: none.
 
 ## Out of scope
 - Sorting by column or by paper number — F-118.
@@ -188,9 +206,39 @@ Tests locked: 57b6567abb2a3d885b814475b67050013554a74f (7 files); unlocks: 0
 - Affected: AC11 (text), new AC15, Screens and API (chip row, limit); BR6 unchanged (the Api keeps 100 per list).
 - Re-approved: 2026-10-13, by the owner's answer to the two cards of the design pass ("Só os chips dos campos", "100 ids no total na tela").
 
+## Validation script
+Needed to validate: the local app host with four questions of two subjects, two types, both statuses, one of them from an edition — owner (step 2 creates them; the sign-in is the development administrator of `appsettings.Development.json`, `admin@simulab.local`). Not in place now, and this screen was never seen by Claude: the containers of the app host (`simulab-postgres`, `simulab-redis`, `simulab-mailpit`) exited when Claude tried to start it, so everything below is also the first look at the page in a browser.
+
+1. Start the app host from this worktree, with its own database (no migration changes, but the data stays apart), and open the Web address the dashboard shows. Sign in as the administrator.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f100"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f100 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the dashboard lists `api` and `web` as running; **Questions** shows in the **Content** menu.
+2. Make four questions (Questions, Add; the seeded subjects "Ortografia e Pontuação" and "Direito Administrativo" are there), each with a short statement:
+   - Q1: single choice, subject "Ortografia e Pontuação", difficulty 3, two options with one correct, then **Publish**.
+   - Q2: true/false, same subject, no difficulty, leave it a draft.
+   - Q3: single choice, subject "Direito Administrativo", difficulty 5, two options with one correct, then **Publish**.
+   - Q4: single choice, subject "Direito Administrativo", no difficulty, a draft, and in **Origin** pick a seeded edition and number 1.
+3. Filters (AC1 to AC7): on the list, **Status** = Published shows Q3 and Q1. Add **Status** = Draft: all four. Remove Draft. **Type** = True/false with **Status** Published: nothing, and the text says no question matches the chosen filters. **Clear all**. **Difficulty** = Not set and 5: Q3, Q4, Q2. **Subject and topic**: pick the whole subject "Direito Administrativo": Q4 and Q3, and its chip says "(all topics)". **Organizer** = the organizer of the edition of Q4 together with that subject: only Q4. Type a word of Q4's statement in the search box with the filters on: Q4 remains.
+4. Chips and clear (AC11): each picked value is a chip under its field; remove one with its **x** and the list reloads from the first page; **Clear** on a field empties only that field; **Clear all** empties every filter and the search box.
+5. Address (AC9, AC10): with two filters set, open Q3 and choose **Cancel**: you are back on the same filtered list. Copy the address of the list into another tab: the same filters and the same rows. Edit the address to add `&topic=00000000-0000-0000-0000-000000000001`: the page still loads and the number of rows does not change.
+6. Language and permission (AC14): switch to pt-BR in the app bar: the fields read Situação, Tipo, Dificuldade, Disciplina e tópico, Banca, Edição and the button Limpar tudo. Sign up a second account in a private window and sign in: no Questions item, and `/admin/questions` shows the not-found page.
+7. Keyboard only, no mouse (AC14): Tab to **Subject and topic**; Arrow down opens the list; Arrow keys move, Space picks, Escape closes; Tab reaches the chip's remove button and Enter removes it; Tab to **Clear all** and press Enter. The picked count under each field is read out ("Picked: n").
+8. Stop the app host (Ctrl+C) before building again. Optional: `DROP DATABASE simulab_f100;` when you are done.
+
 ## Events
 
 - 2026-10-13 question — asked 12, from context 2
 - 2026-10-13 change — v2: no second chip row, page Clear all, 100 picked ids in total
 - 2026-10-13 question — asked 2, from context 0
 - 2026-10-13 blocked — test wrong: the order assertion of two tests used OrdinalIgnoreCase; the Api orders by the normalized name like the catalog list
+- 2026-10-13 rework — review: a failed edition lookup hid the applied edition filter
+- 2026-10-13 rework — review: numeric status of F-95 had no test
+- 2026-10-13 rework — review: item text table out of date
+- 2026-10-13 rework — review: two page tests kept a dummy await
