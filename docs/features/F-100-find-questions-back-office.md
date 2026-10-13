@@ -3,7 +3,7 @@ feature: F-100
 epic: Question bank
 status: building
 board: 146
-version: 1
+version: 2
 ---
 # Find questions in the back office
 
@@ -59,7 +59,8 @@ No mockup: the epic marks this item "Screen design: no" and it reuses kit parts 
 - Pattern: `Exams.razor` toolbar (fields in the `app-table-filters` row) plus `AccountEvents.razor` (address-bound filters).
 - Toolbar, in this order, each field with its own id (`questions-filter-*`): Status (multi), Type (multi), Difficulty (multi, with "Not set"), Subject and topic (grouped multi), Organizer (multi), Edition (search lookup, one value). The text search stays the table's own search box.
 - The pickers are `AppMultiPickField` (Status, Type, Difficulty, Subject/topic, Organizer); the edition is the lookup field the question form already uses.
-- Below the toolbar, a row of `AppFilterChip` per picked value (a subject chip says "Subject: X (all topics)") and a "Clear all" text button, shown only while a filter is active; removing a chip reloads from the first page.
+- Each `AppMultiPickField` draws its own removable chips (a subject chip says "X (all topics)") and its own "Clear"; removing a chip reloads from the first page. There is no second chip row (change note v2). One page-level "Clear all" text button sits in the toolbar, shown only while a filter or the search is active; it clears every filter and the table's search box (`AppDataTable.ClearSearchAsync`, new kit method with a bUnit test).
+- The pickers of subject/topic and organizer share one limit: at most 100 picked ids in total (subject, topic and organizer together); at the limit the unpicked options are disabled with a short hint, as `NoticeSubjectDialog` does. The Api keeps 100 values per list (BR6) so a longer address from outside is still answered.
 - `Questions.Empty.Filters` ("No question matches the chosen filters.") shows when any filter is set and nothing matches; the result count is announced as every table does (`Common.Table.Results.*`).
 - The taxonomy and organizer lists load once with the page (`AppMultiPickState` Loading, LoadFailed with retry, Empty). A failure of one list does not block the list of questions.
 - Keyboard and names: every picker has a visible label and the kit's own accessible name; chips are removable by keyboard with an `aria-label` that names the value (`Common.RemoveFilter`-style key, reuse the one `AccountEvents` uses).
@@ -108,10 +109,11 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 - AC8 Given a request with an unknown `type`, a malformed id or an unknown `status`, then the value is ignored and the list answers 200; a user without `questions.manage` gets 403 on the list, the taxonomy and the organizers. (BR6, BR9)
 - AC9 Given a list filtered by organizer and status, when the curator opens a question, saves and goes back, then the same filters, search and page are applied from the address. (UC6, BR8)
 - AC10 Given an address with a topic that was deleted, when the page opens, then the page loads, that value is not shown in the picker and the list is not restricted by it. (BR8)
-- AC11 Given active filters, then one chip per value shows; removing a chip reloads from the first page without that value; "Clear all" removes every filter and the search. (UC5)
+- AC11 Given active filters, then each picker shows one chip per picked value; removing a chip reloads from the first page without that value; the page-level "Clear all" removes every filter and the search. (UC5)
 - AC12 Given the taxonomy cannot be loaded, then the subject picker shows its load error with retry and the question list still loads. (Screens)
 - AC13 Given the architecture rules, then `QuestionBank` still references other modules only through their `Contracts`, and the list queries on 50,000 questions stay within the interactive budget measured at the build (`EXPLAIN` on the test container; an index is added only if the measurement asks for it). (BR10)
 - AC14 All new texts appear in pt-BR, pt-PT and en. The keyboard and accessible names of the pickers and chips are checked on screen (WCAG 2.2 AA).
+- AC15 Given 100 picked ids across subject, topic and organizer, then no further option of those pickers can be picked and the address stays within the request-line limit: a list request with 100 ids sent through the typed client is answered 200 by the Api. (BR6, change note v2)
 
 ## Criterion → test
 
@@ -131,6 +133,7 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 | AC12 | pending |
 | AC13 | pending |
 | AC14 | pending |
+| AC15 | pending |
 
 ## Decisions
 - 2026-10-13 — An unknown or malformed filter value is ignored, not refused — same as F-95 for `status`; a stale link still opens (confirmed: F-95 `## Decisions`, `List_UnknownStatus_IsIgnored`).
@@ -148,6 +151,17 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 - 2026-10-13 — F-100 approved ("aprovado f-100"), with no screen mockup and no new package (owner).
 - 2026-10-13 — No new index is promised: the build measures the filtered list with `EXPLAIN` on the test container with about 50,000 questions and adds an index on `(Type)`, `(Difficulty)` or `(ContentLanguage)` only if the measurement asks for it; not measured yet (Claude).
 
+- 2026-10-13 — Design passes (`system-design`, then `architect`, both opus), verified against the files (`project.md:64`, `AppMultiPickField.razor:104-135`, `AppDataTable.razor:78,233`, `OrganizerEndpoints.cs:25`, `SubjectEndpoints.cs:35`): accepted with the changes below (Claude).
+- 2026-10-13 — Catalog contracts: `ISubjectDirectory.ListTaxonomyAsync(IReadOnlyCollection<Guid>? subjectIds)` returns the existing `TaxonomySubjectResponse` (null = every subject; a missing entry = unknown subject, empty `Topics` = known with none); `IExamEditionDirectory.ListOrganizersAsync` and `ListOrganizerEditionsAsync` over the same joins as `FindAsync`; `QuestionBank.Contracts` holds only its own records (`QuestionTaxonomySubjectResponse`, `OrganizerLookupResponse`) (architect).
+- 2026-10-13 — Endpoint names `GetQuestionTaxonomy` and `ListQuestionOrganizers`: `GetTaxonomy` and `ListOrganizers` are taken by Catalog and operation ids are unique (architect).
+- 2026-10-13 — A list filter always applies `Contains` when it has values and never skips the predicate because "all values were picked": the rule of `project.md:64` (a future annulled status must not slip in); status and type keep `Enum.TryParse` plus `IsDefined` at the Api so `status=1` still means what it meant (architect).
+- 2026-10-13 — List parameters bind as `string[]?` and are parsed leniently; one place (`QuestionListQuery.Sanitized`) dedupes and caps at 100 per list; an id that is well formed but unknown is dropped, and when every organizer is unknown the edition alone applies (system-design, architect).
+- 2026-10-13 — The interactive budget of AC13 is p95 under 300 ms per list call (count and page) on 50,000 rows, measured once at the build with `EXPLAIN (ANALYZE, BUFFERS)` in a scratch run and quoted here; no timing test is committed (a wall-clock test is flaky under load), the committed tests assert behavior and the architecture rules (Claude).
+- 2026-10-13 — Any index the measurement asks for is recorded as a decision before it is added; the candidate for the newest-first order is `(created_at DESC, id DESC)`, not the three single-column indexes of the earlier note (system-design, architect).
+- 2026-10-13 — Topics of a subject picked as a whole stay enabled in the picker: the pick is a union, so it is harmless and needs no new text (Claude).
+- 2026-10-13 — The reader of repeated query keys is shared with `CatalogQueryString` (second use) in one Web helper (architect).
+- 2026-10-13 — v2 change note: no second chip row, one page "Clear all" that also clears the search, 100 picked ids in total on the page (owner, asked).
+
 ## Out of scope
 - Sorting by column or by paper number — F-118.
 - Filter by content language and by origin (authored or from an edition) — F-118.
@@ -161,6 +175,14 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 
 ## Change notes
 
+### v2 — 2026-10-13
+- What: the separate row of `AppFilterChip` is dropped (each `AppMultiPickField` already draws its removable chips and a "Clear"); one page-level "Clear all" also clears the search; the pickers of subject/topic/organizer share a limit of 100 picked ids.
+- Why: the design pass found every pick would show twice and that 100 topics + 100 subjects + 100 organizers (about 13 KB of address) pass Kestrel's 8 KB request line (414 on reload and on the Web to Api call).
+- Affected: AC11 (text), new AC15, Screens and API (chip row, limit); BR6 unchanged (the Api keeps 100 per list).
+- Re-approved: 2026-10-13, by the owner's answer to the two cards of the design pass ("Só os chips dos campos", "100 ids no total na tela").
+
 ## Events
 
 - 2026-10-13 question — asked 12, from context 2
+- 2026-10-13 change — v2: no second chip row, page Clear all, 100 picked ids in total
+- 2026-10-13 question — asked 2, from context 0
