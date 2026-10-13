@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: pt-PT
-features: [F-36, F-37, F-42, F-57]
-updated: 2026-10-06
+features: [F-36, F-37, F-42, F-57, F-76]
+updated: 2026-10-13
 ---
 # Catálogo
 
@@ -31,6 +31,15 @@ O endereço da página guarda a sua pesquisa, os seus filtros e a página, pelo 
 
 O conteúdo do exame aparece no seu próprio idioma e nunca é traduzido.
 
+### Ver o conteúdo programático de uma edição
+1. Na página do exame, escolha **Ver conteúdo programático** na linha da edição. O botão indica quantas disciplinas do aviso ela tem.
+2. O conteúdo abre sob a linha. As disciplinas aparecem pela ordem do aviso, sob o título do grupo quando o aviso as agrupa, cada uma com o número de questões (um traço quando o aviso não o indica).
+3. Sob cada disciplina estão as disciplinas e os tópicos do produto que ela abrange, como "Matemática · disciplina inteira" ou "Raciocínio Lógico › Proposições". Quando ainda não há nenhum, a linha diz "Tópicos ainda não mapeados".
+4. No fim, o total de questões indicado no aviso e quantas disciplinas ficaram fora da soma por não indicarem número.
+5. Escolha **Ocultar conteúdo programático** para fechar. Cada edição abre e fecha por si, e várias podem ficar abertas ao mesmo tempo.
+
+Uma edição sem disciplinas do aviso registadas não tem botão e diz que o conteúdo programático ainda não está registado.
+
 ## O que um ambiente novo já tem
 Todos os ambientes começam com os exames de guarda municipal, pelo que o catálogo nunca começa vazio. Quatro exames aparecem para os alunos, cada um com a edição publicada e a ligação ao edital oficial: Guarda Municipal de Curitiba (Instituto AOCP, edital de 2025), Guarda Municipal de Manaus (Instituto Consulplan, 2026), Guarda Civil Municipal de Salvador (FGV, 2026) e Guarda Civil Municipal de Maceió (Copeve/Ufal, 2026). Os exames de Recife e Goiânia já estão registados, mas ainda não têm edital, por isso ficam só na administração até um Administrador registar e publicar uma edição. As edições publicadas não mostram data de aplicação, porque não foi confirmada nos sítios oficiais.
 
@@ -57,6 +66,8 @@ Estas linhas são dados comuns: um Administrador pode editar ou eliminar qualque
 | Não foi possível carregar as opções de entidade organizadora, ano e estado. O resto da pesquisa funciona. | As três listas de opções não carregaram. | Escolha **Tentar novamente** ou continue a pesquisar sem elas. |
 | Não foi possível carregar este exame. | A página do exame não carregou. | Escolha **Tentar novamente**. |
 | Este exame já não existe. | O exame não existe, foi removido ou não tem nada publicado. | Escolha **Voltar ao catálogo**. |
+| O conteúdo programático desta edição ainda não está registado. | A edição não tem disciplinas do aviso registadas. | Nada; aparece quando um Administrador o registar. |
+| Tópicos ainda não mapeados | A disciplina do aviso ainda não foi ligada às disciplinas e tópicos do produto. | Nada; é só a indicação de que a lista ainda não existe. |
 
 ## Páginas relacionadas
 - [Como navegar](getting-around.md)

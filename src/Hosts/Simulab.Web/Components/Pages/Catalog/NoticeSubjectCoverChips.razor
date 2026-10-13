@@ -7,8 +7,16 @@
    later topic move made is shown as is: both chips, no marker (BR4). *@
 @if (Mappings is not { Count: > 0 } mappings)
 {
-    @* "Still to do", nothing is blocked: the tone is a warning, the text carries the meaning. *@
-    <AppStatusChip Text="@L["NoticeSubjects.Row.NotMapped"]" Tone="AppStatusTone.Warning" />
+    @if (NotMappedNote is not null)
+    {
+        @* F-76, BR6: for a student there is nothing to fix, so it is a plain note and never a warning. *@
+        <span class="app-syllabus-not-mapped app-muted">@NotMappedNote</span>
+    }
+    else
+    {
+        @* "Still to do", nothing is blocked: the tone is a warning, the text carries the meaning. *@
+        <AppStatusChip Text="@L["NoticeSubjects.Row.NotMapped"]" Tone="AppStatusTone.Warning" />
+    }
 }
 else
 {
@@ -39,4 +47,9 @@ else
 
     /// <summary>The notice subject's label: the list is named "Covers: Label" for a screen reader.</summary>
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// F-76: when set, a row with no entry shows this text as a plain note instead of the back office's warning chip.
+    /// </summary>
+    [Parameter] public string? NotMappedNote { get; set; }
 }

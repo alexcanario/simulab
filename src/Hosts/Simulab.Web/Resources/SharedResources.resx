@@ -605,6 +605,11 @@
   <data name="Catalog.BackToCatalog" xml:space="preserve"><value>Back to the catalog</value></data>
   <data name="Catalog.Editions.Subtitle" xml:space="preserve"><value>Each paper applied, newest first. The official notice has the full rules.</value></data>
   <data name="Catalog.Editions.Empty" xml:space="preserve"><value>This exam has no published edition.</value></data>
+  <data name="Catalog.Syllabus.Show.One" xml:space="preserve"><value>Show syllabus (1 subject)</value></data>
+  <data name="Catalog.Syllabus.Show.Many" xml:space="preserve"><value>Show syllabus ({0} subjects)</value></data>
+  <data name="Catalog.Syllabus.Hide" xml:space="preserve"><value>Hide syllabus</value></data>
+  <data name="Catalog.Syllabus.NotRegistered" xml:space="preserve"><value>The syllabus of this edition is not registered yet.</value></data>
+  <data name="Catalog.Syllabus.NotMapped" xml:space="preserve"><value>Topics not mapped yet</value></data>
   <data name="Catalog.Editions.NoticeLink" xml:space="preserve"><value>Official notice</value></data>
   <data name="Catalog.Editions.NoticeLink.Name" xml:space="preserve"><value>Official notice, {0}, opens in a new tab</value></data>
   <data name="Gallery.Section.KitParameters" xml:space="preserve"><value>Parameters for a page that keeps its state in the address</value></data>
