@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-PT
-features: [F-95, F-96, F-97]
-updated: 2026-10-12
+features: [F-95, F-96, F-97, F-98]
+updated: 2026-10-13
 ---
 # Questões
 
@@ -75,6 +75,34 @@ cartão aparece a quem também gere o banco de questões.
 3. Uma questão publicada ainda pode ser editada, mas cada edição tem de a manter completa.
 4. **Retirar publicação** devolve a questão a rascunho com o mesmo conteúdo.
 
+### Versões e alterações da chave de respostas
+Todo o estado em que uma questão publicada foi apresentada fica guardado, para que uma tentativa de prova
+possa sempre ser ligada ao texto e à chave exatos que a corrigiram. O cartão **Histórico**, abaixo do cartão
+**Publicação**, lista as versões de uma questão guardada, da mais recente para a mais antiga, com a data, o
+que mudou e o motivo.
+1. Na primeira vez que a questão é publicada, passa a ser a **versão 1**, "Primeira publicação". Um rascunho
+   que nunca foi publicado não tem versão.
+2. Guardar uma questão publicada regista uma nova versão apenas quando mudou o que o estudante vê ou aquilo em
+   que é corrigido: o enunciado, o texto de apoio, as opções e a chave, a explicação ou o idioma. Mudar só o
+   tópico, a dificuldade ou a origem não regista. Guardar sem alterações não regista nada.
+3. Se retirar a publicação, editar e publicar de novo, é registada uma nova versão na publicação quando o
+   conteúdo difere da última versão.
+4. Para alterar a chave de respostas de uma questão publicada (após um recurso, por exemplo), marque outra
+   opção como correta ou inverta Certo/Errado. Surge o campo **Motivo da alteração da chave de respostas** sob
+   as opções (ou sob a chave); é obrigatório, até 500 carateres. **Guardar** regista a versão como "Chave de
+   respostas alterada" com o seu motivo e a data. Mover a opção correta por reordenação também conta como
+   alteração da chave.
+5. Se a chave mudou enquanto a questão era rascunho, **Publicar** é recusado na primeira vez com "Escreva o
+   motivo da alteração da chave de respostas." O campo do motivo surge no cartão **Publicação**; escreva-o e
+   escolha **Publicar** de novo.
+6. No cartão **Histórico**, escolha **Ver** numa linha para abrir essa versão tal como foi registada, só para
+   leitura. A resposta correta fica oculta até **Mostrar resposta**. A versão atual leva a marca **Atual**.
+7. Um rascunho que tem versões pode ser eliminado; as versões ficam guardadas, e o histórico deixa de ser
+   mostrado quando a questão desaparece. Uma questão publicada continua a não poder ser eliminada.
+
+As versões nunca são editadas nem removidas. O nome de quem fez a alteração é guardado, mas ainda não é
+mostrado.
+
 ### Pré-visualizar como estudante
 1. No cartão **Publicação**, escolha **Pré-visualizar como estudante**.
 2. A janela mostra o texto de apoio, o enunciado e as opções como o estudante as vai ver; uma questão
@@ -100,6 +128,7 @@ cartão aparece a quem também gere o banco de questões.
 | Opções | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta. Cada uma até 2 000 caracteres |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não o pode perder |
 | Explicação | Porque é que a chave está certa | Opcional, até 10 000 caracteres |
+| Motivo da alteração da chave de respostas | Porque é que a chave de uma questão publicada mudou | Obrigatório quando uma gravação ou uma publicação regista uma versão cuja chave difere da anterior; de 1 a 500 carateres. Um motivo em qualquer outra versão nova fica como nota |
 | Edição | A prova anterior de onde a questão veio | Opcional. Sem edição a questão é autoral. Uma edição não pode ser eliminada enquanto uma questão a usa |
 | Número na prova | A posição da questão na prova da edição | Obrigatório com edição, um número inteiro de 1 a 500, único entre as questões da edição |
 | Disciplina do edital | A disciplina do edital da edição a que a questão pertence | Opcional, só com edição, e da mesma edição. Não pode ser eliminada enquanto uma questão a usa |
@@ -127,6 +156,10 @@ removidos ao guardar, e a página mostra o que foi mantido.
 | O número é um inteiro de 1 a 500. | O número está fora do intervalo. | Escreva um número de 1 a 500. |
 | Número já usado nesta edição. | Outra questão da edição tem este número. | Escolha outro número, ou corrija a outra questão. |
 | Escolha uma edição para indicar um número ou uma disciplina do edital. | Há número ou disciplina e nenhuma edição. | Escolha a edição ou esvazie os campos. |
+| Escreva o motivo da alteração da chave de respostas. | A chave mudou e não foi indicado motivo. | Escreva o motivo, até 500 carateres, e guarde ou publique de novo. |
+| O motivo é demasiado longo (no máximo 500 carateres). | O motivo tem mais de 500 carateres. | Encurte-o. |
+| Esta versão não existe. | Pediu-se a versão por um número que a questão não tem. | Recarregue a página. |
+| Outra gravação alterou antes o histórico desta questão. Recarregue a página e tente novamente. | Duas gravações tentaram registar o mesmo número de versão. | Recarregue a página e guarde de novo. |
 | Só um rascunho pode ser eliminado. Retire primeiro a publicação. | A questão está publicada. | Retire a publicação e depois elimine. |
 | Esta questão já está publicada. / Esta questão não está publicada. | Outra pessoa alterou antes de si. | Recarregue a página. |
 | Esta questão já não existe. | Alguém a eliminou com o seu ecrã aberto. | Volte à lista. |

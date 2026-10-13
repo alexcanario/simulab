@@ -9,6 +9,8 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/question-bank/editions/{editionId}/questions` | ListEditionQuestions | 200 |
 | `GET` | `/api/v1/question-bank/editions/{editionId}` | FindQuestionEdition | 200 |
 | `GET` | `/api/v1/question-bank/editions` | SearchQuestionEditions | 200 |
+| `GET` | `/api/v1/question-bank/questions/{id}/versions/{number}` | FindQuestionVersion | 200 |
+| `GET` | `/api/v1/question-bank/questions/{id}/versions` | ListQuestionVersions | 200 |
 | `GET` | `/api/v1/question-bank/questions/{id}` | FindQuestion | 200 |
 | `GET` | `/api/v1/question-bank/questions` | ListQuestions | 200 |
 | `GET` | `/api/v1/question-bank/subjects/{subjectId}/topics` | ListQuestionSubjectTopics | 200 |

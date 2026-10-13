@@ -12,6 +12,14 @@
             <AppAlert Severity="Severity.Info" Text="@L["Questions.Preview.UnsavedNote"]" Class="mb-4" />
         }
 
+        @* F-98 UC5: a version of the history opens here, read only, from what was recorded then. *@
+        @if (VersionRecordedAt is { } recordedAt)
+        {
+            <AppAlert Severity="Severity.Info"
+                      Text="@L["Questions.History.Version.Note", recordedAt.ToString("g", CultureInfo.CurrentCulture)].Value"
+                      Class="mb-4" />
+        }
+
         @* F-96 BR7: where the question came from, above the statement. A question without an edition shows nothing,
            and so does one whose edition no longer resolves (BR11). *@
         @if (QuestionText.SourceLine(Question.Origin) is { } sourceLine)
@@ -124,6 +132,9 @@
 
     /// <summary>True when the form holds changes that are not saved: the dialog says the preview is the saved version.</summary>
     [Parameter] public bool UnsavedChanges { get; set; }
+
+    /// <summary>F-98: when the version shown was recorded; set only when the dialog shows a version of the history.</summary>
+    [Parameter] public DateTimeOffset? VersionRecordedAt { get; set; }
 
     private IReadOnlyList<QuestionOptionResponse> _options = [];
     private bool _revealed;

@@ -1766,6 +1766,13 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     color: var(--mud-palette-text-secondary);
 }
 
+/* ---- F-98: the reason of an answer key change, under the options or the true/false key, and in the
+   Publication card when a publish is refused for the missing reason. ---- */
+.app-change-reason,
+.app-publication-change-reason {
+    margin-top: var(--app-space-4);
+}
+
 /* ---- F-96: where the question came from, above the statement in the preview. ---- */
 .app-question-source {
     display: flex;

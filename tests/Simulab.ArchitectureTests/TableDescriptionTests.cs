@@ -53,7 +53,10 @@ public class TableDescriptionTests
             $"every column of a table we define is described; a shadow column needs builder.Property<T>(\"Name\").HasComment(...). Missing: {string.Join(", ", missing)}");
     }
 
-    /// <summary>AC1b: the exemption is real and narrow — the JSON containers of <c>role_changes</c>.</summary>
+    /// <summary>
+    /// AC1b: the exemption is real and narrow — the JSON containers of <c>role_changes</c> and the options of a
+    /// question version (F-98: an immutable copy read whole, never queried by option).
+    /// </summary>
     [Fact]
     public void OnlyColumnsWithNoPropertyBehindThem_AreExempt()
     {
@@ -63,7 +66,7 @@ public class TableDescriptionTests
             .ToList();
 
         exempt.Should().NotBeEmpty("the exemption must cover something, or it hides a gap instead of naming one");
-        exempt.Should().BeEquivalentTo(["role_changes.added", "role_changes.removed"]);
+        exempt.Should().BeEquivalentTo(["role_changes.added", "role_changes.removed", "question_versions.options"]);
     }
 
     /// <summary>AC6: the tables we do not define are skipped, and the skipped set is not empty.</summary>

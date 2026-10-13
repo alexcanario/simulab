@@ -147,6 +147,7 @@ public sealed class TrueFalseQuestionEndpointTests : OriginApiTests
     }
 
     // AC4, BR4: a published key may change, never be cleared; a refusal leaves the stored question as it was.
+    // F-98 AC7: changing the key of a published question now records a version and needs its reason.
     [Fact]
     public async Task Update_PublishedTrueFalse_ChangingTheKey_StaysPublishedWithTheNewKey()
     {
@@ -155,7 +156,8 @@ public sealed class TrueFalseQuestionEndpointTests : OriginApiTests
         var question = await CreatedAsync(admin, TrueFalse(topic.Id, true));
         (await PublishAsync(admin, question.Id)).StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var updated = await UpdatedAsync(admin, question.Id, TrueFalse(topic.Id, false));
+        var updated = await UpdatedAsync(
+            admin, question.Id, TrueFalse(topic.Id, false) with { ChangeReason = "Gabarito oficial retificado." });
 
         updated.Status.Should().Be(QuestionStatus.Published);
         updated.TrueFalseKey.Should().BeFalse();

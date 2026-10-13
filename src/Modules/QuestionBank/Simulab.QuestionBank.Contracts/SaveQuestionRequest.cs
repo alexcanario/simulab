@@ -19,6 +19,11 @@ namespace Simulab.QuestionBank.Contracts;
 /// must be null or the stored type (F-97, BR2).
 /// </param>
 /// <param name="TrueFalseKey">The key of a true/false question: true is "certo", false "errado", null not set yet (F-97, BR1).</param>
+/// <param name="ChangeReason">
+/// Why the answer key changed (F-98, BR5): plain text, 1 to 500 characters after trimming. Required when the save
+/// creates a version whose key differs from the latest one; kept as a note on any other version the save creates
+/// and ignored when it creates none.
+/// </param>
 public sealed record SaveQuestionRequest(
     Guid? TopicId = null,
     string? ContentLanguage = null,
@@ -31,4 +36,5 @@ public sealed record SaveQuestionRequest(
     int? PaperNumber = null,
     Guid? NoticeSubjectId = null,
     QuestionType? Type = null,
-    bool? TrueFalseKey = null);
+    bool? TrueFalseKey = null,
+    string? ChangeReason = null);
