@@ -68,7 +68,7 @@ public sealed class QuestionVersionFormTests : QuestionPageTestContext
         var card = page.WaitForElement(HistoryCard);
         page.WaitForAssertion(() => card.QuerySelectorAll("tbody tr").Should().HaveCount(3));
         var rows = card.QuerySelectorAll("tbody tr").Select(Row).ToList();
-        rows[0].Should().Contain(cell => cell.StartsWith("3", StringComparison.Ordinal) && cell.Contains("Current"));
+        rows[0].Should().Contain(cell => cell.StartsWith('3') && cell.Contains("Current"));
         rows[0].Should().Contain("Answer key changed").And.Contain("Recurso deferido pela banca.");
         rows[1].Should().Contain("Content edited");
         rows[1].Should().NotContain(cell => cell.Contains("Current"));
