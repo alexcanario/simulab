@@ -1,7 +1,7 @@
 ---
 feature: F-76
 epic: Subject taxonomy
-status: building
+status: validating
 board: 120
 version: 1
 ---
@@ -71,7 +71,7 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 
 ## Criterion → test
 
-Tests locked: 808521e898327fbebb9f17a6503e46d1b926d41d (2 files); unlocks: 0
+Tests locked: 9044934d6bcfec49e17e97cb241f28a885b011b7 (2 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
@@ -110,6 +110,20 @@ Tests locked: 808521e898327fbebb9f17a6503e46d1b926d41d (2 files); unlocks: 0
 
 ## Open questions
 - (none)
+
+## Validation script
+Needed to validate: an exam with a published edition that has notice subjects (some mapped, one not, one with no number), a second published edition with none and, if you want to see the draft rule, a draft edition with a notice subject. The back office screens of F-74 and F-75 create them; Claude does not sign in for you. Not in place now: the local database holds whatever you created before. The local database is the shared `simulab-postgres-data` volume (no knob of its own in `docs/infra.md`); this item adds no migration and writes nothing of its own.
+
+1. Stop any other app host (the main checkout's, F-98's), then start this one from the worktree. Expect the Aspire dashboard URL and Web on https://localhost:7125.
+   - PowerShell 7: `cd D:wtsimulab-76-syllabus-for; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Git Bash: `cd /d/wt/simulab/f-76-syllabus-for && dotnet run --project src/Hosts/Simulab.AppHost`
+2. Signed in as an Admin, open an exam's published edition in the back office and make sure it has three notice subjects in two groups (one without a number of questions), one mapped to a whole subject and a topic of another subject, one not mapped. Expect the section to look and add up as before (group headings, total "15 questions", "1 subject has no number").
+3. Signed in as a Student (sign up at `/sign-up`, confirm in Mailpit), open Study → Catalog → that exam. Expect each published edition's row to show a button "Ver conteúdo programático (3 disciplinas)", all closed, and the edition with no notice subjects saying its syllabus is not registered yet, with no button.
+4. Open the first edition's syllabus. Expect: one heading per group; each notice subject with its label, "N questões" or a dash, and under it its chips ("Matemática · disciplina inteira", "Raciocínio Lógico › Proposições") or the plain note "Tópicos ainda não mapeados" (no warning chip); at the end "Total informado no edital: 15 questões" and "1 disciplina sem número fica fora da soma."
+5. Open a second edition's syllabus too, then close the first. Expect each to keep its own state and the button text to change to "Ocultar conteúdo programático".
+6. Keyboard only: Tab to the button (visible focus ring), Space or Enter opens it, Tab goes on into the block, Shift+Tab comes back; the page header and aside are unchanged.
+7. Switch the language to English and to Português (Portugal). Expect the button, note and total in each language and the notice subjects' labels and groups exactly as typed.
+8. Switch to dark mode. Expect the button, the note and the headings readable on the card.
 
 ## Events
 
