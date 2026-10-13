@@ -157,6 +157,8 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         private const string QuestionsPath = "/api/v1/question-bank/questions";
         private const string EditionsPath = "/api/v1/question-bank/editions";
         private const string SubjectsPath = "/api/v1/question-bank/subjects";
+        private const string TaxonomyPath = "/api/v1/question-bank/taxonomy";
+        private const string OrganizersPath = "/api/v1/question-bank/organizers";
         private const string CatalogPath = "/api/v1/catalog/";
 
         /// <summary>The stored questions, newest first: the test sets it, the writes change it.</summary>
@@ -168,6 +170,12 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
         /// <summary>F-96: the editions the origin lookup knows.</summary>
         public List<ExamEditionLookupResponse> Editions { get; } = [];
+
+        /// <summary>F-100: the organizers the list's organizer filter offers.</summary>
+        public List<OrganizerLookupResponse> Organizers { get; } = [];
+
+        /// <summary>F-100: when set, the taxonomy of the list's subject filter answers 500 (its load error).</summary>
+        public bool TaxonomyFails { get; set; }
 
         /// <summary>F-96: the notice subjects of each edition, in display order.</summary>
         public Dictionary<Guid, List<NoticeSubjectLookupResponse>> NoticeSubjects { get; } = [];
@@ -218,6 +226,16 @@ public abstract partial class QuestionPageTestContext : KitTestContext
             if (path.StartsWith(CatalogPath, StringComparison.Ordinal))
             {
                 return Problem(HttpStatusCode.Forbidden, "identity.forbidden");
+            }
+
+            if (path == TaxonomyPath)
+            {
+                return TaxonomyFails ? Problem(HttpStatusCode.InternalServerError, "common.unexpected_error") : Json(TaxonomyOf());
+            }
+
+            if (path == OrganizersPath)
+            {
+                return Json(Organizers.OrderBy(organizer => organizer.Acronym, StringComparer.OrdinalIgnoreCase).ToList());
             }
 
             if (path.StartsWith(SubjectsPath, StringComparison.Ordinal))
@@ -383,9 +401,34 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
             var parameters = System.Web.HttpUtility.ParseQueryString(query);
             IEnumerable<QuestionResponse> rows = Questions;
-            if (Enum.TryParse<QuestionStatus>(parameters["status"], ignoreCase: true, out var status))
+            rows = FilterBy<QuestionStatus>(rows, parameters, "status", (row, value) => row.Status == value);
+            rows = FilterBy<QuestionType>(rows, parameters, "type", (row, value) => row.Type == value);
+
+            var difficulties = parameters.GetValues("difficulty") ?? [];
+            if (difficulties.Length > 0)
             {
-                rows = rows.Where(row => row.Status == status);
+                var numbers = difficulties.Select(value => int.TryParse(value, out var number) ? number : 0).ToList();
+                var none = difficulties.Contains("none", StringComparer.OrdinalIgnoreCase);
+                rows = rows.Where(row => row.Difficulty is null ? none : numbers.Contains(row.Difficulty.Value));
+            }
+
+            var topicIds = Guids(parameters, "topic");
+            var subjectIds = Guids(parameters, "subject");
+            if (topicIds.Count + subjectIds.Count > 0)
+            {
+                rows = rows.Where(row => topicIds.Contains(row.TopicId) || subjectIds.Contains(row.SubjectId));
+            }
+
+            var organizerIds = Guids(parameters, "organizer");
+            if (organizerIds.Count > 0)
+            {
+                var acronyms = Organizers.Where(organizer => organizerIds.Contains(organizer.Id)).Select(organizer => organizer.Acronym).ToList();
+                rows = rows.Where(row => row.Origin is not null && acronyms.Contains(row.Origin.OrganizerAcronym));
+            }
+
+            if (Guids(parameters, "edition") is [var editionId])
+            {
+                rows = rows.Where(row => row.Origin?.ExamEditionId == editionId);
             }
 
             if (parameters["search"] is { Length: > 0 } term)
@@ -400,6 +443,36 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
             return Json(new QuestionPageResponse(items, all.Count));
         }
+
+        private static IEnumerable<QuestionResponse> FilterBy<TEnum>(
+            IEnumerable<QuestionResponse> rows,
+            System.Collections.Specialized.NameValueCollection parameters,
+            string key,
+            Func<QuestionResponse, TEnum, bool> matches)
+            where TEnum : struct, Enum
+        {
+            var values = (parameters.GetValues(key) ?? [])
+                .Select(value => Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed) ? parsed : (TEnum?)null)
+                .Where(value => value is not null)
+                .Select(value => value!.Value)
+                .ToList();
+
+            return values.Count == 0 ? rows : rows.Where(row => values.Exists(value => matches(row, value)));
+        }
+
+        private static List<Guid> Guids(System.Collections.Specialized.NameValueCollection parameters, string key) =>
+            [.. (parameters.GetValues(key) ?? []).Select(value => Guid.TryParse(value, out var id) ? id : (Guid?)null)
+                .Where(id => id is not null).Select(id => id!.Value)];
+
+        // The taxonomy as the Api answers it: subjects by name, each with its topics by name.
+        private List<QuestionTaxonomySubjectResponse> TaxonomyOf() =>
+            [.. Subjects.OrderBy(subject => subject.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(subject => new QuestionTaxonomySubjectResponse(
+                    subject.Id,
+                    subject.Name,
+                    [.. Topics.Where(topic => topic.SubjectId == subject.Id)
+                        .OrderBy(topic => topic.Name, StringComparer.OrdinalIgnoreCase)
+                        .Select(topic => new TopicLookupResponse(topic.Id, topic.Name))]))];
 
         private static QuestionListItemResponse ToListItem(QuestionResponse question) =>
             new(

@@ -36,6 +36,8 @@ public sealed class QuestionBankApiClient(HttpClient http)
     private const string Base = "/api/v1/question-bank/questions";
     private const string EditionsBase = "/api/v1/question-bank/editions";
     private const string SubjectsBase = "/api/v1/question-bank/subjects";
+    private const string TaxonomyRoute = "/api/v1/question-bank/taxonomy";
+    private const string OrganizersRoute = "/api/v1/question-bank/organizers";
 
     /// <summary>F-95 UC5: one page of questions, newest first, filtered by status and by a word of the statement.</summary>
     public Task<QuestionBankResult<QuestionPageResponse>> ListQuestionsAsync(
@@ -51,9 +53,17 @@ public sealed class QuestionBankApiClient(HttpClient http)
             route += $"&search={Uri.EscapeDataString(query.Search)}";
         }
 
-        if (query.Status is { } status)
+        // F-100: a list of values is a repeated key, never a joined string.
+        route += string.Concat((query.Statuses ?? []).Select(status => $"&status={status}"));
+        route += string.Concat((query.Types ?? []).Select(type => $"&type={type}"));
+        route += string.Concat((query.Difficulties ?? []).Select(number => $"&difficulty={number.ToString(CultureInfo.InvariantCulture)}"));
+        route += query.DifficultyNotSet ? "&difficulty=none" : string.Empty;
+        route += string.Concat((query.SubjectIds ?? []).Select(id => $"&subject={id}"));
+        route += string.Concat((query.TopicIds ?? []).Select(id => $"&topic={id}"));
+        route += string.Concat((query.OrganizerIds ?? []).Select(id => $"&organizer={id}"));
+        if (query.ExamEditionId is { } edition)
         {
-            route += $"&status={status}";
+            route += $"&edition={edition}";
         }
 
         return SendAsync<QuestionPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
@@ -171,6 +181,20 @@ public sealed class QuestionBankApiClient(HttpClient http)
         return SendAsync<IReadOnlyList<SubjectLookupResponse>>(
             () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
+
+    /// <summary>F-100: every live subject with its live topics, for the list's subject and topic filter.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<QuestionTaxonomySubjectResponse>>> GetTaxonomyAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<QuestionTaxonomySubjectResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, TaxonomyRoute), accessToken), cancellationToken);
+
+    /// <summary>F-100: every live organizer by acronym, for the list's organizer filter.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<OrganizerLookupResponse>>> ListOrganizersAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<OrganizerLookupResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, OrganizersRoute), accessToken), cancellationToken);
 
     /// <summary>B-28 BR2: the live topics of a subject by name.</summary>
     public Task<QuestionBankResult<IReadOnlyList<TopicLookupResponse>>> ListTopicsAsync(

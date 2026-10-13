@@ -31,7 +31,7 @@ else if (_notFound)
 {
     <MudPaper Class="app-form-card" Elevation="0">
         <AppAlert Severity="Severity.Error" Text="@Errors.For(QuestionBankErrorCodes.QuestionNotFound)" Class="mb-4" />
-        <AppLink Href="/admin/questions">@L["Questions.BackToList"]</AppLink>
+        <AppLink Href="@ListHref">@L["Questions.BackToList"]</AppLink>
     </MudPaper>
 }
 else
@@ -934,7 +934,7 @@ else
         _breadcrumbs =
         [
             new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
-            new BreadcrumbItem(L["Questions.Title"], href: "/admin/questions"),
+            new BreadcrumbItem(L["Questions.Title"], href: ListHref),
             new BreadcrumbItem(Title, href: null, disabled: true)
         ];
 
@@ -1127,11 +1127,7 @@ else
     // -- the origin (F-96) --------------------------------------------------------------------------------------
 
     // The line the reader picks is the source line; the position, when there is one, tells look-alikes apart.
-    private static AppLookupOption EditionOption(ExamEditionLookupResponse edition) =>
-        new(
-            edition.Id,
-            QuestionText.SourceLine(edition.OrganizerAcronym, edition.ExamName, edition.NoticeYear) ?? edition.ExamName,
-            edition.Position);
+    private static AppLookupOption EditionOption(ExamEditionLookupResponse edition) => QuestionText.EditionOption(edition);
 
     // BR11: an edition that no longer resolves has no name; the field says so instead of showing an empty box.
     private AppLookupOption EditionOption(QuestionOriginResponse origin) =>
@@ -1436,7 +1432,7 @@ else
                 // just saved (F-35).
                 StateHasChanged();
                 await Task.Yield();
-                Navigation.NavigateTo($"/admin/questions/{question.Id}", replace: true);
+                Navigation.NavigateTo($"/admin/questions/{question.Id}{QuestionListQueryString.Carried(Navigation.Uri)}", replace: true);
             }
 
             return;
@@ -1545,7 +1541,10 @@ else
         }
     }
 
-    private void Cancel() => Navigation.NavigateTo("/admin/questions");
+    // F-100 AC9: the list's own keys came with the address the form was opened on; they go back with the curator.
+    private string ListHref => "/admin/questions" + QuestionListQueryString.Carried(Navigation.Uri);
+
+    private void Cancel() => Navigation.NavigateTo(ListHref);
 
     // -- publication and preview -------------------------------------------------------------------------------
 

@@ -22,4 +22,14 @@ public interface ISubjectDirectory
     /// subject with no topic answers an empty list).
     /// </summary>
     Task<IReadOnlyList<TopicDirectoryEntry>?> ListTopicsAsync(Guid subjectId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The live taxonomy (F-100): every live subject by name with its live topics by name, or only the live
+    /// subjects among <paramref name="subjectIds"/> when it is given. A subject that is unknown or deleted is
+    /// absent from the answer; a live subject with no topic is present with an empty list, which is how a
+    /// caller tells "unknown" from "known and empty".
+    /// </summary>
+    Task<IReadOnlyList<TaxonomySubjectResponse>> ListTaxonomyAsync(
+        IReadOnlyCollection<Guid>? subjectIds,
+        CancellationToken cancellationToken);
 }

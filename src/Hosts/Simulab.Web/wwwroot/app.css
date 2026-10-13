@@ -1656,6 +1656,10 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    of squeezing the search (found on screen at 800 px). The library gives it a fixed height, so it also
    has to grow with its rows - otherwise the wrapped line lands on top of the table header. */
 .app-data-table .mud-toolbar {
+    /* The library's toolbar is `position: sticky` with no z-index, which is a stacking context of its own at the
+       lowest level: a filter popup inside it (F-100) was painted under the sticky header cells (z-index 2 and 3)
+       and its options mixed with the table's text (found on screen). */
+    z-index: 4;
     flex-wrap: wrap;
     row-gap: var(--app-space-3);
     height: auto;
@@ -1666,6 +1670,39 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-table-filters .app-field-label {
     white-space: nowrap;
+}
+
+/* A page that marks its content `.app-page-wide` (F-100: the question list) gets the layout's content area up to
+   1800 px instead of 1280 px; the other pages keep the layout's own width. Under 1800 px of room it changes
+   nothing: the container is as wide as the room. */
+.mud-container-maxwidth-lg:has(> .app-page-wide) {
+    max-width: 1800px;
+}
+
+/* A toolbar with many filters (F-100: six fields and a clear button): the filters take their own full line under
+   the search box and flow into as many columns as fit, then wrap onto more rows, instead of one row that is wider
+   than the card (found on screen). */
+.app-table-filters-grid {
+    flex: 1 1 100%;
+    display: grid;
+    /* auto-fit, not auto-fill: the tracks nobody uses collapse, so six filters share the whole line (measured on
+       a 1920 px screen: 191 px each with auto-fill, which kept two empty tracks, and about 255 px with auto-fit). */
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    justify-content: stretch;
+    align-items: start;
+    gap: var(--app-space-3);
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-field {
+    flex: initial;
+    width: 100%;
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-filter-clear {
+    justify-self: start;
+    align-self: end;
 }
 
 /* ---------------------------------------------------------------------------

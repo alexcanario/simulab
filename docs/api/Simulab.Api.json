@@ -2211,6 +2211,66 @@
             "name": "status",
             "in": "query",
             "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "organizer",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "edition",
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           }
@@ -2628,6 +2688,32 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/taxonomy": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "GetQuestionTaxonomy",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/organizers": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListQuestionOrganizers",
         "responses": {
           "200": {
             "description": "OK"

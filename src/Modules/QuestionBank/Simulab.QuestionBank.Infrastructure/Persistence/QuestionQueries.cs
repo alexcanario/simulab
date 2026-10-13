@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.QuestionBank.Domain.Entities;
 using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Text;
 
@@ -29,9 +30,45 @@ public sealed class QuestionQueries(
         var sanitized = query.Sanitized();
         var questions = context.Questions.AsNoTracking();
 
-        if (sanitized.Status is { } status)
+        // F-100 BR1: AND between filters, OR among the values of one. A list with values always restricts;
+        // the predicate is never skipped because "every value was picked" (a status may be added later).
+        if (sanitized.Statuses is { Count: > 0 } statuses)
         {
-            questions = questions.Where(question => question.Status == status);
+            var wanted = statuses.ToList();
+            questions = questions.Where(question => wanted.Contains(question.Status));
+        }
+
+        if (sanitized.Types is { Count: > 0 } types)
+        {
+            var wanted = types.ToList();
+            questions = questions.Where(question => wanted.Contains(question.Type));
+        }
+
+        questions = ByDifficulty(questions, sanitized);
+
+        // The catalog resolves what the question bank only holds by id (BR2, BR3, BR6): a subject is its topics
+        // as they are now, an organizer is its editions, and an id nothing has is dropped, not "matches nothing".
+        var topicIds = await TopicsOfAsync(sanitized, cancellationToken);
+        if (topicIds is { Count: 0 })
+        {
+            return new QuestionPageResponse([], 0);
+        }
+
+        if (topicIds is not null)
+        {
+            questions = questions.Where(question => topicIds.Contains(question.TopicId));
+        }
+
+        var editionFilter = await EditionsOfAsync(sanitized, cancellationToken);
+        if (editionFilter is { Count: 0 })
+        {
+            return new QuestionPageResponse([], 0);
+        }
+
+        if (editionFilter is not null)
+        {
+            questions = questions.Where(question =>
+                question.ExamEditionId != null && editionFilter.Contains(question.ExamEditionId.Value));
         }
 
         var search = ComparableText.Normalize(sanitized.Search);
@@ -198,6 +235,21 @@ public sealed class QuestionQueries(
             version.CreatedAt));
     }
 
+    public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>
+        [
+            .. (await subjects.ListTaxonomyAsync(null, cancellationToken))
+                .Select(subject => new QuestionTaxonomySubjectResponse(
+                    subject.Id,
+                    subject.Name,
+                    [.. subject.Topics.Select(topic => new TopicLookupResponse(topic.Id, topic.Name))]))
+        ];
+
+    public async Task<IReadOnlyList<OrganizerLookupResponse>> ListOrganizersAsync(CancellationToken cancellationToken) =>
+        [
+            .. (await editions.ListOrganizersAsync(cancellationToken))
+                .Select(organizer => new OrganizerLookupResponse(organizer.Id, organizer.Acronym, organizer.Name))
+        ];
+
     public async Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(
         string? search,
         int take,
@@ -307,6 +359,80 @@ public sealed class QuestionQueries(
             .ToList();
 
         return new EditionQuestionPageResponse(items, total);
+    }
+
+    // F-100 BR4: the numbers and "not set" are one filter; with both it is an OR.
+    private static IQueryable<Question> ByDifficulty(IQueryable<Question> questions, QuestionListQuery query)
+    {
+        var numbers = (query.Difficulties ?? []).ToList();
+
+        return (numbers.Count > 0, query.DifficultyNotSet) switch
+        {
+            (true, true) => questions.Where(question => question.Difficulty == null || numbers.Contains(question.Difficulty.Value)),
+            (true, false) => questions.Where(question => question.Difficulty != null && numbers.Contains(question.Difficulty.Value)),
+            (false, true) => questions.Where(question => question.Difficulty == null),
+            _ => questions
+        };
+    }
+
+    // The topics the subject and topic picks mean, or null when nothing was picked or nothing picked exists
+    // (the filter is dropped, AC10); an empty set means a subject that exists and has no topic (nothing matches).
+    private async Task<List<Guid>?> TopicsOfAsync(QuestionListQuery query, CancellationToken cancellationToken)
+    {
+        var pickedTopics = query.TopicIds ?? [];
+        var pickedSubjects = query.SubjectIds ?? [];
+        var resolved = false;
+        var result = new HashSet<Guid>();
+
+        if (pickedTopics.Count > 0)
+        {
+            foreach (var topic in await topics.FindManyAsync([.. pickedTopics], cancellationToken))
+            {
+                resolved = true;
+                result.Add(topic.Id);
+            }
+        }
+
+        if (pickedSubjects.Count > 0)
+        {
+            foreach (var subject in await subjects.ListTaxonomyAsync([.. pickedSubjects], cancellationToken))
+            {
+                resolved = true;
+                result.UnionWith(subject.Topics.Select(topic => topic.Id));
+            }
+        }
+
+        return resolved ? [.. result] : null;
+    }
+
+    // The editions the organizer and edition picks mean, or null when nothing was picked or nothing picked exists.
+    // Both together are an intersection (AC4); organizers that all are unknown leave the edition alone (AC10).
+    private async Task<List<Guid>?> EditionsOfAsync(QuestionListQuery query, CancellationToken cancellationToken)
+    {
+        HashSet<Guid>? fromOrganizers = null;
+        if (query.OrganizerIds is { Count: > 0 } organizerIds)
+        {
+            var entries = await editions.ListOrganizerEditionsAsync([.. organizerIds], cancellationToken);
+            if (entries.Count > 0)
+            {
+                fromOrganizers = [.. entries.SelectMany(entry => entry.ExamEditionIds)];
+            }
+        }
+
+        Guid? single = null;
+        if (query.ExamEditionId is { } editionId
+            && await editions.FindAsync(editionId, cancellationToken) is not null)
+        {
+            single = editionId;
+        }
+
+        return (fromOrganizers, single) switch
+        {
+            (null, null) => null,
+            (null, { } only) => [only],
+            ({ } many, null) => [.. many],
+            ({ } many, { } only) => many.Contains(only) ? [only] : []
+        };
     }
 
     private static ExamEditionLookupResponse ToLookup(ExamEditionDirectoryEntry edition) =>

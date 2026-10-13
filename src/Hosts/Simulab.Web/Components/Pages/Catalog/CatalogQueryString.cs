@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.AspNetCore.WebUtilities;
 using Simulab.Catalog.Contracts;
 using Simulab.Web.Components.Ui;
 
@@ -103,23 +102,13 @@ public static class CatalogQueryString
     /// </summary>
     public static string Carried(string uri) => Build(Parse(uri));
 
+    // The first value of each key: this page keeps one value per key.
     private static Dictionary<string, string> Read(string uri)
     {
-        var start = uri.IndexOf('?', StringComparison.Ordinal);
-        if (start < 0)
-        {
-            return [];
-        }
-
-        var end = uri.IndexOf('#', start);
-        var query = end < 0 ? uri[start..] : uri[start..end];
         var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var pair in QueryHelpers.ParseQuery(query))
+        foreach (var (key, all) in AddressQuery.Read(uri, Keys))
         {
-            if (Keys.Contains(pair.Key, StringComparer.OrdinalIgnoreCase) && pair.Value.Count > 0)
-            {
-                values.TryAdd(pair.Key, pair.Value[0] ?? string.Empty);
-            }
+            values[key] = all[0];
         }
 
         return values;

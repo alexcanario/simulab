@@ -137,6 +137,16 @@
 
     public Task ReloadAsync() => _grid.ReloadServerData();
 
+    /// <summary>F-100: empties the search box and reloads from the first page; a page that clears its own
+    /// filters with one button clears the table's search with them.</summary>
+    public async Task ClearSearchAsync()
+    {
+        await OnSearchChangedAsync(null);
+
+        // Called from outside the table, so nothing re-renders the box by itself.
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void OnRowsPerPageChanged(int size) => _rowsPerPage = size;
 
     private void OnCurrentPageChanged(int page) => _currentPage = page;
