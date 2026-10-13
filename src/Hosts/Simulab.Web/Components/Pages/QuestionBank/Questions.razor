@@ -41,7 +41,7 @@
               InitialPage="@_initial.Page"
               InitialPageSize="@_initial.PageSize">
     <ToolBarContent>
-        <div class="app-table-filters">
+        <div class="app-table-filters app-table-filters-grid">
             <AppMultiPickField Id="questions-filter-status"
                                Label="@L["Questions.Filter.Status"]"
                                Placeholder="@L["Questions.Filter.Status.Placeholder"]"
@@ -138,12 +138,14 @@
                             SearchAsync="SearchEditionsAsync"
                             MinChars="0"
                             OpenOnFocus="true"
+                            Hint="@L["Questions.Field.Edition.Hint"]"
                             Value="_edition"
                             ValueChanged="OnEditionChangedAsync" />
 
             @if (_state.HasFilters)
             {
                 <MudButton id="questions-filter-clear"
+                           Class="app-filter-clear"
                            Variant="Variant.Text"
                            Size="Size.Small"
                            StartIcon="@AppIcons.ClearFilters"

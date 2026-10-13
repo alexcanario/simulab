@@ -1572,6 +1572,30 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     white-space: nowrap;
 }
 
+/* A toolbar with many filters (F-100: six fields and a clear button): the filters take their own full line under
+   the search box and flow into as many columns as fit, then wrap onto more rows, instead of one row that is wider
+   than the card (found on screen). */
+.app-table-filters-grid {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    justify-content: stretch;
+    align-items: start;
+    gap: var(--app-space-3);
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-field {
+    flex: initial;
+    width: 100%;
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-filter-clear {
+    justify-self: start;
+    align-self: end;
+}
+
 /* ---------------------------------------------------------------------------
    Rich text field (F-95): the kit's AppRichTextField around the Quill 2 editor. The editor's own styles
    (lib/quill/quill.snow.css) are overridden here with the theme's variables, so there is no literal colour.
