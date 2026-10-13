@@ -1,7 +1,7 @@
 ---
 feature: F-76
 epic: Subject taxonomy
-status: approved
+status: building
 board: 120
 version: 1
 ---
@@ -72,14 +72,14 @@ Make the taxonomy visible to the student for the first time: before choosing a t
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
+| AC1 | PublishedExamSyllabusEndpointTests.Find_PublishedEdition_CarriesItsNoticeSubjectsInDisplayOrderWithTheirMappings; CatalogExamSyllabusTests.Open_ShowsTheRowsInOrderUnderOneHeadingPerGroupWithTheirNumbers; CatalogExamSyllabusTests.Open_NoRowHasAGroup_NoHeadingIsDrawn |
+| AC2 | PublishedExamSyllabusEndpointTests.Find_PublishedEdition_CarriesItsNoticeSubjectsInDisplayOrderWithTheirMappings; CatalogExamSyllabusTests.Open_ShowsTheCoverEntriesInTheFormOfTheBackOffice |
+| AC3 | CatalogExamSyllabusTests.Open_ANoticeSubjectNotMappedYet_ShowsTheNoteAndNoWarningChip |
+| AC4 | CatalogExamSyllabusTests.Render_AnEditionWithoutNoticeSubjects_SaysItIsNotRegisteredAndHasNoButton; PublishedExamSyllabusEndpointTests.Find_PublishedEditionWithoutNoticeSubjects_CarriesAnEmptyList |
+| AC5 | CatalogExamSyllabusTests.Open_TheTotalIsTheSumOfTheStatedNumbersAndSaysHowManyAreLeftOut; CatalogExamSyllabusTests.Open_NoSubjectStatesItsNumber_SaysSo |
+| AC6 | CatalogExamSyllabusTests.Render_TheSyllabusIsClosedAndTheButtonSaysHowManySubjects; CatalogExamSyllabusTests.Toggle_OpensOneEditionAtATime_LeavesTheOtherAsItWas_AndTheNameFollowsTheState; CatalogExamSyllabusTests.Open_TheButtonControlsTheBlockItOpens |
+| AC7 | PublishedExamSyllabusEndpointTests.Find_DraftEdition_NeverCarriesItsNoticeSubjects; PublishedExamSyllabusEndpointTests.Find_DeletedNoticeSubject_IsNotReturned |
+| AC8 | PublishedExamSyllabusEndpointTests.Find_TopicMovedToAnotherSubject_ShowsTheNewSubject |
 | AC9 | pending |
 | AC10 | pending |
 
