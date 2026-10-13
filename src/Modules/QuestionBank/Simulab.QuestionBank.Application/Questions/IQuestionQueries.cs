@@ -50,6 +50,12 @@ public interface IQuestionQueries
     /// <summary>The live topics of a subject by name, or null when the subject is unknown or deleted (B-28, BR2).</summary>
     Task<IReadOnlyList<TopicLookupResponse>?> ListSubjectTopicsAsync(Guid subjectId, CancellationToken cancellationToken);
 
+    /// <summary>The live taxonomy for the list's subject and topic filter: subjects by name, each with its topics (F-100).</summary>
+    Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken);
+
+    /// <summary>Every live organizer by acronym, for the list's organizer filter (F-100).</summary>
+    Task<IReadOnlyList<OrganizerLookupResponse>> ListOrganizersAsync(CancellationToken cancellationToken);
+
     /// <summary>One edition for prefilling the form, or null when it does not exist or was deleted (F-96, BR9).</summary>
     Task<ExamEditionLookupResponse?> FindEditionAsync(Guid examEditionId, CancellationToken cancellationToken);
 

@@ -103,6 +103,14 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
             .ToListAsync(cancellationToken);
     }
 
+    public Task<IReadOnlyList<OrganizerDirectoryEntry>> ListOrganizersAsync(CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
+    public Task<IReadOnlyList<OrganizerEditionsDirectoryEntry>> ListOrganizerEditionsAsync(
+        IReadOnlyCollection<Guid> organizerIds,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     // The years that begin with the digits typed; an empty range (1, 0) when the text is not a number of one to
     // four digits.
     private static (int From, int To) YearRange(string text)

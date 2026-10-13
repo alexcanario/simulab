@@ -51,9 +51,9 @@ public sealed class QuestionBankApiClient(HttpClient http)
             route += $"&search={Uri.EscapeDataString(query.Search)}";
         }
 
-        if (query.Status is { } status)
+        if (query.Statuses is { Count: > 0 } statuses)
         {
-            route += $"&status={status}";
+            route += $"&status={statuses[0]}";
         }
 
         return SendAsync<QuestionPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
@@ -171,6 +171,18 @@ public sealed class QuestionBankApiClient(HttpClient http)
         return SendAsync<IReadOnlyList<SubjectLookupResponse>>(
             () => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
     }
+
+    /// <summary>F-100: every live subject with its live topics, for the list's subject and topic filter.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<QuestionTaxonomySubjectResponse>>> GetTaxonomyAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>F-100: every live organizer by acronym, for the list's organizer filter.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<OrganizerLookupResponse>>> ListOrganizersAsync(
+        string accessToken,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
 
     /// <summary>B-28 BR2: the live topics of a subject by name.</summary>
     public Task<QuestionBankResult<IReadOnlyList<TopicLookupResponse>>> ListTopicsAsync(

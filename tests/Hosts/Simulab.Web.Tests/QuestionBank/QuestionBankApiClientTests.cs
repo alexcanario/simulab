@@ -51,7 +51,7 @@ public sealed class QuestionBankApiClientTests
             Content = JsonContent.Create(new QuestionPageResponse([], 0), options: AppJson.Options)
         });
 
-        var result = await client.ListQuestionsAsync("token", new QuestionListQuery(2, 10, "vírgula & crase", QuestionStatus.Published));
+        var result = await client.ListQuestionsAsync("token", new QuestionListQuery(2, 10, "vírgula & crase", [QuestionStatus.Published]));
 
         result.IsSuccess.Should().BeTrue();
         var call = handler.Received.Single();

@@ -29,8 +29,9 @@ public sealed class QuestionQueries(
         var sanitized = query.Sanitized();
         var questions = context.Questions.AsNoTracking();
 
-        if (sanitized.Status is { } status)
+        if (sanitized.Statuses is { Count: > 0 } statuses)
         {
+            var status = statuses[0];
             questions = questions.Where(question => question.Status == status);
         }
 
@@ -197,6 +198,12 @@ public sealed class QuestionQueries(
             version.Reason,
             version.CreatedAt));
     }
+
+    public Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
+    public Task<IReadOnlyList<OrganizerLookupResponse>> ListOrganizersAsync(CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
 
     public async Task<IReadOnlyList<ExamEditionLookupResponse>> SearchEditionsAsync(
         string? search,

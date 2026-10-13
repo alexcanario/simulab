@@ -51,6 +51,7 @@ A curator with hundreds of questions finds the ones to review, fix or publish in
 - BR8 The filters are kept in the address: `status`, `type`, `difficulty`, `subject`, `topic`, `organizer`, `edition`, `search` (repeated keys for lists). Opening such an address applies the filters; a value that no longer resolves (a deleted topic, an unknown edition) is dropped from the pickers without an error.
 - BR9 Only the permission `questions.manage` is needed for the list, the taxonomy route and the organizer route (F-95 BR14); no new permission.
 - BR10 The Api reads other modules only through `Catalog.Contracts`; the module never reads `catalog.*` tables.
+- BR11 The pickers of subject/topic and organizer share a limit of 100 picked ids in total on the page, so the address stays inside the hosts' request line (change note v2); the Api keeps 100 values per list (BR6).
 
 ## Screens and API
 No mockup: the epic marks this item "Screen design: no" and it reuses kit parts on an existing page; the owner may ask for `/agile:screen` before approving.
@@ -119,21 +120,21 @@ Reused as they are: `Questions.Filter.Status`, `Questions.Status.*`, `Common.Fil
 
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
+| AC1 | `QuestionFilterEndpointTests.List_ByTopics_KeepsOnlyTheQuestionsOfThePickedOnes`; screen: `QuestionsFilterPageTests.Filter_ATopic_IsSentAsTopic` |
+| AC2 | `QuestionFilterEndpointTests.List_BySubject_MeansEveryTopicOfIt_AndIsAUnionWithPickedTopics`, `QuestionFilterDirectoryTests.ListTaxonomy_WithIds_KeepsOnlyTheLiveSubjectsAmongThem`; screen: `QuestionsFilterPageTests.Filter_AWholeSubject_IsSentAsSubject_AndItsChipSaysAllTopics` |
+| AC3 | `QuestionFilterEndpointTests.List_ByOrganizer_KeepsTheQuestionsOfItsEditions_AndLeavesOutAuthoredOnes`, `QuestionFilterDirectoryTests.ListOrganizerEditions_AreTheLiveEditionsOfAnyStatus_ByOrganizer`; screen: `QuestionsFilterPageTests.Filter_AnOrganizer_IsSentAsOrganizer`, `QuestionsFilterPageTests.Filter_AnEdition_IsSentAsEdition` |
+| AC4 | `QuestionFilterEndpointTests.List_ByAnEditionAndAForeignOrganizer_IsEmpty` |
+| AC5 | `QuestionFilterEndpointTests.List_ByTypeAndStatus_KeepsWhatMatchesEveryFilter`; screen: `QuestionsFilterPageTests.Filter_TypeAndStatus_AreSentAsRepeatedKeys_FromTheFirstPage`, `QuestionsPageTests.Filter_ByStatus_ReloadsTheListFromTheFirstPageWithThatStatus` |
+| AC6 | `QuestionFilterEndpointTests.List_ByDifficultyNoneAndFive_KeepsBothOfThem`; screen: `QuestionsFilterPageTests.Filter_DifficultyNotSetAndFive_AreSentAsNoneAndFive` |
+| AC7 | `QuestionFilterEndpointTests.List_FiltersAndSearchTogether_AreNewestFirstAndPaged`; screen: `QuestionsFilterPageTests.Filter_AndSearch_AreSentTogether` |
+| AC8 | `QuestionFilterEndpointTests.List_ValuesThatAreNotUnderstood_AreIgnored`, `QuestionFilterEndpointTests.Lookups_WithoutThePermission_AnswerForbidden`, `QuestionFilterEndpointTests.Taxonomy_ListsEverySubjectWithItsTopicsByName_ForACuratorWithNoCatalogPermission`, `QuestionFilterEndpointTests.Organizers_ListsEveryLiveOrganizerByAcronym_ForACuratorWithNoCatalogPermission` |
+| AC9 | `QuestionListQueryStringTests` (read, write, round trip, carried keys); screen: `QuestionsFilterPageTests.Filter_IsWrittenToTheAddress`, `QuestionsFilterPageTests.Address_WithFilters_IsAppliedAndShownInThePickers`, `QuestionsFilterPageTests.Add_FromAFilteredList_CarriesTheFiltersToTheForm`, `QuestionsFilterPageTests.Edit_FromAFilteredList_CarriesTheFiltersToTheForm`, `QuestionsFilterPageTests.Form_Cancel_ReturnsToTheListWithTheFiltersItWasOpenedWith` |
+| AC10 | `QuestionFilterEndpointTests.List_IdsThatNothingHas_AreDropped`; screen: `QuestionsFilterPageTests.Address_WithATopicThatNoLongerExists_LoadsAndDropsIt` |
+| AC11 | `QuestionsFilterPageTests.Chips_OnePerPickedValue_AndRemovingOneReloadsWithoutIt`, `QuestionsFilterPageTests.ClearAll_RemovesEveryFilterAndTheSearch_AndHidesItself`, `QuestionsFilterPageTests.ClearAll_IsShownWhileOnlyTheSearchIsSet`, `AppDataTableClearSearchTests` |
+| AC12 | `QuestionsFilterPageTests.Taxonomy_FailsToLoad_ShowsItsErrorWithTryAgain_AndTheListStillLoads` |
+| AC13 | `ModuleBoundaryTests` (the module still reaches others only through `Contracts`); the `EXPLAIN` measurement at 50,000 rows is quoted in `## Decisions` (validation step 6) |
+| AC14 | `QuestionFilterResourcesTests`, `ResourceParityTests`; keyboard and accessible names of the pickers and chips: validation step 5 |
+| AC15 | `QuestionFilterEndpointTests.List_HundredTopicIds_AreReadWhole`, `QuestionFilterEndpointTests.List_MoreIdsThanTheCap_ReadsOnlyTheFirstOnes`, `QuestionBankApiClientFilterTests.List_AHundredPickedIds_StayInsideTheRequestLineOfTheHosts`; screen: `QuestionsFilterPageTests.Limit_AtAHundredPickedIds_TheOtherOptionsAreDisabledAndTheHintSaysWhy` |
 
 ## Decisions
 - 2026-10-13 — An unknown or malformed filter value is ignored, not refused — same as F-95 for `status`; a stale link still opens (confirmed: F-95 `## Decisions`, `List_UnknownStatus_IsIgnored`).

@@ -182,7 +182,7 @@
         var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
         var result = await Api.ListQuestionsAsync(
             token,
-            new QuestionListQuery(query.Page, query.PageSize, query.Search, _status),
+            new QuestionListQuery(query.Page, query.PageSize, query.Search, _status is { } status ? [status] : null),
             cancellationToken);
 
         if (!result.IsSuccess)

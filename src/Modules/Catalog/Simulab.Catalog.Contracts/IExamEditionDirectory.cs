@@ -34,4 +34,16 @@ public interface IExamEditionDirectory
     Task<IReadOnlyList<NoticeSubjectDirectoryEntry>> FindNoticeSubjectsAsync(
         IReadOnlyCollection<Guid> noticeSubjectIds,
         CancellationToken cancellationToken);
+
+    /// <summary>Every live organizer by acronym (F-100); the list is short.</summary>
+    Task<IReadOnlyList<OrganizerDirectoryEntry>> ListOrganizersAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The live editions of each live organizer among <paramref name="organizerIds"/> (F-100): editions of any
+    /// status, under the same rule as <see cref="FindAsync"/> (an edition whose exam was deleted is left out).
+    /// An unknown or deleted organizer has no entry; a live one with no edition has an empty list.
+    /// </summary>
+    Task<IReadOnlyList<OrganizerEditionsDirectoryEntry>> ListOrganizerEditionsAsync(
+        IReadOnlyCollection<Guid> organizerIds,
+        CancellationToken cancellationToken);
 }

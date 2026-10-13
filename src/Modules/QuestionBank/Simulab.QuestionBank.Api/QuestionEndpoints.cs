@@ -49,7 +49,9 @@ public static class QuestionEndpoints
             ? value
             : null;
 
-        return Results.Ok(await queries.ListAsync(new QuestionListQuery(page, pageSize, search, parsed), cancellationToken));
+        return Results.Ok(await queries.ListAsync(
+            new QuestionListQuery(page, pageSize, search, parsed is { } one ? [one] : null),
+            cancellationToken));
     }
 
     private static async Task<IResult> FindAsync(Guid id, IQuestionQueries queries, CancellationToken cancellationToken)

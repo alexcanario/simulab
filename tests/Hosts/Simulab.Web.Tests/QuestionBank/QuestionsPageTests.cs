@@ -107,9 +107,9 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         var page = RenderPage();
         WaitForRows(page, 2);
 
-        var filter = page.FindComponents<AppSelectField<QuestionStatus?>>()
-            .Single(field => field.Instance.Id == "questions-filter-status");
-        await page.InvokeAsync(() => filter.Instance.ValueChanged.InvokeAsync(QuestionStatus.Published));
+        // F-100: the status filter is a multi-pick since the list gained its other filters.
+        page.Find("#questions-filter-status").Click();
+        page.Find("#questions-filter-status-option-Published").Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/question-bank/questions"
@@ -117,20 +117,22 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
             && call.Query.Contains("page=0", StringComparison.Ordinal)));
         WaitForRows(page, 1);
         CellsOf(page, 5).Should().Equal("Published");
+        await Task.CompletedTask;
     }
 
-    // BR15: the list offers the status filter and the statement search, and nothing else (the rest is F-100).
+    // F-95 BR15 read with F-100: the status filter offers Draft and Published, in that order.
     [Fact]
-    public void Filter_OffersAllDraftAndPublished_AndNothingElse()
+    public void Filter_Status_OffersDraftAndPublished()
     {
         var page = RenderPage();
-        page.WaitForAssertion(() => page.FindComponents<AppSelectField<QuestionStatus?>>().Should().ContainSingle());
+        page.WaitForAssertion(() => page.FindAll("#questions-filter-status").Should().ContainSingle());
 
-        var filter = page.FindComponents<AppSelectField<QuestionStatus?>>().Single().Instance;
+        page.Find("#questions-filter-status").Click();
 
-        filter.Options.Select(option => option.Text).Should().Equal("All", "Draft", "Published");
-        filter.Label.Should().Be("Status");
-        page.FindAll(".app-table-filters .app-field").Should().ContainSingle("the status filter is the only one");
+        page.FindAll("[id^='questions-filter-status-option-']")
+            .Select(option => option.QuerySelector(".app-mp-option-name")!.TextContent.Trim())
+            .Should().Equal("Draft", "Published");
+        page.Find("label[for='questions-filter-status']").TextContent.Should().Be("Status");
     }
 
     [Fact]
@@ -149,10 +151,11 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         var page = RenderPage();
         WaitForRows(page, 1);
 
-        var filter = page.FindComponents<AppSelectField<QuestionStatus?>>().Single();
-        await page.InvokeAsync(() => filter.Instance.ValueChanged.InvokeAsync(QuestionStatus.Published));
+        page.Find("#questions-filter-status").Click();
+        page.Find("#questions-filter-status-option-Published").Click();
 
-        page.WaitForAssertion(() => page.Markup.Should().Contain("No question matches the chosen filter."));
+        page.WaitForAssertion(() => page.Markup.Should().Contain("No question matches the chosen filters."));
+        await Task.CompletedTask;
     }
 
     [Fact]

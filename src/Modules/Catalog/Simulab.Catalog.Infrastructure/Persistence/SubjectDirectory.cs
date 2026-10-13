@@ -32,6 +32,11 @@ public sealed class SubjectDirectory(CatalogModuleDbContext context) : ISubjectD
             .ToListAsync(cancellationToken);
     }
 
+    public Task<IReadOnlyList<TaxonomySubjectResponse>> ListTaxonomyAsync(
+        IReadOnlyCollection<Guid>? subjectIds,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<IReadOnlyList<TopicDirectoryEntry>?> ListTopicsAsync(
         Guid subjectId,
         CancellationToken cancellationToken)
