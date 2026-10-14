@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-PT
-features: [F-95, F-96, F-97, F-98, F-100]
-updated: 2026-10-13
+features: [F-95, F-96, F-97, F-98, F-100, F-101]
+updated: 2026-10-14
 ---
 # Questões
 
@@ -25,7 +25,7 @@ outras veem Página não encontrada, e o menu não tem o item Questões.
 3. Escreva na caixa de pesquisa para encontrar uma palavra do enunciado. Maiúsculas e acentos não contam.
 4. Restrinja a lista com os filtros acima da tabela. Cada um aceita vários valores; uma questão é mantida
    quando corresponde a pelo menos um valor de cada filtro utilizado:
-   - **Estado**: rascunhos, questões publicadas ou ambos.
+   - **Estado**: rascunhos, questões publicadas, questões anuladas ou qualquer combinação.
    - **Tipo**: escolha múltipla, certo/errado ou ambos.
    - **Dificuldade**: de 1 a 5, e **Não definida** para questões sem dificuldade.
    - **Disciplina e tópico**: escolha uma disciplina inteira (vale todos os tópicos dela, mesmo os criados
@@ -117,6 +117,29 @@ que mudou e o motivo.
 As versões nunca são editadas nem removidas. O nome de quem fez a alteração é guardado, mas ainda não é
 mostrado.
 
+### Anular e reintegrar uma questão
+Quando a banca de uma prova anula uma questão, registe-o para que a prática deixe de a usar. A questão
+continua no banco, na edição e no histórico; só o estado dela muda.
+1. Abra uma questão **publicada** e veja o cartão **Publicação**. Um rascunho não pode ser anulado.
+2. Escolha **Anular questão**. Se o formulário tem alterações por guardar, o botão fica desativado e o cartão
+   diz "Guarde primeiro as suas alterações."
+3. Na janela, escreva o **motivo** (até 500 carateres; é obrigatório) e escolha **Anular**. A questão passa a
+   **Anulada**: um aviso amarelo no topo diz que não pode ser editada, o cartão mostra a data e o motivo,
+   todos os campos ficam só de leitura e o cartão Histórico ganha uma linha "Anulada" com o motivo.
+4. Enquanto estiver anulada, a questão não pode ser guardada, publicada, retirada da publicação nem
+   eliminada, e a lista não oferece Publicar nem Retirar publicação para ela. **Pré-visualizar como estudante**
+   continua a funcionar e mostra a data e o motivo acima do enunciado. Mantém o tópico, a edição e o número
+   na prova.
+5. Para desfazer (um engano, ou a banca reverteu a decisão), escolha **Reintegrar questão**, escreva o motivo e
+   confirme. A questão volta a ser **Publicada**, pode ser editada, e o cartão Histórico mostra uma linha
+   "Reintegrada" com esse motivo.
+6. Na lista, filtre o **Estado** por **Anulada** para as ver. As questões em prática são as publicadas; a
+   forma como uma questão anulada conta num simulado completo é regra de pontuação da edição, que não é
+   definida aqui.
+
+A data mostrada é o dia em que registou a anulação, não a data oficial da banca; o motivo é o sítio para citar
+o ato oficial.
+
 ### Pré-visualizar como estudante
 1. No cartão **Publicação**, escolha **Pré-visualizar como estudante**.
 2. A janela mostra o texto de apoio, o enunciado e as opções como o estudante as vai ver; uma questão
@@ -126,7 +149,8 @@ mostrado.
 
 ### Eliminar uma questão
 1. Só um rascunho pode ser eliminado. Numa questão publicada o botão Eliminar fica desativado; retire a
-   publicação antes.
+   publicação antes. Uma questão anulada não pode ser eliminada; reintegre-a, retire a publicação e só então
+   elimine, se precisar.
 2. Escolha **Eliminar** na linha e confirme. O tópico mantém-se.
 
 ## Campos
@@ -143,6 +167,7 @@ mostrado.
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não o pode perder |
 | Explicação | Porque é que a chave está certa | Opcional, até 10 000 caracteres |
 | Motivo da alteração da chave de respostas | Porque é que a chave de uma questão publicada mudou | Obrigatório quando uma gravação ou uma publicação regista uma versão cuja chave difere da anterior; de 1 a 500 carateres. Um motivo em qualquer outra versão nova fica como nota |
+| Motivo (anular ou reintegrar) | Porque é que uma questão publicada foi anulada, ou uma anulada foi retomada | Obrigatório, de 1 a 500 carateres. Fica no cartão Histórico com a data |
 | Edição | A prova anterior de onde a questão veio | Opcional. Sem edição a questão é autoral. Uma edição não pode ser eliminada enquanto uma questão a usa |
 | Número na prova | A posição da questão na prova da edição | Obrigatório com edição, um número inteiro de 1 a 500, único entre as questões da edição |
 | Disciplina do edital | A disciplina do edital da edição a que a questão pertence | Opcional, só com edição, e da mesma edição. Não pode ser eliminada enquanto uma questão a usa |
@@ -174,6 +199,9 @@ removidos ao guardar, e a página mostra o que foi mantido.
 | O motivo é demasiado longo (no máximo 500 carateres). | O motivo tem mais de 500 carateres. | Encurte-o. |
 | Esta versão não existe. | Pediu-se a versão por um número que a questão não tem. | Recarregue a página. |
 | Outra gravação alterou antes o histórico desta questão. Recarregue a página e tente novamente. | Duas gravações tentaram registar o mesmo número de versão. | Recarregue a página e guarde de novo. |
+| Escreva o motivo. | O motivo de uma anulação ou de uma reintegração está vazio. | Escreva o motivo, até 500 carateres. |
+| Esta questão está anulada e não pode ser alterada. Reintegre-a primeiro. | Tentou guardar, publicar, retirar a publicação ou eliminar uma questão anulada. | Escolha **Reintegrar questão** primeiro, se a anulação foi um engano. |
+| Esta questão já está anulada. / Esta questão não está anulada. | Outra pessoa alterou-a antes. | Recarregue a página. |
 | Só um rascunho pode ser eliminado. Retire primeiro a publicação. | A questão está publicada. | Retire a publicação e depois elimine. |
 | Esta questão já está publicada. / Esta questão não está publicada. | Outra pessoa alterou antes de si. | Recarregue a página. |
 | Esta questão já não existe. | Alguém a eliminou com o seu ecrã aberto. | Volte à lista. |

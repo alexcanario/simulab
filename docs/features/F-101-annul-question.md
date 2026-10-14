@@ -239,6 +239,7 @@ Whose data: the app runs on its own database `simulab_f101` in the shared local 
 - 2026-10-13 rework — review #2: progress on the dialog's confirm button
 - 2026-10-13 rework — review #3: status text and tone pinned by a test over the enum values
 - 2026-10-13 rework — review #4: edition and notice subject delete refused for an annulled question, tested
+- 2026-10-14 test-fail — 38 new warning(s): NU1902 in src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj, 1 red
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

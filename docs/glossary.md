@@ -117,6 +117,7 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 
 | Term | pt-BR | Meaning | Meaning (pt-BR) |
 |---|---|---|---|
+| GHSA | aviso de segurança do GitHub (GHSA) | The id of a GitHub Security Advisory (`GHSA-xxxx-xxxx-xxxx`): a published vulnerability of a package, which the scan and the NuGet audit report by that id (B-29). | O id de um aviso de segurança do GitHub (`GHSA-xxxx-xxxx-xxxx`): uma vulnerabilidade publicada de um pacote, que o scan e a auditoria do NuGet informam por esse id (B-29). |
 | concurrency token | token de concorrência | A column the database compares on every update, so a write that read an old value is refused instead of overwriting the newer one; `questions.status` is one (F-101). | Uma coluna que o banco compara em toda atualização, para que uma gravação que leu um valor antigo seja recusada em vez de sobrescrever o mais novo; `questions.status` é uma (F-101). |
 | thread pool | pool de threads | The shared set of threads .NET uses to run async continuations and timer callbacks (B-24). | O conjunto compartilhado de threads que o .NET usa para continuar código assíncrono e disparar timers (B-24). |
 | thread-pool starvation | falta de threads no pool | Every pool thread is blocked waiting, so queued work (a finished socket, a timer) cannot run; the pool adds threads slowly (B-24). | Todas as threads do pool estão bloqueadas esperando, então o trabalho na fila (um socket pronto, um timer) não roda; o pool cria threads devagar (B-24). |
