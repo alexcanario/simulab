@@ -1,8 +1,7 @@
 ---
 bug: B-29
 feature: -
-status: validating
-Autopilot: stop 2
+status: done
 board: 170
 severity: high
 epic: foundation-and-identity
@@ -70,3 +69,12 @@ Tests locked: 1b41be45b82646fe4905192e14f22fc1a131c748 (1 file); unlocks: 0
 4. Start the app host and sign in once → the sign-in works (DataProtection and OpenIddict load with the new packages).
 
 ## Events
+
+## Delivery
+
+Gate time: 6 passes, 15 min 8 s — turn 1 (21 s), ship 3 (11 min 15 s), scan 2 (3 min 32 s); 0 red
+
+- Branch: `bug/B-29`, merged `--no-ff` as `1ab18f2d` (board #170); app version 0.35.1.
+- Tests: full suite green, architecture 220 (including `CryptographyPackagesTests`), Web 1690, Identity 501, Catalog 528, QuestionBank 298, Api 58; slowest project 4 m 3 s.
+- Scan: `agile scan GREEN`, twelve findings `fixed`; warnings baseline empty.
+- Manual: unchanged, no visible behavior changed.
