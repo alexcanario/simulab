@@ -4,7 +4,7 @@
 
 | # | Id | Title | Status | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|
-| 1 | F-101 | Annul a question | idea | Question bank | - | - |
+| 1 | B-29 | Raise System.Security.Cryptography.Xml and Pkcs to patched versions | idea | foundation-and-identity | - | - |
 | 2 | F-77 | Subject and topic aliases | approved | Subject taxonomy | - | - |
 | 3 | F-99 | Transcribe the paper of an edition | idea | Question bank | - | first release of question-bank |
 | 4 | F-102 | Shared base text | idea | Question bank | - | - |
@@ -45,7 +45,7 @@
 
 ## Checklist
 
-- [ ] 1. F-101 — Annul a question [idea]
+- [ ] 1. B-29 — Raise System.Security.Cryptography.Xml and Pkcs to patched versions [idea]
 - [ ] 2. F-77 — Subject and topic aliases [approved]
 - [ ] 3. F-99 — Transcribe the paper of an edition [idea] — unlocks first release of question-bank
 - [ ] 4. F-102 — Shared base text [idea]
@@ -86,7 +86,7 @@
 
 ## Summary
 
-- Delivered: 108
+- Delivered: 109
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
 - First release (question-bank): 4 of 5 delivered; missing: F-99

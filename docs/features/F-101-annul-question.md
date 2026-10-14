@@ -1,7 +1,7 @@
 ---
 feature: F-101
 epic: Question bank
-status: validating
+status: done
 board: 147
 version: 1
 ---
@@ -242,4 +242,11 @@ Whose data: the app runs on its own database `simulab_f101` in the shared local 
 - 2026-10-14 test-fail — 38 new warning(s): NU1902 in src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj, 1 red
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: feature/F-101
+- Merge: bd73d3a2
+- Version: 0.35.0
+- Tests: 3,478 passed in 13 projects (QuestionBank 298 in 1 m 54 s, Web 1,689, Catalog 528, Identity 501, Architecture 219, Api 58, AppHost 80, others 105); 0 failed; build 21 s, test run 134 s; 38 NuGet advisory warnings (NU1902, NU1903) accepted in the baseline by the owner, fixed by B-29; `agile scan GREEN` (12 accepted, 14 false positive)
+- Manual pages: docs/manual/en/questions.md, docs/manual/pt-BR/questions.md, docs/manual/pt-PT/questions.md
+- Technical pages: docs/flows/annul-question.md
+
+Gate time: 10 passes, 17 min 58 s — turn 1 (52 s), ship 5 (11 min 33 s), baseline 1 (21 s), scan 3 (5 min 12 s); 2 red
