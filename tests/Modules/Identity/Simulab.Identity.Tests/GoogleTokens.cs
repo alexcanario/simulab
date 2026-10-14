@@ -127,8 +127,8 @@ public static class GoogleTokens
         DeclaresAdult: true,
         AcceptsTerms: true,
         AcceptsPrivacy: true,
-        TermsVersion: SignUpForm.CurrentVersion,
-        PrivacyVersion: SignUpForm.CurrentVersion,
+        TermsVersion: SignUpForm.TermsVersion,
+        PrivacyVersion: SignUpForm.PrivacyVersion,
         FullName: fullName);
 
     /// <summary>

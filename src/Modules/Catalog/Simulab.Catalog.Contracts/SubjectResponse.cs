@@ -6,4 +6,5 @@ namespace Simulab.Catalog.Contracts;
 /// <param name="AreaId">The area it belongs to, null when it has none.</param>
 /// <param name="AreaCode">The area's stable code, null when it has none.</param>
 /// <param name="TopicCount">How many topics it has, deleted ones excluded; the screen blocks the delete on it.</param>
-public sealed record SubjectResponse(Guid Id, string Name, Guid? AreaId, string? AreaCode, int TopicCount);
+/// <param name="InUse">True when a live notice subject maps it as a whole subject (F-75, BR10); the screen blocks the delete on it.</param>
+public sealed record SubjectResponse(Guid Id, string Name, Guid? AreaId, string? AreaCode, int TopicCount, bool InUse = false);

@@ -1,0 +1,39 @@
+@* F-76: a block that opens and closes under its own button, closed when the page opens. The button carries
+   aria-expanded and aria-controls and its text follows its state; the content is not rendered while closed, so a
+   page of many blocks stays light. Several blocks can be open at once: each keeps its own state. *@
+<div class="@($"app-disclosure {Class}".Trim())">
+    <button type="button"
+            class="app-disclosure-button"
+            id="@($"{Id}-button")"
+            aria-expanded="@(_expanded ? "true" : "false")"
+            aria-controls="@Id"
+            @onclick="Toggle">
+        <MudIcon Icon="@AppIcons.Expand" Size="Size.Small" aria-hidden="true" Class="@($"app-disclosure-icon{(_expanded ? " is-open" : string.Empty)}")" />
+        <span>@(_expanded ? HideText : ShowText)</span>
+    </button>
+    <div id="@Id" class="app-disclosure-content" hidden="@(!_expanded)">
+        @if (_expanded)
+        {
+            @ChildContent
+        }
+    </div>
+</div>
+
+@code {
+    private bool _expanded;
+
+    /// <summary>The id of the content block, unique on the page; the button's own id is this one plus "-button".</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    /// <summary>What the button says while the block is closed, already translated.</summary>
+    [Parameter, EditorRequired] public string ShowText { get; set; } = string.Empty;
+
+    /// <summary>What the button says while the block is open, already translated.</summary>
+    [Parameter, EditorRequired] public string HideText { get; set; } = string.Empty;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private void Toggle() => _expanded = !_expanded;
+}

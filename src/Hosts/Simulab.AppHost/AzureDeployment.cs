@@ -154,9 +154,9 @@ internal static class AzureDeployment
                 DropBlanketForwardedHeaders(app);
                 app.Template.Scale.MinReplicas = 1;
 
-                // F-54 BR7: a second replica would reject the first one's tokens (OpenIddict development
-                // certificates per machine, F-73); F-73 lifts this cap.
-                app.Template.Scale.MaxReplicas = 1;
+                // F-73 BR6: every replica signs and encrypts with the same two certificates from Key Vault (F-64), so a
+                // token issued by one is accepted by the other.
+                app.Template.Scale.MaxReplicas = 2;
             });
 
         // The cloud Web has no appsettings.Development.json, so the client id it sends to the token endpoint comes from

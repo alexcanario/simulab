@@ -473,18 +473,126 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     min-width: 0;
 }
 
-.app-notice-subject-row .app-truncate-host {
+/* F-75: two lines in the content column - the label, then what the row covers (chips) or "Not mapped". */
+.app-notice-subject-main {
     flex: 1 1 auto;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--app-space-1);
+}
+
+.app-notice-subject-main .app-truncate-host {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .app-notice-subject-count {
+    flex: none;
+    align-self: flex-start;
+    min-width: 6.5rem;
+    padding-top: 1px;
+    text-align: right;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* F-76: the kit's open/close block and the student's syllabus built on it. */
+.app-disclosure-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    padding: var(--app-space-1) 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: var(--mud-palette-primary);
+    cursor: pointer;
+}
+
+.app-disclosure-button:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.app-disclosure-icon {
+    transition: transform 0.15s;
+}
+
+.app-disclosure-icon.is-open {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-disclosure-icon {
+        transition: none;
+    }
+}
+
+.app-disclosure-content {
+    margin-top: var(--app-space-2);
+}
+
+.app-syllabus {
+    margin-top: var(--app-space-2);
+}
+
+.app-syllabus-empty {
+    margin: var(--app-space-2) 0 0;
+    font-size: var(--app-font-sm);
+}
+
+.app-syllabus-group + .app-syllabus-group {
+    margin-top: var(--app-space-3);
+}
+
+.app-syllabus-group-title {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+}
+
+.app-syllabus-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.app-syllabus-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    padding: var(--app-space-2) 0;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-syllabus-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--app-space-1);
+}
+
+.app-syllabus-not-mapped {
+    font-size: var(--app-font-sm);
+}
+
+.app-syllabus-count {
     flex: none;
     min-width: 6.5rem;
     text-align: right;
     font-size: var(--app-font-sm);
     font-variant-numeric: tabular-nums;
     color: var(--mud-palette-text-secondary);
+}
+
+.app-syllabus-total {
+    margin: var(--app-space-3) 0 0;
+    font-size: var(--app-font-sm);
 }
 
 .app-notice-subjects-footer {
@@ -509,6 +617,16 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-notice-subjects-total-unstated {
     display: block;
+}
+
+/* F-75: the right side of the footer stacks the sum and, below it, how many rows are not mapped yet. */
+.app-notice-subjects-summary {
+    text-align: right;
+}
+
+.app-notice-subjects-unmapped {
+    margin: 0;
+    font-size: var(--app-font-sm);
 }
 
 /* ---- Form + read-only aside layout (F-43, BR1, BR4): the reference screen's two-column page. ---- */
@@ -887,14 +1005,283 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     vertical-align: middle;
 }
 
+/* The read-only chip (F-75 AppChip). A list of them (.app-chip-list, .app-mp-chips) spaces them with its own gap. */
 .app-chip {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
     margin: 2px var(--app-space-1) 2px 0;
     padding: 2px 10px;
     border: 1px solid var(--mud-palette-divider);
     border-radius: 12px;
+    background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
     font-size: var(--app-font-xs);
+    line-height: 1.35;
+}
+
+.app-chip .app-chip-icon {
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-chip-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-chip-secondary {
+    color: var(--mud-palette-text-secondary);
+}
+
+/* A chip in a table cell holds a short label that must stay on one line: with overflow-wrap: anywhere the browser
+   sizes the column to one character and the label breaks letter by letter (F-97, the Type column). */
+.app-cell-nowrap .app-chip {
+    white-space: nowrap;
+}
+
+.app-cell-nowrap .app-chip-text {
+    overflow-wrap: normal;
+}
+
+.app-chip.is-removable {
+    padding-right: 2px;
+}
+
+/* A chip the Api refused: the border and the text say it, and the words say why (never the colour alone). */
+.app-chip.is-marked {
+    border-color: var(--mud-palette-error);
+    border-width: 2px;
+}
+
+.app-chip-mark {
+    color: var(--mud-palette-error);
+    font-weight: 700;
+}
+
+/* The remove button is 24 px inside a 28 px chip (rule ui: a target is at least 24 px). */
+.app-chip .app-chip-remove {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    color: var(--mud-palette-action-default);
+}
+
+.app-chip-list,
+.app-mp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-1) 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-chip-list .app-chip,
+.app-mp-chips .app-chip {
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Multi-pick field (F-75): a search over a short local list, grouped, to pick several. Built from the field anatomy
+   of AppTextField (label above, description below) with a listbox popup under the input.
+   --------------------------------------------------------------------------- */
+.app-mp-anchor {
+    position: relative;
+}
+
+.app-mp-input {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    height: 42px;
+    padding: 0 var(--app-space-3);
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-sm);
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+}
+
+.app-mp-input:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-field-error .app-mp-input {
+    border-color: var(--mud-palette-error);
+}
+
+.app-mp-input .mud-icon-root {
+    flex: none;
+    color: var(--mud-palette-action-default);
+}
+
+.app-mp-input input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: var(--app-font-base);
+}
+
+.app-mp-input input::placeholder {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-input input:disabled {
+    cursor: not-allowed;
+}
+
+.app-mp-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 25;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--app-space-1) 0;
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-sm);
+    background: var(--mud-palette-surface);
+    box-shadow: var(--mud-elevation-8);
+}
+
+.app-mp-group + .app-mp-group {
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.app-mp-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+    min-height: 36px;
+    padding: 7px var(--app-space-3);
+    cursor: pointer;
+    font-size: var(--app-font-sm);
+    line-height: 1.4;
+}
+
+.app-mp-option.is-member {
+    padding-left: var(--app-space-7);
+}
+
+.app-mp-option.is-group .app-mp-option-name {
+    font-weight: 700;
+}
+
+.app-mp-option:hover,
+.app-mp-option:focus {
+    background: var(--mud-palette-primary-lighten);
+}
+
+.app-mp-option:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.app-mp-option[aria-selected="true"] {
+    background: var(--mud-palette-primary-lighten);
+}
+
+.app-mp-option[aria-disabled="true"] {
+    cursor: not-allowed;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-option[aria-disabled="true"]:hover,
+.app-mp-option[aria-disabled="true"]:focus {
+    background: transparent;
+}
+
+/* The check box is drawn here: a picked option fills it and shows a check mark made of two borders. */
+.app-mp-check {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 2px solid var(--mud-palette-lines-inputs);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-mp-option[aria-selected="true"] .app-mp-check {
+    background: var(--mud-palette-primary);
+    border-color: var(--mud-palette-primary);
+}
+
+.app-mp-option[aria-selected="true"] .app-mp-check::after {
+    content: "";
+    width: 8px;
+    height: 4px;
+    margin-top: -2px;
+    border-left: 2px solid var(--mud-palette-primary-text);
+    border-bottom: 2px solid var(--mud-palette-primary-text);
+    transform: rotate(-45deg);
+}
+
+.app-mp-option[aria-disabled="true"] .app-mp-check {
+    border-style: dashed;
+}
+
+.app-mp-option-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.app-mp-option-secondary {
+    display: block;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-empty {
+    padding: var(--app-space-3);
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-status {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+}
+
+.app-mp-status .app-mp-spinner {
+    width: 12px;
+    height: 12px;
+}
+
+.app-mp-countline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--app-space-2);
+    min-height: 28px;
+    margin-top: var(--app-space-2);
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-mp-chips {
+    margin-top: var(--app-space-1);
+}
+
+.app-mp-none {
+    margin: var(--app-space-1) 0 0;
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
 }
 
 .app-muted {
@@ -1133,6 +1520,117 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 /* ---------------------------------------------------------------------------
+   Select field (F-114): the list the page holds whole. An arrow at the end says "a list opens before you type";
+   the leading icon (F-43) is drawn by the kit over the input's left padding, because the library has one
+   adornment slot and the arrow uses it. Icons are actionDefault, the focus ring is the outline's (primary),
+   the error border is the library's (error); no new colour.
+   --------------------------------------------------------------------------- */
+.app-select {
+    position: relative;
+}
+
+/* The arrow: 24 px glyph inside a 32 px round target (rule ui: at least 24 px). */
+.app-select .mud-input-adornment-end .mud-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: var(--app-space-1);
+    color: var(--mud-palette-action-default);
+}
+
+.app-select .mud-input-adornment-end .mud-icon-root {
+    width: 24px;
+    height: 24px;
+}
+
+.app-select.app-select-disabled,
+.app-select.app-select-disabled input,
+.app-select.app-select-disabled .mud-input-adornment-end .mud-icon-button {
+    cursor: not-allowed;
+}
+
+.app-select-leading {
+    position: absolute;
+    top: 50%;
+    left: var(--app-space-3);
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    transform: translateY(-50%);
+    color: var(--mud-palette-action-default);
+    pointer-events: none;
+}
+
+.app-field .app-select.app-select-has-icon .mud-input input {
+    padding-left: var(--app-space-7);
+}
+
+/* Loading: a 16 px progress where the arrow would be; the input still takes focus. */
+.app-select-progress {
+    position: absolute;
+    top: 50%;
+    right: var(--app-space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.app-select-progress .mud-progress-circular {
+    width: 16px;
+    height: 16px;
+}
+
+.app-field .app-select.app-select-loading .mud-input input {
+    padding-right: 44px;
+}
+
+/* An option wider than the list wraps; the text of a long option never runs out of the popover. */
+.app-select-option {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.app-select-message {
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+/* Field kinds gallery section (F-114): one column per kind, the kind's states stacked under a caption. */
+.gallery-kind-title {
+    margin-bottom: var(--app-space-3);
+}
+
+.gallery-state-caption {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    margin-bottom: var(--app-space-2);
+    font-size: var(--app-font-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.gallery-state-caption::after {
+    content: "";
+    flex: 1;
+    border-top: 1px dashed var(--mud-palette-divider);
+}
+
+.gallery-state-na {
+    margin-bottom: var(--app-space-4);
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---------------------------------------------------------------------------
    Table filters (F-34): the fields a list offers beside its search box, inside
    the data table's toolbar. The toolbar is a flex row, so the fields lay out as
    one and drop their bottom margin; a kit field is a block by default and would
@@ -1158,6 +1656,10 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    of squeezing the search (found on screen at 800 px). The library gives it a fixed height, so it also
    has to grow with its rows - otherwise the wrapped line lands on top of the table header. */
 .app-data-table .mud-toolbar {
+    /* The library's toolbar is `position: sticky` with no z-index, which is a stacking context of its own at the
+       lowest level: a filter popup inside it (F-100) was painted under the sticky header cells (z-index 2 and 3)
+       and its options mixed with the table's text (found on screen). */
+    z-index: 4;
     flex-wrap: wrap;
     row-gap: var(--app-space-3);
     height: auto;
@@ -1168,4 +1670,376 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-table-filters .app-field-label {
     white-space: nowrap;
+}
+
+/* A page that marks its content `.app-page-wide` (F-100: the question list) gets the layout's content area up to
+   1800 px instead of 1280 px; the other pages keep the layout's own width. Under 1800 px of room it changes
+   nothing: the container is as wide as the room. */
+.mud-container-maxwidth-lg:has(> .app-page-wide) {
+    max-width: 1800px;
+}
+
+/* A toolbar with many filters (F-100: six fields and a clear button): the filters take their own full line under
+   the search box and flow into as many columns as fit, then wrap onto more rows, instead of one row that is wider
+   than the card (found on screen). */
+.app-table-filters-grid {
+    flex: 1 1 100%;
+    display: grid;
+    /* auto-fit, not auto-fill: the tracks nobody uses collapse, so six filters share the whole line (measured on
+       a 1920 px screen: 191 px each with auto-fill, which kept two empty tracks, and about 255 px with auto-fit). */
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    justify-content: stretch;
+    align-items: start;
+    gap: var(--app-space-3);
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-field {
+    flex: initial;
+    width: 100%;
+    min-width: 0;
+}
+
+.app-table-filters-grid .app-filter-clear {
+    justify-self: start;
+    align-self: end;
+}
+
+/* ---------------------------------------------------------------------------
+   Rich text field (F-95): the kit's AppRichTextField around the Quill 2 editor. The editor's own styles
+   (lib/quill/quill.snow.css) are overridden here with the theme's variables, so there is no literal colour.
+   --------------------------------------------------------------------------- */
+.app-rt-frame {
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-md);
+    background: var(--mud-palette-surface);
+    overflow: hidden;
+}
+
+/* The same 2px primary ring every outlined field takes on focus. */
+.app-rt-frame:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-field-error .app-rt-frame {
+    border-color: var(--mud-palette-error);
+}
+
+.app-rich-text-disabled .app-rt-frame {
+    opacity: 0.55;
+}
+
+.app-rt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: var(--app-space-1) var(--app-space-2);
+}
+
+.app-rt-sep {
+    align-self: stretch;
+    width: 1px;
+    margin: 0 var(--app-space-1);
+    background: var(--mud-palette-divider);
+}
+
+/* Quill's snow theme paints its own toolbar and buttons; these rules put them on the theme. */
+.app-rt-frame .ql-toolbar.ql-snow {
+    border: 0;
+    border-bottom: 1px solid var(--mud-palette-divider);
+    padding: 0;
+    font-family: inherit;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn {
+    float: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--app-radius-sm);
+    background: transparent;
+    color: var(--mud-palette-action-default);
+    cursor: pointer;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn svg {
+    float: none;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn:hover {
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-action-default);
+}
+
+/* Pressed is the primary text on its lighten tone (4.79:1 light, 5.70:1 dark); the state is also aria-pressed. */
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn[aria-pressed="true"] {
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-primary);
+}
+
+.app-rt-frame .ql-toolbar.ql-snow .app-rt-btn:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.app-rt-frame .ql-container.ql-snow {
+    border: 0;
+    font-family: inherit;
+    font-size: var(--app-font-md);
+}
+
+/* The editable grows with its content: no inner scroll, long words wrap. 7.5rem and 2.5rem are the editor's
+   own minimum heights, which no step of the spacing scale covers. */
+.app-rt-frame .ql-editor {
+    min-height: 7.5rem;
+    padding: var(--app-space-2) var(--app-space-3);
+    overflow-wrap: anywhere;
+    color: var(--mud-palette-text-primary);
+    font-size: var(--app-font-md);
+    line-height: 1.65;
+}
+
+.app-rich-text-compact .ql-editor {
+    min-height: 2.5rem;
+    padding: 6px var(--app-space-3);
+}
+
+.app-rt-frame .ql-editor.ql-blank::before {
+    left: var(--app-space-3);
+    right: var(--app-space-3);
+    color: var(--mud-palette-text-secondary);
+    font-style: normal;
+}
+
+.app-rt-frame .ql-editor blockquote {
+    border-left: 3px solid var(--mud-palette-lines-inputs);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Option rows of the question form: letter badge, radio, compact editor, move and remove. ---- */
+.app-option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+    min-width: 0;
+}
+
+.app-option-row .app-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+/* A circle with the letter: the primary text on its lighten tone, a pair the theme tests already measure. */
+.app-option-letter {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    border-radius: var(--app-radius-pill);
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-text-primary);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+}
+
+.app-option-radio {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.app-options-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-3);
+}
+
+.app-options-count {
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Publication card of the question form. ---- */
+.app-publication-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--app-space-3);
+    font-size: var(--app-font-sm);
+}
+
+.app-publication-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-2);
+    margin-top: var(--app-space-4);
+}
+
+.app-publication-reason {
+    margin: var(--app-space-2) 0 0;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* ---- F-98: the reason of an answer key change, under the options or the true/false key, and in the
+   Publication card when a publish is refused for the missing reason. ---- */
+.app-change-reason,
+.app-publication-change-reason {
+    margin-top: var(--app-space-4);
+}
+
+/* ---- F-96: where the question came from, above the statement in the preview. ---- */
+.app-question-source {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-2);
+    margin: 0 0 var(--app-space-3);
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+}
+
+.app-question-source-line {
+    overflow-wrap: anywhere;
+}
+
+/* ---- The question as a student reads it (preview dialog): stored HTML, so the look is all here (BR8). ---- */
+.app-question-content {
+    overflow-wrap: anywhere;
+}
+
+.app-question-content p {
+    margin: 0;
+}
+
+.app-question-content p + p {
+    margin-top: var(--app-space-2);
+}
+
+.app-question-content a {
+    color: var(--mud-palette-primary);
+    text-decoration: underline;
+}
+
+.app-question-content blockquote {
+    margin: var(--app-space-2) 0;
+    padding-left: var(--app-space-3);
+    border-left: 3px solid var(--mud-palette-lines-inputs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-question-content ul,
+.app-question-content ol {
+    margin: var(--app-space-2) 0;
+    padding-left: var(--app-space-5);
+}
+
+.app-question-content table {
+    display: block;
+    max-width: 100%;
+    margin: var(--app-space-2) 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.app-question-content th,
+.app-question-content td {
+    padding: 2px var(--app-space-2);
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.app-question-content th {
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-sm);
+    text-align: left;
+}
+
+.app-question-base {
+    margin-bottom: var(--app-space-4);
+    padding: var(--app-space-3) var(--app-space-4);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-sm);
+}
+
+.app-question-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+    margin: var(--app-space-4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-question-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    padding: var(--app-space-2) var(--app-space-3);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+}
+
+/* The key is a 2px success border (3.33:1 light, 4.88:1 dark on the surface) beside an icon and a text. */
+.app-question-option.is-correct {
+    border: 2px solid var(--mud-palette-success);
+}
+
+.app-question-option .app-option-letter {
+    margin-top: 0;
+}
+
+.app-question-option-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-correct-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+    margin-top: var(--app-space-1);
+    font-size: var(--app-font-xs);
+    font-weight: 700;
+}
+
+.app-preview-actions {
+    margin-top: var(--app-space-4);
+}
+
+.app-preview-answer {
+    margin-top: var(--app-space-4);
+    padding-top: var(--app-space-4);
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.app-preview-heading {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-preview-no-key {
+    margin: 0 0 var(--app-space-3);
+    font-size: var(--app-font-sm);
 }

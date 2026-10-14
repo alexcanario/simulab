@@ -1,12 +1,12 @@
 <Project>
   <!-- Shared by every project of the solution (from agile@canary templates/dotnet). A property repeated in three or more projects moves here. -->
   <PropertyGroup>
-    <Version>0.19.0</Version>
+    <Version>0.35.1</Version>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- The app ships in pt-BR, pt-PT and en: cultures must work everywhere, containers included. -->
+    <!-- The app ships in the locales of the UI locales line of CLAUDE.md: cultures must work everywhere, containers included. -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <NeutralLanguage>en</NeutralLanguage>
     <Deterministic>true</Deterministic>

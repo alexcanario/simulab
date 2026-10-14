@@ -117,8 +117,8 @@ public sealed class GoogleSignInTests : IdentityApiTests
         user.PreferredLanguage.Should().Be("pt-BR");
         (await GoogleKeysAsync(user.Id)).Should().Equal(subject);
         var consent = await QueryAsync(context => context.ConsentRecords.AsNoTracking().SingleAsync(record => record.UserId == user.Id));
-        consent.TermsVersion.Should().Be(SignUpForm.CurrentVersion);
-        consent.PrivacyVersion.Should().Be(SignUpForm.CurrentVersion);
+        consent.TermsVersion.Should().Be(SignUpForm.TermsVersion);
+        consent.PrivacyVersion.Should().Be(SignUpForm.PrivacyVersion);
         consent.DeclaresAdult.Should().BeTrue();
         Emails.Count.Should().Be(0, "Google proved the address, so no verification email is sent");
 

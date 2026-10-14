@@ -1,10 +1,11 @@
 ---
 feature: F-58
 epic: Foundation and identity
-status: idea
+status: cancelled
 board: 97
 version: 1
 ---
+Duplicate of F-12 (2026-10-09): the gap is covered by `SolutionLayoutTests.EveryProjectOnDisk_IsListedInTheSolution`.
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
 Status flow: idea -> refining -> approved -> building -> validating -> done

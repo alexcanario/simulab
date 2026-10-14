@@ -1,0 +1,108 @@
+@using Simulab.Catalog.Contracts
+@inject IStringLocalizer<SharedResources> L
+
+@* F-76, UC1 to UC3: the syllabus of one published edition, under the edition's row on the exam page. Closed until the
+   student opens it (BR2); an edition with no notice subject has no button and says so (BR3). The groups and the sum
+   are the back office's own rules (NoticeSubjectGroups); each row shows what it covers in the F-75 form, and a row
+   not mapped yet says so in a plain note, not a warning: there is nothing for a student to fix (BR6). Names are
+   content: shown as stored and marked with the exam's language (BR8). *@
+@if (Rows is not { Count: > 0 } rows)
+{
+    <p class="app-syllabus-empty app-muted">@L["Catalog.Syllabus.NotRegistered"]</p>
+}
+else
+{
+    var groups = NoticeSubjectGroups.Group(rows);
+    var showHeadings = NoticeSubjectGroups.ShowHeadings(groups);
+    var totals = NoticeSubjectGroups.Totals(rows);
+
+    <AppDisclosure Id="@($"syllabus-{EditionId:N}")"
+                   Class="app-syllabus"
+                   ShowText="@ShowText(rows.Count)"
+                   HideText="@L["Catalog.Syllabus.Hide"]">
+        @for (var index = 0; index < groups.Count; index++)
+        {
+            var group = groups[index];
+            var headingId = $"syllabus-{EditionId:N}-group-{index}";
+            <div class="app-syllabus-group">
+                @if (showHeadings)
+                {
+                    <h3 id="@headingId" class="app-syllabus-group-title" lang="@ContentLanguage">
+                        @if (group.Label is { } label)
+                        {
+                            @label
+                        }
+                        else
+                        {
+                            @L["NoticeSubjects.Group.None"]
+                        }
+                    </h3>
+                }
+
+                <ul class="app-syllabus-list" aria-labelledby="@(showHeadings ? headingId : null)">
+                    @foreach (var row in group.Rows)
+                    {
+                        <li class="app-syllabus-row" @key="row.Id">
+                            <div class="app-syllabus-main">
+                                <span class="app-syllabus-label" lang="@ContentLanguage">@row.Label</span>
+                                <NoticeSubjectCoverChips Mappings="row.Mappings" Label="@row.Label" NotMappedNote="@L["Catalog.Syllabus.NotMapped"]" />
+                            </div>
+                            <span class="app-syllabus-count">@CountText(row)</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <p class="app-syllabus-total">
+            @if (totals.StatedCount == 0)
+            {
+                <span>@L["NoticeSubjects.Total.None"]</span>
+            }
+            else
+            {
+                <span class="app-syllabus-total-sum">@NoticeSubjectGroups.TotalText(L, totals)</span>
+                @if (totals.UnstatedCount > 0)
+                {
+                    <span class="app-syllabus-total-unstated app-muted"> @NoticeSubjectGroups.UnstatedText(L, totals)</span>
+                }
+            }
+        </p>
+    </AppDisclosure>
+}
+
+@code {
+    /// <summary>The edition's id: it makes the ids of the block unique among the editions of the page.</summary>
+    [Parameter, EditorRequired] public Guid EditionId { get; set; }
+
+    /// <summary>The edition's notice subjects in display order; null or empty is "not registered yet".</summary>
+    [Parameter] public IReadOnlyList<NoticeSubjectResponse>? Rows { get; set; }
+
+    /// <summary>The exam's content language: it marks the labels and groups, which are content.</summary>
+    [Parameter] public string? ContentLanguage { get; set; }
+
+    private string ShowText(int count) => count == 1
+        ? L["Catalog.Syllabus.Show.One"]
+        : L["Catalog.Syllabus.Show.Many", count.ToString("N0", CultureInfo.CurrentCulture)];
+
+    private RenderFragment CountText(NoticeSubjectResponse row) => builder =>
+    {
+        if (row.QuestionCount is { } count)
+        {
+            builder.AddContent(0, count == 1
+                ? L["NoticeSubjects.Row.Questions.One"].Value
+                : L["NoticeSubjects.Row.Questions.Many", count.ToString("N0", CultureInfo.CurrentCulture)].Value);
+            return;
+        }
+
+        // The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead.
+        builder.OpenElement(1, "span");
+        builder.AddAttribute(2, "aria-hidden", "true");
+        builder.AddContent(3, "—");
+        builder.CloseElement();
+        builder.OpenElement(4, "span");
+        builder.AddAttribute(5, "class", "app-visually-hidden");
+        builder.AddContent(6, L["NoticeSubjects.Row.NoCount.Spoken"].Value);
+        builder.CloseElement();
+    };
+}

@@ -1,0 +1,122 @@
+name: deploy
+
+# F-65: deploys the ref this run was started on to one environment. Manual only (BR1); nothing else starts a deploy.
+# The Azure sign-in is OIDC federation: no Azure credential is stored in GitHub (BR3). The three application secrets
+# below are the only secrets the workflow reads (BR5, change note v2). Setup commands: docs/infra.md, "Deploy workflow".
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to (the version is the ref this run was started on)
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  # Must equal the version of the Aspire.* packages in Directory.Packages.props (a test compares them, AC5).
+  ASPIRE_CLI_VERSION: "13.6.1"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # The job runs inside the environment: production waits here for its reviewer, and a rejected run never reaches the sign-in (BR4).
+    environment: ${{ inputs.environment }}
+    # One deploy per environment at a time; a second one waits and a running one is never cancelled (BR6).
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    steps:
+      # BR2: first step, before any Azure sign-in. Staging takes main or a tag v*; production only a tag v*.
+      - name: Check the ref
+        env:
+          TARGET: ${{ inputs.environment }}
+        run: |
+          case "$TARGET:$GITHUB_REF" in
+            staging:refs/heads/main | staging:refs/tags/v* | production:refs/tags/v*)
+              echo "Deploying $GITHUB_REF to $TARGET"
+              ;;
+            *)
+              echo "::error::Ref $GITHUB_REF cannot be deployed to $TARGET. Staging accepts main or a tag v*; production accepts only a tag v*."
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Install the Aspire CLI
+        run: |
+          dotnet tool install --global Aspire.Cli --version "$ASPIRE_CLI_VERSION"
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Sign in to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # BR5: the command is the one docs/infra.md declares for the environment, character for character (a test compares them, AC4).
+      - name: Deploy staging
+        if: ${{ inputs.environment == 'staging' }}
+        env:
+          AZURE__SUBSCRIPTIONID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          AZURE__LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE__RESOURCEGROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          Azure__CredentialSource: AzureCli
+          Parameters__openiddict-client-secret: ${{ secrets.OPENIDDICT_CLIENT_SECRET }}
+          Parameters__postgres-admin-user: ${{ vars.POSTGRES_ADMIN_USER }}
+          Parameters__postgres-admin-password: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          Parameters__redis-password: ${{ secrets.REDIS_PASSWORD }}
+        run: aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
+
+      - name: Deploy production
+        if: ${{ inputs.environment == 'production' }}
+        env:
+          AZURE__SUBSCRIPTIONID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          AZURE__LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE__RESOURCEGROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          Azure__CredentialSource: AzureCli
+          Parameters__openiddict-client-secret: ${{ secrets.OPENIDDICT_CLIENT_SECRET }}
+          Parameters__postgres-admin-user: ${{ vars.POSTGRES_ADMIN_USER }}
+          Parameters__postgres-admin-password: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          Parameters__redis-password: ${{ secrets.REDIS_PASSWORD }}
+        run: aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Production -o artifacts/deploy/production --clear-cache --non-interactive --nologo
+
+      - name: Summarize the deploy
+        env:
+          TARGET: ${{ inputs.environment }}
+        run: |
+          {
+            echo "### Deployed $TARGET"
+            echo "- Environment: $TARGET"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Commit: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # BR7: when the environment has a check URL, wait for HTTP 200 for at most 5 minutes.
+      - name: Wait for the check URL
+        if: ${{ vars.CHECK_URL != '' }}
+        env:
+          CHECK_URL: ${{ vars.CHECK_URL }}
+        timeout-minutes: 6
+        run: |
+          deadline=$((SECONDS + 300))
+          until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$CHECK_URL")" = "200" ]; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::$CHECK_URL did not answer 200 within 5 minutes"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "$CHECK_URL answered 200"

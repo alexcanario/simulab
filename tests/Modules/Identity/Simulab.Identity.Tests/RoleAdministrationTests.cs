@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
+using Simulab.QuestionBank.Contracts;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Tests;
@@ -213,7 +214,7 @@ public sealed class RoleAdministrationTests : IdentityApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(IdentityErrorCodes.RoleAdminPermissionRequired);
         // The refusal changes nothing: Admin keeps the seeded set, which is every module's (F-33 BR3).
         (await RoleNamedAsync(admin, IdentityRoles.Admin)).Permissions
-            .Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All]);
+            .Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All]);
     }
 
     [Fact]
@@ -313,8 +314,9 @@ public sealed class RoleAdministrationTests : IdentityApiTests
             .Should().BeEquivalentTo([curator.Id, custom.Id]);
         var session = await (await Accounts.SignedInAsync(Client(), user.Email!))
             .GetFromJsonAsync<SessionInfoResponse>("/api/v1/identity/session", AppJson.Options);
-        // The union of the Curator seed grant (F-36: catalog.browse) and the custom role.
-        session!.Permissions.Should().BeEquivalentTo([IdentityPermissions.RolesManage, CatalogPermissions.Browse]);
+        // The union of the Curator seed grants (F-36: catalog.browse; F-95: questions.manage) and the custom role.
+        session!.Permissions.Should().BeEquivalentTo(
+            [IdentityPermissions.RolesManage, CatalogPermissions.Browse, QuestionBankPermissions.Manage]);
 
         var emptied = await admin.PutAsJsonAsync($"{Users}/{user.Id}/roles", new SetUserRolesRequest([]), AppJson.Options);
         emptied.StatusCode.Should().Be(HttpStatusCode.OK);

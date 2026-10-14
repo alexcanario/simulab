@@ -47,6 +47,24 @@ public class AppIconsTests
         AppIcons.MoveDown.Should().Be(Icons.Material.Outlined.ArrowDownward);
     }
 
+    // F-95: the question bank's screens and the rich text field's toolbar.
+    [Fact]
+    public void AppIcons_QuestionBankAndRichTextToolbar_AreTheOutlinedIconsTheItemNames()
+    {
+        AppIcons.Questions.Should().Be(Icons.Material.Outlined.Quiz);
+        AppIcons.FormatBold.Should().Be(Icons.Material.Outlined.FormatBold);
+        AppIcons.FormatItalic.Should().Be(Icons.Material.Outlined.FormatItalic);
+        AppIcons.FormatUnderline.Should().Be(Icons.Material.Outlined.FormatUnderlined);
+        AppIcons.FormatStrikethrough.Should().Be(Icons.Material.Outlined.FormatStrikethrough);
+        AppIcons.Superscript.Should().Be(Icons.Material.Outlined.Superscript);
+        AppIcons.Subscript.Should().Be(Icons.Material.Outlined.Subscript);
+        AppIcons.BulletList.Should().Be(Icons.Material.Outlined.FormatListBulleted);
+        AppIcons.NumberedList.Should().Be(Icons.Material.Outlined.FormatListNumbered);
+        AppIcons.Quote.Should().Be(Icons.Material.Outlined.FormatQuote);
+        AppIcons.ClearFormatting.Should().Be(Icons.Material.Outlined.FormatClear);
+        AppIcons.Link.Should().Be(Icons.Material.Outlined.Link, "the link button reuses the existing constant");
+    }
+
     [Fact]
     public void AppIcons_SemanticNames_CoverTheKitActions()
     {

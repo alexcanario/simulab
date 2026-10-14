@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Routing;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
+using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Ui;
 
 namespace Simulab.Web.Components.Layout;
@@ -16,6 +17,7 @@ public static class NavigationItems
         new(NavigationSection.Content, "/admin/issuing-authorities", AppIcons.IssuingAuthorities, "Nav.IssuingAuthorities", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/exams", AppIcons.Exams, "Nav.Exams", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/subjects", AppIcons.Subjects, "Nav.Subjects", RequiredPermission: CatalogPermissions.Manage),
+        new(NavigationSection.Content, "/admin/questions", AppIcons.Questions, "Nav.Questions", RequiredPermission: QuestionBankPermissions.Manage),
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),

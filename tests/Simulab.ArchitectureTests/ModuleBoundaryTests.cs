@@ -32,9 +32,17 @@ public class ModuleBoundaryTests
         typeof(Simulab.Catalog.Infrastructure.CatalogModule).Assembly,
         typeof(Simulab.Catalog.Api.CatalogEndpoints).Assembly);
 
-    public static TheoryData<Module> Modules => [Identity, Catalog];
+    private static readonly Module QuestionBank = new(
+        "QuestionBank",
+        typeof(Simulab.QuestionBank.Domain.Entities.Question).Assembly,
+        typeof(Simulab.QuestionBank.Application.Questions.SaveQuestionHandler).Assembly,
+        typeof(Simulab.QuestionBank.Contracts.QuestionBankErrorCodes).Assembly,
+        typeof(Simulab.QuestionBank.Infrastructure.QuestionBankModule).Assembly,
+        typeof(Simulab.QuestionBank.Api.QuestionBankEndpoints).Assembly);
 
-    private static IReadOnlyList<Module> AllModules => [Identity, Catalog];
+    public static TheoryData<Module> Modules => [Identity, Catalog, QuestionBank];
+
+    private static IReadOnlyList<Module> AllModules => [Identity, Catalog, QuestionBank];
 
     private static Assembly Web => typeof(Simulab.Web.Resources.SharedResources).Assembly;
 

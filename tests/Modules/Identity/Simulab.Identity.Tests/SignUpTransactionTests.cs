@@ -283,8 +283,8 @@ public sealed class SignUpTransactionTests : IdentityApiTests
         context.ConsentRecords.Add(new ConsentRecord
         {
             UserId = user.Id,
-            TermsVersion = SignUpForm.CurrentVersion,
-            PrivacyVersion = SignUpForm.CurrentVersion,
+            TermsVersion = SignUpForm.TermsVersion,
+            PrivacyVersion = SignUpForm.PrivacyVersion,
             DeclaresAdult = true,
             Locale = "en",
             AcceptedAt = Factory.Clock.GetUtcNow(),

@@ -123,6 +123,9 @@
         var found = Match(Suggestions, term);
         _announcement = found.Count == 0 ? string.Empty : $"{SuggestionsLabel}: {found.Count}";
 
+        // B-27: the library re-renders its own subtree when the search returns, not this wrapper (see AppLookupField).
+        _ = InvokeAsync(StateHasChanged);
+
         return Task.FromResult<IEnumerable<string>>(found);
     }
 

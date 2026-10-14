@@ -17,6 +17,16 @@
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0" />
   </ItemGroup>
 
+  <!--
+    B-29: transitive pins. Both packages arrive through Microsoft.AspNetCore.DataProtection (OpenIddict) and MimeKit (MailKit);
+    10.0.0 to 10.0.12 carry GHSA-c399-9853-6jmj, GHSA-r955-8q5j-3h83, GHSA-7hqp-7c5m-4vq6 (Xml) and GHSA-846f-f764-76mx,
+    GHSA-2fmv-rv2c-59x7 (Pkcs). Remove both lines once MailKit and DataProtection resolve them at 10.0.13 or later by themselves.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.13" />
+  </ItemGroup>
+
   <!-- ASP.NET Core -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
@@ -77,6 +87,10 @@
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="10.0.12" />
     <PackageVersion Include="Markdig" Version="1.3.2" />
+    <!-- F-95: the allow-list sanitizer behind every question text (BR8). MIT; approved with the item. -->
+    <PackageVersion Include="HtmlSanitizer" Version="9.2.1039" />
+    <!-- F-95: the visual editor behind AppRichTextField (Quill 2). MIT; approved with the item. Only the Web references it. -->
+    <PackageVersion Include="Blazored.TextEditor" Version="1.1.3" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3" />
   </ItemGroup>
 
@@ -134,6 +148,8 @@
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <!-- F-65: the deploy workflow tests read deploy.yml as YAML (MIT, approved by the owner 2026-10-04). Test projects only. -->
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
 </Project>

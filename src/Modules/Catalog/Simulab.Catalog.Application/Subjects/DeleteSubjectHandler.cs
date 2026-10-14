@@ -24,6 +24,12 @@ public sealed class DeleteSubjectHandler(ISubjectStore store, ITopicStore topics
             return Result.Failure(new Error(CatalogErrorCodes.SubjectHasTopics, ErrorKind.Conflict));
         }
 
+        // F-75 BR9: a live notice subject maps it as a whole subject. The topics check above runs first.
+        if (await store.IsMappedWholeAsync(id, cancellationToken))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.SubjectInUse, ErrorKind.Conflict));
+        }
+
         store.Remove(subject);
         await store.SaveChangesAsync(cancellationToken);
 

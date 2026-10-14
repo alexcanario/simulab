@@ -41,6 +41,17 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
     /// <summary>F-74: the subjects each edition's notice names, grouped and ordered.</summary>
     public DbSet<NoticeSubject> NoticeSubjects => Set<NoticeSubject>();
 
+    /// <summary>F-75: the canonical subjects and topics each notice subject covers.</summary>
+    public DbSet<NoticeSubjectMapping> NoticeSubjectMappings => Set<NoticeSubjectMapping>();
+
+    /// <summary>
+    /// F-75 BR9: the mapping rows that count as "in use": live rows whose notice subject and edition are both
+    /// live. The global soft-delete filters of those two sets do the excluding; no explicit flag is read.
+    /// </summary>
+    public IQueryable<NoticeSubjectMapping> LiveNoticeSubjectMappings =>
+        NoticeSubjectMappings.Where(mapping => NoticeSubjects.Any(subject =>
+            subject.Id == mapping.NoticeSubjectId && ExamEditions.Any(edition => edition.Id == subject.ExamEditionId)));
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -54,5 +65,6 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         modelBuilder.ApplyConfiguration(new SubjectConfiguration());
         modelBuilder.ApplyConfiguration(new TopicConfiguration());
         modelBuilder.ApplyConfiguration(new NoticeSubjectConfiguration());
+        modelBuilder.ApplyConfiguration(new NoticeSubjectMappingConfiguration());
     }
 }

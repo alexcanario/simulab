@@ -1,6 +1,7 @@
 # Output style
 
 - Talk to the owner in Brazilian Portuguese (pt-BR): answers, questions, reports and summaries of what a subagent found. Only what is written to the repository is English.
+- What you write to the board for the owner to read (issue title, body, comments, PR of `Merge: pr`) is pt-BR, rendered whole from the English file: `references/board.md`, "Language of the board".
 - Keep code, identifiers, paths, commands and quoted tool output as they are; never translate them.
 - A technical term (a review severity, a service, an acronym, a protocol, a library) goes to the owner, in the chat and in the documents, with its pt-BR word from "Technical terms" in `docs/glossary.md`; the skill that writes a document adds the row (term, pt-BR word, both meanings) the first time one is used.
 - Answer first. The first sentence is the answer, the result or the question — never a preamble, a recap of the request or praise.

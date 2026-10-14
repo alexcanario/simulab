@@ -11,6 +11,7 @@ using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure;
 using Simulab.Identity.Infrastructure.Persistence;
+using Simulab.QuestionBank.Contracts;
 using Simulab.Testing;
 
 namespace Simulab.Identity.Tests;
@@ -75,7 +76,7 @@ public sealed class SeedAdminTests
                 .ToListAsync();
         });
 
-        granted.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All]);
+        granted.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All]);
     }
 
     [Theory]

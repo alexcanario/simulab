@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-95 - Single-choice questions in the back office (mockup)</title>
+<style>
+/* ===========================================================================
+   F-95 mockup - /admin/questions, /admin/questions/new|{id}, kit AppRichTextField
+   Every colour is a token of docs/design/identity.tokens.json (light and dark).
+   Classes mirror the kit (app.css): app-page-header, app-data-table, app-row-actions,
+   app-section-card, app-form-grid, app-field, app-item-rows, app-form-aside, app-status-chip,
+   app-state, app-alert, app-error-summary, app-form-actions. New: app-rich-text, app-option-*.
+   No external request: no web font, no icon font, no image, no script.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius-md: 10px; --app-radius-pill: 999px;
+
+  /* tokens, light */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --info: #2478C5;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.918); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --table-lines: #D0D8EA; --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --info: #2478C5;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.498); --appbar: #091422; --appbar-text: rgba(255,255,255,0.7);
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --table-lines: #263352; --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: inline-block; flex-shrink: 0; vertical-align: middle; fill: currentColor; }
+a { color: var(--primary); }
+button { font: inherit; color: inherit; }
+:is(a, button, input, select, textarea, [tabindex], [contenteditable]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+.app-muted { color: var(--text-secondary); }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider); font-size: var(--app-font-xs); }
+.demo-label { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-left: var(--app-space-2); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note { width: 100%; color: var(--text-secondary); }
+
+/* ---- app shell (F-2) ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-3); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: 6px; font-size: var(--app-font-sm); cursor: pointer; color: inherit; text-decoration: none; }
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); min-width: 0; }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- AppPageHeader ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-page-header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+
+/* ---- buttons (MudButton variants) ---- */
+.app-button { font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; min-height: 38px; padding: 0 var(--app-space-4); border-radius: var(--app-radius-md);
+  display: inline-flex; align-items: center; gap: var(--app-space-2); border: 1px solid transparent; background: transparent; text-transform: none; }
+.app-button-filled { background: var(--primary); color: var(--primary-contrast); }
+.app-button-filled:hover { background: var(--primary-darken); }
+.app-button-outlined { border-color: var(--primary); color: var(--primary); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-text { color: var(--text-primary); }
+.app-button-text:hover { background: var(--primary-lighten); }
+.app-button-error { background: var(--error); color: var(--error-contrast); }
+.app-button[disabled], .app-button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+.app-icon-button { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--action-default); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.app-icon-button:hover { background: var(--primary-lighten); }
+.app-icon-button.is-error { color: var(--error); }
+.app-icon-button[disabled] { opacity: .4; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+.app-spinner-lg { width: 36px; height: 36px; border-width: 3px; color: var(--primary); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppDataTable ---- */
+.app-data-table { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); overflow: hidden; }
+.app-table-toolbar { display: flex; align-items: flex-end; gap: var(--app-space-3); padding: var(--app-space-3) var(--app-space-4); flex-wrap: wrap; }
+.app-table-search { flex: 1 1 18rem; }
+.app-table-filters { display: flex; gap: var(--app-space-3); }
+.app-table-filters .app-field { width: 12rem; margin: 0; }
+.app-table { width: 100%; border-collapse: collapse; font-size: var(--app-font-sm); }
+.app-table th { text-align: left; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); }
+.app-table td { padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); vertical-align: middle; }
+.app-table tbody tr:hover { background: var(--primary-lighten); }
+.app-cell-number, th.app-cell-number { text-align: right; font-variant-numeric: tabular-nums; }
+.app-cell-actions { text-align: right; white-space: nowrap; width: 1%; }
+.app-cell-secondary { display: block; color: var(--text-secondary); font-size: var(--app-font-xs); }
+.app-truncate { display: inline-block; max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.app-truncate-sm { max-width: 14rem; }
+.app-row-actions { display: inline-flex; gap: 2px; }
+.app-pager { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-4); padding: var(--app-space-2) var(--app-space-4); font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-pager select { font: inherit; color: inherit; background: transparent; border: 0; }
+
+/* ---- AppStatusChip ---- */
+.app-status-chip { display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 2px 10px; border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-pill); background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; white-space: nowrap; }
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-success .app-status-chip-dot { background: var(--success); }
+
+/* ---- states ---- */
+.app-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center; color: var(--text-secondary); }
+.app-state-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state-error svg { color: var(--error); }
+
+/* ---- AppAlert / AppErrorSummary ---- */
+.app-alert { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); }
+.app-alert-error { background: var(--error); color: var(--error-contrast); }
+.app-alert-info { border: 1px solid var(--info); color: var(--text-primary); background: var(--surface); }
+.app-alert-info svg { color: var(--info); }
+.app-alert-title { font-weight: 700; }
+.app-error-summary-list { margin: var(--app-space-1) 0 0; padding-left: var(--app-space-5); }
+.app-error-summary-list a { color: inherit; }
+
+/* ---- form layout ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); min-width: 0; }
+.mt-4 { margin-top: var(--app-space-4); }
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4); }
+.app-section-card + .app-section-card { margin-top: var(--app-space-4); }
+.app-section-card-head { display: flex; align-items: flex-start; gap: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.app-section-card-icon { color: var(--primary); margin-top: 3px; }
+.app-section-card-title { font-size: var(--app-font-lg); font-weight: 600; color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-1); }
+.app-form-grid { display: grid; gap: var(--app-space-3) var(--app-space-4); }
+.app-form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 599.98px) { .app-form-grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- fields ---- */
+.app-field { margin-bottom: var(--app-space-4); min-width: 0; }
+.app-form-grid .app-field { margin-bottom: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input { display: flex; align-items: center; gap: var(--app-space-2); height: 40px; padding: 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); color: var(--text-primary); }
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-field-input input, .app-field-input select { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+.app-field-icon { color: var(--primary); }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-disabled .app-field-input { opacity: .55; }
+.app-field-description { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); min-height: 1.1em; }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+
+/* ---- AppRichTextField (new, F-95) ---- */
+.app-rich-text-frame { border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); overflow: hidden; }
+.app-rich-text-frame:focus-within, .app-rich-text-frame.is-focused { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-field-error .app-rich-text-frame { border-color: var(--error); }
+.app-rich-text-disabled .app-rich-text-frame { opacity: .55; }
+.app-rt-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: var(--app-space-1) var(--app-space-2); border-bottom: 1px solid var(--divider); }
+.app-rt-btn { width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: var(--action-default); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.app-rt-btn:hover { background: var(--primary-lighten); }
+.app-rt-btn[aria-pressed="true"] { background: var(--primary-lighten); color: var(--primary); }
+.app-rt-sep { width: 1px; background: var(--divider); margin: 4px var(--app-space-1); }
+.app-rt-editor { padding: var(--app-space-2) var(--app-space-3); min-height: 7.5rem; outline: none; font-size: var(--app-font-md); overflow-wrap: anywhere; }
+.app-rich-text-compact .app-rt-editor { min-height: 2.5rem; padding: 6px var(--app-space-3); }
+.app-rt-editor:empty::before, .app-rt-editor.is-empty::before { content: attr(data-placeholder); color: var(--text-secondary); }
+.app-rt-editor p + p, .app-rt-editor ul, .app-rt-editor ol { margin-top: var(--app-space-2); }
+.app-rt-editor ul, .app-rt-editor ol { padding-left: var(--app-space-5); }
+.app-rt-editor blockquote { border-left: 3px solid var(--lines-inputs); padding-left: var(--app-space-3); color: var(--text-secondary); margin-top: var(--app-space-2); }
+.app-rt-editor table { border-collapse: collapse; margin-top: var(--app-space-2); }
+.app-rt-editor th, .app-rt-editor td { border: 1px solid var(--divider); padding: 2px 8px; }
+.app-rt-editor th { color: var(--text-secondary); font-size: var(--app-font-sm); }
+
+/* ---- option rows (AppItemRows + letter badge + MudRadio + compact editor + AppRowActions) ---- */
+.app-item-rows-list { list-style: none; }
+.app-item-row { display: flex; align-items: flex-start; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--table-lines); }
+.app-item-row:last-child { border-bottom: 0; }
+.app-item-row-content { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: var(--app-space-2); }
+.app-item-row-actions { flex: none; padding-top: 2px; }
+.app-item-rows-empty { color: var(--text-secondary); font-size: var(--app-font-sm); padding: var(--app-space-2) 0; }
+.app-option-letter { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-lighten); color: var(--text-primary); font-weight: 700; font-size: var(--app-font-sm); display: inline-flex; align-items: center; justify-content: center; margin-top: 6px; }
+.app-option-radio { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+.app-option-radio input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; margin: 0; }
+.app-option-row .app-field { flex: 1; margin: 0; }
+.app-options-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); margin-top: var(--app-space-3); flex-wrap: wrap; }
+.app-options-count { font-size: var(--app-font-sm); color: var(--text-secondary); }
+@media (max-width: 699.98px) { .app-item-row { flex-wrap: wrap; } .app-item-row-actions { width: 100%; text-align: right; } }
+
+/* ---- AppFormActions ---- */
+.app-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+
+/* ---- AppFormAside ---- */
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-form-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-form-aside-row:last-of-type { border-bottom: 0; }
+.app-form-aside-row-label { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-form-aside-row-value { text-align: right; overflow-wrap: anywhere; }
+.app-form-aside-row-empty { color: var(--text-secondary); font-style: italic; }
+.app-form-aside-checklist-title { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin: var(--app-space-4) 0 var(--app-space-2); }
+.app-form-aside-checklist { list-style: none; display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-form-aside-checklist li { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-sm); }
+.app-checklist-done svg { color: var(--success); }
+.app-checklist-pending svg { color: var(--text-secondary); }
+
+/* ---- publication card ---- */
+.app-publication-row { display: flex; align-items: center; gap: var(--app-space-3); flex-wrap: wrap; font-size: var(--app-font-sm); }
+.app-publication-actions { display: flex; gap: var(--app-space-2); margin-top: var(--app-space-4); flex-wrap: wrap; }
+.app-publication-reason { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-2); }
+
+/* ---- preview dialog (MudDialog) and content ---- */
+.app-dialog-backdrop { position: fixed; inset: 0; background: rgba(14,24,40,.55); display: flex; align-items: flex-start; justify-content: center; padding: var(--app-space-6) var(--app-space-4); z-index: 40; overflow-y: auto; }
+.app-dialog { background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); width: 100%; max-width: 48rem; box-shadow: 0 8px 32px rgba(10,20,40,.35); }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 600; padding: var(--app-space-4) var(--app-space-5); border-bottom: 1px solid var(--divider); }
+.app-dialog-content { padding: var(--app-space-5); }
+.app-dialog-actions { display: flex; justify-content: flex-end; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-5); border-top: 1px solid var(--divider); }
+.app-question-content { overflow-wrap: anywhere; }
+.app-question-content p + p { margin-top: var(--app-space-2); }
+.app-question-content blockquote { border-left: 3px solid var(--lines-inputs); padding-left: var(--app-space-3); color: var(--text-secondary); margin: var(--app-space-2) 0; }
+.app-question-content table { border-collapse: collapse; margin: var(--app-space-2) 0; }
+.app-question-content th, .app-question-content td { border: 1px solid var(--divider); padding: 2px 8px; }
+.app-question-content th { color: var(--text-secondary); font-size: var(--app-font-sm); }
+.app-question-base { padding: var(--app-space-3) var(--app-space-4); border: 1px solid var(--divider); border-radius: var(--app-radius-md); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); }
+.app-question-options { list-style: none; margin-top: var(--app-space-4); display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-question-option { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-2) var(--app-space-3); border: 1px solid var(--divider); border-radius: var(--app-radius-md); }
+.app-question-option.is-correct { border: 2px solid var(--success); }
+.app-question-option .app-option-letter { margin-top: 0; }
+.app-question-option-body { flex: 1; min-width: 0; }
+.app-correct-label { display: inline-flex; align-items: center; gap: 4px; font-size: var(--app-font-xs); font-weight: 700; margin-top: var(--app-space-1); }
+.app-correct-label svg { color: var(--success); }
+.app-preview-answer { margin-top: var(--app-space-4); border-top: 1px solid var(--divider); padding-top: var(--app-space-4); }
+.app-preview-heading { font-size: var(--app-font-sm); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); margin-bottom: var(--app-space-2); }
+
+/* ---- snackbar ---- */
+.app-snackbar { position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 50; display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25); }
+
+/* ---- kit panel (gallery section) ---- */
+.kit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); gap: var(--app-space-4); }
+.kit-caption { font-size: var(--app-font-xs); color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: var(--app-space-2); }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo" id="demo">
+  <span class="demo-label">Screen</span>
+  <button type="button" data-screen="list" aria-pressed="true">List</button>
+  <button type="button" data-screen="form">Form</button>
+  <button type="button" data-screen="kit">Kit: AppRichTextField</button>
+  <span class="demo-label">State</span>
+  <span id="demo-states" style="display:contents"></span>
+  <span class="demo-label">Language</span>
+  <button type="button" data-lang="pt-BR" aria-pressed="true">pt-BR</button>
+  <button type="button" data-lang="pt-PT">pt-PT</button>
+  <button type="button" data-lang="en">en</button>
+  <span class="demo-label">Theme</span>
+  <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+  <button type="button" data-theme-btn="dark">Dark</button>
+  <span class="demo-note" id="demo-note"></span>
+</div>
+
+<header class="appbar">
+  <button type="button" class="app-icon-button" style="color:inherit" aria-label="Menu"><svg data-icon="menu" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"></svg></button>
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar" aria-hidden="true">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main">
+    <span class="nav-section" data-i18n="Nav.Section.Content"></span>
+    <a class="nav-link" href="#"><svg data-icon="exams" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Exams"></span></a>
+    <a class="nav-link" href="#"><svg data-icon="subjects" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Subjects"></span></a>
+    <!-- F-95: shown only with questions.manage -->
+    <a class="nav-link" href="#" aria-current="page" id="nav-questions"><svg data-icon="questions" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Questions"></span></a>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- Permission denied: the not-found page (F-2 BR7), shared by both screens -->
+    <div id="block-denied" hidden>
+      <div class="app-state app-state-card">
+        <svg data-icon="error" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"></svg>
+        <h1 class="app-state-title" data-i18n="NotFound.Title"></h1>
+        <p data-i18n="NotFound.Message"></p>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- SCREEN 1: /admin/questions                                           -->
+    <!-- =================================================================== -->
+    <section id="screen-list">
+      <header class="app-page-header">
+        <div class="app-breadcrumbs"><span data-i18n="Nav.Section.Content"></span> <span aria-hidden="true">/</span> <span data-i18n="Questions.Title"></span></div>
+        <div class="app-page-header-row">
+          <h1 class="app-page-title" data-i18n="Questions.Title"></h1>
+          <button type="button" class="app-button app-button-filled"><svg data-icon="add" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Common.Add"></span></button>
+        </div>
+      </header>
+
+      <div class="app-alert app-alert-error" role="alert" id="list-alert" hidden>
+        <svg data-icon="error" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+        <span data-i18n="question.delete_requires_draft"></span>
+      </div>
+
+      <div class="app-data-table">
+        <div class="app-table-toolbar">
+          <div class="app-field app-table-search">
+            <label class="app-visually-hidden" for="list-search" data-i18n="Common.Search"></label>
+            <div class="app-field-input"><svg class="app-field-icon" data-icon="search" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><input id="list-search" type="search" data-i18n-ph="Questions.Search.Placeholder" autocomplete="off"></div>
+          </div>
+          <div class="app-table-filters">
+            <div class="app-field">
+              <label class="app-field-label" for="questions-filter-status" data-i18n="Questions.Filter.Status"></label>
+              <div class="app-field-input">
+                <select id="questions-filter-status">
+                  <option value="" data-i18n="Common.Filter.All"></option>
+                  <option value="Draft" data-i18n="Questions.Status.Draft"></option>
+                  <option value="Published" data-i18n="Questions.Status.Published"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="list-loading" hidden><div class="app-state" role="status" aria-live="polite"><span class="app-spinner app-spinner-lg" aria-hidden="true"></span><span data-i18n="Common.Loading"></span></div></div>
+        <div id="list-error" hidden><div class="app-state app-state-error" role="alert"><svg data-icon="error" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"></svg><p data-i18n="Common.LoadFailed"></p><button type="button" class="app-button app-button-outlined"><svg data-icon="refresh" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Common.TryAgain"></span></button></div></div>
+        <div id="list-empty" hidden><div class="app-state"><svg data-icon="inbox" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"></svg><p id="list-empty-text"></p><button type="button" class="app-button app-button-outlined" id="list-empty-action"><svg data-icon="add" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Common.Add"></span></button></div></div>
+
+        <div id="list-ready">
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th scope="col" data-i18n="Questions.Column.Statement"></th>
+                <th scope="col" data-i18n="Questions.Column.Topic"></th>
+                <th scope="col" class="app-cell-number" data-i18n="Questions.Column.Difficulty"></th>
+                <th scope="col" data-i18n="Questions.Column.Language"></th>
+                <th scope="col" data-i18n="Questions.Column.Status"></th>
+                <th scope="col" class="app-cell-actions" data-i18n="Common.Actions"></th>
+              </tr>
+            </thead>
+            <tbody id="list-rows"></tbody>
+          </table>
+          <div class="app-pager"><span><span data-i18n="Common.Table.RowsPerPage"></span> <select aria-label="Rows per page"><option>10</option><option selected>25</option><option>50</option></select></span><span id="list-pageinfo"></span></div>
+        </div>
+      </div>
+      <div class="app-visually-hidden" role="status" aria-live="polite" id="list-live"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SCREEN 2: /admin/questions/new and /admin/questions/{id}             -->
+    <!-- =================================================================== -->
+    <section id="screen-form" hidden>
+      <header class="app-page-header">
+        <div class="app-breadcrumbs"><span data-i18n="Nav.Section.Content"></span> <span aria-hidden="true">/</span> <a href="#" data-i18n="Questions.Title"></a> <span aria-hidden="true">/</span> <span id="form-crumb"></span></div>
+        <div class="app-page-header-row"><h1 class="app-page-title" id="form-title"></h1></div>
+      </header>
+
+      <div id="f-loading" hidden><div class="app-state app-state-card" role="status" aria-live="polite"><span class="app-spinner app-spinner-lg" aria-hidden="true"></span><span data-i18n="Common.Loading"></span></div></div>
+
+      <div id="f-notfound" hidden>
+        <div class="app-form-card">
+          <div class="app-alert app-alert-error" role="alert"><svg data-icon="error" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="question.not_found"></span></div>
+          <a href="#" data-i18n="Questions.BackToList"></a>
+        </div>
+      </div>
+
+      <div id="f-body">
+        <div class="app-form-layout">
+          <form class="app-form-card" id="question-form" novalidate>
+
+            <!-- AppErrorSummary -->
+            <div class="app-alert app-alert-error" id="question-error-summary" role="alert" tabindex="-1" hidden>
+              <svg data-icon="error" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+              <div><div class="app-alert-title" data-i18n="Common.ErrorSummary.Title"></div><ul class="app-error-summary-list" id="error-summary-list"></ul></div>
+            </div>
+            <!-- AppAlert: a refusal that belongs to no field -->
+            <div class="app-alert app-alert-error" id="f-server-alert" role="alert" hidden>
+              <svg data-icon="error" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="common.unexpected_error"></span>
+            </div>
+
+            <!-- 1. Classification -->
+            <section class="app-section-card" aria-labelledby="question-section-classification-title">
+              <header class="app-section-card-head">
+                <svg class="app-section-card-icon" data-icon="topics" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                <div><h2 class="app-section-card-title" id="question-section-classification-title" data-i18n="Questions.Section.Classification"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.Classification.Subtitle"></p></div>
+              </header>
+              <div class="app-form-grid app-form-grid-2">
+                <div class="app-field" id="field-subject">
+                  <label class="app-field-label" for="question-subject"><span data-i18n="Questions.Field.Subject"></span><span class="app-field-required" aria-hidden="true">*</span></label>
+                  <div class="app-field-input"><svg class="app-field-icon" data-icon="subjects" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><input type="text" id="question-subject" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-required="true" aria-describedby="question-subject-description" autocomplete="off" data-i18n-ph="Questions.Field.Subject.Placeholder"></div>
+                  <span class="app-field-description" id="question-subject-description"><span class="app-field-hint" data-i18n="Questions.Field.Subject.Hint"></span></span>
+                </div>
+                <div class="app-field" id="field-topic">
+                  <label class="app-field-label" for="question-topic"><span data-i18n="Questions.Field.Topic"></span><span class="app-field-required" aria-hidden="true">*</span></label>
+                  <div class="app-field-input"><svg class="app-field-icon" data-icon="topics" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><input type="text" id="question-topic" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-required="true" aria-describedby="question-topic-description" autocomplete="off" data-i18n-ph="Questions.Field.Topic.Placeholder"></div>
+                  <span class="app-field-description" id="question-topic-description"><span class="app-field-hint" id="topic-hint"></span><span class="app-field-error-text" id="topic-error" hidden></span></span>
+                </div>
+                <div class="app-field" id="field-language">
+                  <label class="app-field-label" for="question-content-language"><span data-i18n="Questions.Field.ContentLanguage"></span><span class="app-field-required" aria-hidden="true">*</span></label>
+                  <div class="app-field-input"><svg class="app-field-icon" data-icon="language" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                    <select id="question-content-language" aria-required="true" aria-describedby="question-content-language-description">
+                      <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+                      <option value="pt-PT" lang="pt-PT">Português (Portugal)</option>
+                      <option value="en" lang="en">English</option>
+                    </select></div>
+                  <span class="app-field-description" id="question-content-language-description"><span class="app-field-hint" data-i18n="Questions.Field.ContentLanguage.Hint"></span></span>
+                </div>
+                <div class="app-field" id="field-difficulty">
+                  <label class="app-field-label" for="question-difficulty"><span data-i18n="Questions.Field.Difficulty"></span></label>
+                  <div class="app-field-input">
+                    <select id="question-difficulty" aria-describedby="question-difficulty-description">
+                      <option value="" data-i18n="Questions.Difficulty.NotSet"></option>
+                      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                    </select></div>
+                  <span class="app-field-description" id="question-difficulty-description"><span class="app-field-hint" data-i18n="Questions.Field.Difficulty.Hint"></span></span>
+                </div>
+              </div>
+            </section>
+
+            <!-- 2. Statement -->
+            <section class="app-section-card" aria-labelledby="question-section-statement-title">
+              <header class="app-section-card-head">
+                <svg class="app-section-card-icon" data-icon="questions" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                <div><h2 class="app-section-card-title" id="question-section-statement-title" data-i18n="Questions.Section.Statement"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.Statement.Subtitle"></p></div>
+              </header>
+              <div id="rt-statement"></div>
+            </section>
+
+            <!-- 3. Base text -->
+            <section class="app-section-card" aria-labelledby="question-section-base-text-title">
+              <header class="app-section-card-head">
+                <svg class="app-section-card-icon" data-icon="basetext" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                <div><h2 class="app-section-card-title" id="question-section-base-text-title" data-i18n="Questions.Section.BaseText"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.BaseText.Subtitle"></p></div>
+              </header>
+              <div id="rt-base-text"></div>
+            </section>
+
+            <!-- 4. Options -->
+            <section class="app-section-card" aria-labelledby="question-section-options-title">
+              <header class="app-section-card-head">
+                <svg class="app-section-card-icon" data-icon="options" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                <div><h2 class="app-section-card-title" id="question-section-options-title" data-i18n="Questions.Section.Options"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.Options.Subtitle"></p></div>
+              </header>
+              <div class="app-item-rows" role="radiogroup" id="question-options" aria-labelledby="question-options-label" aria-describedby="question-options-description">
+                <span class="app-visually-hidden" id="question-options-label" data-i18n="Questions.Options.Correct.Label"></span>
+                <p class="app-item-rows-empty" id="options-empty" hidden data-i18n="Questions.Options.Empty"></p>
+                <ul class="app-item-rows-list" id="options-list" aria-labelledby="question-section-options-title"></ul>
+              </div>
+              <span class="app-field-description" id="question-options-description"><span class="app-field-error-text" id="options-error" hidden></span></span>
+              <div class="app-options-footer">
+                <span><button type="button" class="app-button app-button-outlined" id="question-option-add"><svg data-icon="add" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Questions.Options.Add"></span></button></span>
+                <span class="app-options-count" id="options-count"></span>
+              </div>
+              <div class="app-visually-hidden" role="status" aria-live="polite" id="options-live"></div>
+            </section>
+
+            <!-- 5. Explanation -->
+            <section class="app-section-card" aria-labelledby="question-section-explanation-title">
+              <header class="app-section-card-head">
+                <svg class="app-section-card-icon" data-icon="explanation" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+                <div><h2 class="app-section-card-title" id="question-section-explanation-title" data-i18n="Questions.Section.Explanation"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.Explanation.Subtitle"></p></div>
+              </header>
+              <div id="rt-explanation"></div>
+            </section>
+
+            <!-- AppFormActions -->
+            <div class="app-form-actions">
+              <button type="button" class="app-button app-button-text" id="btn-cancel" data-i18n="Common.Cancel"></button>
+              <button type="button" class="app-button app-button-filled" id="btn-save"><span class="app-spinner" id="save-spinner" hidden aria-hidden="true"></span><span id="save-label" role="status"></span></button>
+            </div>
+          </form>
+
+          <!-- AppFormAside -->
+          <aside class="app-form-aside" aria-labelledby="app-form-aside-title">
+            <h2 class="app-form-aside-title" id="app-form-aside-title" data-i18n="Questions.Form.Aside.Title"></h2>
+            <dl class="app-form-aside-rows" id="aside-rows"></dl>
+            <p class="app-form-aside-checklist-title" data-i18n="Questions.Form.Aside.Checklist"></p>
+            <ul class="app-form-aside-checklist" id="aside-checklist"></ul>
+          </aside>
+        </div>
+
+        <!-- Publication card: outside the form, Save never publishes (BR12) -->
+        <div class="app-form-card mt-4">
+          <section class="app-section-card" aria-labelledby="question-section-publication-title">
+            <header class="app-section-card-head">
+              <svg class="app-section-card-icon" data-icon="publish" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg>
+              <div><h2 class="app-section-card-title" id="question-section-publication-title" data-i18n="Questions.Section.Publication"></h2><p class="app-section-card-subtitle" data-i18n="Questions.Section.Publication.Subtitle"></p></div>
+            </header>
+            <p id="pub-save-first" class="app-muted" style="font-size:var(--app-font-sm)" data-i18n="Questions.Publication.SaveFirst" hidden></p>
+            <div id="pub-saved" hidden>
+              <div class="app-alert app-alert-error" role="alert" id="pub-alert" hidden><svg data-icon="error" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="question.key_invalid"></span></div>
+              <div class="app-publication-row"><span id="pub-chip"></span><span id="pub-sentence"></span></div>
+              <div class="app-publication-actions">
+                <button type="button" class="app-button app-button-outlined" id="btn-preview"><svg data-icon="view" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Questions.Action.Preview"></span></button>
+                <span id="pub-publish-wrap"><button type="button" class="app-button app-button-outlined" id="btn-publish"><svg data-icon="publish" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Questions.Action.Publish"></span></button></span>
+                <button type="button" class="app-button app-button-outlined" id="btn-unpublish" hidden><svg data-icon="unpublish" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Questions.Action.Unpublish"></span></button>
+              </div>
+              <p class="app-publication-reason" id="pub-reason" hidden></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- KIT: AppRichTextField states (gallery section Gallery.Section.RichText) -->
+    <!-- =================================================================== -->
+    <section id="screen-kit" hidden>
+      <header class="app-page-header">
+        <div class="app-breadcrumbs"><span data-i18n="Nav.Section.Development"></span> <span aria-hidden="true">/</span> <span data-i18n="Nav.Dev.UiKit"></span></div>
+        <div class="app-page-header-row"><h1 class="app-page-title" data-i18n="Gallery.Section.RichText"></h1></div>
+      </header>
+      <div class="app-form-card">
+        <div class="kit-grid" id="kit-grid"></div>
+        <p class="app-muted" style="font-size:var(--app-font-xs);margin-top:var(--app-space-4)" data-i18n="RichText.Hint.Keyboard"></p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Preview dialog (MudDialog, MaxWidth.Medium) -->
+<div class="app-dialog-backdrop" id="dialog" hidden>
+  <div class="app-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="app-dialog-title" id="dialog-title" data-i18n="Questions.Preview.Title"></div>
+    <div class="app-dialog-content" id="dialog-content"></div>
+    <div class="app-dialog-actions"><button type="button" class="app-button app-button-text" id="dialog-close" data-i18n="Common.Close"></button></div>
+  </div>
+</div>
+
+<div class="app-snackbar" id="snackbar" role="status" hidden><svg data-icon="verified" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"></svg><span id="snackbar-text"></span></div>
+
+<script>
+/* ===========================================================================
+   Texts: resource keys of SharedResources in the three UI locales. Keys under
+   Questions.*, RichText.*, question.* and Nav.Questions are new with F-95.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Section.Development": "Development", "Nav.Dev.UiKit": "UI kit",
+    "Nav.Exams": "Exams", "Nav.Subjects": "Subjects", "Nav.Questions": "Questions",
+    "Common.Add": "Add", "Common.Edit": "Edit", "Common.Delete": "Delete", "Common.Save": "Save", "Common.Saving": "Saving...", "Common.Cancel": "Cancel", "Common.Close": "Close",
+    "Common.Search": "Search", "Common.Actions": "Actions", "Common.MoveUp": "Move up", "Common.MoveDown": "Move down", "Common.TryAgain": "Try again", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "The data could not be loaded.", "Common.Filter.All": "All", "Common.Table.RowsPerPage": "Rows per page:", "Common.Table.PageInfo": "{0}-{1} of {2}",
+    "Common.Table.Results.None": "No results", "Common.Table.Results.Many": "{0} results", "Common.ActionOnItem": "{0}: {1}",
+    "Common.ErrorSummary.Title": "This form cannot be saved yet", "Common.Summary.NotFilled": "Not filled", "Common.Checklist.Done": "Done", "Common.Checklist.Pending": "Pending",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.", "common.unexpected_error": "Something went wrong. Please try again.",
+    "Questions.Title": "Questions", "Questions.Search.Placeholder": "Search the statement", "Questions.Filter.Status": "Status",
+    "Questions.Status.Draft": "Draft", "Questions.Status.Published": "Published",
+    "Questions.Column.Statement": "Statement", "Questions.Column.Topic": "Topic", "Questions.Column.Difficulty": "Difficulty", "Questions.Column.Language": "Language", "Questions.Column.Status": "Status",
+    "Questions.Empty": "No question in the bank yet.", "Questions.Empty.Filters": "No question matches the chosen filter.", "Questions.Empty.Search": "No question matches \"{0}\".",
+    "Questions.Difficulty.NotSet": "Not set", "Questions.Difficulty.NotSet.Spoken": "No difficulty set", "Questions.Row.Name": "question \"{0}\"",
+    "Questions.Action.Publish": "Publish", "Questions.Action.Unpublish": "Unpublish", "Questions.Action.Preview": "Preview as a student",
+    "Questions.Delete.DisabledPublished": "This question is published. Unpublish it before deleting.",
+    "Questions.Deleted": "Question deleted.", "Questions.Saved": "Question saved.", "Questions.Published": "Question published.", "Questions.Unpublished": "Question unpublished. It is a draft again.",
+    "Questions.BackToList": "Back to the questions", "Questions.Form.AddTitle": "Add question", "Questions.Form.EditTitle": "Edit question",
+    "Questions.Section.Classification": "Classification", "Questions.Section.Classification.Subtitle": "Where the question sits in the taxonomy, its language and how hard it is.",
+    "Questions.Field.Subject": "Subject", "Questions.Field.Subject.Placeholder": "Subject name", "Questions.Field.Subject.Hint": "Pick the subject to list its topics.",
+    "Questions.Field.Topic": "Topic", "Questions.Field.Topic.Placeholder": "Topic name", "Questions.Field.Topic.Hint": "Only topics of the chosen subject.", "Questions.Field.Topic.DisabledHint": "Choose a subject first.", "Questions.Field.Topic.Required": "Choose the topic.",
+    "Questions.Field.ContentLanguage": "Content language", "Questions.Field.ContentLanguage.Hint": "The language the question is written in. Content is never translated.",
+    "Questions.Field.Difficulty": "Difficulty", "Questions.Field.Difficulty.Hint": "From 1 (easiest) to 5 (hardest). Optional.",
+    "Questions.Section.Statement": "Statement", "Questions.Section.Statement.Subtitle": "What the student is asked. Formatting, lists and links are kept; images come later.",
+    "Questions.Field.Statement": "Statement", "Questions.Field.Statement.Placeholder": "Write the statement", "Questions.Field.Statement.Hint": "Up to 10,000 characters.",
+    "Questions.Section.BaseText": "Base text", "Questions.Section.BaseText.Subtitle": "A text the question refers to, shown before the statement. Optional.",
+    "Questions.Field.BaseText": "Base text", "Questions.Field.BaseText.Placeholder": "Paste or write the base text", "Questions.Field.BaseText.Hint": "Up to 20,000 characters.",
+    "Questions.Section.Options": "Options", "Questions.Section.Options.Subtitle": "2 to 5 options to publish. The letters follow the order; mark the correct one.",
+    "Questions.Options.Correct.Label": "Correct option", "Questions.Options.MarkCorrect": "Mark {0} as correct", "Questions.Options.Letter": "option {0}", "Questions.Options.Field": "Text of option {0}", "Questions.Options.Field.Placeholder": "Option text",
+    "Questions.Options.Add": "Add option", "Questions.Options.Add.DisabledMax": "A question has at most 5 options.", "Questions.Options.Count": "{0} of 5 options",
+    "Questions.Options.Empty": "No option yet. A draft can be saved without options; publishing needs 2 to 5.",
+    "Questions.Options.MoveUp.DisabledFirst": "Already the first option.", "Questions.Options.MoveDown.DisabledLast": "Already the last option.",
+    "Questions.Options.Moved": "Option moved to position {0} of {1}.", "Questions.Options.Removed": "Option removed. {0} left.",
+    "Questions.Section.Explanation": "Explanation", "Questions.Section.Explanation.Subtitle": "Why the key is right. Optional; shown with the answer key.",
+    "Questions.Field.Explanation": "Explanation", "Questions.Field.Explanation.Placeholder": "Explain the answer", "Questions.Field.Explanation.Hint": "Up to 10,000 characters.",
+    "Questions.Form.Aside.Title": "Summary", "Questions.Form.Aside.Status": "Status", "Questions.Form.Aside.Options": "Options", "Questions.Form.Aside.Checklist": "Before publishing",
+    "Questions.Checklist.Topic": "Topic", "Questions.Checklist.Language": "Content language", "Questions.Checklist.Statement": "Statement", "Questions.Checklist.OptionsCount": "2 to 5 options", "Questions.Checklist.OptionsText": "Every option has text", "Questions.Checklist.Key": "Exactly one correct option",
+    "Questions.Section.Publication": "Publication", "Questions.Section.Publication.Subtitle": "A draft is seen only here. A published question is ready for the bank and must stay complete.",
+    "Questions.Publication.SaveFirst": "Save the question first to preview or publish it.", "Questions.Publication.Draft": "Draft. Not available outside the back office.", "Questions.Publication.Published": "Published. Edits apply at once and must keep it complete.",
+    "Questions.Publication.Publish.DisabledIncomplete": "Complete the checklist before publishing.", "Questions.Publication.Publish.DisabledUnsaved": "Save your changes first.",
+    "Questions.Preview.Title": "Preview", "Questions.Preview.UnsavedNote": "Showing the saved version. Unsaved changes are not included.", "Questions.Preview.Options": "Options",
+    "Questions.Preview.ShowAnswer": "Show answer", "Questions.Preview.HideAnswer": "Hide answer", "Questions.Preview.Answer": "Answer", "Questions.Preview.CorrectAnswer": "Correct answer",
+    "Questions.Preview.NoKey": "This draft has no correct option marked yet.", "Questions.Preview.Explanation": "Explanation", "Questions.Preview.NoExplanation": "No explanation.",
+    "RichText.Toolbar": "Formatting", "RichText.Bold": "Bold (Ctrl+B)", "RichText.Italic": "Italic (Ctrl+I)", "RichText.Underline": "Underline (Ctrl+U)", "RichText.Strikethrough": "Strikethrough",
+    "RichText.Superscript": "Superscript", "RichText.Subscript": "Subscript", "RichText.BulletList": "Bulleted list", "RichText.NumberedList": "Numbered list", "RichText.Quote": "Quote", "RichText.Link": "Link", "RichText.ClearFormatting": "Clear formatting",
+    "RichText.Hint.Keyboard": "Tab leaves the editor.", "Gallery.Section.RichText": "Rich text field",
+    "question.not_found": "This question no longer exists.", "question.topic_not_found": "The topic no longer exists. Pick another.", "question.statement_required": "Write the statement.",
+    "question.statement_too_long": "The statement has more than 10,000 characters.", "question.option_too_long": "An option has more than 2,000 characters.", "question.options_count": "A question is published with 2 to 5 options.",
+    "question.option_text_required": "Every option needs text.", "question.key_invalid": "Mark exactly one option as correct.", "question.delete_requires_draft": "Only a draft can be deleted. Unpublish the question first.",
+    "kit.empty": "Empty", "kit.focused": "Focused", "kit.filled": "Filled", "kit.error": "Error", "kit.disabled": "Disabled", "kit.compact": "Compact (option row)", "kit.longtext": "Long text"
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Development": "Desenvolvimento", "Nav.Dev.UiKit": "Kit de UI",
+    "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Excluir", "Common.Save": "Salvar", "Common.Saving": "Salvando...", "Common.Cancel": "Cancelar", "Common.Close": "Fechar",
+    "Common.Search": "Pesquisar", "Common.Actions": "Ações", "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo", "Common.TryAgain": "Tentar novamente", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar os dados.", "Common.Filter.All": "Todos", "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}",
+    "Common.Table.Results.None": "Nenhum resultado", "Common.Table.Results.Many": "{0} resultados", "Common.ActionOnItem": "{0}: {1}",
+    "Common.ErrorSummary.Title": "Ainda não é possível salvar este formulário", "Common.Summary.NotFilled": "Não preenchido", "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.", "common.unexpected_error": "Algo deu errado. Tente novamente.",
+    "Questions.Title": "Questões", "Questions.Search.Placeholder": "Pesquisar no enunciado", "Questions.Filter.Status": "Situação",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Topic": "Tópico", "Questions.Column.Difficulty": "Dificuldade", "Questions.Column.Language": "Idioma", "Questions.Column.Status": "Situação",
+    "Questions.Empty": "Nenhuma questão no banco ainda.", "Questions.Empty.Filters": "Nenhuma questão corresponde ao filtro escolhido.", "Questions.Empty.Search": "Nenhuma questão corresponde a \"{0}\".",
+    "Questions.Difficulty.NotSet": "Não definida", "Questions.Difficulty.NotSet.Spoken": "Dificuldade não definida", "Questions.Row.Name": "questão \"{0}\"",
+    "Questions.Action.Publish": "Publicar", "Questions.Action.Unpublish": "Despublicar", "Questions.Action.Preview": "Visualizar como aluno",
+    "Questions.Delete.DisabledPublished": "Esta questão está publicada. Despublique-a antes de excluir.",
+    "Questions.Deleted": "Questão excluída.", "Questions.Saved": "Questão salva.", "Questions.Published": "Questão publicada.", "Questions.Unpublished": "Questão despublicada. Voltou a ser rascunho.",
+    "Questions.BackToList": "Voltar para as questões", "Questions.Form.AddTitle": "Adicionar questão", "Questions.Form.EditTitle": "Editar questão",
+    "Questions.Section.Classification": "Classificação", "Questions.Section.Classification.Subtitle": "Onde a questão fica na taxonomia, seu idioma e sua dificuldade.",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Subject.Placeholder": "Nome da disciplina", "Questions.Field.Subject.Hint": "Escolha a disciplina para listar seus tópicos.",
+    "Questions.Field.Topic": "Tópico", "Questions.Field.Topic.Placeholder": "Nome do tópico", "Questions.Field.Topic.Hint": "Só tópicos da disciplina escolhida.", "Questions.Field.Topic.DisabledHint": "Escolha uma disciplina primeiro.", "Questions.Field.Topic.Required": "Escolha o tópico.",
+    "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.ContentLanguage.Hint": "O idioma em que a questão está escrita. O conteúdo nunca é traduzido.",
+    "Questions.Field.Difficulty": "Dificuldade", "Questions.Field.Difficulty.Hint": "De 1 (mais fácil) a 5 (mais difícil). Opcional.",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao aluno. Formatação, listas e links são mantidos; imagens vêm depois.",
+    "Questions.Field.Statement": "Enunciado", "Questions.Field.Statement.Placeholder": "Escreva o enunciado", "Questions.Field.Statement.Hint": "Até 10.000 caracteres.",
+    "Questions.Section.BaseText": "Texto-base", "Questions.Section.BaseText.Subtitle": "Um texto a que a questão se refere, mostrado antes do enunciado. Opcional.",
+    "Questions.Field.BaseText": "Texto-base", "Questions.Field.BaseText.Placeholder": "Cole ou escreva o texto-base", "Questions.Field.BaseText.Hint": "Até 20.000 caracteres.",
+    "Questions.Section.Options": "Alternativas", "Questions.Section.Options.Subtitle": "De 2 a 5 alternativas para publicar. As letras seguem a ordem; marque a correta.",
+    "Questions.Options.Correct.Label": "Alternativa correta", "Questions.Options.MarkCorrect": "Marcar {0} como correta", "Questions.Options.Letter": "alternativa {0}", "Questions.Options.Field": "Texto da alternativa {0}", "Questions.Options.Field.Placeholder": "Texto da alternativa",
+    "Questions.Options.Add": "Adicionar alternativa", "Questions.Options.Add.DisabledMax": "Uma questão tem no máximo 5 alternativas.", "Questions.Options.Count": "{0} de 5 alternativas",
+    "Questions.Options.Empty": "Nenhuma alternativa ainda. Um rascunho pode ser salvo sem alternativas; publicar exige de 2 a 5.",
+    "Questions.Options.MoveUp.DisabledFirst": "Já é a primeira alternativa.", "Questions.Options.MoveDown.DisabledLast": "Já é a última alternativa.",
+    "Questions.Options.Moved": "Alternativa movida para a posição {0} de {1}.", "Questions.Options.Removed": "Alternativa removida. Restam {0}.",
+    "Questions.Section.Explanation": "Explicação", "Questions.Section.Explanation.Subtitle": "Por que o gabarito está certo. Opcional; aparece junto do gabarito.",
+    "Questions.Field.Explanation": "Explicação", "Questions.Field.Explanation.Placeholder": "Explique a resposta", "Questions.Field.Explanation.Hint": "Até 10.000 caracteres.",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Situação", "Questions.Form.Aside.Options": "Alternativas", "Questions.Form.Aside.Checklist": "Antes de publicar",
+    "Questions.Checklist.Topic": "Tópico", "Questions.Checklist.Language": "Idioma do conteúdo", "Questions.Checklist.Statement": "Enunciado", "Questions.Checklist.OptionsCount": "De 2 a 5 alternativas", "Questions.Checklist.OptionsText": "Toda alternativa tem texto", "Questions.Checklist.Key": "Exatamente uma alternativa correta",
+    "Questions.Section.Publication": "Publicação", "Questions.Section.Publication.Subtitle": "Um rascunho só aparece aqui. Uma questão publicada está pronta para o banco e precisa continuar completa.",
+    "Questions.Publication.SaveFirst": "Salve a questão primeiro para visualizar ou publicar.", "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.", "Questions.Publication.Published": "Publicada. Edições valem na hora e precisam mantê-la completa.",
+    "Questions.Publication.Publish.DisabledIncomplete": "Complete a lista \"Antes de publicar\" primeiro.", "Questions.Publication.Publish.DisabledUnsaved": "Salve suas alterações primeiro.",
+    "Questions.Preview.Title": "Visualização", "Questions.Preview.UnsavedNote": "Mostrando a versão salva. Alterações não salvas não aparecem.", "Questions.Preview.Options": "Alternativas",
+    "Questions.Preview.ShowAnswer": "Mostrar resposta", "Questions.Preview.HideAnswer": "Ocultar resposta", "Questions.Preview.Answer": "Resposta", "Questions.Preview.CorrectAnswer": "Resposta correta",
+    "Questions.Preview.NoKey": "Este rascunho ainda não tem alternativa correta marcada.", "Questions.Preview.Explanation": "Explicação", "Questions.Preview.NoExplanation": "Sem explicação.",
+    "RichText.Toolbar": "Formatação", "RichText.Bold": "Negrito (Ctrl+B)", "RichText.Italic": "Itálico (Ctrl+I)", "RichText.Underline": "Sublinhado (Ctrl+U)", "RichText.Strikethrough": "Tachado",
+    "RichText.Superscript": "Sobrescrito", "RichText.Subscript": "Subscrito", "RichText.BulletList": "Lista com marcadores", "RichText.NumberedList": "Lista numerada", "RichText.Quote": "Citação", "RichText.Link": "Link", "RichText.ClearFormatting": "Limpar formatação",
+    "RichText.Hint.Keyboard": "Tab sai do editor.", "Gallery.Section.RichText": "Campo de texto formatado",
+    "question.not_found": "Esta questão não existe mais.", "question.topic_not_found": "O tópico não existe mais. Escolha outro.", "question.statement_required": "Escreva o enunciado.",
+    "question.statement_too_long": "O enunciado passa de 10.000 caracteres.", "question.option_too_long": "Uma alternativa passa de 2.000 caracteres.", "question.options_count": "Uma questão é publicada com 2 a 5 alternativas.",
+    "question.option_text_required": "Toda alternativa precisa de texto.", "question.key_invalid": "Marque exatamente uma alternativa como correta.", "question.delete_requires_draft": "Só um rascunho pode ser excluído. Despublique a questão primeiro.",
+    "kit.empty": "Vazio", "kit.focused": "Com foco", "kit.filled": "Preenchido", "kit.error": "Erro", "kit.disabled": "Desabilitado", "kit.compact": "Compacto (linha de alternativa)", "kit.longtext": "Texto longo"
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Development": "Desenvolvimento", "Nav.Dev.UiKit": "Kit de UI",
+    "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Eliminar", "Common.Save": "Guardar", "Common.Saving": "A guardar...", "Common.Cancel": "Cancelar", "Common.Close": "Fechar",
+    "Common.Search": "Pesquisar", "Common.Actions": "Ações", "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo", "Common.TryAgain": "Tentar novamente", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar os dados.", "Common.Filter.All": "Todos", "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}",
+    "Common.Table.Results.None": "Nenhum resultado", "Common.Table.Results.Many": "{0} resultados", "Common.ActionOnItem": "{0}: {1}",
+    "Common.ErrorSummary.Title": "Ainda não é possível guardar este formulário", "Common.Summary.NotFilled": "Não preenchido", "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.", "common.unexpected_error": "Ocorreu um erro. Tente novamente.",
+    "Questions.Title": "Questões", "Questions.Search.Placeholder": "Pesquisar no enunciado", "Questions.Filter.Status": "Estado",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Topic": "Tópico", "Questions.Column.Difficulty": "Dificuldade", "Questions.Column.Language": "Idioma", "Questions.Column.Status": "Estado",
+    "Questions.Empty": "Ainda não há questões no banco.", "Questions.Empty.Filters": "Nenhuma questão corresponde ao filtro escolhido.", "Questions.Empty.Search": "Nenhuma questão corresponde a \"{0}\".",
+    "Questions.Difficulty.NotSet": "Não definida", "Questions.Difficulty.NotSet.Spoken": "Dificuldade não definida", "Questions.Row.Name": "questão \"{0}\"",
+    "Questions.Action.Publish": "Publicar", "Questions.Action.Unpublish": "Retirar publicação", "Questions.Action.Preview": "Pré-visualizar como estudante",
+    "Questions.Delete.DisabledPublished": "Esta questão está publicada. Retire a publicação antes de eliminar.",
+    "Questions.Deleted": "Questão eliminada.", "Questions.Saved": "Questão guardada.", "Questions.Published": "Questão publicada.", "Questions.Unpublished": "Publicação retirada. Voltou a ser rascunho.",
+    "Questions.BackToList": "Voltar às questões", "Questions.Form.AddTitle": "Adicionar questão", "Questions.Form.EditTitle": "Editar questão",
+    "Questions.Section.Classification": "Classificação", "Questions.Section.Classification.Subtitle": "Onde a questão fica na taxonomia, o seu idioma e a sua dificuldade.",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Subject.Placeholder": "Nome da disciplina", "Questions.Field.Subject.Hint": "Escolha a disciplina para listar os seus tópicos.",
+    "Questions.Field.Topic": "Tópico", "Questions.Field.Topic.Placeholder": "Nome do tópico", "Questions.Field.Topic.Hint": "Só tópicos da disciplina escolhida.", "Questions.Field.Topic.DisabledHint": "Escolha primeiro uma disciplina.", "Questions.Field.Topic.Required": "Escolha o tópico.",
+    "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.ContentLanguage.Hint": "O idioma em que a questão está escrita. O conteúdo nunca é traduzido.",
+    "Questions.Field.Difficulty": "Dificuldade", "Questions.Field.Difficulty.Hint": "De 1 (mais fácil) a 5 (mais difícil). Opcional.",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao estudante. Formatação, listas e ligações são mantidas; as imagens vêm mais tarde.",
+    "Questions.Field.Statement": "Enunciado", "Questions.Field.Statement.Placeholder": "Escreva o enunciado", "Questions.Field.Statement.Hint": "Até 10 000 caracteres.",
+    "Questions.Section.BaseText": "Texto de apoio", "Questions.Section.BaseText.Subtitle": "Um texto a que a questão se refere, mostrado antes do enunciado. Opcional.",
+    "Questions.Field.BaseText": "Texto de apoio", "Questions.Field.BaseText.Placeholder": "Cole ou escreva o texto de apoio", "Questions.Field.BaseText.Hint": "Até 20 000 caracteres.",
+    "Questions.Section.Options": "Opções", "Questions.Section.Options.Subtitle": "De 2 a 5 opções para publicar. As letras seguem a ordem; assinale a correta.",
+    "Questions.Options.Correct.Label": "Opção correta", "Questions.Options.MarkCorrect": "Assinalar {0} como correta", "Questions.Options.Letter": "opção {0}", "Questions.Options.Field": "Texto da opção {0}", "Questions.Options.Field.Placeholder": "Texto da opção",
+    "Questions.Options.Add": "Adicionar opção", "Questions.Options.Add.DisabledMax": "Uma questão tem no máximo 5 opções.", "Questions.Options.Count": "{0} de 5 opções",
+    "Questions.Options.Empty": "Ainda sem opções. Um rascunho pode ser guardado sem opções; publicar exige de 2 a 5.",
+    "Questions.Options.MoveUp.DisabledFirst": "Já é a primeira opção.", "Questions.Options.MoveDown.DisabledLast": "Já é a última opção.",
+    "Questions.Options.Moved": "Opção movida para a posição {0} de {1}.", "Questions.Options.Removed": "Opção removida. Restam {0}.",
+    "Questions.Section.Explanation": "Explicação", "Questions.Section.Explanation.Subtitle": "Porque é que a chave está certa. Opcional; aparece junto da chave de resposta.",
+    "Questions.Field.Explanation": "Explicação", "Questions.Field.Explanation.Placeholder": "Explique a resposta", "Questions.Field.Explanation.Hint": "Até 10 000 caracteres.",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Estado", "Questions.Form.Aside.Options": "Opções", "Questions.Form.Aside.Checklist": "Antes de publicar",
+    "Questions.Checklist.Topic": "Tópico", "Questions.Checklist.Language": "Idioma do conteúdo", "Questions.Checklist.Statement": "Enunciado", "Questions.Checklist.OptionsCount": "De 2 a 5 opções", "Questions.Checklist.OptionsText": "Todas as opções têm texto", "Questions.Checklist.Key": "Exatamente uma opção correta",
+    "Questions.Section.Publication": "Publicação", "Questions.Section.Publication.Subtitle": "Um rascunho só aparece aqui. Uma questão publicada está pronta para o banco e tem de continuar completa.",
+    "Questions.Publication.SaveFirst": "Guarde primeiro a questão para a pré-visualizar ou publicar.", "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.", "Questions.Publication.Published": "Publicada. As edições aplicam-se de imediato e têm de a manter completa.",
+    "Questions.Publication.Publish.DisabledIncomplete": "Complete primeiro a lista \"Antes de publicar\".", "Questions.Publication.Publish.DisabledUnsaved": "Guarde primeiro as suas alterações.",
+    "Questions.Preview.Title": "Pré-visualização", "Questions.Preview.UnsavedNote": "A mostrar a versão guardada. As alterações por guardar não aparecem.", "Questions.Preview.Options": "Opções",
+    "Questions.Preview.ShowAnswer": "Mostrar resposta", "Questions.Preview.HideAnswer": "Ocultar resposta", "Questions.Preview.Answer": "Resposta", "Questions.Preview.CorrectAnswer": "Resposta correta",
+    "Questions.Preview.NoKey": "Este rascunho ainda não tem opção correta assinalada.", "Questions.Preview.Explanation": "Explicação", "Questions.Preview.NoExplanation": "Sem explicação.",
+    "RichText.Toolbar": "Formatação", "RichText.Bold": "Negrito (Ctrl+B)", "RichText.Italic": "Itálico (Ctrl+I)", "RichText.Underline": "Sublinhado (Ctrl+U)", "RichText.Strikethrough": "Rasurado",
+    "RichText.Superscript": "Superior à linha", "RichText.Subscript": "Inferior à linha", "RichText.BulletList": "Lista com marcas", "RichText.NumberedList": "Lista numerada", "RichText.Quote": "Citação", "RichText.Link": "Ligação", "RichText.ClearFormatting": "Limpar formatação",
+    "RichText.Hint.Keyboard": "Tab sai do editor.", "Gallery.Section.RichText": "Campo de texto formatado",
+    "question.not_found": "Esta questão já não existe.", "question.topic_not_found": "O tópico já não existe. Escolha outro.", "question.statement_required": "Escreva o enunciado.",
+    "question.statement_too_long": "O enunciado excede 10 000 caracteres.", "question.option_too_long": "Uma opção excede 2 000 caracteres.", "question.options_count": "Uma questão é publicada com 2 a 5 opções.",
+    "question.option_text_required": "Todas as opções precisam de texto.", "question.key_invalid": "Assinale exatamente uma opção como correta.", "question.delete_requires_draft": "Só um rascunho pode ser eliminado. Retire primeiro a publicação.",
+    "kit.empty": "Vazio", "kit.focused": "Com foco", "kit.filled": "Preenchido", "kit.error": "Erro", "kit.disabled": "Desativado", "kit.compact": "Compacto (linha de opção)", "kit.longtext": "Texto longo"
+  }
+};
+
+/* Material Outlined paths (AppIcons). The toolbar icons are the kit's registration over Quill's icon set (open point 2). */
+const ICONS = {
+  menu: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+  add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  edit: "M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z",
+  delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  search: "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  moveup: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+  movedown: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+  publish: "M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7zm8-2v6h-2v-6H9.83L12 9.83 14.17 12H13z",
+  unpublish: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31A7.902 7.902 0 0 1 12 20zm6.31-3.1L7.1 5.69A7.902 7.902 0 0 1 12 4c4.41 0 8 3.59 8 8 0 1.85-.63 3.55-1.69 4.9z",
+  view: "M12 6a9.77 9.77 0 0 1 8.82 5.5A9.77 9.77 0 0 1 12 17a9.77 9.77 0 0 1-8.82-5.5A9.77 9.77 0 0 1 12 6zm0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5zm0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z",
+  verified: "M16.59 7.58L10 14.17l-3.59-3.58L5 12l5 5 8-8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  pending: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  bold: "M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z",
+  italic: "M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z",
+  underline: "M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z",
+  strike: "M10 19h4v-3h-4v3zM5 4v3h5v3h4V7h5V4H5zM3 14h18v-2H3v2z",
+  sup: "M22 7h-2v1h3v1h-4V7c0-.55.45-1 1-1h2V5h-3V4h3c.55 0 1 .45 1 1v1c0 .55-.45 1-1 1zM5.88 20h2.66l3.4-5.42h.12l3.4 5.42h2.66l-4.65-7.27L17.81 6h-2.68l-3.07 4.99h-.12L8.85 6H6.19l4.32 6.73L5.88 20z",
+  sub: "M22 18h-2v1h3v1h-4v-2c0-.55.45-1 1-1h2v-1h-3v-1h3c.55 0 1 .45 1 1v1c0 .55-.45 1-1 1zM5.88 18h2.66l3.4-5.42h.12l3.4 5.42h2.66l-4.65-7.27L17.81 4h-2.68l-3.07 4.99h-.12L8.85 4H6.19l4.32 6.73L5.88 18z",
+  bullets: "M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z",
+  numbers: "M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z",
+  quote: "M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z",
+  link: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+  clear: "M3.27 5L2 6.27l6.97 6.97L6.5 19h3l1.57-3.66L16.73 21 18 19.73 3.55 5.27 3.27 5zM6 5v.18L8.82 8h2.4l-.72 1.68 2.1 2.1L14.21 8H20V5H6z",
+  inbox: "M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10zm-3-5h-2V7h-4v3H8l4 4 4-4z",
+  error: "M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  info: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+  refresh: "M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  questions: "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-7.5-1.5h2v-2h-2v2zm1-11c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z",
+  topics: "M19 18l2 1V3c0-1.1-.9-2-2-2H8.99C7.89 1 7 1.9 7 3h10c1.1 0 2 .9 2 2v13zM15 5H5c-1.1 0-2 .9-2 2v16l7-3 7 3V7c0-1.1-.9-2-2-2zm0 15.01l-5-2.14-5 2.14V7h10v13.01z",
+  subjects: "M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z",
+  exams: "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",
+  language: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 0 1 5.08 16zm2.95-8H5.08a7.987 7.987 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
+  basetext: "M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z",
+  options: "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  explanation: "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"
+};
+const svg = (name, size) => `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+document.querySelectorAll("svg[data-icon]").forEach(el => { el.innerHTML = `<path d="${ICONS[el.dataset.icon]}"/>`; });
+
+/* ===========================================================================
+   Sample data (realistic; content is in its own language and is never translated)
+   =========================================================================== */
+const LETTERS = ["A", "B", "C", "D", "E"];
+const LANG_NAMES = { "pt-BR": "Português (Brasil)", "pt-PT": "Português (Portugal)", "en": "English" };
+
+const LIST_ROWS = [
+  { id: 1, excerpt: "Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão da língua portuguesa.", topic: "Concordância verbal", subject: "Língua Portuguesa", difficulty: 3, lang: "pt-BR", status: "Published" },
+  { id: 2, excerpt: "Um produto custava R$ 250,00 e passou a custar R$ 300,00. O aumento percentual foi de:", topic: "Porcentagem", subject: "Matemática", difficulty: 2, lang: "pt-BR", status: "Draft" },
+  { id: 3, excerpt: "Com base no art. 5º da Constituição Federal de 1988, assinale a opção que apresenta um direito fundamental expressamente previsto.", topic: "Direitos e garantias fundamentais", subject: "Direito Constitucional", difficulty: null, lang: "pt-BR", status: "Draft" },
+  { id: 4, excerpt: "Which organelle is responsible for most of the ATP synthesis in eukaryotic cells?", topic: "Cell biology", subject: "Biology", difficulty: 1, lang: "en", status: "Published" },
+  { id: 5, excerpt: "Leia o texto e responda. O período conhecido como Era Vargas (1930-1945) foi marcado por transformações políticas, econômicas e sociais profundas, entre as quais a criação da legislação trabalhista, a centralização administrativa e a consolidação de um Estado interventor que redefiniu as relações entre capital e trabalho no Brasil urbano e industrial em formação.", topic: "Era Vargas", subject: "História do Brasil", difficulty: 4, lang: "pt-BR", status: "Published" },
+  { id: 6, excerpt: "Um móvel parte do repouso com aceleração constante de 2 m/s2. A distância percorrida nos primeiros 5 segundos é:", topic: "Cinemática", subject: "Física", difficulty: 4, lang: "pt-BR", status: "Draft" }
+];
+
+const Q_DRAFT = {
+  status: "Draft", subject: "Física", topic: "Cinemática", lang: "pt-BR", difficulty: 4,
+  statement: "<p>Um móvel parte do repouso com aceleração constante de 2 m/s<sup>2</sup>. A distância percorrida nos primeiros 5 segundos é:</p>",
+  baseText: "",
+  options: ["<p>10 m</p>", "<p>20 m</p>", "<p>25 m</p>", "<p>50 m</p>"], correct: 2,
+  explanation: "<p>Com velocidade inicial nula, <em>d</em> = a·t<sup>2</sup>/2 = 2 · 25 / 2 = <strong>25 m</strong>.</p>"
+};
+const Q_PUBLISHED = {
+  status: "Published", subject: "Língua Portuguesa", topic: "Concordância verbal", lang: "pt-BR", difficulty: 3,
+  statement: "<p>Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão da língua portuguesa.</p>",
+  baseText: "",
+  options: ["<p>Fazem dois anos que ele partiu.</p>", "<p>Houveram muitos problemas na reunião.</p>", "<p>Mais de um candidato <strong>faltaram</strong> à prova.</p>", "<p>Devem haver outras soluções para o caso.</p>", "<p>Faz dois anos que ele partiu.</p>"], correct: 4,
+  explanation: "<p>O verbo <em>fazer</em>, indicando tempo decorrido, é impessoal: fica na 3.ª pessoa do singular.</p>"
+};
+const Q_LONG = {
+  status: "Published", subject: "História do Brasil", topic: "Era Vargas", lang: "pt-BR", difficulty: 4,
+  baseText: "<p>O período conhecido como Era Vargas (1930-1945) foi marcado por transformações políticas, econômicas e sociais profundas, entre as quais a criação da legislação trabalhista, a centralização administrativa e a consolidação de um Estado interventor que redefiniu as relações entre capital e trabalho no Brasil urbano e industrial em formação.</p><blockquote>\"A revolução de 1930 não foi feita para o povo, mas pode vir a ser feita pelo povo.\" — atribuída a um contemporâneo</blockquote><p>A fonte da citação pode ser consultada em <a href=\"https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.gov.br/documentos/historicos/era-vargas/legislacao-trabalhista-1943-consolidacao-das-leis-do-trabalho.html\" rel=\"noopener noreferrer\">https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.gov.br/documentos/historicos/era-vargas/legislacao-trabalhista-1943-consolidacao-das-leis-do-trabalho.html</a>.</p><table><thead><tr><th>Ano</th><th>Medida</th></tr></thead><tbody><tr><td>1930</td><td>Ministério do Trabalho</td></tr><tr><td>1943</td><td>CLT</td></tr></tbody></table>",
+  statement: "<p>Leia o texto e responda. Considerando o contexto descrito e as medidas adotadas pelo governo Vargas entre 1930 e 1945, assinale a alternativa que apresenta corretamente uma consequência direta da política trabalhista do período para a organização sindical brasileira, levando em conta tanto a legislação consolidada em 1943 quanto o modelo de relação entre Estado e sindicatos que se estabeleceu a partir dela e perdurou por décadas após o fim do Estado Novo.</p>",
+  options: ["<p>A extinção de todos os sindicatos e a proibição definitiva de qualquer forma de organização operária no país, inclusive das associações de auxílio mútuo que existiam desde o século XIX.</p>", "<p>A vinculação dos sindicatos ao Estado, com reconhecimento oficial, unicidade sindical e imposto sindical obrigatório.</p>", "<p>A plena autonomia sindical, sem qualquer interferência estatal.</p>", "<p>A criação de centrais sindicais independentes com direito irrestrito de greve.</p>"], correct: 1,
+  explanation: ""
+};
+
+/* ===========================================================================
+   i18n
+   =========================================================================== */
+let lang = "pt-BR";
+const t = (key, ...args) => { let s = (TEXTS[lang] && TEXTS[lang][key]) || TEXTS.en[key] || key; args.forEach((a, i) => { s = s.replace("{" + i + "}", a); }); return s; };
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  render();
+}
+
+/* ===========================================================================
+   AppRichTextField (mockup of the kit component; the real one wraps Quill 2)
+   =========================================================================== */
+const FULL_TOOLS = [["bold","RichText.Bold"],["italic","RichText.Italic"],["underline","RichText.Underline"],["strike","RichText.Strikethrough"],"|",["sup","RichText.Superscript"],["sub","RichText.Subscript"],"|",["bullets","RichText.BulletList"],["numbers","RichText.NumberedList"],["quote","RichText.Quote"],["link","RichText.Link"],"|",["clear","RichText.ClearFormatting"]];
+const COMPACT_TOOLS = [["bold","RichText.Bold"],["italic","RichText.Italic"],["underline","RichText.Underline"],["strike","RichText.Strikethrough"],["sup","RichText.Superscript"],["sub","RichText.Subscript"],["link","RichText.Link"],["clear","RichText.ClearFormatting"]];
+function richText(o) {
+  // o: id, labelKey, labelArg, placeholderKey, hintKey, required, value, error, disabled, compact, lang, focused, hideLabel
+  const tools = (o.compact ? COMPACT_TOOLS : FULL_TOOLS).map((tl, i) => tl === "|" ? '<span class="app-rt-sep" aria-hidden="true"></span>'
+    : `<button type="button" class="app-rt-btn" data-cmd="${tl[0]}" aria-label="${t(tl[1])}" title="${t(tl[1])}" aria-pressed="false" tabindex="${i === 0 ? 0 : -1}" ${o.disabled ? "disabled" : ""}>${svg(tl[0], 18)}</button>`).join("");
+  const label = t(o.labelKey, o.labelArg || "");
+  const descr = o.error ? `<span class="app-field-error-text" aria-live="polite">${o.error}</span>` : (o.hintKey ? `<span class="app-field-hint">${t(o.hintKey)}</span>` : "");
+  return `<div class="app-field app-rich-text ${o.error ? "app-field-error" : ""} ${o.compact ? "app-rich-text-compact" : ""} ${o.disabled ? "app-rich-text-disabled" : ""}">
+    <span class="app-field-label ${o.hideLabel ? "app-visually-hidden" : ""}" id="${o.id}-label">${label}${o.required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</span>
+    <div class="app-rich-text-frame ${o.focused ? "is-focused" : ""}">
+      <div class="app-rt-toolbar" role="toolbar" aria-label="${t("RichText.Toolbar")}" aria-controls="${o.id}">${tools}</div>
+      <div class="app-rt-editor ${o.value ? "" : "is-empty"}" id="${o.id}" role="textbox" aria-multiline="true" contenteditable="${o.disabled ? "false" : "true"}" ${o.disabled ? 'aria-disabled="true"' : ""} aria-labelledby="${o.id}-label" aria-describedby="${o.id}-description" ${o.required ? 'aria-required="true"' : ""} ${o.error ? 'aria-invalid="true"' : ""} lang="${o.lang || lang}" data-placeholder="${t(o.placeholderKey)}" spellcheck="true">${o.value || ""}</div>
+    </div>
+    <span class="app-field-description" id="${o.id}-description">${descr}</span>
+  </div>`;
+}
+// Toolbar: one tab stop, arrows move; buttons toggle; Tab inside the editor leaves it (Quill's tab binding is removed in the kit).
+document.addEventListener("click", e => {
+  const b = e.target.closest(".app-rt-btn"); if (!b || b.disabled) return;
+  const cmd = { bold: "bold", italic: "italic", underline: "underline", strike: "strikeThrough", sup: "superscript", sub: "subscript", bullets: "insertUnorderedList", numbers: "insertOrderedList", clear: "removeFormat" }[b.dataset.cmd];
+  const editor = document.getElementById(b.closest(".app-rt-toolbar").getAttribute("aria-controls"));
+  if (cmd && editor) { editor.focus(); document.execCommand(cmd); }
+  if (["bold","italic","underline","strike","sup","sub"].includes(b.dataset.cmd)) b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+});
+document.addEventListener("keydown", e => {
+  const b = e.target.closest(".app-rt-btn"); if (!b) return;
+  const btns = [...b.closest(".app-rt-toolbar").querySelectorAll(".app-rt-btn")]; let i = btns.indexOf(b);
+  if (e.key === "ArrowRight") i = (i + 1) % btns.length; else if (e.key === "ArrowLeft") i = (i - 1 + btns.length) % btns.length; else if (e.key === "Home") i = 0; else if (e.key === "End") i = btns.length - 1; else return;
+  e.preventDefault(); btns.forEach(x => x.tabIndex = -1); btns[i].tabIndex = 0; btns[i].focus();
+});
+document.addEventListener("input", e => { if (e.target.classList && e.target.classList.contains("app-rt-editor")) e.target.classList.toggle("is-empty", e.target.textContent.trim() === "" && !e.target.querySelector("li,table")); });
+
+/* ===========================================================================
+   Screen 1: list
+   =========================================================================== */
+const listStates = ["loading", "empty", "empty-filter", "empty-search", "ready", "error", "action-error", "denied"];
+let listState = "ready";
+const chip = (status) => `<span class="app-status-chip ${status === "Published" ? "app-status-chip-success" : ""}"><span class="app-status-chip-dot" aria-hidden="true"></span>${t(status === "Published" ? "Questions.Status.Published" : "Questions.Status.Draft")}</span>`;
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const iconBtn = (icon, labelKey, itemName, opts) => {
+  opts = opts || {}; const label = t("Common.ActionOnItem", t(labelKey), itemName); const tip = opts.disabledReason || t(labelKey);
+  return `<span title="${esc(tip)}"><button type="button" class="app-icon-button ${opts.error ? "is-error" : ""}" aria-label="${esc(label)}" ${opts.disabledReason || opts.disabled ? "disabled" : ""} ${opts.id ? `id="${opts.id}"` : ""} ${opts.onclick ? `data-action="${opts.onclick}"` : ""}>${svg(icon, 20)}</button></span>`;
+};
+function renderList() {
+  document.getElementById("block-denied").hidden = listState !== "denied";
+  const screen = document.getElementById("screen-list");
+  screen.hidden = false;
+  screen.querySelector(".app-page-header").hidden = listState === "denied";
+  screen.querySelector(".app-data-table").hidden = listState === "denied";
+  document.getElementById("nav-questions").hidden = listState === "denied";
+  document.getElementById("list-alert").hidden = listState !== "action-error";
+  document.getElementById("list-loading").hidden = listState !== "loading";
+  document.getElementById("list-error").hidden = listState !== "error";
+  const isEmpty = listState.startsWith("empty");
+  document.getElementById("list-empty").hidden = !isEmpty;
+  document.getElementById("list-ready").hidden = !(listState === "ready" || listState === "action-error");
+  document.getElementById("list-empty-action").hidden = listState !== "empty";
+  document.getElementById("list-empty-text").textContent = listState === "empty-search" ? t("Questions.Empty.Search", "fotossíntese") : listState === "empty-filter" ? t("Questions.Empty.Filters") : t("Questions.Empty");
+  document.getElementById("list-search").value = listState === "empty-search" ? "fotossíntese" : "";
+  document.getElementById("questions-filter-status").value = listState === "empty-filter" ? "Published" : "";
+  document.getElementById("list-rows").innerHTML = LIST_ROWS.map(r => {
+    const name = t("Questions.Row.Name", r.excerpt.length > 60 ? r.excerpt.slice(0, 60).trim() + "…" : r.excerpt);
+    const diff = r.difficulty === null ? `<span aria-hidden="true">—</span><span class="app-visually-hidden">${t("Questions.Difficulty.NotSet.Spoken")}</span>` : r.difficulty;
+    const more = r.status === "Published" ? iconBtn("unpublish", "Questions.Action.Unpublish", name) : iconBtn("publish", "Questions.Action.Publish", name);
+    return `<tr>
+      <td><span class="app-truncate" tabindex="0" title="${r.excerpt}" lang="${r.lang}">${r.excerpt}</span></td>
+      <td><span class="app-truncate app-truncate-sm" title="${r.topic}">${r.topic}</span><span class="app-cell-secondary app-truncate app-truncate-sm" title="${r.subject}">${r.subject}</span></td>
+      <td class="app-cell-number">${diff}</td>
+      <td><span lang="${r.lang}">${LANG_NAMES[r.lang]}</span></td>
+      <td>${chip(r.status)}</td>
+      <td class="app-cell-actions"><div class="app-row-actions" role="group" aria-label="${t("Common.Actions")}">${iconBtn("edit", "Common.Edit", name)}${iconBtn("delete", "Common.Delete", name, { error: true, disabledReason: r.status === "Published" ? t("Questions.Delete.DisabledPublished") : null })}${more}</div></td>
+    </tr>`; }).join("");
+  document.getElementById("list-pageinfo").textContent = t("Common.Table.PageInfo", 1, 6, 6);
+  document.getElementById("list-live").textContent = listState === "ready" ? t("Common.Table.Results.Many", 6) : isEmpty ? t("Common.Table.Results.None") : "";
+}
+
+/* ===========================================================================
+   Screen 2: form
+   =========================================================================== */
+const formStates = ["loading", "new", "draft", "published", "options-none", "options-max", "publish-unsaved", "saving", "success", "validation", "server", "publish-refused", "notfound", "denied", "longtext", "preview", "preview-answer"];
+let formState = "draft";
+let model = null; // what the form holds in the current state
+
+function clone(q) { return JSON.parse(JSON.stringify(q)); }
+function modelFor(state) {
+  switch (state) {
+    case "new": return { status: null, subject: "", topic: "", lang: lang, difficulty: "", statement: "", baseText: "", options: [], correct: null, explanation: "", saved: false };
+    case "published": case "publish-refused": return Object.assign(clone(Q_PUBLISHED), { saved: true });
+    case "options-none": return Object.assign(clone(Q_DRAFT), { options: [], correct: null, saved: true });
+    case "options-max": return Object.assign(clone(Q_DRAFT), { options: Q_DRAFT.options.concat(["<p>100 m</p>"]), saved: true });
+    case "publish-unsaved": return Object.assign(clone(Q_DRAFT), { saved: true, dirty: true });
+    case "validation": return { status: null, subject: "Matemática", topic: "", lang: lang, difficulty: "2", statement: "<p><br></p>", baseText: "", options: ["<p>20%</p>", ""], correct: null, explanation: "", saved: false };
+    case "longtext": return Object.assign(clone(Q_LONG), { saved: true });
+    default: return Object.assign(clone(Q_DRAFT), { saved: true });
+  }
+}
+const plain = (html) => (html || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+
+function checklist(m) {
+  const texts = m.options.map(plain);
+  return [
+    ["Questions.Checklist.Topic", !!m.topic],
+    ["Questions.Checklist.Language", !!m.lang],
+    ["Questions.Checklist.Statement", plain(m.statement).length > 0],
+    ["Questions.Checklist.OptionsCount", m.options.length >= 2 && m.options.length <= 5],
+    ["Questions.Checklist.OptionsText", m.options.length > 0 && texts.every(x => x.length > 0)],
+    ["Questions.Checklist.Key", m.correct !== null && m.correct !== undefined && m.correct < m.options.length]
+  ];
+}
+
+function renderOptions(m, errors) {
+  const list = document.getElementById("options-list");
+  document.getElementById("options-empty").hidden = m.options.length > 0;
+  list.innerHTML = m.options.map((html, i) => {
+    const L = LETTERS[i], name = t("Questions.Options.Letter", L);
+    const err = errors && errors.options && errors.options[i] ? t(errors.options[i]) : "";
+    return `<li class="app-item-row app-option-row" id="question-option-row-${i}">
+      <div class="app-item-row-content">
+        <span class="app-option-letter">${L}</span>
+        <span class="app-option-radio"><input type="radio" name="question-correct" value="${i}" ${m.correct === i ? "checked" : ""} aria-label="${t("Questions.Options.MarkCorrect", L)}" ${formState === "saving" ? "disabled" : ""}></span>
+        ${richText({ id: `question-option-${i}`, labelKey: "Questions.Options.Field", labelArg: L, hideLabel: true, placeholderKey: "Questions.Options.Field.Placeholder", value: html, error: err, compact: true, lang: m.lang, disabled: formState === "saving" })}
+      </div>
+      <div class="app-item-row-actions"><div class="app-row-actions" role="group" aria-label="${t("Common.Actions")}">
+        ${iconBtn("moveup", "Common.MoveUp", name, { id: `question-option-actions-${i}-move-up`, disabledReason: i === 0 ? t("Questions.Options.MoveUp.DisabledFirst") : null, onclick: "up:" + i })}
+        ${iconBtn("movedown", "Common.MoveDown", name, { id: `question-option-actions-${i}-move-down`, disabledReason: i === m.options.length - 1 ? t("Questions.Options.MoveDown.DisabledLast") : null, onclick: "down:" + i })}
+        ${iconBtn("delete", "Common.Delete", name, { id: `question-option-actions-${i}-delete`, error: true, onclick: "remove:" + i })}
+      </div></div>
+    </li>`; }).join("");
+  const add = document.getElementById("question-option-add");
+  add.disabled = m.options.length >= 5 || formState === "saving";
+  add.parentElement.title = m.options.length >= 5 ? t("Questions.Options.Add.DisabledMax") : "";
+  document.getElementById("options-count").textContent = t("Questions.Options.Count", m.options.length);
+  const optErr = document.getElementById("options-error");
+  optErr.hidden = !(errors && errors.section); optErr.textContent = errors && errors.section ? t(errors.section) : "";
+  document.getElementById("question-options").setAttribute("aria-invalid", errors && errors.section ? "true" : "false");
+}
+document.getElementById("options-list").addEventListener("click", e => {
+  const b = e.target.closest("[data-action]"); if (!b) return;
+  const [act, idx] = b.dataset.action.split(":"); const i = +idx; const live = document.getElementById("options-live");
+  if (act === "up" && i > 0) { [model.options[i - 1], model.options[i]] = [model.options[i], model.options[i - 1]]; if (model.correct === i) model.correct = i - 1; else if (model.correct === i - 1) model.correct = i; renderOptions(model); live.textContent = t("Questions.Options.Moved", i, model.options.length); document.getElementById(`question-option-actions-${i - 1}-move-${i - 1 === 0 ? "down" : "up"}`).focus(); }
+  if (act === "down" && i < model.options.length - 1) { [model.options[i + 1], model.options[i]] = [model.options[i], model.options[i + 1]]; if (model.correct === i) model.correct = i + 1; else if (model.correct === i + 1) model.correct = i; renderOptions(model); live.textContent = t("Questions.Options.Moved", i + 2, model.options.length); document.getElementById(`question-option-actions-${i + 1}-move-${i + 1 === model.options.length - 1 ? "up" : "down"}`).focus(); }
+  if (act === "remove") { model.options.splice(i, 1); if (model.correct === i) model.correct = null; else if (model.correct > i) model.correct--; renderOptions(model); live.textContent = t("Questions.Options.Removed", model.options.length); (document.getElementById(`question-option-actions-${Math.min(i, model.options.length - 1)}-delete`) || document.getElementById("question-option-add")).focus(); }
+  renderAside(model); renderPublication(model);
+});
+document.getElementById("question-option-add").addEventListener("click", () => { if (model.options.length < 5) { model.options.push(""); renderOptions(model); renderAside(model); renderPublication(model); document.getElementById(`question-option-${model.options.length - 1}`).focus(); } });
+document.getElementById("question-options").addEventListener("change", e => { if (e.target.name === "question-correct") { model.correct = +e.target.value; renderAside(model); renderPublication(model); } });
+
+function renderAside(m) {
+  const row = (label, value) => `<div class="app-form-aside-row"><dt class="app-form-aside-row-label">${label}</dt><dd class="app-form-aside-row-value ${value ? "" : "app-form-aside-row-empty"}">${value || t("Common.Summary.NotFilled")}</dd></div>`;
+  document.getElementById("aside-rows").innerHTML =
+    row(t("Questions.Form.Aside.Status"), m.status ? t(m.status === "Published" ? "Questions.Status.Published" : "Questions.Status.Draft") : "") +
+    row(t("Questions.Field.Subject"), m.subject) + row(t("Questions.Field.Topic"), m.topic) +
+    row(t("Questions.Field.ContentLanguage"), m.lang ? `<span lang="${m.lang}">${LANG_NAMES[m.lang]}</span>` : "") +
+    row(t("Questions.Field.Difficulty"), m.difficulty ? String(m.difficulty) : "") +
+    row(t("Questions.Form.Aside.Options"), m.options.length ? String(m.options.length) : "");
+  document.getElementById("aside-checklist").innerHTML = checklist(m).map(([k, done]) =>
+    `<li class="${done ? "app-checklist-done" : "app-checklist-pending"}">${svg(done ? "verified" : "pending", 18)}<span>${t(k)}</span><span class="app-visually-hidden">${t(done ? "Common.Checklist.Done" : "Common.Checklist.Pending")}</span></li>`).join("");
+}
+
+function renderPublication(m) {
+  document.getElementById("pub-save-first").hidden = m.saved;
+  document.getElementById("pub-saved").hidden = !m.saved;
+  if (!m.saved) return;
+  const published = m.status === "Published";
+  document.getElementById("pub-chip").innerHTML = chip(m.status);
+  document.getElementById("pub-sentence").textContent = t(published ? "Questions.Publication.Published" : "Questions.Publication.Draft");
+  document.getElementById("pub-publish-wrap").hidden = published;
+  document.getElementById("btn-unpublish").hidden = !published;
+  document.getElementById("pub-alert").hidden = formState !== "publish-refused";
+  const complete = checklist(m).every(x => x[1]);
+  const reason = published ? null : m.dirty ? t("Questions.Publication.Publish.DisabledUnsaved") : !complete ? t("Questions.Publication.Publish.DisabledIncomplete") : null;
+  const btn = document.getElementById("btn-publish"); btn.disabled = !!reason; btn.parentElement.title = reason || "";
+  const r = document.getElementById("pub-reason"); r.hidden = !reason; r.textContent = reason || "";
+}
+
+function renderForm() {
+  const s = formState;
+  model = model && ["draft", "preview", "preview-answer", "saving", "success", "server"].includes(s) && model.saved && model.status === "Draft" ? model : modelFor(s);
+  document.getElementById("block-denied").hidden = s !== "denied";
+  const screen = document.getElementById("screen-form");
+  screen.hidden = false;
+  screen.querySelector(".app-page-header").hidden = s === "denied";
+  document.getElementById("nav-questions").hidden = s === "denied";
+  document.getElementById("f-loading").hidden = s !== "loading";
+  document.getElementById("f-notfound").hidden = s !== "notfound";
+  document.getElementById("f-body").hidden = ["loading", "notfound", "denied"].includes(s);
+  const isNew = !model.saved;
+  document.getElementById("form-title").textContent = t(isNew ? "Questions.Form.AddTitle" : "Questions.Form.EditTitle");
+  document.getElementById("form-crumb").textContent = t(isNew ? "Questions.Form.AddTitle" : "Questions.Form.EditTitle");
+
+  // errors of the validation state (client-side, before anything is sent)
+  const errors = s === "validation" ? { topic: "Questions.Field.Topic.Required", statement: "question.statement_required", section: "question.key_invalid", options: { 1: "question.option_text_required" } } : {};
+
+  // classification
+  document.getElementById("question-subject").value = model.subject;
+  const topic = document.getElementById("question-topic"); topic.value = model.topic; topic.disabled = !model.subject;
+  document.getElementById("field-topic").classList.toggle("app-field-disabled", !model.subject);
+  document.getElementById("field-topic").classList.toggle("app-field-error", !!errors.topic);
+  document.getElementById("topic-hint").textContent = t(model.subject ? "Questions.Field.Topic.Hint" : "Questions.Field.Topic.DisabledHint");
+  document.getElementById("topic-hint").hidden = !!errors.topic;
+  const te = document.getElementById("topic-error"); te.hidden = !errors.topic; te.textContent = errors.topic ? t(errors.topic) : ""; topic.setAttribute("aria-invalid", errors.topic ? "true" : "false");
+  document.getElementById("question-content-language").value = model.lang || lang;
+  document.getElementById("question-difficulty").value = model.difficulty === null || model.difficulty === undefined ? "" : String(model.difficulty);
+
+  const saving = s === "saving";
+  document.getElementById("rt-statement").innerHTML = richText({ id: "question-statement", labelKey: "Questions.Field.Statement", placeholderKey: "Questions.Field.Statement.Placeholder", hintKey: "Questions.Field.Statement.Hint", required: true, value: plain(model.statement) ? model.statement : "", error: errors.statement ? t(errors.statement) : "", lang: model.lang, disabled: saving });
+  document.getElementById("rt-base-text").innerHTML = richText({ id: "question-base-text", labelKey: "Questions.Field.BaseText", placeholderKey: "Questions.Field.BaseText.Placeholder", hintKey: "Questions.Field.BaseText.Hint", value: model.baseText, lang: model.lang, disabled: saving });
+  document.getElementById("rt-explanation").innerHTML = richText({ id: "question-explanation", labelKey: "Questions.Field.Explanation", placeholderKey: "Questions.Field.Explanation.Placeholder", hintKey: "Questions.Field.Explanation.Hint", value: model.explanation, lang: model.lang, disabled: saving });
+  renderOptions(model, errors);
+  renderAside(model);
+  renderPublication(model);
+
+  // error summary
+  const sum = document.getElementById("question-error-summary");
+  sum.hidden = s !== "validation";
+  if (s === "validation") {
+    document.getElementById("error-summary-list").innerHTML = [["question-topic", t("Questions.Field.Topic")], ["question-statement", t("Questions.Field.Statement")], ["question-options", t("Questions.Section.Options")]].map(([id, lbl]) => `<li><a href="#${id}" data-focus="${id}">${lbl}</a></li>`).join("");
+    setTimeout(() => sum.focus(), 0);
+  }
+  document.getElementById("f-server-alert").hidden = s !== "server";
+
+  // actions
+  document.getElementById("save-spinner").hidden = !saving;
+  document.getElementById("save-label").textContent = t(saving ? "Common.Saving" : "Common.Save");
+  document.getElementById("btn-save").disabled = saving; document.getElementById("btn-cancel").disabled = saving;
+  document.querySelectorAll("#question-form input, #question-form select").forEach(el => { if (el.id !== "question-topic" || model.subject) el.disabled = saving; });
+
+  // snackbar, dialog
+  const snack = document.getElementById("snackbar"); snack.hidden = s !== "success"; document.getElementById("snackbar-text").textContent = t("Questions.Saved");
+  if (s === "preview" || s === "preview-answer") openPreview(s === "preview-answer"); else document.getElementById("dialog").hidden = true;
+}
+document.getElementById("error-summary-list").addEventListener("click", e => { const a = e.target.closest("a[data-focus]"); if (a) { e.preventDefault(); const el = document.getElementById(a.dataset.focus); el && el.focus(); } });
+document.getElementById("btn-preview").addEventListener("click", () => openPreview(false));
+document.getElementById("dialog-close").addEventListener("click", () => { document.getElementById("dialog").hidden = true; document.getElementById("btn-preview").focus(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("dialog").hidden) document.getElementById("dialog-close").click(); });
+
+function openPreview(revealed) {
+  const m = model; const hasKey = m.correct !== null && m.correct !== undefined && m.correct < m.options.length;
+  const c = document.getElementById("dialog-content");
+  c.innerHTML = `
+    ${m.dirty ? `<div class="app-alert app-alert-info" role="status">${svg("info", 20)}<span>${t("Questions.Preview.UnsavedNote")}</span></div>` : ""}
+    <div lang="${m.lang}">
+      ${plain(m.baseText) ? `<div class="app-question-base app-question-content">${m.baseText}</div>` : ""}
+      <div class="app-question-content">${m.statement}</div>
+      <ol class="app-question-options" aria-label="${t("Questions.Preview.Options")}">
+        ${m.options.map((o, i) => `<li class="app-question-option ${revealed && hasKey && m.correct === i ? "is-correct" : ""}"><span class="app-option-letter">${LETTERS[i]}</span><div class="app-question-option-body"><div class="app-question-content">${o}</div>${revealed && hasKey && m.correct === i ? `<span class="app-correct-label">${svg("verified", 16)}${t("Questions.Preview.CorrectAnswer")}</span>` : ""}</div></li>`).join("")}
+      </ol>
+    </div>
+    <div class="app-preview-answer">
+      <button type="button" class="app-button app-button-outlined" id="btn-show-answer" aria-expanded="${revealed}" aria-controls="preview-answer-region">${svg("view", 18)}<span>${t(revealed ? "Questions.Preview.HideAnswer" : "Questions.Preview.ShowAnswer")}</span></button>
+      <div id="preview-answer-region" role="region" aria-labelledby="preview-answer-heading" aria-live="polite" ${revealed ? "" : "hidden"} style="margin-top:var(--app-space-4)">
+        <p class="app-preview-heading" id="preview-answer-heading">${t("Questions.Preview.Answer")}</p>
+        <p>${hasKey ? `<strong>${LETTERS[m.correct]}</strong>` : t("Questions.Preview.NoKey")}</p>
+        <p class="app-preview-heading" style="margin-top:var(--app-space-3)">${t("Questions.Preview.Explanation")}</p>
+        <div class="app-question-content" lang="${m.lang}">${plain(m.explanation) ? m.explanation : `<span class="app-muted">${t("Questions.Preview.NoExplanation")}</span>`}</div>
+      </div>
+    </div>`;
+  document.getElementById("dialog").hidden = false;
+  document.getElementById("btn-show-answer").addEventListener("click", () => openPreview(!revealed));
+  setTimeout(() => document.getElementById("btn-show-answer").focus(), 0);
+}
+
+/* ===========================================================================
+   Kit panel: AppRichTextField states
+   =========================================================================== */
+function renderKit() {
+  const panel = (captionKey, html) => `<div><p class="kit-caption">${t(captionKey)}</p>${html}</div>`;
+  const filled = "<p>Um móvel parte do repouso com aceleração constante de 2 m/s<sup>2</sup>.</p><ul><li>Primeiro item</li><li>Segundo item</li></ul>";
+  const longWord = "<p>" + "Pneumoultramicroscopicossilicovulcanoconiótico".repeat(3) + " — https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.gov.br/documentos/historicos/era-vargas/legislacao-trabalhista-1943.html " + "Texto longo que ocupa várias linhas e continua até quebrar dentro do componente, nunca para fora dele. ".repeat(6) + "</p>";
+  document.getElementById("kit-grid").innerHTML =
+    panel("kit.empty", richText({ id: "kit-empty", labelKey: "Questions.Field.Statement", placeholderKey: "Questions.Field.Statement.Placeholder", hintKey: "Questions.Field.Statement.Hint", required: true, value: "" })) +
+    panel("kit.focused", richText({ id: "kit-focused", labelKey: "Questions.Field.Statement", placeholderKey: "Questions.Field.Statement.Placeholder", hintKey: "Questions.Field.Statement.Hint", required: true, value: "<p>Digitando…</p>", focused: true })) +
+    panel("kit.filled", richText({ id: "kit-filled", labelKey: "Questions.Field.Statement", placeholderKey: "Questions.Field.Statement.Placeholder", hintKey: "Questions.Field.Statement.Hint", required: true, value: filled })) +
+    panel("kit.error", richText({ id: "kit-error", labelKey: "Questions.Field.Statement", placeholderKey: "Questions.Field.Statement.Placeholder", hintKey: "Questions.Field.Statement.Hint", required: true, value: "", error: t("question.statement_required") })) +
+    panel("kit.disabled", richText({ id: "kit-disabled", labelKey: "Questions.Field.Explanation", placeholderKey: "Questions.Field.Explanation.Placeholder", hintKey: "Questions.Field.Explanation.Hint", value: "<p>Salvando…</p>", disabled: true })) +
+    panel("kit.compact", `<ul class="app-item-rows-list"><li class="app-item-row app-option-row"><div class="app-item-row-content"><span class="app-option-letter">B</span><span class="app-option-radio"><input type="radio" name="kit-correct" checked aria-label="${t("Questions.Options.MarkCorrect", "B")}"></span>${richText({ id: "kit-compact", labelKey: "Questions.Options.Field", labelArg: "B", hideLabel: true, placeholderKey: "Questions.Options.Field.Placeholder", value: "<p>20 m</p>", compact: true })}</div><div class="app-item-row-actions"><div class="app-row-actions" role="group" aria-label="${t("Common.Actions")}">${iconBtn("moveup", "Common.MoveUp", t("Questions.Options.Letter", "B"))}${iconBtn("movedown", "Common.MoveDown", t("Questions.Options.Letter", "B"))}${iconBtn("delete", "Common.Delete", t("Questions.Options.Letter", "B"), { error: true })}</div></div></li></ul>`) +
+    panel("kit.longtext", richText({ id: "kit-long", labelKey: "Questions.Field.BaseText", placeholderKey: "Questions.Field.BaseText.Placeholder", hintKey: "Questions.Field.BaseText.Hint", value: longWord }));
+}
+
+/* ===========================================================================
+   Demo chrome: screen, state, language, theme
+   =========================================================================== */
+let screen = "list";
+const NOTES = {
+  "list:ready": "Row actions: Edit, Delete (disabled with reason on a published row), Publish/Unpublish. Excerpt truncated at 26rem with tooltip; difficulty right-aligned, dash + spoken text when empty.",
+  "list:action-error": "A refused row action (409 question.delete_requires_draft): alert above the table, list reloaded.",
+  "list:denied": "Without questions.manage: the menu item is absent and the route renders the not-found page (F-2 BR7).",
+  "form:new": "Topic disabled until a subject is picked; language preselected with the UI language (BR7); publication card says to save first.",
+  "form:draft": "Saved draft, checklist complete: Publish enabled. Move/remove/add options and mark the correct one to see the aside follow.",
+  "form:published": "Published: Unpublish replaces Publish; Save runs the BR4 checks before sending (AC7).",
+  "form:options-none": "0 options: a draft can be saved; the checklist shows what publishing still needs and Publish is disabled with the reason as visible text.",
+  "form:options-max": "5 options: Add is disabled, the counter says 5 of 5.",
+  "form:publish-unsaved": "Unsaved changes: Publish is disabled (it acts on the stored version); Preview shows the saved version with a note.",
+  "form:validation": "Client-side refusal before anything is sent: error summary (focused) + field errors; option B empty and no correct option.",
+  "form:server": "A refusal that belongs to no field: alert at the top of the form.",
+  "form:publish-refused": "Publish answered 400 question.key_invalid: alert inside the publication card.",
+  "form:longtext": "Long base text with a long URL, a table and a quote; long options wrap inside the compact editor; the aside wraps its values.",
+  "form:preview": "Preview as a student: base text, statement, lettered options; the answer is hidden until Show answer. Esc closes.",
+  "form:preview-answer": "Answer revealed: the correct option gets border + icon + text (never colour alone), then the explanation.",
+  "kit:all": "AppRichTextField: empty, focused, filled, error, disabled, compact (option row) and long text. Toolbar is one tab stop (arrows move); Tab leaves the editor."
+};
+function renderDemoStates() {
+  const states = screen === "list" ? listStates : screen === "form" ? formStates : ["all"];
+  const current = screen === "list" ? listState : screen === "form" ? formState : "all";
+  document.getElementById("demo-states").innerHTML = states.map(s => `<button type="button" data-state="${s}" aria-pressed="${s === current}">${s}</button>`).join("");
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", b.dataset.screen === screen));
+  document.getElementById("demo-note").textContent = NOTES[`${screen}:${current}`] || "";
+}
+function render() {
+  document.getElementById("screen-list").hidden = screen !== "list";
+  document.getElementById("screen-form").hidden = screen !== "form";
+  document.getElementById("screen-kit").hidden = screen !== "kit";
+  document.getElementById("block-denied").hidden = true;
+  document.getElementById("nav-questions").hidden = false;
+  document.getElementById("snackbar").hidden = true;
+  document.getElementById("dialog").hidden = true;
+  if (screen === "list") renderList(); else if (screen === "form") renderForm(); else renderKit();
+  renderDemoStates();
+}
+document.getElementById("demo").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.screen) { screen = b.dataset.screen; render(); }
+  else if (b.dataset.state) { if (screen === "list") listState = b.dataset.state; else { formState = b.dataset.state; model = null; } render(); }
+  else if (b.dataset.lang) { lang = b.dataset.lang; applyLang(); }
+  else if (b.dataset.themeBtn) { document.documentElement.dataset.theme = b.dataset.themeBtn; document.querySelectorAll("[data-theme-btn]").forEach(x => x.setAttribute("aria-pressed", x.dataset.themeBtn === b.dataset.themeBtn)); }
+});
+applyLang();
+</script>
+</body>
+</html>

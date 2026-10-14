@@ -1,0 +1,1783 @@
+@page "/admin/questions/new"
+@page "/admin/questions/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject IDialogService Dialogs
+@inject IJSRuntime JS
+
+@* F-95, UC1 to UC4 and UC6: the question is written on a page of its own (rule: ui-project): classification,
+   statement, base text, options, explanation, and a publish checklist beside the form. Save is the only primary
+   button of the page and never publishes (BR12); publishing, unpublishing and the preview sit in a card of their
+   own below the form, because they act on what is stored (the ExamEditionsSection pattern). *@
+<AppPageHeader Title="@Title" Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_loadFailed)
+{
+    <AppErrorState OnRetry="ReloadAsync" />
+}
+else if (_notFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(QuestionBankErrorCodes.QuestionNotFound)" Class="mb-4" />
+        <AppLink Href="@ListHref">@L["Questions.BackToList"]</AppLink>
+    </MudPaper>
+}
+else
+{
+    <div class="app-form-layout">
+        <MudPaper Class="app-form-card" Elevation="0">
+            <AppErrorSummary Id="@ErrorSummaryId"
+                             Title="@L["Common.ErrorSummary.Title"]"
+                             Items="@(_showErrorSummary ? ErrorSummaryItems : Array.Empty<AppErrorSummaryItem>())" />
+
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            @* F-101 BR5: an annulled question is frozen; the way out is the Reinstate button of the card below. *@
+            @if (IsAnnulled)
+            {
+                <div id="question-annulled-alert">
+                    <AppAlert Severity="Severity.Warning" Text="@L["Questions.Annulled.Alert"]" Class="mb-4" />
+                </div>
+            }
+
+            <AppSectionCard Id="question-section-classification"
+                            Title="@L["Questions.Section.Classification"]"
+                            Icon="@AppIcons.Topics"
+                            Subtitle="@L["Questions.Section.Classification.Subtitle"]">
+                @* F-97, UC1 and BR2: the type is the first field. It is chosen when the question is created and read
+                   only afterwards: changing it would drop options or a key without saying so. *@
+                @if (IsEdit)
+                {
+                    <div class="app-field mb-4">
+                        <span class="app-field-label" id="question-type-label">@L["Questions.Field.Type"]</span>
+                        <span class="app-field-value" id="question-type-value">@QuestionText.TypeName(L, _type)</span>
+                        <span class="app-field-description"><span class="app-field-hint">@L["Questions.Type.ReadOnlyHint"]</span></span>
+                    </div>
+                }
+                else
+                {
+                    <AppRadioCards TValue="QuestionType?"
+                                   Id="question-type"
+                                   Label="@L["Questions.Field.Type"]"
+                                   Value="_type"
+                                   ValueChanged="@((QuestionType? value) => OnTypeChanged(value))"
+                                   Options="TypeCards"
+                                   Columns="2"
+                                   Required="true" />
+                }
+
+                <AppFormGrid Columns="2">
+                    @* The question stores only the topic, so the Api does not ask for the subject; the screen does,
+                       because the topic cannot be picked without it. *@
+                    <AppLookupField Id="question-subject"
+                                    Label="@L["Questions.Field.Subject"]"
+                                    Placeholder="@L["Questions.Field.Subject.Placeholder"]"
+                                    LeadingIcon="@AppIcons.Subjects"
+                                    SearchAsync="SearchSubjectsAsync"
+                                    Value="_subject"
+                                    ValueChanged="OnSubjectChanged"
+                                    Required="true"
+                                    Disabled="IsAnnulled"
+                                    Hint="@L["Questions.Field.Subject.Hint"]" />
+
+                    <AppLookupField Id="question-topic"
+                                    Label="@L["Questions.Field.Topic"]"
+                                    Placeholder="@L["Questions.Field.Topic.Placeholder"]"
+                                    LeadingIcon="@AppIcons.Topics"
+                                    SearchAsync="SearchTopicsAsync"
+                                    MinChars="0"
+                                    OpenOnFocus="true"
+                                    Value="_topic"
+                                    ValueChanged="OnTopicChanged"
+                                    Required="true"
+                                    Disabled="@(_subject is null || IsAnnulled)"
+                                    Hint="@(_subject is null ? L["Questions.Field.Topic.DisabledHint"].Value : L["Questions.Field.Topic.Hint"].Value)"
+                                    Error="@_topicError" />
+
+                    <AppSelectField TValue="string"
+                                    Id="question-content-language"
+                                    Label="@L["Questions.Field.ContentLanguage"]"
+                                    Value="_contentLanguage"
+                                    ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
+                                    Options="LanguageOptions"
+                                    Required="true"
+                                    Disabled="IsAnnulled"
+                                    LeadingIcon="@AppIcons.Language"
+                                    Hint="@L["Questions.Field.ContentLanguage.Hint"]"
+                                    Error="@_languageError" />
+
+                    <AppSelectField TValue="int?"
+                                    Id="question-difficulty"
+                                    Label="@L["Questions.Field.Difficulty"]"
+                                    Value="_difficulty"
+                                    ValueChanged="@((int? value) => OnDifficultyChanged(value))"
+                                    Options="DifficultyOptions"
+                                    Disabled="IsAnnulled"
+                                    Hint="@L["Questions.Field.Difficulty.Hint"]"
+                                    Error="@_difficultyError" />
+                </AppFormGrid>
+            </AppSectionCard>
+
+            @* F-96, UC1 and UC2: where a past-exam question came from. All three fields are optional together: an
+               empty section is an authored question. The lookups are routes of the question bank, so a curator
+               needs no catalog permission to fill them (BR9). *@
+            <AppSectionCard Id="question-section-origin"
+                            Title="@L["Questions.Section.Origin"]"
+                            Icon="@AppIcons.Editions"
+                            Subtitle="@L["Questions.Section.Origin.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppLookupField Id="question-edition"
+                                    Label="@L["Questions.Field.Edition"]"
+                                    Placeholder="@L["Questions.Field.Edition.Placeholder"]"
+                                    LeadingIcon="@AppIcons.Editions"
+                                    SearchAsync="SearchEditionsAsync"
+                                    MinChars="0"
+                                    OpenOnFocus="true"
+                                    Value="_edition"
+                                    ValueChanged="OnEditionChangedAsync"
+                                    Disabled="IsAnnulled"
+                                    Hint="@L["Questions.Field.Edition.Hint"]"
+                                    Error="@_editionError" />
+
+                    <AppTextField TValue="int?"
+                                  Id="question-paper-number"
+                                  Label="@L["Questions.Field.PaperNumber"]"
+                                  InputType="InputType.Number"
+                                  Value="_paperNumber"
+                                  ValueChanged="@((int? value) => OnPaperNumberChanged(value))"
+                                  Required="@(_edition is not null)"
+                                  Disabled="@(_edition is null || IsAnnulled)"
+                                  Hint="@(_edition is null ? L["Questions.Field.PaperNumber.DisabledHint"].Value : L["Questions.Field.PaperNumber.Hint"].Value)"
+                                  Error="@_paperNumberError" />
+
+                    <AppSelectField TValue="Guid?"
+                                    Id="question-notice-subject"
+                                    Label="@L["Questions.Field.NoticeSubject"]"
+                                    Value="_noticeSubjectId"
+                                    ValueChanged="@((Guid? value) => OnNoticeSubjectChanged(value))"
+                                    Options="NoticeSubjectOptions"
+                                    Disabled="@(_edition is null || IsAnnulled)"
+                                    Loading="_noticeSubjectsLoading"
+                                    Hint="@(_edition is null ? L["Questions.Field.NoticeSubject.DisabledHint"].Value : L["Questions.Field.NoticeSubject.Hint"].Value)"
+                                    Error="@_noticeSubjectError" />
+                </AppFormGrid>
+            </AppSectionCard>
+
+            <AppSectionCard Id="question-section-statement"
+                            Title="@L["Questions.Section.Statement"]"
+                            Icon="@AppIcons.Questions"
+                            Subtitle="@L["Questions.Section.Statement.Subtitle"]">
+                <AppRichTextField Id="question-statement"
+                                  Label="@L["Questions.Field.Statement"]"
+                                  Placeholder="@L["Questions.Field.Statement.Placeholder"]"
+                                  Hint="@L["Questions.Field.Statement.Hint"]"
+                                  Required="true"
+                                  Disabled="IsAnnulled"
+                                  Lang="@_contentLanguage"
+                                  Value="@_statement"
+                                  ValueChanged="@((string? value) => OnStatementChanged(value))"
+                                  Error="@_statementError" />
+            </AppSectionCard>
+
+            <AppSectionCard Id="question-section-base-text"
+                            Title="@L["Questions.Section.BaseText"]"
+                            Icon="@AppIcons.BaseText"
+                            Subtitle="@L["Questions.Section.BaseText.Subtitle"]">
+                <AppRichTextField Id="question-base-text"
+                                  Label="@L["Questions.Field.BaseText"]"
+                                  Placeholder="@L["Questions.Field.BaseText.Placeholder"]"
+                                  Hint="@L["Questions.Field.BaseText.Hint"]"
+                                  Disabled="IsAnnulled"
+                                  Lang="@_contentLanguage"
+                                  Value="@_baseText"
+                                  ValueChanged="@((string? value) => OnBaseTextChanged(value))"
+                                  Error="@_baseTextError" />
+            </AppSectionCard>
+
+            @* F-97, BR9: the section that edits the answer is the one the type declares. The options typed for
+               single choice stay in the form while the other type is shown, and only the chosen type's are sent. *@
+            @if (IsTrueFalse)
+            {
+                <AppSectionCard Id="question-section-true-false-key"
+                                Title="@L["Questions.Section.TrueFalseKey"]"
+                                Icon="@AppIcons.Verified"
+                                Subtitle="@L["Questions.Section.TrueFalseKey.Subtitle"]">
+                    @* F-101: the radio cards have no disabled state, so a frozen key is read as a value, as the type is. *@
+                    @if (IsAnnulled)
+                    {
+                        <div class="app-field mb-4">
+                            <span class="app-field-label" id="question-true-false-key-label">@L["Questions.TrueFalseKey.Label"]</span>
+                            <span class="app-field-value" id="question-true-false-key-value">@(_trueFalseKey == true ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <AppRadioCards TValue="bool?"
+                                       Id="question-true-false-key"
+                                       Label="@L["Questions.TrueFalseKey.Label"]"
+                                       Value="_trueFalseKey"
+                                       ValueChanged="@((bool? value) => OnTrueFalseKeyChanged(value))"
+                                       Options="TrueFalseCards"
+                                       Columns="2"
+                                       Hint="@L["Questions.TrueFalseKey.Hint"]"
+                                       Error="@_trueFalseKeyError" />
+                    }
+
+                    @* F-98 BR5, AC16: the same reason field as the options section has. *@
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
+                </AppSectionCard>
+            }
+            else
+            {
+            <AppSectionCard Id="question-section-options"
+                            Title="@L["Questions.Section.Options"]"
+                            Icon="@AppIcons.Options"
+                            Subtitle="@L["Questions.Section.Options.Subtitle"]">
+                @* The group's value is the position of the correct option: exactly one can be checked (BR4) and a
+                   draft may have none (BR3). *@
+                <MudRadioGroup T="int?"
+                               Value="CorrectPosition"
+                               ValueChanged="OnCorrectChanged"
+                               aria-label="@L["Questions.Options.Correct.Label"].Value"
+                               aria-describedby="question-options-description">
+                    <AppItemRows TItem="OptionDraft"
+                                 Items="_options"
+                                 EmptyMessage="@L["Questions.Options.Empty"]"
+                                 AriaLabelledBy="question-section-options-title">
+                        <RowTemplate Context="option">
+                            @{
+                                var position = _options.IndexOf(option);
+                                var letter = QuestionText.Letter(position);
+                            }
+                            <div class="app-option-row">
+                                <span class="app-option-letter">@letter</span>
+                                <span class="app-option-radio">
+                                    <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsAnnulled">
+                                        <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
+                                    </MudRadio>
+                                </span>
+                                <AppRichTextField Id="@OptionId(position)"
+                                                  Label="@L["Questions.Options.Field", letter]"
+                                                  LabelVisuallyHidden="true"
+                                                  Placeholder="@L["Questions.Options.Field.Placeholder"]"
+                                                  Compact="true"
+                                                  Disabled="IsAnnulled"
+                                                  AutoFocus="@option.FocusOnRender"
+                                                  Lang="@_contentLanguage"
+                                                  Value="@option.Html"
+                                                  ValueChanged="@((string? value) => OnOptionChanged(option, value))"
+                                                  Error="@option.Error" />
+                            </div>
+                        </RowTemplate>
+                        <Actions Context="option">
+                            @{
+                                var index = _options.IndexOf(option);
+                            }
+                            @if (!IsAnnulled)
+                            {
+                                <AppRowActions ItemName="@L["Questions.Options.Letter", QuestionText.Letter(index)]"
+                                               IdPrefix="@ActionsId(index)"
+                                               OnMoveUp="@(() => Move(index, -1))"
+                                               MoveUpDisabledReason="@(index == 0 ? L["Questions.Options.MoveUp.DisabledFirst"].Value : null)"
+                                               OnMoveDown="@(() => Move(index, 1))"
+                                               MoveDownDisabledReason="@(index == _options.Count - 1 ? L["Questions.Options.MoveDown.DisabledLast"].Value : null)"
+                                               OnDelete="@(() => Remove(index))" />
+                            }
+                        </Actions>
+                    </AppItemRows>
+                </MudRadioGroup>
+
+                @* A section-level refusal (count, key, or an option error the problem did not place) is under the list
+                   and described to the group, so it is read with it. *@
+                <span id="question-options-description" class="app-field-description">
+                    @if (_optionsError is not null)
+                    {
+                        <span class="app-field-error-text" aria-live="polite">@_optionsError</span>
+                    }
+                </span>
+
+                <div class="app-options-footer">
+                    @if (IsAnnulled)
+                    {
+                        @* F-101: frozen; no button, only the count below. *@
+                    }
+                    else if (AtMaxOptions)
+                    {
+                        <MudTooltip Text="@L["Questions.Options.Add.DisabledMax"].Value">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@AppIcons.Add"
+                                       Disabled="true"
+                                       id="@AddOptionId">@L["Questions.Options.Add"]</MudButton>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Add"
+                                   OnClick="AddOption"
+                                   id="@AddOptionId">@L["Questions.Options.Add"]</MudButton>
+                    }
+
+                    @* The limit is never told by a tooltip alone: a disabled button is not focusable. *@
+                    <span class="app-options-count">@L["Questions.Options.Count", _options.Count]</span>
+                </div>
+
+                <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+                @* F-98 BR5, AC16: a published question whose key is changing says why; the reason goes with Save. *@
+                @if (ShowChangeReason)
+                {
+                    @ChangeReasonField
+                }
+            </AppSectionCard>
+            }
+
+            <AppSectionCard Id="question-section-explanation"
+                            Title="@L["Questions.Section.Explanation"]"
+                            Icon="@AppIcons.Explanation"
+                            Subtitle="@L["Questions.Section.Explanation.Subtitle"]">
+                <AppRichTextField Id="question-explanation"
+                                  Label="@L["Questions.Field.Explanation"]"
+                                  Placeholder="@L["Questions.Field.Explanation.Placeholder"]"
+                                  Hint="@L["Questions.Field.Explanation.Hint"]"
+                                  Disabled="IsAnnulled"
+                                  Lang="@_contentLanguage"
+                                  Value="@_explanation"
+                                  ValueChanged="@((string? value) => OnExplanationChanged(value))"
+                                  Error="@_explanationError" />
+            </AppSectionCard>
+
+            @* F-101 BR5: a frozen form has nothing to save; Cancel's job is the "Back" of the page header. *@
+            @if (!IsAnnulled)
+            {
+                <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+            }
+        </MudPaper>
+
+        <AppFormAside Title="@L["Questions.Form.Aside.Title"]"
+                      EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="AsideRows"
+                      ChecklistTitle="@L["Questions.Form.Aside.Checklist"]"
+                      DoneText="@L["Common.Checklist.Done"]"
+                      PendingText="@L["Common.Checklist.Pending"]"
+                      Checklist="AsideChecklist" />
+    </div>
+
+    @* Publication: outside the form. Save never publishes and Publish never saves (BR12); both act on what is
+       stored, so a change that is not saved blocks Publish and the preview says it shows the saved version. *@
+    <MudPaper Class="app-form-card mt-4" Elevation="0">
+        <AppSectionCard Id="question-section-publication"
+                        Title="@L["Questions.Section.Publication"]"
+                        Icon="@AppIcons.Publish"
+                        Subtitle="@L["Questions.Section.Publication.Subtitle"]">
+            @if (_saved is null)
+            {
+                <MudText Typo="Typo.body2">@L["Questions.Publication.SaveFirst"]</MudText>
+            }
+            else
+            {
+                @if (_publicationError is not null)
+                {
+                    <AppAlert Severity="Severity.Error" Text="@_publicationError" Class="mb-4" />
+                }
+
+                <div class="app-publication-row">
+                    <AppStatusChip Text="@QuestionText.StatusName(L, _saved.Status)" Tone="QuestionText.StatusTone(_saved.Status)" />
+                    <span>@PublicationText</span>
+                </div>
+
+                @* F-101 UC3: when and why it was annulled, from the version that recorded it. *@
+                @if (IsAnnulled && _saved?.Annulment is { } annulment)
+                {
+                    <div class="app-publication-annulment">
+                        <p id="question-annulment-date">@L["Questions.Annulment.Date", annulment.AnnulledAt.ToString("g", CultureInfo.CurrentCulture)]</p>
+                        <p id="question-annulment-reason">@L["Questions.Annulment.Reason", annulment.Reason]</p>
+                    </div>
+                }
+
+                <div class="app-publication-actions">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@AppIcons.View"
+                               Disabled="_publishing"
+                               OnClick="PreviewAsync"
+                               id="@PreviewButtonId">@L["Questions.Action.Preview"]</MudButton>
+
+                    @if (IsAnnulled)
+                    {
+                        @* F-101 BR6: the only way out of the frozen state; the reason is asked in a dialog. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Retry"
+                                   OnClick="ReinstateAsync"
+                                   id="question-reinstate">@L["Questions.Action.Reinstate"]</MudButton>
+                    }
+                    else if (IsPublished)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@(_publishing ? null : AppIcons.Unpublish)"
+                                   Disabled="_publishing"
+                                   OnClick="UnpublishAsync"
+                                   id="question-unpublish">
+                            @if (_publishing)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                            }
+                            @L["Questions.Action.Unpublish"]
+                        </MudButton>
+
+                        @* F-101 UC1: annulling acts on what is stored, so unsaved changes block it, with the reason said below. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   StartIcon="@AppIcons.Archive"
+                                   Disabled="@(_publishing || HasChanges)"
+                                   OnClick="AnnulAsync"
+                                   aria-describedby="@(HasChanges ? "question-annul-reason-hint" : null)"
+                                   id="question-annul">@L["Questions.Action.Annul"]</MudButton>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.Publish"].Value)">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@(_publishing ? null : AppIcons.Publish)"
+                                       Disabled="@(_publishing || PublishDisabledReason is not null)"
+                                       OnClick="PublishAsync"
+                                       aria-describedby="@(PublishDisabledReason is null ? null : "question-publication-reason")"
+                                       id="question-publish">
+                                @if (_publishing)
+                                {
+                                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                                }
+                                @L["Questions.Action.Publish"]
+                            </MudButton>
+                        </MudTooltip>
+                    }
+                </div>
+
+                @* The reason is visible text, not a tooltip alone: a disabled button is not focusable. *@
+                @if (!IsPublished && !IsAnnulled && PublishDisabledReason is not null)
+                {
+                    <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
+                }
+                else if (IsPublished && HasChanges)
+                {
+                    <p id="question-annul-reason-hint" class="app-publication-reason">@L["Questions.Publication.Publish.DisabledUnsaved"]</p>
+                }
+
+                @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
+                   the Api refused the first click; the second click sends it. *@
+                @if (!IsPublished && !IsAnnulled && _publishReasonRequired)
+                {
+                    <div class="app-publication-change-reason">
+                        <AppTextField TValue="string"
+                                      Id="@PublishReasonId"
+                                      Label="@L["Questions.ChangeReason.Label"]"
+                                      Hint="@L["Questions.ChangeReason.Hint"]"
+                                      Value="_publishReason"
+                                      ValueChanged="@((string? value) => OnPublishReasonChanged(value))"
+                                      Lines="3"
+                                      MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                                      Required="true"
+                                      Error="@_publishReasonError" />
+                    </div>
+                }
+            }
+        </AppSectionCard>
+    </MudPaper>
+
+    @* F-98 UC5, AC15: every version the question has had, newest first. A version opens read only in the preview
+       dialog. The author is stored and not shown: no contract resolves a name. *@
+    @if (_saved is not null)
+    {
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <AppSectionCard Id="question-section-history"
+                            Title="@L["Questions.Section.History"]"
+                            Icon="@AppIcons.History"
+                            Subtitle="@L["Questions.Section.History.Subtitle"]">
+                @if (_historyError is not null)
+                {
+                    <AppAlert Severity="Severity.Error" Text="@_historyError" Class="mb-4" />
+                }
+
+                <AppDataTable @ref="_history"
+                              TItem="QuestionVersionListItemResponse"
+                              LoadAsync="LoadHistoryAsync"
+                              Searchable="false"
+                              EmptyMessage="@L["Questions.History.Empty"]">
+                    <Columns>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Version"]" Sortable="false">
+                            <CellTemplate>
+                                <span class="app-cell-nowrap">
+                                    <span>@context.Item.Number.ToString(CultureInfo.CurrentCulture)</span>
+                                    @if (context.Item.IsCurrent)
+                                    {
+                                        <AppStatusChip Text="@L["Questions.History.Current"]" Tone="AppStatusTone.Info" />
+                                    }
+                                </span>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Date"]" Sortable="false">
+                            <CellTemplate>
+                                <span class="app-cell-nowrap">@context.Item.CreatedAt.ToString("g", CultureInfo.CurrentCulture)</span>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Change"]" Sortable="false">
+                            <CellTemplate>
+                                <AppStatusChip Text="@ChangeLabel(context.Item)" Tone="ChangeTone(context.Item)" />
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="QuestionVersionListItemResponse" Title="@L["Questions.History.Column.Reason"]" Sortable="false">
+                            <CellTemplate>
+                                @if (string.IsNullOrWhiteSpace(context.Item.Reason))
+                                {
+                                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
+                                    <span aria-hidden="true">—</span>
+                                    <span class="app-visually-hidden">@L["Questions.History.NoReason"]</span>
+                                }
+                                else
+                                {
+                                    <AppTruncatedText Text="@context.Item.Reason" MaxWidth="24rem" />
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                    <RowActions>
+                        <AppRowActions ItemName="@L["Questions.History.Row.Name", context.Number]"
+                                       IdPrefix="@HistoryActionsId(context.Number)"
+                                       MoreActions="@HistoryActions(context)" />
+                    </RowActions>
+                </AppDataTable>
+            </AppSectionCard>
+        </MudPaper>
+    }
+}
+
+@code {
+    private const string ErrorSummaryId = "question-error-summary";
+    private const string AddOptionId = "question-option-add";
+    private const string PreviewButtonId = "question-preview";
+    private const string ChangeReasonId = "question-change-reason";
+    private const string PublishReasonId = "question-publish-reason";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The question being edited; absent on /admin/questions/new.</summary>
+    [Parameter] public Guid? Id { get; set; }
+
+    /// <summary>The edition chosen on the new form when it opens from the edition page (F-96, "Add question").</summary>
+    [SupplyParameterFromQuery(Name = "examEditionId")] public Guid? PreselectedEditionId { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private QuestionResponse? _saved;
+    private AppLookupOption? _subject;
+    private AppLookupOption? _topic;
+    private string? _contentLanguage;
+    private int? _difficulty;
+    private string _statement = string.Empty;
+    private string _baseText = string.Empty;
+    private string _explanation = string.Empty;
+    private List<OptionDraft> _options = [];
+    private QuestionType _type = QuestionType.SingleChoice;
+    private bool? _trueFalseKey;
+    private string? _trueFalseKeyError;
+
+    // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
+    private AppLookupOption? _edition;
+    private int? _paperNumber;
+    private Guid? _noticeSubjectId;
+    private IReadOnlyList<NoticeSubjectLookupResponse> _noticeSubjects = [];
+    private bool _noticeSubjectsLoading;
+    private string? _editionError;
+    private string? _paperNumberError;
+    private string? _noticeSubjectError;
+    private Guid? _noticeSubjectsFor;
+    private bool _preselected;
+
+    private string? _topicError;
+    private string? _languageError;
+    private string? _difficultyError;
+    private string? _statementError;
+    private string? _baseTextError;
+    private string? _optionsError;
+    private string? _explanationError;
+    private string? _error;
+    private string? _publicationError;
+    private string? _announcement;
+    private string? _pendingFocus;
+
+    // F-98: the reason of an answer key change, sent with Save (BR5), and the one a refused publish asks for.
+    private string _changeReason = string.Empty;
+    private string? _changeReasonError;
+    private bool _changeReasonForced;
+    private string _publishReason = string.Empty;
+    private string? _publishReasonError;
+    private bool _publishReasonRequired;
+    private AppDataTable<QuestionVersionListItemResponse>? _history;
+    private string? _historyError;
+
+    private bool _loading;
+    private bool _loadFailed;
+    private bool _notFound;
+    private bool _saving;
+    private bool _publishing;
+    private bool _showErrorSummary;
+
+    private bool IsEdit => _saved is not null;
+
+    private bool IsPublished => _saved?.Status == QuestionStatus.Published;
+
+    // F-101 BR5: an annulled question is frozen; the fields, the options and Save give way to Reinstate.
+    private bool IsAnnulled => _saved?.Status == QuestionStatus.Annulled;
+
+    private string PublicationText =>
+        IsAnnulled
+            ? L["Questions.Publication.Annulled"]
+            : IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"];
+
+    private bool AtMaxOptions => _options.Count >= QuestionLimits.OptionsMax;
+
+    private bool IsTrueFalse => _type == QuestionType.TrueFalse;
+
+    private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
+    [
+        new(QuestionType.SingleChoice, L["Questions.Type.SingleChoice"], L["Questions.Type.SingleChoice.Description"], AppIcons.Options),
+        new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified)
+    ];
+
+    private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
+    [
+        new(true, L["Questions.TrueFalse.True"], string.Empty),
+        new(false, L["Questions.TrueFalse.False"], string.Empty)
+    ];
+
+    private string Title => IsEdit || Id is not null ? L["Questions.Form.EditTitle"] : L["Questions.Form.AddTitle"];
+
+    private static string OptionId(int position) => $"question-option-{position}";
+
+    private static string ActionsId(int position) => $"question-option-actions-{position}";
+
+    // A language is shown in its own name: it does not depend on the reader's UI language.
+    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
+        [.. SupportedCultures.All.Select(culture =>
+            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    private IReadOnlyList<AppSelectOption<int?>> DifficultyOptions =>
+    [
+        new(null, L["Questions.Difficulty.NotSet"]),
+        .. Enumerable.Range(QuestionLimits.DifficultyMin, QuestionLimits.DifficultyMax - QuestionLimits.DifficultyMin + 1)
+            .Select(value => new AppSelectOption<int?>(value, value.ToString(CultureInfo.CurrentCulture)))
+    ];
+
+    private int? CorrectPosition
+    {
+        get
+        {
+            var index = _options.FindIndex(option => option.IsCorrect);
+            return index >= 0 ? index : null;
+        }
+    }
+
+    // BR3 then BR4, in the order the aside lists them. The first three are also what a draft needs.
+    private bool TopicDone => _topic is not null;
+
+    private bool LanguageDone => !string.IsNullOrWhiteSpace(_contentLanguage);
+
+    private bool StatementDone => !QuestionHtml.IsBlank(_statement);
+
+    private bool OptionsCountDone =>
+        _options.Count >= QuestionLimits.OptionsMin && _options.Count <= QuestionLimits.OptionsMax;
+
+    private bool OptionsTextDone => _options.Count > 0 && _options.All(option => !QuestionHtml.IsBlank(option.Html));
+
+    private bool KeyDone => _options.Count(option => option.IsCorrect) == 1;
+
+    // F-97: a true/false question has one key and no options, so the three option items are one.
+    private bool TrueFalseKeyDone => _trueFalseKey is not null;
+
+    private bool ChecklistComplete =>
+        TopicDone && LanguageDone && StatementDone
+        && (IsTrueFalse ? TrueFalseKeyDone : OptionsCountDone && OptionsTextDone && KeyDone);
+
+    private IReadOnlyList<AppChecklistItem> AsideChecklist =>
+    [
+        new(L["Questions.Checklist.Topic"], TopicDone),
+        new(L["Questions.Checklist.Language"], LanguageDone),
+        new(L["Questions.Checklist.Statement"], StatementDone),
+        .. IsTrueFalse
+            ? [new AppChecklistItem(L["Questions.Checklist.TrueFalseKey"], TrueFalseKeyDone)]
+            : new List<AppChecklistItem>
+            {
+                new(L["Questions.Checklist.OptionsCount"], OptionsCountDone),
+                new(L["Questions.Checklist.OptionsText"], OptionsTextDone),
+                new(L["Questions.Checklist.Key"], KeyDone)
+            }
+    ];
+
+    private IReadOnlyList<AppAsideRow> AsideRows =>
+    [
+        new(L["Questions.Form.Aside.Status"], _saved is null ? null : QuestionText.StatusName(L, _saved.Status)),
+        new(L["Questions.Field.Subject"], _subject?.Text),
+        new(L["Questions.Field.Topic"], _topic?.Text),
+        new(L["Questions.Field.ContentLanguage"], LanguageDone ? QuestionText.LanguageName(_contentLanguage!) : null),
+        new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
+        new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
+        IsTrueFalse
+            ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
+            : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value)
+    ];
+
+    // The notice subject select: the group is part of the text, since the kit select has no group headings.
+    private IReadOnlyList<AppSelectOption<Guid?>> NoticeSubjectOptions =>
+    [
+        new(null, L["Questions.NoticeSubject.None"]),
+        .. _noticeSubjects.Select(subject => new AppSelectOption<Guid?>(
+            subject.Id,
+            string.IsNullOrWhiteSpace(subject.Group) ? subject.Label : $"{subject.Group} · {subject.Label}"))
+    ];
+
+    // The reason Publish is disabled, said in words. Unsaved changes come first: publishing acts on what is stored.
+    private string? PublishDisabledReason =>
+        HasChanges
+            ? L["Questions.Publication.Publish.DisabledUnsaved"].Value
+            : !ChecklistComplete
+                ? L["Questions.Publication.Publish.DisabledIncomplete"].Value
+                : null;
+
+    // One line per field the Api or the form refused, in the order the form shows them.
+    private IReadOnlyList<AppErrorSummaryItem> ErrorSummaryItems
+    {
+        get
+        {
+            List<AppErrorSummaryItem> items = [];
+            AddIfRefused(items, _topicError, "question-topic", L["Questions.Field.Topic"]);
+            AddIfRefused(items, _languageError, "question-content-language", L["Questions.Field.ContentLanguage"]);
+            AddIfRefused(items, _difficultyError, "question-difficulty", L["Questions.Field.Difficulty"]);
+            AddIfRefused(items, _editionError, "question-edition", L["Questions.Field.Edition"]);
+            AddIfRefused(items, _paperNumberError, "question-paper-number", L["Questions.Field.PaperNumber"]);
+            AddIfRefused(items, _noticeSubjectError, "question-notice-subject", L["Questions.Field.NoticeSubject"]);
+            AddIfRefused(items, _statementError, "question-statement", L["Questions.Field.Statement"]);
+            AddIfRefused(items, _baseTextError, "question-base-text", L["Questions.Field.BaseText"]);
+            for (var index = 0; index < _options.Count; index++)
+            {
+                AddIfRefused(items, _options[index].Error, OptionId(index), L["Questions.Options.Field", QuestionText.Letter(index)]);
+            }
+
+            AddIfRefused(items, _optionsError, AddOptionId, L["Questions.Section.Options"]);
+            AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
+            AddIfRefused(items, _changeReasonError, ChangeReasonId, L["Questions.ChangeReason.Label"]);
+            AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
+            return items;
+        }
+    }
+
+    private static void AddIfRefused(List<AppErrorSummaryItem> items, string? error, string fieldId, string label)
+    {
+        if (error is not null)
+        {
+            items.Add(new AppErrorSummaryItem(fieldId, label));
+        }
+    }
+
+    // What the form holds against what is stored. A new question is compared with an empty one.
+    private bool HasChanges =>
+        _topic?.Id != _saved?.TopicId
+        || (_contentLanguage ?? string.Empty) != (_saved?.ContentLanguage ?? DefaultLanguage)
+        || _difficulty != _saved?.Difficulty
+        || _edition?.Id != _saved?.Origin?.ExamEditionId
+        || (_edition is not null && _paperNumber != _saved?.Origin?.PaperNumber)
+        || (_edition is not null && _noticeSubjectId != _saved?.Origin?.NoticeSubjectId)
+        || Normalized(_statement) != Normalized(_saved?.StatementHtml)
+        || Normalized(_baseText) != Normalized(_saved?.BaseTextHtml)
+        || Normalized(_explanation) != Normalized(_saved?.ExplanationHtml)
+        || AnswerChanged();
+
+    // The answer of the chosen type against what is stored; the other type's answer is not part of the question.
+    private bool AnswerChanged() =>
+        IsTrueFalse
+            ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
+            : OptionsChanged();
+
+    // F-98 BR4: the key of a published question differs from the stored one when the correct option moved (a
+    // reorder counts) or the true/false value did. Version 1 and drafts never need a reason.
+    private bool KeyChangeNeedsReason =>
+        IsPublished
+        && _saved is not null
+        && (IsTrueFalse ? _trueFalseKey != _saved.TrueFalseKey : CorrectPosition != StoredCorrectPosition);
+
+    private int? StoredCorrectPosition
+    {
+        get
+        {
+            var index = _saved?.Options.OrderBy(option => option.Position).ToList().FindIndex(option => option.IsCorrect) ?? -1;
+            return index >= 0 ? index : null;
+        }
+    }
+
+    // The field also shows when the Api asked for a reason the form did not expect (the stored key moved meanwhile).
+    private bool ShowChangeReason => KeyChangeNeedsReason || _changeReasonForced;
+
+    private RenderFragment ChangeReasonField =>
+        @<div class="app-change-reason">
+            <AppTextField TValue="string"
+                          Id="@ChangeReasonId"
+                          Label="@L["Questions.ChangeReason.Label"]"
+                          Hint="@L["Questions.ChangeReason.Hint"]"
+                          Value="_changeReason"
+                          ValueChanged="@((string? value) => OnChangeReasonChanged(value))"
+                          Lines="3"
+                          MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                          Required="true"
+                          Error="@_changeReasonError" />
+        </div>;
+
+    private void OnChangeReasonChanged(string? value)
+    {
+        _changeReason = value ?? string.Empty;
+        _changeReasonError = null;
+    }
+
+    private void OnPublishReasonChanged(string? value)
+    {
+        _publishReason = value ?? string.Empty;
+        _publishReasonError = null;
+    }
+
+    // The comfort check of the reason (BR5); the Api is the authority and runs the same one.
+    private string? ChangeReasonValidation()
+    {
+        if (!ShowChangeReason)
+        {
+            return null;
+        }
+
+        var reason = _changeReason.Trim();
+
+        return reason.Length == 0
+            ? Errors.For(QuestionBankErrorCodes.QuestionKeyChangeReasonRequired)
+            : reason.Length > QuestionLimits.ChangeReasonMaxLength
+                ? Errors.For(QuestionBankErrorCodes.QuestionChangeReasonTooLong)
+                : null;
+    }
+
+    private string DefaultLanguage => QuestionText.DefaultContentLanguage();
+
+    private static string Normalized(string? html) => QuestionHtml.IsBlank(html) ? string.Empty : html!;
+
+    private bool OptionsChanged()
+    {
+        var stored = _saved?.Options.OrderBy(option => option.Position).ToList() ?? [];
+        if (stored.Count != _options.Count)
+        {
+            return true;
+        }
+
+        for (var index = 0; index < stored.Count; index++)
+        {
+            if (stored[index].IsCorrect != _options[index].IsCorrect
+                || Normalized(stored[index].TextHtml) != Normalized(_options[index].Html))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected override void OnInitialized() => _contentLanguage = DefaultLanguage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BuildBreadcrumbs();
+        if (Id is not { } id)
+        {
+            await PreselectEditionAsync();
+            return;
+        }
+
+        if (_saved?.Id == id)
+        {
+            return;
+        }
+
+        await LoadAsync(id);
+    }
+
+    // The edition page's "Add question" opens the new form with its edition already chosen (UC3). An edition that
+    // cannot be read just leaves the field empty: the curator picks one, nothing breaks.
+    private async Task PreselectEditionAsync()
+    {
+        if (PreselectedEditionId is not { } editionId || _edition is not null || _preselected)
+        {
+            return;
+        }
+
+        _preselected = true;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindEditionAsync(token, editionId);
+        if (result is { IsSuccess: true, Value: { } edition })
+        {
+            _edition = EditionOption(edition);
+            await LoadNoticeSubjectsAsync(edition.Id);
+        }
+    }
+
+    private Task ReloadAsync() => Id is { } id ? LoadAsync(id) : Task.CompletedTask;
+
+    private async Task LoadAsync(Guid id)
+    {
+        _loading = true;
+        _loadFailed = false;
+        _notFound = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindQuestionAsync(token, id);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            Apply(question);
+            BuildBreadcrumbs();
+            await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
+            return;
+        }
+
+        // 404 is the answer "this question is not here"; anything else is a broken call the reader may retry.
+        _notFound = result?.ErrorCode == QuestionBankErrorCodes.QuestionNotFound;
+        _loadFailed = !_notFound;
+    }
+
+    // The form shows what was stored: the sanitized HTML replaces what the editors held (BR8).
+    private void Apply(QuestionResponse question)
+    {
+        _saved = question;
+        _type = question.Type;
+        _trueFalseKey = question.TrueFalseKey;
+        _subject = new AppLookupOption(question.SubjectId, question.SubjectName);
+        _topic = new AppLookupOption(question.TopicId, question.TopicName);
+        _contentLanguage = question.ContentLanguage;
+        _difficulty = question.Difficulty;
+        _edition = question.Origin is { } origin ? EditionOption(origin) : null;
+        _paperNumber = question.Origin?.PaperNumber;
+        _noticeSubjectId = question.Origin?.NoticeSubjectId;
+        _statement = question.StatementHtml;
+        _baseText = question.BaseTextHtml ?? string.Empty;
+        _explanation = question.ExplanationHtml ?? string.Empty;
+        _options =
+        [
+            .. question.Options.OrderBy(option => option.Position)
+                .Select(option => new OptionDraft { Html = option.TextHtml, IsCorrect = option.IsCorrect })
+        ];
+        // F-98: what was typed as a reason belonged to the save that just came back.
+        _changeReason = string.Empty;
+        _changeReasonForced = false;
+        ClearErrors();
+    }
+
+    private void ClearErrors()
+    {
+        _changeReasonError = null;
+        _topicError = _languageError = _difficultyError = _statementError = null;
+        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = null;
+        _editionError = _paperNumberError = _noticeSubjectError = null;
+        _showErrorSummary = false;
+        foreach (var option in _options)
+        {
+            option.Error = null;
+        }
+    }
+
+    private void BuildBreadcrumbs() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["Questions.Title"], href: ListHref),
+            new BreadcrumbItem(Title, href: null, disabled: true)
+        ];
+
+    // -- history (F-98) ---------------------------------------------------------------------------------------
+
+    private static string HistoryActionsId(int number) => $"question-version-actions-{number}";
+
+    // F-101: an annulment and a reinstatement are told before the F-98 labels; they are never a key change.
+    private string ChangeLabel(QuestionVersionListItemResponse version) =>
+        version.Annulled
+            ? L["Questions.History.Change.Annulled"]
+            : version.Reinstated
+                ? L["Questions.History.Change.Reinstated"]
+                : version.Number == 1
+                    ? L["Questions.History.Change.First"]
+                    : version.AnswerKeyChanged
+                        ? L["Questions.History.Change.KeyChanged"]
+                        : L["Questions.History.Change.Edited"];
+
+    // The annulment and the key change are the rows a reader must notice; the rest are plain labels.
+    private static AppStatusTone ChangeTone(QuestionVersionListItemResponse version) =>
+        version.Annulled
+            ? AppStatusTone.Error
+            : version.Number > 1 && version.AnswerKeyChanged ? AppStatusTone.Warning : AppStatusTone.Neutral;
+
+    private IReadOnlyList<AppRowAction> HistoryActions(QuestionVersionListItemResponse version) =>
+    [
+        new AppRowAction(L["Questions.History.Action.View"], AppIcons.View, () => ViewVersionAsync(version), Key: "view")
+    ];
+
+    // A question has few versions: the Api answers all of them and the table pages them here.
+    private async Task<AppTablePage<QuestionVersionListItemResponse>> LoadHistoryAsync(
+        AppTableQuery query,
+        CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListVersionsAsync(token, _saved!.Id, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Versions failed to load: {result.ErrorCode}.");
+        }
+
+        var all = result.Value!;
+
+        return new AppTablePage<QuestionVersionListItemResponse>(
+            [.. all.Skip(query.Page * query.PageSize).Take(query.PageSize)],
+            all.Count);
+    }
+
+    private Task ReloadHistoryAsync() => _history is null ? Task.CompletedTask : _history.ReloadAsync();
+
+    // UC5: the version opens in the preview dialog, read only, from what was recorded then.
+    private async Task ViewVersionAsync(QuestionVersionListItemResponse row)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.GetVersionAsync(token, current.Id, row.Number);
+        if (result is not { IsSuccess: true, Value: { } version })
+        {
+            // The refusal belongs to the History card the curator acted in, not to the Publication card.
+            _historyError = Errors.For(result?.ErrorCode);
+
+            // The row button calls this delegate itself, not an EventCallback of the page: say it changed.
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _historyError = null;
+
+        // The dialog draws a question: the version fills its content and the question's catalog data stays as
+        // it is (it is not part of a version, BR1).
+        var asQuestion = new QuestionResponse(
+            version.QuestionId,
+            version.Type,
+            QuestionStatus.Published,
+            current.TopicId,
+            current.TopicName,
+            current.SubjectId,
+            current.SubjectName,
+            version.ContentLanguage,
+            version.StatementHtml,
+            version.BaseTextHtml,
+            version.ExplanationHtml,
+            current.Difficulty,
+            version.Options,
+            TrueFalseKey: version.TrueFalseKey,
+            CurrentVersion: version.Number);
+        var parameters = new DialogParameters<QuestionPreviewDialog>
+        {
+            { dialog => dialog.Question, asQuestion },
+            { dialog => dialog.VersionRecordedAt, version.CreatedAt }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionPreviewDialog>(
+            L["Questions.History.Version.Title", version.Number], parameters, options);
+        await reference.Result;
+
+        _pendingFocus = $"{HistoryActionsId(row.Number)}-view";
+        StateHasChanged();
+    }
+
+    // -- classification ---------------------------------------------------------------------------------------
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchSubjectsAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.SearchSubjectsAsync(token, term, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Subjects failed to load: {result.ErrorCode}.");
+        }
+
+        return [.. result.Value!.Select(subject => new AppLookupOption(subject.Id, subject.Name))];
+    }
+
+    // A subject has a short topic list: the Api answers all of it and the term narrows it here, ignoring case and accents.
+    private async Task<IReadOnlyList<AppLookupOption>> SearchTopicsAsync(string term, CancellationToken cancellationToken)
+    {
+        if (_subject is not { } subject)
+        {
+            return [];
+        }
+
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListTopicsAsync(token, subject.Id, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Topics failed to load: {result.ErrorCode}.");
+        }
+
+        var wanted = AppSuggestField.Normalize(term);
+        return
+        [
+            .. result.Value!
+                .Where(topic => wanted.Length == 0 || AppSuggestField.Normalize(topic.Name).Contains(wanted, StringComparison.Ordinal))
+                .Select(topic => new AppLookupOption(topic.Id, topic.Name))
+                .Take(AppLookupField.MaxCandidates)
+        ];
+    }
+
+    // Changing or clearing the subject clears the topic: a topic belongs to one subject.
+    private void OnSubjectChanged(AppLookupOption? value)
+    {
+        if (value?.Id != _subject?.Id)
+        {
+            _topic = null;
+            _topicError = null;
+        }
+
+        _subject = value;
+    }
+
+    private void OnTopicChanged(AppLookupOption? value)
+    {
+        _topic = value;
+        _topicError = TopicError();
+    }
+
+    private void OnContentLanguageChanged(string? value)
+    {
+        _contentLanguage = value;
+        _languageError = null;
+    }
+
+    private void OnDifficultyChanged(int? value)
+    {
+        _difficulty = value;
+        _difficultyError = null;
+    }
+
+    // F-97 BR2: the type is a choice of a new question. The answers typed for the other type are kept, so a
+    // curator who picks the wrong card loses nothing, and only the chosen type's are sent.
+    private void OnTypeChanged(QuestionType? value)
+    {
+        if (value is not { } type || IsEdit)
+        {
+            return;
+        }
+
+        _type = type;
+        _optionsError = null;
+        _trueFalseKeyError = null;
+    }
+
+    private void OnTrueFalseKeyChanged(bool? value)
+    {
+        _trueFalseKey = value;
+        _trueFalseKeyError = null;
+    }
+
+    // -- the origin (F-96) --------------------------------------------------------------------------------------
+
+    // The line the reader picks is the source line; the position, when there is one, tells look-alikes apart.
+    private static AppLookupOption EditionOption(ExamEditionLookupResponse edition) => QuestionText.EditionOption(edition);
+
+    // BR11: an edition that no longer resolves has no name; the field says so instead of showing an empty box.
+    private AppLookupOption EditionOption(QuestionOriginResponse origin) =>
+        new(
+            origin.ExamEditionId,
+            QuestionText.SourceLine(origin) ?? L["Questions.Source.Unresolved"].Value,
+            origin.Position);
+
+    private async Task<IReadOnlyList<AppLookupOption>> SearchEditionsAsync(string term, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.SearchEditionsAsync(token, term, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Editions failed to load: {result.ErrorCode}.");
+        }
+
+        return [.. result.Value!.Select(EditionOption)];
+    }
+
+    // Choosing another edition, or clearing it, clears the number and the notice subject (AC14): both belong to
+    // the edition that was there.
+    private async Task OnEditionChangedAsync(AppLookupOption? value)
+    {
+        if (value?.Id == _edition?.Id)
+        {
+            return;
+        }
+
+        _edition = value;
+        _paperNumber = null;
+        _noticeSubjectId = null;
+        _editionError = _paperNumberError = _noticeSubjectError = null;
+        await LoadNoticeSubjectsAsync(value?.Id);
+    }
+
+    private void OnPaperNumberChanged(int? value)
+    {
+        _paperNumber = value;
+        _paperNumberError = PaperNumberError();
+    }
+
+    private void OnNoticeSubjectChanged(Guid? value)
+    {
+        _noticeSubjectId = value;
+        _noticeSubjectError = null;
+    }
+
+    // The notice subjects of the chosen edition, in display order. A failure leaves the select empty and says so;
+    // the curator can still save without one (it is optional).
+    private async Task LoadNoticeSubjectsAsync(Guid? editionId)
+    {
+        if (editionId is null)
+        {
+            _noticeSubjects = [];
+            _noticeSubjectsFor = null;
+            return;
+        }
+
+        if (_noticeSubjectsFor == editionId)
+        {
+            return;
+        }
+
+        _noticeSubjectsLoading = true;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListNoticeSubjectsAsync(token, editionId.Value);
+        _noticeSubjectsLoading = false;
+
+        _noticeSubjects = result is { IsSuccess: true, Value: { } subjects } ? subjects : [];
+        _noticeSubjectsFor = editionId;
+    }
+
+    // -- the rich texts ---------------------------------------------------------------------------------------
+
+    private void OnStatementChanged(string? value)
+    {
+        _statement = value ?? string.Empty;
+        _statementError = StatementError();
+    }
+
+    private void OnBaseTextChanged(string? value)
+    {
+        _baseText = value ?? string.Empty;
+        _baseTextError = BaseTextError();
+    }
+
+    private void OnExplanationChanged(string? value)
+    {
+        _explanation = value ?? string.Empty;
+        _explanationError = ExplanationError();
+    }
+
+    private void OnOptionChanged(OptionDraft option, string? value)
+    {
+        option.Html = value ?? string.Empty;
+        option.Error = OptionError(option, required: IsPublished);
+        _optionsError = null;
+    }
+
+    // -- the options ------------------------------------------------------------------------------------------
+
+    private void OnCorrectChanged(int? position)
+    {
+        for (var index = 0; index < _options.Count; index++)
+        {
+            _options[index].IsCorrect = index == position;
+        }
+
+        _optionsError = null;
+    }
+
+    private void AddOption()
+    {
+        if (AtMaxOptions)
+        {
+            return;
+        }
+
+        // Only the row added now takes the focus once its editor is ready.
+        foreach (var existing in _options)
+        {
+            existing.FocusOnRender = false;
+        }
+
+        _options.Add(new OptionDraft { FocusOnRender = true });
+        _optionsError = null;
+        _announcement = null;
+    }
+
+    // A move is client-side: the order is sent with Save. The focus stays on the pressed button, or on its pair
+    // when the move made it disabled (the NoticeSubjectsSection rule).
+    private void Move(int index, int direction)
+    {
+        var target = index + direction;
+        if (target < 0 || target >= _options.Count)
+        {
+            return;
+        }
+
+        (_options[index], _options[target]) = (_options[target], _options[index]);
+        _announcement = L["Questions.Options.Moved", target + 1, _options.Count];
+
+        var pressedStillEnabled = direction < 0 ? target > 0 : target < _options.Count - 1;
+        var key = (direction < 0) == pressedStillEnabled ? AppRowActions.MoveUpKey : AppRowActions.MoveDownKey;
+        _pendingFocus = $"{ActionsId(target)}-{key}";
+    }
+
+    // No confirmation: nothing is saved until Save, and leaving the page without saving discards the change.
+    private void Remove(int index)
+    {
+        if (index < 0 || index >= _options.Count)
+        {
+            return;
+        }
+
+        _options.RemoveAt(index);
+        _optionsError = null;
+        _announcement = L["Questions.Options.Removed", _options.Count];
+        _pendingFocus = index < _options.Count ? $"{ActionsId(index)}-{AppRowActions.DeleteKey}" : AddOptionId;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+
+    // -- comfort checks: the Api is the authority and runs the same ones (rule: ui-project) --------------------
+
+    private string? TopicError() =>
+        _topic is null ? L["Questions.Field.Topic.Required"].Value : null;
+
+    private string? StatementError() =>
+        QuestionHtml.IsBlank(_statement)
+            ? Errors.For(QuestionBankErrorCodes.QuestionStatementRequired)
+            : _statement.Length > QuestionLimits.StatementMaxLength
+                ? Errors.For(QuestionBankErrorCodes.QuestionStatementTooLong)
+                : null;
+
+    private string? BaseTextError() =>
+        _baseText.Length > QuestionLimits.BaseTextMaxLength
+            ? Errors.For(QuestionBankErrorCodes.QuestionBaseTextTooLong)
+            : null;
+
+    // BR2: an edition needs a whole number from 1 to 500. Without an edition there is nothing to check.
+    private string? PaperNumberError() =>
+        _edition is null
+            ? null
+            : _paperNumber is not { } number
+                ? Errors.For(QuestionBankErrorCodes.QuestionPaperNumberRequired)
+                : number < QuestionLimits.PaperNumberMin || number > QuestionLimits.PaperNumberMax
+                    ? Errors.For(QuestionBankErrorCodes.QuestionPaperNumberInvalid)
+                    : null;
+
+    private string? ExplanationError() =>
+        _explanation.Length > QuestionLimits.ExplanationMaxLength
+            ? Errors.For(QuestionBankErrorCodes.QuestionExplanationTooLong)
+            : null;
+
+    private string? OptionError(OptionDraft option, bool required) =>
+        option.Html.Length > QuestionLimits.OptionMaxLength
+            ? Errors.For(QuestionBankErrorCodes.QuestionOptionTooLong)
+            : required && QuestionHtml.IsBlank(option.Html)
+                ? Errors.For(QuestionBankErrorCodes.QuestionOptionTextRequired)
+                : null;
+
+    // The section-level rule of a published question (BR4): a count, then the key.
+    private string? PublishedOptionsError()
+    {
+        if (!OptionsCountDone)
+        {
+            return Errors.For(QuestionBankErrorCodes.QuestionOptionsCount);
+        }
+
+        return KeyDone ? null : Errors.For(QuestionBankErrorCodes.QuestionKeyInvalid);
+    }
+
+    // -- save -------------------------------------------------------------------------------------------------
+
+    private async Task SaveAsync()
+    {
+        var published = IsPublished;
+
+        _topicError = TopicError();
+        _languageError = LanguageDone ? null : Errors.For(QuestionBankErrorCodes.QuestionContentLanguageInvalid);
+        _difficultyError = null;
+        _editionError = null;
+        _paperNumberError = PaperNumberError();
+        _noticeSubjectError = null;
+        _statementError = StatementError();
+        _baseTextError = BaseTextError();
+        _explanationError = ExplanationError();
+        // F-97: only the answer of the chosen type is judged; the other type's stays in the form, unsent.
+        foreach (var option in _options)
+        {
+            option.Error = IsTrueFalse ? null : OptionError(option, required: published);
+        }
+
+        _optionsError = published && !IsTrueFalse ? PublishedOptionsError() : null;
+        _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
+            ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
+            : null;
+        _changeReasonError = ChangeReasonValidation();
+
+        if (HasClientRefusal())
+        {
+            // The summary lists every refused field at once and takes the focus, so the reader does not hunt.
+            _showErrorSummary = true;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
+            return;
+        }
+
+        _showErrorSummary = false;
+        _saving = true;
+        _error = null;
+
+        var token = await TokenAsync();
+        var request = new SaveQuestionRequest(
+            _topic!.Id,
+            _contentLanguage,
+            _statement,
+            QuestionHtml.NullIfBlank(_baseText),
+            QuestionHtml.NullIfBlank(_explanation),
+            _difficulty,
+            IsTrueFalse
+                ? []
+                : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))],
+            _edition?.Id,
+            _edition is null ? null : _paperNumber,
+            _edition is null ? null : _noticeSubjectId,
+            _type,
+            IsTrueFalse ? _trueFalseKey : null,
+            ShowChangeReason ? QuestionHtml.NullIfBlank(_changeReason.Trim()) : null);
+
+        var result = token is null
+            ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+            : IsEdit
+                ? await Api.UpdateQuestionAsync(token, _saved!.Id, request)
+                : await Api.CreateQuestionAsync(token, request);
+
+        _saving = false;
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            var wasAdd = !IsEdit;
+            Apply(question);
+            _publicationError = null;
+            BuildBreadcrumbs();
+            await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
+            Snackbar.Add(L["Questions.Saved"], Severity.Success);
+            await ReloadHistoryAsync();
+            if (wasAdd)
+            {
+                // The page stays open as the edit form of the question that was just saved: previewing and
+                // publishing it are the usual next steps. The render comes first: the NavigationLock of the form
+                // actions reads HasChanges from the last render and would otherwise ask to discard what was
+                // just saved (F-35).
+                StateHasChanged();
+                await Task.Yield();
+                Navigation.NavigateTo($"/admin/questions/{question.Id}{QuestionListQueryString.Carried(Navigation.Uri)}", replace: true);
+            }
+
+            return;
+        }
+
+        await ShowRefusalAsync(result);
+    }
+
+    private bool HasClientRefusal() =>
+        _topicError is not null || _languageError is not null || _statementError is not null
+        || _paperNumberError is not null || _baseTextError is not null || _explanationError is not null || _optionsError is not null
+        || _trueFalseKeyError is not null || _changeReasonError is not null
+        || _options.Any(option => option.Error is not null);
+
+    // A refusal belongs to the field that caused it, so the reader sees where to change something (BR16).
+    private async Task ShowRefusalAsync(QuestionBankResult<QuestionResponse> result)
+    {
+        var code = result.ErrorCode;
+        var text = Errors.For(code);
+        var fieldRefused = true;
+
+        switch (code)
+        {
+            case QuestionBankErrorCodes.QuestionStatementRequired:
+            case QuestionBankErrorCodes.QuestionStatementTooLong:
+                _statementError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionBaseTextTooLong:
+                _baseTextError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionExplanationTooLong:
+                _explanationError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionOptionTextRequired:
+            case QuestionBankErrorCodes.QuestionOptionTooLong:
+                // The problem names the option when it can; otherwise the section says it (decision of 2026-10-10).
+                if (result.OptionPosition is { } position && position >= 0 && position < _options.Count)
+                {
+                    _options[position].Error = text;
+                }
+                else
+                {
+                    _optionsError = text;
+                }
+
+                break;
+            case QuestionBankErrorCodes.QuestionOptionsCount:
+            case QuestionBankErrorCodes.QuestionKeyInvalid:
+                _optionsError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionTrueFalseKeyRequired:
+                _trueFalseKeyError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionKeyChangeReasonRequired:
+            case QuestionBankErrorCodes.QuestionChangeReasonTooLong:
+                // F-98: the field is shown even when the form did not expect to need it (the key moved meanwhile).
+                _changeReasonForced = true;
+                _changeReasonError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionVersionConflict:
+                // BR10: another save recorded the next version first; the curator reloads and tries again.
+                _error = text;
+                fieldRefused = false;
+                break;
+            case QuestionBankErrorCodes.QuestionDifficultyInvalid:
+                _difficultyError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionContentLanguageInvalid:
+                _languageError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionExamEditionNotFound:
+                // The edition left the catalog since it was picked: clear it and the fields that hung from it.
+                _edition = null;
+                _paperNumber = null;
+                _noticeSubjectId = null;
+                _noticeSubjects = [];
+                _noticeSubjectsFor = null;
+                _editionError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionNoticeSubjectNotFound:
+                _noticeSubjectId = null;
+                _noticeSubjectError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionPaperNumberRequired:
+            case QuestionBankErrorCodes.QuestionPaperNumberInvalid:
+            case QuestionBankErrorCodes.QuestionOriginRequiresEdition:
+            case QuestionBankErrorCodes.QuestionPaperNumberTaken:
+                _paperNumberError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionTopicNotFound:
+                // The topic left the catalog since it was picked: clear it and make the reader choose again.
+                _topic = null;
+                _topicError = L["Questions.Field.Topic.Required"].Value;
+                _error = text;
+                break;
+            default:
+                _error = text;
+                fieldRefused = false;
+                break;
+        }
+
+        if (fieldRefused)
+        {
+            _showErrorSummary = true;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
+        }
+    }
+
+    // F-100 AC9: the list's own keys came with the address the form was opened on; they go back with the curator.
+    private string ListHref => "/admin/questions" + QuestionListQueryString.Carried(Navigation.Uri);
+
+    private void Cancel() => Navigation.NavigateTo(ListHref);
+
+    // -- publication and preview -------------------------------------------------------------------------------
+
+    private Task PublishAsync() => SetPublicationAsync(publish: true);
+
+    private Task UnpublishAsync() => SetPublicationAsync(publish: false);
+
+    // BR12: only the status changes. The form keeps what the reader has typed; the stored content is the same,
+    // so the saved question is replaced without touching the fields.
+    private async Task SetPublicationAsync(bool publish)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        _publicationError = null;
+        _publishReasonError = null;
+        _publishing = true;
+
+        // F-98 BR5: the reason goes along only once the Api asked for it (the field is visible then).
+        var reason = _publishReasonRequired ? QuestionHtml.NullIfBlank(_publishReason.Trim()) : null;
+        var token = await TokenAsync();
+        var result = token is null
+            ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+            : publish
+                ? await Api.PublishQuestionAsync(token, current.Id, reason)
+                : await Api.UnpublishQuestionAsync(token, current.Id);
+
+        _publishing = false;
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            _saved = question;
+            _publishReason = string.Empty;
+            _publishReasonRequired = false;
+            Snackbar.Add(publish ? L["Questions.Published"] : L["Questions.Unpublished"], Severity.Success);
+            await ReloadHistoryAsync();
+            return;
+        }
+
+        // F-98 BR5, AC16: the key differs from the latest version's and no reason (or an over-long one) came:
+        // the card shows the field, focused, and the second click sends it.
+        if (result.ErrorCode is QuestionBankErrorCodes.QuestionKeyChangeReasonRequired
+            or QuestionBankErrorCodes.QuestionChangeReasonTooLong)
+        {
+            _publishReasonRequired = true;
+            _publishReasonError = Errors.For(result.ErrorCode);
+            _pendingFocus = PublishReasonId;
+            return;
+        }
+
+        // 400 while incomplete (BR4), 409 when it is already in that state, 404 when it is gone.
+        _publicationError = Errors.For(result.ErrorCode);
+    }
+
+    private Task AnnulAsync() => ChangeAnnulmentAsync(annul: true);
+
+    private Task ReinstateAsync() => ChangeAnnulmentAsync(annul: false);
+
+    // F-101 UC1 and UC2: the reason is asked in a dialog that sends it itself, so a refusal of the Api is read
+    // where the curator is typing; only an accepted change closes it. The form keeps what was typed.
+    private async Task ChangeAnnulmentAsync(bool annul)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        _publicationError = null;
+        QuestionResponse? changed = null;
+        Task<string?>? inFlight = null;
+
+        // The dialog may be closed (Esc, backdrop) while the call is still running; the answer of that call is
+        // awaited below, so a change the Api made is never lost to the screen (review finding 1).
+        Task<string?> Send(string reason) => inFlight = SubmitAsync(reason);
+
+        async Task<string?> SubmitAsync(string reason)
+        {
+            var token = await TokenAsync();
+            var result = token is null
+                ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+                : annul
+                    ? await Api.AnnulQuestionAsync(token, current.Id, reason)
+                    : await Api.ReinstateQuestionAsync(token, current.Id, reason);
+            if (result is { IsSuccess: true, Value: { } question })
+            {
+                changed = question;
+
+                return null;
+            }
+
+            return result.ErrorCode ?? ErrorText.UnexpectedCode;
+        }
+
+        var parameters = new DialogParameters<QuestionStatusReasonDialog>
+        {
+            { dialog => dialog.Message, annul ? L["Questions.Annul.Dialog.Message"].Value : L["Questions.Reinstate.Dialog.Message"].Value },
+            { dialog => dialog.ConfirmText, annul ? L["Questions.Action.Annul"].Value : L["Questions.Action.Reinstate"].Value },
+            { dialog => dialog.Destructive, annul },
+            { dialog => dialog.Submit, Send }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionStatusReasonDialog>(
+            annul ? L["Questions.Annul.Dialog.Title"] : L["Questions.Reinstate.Dialog.Title"], parameters, options);
+        await reference.Result;
+        if (inFlight is not null)
+        {
+            await inFlight;
+        }
+
+        if (changed is { } question)
+        {
+            _saved = question;
+            Snackbar.Add(annul ? L["Questions.Annulled"] : L["Questions.Reinstated"], Severity.Success);
+            await ReloadHistoryAsync();
+        }
+
+        // Closed: the focus goes back to the button that opened the dialog, or to Preview when that one is gone.
+        _pendingFocus = changed is null ? (annul ? "question-annul" : "question-reinstate") : PreviewButtonId;
+        StateHasChanged();
+    }
+
+    private async Task PreviewAsync()
+    {
+        if (_saved is not { } question)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<QuestionPreviewDialog>
+        {
+            { dialog => dialog.Question, question },
+            { dialog => dialog.UnsavedChanges, HasChanges }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionPreviewDialog>(L["Questions.Preview.Title"], parameters, options);
+        await reference.Result;
+
+        // Closed: the focus goes back to the button that opened it.
+        _pendingFocus = PreviewButtonId;
+        StateHasChanged();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

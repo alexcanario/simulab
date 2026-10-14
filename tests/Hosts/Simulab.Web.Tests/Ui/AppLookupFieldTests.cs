@@ -137,6 +137,27 @@ public sealed class AppLookupFieldTests : KitTestContext
         field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
 
+    private static IEnumerable<string> PathData(string svg) =>
+        System.Text.RegularExpressions.Regex.Matches(svg, "\\bd=\"([^\"]+)\"").Select(match => match.Groups[1].Value);
+
+    // F-114 AC7: the magnifier says "type first, the server answers"; a leading icon no longer takes its place.
+    [Fact]
+    public void Render_WithALeadingIcon_StillShowsTheMagnifier()
+    {
+        var field = Render<AppLookupField>(parameters => parameters
+            .Add(component => component.Id, "lookup")
+            .Add(component => component.Label, "Issuing authority")
+            .Add(component => component.Placeholder, "Name or acronym")
+            .Add(component => component.SearchAsync, Found)
+            .Add(component => component.LeadingIcon, AppIcons.Scope));
+
+        var start = field.Find(".mud-input-adornment-start");
+        var drawn = start.QuerySelectorAll("path").Select(path => path.GetAttribute("d")).ToList();
+        PathData(AppIcons.Search).Should().OnlyContain(data => drawn.Contains(data), "the magnifier is drawn");
+        PathData(AppIcons.Scope).Where(data => data != "M0 0h24v24H0V0z").Should().NotContain(data => drawn.Contains(data), "the leading icon is ignored");
+        field.Find(".app-field-description").TextContent.Should().Contain("Type at least 2 characters");
+    }
+
     // F-42: a search over the catalog keeps its defaults - nothing opens before the reader types, and the list is cut at 20.
     [Fact]
     public void Render_ByDefault_DoesNotOpenOnFocus_AndShowsAtMostTwentyCandidates()
@@ -146,6 +167,43 @@ public sealed class AppLookupFieldTests : KitTestContext
         var autocomplete = field.FindComponent<MudBlazor.MudAutocomplete<AppLookupOption>>().Instance;
         autocomplete.OpenOnFocus.Should().BeFalse();
         autocomplete.MaxItems.Should().Be(AppLookupField.MaxCandidates).And.Be(20);
+    }
+
+    // B-27 AC1: the second search leaves the list open, so nothing else re-renders the wrapper; the live region
+    // must still hold the count of that second search. No re-render is forced: the markup is read as it stands.
+    [Fact]
+    public void Search_Twice_TheLiveRegionHoldsTheCountOfTheSecondSearch()
+    {
+        Render<MudBlazor.MudPopoverProvider>();
+        var field = Render((term, cancellationToken) =>
+            Task.FromResult<IReadOnlyList<AppLookupOption>>(term.Length == 3
+                ? [Cebraspe]
+                : [Cebraspe, Cebraspe with { Id = Guid.NewGuid() }, Cebraspe with { Id = Guid.NewGuid() }]));
+        field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+
+        field.Find("#lookup").Input("cebr");
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 3"));
+    }
+
+    // B-27 AC2: a second search that throws shows the failure and the retry button at once.
+    [Fact]
+    public void Search_SecondOneFails_ShowsTheFailureWithoutAnotherRender()
+    {
+        Render<MudBlazor.MudPopoverProvider>();
+        var field = Render((term, cancellationToken) => term.Length == 3 ? Found(term, cancellationToken) : Broken(term, cancellationToken));
+        field.Find("#lookup").Input("ceb");
+        AdvanceDebounce();
+        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+
+        field.Find("#lookup").Input("cebr");
+        AdvanceDebounce();
+
+        field.WaitForAssertion(() => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
+        field.Markup.Should().Contain("Try again");
     }
 
     // F-42: a short fixed list (the 27 states) opens on focus, with no minimum of characters and room for every item.

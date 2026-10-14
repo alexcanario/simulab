@@ -3,7 +3,7 @@
 A study coach that runs realistic practice exams (public service exams, certifications, university entrance exams, ENEM) and tells each student what to study next.
 
 ## Working agreement
-- Workflow: agile@canary — see `docs/agile/workflow.md`. One feature in progress at a time.
+- Workflow: agile@canary — see `docs/agile/workflow.pt-BR.md`. One feature in progress at a time.
 - Plugins: agile
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Three gates: feature approved → validated on screen → merge authorized.
@@ -25,7 +25,7 @@ A study coach that runs realistic practice exams (public service exams, certific
 ## Languages
 - UI locales: pt-BR, pt-PT, en. No hardcoded UI strings; resource files per module; `IStringLocalizer`.
 - Question content is not translated; each exam and question carries its own language.
-- App manual: `docs/manual/<locale>/`, updated when each feature ships.
+- Manual locales: pt-BR, pt-PT, en. App manual: `docs/manual/<locale>/`, updated when each feature ships.
 
 ## Commands
 - Build: `dotnet build Simulab.slnx`
@@ -58,4 +58,5 @@ Mapping: epic → feature/bug. No tasks per role. Board text in ASCII English.
 - Modules and pages never read plan columns; they ask `IEntitlementService`.
 - Never reference MassTransit, RabbitMQ or FluentAssertions.
 - Screens follow the rules `ui` (core) and `ui-project` (Simulab choices): UI kit first, `AppIcons` (Material Outlined), one way to edit an item.
+- If the AppHost says the container runtime cannot be found while Docker Desktop is running, the IDE inherited a stale `PATH` without `...\DockerDesktop\resources\bin` (verified 2026-10-11: the entry was in the user `PATH` in the registry but missing from `explorer.exe`, `devenv.exe` and the AppHost it started). Restart `explorer.exe` (or sign out and in), reopen Visual Studio from it and check `docker version` in its terminal; until then, start the AppHost from a terminal (`dotnet run --project src/Hosts/Simulab.AppHost`).
 - Redis: always through `Aspire.StackExchange.Redis` (`builder.AddRedisClient(...)`), never a plain `ConnectionMultiplexer.Connect` — the local container uses TLS by default and a plain client cannot trust its dev certificate.

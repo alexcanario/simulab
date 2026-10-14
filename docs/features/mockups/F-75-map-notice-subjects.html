@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-75 - Map notice subjects to the canonical taxonomy (mockup)</title>
+<style>
+/* ===========================================================================
+   F-75 mockup - only the deltas on screens that F-74 and F-79 own:
+   1. edition page, "Notice subjects" section: chips under each row, "Not mapped" marker, footer count
+   2. NoticeSubjectDialog: the new field "Covers" (AppMultiPickField + AppChip, new kit parts)
+   3. /admin/subjects and /admin/subjects/{id}: delete disabled with the in-use reason (BR10)
+   Visual language of the F-74 mockup. Every colour is a SimulabTheme token; no new colour.
+   No identity tokens file exists yet: the tokens are SimulabTheme's (MudBlazor palette).
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius-sm: 6px; --app-radius-md: 10px; --app-radius-lg: 14px;
+
+  /* PaletteLight */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E; --warning: #D98B1A;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.92); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  /* PaletteDark */
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E; --warning: #D98B1A;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.92); --appbar: #091422; --appbar-text: #FFFFFF;
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: block; flex-shrink: 0; }
+a { color: inherit; }
+button { font: inherit; }
+:is(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-direction: column; gap: var(--app-space-1); padding: var(--app-space-2) var(--app-space-4); background: var(--surface); border-bottom: 1px dashed var(--divider); }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.demo-label { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-right: var(--app-space-1); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer; border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note { display: inline-block; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); border: 1px dashed var(--divider); border-radius: 20px; padding: 0 var(--app-space-2); margin-bottom: var(--app-space-2); }
+.demo-note-plain { text-transform: none; letter-spacing: 0; font-weight: 600; border-radius: var(--app-radius-sm); }
+
+/* ---- app shell ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-2); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); overflow-y: auto; }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: var(--app-radius-sm); font-size: var(--app-font-sm); cursor: pointer; }
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- page header ---- */
+.app-page-header { margin-bottom: var(--app-space-5); display: flex; align-items: flex-end; gap: var(--app-space-4); flex-wrap: wrap; }
+.app-page-header-text { flex: 1; min-width: 0; }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); }
+.app-breadcrumbs a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; }
+
+/* ---- layout ---- */
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); }
+.app-form-card + .app-form-card { margin-top: var(--app-space-4); }
+.stub-card { padding: var(--app-space-4) var(--app-space-5); color: var(--text-secondary); font-size: var(--app-font-sm); }
+
+/* ---- AppSectionCard ---- */
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-section-card-title { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-lg); font-weight: 600; }
+.app-section-card-icon { color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin: var(--app-space-1) 0 var(--app-space-4); }
+
+/* ---- fields ---- */
+.app-field { position: relative; margin-bottom: var(--app-space-4); }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input { display: flex; align-items: center; gap: var(--app-space-2); height: 42px; padding: 0 var(--app-space-1) 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); background: var(--surface); color: var(--text-primary); }
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.app-field-input svg { color: var(--action-default); }
+.app-field-input input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+.app-field-input input:disabled { cursor: not-allowed; }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-hint, .app-field-error-text { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+.app-field-status { display: flex; align-items: center; gap: var(--app-space-2); }
+.app-field-count { width: 50%; }
+@media (max-width: 599.98px) { .app-field-count { width: 100%; } }
+.app-select { height: 42px; padding: 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-sm); background: var(--surface); color: var(--text-primary); font: inherit; font-size: var(--app-font-md); min-width: 220px; }
+
+/* ---- icon buttons + tooltip ---- */
+.app-icon-button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.app-icon-button:hover { background: var(--background); }
+.app-icon-button[disabled] { cursor: not-allowed; opacity: .45; }
+.app-icon-button.is-destructive { color: var(--error); }
+.tip { position: relative; display: inline-flex; }
+.tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); right: 0; background: var(--text-primary); color: var(--surface); font-size: var(--app-font-xs); line-height: 1.4; padding: 2px 8px; border-radius: 4px; white-space: normal; width: max-content; max-width: 22rem; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 30; }
+.tip:hover::after, .tip:focus-within::after { opacity: 1; }
+.tip.is-shown::after { opacity: 1; }
+
+/* ---- AppAlert ---- */
+.app-alert { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm); background: var(--error); color: var(--error-contrast); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); }
+
+/* ---- buttons ---- */
+.app-button { font-size: var(--app-font-md); font-weight: 600; cursor: pointer; text-decoration: none; min-height: 40px; padding: 0 var(--app-space-5); border-radius: var(--app-radius-sm); display: inline-flex; align-items: center; gap: var(--app-space-2); }
+.app-button-text { border: 0; background: transparent; color: var(--text-primary); }
+.app-button-filled { border: 0; background: var(--primary); color: var(--primary-contrast); }
+.app-button-outlined { border: 1px solid var(--primary); background: transparent; color: var(--primary); padding: 0 var(--app-space-4); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-danger { border: 0; background: var(--error); color: var(--error-contrast); }
+.app-button-small { min-height: 28px; padding: 0 var(--app-space-2); font-size: var(--app-font-xs); color: var(--primary); }
+.app-button-small:hover { background: var(--primary-lighten); }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+.app-spinner-sm { width: 12px; height: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppItemRows + AppRowActions + AppStatusChip ---- */
+.app-item-rows-list { list-style: none; border: 1px solid var(--divider); border-radius: var(--app-radius-sm); }
+.app-item-row { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-2) var(--app-space-2) var(--app-space-3); border-bottom: 1px solid var(--divider); }
+.app-item-row:last-child { border-bottom: 0; }
+.app-item-row:hover { background: var(--background); }
+.app-item-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--app-space-3); }
+.app-item-row-label { font-weight: 600; font-size: var(--app-font-sm); }
+.app-item-rows-empty { font-size: var(--app-font-sm); color: var(--text-secondary); padding: var(--app-space-4); border: 1px dashed var(--divider); border-radius: var(--app-radius-sm); text-align: center; }
+.app-row-actions { display: flex; align-items: center; gap: var(--app-space-1); flex-shrink: 0; }
+.app-row-actions-gap { width: 1px; height: 20px; background: var(--divider); margin: 0 var(--app-space-1); }
+.app-status-chip { display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 0 10px; border: 1px solid var(--divider); border-radius: 20px; background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; line-height: 1.8; }
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-warning .app-status-chip-dot { background: var(--warning); }
+.app-truncated { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.app-muted { color: var(--text-secondary); }
+
+/* ---- AppChip (new kit component) ---- */
+.app-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; max-width: 100%; padding: 2px 10px; border: 1px solid var(--divider); border-radius: var(--app-radius-lg); background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); line-height: 1.35; }
+.app-chip > svg { color: var(--text-secondary); }
+.app-chip-text { min-width: 0; overflow-wrap: anywhere; }
+.app-chip-secondary { color: var(--text-secondary); }
+.app-chip.is-removable { padding-right: 2px; }
+.app-chip-remove { width: 24px; height: 24px; border: 0; border-radius: 50%; background: transparent; color: var(--action-default); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+.app-chip-remove:hover { background: var(--background); }
+.app-chip-remove[disabled] { cursor: not-allowed; opacity: .45; }
+.app-chip.is-marked { border-color: var(--error); border-width: 2px; }
+.app-chip-mark { color: var(--error); font-weight: 700; }
+
+/* ---- notice subjects (composition of kit parts; no new token) ---- */
+.ns-group + .ns-group { margin-top: var(--app-space-4); }
+.ns-group-title { font-size: var(--app-font-sm); font-weight: 700; color: var(--text-primary); margin-bottom: var(--app-space-2); }
+.ns-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--app-space-1); }
+.ns-covers { list-style: none; display: flex; flex-wrap: wrap; gap: var(--app-space-1) 6px; }
+.ns-count { flex: none; min-width: 6.5rem; text-align: right; font-size: var(--app-font-sm); font-variant-numeric: tabular-nums; color: var(--text-secondary); align-self: flex-start; padding-top: 1px; }
+.ns-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--app-space-3); margin-top: var(--app-space-3); }
+.ns-total { font-size: var(--app-font-sm); text-align: right; }
+.ns-total-sum { font-weight: 700; display: block; }
+.ns-total-line { color: var(--text-secondary); display: block; }
+
+/* ---- AppMultiPickField (new kit component) ---- */
+.app-mp-list { position: absolute; left: 0; right: 0; top: 70px; z-index: 25; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-sm); box-shadow: 0 6px 20px rgba(20,40,100,.18); max-height: 300px; overflow-y: auto; padding: var(--app-space-1) 0; }
+.app-mp-group + .app-mp-group { border-top: 1px solid var(--divider); }
+.app-mp-option { display: flex; align-items: flex-start; gap: var(--app-space-2); min-height: 36px; padding: 7px var(--app-space-3); cursor: pointer; font-size: var(--app-font-sm); line-height: 1.4; }
+.app-mp-option.is-topic { padding-left: 40px; }
+.app-mp-option.is-whole .app-mp-option-name { font-weight: 700; }
+.app-mp-option:hover, .app-mp-option:focus { background: var(--primary-lighten); }
+.app-mp-option:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.app-mp-option[aria-selected="true"] { background: var(--primary-lighten); }
+.app-mp-option[aria-disabled="true"] { cursor: not-allowed; color: var(--text-secondary); }
+.app-mp-option[aria-disabled="true"]:hover, .app-mp-option[aria-disabled="true"]:focus { background: transparent; }
+.app-mp-check { width: 18px; height: 18px; flex: none; margin-top: 1px; border: 2px solid var(--lines-inputs); border-radius: 3px; display: flex; align-items: center; justify-content: center; color: var(--primary-contrast); }
+.app-mp-option[aria-selected="true"] .app-mp-check { background: var(--primary); border-color: var(--primary); }
+.app-mp-option[aria-disabled="true"] .app-mp-check { border-style: dashed; }
+.app-mp-option-text { flex: 1; min-width: 0; }
+.app-mp-option-secondary { display: block; font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-mp-empty { padding: var(--app-space-3); font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-mp-countline { display: flex; justify-content: space-between; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-2); font-size: var(--app-font-xs); color: var(--text-secondary); min-height: 28px; }
+.app-mp-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--app-space-1); }
+.app-mp-none { font-size: var(--app-font-sm); color: var(--text-secondary); margin-top: var(--app-space-1); }
+
+/* ---- AppDataTable (look) ---- */
+.app-table-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); overflow: hidden; }
+.app-table-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--app-space-4); padding: var(--app-space-4); }
+.app-table-toolbar .app-field { margin-bottom: 0; min-width: 260px; }
+.app-table { width: 100%; border-collapse: collapse; font-size: var(--app-font-sm); }
+.app-table th { text-align: left; font-size: var(--app-font-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--divider); }
+.app-table td { padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--divider); }
+.app-table tbody tr:hover td { background: var(--background); }
+.app-table .is-number { text-align: right; font-variant-numeric: tabular-nums; }
+.app-table .is-actions { width: 1%; white-space: nowrap; }
+.app-link { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; font-weight: 600; }
+
+/* ---- states ---- */
+.app-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); color: var(--text-secondary); }
+.app-state-inline { padding: var(--app-space-5) var(--app-space-4); border-style: dashed; }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state .is-error { color: var(--error); }
+
+/* ---- dialogs ---- */
+.app-overlay { position: fixed; inset: 0; background: rgba(9,20,34,.55); display: flex; align-items: center; justify-content: center; z-index: 60; padding: var(--app-space-4); }
+.app-overlay.is-top { z-index: 65; }
+.app-dialog { width: 100%; max-width: 30rem; background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); padding: var(--app-space-5); box-shadow: 0 10px 40px rgba(0,0,0,.35); max-height: calc(100vh - 32px); overflow-y: auto; }
+.app-dialog-wide { max-width: 38rem; }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 700; margin-bottom: var(--app-space-4); }
+.app-dialog-message { font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+
+/* ---- snackbar ---- */
+.app-snackbar { position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 70; display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-sm); background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25); }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo">
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; screen</span>
+    <button type="button" data-screen="edition">1-2 &middot; Edition page: notice subjects + dialog</button>
+    <button type="button" data-screen="subjects">3a &middot; Subjects list (F-79)</button>
+    <button type="button" data-screen="topics">3b &middot; Subject page, topics (F-79)</button>
+  </div>
+  <div class="demo-row" id="demo-states-1"></div>
+  <div class="demo-row" id="demo-states-2"></div>
+  <div class="demo-row">
+    <span class="demo-label">Demo &middot; language</span>
+    <button type="button" data-lang="pt-BR">pt-BR</button>
+    <button type="button" data-lang="pt-PT">pt-PT</button>
+    <button type="button" data-lang="en">en</button>
+    <span class="demo-label" style="margin-left:12px">Demo &middot; theme</span>
+    <button type="button" data-theme-btn="light">Light</button>
+    <button type="button" data-theme-btn="dark">Dark</button>
+  </div>
+</div>
+
+<header class="appbar"><span class="brand">SIMULAB</span><span class="spacer"></span><span class="avatar">AC</span></header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main" id="drawer"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="dialog-root"></div>
+<div id="confirm-root"></div>
+<div id="snackbar-root"></div>
+<div class="app-visually-hidden" id="live" role="status" aria-live="polite"></div>
+
+<script>
+/* ===========================================================================
+   Texts: SharedResources keys in the three UI locales. Keys new in F-75 are in the item file's
+   "UI texts" table; the others are F-74 / F-79 / existing values copied from their files.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Section.Administration": "Administration",
+    "Exams.Title": "Exams", "Subjects.Title": "Subjects", "IssuingAuthorities.Title": "Issuing authorities", "Organizers.Title": "Organizers",
+    "Users.Title": "Users", "Roles.Title": "Roles",
+    "ExamEditions.Form.EditTitle": "Edit edition",
+    "Common.Add": "Add", "Common.Save": "Save", "Common.Saving": "Saving...", "Common.Cancel": "Cancel", "Common.Edit": "Edit", "Common.Delete": "Delete",
+    "Common.Actions": "Actions", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "We could not load this list.", "Common.TryAgain": "Try again", "Common.Search": "Search", "Common.Filter.All": "All",
+    "Common.Discard.Title": "Discard changes?", "Common.Discard.Message": "You have unsaved changes. If you leave now, they will be lost.", "Common.Discard.Confirm": "Discard changes",
+    "Common.MoveUp": "Move up", "Common.MoveDown": "Move down",
+    "Lookup.Clear": "Clear the selection", "Lookup.NoResults": "Nothing found for \"{0}\".", "Lookup.Results": "Results: {0}",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "common.unexpected_error": "Something went wrong. Please try again.",
+    "NoticeSubjects.Section.Title": "Notice subjects",
+    "NoticeSubjects.Section.Subtitle": "The syllabus as the notice states it: each subject under its group, in the notice's order, with its number of questions.",
+    "NoticeSubjects.Empty": "This edition has no notice subject yet.",
+    "NoticeSubjects.Row.Questions.One": "1 question", "NoticeSubjects.Row.Questions.Many": "{0} questions",
+    "NoticeSubjects.Row.NoCount.Spoken": "number of questions not stated",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Already first in its group", "NoticeSubjects.MoveDown.DisabledLast": "Already last in its group",
+    "NoticeSubjects.Total.One": "Stated in the notice: 1 question in total", "NoticeSubjects.Total.Many": "Stated in the notice: {0} questions in total",
+    "NoticeSubjects.Total.None": "No subject states its number of questions.",
+    "NoticeSubjects.Total.Unstated.One": "1 subject has no number and is left out of the sum.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} subjects have no number and are left out of the sum.",
+    "NoticeSubjects.Form.AddTitle": "Add notice subject", "NoticeSubjects.Form.EditTitle": "Edit notice subject",
+    "NoticeSubjects.Field.Group": "Group", "NoticeSubjects.Field.Group.Placeholder": "E.g.: Basic knowledge",
+    "NoticeSubjects.Field.Group.Hint": "How the notice groups its subjects. Pick a group already used or type a new one; leave it empty when the notice has no groups. At most 100 characters.",
+    "NoticeSubjects.Field.Label": "Subject", "NoticeSubjects.Field.Label.Placeholder": "E.g.: Portuguese language",
+    "NoticeSubjects.Field.Label.Hint": "As the notice names it. From 2 to 200 characters.",
+    "NoticeSubjects.Field.QuestionCount": "Number of questions", "NoticeSubjects.Field.QuestionCount.Placeholder": "E.g.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "From 1 to 500. Leave it empty when the notice does not say.",
+    "NoticeSubjects.Saved": "Notice subject saved.",
+    "notice_subject.label_required": "Type the subject as the notice names it.",
+    "Subjects.Search.Placeholder": "Search by name", "Subjects.Filter.Area": "Area",
+    "Subjects.Column.Name": "Name", "Subjects.Column.Area": "Area", "Subjects.Column.Topics": "Topics", "Subjects.NoArea": "No area",
+    "Subjects.Field.Area": "Area",
+    "Subjects.Delete.DisabledHasTopics": "This subject has topics. Delete them first, on the subject's page.",
+    "Topics.Section.Title": "Topics", "Topics.Section.Subtitle": "What is studied inside this subject, in alphabetical order.",
+    "Topics.Dialog.AddTitle": "Add topic",
+    "Area.Law": "Law", "Area.Mathematics": "Mathematics", "Area.HumanSciences": "Human Sciences", "Area.Administration": "Administration and Management",
+    /* F-75 new */
+    "Common.RemoveItem": "Remove {0}",
+    "NoticeSubjects.Field.Covers": "Covers",
+    "NoticeSubjects.Field.Covers.Placeholder": "Search a subject or a topic",
+    "NoticeSubjects.Field.Covers.Hint": "Optional. The taxonomy subjects and topics this notice subject covers: pick a whole subject or only some of its topics. At most 50 items.",
+    "NoticeSubjects.Field.Covers.Options": "Taxonomy: subjects and topics",
+    "NoticeSubjects.Field.Covers.Picked": "Picked items",
+    "NoticeSubjects.Field.Covers.Count": "Picked: {0} of {1}",
+    "NoticeSubjects.Field.Covers.None": "Nothing picked: the subject stays not mapped.",
+    "NoticeSubjects.Field.Covers.Loading": "Loading the taxonomy...",
+    "NoticeSubjects.Field.Covers.LoadFailed": "The taxonomy could not be loaded. The items already picked stay here.",
+    "NoticeSubjects.Field.Covers.EmptyTaxonomy": "The taxonomy has no subject yet. Add them under Content › Subjects.",
+    "NoticeSubjects.Field.Covers.LimitReached": "Limit of {0} items reached. Remove one to pick another.",
+    "NoticeSubjects.Covers.WholeMarker": "whole subject",
+    "NoticeSubjects.Covers.Topic": "{0} › {1}",
+    "NoticeSubjects.Covers.Topic.Spoken": "{1}, topic of {0}",
+    "NoticeSubjects.Covers.CoveredByWhole": "Already covered by the whole subject",
+    "NoticeSubjects.Covers.WholeBlocked": "Remove its picked topics to pick the whole subject",
+    "NoticeSubjects.Covers.Added": "Picked: {0}.", "NoticeSubjects.Covers.Removed": "Removed: {0}.", "NoticeSubjects.Covers.Cleared": "All items were removed.",
+    "NoticeSubjects.Covers.Overlaps": "repeats the whole subject",
+    "NoticeSubjects.Covers.Gone": "no longer in the taxonomy",
+    "NoticeSubjects.Row.NotMapped": "Not mapped",
+    "NoticeSubjects.Total.Unmapped.One": "1 subject is not mapped yet.", "NoticeSubjects.Total.Unmapped.Many": "{0} subjects are not mapped yet.",
+    "Subjects.Delete.DisabledInUse": "Notice subjects map this whole subject. Remove it from their mappings before deleting it.",
+    "Topics.Delete.DisabledInUse": "Notice subjects map this topic. Remove it from their mappings before deleting it.",
+    "notice_subject.mapping_invalid": "One of the picked items is not valid. Remove it and pick it again.",
+    "notice_subject.mapping_too_many": "At most 50 items per notice subject.",
+    "notice_subject.mapping_target_not_found": "One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again.",
+    "notice_subject.mapping_overlap": "A topic cannot be picked together with its whole subject; the items are marked below. Remove the topic or the whole subject.",
+    "subject.in_use": "Notice subjects map this subject, so it cannot be deleted. The list was reloaded.",
+    "topic.in_use": "Notice subjects map this topic, so it cannot be deleted. The list was reloaded."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames", "Subjects.Title": "Disciplinas", "IssuingAuthorities.Title": "Órgãos contratantes", "Organizers.Title": "Bancas",
+    "Users.Title": "Usuários", "Roles.Title": "Papéis",
+    "ExamEditions.Form.EditTitle": "Editar edição",
+    "Common.Add": "Adicionar", "Common.Save": "Salvar", "Common.Saving": "Salvando...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Excluir",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente", "Common.Search": "Pesquisar", "Common.Filter.All": "Todos",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Você tem alterações não salvas. Se sair agora, elas serão perdidas.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo",
+    "Lookup.Clear": "Limpar a seleção", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.Results": "Resultados: {0}",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "common.unexpected_error": "Algo deu errado. Tente novamente.",
+    "NoticeSubjects.Section.Title": "Disciplinas do edital",
+    "NoticeSubjects.Section.Subtitle": "O conteúdo como o edital o apresenta: cada disciplina sob o seu grupo, na ordem do edital, com o número de questões.",
+    "NoticeSubjects.Empty": "Esta edição ainda não tem disciplinas do edital.",
+    "NoticeSubjects.Row.Questions.One": "1 questão", "NoticeSubjects.Row.Questions.Many": "{0} questões",
+    "NoticeSubjects.Row.NoCount.Spoken": "número de questões não informado",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Já é a primeira do grupo", "NoticeSubjects.MoveDown.DisabledLast": "Já é a última do grupo",
+    "NoticeSubjects.Total.One": "Total informado no edital: 1 questão", "NoticeSubjects.Total.Many": "Total informado no edital: {0} questões",
+    "NoticeSubjects.Total.None": "Nenhuma disciplina informa o número de questões.",
+    "NoticeSubjects.Total.Unstated.One": "1 disciplina sem número fica fora da soma.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} disciplinas sem número ficam fora da soma.",
+    "NoticeSubjects.Form.AddTitle": "Adicionar disciplina do edital", "NoticeSubjects.Form.EditTitle": "Editar disciplina do edital",
+    "NoticeSubjects.Field.Group": "Grupo", "NoticeSubjects.Field.Group.Placeholder": "Ex.: Conhecimentos Básicos",
+    "NoticeSubjects.Field.Group.Hint": "Como o edital agrupa as disciplinas. Escolha um grupo já usado ou digite um novo; deixe vazio se o edital não agrupa. Até 100 caracteres.",
+    "NoticeSubjects.Field.Label": "Disciplina", "NoticeSubjects.Field.Label.Placeholder": "Ex.: Língua Portuguesa",
+    "NoticeSubjects.Field.Label.Hint": "Como o edital a nomeia. De 2 a 200 caracteres.",
+    "NoticeSubjects.Field.QuestionCount": "Número de questões", "NoticeSubjects.Field.QuestionCount.Placeholder": "Ex.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "De 1 a 500. Deixe vazio se o edital não informa.",
+    "NoticeSubjects.Saved": "Disciplina do edital salva.",
+    "notice_subject.label_required": "Informe a disciplina como o edital a nomeia.",
+    "Subjects.Search.Placeholder": "Buscar por nome", "Subjects.Filter.Area": "Área",
+    "Subjects.Column.Name": "Nome", "Subjects.Column.Area": "Área", "Subjects.Column.Topics": "Tópicos", "Subjects.NoArea": "Sem área",
+    "Subjects.Field.Area": "Área",
+    "Subjects.Delete.DisabledHasTopics": "Esta disciplina tem tópicos. Exclua-os primeiro, na página da disciplina.",
+    "Topics.Section.Title": "Tópicos", "Topics.Section.Subtitle": "O que se estuda dentro desta disciplina, em ordem alfabética.",
+    "Topics.Dialog.AddTitle": "Adicionar tópico",
+    "Area.Law": "Direito", "Area.Mathematics": "Matemática", "Area.HumanSciences": "Ciências Humanas", "Area.Administration": "Administração e Gestão",
+    "Common.RemoveItem": "Remover {0}",
+    "NoticeSubjects.Field.Covers": "Abrange",
+    "NoticeSubjects.Field.Covers.Placeholder": "Busque uma disciplina ou um tópico",
+    "NoticeSubjects.Field.Covers.Hint": "Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do edital cobre: escolha uma disciplina inteira ou só alguns tópicos dela. Até 50 itens.",
+    "NoticeSubjects.Field.Covers.Options": "Taxonomia: disciplinas e tópicos",
+    "NoticeSubjects.Field.Covers.Picked": "Itens escolhidos",
+    "NoticeSubjects.Field.Covers.Count": "Escolhidos: {0} de {1}",
+    "NoticeSubjects.Field.Covers.None": "Nada escolhido: a disciplina fica não mapeada.",
+    "NoticeSubjects.Field.Covers.Loading": "Carregando a taxonomia...",
+    "NoticeSubjects.Field.Covers.LoadFailed": "Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui.",
+    "NoticeSubjects.Field.Covers.EmptyTaxonomy": "A taxonomia ainda não tem disciplinas. Cadastre-as em Conteúdo › Disciplinas.",
+    "NoticeSubjects.Field.Covers.LimitReached": "Limite de {0} itens atingido. Remova um para escolher outro.",
+    "NoticeSubjects.Covers.WholeMarker": "disciplina inteira",
+    "NoticeSubjects.Covers.Topic": "{0} › {1}",
+    "NoticeSubjects.Covers.Topic.Spoken": "{1}, tópico de {0}",
+    "NoticeSubjects.Covers.CoveredByWhole": "Já coberto pela disciplina inteira",
+    "NoticeSubjects.Covers.WholeBlocked": "Remova os tópicos dela já escolhidos para escolher a disciplina inteira",
+    "NoticeSubjects.Covers.Added": "Escolhido: {0}.", "NoticeSubjects.Covers.Removed": "Removido: {0}.", "NoticeSubjects.Covers.Cleared": "Todos os itens foram removidos.",
+    "NoticeSubjects.Covers.Overlaps": "repete a disciplina inteira",
+    "NoticeSubjects.Covers.Gone": "não existe mais na taxonomia",
+    "NoticeSubjects.Row.NotMapped": "Não mapeada",
+    "NoticeSubjects.Total.Unmapped.One": "1 disciplina ainda não está mapeada.", "NoticeSubjects.Total.Unmapped.Many": "{0} disciplinas ainda não estão mapeadas.",
+    "Subjects.Delete.DisabledInUse": "Disciplinas do edital estão mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de excluir.",
+    "Topics.Delete.DisabledInUse": "Disciplinas do edital estão mapeadas para este tópico. Retire-o desses mapeamentos antes de excluir.",
+    "notice_subject.mapping_invalid": "Um dos itens escolhidos não é válido. Remova-o e escolha de novo.",
+    "notice_subject.mapping_too_many": "No máximo 50 itens por disciplina do edital.",
+    "notice_subject.mapping_target_not_found": "Um dos itens escolhidos não existe mais na taxonomia; ele está marcado abaixo. Remova-o e salve de novo.",
+    "notice_subject.mapping_overlap": "Um tópico não pode ser escolhido junto com a disciplina inteira dele; os itens estão marcados abaixo. Remova o tópico ou a disciplina inteira.",
+    "subject.in_use": "Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada.",
+    "topic.in_use": "Este tópico está mapeado em disciplinas do edital e não pode ser excluído. A lista foi recarregada."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Section.Administration": "Administração",
+    "Exams.Title": "Exames", "Subjects.Title": "Disciplinas", "IssuingAuthorities.Title": "Entidades contratantes", "Organizers.Title": "Entidades organizadoras",
+    "Users.Title": "Utilizadores", "Roles.Title": "Perfis",
+    "ExamEditions.Form.EditTitle": "Editar edição",
+    "Common.Add": "Adicionar", "Common.Save": "Guardar", "Common.Saving": "A guardar...", "Common.Cancel": "Cancelar", "Common.Edit": "Editar", "Common.Delete": "Eliminar",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.TryAgain": "Tentar novamente", "Common.Search": "Pesquisar", "Common.Filter.All": "Todos",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Tem alterações por guardar. Se sair agora, vai perdê-las.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.MoveUp": "Mover para cima", "Common.MoveDown": "Mover para baixo",
+    "Lookup.Clear": "Limpar a seleção", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.Results": "Resultados: {0}",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "common.unexpected_error": "Ocorreu um erro. Tente novamente.",
+    "NoticeSubjects.Section.Title": "Disciplinas do aviso",
+    "NoticeSubjects.Section.Subtitle": "O conteúdo tal como o aviso o apresenta: cada disciplina sob o seu grupo, pela ordem do aviso, com o número de questões.",
+    "NoticeSubjects.Empty": "Esta edição ainda não tem disciplinas do aviso.",
+    "NoticeSubjects.Row.Questions.One": "1 questão", "NoticeSubjects.Row.Questions.Many": "{0} questões",
+    "NoticeSubjects.Row.NoCount.Spoken": "número de questões não indicado",
+    "NoticeSubjects.MoveUp.DisabledFirst": "Já é a primeira do grupo", "NoticeSubjects.MoveDown.DisabledLast": "Já é a última do grupo",
+    "NoticeSubjects.Total.One": "Total indicado no aviso: 1 questão", "NoticeSubjects.Total.Many": "Total indicado no aviso: {0} questões",
+    "NoticeSubjects.Total.None": "Nenhuma disciplina indica o número de questões.",
+    "NoticeSubjects.Total.Unstated.One": "1 disciplina sem número fica fora da soma.",
+    "NoticeSubjects.Total.Unstated.Many": "{0} disciplinas sem número ficam fora da soma.",
+    "NoticeSubjects.Form.AddTitle": "Adicionar disciplina do aviso", "NoticeSubjects.Form.EditTitle": "Editar disciplina do aviso",
+    "NoticeSubjects.Field.Group": "Grupo", "NoticeSubjects.Field.Group.Placeholder": "Ex.: Conhecimentos gerais",
+    "NoticeSubjects.Field.Group.Hint": "Como o aviso agrupa as disciplinas. Escolha um grupo já usado ou escreva um novo; deixe vazio se o aviso não agrupa. No máximo 100 caracteres.",
+    "NoticeSubjects.Field.Label": "Disciplina", "NoticeSubjects.Field.Label.Placeholder": "Ex.: Língua Portuguesa",
+    "NoticeSubjects.Field.Label.Hint": "Tal como o aviso a designa. De 2 a 200 caracteres.",
+    "NoticeSubjects.Field.QuestionCount": "Número de questões", "NoticeSubjects.Field.QuestionCount.Placeholder": "Ex.: 10",
+    "NoticeSubjects.Field.QuestionCount.Hint": "De 1 a 500. Deixe vazio se o aviso não o indica.",
+    "NoticeSubjects.Saved": "Disciplina do aviso guardada.",
+    "notice_subject.label_required": "Indique a disciplina tal como o aviso a designa.",
+    "Subjects.Search.Placeholder": "Pesquisar por nome", "Subjects.Filter.Area": "Área",
+    "Subjects.Column.Name": "Nome", "Subjects.Column.Area": "Área", "Subjects.Column.Topics": "Tópicos", "Subjects.NoArea": "Sem área",
+    "Subjects.Field.Area": "Área",
+    "Subjects.Delete.DisabledHasTopics": "Esta disciplina tem tópicos. Elimine-os primeiro, na página da disciplina.",
+    "Topics.Section.Title": "Tópicos", "Topics.Section.Subtitle": "O que se estuda dentro desta disciplina, por ordem alfabética.",
+    "Topics.Dialog.AddTitle": "Adicionar tópico",
+    "Area.Law": "Direito", "Area.Mathematics": "Matemática", "Area.HumanSciences": "Ciências Humanas", "Area.Administration": "Administração e Gestão",
+    "Common.RemoveItem": "Retirar {0}",
+    "NoticeSubjects.Field.Covers": "Abrange",
+    "NoticeSubjects.Field.Covers.Placeholder": "Pesquise uma disciplina ou um tópico",
+    "NoticeSubjects.Field.Covers.Hint": "Opcional. As disciplinas e os tópicos da taxonomia que esta disciplina do aviso abrange: escolha uma disciplina inteira ou apenas alguns dos seus tópicos. No máximo 50 itens.",
+    "NoticeSubjects.Field.Covers.Options": "Taxonomia: disciplinas e tópicos",
+    "NoticeSubjects.Field.Covers.Picked": "Itens escolhidos",
+    "NoticeSubjects.Field.Covers.Count": "Escolhidos: {0} de {1}",
+    "NoticeSubjects.Field.Covers.None": "Nada escolhido: a disciplina fica sem mapeamento.",
+    "NoticeSubjects.Field.Covers.Loading": "A carregar a taxonomia...",
+    "NoticeSubjects.Field.Covers.LoadFailed": "Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui.",
+    "NoticeSubjects.Field.Covers.EmptyTaxonomy": "A taxonomia ainda não tem disciplinas. Registe-as em Conteúdo › Disciplinas.",
+    "NoticeSubjects.Field.Covers.LimitReached": "Limite de {0} itens atingido. Retire um para escolher outro.",
+    "NoticeSubjects.Covers.WholeMarker": "disciplina inteira",
+    "NoticeSubjects.Covers.Topic": "{0} › {1}",
+    "NoticeSubjects.Covers.Topic.Spoken": "{1}, tópico de {0}",
+    "NoticeSubjects.Covers.CoveredByWhole": "Já abrangido pela disciplina inteira",
+    "NoticeSubjects.Covers.WholeBlocked": "Retire os tópicos dela já escolhidos para escolher a disciplina inteira",
+    "NoticeSubjects.Covers.Added": "Escolhido: {0}.", "NoticeSubjects.Covers.Removed": "Retirado: {0}.", "NoticeSubjects.Covers.Cleared": "Todos os itens foram retirados.",
+    "NoticeSubjects.Covers.Overlaps": "repete a disciplina inteira",
+    "NoticeSubjects.Covers.Gone": "já não existe na taxonomia",
+    "NoticeSubjects.Row.NotMapped": "Não mapeada",
+    "NoticeSubjects.Total.Unmapped.One": "1 disciplina ainda não está mapeada.", "NoticeSubjects.Total.Unmapped.Many": "{0} disciplinas ainda não estão mapeadas.",
+    "Subjects.Delete.DisabledInUse": "Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar.",
+    "Topics.Delete.DisabledInUse": "Há disciplinas do aviso mapeadas para este tópico. Retire-o desses mapeamentos antes de o eliminar.",
+    "notice_subject.mapping_invalid": "Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo.",
+    "notice_subject.mapping_too_many": "No máximo 50 itens por disciplina do aviso.",
+    "notice_subject.mapping_target_not_found": "Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente.",
+    "notice_subject.mapping_overlap": "Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira.",
+    "subject.in_use": "Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada.",
+    "topic.in_use": "Este tópico está mapeado em disciplinas do aviso e não pode ser eliminado. A lista foi recarregada."
+  }
+};
+
+/* ---- icons: Material Outlined paths, named as AppIcons constants (all exist; F-74 adds MoveUp, MoveDown, NoticeSubjects) ---- */
+const ICONS = {
+  Exams: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z",
+  IssuingAuthorities: "M1 21h12v2H1v-2zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83L5.24 8.07zM12.32 1l5.66 5.66-2.83 2.83-5.66-5.66L12.32 1zM3.83 9.48l5.66 5.66-2.83 2.83L1 12.31l2.83-2.83z",
+  Organizers: "M12 3 2 8v2h20V8L12 3zm0 2.2 5.6 2.8H6.4L12 5.2zM4 11v8H2v2h20v-2h-2v-8h-2v8h-3v-8h-2v8H8v-8H4z",
+  Users: "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 1.9 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+  Roles: "M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm6 9c0 4-2.6 7.8-6 8.9C8.6 18.8 6 15 6 11V6.3l6-2.2 6 2.2V11z",
+  Subjects: "M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z",
+  Topics: "M15 7v12.97l-4.21-1.81-.79-.34-.79.34L5 19.97V7h10m4-6H8.99C7.89 1 7 1.9 7 3h10c1.1 0 2 .9 2 2v13l2 1V3c0-1.1-.9-2-2-2zm-4 4H5c-1.1 0-2 .9-2 2v16l7-3 7 3V7c0-1.1-.9-2-2-2z",
+  NoticeSubjects: "M19 5v14H5V5h14m1.1-2H3.9c-.5 0-.9.4-.9.9v16.2c0 .4.4.9.9.9h16.2c.4 0 .9-.5.9-.9V3.9c0-.5-.5-.9-.9-.9zM11 7h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2z",
+  MoveUp: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+  MoveDown: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+  Edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83a1 1 0 0 0 0-1.41z",
+  Delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  Add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  Close: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  Search: "M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  Error: "M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm1-5C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z",
+  Retry: "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  Check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+};
+const icon = (name, size = 20, cls = "") =>
+  `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="${ICONS[name]}"/></svg>`;
+
+/* ===========================================================================
+   Sample data. Subject and topic names are content: shown as typed, never translated (BR13).
+   =========================================================================== */
+const LIMIT = 50;
+const RAW_TAX = [
+  ["s-atu", "Atualidades", []],
+  ["s-cid", "Cidadania", []],
+  ["s-adm", "Direito Administrativo", ["Agentes públicos", "Atos administrativos", "Licitações e contratos", "Poderes administrativos"]],
+  ["s-con", "Direito Constitucional", ["Administração pública", "Direitos e garantias fundamentais", "Organização do Estado", "Segurança pública"]],
+  ["s-pen", "Direito Penal", ["Crimes contra a administração pública", "Crimes contra a pessoa", "Crimes contra o patrimônio", "Teoria do crime"]],
+  ["s-dh", "Direitos Humanos", []],
+  ["s-eti", "Ética no Serviço Público", []],
+  ["s-geo", "Geografia do Amazonas", []],
+  ["s-his", "História do Amazonas", []],
+  ["s-inf", "Informática", ["Correio eletrônico", "Editores de texto", "Internet e navegadores", "Planilhas eletrônicas", "Segurança da informação", "Sistemas operacionais"]],
+  ["s-leg", "Legislação Especial", ["Código de Trânsito Brasileiro", "Estatuto da Criança e do Adolescente", "Estatuto do Desarmamento", "Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014)", "Lei de Abuso de Autoridade", "Lei de Drogas", "Lei Maria da Penha"]],
+  ["s-lmm", "Legislação Municipal de Manaus", ["Estatuto dos Servidores Públicos de Manaus", "Lei Orgânica do Município de Manaus", "Plano Diretor de Manaus"]],
+  ["s-lp", "Língua Portuguesa", ["Concordância verbal e nominal", "Crase", "Interpretação de texto", "Ortografia", "Pontuação", "Regência", "Semântica"]],
+  ["s-mat", "Matemática", ["Equações do 1º grau", "Frações", "Porcentagem", "Razão e proporção", "Regra de três"]],
+  ["s-rl", "Raciocínio Lógico", ["Equivalências lógicas", "Proposições", "Sequências lógicas", "Tabela-verdade"]]
+];
+const baseTax = () => RAW_TAX.map(([id, name, topics]) => ({ id, name, topics: topics.map((n, i) => ({ id: `${id}-${i}`, name: n })) }));
+const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+const byName = (a, b) => norm(a.name).localeCompare(norm(b.name));
+const sortTax = (tax) => { tax.sort(byName); tax.forEach(s => s.topics.sort(byName)); return tax; };
+const BASE = baseTax();
+const tid = (sid, name) => BASE.find(s => s.id === sid).topics.find(x => x.name === name).id;
+/* a pick: whole subject {k:"s"} or one topic {k:"t"}; the names are the fallback the row's Api answer carries */
+const W = (sid) => ({ k: "s", id: sid, sName: BASE.find(s => s.id === sid).name });
+const T = (sid, name) => ({ k: "t", id: tid(sid, name), sName: BASE.find(s => s.id === sid).name, tName: name });
+const keyOf = (p) => `${p.k}:${p.id}`;
+
+/* variants of the taxonomy that the states need */
+function moveTopic(tax, topicId, toSid) {
+  let moved = null;
+  tax.forEach(s => { const i = s.topics.findIndex(x => x.id === topicId); if (i >= 0) moved = s.topics.splice(i, 1)[0]; });
+  tax.find(s => s.id === toSid).topics.push(moved);
+  return sortTax(tax);
+}
+function deleteTopic(tax, topicId) { tax.forEach(s => { s.topics = s.topics.filter(x => x.id !== topicId); }); return tax; }
+
+const B = "Conhecimentos Básicos", E = "Conhecimentos Específicos";
+const ROWS = () => [
+  { id: 1, g: B, l: "Língua Portuguesa", n: 15, m: [W("s-lp")] },
+  { id: 2, g: B, l: "Raciocínio Lógico-Matemático", n: 10, m: [W("s-mat"), T("s-rl", "Proposições"), T("s-rl", "Sequências lógicas")] },
+  { id: 3, g: B, l: "Noções de Informática", n: 5, m: [W("s-inf")] },
+  { id: 4, g: B, l: "Conhecimentos Gerais sobre o Estado do Amazonas e o Município de Manaus: história, geografia, economia, cultura e atualidades", n: null, m: [] },
+  { id: 5, g: E, l: "Lei Orgânica do Município de Manaus", n: 10, m: [T("s-lmm", "Lei Orgânica do Município de Manaus")] },
+  { id: 6, g: E, l: "Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014)", n: 5, m: [T("s-leg", "Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014)")] },
+  { id: 7, g: E, l: "Noções de Direito Constitucional", n: 5, m: [W("s-con")] }
+];
+const EXAM = { name: "Concurso Público Prefeitura de Manaus - Guarda Municipal" };
+const EDITION = { year: 2026, position: "Guarda Municipal de 3ª Classe" };
+
+const SUBJECTS = () => [
+  { id: 1, name: "Direito Constitucional", area: "Law", topics: 4, inUse: true },
+  { id: 2, name: "Direitos Humanos", area: "Law", topics: 0, inUse: true },
+  { id: 3, name: "Ética no Serviço Público", area: "Administration", topics: 0, inUse: false },
+  { id: 4, name: "Geografia do Amazonas", area: "HumanSciences", topics: 0, inUse: true },
+  { id: 5, name: "Matemática", area: "Mathematics", topics: 5, inUse: true },
+  { id: 6, name: "Teoria Musical", area: null, topics: 0, inUse: false }
+];
+const TOPICS = () => BASE.find(s => s.id === "s-leg").topics.map(x => ({ ...x,
+  inUse: ["Estatuto do Desarmamento", "Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014)", "Lei Maria da Penha"].includes(x.name) }));
+
+const STATES = {
+  edition: [
+    ["Section", [["mapped", "Mapped + 1 not mapped"], ["allmapped", "Every row mapped"], ["nonemapped", "No row mapped"],
+                 ["moved", "Overlap after a topic move (AC6)"], ["many", "Row with many entries"],
+                 ["loading", "Loading"], ["loaderror", "Load error"], ["empty", "Empty"], ["saved", "Saved (row 4 mapped)"], ["cleared", "Saved (row 7 cleared)"]]],
+    ["Dialog", [["d-edit", "Edit, mapped"], ["d-add", "Add, nothing picked"], ["d-taxloading", "Taxonomy loading"], ["d-taxerror", "Taxonomy load error"],
+                ["d-taxempty", "Empty taxonomy"], ["d-open", "List open"], ["d-search", "Search \"lei\""], ["d-noresults", "No results"],
+                ["d-whole", "Whole subject picked"], ["d-topics", "Topics picked"], ["d-limit", "Limit (50)"],
+                ["d-overlap", "Overlap refused (400)"], ["d-gone", "Target not found (400)"], ["d-saving", "Saving"], ["d-discard", "Unsaved changes"], ["d-server", "Server error"]]]
+  ],
+  subjects: [["Subjects list", [["ready", "List: in use / has topics / free"], ["refused", "Delete refused (409 subject.in_use)"]]]],
+  topics: [["Topics section", [["ready", "Topics: in use / free"], ["refused", "Delete refused (409 topic.in_use)"]]]]
+};
+
+const S = {
+  screen: "edition", lang: "pt-BR", theme: "light",
+  state: { edition: "mapped", subjects: "ready", topics: "ready" },
+  load: "ready", rows: [], tax: sortTax(baseTax()), dlg: null, confirm: null, snack: null, note: null, changedRow: null,
+  subjects: [], topics: [], pageAlert: null, returnFocus: null, nextId: 100
+};
+
+const $ = (id) => document.getElementById(id);
+const t = (key, ...args) => {
+  let s = (TEXTS[S.lang] && TEXTS[S.lang][key]) || key;
+  args.forEach((a, i) => { s = s.split(`{${i}}`).join(a); });
+  return s;
+};
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fmt = (n) => new Intl.NumberFormat(S.lang).format(n);
+const clone = (a) => a.map(r => ({ ...r, m: r.m ? r.m.map(p => ({ ...p })) : r.m }));
+const itemName = (r) => r.g ? `${r.l}, ${r.g}` : r.l;
+function announce(msg) { $("live").textContent = ""; setTimeout(() => { $("live").textContent = msg; }, 40); }
+
+/* ===========================================================================
+   Picks: resolved against the current taxonomy (BR8: a topic counts under its current subject)
+   =========================================================================== */
+function findSubject(tax, sid) { return tax.find(s => s.id === sid) || null; }
+function findTopic(tax, topicId) {
+  for (const s of tax) { const x = s.topics.find(y => y.id === topicId); if (x) return { subject: s, topic: x }; }
+  return null;
+}
+function info(p, tax = S.tax) {
+  if (p.k === "s") {
+    const s = findSubject(tax, p.id);
+    return { whole: true, subjectId: p.id, subject: s ? s.name : p.sName, topic: null, gone: !s };
+  }
+  const r = findTopic(tax, p.id);
+  return r ? { whole: false, subjectId: r.subject.id, subject: r.subject.name, topic: r.topic.name, gone: false }
+           : { whole: false, subjectId: null, subject: p.sName, topic: p.tName, gone: true };
+}
+function spoken(i) { return i.whole ? `${i.subject}, ${t("NoticeSubjects.Covers.WholeMarker")}` : t("NoticeSubjects.Covers.Topic.Spoken", i.subject, i.topic); }
+function sortPicks(picks, tax = S.tax) {
+  return [...picks].sort((a, b) => {
+    const x = info(a, tax), y = info(b, tax);
+    const c = norm(x.subject).localeCompare(norm(y.subject)); if (c) return c;
+    if (x.whole !== y.whole) return x.whole ? -1 : 1;
+    return norm(x.topic).localeCompare(norm(y.topic));
+  });
+}
+
+/* AppChip: read-only, or with a remove button; marked when the Api refused it */
+function chipHtml(p, { removable = false, mark = null, index = 0, disabled = false } = {}) {
+  const i = info(p);
+  const body = i.whole
+    ? `${icon("Subjects", 14)}<span class="app-chip-text">${esc(i.subject)}<span aria-hidden="true"> · </span><span class="app-visually-hidden">, </span><span class="app-chip-secondary">${esc(t("NoticeSubjects.Covers.WholeMarker"))}</span></span>`
+    : `${icon("Topics", 14)}<span class="app-chip-text"><span aria-hidden="true">${esc(t("NoticeSubjects.Covers.Topic", i.subject, i.topic))}</span><span class="app-visually-hidden">${esc(spoken(i))}</span></span>`;
+  const markHtml = mark ? `<span class="app-chip-mark"><span class="app-visually-hidden">, </span>${esc(t(mark))}</span>` : "";
+  const remove = removable
+    ? `<span class="tip" data-tip="${esc(t("Common.RemoveItem", spoken(i)))}"><button type="button" class="app-chip-remove" data-action="chip-remove" data-key="${keyOf(p)}" data-index="${index}"
+         aria-label="${esc(t("Common.RemoveItem", spoken(i)))}" ${disabled ? "disabled" : ""}>${icon("Close", 16)}</button></span>` : "";
+  return `<li class="app-chip ${removable ? "is-removable" : ""} ${mark ? "is-marked" : ""}">${body}${markHtml}${remove}</li>`;
+}
+
+/* ===================================================================== */
+/* Screen 1: edition page, notice subjects section                        */
+/* ===================================================================== */
+function setEditionState(st) {
+  S.state.edition = st;
+  S.load = "ready"; S.rows = clone(ROWS()); S.tax = sortTax(baseTax()); S.dlg = null; S.confirm = null; S.snack = null; S.note = null; S.changedRow = null;
+  const row = (id) => S.rows.find(r => r.id === id);
+  switch (st) {
+    case "allmapped": row(4).m = [W("s-geo"), W("s-his"), W("s-atu")]; break;
+    case "nonemapped": S.rows.forEach(r => { r.m = []; }); break;
+    case "moved":
+      S.tax = moveTopic(sortTax(baseTax()), tid("s-rl", "Proposições"), "s-mat");
+      S.note = "Demo: a curator moved the topic Proposições from Raciocínio Lógico to Matemática (F-79 BR10). Row 2 keeps both entries and shows them as is (BR4, BR8).";
+      break;
+    case "many":
+      Object.assign(row(6), { l: "Legislação Aplicada à Guarda Municipal", n: 15,
+        m: [...BASE.find(s => s.id === "s-leg").topics.map(x => T("s-leg", x.name)), W("s-dh"), W("s-cid"), W("s-eti"),
+            T("s-lmm", "Estatuto dos Servidores Públicos de Manaus"), T("s-lmm", "Plano Diretor de Manaus")] });
+      break;
+    case "loading": S.load = "loading"; break;
+    case "loaderror": S.load = "error"; break;
+    case "empty": S.rows = []; break;
+    case "saved": row(4).m = [W("s-geo"), W("s-his")]; S.snack = "NoticeSubjects.Saved"; S.changedRow = 4; break;
+    case "cleared": row(7).m = []; S.snack = "NoticeSubjects.Saved"; S.changedRow = 7; break;
+    default: if (st.startsWith("d-")) setDialogState(st);
+  }
+}
+
+function setDialogState(st) {
+  const row = (id) => S.rows.find(r => r.id === id);
+  switch (st) {
+    case "d-edit": openDialog("edit", 2); break;
+    case "d-add": openDialog("add"); break;
+    case "d-taxloading": openDialog("edit", 2); S.dlg.tax = "loading"; break;
+    case "d-taxerror": openDialog("edit", 2); S.dlg.tax = "error"; break;
+    case "d-taxempty": openDialog("add"); S.dlg.tax = "empty"; S.tax = []; break;
+    case "d-open": openDialog("edit", 2); S.dlg.open = true; break;
+    case "d-search": openDialog("edit", 6); Object.assign(S.dlg, { open: true, term: "lei" }); break;
+    case "d-noresults": openDialog("edit", 2); Object.assign(S.dlg, { open: true, term: "xadrez" }); break;
+    case "d-whole": openDialog("edit", 1); Object.assign(S.dlg, { open: true, term: "portug" }); break;
+    case "d-topics": openDialog("edit", 5); Object.assign(S.dlg, { open: true, term: "manaus" }); break;
+    case "d-limit": {
+      openDialog("add"); S.dlg.label = "Conhecimentos Gerais e Legislação";
+      const picks = [];
+      S.tax.forEach(s => { if (s.topics.length) s.topics.forEach(x => picks.push({ k: "t", id: x.id, sName: s.name, tName: x.name })); else picks.push({ k: "s", id: s.id, sName: s.name }); });
+      Object.assign(S.dlg, { picks: picks.slice(0, LIMIT), open: true, dirty: true });
+      break;
+    }
+    case "d-overlap":
+      openDialog("add"); S.dlg.group = B; S.dlg.label = "Matemática e Raciocínio Lógico"; S.dlg.count = "10";
+      S.dlg.picks = [W("s-mat"), T("s-rl", "Proposições")];
+      S.tax = moveTopic(sortTax(baseTax()), tid("s-rl", "Proposições"), "s-mat");
+      Object.assign(S.dlg, { dirty: true, covErr: "notice_subject.mapping_overlap" });
+      S.note = "Demo: while the dialog was open, a curator moved Proposições into Matemática. The Api refused the save; the list now shows the topic under Matemática.";
+      break;
+    case "d-gone":
+      openDialog("add"); S.dlg.group = E; S.dlg.label = "Noções de Direito Penal"; S.dlg.count = "5";
+      S.dlg.picks = [T("s-pen", "Crimes contra a pessoa"), T("s-pen", "Crimes contra o patrimônio")];
+      S.tax = deleteTopic(sortTax(baseTax()), tid("s-pen", "Crimes contra o patrimônio"));
+      Object.assign(S.dlg, { dirty: true, covErr: "notice_subject.mapping_target_not_found" });
+      S.note = "Demo: a curator deleted the topic Crimes contra o patrimônio after the dialog loaded the taxonomy. The taxonomy was loaded again; the chip is marked.";
+      break;
+    case "d-saving": openDialog("edit", 4); Object.assign(S.dlg, { picks: [W("s-geo"), W("s-his")], dirty: true, saving: true }); break;
+    case "d-discard": openDialog("edit", 4); Object.assign(S.dlg, { picks: [W("s-geo")], dirty: true }); S.confirm = { kind: "discard" }; break;
+    case "d-server": openDialog("edit", 2); Object.assign(S.dlg, { picks: [W("s-mat")], dirty: true, alert: "common.unexpected_error" }); break;
+  }
+}
+
+function crumbsHtml(current) {
+  return `<nav class="app-breadcrumbs" aria-label="Breadcrumb">
+    <span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span>
+    <a tabindex="0">${esc(t("Exams.Title"))}</a><span aria-hidden="true"> / </span>
+    <a tabindex="0">${esc(EXAM.name)}</a><span aria-hidden="true"> / </span>
+    <span aria-current="page">${esc(current)}</span></nav>`;
+}
+
+function editionHtml() {
+  return `
+  <div class="app-page-header"><div class="app-page-header-text">${crumbsHtml(`${EDITION.year} · ${EDITION.position}`)}<h1 class="app-page-title">${esc(t("ExamEditions.Form.EditTitle"))}</h1></div></div>
+  <div class="app-form-card stub-card"><span class="demo-note">Demo: the F-35 edition form and its summary, unchanged (not drawn)</span></div>
+  <div class="app-form-card">
+    <section class="app-section-card" id="edition-section-notice-subjects" aria-labelledby="edition-section-notice-subjects-title">
+      <h2 class="app-section-card-title" id="edition-section-notice-subjects-title">${icon("NoticeSubjects", 20, "app-section-card-icon")}<span>${esc(t("NoticeSubjects.Section.Title"))}</span></h2>
+      <p class="app-section-card-subtitle">${esc(t("NoticeSubjects.Section.Subtitle"))}</p>
+      <div id="ns-body">${sectionBodyHtml()}</div>
+    </section>
+  </div>`;
+}
+
+function groupsOf(rows) {
+  const out = [], map = new Map();
+  rows.forEach(r => {
+    const k = norm(r.g);
+    if (!map.has(k)) { const grp = { key: k, label: r.g ? r.g.trim() : null, rows: [] }; map.set(k, grp); out.push(grp); }
+    map.get(k).rows.push(r);
+  });
+  return out;
+}
+
+function sectionBodyHtml() {
+  if (S.load === "loading") return `<div class="app-state app-state-inline" role="status" aria-live="polite"><span class="app-spinner" style="color:var(--primary)" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+  if (S.load === "error") return `
+    <div class="app-state app-state-inline" role="alert">
+      ${icon("Error", 36, "is-error")}<p>${esc(t("Common.LoadFailed"))}</p>
+      <button type="button" class="app-button app-button-outlined" data-action="retry">${icon("Retry", 18)}${esc(t("Common.TryAgain"))}</button>
+    </div>`;
+  const note = S.note && !S.dlg ? `<span class="demo-note demo-note-plain">${esc(S.note)}</span>` : "";
+  let lists;
+  if (S.rows.length === 0) {
+    lists = `<div class="app-item-rows"><p class="app-item-rows-empty">${esc(t("NoticeSubjects.Empty"))}</p></div>`;
+  } else {
+    lists = groupsOf(S.rows).map((grp, gi) => {
+      const hid = `ns-group-${gi}`;
+      return `<div class="ns-group"><h3 class="ns-group-title" id="${hid}">${esc(grp.label)}</h3>
+        <div class="app-item-rows"><ul class="app-item-rows-list" aria-labelledby="${hid}">
+          ${grp.rows.map((r, i) => rowHtml(r, i, grp.rows.length)).join("")}
+        </ul></div></div>`;
+    }).join("");
+  }
+  return `${note}${lists}
+    <div class="ns-footer">
+      <button type="button" class="app-button app-button-outlined" id="ns-add" data-action="add">${icon("Add", 18)}${esc(t("NoticeSubjects.Form.AddTitle"))}</button>
+      ${S.rows.length ? totalHtml() : ""}
+    </div>`;
+}
+
+function totalHtml() {
+  const stated = S.rows.filter(r => r.n != null);
+  const sum = stated.reduce((a, r) => a + r.n, 0);
+  const unstated = S.rows.length - stated.length;
+  const unmapped = S.rows.filter(r => !r.m || r.m.length === 0).length;
+  const first = stated.length ? t(sum === 1 ? "NoticeSubjects.Total.One" : "NoticeSubjects.Total.Many", fmt(sum)) : t("NoticeSubjects.Total.None");
+  const second = stated.length && unstated ? t(unstated === 1 ? "NoticeSubjects.Total.Unstated.One" : "NoticeSubjects.Total.Unstated.Many", fmt(unstated)) : "";
+  /* F-75: the not-mapped count, only when above zero (AC10) */
+  const third = unmapped ? t(unmapped === 1 ? "NoticeSubjects.Total.Unmapped.One" : "NoticeSubjects.Total.Unmapped.Many", fmt(unmapped)) : "";
+  return `<p class="ns-total"><span class="ns-total-sum">${esc(first)}</span>${second ? `<span class="ns-total-line">${esc(second)}</span>` : ""}${third ? `<span class="ns-total-line">${esc(third)}</span>` : ""}</p>`;
+}
+
+function countHtml(r) {
+  if (r.n == null) return `<span class="ns-count"><span aria-hidden="true">—</span><span class="app-visually-hidden">${esc(t("NoticeSubjects.Row.NoCount.Spoken"))}</span></span>`;
+  return `<span class="ns-count">${esc(r.n === 1 ? t("NoticeSubjects.Row.Questions.One") : t("NoticeSubjects.Row.Questions.Many", fmt(r.n)))}</span>`;
+}
+
+function coversRowHtml(r) {
+  if (!r.m || r.m.length === 0)
+    return `<span><span class="app-status-chip app-status-chip-warning"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("NoticeSubjects.Row.NotMapped"))}</span></span>`;
+  return `<ul class="ns-covers" aria-label="${esc(t("NoticeSubjects.Field.Covers"))}: ${esc(r.l)}">${sortPicks(r.m).map(p => chipHtml(p)).join("")}</ul>`;
+}
+
+function iconBtn({ action, id, ic, label, tip, name, disabled, destructive }) {
+  return `<span class="tip" data-tip="${esc(tip || label)}"><button type="button" class="app-icon-button ${destructive ? "is-destructive" : ""}"
+    data-action="${action}" data-id="${id}" aria-label="${esc(t("Common.ActionOnItem", label, name))}" ${disabled ? "disabled" : ""}>${icon(ic, 18)}</button></span>`;
+}
+
+function rowHtml(r, i, count) {
+  const first = i === 0, last = i === count - 1, name = itemName(r);
+  const up = iconBtn({ action: "noop", id: r.id, ic: "MoveUp", label: t("Common.MoveUp"), name, disabled: first, tip: first ? t("NoticeSubjects.MoveUp.DisabledFirst") : null });
+  const down = iconBtn({ action: "noop", id: r.id, ic: "MoveDown", label: t("Common.MoveDown"), name, disabled: last, tip: last ? t("NoticeSubjects.MoveDown.DisabledLast") : null });
+  const edit = iconBtn({ action: "edit", id: r.id, ic: "Edit", label: t("Common.Edit"), name });
+  const del = iconBtn({ action: "noop", id: r.id, ic: "Delete", label: t("Common.Delete"), name, destructive: true });
+  return `<li class="app-item-row ${S.changedRow === r.id ? "ns-changed" : ""}" data-row="${r.id}">
+    <div class="app-item-row-content">
+      <div class="ns-row-main">
+        <span class="app-item-row-label app-truncated" title="${esc(r.l)}">${esc(r.l)}</span>
+        ${coversRowHtml(r)}
+      </div>
+      ${countHtml(r)}
+    </div>
+    <div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">${up}${down}<span class="app-row-actions-gap" aria-hidden="true"></span>${edit}${del}</div>
+  </li>`;
+}
+
+/* ===================================================================== */
+/* Screen 2: dialog with the new field "Covers"                           */
+/* ===================================================================== */
+function openDialog(mode, id) {
+  const r = id ? S.rows.find(x => x.id === id) : null;
+  S.dlg = { mode, id: r ? r.id : null, group: r ? (r.g || "") : "", label: r ? r.l : "", count: r && r.n != null ? String(r.n) : "",
+            picks: r ? r.m.map(p => ({ ...p })) : [], saved: r ? r.m.map(p => ({ ...p })) : [],
+            tax: "ready", open: false, term: "", covErr: null, errors: {}, alert: null, saving: false, dirty: false };
+}
+
+/* comfort checks, compared with the saved mapping like BR4 (an overlap that already existed is never blocked) */
+function savedOverlapOf(sid) {
+  const d = S.dlg;
+  return d.saved.some(p => p.k === "s" && p.id === sid) && d.saved.some(p => p.k === "t" && info(p).subjectId === sid);
+}
+function isPicked(k, id) { return S.dlg.picks.some(p => p.k === k && p.id === id); }
+function optionState(k, sid, id) {
+  const d = S.dlg, picked = isPicked(k, id);
+  if (picked) return { picked, reason: null, disabled: false };
+  if (k === "s" && d.picks.some(p => p.k === "t" && info(p).subjectId === sid) && !savedOverlapOf(sid))
+    return { picked, disabled: true, reason: "NoticeSubjects.Covers.WholeBlocked" };
+  if (k === "t" && isPicked("s", sid) && !savedOverlapOf(sid))
+    return { picked, disabled: true, reason: "NoticeSubjects.Covers.CoveredByWhole" };
+  if (d.picks.length >= LIMIT) return { picked, disabled: true, reason: null };
+  return { picked, disabled: false, reason: null };
+}
+
+function visibleGroups() {
+  const term = norm(S.dlg.term);
+  return S.tax.map(s => {
+    if (!term || norm(s.name).includes(term)) return { s, topics: s.topics };
+    const topics = s.topics.filter(x => norm(x.name).includes(term));
+    return topics.length ? { s, topics } : null;
+  }).filter(Boolean);
+}
+const optionCount = (groups) => groups.reduce((a, g) => a + 1 + g.topics.length, 0);
+
+function optionHtml(k, sid, id, name, secondaryDefault) {
+  const st = optionState(k, sid, id);
+  const secondary = st.reason ? t(st.reason) : secondaryDefault;
+  const oid = `covers-opt-${k}-${id}`;
+  return `<div role="option" id="${oid}" tabindex="-1" class="app-mp-option ${k === "s" ? "is-whole" : "is-topic"}" data-key="${k}:${id}" data-sid="${sid}"
+      aria-selected="${st.picked}" ${st.disabled ? 'aria-disabled="true"' : ""} ${secondary ? `aria-describedby="${oid}-sec"` : ""}>
+    <span class="app-mp-check" aria-hidden="true">${st.picked ? icon("Check", 14) : ""}</span>
+    <span class="app-mp-option-text"><span class="app-mp-option-name">${esc(name)}</span>${secondary ? `<span class="app-mp-option-secondary" id="${oid}-sec">${esc(secondary)}</span>` : ""}</span>
+  </div>`;
+}
+
+function listHtml() {
+  const d = S.dlg;
+  if (!d.open || d.tax !== "ready") return "";
+  const groups = visibleGroups();
+  const body = groups.length === 0
+    ? `<div class="app-mp-empty" role="presentation">${esc(t("Lookup.NoResults", d.term))}</div>`
+    : groups.map(g => `<div role="group" class="app-mp-group" aria-label="${esc(g.s.name)}">
+        ${optionHtml("s", g.s.id, g.s.id, g.s.name, t("NoticeSubjects.Covers.WholeMarker"))}
+        ${g.topics.map(x => optionHtml("t", g.s.id, x.id, x.name, null)).join("")}
+      </div>`).join("");
+  return `<div class="app-mp-list" role="listbox" id="notice-subject-covers-list" aria-multiselectable="true" aria-label="${esc(t("NoticeSubjects.Field.Covers.Options"))}">${body}</div>`;
+}
+
+function markOf(p) {
+  const d = S.dlg, i = info(p);
+  if (i.gone) return "NoticeSubjects.Covers.Gone";
+  if (d.covErr === "notice_subject.mapping_overlap" && !i.whole && isPicked("s", i.subjectId)) return "NoticeSubjects.Covers.Overlaps";
+  return null;
+}
+
+function coversFieldHtml() {
+  const d = S.dlg, id = "notice-subject-covers";
+  const inputDisabled = d.tax !== "ready" || d.saving;
+  let desc;
+  if (d.covErr) desc = `<span class="app-field-error-text">${esc(t(d.covErr))}</span>`;
+  else if (d.tax === "loading") desc = `<span class="app-field-hint app-field-status"><span class="app-spinner app-spinner-sm" aria-hidden="true"></span>${esc(t("NoticeSubjects.Field.Covers.Loading"))}</span>`;
+  else if (d.tax === "error") desc = `<span class="app-field-error-text">${esc(t("NoticeSubjects.Field.Covers.LoadFailed"))}
+      <button type="button" class="app-button app-button-text app-button-small" data-action="tax-retry">${esc(t("Common.TryAgain"))}</button></span>`;
+  else if (d.tax === "empty") desc = `<span class="app-field-hint">${esc(t("NoticeSubjects.Field.Covers.EmptyTaxonomy"))}</span>`;
+  else if (d.picks.length >= LIMIT) desc = `<span class="app-field-hint">${esc(t("NoticeSubjects.Field.Covers.LimitReached", fmt(LIMIT)))}</span>`;
+  else desc = `<span class="app-field-hint">${esc(t("NoticeSubjects.Field.Covers.Hint"))}</span>`;
+  const sorted = sortPicks(d.picks);
+  const chips = sorted.length
+    ? `<ul class="app-mp-chips" aria-label="${esc(t("NoticeSubjects.Field.Covers.Picked"))}">${sorted.map((p, i) => chipHtml(p, { removable: true, mark: markOf(p), index: i, disabled: d.saving })).join("")}</ul>`
+    : `<p class="app-mp-none">${esc(t("NoticeSubjects.Field.Covers.None"))}</p>`;
+  const open = d.open && d.tax === "ready";
+  return `<div class="app-field ${d.covErr ? "app-field-error" : ""}" id="wrap-${id}" style="margin-bottom:0">
+    <label class="app-field-label" for="${id}">${esc(t("NoticeSubjects.Field.Covers"))}</label>
+    <div class="app-field-input">
+      ${icon("Search", 18)}
+      <input type="text" id="${id}" data-covers="input" value="${esc(d.term)}" autocomplete="off"
+        role="combobox" aria-autocomplete="list" aria-expanded="${open}" aria-controls="${id}-list" aria-haspopup="listbox"
+        placeholder="${esc(t("NoticeSubjects.Field.Covers.Placeholder"))}" aria-describedby="${id}-description ${id}-count"
+        ${d.covErr ? 'aria-invalid="true"' : ""} ${inputDisabled ? "disabled" : ""}>
+    </div>
+    ${listHtml()}
+    <span id="${id}-description" class="app-field-description">${desc}</span>
+    <div class="app-mp-countline">
+      <span id="${id}-count">${esc(t("NoticeSubjects.Field.Covers.Count", fmt(d.picks.length), fmt(LIMIT)))}</span>
+      ${d.picks.length ? `<button type="button" class="app-button app-button-text app-button-small" data-action="covers-clear" ${d.saving ? "disabled" : ""}>${esc(t("Lookup.Clear"))}</button>` : ""}
+    </div>
+    ${chips}
+  </div>`;
+}
+
+function textFieldHtml({ id, field, labelKey, required, placeholderKey, hintKey, maxlength, numeric, cls = "" }) {
+  const d = S.dlg, err = d.errors[field];
+  return `<div class="app-field ${cls} ${err ? "app-field-error" : ""}" id="wrap-${id}">
+    <label class="app-field-label" for="${id}">${esc(t(labelKey))}${required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>
+    <div class="app-field-input">
+      <input type="${numeric ? "number" : "text"}" id="${id}" data-field="${field}" value="${esc(d[field])}" autocomplete="off"
+        ${maxlength ? `maxlength="${maxlength}"` : ""} ${numeric ? 'inputmode="numeric" min="1" max="500" step="1"' : ""}
+        placeholder="${esc(t(placeholderKey))}" aria-describedby="${id}-description"
+        ${required ? 'aria-required="true"' : ""} ${err ? 'aria-invalid="true"' : ""} ${d.saving ? "disabled" : ""}>
+    </div>
+    <span id="${id}-description" class="app-field-description">${err ? `<span class="app-field-error-text">${esc(t(err))}</span>` : `<span class="app-field-hint">${esc(t(hintKey))}</span>`}</span>
+  </div>`;
+}
+
+function dialogHtml() {
+  const d = S.dlg;
+  if (!d) return "";
+  const note = S.note ? `<span class="demo-note demo-note-plain">${esc(S.note)}</span>` : "";
+  return `<div class="app-overlay">
+    <div class="app-dialog app-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="ns-dlg-title" id="ns-dialog">
+      <h2 class="app-dialog-title" id="ns-dlg-title">${esc(t(d.mode === "add" ? "NoticeSubjects.Form.AddTitle" : "NoticeSubjects.Form.EditTitle"))}</h2>
+      ${note}
+      ${d.alert ? `<div class="app-alert" role="alert" id="ns-dlg-alert">${icon("Error", 20)}<span>${esc(t(d.alert))}</span></div>` : ""}
+      <span class="demo-note demo-note-plain">Demo: Group, Subject and Number of questions as F-74 (suggestions not repeated here)</span>
+      ${textFieldHtml({ id: "notice-subject-group", field: "group", labelKey: "NoticeSubjects.Field.Group", placeholderKey: "NoticeSubjects.Field.Group.Placeholder", hintKey: "NoticeSubjects.Field.Group.Hint", maxlength: 100 })}
+      ${textFieldHtml({ id: "notice-subject-label", field: "label", labelKey: "NoticeSubjects.Field.Label", required: true, placeholderKey: "NoticeSubjects.Field.Label.Placeholder", hintKey: "NoticeSubjects.Field.Label.Hint", maxlength: 200 })}
+      ${textFieldHtml({ id: "notice-subject-question-count", field: "count", labelKey: "NoticeSubjects.Field.QuestionCount", numeric: true, cls: "app-field-count", placeholderKey: "NoticeSubjects.Field.QuestionCount.Placeholder", hintKey: "NoticeSubjects.Field.QuestionCount.Hint" })}
+      ${coversFieldHtml()}
+      <div class="app-dialog-actions">
+        <button type="button" class="app-button app-button-text" data-action="dlg-cancel" ${d.saving ? "disabled" : ""}>${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-filled" data-action="dlg-save" ${d.saving ? "disabled" : ""}>
+          ${d.saving ? `<span class="app-spinner" aria-hidden="true"></span><span role="status">${esc(t("Common.Saving"))}</span>` : esc(t("Common.Save"))}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* re-render only the Covers field, then put the focus back where it was */
+function refreshCovers(focus) {
+  const w = $("wrap-notice-subject-covers"); if (!w) return;
+  const active = document.activeElement;
+  const was = focus || (active && active.id === "notice-subject-covers" ? { input: true, pos: active.selectionStart }
+            : active && active.dataset && active.dataset.key && active.getAttribute("role") === "option" ? { option: active.dataset.key } : null);
+  w.outerHTML = coversFieldHtml();
+  if (!was) return;
+  if (was.input) { const i = $("notice-subject-covers"); if (i && !i.disabled) { i.focus(); if (was.pos != null) i.setSelectionRange(was.pos, was.pos); } }
+  else if (was.option) document.querySelector(`#notice-subject-covers-list [data-key="${was.option}"]`)?.focus();
+  else if (was.chip != null) {
+    const btns = [...document.querySelectorAll('[data-action="chip-remove"]')];
+    (btns[Math.min(was.chip, btns.length - 1)] || $("notice-subject-covers"))?.focus();
+  }
+}
+
+function toggle(el) {
+  const d = S.dlg;
+  if (el.getAttribute("aria-disabled") === "true" || d.saving) return;
+  const [k, id] = el.dataset.key.split(":");
+  const sid = el.dataset.sid;
+  const s = findSubject(S.tax, sid);
+  let p;
+  if (isPicked(k, id)) {
+    p = d.picks.find(x => x.k === k && x.id === id);
+    d.picks = d.picks.filter(x => x !== p);
+    announce(t("NoticeSubjects.Covers.Removed", spoken(info(p))));
+  } else {
+    p = k === "s" ? { k, id, sName: s.name } : { k, id, sName: s.name, tName: s.topics.find(x => x.id === id).name };
+    d.picks.push(p);
+    announce(t("NoticeSubjects.Covers.Added", spoken(info(p))));
+  }
+  d.dirty = true; d.covErr = null;
+  refreshCovers({ option: el.dataset.key });
+}
+
+function saveDialog() {
+  const d = S.dlg;
+  d.errors.label = d.label.trim() ? null : "notice_subject.label_required";
+  if (d.errors.label) { renderDialog(); $("notice-subject-label")?.focus(); return; }
+  /* what the Api would answer (the screen also checks for comfort) */
+  const gone = d.picks.some(p => info(p).gone);
+  const newOverlap = d.picks.some(p => p.k === "t" && isPicked("s", info(p).subjectId) && !savedOverlapOf(info(p).subjectId));
+  if (d.picks.length > LIMIT) d.covErr = "notice_subject.mapping_too_many";
+  else if (gone) d.covErr = "notice_subject.mapping_target_not_found";
+  else if (newOverlap) d.covErr = "notice_subject.mapping_overlap";
+  if (d.covErr) { d.open = false; renderDialog(); $("notice-subject-covers")?.focus(); return; }
+  d.saving = true; d.open = false; renderDialog();
+  setTimeout(() => {
+    let id = d.id;
+    if (d.mode === "add") { id = S.nextId++; S.rows.push({ id, g: d.group.trim() || null, l: d.label.trim(), n: d.count ? Number(d.count) : null, m: d.picks }); }
+    else Object.assign(S.rows.find(r => r.id === d.id), { g: d.group.trim() || null, l: d.label.trim(), n: d.count ? Number(d.count) : null, m: d.picks });
+    S.dlg = null; S.note = null; S.snack = "NoticeSubjects.Saved"; S.changedRow = id;
+    render(); document.querySelector(`[data-action="edit"][data-id="${id}"]`)?.focus();
+  }, 900);
+}
+
+function closeDialog() {
+  S.dlg = null; S.confirm = null; S.note = null; render();
+  if (S.returnFocus) document.querySelector(S.returnFocus)?.focus();
+}
+function cancelDialog() {
+  if (S.dlg.saving) return;
+  if (S.dlg.dirty) { S.confirm = { kind: "discard" }; renderConfirm(); return; }
+  closeDialog();
+}
+
+/* ===================================================================== */
+/* Screen 3: F-79 subject list and topics section (BR10)                  */
+/* ===================================================================== */
+function setSubjectsState(st) {
+  S.state.subjects = st; S.subjects = SUBJECTS(); S.pageAlert = null;
+  if (st === "refused") { S.pageAlert = "subject.in_use"; S.subjects.find(s => s.id === 3).inUse = true; }
+}
+function setTopicsState(st) {
+  S.state.topics = st; S.topics = TOPICS(); S.pageAlert = null;
+  if (st === "refused") { S.pageAlert = "topic.in_use"; S.topics.find(x => x.name === "Lei de Drogas").inUse = true; }
+}
+function subjectDeleteReason(s) {
+  if (s.topics > 0) return t("Subjects.Delete.DisabledHasTopics");   /* subject.has_topics first (BR9) */
+  if (s.inUse) return t("Subjects.Delete.DisabledInUse");
+  return null;
+}
+
+function subjectsHtml() {
+  const alert = S.pageAlert ? `<div class="app-alert" role="alert">${icon("Error", 20)}<span>${esc(t(S.pageAlert))}</span></div>` : "";
+  const note = S.state.subjects === "refused" ? `<span class="demo-note demo-note-plain">Demo: someone mapped Ética no Serviço Público after the list loaded; the click got 409 and the list was reloaded.</span>` : "";
+  return `
+  <div class="app-page-header">
+    <div class="app-page-header-text">
+      <nav class="app-breadcrumbs" aria-label="Breadcrumb"><span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span><span aria-current="page">${esc(t("Subjects.Title"))}</span></nav>
+      <h1 class="app-page-title">${esc(t("Subjects.Title"))}</h1>
+    </div>
+    <button type="button" class="app-button app-button-filled" data-action="noop">${icon("Add", 18)}${esc(t("Common.Add"))}</button>
+  </div>
+  ${note}${alert}
+  <div class="app-table-card">
+    <div class="app-table-toolbar">
+      <div class="app-field"><label class="app-field-label" for="subjects-search">${esc(t("Common.Search"))}</label>
+        <div class="app-field-input">${icon("Search", 18)}<input type="text" id="subjects-search" placeholder="${esc(t("Subjects.Search.Placeholder"))}"></div></div>
+      <div class="app-field"><label class="app-field-label" for="subjects-filter-area">${esc(t("Subjects.Filter.Area"))}</label>
+        <select class="app-select" id="subjects-filter-area"><option>${esc(t("Common.Filter.All"))}</option><option>${esc(t("Subjects.NoArea"))}</option><option>${esc(t("Area.Law"))}</option></select></div>
+    </div>
+    <table class="app-table">
+      <thead><tr><th scope="col">${esc(t("Subjects.Column.Name"))}</th><th scope="col">${esc(t("Subjects.Column.Area"))}</th><th scope="col" class="is-number">${esc(t("Subjects.Column.Topics"))}</th><th scope="col" class="is-actions"><span class="app-visually-hidden">${esc(t("Common.Actions"))}</span></th></tr></thead>
+      <tbody>${S.subjects.map(s => {
+        const reason = subjectDeleteReason(s);
+        return `<tr>
+          <td><a class="app-link" tabindex="0">${esc(s.name)}</a></td>
+          <td>${s.area ? esc(t("Area." + s.area)) : `<span class="app-muted">${esc(t("Subjects.NoArea"))}</span>`}</td>
+          <td class="is-number">${fmt(s.topics)}</td>
+          <td class="is-actions"><div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">
+            ${iconBtn({ action: "noop", id: s.id, ic: "Edit", label: t("Common.Edit"), name: s.name })}
+            ${iconBtn({ action: "noop", id: s.id, ic: "Delete", label: t("Common.Delete"), name: s.name, destructive: true, disabled: !!reason, tip: reason })}
+          </div></td></tr>`;
+      }).join("")}</tbody>
+    </table>
+  </div>`;
+}
+
+function topicsHtml() {
+  const alert = S.pageAlert ? `<div class="app-alert" role="alert">${icon("Error", 20)}<span>${esc(t(S.pageAlert))}</span></div>` : "";
+  const note = S.state.topics === "refused" ? `<span class="demo-note demo-note-plain">Demo: someone mapped Lei de Drogas after the section loaded; the click got 409 and the section was reloaded.</span>` : "";
+  return `
+  <div class="app-page-header">
+    <div class="app-page-header-text">
+      <nav class="app-breadcrumbs" aria-label="Breadcrumb"><span>${esc(t("Nav.Section.Content"))}</span><span aria-hidden="true"> / </span><a tabindex="0">${esc(t("Subjects.Title"))}</a><span aria-hidden="true"> / </span><span aria-current="page">Legislação Especial</span></nav>
+      <h1 class="app-page-title">Legislação Especial</h1>
+    </div>
+    <button type="button" class="app-button app-button-filled" data-action="noop">${icon("Edit", 18)}${esc(t("Common.Edit"))}</button>
+  </div>
+  <p style="margin-bottom:16px"><span class="app-muted">${esc(t("Subjects.Field.Area"))}:</span> ${esc(t("Area.Law"))}</p>
+  <div class="app-form-card">
+    <section class="app-section-card" aria-labelledby="subject-section-topics-title">
+      <h2 class="app-section-card-title" id="subject-section-topics-title">${icon("Topics", 20, "app-section-card-icon")}<span>${esc(t("Topics.Section.Title"))}</span></h2>
+      <p class="app-section-card-subtitle">${esc(t("Topics.Section.Subtitle"))}</p>
+      ${note}${alert}
+      <ul class="app-item-rows-list" aria-labelledby="subject-section-topics-title">${S.topics.map(x => `
+        <li class="app-item-row">
+          <div class="app-item-row-content"><span class="app-truncated" title="${esc(x.name)}">${esc(x.name)}</span></div>
+          <div class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">
+            ${iconBtn({ action: "noop", id: x.id, ic: "Edit", label: t("Common.Edit"), name: x.name })}
+            ${iconBtn({ action: "noop", id: x.id, ic: "Delete", label: t("Common.Delete"), name: x.name, destructive: true,
+                disabled: x.inUse, tip: x.inUse ? t("Topics.Delete.DisabledInUse") : null })}
+          </div>
+        </li>`).join("")}</ul>
+      <div style="margin-top:12px"><button type="button" class="app-button app-button-outlined" data-action="noop">${icon("Add", 18)}${esc(t("Topics.Dialog.AddTitle"))}</button></div>
+    </section>
+  </div>`;
+}
+
+/* ===================================================================== */
+/* shared                                                                 */
+/* ===================================================================== */
+function navHtml() {
+  const link = (ic, key, current) => `<span class="nav-link" ${current ? 'aria-current="page"' : ""}>${icon(ic, 20)}<span>${esc(t(key))}</span></span>`;
+  const onSubjects = S.screen !== "edition";
+  return `<span class="nav-section">${esc(t("Nav.Section.Content"))}</span>
+    ${link("Exams", "Exams.Title", !onSubjects)}${link("Subjects", "Subjects.Title", onSubjects)}${link("IssuingAuthorities", "IssuingAuthorities.Title")}${link("Organizers", "Organizers.Title")}
+    <span class="nav-section">${esc(t("Nav.Section.Administration"))}</span>${link("Users", "Users.Title")}${link("Roles", "Roles.Title")}`;
+}
+
+function confirmHtml() {
+  if (!S.confirm) return "";
+  return `<div class="app-overlay is-top">
+    <div class="app-dialog" role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-message">
+      <h2 class="app-dialog-title" id="cf-title">${esc(t("Common.Discard.Title"))}</h2>
+      <p class="app-dialog-message" id="cf-message">${esc(t("Common.Discard.Message"))}</p>
+      <div class="app-dialog-actions">
+        <button type="button" class="app-button app-button-text" data-action="cf-cancel" id="cf-cancel">${esc(t("Common.Cancel"))}</button>
+        <button type="button" class="app-button app-button-danger" data-action="cf-confirm">${esc(t("Common.Discard.Confirm"))}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+let snackTimer = null;
+function renderSnack() {
+  $("snackbar-root").innerHTML = S.snack ? `<div class="app-snackbar" role="status">${icon("Check", 18)}<span>${esc(t(S.snack))}</span></div>` : "";
+  clearTimeout(snackTimer);
+  if (S.snack) snackTimer = setTimeout(() => { S.snack = null; $("snackbar-root").innerHTML = ""; }, 4000);
+}
+
+function renderDemo() {
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === S.screen)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeBtn === S.theme)));
+  const groups = STATES[S.screen];
+  ["demo-states-1", "demo-states-2"].forEach((rid, i) => {
+    const g = groups[i];
+    $(rid).innerHTML = g ? `<span class="demo-label">Demo &middot; ${g[0]}</span>` +
+      g[1].map(([k, label]) => `<button type="button" data-state="${k}" aria-pressed="${S.state[S.screen] === k}">${label}</button>`).join("") : "";
+    $(rid).hidden = !g;
+  });
+}
+
+function renderDialog() { $("dialog-root").innerHTML = dialogHtml(); }
+function renderConfirm() { $("confirm-root").innerHTML = confirmHtml(); if (S.confirm) $("cf-cancel")?.focus(); }
+
+function render() {
+  document.documentElement.lang = S.lang;
+  document.documentElement.dataset.theme = S.theme;
+  renderDemo();
+  $("drawer").innerHTML = navHtml();
+  $("main").innerHTML = S.screen === "edition" ? editionHtml() : S.screen === "subjects" ? subjectsHtml() : topicsHtml();
+  renderDialog();
+  renderConfirm();
+  renderSnack();
+}
+
+function setState(st) {
+  if (S.screen === "edition") setEditionState(st);
+  else if (S.screen === "subjects") setSubjectsState(st);
+  else setTopicsState(st);
+  render();
+  if (S.dlg && !S.confirm) {
+    if (S.dlg.covErr || S.dlg.open) $("notice-subject-covers")?.focus();
+    else $("notice-subject-group")?.focus();
+  }
+}
+
+/* ---- events ---- */
+document.addEventListener("click", (ev) => {
+  const demo = ev.target.closest(".demo button");
+  if (demo) {
+    if (demo.dataset.screen) { S.screen = demo.dataset.screen; setState(S.state[S.screen]); return; }
+    if (demo.dataset.state) { setState(demo.dataset.state); return; }
+    if (demo.dataset.lang) { S.lang = demo.dataset.lang; render(); return; }
+    if (demo.dataset.themeBtn) { S.theme = demo.dataset.themeBtn; render(); return; }
+  }
+  const opt = ev.target.closest('[role="option"]');
+  if (opt && S.dlg) { toggle(opt); return; }
+  const el = ev.target.closest("[data-action]");
+  if (!el) {
+    if (!document.contains(ev.target)) return;   /* the field was redrawn under the pointer */
+    if (S.dlg && S.dlg.open && !ev.target.closest("#wrap-notice-subject-covers")) { S.dlg.open = false; refreshCovers(); }
+    return;
+  }
+  ev.preventDefault();
+  const a = el.dataset.action, id = Number(el.dataset.id);
+  switch (a) {
+    case "retry": S.load = "ready"; S.state.edition = "mapped"; render(); break;
+    case "add": S.returnFocus = "#ns-add"; openDialog("add"); renderDialog(); $("notice-subject-group")?.focus(); break;
+    case "edit": S.returnFocus = `[data-action="edit"][data-id="${id}"]`; openDialog("edit", id); renderDialog(); $("notice-subject-group")?.focus(); break;
+    case "tax-retry": S.dlg.tax = "ready"; S.tax = sortTax(baseTax()); refreshCovers({ input: true }); break;
+    case "chip-remove": {
+      const d = S.dlg; const p = d.picks.find(x => keyOf(x) === el.dataset.key);
+      d.picks = d.picks.filter(x => x !== p); d.dirty = true; d.covErr = null;
+      announce(t("NoticeSubjects.Covers.Removed", spoken(info(p))));
+      refreshCovers({ chip: Number(el.dataset.index) });
+      break;
+    }
+    case "covers-clear":
+      S.dlg.picks = []; S.dlg.dirty = true; S.dlg.covErr = null; announce(t("NoticeSubjects.Covers.Cleared")); refreshCovers({ input: true }); break;
+    case "cf-cancel": S.confirm = null; renderConfirm(); $("notice-subject-group")?.focus(); break;
+    case "cf-confirm": closeDialog(); break;
+    case "dlg-cancel": cancelDialog(); break;
+    case "dlg-save": saveDialog(); break;
+  }
+});
+
+let resultsTimer = null;
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (!S.dlg) return;
+  if (el.dataset.covers === "input") {
+    S.dlg.term = el.value; S.dlg.open = true; refreshCovers({ input: true, pos: el.selectionStart });
+    clearTimeout(resultsTimer);
+    resultsTimer = setTimeout(() => {
+      const n = optionCount(visibleGroups());
+      announce(n ? t("Lookup.Results", fmt(n)) : t("Lookup.NoResults", S.dlg.term));
+    }, 400);
+    return;
+  }
+  if (el.dataset.field) { S.dlg[el.dataset.field] = el.value; S.dlg.dirty = true; }
+});
+
+/* the list opens on a click in the input, on typing or on Arrow down - not on focus alone, so a field error
+   under the input stays visible when Save moves the focus there */
+document.addEventListener("mousedown", (ev) => {
+  const el = ev.target;
+  if (S.dlg && el.dataset && el.dataset.covers === "input" && !S.dlg.open && S.dlg.tax === "ready" && !el.disabled) {
+    S.dlg.open = true; setTimeout(() => refreshCovers({ input: true, pos: el.value.length }), 0);
+  }
+});
+
+document.addEventListener("keydown", (ev) => {
+  const el = ev.target;
+  const isOption = el.getAttribute && el.getAttribute("role") === "option";
+  const options = () => [...document.querySelectorAll('#notice-subject-covers-list [role="option"]')];
+  if (ev.key === "Escape") {
+    if (S.confirm) { ev.preventDefault(); document.querySelector('[data-action="cf-cancel"]')?.click(); return; }
+    if (S.dlg && S.dlg.open) { ev.preventDefault(); S.dlg.open = false; refreshCovers({ input: true }); return; }
+    if (S.dlg) { ev.preventDefault(); cancelDialog(); return; }
+  }
+  if (el.id === "notice-subject-covers" && ev.key === "Tab" && S.dlg.open) {
+    S.dlg.open = false;
+    setTimeout(() => { $("notice-subject-covers-list")?.remove(); el.setAttribute("aria-expanded", "false"); }, 0);
+  }
+  if (el.id === "notice-subject-covers" && ev.key === "ArrowDown") {
+    ev.preventDefault();
+    if (!S.dlg.open) { S.dlg.open = true; refreshCovers({ input: true }); }
+    options()[0]?.focus();
+    return;
+  }
+  if (isOption) {
+    const list = options(), i = list.indexOf(el);
+    if (ev.key === "ArrowDown") { ev.preventDefault(); list[Math.min(i + 1, list.length - 1)]?.focus(); }
+    else if (ev.key === "ArrowUp") { ev.preventDefault(); (i === 0 ? $("notice-subject-covers") : list[i - 1])?.focus(); }
+    else if (ev.key === "Home") { ev.preventDefault(); list[0]?.focus(); }
+    else if (ev.key === "End") { ev.preventDefault(); list[list.length - 1]?.focus(); }
+    else if (ev.key === " " || ev.key === "Enter") { ev.preventDefault(); toggle(el); }
+    else if (ev.key === "Tab") {
+      /* close without redrawing, so the focus lands on the next control */
+      S.dlg.open = false;
+      setTimeout(() => { $("notice-subject-covers-list")?.remove(); $("notice-subject-covers")?.setAttribute("aria-expanded", "false"); }, 0);
+    }
+    else if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey) { $("notice-subject-covers")?.focus(); }
+    return;
+  }
+  if (S.dlg && ev.key === "Enter" && el.tagName === "INPUT" && el.id !== "notice-subject-covers") { ev.preventDefault(); saveDialog(); }
+});
+
+setSubjectsState("ready");
+setTopicsState("ready");
+setEditionState("mapped");
+render();
+</script>
+</body>
+</html>

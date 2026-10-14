@@ -1,0 +1,116 @@
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Components.Pages.QuestionBank
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+
+@* F-96 UC3: the questions that came from this edition, in paper order, in a card of their own below the notice
+   subjects and outside the edition form - the edition's Save never touches a question. Drafts and published ones
+   are listed (BR10). The page draws this only for who holds questions.manage (BR12). A question is edited on
+   its own page, one way (rule: ui): the row action opens it. *@
+<AppSectionCard Id="edition-section-questions"
+                Title="@L["EditionQuestions.Section.Title"]"
+                Icon="@AppIcons.Questions"
+                Subtitle="@L["EditionQuestions.Section.Subtitle"]">
+    @if (EditionId is null)
+    {
+        <MudText Typo="Typo.body2">@L["EditionQuestions.Section.SaveEditionFirst"]</MudText>
+    }
+    else
+    {
+        @* Outlined: the edition's Save stays the page's only primary button. It navigates to the form with the
+           edition already chosen. *@
+        <div class="app-edition-questions-actions">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@AppIcons.Add"
+                       OnClick="AddQuestion"
+                       id="edition-question-add">@L["EditionQuestions.Add"]</MudButton>
+        </div>
+
+        <AppDataTable @key="EditionId"
+                      TItem="EditionQuestionListItemResponse"
+                      LoadAsync="LoadAsync"
+                      Searchable="false"
+                      InitialPageSize="@PageSize"
+                      EmptyMessage="@L["EditionQuestions.Empty"]">
+            <Columns>
+                <AppNumberColumn TItem="EditionQuestionListItemResponse" TProperty="int" Property="row => row.PaperNumber"
+                                 Title="@L["EditionQuestions.Column.Number"]" Sortable="false" />
+                <TemplateColumn T="EditionQuestionListItemResponse" Title="@L["EditionQuestions.Column.Statement"]" Sortable="false">
+                    <CellTemplate>
+                        <AppTruncatedText Text="@context.Item.StatementExcerpt" MaxWidth="26rem" Lang="@context.Item.ContentLanguage" />
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn T="EditionQuestionListItemResponse" Title="@L["EditionQuestions.Column.NoticeSubject"]" Sortable="false">
+                    <CellTemplate>
+                        @if (context.Item.NoticeSubjectLabel is { } label)
+                        {
+                            <AppTruncatedText Text="@label" MaxWidth="14rem" />
+                        }
+                        else
+                        {
+                            @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text. *@
+                            <span aria-hidden="true">—</span>
+                            <span class="app-visually-hidden">@L["EditionQuestions.NoticeSubject.None"]</span>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn T="EditionQuestionListItemResponse" Title="@L["EditionQuestions.Column.Status"]" Sortable="false">
+                    <CellTemplate>
+                        <AppStatusChip Text="@QuestionText.StatusName(L, context.Item.Status)"
+                                       Tone="QuestionText.StatusTone(context.Item.Status)" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <RowActions>
+                <AppRowActions ItemName="@ItemName(context)"
+                               IdPrefix="@($"edition-question-actions-{context.Id}")"
+                               OnEdit="@(() => Edit(context))" />
+            </RowActions>
+        </AppDataTable>
+    }
+</AppSectionCard>
+
+@code {
+    /// <summary>How many questions one page lists (F-96, BR10).</summary>
+    private const int PageSize = 25;
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The edition whose questions are listed; null while the edition is not saved yet.</summary>
+    [Parameter, EditorRequired] public Guid? EditionId { get; set; }
+
+    // The accessible name of the row's action: "Question 12", short and unique inside the edition.
+    private string ItemName(EditionQuestionListItemResponse question) =>
+        L["EditionQuestions.Row.Name", question.PaperNumber];
+
+    private async Task<AppTablePage<EditionQuestionListItemResponse>> LoadAsync(
+        AppTableQuery query,
+        CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListEditionQuestionsAsync(token, EditionId!.Value, query.Page, query.PageSize, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Edition questions failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<EditionQuestionListItemResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    private void AddQuestion() =>
+        Navigation.NavigateTo($"/admin/questions/new?examEditionId={EditionId}");
+
+    private void Edit(EditionQuestionListItemResponse question) =>
+        Navigation.NavigateTo($"/admin/questions/{question.Id}");
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

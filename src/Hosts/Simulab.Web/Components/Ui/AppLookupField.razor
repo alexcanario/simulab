@@ -29,7 +29,7 @@
                      ResetValueOnEmptyText="true"
                      CoerceText="true"
                      OpenChanged="OnOpenChanged"
-                     AdornmentIcon="@(LeadingIcon ?? AppIcons.Search)"
+                     AdornmentIcon="@AppIcons.Search"
                      Adornment="Adornment.Start"
                      AdornmentAriaLabel="@L["Common.Search"]"
                      UserAttributes="@Attributes">
@@ -123,8 +123,8 @@
     /// </summary>
     [Parameter] public int MaxItems { get; set; } = MaxCandidates;
 
-    /// <summary>F-43 BR1: a decorative <see cref="AppIcons"/> constant in place of the magnifier, when what the
-    /// field looks for is worth naming. It never carries meaning of its own; the label does.</summary>
+    /// <summary>Ignored (F-114 BR1): the magnifier at the start says "type first, the server answers", and an icon in
+    /// its place would hide that. The parameter stays so the call sites that pass one still compile.</summary>
     [Parameter] public string? LeadingIcon { get; set; }
 
     private string _lastTerm = string.Empty;
@@ -174,6 +174,7 @@
             _announcement = options.Count == 0
                 ? L["Lookup.NoResults", _lastTerm]
                 : L["Lookup.Results", options.Count];
+            RequestRender();
 
             return options;
         }
@@ -181,10 +182,15 @@
         {
             _searchFailed = true;
             _announcement = L["Lookup.LoadFailed"];
+            RequestRender();
 
             return [];
         }
     }
+
+    // B-27: the library re-renders its own subtree when the search returns, not this wrapper, so the live region and
+    // the failure message would keep the previous search until something else rendered (F-114 found it on screen).
+    private void RequestRender() => _ = InvokeAsync(StateHasChanged);
 
     private Task RetryAsync()
     {

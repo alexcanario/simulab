@@ -1,0 +1,193 @@
+@* One rich text field everywhere (F-95): label above, required marker, hint or error below, announced - the anatomy
+   of AppTextField - around a visual editor with the formats of the sanitizer's allow-list. This is the only
+   component that names the editor package (Blazored.TextEditor, Quill 2); pages never see it. The editable region
+   is created by the editor in the browser, so its attributes travel through IRichTextEditorBridge. *@
+@using Blazored.TextEditor
+@implements IAsyncDisposable
+@inject IRichTextEditorBridge Bridge
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService Dialogs
+
+<div class="@FieldClass">
+    <label id="@LabelId" class="@(LabelVisuallyHidden ? "app-visually-hidden" : "app-field-label")">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </label>
+    <div id="@HostId" class="app-rt-frame">
+        @if (Bridge.HostsEditor)
+        {
+            @* The editor puts our toolbar in its own toolbar container and creates the editable region after it. *@
+            <BlazoredTextEditor Placeholder="@Placeholder" ReadOnly="Disabled">
+                <ToolbarContent>
+                    <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" />
+                </ToolbarContent>
+            </BlazoredTextEditor>
+        }
+        else
+        {
+            <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" />
+        }
+    </div>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            @* Live, so an error that appears when the reader leaves the editor is spoken (WCAG 4.1.3). *@
+            <span class="app-field-error-text" aria-live="polite">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    private IAsyncDisposable? _attachment;
+    private RichTextEditorOptions? _applied;
+    private string _editorHtml = string.Empty;
+    private bool _disposed;
+
+    /// <summary>Id of the editable region; the label, the description, the error summary and the page point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>The content as HTML. What the Api stored replaces what the editor holds when it comes back here.</summary>
+    [Parameter] public string? Value { get; set; }
+
+    /// <summary>Raised when the reader leaves the editor and after a 300 ms pause while typing.</summary>
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>What the empty editor invites the reader to write; it names the thing, so it has no default.</summary>
+    [Parameter, EditorRequired] public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>Inline formats only and a one-line minimum height that grows with the text: an option row.</summary>
+    [Parameter] public bool Compact { get; set; }
+
+    /// <summary>BCP 47 tag of the content, set on the editable region so a screen reader switches voice.</summary>
+    [Parameter] public string? Lang { get; set; }
+
+    /// <summary>The label is read but not drawn: another element (the option's letter) is the visible label.</summary>
+    [Parameter] public bool LabelVisuallyHidden { get; set; }
+
+    /// <summary>Moves the focus into the editor once it is ready: a row the reader has just added.</summary>
+    [Parameter] public bool AutoFocus { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private string HostId => $"{Id}-editor";
+
+    private string FieldClass =>
+        string.Join(' ', new[]
+        {
+            "app-field", "app-rich-text",
+            HasError ? "app-field-error" : null,
+            Compact ? "app-rich-text-compact" : null,
+            Disabled ? "app-rich-text-disabled" : null
+        }.Where(name => name is not null));
+
+    private RichTextEditorOptions Options(string html) =>
+        new(Id, HostId, LabelId, DescriptionId, Lang, Placeholder, Required, HasError, Disabled, Compact, html);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (firstRender)
+        {
+            _editorHtml = Value ?? string.Empty;
+            _applied = Options(_editorHtml);
+            var callbacks = new RichTextEditorCallbacks(OnEditorChangedAsync, RequestLinkAsync);
+            var attachment = await Bridge.AttachAsync(_applied, callbacks);
+            if (_disposed)
+            {
+                await attachment.DisposeAsync();
+                return;
+            }
+
+            _attachment = attachment;
+            if (AutoFocus)
+            {
+                await Bridge.FocusAsync(Id);
+            }
+
+            // The value may have changed while the editor was coming up.
+            await PushValueAsync();
+            return;
+        }
+
+        if (_attachment is null)
+        {
+            return;
+        }
+
+        await PushValueAsync();
+
+        var options = Options(_editorHtml);
+        if (_applied is not null && (options with { Html = string.Empty }) != (_applied with { Html = string.Empty }))
+        {
+            _applied = options;
+            await Bridge.UpdateAsync(options);
+        }
+    }
+
+    // A value that did not come from the editor (the page loaded the question, or the Api answered with the
+    // sanitized text) replaces what the editor holds, silently: nothing is raised back.
+    private async Task PushValueAsync()
+    {
+        var incoming = Value ?? string.Empty;
+        if (incoming == _editorHtml)
+        {
+            return;
+        }
+
+        _editorHtml = incoming;
+        await Bridge.SetHtmlAsync(Id, incoming);
+    }
+
+    private async Task OnEditorChangedAsync(string html)
+    {
+        _editorHtml = html;
+        Value = html;
+        await ValueChanged.InvokeAsync(html);
+    }
+
+    private async Task<string?> RequestLinkAsync(string? currentUrl)
+    {
+        var parameters = new DialogParameters<AppRichTextLinkDialog> { { dialog => dialog.Url, currentUrl } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+        var reference = await Dialogs.ShowAsync<AppRichTextLinkDialog>(L["RichText.Link"], parameters, options);
+        var result = await reference.Result;
+
+        return result is { Canceled: false, Data: string url } ? url : null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        if (_attachment is not null)
+        {
+            await _attachment.DisposeAsync();
+            _attachment = null;
+        }
+    }
+}

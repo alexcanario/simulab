@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-PT
-features: [F-35, F-74]
-updated: 2026-10-04
+features: [F-35, F-74, F-75, F-96]
+updated: 2026-10-12
 ---
 # Edições de um exame
 
@@ -61,6 +61,7 @@ Um exame não pode ter duas edições com o mesmo ano, posto de trabalho e entid
 | Este exame tem edições. Elimine primeiro as edições. | Um exame com edições não pode ser eliminado. | Elimine as edições e depois o exame. |
 | Há edições que indicam esta entidade organizadora. Altere ou elimine primeiro essas edições. | Uma entidade em uso não pode ser eliminada. | Altere ou elimine essas edições. |
 | Esta edição já não existe. | Alguém a eliminou com o seu ecrã aberto. | Volte ao exame. |
+| Há questões do banco que vieram desta edição, por isso não pode ser eliminada. | Uma questão (rascunho ou publicada) aponta para esta edição. | Elimine as questões ou esvazie a edição delas, e depois elimine a edição. |
 
 ## Disciplinas do aviso
 No cartão **Disciplinas do aviso**, abaixo do formulário da edição, regista as disciplinas tal como o aviso as apresenta: o grupo (por exemplo "Conhecimentos gerais"), o nome da disciplina e o número de questões. O cartão só aparece depois de a edição ser guardada; numa edição nova pede para guardar primeiro. Cada disciplina é guardada pelo seu próprio diálogo ou ação: o botão **Guardar** da edição nunca as guarda. Funciona em edições em rascunho e publicadas.
@@ -78,12 +79,25 @@ No cartão **Disciplinas do aviso**, abaixo do formulário da edição, regista 
 - **Editar** abre o mesmo diálogo preenchido. Mudar o grupo passa a disciplina para o fim do novo grupo; mudar só o nome ou o número mantém a posição.
 - **Eliminar** pede confirmação e retira a disciplina da edição. Pode voltar a ser adicionada mais tarde.
 
+### Mapear uma disciplina do aviso para a taxonomia
+O aviso designa as disciplinas com as suas próprias palavras ("Raciocínio Lógico-Matemático"). O campo **Abrange** indica que [disciplinas e tópicos](subjects.md) da lista comum do Simulab esse título quer dizer, para que todas as edições usem o mesmo vocabulário.
+1. Escolha **Editar** na disciplina do aviso (ou preencha-o ao adicioná-la).
+2. Em **Abrange**, clique no campo ou prima a seta para baixo. A lista mostra todas as disciplinas, cada uma a começar pela opção "disciplina inteira", seguida dos seus tópicos. Escreva para filtrar: maiúsculas e acentos não importam, e uma disciplina cujo nome corresponde mostra todos os seus tópicos.
+3. Escolha a disciplina inteira quando o título a abrange toda, ou apenas os tópicos que abrange. A lista continua aberta para escolher vários; cada escolha aparece abaixo como um chip ("Disciplina · disciplina inteira" ou "Disciplina › Tópico"), e o contador indica quantos escolheu de 50.
+4. Retire uma escolha pelo X do chip, ou todas com **Limpar a seleção**. Escolha **Guardar**.
+
+- Enquanto uma disciplina está escolhida inteira, os seus tópicos ficam a cinzento: a disciplina inteira já os abrange. Enquanto alguns dos seus tópicos estão escolhidos, a opção "disciplina inteira" fica a cinzento: retire primeiro esses tópicos. Apontar para uma opção a cinzento explica o motivo.
+- A mesma disciplina ou tópico pode ser escolhido por várias disciplinas do aviso da mesma edição, para uma lei que o aviso lista sob dois títulos.
+- O mapeamento é opcional. Uma linha sem nada escolhido mostra o chip **Não mapeada**, e o rodapé conta as linhas ainda sem mapeamento. A edição continua a poder ser guardada e publicada.
+- Quando um curador move um tópico mapeado para outra disciplina, a linha mostra-o sob a nova disciplina sem ser editada.
+
 ### Campos das disciplinas do aviso
 | Campo | Significado | Regras |
 |---|---|---|
 | Grupo | O título sob o qual o aviso lista a disciplina | Opcional, no máximo 100 caracteres. Vazio é "Sem grupo" |
 | Disciplina | A disciplina como o aviso a designa | Obrigatório, de 2 a 200 caracteres |
 | Número de questões | Quantas questões o aviso reserva à disciplina | Opcional, número inteiro de 1 a 500 |
+| Abrange | As disciplinas e os tópicos da taxonomia que a disciplina do aviso abrange | Opcional, no máximo 50 itens. Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence |
 
 Na mesma edição, o nome da disciplina não pode repetir-se dentro do mesmo grupo (maiúsculas e acentos não contam; "sem grupo" é um grupo). Uma disciplina eliminada não conta.
 
@@ -98,9 +112,31 @@ Na mesma edição, o nome da disciplina não pode repetir-se dentro do mesmo gru
 | Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam). | A mesma disciplina já está no grupo. | Mude o nome ou o grupo. |
 | Esta disciplina já não está na edição. A lista foi recarregada. | Alguém eliminou-a com o seu ecrã aberto. | Confira a lista atualizada. |
 | Esta disciplina não pode ir nesse sentido. A lista foi recarregada. | Outra pessoa já a moveu. | Confira a ordem atual. |
+| Limite de 50 itens atingido. Retire um para escolher outro. | O campo Abrange já tem 50 escolhas. | Retire primeiro uma escolha. |
+| No máximo 50 itens por disciplina do aviso. | Foram enviadas mais de 50 escolhas. | Retire escolhas e guarde novamente. |
+| Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira. | Um tópico e a sua disciplina inteira foram escolhidos juntos. | Retire um dos chips assinalados. |
+| Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente. | Alguém eliminou uma disciplina ou tópico escolhido com o seu ecrã aberto. | Retire o chip assinalado e guarde. |
+| Um dos itens escolhidos não é válido. Retire-o e volte a escolhê-lo. | Uma escolha não pôde ser lida. | Retire-a e volte a escolhê-la. |
+| Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente. | Duas pessoas guardaram a mesma linha ao mesmo tempo. | Guarde novamente. |
+| Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui. | A lista de disciplinas não carregou. | Recarregue a página e tente novamente. |
+
+## Questões da edição
+No cartão **Questões**, abaixo das disciplinas do aviso, aparecem as questões do banco que vieram desta edição, pela ordem da prova: o número, o início do enunciado, a disciplina do edital e o estado (rascunho ou publicada), 25 por página. O cartão só aparece a quem também gere o banco de questões; numa edição nova pede para guardar primeiro a edição.
+
+1. Escolha **Adicionar questão** para abrir o formulário de questão com esta edição já escolhida; indique o número na prova.
+2. Escolha **Editar** na linha para abrir a questão na própria página. A questão altera-se aí, não neste cartão.
+3. Veja [Questões](questions.md) para registar a origem de uma questão.
+
+Enquanto uma questão do banco aponta para a edição, a edição não pode ser eliminada; o mesmo vale para uma disciplina do edital que uma questão usa. Em ambos os casos a mensagem diz o motivo.
+
+| Mensagem | O que significa | O que fazer |
+|---|---|---|
+| Há questões do banco ligadas a esta disciplina do edital, por isso não pode ser eliminada. | Uma questão aponta para esta disciplina. | Esvazie a disciplina na questão ou elimine a questão, e depois elimine a disciplina. |
 
 ## Páginas relacionadas
+- [Questões](questions.md): o banco de questões e a origem de cada uma
 - [Exames](exams.md): os exames do catálogo (Administradores)
 - [Entidades organizadoras](organizers.md): as entidades que uma edição indica (Administradores)
+- [Disciplinas e tópicos](subjects.md): a lista comum para a qual uma disciplina do aviso é mapeada (Administradores)
 - [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
 - [Simulab](index.md)

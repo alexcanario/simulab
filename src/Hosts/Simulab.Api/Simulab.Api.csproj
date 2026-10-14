@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Catalog\Simulab.Catalog.Api\Simulab.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\Simulab.Identity.Api\Simulab.Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\QuestionBank\Simulab.QuestionBank.Api\Simulab.QuestionBank.Api.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Ai\Simulab.Ai.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Email\Simulab.Email.csproj" />

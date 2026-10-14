@@ -88,13 +88,14 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
 
     /// <summary>
     /// AC4 (BR5): the Api always runs (it carries the job worker); the Web runs at most once and may sleep.
-    /// F-54 AC10 (BR7): the Api runs at most once too, until F-73 shares the OpenIddict keys.
+    /// F-73 AC7 (BR6): the Api may run twice now that every replica signs with the same certificates (it replaces
+    /// F-54 AC10, which capped it at one until then); the Web still runs at most once.
     /// </summary>
     [Fact]
-    public void Publish_KeepsTheApiAwakeAndBothHostsAtMostOnce()
+    public void Publish_KeepsTheApiAwakeAtMostTwiceAndTheWebAtMostOnce()
     {
         var api = Bicep("api-containerapp");
-        api.Should().Contain("minReplicas: 1").And.Contain("maxReplicas: 1");
+        api.Should().Contain("minReplicas: 1").And.Contain("maxReplicas: 2");
 
         var web = Bicep("web-containerapp");
         web.Should().Contain("minReplicas: 0").And.Contain("maxReplicas: 1");
@@ -115,6 +116,19 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             .And.NotContain($"Password={LocalPostgresPassword}");
         // The OpenIddict secret is a parameter: the files name it and the deployment asks for it.
         Bicep("api-containerapp").Should().Contain("param openiddict_client_secret_value string");
+    }
+
+    /// <summary>
+    /// F-73 AC6 (BR4): the OpenIddict certificates reach the Api only through the Key Vault it reads as configuration
+    /// (F-64), never as a deploy parameter, an environment value or a file the publish writes.
+    /// </summary>
+    [Fact]
+    public void Publish_CarriesNoOpenIddictCertificate()
+    {
+        var all = string.Join('\n', _files.Values);
+
+        all.Should().NotContainEquivalentOf("SigningCertificate")
+            .And.NotContainEquivalentOf("EncryptionCertificate");
     }
 
     /// <summary>BR1 (v2): the images go to the Azure Container Registry that the environment creates.</summary>
