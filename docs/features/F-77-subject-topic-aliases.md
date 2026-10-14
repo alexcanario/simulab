@@ -1,7 +1,7 @@
 ---
 feature: F-77
 epic: Subject taxonomy
-status: approved
+status: building
 board: 121
 version: 1
 ---
@@ -80,6 +80,26 @@ No new screen or route. Both dialogs of F-79 gain one field.
 - AC14 Given `SubjectAlias` or `TopicAlias` creation with an empty text, then a failed `Result` with the too-short code, and nothing throws. (BR12)
 - AC15 Given a signed-in Student, then the endpoints that save aliases answer 403 `identity.forbidden` and the pages stay Not Found (F-79 AC15 extended to the new fields). (UC5, BR13)
 - AC16 All new texts and error codes appear in pt-BR, pt-PT and en, and the missing-key test is green. (BR14)
+
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
 
 ## Decisions
 - 2026-10-04 — A subject alias is unique across every subject's name and alias; equal to its own name is refused — the lookup must point to one subject (owner, refinement).
