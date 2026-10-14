@@ -82,6 +82,9 @@ No new screen or route. Both dialogs of F-79 gain one field.
 - AC16 All new texts and error codes appear in pt-BR, pt-PT and en, and the missing-key test is green. (BR14)
 
 ## Criterion → test
+
+Tests locked: 35d4e5756b45d6fd768824b505d14d2502007c02 (7 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `AddSubjectTopicAliasesMigrationTests.Up_CreatesTheTablesTheirKeysAndTheirIndexes_AndDownDropsThem` |
@@ -90,7 +93,7 @@ No new screen or route. Both dialogs of F-79 gain one field.
 | AC4 | `SubjectAliasEndpointTests.Create_AliasEqualToTheName_IsRefused_AndNothingIsWritten`; `SubjectAliasEndpointTests.Update_RenamedToItsOwnStoredAlias_WithAliasesNull_IsRefusedAsSameAsName`; `TopicAliasEndpointTests.Create_AliasEqualToTheName_IsRefused`; `SubjectAliasTests.IsSameAsName_ComparesTheNormalizedForms` |
 | AC5 | `SubjectAliasEndpointTests.Alias_ClashingWithAnotherSubjectsNameOrAlias_IsRefused_AndSoIsTheReverse`; `SubjectAliasEndpointTests.Rename_ToAnotherSubjectsLiveAlias_IsRefusedAsNameTaken` |
 | AC6 | `TopicAliasEndpointTests.Alias_IsUniqueInsideItsSubject_AndFreeAcrossSubjects`; `TopicAliasEndpointTests.Alias_EqualToASiblingTopicsName_IsRefused` |
-| AC7 | `SubjectAliasEndpointTests.RemovedAlias_FreesItsText_ForAnotherSubjectAsAliasAndAsName_AndTheRowStaysFlagged` |
+| AC7 | `SubjectAliasEndpointTests.RemovedAlias_FreesItsText_ForAnotherSubjectAsAlias_AndTheRowStaysFlagged`; `SubjectAliasEndpointTests.RemovedAlias_FreesItsText_ForANewSubjectAsName` |
 | AC8 | `SubjectAliasIndexTests.TwoLiveAliasesOfOneSubjectWithTheSameForm_AreRejected_UnlessTheFirstIsDeleted`; `SubjectAliasIndexTests.TheSameFormOnAnotherSubject_IsRejected`; `SubjectAliasIndexTests.TwoLiveAliasesOfOneTopicWithTheSameForm_AreRejected_UnlessTheFirstIsDeleted_AndAnotherTopicMayHoldIt`; `SubjectAliasIndexTests.TheUniqueIndexes_TreatNullTenantsAsEqual_AndHoldLiveRowsOnly` |
 | AC9 | `TopicAliasEndpointTests.Move_ClashingInTheTargetSubject_IsRefused_ThenAClearMoveTakesTheAliasesAlong` |
 | AC10 | `TopicAliasEndpointTests.Delete_TopicWithAliases_RemovesItsAliasesWithIt`; `SubjectAliasEndpointTests.Delete_SubjectWithAliases_RemovesItsAliasesWithIt` |
@@ -129,6 +132,8 @@ No new screen or route. Both dialogs of F-79 gain one field.
 - 2026-10-14 — Size judged M: one module, one additive migration, two dialogs; kept whole (Claude).
 - 2026-10-14 — Out of scope, to register as an idea: `ISubjectDirectory.SearchAsync` matching aliases (QuestionBank picker); the topic-move picker also finds subjects by alias through BR10 (harmless, noted).
 
+- 2026-10-14 — tests unlocked (the AC7 test gave an alias to a subject and then created a subject with the same name, which BR6 refuses; the code was right, the test was wrong; owner answered "unlock and rewrite"): split into two scenarios, same criterion.
+
 ## Out of scope
 - The import calling the lookup, suggesting the closest topic and turning a curator's confirmation into an alias — epic E-9 (owner, refinement).
 - A limit on the number of aliases per item (owner, refinement).
@@ -143,5 +148,9 @@ No new screen or route. Both dialogs of F-79 gain one field.
 ## Change notes
 
 ## Validation script
+
+## Events
+
+- 2026-10-14 blocked — test wrong: RemovedAlias test gave the alias to a subject and then created a subject with the same name, which BR6 refuses; split into two scenarios
 
 ## Delivery

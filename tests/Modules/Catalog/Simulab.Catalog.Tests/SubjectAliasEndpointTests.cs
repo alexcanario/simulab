@@ -169,7 +169,7 @@ public sealed class SubjectAliasEndpointTests : CatalogApiTests
 
     // AC7: a removed alias frees its text, and its old row stays flagged.
     [Fact]
-    public async Task RemovedAlias_FreesItsText_ForAnotherSubjectAsAliasAndAsName_AndTheRowStaysFlagged()
+    public async Task RemovedAlias_FreesItsText_ForAnotherSubjectAsAlias_AndTheRowStaysFlagged()
     {
         var admin = await AdminAsync();
         var marker = Marker();
@@ -178,11 +178,26 @@ public sealed class SubjectAliasEndpointTests : CatalogApiTests
 
         var removed = await PutAsync(admin, first.Id, first.Name, []);
         var asAlias = await PutAsync(admin, second.Id, second.Name, [$"Português {marker}"]);
-        var asName = await PostAsync(admin, $"Portugues {marker}");
 
         removed.StatusCode.Should().Be(HttpStatusCode.OK);
         (await removed.Content.ReadFromJsonAsync<SubjectResponse>(AppJson.Options))!.Aliases.Should().BeEmpty();
-        asAlias.StatusCode.Should().Be(HttpStatusCode.OK);
+        asAlias.StatusCode.Should().Be(HttpStatusCode.OK, await asAlias.Content.ReadAsStringAsync());
+        (await FindAsync(admin, second.Id)).Aliases.Should().Equal($"Português {marker}");
+        (await StoredDeletedFlagsAsync(first.Id)).Should().Equal(true);
+    }
+
+    // AC7: the freed text is also free as the name of a new subject (a live alias would refuse it: BR6).
+    [Fact]
+    public async Task RemovedAlias_FreesItsText_ForANewSubjectAsName()
+    {
+        var admin = await AdminAsync();
+        var marker = Marker();
+        var first = await CreateAsync(admin, $"Língua Portuguesa {marker}", $"Português {marker}");
+
+        var removed = await PutAsync(admin, first.Id, first.Name, []);
+        var asName = await PostAsync(admin, $"Portugues {marker}");
+
+        removed.StatusCode.Should().Be(HttpStatusCode.OK);
         asName.StatusCode.Should().Be(HttpStatusCode.Created, await asName.Content.ReadAsStringAsync());
         (await StoredDeletedFlagsAsync(first.Id)).Should().Equal(true);
     }
