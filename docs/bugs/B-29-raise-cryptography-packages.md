@@ -1,7 +1,7 @@
 ---
 bug: B-29
 feature: -
-status: refining
+status: approved
 board: 170
 severity: high
 epic: foundation-and-identity
