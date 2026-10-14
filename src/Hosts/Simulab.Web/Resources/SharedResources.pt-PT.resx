@@ -997,4 +997,29 @@
   <data name="question.change_reason_too_long" xml:space="preserve"><value>O motivo é demasiado longo (no máximo 500 carateres).</value></data>
   <data name="question.version_not_found" xml:space="preserve"><value>Esta versão não existe.</value></data>
   <data name="question.version_conflict" xml:space="preserve"><value>Outra gravação alterou antes o histórico desta questão. Recarregue a página e tente novamente.</value></data>
+  <data name="Questions.Status.Annulled" xml:space="preserve"><value>Anulada</value></data>
+  <data name="Questions.Action.Annul" xml:space="preserve"><value>Anular questão</value></data>
+  <data name="Questions.Action.Reinstate" xml:space="preserve"><value>Reintegrar questão</value></data>
+  <data name="Questions.Publication.Annulled" xml:space="preserve"><value>Anulada. Fora da prática e congelada até ser reintegrada.</value></data>
+  <data name="Questions.Annulment.Date" xml:space="preserve"><value>Anulada em {0}</value></data>
+  <data name="Questions.Annulment.Reason" xml:space="preserve"><value>Motivo: {0}</value></data>
+  <data name="Questions.Annulled.Alert" xml:space="preserve"><value>Esta questão está anulada e não pode ser editada. Reintegre-a para a alterar.</value></data>
+  <data name="Questions.Annul.Dialog.Title" xml:space="preserve"><value>Anular esta questão?</value></data>
+  <data name="Questions.Annul.Dialog.Message" xml:space="preserve"><value>A prática deixará de a usar. Pode reintegrá-la depois; o histórico é mantido.</value></data>
+  <data name="Questions.Reinstate.Dialog.Title" xml:space="preserve"><value>Reintegrar esta questão?</value></data>
+  <data name="Questions.Reinstate.Dialog.Message" xml:space="preserve"><value>Volta a ser publicada e a prática pode usá-la.</value></data>
+  <data name="Questions.StatusReason.Label" xml:space="preserve"><value>Motivo</value></data>
+  <data name="Questions.StatusReason.Hint" xml:space="preserve"><value>Obrigatório. Texto simples, até 500 carateres.</value></data>
+  <data name="Questions.StatusReason.Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Questions.Annulled" xml:space="preserve"><value>Questão anulada.</value></data>
+  <data name="Questions.Reinstated" xml:space="preserve"><value>Questão reintegrada.</value></data>
+  <data name="Questions.History.Change.Annulled" xml:space="preserve"><value>Anulada</value></data>
+  <data name="Questions.History.Change.Reinstated" xml:space="preserve"><value>Reintegrada</value></data>
+  <data name="Questions.Preview.Annulled" xml:space="preserve"><value>Anulada em {0}: {1}</value></data>
+  <data name="Questions.Delete.DisabledAnnulled" xml:space="preserve"><value>Esta questão está anulada e não pode ser eliminada.</value></data>
+  <data name="question.annulled" xml:space="preserve"><value>Esta questão está anulada e não pode ser alterada. Reintegre-a primeiro.</value></data>
+  <data name="question.already_annulled" xml:space="preserve"><value>Esta questão já está anulada.</value></data>
+  <data name="question.not_annulled" xml:space="preserve"><value>Esta questão não está anulada.</value></data>
+  <data name="question.status_reason_required" xml:space="preserve"><value>Escreva o motivo.</value></data>
+  <data name="question.status_reason_too_long" xml:space="preserve"><value>O motivo é demasiado longo (no máximo 500 carateres).</value></data>
 </root>

@@ -31,6 +31,8 @@ public static class QuestionEndpoints
         questions.MapPut("/{id:guid}", UpdateAsync).WithName("UpdateQuestion");
         questions.MapPost("/{id:guid}/publish", PublishAsync).WithName("PublishQuestion");
         questions.MapPost("/{id:guid}/unpublish", UnpublishAsync).WithName("UnpublishQuestion");
+        questions.MapPost("/{id:guid}/annul", AnnulAsync).WithName("AnnulQuestion");
+        questions.MapPost("/{id:guid}/reinstate", ReinstateAsync).WithName("ReinstateQuestion");
         questions.MapDelete("/{id:guid}", DeleteAsync).WithName("DeleteQuestion");
         questions.MapGet("/{id:guid}/versions", ListVersionsAsync).WithName("ListQuestionVersions");
         questions.MapGet("/{id:guid}/versions/{number:int}", FindVersionAsync).WithName("FindQuestionVersion");
@@ -141,6 +143,29 @@ public static class QuestionEndpoints
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(id, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    // F-101 BR3: the body is optional on the wire, so a missing one answers with the code of a missing reason.
+    private static async Task<IResult> AnnulAsync(
+        Guid id,
+        AnnulQuestionHandler handler,
+        CancellationToken cancellationToken,
+        AnnulQuestionRequest? request = null)
+    {
+        var result = await handler.HandleAsync(id, request?.Reason, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    private static async Task<IResult> ReinstateAsync(
+        Guid id,
+        ReinstateQuestionHandler handler,
+        CancellationToken cancellationToken,
+        ReinstateQuestionRequest? request = null)
+    {
+        var result = await handler.HandleAsync(id, request?.Reason, cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }

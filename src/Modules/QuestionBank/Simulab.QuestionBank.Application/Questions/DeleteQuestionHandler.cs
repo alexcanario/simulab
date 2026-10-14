@@ -22,7 +22,11 @@ public sealed class DeleteQuestionHandler(IQuestionStore store)
 
         // The question and its options leave together; the interceptor turns both removals into flags.
         store.Remove(question);
-        await store.SaveChangesAsync(cancellationToken);
+        // F-101: the status is a concurrency token; a publish or an annulment that got there first answers 409.
+        if (await store.TrySaveChangesAsync(cancellationToken) is { } refused)
+        {
+            return Result.Failure(refused);
+        }
 
         return Result.Success();
     }

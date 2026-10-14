@@ -22,6 +22,12 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
     /// <summary>F-98 BR5: a version whose key changed always carries the reason.</summary>
     public const string ReasonCheck = "ck_question_versions_key_change_reason";
 
+    /// <summary>F-101 BR2: an annulled version always carries the reason.</summary>
+    public const string AnnulledReasonCheck = "ck_question_versions_annulled_reason";
+
+    /// <summary>F-101 BR2: an annulment is never also an answer key change.</summary>
+    public const string AnnulledKeyChangedCheck = "ck_question_versions_annulled_key_changed";
+
     public void Configure(EntityTypeBuilder<QuestionVersion> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -33,6 +39,8 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
                 table.HasComment("An immutable snapshot of a published question: what students were shown and graded on, numbered from 1 for the question. Never edited or deleted.");
                 table.HasCheckConstraint(NumberCheck, "number >= 1");
                 table.HasCheckConstraint(ReasonCheck, "answer_key_changed = false OR reason IS NOT NULL");
+                table.HasCheckConstraint(AnnulledReasonCheck, "annulled = false OR reason IS NOT NULL");
+                table.HasCheckConstraint(AnnulledKeyChangedCheck, "annulled = false OR answer_key_changed = false");
             });
         builder.HasKey(version => version.Id);
 
@@ -80,7 +88,11 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
 
         builder.Property(version => version.Reason)
             .HasMaxLength(QuestionLimits.ChangeReasonMaxLength)
-            .HasComment("Why the curator changed the answer key, or a note on the change. Always set when answer_key_changed is true.");
+            .HasComment("Why the curator changed the answer key, annulled or reinstated the question, or a note on the change. Always set when answer_key_changed or annulled is true.");
+
+        builder.Property(version => version.Annulled)
+            .IsRequired()
+            .HasComment("True when the question was annulled when this version was recorded. A reinstatement is the first version after an annulled one with this false.");
 
         // BR1: the options are a copy read whole: a JSON column with no property behind it, so no comment can be
         // attached to it (the architecture test names this exemption).

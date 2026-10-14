@@ -997,4 +997,29 @@
   <data name="question.change_reason_too_long" xml:space="preserve"><value>The reason is too long (500 characters at most).</value></data>
   <data name="question.version_not_found" xml:space="preserve"><value>This version does not exist.</value></data>
   <data name="question.version_conflict" xml:space="preserve"><value>Another save changed this question's history first. Reload the page and try again.</value></data>
+  <data name="Questions.Status.Annulled" xml:space="preserve"><value>Annulled</value></data>
+  <data name="Questions.Action.Annul" xml:space="preserve"><value>Annul question</value></data>
+  <data name="Questions.Action.Reinstate" xml:space="preserve"><value>Reinstate question</value></data>
+  <data name="Questions.Publication.Annulled" xml:space="preserve"><value>Annulled. Out of practice and frozen until it is reinstated.</value></data>
+  <data name="Questions.Annulment.Date" xml:space="preserve"><value>Annulled on {0}</value></data>
+  <data name="Questions.Annulment.Reason" xml:space="preserve"><value>Reason: {0}</value></data>
+  <data name="Questions.Annulled.Alert" xml:space="preserve"><value>This question is annulled and cannot be edited. Reinstate it to change it.</value></data>
+  <data name="Questions.Annul.Dialog.Title" xml:space="preserve"><value>Annul this question?</value></data>
+  <data name="Questions.Annul.Dialog.Message" xml:space="preserve"><value>Practice will stop using it. You can reinstate it later; the history is kept.</value></data>
+  <data name="Questions.Reinstate.Dialog.Title" xml:space="preserve"><value>Reinstate this question?</value></data>
+  <data name="Questions.Reinstate.Dialog.Message" xml:space="preserve"><value>It becomes published again and practice can use it.</value></data>
+  <data name="Questions.StatusReason.Label" xml:space="preserve"><value>Reason</value></data>
+  <data name="Questions.StatusReason.Hint" xml:space="preserve"><value>Required. Plain text, up to 500 characters.</value></data>
+  <data name="Questions.StatusReason.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Questions.Annulled" xml:space="preserve"><value>Question annulled.</value></data>
+  <data name="Questions.Reinstated" xml:space="preserve"><value>Question reinstated.</value></data>
+  <data name="Questions.History.Change.Annulled" xml:space="preserve"><value>Annulled</value></data>
+  <data name="Questions.History.Change.Reinstated" xml:space="preserve"><value>Reinstated</value></data>
+  <data name="Questions.Preview.Annulled" xml:space="preserve"><value>Annulled on {0}: {1}</value></data>
+  <data name="Questions.Delete.DisabledAnnulled" xml:space="preserve"><value>This question is annulled and cannot be deleted.</value></data>
+  <data name="question.annulled" xml:space="preserve"><value>This question is annulled and cannot be changed. Reinstate it first.</value></data>
+  <data name="question.already_annulled" xml:space="preserve"><value>This question is already annulled.</value></data>
+  <data name="question.not_annulled" xml:space="preserve"><value>This question is not annulled.</value></data>
+  <data name="question.status_reason_required" xml:space="preserve"><value>Write the reason.</value></data>
+  <data name="question.status_reason_too_long" xml:space="preserve"><value>The reason is too long (500 characters at most).</value></data>
 </root>

@@ -51,11 +51,14 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .IsRequired()
             .HasComment("How the question is answered: SingleChoice or TrueFalse.");
 
+        // F-101: a write that read another status than the stored one is a lost race (an annulment against an
+        // unpublish, a save against an annulment) and answers 409 instead of last-writer-wins.
         builder.Property(question => question.Status)
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("Where the question is in its life: Draft or Published.");
+            .IsConcurrencyToken()
+            .HasComment("Where the question is in its life: Draft, Published or Annulled.");
 
         builder.Property(question => question.TopicId)
             .IsRequired()

@@ -29,7 +29,8 @@ public sealed class QuestionVersion : TenantEntity
         bool? trueFalseKey,
         IEnumerable<QuestionVersionOption> options,
         bool answerKeyChanged,
-        string? reason)
+        string? reason,
+        bool annulled = false)
     {
         QuestionId = questionId;
         Number = number;
@@ -42,7 +43,33 @@ public sealed class QuestionVersion : TenantEntity
         _options.AddRange(options);
         AnswerKeyChanged = answerKeyChanged;
         Reason = reason;
+        Annulled = annulled;
     }
+
+    /// <summary>
+    /// The version an annulment or a reinstatement records (F-101, BR2, BR6): this one's content, numbered
+    /// <paramref name="number"/>, not a key change, with the state and the reason given. The options are new
+    /// instances, so the two versions share nothing.
+    /// </summary>
+    internal QuestionVersion CopyAs(int number, bool annulled, string reason) =>
+        new(
+            QuestionId,
+            number,
+            Type,
+            ContentLanguage,
+            StatementHtml,
+            BaseTextHtml,
+            ExplanationHtml,
+            TrueFalseKey,
+            _options.Select(option => new QuestionVersionOption
+            {
+                Position = option.Position,
+                TextHtml = option.TextHtml,
+                IsCorrect = option.IsCorrect
+            }),
+            answerKeyChanged: false,
+            reason,
+            annulled);
 
     /// <summary>The question the version belongs to, held by id with no navigation back.</summary>
     public Guid QuestionId { get; private set; }
@@ -71,4 +98,10 @@ public sealed class QuestionVersion : TenantEntity
 
     /// <summary>The reason the curator wrote, trimmed; always set when <see cref="AnswerKeyChanged"/> is (BR5).</summary>
     public string? Reason { get; private set; }
+
+    /// <summary>
+    /// True when the question was annulled when this version was recorded (F-101, BR2). A reinstatement is
+    /// the first version after an annulled one with this false; it is derived, not stored.
+    /// </summary>
+    public bool Annulled { get; private set; }
 }

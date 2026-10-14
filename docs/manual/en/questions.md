@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98, F-100]
-updated: 2026-10-13
+features: [F-95, F-96, F-97, F-98, F-100, F-101]
+updated: 2026-10-14
 ---
 # Questions
 
@@ -24,7 +24,7 @@ Page not found, and the menu has no Questions entry.
 3. Type in the search box to find a word of the statement. Case and accents do not matter.
 4. Narrow the list with the filters above the table. Each one lets you pick several values; a question is
    kept when it matches at least one value of every filter you used:
-   - **Status**: drafts, published questions, or both.
+   - **Status**: drafts, published questions, annulled questions, or any mix.
    - **Type**: single choice, true/false, or both.
    - **Difficulty**: 1 to 5, and **Not set** for questions with no difficulty.
    - **Subject and topic**: pick a whole subject (it means all its topics, even topics added later) or
@@ -113,6 +113,29 @@ question, newest first, with the date, what changed and the reason.
 
 Versions are never edited or removed. The name of the person who made a change is stored, but not shown yet.
 
+### Annul and reinstate a question
+When the organizer of an exam annuls a question, record it so practice stops using it. The question stays in
+the bank, in its edition and in the history; only its status changes.
+1. Open a **published** question and look at the **Publication** card. A draft cannot be annulled.
+2. Choose **Annul question**. If the form has changes you did not save, the button is disabled and the card
+   says "Save your changes first."
+3. In the window, write the **reason** (up to 500 characters; it is required) and choose **Annul**. The
+   question becomes **Annulled**: a yellow notice at the top says it cannot be edited, the card shows the
+   date and the reason, every field is read only, and the History card gets a new row "Annulled" with the
+   reason.
+4. While a question is annulled it cannot be saved, published, unpublished or deleted, and the list offers
+   neither Publish nor Unpublish for it. **Preview as a student** still works and shows the date and the
+   reason above the statement. It keeps its topic, its edition and its number in the paper.
+5. To undo it (a mistake, or the organizer reversed the decision), choose **Reinstate question**, write the
+   reason and confirm. The question is **Published** again, can be edited, and the History card shows a row
+   "Reinstated" with that reason.
+6. In the list, filter the **Status** by **Annulled** to see them. Questions in practice are the published
+   ones; how an annulled question counts in a full exam simulation is the edition's scoring rule, not set
+   here.
+
+The date shown is the day you recorded the annulment, not the organizer's own date; the reason is the place to
+cite the official act.
+
 ### Preview as a student
 1. In the **Publication** card, choose **Preview as a student**.
 2. The window shows the base text, the statement and the options as a student will see them; a true/false
@@ -121,7 +144,8 @@ Versions are never edited or removed. The name of the person who made a change i
    version; save first to see your latest changes.
 
 ### Delete a question
-1. Only a draft can be deleted. A published question has its Delete button disabled; unpublish it first.
+1. Only a draft can be deleted. A published question has its Delete button disabled; unpublish it first. An
+   annulled question cannot be deleted at all; reinstate it, unpublish it, and then delete it if you must.
 2. Choose **Delete** on its row and confirm. The topic stays.
 
 ## Fields
@@ -138,6 +162,7 @@ Versions are never edited or removed. The name of the person who made a change i
 | Answer key | Whether the statement of a true/false question is true or false | Only for true/false. May be empty in a draft; required to publish. A published question cannot lose it |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
 | Reason for the answer key change | Why the key of a published question changed | Required when a save or a publish records a version whose key differs from the previous one; 1 to 500 characters. A reason on any other new version is kept as a note |
+| Reason (annul or reinstate) | Why a published question was annulled, or an annulled one taken back | Required, 1 to 500 characters. Kept in the History card with the date |
 | Edition | The past paper the question came from | Optional. With no edition the question is authored. An edition cannot be deleted while a question uses it |
 | Number in the paper | The question's position in the edition's paper | Required with an edition, a whole number from 1 to 500, unique among the edition's questions |
 | Notice subject | The subject of the edition's notice the question belongs to | Optional, only with an edition, and of that same edition. It cannot be deleted while a question uses it |
@@ -169,6 +194,9 @@ the question is saved, and the page shows what was kept.
 | The reason is too long (500 characters at most). | The reason has more than 500 characters. | Shorten it. |
 | This version does not exist. | The version was asked for by a number the question does not have. | Reload the page. |
 | Another save changed this question's history first. Reload the page and try again. | Two saves tried to record the same version number. | Reload the page and save again. |
+| Write the reason. | The reason of an annulment or a reinstatement is empty. | Type the reason, up to 500 characters. |
+| This question is annulled and cannot be changed. Reinstate it first. | You tried to save, publish, unpublish or delete an annulled question. | Choose **Reinstate question** first, if the annulment was a mistake. |
+| This question is already annulled. / This question is not annulled. | Someone else changed it first. | Reload the page. |
 | Only a draft can be deleted. Unpublish the question first. | The question is published. | Unpublish it, then delete. |
 | This question is already published. / This question is not published. | Someone else changed it first. | Reload the page. |
 | This question no longer exists. | Someone deleted it while your screen was open. | Go back to the list. |

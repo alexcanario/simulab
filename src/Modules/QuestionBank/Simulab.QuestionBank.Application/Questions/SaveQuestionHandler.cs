@@ -37,6 +37,13 @@ public sealed class SaveQuestionHandler(
             return Refused(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound));
         }
 
+        // F-101 BR5: an annulled question is frozen. It is a 409 before anything else is judged, so a save with
+        // a topic that is gone does not answer 404 for a question that cannot be saved at all.
+        if (existing?.Status == QuestionStatus.Annulled)
+        {
+            return Refused(new Error(QuestionBankErrorCodes.QuestionAnnulled, ErrorKind.Conflict));
+        }
+
         // F-97 BR2: the type never changes. Naming another one is a 409 before anything else is judged, so the
         // shape checks never answer 400 for a request that is really asking to change the type.
         if (existing is not null && request.Type is { } named && named != existing.Type)

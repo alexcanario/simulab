@@ -18,6 +18,7 @@ namespace Simulab.QuestionBank.Contracts;
 /// <param name="AnswerKeyChanged">True when the answer key differs from the previous version's (BR4).</param>
 /// <param name="Reason">The reason the curator wrote, or null.</param>
 /// <param name="CreatedAt">When the version was recorded.</param>
+/// <param name="Annulled">True when the question was annulled when this version was recorded (F-101, BR2).</param>
 public sealed record QuestionVersionResponse(
     Guid Id,
     Guid QuestionId,
@@ -31,4 +32,5 @@ public sealed record QuestionVersionResponse(
     bool? TrueFalseKey,
     bool AnswerKeyChanged,
     string? Reason,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    bool Annulled);

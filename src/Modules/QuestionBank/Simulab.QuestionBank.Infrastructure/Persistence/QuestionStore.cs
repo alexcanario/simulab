@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.QuestionBank.Application.Questions;
+using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain.Entities;
 using Simulab.SharedKernel.Results;
 
@@ -83,6 +84,14 @@ public sealed class QuestionStore(
             context.ChangeTracker.Clear();
 
             return QuestionUniqueViolations.Translate(exception);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // F-101: the status read is no longer the stored one (the question was annulled, unpublished or
+            // published meanwhile). Nothing of this save was written; the curator reloads and tries again.
+            context.ChangeTracker.Clear();
+
+            return new Error(QuestionBankErrorCodes.QuestionVersionConflict, ErrorKind.Conflict);
         }
     }
 }
