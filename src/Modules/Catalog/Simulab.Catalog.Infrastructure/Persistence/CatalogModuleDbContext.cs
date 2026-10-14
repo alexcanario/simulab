@@ -38,6 +38,12 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
     /// <summary>F-79: the topics, each under its subject.</summary>
     public DbSet<Topic> Topics => Set<Topic>();
 
+    /// <summary>F-77: the other names each subject goes by.</summary>
+    public DbSet<SubjectAlias> SubjectAliases => Set<SubjectAlias>();
+
+    /// <summary>F-77: the other names each topic goes by.</summary>
+    public DbSet<TopicAlias> TopicAliases => Set<TopicAlias>();
+
     /// <summary>F-74: the subjects each edition's notice names, grouped and ordered.</summary>
     public DbSet<NoticeSubject> NoticeSubjects => Set<NoticeSubject>();
 
@@ -64,6 +70,8 @@ public sealed class CatalogModuleDbContext(DbContextOptions<CatalogModuleDbConte
         modelBuilder.ApplyConfiguration(new AreaConfiguration());
         modelBuilder.ApplyConfiguration(new SubjectConfiguration());
         modelBuilder.ApplyConfiguration(new TopicConfiguration());
+        modelBuilder.ApplyConfiguration(new SubjectAliasConfiguration());
+        modelBuilder.ApplyConfiguration(new TopicAliasConfiguration());
         modelBuilder.ApplyConfiguration(new NoticeSubjectConfiguration());
         modelBuilder.ApplyConfiguration(new NoticeSubjectMappingConfiguration());
     }

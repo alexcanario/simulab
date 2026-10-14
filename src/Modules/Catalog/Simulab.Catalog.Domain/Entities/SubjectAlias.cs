@@ -1,3 +1,4 @@
+using Simulab.Catalog.Contracts;
 using Simulab.SharedKernel.Entities;
 using Simulab.SharedKernel.Results;
 
@@ -23,8 +24,35 @@ public sealed class SubjectAlias : TenantEntity
     /// <summary>The comparable form of <see cref="Name"/>: what the unique index and the lookup read.</summary>
     public string NormalizedName { get; private set; } = string.Empty;
 
-    public static Result<SubjectAlias> Create(Guid subjectId, string? name) => throw new NotImplementedException();
+    public static Result<SubjectAlias> Create(Guid subjectId, string? name)
+    {
+        var alias = new SubjectAlias { SubjectId = subjectId };
+        var applied = alias.Apply(name);
+
+        return applied.IsFailure
+            ? Result.Failure<SubjectAlias>(applied.Error!)
+            : Result.Success(alias);
+    }
 
     /// <summary>Changes the typed form of the text, for a kept alias typed again with another case or accent.</summary>
-    public Result Rename(string? name) => throw new NotImplementedException();
+    public Result Rename(string? name) => Apply(name);
+
+    private Result Apply(string? name)
+    {
+        var trimmed = name?.Trim() ?? string.Empty;
+        if (trimmed.Length < CatalogLimits.NameMinLength)
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.SubjectAliasTooShort, ErrorKind.Validation));
+        }
+
+        if (trimmed.Length > CatalogLimits.SubjectNameMaxLength)
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.SubjectAliasTooLong, ErrorKind.Validation));
+        }
+
+        Name = trimmed;
+        NormalizedName = CatalogText.Normalize(trimmed);
+
+        return Result.Success();
+    }
 }

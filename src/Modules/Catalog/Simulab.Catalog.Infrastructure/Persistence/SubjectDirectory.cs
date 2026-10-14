@@ -82,8 +82,41 @@ public sealed class SubjectDirectory(CatalogModuleDbContext context) : ISubjectD
         ];
     }
 
-    public Task<TaxonomyNameMatch> FindByNameAsync(string? name, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+    public async Task<TaxonomyNameMatch> FindByNameAsync(string? name, CancellationToken cancellationToken)
+    {
+        var text = ComparableText.Normalize(name);
+        if (text.Length == 0)
+        {
+            return TaxonomyNameMatch.Empty;
+        }
+
+        // Every set is read through the global soft-delete filter: a deleted subject, topic or alias never matches.
+        var subjects = await context.Subjects
+            .AsNoTracking()
+            .Where(subject => subject.NormalizedName == text
+                || context.SubjectAliases.Any(alias => alias.SubjectId == subject.Id && alias.NormalizedName == text))
+            .OrderBy(subject => subject.NormalizedName)
+            .ThenBy(subject => subject.Id)
+            .Select(subject => new SubjectDirectoryEntry(subject.Id, subject.Name))
+            .ToListAsync(cancellationToken);
+
+        var topics = await context.Topics
+            .AsNoTracking()
+            .Where(topic => topic.NormalizedName == text
+                || context.TopicAliases.Any(alias => alias.TopicId == topic.Id && alias.NormalizedName == text))
+            .Join(
+                context.Subjects,
+                topic => topic.SubjectId,
+                subject => subject.Id,
+                (topic, subject) => new { topic, subject })
+            .OrderBy(row => row.subject.NormalizedName)
+            .ThenBy(row => row.topic.NormalizedName)
+            .ThenBy(row => row.topic.Id)
+            .Select(row => new TopicDirectoryEntry(row.topic.Id, row.topic.Name, row.subject.Id, row.subject.Name))
+            .ToListAsync(cancellationToken);
+
+        return new TaxonomyNameMatch(subjects, topics);
+    }
 
     public async Task<IReadOnlyList<TopicDirectoryEntry>?> ListTopicsAsync(
         Guid subjectId,

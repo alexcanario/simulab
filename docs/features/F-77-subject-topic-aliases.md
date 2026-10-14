@@ -83,7 +83,7 @@ No new screen or route. Both dialogs of F-79 gain one field.
 
 ## Criterion → test
 
-Tests locked: 35d4e5756b45d6fd768824b505d14d2502007c02 (7 files); unlocks: 0
+Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|

@@ -24,6 +24,20 @@ public interface ISubjectStore
     /// <summary>True when a live notice subject maps this subject as a whole subject (F-75, BR9).</summary>
     Task<bool> IsMappedWholeAsync(Guid subjectId, CancellationToken cancellationToken);
 
+    /// <summary>The live other names of the subject, tracked, so the handler can keep, rename or remove them (F-77).</summary>
+    Task<IReadOnlyList<SubjectAlias>> ListAliasesAsync(Guid subjectId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// True when a live other name of another subject has this normalized form (F-77, BR6). Deleted aliases do
+    /// not count: the text is free again (BR8).
+    /// </summary>
+    Task<bool> AliasIsTakenAsync(string normalizedName, Guid? exceptSubjectId, CancellationToken cancellationToken);
+
+    void AddAlias(SubjectAlias alias);
+
+    /// <summary>Soft-deletes the other name: the interceptor turns the removal into a flag.</summary>
+    void RemoveAlias(SubjectAlias alias);
+
     void Add(Subject subject);
 
     /// <summary>Soft-deletes the subject: the interceptor turns the removal into a flag.</summary>

@@ -31,6 +31,7 @@ public static class TopicUniqueViolations
         return violation.ConstraintName switch
         {
             NameIndex => new Error(CatalogErrorCodes.TopicNameTaken, ErrorKind.Conflict),
+            AliasIndex => new Error(CatalogErrorCodes.TopicAliasTaken, ErrorKind.Conflict),
             _ => null,
         };
     }

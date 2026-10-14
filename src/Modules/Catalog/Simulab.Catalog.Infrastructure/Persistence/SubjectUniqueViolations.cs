@@ -31,6 +31,7 @@ public static class SubjectUniqueViolations
         return violation.ConstraintName switch
         {
             NameIndex => new Error(CatalogErrorCodes.SubjectNameTaken, ErrorKind.Conflict),
+            AliasIndex => new Error(CatalogErrorCodes.SubjectAliasTaken, ErrorKind.Conflict),
             _ => null,
         };
     }
