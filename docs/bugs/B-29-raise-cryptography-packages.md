@@ -1,7 +1,8 @@
 ---
 bug: B-29
 feature: -
-status: building
+status: validating
+Autopilot: stop 2
 board: 170
 severity: high
 epic: foundation-and-identity
@@ -56,6 +57,8 @@ Tests locked: 1b41be45b82646fe4905192e14f22fc1a131c748 (1 file); unlocks: 0
 - 2026-10-14 — Regression guard is an architecture test over `obj/project.assets.json` — the definition of done asks for a regression test seen failing; owner first chose "scan only", then switched to the recommended test after the evaluation (average 7.5 vs 5.0) — asked.
 - 2026-10-14 — The pin carries a comment saying it is removed once `MailKit` and `Microsoft.AspNetCore.DataProtection` resolve both packages at 10.0.13 or later — avoids a pin nobody remembers — asked.
 - 2026-10-14 — Validation of this bug is the scan and the full suite; no screen is involved — the fix changes no behavior — decided by Claude.
+- 2026-10-14 — Built under autopilot after "Aprovo B-29": test `CryptographyPackagesTests` seen failing (`Simulab.Ai.Tests: System.Security.Cryptography.Pkcs 10.0.0`), locked, then the pin made it pass. Gate GREEN (3,469 tests, `agile gate GREEN`), scan GREEN, the warnings baseline went from 40 lines to empty (the NU1902/NU1903 entries of the two packages are gone) and the twelve findings are `fixed`.
+- 2026-10-14 — Reuse: transitive pinning already on in `Directory.Packages.props` (one `PackageVersion` per package); the file-reading helper `SolutionAssemblies.RepositoryRoot()` of the architecture tests.
 
 ## Open questions
 - (none)
