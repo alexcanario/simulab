@@ -82,6 +82,9 @@ public sealed class SubjectDirectory(CatalogModuleDbContext context) : ISubjectD
         ];
     }
 
+    public Task<TaxonomyNameMatch> FindByNameAsync(string? name, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<IReadOnlyList<TopicDirectoryEntry>?> ListTopicsAsync(
         Guid subjectId,
         CancellationToken cancellationToken)

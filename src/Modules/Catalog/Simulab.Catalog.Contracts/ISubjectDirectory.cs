@@ -32,4 +32,12 @@ public interface ISubjectDirectory
     Task<IReadOnlyList<TaxonomySubjectResponse>> ListTaxonomyAsync(
         IReadOnlyCollection<Guid>? subjectIds,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// What a name stands for in the taxonomy (F-77, BR11): every live subject whose name or other name has the
+    /// same normalized form as <paramref name="name"/> (case and accents ignored), and every live topic whose
+    /// name or other name does, each with its subject. An empty name matches nothing. The answer does not say
+    /// whether the name or an other name matched; a deleted subject, topic or other name is never returned.
+    /// </summary>
+    Task<TaxonomyNameMatch> FindByNameAsync(string? name, CancellationToken cancellationToken);
 }

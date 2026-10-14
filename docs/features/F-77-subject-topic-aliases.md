@@ -84,22 +84,22 @@ No new screen or route. Both dialogs of F-79 gain one field.
 ## Criterion → test
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
+| AC1 | `AddSubjectTopicAliasesMigrationTests.Up_CreatesTheTablesTheirKeysAndTheirIndexes_AndDownDropsThem` |
+| AC2 | `SubjectAliasEndpointTests.Create_WithTheSameNameTwiceByNormalizedForm_StoresOneAliasAndShowsOneChip`; `SubjectAliasTests.Distinct_CollapsesTheSameNormalizedForm_KeepingTheFirstAsTyped`; `TopicAliasEndpointTests.Create_WithAliases_AnswersAndListsThemOrderedAndWithoutRepeats`; the chip in the dialog: pending (Web test) |
+| AC3 | `SubjectAliasEndpointTests.Create_AliasOutOfRange_IsRefused_AndNothingIsWritten`; `TopicAliasEndpointTests.Create_AliasOutOfRange_IsRefused_AndNothingIsWritten`; `SubjectAliasTests.Create_LengthEdges_AreTwoToOneHundredFifty`; `TopicAliasTests.Create_LengthEdges_AreTwoToTwoHundred` |
+| AC4 | `SubjectAliasEndpointTests.Create_AliasEqualToTheName_IsRefused_AndNothingIsWritten`; `SubjectAliasEndpointTests.Update_RenamedToItsOwnStoredAlias_WithAliasesNull_IsRefusedAsSameAsName`; `TopicAliasEndpointTests.Create_AliasEqualToTheName_IsRefused`; `SubjectAliasTests.IsSameAsName_ComparesTheNormalizedForms` |
+| AC5 | `SubjectAliasEndpointTests.Alias_ClashingWithAnotherSubjectsNameOrAlias_IsRefused_AndSoIsTheReverse`; `SubjectAliasEndpointTests.Rename_ToAnotherSubjectsLiveAlias_IsRefusedAsNameTaken` |
+| AC6 | `TopicAliasEndpointTests.Alias_IsUniqueInsideItsSubject_AndFreeAcrossSubjects`; `TopicAliasEndpointTests.Alias_EqualToASiblingTopicsName_IsRefused` |
+| AC7 | `SubjectAliasEndpointTests.RemovedAlias_FreesItsText_ForAnotherSubjectAsAliasAndAsName_AndTheRowStaysFlagged` |
+| AC8 | `SubjectAliasIndexTests.TwoLiveAliasesOfOneSubjectWithTheSameForm_AreRejected_UnlessTheFirstIsDeleted`; `SubjectAliasIndexTests.TheSameFormOnAnotherSubject_IsRejected`; `SubjectAliasIndexTests.TwoLiveAliasesOfOneTopicWithTheSameForm_AreRejected_UnlessTheFirstIsDeleted_AndAnotherTopicMayHoldIt`; `SubjectAliasIndexTests.TheUniqueIndexes_TreatNullTenantsAsEqual_AndHoldLiveRowsOnly` |
+| AC9 | `TopicAliasEndpointTests.Move_ClashingInTheTargetSubject_IsRefused_ThenAClearMoveTakesTheAliasesAlong` |
+| AC10 | `TopicAliasEndpointTests.Delete_TopicWithAliases_RemovesItsAliasesWithIt`; `SubjectAliasEndpointTests.Delete_SubjectWithAliases_RemovesItsAliasesWithIt` |
+| AC11 | `SubjectAliasEndpointTests.List_SearchFindsASubjectByItsAlias_OnceAndWithItsOwnName` |
+| AC12 | `SubjectDirectoryAliasTests.FindByName_ReturnsSubjectsAndTopicsByNameOrAlias_EachTopicWithItsSubject`; `SubjectDirectoryAliasTests.FindByName_NeverReturnsADeletedSubjectTopicOrAlias`; `SubjectDirectoryAliasTests.FindByName_EmptyText_MatchesNothing` |
+| AC13 | `SubjectAliasEndpointTests.Update_WithAliasesNull_LeavesTheSetUnchanged`; `TopicAliasEndpointTests.Update_WithAliasesNull_LeavesTheSetUnchanged` |
+| AC14 | `SubjectAliasTests.Create_EmptyName_FailsWithTooShort_AndNothingThrows`; `TopicAliasTests.Create_EmptyName_FailsWithTooShort_AndNothingThrows` |
+| AC15 | `SubjectAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; `TopicAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; the pages: pending (Web test) |
+| AC16 | pending (the resource parity test and the dialogs' Web tests) |
 
 ## Decisions
 - 2026-10-04 — A subject alias is unique across every subject's name and alias; equal to its own name is refused — the lookup must point to one subject (owner, refinement).
@@ -116,6 +116,18 @@ No new screen or route. Both dialogs of F-79 gain one field.
 - 2026-10-04 — Cross-table uniqueness (an alias against the other subjects' names, a name against the other subjects' aliases) is checked in the handlers; the database guarantees only uniqueness inside each alias table. Two curators racing the same text into a name and an alias at the same instant can both succeed; accepted, as F-79 accepts its own delete race (Claude, technical).
 - 2026-10-04 — Aliases travel in the save requests as a whole set (`null` = unchanged), not through their own endpoints — the dialog saves once (Claude, technical).
 - 2026-10-04 — `topic_aliases` carries no `subject_id`; the per-subject check joins through `topics`, so a move needs no alias row update — one source of truth for the subject (Claude, technical; the build's design pass may revisit it with `EXPLAIN` if the index cannot serve the check).
+
+- 2026-10-14 — Build design pass (system-design + architect, both opus; signal: a unique rule). Verified against the code: F-79 is merged (`## Start` and "What exists" were stale), `TopicQueries.cs:21` and `SaveTopicHandler.cs:76` also build `TopicResponse` and must carry the aliases, `NameIsTakenAsync` counts deleted rows (Claude, verified).
+- 2026-10-14 — Design coverage: layout, data, contracts, scope, simplicity, rules and UI kit checked; the `EXISTS` search and the delete handlers were checked as described and are proven by tests (Claude).
+- 2026-10-14 — Design trade-off 8 (lookup home): owner chose as proposed — `FindByNameAsync(string?, CancellationToken)` on `ISubjectDirectory`, returning `TaxonomyNameMatch(IReadOnlyList<SubjectDirectoryEntry> Subjects, IReadOnlyList<TopicDirectoryEntry> Topics)`.
+- 2026-10-14 — Design trade-off 9 (aliases in the dialog): owner chose as proposed — aliases ride on every list row through the shared `Project`; both dialogs send `Aliases = null` when the chips did not change, creates with no chips included.
+- 2026-10-14 — Alias against a name counts deleted subjects' and topics' names too (reuses `NameIsTakenAsync`), as BR6 and BR7 read and F-79 BR5 keeps deleted names taken; only alias against alias is live-only (BR8) (Claude, architect finding 3).
+- 2026-10-14 — BR5 and the alias checks run against the resulting set (the stored set when `Aliases` is null), so renaming to an own alias answers `*.alias_same_as_name`; the entities' `Create` own trim, length and codes, `AliasRules` only dedupes and compares with the name (Claude, design pass).
+- 2026-10-14 — The set is replaced by a diff on the normalized form (keep, rename when the typed form changed, remove the missing, add the new), never delete-all then insert: the soft delete is an UPDATE and the partial unique index could refuse the INSERT first (Claude, trap T3).
+- 2026-10-14 — The chips field is a kit component built from `AppChip` + `AppChipRemove` with a plain `<input>` and `@onkeydown`, with a gallery entry and a wrap test; Enter is also a validation-script step. No mockup agent: no new screen (Claude, architect finding 6).
+- 2026-10-14 — Traps: T1 list rows without aliases would wipe them on save (aliases in the shared projection, null when unchanged); T2 `subject_id` on `topic_aliases` (not added); T3 delete-all-then-insert (diff instead).
+- 2026-10-14 — Size judged M: one module, one additive migration, two dialogs; kept whole (Claude).
+- 2026-10-14 — Out of scope, to register as an idea: `ISubjectDirectory.SearchAsync` matching aliases (QuestionBank picker); the topic-move picker also finds subjects by alias through BR10 (harmless, noted).
 
 ## Out of scope
 - The import calling the lookup, suggesting the closest topic and turning a curator's confirmation into an alias — epic E-9 (owner, refinement).
