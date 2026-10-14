@@ -1,5 +1,7 @@
 # F-95 — Question text format: Markdown or sanitized HTML
 
+Technical terms: [glossary](../../glossary.md)
+
 Refinement material of [F-95](../F-95-single-choice-questions.md). Not an item file. Measured on 2026-10-10 in two scratch projects (net10.0, outside the repository); nothing here is in `src/`.
 
 ## The decision

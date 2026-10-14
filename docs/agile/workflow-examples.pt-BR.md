@@ -4408,3 +4408,67 @@ agile techdocs GREEN: 1 page(s)
 Quem abre `docs/flows/order-summary.md` num wiki vê a tela desenhada na hora; o HTML, que o wiki não abre, fica a um link de distância. Um bug que muda o layout depois lista `update docs/flows/order-summary.md#Wireframe`, e o Claude corrige o desenho na mesma página.
 
 As saídas acima são as que o `techdocs.js` imprimiu sobre um projeto de teste com o item F-1, a página de fluxo e o mockup deste exemplo.
+
+### 14.120 O desenho e a revisão dizem a armadilha: a escolha atraente que custa depois
+
+A F-2 do projeto de pedidos cria a rota `GET /api/v1/orders/summary` e uma tabela de contagem, então o `/agile:build F-2` roda as duas passagens somente leitura. O relatório do `system-design` agora tem uma seção entre os riscos e os pontos em aberto, com até 3 linhas no formato `T<n> | a escolha atraente | onde ela tenta | o custo escondido | taken ou avoided` (trecho, no inglês do agente):
+
+```
+## Traps
+
+T1 | Keep a counter table OrderSummaries updated by the create handler | F-2 Design, line 21 | It drifts on any path that skips the handler and needs a backfill and an atomic upsert, while BR3 (at most 200 orders) makes an indexed COUNT cheap | taken (owner's design; Risk 2, Open points 2 and 3)
+T2 | Cut at 500 and drop Notes in the same migration | F-2 Design, line 20; 001_create_orders.sql:5,7 | Anything past 500 characters is lost silently and the down cannot restore it, against BR4 | taken (owner's design; Risk 1, Open point 1)
+T3 | Answer the summary with OrdersCache.ListFor(tenant).Count | OrdersCache.cs:3-15, use case AC2 | The count is up to 60 s late right after a create and can disagree with the counter | avoided
+```
+
+Uma armadilha não é um risco (um jeito de a própria proposta falhar), não é um achado (um defeito) e não é uma escolha com custo dos dois lados: é o caminho que parece certo e que o item poderia tomar na confiança. A T3 é a que a proposta recusou; a T1 e a T2 são as que ela tomou, porque o desenho é seu, e por isso também aparecem nos riscos e nos pontos em aberto. A T2 toca a BR4 (nenhuma nota pode perder texto), e nesta execução o Claude a aceitou como mitigada pela guarda de tamanho que a migração ganhou; se a mitigação não fechasse a BR4, ela seria movida para os achados. O Claude confere o que cada linha cita no código (o cache está mesmo em `OrdersCache.cs:3`), descarta a que tem premissa falsa e move para os achados a que quebra regra ou critério. Para você, ele diz uma linha e grava outra em `## Decisions`; nenhuma vira cartão:
+
+```
+Armadilhas: T1 (tabela de contagem) e T2 (corte em 500 + drop de `Notes`) aceitas e mitigadas; T3 (resumo pelo cache) evitada.
+```
+
+```
+2026-10-13: traps — T1 counter table updated by the create handler: taken (owner's design), mitigated with the migration 002 back-fill ...; T2 cut at 500 and drop `Notes` in the same migration: taken (owner's design), mitigated with the length guard above; T3 answer the summary from `OrdersCache`: avoided (would read up to 60s stale, could disagree with the counter).
+```
+
+No `/agile:review F-3`, outra mudança, o relatório do revisor ganha `## Traps` entre as escolhas com custo e o conferido sem achado. A armadilha do revisor é uma escolha que passa nas nove conferências hoje e custa depois, com número `T<n>` próprio, que nunca entra na sequência `#` dos achados, para os cartões e as linhas de `## Decisions` não mudarem de número:
+
+```
+## Traps
+| T# | File:line | The attractive choice | Hidden cost | Why it passes the nine checks |
+| T1 | src/Orders/OrdersEndpoints.cs:12 | Count with `store.ListFor(tenant.Id).Count`, reusing the existing list method. | Every summary call builds the tenant's full customer list just to count it. The cost grows with the number of orders ... (`SELECT` all rows instead of `COUNT(*)`). | It is correct, filtered by tenant, and reuses an existing helper with no new code. At today's volumes it is not a defect. |
+| T2 | src/Orders/OrdersEndpoints.cs:12 | The summary reads `OrdersStore` directly, while the list endpoint (line 10) reads `OrdersCache` (60 s). | For up to 60 s after an order is created, the count and the list can disagree ... | BR1 and AC1 only ask for the right tenant's count. ... |
+```
+
+e o Claude mostra a linha `Armadilhas: T1 contar monta lista inteira; T2 vitrine em cache (60s) vs leitura direta podem discordar`, depois dos dois achados de teste, que continuam achados. Sem nenhuma, o relatório diz `Traps: none`, resposta válida: o agente não enche a lista para parecer completo, e o teto é 3. No `/agile:autopilot` e com `--assume` nada disso para a corrida; o stop 2 lista as armadilhas com as escolhas com custo.
+
+As saídas acima são as de duas execuções reais com o plugin da branch (`/agile:build F-2` e `/agile:review F-3` sobre dois projetos de teste); com o plugin anterior, o mesmo desenho e a mesma revisão não tinham onde dizer isso: a escolha atraente ficava de fora ou virava um achado leve. A passagem `system-design` custou 17 878 tokens, contra 17 040 antes (+838).
+
+### 14.121 O build sobe a escada de reuso antes de escrever e diz o que reaproveitou
+
+No build da F-1 ("total do pedido com imposto"), a tarefa pede arredondar como o endpoint de pedidos já arredonda e conferir o tenant. O Claude lê o código que a mudança toca (passo 6) e, antes de escrever um helper, sobe a escada de reuso: o código já tem um arredondamento (`Money.Round2`) e uma checagem de tenant (`TenantGuard.Allows`), então nenhum dos dois é reescrito. O que a biblioteca base já faz (`decimal.TryParse`) também não vira helper. O relatório do build ganha uma linha `Reuse:`, copiada para `## Decisions` do item:
+
+```
+- Reuse: `Money.Round2` and `TenantGuard.Allows` (`src/Seed.Api/Program.cs`, `src/Seed.Api/Money.cs`, `src/Seed.Api/TenantGuard.cs`), the same helpers the existing order endpoint uses; `decimal.TryParse` (BCL) for the tax-rate check, no new helper written.
+```
+
+Quando nada serve, a linha diz o que foi procurado, para você e para o revisor conferirem: `Reuse: nothing found (<o que foi procurado>)`. O piso de segurança (validação nas fronteiras de confiança, autorização, isolamento de tenant, perda de dados, i18n, acessibilidade) nunca é cortado pela escada, e ela nunca adiciona pacote.
+
+As linhas acima são de execuções reais do `/agile:build` com o plugin da branch sobre a seed do `benchmarks/` (a tarefa `total-with-tax` do #130), três execuções, em que duas escreveram a linha `Reuse:` no arquivo do item (a terceira usou os mesmos helpers e não a escreveu): a média foi de 16,3 linhas de fonte contra 21 da linha de base anterior, gate verde nas três, `Money.Round2` e `TenantGuard.Allows` chamados em todas, US$ 9,12 no total. Com três execuções a diferença de linhas está dentro do ruído; o que a medida prova é que o piso se manteve.
+
+### 14.122 O plugin no Copilot CLI: a instalação e a tabela do que funciona
+
+Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do manual (seção 3) dá a instalação a partir de um clone local: o plugin registra a pasta como marketplace `canary` e responde que está carregado ao vivo, sem copiar nada. `copilot plugin list` passa a mostrar `agile@canary (v0.77.0) (enabled)`. A mesma tabela diz, parte por parte, o que foi medido: as 22 skills e os 5 agentes carregam e são listados; os comandos, os 6 eventos de hook, a variável `CLAUDE_PLUGIN_ROOT` (21 arquivos) e `AskUserQuestion` (1 arquivo) estão como `não medido`, e a seção diz que nada ali afirma que funcionam.
+
+O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
+
+```
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (21)
+ok   AC5: the report states the files that use AskUserQuestion (1)
+ok   AC5: the report states the hook events (6)
+ok   AC5: the report states the skills (22) and the agents (5)
+```
+
+Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
+
+As medidas da tabela vêm de uma execução real do Copilot CLI 1.0.83 sobre a pasta do plugin (uma chamada de 8,28 AI Credits); a instalação local foi executada e desfeita depois, e a forma `<owner>/<repo>` do GitHub não foi.
