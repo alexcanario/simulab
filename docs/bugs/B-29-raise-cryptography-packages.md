@@ -44,6 +44,9 @@ Measured 2026-10-14 in this worktree with `dotnet list Simulab.slnx package --vu
 - none — no technical page describes these packages.
 
 ## Regression test
+
+Tests locked: 1b41be45b82646fe4905192e14f22fc1a131c748 (1 file); unlocks: 0
+
 - `CryptographyPackagesTests.XmlAndPkcs_ResolveToPatchedVersion_InEveryProject` — `Simulab.ArchitectureTests`. Reads the `obj/project.assets.json` of every project of `Simulab.slnx` and fails when `System.Security.Cryptography.Xml` or `System.Security.Cryptography.Pkcs` resolves below `10.0.13` (names the project and the version). Seen failing before the pin (resolves 10.0.11 and 10.0.0 today). Scope: the two packages of these advisories; a future advisory is still the scan's job.
 
 ## Decisions
