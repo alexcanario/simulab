@@ -31,7 +31,7 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | F-101 | Annul a question | A curator annuls a published question with a reason; the simulators leave it out or score it by the organizer's rule (E-6) | Should | S | F-98 | - | no | done |
 | F-102 | Shared base text | One base text (reading passage) serves several questions | Should | M | F-95 | - | yes | done |
 | F-103 | Images in questions | Images in the statement, base text and options, stored through `IFileStorage` | Should | M | F-95, F-89 | - | no | idea |
-| F-104 | Multiple-answer questions | The multiple-answer type | Should | M | F-95 | - | no | idea |
+| F-104 | Multiple-answer questions | The multiple-answer type | Should | M | F-95 | - | no | done |
 | F-105 | Review before publishing | `InReview` status, review queue, approve or reject with a reason, a review permission; may move to epic E-9 | Should | M | F-95 | - | yes | idea |
 | F-106 | Matching questions | The matching type | Could | M | F-95 | - | no | idea |
 | F-107 | Fill-in-the-blanks questions | The fill-in-the-blanks type | Could | M | F-95 | - | no | idea |

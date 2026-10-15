@@ -1,7 +1,7 @@
 ---
 feature: F-104
 epic: Question bank
-status: validating
+status: done
 board: 150
 version: 1
 ---
@@ -229,3 +229,9 @@ Pare o app host (Ctrl+C) e, ao terminar, apague o banco: `DROP DATABASE simulab_
 - 2026-10-15 blocked — test wrong: Six screen tests looked up the checkboxes through #question-section-options, an id the section card does not render (it sits on the heading); test defect, no criterion changes
 
 ## Delivery
+- Branch `feature/F-104`, merge commit `2e506da2`, version 1.1.0 (board #150).
+- Ship gate `agile gate GREEN`: Web 1908, AppHost 80, Api 58, Catalog 582, Identity 501, QuestionBank 402, Jobs 25, Ai 10, Persistence 25, Email 19, ApiResults 13, SharedKernel 12; architecture 220. Scan `agile scan GREEN`, techdocs `agile techdocs GREEN`, test lock unchanged since its second lock (1 unlock, recorded in Decisions).
+- Backend: `QuestionType.MultipleAnswer`, `MultipleAnswerKey` beside the two older keys, two 400 codes, the F-98 key-change check over the set of correct positions; migration `UpdateQuestionTypeComment` (comments only).
+- Screens: third type card, checkboxes in the Options section, own checklist items, "Mark N options." line in the preview; the transcription screen offers the three types.
+- Manual: `questions.md` in pt-BR, pt-PT and en. Flow page: `docs/flows/multiple-answer-questions.md`.
+Gate time: 3 passes, 10 min 56 s — turn 1 (2 min 8 s), ship 1 (5 min 35 s), scan 1 (3 min 13 s), sealed 2 (8 min 48 s saved); 0 red
