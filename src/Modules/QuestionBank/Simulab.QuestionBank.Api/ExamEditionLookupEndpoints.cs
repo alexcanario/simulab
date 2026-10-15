@@ -30,6 +30,7 @@ public static class ExamEditionLookupEndpoints
         editions.MapGet("/{editionId:guid}", FindAsync).WithName("FindQuestionEdition");
         editions.MapGet("/{editionId:guid}/notice-subjects", NoticeSubjectsAsync).WithName("ListQuestionEditionNoticeSubjects");
         editions.MapGet("/{editionId:guid}/questions", QuestionsAsync).WithName("ListEditionQuestions");
+        editions.MapGet("/{editionId:guid}/next-paper-number", NextPaperNumberAsync).WithName("GetNextEditionPaperNumber");
 
         return group;
     }
@@ -59,6 +60,16 @@ public static class ExamEditionLookupEndpoints
         var subjects = await queries.ListNoticeSubjectsAsync(editionId, cancellationToken);
 
         return subjects is null ? EditionNotFound() : Results.Ok(subjects);
+    }
+
+    private static async Task<IResult> NextPaperNumberAsync(
+        Guid editionId,
+        IQuestionQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var number = await queries.GetNextPaperNumberAsync(editionId, cancellationToken);
+
+        return number is null ? EditionNotFound() : Results.Ok(new NextPaperNumberResponse(number.Value));
     }
 
     private static async Task<IResult> QuestionsAsync(

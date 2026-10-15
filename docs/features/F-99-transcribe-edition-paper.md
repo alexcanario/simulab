@@ -103,15 +103,15 @@ Let a curator enter a whole past paper in one sitting, instead of reopening the 
 | Criterion | Test |
 |---|---|
 | AC1 | pending |
-| AC2 | pending |
+| AC2 | NextPaperNumberEndpointTests.NextPaperNumber_OfAnEditionWithNoQuestions_IsOne, NextPaperNumber_IsTheHighestLiveNumberPlusOne_AndIgnoresDeletedQuestions, NextPaperNumber_FollowsASavedQuestion |
 | AC3 | pending |
-| AC4 | pending |
+| AC4 | NextPaperNumberEndpointTests.SavingTheSuggestedNumberTwice_IsRefusedTheSecondTime (screen behavior: screen test, pending) |
 | AC5 | pending |
 | AC6 | pending |
 | AC7 | pending |
-| AC8 | pending |
+| AC8 | NextPaperNumberEndpointTests.NextPaperNumber_WithoutTheManagePermission_IsForbidden, NextPaperNumber_ForACurator_Answers200 (button and route: screen tests, pending) |
 | AC9 | pending |
-| AC10 | pending |
+| AC10 | NextPaperNumberEndpointTests.NextPaperNumber_OfAnUnknownEdition_Is404 (screen state: screen test, pending) |
 | AC11 | pending |
 
 ## Decisions

@@ -65,6 +65,12 @@ public interface IQuestionQueries
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// The number transcription mode suggests next: the highest paper number among the edition's live questions
+    /// plus one, or 1 when it has none; null when the edition is unknown (F-99, BR4).
+    /// </summary>
+    Task<int?> GetNextPaperNumberAsync(Guid examEditionId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// One page of the edition's live questions in paper order, drafts and published, or null when the edition
     /// is unknown (F-96, BR10). <paramref name="page"/> is zero-based and the size is capped as the list's.
     /// </summary>

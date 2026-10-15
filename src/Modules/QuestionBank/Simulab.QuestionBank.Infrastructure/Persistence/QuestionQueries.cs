@@ -330,6 +330,9 @@ public sealed class QuestionQueries(
         ];
     }
 
+    public Task<int?> GetNextPaperNumberAsync(Guid examEditionId, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<EditionQuestionPageResponse?> ListEditionQuestionsAsync(
         Guid examEditionId,
         int page,
