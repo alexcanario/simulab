@@ -1,7 +1,7 @@
 ---
 feature: F-99
 epic: Question bank
-status: building
+status: validating
 board: 145
 version: 1
 ---

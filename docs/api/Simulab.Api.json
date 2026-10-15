@@ -2716,6 +2716,30 @@
         }
       }
     },
+    "/api/v1/question-bank/editions/{editionId}/next-paper-number": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "GetNextEditionPaperNumber",
+        "parameters": [
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/question-bank/subjects": {
       "get": {
         "tags": [
