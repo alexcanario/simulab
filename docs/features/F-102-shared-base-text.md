@@ -171,4 +171,6 @@ A curator writes a passage once and links every question that refers to it, so a
 
 ## Events
 
+- 2026-10-15 question — asked 7, from context 0
+
 ## Delivery
