@@ -28,11 +28,15 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-98: the immutable snapshots of the published questions, numbered per question.</summary>
     public DbSet<QuestionVersion> QuestionVersions => Set<QuestionVersion>();
 
+    /// <summary>F-102: the passages several questions share, linked through <c>questions.base_text_id</c>.</summary>
+    public DbSet<BaseText> BaseTexts => Set<BaseText>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.ApplyConfiguration(new BaseTextConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());

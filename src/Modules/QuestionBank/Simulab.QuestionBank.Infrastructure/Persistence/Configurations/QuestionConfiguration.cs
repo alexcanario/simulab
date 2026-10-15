@@ -84,12 +84,19 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .IsRequired()
             .HasComment("The plain statement without case or accents. The list search reads it; derived on every write.");
 
-        // F-102 skeleton: the old column stays mapped as it was, so the model equals the snapshot, until the
-        // migration of the build replaces it with the link.
-        builder.Ignore(question => question.BaseTextId);
-        builder.Property<string?>("BaseTextHtml")
-            .HasMaxLength(QuestionLimits.BaseTextMaxLength)
-            .HasComment("The text the question refers to, as sanitized HTML. Empty when there is none.");
+        // F-102: the base text is shared, so the question holds a link to it, a foreign key inside the module.
+        builder.Property(question => question.BaseTextId)
+            .HasComment("The base text shown before the statement. A foreign key to base_texts; null when the question has none.");
+
+        builder.HasOne<BaseText>()
+            .WithMany()
+            .HasForeignKey(question => question.BaseTextId)
+            .HasConstraintName("fk_questions_base_text")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // The in-use check, the counts, the linked list and the fan-out of an edit filter by the base text alone.
+        builder.HasIndex(question => question.BaseTextId)
+            .HasDatabaseName("ix_questions_base_text");
 
         builder.Property(question => question.ExplanationHtml)
             .HasMaxLength(QuestionLimits.ExplanationMaxLength)

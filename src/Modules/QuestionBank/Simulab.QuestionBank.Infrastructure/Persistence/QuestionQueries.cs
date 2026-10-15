@@ -77,10 +77,18 @@ public sealed class QuestionQueries(
             questions = questions.Where(question => question.NormalizedStatement.Contains(search));
         }
 
+        // F-102 BR11: the questions of one base text, most recently changed first.
+        if (sanitized.BaseTextId is { } baseTextId)
+        {
+            questions = questions.Where(question => question.BaseTextId == baseTextId);
+        }
+
         var total = await questions.CountAsync(cancellationToken);
 
-        var rows = await questions
-            .OrderByDescending(question => question.CreatedAt)
+        var ordered = sanitized.BaseTextId is null
+            ? questions.OrderByDescending(question => question.CreatedAt)
+            : questions.OrderByDescending(question => question.UpdatedAt ?? question.CreatedAt);
+        var rows = await ordered
             .ThenByDescending(question => question.Id)
             .Skip(sanitized.Page * sanitized.PageSize)
             .Take(sanitized.PageSize)
@@ -154,6 +162,15 @@ public sealed class QuestionQueries(
             ? new QuestionAnnulmentResponse(latest.Reason, latest.CreatedAt)
             : null;
 
+        // F-102 BR2: the linked base text, read live; the soft-delete filter makes a deleted one read as none.
+        var baseText = question.BaseTextId is { } baseTextId
+            ? await context.BaseTexts
+                .AsNoTracking()
+                .Where(row => row.Id == baseTextId)
+                .Select(row => new QuestionBaseTextResponse(row.Id, row.Title, row.TextHtml))
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
+
         return new QuestionResponse(
             question.Id,
             question.Type,
@@ -164,7 +181,7 @@ public sealed class QuestionQueries(
             topic?.SubjectName ?? string.Empty,
             question.ContentLanguage,
             question.StatementHtml,
-            null,
+            baseText,
             question.ExplanationHtml,
             question.Difficulty,
             [

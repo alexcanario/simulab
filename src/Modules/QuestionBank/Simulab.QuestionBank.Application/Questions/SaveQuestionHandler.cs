@@ -1,3 +1,4 @@
+using Simulab.Identity.Contracts;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain;
@@ -74,6 +75,25 @@ public sealed class SaveQuestionHandler(
             }
         }
 
+        // F-102 BR7: a base text that is unknown or deleted answers 404 before the content is judged, as the topic
+        // does. BR3: a language that differs from the text's answers 409 before Apply, so a refused save leaves
+        // the entity untouched; an invalid language falls through to Apply's 400.
+        LinkedBaseText? baseText = null;
+        if (request.BaseTextId is { } baseTextId && baseTextId != Guid.Empty)
+        {
+            baseText = await store.FindBaseTextAsync(baseTextId, cancellationToken);
+            if (baseText is null)
+            {
+                return Refused(new Error(QuestionBankErrorCodes.QuestionBaseTextNotFound, ErrorKind.NotFound));
+            }
+
+            var language = SupportedLanguages.Canonical(request.ContentLanguage);
+            if (language is not null && language != baseText.ContentLanguage)
+            {
+                return Refused(new Error(QuestionBankErrorCodes.QuestionBaseTextLanguageMismatch, ErrorKind.Conflict));
+            }
+        }
+
         var drafts = (request.Options ?? [])
             .Select(option => new OptionDraft(sanitizer.Sanitize(option.TextHtml), option.IsCorrect))
             .ToList();
@@ -120,7 +140,7 @@ public sealed class SaveQuestionHandler(
         if (existing is not null && question!.Status == QuestionStatus.Published)
         {
             var latest = await store.FindLatestVersionAsync(question.Id, cancellationToken);
-            var next = question.NextVersion(latest, request.ChangeReason);
+            var next = question.NextVersion(latest, request.ChangeReason, baseText?.TextHtml);
             if (next.IsFailure)
             {
                 return Refused(next.Error!);
