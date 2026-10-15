@@ -34,6 +34,7 @@ public static class QuestionBankResult
 public sealed class QuestionBankApiClient(HttpClient http)
 {
     private const string Base = "/api/v1/question-bank/questions";
+    private const string BaseTextsBase = "/api/v1/question-bank/base-texts";
     private const string EditionsBase = "/api/v1/question-bank/editions";
     private const string SubjectsBase = "/api/v1/question-bank/subjects";
     private const string TaxonomyRoute = "/api/v1/question-bank/taxonomy";
@@ -173,6 +174,78 @@ public sealed class QuestionBankApiClient(HttpClient http)
         Guid questionId,
         CancellationToken cancellationToken = default) =>
         SendAsync<bool>(() => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/{questionId}"), accessToken), cancellationToken);
+
+    /// <summary>F-102 BR11: one page of base texts sorted by title, filtered by language and a word of the title.</summary>
+    public Task<QuestionBankResult<BaseTextPageResponse>> ListBaseTextsAsync(
+        string accessToken,
+        BaseTextListQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var route = $"{BaseTextsBase}?page={query.Page.ToString(CultureInfo.InvariantCulture)}&pageSize={query.PageSize.ToString(CultureInfo.InvariantCulture)}";
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            route += $"&search={Uri.EscapeDataString(query.Search)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Language))
+        {
+            route += $"&language={Uri.EscapeDataString(query.Language)}";
+        }
+
+        return SendAsync<BaseTextPageResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken), cancellationToken);
+    }
+
+    /// <summary>F-102 UC2: the base text the form edits, with the count of questions that link it.</summary>
+    public Task<QuestionBankResult<BaseTextResponse>> FindBaseTextAsync(
+        string accessToken,
+        Guid baseTextId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<BaseTextResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{BaseTextsBase}/{baseTextId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-102 UC1: creates a base text.</summary>
+    public Task<QuestionBankResult<BaseTextResponse>> CreateBaseTextAsync(
+        string accessToken,
+        SaveBaseTextRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<BaseTextResponse>(() => Authorized(WithJson(HttpMethod.Post, BaseTextsBase, body), accessToken), cancellationToken);
+
+    /// <summary>F-102 UC2: replaces a base text; a changed text makes versions of the published questions that link it.</summary>
+    public Task<QuestionBankResult<BaseTextResponse>> UpdateBaseTextAsync(
+        string accessToken,
+        Guid baseTextId,
+        SaveBaseTextRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<BaseTextResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{BaseTextsBase}/{baseTextId}", body), accessToken),
+            cancellationToken);
+
+    /// <summary>F-102 UC5: a soft delete on the server, refused with a 409 while a question links the text.</summary>
+    public Task<QuestionBankResult<bool>> DeleteBaseTextAsync(
+        string accessToken,
+        Guid baseTextId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{BaseTextsBase}/{baseTextId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-102 UC4: the questions that link a base text, most recently changed first.</summary>
+    public Task<QuestionBankResult<QuestionPageResponse>> ListBaseTextQuestionsAsync(
+        string accessToken,
+        Guid baseTextId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionPageResponse>(
+            () => Authorized(
+                new HttpRequestMessage(
+                    HttpMethod.Get,
+                    $"{BaseTextsBase}/{baseTextId}/questions?page={page.ToString(CultureInfo.InvariantCulture)}&pageSize={pageSize.ToString(CultureInfo.InvariantCulture)}"),
+                accessToken),
+            cancellationToken);
 
     /// <summary>F-96 BR9: editions of any status the origin lookup offers, at most 20, by exam then year.</summary>
     public Task<QuestionBankResult<IReadOnlyList<ExamEditionLookupResponse>>> SearchEditionsAsync(
