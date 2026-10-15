@@ -1,7 +1,7 @@
 ---
 feature: F-104
 epic: Question bank
-status: approved
+status: building
 board: 150
 version: 1
 ---
@@ -137,23 +137,23 @@ No mockup (owner, 2026-10-15): two controls change inside the form of F-95/F-97 
 <!-- Written by /agile:build at its start, one row per criterion above. -->
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
+| AC1 | `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswerWithNoOptions_IsStoredAsADraftOfThatType_AndListedWithIt`; `MultipleAnswerQuestionTests.Create_MultipleAnswerWithNoOptions_IsADraftOfThatTypeWithNoKey` |
+| AC2 | `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswerDraft_WithAnyMarking_IsAccepted_AndKeepsTheMarks`; `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswerWithSixOptions_IsRefusedWithOptionsCount`; `MultipleAnswerQuestionTests.Create_MultipleAnswerDraft_AcceptsAnyMarking`; `MultipleAnswerQuestionTests.Create_MultipleAnswerWithSixOptions_IsRefusedWithOptionsCount` |
+| AC3 | `MultipleAnswerQuestionEndpointTests.Publish_MultipleAnswerWithFewerThanThreeOptions_IsRefusedWithMultipleOptionsCount`; `MultipleAnswerQuestionEndpointTests.Publish_MultipleAnswerWithAnEmptyOptionText_IsRefusedWithOptionTextRequired`; `MultipleAnswerQuestionTests.Publish_MultipleAnswerWithFewerThanThreeOptions_IsRefusedWithMultipleOptionsCount`; `MultipleAnswerQuestionTests.Publish_MultipleAnswerWithAnEmptyOptionText_IsRefusedWithOptionTextRequired` |
+| AC4 | `MultipleAnswerQuestionEndpointTests.Publish_MultipleAnswerWithAnInvalidMarking_IsRefusedWithMultipleKeyInvalid`; `MultipleAnswerQuestionEndpointTests.Publish_MultipleAnswerWithTwoCorrectAndOneWrong_BecomesPublished`; `MultipleAnswerQuestionTests.Publish_MultipleAnswerWithAnInvalidMarking_IsRefusedWithMultipleKeyInvalid`; `MultipleAnswerQuestionTests.Publish_MultipleAnswerWithTwoOrMoreCorrectAndOneWrong_BecomesPublished` |
+| AC5 | `MultipleAnswerQuestionEndpointTests.Update_PublishedMultipleAnswer_LeavingOneCorrect_IsRefused_AndTheStoredQuestionIsUnchanged`; `MultipleAnswerQuestionEndpointTests.Update_PublishedMultipleAnswer_MarkingAnotherValidSet_WithAReason_StaysPublished`; `MultipleAnswerQuestionTests.Update_PublishedMultipleAnswer_LeavingOneCorrect_IsRefused_AndTheStoredQuestionIsUnchanged`; `MultipleAnswerQuestionTests.Update_PublishedMultipleAnswer_MarkingAnotherValidSet_StaysPublished` |
+| AC6 | `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswerWithATrueFalseKey_IsRefusedWithKeyNotAllowed_AndNothingIsStored`; `MultipleAnswerQuestionTests.Create_MultipleAnswerWithATrueFalseKey_IsRefusedWithKeyNotAllowed` |
+| AC7 | `MultipleAnswerQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndTheStoredQuestionIsUnchanged`; `MultipleAnswerQuestionEndpointTests.Update_NamingItsOwnTypeOrNone_IsAccepted`; `MultipleAnswerQuestionTests.Update_WithAnotherType_IsRefusedWithTypeChanged_AndNothingChanges`; `MultipleAnswerQuestionTests.Update_SingleChoiceWithMultipleAnswerContent_IsRefusedWithTypeChanged` |
+| AC8 | `MultipleAnswerQuestionEndpointTests.Update_PublishedMultipleAnswer_MovingASecondCorrectOption_NeedsAReason_AndThenRecordsAKeyChange`; `MultipleAnswerQuestionTests.NextVersion_MovingASecondCorrectOption_IsAKeyChangeThatNeedsAReason`; `MultipleAnswerQuestionTests.NextVersion_MovingASecondCorrectOption_WithAReason_RecordsAKeyChange`; `MultipleAnswerQuestionTests.NextVersion_AddingACorrectOption_IsAKeyChange`; `MultipleAnswerQuestionFormTests.Edit_PublishedMultipleAnswer_MovingASecondCorrectOption_AsksForTheReason` |
+| AC9 | `MultipleAnswerQuestionEndpointTests.Update_PublishedMultipleAnswer_ChangingOnlyAnOptionText_RecordsAVersionWithNoKeyChange`; `MultipleAnswerQuestionTests.NextVersion_ChangingOnlyTheTextOfAnOption_IsNotAKeyChange`; the F-98 test classes, run unedited |
+| AC10 | `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswer_SanitizesTheHtmlOfTheTextFields`; `MultipleAnswerQuestionEndpointTests.Create_MultipleAnswer_WithAPaperNumberAlreadyTaken_IsRefusedWithPaperNumberTaken`; `MultipleAnswerQuestionEndpointTests.Delete_PublishedMultipleAnswer_IsRefused_AndADraftIsDeleted`; `MultipleAnswerQuestionEndpointTests.DeleteTopic_WithOnlyAMultipleAnswerQuestion_IsRefusedWithTopicInUse`; `MultipleAnswerQuestionTests.Create_MultipleAnswerWithAnEmptyStatement_IsRefusedWithStatementRequired`; `MultipleAnswerQuestionTests.EnsureDeletable_PublishedMultipleAnswer_IsRefusedWithDeleteRequiresDraft`; `MultipleAnswerQuestionFormTests.Edit_AnnulledMultipleAnswer_ShowsTheBoxesDisabled` |
+| AC11 | `MultipleAnswerQuestionEndpointTests.List_QuestionsOfTheThreeTypes_NameTheTypeOfEachRow`; `MultipleAnswerQuestionPreviewAndListTests.List_NamesTheTypeOfEachRow_InTheThirdLabel` |
+| AC12 | `MultipleAnswerQuestionFormTests.Add_OffersTheThreeTypesWithSingleChoicePreselected`; `MultipleAnswerQuestionFormTests.Add_ChoosingMultipleAnswer_DrawsCheckboxesInPlaceOfTheRadios_AndSeveralCanBeChecked`; `MultipleAnswerQuestionFormTests.Add_MultipleAnswer_SavesADraftWithItsTypeAndEveryMarkedOption`; `MultipleAnswerQuestionFormTests.Add_GoingToMultipleAnswerAndBack_BringsTheTypedOptionsBack`; `MultipleAnswerQuestionFormTests.Edit_MultipleAnswer_ShowsTheTypeAsAReadOnlyValue_AndTheStoredMarks`; `MultipleAnswerQuestionFormTests.Edit_MultipleAnswer_ChecklistIsDoneOnlyForTwoOrMoreCorrectAndOneWrong` |
+| AC13 | `MultipleAnswerQuestionPreviewAndListTests.Preview_MultipleAnswer_ShowsHowManyOptionsToMark_BeforeTheOptions`; `MultipleAnswerQuestionPreviewAndListTests.Preview_MultipleAnswer_BeforeShowAnswer_HidesTheKeyAndTheExplanation`; `MultipleAnswerQuestionPreviewAndListTests.Preview_MultipleAnswer_ShowAnswer_MarksEveryCorrectOptionWithIconTextAndBorder` |
+| AC14 | `UpdateQuestionTypeCommentMigrationTests.Up_NamesTheThirdTypeInBothTypeComments_AndKeepsEveryQuestionWithItsType`; `MultipleAnswerQuestionTests.TheEntityAndTheContracts_CarryNoCountOrScoringModeForTheKey`; `MultipleAnswerQuestionEndpointTests.TheQuestionsTable_HasNoCorrectCountOrScoringModeColumn`; `EnumColumnCommentTests.EnumColumnComments_NameOnlyValuesTheEnumHas` |
+| AC15 | `MultipleAnswerQuestionEndpointTests.CreateAndUpdate_OfAMultipleAnswerQuestion_WithoutThePermission_AnswerForbidden` |
+| AC16 | `MultipleAnswerQuestionFormTests.Add_MultipleAnswer_EachCheckboxNamesItsLetter` (names); `MultipleAnswerQuestionFormTests.Edit_PublishedMultipleAnswer_WhenTheApiRefuses_TheMessageIsUnderTheOptionsList` (error text); keyboard pass and announcement: validation step 3 |
+| AC17 | `MultipleAnswerQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords` |
 
 ## Decisions
 - 2026-10-15 — Scoring (all or nothing, partial credit) is the edition's scoring rule (E-6); the question keeps only its answer key and no scoring mode — same reasoning as the penalty of true/false (epic Question bank, 2026-10-09) — confirmed: docs/epics/question-bank.md
