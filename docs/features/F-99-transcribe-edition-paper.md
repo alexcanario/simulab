@@ -100,6 +100,9 @@ Let a curator enter a whole past paper in one sitting, instead of reopening the 
 - AC11 All new texts appear in pt-BR, pt-PT and en.
 
 ## Criterion → test
+
+Tests locked: 3254ebaeb6da1b87a95e72b861d2fd3ca8f64482 (1 file); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | pending |

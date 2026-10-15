@@ -330,8 +330,20 @@ public sealed class QuestionQueries(
         ];
     }
 
-    public Task<int?> GetNextPaperNumberAsync(Guid examEditionId, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+    public async Task<int?> GetNextPaperNumberAsync(Guid examEditionId, CancellationToken cancellationToken)
+    {
+        if (await editions.FindAsync(examEditionId, cancellationToken) is null)
+        {
+            return null;
+        }
+
+        var highest = await context.Questions
+            .AsNoTracking()
+            .Where(question => question.ExamEditionId == examEditionId)
+            .MaxAsync(question => question.PaperNumber, cancellationToken);
+
+        return (highest ?? 0) + 1;
+    }
 
     public async Task<EditionQuestionPageResponse?> ListEditionQuestionsAsync(
         Guid examEditionId,
