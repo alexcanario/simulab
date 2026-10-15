@@ -31,4 +31,5 @@ Written by `scan.js` (never a secret value). Triage with `node scan.js accept <i
 | 5f226af9 | medium | dotnet | GHSA-2fmv-rv2c-59x7 | System.Security.Cryptography.Pkcs@10.0.0 | fixed | B-29: Xml and Pkcs pinned at 10.0.13 in Directory.Packages.props; the scan no longer reports it | owner | 2026-10-14 |
 | 8b22e1a8 | medium | semgrep | unsafe-path-combine | tools/Simulab.DocGen/GeneratedDocs.cs:16 | open |  |  | 2026-10-08 |
 | b0ca391a | medium | dotnet | GHSA-2fmv-rv2c-59x7 | System.Security.Cryptography.Pkcs@10.0.10 | fixed | B-29: Xml and Pkcs pinned at 10.0.13 in Directory.Packages.props; the scan no longer reports it | owner | 2026-10-14 |
+| cf8d5578 | medium | dotnet | GHSA-qhrr-8q5h-9q3h | MessagePack@2.5.302 | open |  |  | 2026-10-15 |
 | d484175a | medium | dotnet | GHSA-2fmv-rv2c-59x7 | System.Security.Cryptography.Pkcs@10.0.11 | fixed | B-29: Xml and Pkcs pinned at 10.0.13 in Directory.Packages.props; the scan no longer reports it | owner | 2026-10-14 |

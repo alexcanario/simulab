@@ -463,10 +463,10 @@ Tests locked: c5e0b8a483ea0832f48ab684c0108c16080a9ebb (5 files); unlocks: 1
 | AC8 | `BaseTextEndpointTests.List_SortsByTitle_SearchesWithoutCaseOrAccents_AndFiltersByLanguage` |
 | AC9 | `BaseTextEndpointTests.Questions_OfABaseText_ListsTheLiveLinkedQuestions_AndAnUnknownTextAnswers404` |
 | AC10 | `BaseTextEndpointTests.EveryBaseTextEndpoint_WithoutThePermission_AnswersForbidden_AndACuratorHasIt` |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC11 | `QuestionPreviewDialogTests.Render_LinkedBaseText_IsShownBeforeTheStatement`; `QuestionPreviewDialogTests.Render_NoBaseText_ShowsNoBaseTextBlock`; `QuestionPreviewDialogTests.Render_AVersion_ShowsTheBaseTextHtmlItRecorded_NotTheLinkedOne`; `QuestionFormBaseTextTests.Preview_ShowsTheLinkedBaseTextBeforeTheStatement`; `QuestionFormBaseTextTests.VersionView_ShowsTheBaseTextHtmlTheVersionRecorded` |
+| AC12 | `QuestionTranscriptionBaseTextTests.Save_KeepsTheChosenBaseText_WhileTheOtherFieldsAreBlank`; `QuestionTranscriptionBaseTextTests.Save_TheNextQuestionIsSentWithTheSameBaseText`; `QuestionTranscriptionBaseTextTests.KeptBaseText_IsNotAnUnsavedChange`; `QuestionTranscriptionBaseTextTests.LanguageChange_ClearsTheChoiceWithTheMessage` |
+| AC13 | `QuestionFormBaseTextTests.Picker_OffersOnlyTheTextsOfTheQuestionsLanguage_AndAsksTheServerByLanguage`; `QuestionFormBaseTextTests.Save_New_SendsTheChosenBaseTextId_AndTheAsideShowsItsTitle`; `QuestionFormBaseTextTests.Edit_RemovingTheLink_SendsNullAndTheQuestionHasNoBaseText`; `QuestionFormBaseTextTests.UnsavedChanges_ADifferentChoiceIsAChange_ComingBackToTheStoredOneIsNot` |
+| AC14 | `BaseTextResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `BaseTextResourcesTests.TheInlineBaseTextTooLongText_LeftWithTheInlineField`; `ResourceParityTests` (every key of the neutral file exists in each satellite) |
 
 ## Decisions
 - 2026-10-15 — One concept: every question links to a `BaseText` or has none; the inline field is dropped and the migration turns each existing text into a base text linked to its question — one way to edit, the data keeps nothing in two places — asked.
