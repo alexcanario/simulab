@@ -15,6 +15,9 @@ public static class SubjectUniqueViolations
 
     public const string NameIndex = "ux_subjects_tenant_normalized_name";
 
+    /// <summary>F-77: an other name is unique across every subject, live rows only.</summary>
+    public const string AliasIndex = "ux_subject_aliases_tenant_normalized_name";
+
     /// <summary>The 409 for a duplicate name, or null when the exception is anything else.</summary>
     public static Error? Translate(DbUpdateException exception)
     {
@@ -28,6 +31,7 @@ public static class SubjectUniqueViolations
         return violation.ConstraintName switch
         {
             NameIndex => new Error(CatalogErrorCodes.SubjectNameTaken, ErrorKind.Conflict),
+            AliasIndex => new Error(CatalogErrorCodes.SubjectAliasTaken, ErrorKind.Conflict),
             _ => null,
         };
     }

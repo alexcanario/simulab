@@ -30,6 +30,12 @@ public sealed class DeleteSubjectHandler(ISubjectStore store, ITopicStore topics
             return Result.Failure(new Error(CatalogErrorCodes.SubjectInUse, ErrorKind.Conflict));
         }
 
+        // F-77 BR9: the other names go with the subject and never hold it back.
+        foreach (var alias in await store.ListAliasesAsync(id, cancellationToken))
+        {
+            store.RemoveAlias(alias);
+        }
+
         store.Remove(subject);
         await store.SaveChangesAsync(cancellationToken);
 

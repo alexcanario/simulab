@@ -765,6 +765,25 @@
   <data name="question.not_published" xml:space="preserve"><value>Esta questão não está publicada.</value></data>
   <data name="Gallery.Section.Chip" xml:space="preserve"><value>Chip</value></data>
   <data name="Gallery.Chip.Hint" xml:space="preserve"><value>Uma etiqueta só de leitura com ícone e texto secundário opcionais, um estado assinalado e um botão de retirar opcional. Só recebe o foco se tiver o botão.</value></data>
+  <data name="Gallery.Section.ChipsField" xml:space="preserve"><value>Campo de chips</value></data>
+  <data name="Gallery.ChipsField.Hint" xml:space="preserve"><value>Texto livre introduzido um nome de cada vez e mantido como chips removíveis sob o campo. Enter, ou sair do campo, adiciona o nome.</value></data>
+  <data name="Gallery.ChipsField.Label" xml:space="preserve"><value>Outros nomes</value></data>
+  <data name="Subjects.Field.Aliases" xml:space="preserve"><value>Outros nomes</value></data>
+  <data name="Subjects.Field.Aliases.Placeholder" xml:space="preserve"><value>Introduza um nome e prima Enter</value></data>
+  <data name="Subjects.Field.Aliases.Help" xml:space="preserve"><value>Nomes que as organizadoras usam para esta disciplina, por exemplo Português para Língua Portuguesa. De 2 a 150 caracteres cada.</value></data>
+  <data name="Topics.Field.Aliases" xml:space="preserve"><value>Outros nomes</value></data>
+  <data name="Topics.Field.Aliases.Placeholder" xml:space="preserve"><value>Introduza um nome e prima Enter</value></data>
+  <data name="Topics.Field.Aliases.Help" xml:space="preserve"><value>Nomes que as organizadoras usam para este tópico. De 2 a 200 caracteres cada, únicos dentro da disciplina.</value></data>
+  <data name="Aliases.Added" xml:space="preserve"><value>{0} adicionado.</value></data>
+  <data name="Aliases.Removed" xml:space="preserve"><value>{0} retirado.</value></data>
+  <data name="subject.alias_too_short" xml:space="preserve"><value>Cada outro nome precisa de pelo menos 2 caracteres.</value></data>
+  <data name="subject.alias_too_long" xml:space="preserve"><value>Um outro nome é demasiado longo. Use no máximo 150 caracteres.</value></data>
+  <data name="subject.alias_same_as_name" xml:space="preserve"><value>Um outro nome é igual ao nome da disciplina. Retire-o.</value></data>
+  <data name="subject.alias_taken" xml:space="preserve"><value>Outra disciplina já usa um destes nomes, como nome ou como outro nome. Retire-o ou escolha um diferente.</value></data>
+  <data name="topic.alias_too_short" xml:space="preserve"><value>Cada outro nome precisa de pelo menos 2 caracteres.</value></data>
+  <data name="topic.alias_too_long" xml:space="preserve"><value>Um outro nome é demasiado longo. Use no máximo 200 caracteres.</value></data>
+  <data name="topic.alias_same_as_name" xml:space="preserve"><value>Um outro nome é igual ao nome do tópico. Retire-o.</value></data>
+  <data name="topic.alias_taken" xml:space="preserve"><value>Outro tópico desta disciplina já usa um destes nomes, como nome ou como outro nome. Retire-o ou escolha um diferente.</value></data>
   <data name="Gallery.Section.MultiPickField" xml:space="preserve"><value>Campo de escolha múltipla</value></data>
   <data name="Gallery.MultiPickField.Hint" xml:space="preserve"><value>Pesquisa numa lista local curta, agrupada, e escolhe vários itens; as escolhas aparecem abaixo como chips removíveis.</value></data>
   <data name="Gallery.MultiPickField.Label" xml:space="preserve"><value>Fruta</value></data>

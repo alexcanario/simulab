@@ -26,6 +26,12 @@ public sealed class DeleteTopicHandler(ITopicStore store, IEnumerable<ITopicUsag
             return Result.Failure(new Error(CatalogErrorCodes.TopicInUse, ErrorKind.Conflict));
         }
 
+        // F-77 BR9: the other names go with the topic and never hold it back.
+        foreach (var alias in await store.ListAliasesAsync(id, cancellationToken))
+        {
+            store.RemoveAlias(alias);
+        }
+
         store.Remove(topic);
         await store.SaveChangesAsync(cancellationToken);
 

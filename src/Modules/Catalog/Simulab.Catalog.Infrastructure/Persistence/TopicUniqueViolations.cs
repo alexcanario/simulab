@@ -15,6 +15,9 @@ public static class TopicUniqueViolations
 
     public const string NameIndex = "ux_topics_tenant_subject_normalized_name";
 
+    /// <summary>F-77: an other name is unique inside its topic, live rows only.</summary>
+    public const string AliasIndex = "ux_topic_aliases_tenant_topic_normalized_name";
+
     /// <summary>The 409 for a duplicate name inside the subject, or null when the exception is anything else.</summary>
     public static Error? Translate(DbUpdateException exception)
     {
@@ -28,6 +31,7 @@ public static class TopicUniqueViolations
         return violation.ConstraintName switch
         {
             NameIndex => new Error(CatalogErrorCodes.TopicNameTaken, ErrorKind.Conflict),
+            AliasIndex => new Error(CatalogErrorCodes.TopicAliasTaken, ErrorKind.Conflict),
             _ => null,
         };
     }

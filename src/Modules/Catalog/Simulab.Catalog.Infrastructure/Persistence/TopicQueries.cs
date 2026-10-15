@@ -22,7 +22,14 @@ public sealed class TopicQueries(CatalogModuleDbContext context, IEnumerable<ITo
                 topic.Id,
                 topic.SubjectId,
                 topic.Name,
-                context.LiveNoticeSubjectMappings.Any(mapping => mapping.TopicId == topic.Id)))
+                context.LiveNoticeSubjectMappings.Any(mapping => mapping.TopicId == topic.Id))
+            {
+                Aliases = context.TopicAliases
+                    .Where(alias => alias.TopicId == topic.Id)
+                    .OrderBy(alias => alias.NormalizedName)
+                    .Select(alias => alias.Name)
+                    .ToList(),
+            })
             .ToListAsync(cancellationToken);
 
         var ids = topics.Where(topic => !topic.InUse).Select(topic => topic.Id).ToList();

@@ -398,6 +398,39 @@
     </MudPaper>
 </section>
 
+@* F-77: free text kept as a list of chips. The first field is live; the second shows a refusal under the field and the
+   third a name longer than the field, which wraps inside its chip. *@
+<section id="gallery-chips-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.ChipsField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.ChipsField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        <AppChipsField Id="gallery-aliases"
+                       Label="@L["Gallery.ChipsField.Label"]"
+                       Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
+                       Hint="@L["Subjects.Field.Aliases.Help"]"
+                       Items="_chipsItems"
+                       ItemsChanged="@(items => _chipsItems = items)"
+                       MaxLength="CatalogLimits.SubjectNameMaxLength"
+                       MinLength="2"
+                       TooShortText="@L["subject.alias_too_short"]" />
+
+        <AppChipsField Id="gallery-aliases-error"
+                       Label="@L["Gallery.ChipsField.Label"]"
+                       Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
+                       Items="@(new[] { "Português" })"
+                       ItemsChanged="@(_ => Done(L["Aliases.Added", "Português"]))"
+                       MaxLength="CatalogLimits.SubjectNameMaxLength"
+                       Error="@L["subject.alias_taken"].Value" />
+
+        <AppChipsField Id="gallery-aliases-long"
+                       Label="@L["Gallery.ChipsField.Label"]"
+                       Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
+                       Items="@(new[] { "Interpretação e compreensão de textos de diferentes gêneros e tipos de discurso, em prosa e em verso" })"
+                       ItemsChanged="@(_ => Done(L["Aliases.Added", "Interpretação"]))"
+                       MaxLength="CatalogLimits.TopicNameMaxLength" />
+    </MudPaper>
+</section>
+
 @* F-75: search a short local list, grouped, and pick several. The first field is live; the others are its states: the
    taxonomy loading, failing to load, empty, and a refusal under the field. *@
 <section id="gallery-multi-pick-field" class="gallery-section">
@@ -810,6 +843,9 @@
     private string? _scopeDetail;
 
     private static readonly IReadOnlyList<string> _editions = ["Edital 01/2026", "Edital 02/2023"];
+
+    // F-77: the chips field. The live sample starts with two names.
+    private IReadOnlyList<string> _chipsItems = ["Português", "Língua Portuguesa básica"];
 
     // F-95: the rich text field. Each sample holds the HTML its editor last reported.
     private string? _richEmpty;

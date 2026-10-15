@@ -3534,6 +3534,16 @@
             ],
             "description": "The area it belongs to, optional.",
             "format": "uuid"
+          },
+          "aliases": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The other names the subject goes by (F-77, BR4): the whole set, which replaces the current one. Null leaves\r\nthe set as it is and an empty list clears it; each name is 2 to 150 characters."
           }
         },
         "description": "What the add and the edit dialog of a subject send (F-79)."
@@ -3558,6 +3568,16 @@
             ],
             "description": "Where the topic moves to (BR10). A create takes its subject from the route and ignores this; an update\r\nwith null keeps the current subject.",
             "format": "uuid"
+          },
+          "aliases": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The other names the topic goes by (F-77, BR4): the whole set, which replaces the current one. Null leaves\r\nthe set as it is and an empty list clears it; each name is 2 to 200 characters."
           }
         },
         "description": "What the add and the edit dialog of a topic send (F-79)."

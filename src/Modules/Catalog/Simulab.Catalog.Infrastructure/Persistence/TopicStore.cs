@@ -30,6 +30,35 @@ public sealed class TopicStore(CatalogModuleDbContext context) : ITopicStore
     public Task<bool> IsMappedAsync(Guid topicId, CancellationToken cancellationToken) =>
         context.LiveNoticeSubjectMappings.AnyAsync(mapping => mapping.TopicId == topicId, cancellationToken);
 
+    public async Task<IReadOnlyList<TopicAlias>> ListAliasesAsync(Guid topicId, CancellationToken cancellationToken) =>
+        await context.TopicAliases
+            .Where(alias => alias.TopicId == topicId)
+            .OrderBy(alias => alias.NormalizedName)
+            .ToListAsync(cancellationToken);
+
+    // The topic is reached through its row, so an alias of a topic that is gone, and a removed alias, never clash.
+    public Task<bool> AliasIsTakenAsync(
+        Guid subjectId,
+        string normalizedName,
+        Guid? exceptTopicId,
+        CancellationToken cancellationToken)
+    {
+        var topics = context.Topics.Where(topic => topic.SubjectId == subjectId);
+        if (exceptTopicId is { } id)
+        {
+            topics = topics.Where(topic => topic.Id != id);
+        }
+
+        return context.TopicAliases
+            .Where(alias => alias.NormalizedName == normalizedName)
+            .AnyAsync(alias => topics.Any(topic => topic.Id == alias.TopicId), cancellationToken);
+    }
+
+    public void AddAlias(TopicAlias alias) => context.TopicAliases.Add(alias);
+
+    // The audit and soft-delete interceptor turns this into a flag, never a DELETE.
+    public void RemoveAlias(TopicAlias alias) => context.TopicAliases.Remove(alias);
+
     public void Add(Topic topic) => context.Topics.Add(topic);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE.

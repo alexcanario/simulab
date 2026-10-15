@@ -30,7 +30,11 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
         var search = CatalogText.Normalize(sanitized.Search);
         if (search.Length > 0)
         {
-            subjects = subjects.Where(subject => subject.NormalizedName.Contains(search));
+            // F-77 BR10: the name or any live other name; EXISTS, so a subject shows once however many match.
+            subjects = subjects.Where(subject =>
+                subject.NormalizedName.Contains(search)
+                || context.SubjectAliases.Any(alias =>
+                    alias.SubjectId == subject.Id && alias.NormalizedName.Contains(search)));
         }
 
         // "No area" wins over a given area: a list is a read, so two filters that contradict are not an error.
@@ -89,5 +93,12 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
             subject.AreaId,
             context.Areas.Where(area => area.Id == subject.AreaId).Select(area => area.Code).FirstOrDefault(),
             context.Topics.Count(topic => topic.SubjectId == subject.Id),
-            context.LiveNoticeSubjectMappings.Any(mapping => mapping.SubjectId == subject.Id)));
+            context.LiveNoticeSubjectMappings.Any(mapping => mapping.SubjectId == subject.Id))
+        {
+            Aliases = context.SubjectAliases
+                .Where(alias => alias.SubjectId == subject.Id)
+                .OrderBy(alias => alias.NormalizedName)
+                .Select(alias => alias.Name)
+                .ToList(),
+        });
 }
