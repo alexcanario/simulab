@@ -84,7 +84,10 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .IsRequired()
             .HasComment("The plain statement without case or accents. The list search reads it; derived on every write.");
 
-        builder.Property(question => question.BaseTextHtml)
+        // F-102 skeleton: the old column stays mapped as it was, so the model equals the snapshot, until the
+        // migration of the build replaces it with the link.
+        builder.Ignore(question => question.BaseTextId);
+        builder.Property<string?>("BaseTextHtml")
             .HasMaxLength(QuestionLimits.BaseTextMaxLength)
             .HasComment("The text the question refers to, as sanitized HTML. Empty when there is none.");
 

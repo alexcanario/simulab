@@ -164,7 +164,7 @@ public sealed class QuestionQueries(
             topic?.SubjectName ?? string.Empty,
             question.ContentLanguage,
             question.StatementHtml,
-            question.BaseTextHtml,
+            null,
             question.ExplanationHtml,
             question.Difficulty,
             [

@@ -16,7 +16,6 @@ public static class QuestionBankErrorCodes
     public const string QuestionStatementRequired = "question.statement_required";
 
     public const string QuestionStatementTooLong = "question.statement_too_long";
-    public const string QuestionBaseTextTooLong = "question.base_text_too_long";
     public const string QuestionExplanationTooLong = "question.explanation_too_long";
     public const string QuestionOptionTooLong = "question.option_too_long";
 
@@ -97,4 +96,30 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-101 BR3: the reason of an annulment or a reinstatement has more than 500 characters.</summary>
     public const string QuestionStatusReasonTooLong = "question.status_reason_too_long";
+
+    /// <summary>F-102 BR7: the base text the question links is unknown or deleted.</summary>
+    public const string QuestionBaseTextNotFound = "question.base_text_not_found";
+
+    /// <summary>F-102 BR3: the question and the base text it links are in different content languages.</summary>
+    public const string QuestionBaseTextLanguageMismatch = "question.base_text_language_mismatch";
+
+    /// <summary>F-102: the base text is unknown or deleted.</summary>
+    public const string BaseTextNotFound = "base_text.not_found";
+
+    /// <summary>F-102 BR1: the title is empty once trimmed.</summary>
+    public const string BaseTextTitleRequired = "base_text.title_required";
+
+    public const string BaseTextTitleTooLong = "base_text.title_too_long";
+
+    /// <summary>F-102 BR1: the text is empty once its tags are removed.</summary>
+    public const string BaseTextTextRequired = "base_text.text_required";
+
+    public const string BaseTextTextTooLong = "base_text.text_too_long";
+    public const string BaseTextContentLanguageInvalid = "base_text.content_language_invalid";
+
+    /// <summary>F-102 BR6: a live question still links the base text; remove the links first.</summary>
+    public const string BaseTextInUse = "base_text.in_use";
+
+    /// <summary>F-102 BR3: the language of a base text that has linked questions cannot change.</summary>
+    public const string BaseTextLanguageInUse = "base_text.language_in_use";
 }

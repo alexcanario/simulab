@@ -263,9 +263,9 @@ public sealed class TrueFalseQuestionEndpointTests : OriginApiTests
 
         var question = await CreatedAsync(
             admin,
-            TrueFalse(topic.Id, true, hostile) with { BaseTextHtml = hostile, ExplanationHtml = hostile });
+            TrueFalse(topic.Id, true, hostile) with { ExplanationHtml = hostile });
 
-        foreach (var field in new[] { question.StatementHtml, question.BaseTextHtml!, question.ExplanationHtml! })
+        foreach (var field in new[] { question.StatementHtml, question.ExplanationHtml! })
         {
             field.Should().NotContain("script").And.NotContain("onclick");
             field.Should().Contain("<sup>2</sup>");

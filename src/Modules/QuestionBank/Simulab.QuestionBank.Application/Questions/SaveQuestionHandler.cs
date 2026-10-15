@@ -81,7 +81,7 @@ public sealed class SaveQuestionHandler(
             request.TopicId,
             request.ContentLanguage,
             sanitizer.Sanitize(request.StatementHtml),
-            sanitizer.Sanitize(request.BaseTextHtml),
+            request.BaseTextId,
             sanitizer.Sanitize(request.ExplanationHtml),
             request.Difficulty,
             drafts,

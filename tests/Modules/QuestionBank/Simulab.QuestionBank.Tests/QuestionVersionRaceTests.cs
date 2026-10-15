@@ -121,6 +121,9 @@ public sealed class QuestionVersionRaceTests : QuestionBankApiTests
         public Task<Question?> FindAsync(Guid id, CancellationToken cancellationToken) =>
             inner.FindAsync(id, cancellationToken);
 
+        public Task<LinkedBaseText?> FindBaseTextAsync(Guid id, CancellationToken cancellationToken) =>
+            inner.FindBaseTextAsync(id, cancellationToken);
+
         public Task<bool> TopicExistsAsync(Guid topicId, CancellationToken cancellationToken) =>
             inner.TopicExistsAsync(topicId, cancellationToken);
 

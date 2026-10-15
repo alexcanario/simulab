@@ -78,7 +78,7 @@ public sealed class QuestionEndpointTests : QuestionBankApiTests
             topic.Id,
             "pt-BR",
             hostile,
-            hostile,
+            null,
             hostile,
             null,
             [new SaveQuestionOptionRequest(hostile, true), new SaveQuestionOptionRequest("<p>B</p>")]);
@@ -90,7 +90,7 @@ public sealed class QuestionEndpointTests : QuestionBankApiTests
         {
             var fields = new[]
             {
-                question.StatementHtml, question.BaseTextHtml!, question.ExplanationHtml!, question.Options[0].TextHtml
+                question.StatementHtml, question.ExplanationHtml!, question.Options[0].TextHtml
             };
             foreach (var field in fields)
             {
@@ -363,14 +363,12 @@ public sealed class QuestionEndpointTests : QuestionBankApiTests
         var admin = await AdminAsync();
         var topic = await TopicAsync(admin);
         var statement = $"<p>{new string('a', QuestionLimits.StatementMaxLength)}</p>";
-        var baseText = $"<p>{new string('a', QuestionLimits.BaseTextMaxLength)}</p>";
         var explanation = $"<p>{new string('a', QuestionLimits.ExplanationMaxLength)}</p>";
         var option = $"<p>{new string('a', QuestionLimits.OptionMaxLength)}</p>";
 
         (string Code, SaveQuestionRequest Request)[] cases =
         [
             (QuestionBankErrorCodes.QuestionStatementTooLong, Complete(topic.Id, statement)),
-            (QuestionBankErrorCodes.QuestionBaseTextTooLong, Complete(topic.Id) with { BaseTextHtml = baseText }),
             (QuestionBankErrorCodes.QuestionExplanationTooLong, Complete(topic.Id) with { ExplanationHtml = explanation }),
             (QuestionBankErrorCodes.QuestionOptionTooLong, Complete(topic.Id) with
             {

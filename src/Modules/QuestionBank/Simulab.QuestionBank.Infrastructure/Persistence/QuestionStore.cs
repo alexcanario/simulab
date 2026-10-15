@@ -21,6 +21,9 @@ public sealed class QuestionStore(
             .Include(question => question.Options)
             .FirstOrDefaultAsync(question => question.Id == id, cancellationToken);
 
+    public Task<LinkedBaseText?> FindBaseTextAsync(Guid id, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<bool> TopicExistsAsync(Guid topicId, CancellationToken cancellationToken) =>
         await topics.FindAsync(topicId, cancellationToken) is not null;
 

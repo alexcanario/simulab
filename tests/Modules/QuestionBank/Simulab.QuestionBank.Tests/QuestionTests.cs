@@ -22,7 +22,7 @@ public sealed class QuestionTests
         Guid? topicId = null,
         string? language = "pt-BR",
         SanitizedHtml? statement = null,
-        SanitizedHtml? baseText = null,
+        Guid? baseTextId = null,
         SanitizedHtml? explanation = null,
         int? difficulty = null,
         IReadOnlyList<OptionDraft>? options = null) =>
@@ -30,7 +30,7 @@ public sealed class QuestionTests
             topicId ?? Topic,
             language,
             statement ?? Text("<p>Qual e a capital da França?</p>", "Qual e a capital da França?"),
-            baseText ?? SanitizedHtml.Empty,
+            baseTextId,
             explanation ?? SanitizedHtml.Empty,
             difficulty,
             options ?? []);
@@ -160,15 +160,6 @@ public sealed class QuestionTests
 
         Question.Create(Content(statement: statement)).Value.StatementHtml.Length
             .Should().Be(QuestionLimits.StatementMaxLength);
-    }
-
-    [Fact]
-    public void Create_BaseTextOverTheLimit_IsRefused()
-    {
-        var baseText = Text(new string('a', QuestionLimits.BaseTextMaxLength + 1));
-
-        Question.Create(Content(baseText: baseText)).Error!.Code
-            .Should().Be(QuestionBankErrorCodes.QuestionBaseTextTooLong);
     }
 
     [Fact]

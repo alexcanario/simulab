@@ -450,16 +450,16 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | `BaseTextTests.Create_ValidContent_TrimsTheTitle_CanonicalizesTheLanguage_AndDerivesTheSearchForm`; `BaseTextTests.Create_BlankTitle_IsRefusedWithTitleRequired`; `BaseTextTests.Create_TitleOfExactlyTheLimitAfterTrimming_IsAccepted_AndOneMoreIsRefused`; `BaseTextTests.Create_TextWithNoBody_IsRefusedWithTextRequired`; `BaseTextTests.Create_TextOfExactlyTheLimit_IsAccepted_AndOneMoreIsRefusedWithTextTooLong`; `BaseTextTests.Create_ALanguageTheAppDoesNotKnow_IsRefusedWithContentLanguageInvalid`; `BaseTextEndpointTests.Create_AValidBaseText_Answers201WithTheSanitizedHtml_AndAFreshCount`; `BaseTextEndpointTests.Create_ABadBaseText_IsRefusedWithTheFieldsOwnCode_AndStoresNothing` |
+| AC2 | `BaseTextEndpointTests.Save_AQuestionWithABaseTextId_ReturnsTheLinkedText_AndNullRemovesIt`; `BaseTextEndpointTests.Save_ABaseTextOfAnotherLanguage_Answers409LanguageMismatch_AndStoresNothing`; `BaseTextEndpointTests.Save_ChangingTheLanguageOfALinkedQuestion_Answers409LanguageMismatch_AndTheLinkStays`; `BaseTextEndpointTests.Save_AnUnknownOrDeletedBaseText_Answers404_AndAnInvalidLanguageStillAnswers400` |
+| AC3 | `QuestionBaseTextVersionTests.NextVersion_FirstPublication_SnapshotsTheLinkedBaseTextHtml`; `QuestionBaseTextVersionTests.NextVersion_TheLinkedTextChanged_MakesTheNextVersion_NotAKeyChange_WithNoReason`; `QuestionBaseTextVersionTests.NextVersion_TheLinkedTextIsTheSame_MakesNothing`; `QuestionBaseTextVersionTests.NextVersion_TheLinkWasRemoved_MakesTheNextVersionWithNoBaseText`; `BaseTextEndpointTests.Edit_TheText_RecordsANewVersionOnEachPublishedLinkedQuestion_AndOnNoDraftNorAnnulled`; `BaseTextEndpointTests.Edit_OnlyTheTitle_RecordsNoVersion` |
+| AC4 | `BaseTextEndpointTests.Edit_TheText_OfTwoPublishedQuestions_RecordsBothVersionsInOneSave`; `BaseTextRaceTests.Edit_StartedWhileAPublishHoldsTheBaseText_WaitsForIt_AndThenVersionsTheNewlyPublishedQuestion` |
+| AC5 | `BaseTextTests.Update_ChangingTheLanguage_WhileQuestionsLinkIt_IsRefusedWithLanguageInUse_AndNothingChanges`; `BaseTextTests.Update_KeepingTheLanguage_WhileQuestionsLinkIt_ReplacesTitleAndText`; `BaseTextTests.Update_ChangingTheLanguage_WhenNoQuestionLinksIt_Changes`; `BaseTextEndpointTests.Edit_TheLanguage_Answers409WhileAQuestionLinksIt_AndChangesWhenNoneDoes` |
+| AC6 | `BaseTextEndpointTests.Delete_WhileAQuestionLinksIt_Answers409InUse_AndWithNoneItDisappears`; `BaseTextRaceTests.Delete_StartedWhileAQuestionSaveHoldsTheBaseText_WaitsForIt_AndThenAnswersInUse` |
+| AC7 | `AddBaseTextsMigrationTests.Up_GivesEachQuestionWithInlineTextABaseTextOfItsOwn_AndLinksIt`; `AddBaseTextsMigrationTests.Up_CutsTheTitleAtEightyCharacters`; `AddBaseTextsMigrationTests.Up_SoftDeletesTheTextOfASoftDeletedQuestion_AndWritesNoVersion`; `AddBaseTextsMigrationTests.Up_Then_Down_CopiesTheTextBackIntoTheQuestions_AndDropsTheTable`; `AddBaseTextsMigrationTests.TheDatabase_RefusesABlankTitleAndABlankText_AndAHardDeleteOfALinkedText` |
+| AC8 | `BaseTextEndpointTests.List_SortsByTitle_SearchesWithoutCaseOrAccents_AndFiltersByLanguage` |
+| AC9 | `BaseTextEndpointTests.Questions_OfABaseText_ListsTheLiveLinkedQuestions_AndAnUnknownTextAnswers404` |
+| AC10 | `BaseTextEndpointTests.EveryBaseTextEndpoint_WithoutThePermission_AnswersForbidden_AndACuratorHasIt` |
 | AC11 | pending |
 | AC12 | pending |
 | AC13 | pending |
