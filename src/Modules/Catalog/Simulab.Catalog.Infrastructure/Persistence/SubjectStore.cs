@@ -24,6 +24,26 @@ public sealed class SubjectStore(CatalogModuleDbContext context) : ISubjectStore
     public Task<bool> IsMappedWholeAsync(Guid subjectId, CancellationToken cancellationToken) =>
         context.LiveNoticeSubjectMappings.AnyAsync(mapping => mapping.SubjectId == subjectId, cancellationToken);
 
+    public async Task<IReadOnlyList<SubjectAlias>> ListAliasesAsync(Guid subjectId, CancellationToken cancellationToken) =>
+        await context.SubjectAliases
+            .Where(alias => alias.SubjectId == subjectId)
+            .OrderBy(alias => alias.NormalizedName)
+            .ToListAsync(cancellationToken);
+
+    // The soft-delete filter of the alias set leaves out a removed alias, so only live ones can clash (BR8).
+    public Task<bool> AliasIsTakenAsync(string normalizedName, Guid? exceptSubjectId, CancellationToken cancellationToken)
+    {
+        var aliases = context.SubjectAliases.Where(alias => alias.NormalizedName == normalizedName);
+
+        return (exceptSubjectId is { } id ? aliases.Where(alias => alias.SubjectId != id) : aliases)
+            .AnyAsync(cancellationToken);
+    }
+
+    public void AddAlias(SubjectAlias alias) => context.SubjectAliases.Add(alias);
+
+    // The audit and soft-delete interceptor turns this into a flag, never a DELETE.
+    public void RemoveAlias(SubjectAlias alias) => context.SubjectAliases.Remove(alias);
+
     public void Add(Subject subject) => context.Subjects.Add(subject);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE.

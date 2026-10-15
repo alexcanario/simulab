@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: pt-PT
-features: [F-79, F-51, F-75, F-95]
-updated: 2026-10-11
+features: [F-79, F-51, F-75, F-95, F-77]
+updated: 2026-10-15
 ---
 # Disciplinas e tópicos
 
@@ -25,7 +25,9 @@ como estava e só os tópicos em falta são acrescentados nela.
 ### Ver as disciplinas
 1. Escolha **Disciplinas**, na secção **Conteúdo** do menu lateral.
 2. A lista mostra o nome, a área e quantos tópicos cada disciplina tem, por ordem de nome.
-3. Escreva na caixa de pesquisa para filtrar pelo nome. Maiúsculas e acentos não fazem diferença.
+3. Escreva na caixa de pesquisa para filtrar pelo nome ou por qualquer outro nome da disciplina. Maiúsculas e
+   acentos não fazem diferença. A disciplina aparece uma vez, com o próprio nome, mesmo que vários outros nomes
+   correspondam.
 4. Use **Área** para ver só as disciplinas de uma área, ou só as que não têm área.
 
 ### Adicionar uma disciplina
@@ -37,6 +39,17 @@ como estava e só os tópicos em falta são acrescentados nela.
 ### Alterar uma disciplina
 1. Escolha **Editar** na linha dela, ou na página da própria disciplina.
 2. Mude o nome ou a área e escolha **Guardar**.
+
+### Dar outros nomes a uma disciplina ou a um tópico
+As organizadoras chamam à mesma disciplina nomes diferentes ("Português" para "Língua Portuguesa"). Registe esses
+nomes para que o texto de um aviso possa ser ligado à disciplina sem criar uma duplicação.
+1. Abra a janela **Adicionar** ou **Editar** de uma disciplina, ou de um tópico na página da disciplina.
+2. Em **Outros nomes**, escreva um nome e prima **Enter**. Aparece como um chip sob o campo. O nome também é
+   acrescentado quando sai do campo, pelo que um nome escrito não se perde ao escolher **Guardar**.
+3. Para retirar um, escolha o **X** do chip. Não há limite de quantos outros nomes um item tem.
+4. Escolha **Guardar**. O conjunto que vê é o conjunto que fica guardado: retirar um chip retira o nome.
+5. Um outro nome é só texto. Acompanha a disciplina ou o tópico: vai com um tópico que muda de disciplina e é
+   eliminado com o item. Um nome que retirou fica livre de novo, para este item ou para outro.
 
 ### Eliminar uma disciplina
 1. Uma disciplina que ainda tem tópicos não pode ser eliminada: o botão Eliminar fica desativado, e ao apontar
@@ -66,6 +79,8 @@ como estava e só os tópicos em falta são acrescentados nela.
 | Área | Um grupo de disciplinas semelhantes, como Direito ou Linguagens | Opcional. As áreas são uma lista fixa: Linguagens, Matemática, Raciocínio Lógico, Ciências da Natureza, Ciências Humanas, Direito, Tecnologias de Informação, Administração e Gestão, Conhecimentos Específicos |
 | Nome do tópico | O tópico dentro da disciplina | Obrigatório, de 2 a 200 carateres, não pode repetir o nome de outro tópico da mesma disciplina, nem de um eliminado. O mesmo nome pode existir em duas disciplinas diferentes |
 | Disciplina (no tópico) | Onde o tópico está | Só na edição, para mover o tópico. A disciplina tem de existir |
+| Outros nomes (disciplina) | Nomes que as organizadoras usam para a disciplina | Opcional, em qualquer quantidade, de 2 a 150 carateres cada. Um nome escrito duas vezes (sem contar maiúsculas e acentos) vale um. Não pode ser igual ao nome da própria disciplina, ao nome de outra disciplina nem a outro nome de outra disciplina |
+| Outros nomes (tópico) | Nomes que as organizadoras usam para o tópico | Opcional, em qualquer quantidade, de 2 a 200 carateres cada. Não pode ser igual ao nome do próprio tópico, nem ao nome ou a outro nome de outro tópico da mesma disciplina. O mesmo outro nome pode existir em duas disciplinas |
 
 Os nomes aparecem exatamente como foram escritos, em todos os idiomas da aplicação.
 
@@ -76,6 +91,11 @@ Os nomes aparecem exatamente como foram escritos, em todos os idiomas da aplica�
 | Esta disciplina já tem um tópico com este nome, mesmo que tenha sido eliminado. Escolha um nome diferente. | O nome do tópico está ocupado dentro desta disciplina. | Escolha outro nome, ou ponha o tópico noutra disciplina. |
 | Indique um nome com pelo menos 2 carateres. | O nome está vazio ou curto demais. | Escreva o nome completo. |
 | O nome é demasiado longo. Use no máximo 150 carateres. / Use no máximo 200 carateres. | O nome passa do limite. | Encurte o nome. |
+| Cada outro nome precisa de pelo menos 2 carateres. | Um outro nome está vazio ou curto demais. | Escreva o nome completo ou retire-o. |
+| Um outro nome é demasiado longo. Use no máximo 150 carateres. / Use no máximo 200 carateres. | Um outro nome passa do limite. | Encurte-o. |
+| Um outro nome é igual ao nome da disciplina. Retire-o. / ... ao nome do tópico. | O outro nome repete o próprio nome do item. | Retire-o: o nome já encontra o item. |
+| Outra disciplina já usa um destes nomes, como nome ou como outro nome. Retire-o ou escolha um diferente. | Um outro nome é o nome, ou outro nome, de outra disciplina. Também aparece no nome da própria disciplina quando é igual a outro nome de outra disciplina. | Retire-o ou escolha outro. |
+| Outro tópico desta disciplina já usa um destes nomes, como nome ou como outro nome. Retire-o ou escolha um diferente. | Um outro nome é o nome, ou outro nome, de outro tópico da mesma disciplina. Mover um tópico também o pode causar. | Retire-o, escolha outro, ou mova o tópico para outro lugar. |
 | Esta área não está na lista. Escolha uma das áreas oferecidas. | A área não é uma da lista fixa. | Escolha uma área da lista, ou nenhuma. |
 | Esta disciplina tem tópicos. Elimine-os primeiro, na página da disciplina. | A disciplina ainda tem pelo menos um tópico. | Abra a disciplina, elimine os tópicos e volte. |
 | Há disciplinas do aviso mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de a eliminar. | Aparece no Eliminar desativado: disciplinas do aviso mapeiam a disciplina inteira. | Retire-a dessas disciplinas do aviso e depois elimine. |

@@ -21,6 +21,24 @@ public interface ITopicStore
     /// <summary>True when a live notice subject maps this topic (F-75, BR9).</summary>
     Task<bool> IsMappedAsync(Guid topicId, CancellationToken cancellationToken);
 
+    /// <summary>The live other names of the topic, tracked, so the handler can keep, rename or remove them (F-77).</summary>
+    Task<IReadOnlyList<TopicAlias>> ListAliasesAsync(Guid topicId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// True when a live other name of another live topic of this subject has this normalized form (F-77, BR7).
+    /// Deleted aliases do not count: the text is free again (BR8).
+    /// </summary>
+    Task<bool> AliasIsTakenAsync(
+        Guid subjectId,
+        string normalizedName,
+        Guid? exceptTopicId,
+        CancellationToken cancellationToken);
+
+    void AddAlias(TopicAlias alias);
+
+    /// <summary>Soft-deletes the other name: the interceptor turns the removal into a flag.</summary>
+    void RemoveAlias(TopicAlias alias);
+
     void Add(Topic topic);
 
     /// <summary>Soft-deletes the topic: the interceptor turns the removal into a flag.</summary>

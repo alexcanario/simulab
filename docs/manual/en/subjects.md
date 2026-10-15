@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: en
-features: [F-79, F-51, F-75, F-95]
-updated: 2026-10-11
+features: [F-79, F-51, F-75, F-95, F-77]
+updated: 2026-10-15
 ---
 # Subjects and topics
 
@@ -26,7 +26,8 @@ it is kept as it was and only the missing topics are added under it.
 ### See the subjects
 1. Choose **Subjects**, in the **Content** section of the side menu.
 2. The list shows the name, the area and how many topics each subject has, in name order.
-3. Type in the search box to filter by name. Case and accents do not matter.
+3. Type in the search box to filter by name or by any of the subject's other names. Case and accents do not matter.
+   A subject appears once, under its own name, even when several of its other names match.
 4. Use **Area** to show only the subjects of one area, or only those with no area.
 
 ### Add a subject
@@ -38,6 +39,17 @@ it is kept as it was and only the missing topics are added under it.
 ### Change a subject
 1. Choose **Edit** on its row, or on the subject's own page.
 2. Change the name or the area and choose **Save**.
+
+### Give a subject or a topic other names
+Organizers call the same subject by different names ("Português" for "Língua Portuguesa"). Record those names so a
+notice's wording can be matched to the subject without creating a duplicate.
+1. Open the **Add** or **Edit** window of a subject, or of a topic on the subject's page.
+2. In **Other names**, type a name and press **Enter**. It appears as a chip under the field. The name is also added
+   when you leave the field, so a name you typed is not lost when you choose **Save**.
+3. To remove one, choose the **X** of its chip. There is no limit on how many other names an item has.
+4. Choose **Save**. The set you see is the set that is saved: removing a chip removes the name.
+5. Another name is only text. It follows its subject or topic: it goes with a topic that moves to another subject
+   and it is deleted with the item. A name you removed is free again, for this item or for another.
 
 ### Delete a subject
 1. A subject that still has topics cannot be deleted: its Delete button is disabled, and pointing at it says why.
@@ -67,6 +79,8 @@ it is kept as it was and only the missing topics are added under it.
 | Area | A group of similar subjects, such as Law or Languages | Optional. The areas are a fixed list: Languages, Mathematics, Logical Reasoning, Natural Sciences, Human Sciences, Law, Information Technology, Administration and Management, Specific Knowledge |
 | Topic name | The topic inside its subject | Required, 2 to 200 characters, cannot repeat another topic's name in the same subject, a deleted one included. The same name may exist in two different subjects |
 | Subject (on a topic) | Where the topic sits | Only on edit, to move the topic. The subject must exist |
+| Other names (subject) | Names organizers use for the subject | Optional, any number, 2 to 150 characters each. A name typed twice (case and accents aside) counts once. It cannot equal the subject's own name, another subject's name or another subject's other name |
+| Other names (topic) | Names organizers use for the topic | Optional, any number, 2 to 200 characters each. It cannot equal the topic's own name, nor the name or other name of another topic of the same subject. The same other name may exist under two subjects |
 
 Names are shown exactly as typed, in every language of the app.
 
@@ -77,6 +91,11 @@ Names are shown exactly as typed, in every language of the app.
 | This subject already has a topic with this name, even if it was deleted. Pick a different name. | The topic name is taken inside this subject. | Choose another name, or put the topic in another subject. |
 | Type a name with at least 2 characters. | The name is empty or too short. | Type the full name. |
 | The name is too long. Use at most 150 characters. / Use at most 200 characters. | The name is over the limit. | Shorten the name. |
+| Each other name needs at least 2 characters. | An other name is empty or too short. | Type the full name or remove it. |
+| An other name is too long. Use at most 150 characters. / Use at most 200 characters. | An other name is over the limit. | Shorten it. |
+| An other name is the same as the subject's name. Remove it. / ... the topic's name. | The other name repeats the item's own name. | Remove it: the name already finds the item. |
+| Another subject already uses one of these names, as its name or as an other name. Remove it or pick a different one. | An other name is the name, or an other name, of another subject. Also shown on a subject's own name when it equals another subject's other name. | Remove it or choose another. |
+| Another topic of this subject already uses one of these names, as its name or as an other name. Remove it or pick a different one. | An other name is the name, or an other name, of another topic of the same subject. Moving a topic can cause it too. | Remove it, choose another, or move the topic elsewhere. |
 | This area is not on the list. Pick one of the areas offered. | The area is not one of the fixed list. | Pick an area from the list, or none. |
 | This subject has topics. Delete them first, on the subject's page. | The subject still has at least one topic. | Open the subject, delete its topics and come back. |
 | Notice subjects map this whole subject. Remove it from their mappings before deleting it. | Shown on the disabled Delete: notice subjects map the subject whole. | Remove it from those notice subjects, then delete. |

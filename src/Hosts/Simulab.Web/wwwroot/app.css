@@ -1087,6 +1087,59 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin: 0;
 }
 
+/* Chips field (F-77): a text input over a list of removable chips. The input has the anatomy of the multi-pick
+   input without its icon; the chips go under the description, wrapping inside the field's width. */
+.app-chips-input {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 var(--app-space-3);
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-sm);
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+}
+
+.app-chips-input:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-field-error .app-chips-input {
+    border-color: var(--mud-palette-error);
+}
+
+.app-chips-input input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: var(--app-font-base);
+}
+
+.app-chips-input input::placeholder {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-chips-input input:disabled {
+    cursor: not-allowed;
+}
+
+.app-chips-list {
+    margin-top: var(--app-space-2);
+}
+
+/* "overflow-wrap: anywhere" also lowers the min-content width of the item to one character, so a chip in this
+   flex list would shrink to a sliver and break letter by letter. break-word wraps a long name only when the line is
+   full and leaves the min-content width at its longest word. */
+.app-chips-list .app-chip-text {
+    overflow-wrap: break-word;
+}
+
 /* ---------------------------------------------------------------------------
    Multi-pick field (F-75): a search over a short local list, grouped, to pick several. Built from the field anatomy
    of AppTextField (label above, description below) with a listbox popup under the input.

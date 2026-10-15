@@ -78,6 +78,30 @@ public static class CatalogErrorCodes
     public const string TopicNameTooLong = "topic.name_too_long";
     public const string TopicNameTaken = "topic.name_taken";
 
+    /// <summary>F-77 BR2: an other name of a subject is under 2 characters once trimmed.</summary>
+    public const string SubjectAliasTooShort = "subject.alias_too_short";
+
+    /// <summary>F-77 BR2: an other name of a subject is over 150 characters.</summary>
+    public const string SubjectAliasTooLong = "subject.alias_too_long";
+
+    /// <summary>F-77 BR5: an other name equals the subject's own name once normalized.</summary>
+    public const string SubjectAliasSameAsName = "subject.alias_same_as_name";
+
+    /// <summary>F-77 BR6: another subject already holds this text as its name or as one of its other names.</summary>
+    public const string SubjectAliasTaken = "subject.alias_taken";
+
+    /// <summary>F-77 BR2: an other name of a topic is under 2 characters once trimmed.</summary>
+    public const string TopicAliasTooShort = "topic.alias_too_short";
+
+    /// <summary>F-77 BR2: an other name of a topic is over 200 characters.</summary>
+    public const string TopicAliasTooLong = "topic.alias_too_long";
+
+    /// <summary>F-77 BR5: an other name equals the topic's own name once normalized.</summary>
+    public const string TopicAliasSameAsName = "topic.alias_same_as_name";
+
+    /// <summary>F-77 BR7: another topic of the same subject already holds this text as its name or other name.</summary>
+    public const string TopicAliasTaken = "topic.alias_taken";
+
     public const string NoticeSubjectNotFound = "notice_subject.not_found";
     public const string NoticeSubjectLabelRequired = "notice_subject.label_required";
     public const string NoticeSubjectLabelTooShort = "notice_subject.label_too_short";

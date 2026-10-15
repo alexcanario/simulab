@@ -41,6 +41,19 @@
                                 Hint="@L["Topics.Field.Subject.Help"]"
                                 Error="@_subjectError" />
             }
+
+            @* F-77: the other names organizers use for this topic, kept as chips. *@
+            <AppChipsField Id="topic-aliases"
+                           Label="@L["Topics.Field.Aliases"]"
+                           Placeholder="@L["Topics.Field.Aliases.Placeholder"]"
+                           Hint="@L["Topics.Field.Aliases.Help"]"
+                           Items="_aliases"
+                           ItemsChanged="OnAliasesChanged"
+                           MaxLength="CatalogLimits.TopicNameMaxLength"
+                           MinLength="CatalogLimits.NameMinLength"
+                           TooShortText="@Errors.For(CatalogErrorCodes.TopicAliasTooShort)"
+                           Disabled="_saving"
+                           Error="@_aliasError" />
         </div>
     </DialogContent>
     <DialogActions>
@@ -69,17 +82,31 @@
     private AppLookupOption? _subject;
     private string? _nameError;
     private string? _subjectError;
+    private string? _aliasError;
     private string? _error;
     private bool _saving;
+    private IReadOnlyList<string> _aliases = [];
 
     private bool HasChanges =>
         Trimmed(_name) != (Topic?.Name ?? string.Empty)
-        || (_subject is not null && _subject.Id != CurrentSubject.Id);
+        || (_subject is not null && _subject.Id != CurrentSubject.Id)
+        || AliasesChanged;
+
+    // The order of the chips is the order they were typed, the order of the stored set is the Api's: compare as sets.
+    private bool AliasesChanged =>
+        !_aliases.ToHashSet(StringComparer.Ordinal).SetEquals(Topic?.Aliases ?? []);
 
     protected override void OnInitialized()
     {
         _name = Topic?.Name ?? string.Empty;
         _subject = CurrentSubject;
+        _aliases = [.. Topic?.Aliases ?? []];
+    }
+
+    private void OnAliasesChanged(IReadOnlyList<string> aliases)
+    {
+        _aliases = aliases;
+        _aliasError = null;
     }
 
     private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
@@ -117,7 +144,12 @@
         _error = null;
 
         // An add takes its subject from the route; only an edit sends one, and only to move the topic.
-        var result = await Save(new SaveTopicRequest(Trimmed(_name), Topic is null ? null : (_subject ?? CurrentSubject).Id));
+        // The set travels whole, and null means "leave it as it is": a dialog that did not touch the chips never
+        // sends them, so an unchanged save cannot wipe what the Api holds (F-77, BR4).
+        var result = await Save(new SaveTopicRequest(
+            Trimmed(_name),
+            Topic is null ? null : (_subject ?? CurrentSubject).Id,
+            AliasesChanged ? _aliases : null));
 
         _saving = false;
         if (result.IsSuccess)
@@ -135,6 +167,12 @@
                 break;
             case CatalogErrorCodes.SubjectNotFound when Topic is not null:
                 _subjectError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.TopicAliasTooShort:
+            case CatalogErrorCodes.TopicAliasTooLong:
+            case CatalogErrorCodes.TopicAliasSameAsName:
+            case CatalogErrorCodes.TopicAliasTaken:
+                _aliasError = Errors.For(result.ErrorCode);
                 break;
             default:
                 _error = Errors.For(result.ErrorCode);
