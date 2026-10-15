@@ -37,6 +37,40 @@ public abstract partial class QuestionPageTestContext : KitTestContext
 
     protected static readonly TopicResponse FundamentalRights = new(Guid.Parse("0198f5a0-0000-7000-8000-0000000000b3"), Law.Id, "Direitos fundamentais");
 
+    /// <summary>F-102: a pt-PT base text that the published question below links.</summary>
+    protected static readonly BaseTextResponse CommaText = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000d1"),
+        "Texto I - A vírgula",
+        "pt-PT",
+        "<p>Texto-base com <sup>nota</sup>.</p>",
+        1,
+        new DateTimeOffset(2026, 10, 14, 9, 0, 0, TimeSpan.Zero));
+
+    /// <summary>F-102: pt-BR texts, one used by three questions and one by none.</summary>
+    protected static readonly BaseTextResponse ClinicalCase = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000d2"),
+        "Caso clínico - UBS do bairro",
+        "pt-BR",
+        "<p>Paciente de 54 anos chega à UBS.</p>",
+        3,
+        new DateTimeOffset(2026, 10, 2, 9, 0, 0, TimeSpan.Zero));
+
+    protected static readonly BaseTextResponse UnusedTariffs = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000d3"),
+        "Tabela de tarifas de energia 2025",
+        "pt-BR",
+        "<p>Tabela de tarifas.</p>",
+        0,
+        new DateTimeOffset(2026, 9, 20, 9, 0, 0, TimeSpan.Zero));
+
+    protected static readonly BaseTextResponse PacificText = new(
+        Guid.Parse("0198f5a0-0000-7000-8000-0000000000d4"),
+        "Text 1 - The Great Pacific Garbage Patch",
+        "en",
+        "<p>The patch is a gyre of plastic.</p>",
+        5,
+        new DateTimeOffset(2026, 10, 10, 9, 0, 0, TimeSpan.Zero));
+
     /// <summary>A draft with two options and no key: it appears in the list as a draft and cannot be published yet.</summary>
     protected static readonly QuestionResponse Draft = new(
         Guid.Parse("0198f5a0-0000-7000-8000-000000000001"),
@@ -64,7 +98,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         Portuguese.Name,
         "pt-PT",
         "<p>Onde entra a vírgula?</p>",
-        "<p>Texto-base com <sup>nota</sup>.</p>",
+        new QuestionBaseTextResponse(CommaText.Id, CommaText.Title, CommaText.TextHtml),
         "<p>Porque separa o vocativo.</p>",
         null,
         [new(0, "<p>Antes do vocativo</p>", true), new(1, "<p>Depois do verbo</p>", false), new(2, "<p>Nunca</p>", false)]);
@@ -155,6 +189,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
     protected sealed partial class FakeQuestionBankApi : HttpMessageHandler
     {
         private const string QuestionsPath = "/api/v1/question-bank/questions";
+        private const string BaseTextsPath = "/api/v1/question-bank/base-texts";
         private const string EditionsPath = "/api/v1/question-bank/editions";
         private const string SubjectsPath = "/api/v1/question-bank/subjects";
         private const string TaxonomyPath = "/api/v1/question-bank/taxonomy";
@@ -167,6 +202,34 @@ public abstract partial class QuestionPageTestContext : KitTestContext
         public List<SubjectResponse> Subjects { get; } = [Portuguese, Law];
 
         public List<TopicResponse> Topics { get; } = [Crase, Punctuation, FundamentalRights];
+
+        /// <summary>
+        /// F-102: the stored base texts, with the count of linked questions as the test sets it. It starts with the
+        /// text the published question links, so saving that question unchanged is not refused.
+        /// </summary>
+        public List<BaseTextResponse> BaseTexts { get; } = [CommaText];
+
+        /// <summary>F-102: when set, listing the base texts answers this problem (the list's load error).</summary>
+        public (HttpStatusCode Status, string Code)? BaseTextListFailure { get; set; }
+
+        /// <summary>F-102: when set, reading one base text, or the questions of one, answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? BaseTextFindFailure { get; set; }
+
+        /// <summary>F-102: when set, creating or updating a base text answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? BaseTextSaveFailure { get; set; }
+
+        /// <summary>F-102: when set, deleting a base text answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? BaseTextDeleteFailure { get; set; }
+
+        /// <summary>F-102: replaces the stored base texts with exactly these.</summary>
+        public void SeedBaseTexts(params BaseTextResponse[] texts)
+        {
+            BaseTexts.Clear();
+            BaseTexts.AddRange(texts);
+        }
+
+        public SaveBaseTextRequest LastSavedBaseText(HttpMethod method) =>
+            Read<SaveBaseTextRequest>(Received.Last(call => call.Method == method && call.Path.StartsWith(BaseTextsPath, StringComparison.Ordinal)).Body);
 
         /// <summary>F-96: the editions the origin lookup knows.</summary>
         public List<ExamEditionLookupResponse> Editions { get; } = [];
@@ -248,6 +311,11 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return HandleEditions(path, query);
             }
 
+            if (path.StartsWith(BaseTextsPath, StringComparison.Ordinal))
+            {
+                return HandleBaseTexts(request.Method, path, query, body);
+            }
+
             if (!path.StartsWith(QuestionsPath, StringComparison.Ordinal))
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -323,7 +391,7 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 current.Type,
                 current.ContentLanguage,
                 current.StatementHtml,
-                current.BaseTextHtml,
+                current.BaseText?.TextHtml,
                 current.ExplanationHtml,
                 current.Options,
                 current.TrueFalseKey,
@@ -376,6 +444,180 @@ public abstract partial class QuestionPageTestContext : KitTestContext
             return version is null
                 ? Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionVersionNotFound)
                 : Json(version);
+        }
+
+        // F-102: the base text routes, as the Api answers them, with the smallest rules a screen test needs.
+        private HttpResponseMessage HandleBaseTexts(HttpMethod method, string path, string query, string? body)
+        {
+            var segments = path[BaseTextsPath.Length..].Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 0)
+            {
+                return method == HttpMethod.Post ? CreateBaseText(body) : ListBaseTexts(query);
+            }
+
+            var id = Guid.Parse(segments[0]);
+            if (segments.Length == 2 && segments[1] == "questions")
+            {
+                return ListBaseTextQuestions(id, query);
+            }
+
+            return method.Method switch
+            {
+                "GET" => FindBaseText(id),
+                "PUT" => UpdateBaseText(id, body),
+                "DELETE" => DeleteBaseText(id),
+                _ => new HttpResponseMessage(HttpStatusCode.NotFound)
+            };
+        }
+
+        private HttpResponseMessage ListBaseTexts(string query)
+        {
+            if (BaseTextListFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var parameters = System.Web.HttpUtility.ParseQueryString(query);
+            IEnumerable<BaseTextResponse> rows = BaseTexts;
+            if (parameters["language"] is { Length: > 0 } language)
+            {
+                rows = rows.Where(row => string.Equals(row.ContentLanguage, language, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (parameters["search"] is { Length: > 0 } term)
+            {
+                rows = rows.Where(row => row.Title.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            var all = rows.OrderBy(row => row.Title, StringComparer.OrdinalIgnoreCase).ToList();
+            var size = int.Parse(parameters["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+            var page = int.Parse(parameters["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+            var items = all.Skip(page * size).Take(size)
+                .Select(row => new BaseTextListItemResponse(row.Id, row.Title, row.ContentLanguage, row.QuestionCount, row.UpdatedAt))
+                .ToList();
+
+            return Json(new BaseTextPageResponse(items, all.Count));
+        }
+
+        private HttpResponseMessage FindBaseText(Guid id)
+        {
+            if (BaseTextFindFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var found = BaseTexts.Find(candidate => candidate.Id == id);
+
+            return found is null
+                ? Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.BaseTextNotFound)
+                : Json(found);
+        }
+
+        private HttpResponseMessage CreateBaseText(string? body)
+        {
+            if (BaseTextSaveFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var request = Read<SaveBaseTextRequest>(body);
+            var created = new BaseTextResponse(
+                Guid.CreateVersion7(),
+                request.Title!.Trim(),
+                request.ContentLanguage!,
+                Sanitize(request.TextHtml) ?? string.Empty,
+                0,
+                new DateTimeOffset(2026, 10, 15, 9, 0, 0, TimeSpan.Zero));
+            BaseTexts.Add(created);
+
+            return Json(created, HttpStatusCode.Created);
+        }
+
+        private HttpResponseMessage UpdateBaseText(Guid id, string? body)
+        {
+            if (BaseTextSaveFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var existing = BaseTexts.Find(candidate => candidate.Id == id);
+            if (existing is null)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.BaseTextNotFound);
+            }
+
+            var request = Read<SaveBaseTextRequest>(body);
+            var updated = existing with
+            {
+                Title = request.Title!.Trim(),
+                ContentLanguage = request.ContentLanguage!,
+                TextHtml = Sanitize(request.TextHtml) ?? string.Empty
+            };
+            BaseTexts[BaseTexts.IndexOf(existing)] = updated;
+
+            return Json(updated);
+        }
+
+        private HttpResponseMessage DeleteBaseText(Guid id)
+        {
+            if (BaseTextDeleteFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var existing = BaseTexts.Find(candidate => candidate.Id == id);
+            if (existing is null)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.BaseTextNotFound);
+            }
+
+            if (existing.QuestionCount > 0)
+            {
+                return Problem(HttpStatusCode.Conflict, QuestionBankErrorCodes.BaseTextInUse);
+            }
+
+            BaseTexts.Remove(existing);
+
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        private HttpResponseMessage ListBaseTextQuestions(Guid id, string query)
+        {
+            if (BaseTextFindFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            if (!BaseTexts.Exists(candidate => candidate.Id == id))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.BaseTextNotFound);
+            }
+
+            var parameters = System.Web.HttpUtility.ParseQueryString(query);
+            var all = Questions.Where(question => question.BaseText?.Id == id).ToList();
+            var size = int.Parse(parameters["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+            var page = int.Parse(parameters["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+
+            return Json(new QuestionPageResponse([.. all.Skip(page * size).Take(size).Select(ToListItem)], all.Count));
+        }
+
+        // The Api answers 404 for a text that is gone and 409 for one in another language, before it judges the rest.
+        private HttpResponseMessage? BaseTextRefusal(SaveQuestionRequest request)
+        {
+            if (request.BaseTextId is not { } baseTextId)
+            {
+                return null;
+            }
+
+            var linked = BaseTexts.Find(candidate => candidate.Id == baseTextId);
+            if (linked is null)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionBaseTextNotFound);
+            }
+
+            return string.Equals(linked.ContentLanguage, request.ContentLanguage, StringComparison.OrdinalIgnoreCase)
+                ? null
+                : Problem(HttpStatusCode.Conflict, QuestionBankErrorCodes.QuestionBaseTextLanguageMismatch);
         }
 
         private HttpResponseMessage HandleEditions(string path, string query)
@@ -589,7 +831,13 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return Problem(refused.Status, refused.Code, refused.Position);
             }
 
-            var created = Build(Guid.CreateVersion7(), Read<SaveQuestionRequest>(body), QuestionStatus.Draft);
+            var request = Read<SaveQuestionRequest>(body);
+            if (BaseTextRefusal(request) is { } baseTextRefused)
+            {
+                return baseTextRefused;
+            }
+
+            var created = Build(Guid.CreateVersion7(), request, QuestionStatus.Draft);
             Questions.Insert(0, created);
 
             return Json(created, HttpStatusCode.Created);
@@ -608,7 +856,13 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
             }
 
-            var updated = Build(id, Read<SaveQuestionRequest>(body), existing.Status, existing.Type);
+            var request = Read<SaveQuestionRequest>(body);
+            if (BaseTextRefusal(request) is { } baseTextRefused)
+            {
+                return baseTextRefused;
+            }
+
+            var updated = Build(id, request, existing.Status, existing.Type);
             Questions[Questions.IndexOf(existing)] = updated;
 
             return Json(updated);
@@ -673,7 +927,9 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 subject.Name,
                 request.ContentLanguage!,
                 Sanitize(request.StatementHtml) ?? string.Empty,
-                Sanitize(request.BaseTextHtml),
+                request.BaseTextId is { } baseTextId && BaseTexts.Find(candidate => candidate.Id == baseTextId) is { } linked
+                    ? new QuestionBaseTextResponse(linked.Id, linked.Title, linked.TextHtml)
+                    : null,
                 Sanitize(request.ExplanationHtml),
                 request.Difficulty,
                 [.. (request.Options ?? []).Select((option, position) =>

@@ -752,7 +752,16 @@
   <data name="question.topic_not_found" xml:space="preserve"><value>O tópico já não existe. Escolha outro.</value></data>
   <data name="question.statement_required" xml:space="preserve"><value>Escreva o enunciado.</value></data>
   <data name="question.statement_too_long" xml:space="preserve"><value>O enunciado excede 10 000 caracteres.</value></data>
-  <data name="question.base_text_too_long" xml:space="preserve"><value>O texto de apoio excede 20 000 caracteres.</value></data>
+  <data name="question.base_text_not_found" xml:space="preserve"><value>Este texto de apoio já não existe. Escolha outro ou deixe o campo vazio.</value></data>
+  <data name="question.base_text_language_mismatch" xml:space="preserve"><value>O texto de apoio e a questão têm de estar no mesmo idioma.</value></data>
+  <data name="base_text.not_found" xml:space="preserve"><value>Este texto de apoio já não existe.</value></data>
+  <data name="base_text.title_required" xml:space="preserve"><value>Escreva o título.</value></data>
+  <data name="base_text.title_too_long" xml:space="preserve"><value>O título excede 200 caracteres.</value></data>
+  <data name="base_text.text_required" xml:space="preserve"><value>Escreva o texto.</value></data>
+  <data name="base_text.text_too_long" xml:space="preserve"><value>O texto excede 20 000 caracteres.</value></data>
+  <data name="base_text.content_language_invalid" xml:space="preserve"><value>Escolha um dos idiomas da lista.</value></data>
+  <data name="base_text.in_use" xml:space="preserve"><value>Ainda há questões a usar este texto de apoio. Retire as ligações delas antes de o eliminar.</value></data>
+  <data name="base_text.language_in_use" xml:space="preserve"><value>Há questões a usar este texto de apoio, por isso o idioma dele não pode mudar.</value></data>
   <data name="question.explanation_too_long" xml:space="preserve"><value>A explicação excede 10 000 caracteres.</value></data>
   <data name="question.option_too_long" xml:space="preserve"><value>Uma opção excede 2 000 caracteres.</value></data>
   <data name="question.options_count" xml:space="preserve"><value>Uma questão é publicada com 2 a 5 opções.</value></data>
@@ -858,10 +867,58 @@
   <data name="Questions.Field.Statement.Placeholder" xml:space="preserve"><value>Escreva o enunciado</value></data>
   <data name="Questions.Field.Statement.Hint" xml:space="preserve"><value>Até 10 000 caracteres.</value></data>
   <data name="Questions.Section.BaseText" xml:space="preserve"><value>Texto de apoio</value></data>
-  <data name="Questions.Section.BaseText.Subtitle" xml:space="preserve"><value>Um texto a que a questão se refere, mostrado antes do enunciado. Opcional.</value></data>
+  <data name="Questions.Section.BaseText.Subtitle" xml:space="preserve"><value>Um texto partilhado por várias questões, mostrado antes do enunciado. Opcional.</value></data>
   <data name="Questions.Field.BaseText" xml:space="preserve"><value>Texto de apoio</value></data>
-  <data name="Questions.Field.BaseText.Placeholder" xml:space="preserve"><value>Cole ou escreva o texto de apoio</value></data>
-  <data name="Questions.Field.BaseText.Hint" xml:space="preserve"><value>Até 20 000 caracteres.</value></data>
+  <data name="Questions.Field.BaseText.Placeholder" xml:space="preserve"><value>Título do texto de apoio</value></data>
+  <data name="Questions.Field.BaseText.Hint" xml:space="preserve"><value>Só aparecem textos em {0}, o idioma desta questão.</value></data>
+  <data name="Questions.BaseText.Option.Secondary" xml:space="preserve"><value>Questões: {0} · alterado em {1}</value></data>
+  <data name="Questions.BaseText.Open" xml:space="preserve"><value>Abrir o texto de apoio</value></data>
+  <data name="Questions.BaseText.Show" xml:space="preserve"><value>Mostrar o texto</value></data>
+  <data name="Questions.BaseText.Hide" xml:space="preserve"><value>Ocultar o texto</value></data>
+  <data name="Questions.BaseText.ReadOnlyNote" xml:space="preserve"><value>É editado na sua própria página, para todas as questões que o usam.</value></data>
+  <data name="Questions.BaseText.Create.Lead" xml:space="preserve"><value>Não está na lista?</value></data>
+  <data name="Questions.BaseText.Create" xml:space="preserve"><value>Criar um texto de apoio</value></data>
+  <data name="Questions.BaseText.Create.Help" xml:space="preserve"><value>Abre num novo separador, e esta questão fica como está. Guarde o texto lá, volte e escolha-o aqui.</value></data>
+  <data name="Questions.BaseText.Cleared" xml:space="preserve"><value>O texto de apoio "{0}" foi retirado: está em {1}, e esta questão está agora em {2}.</value></data>
+  <data name="Questions.BaseText.Kept" xml:space="preserve"><value>Continua escolhido para a próxima questão. Mude-o ou retire-o quando o bloco de questões terminar.</value></data>
+  <data name="Common.LinkOpensNewTab" xml:space="preserve"><value>{0} (abre num novo separador)</value></data>
+  <data name="Nav.BaseTexts" xml:space="preserve"><value>Textos de apoio</value></data>
+  <data name="BaseTexts.Title" xml:space="preserve"><value>Textos de apoio</value></data>
+  <data name="BaseTexts.Search.Placeholder" xml:space="preserve"><value>Pesquisar pelo título</value></data>
+  <data name="BaseTexts.Filter.Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="BaseTexts.Filter.Language.All" xml:space="preserve"><value>Todos os idiomas</value></data>
+  <data name="BaseTexts.Column.Title" xml:space="preserve"><value>Título</value></data>
+  <data name="BaseTexts.Column.Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="BaseTexts.Column.Questions" xml:space="preserve"><value>Questões</value></data>
+  <data name="BaseTexts.Empty" xml:space="preserve"><value>Ainda não há textos de apoio.</value></data>
+  <data name="BaseTexts.Empty.Filters" xml:space="preserve"><value>Nenhum texto de apoio neste idioma.</value></data>
+  <data name="BaseTexts.Empty.Search" xml:space="preserve"><value>Nenhum texto de apoio corresponde a "{0}".</value></data>
+  <data name="BaseTexts.Row.Name" xml:space="preserve"><value>texto de apoio "{0}"</value></data>
+  <data name="BaseTexts.Delete.DisabledInUse" xml:space="preserve"><value>Há questões que usam este texto ({0}). Retire as ligações delas antes de o eliminar.</value></data>
+  <data name="BaseTexts.Delete.Object" xml:space="preserve"><value>este texto de apoio</value></data>
+  <data name="BaseTexts.Delete.Message" xml:space="preserve"><value>"{0}" sai da lista e do seletor das questões. Nenhuma questão o usa.</value></data>
+  <data name="BaseTexts.Deleted" xml:space="preserve"><value>Texto de apoio eliminado.</value></data>
+  <data name="BaseTexts.Saved" xml:space="preserve"><value>Texto de apoio guardado.</value></data>
+  <data name="BaseTexts.Form.AddTitle" xml:space="preserve"><value>Adicionar texto de apoio</value></data>
+  <data name="BaseTexts.Form.EditTitle" xml:space="preserve"><value>Editar texto de apoio</value></data>
+  <data name="BaseTexts.BackToList" xml:space="preserve"><value>Voltar aos textos de apoio</value></data>
+  <data name="BaseTexts.Section.Text" xml:space="preserve"><value>Texto de apoio</value></data>
+  <data name="BaseTexts.Section.Text.Subtitle" xml:space="preserve"><value>Um excerto, tabela ou caso a que várias questões se referem. Escrito uma vez, aparece antes do enunciado de cada uma.</value></data>
+  <data name="BaseTexts.Field.Title" xml:space="preserve"><value>Título</value></data>
+  <data name="BaseTexts.Field.Title.Placeholder" xml:space="preserve"><value>Um nome fácil de encontrar</value></data>
+  <data name="BaseTexts.Field.Title.Hint" xml:space="preserve"><value>Até 200 caracteres. É o nome do texto nas listas e no formulário da questão.</value></data>
+  <data name="BaseTexts.Field.ContentLanguage" xml:space="preserve"><value>Idioma do conteúdo</value></data>
+  <data name="BaseTexts.Field.ContentLanguage.Hint" xml:space="preserve"><value>O idioma em que o texto está escrito. Só as questões neste idioma o podem usar.</value></data>
+  <data name="BaseTexts.Field.ContentLanguage.Locked" xml:space="preserve"><value>Bloqueado enquanto houver questões a usar este texto ({0}). Uma questão e o seu texto de apoio estão sempre no mesmo idioma.</value></data>
+  <data name="BaseTexts.Field.Text" xml:space="preserve"><value>Texto</value></data>
+  <data name="BaseTexts.Field.Text.Placeholder" xml:space="preserve"><value>Cole ou escreva o texto</value></data>
+  <data name="BaseTexts.Field.Text.Hint" xml:space="preserve"><value>Até 20 000 caracteres.</value></data>
+  <data name="BaseTexts.Versions.Notice" xml:space="preserve"><value>Guardar uma alteração ao texto regista uma nova versão de cada questão publicada que o usa; os rascunhos e as questões anuladas não recebem versão. Alterar só o título não regista nada.</value></data>
+  <data name="BaseTexts.Section.Questions" xml:space="preserve"><value>Questões que usam este texto ({0})</value></data>
+  <data name="BaseTexts.Section.Questions.Subtitle" xml:space="preserve"><value>As alteradas mais recentemente primeiro. Abra uma questão para mudar ou retirar a ligação.</value></data>
+  <data name="BaseTexts.Questions.Empty" xml:space="preserve"><value>Ainda nenhuma questão usa este texto. Escolha-o na secção Texto de apoio de uma questão.</value></data>
+  <data name="BaseTexts.Section.Delete" xml:space="preserve"><value>Eliminar este texto de apoio</value></data>
+  <data name="BaseTexts.Section.Delete.Subtitle" xml:space="preserve"><value>Só um texto que nenhuma questão usa pode ser eliminado.</value></data>
   <data name="Questions.Section.Options" xml:space="preserve"><value>Opções</value></data>
   <data name="Questions.Section.Options.Subtitle" xml:space="preserve"><value>De 2 a 5 opções para publicar. As letras seguem a ordem; assinale a correta.</value></data>
   <data name="Questions.Options.Correct.Label" xml:space="preserve"><value>Opção correta</value></data>
@@ -933,6 +990,8 @@
   <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Desativado</value></data>
   <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compacto (linha de opção)</value></data>
   <data name="Gallery.RichText.LongText" xml:space="preserve"><value>Texto longo</value></data>
+  <data name="Gallery.RichText.LongPlaceholder" xml:space="preserve"><value>Cole ou escreva o texto</value></data>
+  <data name="Gallery.RichText.LongHint" xml:space="preserve"><value>Até 20 000 caracteres.</value></data>
   <data name="Gallery.RichText.OptionRow" xml:space="preserve"><value>Linha de opção: letra, botão de opção, editor compacto, mover e remover</value></data>
   <data name="Gallery.RichText.Sample" xml:space="preserve"><value>&lt;p&gt;Um enunciado &lt;strong&gt;formatado&lt;/strong&gt; com H&lt;sub&gt;2&lt;/sub&gt;O e 10&lt;sup&gt;3&lt;/sup&gt;.&lt;/p&gt;</value></data>
   <data name="Gallery.RichText.LongSample" xml:space="preserve"><value>&lt;p&gt;Um parágrafo longo que continua para mostrar que o campo cresce com o texto e o quebra, junto de uma palavra sem nenhuma quebra: Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico_Pneumoultramicroscopicossilicovulcanoconiotico.&lt;/p&gt;</value></data>

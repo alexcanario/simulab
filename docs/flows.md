@@ -4,4 +4,5 @@
 | Page | Summary | Items |
 |---|---|---|
 | [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101 |
-| [Transcribe the paper of an edition](flows/transcribe-paper.md) | How transcription mode enters a whole past paper, what stays and what clears between questions, and where the suggested number comes from. | F-99 |
+| [Share a base text between questions](flows/shared-base-text.md) | How a curator writes a base text once, links questions to it, what an edit of the text records, what refuses a delete or a language change, and how transcription keeps the choice. | F-102 |
+| [Transcribe the paper of an edition](flows/transcribe-paper.md) | How transcription mode enters a whole past paper, what stays and what clears between questions, and where the suggested number comes from. | F-99, F-102 |

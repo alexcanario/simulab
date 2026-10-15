@@ -9,6 +9,9 @@ public static class QuestionLimits
 {
     public const int StatementMaxLength = 10_000;
     public const int BaseTextMaxLength = 20_000;
+
+    /// <summary>The most characters the title of a base text has, after trimming (F-102, BR1).</summary>
+    public const int BaseTextTitleMaxLength = 200;
     public const int ExplanationMaxLength = 10_000;
     public const int OptionMaxLength = 2_000;
 

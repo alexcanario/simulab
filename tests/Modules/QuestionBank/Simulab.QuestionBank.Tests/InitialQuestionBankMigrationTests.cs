@@ -35,7 +35,7 @@ public sealed class InitialQuestionBankMigrationTests
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         (await ValuesAsync(connection, $"SELECT table_name FROM information_schema.tables WHERE table_schema = '{Schema}' AND table_name <> '__ef_migrations_history'"))
-            .Should().BeEquivalentTo("questions", "question_options", "question_versions");
+            .Should().BeEquivalentTo("questions", "question_options", "question_versions", "base_texts");
         (await ValuesAsync(connection, $"SELECT indexname FROM pg_indexes WHERE schemaname = '{Schema}' AND tablename = 'questions'"))
             .Should().Contain(["pk_questions", "ix_questions_topic", "ix_questions_status_created_at"]);
         (await ValuesAsync(connection, $"SELECT indexname FROM pg_indexes WHERE schemaname = '{Schema}' AND tablename = 'question_options'"))
@@ -43,7 +43,7 @@ public sealed class InitialQuestionBankMigrationTests
         (await ValuesAsync(connection, "SELECT conname FROM pg_constraint WHERE contype = 'c' AND conname = 'ck_questions_difficulty_range'"))
             .Should().ContainSingle();
         (await ValuesAsync(connection, $"SELECT conname FROM pg_constraint WHERE contype = 'f' AND conrelid = '{Schema}.questions'::regclass"))
-            .Should().BeEmpty("a question holds its topic by id, never by a foreign key");
+            .Should().Equal(["fk_questions_base_text"], "a question holds its topic by id, never by a foreign key; the base text link of F-102 is inside the module");
 
         await migrator.MigrateAsync("0");
 

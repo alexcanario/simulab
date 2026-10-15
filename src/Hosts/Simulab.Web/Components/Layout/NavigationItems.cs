@@ -18,6 +18,7 @@ public static class NavigationItems
         new(NavigationSection.Content, "/admin/exams", AppIcons.Exams, "Nav.Exams", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/subjects", AppIcons.Subjects, "Nav.Subjects", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/questions", AppIcons.Questions, "Nav.Questions", RequiredPermission: QuestionBankPermissions.Manage),
+        new(NavigationSection.Content, "/admin/base-texts", AppIcons.BaseText, "Nav.BaseTexts", RequiredPermission: QuestionBankPermissions.Manage),
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),

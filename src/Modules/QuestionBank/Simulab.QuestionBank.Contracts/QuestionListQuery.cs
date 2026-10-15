@@ -17,6 +17,7 @@ namespace Simulab.QuestionBank.Contracts;
 /// <param name="TopicIds">Questions of these topics (a union with the subjects' topics).</param>
 /// <param name="OrganizerIds">Questions that came from an edition of these organizers.</param>
 /// <param name="ExamEditionId">Questions that came from this edition.</param>
+/// <param name="BaseTextId">Questions that link this base text, most recently changed first (F-102, BR11).</param>
 public sealed record QuestionListQuery(
     int Page = 0,
     int PageSize = QuestionListQuery.DefaultPageSize,
@@ -28,7 +29,8 @@ public sealed record QuestionListQuery(
     IReadOnlyList<Guid>? SubjectIds = null,
     IReadOnlyList<Guid>? TopicIds = null,
     IReadOnlyList<Guid>? OrganizerIds = null,
-    Guid? ExamEditionId = null)
+    Guid? ExamEditionId = null,
+    Guid? BaseTextId = null)
 {
     public const int DefaultPageSize = 25;
 

@@ -1,3 +1,4 @@
+using Simulab.Identity.Contracts;
 using Simulab.QuestionBank.Contracts;
 using Simulab.SharedKernel.Results;
 
@@ -17,6 +18,18 @@ public sealed record OptionFault(Error Error, int? Position);
 /// </summary>
 public static class QuestionRules
 {
+    /// <summary>
+    /// False only when <paramref name="questionLanguage"/> is a language the app knows and it differs from the
+    /// base text's (F-102, BR3). A language the app does not know is not a mismatch: the question's own rule
+    /// refuses it with its own code, and that answer comes first.
+    /// </summary>
+    public static bool IsInBaseTextLanguage(string? questionLanguage, string baseTextLanguage)
+    {
+        var language = SupportedLanguages.Canonical(questionLanguage);
+
+        return language is null || language == baseTextLanguage;
+    }
+
     /// <summary>
     /// The first thing wrong with <paramref name="options"/>, or null. A draft only needs up to five options
     /// within their length; a published question also needs two to five with text and exactly one key.

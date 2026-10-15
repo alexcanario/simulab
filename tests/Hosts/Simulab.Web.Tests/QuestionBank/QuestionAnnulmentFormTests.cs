@@ -38,7 +38,7 @@ public sealed class QuestionAnnulmentFormTests : QuestionPageTestContext
             question.Type,
             question.ContentLanguage,
             question.StatementHtml,
-            question.BaseTextHtml,
+            question.BaseText?.TextHtml,
             question.ExplanationHtml,
             question.Options,
             question.TrueFalseKey,

@@ -16,7 +16,7 @@ public sealed record QuestionResponse(
     string SubjectName,
     string ContentLanguage,
     string StatementHtml,
-    string? BaseTextHtml,
+    QuestionBaseTextResponse? BaseText,
     string? ExplanationHtml,
     int? Difficulty,
     IReadOnlyList<QuestionOptionResponse> Options,

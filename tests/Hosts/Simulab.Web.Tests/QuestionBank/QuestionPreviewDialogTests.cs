@@ -23,7 +23,10 @@ public sealed class QuestionPreviewDialogTests : KitTestContext
         "Português",
         "pt-BR",
         "<p>Qual frase usa a <strong>crase</strong> corretamente?</p>",
-        "<p>Texto-base de H<sub>2</sub>O e 10<sup>3</sup>.</p>",
+        new QuestionBaseTextResponse(
+            Guid.Parse("0198f5a0-0000-7000-8000-0000000000d9"),
+            "Texto de química",
+            "<p>Texto-base de H<sub>2</sub>O e 10<sup>3</sup>.</p>"),
         "<p>Porque <em>à</em> é a fusão da preposição com o artigo.</p>",
         2,
         [
@@ -101,9 +104,42 @@ public sealed class QuestionPreviewDialogTests : KitTestContext
     [Fact]
     public async Task Render_NoBaseText_ShowsNoBaseTextBlock()
     {
-        var dialog = await OpenAsync(Full with { BaseTextHtml = "<p><br></p>" });
+        // F-102 AC11: a question with no linked base text shows none (the inline text is gone).
+        var dialog = await OpenAsync(Full with { BaseText = null });
 
         dialog.FindAll("#question-preview-base-text").Should().BeEmpty();
+    }
+
+    // F-102 AC11 (BR9): the linked text is shown before the statement, from the question's base text.
+    [Fact]
+    public async Task Render_LinkedBaseText_IsShownBeforeTheStatement()
+    {
+        var dialog = await OpenAsync(Full);
+
+        dialog.Find("#question-preview-base-text").TextContent.Should().Contain("Texto-base de H2O e 103.");
+        dialog.Markup.IndexOf("question-preview-base-text", StringComparison.Ordinal)
+            .Should().BeLessThan(dialog.Markup.IndexOf("question-preview-statement", StringComparison.Ordinal));
+    }
+
+    // F-102 BR5: a version of the history shows the HTML it recorded, which carries no id of a base text.
+    [Fact]
+    public async Task Render_AVersion_ShowsTheBaseTextHtmlItRecorded_NotTheLinkedOne()
+    {
+        Render<MudPopoverProvider>();
+        var provider = Render<MudDialogProvider>();
+        var dialogs = Services.GetRequiredService<IDialogService>();
+        var parameters = new DialogParameters<QuestionPreviewDialog>
+        {
+            { dialog => dialog.Question, Full with { BaseText = null } },
+            { dialog => dialog.VersionRecordedAt, new DateTimeOffset(2026, 10, 1, 9, 0, 0, TimeSpan.Zero) },
+            { dialog => dialog.VersionBaseTextHtml, "<p>Texto como era na versão 1.</p>" }
+        };
+
+        await provider.InvokeAsync(async () => await dialogs.ShowAsync<QuestionPreviewDialog>(
+            "Version 1", parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true }));
+
+        provider.WaitForAssertion(() => provider.Find("#question-preview-base-text").TextContent
+            .Should().Contain("Texto como era na versão 1."));
     }
 
     [Fact]

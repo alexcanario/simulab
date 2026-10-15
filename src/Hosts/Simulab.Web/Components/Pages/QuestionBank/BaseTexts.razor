@@ -1,0 +1,182 @@
+@page "/admin/base-texts"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+@* F-102, UC5 and BR11: every base text by title, searched and paged on the server, filtered by language, with the
+   number of questions that use it. Add and edit are a page of their own (rule: ui-project). The title is plain
+   text: there is no read-only detail, the form is reached by Edit. A text in use is not deleted (BR6): the row says
+   why and the count is in the next column. *@
+<AppPageHeader Title="@L["BaseTexts.Title"]"
+               Breadcrumbs="_breadcrumbs"
+               PrimaryActionText="@L["Common.Add"]"
+               PrimaryActionIcon="@AppIcons.Add"
+               OnPrimaryAction="AddAsync" />
+
+@if (_error is not null)
+{
+    <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+}
+
+<AppDataTable @ref="_table"
+              TItem="BaseTextListItemResponse"
+              LoadAsync="LoadAsync"
+              Searchable="true"
+              SearchPlaceholder="@L["BaseTexts.Search.Placeholder"]"
+              EmptyMessage="@EmptyMessage"
+              EmptySearchMessage="@(term => L["BaseTexts.Empty.Search", term].Value)"
+              EmptyActionText="@L["Common.Add"]"
+              EmptyActionIcon="@AppIcons.Add"
+              OnEmptyAction="AddAsync">
+    <ToolBarContent>
+        <div class="app-table-filters">
+            @* A short fixed list (the three languages): a select, not a lookup (rule ui-project, F-114). *@
+            <AppSelectField TValue="string"
+                            Id="base-texts-filter-language"
+                            Label="@L["BaseTexts.Filter.Language"]"
+                            Value="_language"
+                            ValueChanged="OnLanguageChangedAsync"
+                            Options="LanguageOptions" />
+        </div>
+    </ToolBarContent>
+    <Columns>
+        @* The order is by title (BR11): no column sorts. The whole title is the tooltip, in its own language. *@
+        <PropertyColumn T="BaseTextListItemResponse" TProperty="string" Property="row => row.Title"
+                        Title="@L["BaseTexts.Column.Title"]" Sortable="false">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.Title" MaxWidth="32rem" Lang="@context.Item.ContentLanguage" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn T="BaseTextListItemResponse" TProperty="string" Property="row => row.ContentLanguage"
+                        Title="@L["BaseTexts.Column.Language"]" Sortable="false">
+            <CellTemplate>
+                <span lang="@context.Item.ContentLanguage">@QuestionText.LanguageName(context.Item.ContentLanguage)</span>
+            </CellTemplate>
+        </PropertyColumn>
+        <AppNumberColumn TItem="BaseTextListItemResponse" TProperty="int" Property="row => row.QuestionCount"
+                         Title="@L["BaseTexts.Column.Questions"]" Sortable="false">
+            <CellTemplate>
+                <span>@context.Item.QuestionCount.ToString(CultureInfo.CurrentCulture)</span>
+            </CellTemplate>
+        </AppNumberColumn>
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@ItemName(context)"
+                       IdPrefix="@ActionsId(context)"
+                       OnEdit="@(() => Edit(context))"
+                       OnDelete="@(() => DeleteAsync(context))"
+                       DeleteDisabledReason="@DeleteDisabledReasonOf(context)" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private AppDataTable<BaseTextListItemResponse> _table = default!;
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private string _language = string.Empty;
+    private string? _error;
+
+    // The empty state says which emptiness it is: nothing stored, or nothing in the chosen language.
+    private string EmptyMessage => _language.Length == 0 ? L["BaseTexts.Empty"] : L["BaseTexts.Empty.Filters"];
+
+    // A language is shown in its own name: it does not depend on the reader's UI language. Empty means all.
+    private IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
+    [
+        new(string.Empty, L["BaseTexts.Filter.Language.All"]),
+        .. SupportedCultures.All.Select(culture =>
+            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))
+    ];
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["BaseTexts.Title"], href: null, disabled: true)
+        ];
+
+    /// <summary>The list is searched, filtered and paged by the server (BR11).</summary>
+    private async Task<AppTablePage<BaseTextListItemResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListBaseTextsAsync(
+            token,
+            new BaseTextListQuery(query.Page, query.PageSize, query.Search, _language.Length == 0 ? null : _language),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Base texts failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<BaseTextListItemResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // A change of the filter reloads from the first page, as a new search does.
+    private async Task OnLanguageChangedAsync(string value)
+    {
+        _language = value;
+        await _table.ReloadFromFirstPageAsync();
+    }
+
+    private static string ActionsId(BaseTextListItemResponse item) => $"base-text-actions-{item.Id}";
+
+    // The title is cut so the accessible name of the row's buttons stays short.
+    private string ItemName(BaseTextListItemResponse item) =>
+        L["BaseTexts.Row.Name", QuestionHtml.Excerpt(item.Title, QuestionText.RowNameLength)];
+
+    // BR6: a text that a question links is not deleted; the button says why, with the count.
+    private string? DeleteDisabledReasonOf(BaseTextListItemResponse item) =>
+        item.QuestionCount > 0 ? L["BaseTexts.Delete.DisabledInUse", item.QuestionCount].Value : null;
+
+    private void AddAsync() => Navigation.NavigateTo("/admin/base-texts/new");
+
+    private void Edit(BaseTextListItemResponse item) => Navigation.NavigateTo($"/admin/base-texts/{item.Id}");
+
+    private async Task DeleteAsync(BaseTextListItemResponse item)
+    {
+        _error = null;
+        if (item.QuestionCount > 0)
+        {
+            return;
+        }
+
+        if (!await Confirm.ConfirmDeleteAsync(L, L["BaseTexts.Delete.Object"], L["BaseTexts.Delete.Message", item.Title]))
+        {
+            return;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.DeleteBaseTextAsync(token, item.Id);
+        if (result is { IsSuccess: true })
+        {
+            Snackbar.Add(L["BaseTexts.Deleted"], Severity.Success);
+        }
+        else
+        {
+            // 409 when a question linked it meanwhile, 404 when another curator deleted it first: the table reloads
+            // so the row shows its count and a disabled Delete.
+            _error = Errors.For(result?.ErrorCode);
+        }
+
+        // The row menu calls this delegate itself, not an EventCallback of the page, so the page is not
+        // re-rendered for it: say so, or the alert above the table never appears.
+        await InvokeAsync(StateHasChanged);
+        await _table.ReloadAsync();
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

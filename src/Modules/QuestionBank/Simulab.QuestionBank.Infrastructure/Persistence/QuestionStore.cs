@@ -21,6 +21,19 @@ public sealed class QuestionStore(
             .Include(question => question.Options)
             .FirstOrDefaultAsync(question => question.Id == id, cancellationToken);
 
+    public async Task<LinkedBaseText?> FindBaseTextAsync(Guid id, CancellationToken cancellationToken)
+    {
+        // F-102: the shared row lock lives as long as the transaction, so it is opened here and ended by the save
+        // that follows (or by the context, which rolls it back when the handler refuses before saving).
+        await context.Database.BeginTransactionIfNoneAsync(cancellationToken);
+
+        return await context.BaseTexts
+            .FromSql($"SELECT * FROM question_bank.base_texts WHERE id = {id} AND is_deleted = false FOR SHARE")
+            .AsNoTracking()
+            .Select(row => new LinkedBaseText(row.Id, row.ContentLanguage, row.TextHtml))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<bool> TopicExistsAsync(Guid topicId, CancellationToken cancellationToken) =>
         await topics.FindAsync(topicId, cancellationToken) is not null;
 
@@ -68,13 +81,18 @@ public sealed class QuestionStore(
     // the question are removed with it.
     public void Remove(Question question) => context.Questions.Remove(question);
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken) => context.SaveChangesAsync(cancellationToken);
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+        await context.Database.CommitTransactionIfAnyAsync(cancellationToken);
+    }
 
     public async Task<Error?> TrySaveChangesAsync(CancellationToken cancellationToken)
     {
         try
         {
             await context.SaveChangesAsync(cancellationToken);
+            await context.Database.CommitTransactionIfAnyAsync(cancellationToken);
 
             return null;
         }
@@ -82,6 +100,7 @@ public sealed class QuestionStore(
         {
             // The refused row is still tracked; drop it so a later save on this context does not retry it.
             context.ChangeTracker.Clear();
+            await context.Database.RollbackTransactionIfAnyAsync(cancellationToken);
 
             return QuestionUniqueViolations.Translate(exception);
         }
@@ -90,6 +109,7 @@ public sealed class QuestionStore(
             // F-101: the status read is no longer the stored one (the question was annulled, unpublished or
             // published meanwhile). Nothing of this save was written; the curator reloads and tries again.
             context.ChangeTracker.Clear();
+            await context.Database.RollbackTransactionIfAnyAsync(cancellationToken);
 
             return new Error(QuestionBankErrorCodes.QuestionVersionConflict, ErrorKind.Conflict);
         }

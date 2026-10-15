@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Simulab.Catalog.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
+using Simulab.QuestionBank.Application.BaseTexts;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
@@ -37,6 +38,10 @@ public static class QuestionBankModule
 
         services.AddScoped<IQuestionStore, QuestionStore>();
         services.AddScoped<IQuestionQueries, QuestionQueries>();
+        services.AddScoped<IBaseTextStore, BaseTextStore>();
+        services.AddScoped<IBaseTextQueries, BaseTextQueries>();
+        services.AddScoped<SaveBaseTextHandler>();
+        services.AddScoped<DeleteBaseTextHandler>();
         services.AddScoped<SaveQuestionHandler>();
         services.AddScoped<PublishQuestionHandler>();
         services.AddScoped<UnpublishQuestionHandler>();

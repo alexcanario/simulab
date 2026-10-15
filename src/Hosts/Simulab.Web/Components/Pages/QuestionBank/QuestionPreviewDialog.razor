@@ -41,9 +41,9 @@
         }
 
         <div class="app-question-paper" lang="@Question.ContentLanguage">
-            @if (!QuestionHtml.IsBlank(Question.BaseTextHtml))
+            @if (!QuestionHtml.IsBlank(BaseTextHtml))
             {
-                <div class="app-question-base app-question-content" id="question-preview-base-text">@((MarkupString)Question.BaseTextHtml!)</div>
+                <div class="app-question-base app-question-content" id="question-preview-base-text">@((MarkupString)BaseTextHtml!)</div>
             }
 
             <div class="app-question-content" id="question-preview-statement">@((MarkupString)Question.StatementHtml)</div>
@@ -146,8 +146,18 @@
     /// <summary>F-98: when the version shown was recorded; set only when the dialog shows a version of the history.</summary>
     [Parameter] public DateTimeOffset? VersionRecordedAt { get; set; }
 
+    /// <summary>
+    /// F-102 AC11: the base text of a version of the history, as it was recorded (F-98 BR1). A version carries the
+    /// HTML and no id, so it travels here and not as a base text of the question. Used only with
+    /// <see cref="VersionRecordedAt"/>.
+    /// </summary>
+    [Parameter] public string? VersionBaseTextHtml { get; set; }
+
     private IReadOnlyList<QuestionOptionResponse> _options = [];
     private bool _revealed;
+
+    // F-102 BR9: the linked text comes from the stored question; a version shows what it recorded.
+    private string? BaseTextHtml => VersionRecordedAt is null ? Question.BaseText?.TextHtml : VersionBaseTextHtml;
 
     private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
 
