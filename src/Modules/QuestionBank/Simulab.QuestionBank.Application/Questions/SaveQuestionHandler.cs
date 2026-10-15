@@ -1,4 +1,3 @@
-using Simulab.Identity.Contracts;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain;
@@ -87,8 +86,7 @@ public sealed class SaveQuestionHandler(
                 return Refused(new Error(QuestionBankErrorCodes.QuestionBaseTextNotFound, ErrorKind.NotFound));
             }
 
-            var language = SupportedLanguages.Canonical(request.ContentLanguage);
-            if (language is not null && language != baseText.ContentLanguage)
+            if (!QuestionRules.IsInBaseTextLanguage(request.ContentLanguage, baseText.ContentLanguage))
             {
                 return Refused(new Error(QuestionBankErrorCodes.QuestionBaseTextLanguageMismatch, ErrorKind.Conflict));
             }

@@ -227,15 +227,84 @@ else
                             Title="@L["Questions.Section.BaseText"]"
                             Icon="@AppIcons.BaseText"
                             Subtitle="@L["Questions.Section.BaseText.Subtitle"]">
-                <AppRichTextField Id="question-base-text"
-                                  Label="@L["Questions.Field.BaseText"]"
-                                  Placeholder="@L["Questions.Field.BaseText.Placeholder"]"
-                                  Hint="@L["Questions.Field.BaseText.Hint"]"
-                                  Disabled="IsAnnulled"
-                                  Lang="@_contentLanguage"
-                                  Value="@_baseText"
-                                  ValueChanged="@((string? value) => OnBaseTextChanged(value))"
-                                  Error="@_baseTextError" />
+                @* F-102: the base text is picked, never typed here: it has a page of its own, so there is one way to
+                   edit it (rule: ui-project). The lookup is the server's search over the texts in the question's
+                   language (BR3); nothing is cached, so a text created in another tab is listed at once. *@
+                <AppLookupField Id="question-base-text"
+                                Label="@L["Questions.Field.BaseText"]"
+                                Placeholder="@L["Questions.Field.BaseText.Placeholder"]"
+                                SearchAsync="SearchBaseTextsAsync"
+                                MinChars="0"
+                                OpenOnFocus="true"
+                                Value="_baseText"
+                                ValueChanged="OnBaseTextChanged"
+                                Disabled="IsAnnulled"
+                                Hint="@BaseTextHint"
+                                Error="@_baseTextError" />
+
+                @if (_baseTextCleared is not null)
+                {
+                    <div id="question-base-text-cleared">
+                        <AppAlert Severity="Severity.Info" Text="@_baseTextCleared" Class="mb-4" />
+                    </div>
+                }
+
+                @if (_baseText is { } chosen)
+                {
+                    @* Reading stays allowed on an annulled question; the link opens in a new tab so this form stays as it is. *@
+                    <div class="app-base-text-links" id="question-base-text-chosen">
+                        <AppLink Href="@($"/admin/base-texts/{chosen.Id}")"
+                                 target="_blank"
+                                 rel="noopener"
+                                 aria-label="@(L["Common.LinkOpensNewTab", L["Questions.BaseText.Open"].Value].Value)"
+                                 id="question-base-text-open">
+                            @L["Questions.BaseText.Open"]
+                            <MudIcon Icon="@AppIcons.OpenInNew" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
+                        </AppLink>
+                    </div>
+
+                    <AppDisclosure Id="question-base-text-preview"
+                                   ShowText="@L["Questions.BaseText.Show"]"
+                                   HideText="@L["Questions.BaseText.Hide"]">
+                        @{
+                            var previewHtml = BaseTextHtmlOf(chosen.Id);
+                        }
+                        @if (previewHtml is not null)
+                        {
+                            <div class="app-base-text-preview">
+                                <div class="app-question-content" lang="@_baseTextLanguage" id="question-base-text-preview-html">@((MarkupString)previewHtml)</div>
+                                <span class="app-field-hint app-base-text-note">@L["Questions.BaseText.ReadOnlyNote"]</span>
+                            </div>
+                        }
+                        else if (_baseTextPreviewFailed)
+                        {
+                            <AppErrorState OnRetry="@(() => LoadBaseTextPreviewAsync(chosen.Id))" />
+                        }
+                        else
+                        {
+                            <AppLoadingState />
+                            // First time it is opened: the text is read once (this renders only while the block is open).
+                            RequestBaseTextPreview(chosen.Id);
+                        }
+                    </AppDisclosure>
+                }
+
+                @if (!IsAnnulled)
+                {
+                    <div class="app-base-text-create" id="question-base-text-create">
+                        <span>@L["Questions.BaseText.Create.Lead"]</span>
+                        <AppLink Href="@CreateBaseTextHref"
+                                 target="_blank"
+                                 rel="noopener"
+                                 aria-label="@(L["Common.LinkOpensNewTab", L["Questions.BaseText.Create"].Value].Value)"
+                                 aria-describedby="question-base-text-create-help"
+                                 id="question-base-text-create-link">
+                            @L["Questions.BaseText.Create"]
+                            <MudIcon Icon="@AppIcons.OpenInNew" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
+                        </AppLink>
+                        <p class="app-base-text-create-help" id="question-base-text-create-help">@L["Questions.BaseText.Create.Help"]</p>
+                    </div>
+                }
             </AppSectionCard>
 
             @* F-97, BR9: the section that edits the answer is the one the type declares. The options typed for
@@ -632,8 +701,16 @@ else
     private string? _contentLanguage;
     private int? _difficulty;
     private string _statement = string.Empty;
-    private string _baseText = string.Empty;
     private string _explanation = string.Empty;
+
+    // F-102: the question links one base text or none. The language the link was made in is kept because the
+    // option carries only an id and a title: a language change clears a text of another language (BR3, BR13).
+    private AppLookupOption? _baseText;
+    private string? _baseTextLanguage;
+    private string? _baseTextCleared;
+    private readonly Dictionary<Guid, string> _baseTextHtmls = [];
+    private Guid? _baseTextPreviewRequested;
+    private bool _baseTextPreviewFailed;
     private List<OptionDraft> _options = [];
     private QuestionType _type = QuestionType.SingleChoice;
     private bool? _trueFalseKey;
@@ -791,6 +868,7 @@ else
         new(L["Questions.Field.Topic"], _topic?.Text),
         new(L["Questions.Field.ContentLanguage"], LanguageDone ? QuestionText.LanguageName(_contentLanguage!) : null),
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
+        new(L["Questions.Field.BaseText"], _baseText?.Text),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
         IsTrueFalse
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
@@ -859,7 +937,7 @@ else
         || (!IsTranscribing && _edition is not null && _paperNumber != _saved?.Origin?.PaperNumber)
         || (!IsTranscribing && _edition is not null && _noticeSubjectId != _saved?.Origin?.NoticeSubjectId)
         || Normalized(_statement) != Normalized(_saved?.StatementHtml)
-        || Normalized(_baseText) != Normalized(_saved?.BaseTextHtml)
+        || (!IsTranscribing && _baseText?.Id != _saved?.BaseText?.Id)
         || Normalized(_explanation) != Normalized(_saved?.ExplanationHtml)
         || AnswerChanged();
 
@@ -1015,7 +1093,8 @@ else
         return next is { IsSuccess: true, Value: { } value } ? value.PaperNumber : null;
     }
 
-    // F-99 AC3: everything but the edition, the notice subject and the content language is blank for the next one.
+    // F-99 AC3: everything but the edition, the notice subject, the content language and (F-102 BR13) the chosen
+    // base text is blank for the next one.
     private async Task ContinueTranscriptionAsync(Guid editionId)
     {
         _batchNumber++;
@@ -1025,7 +1104,6 @@ else
         _subject = null;
         _difficulty = null;
         _statement = string.Empty;
-        _baseText = string.Empty;
         _explanation = string.Empty;
         _options = [];
         _type = QuestionType.SingleChoice;
@@ -1081,7 +1159,9 @@ else
         _paperNumber = question.Origin?.PaperNumber;
         _noticeSubjectId = question.Origin?.NoticeSubjectId;
         _statement = question.StatementHtml;
-        _baseText = question.BaseTextHtml ?? string.Empty;
+        _baseText = question.BaseText is { } linked ? new AppLookupOption(linked.Id, linked.Title) : null;
+        _baseTextLanguage = question.BaseText is null ? null : question.ContentLanguage;
+        _baseTextPreviewFailed = false;
         _explanation = question.ExplanationHtml ?? string.Empty;
         _options =
         [
@@ -1099,6 +1179,7 @@ else
         _changeReasonError = null;
         _topicError = _languageError = _difficultyError = _statementError = null;
         _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = null;
+        _baseTextCleared = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
         foreach (var option in _options)
@@ -1197,7 +1278,7 @@ else
             current.SubjectName,
             version.ContentLanguage,
             version.StatementHtml,
-            version.BaseTextHtml,
+            null,
             version.ExplanationHtml,
             current.Difficulty,
             version.Options,
@@ -1206,7 +1287,9 @@ else
         var parameters = new DialogParameters<QuestionPreviewDialog>
         {
             { dialog => dialog.Question, asQuestion },
-            { dialog => dialog.VersionRecordedAt, version.CreatedAt }
+            { dialog => dialog.VersionRecordedAt, version.CreatedAt },
+            // A version records the base text HTML and no id (F-98 BR1): it travels apart from the question.
+            { dialog => dialog.VersionBaseTextHtml, version.BaseTextHtml }
         };
         var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true };
 
@@ -1280,6 +1363,21 @@ else
     {
         _contentLanguage = value;
         _languageError = null;
+
+        // F-102 BR3 and BR13: a question and its base text share one language, so a text of the old language is
+        // unlinked here and the reader is told, instead of meeting a 409 on save.
+        if (_baseText is { } linked
+            && !string.Equals(_baseTextLanguage, value, StringComparison.OrdinalIgnoreCase))
+        {
+            _baseTextCleared = L[
+                "Questions.BaseText.Cleared",
+                linked.Text,
+                QuestionText.LanguageName(_baseTextLanguage ?? string.Empty),
+                QuestionText.LanguageName(value ?? string.Empty)].Value;
+            _baseText = null;
+            _baseTextLanguage = null;
+            _baseTextError = null;
+        }
     }
 
     private void OnDifficultyChanged(int? value)
@@ -1393,10 +1491,81 @@ else
         _statementError = StatementError();
     }
 
-    private void OnBaseTextChanged(string? value)
+    // -- the base text (F-102) --------------------------------------------------------------------------------
+
+    private string CreateBaseTextHref =>
+        $"/admin/base-texts/new?language={Uri.EscapeDataString(_contentLanguage ?? DefaultLanguage)}";
+
+    // In transcription the choice stays across saves, and the hint says so (BR13).
+    private string BaseTextHint =>
+        IsTranscribing && _baseText is not null
+            ? L["Questions.BaseText.Kept"].Value
+            : L["Questions.Field.BaseText.Hint", QuestionText.LanguageName(_contentLanguage ?? DefaultLanguage)].Value;
+
+    // Only the texts in the question's language are offered; the term narrows by title on the server (BR3, BR11).
+    private async Task<IReadOnlyList<AppLookupOption>> SearchBaseTextsAsync(string term, CancellationToken cancellationToken)
     {
-        _baseText = value ?? string.Empty;
-        _baseTextError = BaseTextError();
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListBaseTextsAsync(
+            token,
+            new BaseTextListQuery(0, AppLookupField.MaxCandidates, string.IsNullOrWhiteSpace(term) ? null : term, _contentLanguage),
+            cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Base texts failed to load: {result.ErrorCode}.");
+        }
+
+        return
+        [
+            .. result.Value!.Items.Select(item => new AppLookupOption(
+                item.Id,
+                item.Title,
+                L["Questions.BaseText.Option.Secondary", item.QuestionCount, item.UpdatedAt.ToString("d", CultureInfo.CurrentCulture)].Value))
+        ];
+    }
+
+    private void OnBaseTextChanged(AppLookupOption? value)
+    {
+        _baseText = value;
+        _baseTextLanguage = value is null ? null : _contentLanguage;
+        _baseTextError = null;
+        _baseTextCleared = null;
+        _baseTextPreviewFailed = false;
+    }
+
+    // The stored link carries its text; a text picked now is read once, the first time it is shown.
+    private string? BaseTextHtmlOf(Guid id) =>
+        _saved?.BaseText is { } stored && stored.Id == id
+            ? stored.TextHtml
+            : _baseTextHtmls.GetValueOrDefault(id);
+
+    private void RequestBaseTextPreview(Guid id)
+    {
+        if (_baseTextPreviewRequested == id || _baseTextHtmls.ContainsKey(id))
+        {
+            return;
+        }
+
+        _baseTextPreviewRequested = id;
+        _ = LoadBaseTextPreviewAsync(id);
+    }
+
+    private async Task LoadBaseTextPreviewAsync(Guid id)
+    {
+        _baseTextPreviewFailed = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindBaseTextAsync(token, id);
+        if (result is { IsSuccess: true, Value: { } baseText })
+        {
+            _baseTextHtmls[id] = baseText.TextHtml;
+        }
+        else
+        {
+            _baseTextPreviewFailed = true;
+        }
+
+        _baseTextPreviewRequested = null;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnExplanationChanged(string? value)
@@ -1497,11 +1666,6 @@ else
                 ? Errors.For(QuestionBankErrorCodes.QuestionStatementTooLong)
                 : null;
 
-    private string? BaseTextError() =>
-        _baseText.Length > QuestionLimits.BaseTextMaxLength
-            ? Errors.For(QuestionBankErrorCodes.QuestionBaseTextTooLong)
-            : null;
-
     // BR2: an edition needs a whole number from 1 to 500. Without an edition there is nothing to check.
     private string? PaperNumberError() =>
         _edition is null
@@ -1548,7 +1712,7 @@ else
         _paperNumberError = PaperNumberError();
         _noticeSubjectError = null;
         _statementError = StatementError();
-        _baseTextError = BaseTextError();
+        _baseTextError = null;
         _explanationError = ExplanationError();
         // F-97: only the answer of the chosen type is judged; the other type's stays in the form, unsent.
         foreach (var option in _options)
@@ -1580,7 +1744,7 @@ else
             _topic!.Id,
             _contentLanguage,
             _statement,
-            QuestionHtml.NullIfBlank(_baseText),
+            _baseText?.Id,
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
             IsTrueFalse
@@ -1635,7 +1799,7 @@ else
 
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
-        || _paperNumberError is not null || _baseTextError is not null || _explanationError is not null || _optionsError is not null
+        || _paperNumberError is not null || _explanationError is not null || _optionsError is not null
         || _trueFalseKeyError is not null || _changeReasonError is not null
         || _options.Any(option => option.Error is not null);
 
@@ -1652,7 +1816,14 @@ else
             case QuestionBankErrorCodes.QuestionStatementTooLong:
                 _statementError = text;
                 break;
-            case QuestionBankErrorCodes.QuestionBaseTextTooLong:
+            case QuestionBankErrorCodes.QuestionBaseTextNotFound:
+                // F-102 BR7: the text was deleted since it was picked: the choice goes, so the reader picks again.
+                _baseText = null;
+                _baseTextLanguage = null;
+                _baseTextError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionBaseTextLanguageMismatch:
+                // The choice stays, so the reader sees which text was refused.
                 _baseTextError = text;
                 break;
             case QuestionBankErrorCodes.QuestionExplanationTooLong:

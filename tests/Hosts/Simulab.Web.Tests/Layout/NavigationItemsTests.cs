@@ -84,7 +84,9 @@ public class NavigationItemsTests
                 ("/admin/issuing-authorities", CatalogPermissions.Manage),
                 ("/admin/exams", CatalogPermissions.Manage),
                 ("/admin/subjects", CatalogPermissions.Manage),
-                ("/admin/questions", QuestionBankPermissions.Manage));
+                ("/admin/questions", QuestionBankPermissions.Manage),
+                // F-102 AC10 (BR12): the base texts follow the questions, behind the same permission.
+                ("/admin/base-texts", QuestionBankPermissions.Manage));
     }
 
     // F-95 AC10: the menu item is shown with questions.manage and absent without it, even for a catalog manager.
@@ -95,7 +97,8 @@ public class NavigationItemsTests
         var withCatalogOnly = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, permission => permission == CatalogPermissions.Manage);
         var withNothing = NavigationItems.Visible(NavigationItems.All, isDevelopment: false, NoPermissions);
 
-        withQuestions.Select(item => item.Route).Should().Equal("/", "/admin/questions");
+        // F-102 AC10: the base texts entry needs the same permission, so it comes with the questions.
+        withQuestions.Select(item => item.Route).Should().Equal("/", "/admin/questions", "/admin/base-texts");
         NavigationItems.Sections(withQuestions).Select(section => section.Key).Should().Equal(NavigationSection.Content);
         withCatalogOnly.Select(item => item.Route).Should().NotContain("/admin/questions");
         withNothing.Select(item => item.Route).Should().NotContain("/admin/questions");

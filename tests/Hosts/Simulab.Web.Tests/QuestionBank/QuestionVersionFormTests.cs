@@ -30,7 +30,7 @@ public sealed class QuestionVersionFormTests : QuestionPageTestContext
             question.Type,
             question.ContentLanguage,
             statement ?? question.StatementHtml,
-            question.BaseTextHtml,
+            question.BaseText?.TextHtml,
             question.ExplanationHtml,
             question.Options,
             question.TrueFalseKey,
