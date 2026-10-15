@@ -37,6 +37,7 @@ public abstract record AnswerKey
         return type switch
         {
             QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey),
+            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey),
             _ => new SingleChoiceKey(options, trueFalseKey)
         };
     }

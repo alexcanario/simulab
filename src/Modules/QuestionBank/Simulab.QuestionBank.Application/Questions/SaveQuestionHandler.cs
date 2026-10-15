@@ -21,7 +21,9 @@ public sealed class SaveQuestionHandler(
         QuestionBankErrorCodes.QuestionOptionsCount,
         QuestionBankErrorCodes.QuestionOptionTooLong,
         QuestionBankErrorCodes.QuestionOptionTextRequired,
-        QuestionBankErrorCodes.QuestionKeyInvalid
+        QuestionBankErrorCodes.QuestionKeyInvalid,
+        QuestionBankErrorCodes.QuestionMultipleOptionsCount,
+        QuestionBankErrorCodes.QuestionMultipleKeyInvalid
     ];
 
     public async Task<SaveQuestionOutcome> HandleAsync(
@@ -126,7 +128,8 @@ public sealed class SaveQuestionHandler(
         {
             // The entity answers with the code; the position of the option it is about comes from the same rule.
             var position = OptionCodes.Contains(applied.Error!.Code)
-                ? QuestionRules.CheckOptions(drafts, existing?.Status == QuestionStatus.Published)?.Position
+                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey)
+                    .Check(existing?.Status == QuestionStatus.Published)?.Position
                 : null;
 
             return Refused(applied.Error, position);

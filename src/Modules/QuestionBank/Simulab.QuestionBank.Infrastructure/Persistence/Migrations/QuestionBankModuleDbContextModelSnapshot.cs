@@ -234,7 +234,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("type")
-                        .HasComment("How the question is answered: SingleChoice or TrueFalse.");
+                        .HasComment("How the question is answered: SingleChoice, TrueFalse or MultipleAnswer.");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -463,7 +463,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("type")
-                        .HasComment("How the question is answered: SingleChoice or TrueFalse.");
+                        .HasComment("How the question is answered: SingleChoice, TrueFalse or MultipleAnswer.");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

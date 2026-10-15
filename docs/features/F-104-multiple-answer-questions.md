@@ -134,6 +134,9 @@ No mockup (owner, 2026-10-15): two controls change inside the form of F-95/F-97 
 - AC17 All new texts appear in pt-BR, pt-PT and en, including the two error code texts.
 
 ## Criterion → test
+
+Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
+
 <!-- Written by /agile:build at its start, one row per criterion above. -->
 | Criterion | Test |
 | --- | --- |
