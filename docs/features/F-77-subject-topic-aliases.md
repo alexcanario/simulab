@@ -1,7 +1,7 @@
 ---
 feature: F-77
 epic: Subject taxonomy
-status: validating
+status: done
 board: 121
 version: 1
 ---
@@ -188,3 +188,9 @@ Not on screen, covered by tests: the lookup by name (AC12), the unique indexes (
 - 2026-10-15 rework — review minor: alias diff duplicated in both save handlers, moved to AliasRules.Diff
 
 ## Delivery
+- Branch: `feature/F-77`, merged with `--no-ff` into `main` as `6038871e` (board #121), 2026-10-15; app version 0.36.0.
+- Tests at the last full run: Catalog 582, Web 1731, Identity 501, QuestionBank 298, Architecture 220, AppHost 80, Api 58, Jobs 25, Persistence 25, Email 19, Ai 10, ApiResults 13, SharedKernel 12; all green. Scan: `agile scan GREEN`.
+- Manual: `docs/manual/{en,pt-BR,pt-PT}/subjects.md`. Generated docs: `docs/api/Simulab.Api.json`, `docs/architecture/Catalog/` (data dictionary and schema).
+- Migration: `AddSubjectTopicAliases` (two additive tables).
+- Owner follow-up: the shared local database `simulab` most likely holds this migration already (an app host check ran on it, see `## Decisions`, 2026-10-15).
+Gate time: 9 passes, 23 min 12 s — turn 2 (1 min 23 s), ship 5 (18 min 14 s), scan 2 (3 min 35 s); 1 red
