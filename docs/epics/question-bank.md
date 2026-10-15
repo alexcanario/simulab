@@ -29,7 +29,7 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | F-99 | Transcribe the paper of an edition | Fast sequential entry of an edition's questions: edition and notice subject kept, number auto-incremented | Should | M | F-96, F-97 | - | yes | idea |
 | F-100 | Find questions in the back office | Filters by subject, topic, organizer, edition, type, status, difficulty and text | Should | S | F-95 | - | no | idea |
 | F-101 | Annul a question | A curator annuls a published question with a reason; the simulators leave it out or score it by the organizer's rule (E-6) | Should | S | F-98 | - | no | done |
-| F-102 | Shared base text | One base text (reading passage) serves several questions | Should | M | F-95 | - | yes | idea |
+| F-102 | Shared base text | One base text (reading passage) serves several questions | Should | M | F-95 | - | yes | done |
 | F-103 | Images in questions | Images in the statement, base text and options, stored through `IFileStorage` | Should | M | F-95, F-89 | - | no | idea |
 | F-104 | Multiple-answer questions | The multiple-answer type | Should | M | F-95 | - | no | idea |
 | F-105 | Review before publishing | `InReview` status, review queue, approve or reject with a reason, a review permission; may move to epic E-9 | Should | M | F-95 | - | yes | idea |

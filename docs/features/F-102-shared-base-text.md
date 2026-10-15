@@ -1,7 +1,7 @@
 ---
 feature: F-102
 epic: Question bank
-status: validating
+status: done
 board: 148
 version: 1
 ---
@@ -581,3 +581,9 @@ Necessário para validar: o app host local, com o Docker Desktop em execução e
 - 2026-10-15 test-fail — 4 new warning(s): CS8669 in src/Hosts/Simulab.Web/obj/Debug/net10.0/Microsoft.CodeAnalysis.Razor.Compiler/Microsoft.NET., 2 reds
 
 ## Delivery
+Gate time: 9 passes, 16 min 34 s — turn 2 (1 min 2 s), ship 5 (12 min 38 s), scan 2 (2 min 54 s), sealed 1 (2 min 47 s saved); 2 red
+- Branch: feature/F-102
+- Merge: 100686e8 (app version 1.0.0, a breaking change of the v1 question contract recorded in `## Decisions`)
+- Tests: 3,773 passed, 0 failed (QuestionBank 346, Web 1,882, Catalog 582, Identity 501, Architecture 220, the other projects 242); full gate 2 min 47 s sealed, scan GREEN
+- Manual pages: docs/manual/en/base-texts.md, docs/manual/pt-BR/base-texts.md, docs/manual/pt-PT/base-texts.md; questions.md and index.md updated in the three locales
+- Technical pages: docs/flows/shared-base-text.md (new), docs/flows/transcribe-paper.md (updated)
