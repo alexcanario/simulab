@@ -34,7 +34,7 @@ public sealed class AddQuestionOriginMigrationTests
         (await ValuesAsync(database.Connection, "SELECT conname FROM pg_constraint WHERE contype = 'c' AND conname = 'ck_questions_origin'"))
             .Should().ContainSingle();
         (await ValuesAsync(database.Connection, $"SELECT conname FROM pg_constraint WHERE contype = 'f' AND conrelid = '{Schema}.questions'::regclass"))
-            .Should().BeEmpty("a question holds its edition by id, never by a foreign key");
+            .Should().Equal(["fk_questions_base_text"], "a question holds its edition by id, never by a foreign key; the base text link of F-102 is the only one");
         (await ValuesAsync(database.Connection, $"SELECT count(*)::text FROM {Schema}.questions WHERE exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL"))
             .Should().Equal("1");
 

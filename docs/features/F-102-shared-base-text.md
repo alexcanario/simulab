@@ -448,6 +448,9 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 - AC14 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en), the missing-key test is green, and every new error code has its text in the three languages.
 
 ## Criterion → test
+
+Tests locked: 50392f75011f4ab7b682691fa295256dc81c2d48 (5 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `BaseTextTests.Create_ValidContent_TrimsTheTitle_CanonicalizesTheLanguage_AndDerivesTheSearchForm`; `BaseTextTests.Create_BlankTitle_IsRefusedWithTitleRequired`; `BaseTextTests.Create_TitleOfExactlyTheLimitAfterTrimming_IsAccepted_AndOneMoreIsRefused`; `BaseTextTests.Create_TextWithNoBody_IsRefusedWithTextRequired`; `BaseTextTests.Create_TextOfExactlyTheLimit_IsAccepted_AndOneMoreIsRefusedWithTextTooLong`; `BaseTextTests.Create_ALanguageTheAppDoesNotKnow_IsRefusedWithContentLanguageInvalid`; `BaseTextEndpointTests.Create_AValidBaseText_Answers201WithTheSanitizedHtml_AndAFreshCount`; `BaseTextEndpointTests.Create_ABadBaseText_IsRefusedWithTheFieldsOwnCode_AndStoresNothing` |
@@ -495,6 +498,9 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 - 2026-10-15 — Traps: T1 `Question.BaseText` navigation with `Include` (the soft-delete filter gives null and a version with no text); T2 trusting the status token for the fan-out (it only inserts versions); T3 the scaffolded migration drops the column before the backfill and its `Down` loses every text — all avoided by the design.
 - 2026-10-15 — A reinstated question that was annulled while its base text changed gets the old HTML back (F-101 BR6 copies the latest version); the next save makes a version with the live text — kept as F-101 decided, said in the flow page — technical.
 
+- 2026-10-15 — Tests unlocked (the blank title and hard delete migration test inserted a question with the `base_text_html` column the migration drops; the test was wrong, not the code) — owner chose to unlock and rewrite, asked in the build; rewritten with a helper that inserts without the column, the foreign key code corrected to restrict's 23001, and one parity test added for the SQL title and search form against `ComparableText`.
+- 2026-10-15 — Build: `Question.NextVersion` takes the linked text HTML as an optional third parameter so the existing callers and tests stay as they are; the base text row locks and the transaction live in `QuestionStore`/`BaseTextStore` (`RowLockTransactions`), committed by `IQuestionStore` saves; `QuestionListQuery` gains an optional `BaseTextId` and `GET /base-texts/{id}/questions` goes through the question list; SQL `upper` writes capital sharp s for ß where C# keeps ß, so the migration folds it back — technical.
+
 ## Out of scope
 - Images in a base text — F-103 (`IFileStorage`).
 - Merging duplicate base texts the migration created, or finding near-duplicates — a later item if it hurts.
@@ -516,5 +522,6 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 
 - 2026-10-15 question — asked 7, from context 0
 - 2026-10-15 question — asked 3, from context 0
+- 2026-10-15 blocked — test wrong: the blank title and hard delete test inserted a question with the base_text_html column, which the migration under test drops
 
 ## Delivery

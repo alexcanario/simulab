@@ -55,6 +55,20 @@ public sealed class AddBaseTextsMigrationTests
         (await ValuesAsync(database.Connection, $"SELECT length(title)::text FROM {Schema}.base_texts")).Should().Equal("80");
     }
 
+    // The title and its search form are written in SQL; they must equal what the entity would write (BR1, BR10).
+    [Fact]
+    public async Task Up_WritesTheNormalizedTitleTheEntityWouldWrite()
+    {
+        await using var database = await MigratedAsync(nameof(Up_WritesTheNormalizedTitleTheEntityWouldWrite));
+        await InsertQuestionAsync(database.Connection, "pt-BR", "<p>Fundação do Brasil, àéîõü Ø ß</p>", false);
+
+        await database.Migrator.MigrateAsync();
+
+        var rows = await ValuesAsync(database.Connection, $"SELECT title || '|' || normalized_title FROM {Schema}.base_texts");
+        var title = "Fundação do Brasil, àéîõü Ø ß";
+        rows.Should().Equal($"{title}|{Simulab.SharedKernel.Text.ComparableText.Normalize(title)}");
+    }
+
     // AC7, BR10: a soft-deleted question's text is soft-deleted with its date; versions are untouched.
     [Fact]
     public async Task Up_SoftDeletesTheTextOfASoftDeletedQuestion_AndWritesNoVersion()
@@ -106,7 +120,7 @@ public sealed class AddBaseTextsMigrationTests
         await using var database = await MigratedAsync(nameof(TheDatabase_RefusesABlankTitleAndABlankText_AndAHardDeleteOfALinkedText));
         await database.Migrator.MigrateAsync();
         var linked = await InsertBaseTextAsync(database.Connection, "Texto", "<p>x</p>");
-        var question = await InsertQuestionAsync(database.Connection, "pt-BR", null, false);
+        var question = await InsertQuestionAfterMigrationAsync(database.Connection);
         await using (var link = new NpgsqlCommand(
             $"UPDATE {Schema}.questions SET base_text_id = @text WHERE id = @question", database.Connection))
         {
@@ -128,7 +142,7 @@ public sealed class AddBaseTextsMigrationTests
             command.Parameters.AddWithValue("id", linked);
             await command.ExecuteNonQueryAsync();
         };
-        (await hardDelete.Should().ThrowAsync<PostgresException>()).Which.SqlState.Should().Be("23503");
+        (await hardDelete.Should().ThrowAsync<PostgresException>()).Which.SqlState.Should().Be("23001");
         (await ValuesAsync(database.Connection, $"SELECT indexname FROM pg_indexes WHERE schemaname = '{Schema}' AND tablename = 'questions'"))
             .Should().Contain("ix_questions_base_text");
     }
@@ -171,6 +185,22 @@ public sealed class AddBaseTextsMigrationTests
         command.Parameters.AddWithValue("language", language);
         command.Parameters.AddWithValue("base", (object?)baseTextHtml ?? DBNull.Value);
         command.Parameters.AddWithValue("deleted", isDeleted);
+        await command.ExecuteNonQueryAsync();
+
+        return id;
+    }
+
+    // After the migration the inline column is gone, so a question is inserted without it.
+    private static async Task<Guid> InsertQuestionAfterMigrationAsync(NpgsqlConnection connection)
+    {
+        var id = Guid.CreateVersion7();
+        await using var command = new NpgsqlCommand(
+            $@"INSERT INTO {Schema}.questions
+                (id, type, status, topic_id, content_language, statement_html, statement_text, normalized_statement, created_at, is_deleted)
+               VALUES (@id, 'SingleChoice', 'Draft', @topic, 'pt-BR', '<p>Qual?</p>', 'Qual?', 'QUAL?', now(), false)",
+            connection);
+        command.Parameters.AddWithValue("id", id);
+        command.Parameters.AddWithValue("topic", Guid.CreateVersion7());
         await command.ExecuteNonQueryAsync();
 
         return id;
