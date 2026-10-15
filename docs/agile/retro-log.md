@@ -1263,3 +1263,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Events: override 0, question 2 (asked 8, from context 1), rework 0, test-fail 0, blocked 0, change 0. Shipped as 0.37.0 (merge `f56d6deb`). Gate time: 6 passes, 19 min 59 s, 0 red.
 - score 3/5 (applied, project rule in `.claude/rules/agile/project.md`): refinement decided "a page of its own" without measuring the 1783-line form it would copy, and promised "back to the edition page" while the lookup carries no exam id; it cost a question and a change note at build.
 - score 5/4 (applied, plugin note `plugin: agile [generic]`): the validation script opens with one line saying what the screen is for; the owner asked what the Transcribe button did.
+
+## 2026-10-15 - Sync with agile@canary 0.81.0
+- From 0.78.0 to 0.81.0 (3 minor versions). Copied: new template `ui-map.md`; updated rule `naming.md` and templates `bug.md`, `feature.md`, `glossary.md`; `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Left alone: `git.md` and `profile.md` (edited, plugin unchanged), manual build files (plugin unchanged).
+- Glossary: already has the `Meaning (pt-BR)` column; the new template row "UI map" was not added to `docs/glossary.md` (not proposed). The project's `docs/agile/ui-map.md` was not created.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. The `Manual locales:` line reads pt-BR, pt-PT while `docs/manual/` also has `en`: not changed, owner to confirm.
+- Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.

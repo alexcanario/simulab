@@ -32,6 +32,7 @@ Technical terms: [glossary](../glossary.md)
 ## Cause
 <!-- Confirmed in code: file and line. Never a guess. -->
 <!-- If this is a business rule, list every duplicate occurrence found elsewhere in the solution (file:line each), or write "no duplicate found". -->
+<!-- If the cause is in a function used from more than one place, add the `Callers:` line: each caller (file:line) with `same defect`, `relies on old behavior` or `unaffected`; one caller or none: `Callers: none beyond the reported path (...)` or `Callers: not applicable (...)`. -->
 
 ## Fix
 <!-- What changes. Keep it minimal. -->
@@ -55,7 +56,12 @@ Technical terms: [glossary](../glossary.md)
 - (none)
 
 ## Validation script
+<!-- Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
+### English
 1. <Step> → <expected result>
+
+### pt-BR
+1. <Passo> → <resultado esperado>
 
 ## Events
 <!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->

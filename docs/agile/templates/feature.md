@@ -97,8 +97,12 @@ Technical terms: [glossary](../glossary.md)
 -->
 
 ## Validation script
-<!-- Written at the end of build. At most 8 steps the product owner follows on screen. -->
+<!-- Written at the end of build, in two subsections with the same steps and the same code blocks (`scripts/validation-script.check.js`). At most 8 steps the product owner follows on screen. Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
+### English
 1. <Step> → <expected result>
+
+### pt-BR
+1. <Passo> → <resultado esperado>
 
 ## Events
 <!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->

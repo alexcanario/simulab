@@ -1,7 +1,7 @@
 # Naming
 
 - Everything in the repository is English: identifiers, files, folders, routes, database objects, commits, docs, code comments.
-- Only the conversation with the owner and the pt-BR / pt-PT resource and manual files are in Portuguese.
+- Only the conversation with the owner and the pt-BR / pt-PT resource and manual files are in Portuguese; the one exception inside an item file is the `### pt-BR` subsection of `## Validation script`, the twin of `### English`.
 - A business term gets its English identifier in `docs/glossary.md` before its first use in code. Never invent a second translation.
 - An English class name does not excuse Portuguese members: properties, methods, parameters, exceptions and enum values are English too.
 - Existing code that breaks this is debt, not a reference. Do not copy its names; register the rename as an `idea`.

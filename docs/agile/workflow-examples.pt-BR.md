@@ -4463,7 +4463,7 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (21)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (22)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
 ok   AC5: the report states the skills (22) and the agents (5)
@@ -4472,3 +4472,62 @@ ok   AC5: the report states the skills (22) and the agents (5)
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
 
 As medidas da tabela vêm de uma execução real do Copilot CLI 1.0.83 sobre a pasta do plugin (uma chamada de 8,28 AI Credits); a instalação local foi executada e desfeita depois, e a forma `<owner>/<repo>` do GitHub não foi.
+
+### 14.123 O refino de um bug lista os chamadores da função da causa e o build refaz a lista antes de editar
+
+Um bug: "meio centavo arredonda para baixo no total do pedido" (10,045 aparece como 10,04). A causa está em `Money.Round2`, que chama `Math.Round` sem dizer o modo de arredondamento, e a função é usada de três lugares. O relato nomeia só um deles. Antes de qualquer pergunta, o `/agile:refine` escreve em `## Cause` a linha `Callers:` com cada chamador e seu veredito. Esta é a saída real de uma execução do refino num projeto de teste com três chamadores:
+
+```
+Callers of Money.Round2:
+- src/Orders/OrderTotal.cs:8 — same defect (the reported path ...)
+- src/Reports/Weekly.cs:8 — same defect (its comment says "a half cent rounds up like the order screen")
+- src/Invoices/InvoiceLine.cs:8 — relies on old behavior (its comment says invoice lines are rounded to even on purpose, to match the bank file)
+
+Not searched: none (small solution, no reflection or DI-resolved rounding).
+```
+
+O chamador `relies on old behavior` vira pergunta do tema de regras, junto das duplicatas: corrigir a função e adaptar o chamador agora, ou corrigir só o caminho do relato e registrar o resto como dívida. Você escolheu o parâmetro com valor padrão, que mantém o resultado da fatura.
+
+No build, antes da primeira edição de `Money.Round2`, o Claude refaz o grep. Se a lista é a mesma, escreve em `## Decisions` a linha `Callers (build): 3 checked, same as the refinement` e segue. Se outro item acrescentou um chamador depois do refino, ele para. Esta é a parada real do build num projeto de teste em que `src/Reports/Weekly.cs` entrou depois do refino:
+
+```
+Antes do primeiro edit em Money.Round2 ... reconferi as chamadoras.
+Achado: apareceu uma 3ª chamadora que não estava na linha Callers: do arquivo do item:
+- src/Reports/Weekly.cs:8 — Weekly.Total, veredito same defect
+Isso é uma diferença em relação à refinação, então a regra manda parar aqui com um card;
+a decisão vira nota de mudança (/agile:change B-1).
+```
+
+O conserto nunca é decidido dentro do build: você responde ao cartão e o `/agile:change` registra a nota. O custo das execuções foi de US$ 2,71 no total (quatro chamadas, uma delas parada por uma permissão de pasta).
+
+### 14.124 O roteiro de validação em dois idiomas
+
+O F-12 chega ao fim do build. O Claude escreve `## Validation script` em duas subseções, `### English` e `### pt-BR`, e mostra no chat só a versão pt-BR; a board recebe só ela, sob `Roteiro de validação`. Antes de entregar, ele confere o par. Esta é a saída real do conferidor num arquivo de teste em que o passo 3 existe só em inglês e o comando do passo 2 diz `--no-build` só em pt-BR:
+
+```
+step count differs: English 3, pt-BR 2
+code block 1 differs
+```
+
+O Claude corrige as duas subseções numa edição, roda o conferidor de novo e ele diz `OK`. O código de saída é 0 e só então o roteiro é entregue. Um item antigo, com um idioma só, não dá erro: o conferidor diz `legacy: one language`, e o próximo `/agile:script` reescreve o roteiro como o par.
+
+### 14.125 O roteiro de validação diz o caminho até o recurso, e o mapa de telas evita reler o código
+
+No ExamPrep, a feature "transcrever questão" acrescenta o botão **Transcrever** ao cartão de questões. O build não escreve "no cartão de questões, clique em Transcrever": o roteiro diz como chegar lá, e explica o termo uma vez só.
+
+```
+1. Abra o app e entre com o usuário curador.
+2. No sidebar (menu lateral esquerdo), clique em Exames; a lista de edições aparece; escolha a edição clicando nela.
+3. Clicando em Questões, no sidebar, clique no botão "Transcrever" no canto superior direito.
+```
+
+O sidebar foi explicado no passo 2 e aparece curto no passo 3. O caminho vem da linha da tela no mapa `docs/agile/ui-map.md`; o Claude só abriu o código para a linha que o diff tocou. Quando a linha não existe e o código não confirma o menu, o passo diz `(caminho não conferido: nome da entrada de Questões no sidebar)` e a linha fica com `Verified: no`.
+
+No ship, o mapa é conferido. Saída real do script sobre o cenário do exemplo, com o cartão de questões alterado depois da linha ser lida:
+
+```
+STALE: Question card: src/Exams/QuestionCard.razor changed since ccdebe5
+agile uimap STALE: 1 stale, 0 unverified of 2 row(s)
+```
+
+O relatório do ship traz `Map: 1 stale` e nomeia a linha; o ship continua. Com todas as linhas em dia a última linha é `agile uimap GREEN: 2 row(s)`, e sem mapa nada é dito.
