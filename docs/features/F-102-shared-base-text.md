@@ -47,7 +47,7 @@ A curator writes a passage once and links every question that refers to it, so a
 - BR7 A link to a base text that is unknown or deleted answers 404 `question.base_text_not_found` before the content is judged, as the topic does (F-95 BR16).
 - BR8 The text is sanitized by the Api on every write against the one allow-list of the bank (ADR-0005 #5); the Web shows what was stored.
 - BR9 Where a question shows its base text (preview, student preview), the linked text is shown before the statement, as the inline text was (F-95 BR5).
-- BR10 Existing data: every question with a non-empty inline base text (live or soft-deleted) gets one `BaseText` of its own, linked to it: title = the first 80 characters of the plain text, language = the question's, text = the stored HTML; then the inline column is dropped. No version is made (the HTML is the same) and no two texts are merged by the migration.
+- BR10 Existing data: every question with a non-empty inline base text (live or soft-deleted) gets one `BaseText` of its own, linked to it: title = the first 80 characters of the plain text, language = the question's, text = the stored HTML; then the inline column is dropped; a base text made from a soft-deleted question is soft-deleted too, with that question's deletion date. No version is made (the HTML is the same) and no two texts are merged by the migration.
 - BR11 The list of base texts shows title, language and the number of linked questions, sorted by title; it filters by language and searches by title. The detail shows the questions linked (excerpt, status, paper number, a link to the question), most recently changed first.
 - BR12 Every route and screen of base texts needs `questions.manage`, checked by the endpoint and by the screen (menu, page, action), by permission (F-95 BR14).
 - BR13 The transcription screen (F-99) keeps the chosen base text across saves, as it keeps the edition, notice subject and content language; the type, statement, difficulty and key are still cleared (this changes F-99 BR3 for the base text only). If the question's language is changed to one the text does not have, the choice is cleared with a message; the question form does the same (screen design, 2026-10-15).
@@ -484,6 +484,17 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 - 2026-10-15 — Screen design: the linked-questions list shows the source line with the paper number under it, from the question list items the endpoint already returns — asked.
 - 2026-10-15 — Screen design: an empty linked-questions list has guidance text and no button; saving a text change that versions several questions asks no confirmation (no answer key change, the notice says it) — technical.
 
+- 2026-10-15 — Build design (system-design and architect passes, opus, verified against the code): vertical slice inside QuestionBank, `BaseText` entity with `base_texts` table, `questions.base_text_id` foreign key inside the module (restrict), the text read by its own query and never a navigation property, `NextVersion` takes the linked text HTML from its caller, one `IQuestionStore.TrySaveChangesAsync` for the fan-out, hand-ordered migration with a `Down` that copies the text back — technical.
+- 2026-10-15 — Breaking change of the v1 contract: `SaveQuestionRequest.BaseTextHtml` becomes `BaseTextId` and `QuestionResponse.BaseTextHtml` becomes `BaseText`; an exception to `api-contracts.md` ("inside a version only add optional fields"), accepted because only `Simulab.Web` consumes it and ships with the Api; the ship bumps MAJOR (0.37.0 to 1.0.0, profile rule) — owner chose it over the additive option (asked, design pass).
+- 2026-10-15 — Migration soft-deletes the base texts it makes from soft-deleted questions, with the question's deletion date (adds to BR10) — never visible, so the list and the picker get no item with 0 questions — owner chose it over keeping them live (asked, design pass).
+- 2026-10-15 — A base text save that loses a race answers 409 `question.version_conflict` (existing code and texts); Screen 2's error alert shows it — owner chose it over a new code (asked, design pass).
+- 2026-10-15 — A `normalized_title` column on `base_texts` (the recipe of `ComparableText`, as `NormalizedStatement`), so the title search ignores case and accents (i18n rule) — technical; it is data of the item's own table, not a product choice.
+- 2026-10-15 — Races (architect finding 2): the base text save and delete take `SELECT ... FOR UPDATE` on the base text row, and a question save or publish that links a text takes `FOR SHARE` on it, in one explicit transaction through the store; each of the two races gets a test — technical.
+- 2026-10-15 — The language check compares the canonical language with the text's only when the language is valid, so an invalid language still answers 400 first; the backfill takes `created_at`, `created_by` and `tenant_id` from the question and decodes entities and block spacing like `PlainTextOf`; `questions.base_text_id` has a column comment; `question.base_text_too_long` leaves the three resource files and the gallery sample gets keys of its own; one port (`IBaseTextStore`) reads a base text — technical.
+- 2026-10-15 — Design coverage: layout and references, naming and vocabulary, API contract rule, i18n and error-code text check, migration rules and tests, simpler version — read against ADR-0005, `tests/Simulab.ArchitectureTests` and the module's migration tests. Not checked: F-104's status.
+- 2026-10-15 — Traps: T1 `Question.BaseText` navigation with `Include` (the soft-delete filter gives null and a version with no text); T2 trusting the status token for the fan-out (it only inserts versions); T3 the scaffolded migration drops the column before the backfill and its `Down` loses every text — all avoided by the design.
+- 2026-10-15 — A reinstated question that was annulled while its base text changed gets the old HTML back (F-101 BR6 copies the latest version); the next save makes a version with the live text — kept as F-101 decided, said in the flow page — technical.
+
 ## Out of scope
 - Images in a base text — F-103 (`IFileStorage`).
 - Merging duplicate base texts the migration created, or finding near-duplicates — a later item if it hurts.
@@ -504,5 +515,6 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 ## Events
 
 - 2026-10-15 question — asked 7, from context 0
+- 2026-10-15 question — asked 3, from context 0
 
 ## Delivery
