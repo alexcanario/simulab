@@ -36,7 +36,8 @@
 | 30 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | Cloud hosting and operations | - | - |
 | 31 | F-118 | Sort and extra filters of the question list | idea | Question bank | - | - |
 | 32 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | Question bank | - | - |
-| 33 | F-103 | Images in questions | idea | Question bank | F-89 | - |
+| 33 | F-120 | Architecture test for section id selectors | idea | foundation-and-identity | - | - |
+| 34 | F-103 | Images in questions | idea | Question bank | F-89 | - |
 
 ## Checklist
 
@@ -72,7 +73,8 @@
 - [ ] 30. F-117 — The deploy pipeline checks the cloud account before it signs in [idea]
 - [ ] 31. F-118 — Sort and extra filters of the question list [idea]
 - [ ] 32. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea]
-- [ ] 33. F-103 — Images in questions [idea] — waits on F-89
+- [ ] 33. F-120 — Architecture test for section id selectors [idea]
+- [ ] 34. F-103 — Images in questions [idea] — waits on F-89
 
 ## Summary
 
