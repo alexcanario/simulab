@@ -110,7 +110,7 @@ Tests locked: 3254ebaeb6da1b87a95e72b861d2fd3ca8f64482 (1 file); unlocks: 0
 | AC3 | QuestionTranscriptionTests.Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage |
 | AC4 | NextPaperNumberEndpointTests.SavingTheSuggestedNumberTwice_IsRefusedTheSecondTime ; QuestionTranscriptionTests.Save_RefusedAsPaperNumberTaken_KeepsWhatWasTyped |
 | AC5 | QuestionTranscriptionTests.Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage (subject kept); validation step 5 (changing it) |
-| AC6 | QuestionTranscriptionTests.Open_OffersOnlySingleChoiceAndTrueFalse; Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage (cleared fields) |
+| AC6 | QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements; Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage (cleared fields) |
 | AC7 | QuestionTranscriptionTests.Open_ShowsTheEditionLocked_AndThePaperNumberSuggested (edition field disabled) |
 | AC8 | NextPaperNumberEndpointTests.NextPaperNumber_WithoutTheManagePermission_IsForbidden, NextPaperNumber_ForACurator_Answers200 ; ExamEditionQuestionsPermissionTests (button); validation step 6 (route as a user without the permission) |
 | AC9 | QuestionTranscriptionTests.Reopen_RestartsTheCounter_AndSuggestsFromWhatIsStored |

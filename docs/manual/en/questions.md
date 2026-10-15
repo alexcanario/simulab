@@ -1,15 +1,16 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102]
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104]
 updated: 2026-10-15
 ---
 # Questions
 
 The question bank is where curators write the questions that exams and practice are built from. A question
 has a statement, an optional base text, from two to five options with one correct, an optional explanation, a
-difficulty, a topic and the language it is written in. A question is either single choice or true/false
-(right or wrong); a true/false question has one answer key, true or false, instead of options.
+difficulty, a topic and the language it is written in. A question is single choice, true/false (right or wrong)
+or multiple answer; a true/false question has one answer key, true or false, instead of options, and a
+multiple-answer question has several correct options.
 
 ## Who can use it
 An account with the permission "Manage the question bank". Curators and Admins have it. Everyone else gets
@@ -39,8 +40,8 @@ Page not found, and the menu has no Questions entry.
    same filtered list, and you can send the link to someone else.
 
 ### Write a question
-1. Choose **Add**. The first field, **Question type**, offers **Single choice** (the default) and
-   **True/false**. The type is chosen now and cannot be changed after the question is created; on a saved
+1. Choose **Add**. The first field, **Question type**, offers **Single choice** (the default),
+   **True/false** and **Multiple answer**. The type is chosen now and cannot be changed after the question is created; on a saved
    question it is shown as a value.
 2. Pick the **subject**, then the **topic** (the topic list shows only the topics of that subject). The
    **content language** starts as your own language; change it to the language the question is written in.
@@ -60,8 +61,15 @@ For a **true/false** question the **Options** card is replaced by **Answer key**
 penalty for a wrong answer is not part of the question: it comes from the scoring rules of the edition. If you
 change the type before saving, what you typed for the other type stays on the page but is not saved.
 
+For a **multiple-answer** question the **Options** card has a checkbox on each option: mark every correct one.
+To publish it needs three to five options with text, at least two correct and at least one wrong; a draft may
+have any marking. The student is told how many to mark ("Mark 2 options."), counted from the options you
+marked. How a partly right answer scores is not part of the question: it comes from the scoring rules of the
+edition. Going back to single choice keeps only the first option you marked.
+
 A draft may be saved with no options and no correct one yet, or with no key. The list "Before publishing",
-beside the form, shows what is still missing; for a true/false question it has one item, "Answer key set".
+beside the form, shows what is still missing; for a true/false question it has one item, "Answer key set",
+and for a multiple-answer question it asks for "At least two correct and one wrong".
 
 ### Record where a question came from
 A question from a past exam keeps the edition it came from, its number in that paper and, if you like, its
@@ -90,13 +98,14 @@ Use this to enter every question of a past paper in one sitting, without reopeni
 4. The edition, the notice subject, the language and the base text stay as they were; everything else is blank again. A reading block with several questions needs the text picked only once; change or remove it when the block ends. Change the notice subject whenever the paper moves to another one.
 5. Choose **Finish** when you are done. Every question already saved stays in the bank as a draft.
 
-Only single choice and true/false questions can be transcribed. The counter lives only on the screen: if you leave and come back, it starts again at 1 and the suggested number follows what is already saved.
+All three question types can be transcribed. The counter lives only on the screen: if you leave and come back, it starts again at 1 and the suggested number follows what is already saved.
 
 ### Publish and unpublish
 1. Open the question and look at the **Publication** card, below the form.
 2. **Publish** is available when the question is saved and the checklist is complete: topic, language,
    statement, two to five options, every option with text and exactly one correct (for a true/false question:
-   the answer key set). Choosing **Save** never publishes.
+   the answer key set; for a multiple-answer question: three to five options, at least two correct and at
+   least one wrong). Choosing **Save** never publishes.
 3. A published question can still be edited, but every edit must keep it complete.
 4. **Unpublish** takes it back to a draft with the same content.
 
@@ -151,7 +160,8 @@ cite the official act.
 ### Preview as a student
 1. In the **Publication** card, choose **Preview as a student**.
 2. The window shows the base text, the statement and the options as a student will see them; a true/false
-   question shows two lines, True and False.
+   question shows two lines, True and False, and a multiple-answer question starts with "Mark N options."
+   above the options.
 3. Choose **Show answer** to see the correct option (or the key) and the explanation. The preview always shows the saved
    version; save first to see your latest changes.
 
@@ -163,14 +173,14 @@ cite the official act.
 ## Fields
 | Field | Meaning | Rules |
 |---|---|---|
-| Question type | How the question is answered | Single choice or true/false. Chosen when the question is created; it cannot be changed afterwards |
+| Question type | How the question is answered | Single choice, true/false or multiple answer. Chosen when the question is created; it cannot be changed afterwards |
 | Subject | Used to pick the topic | Required on screen; the question stores only its topic |
 | Topic | The topic the question belongs to | Required. A topic cannot be deleted while a question uses it |
 | Content language | The language the question is written in | Required, one of the app's languages. Content is never translated |
 | Difficulty | How hard the question is | Optional, a whole number from 1 to 5 |
 | Statement | What the student is asked | Required, up to 10,000 characters |
 | Base text | A passage the question refers to, written once and shared by every question that links it | Optional. Picked from the base texts in the question's language; see [Base texts](base-texts.md) |
-| Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct. Each up to 2,000 characters |
+| Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct (multiple answer: 3 to 5, at least two correct and at least one wrong). Each up to 2,000 characters |
 | Answer key | Whether the statement of a true/false question is true or false | Only for true/false. May be empty in a draft; required to publish. A published question cannot lose it |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
 | Reason for the answer key change | Why the key of a published question changed | Required when a save or a publish records a version whose key differs from the previous one; 1 to 500 characters. A reason on any other new version is kept as a note |
@@ -189,7 +199,9 @@ the question is saved, and the page shows what was kept.
 | The statement has more than 10,000 characters. (also the explanation and option limits) | The text is over its limit. | Shorten it. Nothing is cut for you. |
 | A question is published with 2 to 5 options. | Fewer than two options, or more than five. | Add or remove options. |
 | Every option needs text. | A published question has an empty option. | Write the text or remove the option. |
-| Mark exactly one option as correct. | No correct option, or more than one. | Mark one. |
+| Mark exactly one option as correct. | No correct option, or more than one, on a single-choice question. | Mark one. |
+| A multiple-answer question is published with 3 to 5 options. | Fewer than three options. | Add options. |
+| Mark at least two options as correct, and leave at least one wrong. | A multiple-answer question has fewer than two correct options, or every option is marked. | Mark two or more, and leave one wrong. |
 | Set the answer key (true or false) to publish. | A true/false question has no key. | Choose True or False under Answer key. |
 | The type of a question cannot be changed. | A save named another type than the stored one. | Reload the page; create a new question for the other type. |
 | A true/false question has no options. / A single-choice question has no true/false key. | A save carried an answer the type does not have. | Reload the page and save again. |
