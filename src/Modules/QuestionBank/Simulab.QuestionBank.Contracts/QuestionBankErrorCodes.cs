@@ -70,6 +70,12 @@ public static class QuestionBankErrorCodes
     /// <summary>F-97 BR4: a published true/false question needs its key; a publish or an edit left it empty.</summary>
     public const string QuestionTrueFalseKeyRequired = "question.true_false_key_required";
 
+    /// <summary>F-104 BR4: a published multiple-answer question needs from 3 to 5 options.</summary>
+    public const string QuestionMultipleOptionsCount = "question.multiple_options_count";
+
+    /// <summary>F-104 BR4: a published multiple-answer question needs two or more correct options and at least one wrong.</summary>
+    public const string QuestionMultipleKeyInvalid = "question.multiple_key_invalid";
+
     /// <summary>F-98 BR5: a save or a publish would create a version whose answer key changed and gave no reason.</summary>
     public const string QuestionKeyChangeReasonRequired = "question.key_change_reason_required";
 

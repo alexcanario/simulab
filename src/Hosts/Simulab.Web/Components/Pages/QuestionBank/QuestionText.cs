@@ -32,7 +32,12 @@ public static class QuestionText
     {
         ArgumentNullException.ThrowIfNull(l);
 
-        return type == QuestionType.TrueFalse ? l["Questions.Type.TrueFalse"] : l["Questions.Type.SingleChoice"];
+        return type switch
+        {
+            QuestionType.TrueFalse => l["Questions.Type.TrueFalse"],
+            QuestionType.MultipleAnswer => l["Questions.Type.MultipleAnswer"],
+            _ => l["Questions.Type.SingleChoice"]
+        };
     }
 
     /// <summary>A draft is a plain label; a published question is the healthy state; an annulled one is cancelled.</summary>

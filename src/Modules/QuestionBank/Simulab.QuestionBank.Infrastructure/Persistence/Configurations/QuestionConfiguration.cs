@@ -49,7 +49,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice or TrueFalse.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse or MultipleAnswer.");
 
         // F-101: a write that read another status than the stored one is a lost race (an annulment against an
         // unpublish, a save against an annulment) and answers 409 instead of last-writer-wins.

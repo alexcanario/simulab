@@ -7,5 +7,8 @@ public enum QuestionType
     SingleChoice,
 
     /// <summary>One statement and one answer key: true ("certo") or false ("errado"). It has no options (F-97).</summary>
-    TrueFalse
+    TrueFalse,
+
+    /// <summary>One statement, three to five options, two or more correct and at least one wrong (F-104).</summary>
+    MultipleAnswer
 }

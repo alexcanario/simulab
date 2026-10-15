@@ -1044,6 +1044,15 @@
   <data name="Questions.Type.SingleChoice.Description" xml:space="preserve"><value>Um enunciado com duas a cinco opções; só uma está correta.</value></data>
   <data name="Questions.Type.TrueFalse" xml:space="preserve"><value>Certo/errado</value></data>
   <data name="Questions.Type.TrueFalse.Description" xml:space="preserve"><value>Um enunciado que o aluno julga como certo ou errado.</value></data>
+  <data name="Questions.Type.MultipleAnswer" xml:space="preserve"><value>Respostas múltiplas</value></data>
+  <data name="Questions.Type.MultipleAnswer.Description" xml:space="preserve"><value>Um enunciado com três a cinco opções; duas ou mais estão corretas.</value></data>
+  <data name="Questions.Section.Options.Multiple.Subtitle" xml:space="preserve"><value>De 3 a 5 opções para publicar. Assinale todas as corretas: pelo menos duas, e pelo menos uma errada.</value></data>
+  <data name="Questions.Options.Correct.Multiple.Label" xml:space="preserve"><value>Opções corretas</value></data>
+  <data name="Questions.Checklist.OptionsCount.Multiple" xml:space="preserve"><value>De 3 a 5 opções</value></data>
+  <data name="Questions.Checklist.Key.Multiple" xml:space="preserve"><value>Pelo menos duas corretas e uma errada</value></data>
+  <data name="Questions.Preview.SelectCount" xml:space="preserve"><value>Assinale {0} opções.</value></data>
+  <data name="question.multiple_options_count" xml:space="preserve"><value>Uma questão de respostas múltiplas é publicada com 3 a 5 opções.</value></data>
+  <data name="question.multiple_key_invalid" xml:space="preserve"><value>Assinale pelo menos duas opções como corretas e deixe pelo menos uma errada.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>O tipo não pode ser alterado depois de a questão ser criada.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Gabarito</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Marque o enunciado como certo ou errado. Só é exigido para publicar.</value></data>

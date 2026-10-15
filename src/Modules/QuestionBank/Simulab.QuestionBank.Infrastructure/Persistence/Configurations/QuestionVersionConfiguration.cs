@@ -59,7 +59,7 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice or TrueFalse.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse or MultipleAnswer.");
 
         builder.Property(version => version.ContentLanguage)
             .HasMaxLength(QuestionLimits.ContentLanguageMaxLength)

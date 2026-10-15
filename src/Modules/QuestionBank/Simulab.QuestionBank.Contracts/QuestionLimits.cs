@@ -21,6 +21,12 @@ public static class QuestionLimits
     /// <summary>The most options a question has, draft or published (BR3).</summary>
     public const int OptionsMax = 5;
 
+    /// <summary>The fewest options a published multiple-answer question has: two correct and one wrong (F-104, BR4).</summary>
+    public const int MultipleAnswerOptionsMin = 3;
+
+    /// <summary>The fewest correct options a published multiple-answer question has (F-104, BR4).</summary>
+    public const int MultipleAnswerCorrectMin = 2;
+
     public const int DifficultyMin = 1;
     public const int DifficultyMax = 5;
 

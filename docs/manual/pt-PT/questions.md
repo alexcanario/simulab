@@ -1,15 +1,16 @@
 ---
 page: questions
 locale: pt-PT
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102]
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104]
 updated: 2026-10-15
 ---
 # Questões
 
 O banco de questões é onde os curadores escrevem as questões de que as provas e os treinos são feitos. Uma
 questão tem enunciado, texto de apoio opcional, de duas a cinco opções com uma correta, explicação opcional,
-dificuldade, tópico e o idioma em que está escrita. Uma questão é de escolha múltipla ou certo/errado; a
-questão certo/errado tem um gabarito, certo ou errado, no lugar das opções.
+dificuldade, tópico e o idioma em que está escrita. Uma questão é de escolha múltipla, certo/errado ou
+respostas múltiplas; a questão certo/errado tem um gabarito, certo ou errado, no lugar das opções, e a de
+respostas múltiplas tem várias opções corretas.
 
 ## Quem pode usar
 Uma conta com a permissão "Gerir o banco de questões". Os curadores e os administradores têm-na. Todas as
@@ -40,8 +41,8 @@ outras veem Página não encontrada, e o menu não tem o item Questões.
    filtrada, e pode enviar a ligação a outra pessoa.
 
 ### Escrever uma questão
-1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Escolha múltipla** (a predefinição)
-   e **Certo/errado**. O tipo é escolhido agora e não pode ser alterado depois de a questão ser criada; numa
+1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Escolha múltipla** (a predefinição),
+   **Certo/errado** e **Respostas múltiplas**. O tipo é escolhido agora e não pode ser alterado depois de a questão ser criada; numa
    questão guardada aparece como um valor.
 2. Escolha a **disciplina** e depois o **tópico** (a lista mostra só os tópicos dessa disciplina). O
    **idioma do conteúdo** começa com o seu idioma; troque-o pelo idioma em que a questão está escrita. Indique
@@ -61,8 +62,16 @@ para o enunciado. O gabarito só é exigido para publicar, por isso um rascunho 
 penalização por resposta errada não faz parte da questão: vem das regras de pontuação da edição. Se trocar o
 tipo antes de guardar, o que escreveu para o outro tipo fica na página, mas não é guardado.
 
+Numa questão de **respostas múltiplas** o cartão **Opções** tem uma caixa de seleção em cada uma: assinale todas
+as corretas. Para publicar, precisa de três a cinco opções com texto, pelo menos duas corretas e pelo menos uma
+errada; um rascunho aceita qualquer marcação. O estudante é avisado de quantas assinalar ("Assinale 2
+opções."), contadas a partir das que assinalou. A forma como uma resposta parcialmente certa pontua não faz
+parte da questão: vem das regras de pontuação da edição. Ao voltar a escolha múltipla, só a primeira opção
+assinalada é mantida.
+
 Um rascunho pode ser guardado sem opções e sem correta, ou sem gabarito. A lista "Antes de publicar", ao lado
-do formulário, mostra o que ainda falta; numa questão certo/errado tem um item, "Gabarito definido".
+do formulário, mostra o que ainda falta; numa questão certo/errado tem um item, "Gabarito definido", e numa de
+respostas múltiplas pede "Pelo menos duas corretas e uma errada".
 
 ### Registar de onde a questão veio
 Uma questão de uma prova anterior guarda a edição de onde veio, o número dela na prova e, se quiser, a
@@ -91,13 +100,14 @@ Use para introduzir todas as questões de uma prova anterior de uma só vez, sem
 4. A edição, a disciplina do edital, o idioma e o texto de apoio mantêm-se; o resto volta a ficar em branco. Um bloco de leitura com várias questões só precisa do texto escolhido uma vez; mude-o ou retire-o quando o bloco acabar. Altere a disciplina do edital sempre que a prova passar para outra.
 5. Escolha **Concluir** ao terminar. Todas as questões já guardadas ficam no banco como rascunho.
 
-Só é possível transcrever questões de escolha única e de verdadeiro ou falso. O contador existe apenas no ecrã: se sair e voltar, recomeça em 1 e o número sugerido segue o que já está guardado.
+Os três tipos de questão podem ser transcritos. O contador existe apenas no ecrã: se sair e voltar, recomeça em 1 e o número sugerido segue o que já está guardado.
 
 ### Publicar e retirar a publicação
 1. Abra a questão e veja o cartão **Publicação**, abaixo do formulário.
 2. **Publicar** fica disponível quando a questão está guardada e a lista está completa: tópico, idioma,
    enunciado, de duas a cinco opções, todas com texto e exatamente uma correta (numa questão certo/errado: o
-   gabarito definido). **Guardar** nunca publica.
+   gabarito definido; numa de respostas múltiplas: de três a cinco opções, pelo menos duas corretas e pelo menos
+   uma errada). **Guardar** nunca publica.
 3. Uma questão publicada ainda pode ser editada, mas cada edição tem de a manter completa.
 4. **Retirar publicação** devolve a questão a rascunho com o mesmo conteúdo.
 
@@ -155,7 +165,8 @@ o ato oficial.
 ### Pré-visualizar como estudante
 1. No cartão **Publicação**, escolha **Pré-visualizar como estudante**.
 2. A janela mostra o texto de apoio, o enunciado e as opções como o estudante as vai ver; uma questão
-   certo/errado mostra duas linhas, Certo e Errado.
+   certo/errado mostra duas linhas, Certo e Errado, e uma de respostas múltiplas começa com "Assinale N opções."
+   acima das opções.
 3. Escolha **Mostrar resposta** para ver a opção correta (ou o gabarito) e a explicação. A pré-visualização mostra sempre a
    versão guardada; guarde primeiro para ver as últimas alterações.
 
@@ -168,14 +179,14 @@ o ato oficial.
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
-| Tipo de questão | Como a questão é respondida | Escolha múltipla ou certo/errado. Escolhido ao criar a questão; não pode ser alterado depois |
+| Tipo de questão | Como a questão é respondida | Escolha múltipla, certo/errado ou respostas múltiplas. Escolhido ao criar a questão; não pode ser alterado depois |
 | Disciplina | Serve para escolher o tópico | Obrigatória no ecrã; a questão guarda só o tópico |
 | Tópico | O tópico a que a questão pertence | Obrigatório. Um tópico não pode ser eliminado enquanto uma questão o usa |
 | Idioma do conteúdo | O idioma em que a questão está escrita | Obrigatório, um dos idiomas da aplicação. O conteúdo nunca é traduzido |
 | Dificuldade | Quão difícil é a questão | Opcional, um número inteiro de 1 a 5 |
 | Enunciado | O que se pede ao estudante | Obrigatório, até 10 000 caracteres |
 | Texto de apoio | Um excerto a que a questão se refere, escrito uma vez e partilhado por todas as questões que o ligam | Opcional. Escolhido entre os textos de apoio do idioma da questão; veja [Textos de apoio](base-texts.md) |
-| Opções | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta. Cada uma até 2 000 caracteres |
+| Opções | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta (respostas múltiplas: de 3 a 5, pelo menos duas corretas e pelo menos uma errada). Cada uma até 2 000 caracteres |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não o pode perder |
 | Explicação | Porque é que a chave está certa | Opcional, até 10 000 caracteres |
 | Motivo da alteração da chave de respostas | Porque é que a chave de uma questão publicada mudou | Obrigatório quando uma gravação ou uma publicação regista uma versão cuja chave difere da anterior; de 1 a 500 carateres. Um motivo em qualquer outra versão nova fica como nota |
@@ -194,7 +205,9 @@ removidos ao guardar, e a página mostra o que foi mantido.
 | O enunciado excede 10 000 caracteres. (e os limites da explicação e da opção) | O texto passou do limite. | Encurte-o. Nada é cortado por si. |
 | Uma questão é publicada com 2 a 5 opções. | Menos de duas opções, ou mais de cinco. | Adicione ou remova opções. |
 | Todas as opções precisam de texto. | Uma questão publicada tem uma opção vazia. | Escreva o texto ou remova a opção. |
-| Assinale exatamente uma opção como correta. | Nenhuma correta, ou mais de uma. | Assinale uma. |
+| Assinale exatamente uma opção como correta. | Nenhuma correta, ou mais de uma, numa questão de escolha múltipla. | Assinale uma. |
+| Uma questão de respostas múltiplas é publicada com 3 a 5 opções. | Menos de três opções. | Acrescente opções. |
+| Assinale pelo menos duas opções como corretas e deixe pelo menos uma errada. | Menos de duas corretas, ou todas as opções assinaladas. | Assinale duas ou mais e deixe uma errada. |
 | Defina o gabarito (certo ou errado) para publicar. | A questão certo/errado não tem gabarito. | Escolha Certo ou Errado em Gabarito. |
 | O tipo de uma questão não pode ser alterado. | Um guardar indicou outro tipo que o guardado. | Recarregue a página; crie uma questão nova para o outro tipo. |
 | Uma questão certo/errado não tem opções. / Uma questão de escolha múltipla não tem gabarito certo/errado. | Um guardar trouxe uma resposta que o tipo não tem. | Recarregue a página e guarde outra vez. |

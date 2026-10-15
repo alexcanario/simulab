@@ -128,11 +128,12 @@ public sealed class Question : TenantEntity
 
         var reason = string.IsNullOrWhiteSpace(changeReason) ? null : changeReason.Trim();
 
-        // BR4: version 1 is never a key change; later ones are when the correct letter or the true/false value moved.
+        // BR4: version 1 is never a key change; later ones are when the set of correct positions or the true/false
+        // value moved (F-104 BR7: a question may have several correct options, so the whole set is compared).
         var keyChanged = latest is not null
             && (latest.TrueFalseKey != TrueFalseKey
-                || latest.Options.FirstOrDefault(option => option.IsCorrect)?.Position
-                    != options.FirstOrDefault(option => option.IsCorrect)?.Position);
+                || !CorrectPositions(latest.Options.Select(option => (option.Position, option.IsCorrect)))
+                    .SequenceEqual(CorrectPositions(options.Select(option => (option.Position, option.IsCorrect)))));
 
         if (keyChanged && reason is null)
         {
@@ -159,6 +160,9 @@ public sealed class Question : TenantEntity
             keyChanged,
             reason));
     }
+
+    private static List<int> CorrectPositions(IEnumerable<(int Position, bool IsCorrect)> options) =>
+        [.. options.Where(option => option.IsCorrect).Select(option => option.Position).Order()];
 
     // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
     // with their mark and the true/false key; topic, difficulty and origin are catalog data and never compared.

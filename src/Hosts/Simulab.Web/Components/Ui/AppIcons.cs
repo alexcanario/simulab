@@ -120,6 +120,9 @@ public static class AppIcons
     /// <summary>F-95: the options of a question, one of them the key.</summary>
     public const string Options = Icons.Material.Outlined.RadioButtonChecked;
 
+    /// <summary>F-104: a question with several correct options.</summary>
+    public const string MultipleAnswer = Icons.Material.Outlined.Checklist;
+
     /// <summary>F-95: why the key is right.</summary>
     public const string Explanation = Icons.Material.Outlined.Info;
 

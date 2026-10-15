@@ -43,6 +43,52 @@ public static class QuestionRules
             return Fault(QuestionBankErrorCodes.QuestionOptionsCount, null);
         }
 
+        var fault = CheckEachOption(options, published);
+        if (fault is not null || !published)
+        {
+            return fault;
+        }
+
+        return options.Count(option => option.IsCorrect) == 1
+            ? null
+            : Fault(QuestionBankErrorCodes.QuestionKeyInvalid, null);
+    }
+
+    /// <summary>
+    /// The first thing wrong with the options of a multiple-answer question, or null (F-104, BR3, BR4). A draft
+    /// needs up to five options within their length, whatever is marked; a published question also needs three
+    /// to five with text, at least two correct and at least one wrong.
+    /// </summary>
+    public static OptionFault? CheckMultipleAnswerOptions(IReadOnlyList<OptionDraft> options, bool published)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (options.Count > QuestionLimits.OptionsMax)
+        {
+            return Fault(QuestionBankErrorCodes.QuestionOptionsCount, null);
+        }
+
+        if (published && options.Count < QuestionLimits.MultipleAnswerOptionsMin)
+        {
+            return Fault(QuestionBankErrorCodes.QuestionMultipleOptionsCount, null);
+        }
+
+        var fault = CheckEachOption(options, published);
+        if (fault is not null || !published)
+        {
+            return fault;
+        }
+
+        var correct = options.Count(option => option.IsCorrect);
+
+        return correct >= QuestionLimits.MultipleAnswerCorrectMin && correct < options.Count
+            ? null
+            : Fault(QuestionBankErrorCodes.QuestionMultipleKeyInvalid, null);
+    }
+
+    // What every type with options shares (F-97 BR5): each option within its length and, to publish, with text.
+    private static OptionFault? CheckEachOption(IReadOnlyList<OptionDraft> options, bool published)
+    {
         for (var position = 0; position < options.Count; position++)
         {
             if (options[position].Text.Html.Length > QuestionLimits.OptionMaxLength)
@@ -64,9 +110,7 @@ public static class QuestionRules
             }
         }
 
-        return options.Count(option => option.IsCorrect) == 1
-            ? null
-            : Fault(QuestionBankErrorCodes.QuestionKeyInvalid, null);
+        return null;
     }
 
     private static OptionFault Fault(string code, int? position) =>
