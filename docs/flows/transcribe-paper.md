@@ -1,7 +1,7 @@
 ---
 title: Transcribe the paper of an edition
 summary: How transcription mode enters a whole past paper, what stays and what clears between questions, and where the suggested number comes from.
-items: [F-99]
+items: [F-99, F-102]
 ---
 # Transcribe the paper of an edition
 
@@ -15,7 +15,7 @@ A curator holding `questions.manage` chooses "Transcribe" on a saved edition's Q
 2. It reads the edition (`GET /api/v1/question-bank/editions/{id}`), its notice subjects and the suggested number (`GET .../editions/{id}/next-paper-number`).
 3. The edition field is locked. The curator fills one question and chooses "Save and continue".
 4. The form sends the regular `POST /api/v1/question-bank/questions`: the question is stored as a `Draft`, exactly as the plain form stores it.
-5. On success the batch counter goes up by one, the form clears every field except the edition, the notice subject and the content language, and the paper number is read again from the Api.
+5. On success the batch counter goes up by one, the form clears every field except the edition, the notice subject, the content language and the base text (F-102, [Share a base text between questions](shared-base-text.md)), and the paper number is read again from the Api. The kept base text does not count as an unsaved change, and a content language it does not have clears it with a message.
 6. "Finish" leaves the screen for the questions list filtered by the edition. Every saved question stays.
 
 ```mermaid

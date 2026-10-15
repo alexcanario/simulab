@@ -429,7 +429,7 @@ Reused unchanged: `Common.Add`, `Common.Edit`, `Common.Delete`, `Common.Save`, `
 
 ## Docs
 - flow: new docs/flows/shared-base-text.md — manage a base text, link and unlink, the versions an edit makes, the delete guard, the transcription.
-- flow: update docs/flows/transcribe-paper.md#after-each-save — the base text stays chosen.
+- flow: update docs/flows/transcribe-paper.md#steps — the base text stays chosen.
 
 ## Acceptance criteria
 - AC1 Given a curator with `questions.manage`, when they create a base text with a title, a language and a text, then it is stored with sanitized HTML and answered with 201; a blank title, a title over 200, a text that is empty once its tags are removed, a text over 20 000 characters or an unknown language answer 400 with `base_text.title_required`, `base_text.title_too_long`, `base_text.text_required`, `base_text.text_too_long`, `base_text.content_language_invalid`, and nothing is stored. (UC1, BR1, BR8)
@@ -523,5 +523,6 @@ Tests locked: c5e0b8a483ea0832f48ab684c0108c16080a9ebb (5 files); unlocks: 1
 - 2026-10-15 question — asked 7, from context 0
 - 2026-10-15 question — asked 3, from context 0
 - 2026-10-15 blocked — test wrong: the blank title and hard delete test inserted a question with the base_text_html column, which the migration under test drops
+- 2026-10-15 test-fail — 4 new warning(s): CS8669 in src/Hosts/Simulab.Web/obj/Debug/net10.0/Microsoft.CodeAnalysis.Razor.Compiler/Microsoft.NET., 2 reds
 
 ## Delivery
