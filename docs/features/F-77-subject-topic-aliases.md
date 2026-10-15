@@ -152,5 +152,6 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 ## Events
 
 - 2026-10-14 blocked — test wrong: RemovedAlias test gave the alias to a subject and then created a subject with the same name, which BR6 refuses; split into two scenarios
+- 2026-10-15 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.FieldLengthTests.Web_Pages_ReadLengthLimitsFromTheContracts, 1 red
 
 ## Delivery
