@@ -8,7 +8,7 @@ namespace Simulab.Catalog.Domain.Entities;
 /// Another name a <see cref="Topic"/> goes by (F-77, ADR-0001 #45): "Compreensão" for "Interpretação de texto".
 /// It is only text. It carries no subject of its own: the subject is the topic's, so a move needs no update.
 /// </summary>
-public sealed class TopicAlias : TenantEntity
+public sealed class TopicAlias : TenantEntity, IAlias
 {
     private TopicAlias()
     {

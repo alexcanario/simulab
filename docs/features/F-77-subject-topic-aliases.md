@@ -134,6 +134,10 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 
 - 2026-10-14 — tests unlocked (the AC7 test gave an alias to a subject and then created a subject with the same name, which BR6 refuses; the code was right, the test was wrong; owner answered "unlock and rewrite"): split into two scenarios, same criterion.
 
+- 2026-10-15 — Review (reviewer agent, opus; signals: a unique rule, an API contract change, permission-gated endpoints): no blocker, no major. Finding 1 (minor, simplicity: the alias diff duplicated in both save handlers) fixed: `AliasRules.Diff` and `IAlias`, with `AliasRulesDiffTests`.
+- 2026-10-15 — Review coverage: correctness, security, data, contracts, localization, locks, tests and rules checked and fine. Read both save and delete handlers, the two stores, the migration and snapshot, both configurations, the unique-violation mappings, the contract records, the three locale files, the dialogs and the 10 test files. Not checked: none; the criteria with no automated test are AC15 pages and the real-browser Enter of AC2, both in the validation script.
+- 2026-10-15 — Traps (review): T1 two queries per alias on every save, about 2n round trips for n aliases (accepted: BR3 sets no limit, the taxonomy is small; revisit with E-9); T2 `SubjectStore.AliasIsTakenAsync` trusts the delete handler to remove the aliases with their subject, where the topic store joins through live topics (accepted: the delete handler is the only remove path, AC10 proves it); T3 hand-written `Equals` on four contract records leaves a future property out unless both members change (accepted: the tests compare as values, and a property added later is caught by them).
+
 ## Out of scope
 - The import calling the lookup, suggesting the closest topic and turning a curator's confirmation into an alias — epic E-9 (owner, refinement).
 - A limit on the number of aliases per item (owner, refinement).
@@ -153,5 +157,8 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 
 - 2026-10-14 blocked — test wrong: RemovedAlias test gave the alias to a subject and then created a subject with the same name, which BR6 refuses; split into two scenarios
 - 2026-10-15 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.FieldLengthTests.Web_Pages_ReadLengthLimitsFromTheContracts, 1 red
+- 2026-10-15 question — asked 2 (design trade-offs 8 and 9), from context 5
+- 2026-10-15 question — asked 1 (locked test with a wrong scenario: unlock)
+- 2026-10-15 rework — review minor: alias diff duplicated in both save handlers, moved to AliasRules.Diff
 
 ## Delivery

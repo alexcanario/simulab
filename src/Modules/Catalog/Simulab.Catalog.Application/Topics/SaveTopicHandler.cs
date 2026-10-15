@@ -131,31 +131,24 @@ public sealed class SaveTopicHandler(ITopicStore store, ISubjectStore subjects, 
         });
     }
 
-    // A diff by normalized form, never "remove all and add": the soft delete is an UPDATE and the partial unique
-    // index could refuse the INSERT first. An alias that stays keeps its row, renamed when its typed form changed.
+    // A diff by normalized form (AliasRules.Diff), never "remove all and add": an alias that stays keeps its row.
     private void ReplaceAliases(Guid topicId, IReadOnlyList<TopicAlias> stored, IReadOnlyList<AliasText> wanted)
     {
-        var kept = stored.ToDictionary(alias => alias.NormalizedName, StringComparer.Ordinal);
-        var wantedForms = wanted.Select(text => text.NormalizedName).ToHashSet(StringComparer.Ordinal);
+        var change = AliasRules.Diff(stored, wanted);
 
-        foreach (var alias in stored.Where(alias => !wantedForms.Contains(alias.NormalizedName)))
+        foreach (var alias in change.Remove)
         {
             store.RemoveAlias(alias);
         }
 
-        foreach (var text in wanted)
+        foreach (var (alias, name) in change.Rename)
         {
-            if (kept.TryGetValue(text.NormalizedName, out var alias))
-            {
-                if (alias.Name != text.Name)
-                {
-                    alias.Rename(text.Name);
-                }
-            }
-            else
-            {
-                store.AddAlias(TopicAlias.Create(topicId, text.Name).Value);
-            }
+            alias.Rename(name);
+        }
+
+        foreach (var text in change.Add)
+        {
+            store.AddAlias(TopicAlias.Create(topicId, text.Name).Value);
         }
     }
 }

@@ -33,6 +33,29 @@ public static class AliasRules
         return distinct;
     }
 
+    /// <summary>
+    /// Compares the stored rows with the requested set by normalized form: which rows go, which stay with a new
+    /// typed form, and which names are new (BR4). The stored rows are unique by normalized form (the index).
+    /// </summary>
+    public static AliasChange<T> Diff<T>(IReadOnlyList<T> stored, IReadOnlyList<AliasText> wanted)
+        where T : IAlias
+    {
+        ArgumentNullException.ThrowIfNull(stored);
+        ArgumentNullException.ThrowIfNull(wanted);
+
+        var wantedByForm = wanted.ToDictionary(text => text.NormalizedName, StringComparer.Ordinal);
+        var storedForms = stored.Select(alias => alias.NormalizedName).ToHashSet(StringComparer.Ordinal);
+
+        var remove = stored.Where(alias => !wantedByForm.ContainsKey(alias.NormalizedName)).ToList();
+        var rename = stored
+            .Where(alias => wantedByForm.TryGetValue(alias.NormalizedName, out var text) && text.Name != alias.Name)
+            .Select(alias => (alias, wantedByForm[alias.NormalizedName].Name))
+            .ToList();
+        var add = wanted.Where(text => !storedForms.Contains(text.NormalizedName)).ToList();
+
+        return new AliasChange<T>(remove, rename, add);
+    }
+
     /// <summary>True when <paramref name="alias"/> is the same text as the owner's own name once normalized (BR5).</summary>
     public static bool IsSameAsName(AliasText alias, string ownerNormalizedName)
     {

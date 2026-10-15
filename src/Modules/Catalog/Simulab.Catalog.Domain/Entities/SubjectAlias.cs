@@ -9,7 +9,7 @@ namespace Simulab.Catalog.Domain.Entities;
 /// only text, with no organizer and no language. Whether the text is free across the vocabulary needs the
 /// tables, so that rule lives in the handler.
 /// </summary>
-public sealed class SubjectAlias : TenantEntity
+public sealed class SubjectAlias : TenantEntity, IAlias
 {
     private SubjectAlias()
     {
