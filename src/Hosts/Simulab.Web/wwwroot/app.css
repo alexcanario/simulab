@@ -1133,6 +1133,13 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-top: var(--app-space-2);
 }
 
+/* "overflow-wrap: anywhere" also lowers the min-content width of the item to one character, so a chip in this
+   flex list would shrink to a sliver and break letter by letter. break-word wraps a long name only when the line is
+   full and leaves the min-content width at its longest word. */
+.app-chips-list .app-chip-text {
+    overflow-wrap: break-word;
+}
+
 /* ---------------------------------------------------------------------------
    Multi-pick field (F-75): a search over a short local list, grouped, to pick several. Built from the field anatomy
    of AppTextField (label above, description below) with a listbox popup under the input.

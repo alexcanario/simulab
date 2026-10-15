@@ -138,6 +138,9 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 - 2026-10-15 — Review coverage: correctness, security, data, contracts, localization, locks, tests and rules checked and fine. Read both save and delete handlers, the two stores, the migration and snapshot, both configurations, the unique-violation mappings, the contract records, the three locale files, the dialogs and the 10 test files. Not checked: none; the criteria with no automated test are AC15 pages and the real-browser Enter of AC2, both in the validation script.
 - 2026-10-15 — Traps (review): T1 two queries per alias on every save, about 2n round trips for n aliases (accepted: BR3 sets no limit, the taxonomy is small; revisit with E-9); T2 `SubjectStore.AliasIsTakenAsync` trusts the delete handler to remove the aliases with their subject, where the topic store joins through live topics (accepted: the delete handler is the only remove path, AC10 proves it); T3 hand-written `Equals` on four contract records leaves a future property out unless both members change (accepted: the tests compare as values, and a property added later is caught by them).
 
+- 2026-10-15 — Screen check: the gallery section was opened through the app host of this worktree (`/dev/ui`, light theme): chips size to their text, a long name wraps inside its chip, the focus and error borders show, text contrast 5.4 to 15.4 (error 5.54, hint 6.92, border 5.36). One fix came out of it: `overflow-wrap: anywhere` shrank the chips to a sliver, so the list uses `break-word`. The dialogs sit behind sign-in and were not opened by Claude (no account password may be typed by the session); they are in the validation script. Dark mode was not measured: the field reuses the tokens of the multi-pick field.
+- 2026-10-15 — Local data: the app host of this check ran on the shared `simulab` database (the volume `simulab-postgres-data`), without `Database__Name`; `docs/infra.md` says the start applies every migration, so `AddSubjectTopicAliases` is most likely in it now (not verified: reading it needs the server up again). Reported to the owner at once; the validation script uses `simulab_f77`.
+
 ## Out of scope
 - The import calling the lookup, suggesting the closest topic and turning a curator's confirmation into an alias — epic E-9 (owner, refinement).
 - A limit on the number of aliases per item (owner, refinement).
@@ -152,6 +155,29 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 ## Change notes
 
 ## Validation script
+Needed to validate: the app host started from this worktree and an Admin account signed in (`admin@simulab.local`, password in the owner's user secrets) — owner; in place now.
+
+Data: the local PostgreSQL volume `simulab-postgres-data` is shared by every checkout, so the item gets its own database, `simulab_f77`, through the knob of `docs/infra.md`. Stop any other app host first (ports collide).
+
+1. Start the app host from this worktree, then open `http://localhost:5211` and sign in as the Admin.
+   - Git Bash: `cd /d/wt/simulab/f-77-subject-topic && Database__Name=simulab_f77 dotnet run --project src/Hosts/Simulab.AppHost`
+   - PowerShell 7: `cd D:\wt\simulab\f-77-subject-topic; $env:Database__Name = "simulab_f77"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Expected: the Web answers on the URL above and the sign-in works. Stop it with Ctrl+C before step 8.
+2. AC2, BR4. Menu → Subjects → Add. Name `Língua Portuguesa Teste`. In "Other names" type `Português` and press Enter, then `Portugues` and press Enter; both show as chips. Save, then edit the subject again.
+   - Expected: the dialog shows one chip, `Português` (the second typed form collapsed, the first kept).
+3. AC4, AC5. Edit the subject, type `lingua portuguesa teste` as an other name, Save. Then add a second subject `Matemática Teste` and give it the other name `portugues`.
+   - Expected: the first refusal says the other name is the same as the subject's name; the second says another subject already uses one of these names. Both messages sit under the "Other names" field, and nothing is saved.
+4. AC11. In the subjects list type `portugues` in the search.
+   - Expected: `Língua Portuguesa Teste` shows once, with its own name.
+5. AC6, AC9. Open `Língua Portuguesa Teste`, add the topic `Interpretação` with the other name `Compreensão`. Add a topic `Crase` to `Matemática Teste`, then edit `Interpretação`, give it the other name `Crase` and move it to `Matemática Teste`.
+   - Expected: the move is refused with a message under the "Other names" field, and the topic stays under `Língua Portuguesa Teste` with its chip. Moving it to a subject with no `Crase` works and the chip goes along.
+6. AC15. Sign out, sign in as a Student (or any account without catalog management) and open `/admin/subjects`.
+   - Expected: the page is Not Found, as before this item.
+7. AC16, keyboard. Back as the Admin, switch the language to Português (Brasil) and then Português (Portugal): the field reads `Outros nomes` in both. Then, with the keyboard only: Tab to the field, type a name, Enter adds a chip, Tab to its remove button, Enter removes it, Tab to Save, Enter saves.
+   - Expected: every step works without the mouse and the chip is announced as added and removed.
+8. Stop the app host (Ctrl+C), then drop the item's database when done: `DROP DATABASE simulab_f77;` (server up, nobody connected).
+
+Not on screen, covered by tests: the lookup by name (AC12), the unique indexes (AC8) and the migration (AC1).
 
 ## Events
 
