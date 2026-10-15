@@ -33,6 +33,19 @@
                             Options="AreaOptions"
                             Hint="@L["Subjects.Field.Area.Help"]"
                             Error="@_areaError" />
+
+            @* F-77: the other names organizers use for this subject, kept as chips. *@
+            <AppChipsField Id="subject-aliases"
+                           Label="@L["Subjects.Field.Aliases"]"
+                           Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
+                           Hint="@L["Subjects.Field.Aliases.Help"]"
+                           Items="_aliases"
+                           ItemsChanged="OnAliasesChanged"
+                           MaxLength="CatalogLimits.SubjectNameMaxLength"
+                           MinLength="CatalogLimits.NameMinLength"
+                           TooShortText="@Errors.For(CatalogErrorCodes.SubjectAliasTooShort)"
+                           Disabled="_saving"
+                           Error="@_aliasError" />
         </div>
     </DialogContent>
     <DialogActions>
@@ -57,8 +70,10 @@
     private Guid? _areaId;
     private string? _nameError;
     private string? _areaError;
+    private string? _aliasError;
     private string? _error;
     private bool _saving;
+    private IReadOnlyList<string> _aliases = [];
 
     private IReadOnlyList<AppSelectOption<Guid?>> AreaOptions =>
         [
@@ -68,12 +83,24 @@
 
     private bool HasChanges =>
         Trimmed(_name) != (Subject?.Name ?? string.Empty)
-        || _areaId != Subject?.AreaId;
+        || _areaId != Subject?.AreaId
+        || AliasesChanged;
+
+    // The order of the chips is the order they were typed, the order of the stored set is the Api's: compare as sets.
+    private bool AliasesChanged =>
+        !_aliases.ToHashSet(StringComparer.Ordinal).SetEquals(Subject?.Aliases ?? []);
 
     protected override void OnInitialized()
     {
         _name = Subject?.Name ?? string.Empty;
         _areaId = Subject?.AreaId;
+        _aliases = [.. Subject?.Aliases ?? []];
+    }
+
+    private void OnAliasesChanged(IReadOnlyList<string> aliases)
+    {
+        _aliases = aliases;
+        _aliasError = null;
     }
 
     private static string Trimmed(string? value) => value?.Trim() ?? string.Empty;
@@ -107,7 +134,9 @@
         _saving = true;
         _error = null;
 
-        var result = await Save(new SaveSubjectRequest(Trimmed(_name), _areaId));
+        // The set travels whole, and null means "leave it as it is": a dialog that did not touch the chips never
+        // sends them, so an unchanged save cannot wipe what the Api holds (F-77, BR4).
+        var result = await Save(new SaveSubjectRequest(Trimmed(_name), _areaId, AliasesChanged ? _aliases : null));
 
         _saving = false;
         if (result.IsSuccess)
@@ -126,6 +155,12 @@
                 break;
             case CatalogErrorCodes.SubjectAreaInvalid:
                 _areaError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.SubjectAliasTooShort:
+            case CatalogErrorCodes.SubjectAliasTooLong:
+            case CatalogErrorCodes.SubjectAliasSameAsName:
+            case CatalogErrorCodes.SubjectAliasTaken:
+                _aliasError = Errors.For(result.ErrorCode);
                 break;
             default:
                 _error = Errors.For(result.ErrorCode);

@@ -88,7 +88,7 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 | Criterion | Test |
 |---|---|
 | AC1 | `AddSubjectTopicAliasesMigrationTests.Up_CreatesTheTablesTheirKeysAndTheirIndexes_AndDownDropsThem` |
-| AC2 | `SubjectAliasEndpointTests.Create_WithTheSameNameTwiceByNormalizedForm_StoresOneAliasAndShowsOneChip`; `SubjectAliasTests.Distinct_CollapsesTheSameNormalizedForm_KeepingTheFirstAsTyped`; `TopicAliasEndpointTests.Create_WithAliases_AnswersAndListsThemOrderedAndWithoutRepeats`; the chip in the dialog: pending (Web test) |
+| AC2 | `SubjectAliasEndpointTests.Create_WithTheSameNameTwiceByNormalizedForm_StoresOneAliasAndShowsOneChip`; `SubjectAliasTests.Distinct_CollapsesTheSameNormalizedForm_KeepingTheFirstAsTyped`; `TopicAliasEndpointTests.Create_WithAliases_AnswersAndListsThemOrderedAndWithoutRepeats`; the chip in the dialog: `SubjectAliasDialogTests.SubjectEdit_ShowsTheStoredOtherNamesAsChips`, `SubjectAliasDialogTests.SubjectEdit_AddingAName_SendsTheWholeSet`, `AppChipsFieldTests.Enter_AddsTheTypedNameTrimmed` |
 | AC3 | `SubjectAliasEndpointTests.Create_AliasOutOfRange_IsRefused_AndNothingIsWritten`; `TopicAliasEndpointTests.Create_AliasOutOfRange_IsRefused_AndNothingIsWritten`; `SubjectAliasTests.Create_LengthEdges_AreTwoToOneHundredFifty`; `TopicAliasTests.Create_LengthEdges_AreTwoToTwoHundred` |
 | AC4 | `SubjectAliasEndpointTests.Create_AliasEqualToTheName_IsRefused_AndNothingIsWritten`; `SubjectAliasEndpointTests.Update_RenamedToItsOwnStoredAlias_WithAliasesNull_IsRefusedAsSameAsName`; `TopicAliasEndpointTests.Create_AliasEqualToTheName_IsRefused`; `SubjectAliasTests.IsSameAsName_ComparesTheNormalizedForms` |
 | AC5 | `SubjectAliasEndpointTests.Alias_ClashingWithAnotherSubjectsNameOrAlias_IsRefused_AndSoIsTheReverse`; `SubjectAliasEndpointTests.Rename_ToAnotherSubjectsLiveAlias_IsRefusedAsNameTaken` |
@@ -101,8 +101,8 @@ Tests locked: 7630046e7ac1ef91b93080f8c52f82e0d78b734d (7 files); unlocks: 1
 | AC12 | `SubjectDirectoryAliasTests.FindByName_ReturnsSubjectsAndTopicsByNameOrAlias_EachTopicWithItsSubject`; `SubjectDirectoryAliasTests.FindByName_NeverReturnsADeletedSubjectTopicOrAlias`; `SubjectDirectoryAliasTests.FindByName_EmptyText_MatchesNothing` |
 | AC13 | `SubjectAliasEndpointTests.Update_WithAliasesNull_LeavesTheSetUnchanged`; `TopicAliasEndpointTests.Update_WithAliasesNull_LeavesTheSetUnchanged` |
 | AC14 | `SubjectAliasTests.Create_EmptyName_FailsWithTooShort_AndNothingThrows`; `TopicAliasTests.Create_EmptyName_FailsWithTooShort_AndNothingThrows` |
-| AC15 | `SubjectAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; `TopicAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; the pages: pending (Web test) |
-| AC16 | pending (the resource parity test and the dialogs' Web tests) |
+| AC15 | `SubjectAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; `TopicAliasEndpointTests.Save_WithAliases_AsAStudent_IsForbidden`; the pages and the menu are F-79's own gate, unchanged here: validation step 6 |
+| AC16 | `AliasResourcesTests.EveryNewText_ExistsInTheThreeLanguages`; `AliasResourcesTests.TheAnnouncements_KeepTheirNamePlaceholderInEveryLanguage`; `ResourceParityTests` and `ErrorCodeTextTests` (existing, green); `SubjectAliasDialogTests.SubjectSave_AliasRefused_ShowsTheMessageOnTheAliasField` |
 
 ## Decisions
 - 2026-10-04 — A subject alias is unique across every subject's name and alias; equal to its own name is refused — the lookup must point to one subject (owner, refinement).

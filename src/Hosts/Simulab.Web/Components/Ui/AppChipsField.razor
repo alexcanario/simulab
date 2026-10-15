@@ -1,0 +1,157 @@
+@inject IStringLocalizer<SharedResources> L
+
+@* F-77: free text typed one at a time and kept as a list of removable chips (the other names of a subject or a
+   topic). Same anatomy as AppTextField - label above, hint or error below, both announced - with the chips under
+   the input. A name is added with Enter or when the input loses focus, so a name typed and not confirmed is never
+   silently dropped by Save. The page owns the list: this field draws it and says what changed; the page answers
+   by changing what it passes in. The length and the uniqueness are the Api's rules; this field only keeps a
+   name under the minimum out of the list, for comfort. *@
+<div class="@RootClass" id="@RootId">
+    <label class="app-field-label" for="@Id">@Label</label>
+    <div class="app-chips-input">
+        <input type="text"
+               id="@Id"
+               autocomplete="off"
+               maxlength="@MaxLength"
+               placeholder="@Placeholder"
+               aria-describedby="@DescriptionId"
+               aria-invalid="@(HasError ? "true" : null)"
+               value="@_text"
+               disabled="@Disabled"
+               @oninput="OnInput"
+               @onchange="OnChangeAsync"
+               @onkeydown="OnKeyDownAsync" />
+    </div>
+
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@(Error ?? _tooShort)</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+
+    @if (Items.Count > 0)
+    {
+        <ul class="app-chip-list app-chips-list" aria-label="@Label">
+            @foreach (var item in Items)
+            {
+                <li @key="item">
+                    <AppChip Text="@item" Remove="@ChipRemove(item)" />
+                </li>
+            }
+        </ul>
+    }
+
+    <span class="app-visually-hidden" aria-live="polite">@_announcement</span>
+</div>
+
+@code {
+    /// <summary>Id of the input; the label and the description point at it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>What the empty input invites the reader to type; it names the thing, so it has no default.</summary>
+    [Parameter, EditorRequired] public string Placeholder { get; set; } = string.Empty;
+
+    /// <summary>The names kept so far, in the order the page wants the chips drawn.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Items { get; set; } = [];
+
+    /// <summary>The list changed: a name was added or removed. The argument is the whole new list.</summary>
+    [Parameter, EditorRequired] public EventCallback<IReadOnlyList<string>> ItemsChanged { get; set; }
+
+    /// <summary>The most characters one name may have (the name limit of the item, never a typed number).</summary>
+    [Parameter, EditorRequired] public int MaxLength { get; set; }
+
+    /// <summary>The fewest characters one name needs; a shorter one is not added and the field says why.</summary>
+    [Parameter] public int MinLength { get; set; }
+
+    /// <summary>What the field says when a name is shorter than <see cref="MinLength"/>.</summary>
+    [Parameter] public string? TooShortText { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>True while the page saves: the input and every remove button are disabled.</summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    private string _text = string.Empty;
+    private string? _tooShort;
+    private string? _announcement;
+
+    private bool HasError => !string.IsNullOrEmpty(Error) || !string.IsNullOrEmpty(_tooShort);
+
+    private string RootClass => HasError ? "app-field app-chips-field app-field-error" : "app-field app-chips-field";
+
+    private string RootId => $"{Id}-field";
+
+    private string DescriptionId => $"{Id}-description";
+
+    /// <summary>The id of a chip's remove button, so a test or a page can find it.</summary>
+    public static string RemoveButtonId(string fieldId, string item) =>
+        $"{fieldId}-remove-{string.Concat(item.Select(character => char.IsAsciiLetterOrDigit(character) ? character : '-'))}";
+
+    private AppChipRemove ChipRemove(string item) =>
+        new(
+            L["Common.RemoveItem", item],
+            EventCallback.Factory.Create(this, () => RemoveAsync(item)),
+            RemoveButtonId(Id, item),
+            Disabled);
+
+    private void OnInput(ChangeEventArgs args)
+    {
+        _text = args.Value?.ToString() ?? string.Empty;
+        _tooShort = null;
+    }
+
+    // The change event fires when the input loses focus (and on Enter): a name typed and left there is kept.
+    private Task OnChangeAsync(ChangeEventArgs args)
+    {
+        _text = args.Value?.ToString() ?? string.Empty;
+
+        return AddAsync();
+    }
+
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Enter" ? AddAsync() : Task.CompletedTask;
+
+    private async Task AddAsync()
+    {
+        var name = _text.Trim();
+        if (name.Length == 0)
+        {
+            _text = string.Empty;
+            return;
+        }
+
+        if (name.Length < MinLength)
+        {
+            _tooShort = TooShortText;
+            return;
+        }
+
+        _text = string.Empty;
+        _tooShort = null;
+
+        // Same text typed again (case aside) is already there: the Api collapses by accent too, this only avoids
+        // a visible duplicate between two saves.
+        if (Items.Any(item => string.Equals(item, name, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        _announcement = L["Aliases.Added", name];
+        await ItemsChanged.InvokeAsync([.. Items, name]);
+    }
+
+    private async Task RemoveAsync(string item)
+    {
+        _announcement = L["Aliases.Removed", item];
+        await ItemsChanged.InvokeAsync([.. Items.Where(existing => existing != item)]);
+    }
+}
