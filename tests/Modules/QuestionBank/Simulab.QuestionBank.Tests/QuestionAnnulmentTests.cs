@@ -13,6 +13,7 @@ namespace Simulab.QuestionBank.Tests;
 public sealed class QuestionAnnulmentTests
 {
     private static readonly Guid Topic = Guid.CreateVersion7();
+    private static readonly Guid BaseTextId = Guid.CreateVersion7();
 
     private static SanitizedHtml Text(string html) => new(html, html);
 
@@ -21,7 +22,7 @@ public sealed class QuestionAnnulmentTests
             Topic,
             "pt-BR",
             Text(statement),
-            Text("<p>Texto-base.</p>"),
+            BaseTextId,
             Text("<p>É Paris.</p>"),
             3,
             [new OptionDraft(Text("Paris"), true), new OptionDraft(Text("Lyon"), false)]);
@@ -31,7 +32,7 @@ public sealed class QuestionAnnulmentTests
             Topic,
             "pt-BR",
             Text("<p>Paris é a capital da França.</p>"),
-            SanitizedHtml.Empty,
+            null,
             SanitizedHtml.Empty,
             null,
             [],
@@ -42,7 +43,7 @@ public sealed class QuestionAnnulmentTests
     {
         var question = Question.Create(content ?? SingleChoice()).Value;
         question.Publish().IsSuccess.Should().BeTrue();
-        var first = question.NextVersion(null, null);
+        var first = question.NextVersion(null, null, question.BaseTextId is null ? null : "<p>Texto-base.</p>");
         first.IsSuccess.Should().BeTrue();
 
         return (question, first.Value!);

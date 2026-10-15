@@ -12,6 +12,13 @@ public interface IQuestionStore
     /// <summary>The question with its options, tracked; null when it does not exist or was deleted.</summary>
     Task<Question?> FindAsync(Guid id, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The base text a question links (F-102, BR3, BR7), read with a shared row lock held until the save so a delete
+    /// or a language change of it cannot slip between this check and the question's write. Null when it does not
+    /// exist or was deleted.
+    /// </summary>
+    Task<LinkedBaseText?> FindBaseTextAsync(Guid id, CancellationToken cancellationToken);
+
     /// <summary>True when a live topic with this id exists in the catalog (BR16).</summary>
     Task<bool> TopicExistsAsync(Guid topicId, CancellationToken cancellationToken);
 

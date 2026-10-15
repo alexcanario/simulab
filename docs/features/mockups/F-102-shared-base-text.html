@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-102 - Shared base text (mockup)</title>
+<style>
+/* ===========================================================================
+   F-102 mockup - /admin/base-texts, /admin/base-texts/new|{id}, the question form's
+   Base text section, the delete confirmation and the transcription screen (F-99).
+   Every colour is a token of docs/design/identity.tokens.json (light and dark); the
+   white on a filled info alert is MudBlazor's default contrast text (DESIGN.md, Info).
+   Classes mirror the kit (app.css): app-page-header, app-data-table, app-row-actions,
+   app-section-card, app-form-grid, app-field, app-lookup, app-rich-text, app-alert,
+   app-error-summary, app-form-actions, app-form-aside, app-status-chip, app-disclosure,
+   app-link, app-state. No new kit component, no new colour, no new icon.
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius-md: 10px; --app-radius-pill: 999px;
+
+  /* tokens, light */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --warning-contrast: #19243E;
+  --info: #2478C5; --info-contrast: #FFFFFF;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.918); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --table-lines: #D0D8EA; --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --warning-contrast: #19243E;
+  --info: #2478C5; --info-contrast: #FFFFFF;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.498); --appbar: #091422; --appbar-text: rgba(255,255,255,0.7);
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --table-lines: #263352; --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: inline-block; flex-shrink: 0; vertical-align: middle; fill: currentColor; }
+button { font: inherit; color: inherit; }
+:is(a, button, input, select, textarea, [tabindex], [contenteditable]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider); font-size: var(--app-font-xs); }
+.demo-label { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-left: var(--app-space-2); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-states { display: contents; }
+.demo-note { width: 100%; color: var(--text-secondary); }
+
+/* ---- app shell (F-2) ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-3); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: 6px; font-size: var(--app-font-sm); cursor: pointer; color: inherit; text-decoration: none; }
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); min-width: 0; }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+
+/* ---- AppLink (B-6): text colour of the surface, underlined ---- */
+.app-link { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-link:hover { text-decoration-thickness: 2px; }
+.app-link svg { vertical-align: text-bottom; }
+
+/* ---- AppPageHeader ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); overflow-wrap: anywhere; }
+.app-breadcrumbs .app-link { color: var(--text-secondary); }
+.app-page-header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; min-width: 0; }
+
+/* ---- buttons (MudButton variants) ---- */
+.app-button { font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; min-height: 38px; padding: 0 var(--app-space-4); border-radius: var(--app-radius-md);
+  display: inline-flex; align-items: center; gap: var(--app-space-2); border: 1px solid transparent; background: transparent; text-transform: none; }
+.app-button-filled { background: var(--primary); color: var(--primary-contrast); }
+.app-button-filled:hover { background: var(--primary-darken); }
+.app-button-outlined { border-color: var(--primary); color: var(--primary); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-outlined-error { border-color: var(--error); color: var(--error); }
+.app-button-text { color: var(--text-primary); }
+.app-button-text:hover { background: var(--primary-lighten); }
+.app-button-error { background: var(--error); color: var(--error-contrast); }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-icon-button { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--action-default); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.app-icon-button:hover { background: var(--primary-lighten); }
+.app-icon-button.is-error { color: var(--error); }
+.app-icon-button[disabled] { opacity: .4; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+.app-spinner-lg { width: 36px; height: 36px; border-width: 3px; color: var(--primary); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppDataTable ---- */
+.app-data-table { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); overflow: hidden; }
+.app-section-card .app-data-table { border-radius: var(--app-radius-md); }
+.app-table-toolbar { display: flex; align-items: flex-end; gap: var(--app-space-3); padding: var(--app-space-3) var(--app-space-4); flex-wrap: wrap; }
+.app-table-search { flex: 1 1 18rem; margin: 0 !important; }
+.app-table-filters { display: flex; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-table-filters .app-field { width: 15rem; margin: 0; }
+.app-table-wrap { overflow-x: auto; }
+.app-table { width: 100%; border-collapse: collapse; font-size: var(--app-font-sm); }
+.app-table th { text-align: left; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); }
+.app-table td { padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); vertical-align: middle; }
+.app-table tbody tr:hover { background: var(--primary-lighten); }
+.app-cell-number, th.app-cell-number { text-align: right; font-variant-numeric: tabular-nums; }
+.app-cell-actions { text-align: right; white-space: nowrap; width: 1%; }
+.app-cell-secondary { display: block; color: var(--text-secondary); font-size: var(--app-font-xs); }
+.app-truncate { display: inline-block; max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.app-truncate-title { max-width: 32rem; }
+.app-truncate-sm { max-width: 16rem; }
+.app-row-actions { display: inline-flex; gap: 2px; }
+.app-pager { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-4); padding: var(--app-space-2) var(--app-space-4); font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-pager select { font: inherit; color: inherit; background: transparent; border: 0; }
+
+/* ---- AppStatusChip ---- */
+.app-status-chip { display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 2px 10px; border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-pill); background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; white-space: nowrap; }
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-success .app-status-chip-dot { background: var(--success); }
+.app-status-chip-error .app-status-chip-dot { background: var(--error); }
+
+/* ---- states ---- */
+.app-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center; color: var(--text-secondary); }
+.app-state-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state-error svg { color: var(--error); }
+
+/* ---- AppAlert (MudAlert, Filled, Dense) / AppErrorSummary ---- */
+.app-alert { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); overflow-wrap: anywhere; }
+.app-alert-content { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); }
+.app-alert-error { background: var(--error); color: var(--error-contrast); }
+.app-alert-info { background: var(--info); color: var(--info-contrast); }
+.app-alert-warning { background: var(--warning); color: var(--warning-contrast); }
+.app-alert-success { background: var(--success); color: var(--success-contrast); }
+.app-alert .app-button-text { color: inherit; min-height: 28px; text-decoration: underline; }
+.app-alert-title { font-weight: 700; }
+.app-error-summary-list { margin: var(--app-space-1) 0 0; padding-left: var(--app-space-5); }
+.app-error-summary-list a { color: inherit; }
+
+/* ---- form layout ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); min-width: 0; display: block; }
+.mt-4 { margin-top: var(--app-space-4); }
+.mb-4 { margin-bottom: var(--app-space-4); }
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4); min-width: 0; }
+.app-section-card + .app-section-card { margin-top: var(--app-space-4); }
+.app-section-card-head { display: flex; align-items: flex-start; gap: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.app-section-card-icon { color: var(--primary); margin-top: 3px; }
+.app-section-card-title { font-size: var(--app-font-lg); font-weight: 600; color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-1); }
+.app-form-grid { display: grid; gap: var(--app-space-3) var(--app-space-4); margin-bottom: var(--app-space-4); }
+.app-form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 599.98px) { .app-form-grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- fields ---- */
+.app-field { margin-bottom: var(--app-space-4); min-width: 0; }
+.app-form-grid .app-field { margin-bottom: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-input { display: flex; align-items: center; gap: var(--app-space-2); height: 40px; padding: 0 var(--app-space-2) 0 var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); color: var(--text-primary); }
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-field-input input, .app-field-input select { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); text-overflow: ellipsis; }
+.app-field-input select option { background: var(--surface); color: var(--text-primary); }
+.app-field-input input::placeholder { color: var(--text-secondary); }
+.app-field-icon { color: var(--primary); display: inline-flex; }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-disabled .app-field-input { opacity: .55; }
+.app-field-description { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); min-height: 1.1em; overflow-wrap: anywhere; }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+
+/* ---- AppLookupField (MudAutocomplete) ---- */
+.app-lookup { position: relative; }
+.app-field-clear { width: 28px; height: 28px; }
+.app-lookup-list { position: absolute; left: 0; right: 0; z-index: 20; margin-top: 2px; list-style: none; padding: var(--app-space-1) 0; max-height: 19rem; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); box-shadow: 0 6px 20px rgba(10,20,40,.22); }
+.app-lookup-option { display: block; padding: 6px var(--app-space-3); cursor: pointer; }
+.app-lookup-option:hover, .app-lookup-option[aria-selected="true"] { background: var(--primary-lighten); }
+.app-lookup-option-text { display: block; overflow-wrap: anywhere; }
+.app-lookup-option-secondary { display: block; font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-lookup-message { padding: var(--app-space-2) var(--app-space-3); color: var(--text-secondary); font-size: var(--app-font-sm); }
+.app-lookup-retry { min-height: 24px; padding: 0 var(--app-space-2); color: var(--error); text-decoration: underline; }
+
+/* ---- AppRichTextField (F-95) ---- */
+.app-rich-text-frame { border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); overflow: hidden; }
+.app-rich-text-frame:focus-within { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-field-error .app-rich-text-frame { border-color: var(--error); }
+.app-rt-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: var(--app-space-1) var(--app-space-2); border-bottom: 1px solid var(--divider); }
+.app-rt-btn { width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: var(--action-default); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.app-rt-btn:hover { background: var(--primary-lighten); }
+.app-rt-sep { width: 1px; background: var(--divider); margin: 4px var(--app-space-1); }
+.app-rt-editor { padding: var(--app-space-2) var(--app-space-3); min-height: 9rem; outline: none; font-size: var(--app-font-md); overflow-wrap: anywhere; }
+.app-rt-editor.is-empty::before { content: attr(data-placeholder); color: var(--text-secondary); }
+.app-rt-editor p + p, .app-question-content p + p { margin-top: var(--app-space-2); }
+.app-rt-editor table, .app-question-content table { border-collapse: collapse; margin-top: var(--app-space-2); }
+.app-rt-editor th, .app-rt-editor td, .app-question-content th, .app-question-content td { border: 1px solid var(--divider); padding: 2px 8px; }
+.app-rt-editor th, .app-question-content th { color: var(--text-secondary); font-size: var(--app-font-sm); }
+.app-question-content { overflow-wrap: anywhere; }
+.app-question-content a, .app-rt-editor a { color: var(--text-primary); }
+
+/* ---- AppDisclosure (F-76) ---- */
+.app-disclosure-button { display: inline-flex; align-items: center; gap: var(--app-space-1); min-height: 32px; padding: 0 var(--app-space-2); border: 0; border-radius: var(--app-radius-md); background: transparent; color: var(--text-primary); font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; }
+.app-disclosure-button:hover { background: var(--primary-lighten); }
+.app-disclosure-icon { display: inline-flex; transition: transform .15s; }
+.app-disclosure-icon.is-open { transform: rotate(180deg); }
+
+/* ---- base text section (F-102): kit pieces arranged in the section ---- */
+.app-base-text-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2) var(--app-space-5); margin-top: calc(-1 * var(--app-space-2)); margin-bottom: var(--app-space-2); font-size: var(--app-font-sm); }
+.app-base-text-preview { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-3) var(--app-space-4); margin-bottom: var(--app-space-3); font-size: var(--app-font-sm); max-height: 22rem; overflow-y: auto; }
+.app-base-text-note { display: block; margin-top: var(--app-space-3); font-size: var(--app-font-xs); }
+.app-base-text-create { margin-top: var(--app-space-3); padding-top: var(--app-space-3); border-top: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-base-text-create-help { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-1); }
+
+/* ---- delete card ---- */
+.app-danger-row { display: flex; align-items: center; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-publication-row { display: flex; align-items: center; gap: var(--app-space-3); flex-wrap: wrap; font-size: var(--app-font-sm); }
+.app-publication-actions { display: flex; gap: var(--app-space-2); margin-top: var(--app-space-4); flex-wrap: wrap; }
+.app-publication-reason { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-2); }
+
+/* ---- AppFormActions ---- */
+.app-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-5); }
+
+/* ---- AppFormAside ---- */
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-form-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-form-aside-row:last-of-type { border-bottom: 0; }
+.app-form-aside-row-label { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-form-aside-row-value { text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.app-form-aside-row-empty { color: var(--text-secondary); font-style: italic; }
+
+/* ---- transcription header (F-99) ---- */
+.app-transcribe-edition { font-size: var(--app-font-lg); font-weight: 600; }
+.app-transcribe-counter { font-size: var(--app-font-sm); color: var(--text-secondary); }
+
+/* ---- dialog (MudDialog via IConfirmService) ---- */
+.app-dialog-backdrop { position: fixed; inset: 0; background: rgba(14,24,40,.55); display: flex; align-items: flex-start; justify-content: center; padding: 15vh var(--app-space-4) var(--app-space-4); z-index: 40; }
+.app-dialog { background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); width: 100%; max-width: 30rem; box-shadow: 0 8px 32px rgba(10,20,40,.35); }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 600; padding: var(--app-space-4) var(--app-space-5) var(--app-space-2); }
+.app-dialog-content { padding: 0 var(--app-space-5) var(--app-space-4); font-size: var(--app-font-md); overflow-wrap: anywhere; }
+.app-dialog-actions { display: flex; justify-content: flex-end; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-5) var(--app-space-4); flex-wrap: wrap; }
+
+/* ---- snackbar ---- */
+.app-snackbar { position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 50; display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25); }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo" id="demo">
+  <span class="demo-label">Screen</span>
+  <button type="button" data-screen="list" aria-pressed="true">1 List</button>
+  <button type="button" data-screen="form" aria-pressed="false">2 Base text form</button>
+  <button type="button" data-screen="question" aria-pressed="false">3 Question form: Base text</button>
+  <button type="button" data-screen="transcribe" aria-pressed="false">5 Transcription</button>
+  <span class="demo-label">State</span>
+  <span id="demo-states" class="demo-states"></span>
+  <span class="demo-label">Language</span>
+  <button type="button" data-lang="pt-BR" aria-pressed="true">pt-BR</button>
+  <button type="button" data-lang="pt-PT" aria-pressed="false">pt-PT</button>
+  <button type="button" data-lang="en" aria-pressed="false">en</button>
+  <span class="demo-label">Theme</span>
+  <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+  <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+  <span class="demo-note" id="demo-note"></span>
+</div>
+
+<header class="appbar">
+  <button type="button" class="app-icon-button" style="color:inherit" aria-label="Menu"><svg data-icon="menu" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"></svg></button>
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar" aria-hidden="true">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main">
+    <span class="nav-section" data-i18n="Nav.Section.Content"></span>
+    <a class="nav-link" href="#"><svg data-icon="exams" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Exams"></span></a>
+    <a class="nav-link" href="#"><svg data-icon="subjects" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Subjects"></span></a>
+    <!-- questions.manage only -->
+    <a class="nav-link" href="#" id="nav-questions"><svg data-icon="questions" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Questions"></span></a>
+    <!-- F-102: new entry, questions.manage only, right after Questions -->
+    <a class="nav-link" href="#" id="nav-base-texts"><svg data-icon="basetext" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.BaseTexts"></span></a>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="overlay"></div>
+
+<script>
+/* ===========================================================================
+   Texts: resource keys of SharedResources in the three UI locales.
+   New with F-102: Nav.BaseTexts, BaseTexts.*, Questions.BaseText.*, Common.LinkOpensNewTab,
+   base_text.*, question.base_text_*. Changed values: Questions.Section.BaseText.Subtitle,
+   Questions.Field.BaseText.Placeholder, Questions.Field.BaseText.Hint. The rest exist today.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Exams": "Exams", "Nav.Subjects": "Subjects", "Nav.Questions": "Questions", "Nav.BaseTexts": "Base texts",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "Common.Add": "Add", "Common.Edit": "Edit", "Common.Delete": "Delete", "Common.Save": "Save", "Common.Saving": "Saving...", "Common.Cancel": "Cancel",
+    "Common.Search": "Search", "Common.Actions": "Actions", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Try again", "Common.Loading": "Loading...",
+    "Common.LoadFailed": "We could not load this list.", "Common.Table.RowsPerPage": "Rows per page:", "Common.Table.PageInfo": "{0}-{1} of {2}",
+    "Common.ErrorSummary.Title": "This form cannot be saved yet", "Common.Summary.NotFilled": "Not filled", "Common.RemoveItem": "Remove {0}",
+    "Common.Delete.Title": "Delete item?", "Common.Delete.Confirm": "Delete {0}",
+    "Common.Discard.Title": "Discard changes?", "Common.Discard.Message": "You have unsaved changes. If you leave now, they will be lost.", "Common.Discard.Confirm": "Discard changes",
+    "Common.LinkOpensNewTab": "{0} (opens in a new tab)",
+    "Lookup.Results": "Results: {0}", "Lookup.NoResults": "Nothing found for \"{0}\".", "Lookup.LoadFailed": "The search failed.",
+    "RichText.Toolbar": "Formatting", "RichText.Bold": "Bold (Ctrl+B)", "RichText.Italic": "Italic (Ctrl+I)", "RichText.Underline": "Underline (Ctrl+U)",
+    "RichText.BulletList": "Bulleted list", "RichText.NumberedList": "Numbered list", "RichText.Quote": "Quote", "RichText.Link": "Link", "RichText.ClearFormatting": "Clear formatting",
+
+    "BaseTexts.Title": "Base texts", "BaseTexts.Search.Placeholder": "Search by title",
+    "BaseTexts.Filter.Language": "Language", "BaseTexts.Filter.Language.All": "All languages",
+    "BaseTexts.Column.Title": "Title", "BaseTexts.Column.Language": "Language", "BaseTexts.Column.Questions": "Questions",
+    "BaseTexts.Empty": "No base text yet.", "BaseTexts.Empty.Filters": "No base text in this language.", "BaseTexts.Empty.Search": "No base text matches \"{0}\".",
+    "BaseTexts.Row.Name": "base text \"{0}\"",
+    "BaseTexts.Delete.DisabledInUse": "Questions use this text ({0}). Remove their links before deleting it.",
+    "BaseTexts.Delete.Object": "this base text", "BaseTexts.Delete.Message": "\"{0}\" leaves the list and the question picker. No question uses it.",
+    "BaseTexts.Deleted": "Base text deleted.", "BaseTexts.Saved": "Base text saved.",
+    "BaseTexts.Form.AddTitle": "Add base text", "BaseTexts.Form.EditTitle": "Edit base text", "BaseTexts.BackToList": "Back to the base texts",
+    "BaseTexts.Section.Text": "Base text", "BaseTexts.Section.Text.Subtitle": "A passage, table or case that several questions refer to. Written once, shown before each of their statements.",
+    "BaseTexts.Field.Title": "Title", "BaseTexts.Field.Title.Placeholder": "A name that is easy to find", "BaseTexts.Field.Title.Hint": "Up to 200 characters. It names the text in lists and in the question form.",
+    "BaseTexts.Field.ContentLanguage": "Content language", "BaseTexts.Field.ContentLanguage.Hint": "The language the text is written in. Only questions in this language can use it.",
+    "BaseTexts.Field.ContentLanguage.Locked": "Locked while questions use this text ({0}). A question and its base text are always in the same language.",
+    "BaseTexts.Field.Text": "Text", "BaseTexts.Field.Text.Placeholder": "Paste or write the text", "BaseTexts.Field.Text.Hint": "Up to 20,000 characters.",
+    "BaseTexts.Versions.Notice": "Saving a change to the text records a new version of each published question that uses it; drafts and annulled questions get none. Changing only the title records nothing.",
+    "BaseTexts.Section.Questions": "Questions that use this text ({0})", "BaseTexts.Section.Questions.Subtitle": "Most recently changed first. Open a question to change or remove its link.",
+    "BaseTexts.Questions.Empty": "No question uses this text yet. Pick it in the Base text section of a question.",
+    "BaseTexts.Section.Delete": "Delete this base text", "BaseTexts.Section.Delete.Subtitle": "Only a text that no question uses can be deleted.",
+
+    "Questions.Title": "Questions", "Questions.Form.EditTitle": "Edit question",
+    "Questions.Section.Classification": "Classification", "Questions.Section.Classification.Subtitle": "Where the question sits in the taxonomy, its language and how hard it is.",
+    "Questions.Field.Subject": "Subject", "Questions.Field.Topic": "Topic", "Questions.Field.Difficulty": "Difficulty",
+    "Questions.Field.ContentLanguage": "Content language", "Questions.Field.ContentLanguage.Hint": "The language the question is written in. Content is never translated.",
+    "Questions.Section.Origin": "Origin", "Questions.Field.Edition": "Edition", "Questions.Field.PaperNumber": "Number in the paper",
+    "Questions.Section.Statement": "Statement", "Questions.Section.Statement.Subtitle": "What the student is asked. Formatting, lists and links are kept; images come later.",
+    "Questions.Field.Statement": "Statement", "Questions.Field.Statement.Placeholder": "Write the statement", "Questions.Field.Statement.Hint": "Up to 10,000 characters.",
+    "Questions.Section.BaseText": "Base text", "Questions.Section.BaseText.Subtitle": "A text shared by several questions, shown before the statement. Optional.",
+    "Questions.Field.BaseText": "Base text", "Questions.Field.BaseText.Placeholder": "Title of the base text", "Questions.Field.BaseText.Hint": "Only texts in {0}, the language of this question, are listed.",
+    "Questions.BaseText.Option.Secondary": "Questions: {0} · changed on {1}", "Questions.BaseText.Open": "Open the base text",
+    "Questions.BaseText.Show": "Show the text", "Questions.BaseText.Hide": "Hide the text", "Questions.BaseText.ReadOnlyNote": "Edited on its own page, for every question that uses it.",
+    "Questions.BaseText.Create.Lead": "Not in the list?", "Questions.BaseText.Create": "Create a base text",
+    "Questions.BaseText.Create.Help": "It opens in a new tab, so this question stays as it is. Save the text there, come back and pick it here.",
+    "Questions.BaseText.Cleared": "The base text \"{0}\" was removed: it is in {1}, and this question is now in {2}.",
+    "Questions.BaseText.Kept": "Stays chosen for the next question. Change or remove it when the block of questions ends.",
+    "Questions.Form.Aside.Title": "Summary", "Questions.Form.Aside.Status": "Status", "Questions.Form.Aside.Source": "Source",
+    "Questions.Status.Draft": "Draft", "Questions.Status.Published": "Published", "Questions.Status.Annulled": "Annulled",
+    "Questions.Column.Statement": "Statement", "Questions.Column.Source": "Source", "Questions.Column.Status": "Status",
+    "Questions.Source.Number": "Question {0}", "Questions.Source.Authored": "Authored",
+    "Questions.Section.Publication": "Publication", "Questions.Publication.Draft": "Draft. Not available outside the back office.",
+    "Questions.Publication.Annulled": "Annulled. Out of practice and frozen until it is reinstated.", "Questions.Row.Name": "question \"{0}\"", "Questions.Difficulty.NotSet": "Not set",
+    "Questions.Action.Preview": "Preview as a student", "Questions.Action.Publish": "Publish", "Questions.Publication.Publish.DisabledUnsaved": "Save your changes first.",
+    "Questions.Annulled.Alert": "This question is annulled and cannot be edited. Reinstate it to change it.",
+    "Questions.Transcribe.Title": "Transcribe a paper", "Questions.Transcribe.Counter": "Question {0} of this session", "Questions.Transcribe.Finish": "Finish",
+    "Questions.Transcribe.Saved": "Question saved. Keep going.", "Questions.Transcribe.SaveAndContinue": "Save and continue",
+    "Questions.Transcribe.EditionLocked": "The edition stays fixed while you transcribe. To transcribe another one, finish and open it from its own page.",
+
+    "base_text.not_found": "This base text no longer exists.", "base_text.title_required": "Write the title.", "base_text.title_too_long": "The title has more than 200 characters.",
+    "base_text.text_required": "Write the text.", "base_text.text_too_long": "The text has more than 20,000 characters.", "base_text.content_language_invalid": "Choose one of the listed languages.",
+    "base_text.in_use": "Questions still use this base text. Remove their links before deleting it.", "base_text.language_in_use": "Questions use this base text, so its language cannot change.",
+    "question.base_text_not_found": "This base text no longer exists. Pick another or leave the field empty.", "question.base_text_language_mismatch": "The base text and the question must be in the same language."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões", "Nav.BaseTexts": "Textos-base",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Excluir", "Common.Save": "Salvar", "Common.Saving": "Salvando...", "Common.Cancel": "Cancelar",
+    "Common.Search": "Pesquisar", "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Tentar novamente", "Common.Loading": "Carregando...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}",
+    "Common.ErrorSummary.Title": "Ainda não é possível salvar este formulário", "Common.Summary.NotFilled": "Não preenchido", "Common.RemoveItem": "Remover {0}",
+    "Common.Delete.Title": "Excluir item?", "Common.Delete.Confirm": "Excluir {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Você tem alterações não salvas. Se sair agora, elas serão perdidas.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.LinkOpensNewTab": "{0} (abre em uma nova aba)",
+    "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.LoadFailed": "A pesquisa falhou.",
+    "RichText.Toolbar": "Formatação", "RichText.Bold": "Negrito (Ctrl+B)", "RichText.Italic": "Itálico (Ctrl+I)", "RichText.Underline": "Sublinhado (Ctrl+U)",
+    "RichText.BulletList": "Lista com marcadores", "RichText.NumberedList": "Lista numerada", "RichText.Quote": "Citação", "RichText.Link": "Link", "RichText.ClearFormatting": "Limpar formatação",
+
+    "BaseTexts.Title": "Textos-base", "BaseTexts.Search.Placeholder": "Pesquisar pelo título",
+    "BaseTexts.Filter.Language": "Idioma", "BaseTexts.Filter.Language.All": "Todos os idiomas",
+    "BaseTexts.Column.Title": "Título", "BaseTexts.Column.Language": "Idioma", "BaseTexts.Column.Questions": "Questões",
+    "BaseTexts.Empty": "Nenhum texto-base ainda.", "BaseTexts.Empty.Filters": "Nenhum texto-base neste idioma.", "BaseTexts.Empty.Search": "Nenhum texto-base corresponde a \"{0}\".",
+    "BaseTexts.Row.Name": "texto-base \"{0}\"",
+    "BaseTexts.Delete.DisabledInUse": "Há questões que usam este texto ({0}). Remova os vínculos delas antes de excluir.",
+    "BaseTexts.Delete.Object": "este texto-base", "BaseTexts.Delete.Message": "\"{0}\" sai da lista e do seletor das questões. Nenhuma questão o usa.",
+    "BaseTexts.Deleted": "Texto-base excluído.", "BaseTexts.Saved": "Texto-base salvo.",
+    "BaseTexts.Form.AddTitle": "Adicionar texto-base", "BaseTexts.Form.EditTitle": "Editar texto-base", "BaseTexts.BackToList": "Voltar para os textos-base",
+    "BaseTexts.Section.Text": "Texto-base", "BaseTexts.Section.Text.Subtitle": "Um trecho, tabela ou caso a que várias questões se referem. Escrito uma vez, aparece antes do enunciado de cada uma.",
+    "BaseTexts.Field.Title": "Título", "BaseTexts.Field.Title.Placeholder": "Um nome fácil de encontrar", "BaseTexts.Field.Title.Hint": "Até 200 caracteres. É o nome do texto nas listas e no formulário da questão.",
+    "BaseTexts.Field.ContentLanguage": "Idioma do conteúdo", "BaseTexts.Field.ContentLanguage.Hint": "O idioma em que o texto está escrito. Só questões neste idioma podem usá-lo.",
+    "BaseTexts.Field.ContentLanguage.Locked": "Bloqueado enquanto houver questões usando este texto ({0}). Uma questão e seu texto-base estão sempre no mesmo idioma.",
+    "BaseTexts.Field.Text": "Texto", "BaseTexts.Field.Text.Placeholder": "Cole ou escreva o texto", "BaseTexts.Field.Text.Hint": "Até 20.000 caracteres.",
+    "BaseTexts.Versions.Notice": "Salvar uma mudança no texto registra uma nova versão de cada questão publicada que o usa; rascunhos e questões anuladas não ganham versão. Mudar só o título não registra nada.",
+    "BaseTexts.Section.Questions": "Questões que usam este texto ({0})", "BaseTexts.Section.Questions.Subtitle": "As alteradas mais recentemente primeiro. Abra uma questão para trocar ou remover o vínculo.",
+    "BaseTexts.Questions.Empty": "Nenhuma questão usa este texto ainda. Escolha-o na seção Texto-base de uma questão.",
+    "BaseTexts.Section.Delete": "Excluir este texto-base", "BaseTexts.Section.Delete.Subtitle": "Só um texto que nenhuma questão usa pode ser excluído.",
+
+    "Questions.Title": "Questões", "Questions.Form.EditTitle": "Editar questão",
+    "Questions.Section.Classification": "Classificação", "Questions.Section.Classification.Subtitle": "Onde a questão fica na taxonomia, seu idioma e sua dificuldade.",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Topic": "Tópico", "Questions.Field.Difficulty": "Dificuldade",
+    "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.ContentLanguage.Hint": "O idioma em que a questão está escrita. O conteúdo nunca é traduzido.",
+    "Questions.Section.Origin": "Origem", "Questions.Field.Edition": "Edição", "Questions.Field.PaperNumber": "Número na prova",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao aluno. Formatação, listas e links são mantidos; imagens vêm depois.",
+    "Questions.Field.Statement": "Enunciado", "Questions.Field.Statement.Placeholder": "Escreva o enunciado", "Questions.Field.Statement.Hint": "Até 10.000 caracteres.",
+    "Questions.Section.BaseText": "Texto-base", "Questions.Section.BaseText.Subtitle": "Um texto compartilhado por várias questões, mostrado antes do enunciado. Opcional.",
+    "Questions.Field.BaseText": "Texto-base", "Questions.Field.BaseText.Placeholder": "Título do texto-base", "Questions.Field.BaseText.Hint": "Só aparecem textos em {0}, o idioma desta questão.",
+    "Questions.BaseText.Option.Secondary": "Questões: {0} · alterado em {1}", "Questions.BaseText.Open": "Abrir o texto-base",
+    "Questions.BaseText.Show": "Mostrar o texto", "Questions.BaseText.Hide": "Ocultar o texto", "Questions.BaseText.ReadOnlyNote": "É editado na página dele, para todas as questões que o usam.",
+    "Questions.BaseText.Create.Lead": "Não está na lista?", "Questions.BaseText.Create": "Criar um texto-base",
+    "Questions.BaseText.Create.Help": "Abre em uma nova aba, e esta questão fica como está. Salve o texto lá, volte e escolha-o aqui.",
+    "Questions.BaseText.Cleared": "O texto-base \"{0}\" foi removido: ele está em {1}, e esta questão agora está em {2}.",
+    "Questions.BaseText.Kept": "Continua escolhido para a próxima questão. Troque ou remova quando o bloco de questões acabar.",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Situação", "Questions.Form.Aside.Source": "Fonte",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada", "Questions.Status.Annulled": "Anulada",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Source": "Fonte", "Questions.Column.Status": "Situação",
+    "Questions.Source.Number": "Questão {0}", "Questions.Source.Authored": "Autoral",
+    "Questions.Section.Publication": "Publicação", "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.",
+    "Questions.Publication.Annulled": "Anulada. Fora da prática e congelada até ser reintegrada.", "Questions.Row.Name": "questão \"{0}\"", "Questions.Difficulty.NotSet": "Não definida",
+    "Questions.Action.Preview": "Visualizar como aluno", "Questions.Action.Publish": "Publicar", "Questions.Publication.Publish.DisabledUnsaved": "Salve suas alterações primeiro.",
+    "Questions.Annulled.Alert": "Esta questão está anulada e não pode ser editada. Reintegre-a para alterá-la.",
+    "Questions.Transcribe.Title": "Transcrever uma prova", "Questions.Transcribe.Counter": "Questão {0} desta sessão", "Questions.Transcribe.Finish": "Concluir",
+    "Questions.Transcribe.Saved": "Questão salva. Continue.", "Questions.Transcribe.SaveAndContinue": "Salvar e continuar",
+    "Questions.Transcribe.EditionLocked": "A edição fica fixa durante a transcrição. Para transcrever outra, conclua e abra pela página dela.",
+
+    "base_text.not_found": "Este texto-base não existe mais.", "base_text.title_required": "Escreva o título.", "base_text.title_too_long": "O título passa de 200 caracteres.",
+    "base_text.text_required": "Escreva o texto.", "base_text.text_too_long": "O texto passa de 20.000 caracteres.", "base_text.content_language_invalid": "Escolha um dos idiomas da lista.",
+    "base_text.in_use": "Ainda há questões usando este texto-base. Remova os vínculos delas antes de excluir.", "base_text.language_in_use": "Há questões usando este texto-base, então o idioma dele não pode mudar.",
+    "question.base_text_not_found": "Este texto-base não existe mais. Escolha outro ou deixe o campo vazio.", "question.base_text_language_mismatch": "O texto-base e a questão precisam estar no mesmo idioma."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões", "Nav.BaseTexts": "Textos de apoio",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Eliminar", "Common.Save": "Guardar", "Common.Saving": "A guardar...", "Common.Cancel": "Cancelar",
+    "Common.Search": "Pesquisar", "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Tentar novamente", "Common.Loading": "A carregar...",
+    "Common.LoadFailed": "Não foi possível carregar esta lista.", "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}",
+    "Common.ErrorSummary.Title": "Ainda não é possível guardar este formulário", "Common.Summary.NotFilled": "Não preenchido", "Common.RemoveItem": "Retirar {0}",
+    "Common.Delete.Title": "Eliminar item?", "Common.Delete.Confirm": "Eliminar {0}",
+    "Common.Discard.Title": "Descartar alterações?", "Common.Discard.Message": "Tem alterações por guardar. Se sair agora, vai perdê-las.", "Common.Discard.Confirm": "Descartar alterações",
+    "Common.LinkOpensNewTab": "{0} (abre num novo separador)",
+    "Lookup.Results": "Resultados: {0}", "Lookup.NoResults": "Nada encontrado para \"{0}\".", "Lookup.LoadFailed": "A pesquisa falhou.",
+    "RichText.Toolbar": "Formatação", "RichText.Bold": "Negrito (Ctrl+B)", "RichText.Italic": "Itálico (Ctrl+I)", "RichText.Underline": "Sublinhado (Ctrl+U)",
+    "RichText.BulletList": "Lista com marcas", "RichText.NumberedList": "Lista numerada", "RichText.Quote": "Citação", "RichText.Link": "Ligação", "RichText.ClearFormatting": "Limpar formatação",
+
+    "BaseTexts.Title": "Textos de apoio", "BaseTexts.Search.Placeholder": "Pesquisar pelo título",
+    "BaseTexts.Filter.Language": "Idioma", "BaseTexts.Filter.Language.All": "Todos os idiomas",
+    "BaseTexts.Column.Title": "Título", "BaseTexts.Column.Language": "Idioma", "BaseTexts.Column.Questions": "Questões",
+    "BaseTexts.Empty": "Ainda não há textos de apoio.", "BaseTexts.Empty.Filters": "Nenhum texto de apoio neste idioma.", "BaseTexts.Empty.Search": "Nenhum texto de apoio corresponde a \"{0}\".",
+    "BaseTexts.Row.Name": "texto de apoio \"{0}\"",
+    "BaseTexts.Delete.DisabledInUse": "Há questões que usam este texto ({0}). Retire as ligações delas antes de o eliminar.",
+    "BaseTexts.Delete.Object": "este texto de apoio", "BaseTexts.Delete.Message": "\"{0}\" sai da lista e do seletor das questões. Nenhuma questão o usa.",
+    "BaseTexts.Deleted": "Texto de apoio eliminado.", "BaseTexts.Saved": "Texto de apoio guardado.",
+    "BaseTexts.Form.AddTitle": "Adicionar texto de apoio", "BaseTexts.Form.EditTitle": "Editar texto de apoio", "BaseTexts.BackToList": "Voltar aos textos de apoio",
+    "BaseTexts.Section.Text": "Texto de apoio", "BaseTexts.Section.Text.Subtitle": "Um excerto, tabela ou caso a que várias questões se referem. Escrito uma vez, aparece antes do enunciado de cada uma.",
+    "BaseTexts.Field.Title": "Título", "BaseTexts.Field.Title.Placeholder": "Um nome fácil de encontrar", "BaseTexts.Field.Title.Hint": "Até 200 caracteres. É o nome do texto nas listas e no formulário da questão.",
+    "BaseTexts.Field.ContentLanguage": "Idioma do conteúdo", "BaseTexts.Field.ContentLanguage.Hint": "O idioma em que o texto está escrito. Só as questões neste idioma o podem usar.",
+    "BaseTexts.Field.ContentLanguage.Locked": "Bloqueado enquanto houver questões a usar este texto ({0}). Uma questão e o seu texto de apoio estão sempre no mesmo idioma.",
+    "BaseTexts.Field.Text": "Texto", "BaseTexts.Field.Text.Placeholder": "Cole ou escreva o texto", "BaseTexts.Field.Text.Hint": "Até 20 000 caracteres.",
+    "BaseTexts.Versions.Notice": "Guardar uma alteração ao texto regista uma nova versão de cada questão publicada que o usa; os rascunhos e as questões anuladas não recebem versão. Alterar só o título não regista nada.",
+    "BaseTexts.Section.Questions": "Questões que usam este texto ({0})", "BaseTexts.Section.Questions.Subtitle": "As alteradas mais recentemente primeiro. Abra uma questão para mudar ou retirar a ligação.",
+    "BaseTexts.Questions.Empty": "Ainda nenhuma questão usa este texto. Escolha-o na secção Texto de apoio de uma questão.",
+    "BaseTexts.Section.Delete": "Eliminar este texto de apoio", "BaseTexts.Section.Delete.Subtitle": "Só um texto que nenhuma questão usa pode ser eliminado.",
+
+    "Questions.Title": "Questões", "Questions.Form.EditTitle": "Editar questão",
+    "Questions.Section.Classification": "Classificação", "Questions.Section.Classification.Subtitle": "Onde a questão fica na taxonomia, o seu idioma e a sua dificuldade.",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Topic": "Tópico", "Questions.Field.Difficulty": "Dificuldade",
+    "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.ContentLanguage.Hint": "O idioma em que a questão está escrita. O conteúdo nunca é traduzido.",
+    "Questions.Section.Origin": "Origem", "Questions.Field.Edition": "Edição", "Questions.Field.PaperNumber": "Número na prova",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao estudante. Formatação, listas e ligações são mantidas; as imagens vêm mais tarde.",
+    "Questions.Field.Statement": "Enunciado", "Questions.Field.Statement.Placeholder": "Escreva o enunciado", "Questions.Field.Statement.Hint": "Até 10 000 caracteres.",
+    "Questions.Section.BaseText": "Texto de apoio", "Questions.Section.BaseText.Subtitle": "Um texto partilhado por várias questões, mostrado antes do enunciado. Opcional.",
+    "Questions.Field.BaseText": "Texto de apoio", "Questions.Field.BaseText.Placeholder": "Título do texto de apoio", "Questions.Field.BaseText.Hint": "Só aparecem textos em {0}, o idioma desta questão.",
+    "Questions.BaseText.Option.Secondary": "Questões: {0} · alterado em {1}", "Questions.BaseText.Open": "Abrir o texto de apoio",
+    "Questions.BaseText.Show": "Mostrar o texto", "Questions.BaseText.Hide": "Ocultar o texto", "Questions.BaseText.ReadOnlyNote": "É editado na sua própria página, para todas as questões que o usam.",
+    "Questions.BaseText.Create.Lead": "Não está na lista?", "Questions.BaseText.Create": "Criar um texto de apoio",
+    "Questions.BaseText.Create.Help": "Abre num novo separador, e esta questão fica como está. Guarde o texto lá, volte e escolha-o aqui.",
+    "Questions.BaseText.Cleared": "O texto de apoio \"{0}\" foi retirado: está em {1}, e esta questão está agora em {2}.",
+    "Questions.BaseText.Kept": "Continua escolhido para a próxima questão. Mude-o ou retire-o quando o bloco de questões terminar.",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Estado", "Questions.Form.Aside.Source": "Fonte",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada", "Questions.Status.Annulled": "Anulada",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Source": "Fonte", "Questions.Column.Status": "Estado",
+    "Questions.Source.Number": "Questão {0}", "Questions.Source.Authored": "Autoral",
+    "Questions.Section.Publication": "Publicação", "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.",
+    "Questions.Publication.Annulled": "Anulada. Fora da prática e congelada até ser reintegrada.", "Questions.Row.Name": "questão \"{0}\"", "Questions.Difficulty.NotSet": "Não definida",
+    "Questions.Action.Preview": "Pré-visualizar como estudante", "Questions.Action.Publish": "Publicar", "Questions.Publication.Publish.DisabledUnsaved": "Guarde primeiro as suas alterações.",
+    "Questions.Annulled.Alert": "Esta questão está anulada e não pode ser editada. Reintegre-a para a alterar.",
+    "Questions.Transcribe.Title": "Transcrever uma prova", "Questions.Transcribe.Counter": "Questão {0} desta sessão", "Questions.Transcribe.Finish": "Concluir",
+    "Questions.Transcribe.Saved": "Questão guardada. Continue.", "Questions.Transcribe.SaveAndContinue": "Guardar e continuar",
+    "Questions.Transcribe.EditionLocked": "A edição fica fixa durante a transcrição. Para transcrever outra, conclua e abra a partir da página dela.",
+
+    "base_text.not_found": "Este texto de apoio já não existe.", "base_text.title_required": "Escreva o título.", "base_text.title_too_long": "O título excede 200 caracteres.",
+    "base_text.text_required": "Escreva o texto.", "base_text.text_too_long": "O texto excede 20 000 caracteres.", "base_text.content_language_invalid": "Escolha um dos idiomas da lista.",
+    "base_text.in_use": "Ainda há questões a usar este texto de apoio. Retire as ligações delas antes de o eliminar.", "base_text.language_in_use": "Há questões a usar este texto de apoio, por isso o idioma dele não pode mudar.",
+    "question.base_text_not_found": "Este texto de apoio já não existe. Escolha outro ou deixe o campo vazio.", "question.base_text_language_mismatch": "O texto de apoio e a questão têm de estar no mesmo idioma."
+  }
+};
+
+/* Material Outlined paths (AppIcons). basetext = AppIcons.BaseText (Notes), openinnew = AppIcons.OpenInNew. */
+const ICONS = {
+  menu: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+  add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  edit: "M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z",
+  delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  search: "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  close: "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  expand: "M7 10l5 5 5-5z",
+  openinnew: "M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
+  view: "M12 6a9.77 9.77 0 0 1 8.82 5.5A9.77 9.77 0 0 1 12 17a9.77 9.77 0 0 1-8.82-5.5A9.77 9.77 0 0 1 12 6zm0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5zm0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z",
+  publish: "M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7zm8-2v6h-2v-6H9.83L12 9.83 14.17 12H13z",
+  verified: "M16.59 7.58L10 14.17l-3.59-3.58L5 12l5 5 8-8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  inbox: "M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10zm-3-5h-2V7h-4v3H8l4 4 4-4z",
+  error: "M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  info: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+  warning: "M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z",
+  refresh: "M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  questions: "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-7.5-1.5h2v-2h-2v2zm1-11c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z",
+  basetext: "M3 18h12v-2H3v2zM3 6v2h18V6H3zm0 7h18v-2H3v2z",
+  topics: "M19 18l2 1V3c0-1.1-.9-2-2-2H8.99C7.89 1 7 1.9 7 3h10c1.1 0 2 .9 2 2v13zM15 5H5c-1.1 0-2 .9-2 2v16l7-3 7 3V7c0-1.1-.9-2-2-2zm0 15.01l-5-2.14-5 2.14V7h10v13.01z",
+  subjects: "M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z",
+  exams: "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",
+  editions: "M17 10H7v2h10v-2zm2-7h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-5-5H7v2h7v-2z",
+  language: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 0 1 5.08 16zm2.95-8H5.08a7.987 7.987 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
+  bold: "M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z",
+  italic: "M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z",
+  underline: "M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z",
+  bullets: "M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z",
+  numbers: "M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z",
+  quote: "M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z",
+  link: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+  clear: "M3.27 5L2 6.27l6.97 6.97L6.5 19h3l1.57-3.66L16.73 21 18 19.73 3.55 5.27 3.27 5zM6 5v.18L8.82 8h2.4l-.72 1.68 2.1 2.1L14.21 8H20V5H6z"
+};
+
+/* ===========================================================================
+   Sample data (content keeps its own language and is never translated)
+   =========================================================================== */
+const LANG_NAMES = { "pt-BR": "Português (Brasil)", "pt-PT": "Português (Portugal)", "en": "English" };
+const LANG_ORDER = ["pt-BR", "pt-PT", "en"];
+const CULTURE = { "pt-BR": "pt-BR", "pt-PT": "pt-PT", "en": "en-US" };
+
+const HTML_DAM = "<p>A barragem de Três Marias, no alto São Francisco, foi construída entre 1957 e 1962 para regularizar a vazão do rio, gerar energia e reduzir as cheias que atingiam as cidades ribeirinhas a jusante.</p><p>O lago formado inundou cerca de mil quilômetros quadrados. Famílias que viviam da pesca e da agricultura de vazante foram reassentadas, nem sempre em terras de qualidade semelhante, e a <em>cota</em> máxima do reservatório passou a separar o que era terra firme do que era água.</p><p>Hoje, a operação da usina precisa conciliar a geração de energia com a vazão mínima exigida para a navegação, o abastecimento das cidades e a vida do rio.</p>";
+const HTML_TARIFFS = "<p>Tarifas residenciais de energia elétrica em vigor a partir de julho de 2025 (valores sem impostos).</p><table><thead><tr><th>Faixa de consumo</th><th>Tarifa (R$/kWh)</th></tr></thead><tbody><tr><td>Até 30 kWh</td><td>0,2847</td></tr><tr><td>31 a 100 kWh</td><td>0,4881</td></tr><tr><td>101 a 220 kWh</td><td>0,7322</td></tr><tr><td>Acima de 220 kWh</td><td>0,8136</td></tr></tbody></table>";
+const HTML_LONG = "<p>O relatório final da comissão, aprovado em plenário, reúne depoimentos de técnicos, moradores e gestores públicos sobre as condições de segurança das barragens de rejeitos.</p><p>A íntegra pode ser consultada em <a href=\"https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.leg.br/comissoes/cpi-barragens-de-rejeitos/relatorio-final-aprovado-em-plenario-versao-integral.pdf\" rel=\"noopener noreferrer\">https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.leg.br/comissoes/cpi-barragens-de-rejeitos/relatorio-final-aprovado-em-plenario-versao-integral.pdf</a>.</p>";
+
+const BASE_TEXTS = [
+  { id: 1, title: "Caso clínico — Unidade Básica de Saúde do bairro Esperança", lang: "pt-BR", count: 3, updated: "2026-10-02", html: "<p>Uma paciente de 54 anos procura a Unidade Básica de Saúde do bairro Esperança com queixa de cansaço e sede intensa há três semanas.</p>" },
+  { id: 2, title: "Gráfico — Taxa de desemprego por região (IBGE, 2025)", lang: "pt-BR", count: 1, updated: "2026-09-28", html: "<p>Taxa de desocupação por grande região, quarto trimestre de 2025.</p>" },
+  { id: 3, title: "Tabela de tarifas de energia elétrica 2025", lang: "pt-BR", count: 0, updated: "2026-10-11", html: HTML_TARIFFS },
+  { id: 4, title: "Text 1 — The Great Pacific Garbage Patch", lang: "en", count: 5, updated: "2026-10-09", html: "<p>Between Hawaii and California, ocean currents gather plastic debris into a slowly turning mass that is larger than many countries.</p>" },
+  { id: 5, title: "Texto I — A barragem de Três Marias", lang: "pt-BR", count: 8, updated: "2026-10-14", html: HTML_DAM },
+  { id: 6, title: "Texto II — Crónica de uma manhã em Lisboa", lang: "pt-PT", count: 2, updated: "2026-10-07", html: "<p>O eléctrico subia a Graça devagar, e a cidade acordava com o cheiro do pão e do rio.</p>" },
+  /* BR10: two inline texts turned into base texts by the migration; same first 80 characters, so the same title */
+  { id: 7, title: "Leia o texto a seguir para responder às questões de 1 a 5. O período conhecido c", lang: "pt-BR", count: 1, updated: "2026-10-15", html: "<p>Leia o texto a seguir para responder às questões de 1 a 5. O período conhecido como Era Vargas (1930-1945)...</p>" },
+  { id: 8, title: "Leia o texto a seguir para responder às questões de 1 a 5. O período conhecido c", lang: "pt-BR", count: 1, updated: "2026-10-15", html: "<p>Leia o texto a seguir para responder às questões de 1 a 5. O período conhecido como Primeira República...</p>" }
+];
+const LONG_TEXT = { id: 99, title: "Texto III — Relatório final da Comissão Parlamentar de Inquérito sobre as condições de segurança das barragens de rejeitos de mineração em Minas Gerais, com as recomendações aprovadas em plenário em 2025", lang: "pt-BR", count: 4, updated: "2026-10-13", html: HTML_LONG };
+
+const SOURCE_LINE = "FGV · CEMIG 2024 · Analista de Gestão";
+const LINKED = [
+  { excerpt: "De acordo com o texto, a construção da barragem de Três Marias teve como objetivo principal", number: 12, status: "Published" },
+  { excerpt: "O termo “cota”, no segundo parágrafo, refere-se", number: 13, status: "Draft" },
+  { excerpt: "Assinale a alternativa que resume corretamente a posição do texto sobre o reassentamento das famílias ribeirinhas e as terras que receberam.", number: 14, status: "Published" },
+  { excerpt: "Segundo o texto, a operação da usina precisa conciliar", number: 15, status: "Annulled" },
+  { excerpt: "A expressão “a jusante” pode ser substituída, sem prejuízo do sentido, por", number: 16, status: "Published" },
+  { excerpt: "No trecho “nem sempre em terras de qualidade semelhante”, o autor", number: 17, status: "Published" },
+  { excerpt: "Em relação à organização do texto, é correto afirmar que", number: null, status: "Draft" },
+  { excerpt: "A palavra “vazante”, no segundo parágrafo, designa", number: 18, status: "Draft" }
+];
+
+/* ===========================================================================
+   helpers
+   =========================================================================== */
+let lang = "pt-BR", screen = "list", state = "ready";
+const t = (key, ...args) => {
+  let s = TEXTS[lang] && TEXTS[lang][key];
+  if (s == null) s = TEXTS.en[key];
+  if (s == null) s = key;
+  args.forEach((a, i) => { s = s.split("{" + i + "}").join(String(a)); });
+  return s;
+};
+const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const ic = (name, size) => `<svg width="${size || 18}" height="${size || 18}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+const fmtDate = iso => new Intl.DateTimeFormat(CULTURE[lang], { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso + "T12:00:00"));
+const fmtNum = n => new Intl.NumberFormat(CULTURE[lang]).format(n);
+const cut = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+const byTitle = list => list.slice().sort((a, b) => a.title.localeCompare(b.title, "pt") || a.id - b.id);
+const findText = id => id === LONG_TEXT.id ? LONG_TEXT : BASE_TEXTS.find(b => b.id === id);
+const langOptions = () => LANG_ORDER.map(l => ({ value: l, text: LANG_NAMES[l], lang: l }));
+
+function pageHeader(crumbs, title, primary, titleLang) {
+  const bc = crumbs.map((c, i) => (i ? ' <span aria-hidden="true">/</span> ' : "") + (c.link ? `<a href="#" class="app-link">${esc(c.text)}</a>` : `<span>${esc(c.text)}</span>`)).join("");
+  return `<header class="app-page-header"><div class="app-breadcrumbs">${bc}</div><div class="app-page-header-row"><h1 class="app-page-title"${titleLang ? ` lang="${titleLang}"` : ""}>${esc(title)}</h1>${primary ? `<button type="button" class="app-button app-button-filled" id="page-primary">${ic("add")}<span>${esc(primary)}</span></button>` : ""}</div></header>`;
+}
+function alertBox(sev, text, opts) {
+  opts = opts || {};
+  const icon = { error: "error", info: "info", warning: "warning", success: "verified" }[sev];
+  return `<div class="app-alert app-alert-${sev}" role="${sev === "error" ? "alert" : "status"}"${opts.id ? ` id="${opts.id}"` : ""}>${ic(icon, 20)}<div class="app-alert-content"><span>${esc(text)}</span>${opts.action ? `<button type="button" class="app-button app-button-text">${esc(opts.action)}</button>` : ""}</div></div>`;
+}
+function errorSummary(id, items) {
+  return `<div class="app-alert app-alert-error" id="${id}" role="alert" tabindex="-1">${ic("error", 20)}<div><div class="app-alert-title">${esc(t("Common.ErrorSummary.Title"))}</div><ul class="app-error-summary-list">${items.map(i => `<li><a href="#${i.id}">${esc(i.label)}</a></li>`).join("")}</ul></div></div>`;
+}
+const fieldLabel = (id, text, required) => `<label class="app-field-label" for="${id}">${esc(text)}${required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>`;
+const description = (id, hint, error) => `<span class="app-field-description" id="${id}-description">${error ? `<span class="app-field-error-text">${esc(error)}</span>` : hint ? `<span class="app-field-hint">${esc(hint)}</span>` : ""}</span>`;
+const aria = o => `aria-describedby="${o.id}-description"${o.required ? ' aria-required="true"' : ""}${o.error ? ' aria-invalid="true"' : ""}`;
+
+function textField(o) {
+  return `<div class="app-field${o.error ? " app-field-error" : ""}">${fieldLabel(o.id, o.label, o.required)}<div class="app-field-input"><input id="${o.id}" type="text" value="${esc(o.value)}" placeholder="${esc(o.placeholder)}" maxlength="${o.maxlength}" ${aria(o)}${o.lang ? ` lang="${o.lang}"` : ""}></div>${description(o.id, o.hint, o.error)}</div>`;
+}
+function selectField(o) {
+  const options = o.options.map(op => `<option value="${esc(op.value)}"${op.value === o.value ? " selected" : ""}${op.lang ? ` lang="${op.lang}"` : ""}>${esc(op.text)}</option>`).join("");
+  return `<div class="app-field${o.error ? " app-field-error" : ""}${o.disabled ? " app-field-disabled" : ""}">${fieldLabel(o.id, o.label, o.required)}<div class="app-field-input">${o.icon ? `<span class="app-field-icon">${ic(o.icon)}</span>` : ""}<select id="${o.id}" ${aria(o)}${o.disabled ? " disabled" : ""}>${options}</select></div>${description(o.id, o.hint, o.error)}</div>`;
+}
+function lookupField(o) {
+  let list = "";
+  if (o.open) {
+    list = `<ul class="app-lookup-list" role="listbox" id="${o.id}-list" aria-label="${esc(o.label)}">` +
+      (o.options.length
+        ? o.options.map((op, i) => `<li role="option" class="app-lookup-option" data-pick="${op.id}" aria-selected="${i === 0}"><span class="app-lookup-option-text"${op.lang ? ` lang="${op.lang}"` : ""}>${esc(op.text)}</span><span class="app-lookup-option-secondary">${esc(op.secondary)}</span></li>`).join("")
+        : `<li class="app-lookup-message" role="presentation">${esc(t("Lookup.NoResults", o.term))}</li>`) + `</ul>`;
+  }
+  const desc = o.error
+    ? `<span class="app-field-error-text">${esc(o.error)}</span>`
+    : o.searchFailed
+      ? `<span class="app-field-error-text">${esc(t("Lookup.LoadFailed"))} <button type="button" class="app-button app-button-text app-lookup-retry">${esc(t("Common.TryAgain"))}</button></span>`
+      : `<span class="app-field-hint">${esc(o.hint)}</span>`;
+  const live = o.open ? (o.options.length ? t("Lookup.Results", o.options.length) : t("Lookup.NoResults", o.term)) : "";
+  const clear = o.value && !o.disabled ? `<button type="button" class="app-icon-button app-field-clear" id="${o.id}-clear" aria-label="${esc(t("Common.RemoveItem", cut(o.value, 60)))}" title="${esc(t("Common.RemoveItem", cut(o.value, 60)))}">${ic("close")}</button>` : "";
+  return `<div class="app-field app-lookup${o.error ? " app-field-error" : ""}${o.disabled ? " app-field-disabled" : ""}">${fieldLabel(o.id, o.label, o.required)}` +
+    `<div class="app-field-input"><span class="app-field-icon">${ic("search")}</span><input id="${o.id}" type="text" role="combobox" aria-expanded="${o.open ? "true" : "false"}" aria-autocomplete="list" aria-haspopup="listbox"${o.open ? ` aria-controls="${o.id}-list"` : ""} ${aria(o)} autocomplete="off" value="${esc(o.open && o.term ? o.term : o.value)}" placeholder="${esc(o.placeholder)}"${o.valueLang ? ` lang="${o.valueLang}"` : ""}${o.disabled ? " disabled" : ""}>${clear}</div>` +
+    list + `<span class="app-field-description" id="${o.id}-description">${desc}</span><span class="app-visually-hidden" aria-live="polite">${esc(live)}</span></div>`;
+}
+const TOOLS = [["bold", "RichText.Bold"], ["italic", "RichText.Italic"], ["underline", "RichText.Underline"], "|", ["bullets", "RichText.BulletList"], ["numbers", "RichText.NumberedList"], ["quote", "RichText.Quote"], ["link", "RichText.Link"], "|", ["clear", "RichText.ClearFormatting"]];
+function richText(o) {
+  const tools = TOOLS.map((x, i) => x === "|" ? '<span class="app-rt-sep" aria-hidden="true"></span>' : `<button type="button" class="app-rt-btn" aria-label="${esc(t(x[1]))}" title="${esc(t(x[1]))}" tabindex="${i === 0 ? 0 : -1}"${o.disabled ? " disabled" : ""}>${ic(x[0])}</button>`).join("");
+  return `<div class="app-field${o.error ? " app-field-error" : ""}"><span class="app-field-label" id="${o.id}-label">${esc(o.label)}${o.required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</span>` +
+    `<div class="app-rich-text-frame"><div class="app-rt-toolbar" role="toolbar" aria-label="${esc(t("RichText.Toolbar"))}" aria-controls="${o.id}">${tools}</div>` +
+    `<div class="app-rt-editor${o.value ? "" : " is-empty"}" id="${o.id}" role="textbox" aria-multiline="true" aria-labelledby="${o.id}-label" ${aria(o)} contenteditable="${o.disabled ? "false" : "true"}" lang="${o.lang}" data-placeholder="${esc(o.placeholder)}" tabindex="0">${o.value || ""}</div></div>${description(o.id, o.hint, o.error)}</div>`;
+}
+const sectionCard = (id, icon, title, subtitle, body) => `<section class="app-section-card" id="${id}" aria-labelledby="${id}-title"><div class="app-section-card-head"><span class="app-section-card-icon">${ic(icon, 22)}</span><div><h2 class="app-section-card-title" id="${id}-title">${esc(title)}</h2>${subtitle ? `<p class="app-section-card-subtitle">${esc(subtitle)}</p>` : ""}</div></div>${body}</section>`;
+const chip = status => `<span class="app-status-chip app-status-chip-${{ Published: "success", Draft: "neutral", Annulled: "error" }[status]}"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("Questions.Status." + status))}</span>`;
+const loadingState = card => `<div class="app-state${card ? " app-state-card" : ""}" role="status" aria-live="polite"><span class="app-spinner app-spinner-lg" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+const errorState = card => `<div class="app-state app-state-error${card ? " app-state-card" : ""}" role="alert">${ic("error", 40)}<p>${esc(t("Common.LoadFailed"))}</p><button type="button" class="app-button app-button-outlined">${ic("refresh")}<span>${esc(t("Common.TryAgain"))}</span></button></div>`;
+const emptyState = (message, action) => `<div class="app-state">${ic("inbox", 40)}<p>${esc(message)}</p>${action ? `<button type="button" class="app-button app-button-outlined">${ic("add")}<span>${esc(action)}</span></button>` : ""}</div>`;
+const deniedState = () => `<div class="app-state app-state-card">${ic("error", 40)}<h1 class="app-state-title">${esc(t("NotFound.Title"))}</h1><p>${esc(t("NotFound.Message"))}</p></div>`;
+const pager = (first, last, total) => `<div class="app-pager"><span>${esc(t("Common.Table.RowsPerPage"))} <select aria-label="${esc(t("Common.Table.RowsPerPage"))}"><option>10</option><option selected>25</option><option>50</option></select></span><span>${esc(t("Common.Table.PageInfo", first, last, total))}</span></div>`;
+function rowActions(itemName, o) {
+  let h = `<span class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">`;
+  h += `<button type="button" class="app-icon-button" aria-label="${esc(t("Common.ActionOnItem", t("Common.Edit"), itemName))}" title="${esc(t("Common.Edit"))}"${o.editTo ? ` data-go="${o.editTo}"` : ""}>${ic("edit")}</button>`;
+  if (o.withDelete) h += `<button type="button" class="app-icon-button is-error" aria-label="${esc(t("Common.ActionOnItem", t("Common.Delete"), itemName))}" title="${esc(o.deleteReason || t("Common.Delete"))}"${o.deleteReason ? " disabled" : ` data-delete="${o.deleteId}"`}>${ic("delete")}</button>`;
+  return h + `</span>`;
+}
+function formActions(saving, saveText) {
+  return `<div class="app-form-actions"><button type="button" class="app-button app-button-text"${saving ? " disabled" : ""}>${esc(t("Common.Cancel"))}</button><button type="button" class="app-button app-button-filled"${saving ? " disabled" : ""}>${saving ? `<span class="app-spinner" aria-hidden="true"></span><span role="status">${esc(t("Common.Saving"))}</span>` : esc(saveText || t("Common.Save"))}</button></div>`;
+}
+const confirmDialog = (title, message, confirm, kind) => `<div class="app-dialog-backdrop"><div class="app-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-message"><h2 class="app-dialog-title" id="dlg-title">${esc(title)}</h2><div class="app-dialog-content" id="dlg-message">${esc(message)}</div><div class="app-dialog-actions"><button type="button" class="app-button app-button-text" data-dlg="cancel">${esc(t("Common.Cancel"))}</button><button type="button" class="app-button app-button-error" data-dlg="confirm" data-kind="${kind}">${esc(confirm)}</button></div></div></div>`;
+const snack = text => `<div class="app-snackbar" role="status">${ic("verified")}<span>${esc(text)}</span></div>`;
+function aside(rows) {
+  return `<aside class="app-form-aside" aria-labelledby="aside-title"><h2 class="app-form-aside-title" id="aside-title">${esc(t("Questions.Form.Aside.Title"))}</h2>` +
+    rows.map(r => `<div class="app-form-aside-row"><span class="app-form-aside-row-label">${esc(r[0])}</span><span class="app-form-aside-row-value${r[1] ? "" : " app-form-aside-row-empty"}"${r[2] ? ` lang="${r[2]}"` : ""}>${esc(r[1] || t("Common.Summary.NotFilled"))}</span></div>`).join("") + `</aside>`;
+}
+
+/* ===========================================================================
+   demo states
+   =========================================================================== */
+const STATES = {
+  list: [["ready", "Ready"], ["loading", "Loading"], ["empty", "Empty"], ["emptyFilter", "Empty: filter"], ["emptySearch", "Empty: search"], ["error", "Error"],
+    ["confirmDelete", "4 Delete: confirm"], ["deleted", "4 Deleted"], ["refused", "4 Delete refused (in use)"], ["long", "Long text"], ["denied", "Permission denied"]],
+  form: [["new", "New"], ["editInUse", "Edit: in use"], ["editFree", "Edit: not in use"], ["loading", "Loading"], ["loadError", "Load error"], ["notFound", "Not found"],
+    ["validation", "Validation error"], ["languageInUse", "Refused: language in use"], ["saving", "Saving"], ["unsaved", "Unsaved changes"], ["saved", "Saved"],
+    ["questionsLoading", "Questions: loading"], ["questionsEmpty", "Questions: empty"], ["questionsError", "Questions: error"],
+    ["confirmDelete", "4 Delete: confirm"], ["refused", "4 Delete refused (in use)"], ["long", "Long text"], ["denied", "Permission denied"]],
+  question: [["none", "No base text"], ["open", "Picker open"], ["noResults", "Picker: no results"], ["searchFailed", "Picker: search failed"], ["chosen", "Chosen"],
+    ["expanded", "Chosen: text shown"], ["cleared", "Language changed: cleared"], ["notFound", "Refused: not found"], ["mismatch", "Refused: language mismatch"],
+    ["unsaved", "Unsaved changes"], ["annulled", "Annulled"], ["long", "Long text"], ["denied", "Permission denied"]],
+  transcribe: [["kept", "After save: kept"], ["cleared", "Language changed: cleared"]]
+};
+const NOTES = {
+  list: "Screen 1 - /admin/base-texts. The search and the language filter work on the sample data. Delete is enabled only on a text no question uses; it opens Screen 4. Sorted by title; no column sorts.",
+  form: "Screen 2 - /admin/base-texts/new and /admin/base-texts/{id}. The language locks while questions use the text; the Delete card says why it is disabled. 'Unsaved changes' shows what leaving asks.",
+  question: "Screen 3 - the Base text section of /admin/questions/{id}. Click the picker to open it and pick a text; change the content language to see the choice cleared. Type, Origin, Options and Explanation are unchanged and left out.",
+  transcribe: "Screen 5 - /admin/questions/transcribe right after 'Save and continue': the base text stays chosen, the rest of the question is blank. Change the language to see the choice cleared (BR13)."
+};
+
+/* list state */
+let listTerm = "", listLang = "", deletedIds = [], pendingDelete = null;
+/* question state */
+let qLang = "pt-BR", qChosen = 5, savedChosen = 5, qExpanded = false, qCleared = null;
+
+function setState(s) {
+  state = s;
+  if (screen === "list") {
+    listTerm = s === "emptySearch" ? "geologia" : "";
+    listLang = s === "emptyFilter" ? "pt-PT" : "";
+    if (s === "ready" || s === "long") deletedIds = [];
+    if (s === "confirmDelete") pendingDelete = 3;
+    if (s === "deleted") deletedIds = [3];
+  }
+  if (screen === "question" || screen === "transcribe") {
+    qLang = "pt-BR"; qExpanded = false; qCleared = null;
+    const map = { none: [null, null], open: [null, null], noResults: [null, null], searchFailed: [null, null], chosen: [5, 5], expanded: [5, 5],
+      cleared: [null, 5], notFound: [null, 5], mismatch: [5, null], unsaved: [1, 5], annulled: [5, 5], long: [99, 99], denied: [5, 5], kept: [5, null] };
+    const m = map[s] || [5, 5];
+    qChosen = m[0]; savedChosen = m[1];
+    if (s === "expanded" || s === "long") qExpanded = true;
+    if (s === "cleared") { qLang = "en"; qCleared = { title: findText(5).title, from: "pt-BR", to: "en" }; }
+  }
+  render();
+}
+
+/* ===========================================================================
+   Screen 1 - /admin/base-texts
+   =========================================================================== */
+function listData() {
+  let data = BASE_TEXTS.filter(b => !deletedIds.includes(b.id));
+  if (state === "long") data = data.concat([LONG_TEXT]);
+  if (state === "emptyFilter") data = data.filter(b => b.lang !== "pt-PT");
+  if (state === "refused") data = data.map(b => b.id === 3 ? Object.assign({}, b, { count: 1 }) : b);
+  return byTitle(data);
+}
+function listBody() {
+  if (state === "loading") return loadingState(false);
+  if (state === "error") return errorState(false);
+  if (state === "empty") return emptyState(t("BaseTexts.Empty"), t("Common.Add"));
+  const term = listTerm.trim().toLowerCase();
+  const rows = listData().filter(b => (!listLang || b.lang === listLang) && (!term || b.title.toLowerCase().includes(term)));
+  if (!rows.length) return emptyState(term ? t("BaseTexts.Empty.Search", listTerm.trim()) : t("BaseTexts.Empty.Filters"), t("Common.Add"));
+  const body = rows.map(b => {
+    const name = t("BaseTexts.Row.Name", cut(b.title, 60));
+    return `<tr><td><span class="app-truncate app-truncate-title" title="${esc(b.title)}" lang="${b.lang}">${esc(b.title)}</span></td>` +
+      `<td><span lang="${b.lang}">${esc(LANG_NAMES[b.lang])}</span></td>` +
+      `<td class="app-cell-number">${fmtNum(b.count)}</td>` +
+      `<td class="app-cell-actions">${rowActions(name, { editTo: "form:" + (b.count > 0 ? "editInUse" : "editFree"), withDelete: true, deleteId: b.id, deleteReason: b.count > 0 ? t("BaseTexts.Delete.DisabledInUse", fmtNum(b.count)) : null })}</td></tr>`;
+  }).join("");
+  return `<div class="app-table-wrap"><table class="app-table"><thead><tr><th scope="col">${esc(t("BaseTexts.Column.Title"))}</th><th scope="col">${esc(t("BaseTexts.Column.Language"))}</th><th scope="col" class="app-cell-number">${esc(t("BaseTexts.Column.Questions"))}</th><th scope="col" class="app-cell-actions"><span class="app-visually-hidden">${esc(t("Common.Actions"))}</span></th></tr></thead><tbody>${body}</tbody></table></div>${pager(1, rows.length, rows.length)}`;
+}
+function renderList() {
+  if (state === "denied") return deniedState();
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("BaseTexts.Title") }], t("BaseTexts.Title"), t("Common.Add"));
+  if (state === "refused") h += alertBox("error", t("base_text.in_use"));
+  const filterOptions = [{ value: "", text: t("BaseTexts.Filter.Language.All") }].concat(langOptions());
+  h += `<div class="app-data-table"><div class="app-table-toolbar">` +
+    `<div class="app-field app-table-search"><label class="app-visually-hidden" for="base-texts-search">${esc(t("Common.Search"))}</label><div class="app-field-input"><span class="app-field-icon">${ic("search")}</span><input id="base-texts-search" type="search" autocomplete="off" placeholder="${esc(t("BaseTexts.Search.Placeholder"))}" value="${esc(listTerm)}"></div></div>` +
+    `<div class="app-table-filters">${selectField({ id: "base-texts-filter-language", label: t("BaseTexts.Filter.Language"), options: filterOptions, value: listLang, icon: "language" })}</div>` +
+    `</div><div id="list-body">${listBody()}</div></div>`;
+  return h;
+}
+
+/* ===========================================================================
+   Screen 2 - /admin/base-texts/new and /admin/base-texts/{id}
+   =========================================================================== */
+function formModel() {
+  const inUse = findText(5), free = findText(3);
+  switch (state) {
+    case "new": return { isNew: true, title: "", lang: "pt-BR", html: "", count: 0 };
+    case "editFree": case "questionsEmpty": case "confirmDelete": return { title: free.title, lang: free.lang, html: free.html, count: 0 };
+    case "validation": return { title: "", lang: free.lang, html: "", count: 0, titleError: t("base_text.title_required"), textError: t("base_text.text_required"), summary: true };
+    case "languageInUse": return { title: free.title, lang: "pt-PT", html: free.html, count: 0, langError: t("base_text.language_in_use"), summary: true };
+    case "refused": return { title: free.title, lang: free.lang, html: free.html, count: 1, topError: t("base_text.in_use") };
+    case "unsaved": return { title: inUse.title + " (revisado)", lang: inUse.lang, html: inUse.html, count: inUse.count };
+    case "long": return { title: LONG_TEXT.title, lang: LONG_TEXT.lang, html: LONG_TEXT.html, count: LONG_TEXT.count };
+    default: return { title: inUse.title, lang: inUse.lang, html: inUse.html, count: inUse.count };
+  }
+}
+function linkedQuestionsCard(count) {
+  let body;
+  if (state === "questionsLoading") body = loadingState(false);
+  else if (state === "questionsError") body = errorState(false);
+  else if (count === 0) body = emptyState(t("BaseTexts.Questions.Empty"), null);
+  else {
+    const rows = LINKED.slice(0, count).map((q, i) => {
+      const name = t("Questions.Row.Name", cut(q.excerpt, 60));
+      const source = q.number
+        ? `<span class="app-truncate app-truncate-sm" title="${esc(SOURCE_LINE)}">${esc(SOURCE_LINE)}</span><span class="app-cell-secondary">${esc(t("Questions.Source.Number", q.number))}</span>`
+        : `<span aria-hidden="true">—</span><span class="app-visually-hidden">${esc(t("Questions.Source.Authored"))}</span>`;
+      return `<tr><td><span class="app-truncate" title="${esc(q.excerpt)}" lang="pt-BR">${esc(q.excerpt)}</span></td><td>${source}</td><td>${chip(q.status)}</td><td class="app-cell-actions">${rowActions(name, { editTo: "question:chosen" })}</td></tr>`;
+    }).join("");
+    body = `<div class="app-table-wrap"><table class="app-table"><thead><tr><th scope="col">${esc(t("Questions.Column.Statement"))}</th><th scope="col">${esc(t("Questions.Column.Source"))}</th><th scope="col">${esc(t("Questions.Column.Status"))}</th><th scope="col" class="app-cell-actions"><span class="app-visually-hidden">${esc(t("Common.Actions"))}</span></th></tr></thead><tbody>${rows}</tbody></table></div>${pager(1, Math.min(count, LINKED.length), count)}`;
+  }
+  return `<div class="app-form-card mt-4">${sectionCard("base-text-section-questions", "questions", t("BaseTexts.Section.Questions", fmtNum(count)), t("BaseTexts.Section.Questions.Subtitle"), `<div class="app-data-table">${body}</div>`)}</div>`;
+}
+function deleteCard(count) {
+  const inUse = count > 0;
+  const body = `<div class="app-danger-row"><button type="button" class="app-button app-button-outlined-error" id="base-text-delete"${inUse ? ' disabled aria-describedby="base-text-delete-reason"' : " data-form-delete"}>${ic("delete")}<span>${esc(t("Common.Delete"))}</span></button></div>` +
+    (inUse ? `<p class="app-publication-reason" id="base-text-delete-reason">${esc(t("BaseTexts.Delete.DisabledInUse", fmtNum(count)))}</p>` : "");
+  return `<div class="app-form-card mt-4">${sectionCard("base-text-section-delete", "delete", t("BaseTexts.Section.Delete"), t("BaseTexts.Section.Delete.Subtitle"), body)}</div>`;
+}
+function renderForm() {
+  if (state === "denied") return deniedState();
+  const m = formModel();
+  const title = m.isNew ? t("BaseTexts.Form.AddTitle") : t("BaseTexts.Form.EditTitle");
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("BaseTexts.Title"), link: true }, { text: title }], title, null);
+  if (state === "loading") return h + loadingState(true);
+  if (state === "loadError") return h + errorState(true);
+  if (state === "notFound") return h + `<div class="app-form-card">${alertBox("error", t("base_text.not_found"))}<a href="#" class="app-link" data-go="list:ready">${esc(t("BaseTexts.BackToList"))}</a></div>`;
+  const locked = !m.isNew && m.count > 0;
+  let form = `<form class="app-form-card" novalidate>`;
+  if (m.summary) {
+    const items = [];
+    if (m.titleError) items.push({ id: "base-text-title", label: t("BaseTexts.Field.Title") });
+    if (m.langError) items.push({ id: "base-text-content-language", label: t("BaseTexts.Field.ContentLanguage") });
+    if (m.textError) items.push({ id: "base-text-text", label: t("BaseTexts.Field.Text") });
+    form += errorSummary("base-text-error-summary", items);
+  }
+  if (m.topError) form += alertBox("error", m.topError);
+  let fields = `<div class="app-form-grid app-form-grid-2">` +
+    textField({ id: "base-text-title", label: t("BaseTexts.Field.Title"), required: true, value: m.title, placeholder: t("BaseTexts.Field.Title.Placeholder"), hint: t("BaseTexts.Field.Title.Hint"), error: m.titleError, maxlength: 200, lang: m.lang }) +
+    selectField({ id: "base-text-content-language", label: t("BaseTexts.Field.ContentLanguage"), required: true, options: langOptions(), value: m.lang, icon: "language", disabled: locked,
+      hint: locked ? t("BaseTexts.Field.ContentLanguage.Locked", fmtNum(m.count)) : t("BaseTexts.Field.ContentLanguage.Hint"), error: m.langError }) + `</div>`;
+  if (locked) fields += alertBox("info", t("BaseTexts.Versions.Notice"));
+  fields += richText({ id: "base-text-text", label: t("BaseTexts.Field.Text"), required: true, value: m.html, placeholder: t("BaseTexts.Field.Text.Placeholder"), hint: t("BaseTexts.Field.Text.Hint"), error: m.textError, lang: m.lang });
+  form += sectionCard("base-text-section-text", "basetext", t("BaseTexts.Section.Text"), t("BaseTexts.Section.Text.Subtitle"), fields);
+  form += formActions(state === "saving") + `</form>`;
+  h += form;
+  if (!m.isNew) h += linkedQuestionsCard(m.count) + deleteCard(m.count);
+  return h;
+}
+
+/* ===========================================================================
+   Screen 3 - the question form, section Base text (and Screen 5, transcription)
+   =========================================================================== */
+function pickerOptions() {
+  if (state === "noResults") return [];
+  return byTitle(BASE_TEXTS.filter(b => b.lang === qLang)).map(b => ({ id: b.id, text: b.title, lang: b.lang, secondary: t("Questions.BaseText.Option.Secondary", fmtNum(b.count), fmtDate(b.updated)) }));
+}
+function baseTextSection(transcribing) {
+  const annulled = state === "annulled";
+  const chosen = qChosen ? findText(qChosen) : null;
+  const open = state === "open" || state === "noResults";
+  const error = state === "notFound" ? t("question.base_text_not_found") : state === "mismatch" ? t("question.base_text_language_mismatch") : null;
+  const hint = transcribing && chosen ? t("Questions.BaseText.Kept") : t("Questions.Field.BaseText.Hint", LANG_NAMES[qLang]);
+  let body = "";
+  if (qCleared) body += alertBox("info", t("Questions.BaseText.Cleared", qCleared.title, LANG_NAMES[qCleared.from], LANG_NAMES[qCleared.to]));
+  body += lookupField({ id: "question-base-text", label: t("Questions.Field.BaseText"), placeholder: t("Questions.Field.BaseText.Placeholder"), value: chosen ? chosen.title : "", valueLang: chosen ? chosen.lang : null,
+    hint: hint, error: error, disabled: annulled, open: open, options: open ? pickerOptions() : [], term: state === "noResults" ? "geologia" : "", searchFailed: state === "searchFailed" });
+  if (chosen) {
+    body += `<div class="app-base-text-links"><a class="app-link" href="#" target="_blank" rel="noopener" aria-label="${esc(t("Common.LinkOpensNewTab", t("Questions.BaseText.Open")))}">${esc(t("Questions.BaseText.Open"))} ${ic("openinnew", 16)}</a>` +
+      `<div class="app-disclosure"><button type="button" class="app-disclosure-button" id="question-base-text-preview-button" aria-expanded="${qExpanded}" aria-controls="question-base-text-preview" data-toggle-preview><span class="app-disclosure-icon${qExpanded ? " is-open" : ""}">${ic("expand")}</span><span>${esc(t(qExpanded ? "Questions.BaseText.Hide" : "Questions.BaseText.Show"))}</span></button></div></div>`;
+    body += `<div id="question-base-text-preview" class="app-base-text-preview"${qExpanded ? "" : " hidden"}>${qExpanded ? `<div class="app-question-content" lang="${chosen.lang}">${chosen.html}</div><span class="app-field-hint app-base-text-note">${esc(t("Questions.BaseText.ReadOnlyNote"))}</span>` : ""}</div>`;
+  }
+  if (!annulled) {
+    body += `<div class="app-base-text-create"><span>${esc(t("Questions.BaseText.Create.Lead"))}</span> <a class="app-link" href="#" target="_blank" rel="noopener" aria-label="${esc(t("Common.LinkOpensNewTab", t("Questions.BaseText.Create")))}" aria-describedby="question-base-text-create-help">${esc(t("Questions.BaseText.Create"))} ${ic("openinnew", 16)}</a>` +
+      `<p class="app-base-text-create-help" id="question-base-text-create-help">${esc(t("Questions.BaseText.Create.Help"))}</p></div>`;
+  }
+  return sectionCard("question-section-base-text", "basetext", t("Questions.Section.BaseText"), t("Questions.Section.BaseText.Subtitle"), body);
+}
+/* blank: the transcription screen after "Save and continue" (F-99 AC3: subject, topic and difficulty are cleared) */
+function classificationSection(annulled, blank) {
+  return sectionCard("question-section-classification", "topics", t("Questions.Section.Classification"), t("Questions.Section.Classification.Subtitle"),
+    `<div class="app-form-grid app-form-grid-2">` +
+    lookupField({ id: "question-subject", label: t("Questions.Field.Subject"), required: true, value: blank ? "" : "Língua Portuguesa", placeholder: "", hint: "", disabled: annulled, options: [] }) +
+    lookupField({ id: "question-topic", label: t("Questions.Field.Topic"), required: true, value: blank ? "" : "Interpretação de texto", placeholder: "", hint: "", disabled: annulled || blank, options: [] }) +
+    selectField({ id: "question-content-language", label: t("Questions.Field.ContentLanguage"), required: true, options: langOptions(), value: qLang, icon: "language", disabled: annulled, hint: t("Questions.Field.ContentLanguage.Hint") }) +
+    selectField({ id: "question-difficulty", label: t("Questions.Field.Difficulty"), options: [{ value: "", text: t("Questions.Difficulty.NotSet") }].concat([1, 2, 3, 4, 5].map(n => ({ value: String(n), text: fmtNum(n) }))), value: blank ? "" : "3", disabled: annulled, hint: "" }) +
+    `</div>`);
+}
+function questionAside(status, transcribing) {
+  const chosen = qChosen ? findText(qChosen) : null;
+  return aside([
+    [t("Questions.Form.Aside.Status"), transcribing ? null : t("Questions.Status." + status)],
+    [t("Questions.Field.Subject"), transcribing ? null : "Língua Portuguesa"],
+    [t("Questions.Field.Topic"), transcribing ? null : "Interpretação de texto"],
+    [t("Questions.Field.ContentLanguage"), LANG_NAMES[qLang], qLang],
+    [t("Questions.Form.Aside.Source"), SOURCE_LINE],
+    [t("Questions.Field.BaseText"), chosen ? chosen.title : null, chosen ? chosen.lang : null]
+  ]);
+}
+const hasChanges = () => qChosen !== savedChosen || qLang !== "pt-BR";
+function renderQuestion() {
+  if (state === "denied") return deniedState();
+  const annulled = state === "annulled";
+  const status = annulled ? "Annulled" : "Draft";
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("Questions.Title"), link: true }, { text: t("Questions.Form.EditTitle") }], t("Questions.Form.EditTitle"), null);
+  let form = `<form class="app-form-card" novalidate>`;
+  if (state === "notFound" || state === "mismatch") form += errorSummary("question-error-summary", [{ id: "question-base-text", label: t("Questions.Field.BaseText") }]);
+  if (annulled) form += alertBox("warning", t("Questions.Annulled.Alert"));
+  form += classificationSection(annulled);
+  form += sectionCard("question-section-statement", "questions", t("Questions.Section.Statement"), t("Questions.Section.Statement.Subtitle"),
+    richText({ id: "question-statement", label: t("Questions.Field.Statement"), required: true, value: "<p>De acordo com o texto, a construção da barragem de Três Marias teve como objetivo principal</p>", placeholder: t("Questions.Field.Statement.Placeholder"), hint: t("Questions.Field.Statement.Hint"), lang: qLang, disabled: annulled }));
+  form += baseTextSection(false);
+  if (!annulled) form += formActions(false);
+  form += `</form>`;
+  h += `<div class="app-form-layout">${form}${questionAside(status, false)}</div>`;
+  const unsaved = hasChanges();
+  const publication = `<div class="app-publication-row">${chip(status)}<span>${esc(t(annulled ? "Questions.Publication.Annulled" : "Questions.Publication.Draft"))}</span></div>` +
+    `<div class="app-publication-actions"><button type="button" class="app-button app-button-outlined">${ic("view")}<span>${esc(t("Questions.Action.Preview"))}</span></button>` +
+    (annulled ? "" : `<button type="button" class="app-button app-button-outlined"${unsaved ? ' disabled aria-describedby="question-publication-reason"' : ""}>${ic("publish")}<span>${esc(t("Questions.Action.Publish"))}</span></button>`) + `</div>` +
+    (!annulled && unsaved ? `<p class="app-publication-reason" id="question-publication-reason">${esc(t("Questions.Publication.Publish.DisabledUnsaved"))}</p>` : "");
+  h += `<div class="app-form-card mt-4">${sectionCard("question-section-publication", "publish", t("Questions.Section.Publication"), "", publication)}</div>`;
+  return h;
+}
+function renderTranscribe() {
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("Questions.Title"), link: true }, { text: t("Questions.Transcribe.Title") }], t("Questions.Transcribe.Title"), null);
+  h += `<div class="app-form-card mb-4" id="question-transcribe-header">${state === "kept" ? alertBox("success", t("Questions.Transcribe.Saved")) : ""}` +
+    `<p class="app-transcribe-edition">${esc(SOURCE_LINE)}</p><p class="app-transcribe-counter">${esc(t("Questions.Transcribe.Counter", 4))}</p>` +
+    `<div class="app-form-actions" style="margin-top:var(--app-space-3)"><button type="button" class="app-button app-button-outlined">${esc(t("Questions.Transcribe.Finish"))}</button></div></div>`;
+  let form = `<form class="app-form-card" novalidate>`;
+  form += classificationSection(false, true);
+  form += sectionCard("question-section-origin", "editions", t("Questions.Section.Origin"), "",
+    `<div class="app-form-grid app-form-grid-2">` +
+    lookupField({ id: "question-edition", label: t("Questions.Field.Edition"), value: SOURCE_LINE, placeholder: "", hint: t("Questions.Transcribe.EditionLocked"), disabled: true, options: [] }) +
+    textField({ id: "question-paper-number", label: t("Questions.Field.PaperNumber"), required: true, value: "15", placeholder: "", hint: "", maxlength: 3 }) + `</div>`);
+  form += sectionCard("question-section-statement", "questions", t("Questions.Section.Statement"), t("Questions.Section.Statement.Subtitle"),
+    richText({ id: "question-statement", label: t("Questions.Field.Statement"), required: true, value: "", placeholder: t("Questions.Field.Statement.Placeholder"), hint: t("Questions.Field.Statement.Hint"), lang: qLang }));
+  form += baseTextSection(true);
+  form += formActions(false, t("Questions.Transcribe.SaveAndContinue")) + `</form>`;
+  h += `<div class="app-form-layout">${form}${questionAside("Draft", true)}</div>`;
+  return h;
+}
+
+/* ===========================================================================
+   render
+   =========================================================================== */
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === screen)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.getElementById("demo-states").innerHTML = STATES[screen].map(s => `<button type="button" data-state="${s[0]}" aria-pressed="${s[0] === state}">${esc(s[1])}</button>`).join("");
+  document.getElementById("demo-note").textContent = NOTES[screen];
+
+  const denied = state === "denied";
+  const navQuestions = document.getElementById("nav-questions"), navBase = document.getElementById("nav-base-texts");
+  navQuestions.hidden = denied; navBase.hidden = denied;
+  navQuestions.toggleAttribute("aria-current", false); navBase.toggleAttribute("aria-current", false);
+  if (screen === "list" || screen === "form") navBase.setAttribute("aria-current", "page"); else navQuestions.setAttribute("aria-current", "page");
+
+  const main = document.getElementById("main");
+  main.innerHTML = { list: renderList, form: renderForm, question: renderQuestion, transcribe: renderTranscribe }[screen]();
+
+  let overlay = "";
+  if (screen === "list" && state === "confirmDelete") {
+    const target = findText(pendingDelete);
+    overlay = confirmDialog(t("Common.Delete.Title"), t("BaseTexts.Delete.Message", target.title), t("Common.Delete.Confirm", t("BaseTexts.Delete.Object")), "delete");
+  }
+  if (screen === "form" && state === "confirmDelete") overlay = confirmDialog(t("Common.Delete.Title"), t("BaseTexts.Delete.Message", findText(3).title), t("Common.Delete.Confirm", t("BaseTexts.Delete.Object")), "delete");
+  if (screen === "form" && state === "unsaved") overlay = confirmDialog(t("Common.Discard.Title"), t("Common.Discard.Message"), t("Common.Discard.Confirm"), "discard");
+  if (screen === "list" && state === "deleted") overlay = snack(t("BaseTexts.Deleted"));
+  if (screen === "form" && state === "saved") overlay = snack(t("BaseTexts.Saved"));
+  document.getElementById("overlay").innerHTML = overlay;
+  const confirmButton = document.querySelector("[data-dlg='confirm']");
+  if (confirmButton) confirmButton.focus();
+}
+
+/* ===========================================================================
+   events
+   =========================================================================== */
+document.querySelectorAll("svg[data-icon]").forEach(el => { el.innerHTML = `<path d="${ICONS[el.dataset.icon]}"/>`; });
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-screen],[data-state],[data-lang],[data-theme-btn],[data-delete],[data-form-delete],[data-dlg],[data-toggle-preview],[data-pick],[data-go],#question-base-text,#question-base-text-clear,#page-primary,a[href='#']");
+  if (!el) return;
+  if (el.matches("a[href='#']") && !el.dataset.go) { e.preventDefault(); return; }
+  if (el.dataset.screen) { screen = el.dataset.screen; setState(STATES[screen][0][0]); return; }
+  if (el.dataset.state) { setState(el.dataset.state); return; }
+  if (el.dataset.lang) { lang = el.dataset.lang; render(); return; }
+  if (el.dataset.themeBtn) {
+    document.documentElement.dataset.theme = el.dataset.themeBtn;
+    document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", String(b === el)));
+    return;
+  }
+  if (el.dataset.go) { e.preventDefault(); const p = el.dataset.go.split(":"); screen = p[0]; setState(p[1]); return; }
+  if (el.id === "page-primary") { screen = "form"; setState("new"); return; }
+  if (el.dataset.delete) { pendingDelete = Number(el.dataset.delete); state = "confirmDelete"; render(); return; }
+  if (el.hasAttribute("data-form-delete")) { setState("confirmDelete"); return; }
+  if (el.dataset.dlg) {
+    const confirmed = el.dataset.dlg === "confirm";
+    if (screen === "list") { if (confirmed) deletedIds.push(pendingDelete); state = confirmed ? "deleted" : "ready"; render(); return; }
+    if (state === "unsaved") { if (confirmed) { screen = "list"; setState("ready"); } else setState("editInUse"); return; }
+    if (confirmed) { screen = "list"; deletedIds = [3]; state = "deleted"; render(); } else setState("editFree");
+    return;
+  }
+  if (el.hasAttribute("data-toggle-preview")) { qExpanded = !qExpanded; render(); document.getElementById("question-base-text-preview-button").focus(); return; }
+  if (el.dataset.pick) {
+    qChosen = Number(el.dataset.pick); qCleared = null; qExpanded = false;
+    state = screen === "transcribe" ? state : (qChosen === savedChosen ? "chosen" : "unsaved");
+    render(); return;
+  }
+  if (el.id === "question-base-text-clear") { qChosen = null; qExpanded = false; render(); document.getElementById("question-base-text").focus(); return; }
+  if (el.id === "question-base-text" && screen === "question" && !qChosen && state !== "open" && state !== "annulled") { state = "open"; render(); const input = document.getElementById("question-base-text"); input.focus(); return; }
+});
+
+document.addEventListener("input", e => {
+  if (e.target.id === "base-texts-search") { listTerm = e.target.value; document.getElementById("list-body").innerHTML = listBody(); }
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "base-texts-filter-language") { listLang = e.target.value; document.getElementById("list-body").innerHTML = listBody(); }
+  if (e.target.id === "question-content-language") {
+    const next = e.target.value;
+    const chosen = qChosen ? findText(qChosen) : null;
+    if (chosen && chosen.lang !== next) {
+      /* BR13 (and the same on the regular form): a text in another language is not kept */
+      qCleared = { title: chosen.title, from: chosen.lang, to: next };
+      qChosen = null; qExpanded = false;
+      if (screen === "question") state = "cleared";
+    } else if (!chosen) {
+      qCleared = null;
+    }
+    qLang = next;
+    render();
+    document.getElementById("question-content-language").focus();
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (document.querySelector(".app-dialog-backdrop")) { const c = document.querySelector("[data-dlg='cancel']"); if (c) c.click(); return; }
+  if (screen === "question" && (state === "open" || state === "noResults")) { state = savedChosen ? "chosen" : "none"; render(); }
+});
+
+render();
+</script>
+</body>
+</html>

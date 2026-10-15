@@ -42,7 +42,8 @@ public sealed class Question : TenantEntity
     /// <summary>The comparable form of <see cref="StatementText"/>: what the list search reads (BR10).</summary>
     public string NormalizedStatement { get; private set; } = string.Empty;
 
-    public string? BaseTextHtml { get; private set; }
+    /// <summary>The base text shown before the statement; held by id (F-102, BR2). Null means none.</summary>
+    public Guid? BaseTextId { get; private set; }
 
     public string? ExplanationHtml { get; private set; }
 
@@ -99,8 +100,10 @@ public sealed class Question : TenantEntity
     /// <paramref name="latest"/> (the first publication makes version 1). A key that differs from the latest
     /// version's needs <paramref name="changeReason"/>, 1 to 500 characters after trimming; a reason on any
     /// other version is kept as its note and a reason where no version is made is ignored.
+    /// <paramref name="baseTextHtml"/> is the HTML of the base text the question links, read by the caller (F-102,
+    /// BR4, BR5): it is part of what a version snapshots, and null means no base text.
     /// </summary>
-    public Result<QuestionVersion?> NextVersion(QuestionVersion? latest, string? changeReason)
+    public Result<QuestionVersion?> NextVersion(QuestionVersion? latest, string? changeReason, string? baseTextHtml = null)
     {
         if (Status != QuestionStatus.Published)
         {
@@ -118,7 +121,7 @@ public sealed class Question : TenantEntity
             .ToList();
 
         // BR3: nothing differs from the latest version, so nothing is recorded and a reason is ignored (BR5).
-        if (latest is not null && SameVersionedContent(latest, options))
+        if (latest is not null && SameVersionedContent(latest, options, baseTextHtml))
         {
             return Result.Success<QuestionVersion?>(null);
         }
@@ -149,7 +152,7 @@ public sealed class Question : TenantEntity
             Type,
             ContentLanguage,
             StatementHtml,
-            BaseTextHtml,
+            baseTextHtml,
             ExplanationHtml,
             TrueFalseKey,
             options,
@@ -159,11 +162,11 @@ public sealed class Question : TenantEntity
 
     // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
     // with their mark and the true/false key; topic, difficulty and origin are catalog data and never compared.
-    private bool SameVersionedContent(QuestionVersion version, List<QuestionVersionOption> options) =>
+    private bool SameVersionedContent(QuestionVersion version, List<QuestionVersionOption> options, string? baseTextHtml) =>
         version.Type == Type
         && version.ContentLanguage == ContentLanguage
         && version.StatementHtml == StatementHtml
-        && version.BaseTextHtml == BaseTextHtml
+        && version.BaseTextHtml == baseTextHtml
         && version.ExplanationHtml == ExplanationHtml
         && version.TrueFalseKey == TrueFalseKey
         && version.Options.Count == options.Count
@@ -336,11 +339,6 @@ public sealed class Question : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionStatementTooLong, ErrorKind.Validation));
         }
 
-        if (content.BaseText.Html.Length > QuestionLimits.BaseTextMaxLength)
-        {
-            return Result.Failure(new Error(QuestionBankErrorCodes.QuestionBaseTextTooLong, ErrorKind.Validation));
-        }
-
         if (content.Explanation.Html.Length > QuestionLimits.ExplanationMaxLength)
         {
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionExplanationTooLong, ErrorKind.Validation));
@@ -388,7 +386,7 @@ public sealed class Question : TenantEntity
         StatementHtml = content.Statement.Html;
         StatementText = content.Statement.PlainText;
         NormalizedStatement = ComparableText.Normalize(content.Statement.PlainText);
-        BaseTextHtml = content.BaseText.IsEmpty ? null : content.BaseText.Html;
+        BaseTextId = content.BaseTextId is { } baseTextId && baseTextId != Guid.Empty ? baseTextId : null;
         ExplanationHtml = content.Explanation.IsEmpty ? null : content.Explanation.Html;
         Difficulty = content.Difficulty;
         ExamEditionId = editionId;

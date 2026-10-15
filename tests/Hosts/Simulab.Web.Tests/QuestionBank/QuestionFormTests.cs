@@ -93,10 +93,13 @@ public sealed class QuestionFormTests : QuestionPageTestContext
             page.FindAll($"#{id}").Should().NotBeEmpty($"the form has the field {id}");
         }
 
-        foreach (var id in new[] { "question-statement", "question-base-text", "question-explanation" })
+        // F-102 AC13 (changed): the base text is a picker of stored base texts, no longer a rich text editor.
+        foreach (var id in new[] { "question-statement", "question-explanation" })
         {
             page.FindAll($"#{id}-label").Should().ContainSingle($"the rich text field {id} has its label");
         }
+
+        page.FindComponents<AppLookupField>().Should().Contain(component => component.Instance.Id == "question-base-text");
 
         // A question that is not saved has nothing to preview or publish: the card only says so.
         page.Markup.Should().Contain("Save the question first to preview or publish it.");
@@ -108,15 +111,14 @@ public sealed class QuestionFormTests : QuestionPageTestContext
     public void Add_RequiredFieldsAreMarked_AndTheStatementEditorIsNamedByItsLabel()
     {
         var page = RenderAdd();
-        WaitForEditors(page, "question-statement", "question-base-text", "question-explanation");
+        WaitForEditors(page, "question-statement", "question-explanation");
 
         RichText.Editors["question-statement"].Required.Should().BeTrue();
         RichText.Editors["question-statement"].LabelId.Should().Be("question-statement-label");
         RichText.Editors["question-statement"].DescriptionId.Should().Be("question-statement-description");
-        RichText.Editors["question-base-text"].Required.Should().BeFalse();
+        RichText.Editors.Keys.Should().NotContain("question-base-text", "the base text is picked, never typed here");
         RichText.Editors["question-explanation"].Required.Should().BeFalse();
         page.Find("#question-statement-description").TextContent.Should().Contain("Up to 10,000 characters.");
-        page.Find("#question-base-text-description").TextContent.Should().Contain("Up to 20,000 characters.");
     }
 
     // AC14: the form starts with the curator's UI language when the app supports it, and with the default when not.
@@ -225,7 +227,7 @@ public sealed class QuestionFormTests : QuestionPageTestContext
         sent.TopicId.Should().Be(Crase.Id);
         sent.ContentLanguage.Should().Be("en");
         sent.StatementHtml.Should().Be("<p>Qual frase está certa?</p>");
-        sent.BaseTextHtml.Should().BeNull("an untouched base text is not sent");
+        sent.BaseTextId.Should().BeNull("a question with no base text chosen links none");
         sent.ExplanationHtml.Should().BeNull();
         sent.Difficulty.Should().Be(4);
         sent.Options!.Select(option => option.TextHtml).Should().Equal("<p>Opção A</p>", "<p>Opção B</p>", "<p>Opção C</p>");
@@ -500,7 +502,8 @@ public sealed class QuestionFormTests : QuestionPageTestContext
         WaitForEditors(page, "question-statement", "question-option-2");
         page.Find("h1").TextContent.Should().Be("Edit question");
         RichText.Editors["question-statement"].Html.Should().Be(Published.StatementHtml);
-        RichText.Editors["question-base-text"].Html.Should().Be(Published.BaseTextHtml);
+        page.FindComponents<AppLookupField>().Single(c => c.Instance.Id == "question-base-text").Instance.Value!.Id
+            .Should().Be(Published.BaseText!.Id, "the stored link is the chosen base text");
         RichText.Editors["question-explanation"].Html.Should().Be(Published.ExplanationHtml);
         RichText.Editors["question-option-0"].Html.Should().Be("<p>Antes do vocativo</p>");
         page.FindAll(".app-option-letter").Select(letter => letter.TextContent).Should().Equal("A", "B", "C");
@@ -625,7 +628,8 @@ public sealed class QuestionFormTests : QuestionPageTestContext
     [Theory]
     [InlineData(QuestionBankErrorCodes.QuestionStatementTooLong, "question-statement", "The statement has more than 10,000 characters.")]
     [InlineData(QuestionBankErrorCodes.QuestionStatementRequired, "question-statement", "Write the statement.")]
-    [InlineData(QuestionBankErrorCodes.QuestionBaseTextTooLong, "question-base-text", "The base text has more than 20,000 characters.")]
+    [InlineData(QuestionBankErrorCodes.QuestionBaseTextNotFound, "question-base-text", "This base text no longer exists. Pick another or leave the field empty.")]
+    [InlineData(QuestionBankErrorCodes.QuestionBaseTextLanguageMismatch, "question-base-text", "The base text and the question must be in the same language.")]
     [InlineData(QuestionBankErrorCodes.QuestionExplanationTooLong, "question-explanation", "The explanation has more than 10,000 characters.")]
     [InlineData(QuestionBankErrorCodes.QuestionDifficultyInvalid, "question-difficulty", "Difficulty is a number from 1 to 5, or empty.")]
     [InlineData(QuestionBankErrorCodes.QuestionContentLanguageInvalid, "question-content-language", "Choose one of the supported languages.")]

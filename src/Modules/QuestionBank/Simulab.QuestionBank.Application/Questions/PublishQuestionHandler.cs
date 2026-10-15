@@ -29,7 +29,12 @@ public sealed class PublishQuestionHandler(IQuestionStore store, IQuestionQuerie
 
         // A refusal here happens before the save, so the question stays a draft.
         var latest = await store.FindLatestVersionAsync(id, cancellationToken);
-        var next = question.NextVersion(latest, changeReason);
+        // F-102 BR5: the version snapshots the passage as it is now; the read holds a shared lock until the save,
+        // so an edit of the text cannot commit between this read and the version.
+        var baseText = question.BaseTextId is { } baseTextId
+            ? await store.FindBaseTextAsync(baseTextId, cancellationToken)
+            : null;
+        var next = question.NextVersion(latest, changeReason, baseText?.TextHtml);
         if (next.IsFailure)
         {
             return Result.Failure<QuestionResponse>(next.Error!);

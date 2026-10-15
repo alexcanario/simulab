@@ -2583,6 +2583,210 @@
         }
       }
     },
+    "/api/v1/question-bank/base-texts": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListBaseTexts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "CreateBaseText",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBaseTextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/base-texts/{id}": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "FindBaseText",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "UpdateBaseText",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveBaseTextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "DeleteBaseText",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/base-texts/{id}/questions": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListBaseTextQuestions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/question-bank/editions": {
       "get": {
         "tags": [
@@ -3127,6 +3331,33 @@
         },
         "description": "Chooses a new password with the token from the reset email (F-7 UC2)."
       },
+      "SaveBaseTextRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "What the curator calls the text, 1 to 200 characters after trimming (BR1)."
+          },
+          "contentLanguage": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "One of the app's languages, canonicalized (BR1). Required."
+          },
+          "textHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The text. Required, not empty once its tags are removed, up to 20,000 characters (BR1)."
+          }
+        },
+        "description": "What the base text form sends, for a create and for an update (F-102, UC1 and UC2). The text is HTML written\r\nby a person; the Api sanitizes it (BR8)."
+      },
       "SaveExamEditionRequest": {
         "type": "object",
         "properties": {
@@ -3401,12 +3632,13 @@
             ],
             "description": "What the student is asked. Required, not empty once its tags are removed (BR3)."
           },
-          "baseTextHtml": {
+          "baseTextId": {
             "type": [
               "null",
               "string"
             ],
-            "description": "A text the question refers to, shown before the statement. Optional."
+            "description": "The base text the question refers to, shown before the statement; null when it has none (F-102, BR2).",
+            "format": "uuid"
           },
           "explanationHtml": {
             "type": [

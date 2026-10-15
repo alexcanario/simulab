@@ -22,7 +22,10 @@ public sealed class TrueFalseQuestionPreviewAndListTests : QuestionPageTestConte
         Portuguese.Name,
         "pt-BR",
         "<p>A crase é <strong>obrigatória</strong> antes de verbos.</p>",
-        "<p>Texto-base sobre crase.</p>",
+        new QuestionBaseTextResponse(
+            Guid.Parse("0198f5a0-0000-7000-8000-0000000000d8"),
+            "Texto sobre crase",
+            "<p>Texto-base sobre crase.</p>"),
         "<p>Nunca se usa crase antes de verbo.</p>",
         2,
         [],

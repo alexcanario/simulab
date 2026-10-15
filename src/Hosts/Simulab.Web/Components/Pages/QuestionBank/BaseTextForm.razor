@@ -1,0 +1,535 @@
+@page "/admin/base-texts/new"
+@page "/admin/base-texts/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject IConfirmService Confirm
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+@* F-102, UC1, UC2, UC4 and UC5: the base text is written on a page of its own, once, and every question that uses
+   it picks it (rule: ui-project, one way to edit an item). Save is the only filled button. The questions that use
+   the text and the delete sit in cards below the form, because they act on what is stored (the question form's
+   publication card pattern). *@
+<AppPageHeader Title="@Title" Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_loadFailed)
+{
+    <AppErrorState OnRetry="ReloadAsync" />
+}
+else if (_notFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(QuestionBankErrorCodes.BaseTextNotFound)" Class="mb-4" />
+        <AppLink Href="@ListRoute">@L["BaseTexts.BackToList"]</AppLink>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppErrorSummary Id="@ErrorSummaryId"
+                         Title="@L["Common.ErrorSummary.Title"]"
+                         Items="@(_showErrorSummary ? ErrorSummaryItems : Array.Empty<AppErrorSummaryItem>())" />
+
+        @if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+        }
+
+        <AppSectionCard Id="base-text-section-text"
+                        Title="@L["BaseTexts.Section.Text"]"
+                        Icon="@AppIcons.BaseText"
+                        Subtitle="@L["BaseTexts.Section.Text.Subtitle"]">
+            <AppFormGrid Columns="2">
+                <AppTextField TValue="string"
+                              Id="base-text-title"
+                              Label="@L["BaseTexts.Field.Title"]"
+                              Placeholder="@L["BaseTexts.Field.Title.Placeholder"]"
+                              Hint="@L["BaseTexts.Field.Title.Hint"]"
+                              Required="true"
+                              MaxLength="QuestionLimits.BaseTextTitleMaxLength"
+                              Value="_title"
+                              ValueChanged="@((string? value) => OnTitleChanged(value))"
+                              Error="@_titleError" />
+
+                @* BR3: a language that questions use cannot change, so the select is locked and says why. *@
+                <AppSelectField TValue="string"
+                                Id="base-text-content-language"
+                                Label="@L["BaseTexts.Field.ContentLanguage"]"
+                                Value="_language"
+                                ValueChanged="@((string? value) => OnLanguageChanged(value))"
+                                Options="LanguageOptions"
+                                Required="true"
+                                Disabled="IsLocked"
+                                LeadingIcon="@AppIcons.Language"
+                                Hint="@(IsLocked ? L["BaseTexts.Field.ContentLanguage.Locked", _saved!.QuestionCount].Value : L["BaseTexts.Field.ContentLanguage.Hint"].Value)"
+                                Error="@_languageError" />
+            </AppFormGrid>
+
+            @* BR4: a change of the text versions each published question that uses it; the notice says so. *@
+            @if (IsLocked)
+            {
+                <div id="base-text-versions-notice">
+                    <AppAlert Severity="Severity.Info" Text="@L["BaseTexts.Versions.Notice"]" Class="mb-4" />
+                </div>
+            }
+
+            <AppRichTextField Id="base-text-text"
+                              Label="@L["BaseTexts.Field.Text"]"
+                              Placeholder="@L["BaseTexts.Field.Text.Placeholder"]"
+                              Hint="@L["BaseTexts.Field.Text.Hint"]"
+                              Required="true"
+                              Lang="@_language"
+                              Value="@_html"
+                              ValueChanged="@((string? value) => OnTextChanged(value))"
+                              Error="@_textError" />
+        </AppSectionCard>
+
+        <AppFormActions Saving="_saving"
+                        HasChanges="HasChanges"
+                        OnSave="SaveAsync"
+                        OnCancel="Cancel" />
+    </MudPaper>
+
+    @if (IsEdit)
+    {
+        @* UC4, BR11: the questions that use the text, most recently changed first; Edit opens the question. *@
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <AppSectionCard Id="base-text-section-questions"
+                            Title="@L["BaseTexts.Section.Questions", _saved!.QuestionCount]"
+                            Icon="@AppIcons.Questions"
+                            Subtitle="@L["BaseTexts.Section.Questions.Subtitle"]">
+                <AppDataTable @ref="_questions"
+                              TItem="QuestionListItemResponse"
+                              LoadAsync="LoadQuestionsAsync"
+                              Searchable="false"
+                              EmptyMessage="@L["BaseTexts.Questions.Empty"]">
+                    <Columns>
+                        <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.StatementExcerpt"
+                                        Title="@L["Questions.Column.Statement"]" Sortable="false">
+                            <CellTemplate>
+                                <AppTruncatedText Text="@context.Item.StatementExcerpt" MaxWidth="26rem" Lang="@context.Item.ContentLanguage" />
+                            </CellTemplate>
+                        </PropertyColumn>
+                        <TemplateColumn T="QuestionListItemResponse" Title="@L["Questions.Column.Source"]" Sortable="false">
+                            <CellTemplate>
+                                @if (QuestionText.SourceLine(context.Item.Origin) is { } sourceLine)
+                                {
+                                    <AppTruncatedText Text="@sourceLine" MaxWidth="16rem" />
+                                    <span class="app-cell-secondary">@L["Questions.Source.Number", context.Item.Origin!.PaperNumber]</span>
+                                }
+                                else if (context.Item.Origin is null)
+                                {
+                                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
+                                    <span aria-hidden="true">—</span>
+                                    <span class="app-visually-hidden">@L["Questions.Source.Authored"]</span>
+                                }
+                                else
+                                {
+                                    <span class="app-cell-secondary">@L["Questions.Source.Number", context.Item.Origin.PaperNumber]</span>
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <PropertyColumn T="QuestionListItemResponse" TProperty="QuestionStatus" Property="row => row.Status"
+                                        Title="@L["Questions.Column.Status"]" Sortable="false">
+                            <CellTemplate>
+                                <AppStatusChip Text="@QuestionText.StatusName(L, context.Item.Status)"
+                                               Tone="QuestionText.StatusTone(context.Item.Status)" />
+                            </CellTemplate>
+                        </PropertyColumn>
+                    </Columns>
+                    <RowActions>
+                        <AppRowActions ItemName="@L["Questions.Row.Name", QuestionHtml.Excerpt(context.StatementExcerpt, QuestionText.RowNameLength)]"
+                                       IdPrefix="@($"base-text-question-actions-{context.Id}")"
+                                       OnEdit="@(() => OpenQuestion(context))" />
+                    </RowActions>
+                </AppDataTable>
+            </AppSectionCard>
+        </MudPaper>
+
+        @* BR6: a text that a question links is not deleted; the reason is visible text under the button because a
+           disabled button cannot take focus. *@
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <AppSectionCard Id="base-text-section-delete"
+                            Title="@L["BaseTexts.Section.Delete"]"
+                            Icon="@AppIcons.Delete"
+                            Subtitle="@L["BaseTexts.Section.Delete.Subtitle"]">
+                <div class="app-danger-row">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@AppIcons.Delete"
+                               Disabled="@(IsLocked || _saving || _deleting)"
+                               OnClick="DeleteAsync"
+                               aria-describedby="@(IsLocked ? "base-text-delete-reason" : null)"
+                               id="base-text-delete">@L["Common.Delete"]</MudButton>
+                </div>
+
+                @if (IsLocked)
+                {
+                    <p id="base-text-delete-reason" class="app-publication-reason">@L["BaseTexts.Delete.DisabledInUse", _saved!.QuestionCount]</p>
+                }
+            </AppSectionCard>
+        </MudPaper>
+    }
+}
+
+@code {
+    private const string ErrorSummaryId = "base-text-error-summary";
+    private const string ListRoute = "/admin/base-texts";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    /// <summary>The base text being edited; absent on /admin/base-texts/new.</summary>
+    [Parameter] public Guid? Id { get; set; }
+
+    /// <summary>The language the new form starts with when it opens from the question form's "Create" link.</summary>
+    [SupplyParameterFromQuery(Name = "language")] public string? PresetLanguage { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private AppDataTable<QuestionListItemResponse>? _questions;
+    private BaseTextResponse? _saved;
+    private string _title = string.Empty;
+    private string? _language;
+    private string _html = string.Empty;
+    private string? _initialLanguage;
+
+    private string? _titleError;
+    private string? _languageError;
+    private string? _textError;
+    private string? _error;
+
+    private bool _loading;
+    private bool _loadFailed;
+    private bool _notFound;
+    private bool _saving;
+    private bool _deleting;
+    private bool _leaving;
+    private bool _showErrorSummary;
+
+    private bool IsEdit => _saved is not null;
+
+    // BR3: the language of a text that questions link does not change.
+    private bool IsLocked => _saved is { QuestionCount: > 0 };
+
+    private string Title => IsEdit || Id is not null ? L["BaseTexts.Form.EditTitle"] : L["BaseTexts.Form.AddTitle"];
+
+    // A language is shown in its own name: it does not depend on the reader's UI language.
+    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
+        [.. SupportedCultures.All.Select(culture =>
+            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    private IReadOnlyList<AppErrorSummaryItem> ErrorSummaryItems
+    {
+        get
+        {
+            List<AppErrorSummaryItem> items = [];
+            if (_titleError is not null)
+            {
+                items.Add(new AppErrorSummaryItem("base-text-title", L["BaseTexts.Field.Title"]));
+            }
+
+            if (_languageError is not null)
+            {
+                items.Add(new AppErrorSummaryItem("base-text-content-language", L["BaseTexts.Field.ContentLanguage"]));
+            }
+
+            if (_textError is not null)
+            {
+                items.Add(new AppErrorSummaryItem("base-text-text", L["BaseTexts.Field.Text"]));
+            }
+
+            return items;
+        }
+    }
+
+    // What the form holds against what is stored (a new text is compared with an empty one). Leaving after a
+    // delete is not a loss: the confirmation already said what goes.
+    private bool HasChanges =>
+        !_leaving
+        && (_saved is null
+            ? _title.Length > 0 || _language != _initialLanguage || !QuestionHtml.IsBlank(_html)
+            : _title != _saved.Title
+                || !string.Equals(_language, _saved.ContentLanguage, StringComparison.Ordinal)
+                || Normalized(_html) != Normalized(_saved.TextHtml));
+
+    private static string Normalized(string? html) => QuestionHtml.IsBlank(html) ? string.Empty : html!;
+
+    protected override void OnInitialized() => _language = _initialLanguage = ValidLanguageOrDefault(null);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BuildBreadcrumbs();
+        if (Id is not { } id)
+        {
+            // New: the question form's Create link presets a valid language (Screen 2).
+            if (_saved is null && !HasChanges)
+            {
+                _language = _initialLanguage = ValidLanguageOrDefault(PresetLanguage);
+            }
+
+            return;
+        }
+
+        if (_saved?.Id == id)
+        {
+            return;
+        }
+
+        await LoadAsync(id);
+    }
+
+    private static string ValidLanguageOrDefault(string? tag) =>
+        SupportedCultures.All.FirstOrDefault(culture => string.Equals(culture.Name, tag, StringComparison.OrdinalIgnoreCase))?.Name
+        ?? QuestionText.DefaultContentLanguage();
+
+    private Task ReloadAsync() => Id is { } id ? LoadAsync(id) : Task.CompletedTask;
+
+    private async Task LoadAsync(Guid id)
+    {
+        _loading = true;
+        _loadFailed = false;
+        _notFound = false;
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindBaseTextAsync(token, id);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } baseText })
+        {
+            Apply(baseText);
+            BuildBreadcrumbs();
+            return;
+        }
+
+        // 404 is the answer "this text is not here"; anything else is a broken call the reader may retry.
+        _notFound = result?.ErrorCode == QuestionBankErrorCodes.BaseTextNotFound;
+        _loadFailed = !_notFound;
+    }
+
+    // The form shows what was stored: the sanitized HTML replaces what the editor held (BR8).
+    private void Apply(BaseTextResponse baseText)
+    {
+        _saved = baseText;
+        _title = baseText.Title;
+        _language = baseText.ContentLanguage;
+        _html = baseText.TextHtml;
+        _titleError = _languageError = _textError = _error = null;
+        _showErrorSummary = false;
+    }
+
+    private void BuildBreadcrumbs() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["BaseTexts.Title"], href: ListRoute),
+            new BreadcrumbItem(Title, href: null, disabled: true)
+        ];
+
+    // -- edits and comfort checks: the Api is the authority and runs the same ones (rule: ui-project) -----------
+
+    private void OnTitleChanged(string? value)
+    {
+        _title = value ?? string.Empty;
+        _titleError = TitleError();
+    }
+
+    private void OnLanguageChanged(string? value)
+    {
+        _language = value;
+        _languageError = null;
+    }
+
+    private void OnTextChanged(string? value)
+    {
+        _html = value ?? string.Empty;
+        _textError = TextError();
+    }
+
+    private string? TitleError()
+    {
+        var title = _title.Trim();
+
+        return title.Length == 0
+            ? Errors.For(QuestionBankErrorCodes.BaseTextTitleRequired)
+            : title.Length > QuestionLimits.BaseTextTitleMaxLength
+                ? Errors.For(QuestionBankErrorCodes.BaseTextTitleTooLong)
+                : null;
+    }
+
+    private string? TextError() =>
+        QuestionHtml.IsBlank(_html)
+            ? Errors.For(QuestionBankErrorCodes.BaseTextTextRequired)
+            : _html.Length > QuestionLimits.BaseTextMaxLength
+                ? Errors.For(QuestionBankErrorCodes.BaseTextTextTooLong)
+                : null;
+
+    // -- save ---------------------------------------------------------------------------------------------------
+
+    private async Task SaveAsync()
+    {
+        _titleError = TitleError();
+        _languageError = string.IsNullOrWhiteSpace(_language) ? Errors.For(QuestionBankErrorCodes.BaseTextContentLanguageInvalid) : null;
+        _textError = TextError();
+
+        if (_titleError is not null || _languageError is not null || _textError is not null)
+        {
+            // The summary lists every refused field at once and takes the focus, so the reader does not hunt.
+            _showErrorSummary = true;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
+            return;
+        }
+
+        _showErrorSummary = false;
+        _saving = true;
+        _error = null;
+
+        var token = await TokenAsync();
+        var request = new SaveBaseTextRequest(_title.Trim(), _language, _html);
+        var result = token is null
+            ? QuestionBankResult.Failed<BaseTextResponse>(ErrorText.UnexpectedCode)
+            : IsEdit
+                ? await Api.UpdateBaseTextAsync(token, _saved!.Id, request)
+                : await Api.CreateBaseTextAsync(token, request);
+
+        _saving = false;
+        if (result is { IsSuccess: true, Value: { } baseText })
+        {
+            var wasAdd = !IsEdit;
+            Apply(baseText);
+            BuildBreadcrumbs();
+            Snackbar.Add(L["BaseTexts.Saved"], Severity.Success);
+            if (wasAdd)
+            {
+                // The page stays open as the edit form of the text just saved. The render comes first: the
+                // NavigationLock of the form actions reads HasChanges from the last render and would otherwise ask
+                // to discard what was just saved (F-35).
+                StateHasChanged();
+                await Task.Yield();
+                Navigation.NavigateTo($"{ListRoute}/{baseText.Id}", replace: true);
+            }
+            else if (_questions is not null)
+            {
+                await _questions.ReloadAsync();
+            }
+
+            return;
+        }
+
+        await ShowRefusalAsync(result.ErrorCode);
+    }
+
+    // A refusal belongs to the field that caused it, so the reader sees where to change something.
+    private async Task ShowRefusalAsync(string? code)
+    {
+        var text = Errors.For(code);
+        var fieldRefused = true;
+
+        switch (code)
+        {
+            case QuestionBankErrorCodes.BaseTextTitleRequired:
+            case QuestionBankErrorCodes.BaseTextTitleTooLong:
+                _titleError = text;
+                break;
+            case QuestionBankErrorCodes.BaseTextTextRequired:
+            case QuestionBankErrorCodes.BaseTextTextTooLong:
+                _textError = text;
+                break;
+            case QuestionBankErrorCodes.BaseTextContentLanguageInvalid:
+            case QuestionBankErrorCodes.BaseTextLanguageInUse:
+                _languageError = text;
+                break;
+            default:
+                // Not found on save, a lost race (question.version_conflict) or an unexpected answer.
+                _error = text;
+                fieldRefused = false;
+                break;
+        }
+
+        if (fieldRefused)
+        {
+            _showErrorSummary = true;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", ErrorSummaryId);
+        }
+    }
+
+    private void Cancel() => Navigation.NavigateTo(ListRoute);
+
+    // -- the questions that use the text (UC4) ------------------------------------------------------------------
+
+    private async Task<AppTablePage<QuestionListItemResponse>> LoadQuestionsAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListBaseTextQuestionsAsync(token, _saved!.Id, query.Page, query.PageSize, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"Questions failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<QuestionListItemResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // The form's NavigationLock asks first when there are unsaved changes.
+    private void OpenQuestion(QuestionListItemResponse question) =>
+        Navigation.NavigateTo($"/admin/questions/{question.Id}");
+
+    // -- delete (BR6) ------------------------------------------------------------------------------------------
+
+    private async Task DeleteAsync()
+    {
+        if (_saved is not { QuestionCount: 0 } current)
+        {
+            return;
+        }
+
+        _error = null;
+        if (!await Confirm.ConfirmDeleteAsync(L, L["BaseTexts.Delete.Object"], L["BaseTexts.Delete.Message", current.Title]))
+        {
+            return;
+        }
+
+        _deleting = true;
+        var token = await TokenAsync();
+        var result = token is null
+            ? QuestionBankResult.Failed<bool>(ErrorText.UnexpectedCode)
+            : await Api.DeleteBaseTextAsync(token, current.Id);
+        _deleting = false;
+
+        if (result.IsSuccess)
+        {
+            Snackbar.Add(L["BaseTexts.Deleted"], Severity.Success);
+
+            // The confirmation already said what goes: leave without the discard question.
+            _leaving = true;
+            StateHasChanged();
+            await Task.Yield();
+            Navigation.NavigateTo(ListRoute);
+            return;
+        }
+
+        // 409 when a question linked it meanwhile: the page reloads the text, so the count, the lock and the
+        // disabled Delete are current, and the alert says why.
+        var text = Errors.For(result.ErrorCode);
+        if (result.ErrorCode == QuestionBankErrorCodes.BaseTextInUse)
+        {
+            await LoadAsync(current.Id);
+        }
+
+        _error = text;
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

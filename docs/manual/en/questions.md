@@ -1,7 +1,7 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101]
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102]
 updated: 2026-10-15
 ---
 # Questions
@@ -47,7 +47,9 @@ Page not found, and the menu has no Questions entry.
    Add a **difficulty** from 1 (easiest) to 5 (hardest) if you want.
 3. Write the **statement**. The toolbar offers bold, italic, underline, strikethrough, superscript, subscript,
    lists, a quote, a link and clear formatting. Images are not supported yet.
-4. Write a **base text** if the question refers to one. It is shown before the statement.
+4. If the question refers to a passage, pick its **base text** in the **Base text** card (see
+   [Base texts](base-texts.md)); only texts in the question's language are offered. It is shown before the
+   statement, and the same text can serve several questions.
 5. Under **Options**, choose **Add option** for each one (up to five), type its text and mark the correct one.
    Use the arrows to move an option; the letters A to E follow the order.
 6. Optionally write the **explanation**, shown with the answer key.
@@ -85,7 +87,7 @@ Use this to enter every question of a past paper in one sitting, without reopeni
 1. Open a saved exam edition and, in its **Questions** card, choose **Transcribe**.
 2. The form opens with the edition fixed and the next number in the paper already filled in (1 when the edition has no questions). You can change the number.
 3. Fill in the question and choose **Save and continue**. The question is saved as a draft, the counter "Question N of this session" goes up and the form clears for the next one.
-4. The edition, the notice subject and the language stay as they were; everything else is blank again. Change the notice subject whenever the paper moves to another one.
+4. The edition, the notice subject, the language and the base text stay as they were; everything else is blank again. A reading block with several questions needs the text picked only once; change or remove it when the block ends. Change the notice subject whenever the paper moves to another one.
 5. Choose **Finish** when you are done. Every question already saved stays in the bank as a draft.
 
 Only single choice and true/false questions can be transcribed. The counter lives only on the screen: if you leave and come back, it starts again at 1 and the suggested number follows what is already saved.
@@ -167,7 +169,7 @@ cite the official act.
 | Content language | The language the question is written in | Required, one of the app's languages. Content is never translated |
 | Difficulty | How hard the question is | Optional, a whole number from 1 to 5 |
 | Statement | What the student is asked | Required, up to 10,000 characters |
-| Base text | A text the question refers to | Optional, up to 20,000 characters |
+| Base text | A passage the question refers to, written once and shared by every question that links it | Optional. Picked from the base texts in the question's language; see [Base texts](base-texts.md) |
 | Options | The choices, letters A to E | Up to 5. To publish: 2 to 5, each with text, exactly one correct. Each up to 2,000 characters |
 | Answer key | Whether the statement of a true/false question is true or false | Only for true/false. May be empty in a draft; required to publish. A published question cannot lose it |
 | Explanation | Why the key is right | Optional, up to 10,000 characters |
@@ -184,7 +186,7 @@ the question is saved, and the page shows what was kept.
 | Message | What it means | What to do |
 |---|---|---|
 | Write the statement. | The statement is empty. | Write what the student is asked. |
-| The statement has more than 10,000 characters. (also the base text, explanation and option limits) | The text is over its limit. | Shorten it. Nothing is cut for you. |
+| The statement has more than 10,000 characters. (also the explanation and option limits) | The text is over its limit. | Shorten it. Nothing is cut for you. |
 | A question is published with 2 to 5 options. | Fewer than two options, or more than five. | Add or remove options. |
 | Every option needs text. | A published question has an empty option. | Write the text or remove the option. |
 | Mark exactly one option as correct. | No correct option, or more than one. | Mark one. |
@@ -220,6 +222,7 @@ the question is saved, and the page shows what was kept.
 - A field with an error says so when you leave it, and a failed save moves the focus to the list of errors.
 
 ## Related pages
+- [Base texts](base-texts.md): the passages several questions share
 - [Subjects and topics](subjects.md): the subjects and topics a question points at
 - [Exam editions](exam-editions.md): the papers questions come from
 - [Roles and permissions](roles.md): who can manage the question bank
