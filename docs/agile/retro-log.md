@@ -1270,3 +1270,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Glossary: already has the `Meaning (pt-BR)` column; the new template row "UI map" was not added to `docs/glossary.md` (not proposed). The project's `docs/agile/ui-map.md` was not created.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. The `Manual locales:` line reads pt-BR, pt-PT while `docs/manual/` also has `en`: not changed, owner to confirm.
 - Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+
+## 2026-10-15 - F-102 Shared base text
+- Events: override 0, question 2 (asked 10, from context 0), rework 0, test-fail 1, blocked 1, change 0. Shipped as 1.0.0 (merge `100686e8`, a breaking change of the v1 question contract accepted by the owner). Gate time: 9 passes, 16 min 34 s, 2 red.
+- score 6/4 (applied, plugin note `plugin: agile [generic]`): a migration test written in the test phase cannot be run against a skeleton, so its seeding helper used a column the migration drops and the locked test had to be unlocked (event `blocked`).
+- score 2/5 (applied, project rule in `.claude/rules/agile/project.md`): the app version is the `<Version>` of `Directory.Build.props`, written by `version.js`; the profile sentence that names `Simulab.Api.csproj` is out of date (F-99 commit `2502a51c` did it that way).
+- score 2/5 (applied, project rule in `.claude/rules/agile/ui-project.md`): an `AppSelectField` filter over string uses `TValue="string"` with an empty value for "all"; `TValue="string?"` gave CS8669 in the generated Razor code and turned the gate red.
