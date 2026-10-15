@@ -1283,3 +1283,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - score 1/6 (applied, hidden fact in `.claude/rules/agile/question-bank-project.md`): a new `QuestionType` value is one more `TypeCards` card, is offered by the transcription screen (F-99 AC6 counted two) and needs a comment migration for the two `type` columns; F-106 to F-109 each add a type.
 - score 1/2 (not recommended, not applied): the F-98 key-change check assumed one correct option; found at refinement by reading `Question.cs` and fixed in the item.
 - Decisions sorted: 11 item decisions stay in the item; 1 hidden fact (the line above).
+
+## 2026-10-16 - Sync with agile@canary 0.85.0
+- From 0.81.0 to 0.85.0 (4 minor versions). Copied: `workflow.pt-BR.md` and `workflow-examples.pt-BR.md` (new section 14.126 `/agile:mvp`, Copilot CLI 1.0.99 measurements). Left alone: edited `git.md` and `profile.md` (plugin unchanged), manual build files (plugin unchanged).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
+- Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.

@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.81.0 (rascunho).
+> Versão 0.85.0 (rascunho).
 
 Sumário
 1. Conceitos em dois minutos
@@ -58,7 +58,7 @@ Subagentes são exceção: um revisor com contexto limpo para mudanças arriscad
 
 ### Usar no Copilot CLI
 
-O plugin foi escrito para o Claude Code, mas o GitHub Copilot CLI lê o mesmo `.claude-plugin/` como manifesto legado: não existe um manifesto à parte nem arquivo convertido. O que existe é uma medida do que carrega, feita com o Copilot CLI 1.0.83 em 2026-10-14; o que não foi medido está dito. Nada aqui muda o plugin para o Claude Code.
+O plugin foi escrito para o Claude Code, mas o GitHub Copilot CLI lê o mesmo `.claude-plugin/` como manifesto legado: não existe um manifesto à parte nem arquivo convertido. O que existe é uma medida do que carrega, feita com o Copilot CLI 1.0.83 em 2026-10-14 (skills e agentes) e, para a variável de root e os hooks, com o 1.0.99 em 2026-10-15; o que não foi medido está dito. Nada aqui muda o plugin para o Claude Code.
 
 Três formas de instalar, as do manual oficial do Copilot CLI. Experimentar sem instalar, a partir de uma pasta qualquer:
 
@@ -98,12 +98,55 @@ O que a medida mostrou, parte por parte. `funciona` quer dizer que o Copilot CLI
 
 | Parte | Estado | Como foi medido |
 |---|---|---|
-| Skills (22) | funciona (carrega e lista; rodar uma skill: não medido) | `copilot --plugin-dir <clone> plugin list` mostrou `agile` em `External Plugins`, e uma chamada `-p` (8,28 AI Credits) listou os 22 nomes, de `idea-capture` a `work-status` |
+| Skills (23) | funciona (carrega e lista; rodar uma skill: não medido) | `copilot --plugin-dir <clone> plugin list` mostrou `agile` em `External Plugins`, e uma chamada `-p` (8,28 AI Credits) listou os 22 nomes da medição, de `idea-capture` a `work-status` (a skill `mvp-cut` veio depois e não foi listada) |
 | Agentes (5) | funciona (carrega e lista; delegar a um: não medido) | a mesma chamada listou `agile:architect`, `agile:frontend`, `agile:reviewer`, `agile:system-design` e `agile:ux-designer`, dos `agents/*.md` sem a extensão `.agent.md` que o manual oficial cita |
 | Comandos (21) | não medido | a chamada respondeu que `/agile:idea` existe e "mapeia" a skill `idea-capture`; uma resposta do modelo não é medida, ninguém digitou o comando |
-| Hooks (6 eventos) | não medido | `hooks/hooks.json` está no formato do Claude Code; o manual oficial não documenta os eventos do Copilot, e `guard.js` não foi rodado lá |
-| `CLAUDE_PLUGIN_ROOT` (22 arquivos) | não medido | as skills e referências a usam para achar os scripts; o manual oficial só documenta a expansão em configurações de MCP, não em texto de skill |
-| `AskUserQuestion` (1 arquivo) | não medido | é uma ferramenta do Claude Code; o equivalente do Copilot CLI não foi verificado |
+| Hooks (6 eventos) | parcial: funciona em 5 dos 6 eventos, 1 não foi alcançado e o matcher de `SubagentStart` não casa | Copilot CLI 1.0.99, 2026-10-15, modelo `claude-haiku-5.5`: um plugin de teste com um registro por evento e oito chamadas `-p` (2,31 AI credits no total), e o `guard.js` real num repositório de teste em `main` com um item `approved` em stage; o detalhe de cada evento está na lista abaixo |
+| `CLAUDE_PLUGIN_ROOT` (23 arquivos) | parcial: funciona em hook; em texto de skill, não medido | Copilot CLI 1.0.99, 2026-10-15: um plugin de teste com um hook `SessionStart` (0,46 AI credits, repetido em 0,19 AI credits com o plugin da sonda abaixo): o processo do hook recebeu `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PLUGIN_DATA`, `COPILOT_PLUGIN_ROOT`, `COPILOT_PLUGIN_DATA` e `PLUGIN_ROOT` (a doc oficial só cita `PLUGIN_ROOT` e `PLUGIN_DATA`, para servidores MCP stdio), e `"${CLAUDE_PLUGIN_ROOT}"` no texto do comando do hook virou a pasta do plugin; nas skills e referências a variável é texto que o modelo lê, e o que ele faz com ela não foi medido |
+| `AskUserQuestion` (1 arquivo) | não medido | é uma ferramenta do Claude Code; o equivalente do Copilot CLI não foi verificado, e um item futuro o mede |
+
+Eventos de hook medidos com o Copilot CLI 1.0.99 (a entrada de cada hook é um JSON no stdin, e o `cwd` do processo do hook é a pasta do plugin):
+
+- `SessionStart`: disparou; a entrada traz `hook_event_name`, `session_id`, `cwd`, `source` e `initial_prompt`.
+- `PreToolUse`: disparou, com `tool_name` `Bash` (comando de shell), `Write`, `Read` e `Agent` (subagente); os matchers `Bash|PowerShell` e `Edit|Write|MultiEdit` do plugin casam com esses nomes, e o `guard.js` real foi acionado por eles.
+- `PostToolUse`: disparou, com `tool_name` e `tool_result`.
+- `Stop`: disparou no fim do turno (`stop_reason` `end_turn`) e também no fim de um subagente.
+- `SubagentStart`: disparou, com `agentName` e `agent_type` `explore` em minúsculas; o matcher `^(Explore|Plan)$` do plugin não casa (medido com os dois matchers: só o de minúsculas disparou), então `status.js subagent` não rodaria no Copilot.
+- `PreCompact`: não alcançado; o modo `-p` não compacta (`-p "/compact"` foi lido como texto) e a compactação automática pede uma sessão longa.
+- `guard.js` (o real, em `PreToolUse`): recusou `git commit` em `main` com `docs/features/F-1-probe.md` (`approved`) em stage, com saída 2 (0,23 AI credits); o Copilot mostrou só `Denied by preToolUse hook from "agile@canary" (hook errored)`, sem a mensagem do guard nem o desvio `# agile:main-ok`; com o desvio escrito no comando o commit passou (0,25 AI credits). Fora de um projeto com `docs/agile`, o guard não faz nada, como no Claude Code.
+
+O que isso quer dizer para o ciclo, e o que nada aqui converteu:
+
+- A guarda de commit em `main` vale no Copilot, mas quem digita não vê o motivo nem o desvio: item a abrir, "a recusa do guard mostra o motivo e o desvio no Copilot".
+- O hook de `SubagentStart` não roda no Copilot por causa do matcher em maiúsculas: item a abrir, junto com os nomes de agente que o Copilot usa.
+- O hook `Stop` que roda os testes (`gate.js stop`) disparou o evento, mas o que ele faz com um .NET real não foi medido; o ciclo de build e ship no Copilot espera esse item e o dos comandos.
+- Os comandos `/agile:<verbo>` e `AskUserQuestion` seguem `não medido`.
+
+O custo no Copilot é em AI credits por token: `/usage` mostra o da sessão e `--max-ai-credits` (mínimo 30) é o teto. As chamadas desta medida custaram de 0,19 a 0,46 AI credits cada, com o modelo `claude-haiku-5.5`.
+
+Para repetir a sonda da variável de root, crie uma pasta com `.claude-plugin/plugin.json` (`{ "name": "probe-root", "version": "0.0.1", "description": "Probe" }`) e `hooks/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "node -e \"require('fs').appendFileSync('plugin-probe.log', Object.keys(process.env).filter(k => /PLUGIN/.test(k)).sort().join(' ') + ';')\"", "timeout": 10 } ] }
+    ]
+  }
+}
+```
+
+```powershell
+copilot --plugin-dir <path to the probe folder> --model claude-haiku-5.5 --max-ai-credits 30 -p "Reply with the single word ok."
+Get-Content <path to the probe folder>/plugin-probe.log
+```
+
+```bash
+copilot --plugin-dir <path to the probe folder> --model claude-haiku-5.5 --max-ai-credits 30 -p "Reply with the single word ok."
+cat <path to the probe folder>/plugin-probe.log
+```
+
+Esperado: os cinco nomes com `PLUGIN` listados, e um custo de cerca de 0,2 AI credits.
 
 O número de arquivos de cada linha é contado pelo `scripts/copilot-compat.check.js`; quando um item muda um deles, o check fica vermelho até a tabela ser atualizada. Converter qualquer coisa que não funcione é um item à parte, não parte desta medida.
 
@@ -778,6 +821,8 @@ A `output-style` define como o Claude fala com você: em pt-BR, com a resposta p
 
 **Uma lista ordenada do que implementar (#166).** `/agile:order` escreve `docs/agile/order.md`: os itens em aberto (de `idea` a `validating`, `blocked` inclusive) na ordem em que devem ser implementados, com o que cada um depende e o que a entrega dele libera. A ordem é a regra do plano de execução do épico, nada além: dependências primeiro (um item fica um nível abaixo das dependências não entregues), depois um bug antes de uma feature, Must, Should, Could, depois o tamanho S, M, L, depois o id. A coluna `Unlocks` nomeia os itens que esperam por ele (`F-13 (unblocks)` quando é a última coisa que um item `blocked` espera) e `first release of <epic>` quando é o último id do `## First release cut` daquele épico, lido como uma lista de ids (`F-12, F-13, F-14`; intervalo ou texto corrido não é lido). O rodapé conta o que foi entregue, diz o quanto falta de cada primeira versão (uma linha por épico, sem MVP global; publicar continua sendo o `/agile:publish`) e lista os itens prontos para serem liberados. Um ciclo vai por último, num grupo próprio. **As marcas ficam salvas (#176).** Uma marca é sua, pessoal, num item em aberto ("li isto" / "quero este agora"): não muda status, ordem nem arquivo de item. Ela fica por id num arquivo só da sua máquina, `agile-order-ticks.json`, dentro da pasta `.git` do repositório (a pasta comum, então todas as worktrees a veem): nunca vai para o Git, não passa para outra máquina e não precisa de linha no `.gitignore`. No app do Claude (a sessão que oferece `show_widget`) a lista aparece como um widget interativo, uma linha por item com caixa (já marcada se salva), posição, id, título, status, o que espera e o que libera, um contador `n de N marcados` e o botão `Limpar marcas`; não há botão de salvar: a cada clique numa caixa (e no `Limpar marcas`) o widget manda na hora uma mensagem com o conjunto inteiro das marcas, `/agile:order ticks F-12 F-14`, e o Claude roda `order.js ticks set` com os ids e responde uma linha; quem marca e troca de sessão não perde nada (#177). O widget é montado a partir da saída de `order.js checklist --json` (com `ticked` em cada item), nunca redigitada. Uma `show_widget` que só está nomeada, ainda não carregada (deferida), conta como oferecida: o Claude a carrega com `ToolSearch` e abre o widget, nunca troca o widget pelo texto só porque a ferramenta não estava carregada (#178). Só num terminal, ou quando a ferramenta não existe ou a chamada falha, você vê as linhas `- [x]` e `- [ ]` de `order.js checklist` dentro de um bloco de código (nunca como linhas `- [ ]` soltas, que o chat desenha como caixas que não clicam), seguidas de uma linha com o motivo (`sem show_widget nesta sessão` ou `o widget não abriu: <erro>`) e de `diga "marque F-3" para marcar`; você marca dizendo "marque F-12" (`tick`, `untick`, `untick --all`, `ticks set`). A marca de um item que saiu da lista (entregue, cancelado) é descartada na execução seguinte; um id que não é um item em aberto da lista é recusado pelo nome e nada é gravado, e um item `deferred` do plugin não pode ser marcado. O `order.md` continua sempre com todas as caixas vazias, então uma marca nunca suja o arquivo versionado (exemplo 14.107). Não marque as caixas ao abrir `docs/agile/order.md` no painel de arquivos do app: lá o clique grava `[x]` no arquivo e suja o checkout. O `/agile:ship` só atualiza o arquivo e nunca mostra o widget. O arquivo é escrito por um script e nunca editado à mão; não leva data, então uma segunda execução não muda nada. O `/agile:order` sempre escreve, mostra a lista de caixas (`## Checklist`, uma linha `- [ ]` por item em aberto, na ordem da tabela, com o que espera e o que libera) e propõe o commit `chore(order): refresh the ordered list` sem fazê-lo. Daí em diante o `/agile:ship` atualiza o arquivo no commit que põe o item em `done` e imprime uma linha `Order:`: o que a entrega liberou e o quanto falta da primeira versão. Um projeto que nunca digitou `/agile:order` não ganha arquivo e vê uma linha. Um bloqueio, uma nota de mudança, uma aprovação ou uma ideia nova não regeneram o arquivo, e o `/agile:sync` e o `/agile:compact` nunca mexem nele. **Na sessão do plugin (#175).** No repositório do próprio plugin, onde os itens são issues, o `/agile:order` roda `order.js plugin` (com `--json` para o widget), de qualquer checkout, e não escreve nada além do arquivo das marcas: não há `order.md`, nenhum commit é proposto e o ship do plugin não atualiza lista alguma. Ele lê os issues com uma chamada do `gh` e ordena pela mesma função: as linhas são os issues `feature` e `bug` (o épico só dá nome ao grupo), o status é a palavra depois de `Status:`, e a dependência é cada `#n` da linha `- Depends on:` de `## Start`. Entregue é o issue fechado como concluído; um duplicado segue o `Duplicate of #n` e um fechado como não planejado aparece como `(cancelled)` sem subir o nível. Um issue com o rótulo `deferred` fica num grupo `## Parked` depois da ordem, sem posição e fora de qualquer `Unlocks`; o que depende dele espera e mostra `#n (parked)`. Não há linhas de primeira versão. Sem o `gh` logado, ou com 1.000 issues ou mais, a saída é `FAILED: <motivo>` e nenhuma lista parcial; fora do repositório do plugin é `REFUSED`. Exemplo 14.106.
 
+**O corte do MVP (#201).** `/agile:mvp [<slug do epic>]` lê o brief, os epics e os itens em aberto e propõe três grupos, MVP / depois / fora, com um motivo por item. Entra no MVP o que o brief pede, o que tem prioridade Must e tudo de que um item que entra depende (o fecho das dependências, calculado por `scripts/mvp.js`, nunca de cabeça). A análise olha o produto inteiro e pode trazer um item de outro epic; ele fica no corte do epic que o pediu, com uma linha em `## Decisions` dizendo de onde veio. Nada é escrito antes do seu ok, epic por epic; o que você pula não é tocado. O arquivo recebe só os ids em `## First release cut` (os já entregues ficam) e uma linha em `## Decisions` com data, critério e quantidade; os motivos ficam no chat. Rodar de novo depois de entregas parte dos itens ainda abertos e mostra o que entra e o que sai contra o corte gravado. Só roda num projeto com `docs/agile`, `product/brief.md` e ao menos um epic; no repositório do plugin recusa e aponta o `/agile:order plugin`. Publicar continua sendo o `/agile:publish`.
+
 **Os idiomas do manual do plugin (#168).** Os manuais do próprio plugin (este arquivo e o dos exemplos, que um projeto recebe como `docs/agile/workflow*.md`) deixaram de ser fixos em `en` e `pt-BR`: o plugin mantém uma lista, `docs/manual/languages.json` (`{ "enabled": ["pt-BR"] }`), com só o pt-BR ligado, e todo script e skill que lia a lista fixa agora lê essa. Uma tag está ligada quando está na lista **e** a pasta `docs/manual/<tag>/` tem `MANUAL.md` e `MANUAL-examples.md`; uma lista vazia, uma tag repetida ou malformada e uma tag sem pasta são erro, nomeado pelo `manual.check.js`. O primeiro idioma da lista é o de referência (o que o bootstrap lê). `docs/manual/en` ficou congelado, com uma linha no topo dizendo que não é mais mantido, e nenhum script o lê. Ligar um idioma de novo é escrever a pasta dele e pôr a tag na lista. Um projeto recebe só os manuais ligados: `workflow.pt-BR.md` e `workflow-examples.pt-BR.md` (`workflow.md` é o nome do `en`; os outros levam `.<tag>`), e o `CLAUDE.md` dele aponta para o primeiro. Estas são três configurações independentes, lidas de três lugares e nunca cruzadas: a lista do plugin, a linha `Manual locales:` do projeto (o manual da app dele) e os idiomas de UI da app. Um projeto que lista `en` para o manual da app continua recebendo só o manual do plugin em pt-BR. Quem já tinha `workflow.md` ou `workflow-examples.md` não os perde: o `/agile:sync` diz uma vez, por arquivo, que o plugin não os mantém mais e deixa a cópia como está (apague se não quiser), e, quando a linha `Workflow:` do `CLAUDE.md` ainda aponta para uma cópia assim, propõe trocá-la por `docs/agile/workflow.pt-BR.md`, escrevendo só essa linha depois do seu ok. O `/agile:version` lê o cabeçalho de `workflow.pt-BR.md` e, quando só existe o `workflow.md` antigo, o dele.
 
 ## 14. Exemplos de workflow
@@ -806,6 +851,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:status` | Feature em andamento, topo do backlog, perguntas em aberto, o que está bloqueado e por quem |
 | `/agile:compact` | Move os itens finalizados (`done`, `cancelled`) e as entradas antigas do retro-log para `docs/archive/`, deixando uma linha de índice por item: mostra o plano, pede o seu ok, aplica com `git mv` e propõe o commit; recusa enquanto um item está em building ou validating |
 | `/agile:order` | Escreve `docs/agile/order.md`: os itens em aberto na ordem de implementar, o que cada um espera e o que a entrega dele libera, uma lista de caixas para marcar (um widget no app que salva a cada clique; sem o widget, as linhas `- [x]` / `- [ ]` num bloco de código com o motivo; as marcas ficam salvas só na sua máquina, em `.git`), a primeira versão de cada épico; propõe o commit; daí em diante o ship o mantém atual; `/agile:order ticks <ids>` só salva as marcas; no repositório do plugin só mostra a lista a partir dos issues (`order.js plugin`), com os `deferred` num grupo à parte, e não escreve nada além das marcas |
+| `/agile:mvp` | `[<epic>]`: propõe o MVP (o brief, prioridade Must, fecho das dependências) em MVP / depois / fora com um motivo por item e, com o seu ok por epic, escreve `## First release cut` |
 | `/agile:identity` | Registra a identidade visual do app (um arquivo, um site, uma imagem ou três perguntas) em `docs/design/`, ou revisa a que já existe |
 | `/agile:sync` | Depois de atualizar o plugin: renova as cópias de regras, templates, workflow (o manual e seus exemplos) e perfil dentro do projeto; avisa das capacidades que o projeto não tem, como o "Staff backoffice" e o "Staff audit log" de um projeto `mobile`; um projeto com mais de 2 versões menores de atraso é avisado disso e vê essas capacidades e as notas entregues agrupadas pela série menor em que chegaram (os arquivos continuam uma tabela por estado, nada os data), e o sync continua indo direto para a versão atual; um projeto sem a linha `- UI locales:` recebe `pt-BR, pt-PT, en` proposto e um sem a linha `- Manual locales:` recebe uma proposta feita a partir das suas pastas de `docs/manual/` (escrita só com o seu OK); um `workflow.md` ou `workflow-examples.md` antigo é dito aposentado, uma vez, e fica como está, e uma linha `Workflow:` do `CLAUDE.md` que aponta para ele é trocada só com o seu ok (exemplo 14.102) |
 | `/agile:autopilot <feature> [--assume] [--worktree]` | Um item, a partir da etapa que o status dá (`idea` ou `refining` no refinamento, `approved` ou `building` no build, `validating` na parada 2) até done numa execução com duas paradas: as perguntas (as suas respostas o aprovam) e o roteiro de validação ("validado e autorizo o merge de F-n" entrega; só "validado" para em validating). `--assume` pula as perguntas, menos pacotes novos |
@@ -840,6 +886,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:compact` | O início da sessão ou o `/agile:status` imprimiu `Compact:`, ou o backlog e o retro-log cresceram; entre features | 14.99 |
 | `/agile:order` | Você quer ver o que refinar ou construir a seguir e por que o resto espera; uma vez, depois o ship mantém o arquivo atual; na sessão do plugin, quando quiser ver a ordem dos issues abertos | 14.100, 14.106 |
 | `/agile:sync` | Depois de atualizar o plugin, antes do próximo item | 14.10, 14.54, 14.86, 14.92, 14.101 |
+| `/agile:mvp` | Os epics têm itens demais para a primeira versão e você quer decidir o que entra; de novo depois de entregas | 14.126 |
 | `/agile:identity` | O app tem telas e nenhuma identidade visual registrada, ou você quer revisar a que existe | 14.22 |
 | `/agile:autopilot` | Um item pequeno e bem entendido que você quer numa execução com duas paradas; `--assume` quando as recomendações servem para você | 14.13 |
 | `/agile:version` | Você quer saber qual versão do plugin esta sessão usa e se as cópias do projeto estão atrasadas | 14.10 |
@@ -1162,6 +1209,20 @@ flowchart TD
     G["/agile:ship: status done escrito"] --> H{"order.md existe?"}
     H -->|não| H1(["Order: sem lista"])
     H -->|sim| I["order.js refresh: o item contado como entregue;<br/>uma linha Order:, commitada com o item"]
+```
+
+### /agile:mvp
+```mermaid
+flowchart TD
+    A["Checkout principal, branch principal, docs/agile, product/brief.md, um epic e um item em aberto?"] -->|não| A1(["REFUSED: o motivo; nada escrito"])
+    A -->|sim| B["mvp.js candidates: itens em aberto, prioridade, cortes atuais"]
+    B --> C["Claude lê o brief e escolhe as sementes (o brief pede, Must)"]
+    C --> D["mvp.js closure: o que cada semente puxa, needed by"]
+    D --> E["mvp.js diff por epic: enters, leaves, kept; tabela com motivo por item"]
+    E --> F{"Um card por epic: escrever?"}
+    F -->|pular| F1(["epic intocado"])
+    F -->|escrever| G["mvp.js write: First release cut e uma linha em Decisions"]
+    G --> H(["commit proposto: chore(epic): first release cut of epic"])
 ```
 
 ### /agile:identity

@@ -4463,10 +4463,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (22)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (23)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
-ok   AC5: the report states the skills (22) and the agents (5)
+ok   AC5: the report states the skills (23) and the agents (5)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -4531,3 +4531,69 @@ agile uimap STALE: 1 stale, 0 unverified of 2 row(s)
 ```
 
 O relatório do ship traz `Map: 1 stale` e nomeia a linha; o ship continua. Com todas as linhas em dia a última linha é `agile uimap GREEN: 2 row(s)`, e sem mapa nada é dito.
+
+### 14.126 O corte do MVP: `/agile:mvp` propõe, você aprova epic por epic
+
+No acme-shop há dois epics, `checkout` (corte atual: só o F-9, já entregue) e `catalogo`, sem corte. Quatro itens em aberto: o F-12 (Pagar com cartão, Must, depende do F-14), o F-13 (Cupom, Could), o F-14 (Carrinho, Should, do epic `catalogo`) e o F-15 (Lista de desejos, Could). Você digita `/agile:mvp checkout`. O Claude lê o brief e os epics e roda a lista de candidatos; a saída real, sobre esse cenário:
+
+```
+| Id | Epic | Priority | Status | Title | Waits on |
+|---|---|---|---|---|---|
+| F-14 | catalogo | should | approved | Carrinho | - |
+| F-13 | checkout | could | approved | Cupom de desconto | - |
+| F-15 | catalogo | could | approved | Lista de desejos | - |
+| F-12 | checkout | must | approved | Pagar com cartao | F-14 |
+cut catalogo: no section
+cut checkout: F-9
+agile mvp CANDIDATES: 4 open, 1 must, 2 epics
+```
+
+O brief pede pagar com cartão e nada sobre cupom ou lista de desejos; a semente é o F-12. O fecho das dependências é calculado pelo script, não de cabeça:
+
+```
+F-14 needed by F-12
+F-12 seed
+agile mvp CLOSURE: 2 ids
+```
+
+O F-14 é de outro epic e entra mesmo assim, porque o F-12 não funciona sem ele. O Claude mostra a tabela (MVP: F-12 e F-14, com o motivo `needed by F-12` no segundo; depois: F-13 e F-15; fora: nenhum) e a diferença contra o corte gravado:
+
+```
+enters: F-14, F-12
+leaves: -
+kept: F-9
+agile mvp DIFF: checkout 2 enter, 0 leave, 1 kept
+```
+
+Um card pergunta "Escrever o corte do checkout?", com `Escrever (Recomendado)`, `Mudar a lista` e `Pular`. Você escolhe escrever. O arquivo `docs/epics/checkout.md` passa a ter `F-9, F-14, F-12` em `## First release cut` (o F-9 entregue fica; a ordem é a do `/agile:order`) e uma linha em `## Decisions`; o `catalogo` não é tocado:
+
+```
+chore(epic): first release cut of checkout
+agile mvp WRITTEN: checkout 3 ids
+- 2026-10-15 — first release cut written by /agile:mvp: 3 items (criterion: the brief, priority Must, dependency closure); from other epics: F-14 (catalogo)
+```
+
+O Claude propõe o commit `chore(epic): first release cut of checkout` e só o faz com a sua autorização. Depois, o `/agile:order` passa a mostrar `First release (checkout): 1 of 3 delivered; missing: F-14, F-12`. Quando o F-14 for entregue e você rodar `/agile:mvp checkout` de novo, a proposta parte dos itens ainda abertos, mantém o F-9 e o F-14 como entregues e mostra só o que entra ou sai. Publicar a versão continua sendo o `/agile:publish`.
+
+### 14.127 O Copilot CLI: a variável de root e os hooks medidos, com o que funciona e o que não
+
+Você tem crédito do Copilot e quer saber se o ciclo roda nele com a guarda de commit no lugar. A seção "Usar no Copilot CLI" do manual (seção 3) agora tem as linhas `CLAUDE_PLUGIN_ROOT` e `Hooks` medidas, cada uma com o comando, a versão do CLI (1.0.99) e o custo: oito chamadas `-p` de 0,23 a 0,46 AI credits, 2,31 no total. A leitura da tabela:
+
+- `CLAUDE_PLUGIN_ROOT`: `parcial`. Num hook, o Copilot entrega `CLAUDE_PLUGIN_ROOT`, `COPILOT_PLUGIN_ROOT` e `PLUGIN_ROOT` e expande `"${CLAUDE_PLUGIN_ROOT}"` no texto do comando, então os 6 hooks do plugin acham seus scripts. Em texto de skill o que o modelo faz com a variável não foi medido.
+- `Hooks`: `parcial`. `SessionStart`, `PreToolUse`, `PostToolUse`, `Stop` e `SubagentStart` disparam; `PreCompact` não foi alcançado. O `guard.js` real recusou um commit de item `approved` em `main`, mas o Copilot mostrou só `hook errored`, sem o motivo nem o desvio `# agile:main-ok`; e o matcher `^(Explore|Plan)$` de `SubagentStart` não casa com o agente `explore` em minúsculas.
+- `Comandos` e `AskUserQuestion` seguem `não medido`, e a seção diz qual item os mede.
+
+A seção também diz o que isso quer dizer para o ciclo e não converte nada: cada falha vira uma ideia à parte (a recusa com motivo e desvio, o matcher em minúsculas).
+
+O check confere a tabela. Esta é a saída real dele sobre o estado deste exemplo (as linhas dos novos casos):
+
+```
+ok   #200 AC4: the CLAUDE_PLUGIN_ROOT row is measured (a state, not a bare "não medido")
+ok   #200 AC4: the Hooks row is measured (a state, not a bare "não medido")
+ok   #200 AC2: the report says whether PreCompact fired
+ok   #200 AC2: the report says whether SubagentStart fired
+ok   #200 AC3: the report says what guard.js did in Copilot (recusou, permitiu or falhou fechado)
+ok   #200 BR6: the Comandos row stays "não medido"
+```
+
+Se alguém voltar uma dessas linhas para `não medido` sem dizer o motivo, ou tirar a versão ou o custo, o check fica vermelho. Para repetir só a sonda da variável de root, o manual traz a pasta de teste e um par de comandos (cerca de 0,2 AI credits).
