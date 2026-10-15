@@ -1276,3 +1276,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - score 6/4 (applied, plugin note `plugin: agile [generic]`): a migration test written in the test phase cannot be run against a skeleton, so its seeding helper used a column the migration drops and the locked test had to be unlocked (event `blocked`).
 - score 2/5 (applied, project rule in `.claude/rules/agile/project.md`): the app version is the `<Version>` of `Directory.Build.props`, written by `version.js`; the profile sentence that names `Simulab.Api.csproj` is out of date (F-99 commit `2502a51c` did it that way).
 - score 2/5 (applied, project rule in `.claude/rules/agile/ui-project.md`): an `AppSelectField` filter over string uses `TValue="string"` with an empty value for "all"; `TValue="string?"` gave CS8669 in the generated Razor code and turned the gate red.
+
+## 2026-10-15 - F-104 Multiple-answer questions
+- Events: override 0, question 1 (asked 2, from context 3), rework 0, test-fail 0, blocked 1, change 0. Shipped as 1.1.0 (merge `2e506da2`). Gate time: 3 passes, 10 min 56 s, 0 red.
+- score 3/7 (applied, idea F-120 in epic foundation-and-identity): screen tests looked up the id of an `AppSectionCard` without `-title` again, the rule of `project.md` (F-97) broken a second time with one unlock each (`blocked` events of F-97 and F-104); an architecture test replaces the written line once it exists.
+- score 1/6 (applied, hidden fact in `.claude/rules/agile/question-bank-project.md`): a new `QuestionType` value is one more `TypeCards` card, is offered by the transcription screen (F-99 AC6 counted two) and needs a comment migration for the two `type` columns; F-106 to F-109 each add a type.
+- score 1/2 (not recommended, not applied): the F-98 key-change check assumed one correct option; found at refinement by reading `Question.cs` and fixed in the item.
+- Decisions sorted: 11 item decisions stay in the item; 1 hidden fact (the line above).
