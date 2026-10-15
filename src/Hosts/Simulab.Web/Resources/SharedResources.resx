@@ -958,6 +958,13 @@
   <data name="EditionQuestions.Section.Subtitle" xml:space="preserve"><value>The questions of the bank that came from this edition, in paper order.</value></data>
   <data name="EditionQuestions.Section.SaveEditionFirst" xml:space="preserve"><value>Save the edition first to add its questions.</value></data>
   <data name="EditionQuestions.Add" xml:space="preserve"><value>Add question</value></data>
+  <data name="EditionQuestions.Transcribe" xml:space="preserve"><value>Transcribe</value></data>
+  <data name="Questions.Transcribe.Title" xml:space="preserve"><value>Transcribe a paper</value></data>
+  <data name="Questions.Transcribe.Counter" xml:space="preserve"><value>Question {0} of this session</value></data>
+  <data name="Questions.Transcribe.Finish" xml:space="preserve"><value>Finish</value></data>
+  <data name="Questions.Transcribe.Saved" xml:space="preserve"><value>Question saved. Keep going.</value></data>
+  <data name="Questions.Transcribe.SaveAndContinue" xml:space="preserve"><value>Save and continue</value></data>
+  <data name="Questions.Transcribe.EditionLocked" xml:space="preserve"><value>The edition stays fixed while you transcribe. To transcribe another one, finish and open it from its own page.</value></data>
   <data name="EditionQuestions.Empty" xml:space="preserve"><value>No questions from this edition yet.</value></data>
   <data name="EditionQuestions.Column.Number" xml:space="preserve"><value>No.</value></data>
   <data name="EditionQuestions.Column.Statement" xml:space="preserve"><value>Statement</value></data>

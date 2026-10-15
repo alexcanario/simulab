@@ -238,6 +238,15 @@ public sealed class QuestionBankApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{EditionsBase}/{examEditionId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-99 BR4: the paper number transcription mode suggests next for an edition.</summary>
+    public Task<QuestionBankResult<NextPaperNumberResponse>> GetNextPaperNumberAsync(
+        string accessToken,
+        Guid examEditionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<NextPaperNumberResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{EditionsBase}/{examEditionId}/next-paper-number"), accessToken),
+            cancellationToken);
+
     /// <summary>F-96 BR9: the notice subjects of an edition in display order.</summary>
     public Task<QuestionBankResult<IReadOnlyList<NoticeSubjectLookupResponse>>> ListNoticeSubjectsAsync(
         string accessToken,

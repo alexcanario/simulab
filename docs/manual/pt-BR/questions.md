@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-100, F-101]
-updated: 2026-10-14
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101]
+updated: 2026-10-15
 ---
 # Questões
 
@@ -79,6 +79,16 @@ mostra acima do enunciado, com o número.
 A edição também lista as suas questões: na página da edição (**Exames**, o exame, **Editar** a edição) o cartão
 **Questões** mostra, na ordem da prova, as questões que vieram dela, com **Adicionar questão**. O cartão
 aparece para quem também gerencia o banco de questões.
+
+### Transcrever uma prova inteira
+Use para digitar todas as questões de uma prova anterior de uma vez, sem reabrir o formulário a cada uma.
+1. Abra uma edição de prova já salva e, no cartão **Questões** dela, escolha **Transcrever**.
+2. O formulário abre com a edição fixa e o próximo número na prova já preenchido (1 quando a edição não tem questões). Você pode alterar o número.
+3. Preencha a questão e escolha **Salvar e continuar**. A questão é salva como rascunho, o contador "Questão N desta sessão" aumenta e o formulário é limpo para a próxima.
+4. A edição, a disciplina do edital e o idioma continuam como estavam; o resto volta em branco. Troque a disciplina do edital sempre que a prova passar para outra.
+5. Escolha **Concluir** ao terminar. Toda questão já salva continua no banco como rascunho.
+
+Só é possível transcrever questões de escolha única e de verdadeiro ou falso. O contador existe apenas na tela: se você sair e voltar, ele recomeça em 1 e o número sugerido segue o que já está salvo.
 
 ### Publicar e despublicar
 1. Abra a questão e veja o cartão **Publicação**, abaixo do formulário.

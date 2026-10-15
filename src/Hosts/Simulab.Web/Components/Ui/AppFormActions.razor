@@ -18,7 +18,7 @@
         }
         else
         {
-            @L["Common.Save"]
+            @(SaveText ?? L["Common.Save"].Value)
         }
     </MudButton>
 </div>
@@ -28,6 +28,9 @@
     [Parameter] public bool Saving { get; set; }
 
     [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>The label of the primary button when "Save" is not the word (F-99: "Save and continue").</summary>
+    [Parameter] public string? SaveText { get; set; }
 
     /// <summary>While true, leaving the page (in the app or closing the tab) asks for confirmation.</summary>
     [Parameter] public bool HasChanges { get; set; }

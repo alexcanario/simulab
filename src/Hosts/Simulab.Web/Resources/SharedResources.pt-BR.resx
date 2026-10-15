@@ -958,6 +958,13 @@
   <data name="EditionQuestions.Section.Subtitle" xml:space="preserve"><value>As questões do banco que vieram desta edição, na ordem da prova.</value></data>
   <data name="EditionQuestions.Section.SaveEditionFirst" xml:space="preserve"><value>Salve a edição primeiro para adicionar suas questões.</value></data>
   <data name="EditionQuestions.Add" xml:space="preserve"><value>Adicionar questão</value></data>
+  <data name="EditionQuestions.Transcribe" xml:space="preserve"><value>Transcrever</value></data>
+  <data name="Questions.Transcribe.Title" xml:space="preserve"><value>Transcrever uma prova</value></data>
+  <data name="Questions.Transcribe.Counter" xml:space="preserve"><value>Questão {0} desta sessão</value></data>
+  <data name="Questions.Transcribe.Finish" xml:space="preserve"><value>Concluir</value></data>
+  <data name="Questions.Transcribe.Saved" xml:space="preserve"><value>Questão salva. Continue.</value></data>
+  <data name="Questions.Transcribe.SaveAndContinue" xml:space="preserve"><value>Salvar e continuar</value></data>
+  <data name="Questions.Transcribe.EditionLocked" xml:space="preserve"><value>A edição fica fixa durante a transcrição. Para transcrever outra, conclua e abra pela página dela.</value></data>
   <data name="EditionQuestions.Empty" xml:space="preserve"><value>Nenhuma questão desta edição ainda.</value></data>
   <data name="EditionQuestions.Column.Number" xml:space="preserve"><value>Nº</value></data>
   <data name="EditionQuestions.Column.Statement" xml:space="preserve"><value>Enunciado</value></data>

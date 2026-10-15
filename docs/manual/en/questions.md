@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98, F-100, F-101]
-updated: 2026-10-14
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101]
+updated: 2026-10-15
 ---
 # Questions
 
@@ -79,6 +79,16 @@ as a student shows it above the statement, with the number.
 The edition lists its questions too: on the edition page (**Exams**, the exam, **Edit** the edition) the
 **Questions** card shows, in paper order, the questions that came from it, with **Add question**. The card is
 shown to people who also manage the question bank.
+
+### Transcribe a whole paper
+Use this to enter every question of a past paper in one sitting, without reopening the form for each one.
+1. Open a saved exam edition and, in its **Questions** card, choose **Transcribe**.
+2. The form opens with the edition fixed and the next number in the paper already filled in (1 when the edition has no questions). You can change the number.
+3. Fill in the question and choose **Save and continue**. The question is saved as a draft, the counter "Question N of this session" goes up and the form clears for the next one.
+4. The edition, the notice subject and the language stay as they were; everything else is blank again. Change the notice subject whenever the paper moves to another one.
+5. Choose **Finish** when you are done. Every question already saved stays in the bank as a draft.
+
+Only single choice and true/false questions can be transcribed. The counter lives only on the screen: if you leave and come back, it starts again at 1 and the suggested number follows what is already saved.
 
 ### Publish and unpublish
 1. Open the question and look at the **Publication** card, below the form.
