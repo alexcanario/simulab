@@ -1,7 +1,7 @@
 ---
 feature: F-77
 epic: Subject taxonomy
-status: building
+status: validating
 board: 121
 version: 1
 ---
