@@ -1,7 +1,7 @@
 ---
 feature: F-99
 epic: Question bank
-status: approved
+status: building
 board: 145
 version: 1
 ---
@@ -98,6 +98,21 @@ Let a curator enter a whole past paper in one sitting, instead of reopening the 
 - AC9 (BR6) Given two questions already saved in a session, when the curator navigates away without finishing and reopens transcription mode on the same edition, then the batch counter restarts at 1, the suggested number is based on the questions already saved (AC2), and both earlier questions are still in the bank as drafts.
 - AC10 Given an unknown or deleted edition id in the screen's query string, then `GET .../next-paper-number` answers 404 `question.exam_edition_not_found` and the screen shows the not-found state with only "Finish".
 - AC11 All new texts appear in pt-BR, pt-PT and en.
+
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
 
 ## Decisions
 - 2026-10-14 — Entry point: a "Transcribe" button next to "Add question" in the edition's Questions card, opening the screen with the edition preselected — owner, asked (Q1): matches the existing "Add question" pattern, no new navigation to learn.
