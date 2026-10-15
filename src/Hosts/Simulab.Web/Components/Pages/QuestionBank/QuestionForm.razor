@@ -1,5 +1,6 @@
 @page "/admin/questions/new"
 @page "/admin/questions/{Id:guid}"
+@page "/admin/questions/transcribe"
 @attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Manage)]
 @layout MainLayout
 @using Simulab.QuestionBank.Contracts
@@ -34,8 +35,36 @@ else if (_notFound)
         <AppLink Href="@ListHref">@L["Questions.BackToList"]</AppLink>
     </MudPaper>
 }
+else if (_transcribeEditionMissing)
+{
+    @* F-99 AC10: an edition that is unknown or deleted leaves Finish as the only action. *@
+    <MudPaper Class="app-form-card" Elevation="0" id="question-transcribe-edition-missing">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(QuestionBankErrorCodes.QuestionExamEditionNotFound)" Class="mb-4" />
+        <AppLink Href="@FinishHref">@L["Questions.Transcribe.Finish"]</AppLink>
+    </MudPaper>
+}
 else
 {
+    @* F-99: transcription mode is this form with the edition locked; the batch counter lives only here (BR6). *@
+    @if (IsTranscribing)
+    {
+        <MudPaper Class="app-form-card mb-4" Elevation="0" id="question-transcribe-header">
+            @if (_transcribeSaved)
+            {
+                <AppAlert Severity="Severity.Success" Text="@L["Questions.Transcribe.Saved"]" Class="mb-4" />
+            }
+
+            <MudText Typo="Typo.subtitle1" id="question-transcribe-edition">@(_edition?.Text)</MudText>
+            <MudText Typo="Typo.body2" id="question-transcribe-counter">@L["Questions.Transcribe.Counter", _batchNumber]</MudText>
+            <div class="app-form-actions">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           OnClick="Finish"
+                           id="question-transcribe-finish">@L["Questions.Transcribe.Finish"]</MudButton>
+            </div>
+        </MudPaper>
+    }
+
     <div class="app-form-layout">
         <MudPaper Class="app-form-card" Elevation="0">
             <AppErrorSummary Id="@ErrorSummaryId"
@@ -150,8 +179,8 @@ else
                                     OpenOnFocus="true"
                                     Value="_edition"
                                     ValueChanged="OnEditionChangedAsync"
-                                    Disabled="IsAnnulled"
-                                    Hint="@L["Questions.Field.Edition.Hint"]"
+                                    Disabled="@(IsAnnulled || IsTranscribing)"
+                                    Hint="@(IsTranscribing ? L["Questions.Transcribe.EditionLocked"].Value : L["Questions.Field.Edition.Hint"].Value)"
                                     Error="@_editionError" />
 
                     <AppTextField TValue="int?"
@@ -370,7 +399,11 @@ else
             @* F-101 BR5: a frozen form has nothing to save; Cancel's job is the "Back" of the page header. *@
             @if (!IsAnnulled)
             {
-                <AppFormActions Saving="_saving" HasChanges="HasChanges" OnSave="SaveAsync" OnCancel="Cancel" />
+                <AppFormActions Saving="_saving"
+                                HasChanges="HasChanges"
+                                SaveText="@(IsTranscribing ? L["Questions.Transcribe.SaveAndContinue"].Value : null)"
+                                OnSave="SaveAsync"
+                                OnCancel="Cancel" />
             }
         </MudPaper>
 
@@ -385,6 +418,8 @@ else
 
     @* Publication: outside the form. Save never publishes and Publish never saves (BR12); both act on what is
        stored, so a change that is not saved blocks Publish and the preview says it shows the saved version. *@
+    @if (!IsTranscribing)
+    {
     <MudPaper Class="app-form-card mt-4" Elevation="0">
         <AppSectionCard Id="question-section-publication"
                         Title="@L["Questions.Section.Publication"]"
@@ -506,6 +541,7 @@ else
             }
         </AppSectionCard>
     </MudPaper>
+    }
 
     @* F-98 UC5, AC15: every version the question has had, newest first. A version opens read only in the preview
        dialog. The author is stored and not shown: no contract resolves a name. *@
@@ -672,7 +708,20 @@ else
         new(false, L["Questions.TrueFalse.False"], string.Empty)
     ];
 
-    private string Title => IsEdit || Id is not null ? L["Questions.Form.EditTitle"] : L["Questions.Form.AddTitle"];
+    // F-99: the transcription route opens this form with the edition locked and a batch counter (BR2, BR6).
+    private bool IsTranscribing =>
+        Id is null
+        && Navigation.ToBaseRelativePath(Navigation.Uri)
+            .StartsWith("admin/questions/transcribe", StringComparison.OrdinalIgnoreCase);
+
+    private int _batchNumber = 1;
+    private bool _transcribeSaved;
+    private bool _transcribeEditionMissing;
+
+    private string Title =>
+        IsTranscribing
+            ? L["Questions.Transcribe.Title"]
+            : IsEdit || Id is not null ? L["Questions.Form.EditTitle"] : L["Questions.Form.AddTitle"];
 
     private static string OptionId(int position) => $"question-option-{position}";
 
@@ -801,13 +850,14 @@ else
     }
 
     // What the form holds against what is stored. A new question is compared with an empty one.
+    // F-99: in transcription mode the origin and the language are the session's, so only what is typed counts.
     private bool HasChanges =>
         _topic?.Id != _saved?.TopicId
-        || (_contentLanguage ?? string.Empty) != (_saved?.ContentLanguage ?? DefaultLanguage)
+        || (!IsTranscribing && (_contentLanguage ?? string.Empty) != (_saved?.ContentLanguage ?? DefaultLanguage))
         || _difficulty != _saved?.Difficulty
-        || _edition?.Id != _saved?.Origin?.ExamEditionId
-        || (_edition is not null && _paperNumber != _saved?.Origin?.PaperNumber)
-        || (_edition is not null && _noticeSubjectId != _saved?.Origin?.NoticeSubjectId)
+        || (!IsTranscribing && _edition?.Id != _saved?.Origin?.ExamEditionId)
+        || (!IsTranscribing && _edition is not null && _paperNumber != _saved?.Origin?.PaperNumber)
+        || (!IsTranscribing && _edition is not null && _noticeSubjectId != _saved?.Origin?.NoticeSubjectId)
         || Normalized(_statement) != Normalized(_saved?.StatementHtml)
         || Normalized(_baseText) != Normalized(_saved?.BaseTextHtml)
         || Normalized(_explanation) != Normalized(_saved?.ExplanationHtml)
@@ -928,6 +978,12 @@ else
     // cannot be read just leaves the field empty: the curator picks one, nothing breaks.
     private async Task PreselectEditionAsync()
     {
+        if (IsTranscribing && PreselectedEditionId is null)
+        {
+            _transcribeEditionMissing = true;
+            return;
+        }
+
         if (PreselectedEditionId is not { } editionId || _edition is not null || _preselected)
         {
             return;
@@ -940,8 +996,52 @@ else
         {
             _edition = EditionOption(edition);
             await LoadNoticeSubjectsAsync(edition.Id);
+            if (IsTranscribing)
+            {
+                _paperNumber = await NextPaperNumberAsync(token!, edition.Id);
+            }
+        }
+        else if (IsTranscribing && result?.ErrorCode == QuestionBankErrorCodes.QuestionExamEditionNotFound)
+        {
+            _transcribeEditionMissing = true;
         }
     }
+
+    // F-99 BR4: the suggestion is read from the Api after every save; a failed read leaves the number to the curator.
+    private async Task<int?> NextPaperNumberAsync(string token, Guid editionId)
+    {
+        var next = await Api.GetNextPaperNumberAsync(token, editionId);
+
+        return next is { IsSuccess: true, Value: { } value } ? value.PaperNumber : null;
+    }
+
+    // F-99 AC3: everything but the edition, the notice subject and the content language is blank for the next one.
+    private async Task ContinueTranscriptionAsync(Guid editionId)
+    {
+        _batchNumber++;
+        _transcribeSaved = true;
+        _saved = null;
+        _topic = null;
+        _subject = null;
+        _difficulty = null;
+        _statement = string.Empty;
+        _baseText = string.Empty;
+        _explanation = string.Empty;
+        _options = [];
+        _type = QuestionType.SingleChoice;
+        _trueFalseKey = null;
+        _changeReason = string.Empty;
+        _changeReasonForced = false;
+        ClearErrors();
+
+        var token = await TokenAsync();
+        _paperNumber = token is null ? null : await NextPaperNumberAsync(token, editionId);
+    }
+
+    private string FinishHref =>
+        PreselectedEditionId is { } editionId ? $"/admin/questions?edition={editionId}" : "/admin/questions";
+
+    private void Finish() => Navigation.NavigateTo(FinishHref);
 
     private Task ReloadAsync() => Id is { } id ? LoadAsync(id) : Task.CompletedTask;
 
@@ -1473,6 +1573,7 @@ else
         _showErrorSummary = false;
         _saving = true;
         _error = null;
+        _transcribeSaved = false;
 
         var token = await TokenAsync();
         var request = new SaveQuestionRequest(
@@ -1499,6 +1600,13 @@ else
                 : await Api.CreateQuestionAsync(token, request);
 
         _saving = false;
+        if (result is { IsSuccess: true } && IsTranscribing && !IsEdit && _edition is { } locked)
+        {
+            // F-99 AC3: the question is stored as the regular form stores it; the form stays for the next one.
+            await ContinueTranscriptionAsync(locked.Id);
+            return;
+        }
+
         if (result is { IsSuccess: true, Value: { } question })
         {
             var wasAdd = !IsEdit;

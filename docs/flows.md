@@ -4,3 +4,4 @@
 | Page | Summary | Items |
 |---|---|---|
 | [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101 |
+| [Transcribe the paper of an edition](flows/transcribe-paper.md) | How transcription mode enters a whole past paper, what stays and what clears between questions, and where the suggested number comes from. | F-99 |

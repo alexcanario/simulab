@@ -409,6 +409,17 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return Json(NoticeSubjects.TryGetValue(editionId, out var subjects) ? subjects : []);
             }
 
+            if (segments[1] == "next-paper-number")
+            {
+                var highest = Questions
+                    .Where(question => question.Origin?.ExamEditionId == editionId)
+                    .Select(question => question.Origin!.PaperNumber)
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                return Json(new NextPaperNumberResponse(highest + 1));
+            }
+
             var parameters = System.Web.HttpUtility.ParseQueryString(query);
             var size = int.Parse(parameters["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
             var page = int.Parse(parameters["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);

@@ -105,17 +105,17 @@ Tests locked: 3254ebaeb6da1b87a95e72b861d2fd3ca8f64482 (1 file); unlocks: 0
 
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
+| AC1 | QuestionTranscriptionTests.Open_ShowsTheEditionLocked_AndThePaperNumberSuggested, Section_Transcribe_OpensTheTranscriptionScreenWithTheEditionChosen, Section_OfAnUnsavedEdition_HasNoTranscribeButton |
 | AC2 | NextPaperNumberEndpointTests.NextPaperNumber_OfAnEditionWithNoQuestions_IsOne, NextPaperNumber_IsTheHighestLiveNumberPlusOne_AndIgnoresDeletedQuestions, NextPaperNumber_FollowsASavedQuestion |
-| AC3 | pending |
-| AC4 | NextPaperNumberEndpointTests.SavingTheSuggestedNumberTwice_IsRefusedTheSecondTime (screen behavior: screen test, pending) |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | NextPaperNumberEndpointTests.NextPaperNumber_WithoutTheManagePermission_IsForbidden, NextPaperNumber_ForACurator_Answers200 (button and route: screen tests, pending) |
-| AC9 | pending |
-| AC10 | NextPaperNumberEndpointTests.NextPaperNumber_OfAnUnknownEdition_Is404 (screen state: screen test, pending) |
-| AC11 | pending |
+| AC3 | QuestionTranscriptionTests.Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage |
+| AC4 | NextPaperNumberEndpointTests.SavingTheSuggestedNumberTwice_IsRefusedTheSecondTime ; QuestionTranscriptionTests.Save_RefusedAsPaperNumberTaken_KeepsWhatWasTyped |
+| AC5 | QuestionTranscriptionTests.Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage (subject kept); validation step 5 (changing it) |
+| AC6 | QuestionTranscriptionTests.Open_OffersOnlySingleChoiceAndTrueFalse; Save_StoresTheQuestionAndClearsTheForm_KeepingTheEditionTheSubjectAndTheLanguage (cleared fields) |
+| AC7 | QuestionTranscriptionTests.Open_ShowsTheEditionLocked_AndThePaperNumberSuggested (edition field disabled) |
+| AC8 | NextPaperNumberEndpointTests.NextPaperNumber_WithoutTheManagePermission_IsForbidden, NextPaperNumber_ForACurator_Answers200 ; ExamEditionQuestionsPermissionTests (button); validation step 6 (route as a user without the permission) |
+| AC9 | QuestionTranscriptionTests.Reopen_RestartsTheCounter_AndSuggestsFromWhatIsStored |
+| AC10 | NextPaperNumberEndpointTests.NextPaperNumber_OfAnUnknownEdition_Is404 ; QuestionTranscriptionTests.Open_OfAnUnknownEdition_ShowsTheNotFoundStateWithFinishOnly |
+| AC11 | ResourceParityTests (every key in en, pt-BR and pt-PT) |
 
 ## Decisions
 - 2026-10-14 — Entry point: a "Transcribe" button next to "Add question" in the edition's Questions card, opening the screen with the edition preselected — owner, asked (Q1): matches the existing "Add question" pattern, no new navigation to learn.
@@ -131,6 +131,11 @@ Tests locked: 3254ebaeb6da1b87a95e72b861d2fd3ca8f64482 (1 file); unlocks: 0
 - 2026-10-14 — The transcription screen is its own page and route (`/admin/questions/transcribe`), not a mode flag on `QuestionForm.razor` — Claude: the two differ enough (locked edition, no loading of an existing question, auto-reset after save, batch counter) that a shared component would need a parallel branch of state in most of its sections.
 - 2026-10-14 — No new glossary row — Claude: transcription mode adds no persisted concept, entity or column; it is a screen-level flow over the existing `Question` and origin fields (F-96).
 - 2026-10-14 — No new package — Claude: nothing here needs one.
+- 2026-10-15 — Build: screen as a mode of the question form on `/admin/questions/transcribe` — owner, asked (change note v1).
+- 2026-10-15 — Build: no `system-design` or `architect` pass — Claude: the only contract is one read route over an existing query interface and no schema change; a thin slice (step 4b).
+- 2026-10-15 — Build: "Finish" opens the questions list filtered by the edition, not the edition page — Claude: the lookup of the question bank carries no exam id, which the edition page route needs, and adding it would change another contract; the list shows exactly the drafts just saved. Owner to confirm at validation.
+- 2026-10-15 — Build: the type is back to the form's default (SingleChoice) after a save, since the form has no "no type chosen" state; the topic and subject clear as well, since AC3 lists only the edition, the notice subject and the language as kept — Claude.
+- 2026-10-15 — Build: the suggestion past 500 is the plain `max + 1` (501): the form's own 1 to 500 check refuses it — Claude, no new rule.
 
 ## Out of scope
 - A batch review or publish screen after transcribing — a later idea if the owner wants one.
@@ -145,8 +150,19 @@ Tests locked: 3254ebaeb6da1b87a95e72b861d2fd3ca8f64482 (1 file); unlocks: 0
 - (none)
 
 ## Change notes
+- 2026-10-15 (v1) The transcription screen is a mode of `QuestionForm.razor` on its own route (`/admin/questions/transcribe`), not a page of its own — owner, asked at build: the form is 1783 lines and a copy of its sections would double its upkeep. Replaces the decision of 2026-10-14 "own page and route". Criteria unchanged; AC1 to AC11 still hold.
 
 ## Validation script
+Needed to validate: the local app host and one real past paper to transcribe a few questions from (owner; in place now when the app host starts).
+
+1. Start the app host (from a terminal, with no other app host running): Git Bash `dotnet run --project src/Hosts/Simulab.AppHost`; PowerShell 7 `dotnet run --project src/Hosts/Simulab.AppHost`. This worktree gets its own database volume. Sign in as a curator or the admin.
+2. Open an exam edition that is saved (Exams, an exam, an edition). In its Questions card choose "Transcribe". Expect: the edition line on top, "Question 1 of this session", the edition field locked and the number already filled (1 when the edition has no questions).
+3. Fill subject, topic, statement and two options with one correct, choose a notice subject, then "Save and continue". Expect: "Question saved. Keep going.", the counter at 2, the number one higher, the notice subject and language kept, everything else blank.
+4. Type a number already used in the edition and save. Expect: "Number already used in this edition.", the field marked, nothing cleared. Then type a free number and save: it stores with that number.
+5. Change the notice subject, save and continue: the next question opens with the new one.
+6. Choose "Finish". Expect: the questions list filtered by the edition with the saved questions as drafts. Sign in as a user without question permission and open `/admin/questions/transcribe`: the page is not reachable.
+7. Switch the language to pt-BR and then pt-PT on the transcription screen: the new texts are translated.
+8. Keyboard only: reach the form with Tab, fill a True/False question and save with Enter on "Save and continue".
 
 ## Events
 

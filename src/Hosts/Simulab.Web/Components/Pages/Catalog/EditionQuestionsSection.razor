@@ -28,6 +28,11 @@
                        StartIcon="@AppIcons.Add"
                        OnClick="AddQuestion"
                        id="edition-question-add">@L["EditionQuestions.Add"]</MudButton>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@AppIcons.Edit"
+                       OnClick="Transcribe"
+                       id="edition-question-transcribe">@L["EditionQuestions.Transcribe"]</MudButton>
         </div>
 
         <AppDataTable @key="EditionId"
@@ -103,6 +108,9 @@
 
     private void AddQuestion() =>
         Navigation.NavigateTo($"/admin/questions/new?examEditionId={EditionId}");
+
+    private void Transcribe() =>
+        Navigation.NavigateTo($"/admin/questions/transcribe?examEditionId={EditionId}");
 
     private void Edit(EditionQuestionListItemResponse question) =>
         Navigation.NavigateTo($"/admin/questions/{question.Id}");
