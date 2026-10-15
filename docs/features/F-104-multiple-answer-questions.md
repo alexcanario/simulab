@@ -169,6 +169,9 @@ Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
 - 2026-10-15 — The key is a domain unit `MultipleAnswerKey` beside the other two, with its own `Check`; it does not call `QuestionRules.CheckOptions` as it is (that rule counts 2 to 5 and exactly one) but shares its option length and text checks through one helper both use — Claude, to keep one rule for what the types share (F-97 BR5)
 - 2026-10-15 — Migration only updates the comments of the two `type` columns; no check constraint: the number of correct options is a publish rule, not a row invariant (a draft may hold any marking) — Claude
 - 2026-10-15 — No new package — the item needs nothing the solution lacks — Claude
+- 2026-10-15 — The transcription screen of F-99 offers the third type too: its BR5 says a type appears when its item ships; `QuestionTranscriptionTests.Open_OffersOnlySingleChoiceAndTrueFalse` becomes `Open_OffersEveryTypeTheFormImplements` (count 2 to 3) — asked (recommended option, owner)
+- 2026-10-15 — Tests unlocked (owner, card, recommended option): six tests of `MultipleAnswerQuestionFormTests` looked up the checkboxes through `#question-section-options`, an id the section card does not render (it sits on the heading); a test defect, no criterion changed; rewritten with `.app-option-row input[type='checkbox']` and locked again — asked
+- 2026-10-15 — The form's key-change check (`KeyChangeNeedsReason`) compares the whole set of correct positions as the entity does (BR7), and going back to single choice keeps only the first mark — Claude
 - 2026-10-15 — Size M, fits one session: one domain unit, one comment-only migration, a third card, checkboxes in the options section, one preview line and the F-98 fix — Claude, from the code read
 
 ## Out of scope
@@ -189,5 +192,6 @@ Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
 ## Events
 
 - 2026-10-15 question — asked 2, from context 3
+- 2026-10-15 blocked — test wrong: Six screen tests looked up the checkboxes through #question-section-options, an id the section card does not render (it sits on the heading); test defect, no criterion changes
 
 ## Delivery

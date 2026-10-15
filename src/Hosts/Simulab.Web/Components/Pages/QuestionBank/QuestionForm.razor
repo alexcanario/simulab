@@ -106,7 +106,7 @@ else
                                    Value="_type"
                                    ValueChanged="@((QuestionType? value) => OnTypeChanged(value))"
                                    Options="TypeCards"
-                                   Columns="2"
+                                   Columns="3"
                                    Required="true" />
                 }
 
@@ -348,15 +348,12 @@ else
             <AppSectionCard Id="question-section-options"
                             Title="@L["Questions.Section.Options"]"
                             Icon="@AppIcons.Options"
-                            Subtitle="@L["Questions.Section.Options.Subtitle"]">
-                @* The group's value is the position of the correct option: exactly one can be checked (BR4) and a
-                   draft may have none (BR3). *@
-                <MudRadioGroup T="int?"
-                               Value="CorrectPosition"
-                               ValueChanged="OnCorrectChanged"
-                               aria-label="@L["Questions.Options.Correct.Label"].Value"
-                               aria-describedby="question-options-description">
-                    <AppItemRows TItem="OptionDraft"
+                            Subtitle="@(IsMultiple ? L["Questions.Section.Options.Multiple.Subtitle"] : L["Questions.Section.Options.Subtitle"])">
+                @* Single choice: the group's value is the position of the correct option, exactly one can be checked
+                   (BR4) and a draft may have none (BR3). Multiple answer (F-104): one checkbox per option, any
+                   marking is a draft; the publish rule is two or more correct and one wrong. *@
+                @{
+                    RenderFragment rows = @<AppItemRows TItem="OptionDraft"
                                  Items="_options"
                                  EmptyMessage="@L["Questions.Options.Empty"]"
                                  AriaLabelledBy="question-section-options-title">
@@ -368,9 +365,21 @@ else
                             <div class="app-option-row">
                                 <span class="app-option-letter">@letter</span>
                                 <span class="app-option-radio">
-                                    <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsAnnulled">
-                                        <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
-                                    </MudRadio>
+                                    @if (IsMultiple)
+                                    {
+                                        <AppCheckbox Id="@($"question-option-correct-{position}")"
+                                                     Value="option.IsCorrect"
+                                                     ValueChanged="@((bool value) => OnCorrectToggled(option, value))"
+                                                     Disabled="IsAnnulled">
+                                            <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
+                                        </AppCheckbox>
+                                    }
+                                    else
+                                    {
+                                        <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsAnnulled">
+                                            <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
+                                        </MudRadio>
+                                    }
                                 </span>
                                 <AppRichTextField Id="@OptionId(position)"
                                                   Label="@L["Questions.Options.Field", letter]"
@@ -400,8 +409,26 @@ else
                                                OnDelete="@(() => Remove(index))" />
                             }
                         </Actions>
-                    </AppItemRows>
-                </MudRadioGroup>
+                    </AppItemRows>;
+                }
+                @if (IsMultiple)
+                {
+                    <div role="group"
+                         aria-label="@L["Questions.Options.Correct.Multiple.Label"].Value"
+                         aria-describedby="question-options-description">
+                        @rows
+                    </div>
+                }
+                else
+                {
+                    <MudRadioGroup T="int?"
+                                   Value="CorrectPosition"
+                                   ValueChanged="OnCorrectChanged"
+                                   aria-label="@L["Questions.Options.Correct.Label"].Value"
+                                   aria-describedby="question-options-description">
+                        @rows
+                    </MudRadioGroup>
+                }
 
                 @* A section-level refusal (count, key, or an option error the problem did not place) is under the list
                    and described to the group, so it is read with it. *@
@@ -773,10 +800,13 @@ else
 
     private bool IsTrueFalse => _type == QuestionType.TrueFalse;
 
+    private bool IsMultiple => _type == QuestionType.MultipleAnswer;
+
     private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
     [
         new(QuestionType.SingleChoice, L["Questions.Type.SingleChoice"], L["Questions.Type.SingleChoice.Description"], AppIcons.Options),
-        new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified)
+        new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified),
+        new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer)
     ];
 
     private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
@@ -832,12 +862,19 @@ else
 
     private bool StatementDone => !QuestionHtml.IsBlank(_statement);
 
+    // F-104 BR4: a multiple-answer question is published with three to five options, not two to five.
     private bool OptionsCountDone =>
-        _options.Count >= QuestionLimits.OptionsMin && _options.Count <= QuestionLimits.OptionsMax;
+        _options.Count >= (IsMultiple ? QuestionLimits.MultipleAnswerOptionsMin : QuestionLimits.OptionsMin)
+        && _options.Count <= QuestionLimits.OptionsMax;
 
     private bool OptionsTextDone => _options.Count > 0 && _options.All(option => !QuestionHtml.IsBlank(option.Html));
 
-    private bool KeyDone => _options.Count(option => option.IsCorrect) == 1;
+    // Single choice: exactly one correct. Multiple answer: two or more correct and at least one wrong (F-104 BR4).
+    private bool KeyDone =>
+        IsMultiple
+            ? _options.Count(option => option.IsCorrect) is var correct
+                && correct >= QuestionLimits.MultipleAnswerCorrectMin && correct < _options.Count
+            : _options.Count(option => option.IsCorrect) == 1;
 
     // F-97: a true/false question has one key and no options, so the three option items are one.
     private bool TrueFalseKeyDone => _trueFalseKey is not null;
@@ -855,9 +892,9 @@ else
             ? [new AppChecklistItem(L["Questions.Checklist.TrueFalseKey"], TrueFalseKeyDone)]
             : new List<AppChecklistItem>
             {
-                new(L["Questions.Checklist.OptionsCount"], OptionsCountDone),
+                new(IsMultiple ? L["Questions.Checklist.OptionsCount.Multiple"] : L["Questions.Checklist.OptionsCount"], OptionsCountDone),
                 new(L["Questions.Checklist.OptionsText"], OptionsTextDone),
-                new(L["Questions.Checklist.Key"], KeyDone)
+                new(IsMultiple ? L["Questions.Checklist.Key.Multiple"] : L["Questions.Checklist.Key"], KeyDone)
             }
     ];
 
@@ -872,7 +909,8 @@ else
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
         IsTrueFalse
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
-            : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value)
+            : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value),
+        .. IsMultiple ? [new AppAsideRow(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))] : Array.Empty<AppAsideRow>()
     ];
 
     // The notice subject select: the group is part of the text, since the kit select has no group headings.
@@ -952,16 +990,15 @@ else
     private bool KeyChangeNeedsReason =>
         IsPublished
         && _saved is not null
-        && (IsTrueFalse ? _trueFalseKey != _saved.TrueFalseKey : CorrectPosition != StoredCorrectPosition);
+        && (IsTrueFalse ? _trueFalseKey != _saved.TrueFalseKey : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
 
-    private int? StoredCorrectPosition
-    {
-        get
-        {
-            var index = _saved?.Options.OrderBy(option => option.Position).ToList().FindIndex(option => option.IsCorrect) ?? -1;
-            return index >= 0 ? index : null;
-        }
-    }
+    // F-104 BR7: the whole set of correct positions, so moving the second correct option counts as well.
+    private IEnumerable<int> CorrectPositions =>
+        _options.Select((option, index) => (option, index)).Where(pair => pair.option.IsCorrect).Select(pair => pair.index);
+
+    private IEnumerable<int> StoredCorrectPositions =>
+        (_saved?.Options.OrderBy(option => option.Position).ToList() ?? [])
+            .Select((option, index) => (option, index)).Where(pair => pair.option.IsCorrect).Select(pair => pair.index);
 
     // The field also shows when the Api asked for a reason the form did not expect (the stored key moved meanwhile).
     private bool ShowChangeReason => KeyChangeNeedsReason || _changeReasonForced;
@@ -1398,6 +1435,12 @@ else
         _type = type;
         _optionsError = null;
         _trueFalseKeyError = null;
+
+        // F-104: single choice has one correct option, so going back to it keeps the first mark only.
+        if (type == QuestionType.SingleChoice && _options.Count(option => option.IsCorrect) > 1)
+        {
+            OnCorrectChanged(CorrectPosition);
+        }
     }
 
     private void OnTrueFalseKeyChanged(bool? value)
@@ -1593,6 +1636,13 @@ else
         _optionsError = null;
     }
 
+    // F-104: a checkbox changes only its own option; the others keep their marks.
+    private void OnCorrectToggled(OptionDraft option, bool value)
+    {
+        option.IsCorrect = value;
+        _optionsError = null;
+    }
+
     private void AddOption()
     {
         if (AtMaxOptions)
@@ -1693,10 +1743,14 @@ else
     {
         if (!OptionsCountDone)
         {
-            return Errors.For(QuestionBankErrorCodes.QuestionOptionsCount);
+            return Errors.For(IsMultiple
+                ? QuestionBankErrorCodes.QuestionMultipleOptionsCount
+                : QuestionBankErrorCodes.QuestionOptionsCount);
         }
 
-        return KeyDone ? null : Errors.For(QuestionBankErrorCodes.QuestionKeyInvalid);
+        return KeyDone
+            ? null
+            : Errors.For(IsMultiple ? QuestionBankErrorCodes.QuestionMultipleKeyInvalid : QuestionBankErrorCodes.QuestionKeyInvalid);
     }
 
     // -- save -------------------------------------------------------------------------------------------------
@@ -1844,6 +1898,8 @@ else
                 break;
             case QuestionBankErrorCodes.QuestionOptionsCount:
             case QuestionBankErrorCodes.QuestionKeyInvalid:
+            case QuestionBankErrorCodes.QuestionMultipleOptionsCount:
+            case QuestionBankErrorCodes.QuestionMultipleKeyInvalid:
                 _optionsError = text;
                 break;
             case QuestionBankErrorCodes.QuestionTrueFalseKeyRequired:

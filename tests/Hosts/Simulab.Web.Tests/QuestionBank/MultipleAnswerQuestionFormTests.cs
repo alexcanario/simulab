@@ -53,7 +53,7 @@ public sealed class MultipleAnswerQuestionFormTests : QuestionPageTestContext
         [.. page.FindAll(".app-form-aside-checklist li").Select(item => item.TextContent)];
 
     private static IReadOnlyList<AngleSharp.Dom.IElement> Boxes(IRenderedComponent<QuestionForm> page) =>
-        [.. page.FindAll("#question-section-options input[type='checkbox']")];
+        [.. page.FindAll(".app-option-row input[type='checkbox']")];
 
     private async Task FillMultipleAsync(IRenderedComponent<QuestionForm> page, int options, params int[] correct)
     {
@@ -95,12 +95,10 @@ public sealed class MultipleAnswerQuestionFormTests : QuestionPageTestContext
         await FillMultipleAsync(page, 3, 0, 2);
 
         Headings(page).Should().Contain("Options").And.NotContain("Answer key");
-        page.FindAll("#question-section-options [role='radiogroup'], #question-section-options input[type='radio']")
-            .Should().BeEmpty();
+        page.FindAll(".app-option-row input[type='radio']").Should().BeEmpty();
         Boxes(page).Should().HaveCount(3);
         Boxes(page).Select(box => box.HasAttribute("checked")).Should().Equal(true, false, true);
-        page.Find("#question-section-options").TextContent.Should()
-            .Contain("Mark every correct one: at least two, and at least one wrong.");
+        page.Markup.Should().Contain("Mark every correct one: at least two, and at least one wrong.");
     }
 
     // AC16: every box names its letter.

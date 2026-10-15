@@ -1044,6 +1044,15 @@
   <data name="Questions.Type.SingleChoice.Description" xml:space="preserve"><value>One statement with two to five options; exactly one is correct.</value></data>
   <data name="Questions.Type.TrueFalse" xml:space="preserve"><value>True/false</value></data>
   <data name="Questions.Type.TrueFalse.Description" xml:space="preserve"><value>One statement the student judges as true or false.</value></data>
+  <data name="Questions.Type.MultipleAnswer" xml:space="preserve"><value>Multiple answer</value></data>
+  <data name="Questions.Type.MultipleAnswer.Description" xml:space="preserve"><value>One statement with three to five options; two or more are correct.</value></data>
+  <data name="Questions.Section.Options.Multiple.Subtitle" xml:space="preserve"><value>3 to 5 options to publish. Mark every correct one: at least two, and at least one wrong.</value></data>
+  <data name="Questions.Options.Correct.Multiple.Label" xml:space="preserve"><value>Correct options</value></data>
+  <data name="Questions.Checklist.OptionsCount.Multiple" xml:space="preserve"><value>3 to 5 options</value></data>
+  <data name="Questions.Checklist.Key.Multiple" xml:space="preserve"><value>At least two correct and one wrong</value></data>
+  <data name="Questions.Preview.SelectCount" xml:space="preserve"><value>Mark {0} options.</value></data>
+  <data name="question.multiple_options_count" xml:space="preserve"><value>A multiple-answer question is published with 3 to 5 options.</value></data>
+  <data name="question.multiple_key_invalid" xml:space="preserve"><value>Mark at least two options as correct, and leave at least one wrong.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>The type cannot be changed after the question is created.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Answer key</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Mark the statement as true or false. Needed only to publish.</value></data>

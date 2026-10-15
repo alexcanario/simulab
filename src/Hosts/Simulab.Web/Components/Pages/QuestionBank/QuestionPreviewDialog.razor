@@ -72,6 +72,12 @@
             }
             else
             {
+            @* F-104 BR6: how many options to mark, from the count of correct ones; nothing more of the key shows. *@
+            @if (Question.Type == QuestionType.MultipleAnswer && CorrectCount > 0)
+            {
+                <p class="app-question-select-count" id="question-preview-select-count">@L["Questions.Preview.SelectCount", CorrectCount]</p>
+            }
+
             <ol class="app-question-options" aria-label="@L["Questions.Preview.Options"]">
                 @foreach (var option in _options)
                 {
@@ -160,6 +166,8 @@
     private string? BaseTextHtml => VersionRecordedAt is null ? Question.BaseText?.TextHtml : VersionBaseTextHtml;
 
     private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
+
+    private int CorrectCount => _options.Count(option => option.IsCorrect);
 
     protected override void OnParametersSet() =>
         _options = [.. Question.Options.OrderBy(option => option.Position)];
