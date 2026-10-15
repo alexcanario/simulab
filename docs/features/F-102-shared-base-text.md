@@ -1,7 +1,7 @@
 ---
 feature: F-102
 epic: Question bank
-status: idea
+status: refining
 board: 148
 version: 1
 ---
