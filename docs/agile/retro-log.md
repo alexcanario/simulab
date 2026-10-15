@@ -1242,3 +1242,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - score 2/6 (applied, `question-bank-project.md`): `questions.status` is an EF concurrency token; a handler that writes a question saves through `IQuestionStore.TrySaveChangesAsync`, which answers a lost race as 409 `question.version_conflict` and not as a 500 (found by the architect pass: `QuestionStore.cs:80` translated only unique violations).
 - score 2/4 (applied, `project.md`): a test helper that wraps `ExecuteSqlInterpolatedAsync` returns `Task<int>` (CA1859 raised two new warnings in a locked file; one unlock, event `blocked`).
 - score 6/3 (applied, plugin note `plugin: agile [generic]`): accepting a scan finding on a transitive package and retaking the gate baseline are two stops for one fact (the 38 NU1902/NU1903 warnings turned the ship gate RED after the owner had accepted the same advisories in the scan). Cause not verified.
+
+## 2026-10-14 - Sync with agile@canary 0.78.0
+- From 0.74.0 to 0.78.0 (4 minor versions). Copied: templates `glossary.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Left alone: `git.md` and `profile.md` (edited, plugin unchanged), manual build files (plugin unchanged).
+- Glossary: `Technical terms:` link line added to `F-95-content-format-comparison.md` (the only document without it). The three new template rows (trap, reuse ladder, safety floor) were not added to `docs/glossary.md`: not proposed in this run.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none.
+- Proposed, not captured (owner: ok, no ideas now): DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+- Precondition: F-77 was `building` in its own worktree; the main checkout was clean, the owner confirmed.
