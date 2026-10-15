@@ -410,7 +410,7 @@
                        Hint="@L["Subjects.Field.Aliases.Help"]"
                        Items="_chipsItems"
                        ItemsChanged="@(items => _chipsItems = items)"
-                       MaxLength="150"
+                       MaxLength="CatalogLimits.SubjectNameMaxLength"
                        MinLength="2"
                        TooShortText="@L["subject.alias_too_short"]" />
 
@@ -419,7 +419,7 @@
                        Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
                        Items="@(new[] { "Português" })"
                        ItemsChanged="@(_ => Done(L["Aliases.Added", "Português"]))"
-                       MaxLength="150"
+                       MaxLength="CatalogLimits.SubjectNameMaxLength"
                        Error="@L["subject.alias_taken"].Value" />
 
         <AppChipsField Id="gallery-aliases-long"
@@ -427,7 +427,7 @@
                        Placeholder="@L["Subjects.Field.Aliases.Placeholder"]"
                        Items="@(new[] { "Interpretação e compreensão de textos de diferentes gêneros e tipos de discurso, em prosa e em verso" })"
                        ItemsChanged="@(_ => Done(L["Aliases.Added", "Interpretação"]))"
-                       MaxLength="200" />
+                       MaxLength="CatalogLimits.TopicNameMaxLength" />
     </MudPaper>
 </section>
 
