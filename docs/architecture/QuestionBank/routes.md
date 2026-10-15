@@ -4,7 +4,11 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 
 | Verb | Route | Summary | Responses |
 |---|---|---|---|
+| `DELETE` | `/api/v1/question-bank/base-texts/{id}` | DeleteBaseText | 200 |
 | `DELETE` | `/api/v1/question-bank/questions/{id}` | DeleteQuestion | 200 |
+| `GET` | `/api/v1/question-bank/base-texts/{id}/questions` | ListBaseTextQuestions | 200 |
+| `GET` | `/api/v1/question-bank/base-texts/{id}` | FindBaseText | 200 |
+| `GET` | `/api/v1/question-bank/base-texts` | ListBaseTexts | 200 |
 | `GET` | `/api/v1/question-bank/editions/{editionId}/next-paper-number` | GetNextEditionPaperNumber | 200 |
 | `GET` | `/api/v1/question-bank/editions/{editionId}/notice-subjects` | ListQuestionEditionNoticeSubjects | 200 |
 | `GET` | `/api/v1/question-bank/editions/{editionId}/questions` | ListEditionQuestions | 200 |
@@ -18,9 +22,11 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/question-bank/subjects/{subjectId}/topics` | ListQuestionSubjectTopics | 200 |
 | `GET` | `/api/v1/question-bank/subjects` | SearchQuestionSubjects | 200 |
 | `GET` | `/api/v1/question-bank/taxonomy` | GetQuestionTaxonomy | 200 |
+| `POST` | `/api/v1/question-bank/base-texts` | CreateBaseText | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/annul` | AnnulQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/publish` | PublishQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/reinstate` | ReinstateQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/unpublish` | UnpublishQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions` | CreateQuestion | 200 |
+| `PUT` | `/api/v1/question-bank/base-texts/{id}` | UpdateBaseText | 200 |
 | `PUT` | `/api/v1/question-bank/questions/{id}` | UpdateQuestion | 200 |

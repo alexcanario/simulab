@@ -1,7 +1,7 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101]
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102]
 updated: 2026-10-15
 ---
 # Questões
@@ -47,7 +47,9 @@ veem Página não encontrada, e o menu não tem o item Questões.
    uma **dificuldade** de 1 (mais fácil) a 5 (mais difícil), se quiser.
 3. Escreva o **enunciado**. A barra oferece negrito, itálico, sublinhado, tachado, sobrescrito, subscrito,
    listas, citação, link e limpar formatação. Imagens ainda não são aceitas.
-4. Escreva um **texto-base** se a questão se refere a um. Ele aparece antes do enunciado.
+4. Se a questão se refere a um trecho, escolha o **texto-base** dela no cartão **Texto-base** (veja
+   [Textos-base](base-texts.md)); só textos do idioma da questão são oferecidos. Ele aparece antes do
+   enunciado, e o mesmo texto pode servir a várias questões.
 5. Em **Alternativas**, escolha **Adicionar alternativa** para cada uma (até cinco), digite o texto e marque a
    correta. Use as setas para mover uma alternativa; as letras A a E seguem a ordem.
 6. Se quiser, escreva a **explicação**, mostrada junto do gabarito.
@@ -85,7 +87,7 @@ Use para digitar todas as questões de uma prova anterior de uma vez, sem reabri
 1. Abra uma edição de prova já salva e, no cartão **Questões** dela, escolha **Transcrever**.
 2. O formulário abre com a edição fixa e o próximo número na prova já preenchido (1 quando a edição não tem questões). Você pode alterar o número.
 3. Preencha a questão e escolha **Salvar e continuar**. A questão é salva como rascunho, o contador "Questão N desta sessão" aumenta e o formulário é limpo para a próxima.
-4. A edição, a disciplina do edital e o idioma continuam como estavam; o resto volta em branco. Troque a disciplina do edital sempre que a prova passar para outra.
+4. A edição, a disciplina do edital, o idioma e o texto-base continuam como estavam; o resto volta em branco. Um bloco de leitura com várias questões só precisa do texto escolhido uma vez; troque ou retire-o quando o bloco acabar. Troque a disciplina do edital sempre que a prova passar para outra.
 5. Escolha **Concluir** ao terminar. Toda questão já salva continua no banco como rascunho.
 
 Só é possível transcrever questões de escolha única e de verdadeiro ou falso. O contador existe apenas na tela: se você sair e voltar, ele recomeça em 1 e o número sugerido segue o que já está salvo.
@@ -171,7 +173,7 @@ citar o ato oficial.
 | Número na prova | A posição da questão na prova da edição | Obrigatório com edição, um número inteiro de 1 a 500, único entre as questões da edição |
 | Disciplina do edital | A disciplina do edital da edição a que a questão pertence | Opcional, só com edição, e da mesma edição. Não pode ser excluída enquanto uma questão a usa |
 | Enunciado | O que se pede ao aluno | Obrigatório, até 10.000 caracteres |
-| Texto-base | Um texto a que a questão se refere | Opcional, até 20.000 caracteres |
+| Texto-base | Um trecho a que a questão se refere, escrito uma vez e compartilhado por toda questão que o liga | Opcional. Escolhido entre os textos-base do idioma da questão; veja [Textos-base](base-texts.md) |
 | Alternativas | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta. Cada uma até 2.000 caracteres |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não pode perdê-lo |
 | Explicação | Por que o gabarito está certo | Opcional, até 10.000 caracteres |
@@ -184,7 +186,7 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | Mensagem | O que significa | O que fazer |
 |---|---|---|
 | Escreva o enunciado. | O enunciado está vazio. | Escreva o que se pede ao aluno. |
-| O enunciado passa de 10.000 caracteres. (e os limites do texto-base, da explicação e da alternativa) | O texto passou do limite. | Encurte-o. Nada é cortado por você. |
+| O enunciado passa de 10.000 caracteres. (e os limites da explicação e da alternativa) | O texto passou do limite. | Encurte-o. Nada é cortado por você. |
 | Uma questão é publicada com 2 a 5 alternativas. | Menos de duas alternativas, ou mais de cinco. | Adicione ou remova alternativas. |
 | Toda alternativa precisa de texto. | Uma questão publicada tem alternativa vazia. | Escreva o texto ou remova a alternativa. |
 | Marque exatamente uma alternativa como correta. | Nenhuma correta, ou mais de uma. | Marque uma. |
@@ -220,6 +222,7 @@ removidos ao salvar, e a página mostra o que foi mantido.
 - Um campo com erro avisa ao sair dele, e um salvamento que falha leva o foco à lista de erros.
 
 ## Páginas relacionadas
+- [Textos-base](base-texts.md): os trechos que várias questões compartilham
 - [Disciplinas e tópicos](subjects.md): as disciplinas e os tópicos a que uma questão aponta
 - [Edições de um exame](exam-editions.md): as provas de onde as questões vêm
 - [Papéis e permissões](roles.md): quem pode gerenciar o banco de questões

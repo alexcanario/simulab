@@ -1,8 +1,8 @@
 ---
 page: index
 locale: pt-PT
-features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79, F-95]
-updated: 2026-10-11
+features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79, F-95, F-102]
+updated: 2026-10-15
 ---
 # Simulab
 
@@ -53,3 +53,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Disciplinas e tópicos](subjects.md): a lista única do que o aluno estuda, com as suas áreas (Administradores)
 - [Catálogo](catalog.md): pesquisar exames publicados, filtrar e ver as edições de cada um
 - [Questões](questions.md): escrever, publicar, pré-visualizar e encontrar questões de escolha única (Curadores e Administradores)
+- [Textos de apoio](base-texts.md): escrever um excerto uma vez e partilhá-lo entre questões (Curadores e Administradores)
