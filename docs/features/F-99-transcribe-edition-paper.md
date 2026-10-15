@@ -1,7 +1,7 @@
 ---
 feature: F-99
 epic: Question bank
-status: validating
+status: done
 board: 145
 version: 1
 ---
@@ -171,3 +171,8 @@ Needed to validate: the local app host and one real past paper to transcribe a f
 - 2026-10-15 approved — owner ("aprovo f-99"), version 1
 
 ## Delivery
+- Branch: `feature/F-99`, merged with `--no-ff` as `f56d6deb` (board #145). App version 0.37.0.
+- Tests at the last full run: Web 1741, QuestionBank 305, Catalog 582, Identity 501, ArchitectureTests 220, Api 58, AppHost 80, Jobs 25, Persistence 25, Email 19, ApiResults 13, SharedKernel 12, Ai 10; 0 failed, 0 new warnings. New: 7 Api tests (locked at `3254ebae`) and 10 screen tests.
+- Manual: `questions.md` and `exam-editions.md` in en, pt-BR and pt-PT. Technical page: `docs/flows/transcribe-paper.md`.
+- Validated by the owner on screen on 2026-10-15; "Finish" opens the questions list filtered by the edition (the lookup carries no exam id).
+Gate time: 6 passes, 19 min 59 s — turn 1 (40 s), ship 3 (14 min 49 s), scan 2 (4 min 30 s); 0 red
