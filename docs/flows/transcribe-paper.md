@@ -61,6 +61,8 @@ flowchart TD
 +------------------------------------------------------+
 ```
 
+The base text kept between questions (F-102): [mockup](../features/mockups/F-102-shared-base-text.html), screen 5.
+
 ## Errors
 - `question.exam_edition_not_found` — the edition is unknown or deleted: the screen shows the not-found state and "Finish" is the only action; the number route answers 404.
 - `question.paper_number_taken` — the number is already used in the edition (409, F-96): the number field is marked and nothing is cleared.
