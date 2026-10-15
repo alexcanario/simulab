@@ -61,6 +61,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                     SELECT q.id AS question_id,
                            gen_random_uuid() AS base_text_id,
                            q.tenant_id,
+                           q.created_at,
                            q.created_by,
                            q.content_language,
                            q.base_text_html AS text_html,
@@ -71,11 +72,11 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                                nullif(
                                    btrim(left(
                                        btrim(regexp_replace(
-                                           replace(replace(replace(replace(replace(replace(
+                                           replace(replace(replace(replace(replace(replace(replace(
                                                regexp_replace(
                                                    regexp_replace(q.base_text_html, '</?(p|br|ul|ol|li|blockquote|table|thead|tbody|tr|th|td)\y[^>]*>', ' ', 'gi'),
                                                    '<[^>]*>', '', 'g'),
-                                               '&nbsp;', ' '), U&'\00A0', ' '), '&lt;', '<'), '&gt;', '>'), '&quot;', '"'), '&#39;', ''''),
+                                               '&nbsp;', ' '), U&'\00A0', ' '), '&lt;', '<'), '&gt;', '>'), '&quot;', '"'), '&#39;', ''''), '&amp;', '&'),
                                            '\s+', ' ', 'g')),
                                        80)),
                                    ''),
@@ -88,11 +89,11 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                          created_at, created_by, is_deleted, deleted_at, deleted_by)
                     SELECT s.base_text_id,
                            s.tenant_id,
-                           replace(s.title, '&amp;', '&'),
-                           normalize(regexp_replace(normalize(replace(upper(btrim(replace(s.title, '&amp;', '&'))), 'ẞ', 'ß'), NFD), '[̀-ͯ]', '', 'g'), NFC),
+                           s.title,
+                           normalize(regexp_replace(normalize(replace(upper(btrim(s.title)), 'ẞ', 'ß'), NFD), '[̀-ͯ]', '', 'g'), NFC),
                            s.content_language,
                            s.text_html,
-                           now(),
+                           s.created_at,
                            s.created_by,
                            s.is_deleted,
                            s.deleted_at,

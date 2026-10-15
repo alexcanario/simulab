@@ -1,7 +1,7 @@
 ---
 feature: F-102
 epic: Question bank
-status: building
+status: validating
 board: 148
 version: 1
 ---
@@ -456,7 +456,7 @@ Tests locked: c5e0b8a483ea0832f48ab684c0108c16080a9ebb (5 files); unlocks: 1
 | AC1 | `BaseTextTests.Create_ValidContent_TrimsTheTitle_CanonicalizesTheLanguage_AndDerivesTheSearchForm`; `BaseTextTests.Create_BlankTitle_IsRefusedWithTitleRequired`; `BaseTextTests.Create_TitleOfExactlyTheLimitAfterTrimming_IsAccepted_AndOneMoreIsRefused`; `BaseTextTests.Create_TextWithNoBody_IsRefusedWithTextRequired`; `BaseTextTests.Create_TextOfExactlyTheLimit_IsAccepted_AndOneMoreIsRefusedWithTextTooLong`; `BaseTextTests.Create_ALanguageTheAppDoesNotKnow_IsRefusedWithContentLanguageInvalid`; `BaseTextEndpointTests.Create_AValidBaseText_Answers201WithTheSanitizedHtml_AndAFreshCount`; `BaseTextEndpointTests.Create_ABadBaseText_IsRefusedWithTheFieldsOwnCode_AndStoresNothing` |
 | AC2 | `BaseTextEndpointTests.Save_AQuestionWithABaseTextId_ReturnsTheLinkedText_AndNullRemovesIt`; `BaseTextEndpointTests.Save_ABaseTextOfAnotherLanguage_Answers409LanguageMismatch_AndStoresNothing`; `BaseTextEndpointTests.Save_ChangingTheLanguageOfALinkedQuestion_Answers409LanguageMismatch_AndTheLinkStays`; `BaseTextEndpointTests.Save_AnUnknownOrDeletedBaseText_Answers404_AndAnInvalidLanguageStillAnswers400` |
 | AC3 | `QuestionBaseTextVersionTests.NextVersion_FirstPublication_SnapshotsTheLinkedBaseTextHtml`; `QuestionBaseTextVersionTests.NextVersion_TheLinkedTextChanged_MakesTheNextVersion_NotAKeyChange_WithNoReason`; `QuestionBaseTextVersionTests.NextVersion_TheLinkedTextIsTheSame_MakesNothing`; `QuestionBaseTextVersionTests.NextVersion_TheLinkWasRemoved_MakesTheNextVersionWithNoBaseText`; `BaseTextEndpointTests.Edit_TheText_RecordsANewVersionOnEachPublishedLinkedQuestion_AndOnNoDraftNorAnnulled`; `BaseTextEndpointTests.Edit_OnlyTheTitle_RecordsNoVersion` |
-| AC4 | `BaseTextEndpointTests.Edit_TheText_OfTwoPublishedQuestions_RecordsBothVersionsInOneSave`; `BaseTextRaceTests.Edit_StartedWhileAPublishHoldsTheBaseText_WaitsForIt_AndThenVersionsTheNewlyPublishedQuestion` |
+| AC4 | `BaseTextEndpointTests.Edit_TheText_OfTwoPublishedQuestions_RecordsBothVersionsInOneSave`; `BaseTextRaceTests.Edit_StartedWhileAPublishHoldsTheBaseText_WaitsForIt_AndThenVersionsTheNewlyPublishedQuestion`; `BaseTextFanOutAtomicityTests.Edit_WhenALinkedQuestionWasUnpublishedMeanwhile_Answers409_AndRollsBackTheTextAndBothVersions` |
 | AC5 | `BaseTextTests.Update_ChangingTheLanguage_WhileQuestionsLinkIt_IsRefusedWithLanguageInUse_AndNothingChanges`; `BaseTextTests.Update_KeepingTheLanguage_WhileQuestionsLinkIt_ReplacesTitleAndText`; `BaseTextTests.Update_ChangingTheLanguage_WhenNoQuestionLinksIt_Changes`; `BaseTextEndpointTests.Edit_TheLanguage_Answers409WhileAQuestionLinksIt_AndChangesWhenNoneDoes` |
 | AC6 | `BaseTextEndpointTests.Delete_WhileAQuestionLinksIt_Answers409InUse_AndWithNoneItDisappears`; `BaseTextRaceTests.Delete_StartedWhileAQuestionSaveHoldsTheBaseText_WaitsForIt_AndThenAnswersInUse` |
 | AC7 | `AddBaseTextsMigrationTests.Up_GivesEachQuestionWithInlineTextABaseTextOfItsOwn_AndLinksIt`; `AddBaseTextsMigrationTests.Up_CutsTheTitleAtEightyCharacters`; `AddBaseTextsMigrationTests.Up_SoftDeletesTheTextOfASoftDeletedQuestion_AndWritesNoVersion`; `AddBaseTextsMigrationTests.Up_Then_Down_CopiesTheTextBackIntoTheQuestions_AndDropsTheTable`; `AddBaseTextsMigrationTests.TheDatabase_RefusesABlankTitleAndABlankText_AndAHardDeleteOfALinkedText` |
@@ -501,6 +501,11 @@ Tests locked: c5e0b8a483ea0832f48ab684c0108c16080a9ebb (5 files); unlocks: 1
 - 2026-10-15 — Tests unlocked (the blank title and hard delete migration test inserted a question with the `base_text_html` column the migration drops; the test was wrong, not the code) — owner chose to unlock and rewrite, asked in the build; rewritten with a helper that inserts without the column, the foreign key code corrected to restrict's 23001, and one parity test added for the SQL title and search form against `ComparableText`.
 - 2026-10-15 — Build: `Question.NextVersion` takes the linked text HTML as an optional third parameter so the existing callers and tests stay as they are; the base text row locks and the transaction live in `QuestionStore`/`BaseTextStore` (`RowLockTransactions`), committed by `IQuestionStore` saves; `QuestionListQuery` gains an optional `BaseTextId` and `GET /base-texts/{id}/questions` goes through the question list; SQL `upper` writes capital sharp s for ß where C# keeps ß, so the migration folds it back — technical.
 
+- 2026-10-15 — Independent review (reviewer agent, opus, fresh context): no blocker; 1 major and 2 minor, all fixed — the rollback half of AC4 got its own test (`BaseTextFanOutAtomicityTests`, a new file because the others are locked); the backfill decodes `&amp;` before cutting the title at 80 characters; the backfill keeps the question's `created_at`. Traps named by the reviewer and accepted for now: the row-lock helpers commit whatever transaction is current (no other QuestionBank code opens one), a refused handler holds its lock until the scope ends (every caller is a request), and the title search is a `%term%` scan of one language (fine at today's volume) — technical.
+- 2026-10-15 — Screen check: the app host was started from the worktree on its own database `simulab_f102` and stopped; signed in as the development administrator, opened `/admin/base-texts` (empty state, no console error), created a text through the form (the Api answered and the page became its edit page with the saved text) and opened the question form, where the picker, its create link (new tab) and the aside row rendered. The signed-in contrast measurements and the `unverified (gallery DOM)` accessibility claims were not measured: they are in the validation script and the owner's pass. — technical.
+- 2026-10-15 — Reuse: the question list, the version snapshot, the sanitizer, `AppRichTextField`, `AppLookupField`, `AppDataTable`, `AppSectionCard`, `ConfirmDeleteAsync` and `ComparableText` were reused; nothing was copied.
+- 2026-10-15 — Gate: `gate.js ship` GREEN, 3,773 tests across the solution, 0 failed (QuestionBank 346; Web 1,882; Catalog 582; Identity 501; Architecture 220; the other projects 242), no new warnings; security scan GREEN (3 medium findings, none from this item); `techdocs.js check F-102` GREEN.
+
 ## Out of scope
 - Images in a base text — F-103 (`IFileStorage`).
 - Merging duplicate base texts the migration created, or finding near-duplicates — a later item if it hurts.
@@ -516,7 +521,57 @@ Tests locked: c5e0b8a483ea0832f48ab684c0108c16080a9ebb (5 files); unlocks: 1
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of the build. -->
+### English
+Needed to validate: the local app host, with Docker Desktop running and nothing else holding ports 5432 and 6379 — owner — in place when you start it.
+
+1. Start the app on its own database, then sign in. Stop any other Simulab app host first (a running host locks the build output and the ports). The database `simulab_f102` is created inside the shared local PostgreSQL volume and gets this item's migration; no other database is touched. Run, from a terminal:
+
+   ```powershell
+   Set-Location D:\wt\simulab\f-102-shared-base-text
+   $env:Database__Name = "simulab_f102"
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+
+   ```bash
+   cd /d/wt/simulab/f-102-shared-base-text
+   export Database__Name="simulab_f102"
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+
+   Open the Web address the Aspire dashboard shows for `web` and sign in as `admin@simulab.local`; its password is `Identity:SeedAdmin:Password` in `src/Hosts/Simulab.Api/appsettings.Development.json`. → The home page opens and the sidebar (menu lateral esquerdo) has **Base texts** right after **Questions**.
+2. Write a base text (a passage several questions share). In the sidebar choose **Base texts**, then **Add** at the top right. Type the title "Texto I - O rio", keep the language Portuguese (Brazil), write a two-line passage in the editor and press **Save** at the bottom of the first card. → The page becomes "Edit base text" with your text, "Questions that use this text (0)" and a **Delete** card at the bottom.
+3. Link a question to it (the picker is the field in the Base text card, after the statement). In the sidebar choose **Questions**, then **Add**. Set the content language to Portuguese (Brazil), pick a subject and topic, write a statement, two options with one marked correct, then click the picker in the **Base text** card and type "Rio". → Only "Texto I - O rio" is offered, with its question count; pick it, then **Open the base text** and **Show the text** appear under the field. Press **Save**, then **Publish** in the Publication card.
+4. Edit the text and see the version it makes. Back in **Base texts**, press the edit icon of "Texto I - O rio", change a word of the passage and **Save**; the page shows "Questions that use this text (1)" and an info notice about new versions. Open that question from the list. → Its History card has version 2, recorded when the text changed, and version 1 keeps the earlier wording (open it from the row).
+5. See what is locked while a question uses the text. On the "Texto I - O rio" form look at the language field and at the Delete card; then go to **Base texts** and look at the row's delete icon. → The language field is disabled with a note that questions use the text, **Delete** is disabled with the reason "Questions use this text (1)", and the row's delete icon is disabled with a tooltip.
+6. Unlink and delete. Open the question again, press the clear (x) button of the picker, **Save**; in **Base texts** open the text and press **Delete**, then confirm "Delete this base text". → The question has no base text, and the text is gone from the list ("No base text yet").
+7. Language switch. Use the **Language** button in the top bar to choose Portuguese (Portugal), open **Base texts** and **Add**. → The title, hints and buttons are in Portuguese (Portugal); the sidebar entry reads "Textos-base".
+8. Keyboard-only pass of the main task. On **Questions** > **Add**, use only Tab, Shift+Tab, arrows, Enter and Space: reach the picker in the Base text card, type "Rio", choose with the arrow and Enter, and reach **Save**. → Every control takes focus in a sensible order, the choice is made without the mouse, and the focus ring is always visible.
+
+### pt-BR
+Necessário para validar: o app host local, com o Docker Desktop em execução e nada mais usando as portas 5432 e 6379 — dono — pronto quando você o iniciar.
+
+1. Inicie o app no banco próprio e entre. Pare antes qualquer outro app host do Simulab (um host em execução trava a saída do build e as portas). O banco `simulab_f102` é criado dentro do volume local compartilhado do PostgreSQL e recebe a migração desta entrega; nenhum outro banco é tocado. Execute, em um terminal:
+
+   ```powershell
+   Set-Location D:\wt\simulab\f-102-shared-base-text
+   $env:Database__Name = "simulab_f102"
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+
+   ```bash
+   cd /d/wt/simulab/f-102-shared-base-text
+   export Database__Name="simulab_f102"
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+
+   Abra o endereço do Web que o painel do Aspire mostra para `web` e entre como `admin@simulab.local`; a senha é `Identity:SeedAdmin:Password` em `src/Hosts/Simulab.Api/appsettings.Development.json`. → A página inicial abre e o menu lateral tem **Textos-base** logo depois de **Questões**.
+2. Escreva um texto-base (um trecho que várias questões compartilham). No menu lateral escolha **Textos-base**, depois **Adicionar** no canto superior direito. Digite o título "Texto I - O rio", mantenha o idioma Português (Brasil), escreva um trecho de duas linhas no editor e aperte **Salvar** no fim do primeiro cartão. → A página vira "Editar texto-base" com o seu texto, "Questões que usam este texto (0)" e um cartão **Excluir** no fim.
+3. Ligue uma questão a ele (o seletor é o campo do cartão Texto-base, depois do enunciado). No menu lateral escolha **Questões**, depois **Adicionar**. Defina o idioma do conteúdo como Português (Brasil), escolha assunto e tópico, escreva um enunciado, duas alternativas com uma correta, depois clique no seletor do cartão **Texto-base** e digite "Rio". → Só "Texto I - O rio" é oferecido, com o número de questões; escolha-o, e **Abrir o texto-base** e **Mostrar o texto** aparecem sob o campo. Aperte **Salvar**, depois **Publicar** no cartão Publicação.
+4. Edite o texto e veja a versão que ele gera. De volta em **Textos-base**, aperte o ícone de editar de "Texto I - O rio", troque uma palavra do trecho e **Salvar**; a página mostra "Questões que usam este texto (1)" e um aviso informativo sobre novas versões. Abra essa questão pela lista. → O cartão Histórico tem a versão 2, registrada quando o texto mudou, e a versão 1 guarda a redação anterior (abra-a pela linha).
+5. Veja o que fica travado enquanto uma questão usa o texto. No formulário de "Texto I - O rio" olhe o campo de idioma e o cartão Excluir; depois vá a **Textos-base** e olhe o ícone de excluir da linha. → O campo de idioma está desabilitado com uma nota de que há questões usando o texto, **Excluir** está desabilitado com o motivo "Questões usam este texto (1)", e o ícone de excluir da linha está desabilitado com uma dica.
+6. Desligue e exclua. Abra a questão de novo, aperte o botão de limpar (x) do seletor, **Salvar**; em **Textos-base** abra o texto e aperte **Excluir**, depois confirme "Excluir este texto-base". → A questão fica sem texto-base, e o texto some da lista ("Nenhum texto-base ainda").
+7. Troca de idioma. Use o botão **Idioma** na barra superior para escolher Português (Portugal), abra **Textos-base** e **Adicionar**. → O título, as dicas e os botões estão em português de Portugal; a entrada do menu lateral diz "Textos-base".
+8. Passada só com teclado na tarefa principal. Em **Questões** > **Adicionar**, use apenas Tab, Shift+Tab, setas, Enter e Espaço: chegue ao seletor do cartão Texto-base, digite "Rio", escolha com a seta e Enter, e chegue a **Salvar**. → Todo controle recebe o foco em uma ordem sensata, a escolha é feita sem o mouse, e o anel de foco está sempre visível.
 
 ## Events
 
