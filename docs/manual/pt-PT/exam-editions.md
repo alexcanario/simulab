@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-PT
-features: [F-35, F-74, F-75, F-96]
-updated: 2026-10-12
+features: [F-35, F-74, F-75, F-96, F-99]
+updated: 2026-10-15
 ---
 # Edições de um exame
 
@@ -123,7 +123,7 @@ Na mesma edição, o nome da disciplina não pode repetir-se dentro do mesmo gru
 ## Questões da edição
 No cartão **Questões**, abaixo das disciplinas do aviso, aparecem as questões do banco que vieram desta edição, pela ordem da prova: o número, o início do enunciado, a disciplina do edital e o estado (rascunho ou publicada), 25 por página. O cartão só aparece a quem também gere o banco de questões; numa edição nova pede para guardar primeiro a edição.
 
-1. Escolha **Adicionar questão** para abrir o formulário de questão com esta edição já escolhida; indique o número na prova.
+1. Escolha **Adicionar questão** para abrir o formulário de questão com esta edição já escolhida; indique o número na prova. Para introduzir uma prova inteira de uma vez, escolha **Transcrever** (veja [Questões](questions.md)).
 2. Escolha **Editar** na linha para abrir a questão na própria página. A questão altera-se aí, não neste cartão.
 3. Veja [Questões](questions.md) para registar a origem de uma questão.
 

@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: en
-features: [F-35, F-74, F-75, F-96]
-updated: 2026-10-12
+features: [F-35, F-74, F-75, F-96, F-99]
+updated: 2026-10-15
 ---
 # Exam editions
 
@@ -123,7 +123,7 @@ In one edition, a subject name cannot repeat inside the same group (capitals and
 ## Questions of the edition
 In the **Questions** card, below the notice subjects, you see the questions of the bank that came from this edition, in paper order: the number, the start of the statement, the notice subject and the status (draft or published), 25 per page. The card is shown only to people who also manage the question bank; on a new edition it asks you to save the edition first.
 
-1. Choose **Add question** to open the question form with this edition already chosen; enter the number in the paper.
+1. Choose **Add question** to open the question form with this edition already chosen; enter the number in the paper. To enter a whole paper in one go, choose **Transcribe** instead (see [Questions](questions.md)).
 2. Choose **Edit** on a row to open the question on its own page. The question is changed there, not in this card.
 3. See [Questions](questions.md) to record the origin of a question.
 
