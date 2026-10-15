@@ -1,7 +1,7 @@
 ---
 feature: F-104
 epic: Question bank
-status: building
+status: validating
 board: 150
 version: 1
 ---
@@ -135,7 +135,7 @@ No mockup (owner, 2026-10-15): two controls change inside the form of F-95/F-97 
 
 ## Criterion → test
 
-Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
+Tests locked: bc7db0cbb3265e59a2f79574ecd884d07f19bb16 (6 files); unlocks: 1
 
 <!-- Written by /agile:build at its start, one row per criterion above. -->
 | Criterion | Test |
@@ -172,6 +172,8 @@ Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
 - 2026-10-15 — The transcription screen of F-99 offers the third type too: its BR5 says a type appears when its item ships; `QuestionTranscriptionTests.Open_OffersOnlySingleChoiceAndTrueFalse` becomes `Open_OffersEveryTypeTheFormImplements` (count 2 to 3) — asked (recommended option, owner)
 - 2026-10-15 — Tests unlocked (owner, card, recommended option): six tests of `MultipleAnswerQuestionFormTests` looked up the checkboxes through `#question-section-options`, an id the section card does not render (it sits on the heading); a test defect, no criterion changed; rewritten with `.app-option-row input[type='checkbox']` and locked again — asked
 - 2026-10-15 — The form's key-change check (`KeyChangeNeedsReason`) compares the whole set of correct positions as the entity does (BR7), and going back to single choice keeps only the first mark — Claude
+- 2026-10-15 — Reuse: the `AnswerKey` seam of F-97 (one record and one `From` line), `QuestionRules` option length and text checks (now one private helper both keys call), kit `AppCheckbox`, the F-98 reason field and `NextVersion`, the F-97 type cards and preview list, the `AddTrueFalseKey` migration test pattern — Claude
+- 2026-10-15 — Gate: `agile gate GREEN` (Web 1908, QuestionBank 402, Catalog 582, Identity 501, AppHost 80, Api 58, Jobs 25, Persistence 25, Email 19, Ai 10, ApiResults 13, SharedKernel 12; architecture 220), `agile scan GREEN`, `agile techdocs GREEN`, test lock unchanged since its second lock (1 unlock) — Claude
 - 2026-10-15 — Size M, fits one session: one domain unit, one comment-only migration, a third card, checkboxes in the options section, one preview line and the F-98 fix — Claude, from the code read
 
 ## Out of scope
@@ -187,7 +189,39 @@ Tests locked: 009bb31fe3fe71b8dd287fad74153d970f5a826e (6 files); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build, in `### English` and `### pt-BR` (references/board.md). -->
+### English
+Needed to validate: the app host on its own database and the seeded subjects (F-37 seed) — in place now; nothing to provide. Stop any other app host first: it locks the build output.
+
+1. **Start the app.** From the worktree, with its own database so the migration `UpdateQuestionTypeComment` never lands in the shared one.
+   - PowerShell 7: `$env:Database__Name = "simulab_f104"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Git Bash: `Database__Name=simulab_f104 dotnet run --project src/Hosts/Simulab.AppHost`
+   Expected: every resource reaches Running and the migration is applied with no `fail` line. Open Web at https://localhost:7125 and sign in with the seeded administrator (`SeedAdmin` of `src/Hosts/Simulab.Api/appsettings.Development.json`).
+2. **The third type.** In the sidebar (left menu) click Content > Questions, then Add. The first field of the Classification card is "Question type" with three type cards (the cards you pick the type from): "Single choice" (selected), "True/false" and "Multiple answer". Pick a subject and a topic, choose "Multiple answer": the Options card now says "Mark every correct one: at least two, and at least one wrong", and the aside's checklist (the "Before publishing" list) reads "3 to 5 options", "Every option has text" and "At least two correct and one wrong".
+3. **Several checkboxes, by keyboard.** Write a statement, click Add option three times and type a text in each. With the keyboard only, Tab to the first checkbox ("Mark A as correct"): each box is one tab stop and Space toggles it. Check A and C, then Save: a draft is saved and the page becomes the edit page. Check only A and Save again: still accepted, since a draft may hold any marking.
+4. **Publish rules.** In the Publication card the Publish button is disabled with the reason while the checklist has a pending item. Check A and C, leave B unchecked, Save, then Publish: the status becomes Published. Now check B too (all three correct) and Save: the form refuses with "Mark at least two options as correct, and leave at least one wrong.", and the stored question is unchanged.
+5. **Preview.** Choose "Preview as a student": under the statement the line "Mark 2 options." appears and the three options show their letters with no mark. Choose "Show answer": A and C get the check icon, the text "Correct answer" and a border; the explanation appears if there is one.
+6. **A key change needs its reason.** Back on the form, uncheck C and check B (the correct set moves from A and C to A and B): a required "reason" field appears. Save with no reason: refused. Type a reason and Save: it stays Published. In the History card a new version is listed and flagged as an answer key change with your reason.
+7. **Languages and the list.** Content > Questions: the **Type** column (last) says "Multiple answer" for this question. Switch to Português (Brasil): the card reads "Múltiplas respostas", the preview "Marque 2 alternativas." and the checklist "Ao menos duas corretas e uma errada". Then open Content > Exams, an exam and one of its editions, and in the Questions section of the edition click Transcribe (the fast entry screen for the questions of one edition): it also offers the three type cards.
+8. **Permission.** Sign out and sign in as a Student: the questions pages are not offered in the menu and the route shows the not-found page.
+
+Stop the app host (Ctrl+C) and, when done, drop the database: `DROP DATABASE simulab_f104;` (server up, nobody connected).
+
+### pt-BR
+Necessário para validar: o app host com banco próprio e as disciplinas do seed (F-37) — já no lugar; nada a providenciar. Pare qualquer outro app host antes: ele trava a saída do build.
+
+1. **Iniciar o app.** A partir da worktree, com banco próprio, para a migração `UpdateQuestionTypeComment` nunca cair no banco compartilhado.
+   - PowerShell 7: `$env:Database__Name = "simulab_f104"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - Git Bash: `Database__Name=simulab_f104 dotnet run --project src/Hosts/Simulab.AppHost`
+   Esperado: todos os recursos chegam a Running e a migração é aplicada sem linha `fail`. Abra a Web em https://localhost:7125 e entre com o administrador do seed (`SeedAdmin` de `src/Hosts/Simulab.Api/appsettings.Development.json`).
+2. **O terceiro tipo.** No menu lateral esquerdo (sidebar) clique em Content > Questions e depois em Add. O primeiro campo do cartão Classification é "Question type", com três cartões de tipo (os cartões de onde se escolhe o tipo): "Single choice" (marcado), "True/false" e "Multiple answer". Escolha uma disciplina e um tópico e marque "Multiple answer": o cartão Options passa a dizer "Mark every correct one: at least two, and at least one wrong", e a lista de conferência ao lado ("Before publishing", a lista do que falta para publicar) mostra "3 to 5 options", "Every option has text" e "At least two correct and one wrong".
+3. **Várias caixas, pelo teclado.** Escreva um enunciado, clique em Add option três vezes e digite um texto em cada. Só com o teclado, use Tab até a primeira caixa ("Mark A as correct"): cada caixa é uma parada de Tab e Espaço alterna. Marque A e C e clique em Save: o rascunho é salvo e a página vira a de edição. Marque só A e salve de novo: continua aceito, porque rascunho aceita qualquer marcação.
+4. **Regras de publicação.** No cartão Publication, o botão Publish fica desabilitado com o motivo enquanto a lista tiver item pendente. Marque A e C, deixe B desmarcada, salve e clique em Publish: a situação vira Published. Agora marque B também (as três corretas) e salve: o formulário recusa com "Mark at least two options as correct, and leave at least one wrong." e a questão guardada não muda.
+5. **Visualização.** Clique em "Preview as a student": sob o enunciado aparece "Mark 2 options." e as três alternativas mostram as letras sem marca. Clique em "Show answer": A e C ganham o ícone de verificação, o texto "Correct answer" e uma borda; a explicação aparece se houver.
+6. **Mudar o gabarito exige o motivo.** De volta ao formulário, desmarque C e marque B (o conjunto correto passa de A e C para A e B): aparece o campo obrigatório de motivo. Salve sem motivo: recusado. Digite um motivo e salve: continua Published. No cartão History aparece uma nova versão marcada como mudança de gabarito, com o seu motivo.
+7. **Idiomas e a lista.** Content > Questions: a coluna **Type** (a última) diz "Multiple answer" nesta questão. Troque para Português (Brasil): o cartão diz "Múltiplas respostas", a visualização "Marque 2 alternativas." e a lista "Ao menos duas corretas e uma errada". Depois abra Content > Exams, uma prova e uma das suas edições e, na seção Questions da edição, clique em Transcribe (a tela de entrada rápida das questões de uma edição): ela também oferece os três cartões de tipo.
+8. **Permissão.** Saia e entre como Student: as páginas de questões não aparecem no menu e a rota mostra a página de não encontrado.
+
+Pare o app host (Ctrl+C) e, ao terminar, apague o banco: `DROP DATABASE simulab_f104;` (servidor ligado, ninguém conectado).
 
 ## Events
 

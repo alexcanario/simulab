@@ -3201,6 +3201,7 @@
         "enum": [
           "SingleChoice",
           "TrueFalse",
+          "MultipleAnswer",
           null
         ]
       },
