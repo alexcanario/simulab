@@ -8,7 +8,7 @@
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
 - WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot: `/agile:build` on an `approved` item runs `deps.js block` before this check, and an undelivered `Depends on` blocks it instead of taking a slot). A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
 - `/agile:refine` creates the item's branch and worktree before writing anything; every document of that item (file, cause, mockup) is written there, never in another item's checkout.
-- Confirm the item at the start of the session. Other items only get registered, never executed.
+- Confirm the item at session start; other items are only registered, never executed.
 - Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's own merge on the PR, and the ship stops at "PR open".
 - `/agile:epic "<name>" --autopilot` takes the epic's features one at a time, in plan order, each through the autopilot with its own two stops: the merge stays per item ("validado" alone ends the run), any owner-reserved stop ends it, and the same command resumes it.
 - Verify premises in the code before asking. Never ask what the code already answers; a decision a rule, an ADR or an earlier item answers is asked as a confirmation naming its source.
@@ -16,15 +16,15 @@
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.
 - A change of mind during build is a change note (`/agile:change`); only the affected criteria are re-approved.
 - An item the session judges too large for one session is proposed in smaller parts at refinement and at the build's plan, the owner approves the cut (`references/item-size.md`).
-- Stay inside the item's scope. Anything extra you notice becomes an `idea` and is reported, not built.
-- When a solution has several moving parts, also offer the simpler version with its trade-off. The owner decides.
-- Show the first artifact of a repeated pattern before replicating it.
+- Stay inside the item's scope: anything extra you notice becomes an `idea`, reported, not built.
+- When a solution has several moving parts, offer the simpler version with its trade-off (the owner decides); show the first artifact of a repeated pattern before replicating it.
+- Stay alert to an external skill that fits a complex task, from `references/companions.md` or the ones the session offers: propose it, never run it unasked, at most once per item.
 - The main session owns the conversation: a subagent never asks the owner, shows a mockup or takes an approval. A subagent is a fresh-context review, a read-only pass before the code (`system-design` proposes, `architect` reviews it, only when the item creates a project, a contract, a message between modules or a schema change), a producing role (`ux-designer` designs a screen, `frontend` implements an approved mockup), or parallel work on different files; one writer at a time in a worktree, and the session runs the gate after a producing agent.
 - Verify what a subagent reports against the files and `git log`. A report is not evidence.
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
-- An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back; never a partial or inline `--body` (it replaces the whole body).
+- An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back, never a partial or inline `--body`.
 - Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
-- Exception: the app host of the item's worktree (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()`, or the project's own knob set for the worktree); data shared with another checkout needs the owner's yes, once per item.
+- Exception: the item worktree's app host (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()` or the project's own knob); shared data needs the owner's yes, once per item.
 - End every step with: what changed (files), what is next, who acts next.
-- Quote real command output for builds and tests (counts, duration). Never paraphrase a result.
-- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes turn into control characters or stray text, and a test can compile and pass while matching nothing.
+- Quote real build and test output (counts, duration), never a paraphrase.
+- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes become stray text; a test can pass matching nothing.

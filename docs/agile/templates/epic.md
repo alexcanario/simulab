@@ -37,7 +37,7 @@ Technical terms: [glossary](../glossary.md)
 | <decision / access / environment / team> | F-<n> | <person or team> | <owner or Claude> |
 
 ## First release cut
-<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. -->
+<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. /agile:mvp may name the cut in the heading: `## First release cut: <label>`. -->
 
 ## Out of scope
 - <Item>

@@ -4597,3 +4597,174 @@ ok   #200 BR6: the Comandos row stays "não medido"
 ```
 
 Se alguém voltar uma dessas linhas para `não medido` sem dizer o motivo, ou tirar a versão ou o custo, o check fica vermelho. Para repetir só a sonda da variável de root, o manual traz a pasta de teste e um par de comandos (cerca de 0,2 AI credits).
+
+### 14.128 O MVP por um objetivo: `/agile:mvp` com rótulo e texto
+
+No acme-sql, um IDE de SQL, há dois epics: `conexao` (sem corte; o F-19, a tela inicial, já entregue) e `relatorios`, com um corte antigo que só tem o F-20 (Relatório mensal). Seis itens em aberto: o F-22 (Configurar o servidor), o F-21 (Listar os bancos do servidor, depende do F-22), o F-25 (Conectar no banco escolhido, depende do F-21), o F-23 (Executar consulta do editor, depende do F-25), o F-20 e o F-24 (Exportar resultado em CSV, Must). Você digita:
+
+```
+/agile:mvp mvp-conexao "o MVP precisa listar todos os bancos do servidor configurado, conectar no escolhido e rodar consultas digitadas no IDE ou abertas de um arquivo de script SQL"
+```
+
+A primeira linha diz o que foi lido: `label: mvp-conexao · epic: all · goal: o MVP precisa listar todos os bancos...`. Uma palavra sem aspas que não é slug de epic vira rótulo; se você tivesse errado o slug de um epic, veria isso aqui. O Claude roda a lista de candidatos; a saída real, sobre esse cenário:
+
+```
+| Id | Epic | Priority | Status | Title | Waits on |
+|---|---|---|---|---|---|
+| F-24 | relatorios | must | approved | Exportar resultado em CSV | - |
+| F-22 | conexao | should | approved | Configurar o servidor | - |
+| F-20 | relatorios | could | approved | Relatorio mensal | - |
+| F-21 | conexao | should | approved | Listar os bancos do servidor | F-22 |
+| F-25 | conexao | should | approved | Conectar no banco escolhido | F-21 |
+| F-23 | conexao | should | approved | Executar consulta do editor | F-25 |
+cut conexao: no section
+cut relatorios: F-20
+agile mvp CANDIDATES: 6 open, 1 must, 2 epics
+```
+
+O objetivo pede listar os bancos (F-21) e rodar consultas (F-23): são as sementes. O fecho das dependências vem do script:
+
+```
+F-22 needed by F-21
+F-21 seed
+F-25 needed by F-23
+F-23 seed
+agile mvp CLOSURE: 4 ids
+```
+
+A tabela põe F-22, F-21, F-25 e F-23 no MVP, cada um com a parte do objetivo que atende (ou `needed by`), e o F-24 em depois com `Must, not needed by the goal`: com objetivo, a prioridade Must não basta. O F-20 também vai para depois. Abrir a consulta de um arquivo de script SQL não tem item nenhum: é uma lacuna. Antes dos cards dos epics vem um card só dela, "Abrir script SQL de um arquivo: o que fazer?", com `Capturar como ideia (Recomendado)`, `Sugerir uma discussão` e `Ignorar`. Se você captura, o `/agile:idea` roda com esse texto, pergunta o epic e o item novo entra no corte nesta mesma rodada; se pede a discussão, o Claude escreve `/agile:discuss "abrir script SQL de um arquivo"` para você digitar quando quiser, e a lacuna fica contada no corte. Aqui você pede a discussão.
+
+Depois, um card por epic. O do `conexao` mostra a diferença:
+
+```
+enters: F-22, F-21, F-25, F-23
+leaves: -
+kept: -
+label: none → mvp-conexao
+agile mvp DIFF: conexao 4 enter, 0 leave, 0 kept
+```
+
+O `relatorios` tem um corte gravado que o objetivo não usa, então recebe o card do corte vazio, para o MVP antigo não se misturar com o novo:
+
+```
+enters: -
+leaves: F-20
+kept: -
+label: none → mvp-conexao
+agile mvp DIFF: relatorios 0 enter, 1 leave, 0 kept
+```
+
+Você escolhe escrever os dois. A saída real das duas gravações:
+
+```
+commit: chore(epic): first release cut of conexao
+agile mvp WRITTEN: conexao 4 ids
+commit: chore(epic): first release cut of relatorios
+agile mvp WRITTEN: relatorios 0 ids
+```
+
+O `docs/epics/conexao.md` passa a ter o rótulo no título e só os ids no corpo, e o objetivo na linha de `## Decisions`:
+
+```
+## First release cut: mvp-conexao
+F-22, F-21, F-25, F-23
+
+- 2026-10-15 — first release cut written by /agile:mvp: 4 items (criterion: the goal, dependency closure); label: mvp-conexao; goal: "o MVP precisa listar todos os bancos do servidor configurado, conectar no escolhido e rodar consultas digitadas no IDE ou abertas de um arquivo de script SQL"; gaps left: 1
+```
+
+O `/agile:order` passa a mostrar o rótulo na linha de cada epic:
+
+```
+- First release (conexao, mvp-conexao): 0 of 4 delivered; missing: F-22, F-21, F-25, F-23
+- First release (relatorios, mvp-conexao): cut not defined
+```
+
+Semanas depois, você digita só `/agile:mvp mvp-conexao`. O Claude não pede o texto de novo: lê o último objetivo gravado para esse rótulo (`agile mvp GOAL: 2026-10-15 "o MVP precisa listar..."`), a primeira linha diz `goal: reused from 2026-10-15` e a proposta mostra só o que mudou contra os cortes gravados. Um rótulo sem objetivo gravado é recusado: `no goal recorded for <rótulo>: type it once with the text`.
+
+### 14.129 A lista ordenada abre com o MVP: `/agile:order` põe antes o que o corte pede e o que ele precisa
+
+No acme-shop há dois epics. O `checkout` tem o corte `F-12, F-14`; o `catalog` não tem corte. Cinco itens em aberto: F-11 (Product search, Should, do `catalog`), F-12 (Checkout with card, Must), F-14 (Order confirmation email, Should, depende do F-11), F-15 (Product reviews, Must, do `catalog`) e F-16 (Wishlist, Could, do `catalog`). Antes, o F-15 (Must, nível 1) vinha na frente do F-11 e do F-14, embora ele não esteja em corte algum. Agora você digita `/agile:order` e a lista abre com o que o MVP precisa: os dois itens do corte e o F-11, que o F-14 espera e que está fora do corte. O F-15 e o F-16 ficam em `## Later`.
+
+Esta é a saída real do script sobre essa fixture (o arquivo, sem o cabeçalho de comentário):
+
+```
+# Order of implementation
+
+## MVP
+
+| # | Id | Title | Status | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|
+| 1 | F-12 | Checkout with card | approved | checkout | - | - |
+| 2 | F-11 | Product search | approved | catalog | - | F-14 |
+| 3 | F-14 | Order confirmation email | approved | checkout | F-11 | - |
+
+## Later
+
+| # | Id | Title | Status | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|
+| 4 | F-15 | Product reviews | approved | catalog | - | - |
+| 5 | F-16 | Wishlist | approved | catalog | - | - |
+
+## Checklist
+
+### MVP
+
+- [ ] 1. F-12 — Checkout with card [approved]
+- [ ] 2. F-11 — Product search [approved] — unlocks F-14
+- [ ] 3. F-14 — Order confirmation email [approved] — waits on F-11
+
+### Later
+
+- [ ] 4. F-15 — Product reviews [approved]
+- [ ] 5. F-16 — Wishlist [approved]
+
+## Summary
+
+- Delivered: 0
+- MVP: 3 open (2 in the cuts, 1 their dependencies)
+- First release (checkout): 0 of 2 delivered; missing: F-12, F-14
+```
+
+Três coisas para notar. A numeração é uma só, de 1 a 5, e dentro de cada grupo vale a mesma regra de antes (o F-12 e o F-11 estão no nível 1 e o Must vem primeiro; o F-14 espera o F-11 e fica no nível 2). A linha `- MVP:` diz de onde vem o grupo: 2 itens estão nos cortes e 1 entrou porque o F-14 depende dele. E a linha `First release (checkout)` continua a de sempre, por épico: a união só ordena a lista, nunca é um release, e publicar continua sendo o `/agile:publish`.
+
+Quando o F-12, o F-14 e o F-11 forem entregues, não sobra item de corte em aberto e a lista volta ao formato anterior, sem grupos e sem a linha `- MVP:`. No widget do app os grupos aparecem como cabeçalhos `MVP` e `Depois` sobre as mesmas linhas.
+
+### 14.130 O ship imprime quanto do uso do modelo o item gastou, por etapa, e o status mostra o uso até agora
+
+A F-12 do acme-shop, o total do pedido, foi refinada, construída e shippada numa sessão só. O Claude Code guarda no seu computador um arquivo por sessão com os tokens de cada resposta; o `usage.js` lê esses arquivos (só o modelo, o id, a contagem de tokens, o horário e as chamadas de skill e de agente, nunca o texto) e pesa cada token pelo preço relativo da API: a entrada vale 1, a leitura do cache 0,1, a escrita do cache 2 e a saída 5, vezes o peso da família do modelo. A etapa de cada resposta é a da última skill do agile carregada antes dela, e o item é o que a skill nomeou:
+
+```
+Usage: 3009.3k weighted (estimate) — refine 11% · build 62% · ship 27% — agents 1% — context per turn 118k → 235k — 1 session, 73 turns
+```
+
+O número é uma **estimativa**: o plano Max pesa os tokens de um jeito que a Anthropic não publica, então o preço é a melhor aproximação, e serve para dizer qual etapa pesa mais, não quanto falta do seu limite. A leitura aqui é a de sempre: quase todo o custo é o histórico lido de novo a cada resposta (o contexto por resposta cresce de 118k no refino para 235k no ship), e o build é a etapa mais pesada. O agente `architect` ficou com 1% do total. A linha da F-13, que a mesma sessão começou depois, não entra na da F-12:
+
+```
+Usage: 107.5k weighted (estimate) — build 100% — context per turn 124k — 1 session, 5 turns
+```
+
+O ship escreve a linha em `## Delivery`, ao lado de `Gate time:`, exatamente como o script a imprimiu, e o `/agile:retro` abre com as duas. Enquanto o item está em `building` ou `validating`, o `/agile:status` (e o começo de cada sessão) mostra uma linha `Usage (F-12): ...` com o que já foi gasto, e nada se não há transcrição. Sem a pasta de transcrições, ou sem nenhuma sessão que cite o item, a linha é `Usage: no transcript found`; uma linha ilegível é pulada e contada, `(1 lines skipped)`. Nada disso para o ship nem muda um gate: é só medida, e os cortes que ela justifica são de outros itens.
+
+As duas linhas acima são a saída real de `usage.js summary F-12` e `summary F-13` sobre uma sessão de teste com os 73 turnos da F-12, os 5 da F-13 e uma resposta do `architect`.
+
+### 14.131 O Claude propõe uma skill companheira uma vez e o catálogo recusa a que faz commit
+
+No ExamPrep, a feature "importar gabarito" muda o contrato público de `/api/v1/exams` (um sinal da régua de modelos: contrato consumido fora do módulo). No refino, antes de fechar o desenho, o Claude escreve uma única proposta:
+
+```
+Esta feature mexe num contrato público, então vale uma segunda leitura de segurança.
+O catálogo tem `safety-pal:review-safety` (só lê; para conferir o piso de segurança de um diff).
+Rodo agora nesta worktree? Se disser não, não pergunto de novo neste item.
+```
+
+Você responde "sim"; a skill roda, o Claude confere o `git status` da worktree e do checkout principal (nada mudou fora dela) e relata em pt-BR o que ela achou. Numa tarefa sem nenhum sinal (um texto de tela, uma coluna a mais), nenhuma proposta aparece.
+
+Uma linha do catálogo que nomeia uma skill que faz commit é recusada pela conferência. Saída real sobre um catálogo de teste com a linha de `agent-protocols:build`:
+
+```
+row 1 (agent-protocols@marketplace:build) names no record of benchmarks/companions.json
+row 1 (agent-protocols@marketplace:build) names an excluded skill (it commits, merges or changes a status)
+```
+
+Com o catálogo vazio, que é o estado enquanto nenhum companheiro foi medido, a conferência passa e a linha fixa das regras ainda vale para as skills que a sessão oferece.
+
