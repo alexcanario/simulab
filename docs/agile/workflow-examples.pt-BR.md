@@ -4463,7 +4463,7 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (23)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (26)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
 ok   AC5: the report states the skills (23) and the agents (5)
@@ -4768,3 +4768,172 @@ row 1 (agent-protocols@marketplace:build) names an excluded skill (it commits, m
 
 Com o catálogo vazio, que é o estado enquanto nenhum companheiro foi medido, a conferência passa e a linha fixa das regras ainda vale para as skills que a sessão oferece.
 
+### 14.132 O agente worker existe, custa mais para uma espera em primeiro plano e a guarda o cobre
+
+No ExamPrep, durante o ship, o Claude pensa em entregar a espera do `gate.js ship` (uma suíte de 150 s) ao agente `worker`, que roda em `haiku`. A régua de modelos (`references/model-choice.md`, seção "Mechanical tasks: worker") já responde: medido em três pares com e sem o agente, ele gastou de 9 a 11% mais, porque esperar em primeiro plano não custa nada à sessão e ela lê o arquivo de saída de qualquer jeito. O Claude então roda o gate ele mesmo, como sempre, e o ship segue igual.
+
+O `worker` fica pronto para a busca do #217 (`find`: linhas `caminho:linha` ou `none`). Como os outros agentes do plugin, ele não pode procurar no checkout principal enquanto existe uma worktree de item. Saída real da guarda sobre um projeto de teste com a worktree `feature/F-7`, numa busca do `worker` feita no checkout principal:
+
+```
+[agile agent-guard] Grep from the `worker` agent targets the main checkout (D:/dev/_scratch/216/gd), not an item's worktree.
+The item's code and status live in its worktree: D:/dev/_scratch/216/gd-wt [feature/F-7].
+Repeat the call with the item's worktree (or a folder inside it) as the path; never report something as missing from a search rooted elsewhere.
+Bypass, only with the owner's yes: restart Claude Code with AGILE_HOOKS=off (this turns off every agile hook).
+```
+
+A chamada termina com código 2; um agente com o mesmo nome vindo de outro plugin (`worker` sem o prefixo `agile:`) nunca é recusado.
+
+### 14.133 Um plugin do Claude Code pelo bootstrap: a rodada do plugin e o esqueleto
+
+O brief da Ana descreve um plugin que, no começo de cada sessão, lembra quem revisa dos pull requests que esperam por ele. Rodada 1:
+
+```
+Claude: 1. Tipo de app → Recomendação: Claude Code plugin. O brief fala de um comando
+       e de um lembrete no começo da sessão, não de telas nem de uma API.
+    2. Perfil de arquitetura → Recomendação: plugin (o único para um plugin).
+> ok
+```
+
+No lugar das rodadas 2 a 8 vem uma só:
+
+```
+Claude: P1. Nome → Recomendação: pr-reminders (kebab-case; vira o nome do marketplace
+       e o prefixo dos comandos, /pr-reminders:<verbo>).
+    P2. Descrição → Recomendação: "Reminds the reviewer of open pull requests at the
+       start of a session."
+    P3. Autor → Recomendação: Ana Souza.  P4. Licença → Recomendação: MIT.
+    P5. O que ele contém → Recomendação: skills e comandos; hooks quando o lembrete
+       vier no começo da sessão (o brief pede, então: skills, comandos e hooks).
+    27. Board → Recomendação: GitHub Issues + Projects (o código está no GitHub).
+    28c. Raiz das worktrees → Recomendação: D:\wt\pr-reminders.
+    28d. Merge → Recomendação: direct.  34. Modelos → as linhas de sempre, sem as de tela.
+    20a. Idiomas do manual → Recomendação: pt-BR.
+    Já está claro: um plugin não tem banco, telas, ambientes nem idiomas de UI;
+    branch principal main, fluxo trunk.
+> ok
+```
+
+Depois da pergunta de fechamento, do resumo e do "confirmo", o Claude descreve o esqueleto e, com o seu sim, copia o `templates/plugin/`: os dois manifestos em `0.1.0`, `skills/`, `commands/` e `hooks/hooks.json` sem hooks (a pasta `agents/` fica de fora, porque a P5 não a escolheu), o `README.md` com a instalação no Claude Code e no Copilot CLI e as três ferramentas em `tools/`. Não há solução, `Directory.Build.props` nem baseline de avisos. As duas checagens rodam uma vez sobre o esqueleto novo, antes do primeiro commit; saída real sobre o esqueleto do exemplo:
+
+```
+structure GREEN: 0 skills, 0 commands, 0 hooks (limits: 60 skill lines, 5 command lines, 250 description characters)
+hooks GREEN: 0 hooks
+```
+
+O `CLAUDE.md` tem `Profile: plugin`, nenhuma linha de idiomas de UI (um plugin não tem texto de tela), e o `.claude/agile/build.json` declara as duas checagens como o comando de docs, o scan só com o gitleaks e os limites. O relatório final lembra que o `/agile:publish` ainda não lança um plugin (#222): a tag `v<versão>` é feita à mão.
+
+### 14.134 O ship de um plugin parado pela checagem de estrutura, e depois a versão
+
+No pr-reminders, a F-1 acrescenta o comando `/pr-reminders:remind` e, para ele, uma skill chamada `remind`. O build rodou as checagens à mão no primeiro arquivo e não depois do último. No ship, o passo de docs as roda de novo; saída real sobre o repositório do exemplo:
+
+```
+RED skill-command-name: skills/remind/SKILL.md:2: a skill named "remind" shares the name of commands/remind.md
+structure RED: 1 problem
+agile docs RED: docs.command exited 1: node tools/structure.check.js
+```
+
+O ship para ali, como para num gate vermelho: um comando e uma skill dividem o mesmo `/pr-reminders:<nome>`, e o Claude Code carregaria só um. Nada foi commitado pelo ship. A correção é renomear a skill para `pr-list` (a pasta e o `name` do frontmatter juntos) e apontar o comando para ela. Na segunda rodada:
+
+```
+ran docs.command (0 s): node tools/structure.check.js
+ran docs.check (0 s): node tools/hooks.check.js
+agile docs GREEN: 0 file(s) changed under tools/
+agile gate OFF: .claude/agile/build.json says engine none (profile plugin: the structure check runs as the docs command)
+```
+
+O OFF mais o `agile docs GREEN` são o verde do merge. Então a versão, com a branch do item já com a `main` mergeada:
+
+```
+app version: profile plugin, node tools/plugin-version.js ship feature
+plugin version: main 0.1.0 + feature -> 0.2.0
+write .claude-plugin/plugin.json: 0.1.0 -> 0.2.0
+write .claude-plugin/marketplace.json (pr-reminders): 0.1.0 -> 0.2.0
+plugin version: both places read back as 0.2.0
+```
+
+Os dois arquivos entram no commit da versão, antes do merge. Se a sua skill precisasse de 80 linhas, o número a subir seria o `skillLines` do bloco `structure` do `build.json`, num commit próprio; a checagem passaria a aceitar 80.
+
+### 14.135 O `/agile:screen` oferece o Stitch uma vez, com o motivo, e só age no seu sim
+
+No ExamPrep, a feature F-12 "montar prova" tem uma tela com muitos estados e nenhuma tela parecida no app. O Stitch está conectado nesta sessão. Você digita `/agile:screen F-12`; o `ux-designer` volta, o Claude lê os dois arquivos e, antes de te mostrar o mockup, mostra um cartão:
+
+```
+Stitch
+Por quê: não há tela parecida no app e esta tem seis estados.
+Enviado ao Stitch: o texto da tela "Montar prova" do item F-12 e docs/design/DESIGN.md.
+Baixado: F-12-exam-builder.stitch.html e .stitch.png em docs/features/mockups/ (worktree do item).
+A geração leva alguns minutos e usa a sua conta do Stitch.
+
+( ) Referência ao lado do mockup (recomendado)
+( ) Usar o visual no mockup
+( ) Não
+```
+
+Você responde "Referência ao lado do mockup". O Claude acha (ou cria) o projeto "ExamPrep" no Stitch, reaproveita o design system feito do `DESIGN.md`, gera uma tela, baixa os dois arquivos e escreve no bloco da tela a linha `Stitch: projects/<p>/screens/<s> (<data>)`. No relatório ele lista o que o HTML baixado referencia fora dele (por exemplo uma fonte remota) e te envia os dois mockups, o do `ux-designer` e a referência. Em `## Decisions` fica uma linha `Stitch offered` com `reference`.
+
+Se você tivesse respondido "Usar o visual no mockup", o `ux-designer` seria chamado de novo com o caminho do HTML do Stitch e refaria o mockup mantendo todos os estados e o seletor de idioma, com as cores da identidade e sem nenhuma referência externa. Com "Não", nada é enviado nem criado e o cartão não volta neste item, a não ser que você digite `/agile:screen F-12 --stitch`. Sem o Stitch conectado nada disso aparece.
+
+
+### 14.136 O Claude oferece uma sessão nova só quando o contexto passa do limite, e nada para por isso
+
+No acme-shop, a F-12 (o total do pedido) é refinada e construída na mesma sessão. Logo depois do "Aprovo F-12", o Claude roda `usage.js fresh --at approval --id F-12`: o script lê a transcrição mais nova da pasta (a sessão em andamento), pega o contexto da última resposta e compara com o limite da parada, 120k na aprovação. Esta sessão está com 140k por resposta, então a linha sai no fim da mensagem:
+
+```
+Contexto desta sessão: 140k por turno; uma sessão nova abre em ~65k. Para economizar uso: /clear e depois /agile:build F-12.
+```
+
+A linha só é mostrada. Você pode digitar `/clear` e `/agile:build F-12`, e o build começa do item no disco com o mesmo rigor (o ship ainda confere cada critério nos arquivos), ou pode seguir na mesma sessão e pagar o que pagaria antes: nenhuma parada entra ou sai e nenhum gate muda. Numa sessão com 90k o mesmo comando não imprime nada e sai com código 0, porque uma sessão nova abre em cerca de 65k ponderados e perderia ao trocar.
+
+Quando a F-12 chega a `validating`, o relatório do build termina com a linha da validação (limite de 80k, porque a sua espera costuma passar de uma hora e o cache de 1 h expira). Aqui o contexto é de 252k:
+
+```
+Contexto desta sessão: 252k por turno; uma sessão nova abre em ~65k. Para economizar uso: /clear e depois /agile:ship F-12.
+```
+
+Em `/agile:epic "Checkout" --autopilot`, depois de cada feature entregue o Claude roda `usage.js fresh --at epic`; com uma linha, a execução termina ali (evento `stop`, `fresh context between features`) com o comando de retomada `/agile:epic "Checkout" --autopilot`, e o estado está no disco; sem linha, ela segue para a próxima feature. O merge continua por item.
+
+Para ver o número por trás da oferta, `usage.js fresh --replay <transcrição>` reprecifica uma sessão medida como se cada etapa depois da primeira abrisse nova. A saída real sobre uma sessão de teste com a forma medida da #201 (12 respostas de refino a partir de 119k, 30 de build a partir de 181k, 20 de ship a partir de 234k):
+
+```
+stage    turns      kept     fresh    saving
+other        1     12.8k     12.8k      0.0k
+refine      12    166.2k    196.4k    -30.2k
+build       30    621.0k    413.0k    208.0k
+ship        20    504.0k    281.0k    223.0k
+total       63   1304.0k    903.2k    400.8k
+Estimate, weights of references/usage-weights.json. Each stage after the first opens a fresh session (~65k weighted to open, a context of 90k = 77k open + 13k item read) and then grows as it did; the 1 h cache expiry is not counted, which favors fresh.
+```
+
+É uma estimativa, como o `Usage:`: o refino perde ao abrir nova (a sessão ainda era pequena), o build e o ship ganham, e é por isso que a oferta só aparece depois que o contexto passa do limite.
+
+
+### 14.137 O plano do build: fatias verticais, na ordem das dependências, cada uma com a sua checagem
+
+No acme-shop, a F-1 (o desconto do cliente na fatura) está aprovada. Ela cria uma tabela nova, `Billing.Discounts`, e um handler que a lê, `GetInvoiceHandler`, e o arquivo do item lista o handler antes da tabela (UC1, depois BR1). Você digita `/agile:build F-1`. Antes da primeira linha de código o Claude lê `references/build-plan.md`, monta o plano de acordo com ele e o grava numa só linha de `## Decisions`. A linha abaixo é a que a execução real escreveu na F-1 de teste (numa execução de verdade, não escrita à mão; o texto do arquivo é em inglês):
+
+```
+- 2026-10-16: plan — 1 `Billing.Discounts` migration (BR1) → AC3; 2 `IDiscounts`/`IInvoices` contracts and `GetInvoiceHandler` applying BR2 → AC1; 3 no-row path returns the full total → AC2; 4 unknown invoice answers `invoices.not_found` (BR3) → build
+```
+
+Repare nas três regras do método. A tabela vem em primeiro, mesmo estando em segundo no arquivo, porque o handler a lê (ordem das dependências). Cada passo é um caminho que funciona, não uma camada (nenhum passo diz "todas as entidades"). E cada passo termina com a sua checagem: o `AC` cujo teste ele deixa verde, ou `build` quando o passo é só o andaime ou a regra não tem critério próprio.
+
+Se o item cria um projeto novo ou uma mensagem entre módulos, o passo 4b roda antes e o plano nasce do corte que o `system-design` propôs. O Claude passa a ele, e ao `architect`, o caminho absoluto de `build-plan.md`. Na F-2 de teste (o módulo `Loyalty` e a mensagem `InvoicePaid`), o `Slice` voltou em passos ordenados, por exemplo:
+
+```
+1. `Loyalty.Points` migration (BR1) → check: build.
+2. Read path (UC1) → AC1. This step needs step 1.
+4. `InvoicePaid` contract owned by Billing (BR3) → check: build. Step 5 reads it, so it comes before.
+5. Consumer adds truncated points (UC2, BR2) → AC2.
+```
+
+Para ver o `architect` pegar uma ordem errada, a mesma F-2 foi dada a ele com um corte plantado ao contrário (os handlers antes da tabela que leem, o consumidor antes da mensagem que ele lê, e um passo que era uma camada inteira). Ele devolveu, sem criar uma sétima conferência, três achados da conferência `layout`:
+
+```
+| 1 | layout | major | Step 1 builds "all entities and all handlers of src/Loyalty at once (a layer alone, no criterion)" ...
+| 2 | layout | major | The order is reversed. The step 1 handlers read `Loyalty.Points`, which only exists in step 4. ...
+| 3 | layout | minor | No step names its check. ...
+```
+
+Quando você retoma um build parado (`/agile:build F-1` com a F-1 já em `building`), o Claude lê essa linha de `plan`, diz em que passo parou pelo último commit `wip` e continua dali; ele nunca reescreve a linha. Se o plano mudar no meio, acrescenta uma linha `plan v2` com o motivo. Se o plano passaria de 8 passos, o item é de tamanho L e o build para antes de qualquer código (`references/item-size.md`).
+
+Se esse plano gasta menos tokens do que o plano solto de antes é uma hipótese, não um número prometido: a linha `plan` de cada item é a evidência daqui em diante.

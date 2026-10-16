@@ -1293,3 +1293,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.85.0 to 0.90.0 (5 minor versions). Copied: `.claude/rules/agile/workflow.md` (companion-skill line, trimmed text), `docs/agile/templates/epic.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md` (examples 14.128 onward). Left alone: edited `git.md` and `profile.md` (plugin unchanged), manual build files (plugin unchanged).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
 - Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+
+## 2026-10-16 - Sync with agile@canary 0.96.0
+- From 0.90.0 to 0.96.0 (6 minor versions). Copied: `docs/agile/templates/project-claude.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Edited in `CLAUDE.md`: the "Code searches and sweeps" line now names the `worker` agent. Left alone: edited `git.md` and `profile.md` (plugin unchanged), manual build files (plugin unchanged). The `Manual locales:` line already lists pt-BR, pt-PT, en: no change.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
+- Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.

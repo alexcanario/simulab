@@ -51,7 +51,7 @@ A named model is for complex tasks: the plugin passes the mid model when no sign
 - Screen design (`/agile:screen`, agent `ux-designer`): <strongest available model>, passed on the call.
 - Screen implementation (`/agile:build`, agent `frontend`): <mid model>, passed on the call.
 - Main session (quiz, refinement, build): the session model, chosen by the owner.
-- Code searches and sweeps: <small fast model>. Bulk mechanical work verified by tests: <mid model>.
+- Code searches and sweeps (the `worker` agent): <small fast model>. Bulk mechanical work verified by tests: <mid model>.
 
 ## Board
 Board: <GitHub Issues + Projects (`<owner>/<repo>`) via `gh` | Azure Boards (`<org>/<project>`) via `az boards` | none (`docs/agile/backlog.md`)>
