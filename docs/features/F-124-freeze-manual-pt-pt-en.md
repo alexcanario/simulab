@@ -1,7 +1,7 @@
 ---
 feature: F-124
 epic: Foundation and identity
-status: approved
+status: building
 board: 175
 version: 1
 ---
@@ -55,13 +55,13 @@ No screen and no API: a configuration line, rule lines, 46 notices and one test.
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
+| AC1 | `FrozenManualTests.ManualLocales_ListsPtBrAlone_AndUiLocalesAreUntouched` |
+| AC2 | `FrozenManualTests.FrozenFolder_HoldsTheSameSlugsAsPtBr`, `FrozenManualTests.ReferenceFolder_Holds23Pages` |
+| AC3 | `FrozenManualTests.FrozenPage_CarriesTheFrozenKeyAndTheNotice` |
+| AC4 | `FrozenManualTests.PtBrPage_HasNoFrozenKey` |
+| AC5 | `PrivacyManualTests.CreateAccount_NamesTheRealRegionAndProcessors` |
 | AC6 | validation step 1 |
-| AC7 | pending |
+| AC7 | `FrozenManualTests.ManualLocales_ListsPtBrAlone_AndUiLocalesAreUntouched` (the `UI locales:` line), the existing missing-key tests of each module |
 
 ## Decisions
 - 2026-10-17 — Only stop updating; nothing is deleted — reversible and cheap — asked
@@ -74,6 +74,10 @@ No screen and no API: a configuration line, rule lines, 46 notices and one test.
 - 2026-10-17 — The notice's version is `<Version>` of `Directory.Build.props` (1.1.0 today) and its date the day of the build, both written once — the idea asked for "date and version" — Claude decided, no product impact
 - 2026-10-17 — New flow pages link the pt-BR manual page and old links to `../manual/en/` stay — the maintained page is the current one, and the en page still exists with its notice — Claude decided, no product impact
 - 2026-10-17 — One architecture test class `FrozenManualTests` reads the files as `PrivacyManualTests` does; no other code — AC1 to AC4 are file facts that would drift unseen — Claude decided
+
+- 2026-10-17 — Parallel build with F-105 (validating) authorized by the owner in chat; no shared files — owner
+- 2026-10-17: plan — 1 `FrozenManualTests` (AC1-AC4) and `PrivacyManualTests` in pt-BR only (AC5), seen failing → commit `test(F-124)` and lock; 2 `CLAUDE.md` `Manual locales:` line (AC1); 3 the 46 pages: `frozen:` key and notice written by one throwaway script run from the scratchpad (AC2-AC4); 4 `project.md` three edits and the unfreezing rule (AC6); 5 gate, coverage table, scan, validation script → `FrozenManualTests`, `PrivacyManualTests` green
+- 2026-10-17 — Design passes skipped: no project, contract, message or schema change (configuration, rule text, markdown and one test) — Claude decided
 
 ## Out of scope
 - Unfreezing and translating the pages again (a later item, when a real pt-PT or en user exists).
