@@ -3,8 +3,11 @@ page: security-google
 locale: en
 features: [F-29]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Connect and disconnect Google
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/security-google.md).
 
 Connect a Google account to sign in with it besides your password. It does not have to be the address you signed up with. If **My account** has no **Security** link, or the page has no **Google** card, connecting Google is not available yet.
 

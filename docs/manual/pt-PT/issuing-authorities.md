@@ -3,8 +3,11 @@ page: issuing-authorities
 locale: pt-PT
 features: [F-34]
 updated: 2026-09-25
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Entidades contratantes
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/issuing-authorities.md).
 
 Uma entidade contratante é quem publica o aviso e define os lugares, o conteúdo e as regras de um exame: uma
 câmara municipal, um governo, um ministério, uma universidade, uma empresa. Todos os exames do catálogo

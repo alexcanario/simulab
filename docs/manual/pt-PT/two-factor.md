@@ -3,8 +3,11 @@ page: two-factor
 locale: pt-PT
 features: [F-11]
 updated: 2026-09-21
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Verificação em dois passos
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/two-factor.md).
 
 A verificação em dois passos pede, depois da palavra-passe, um código de seis dígitos de uma aplicação de autenticação no seu telemóvel. Quem descobrir a sua palavra-passe continua a não conseguir entrar sem o seu telemóvel.
 

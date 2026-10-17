@@ -3,8 +3,11 @@ page: issuing-authorities
 locale: en
 features: [F-34]
 updated: 2026-09-25
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Issuing authorities
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/issuing-authorities.md).
 
 An issuing authority is who publishes the notice and sets the positions, the syllabus and the rules of an exam:
 a city hall, a state government, a ministry, a university, a company. Every exam in the catalog belongs to one

@@ -3,8 +3,11 @@ page: account-events
 locale: pt-PT
 features: [F-21]
 updated: 2026-09-23
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Eventos de conta
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/account-events.md).
 
 A página Eventos de conta mostra o que aconteceu às contas: quem iniciou sessão e a partir de onde, quem falhou ao iniciar sessão, que contas foram bloqueadas e quem alterou a palavra-passe ou desativou a verificação em duas etapas. Responde a perguntas como "alguém entrou nesta conta?".
 

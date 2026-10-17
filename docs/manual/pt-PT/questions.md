@@ -3,8 +3,11 @@ page: questions
 locale: pt-PT
 features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104, F-105]
 updated: 2026-10-17
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Questões
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/questions.md).
 
 O banco de questões é onde os curadores escrevem as questões de que as provas e os treinos são feitos. Uma
 questão tem enunciado, texto de apoio opcional, de duas a cinco opções com uma correta, explicação opcional,

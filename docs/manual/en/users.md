@@ -3,8 +3,11 @@ page: users
 locale: en
 features: [F-9, F-14, F-21]
 updated: 2026-09-23
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Users
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/users.md).
 
 The Users page lists the accounts of Simulab and is where you give or take a role.
 

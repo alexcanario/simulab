@@ -3,8 +3,11 @@ page: password
 locale: pt-PT
 features: [F-7, F-8]
 updated: 2026-09-19
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Palavra-passe: esqueci-me, redefinir e alterar
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/password.md).
 
 Volte a aceder à sua conta quando se esquecer da palavra-passe, ou altere-a com a sessão iniciada.
 

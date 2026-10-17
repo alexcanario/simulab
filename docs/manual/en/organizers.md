@@ -3,8 +3,11 @@ page: organizers
 locale: en
 features: [F-33, F-34, F-35]
 updated: 2026-09-29
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Organizers
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/organizers.md).
 
 An organizer is who writes, applies and marks a paper: an exam board hired for a public service exam, a body that issues certifications, or a university with its own entrance exam. It is chosen on each edition of an exam, and it can change from one edition to the next.
 

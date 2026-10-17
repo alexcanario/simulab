@@ -3,8 +3,11 @@ page: account-activity
 locale: en
 features: [F-31]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Recent activity
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/account-activity.md).
 
 Shows your own recent security events — when you signed in, a failed sign-in, a password change, two-factor turned on or off — so you can tell your own actions from someone else's. If **My account → Security** has no **Recent activity** card, it is not available yet.
 

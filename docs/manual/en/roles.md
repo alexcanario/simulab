@@ -3,8 +3,11 @@ page: roles
 locale: en
 features: [F-6, F-9, F-14, F-33]
 updated: 2026-09-24
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Roles and permissions
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/roles.md).
 
 Every account holds one or more roles, and each role carries the permissions that decide what the account can see and do in Simulab.
 

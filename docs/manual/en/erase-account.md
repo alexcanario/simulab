@@ -3,8 +3,11 @@ page: erase-account
 locale: en
 features: [F-10]
 updated: 2026-09-20
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Erase your account
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/erase-account.md).
 
 Erase your Simulab account yourself, whenever you want. Your personal data is removed straight away and cannot be brought back.
 

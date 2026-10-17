@@ -3,8 +3,11 @@ page: exams
 locale: pt-PT
 features: [F-34, F-43, F-35, F-42, F-57]
 updated: 2026-10-06
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Exames
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/exams.md).
 
 Um exame é a avaliação que se repete ao longo dos anos: o concurso de uma câmara municipal, o ENEM, uma
 certificação, o exame de acesso de uma universidade. Cada exame pertence à **entidade contratante** que publica

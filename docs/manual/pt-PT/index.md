@@ -3,8 +3,11 @@ page: index
 locale: pt-PT
 features: [F-2, F-4, F-5, F-6, F-7, F-8, F-9, F-10, F-11, F-14, F-21, F-31, F-33, F-34, F-35, F-36, F-74, F-79, F-95, F-102]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Simulab
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/index.md).
 
 O Simulab é um coach de estudo. Pratica com provas que se parecem com as reais, acompanha o seu desempenho e fica a saber o que estudar a seguir.
 

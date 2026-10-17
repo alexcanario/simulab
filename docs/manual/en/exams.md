@@ -3,8 +3,11 @@ page: exams
 locale: en
 features: [F-34, F-43, F-35, F-42, F-57]
 updated: 2026-10-06
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Exams
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/exams.md).
 
 An exam is the assessment that comes back year after year: a city hall's public service exam, ENEM, a
 certification, a university's entrance exam. Every exam belongs to the **issuing authority** that publishes its

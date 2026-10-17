@@ -3,8 +3,11 @@ page: exam-editions
 locale: en
 features: [F-35, F-74, F-75, F-96, F-99]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Exam editions
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/exam-editions.md).
 
 An edition is one paper actually applied: the year of its notice, the job it selects for, the board that applied it and whether students can see it. An exam has as many editions as it had papers. When one notice opens several jobs with different papers, each paper is its own edition.
 

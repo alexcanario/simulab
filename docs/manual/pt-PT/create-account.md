@@ -3,8 +3,11 @@ page: create-account
 locale: pt-PT
 features: [F-4, F-71]
 updated: 2026-10-09
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Criar uma conta
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/create-account.md).
 
 Crie a sua conta no Simulab com o seu e-mail e depois confirme o endereço através da mensagem que enviamos.
 

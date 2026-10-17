@@ -3,8 +3,11 @@ page: password
 locale: en
 features: [F-7, F-8]
 updated: 2026-09-19
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Password: forgot, reset and change
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/password.md).
 
 Get back into your account when you forget the password, or change it while you are signed in.
 

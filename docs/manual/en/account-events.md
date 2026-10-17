@@ -3,8 +3,11 @@ page: account-events
 locale: en
 features: [F-21]
 updated: 2026-09-23
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Account events
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/account-events.md).
 
 The Account events page shows what has happened to accounts: who signed in and from where, who failed to sign in, which accounts were locked, and who changed a password or turned two-factor off. It answers questions such as "did someone get into this account?".
 

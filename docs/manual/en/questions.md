@@ -3,8 +3,11 @@ page: questions
 locale: en
 features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104, F-105]
 updated: 2026-10-17
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Questions
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/questions.md).
 
 The question bank is where curators write the questions that exams and practice are built from. A question
 has a statement, an optional base text, from two to five options with one correct, an optional explanation, a

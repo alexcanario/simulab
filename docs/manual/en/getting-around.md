@@ -3,8 +3,11 @@ page: getting-around
 locale: en
 features: [F-2, F-8, F-17, F-50]
 updated: 2026-10-03
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Getting around
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/getting-around.md).
 
 Every page of Simulab has the same top bar and side menu, on a computer and on a phone.
 

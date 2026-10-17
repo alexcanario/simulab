@@ -3,8 +3,11 @@ page: review-queue
 locale: pt-PT
 features: [F-105]
 updated: 2026-10-17
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Fila de revisão
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/review-queue.md).
 
 A fila de revisão reúne as questões que um curador enviou para revisão. Quem revê lê a questão como o estudante
 a verá, com a chave de respostas e a explicação, e **aprova-a** (é publicada de imediato) ou **rejeita-a** com

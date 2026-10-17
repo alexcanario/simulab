@@ -3,8 +3,11 @@ page: my-account
 locale: en
 features: [F-8, F-10, F-11, F-16, F-32]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # My account
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/my-account.md).
 
 See your email, change the name shown in the account menu, and choose the language Simulab opens in and writes your emails in.
 

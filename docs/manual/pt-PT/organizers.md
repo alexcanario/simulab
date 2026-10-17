@@ -3,8 +3,11 @@ page: organizers
 locale: pt-PT
 features: [F-33, F-34, F-35]
 updated: 2026-09-29
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Entidades organizadoras
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/organizers.md).
 
 Uma entidade organizadora é quem elabora, aplica e corrige a prova: o júri contratado para um concurso público, a entidade que emite certificações ou a universidade com exame de acesso próprio. É escolhida em cada edição de um exame, e pode mudar de uma edição para a outra.
 
