@@ -1308,3 +1308,7 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.100.0 to 0.103.0 (3 minor versions). Copied: `docs/agile/templates/bug.md` and `feature.md` (`- Model:` line), `project-claude.md` (Evals line uses `node evals/run.js`), `workflow.pt-BR.md` (models per activity, sealed green tree, `/agile:order`) and `workflow-examples.pt-BR.md`. Left alone: edited `git.md` and `profile.md` (upstream unchanged), manual build files (plugin unchanged).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
 - Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+
+## 2026-10-17 - F-105 Review before publishing
+- Lesson (score 0/3): the slowest test projects of the full suite grew to 3 m 2 s (Catalog) and 2 m 56 s (Identity), against about 2 m 20 s at F-101; the whole run is 190 s, inside the 5 min budget. Cause not measured. Went nowhere: no rule; if the next full runs keep rising, capture an item to look at it.
+- Item decisions: all stayed in the item. Events: override 4, question 3, rework 1, test-fail 1, change 1.
