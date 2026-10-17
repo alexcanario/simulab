@@ -1,7 +1,7 @@
 ---
 feature: F-125
 epic: Foundation and identity
-status: approved
+status: building
 board: 176
 version: 1
 ---
@@ -201,5 +201,7 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-17 override — themes: 4 chosen over 2 recommended (4.8 vs 7.6); switched
 - 2026-10-17 override — app bar: CAS logo chosen over Simulab name (6.5 vs 7.3); kept
 - 2026-10-17 override — emails: in chosen over out (7.5 vs 7.0); kept
+- 2026-10-17 blocked — impossible criterion: dark keycap edges read 2.39-2.84:1 on the surface, BR3/AC2 ask 3:1
+- 2026-10-17 question — asked 1, from context 0
 
 ## Delivery
