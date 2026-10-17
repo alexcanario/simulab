@@ -434,6 +434,7 @@ De quem são os dados: o app roda no banco próprio `simulab_f105`, dentro do vo
 - 2026-10-17 question — asked 3, from context 0
 - 2026-10-17 change — v2: approve note as change reason; QuestionResponse.SubmittedAt; SubmittedAt check on approve/reject
 - 2026-10-17 rework — minor: Answer heading shows the key; dead fallback; column comment; criterion rows
+- 2026-10-17 test-fail — 3 new warning(s): NU1902 in tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj; NU1902 in src/Hosts/Simulab., 1 red
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
