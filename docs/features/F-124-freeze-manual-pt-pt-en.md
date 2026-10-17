@@ -54,7 +54,7 @@ No screen and no API: a configuration line, rule lines, 46 notices and one test.
 
 ## Criterion → test
 
-Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
+Tests locked: 366c6ed111a9cf2a9cde28e9715494b0ac664ca6 (1 file); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
@@ -81,6 +81,8 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 - 2026-10-17 — Parallel build with F-105 (validating) authorized by the owner in chat; no shared files — owner
 - 2026-10-17: plan — 1 `FrozenManualTests` (AC1-AC4) and `PrivacyManualTests` in pt-BR only (AC5), seen failing → commit `test(F-124)` and lock; 2 `CLAUDE.md` `Manual locales:` line (AC1); 3 the 46 pages: `frozen:` key and notice written by one throwaway script run from the scratchpad (AC2-AC4); 4 `project.md` three edits and the unfreezing rule (AC6); 5 gate, coverage table, scan, validation script → `FrozenManualTests`, `PrivacyManualTests` green
 - 2026-10-17 — Design passes skipped: no project, contract, message or schema change (configuration, rule text, markdown and one test) — Claude decided
+- 2026-10-17: tests unlocked (F-105 added the review-queue manual page, so the fixed count of 23 pages was stale; the owner chose to drop it) — owner
+- 2026-10-17 — Notices keep `v1.1.0`, the app version the item was built on, though main moved to 1.2.0 with F-105 before the merge — Claude decided, no product impact
 - 2026-10-17 — Reuse: `SolutionAssemblies.RepositoryRoot()` and the `PrivacyManualTests` file-reading pattern for `FrozenManualTests`
 - 2026-10-17 — The 46 notices were written by a Sonnet subagent with Edit (one file each); checked by `git diff --numstat` (3 insertions per file, 0 deletions) and by `FrozenManualTests` — Claude decided
 
