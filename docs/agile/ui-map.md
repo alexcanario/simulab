@@ -10,6 +10,9 @@
 | picker | seletor: o campo em que se escolhe um texto-base ao editar a questão |
 | type card | cartão de tipo: cada um dos cartões do campo "Question type" (Single choice, True/false, Multiple answer) |
 | checklist | lista "Before publishing": o que falta para a questão poder ser publicada, ao lado do formulário |
+| review queue | fila de revisão: a lista das questões enviadas para revisão, da mais antiga para a mais recente |
+| in review | em revisão: a questão foi enviada, está congelada e espera uma decisão |
+| reviewer-only role | papel só de revisão: um papel criado na tela de papéis que tem apenas a permissão "Review questions" |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
@@ -19,3 +22,6 @@
 | Question form, base text section | sidebar > Content > Questions > Add (or Edit on a row) > Base text card, after Statement | the picker field; Open and Show the text under it | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | bc7db0cb |
 | Question form, type and options | sidebar > Content > Questions > Add > "Question type" cards at the top of the Classification card; the Options card below Base text | the three type cards; in the Options card one checkbox per row for the Multiple answer type, the count "{n} of 5 options" under the list, and the checklist "Before publishing" in the aside | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | bc7db0cb |
 | Question preview | sidebar > Content > Questions > Edit on a row > Preview as a student (Publication card, below the form) | the dialog: the line "Mark N options.", Show answer under the options | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionPreviewDialog.razor | bc7db0cb |
+| Review queue | sidebar > Content > Review queue | the table; the question text is a link, and Review is in the row menu | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/ReviewQueue.razor | 203369c |
+| Review screen | Review queue > the question text or Review in the row | Reject and Approve at the bottom right; the summary (aside) on the right | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/ReviewQuestion.razor | 203369c |
+| Question form, review | sidebar > Content > Questions > Edit on a row > Publication card (Send for review, Withdraw from review) and the Review history card below it | the buttons in the Publication card; the Review history table under it | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | 203369c |

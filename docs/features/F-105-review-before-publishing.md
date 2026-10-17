@@ -1,7 +1,7 @@
 ---
 feature: F-105
 epic: Question bank
-status: building
+status: validating
 board: 151
 version: 2
 ---
@@ -354,10 +354,11 @@ Tests locked: 15a43374df1432e7b4049b5ce4cc5f48f55b2453 (9 files); unlocks: 0
 - 2026-10-17 — design trade-off 1 approve note as the version change reason — owner chose as proposed. design trade-off 2 `SubmittedAt` optional on `QuestionResponse` — owner chose as proposed. design trade-off 3 optional `SubmittedAt` on approve and reject, 409 on mismatch — owner chose as proposed. Contract changes recorded in change note v2 — asked.
 - 2026-10-17 — Size: kept whole, not L — one state machine, 6 vertical steps (fewer than the 8 allowed), one validation flow; the counter is a small kit piece used by the same dialogs — Claude.
 - 2026-10-17 — plan — 1 glossary rows + Submit end to end (enum value, entry table and migration, `Submit`, POST submit, client method, list arms, form Send, keys and code texts) → AC1, AC2, AC13, AC17; 2 freeze, withdraw and history on API and form (`IsFrozen`, status guard, Withdraw, rejected alert, Review history card, keys) → AC3, AC4, AC11, AC12, AC14, AC16; 3 AppTextField Counter, gallery and the shared reason dialog seen on F-101's annul dialog → AC18; 4 `questions.review`, queue, review detail, approve and reject on the API with keys and code texts, `SubmittedAt` → AC5, AC6, AC7, AC8, AC9, AC10; 5 queue page, review page and nav item (frontend agent) → AC15, AC9, AC10; 6 flow page, manual in three languages, security scan, gate → AC19 — Claude.
-
 - 2026-10-17 — Review (`reviewer`, opus), no blocker and no major; five minors: the Answer heading now carries the key in words (`#question-preview-key`) — fixed; the send check reads the whole question (extra read) — kept, `FindAsync` is the one read path; the dead fallback of the "waiting since" time — deleted; the `reason` column comment said "Empty" and the entity stores null — comment text corrected in the unshipped migration, snapshot and docs; this table and the `BR18` comment references — fixed. Review trade-offs: none asked.
 - 2026-10-17 — Review traps, accepted and recorded: a withdraw plus re-send between the `SubmittedAt` check and the save leaves `InReview` to `InReview`, which the status token cannot see (milliseconds; the next step would be the check inside the UPDATE); a base text linked to a question in review stays editable and the approval snapshots it as it is then (BR3 lists the question only; F-102 owns base texts); the queue orders by a correlated `MAX(created_at)` that no index serves (cheap now, to measure with E-9) — Claude.
 - 2026-10-17 — Reuse: `QuestionStatusReasonDialog` (F-101) for the approve note and the rejection, `QuestionPreviewDialog` content extracted to `QuestionPreviewContent`, `AppDataTable` / `AppRowActions` / `AppFormAside` / `AppStatusChip` of the kit, `PublishQuestionHandler` logic as `QuestionPublication`, `StatusReason` of the entity, `GuardStatus` pattern of `BaseTextStore`, `TrySaveChangesAsync` — Claude.
+- 2026-10-17 — Data for the screen check: the app host ran on the shared local PostgreSQL server (volume `simulab-postgres-data`, port 5432) with the item's own database `simulab_f105` (`Database__Name`) — owner said yes, once for this item; the database is dropped at the ship. The warnings baseline accepted the NU1902 advisory (MessagePack 2.5.302, AppHost and AppHost.Tests; the main checkout emits it too) — owner said yes — asked.
+- 2026-10-17 — Screen check through the app host (browser pane, admin sign-in with the local development seed): the queue listed two questions oldest first; the review screen showed key, explanation and summary; Reject with a reason (counter 31/500 and the live region "31 of 500 characters" after the pause) returned to the queue; the form showed the rejection alert, the Review history card, Send and Publish; Approve with a note published and emptied the queue. Not run on screen: the reviewer-only account, pt-PT, keyboard-only pass, dark mode and narrow width (validation script) — Claude.
 
 ## Out of scope
 - Email to the author when a decision is made — F-121.
@@ -376,7 +377,51 @@ Tests locked: 15a43374df1432e7b4049b5ce4cc5f48f55b2453 (9 files); unlocks: 0
 - v2 (2026-10-17, owner answers to the design pass): (1) the approve note doubles as the version change reason (BR5); (2) `QuestionResponse` gains optional `SubmittedAt`, the source of "Sent on" on the review screen and of "waiting since" on the form (API section, AC10); (3) approve and reject take an optional `SubmittedAt` that must match the latest `Submitted` entry, else 409 `question.version_conflict` (API section, AC7). Re-approved: BR5, AC7, AC10 and the API contract; nothing else changed.
 
 ## Validation script
-<!-- Written at the end of build, in two subsections with the same steps (English, pt-BR). -->
+### English
+Needed to validate: the local app host, the seeded administrator `admin@simulab.local`, a second account made at `/sign-up` (confirm its email in Mailpit, the local mail catcher the dashboard links) and one role holding only "Review questions" — owner; none of them is in place yet (the steps below make the role and give it to the second account).
+
+Whose data: the app runs on its own database `simulab_f105` in the shared local PostgreSQL volume, so the migration of this item lands there and never in `simulab`. That database already holds two questions from Claude's check (one published after an approval, one draft after a rejection; topic "Direitos fundamentais"); use them or write your own. Close any other app host first.
+
+1. Start the app host from the item's worktree `D:\wt\simulab\f-105-review-before` (the first start applies `AddQuestionReview` with no `fail` line in the console). Open https://localhost:7125 and sign in as `admin@simulab.local` → you land signed in.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f105"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f105 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. In the sidebar (left menu) open Administration → Roles, add a role "Reviewer" with only **Review questions** ticked and save. Make a second account at `/sign-up` in another browser profile, confirm its email in Mailpit, then as the administrator open Administration → Users and give it the role "Reviewer" → the role holds one permission and the account has it.
+3. As the administrator, sidebar → Content → Questions → Add: write a statement, two options with A correct, pick a topic, **Save**. In the Publication card (below the form) press **Send for review** → a yellow alert says the question is in review and cannot be edited, the card shows the chip "In review" and "Waiting for a reviewer since <date>", every field is read only, there is no Save, Publish or Delete, and the only actions are **Preview as a student** and **Withdraw from review**. Press **Withdraw from review** → no question is asked, the form is editable again and a "Review history" card (below the Publication card) lists "Sent" and "Withdrawn". Press **Send for review** again.
+4. Sign in as the second account (the reviewer-only role) → the sidebar shows Content → **Review queue** and no Questions item. Open **Review queue** → the table lists the question you sent (statement as a link, topic with its subject, type, language, "Sent on"); the row menu has only **Review**. Click the statement → the review screen shows the question as a student sees it with the correct option marked "Correct answer", the heading "Answer" with its letter, the explanation, and a summary on the right with Status "In review" and "Sent on"; no field can be edited.
+5. Press **Reject** → a dialog asks for a reason with a counter "0/500". Press **Reject** with the field empty → "Write the reason for the rejection." and nothing is sent. Type a reason → the counter follows the typing ("31/500" for 31 characters, after a short pause). Press **Reject** → you return to the queue with "Question rejected. It is a draft again." and the question is gone from it. As the administrator open the question → a blue alert in the Publication card says "Rejected on <date>: <your reason>", and the Review history card lists "Rejected" in red above "Sent". Press **Send for review** again → the alert goes away.
+6. As the reviewer-only account open the question again and press **Approve** → a dialog "Approve this question?" with an optional note and the counter; type a note and press **Approve** → "Question approved and published." and the queue is empty ("Nothing is waiting for review."). As the administrator the question is **Published** (list chip), the History card shows "First publication" and the Review history card lists "Approved" with your note.
+7. As the reviewer-only account open `/admin/questions` → Page not found, as for any page the account has no permission for. As the administrator open Content → Questions → the status filter offers Draft, Published, Annulled and **In review**; send a draft for review and check its row: chip "In review", no Publish or Unpublish in the row menu, Delete disabled with "This question is in review. Withdraw it before deleting.". Switch the language to Português (pt-PT) with the language button → the queue, the review screen, the dialogs and the chips are in Portuguese; switch back to English.
+8. Keyboard only, as the reviewer-only account: Tab through the Review queue to the statement link and press Enter → the review screen opens; Tab to **Reject**, Enter → the dialog opens with the focus in the field; Esc → the dialog closes and the focus returns to **Reject**; Tab to **Approve** and Enter, type a note, Tab to **Approve**, Enter → you land on the queue.
+
+### pt-BR
+Necessário para validar: o app host local, o administrador semeado `admin@simulab.local`, uma segunda conta criada em `/sign-up` (confirme o e-mail no Mailpit, o capturador de e-mail local que o painel mostra) e um papel que tenha só "Review questions" (Revisar questões) — dono; nada disso existe ainda (os passos abaixo criam o papel e o dão à segunda conta).
+
+De quem são os dados: o app roda no banco próprio `simulab_f105`, dentro do volume compartilhado do PostgreSQL local; então a migração deste item cai ali e nunca em `simulab`. Esse banco já tem duas questões da verificação do Claude (uma publicada depois de uma aprovação e um rascunho depois de uma rejeição; tópico "Direitos fundamentais"); use-as ou escreva as suas. Feche qualquer outro app host antes.
+
+1. Suba o app host a partir da worktree do item `D:\wt\simulab\f-105-review-before` (a primeira subida aplica `AddQuestionReview` sem nenhuma linha `fail` no console). Abra https://localhost:7125 e entre como `admin@simulab.local` → você entra logado.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f105"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f105 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Na sidebar (menu lateral esquerdo) abra Administration → Roles, adicione um papel "Reviewer" com só **Review questions** marcada e salve. Crie uma segunda conta em `/sign-up` em outro perfil do navegador, confirme o e-mail no Mailpit e, como administrador, abra Administration → Users e dê a ela o papel "Reviewer" → o papel tem uma permissão e a conta a recebeu.
+3. Como administrador, sidebar → Content → Questions → Add: escreva um enunciado, duas alternativas com a A correta, escolha um tópico e **Save**. No cartão Publication (abaixo do formulário) aperte **Send for review** (Enviar para revisão) → um alerta amarelo diz que a questão está em revisão e não pode ser editada, o cartão mostra o chip "In review" (Em revisão) e "Waiting for a reviewer since <data>", todos os campos ficam só de leitura, não há Save, Publish nem Delete, e as únicas ações são **Preview as a student** e **Withdraw from review** (Retirar da revisão). Aperte **Withdraw from review** → nada é perguntado, o formulário volta a ser editável e um cartão "Review history" (Histórico de revisão, abaixo do cartão Publication) lista "Sent" e "Withdrawn". Aperte **Send for review** de novo.
+4. Entre como a segunda conta (a do papel só de revisão) → a sidebar mostra Content → **Review queue** (fila de revisão) e nenhum item Questions. Abra **Review queue** → a tabela lista a questão que você enviou (enunciado como link, tópico com a disciplina, tipo, idioma, "Sent on"); o menu da linha só tem **Review**. Clique no enunciado → a tela de revisão mostra a questão como o aluno a vê, com a alternativa correta marcada "Correct answer", o título "Answer" com a sua letra, a explicação e, à direita, um resumo com Status "In review" e "Sent on"; nenhum campo pode ser editado.
+5. Aperte **Reject** → um diálogo pede o motivo, com o contador "0/500". Aperte **Reject** com o campo vazio → "Write the reason for the rejection." e nada é enviado. Digite um motivo → o contador acompanha a digitação ("31/500" para 31 caracteres, depois de uma pequena pausa). Aperte **Reject** → você volta à fila com "Question rejected. It is a draft again." e a questão sumiu dela. Como administrador abra a questão → um alerta azul no cartão Publication diz "Rejected on <data>: <seu motivo>" e o cartão Review history lista "Rejected" em vermelho acima de "Sent". Aperte **Send for review** de novo → o alerta some.
+6. Como a conta só de revisão, abra a questão de novo e aperte **Approve** (Aprovar) → um diálogo "Approve this question?" com uma observação opcional e o contador; digite uma observação e aperte **Approve** → "Question approved and published." e a fila fica vazia ("Nothing is waiting for review."). Como administrador a questão está **Published** (chip na lista), o cartão History mostra "First publication" e o cartão Review history lista "Approved" com a sua observação.
+7. Como a conta só de revisão abra `/admin/questions` → Page not found, como em qualquer página para a qual a conta não tem permissão. Como administrador abra Content → Questions → o filtro de status oferece Draft, Published, Annulled e **In review**; envie um rascunho para revisão e veja a linha dele: chip "In review", nenhum Publish ou Unpublish no menu da linha, Delete desativado com "This question is in review. Withdraw it before deleting.". Troque o idioma para Português (pt-PT) com o botão de idioma → a fila, a tela de revisão, os diálogos e os chips ficam em português; volte para inglês.
+8. Só com o teclado, como a conta só de revisão: use Tab pela Review queue até o link do enunciado e aperte Enter → a tela de revisão abre; Tab até **Reject**, Enter → o diálogo abre com o foco no campo; Esc → o diálogo fecha e o foco volta para **Reject**; Tab até **Approve** e Enter, digite uma observação, Tab até **Approve**, Enter → você cai na fila.
 
 ## Events
 <!-- Written only by events.js. -->
