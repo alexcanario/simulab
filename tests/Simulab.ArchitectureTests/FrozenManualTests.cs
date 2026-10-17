@@ -58,12 +58,6 @@ public partial class FrozenManualTests
         Slugs(locale).Should().BeEquivalentTo(Slugs("pt-BR"));
     }
 
-    [Fact]
-    public void ReferenceFolder_Holds23Pages()
-    {
-        Slugs("pt-BR").Should().HaveCount(23);
-    }
-
     [Theory]
     [MemberData(nameof(FrozenPages))]
     public void FrozenPage_CarriesTheFrozenKeyAndTheNotice(string locale, string slug)

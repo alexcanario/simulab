@@ -59,7 +59,7 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 | Criterion | Test |
 | --- | --- |
 | AC1 | `FrozenManualTests.ManualLocales_ListsPtBrAlone_AndUiLocalesAreUntouched` |
-| AC2 | `FrozenManualTests.FrozenFolder_HoldsTheSameSlugsAsPtBr`, `FrozenManualTests.ReferenceFolder_Holds23Pages` |
+| AC2 | `FrozenManualTests.FrozenFolder_HoldsTheSameSlugsAsPtBr` |
 | AC3 | `FrozenManualTests.FrozenPage_CarriesTheFrozenKeyAndTheNotice` |
 | AC4 | `FrozenManualTests.PtBrPage_HasNoFrozenKey` |
 | AC5 | `PrivacyManualTests.CreateAccount_NamesTheRealRegionAndProcessors` |
@@ -95,6 +95,7 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 - (none)
 
 ## Change notes
+- 2026-10-17 (ship): F-105 merged first and added the `review-queue` manual page in the three languages, so the count in BR2, AC2 and the "46 notices" reads 24 pages and 48 notices; the rule is unchanged ("every page of both folders"). The owner chose to unlock the test that fixed 23 and drop that count; AC2 stays checked against the pt-BR slugs. The new pt-PT and en pages got the notice. `Manual pages: ... (48 notices)`.
 
 ## Validation script
 
@@ -120,9 +121,10 @@ Necessário para validar: nada além do repositório (a worktree `D:/wt/simulab/
 
 - 2026-10-17 question — round 1: asked 3, from context 2
 - 2026-10-17 override — create-account freeze: owner chose Congela tambem over recommended (5.8 vs 8.2); kept
+- 2026-10-17 blocked — test wrong: F-105 added the review-queue manual page; the fixed count of 23 pages is stale, AC2 is checked against the pt-BR slugs
 
 ## Delivery
 - Branch: feature/F-124
 - Merge: -
 - Tests: ArchitectureTests 291 passed, 0 failed (2 s); gate GREEN; scan GREEN; full suite at the ship
-- Manual pages: pt-PT and en pages frozen (46 notices); pt-BR unchanged
+- Manual pages: pt-PT and en pages frozen (48 notices); pt-BR unchanged

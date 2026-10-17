@@ -3,8 +3,11 @@ page: review-queue
 locale: en
 features: [F-105]
 updated: 2026-10-17
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Review queue
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/review-queue.md).
 
 The review queue gathers the questions a curator sent for review. A reviewer reads the question as the student
 will see it, with the answer key and the explanation, and either **approves** it (it is published at once) or
