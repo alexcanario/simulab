@@ -3,7 +3,7 @@ feature: F-125
 epic: Foundation and identity
 status: building
 board: 176
-version: 1
+version: 2
 ---
 # Control Alt Systems identity in the theme and the UI kit
 
@@ -32,7 +32,7 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 ## Business rules
 - BR1 Two themes only, light and dark, both of the Control Alt Systems identity; the Simulae identity is removed, not kept as a choice.
 - BR2 Every colour comes from `SimulabTheme` (light and dark), whose values are those of `## Approved list` (1. Palette); no screen and no stylesheet carries a literal colour, except the QR code's white quiet zone (`.app-security-qr`).
-- BR3 Every text pair reads at 4.5:1 and every non-text pair (field border, icon, keycap edge against its page, focus ring) at 3:1, in both themes, as `ThemeContrastTests` and `ThemePaletteTests` check today.
+- BR3 Every text pair reads at 4.5:1 and every non-text pair (field border, icon, the keycap top — the fill of a filled button — against the page and the surface, focus ring) at 3:1, in both themes; the keycap edge is decorative and has no minimum; as `ThemeContrastTests` and `ThemePaletteTests` check today.
 - BR4 Buttons follow the four variants of `## Approved list` (3. Buttons). Every `MudButton` takes its variant from its existing `Variant` and `Color`, set once in the kit stylesheet; no page changes a button to get the look.
 - BR5 One orange action at most per screen. F-125 delivers the variant (`Color.Tertiary`, filled) in the kit and the gallery only; no routed page uses it until its screen item (F-126 to F-134) picks its action. The orange key of the brand symbol in the app bar is the brand mark and does not count as that action.
 - BR6 No diffuse shadow: cards, the app bar, the sidebar, menus and dialogs are separated by a 1px `line` border; the only shadow is the keycap edge.
@@ -84,7 +84,7 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 
 ## Acceptance criteria
 - AC1 Given `SimulabTheme`, when the light and the dark palettes are built, then every role holds the value of `## Approved list` (1. Palette) and `docs/design/identity.tokens.json` and `DESIGN.md` hold the same values (BR1, BR2).
-- AC2 Given both themes, when every text pair and every non-text pair of the palette is measured, then text reads at 4.5:1 or more and non-text at 3:1 or more, the keycap edges included (BR3).
+- AC2 Given both themes, when every text pair and every non-text pair of the palette is measured, then text reads at 4.5:1 or more and non-text at 3:1 or more, the fill of every filled button variant against the page and the surface included; the keycap edge is decorative (BR3).
 - AC3 Given `wwwroot/app.css`, when its colours are read, then no literal colour is left but the QR code's white quiet zone; the validation outlines, the validation message, the error boundary and the checkbox border use theme variables (BR2, F-83).
 - AC4 Given a page with a filled primary, an outlined, a text and a filled tertiary `MudButton`, when it renders, then each has the classes the kit stylesheet styles as keycap primary, secondary, text link and action, with a minimum height of 44px (36px for the small size) (BR4).
 - AC5 Given the routed pages, when they are scanned, then none uses `Color.Tertiary` on a button (BR5).
@@ -187,6 +187,12 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 
 ## Change notes
 
+### v2 — 2026-10-18
+- What: the keycap edge is decorative; BR3 and AC2 measure 3:1 for the keycap top (the fill of a filled button) against the page and the surface, in both themes, instead of the edge. No palette value changes.
+- Why: found at the build — the dark edges of `## Approved list` read 2.70:1 (primary `#0F6BA8`), 2.39:1 (green `#006B5B`) and 2.84:1 (orange `#B24A0C`) on the dark surface `#12263A`; the fill is what identifies the control (WCAG 2.2 1.4.11) and reads 5.01 to 6.67:1 in dark, 3.08:1 or more in light. The owner compared both options drawn on screen and chose to keep the approved edges over lightening them to `#1373B1`, `#007D6A`, `#B84E0F`.
+- Affected: BR3, AC2.
+- Re-approved: 2026-10-18 (owner, "aprovo").
+
 ## Validation script
 ### English
 1. (written at the end of build)
@@ -203,5 +209,6 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-17 override — emails: in chosen over out (7.5 vs 7.0); kept
 - 2026-10-17 blocked — impossible criterion: dark keycap edges read 2.39-2.84:1 on the surface, BR3/AC2 ask 3:1
 - 2026-10-17 question — asked 1, from context 0
+- 2026-10-18 change — v2: keycap edge decorative; BR3 and AC2 measure the button fill on page and surface
 
 ## Delivery
