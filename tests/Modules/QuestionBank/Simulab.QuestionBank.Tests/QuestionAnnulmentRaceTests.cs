@@ -225,6 +225,10 @@ public sealed class QuestionAnnulmentRaceTests : QuestionBankApiTests
 
         public void AddVersion(QuestionVersion version) => inner.AddVersion(version);
 
+        public void AddReviewEntry(QuestionReviewEntry entry) => inner.AddReviewEntry(entry);
+
+        public void GuardStatus(Question question) => inner.GuardStatus(question);
+
         public void Add(Question question) => inner.Add(question);
 
         public void Remove(Question question) => inner.Remove(question);

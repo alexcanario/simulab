@@ -75,6 +75,13 @@ public sealed class QuestionStore(
 
     public void AddVersion(QuestionVersion version) => context.QuestionVersions.Add(version);
 
+    public void AddReviewEntry(QuestionReviewEntry entry) => context.QuestionReviewEntries.Add(entry);
+
+    // The original value of the status goes into the UPDATE's WHERE (it is the concurrency token), so a draft that
+    // went into review since it was read makes even a save that changes no column of the question a lost race.
+    public void GuardStatus(Question question) =>
+        context.Entry(question).Property(row => row.Status).IsModified = true;
+
     public void Add(Question question) => context.Questions.Add(question);
 
     // The audit and soft-delete interceptor turns this into a flag, never a DELETE; the options loaded with

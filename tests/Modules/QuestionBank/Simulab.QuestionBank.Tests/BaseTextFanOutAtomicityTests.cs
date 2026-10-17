@@ -118,6 +118,10 @@ public sealed class BaseTextFanOutAtomicityTests : OriginApiTests
         public Task<QuestionVersion?> FindLatestVersionAsync(Guid questionId, CancellationToken cancellationToken) =>
             inner.FindLatestVersionAsync(questionId, cancellationToken);
 
+        public void AddReviewEntry(QuestionReviewEntry entry) => inner.AddReviewEntry(entry);
+
+        public void GuardStatus(Question question) => inner.GuardStatus(question);
+
         public void Add(Question question) => inner.Add(question);
 
         public void Remove(Question question) => inner.Remove(question);

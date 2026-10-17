@@ -302,23 +302,23 @@ typing, at the limit, over the limit (the Api's 400):
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
+| AC1 | QuestionReviewTests.Submit_ACompleteDraft_BecomesInReview_WithOneSubmittedEntryAndNoVersion; QuestionSubmitWithdrawEndpointTests.Submit_ACompleteDraft_BecomesInReview_WithOneSubmittedEntry_AndNoVersion |
+| AC2 | QuestionReviewTests.Submit_AnIncompleteDraft_IsRefusedWithThePublishCode_AndStaysADraft, Submit_InReviewPublishedOrAnnulled_IsRefusedWithTheCodeOfThatState_AndNothingChanges; QuestionSubmitWithdrawEndpointTests.Submit_AnIncompleteDraft_IsRefusedWithThePublishCode_AndNothingChanges, Submit_InReviewPublishedOrAnnulled_IsRefusedWithTheCodeOfThatState |
+| AC3 | QuestionReviewTests.InReview_RefusesUpdatePublishUnpublishAndDelete_WithInReview_AndKeepsItsContent, Annul_AQuestionInReview_KeepsItsOwnCode_NotPublished; QuestionSubmitWithdrawEndpointTests.InReview_SaveDeletePublishAndUnpublish_Answer409InReview_AndChangeNothing, InReview_GetListVersionsAndAnnul_AnswerAsBefore; QuestionReviewRaceTests.Save_OfOnlyAnOptionText_WhenTheQuestionWentIntoReviewMeanwhile_AnswersVersionConflict_AndTheOptionIsNotWritten |
+| AC4 | QuestionReviewTests.Withdraw_AQuestionInReview_BecomesADraftAgain_WithAWithdrawnEntry, Withdraw_ADraftPublishedOrAnnulledQuestion_IsRefusedWithNotInReview; QuestionSubmitWithdrawEndpointTests.Withdraw_AQuestionInReview_BecomesADraftAgain_WithAWithdrawnEntry_AndTheSameContent, Withdraw_ADraftPublishedOrUnknownQuestion_IsRefusedWithNotInReview_Or404 |
+| AC5 | QuestionReviewTests.Approve_*; QuestionReviewDecisionEndpointTests.Approve_AQuestionInReview_PublishesIt_WithVersionOneAndTheTrimmedNote, Approve_WithNoBodyOrABlankNote_Publishes_AndTheEntryHoldsNoNote, Approve_ANoteOf500Characters_IsAccepted_And501AreRefused_ChangingNothing, Approve_WhenTheKeyDiffersFromTheLatestVersion_NeedsTheNoteAsTheReason |
+| AC6 | QuestionReviewTests.Reject_*; QuestionReviewDecisionEndpointTests.Reject_AQuestionInReview_BecomesADraft_WithTheTrimmedReasonInTheHistory, Reject_WithAMissingBlankOrOverLongReason_IsRefused_AndItStaysInReview |
+| AC7 | QuestionReviewTests.ApproveAndReject_AQuestionNotInReview_AreRefusedWithNotInReview_BeforeTheReasonIsLooked_At; QuestionReviewDecisionEndpointTests.ApproveAndReject_AQuestionNotInReview_AreRefusedWithNotInReview_Or404WhenUnknown, Decisions_ThatSendASubmittedAtOtherThanTheLatestSend_AnswerVersionConflict_AndTheOneTheReviewerSawIsAccepted; QuestionReviewRaceTests.Approve_WhenTheQuestionWasWithdrawnMeanwhile_*, Reject_WhenAnotherReviewerApprovedMeanwhile_*, Withdraw_WhenAReviewerRejectedMeanwhile_*, Submit_WhenTheDraftWasPublishedMeanwhile_* |
+| AC8 | QuestionReviewDecisionEndpointTests.Approve_ByThePersonWhoSentTheQuestion_Publishes_AndBothEntriesCarryTheirId |
+| AC9 | QuestionSubmitWithdrawEndpointTests.ManageOnly_CanSendWithdrawAndReadTheHistory_ButNotTheReviewRoutes, ReviewOnly_CannotSendWithdrawSaveOrReadTheHistory, EveryRoute_ForAUserWithNeitherPermissionOrAStudent_Answers403_AndCuratorAndAdminHoldBoth; the menu and the pages: pending (screen tests) |
+| AC10 | ReviewQueueEndpointTests.Queue_ListsOnlyQuestionsInReview_OldestLatestSendFirst, Queue_Row_CarriesTheExcerptTheTopicTheSubjectTheTypeAndTheLanguage, Queue_IsPaginated_AndThePageSizeIsCappedAt100; ReviewQueueEmptyEndpointTests.Queue_WithNothingInReview_IsEmpty; QuestionReviewDecisionEndpointTests.ReviewDetail_OfAQuestionInReview_ReturnsItWithItsSubmittedAt_AndAnyOtherStateAnswers409; the empty state on screen: pending |
+| AC11 | QuestionSubmitWithdrawEndpointTests.Reviews_AfterSendRejectionAndSecondSend_AreThreeEntriesOldestFirst, Reviews_HaveNoRouteThatChangesOrDeletesAnEntry |
+| AC12 | QuestionSubmitWithdrawEndpointTests.DeleteTopic_UsedOnlyByAQuestionInReview_IsRefusedWithTopicInUse |
 | AC13 | pending |
 | AC14 | pending |
 | AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
+| AC16 | QuestionSubmitWithdrawEndpointTests.PublishDirect_AndEditAPublishedQuestion_StillWorkWithNoReview (API); the form and the direct paths on screen: pending |
+| AC17 | AddQuestionReviewMigrationTests.Up_AddsTheHistoryTableWithItsCommentsAndIndex_NamesInReviewInTheStatusComment_AndKeepsEveryStatus, Down_TurnsAQuestionInReviewBackIntoADraft_AndDropsTheTable; EnumColumnCommentTests, TableDescriptionTests (existing) |
 | AC18 | pending |
 | AC19 | pending |
 

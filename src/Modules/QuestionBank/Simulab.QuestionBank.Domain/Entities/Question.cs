@@ -278,6 +278,18 @@ public sealed class Question : TenantEntity
         return Result.Success(latest.CopyAs(latest.Number + 1, annulled: false, checkedReason.Value!));
     }
 
+    /// <summary>Draft to in review (F-105, BR1, BR2): the entry that records the send.</summary>
+    public Result<QuestionReviewEntry> Submit() => throw new NotImplementedException();
+
+    /// <summary>In review to draft (F-105, BR4): the entry that records the withdrawal.</summary>
+    public Result<QuestionReviewEntry> Withdraw() => throw new NotImplementedException();
+
+    /// <summary>In review to published (F-105, BR5): the entry that records the approval and its trimmed note.</summary>
+    public Result<QuestionReviewEntry> Approve(string? note) => throw new NotImplementedException();
+
+    /// <summary>In review to draft (F-105, BR6): the entry that records the rejection and its trimmed reason.</summary>
+    public Result<QuestionReviewEntry> Reject(string? reason) => throw new NotImplementedException();
+
     /// <summary>
     /// Ok for a draft; <c>question.annulled</c> for an annulled question (F-101, BR5);
     /// <c>question.delete_requires_draft</c> for a published question (BR11).
