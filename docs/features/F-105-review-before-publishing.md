@@ -1,7 +1,7 @@
 ---
 feature: F-105
 epic: Question bank
-status: validating
+status: done
 board: 151
 version: 2
 ---
@@ -437,4 +437,9 @@ De quem são os dados: o app roda no banco próprio `simulab_f105`, dentro do vo
 - 2026-10-17 test-fail — 3 new warning(s): NU1902 in tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj; NU1902 in src/Hosts/Simulab., 1 red
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-105` (never pushed), merged into `main` with `--no-ff` on 2026-10-17, merge commit `5689099`; app version 1.1.0 -> 1.2.0.
+- Tests: 3971 passed, 0 failed, in 13 projects (full gate after the version bump: 25 s build, 190 s test run). Security scan: `agile scan GREEN`. Test lock: unchanged (9 files).
+- Manual: `questions.md` updated and `review-queue.md` added, in pt-BR, pt-PT and en. Technical page: `docs/flows/review-before-publishing.md`.
+- Glossary: nothing missing.
+Gate time: 8 passes, 19 min 31 s — turn 1 (1 min 13 s), ship 4 (14 min 34 s), baseline 1 (28 s), scan 2 (3 min 16 s); 1 red
+Usage: 490.4k weighted (estimate) — ship 98% · other 2% — context per turn 167k — 1 session, 30 turns
