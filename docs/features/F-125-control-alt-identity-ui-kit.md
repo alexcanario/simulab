@@ -10,12 +10,196 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Summary
-Every screen takes the Control Alt Systems identity in one change of `SimulabTheme`, the UI kit and the gallery `/dev/ui`: the palette of the screen the owner approved (page `#F4F6F9`, ink `#0B1B2E`, blue `#0872B8`, green `#00806B`, one orange `#E8650A` action per screen), Bricolage Grotesque and JetBrains Mono, keycap-shaped buttons, bordered cards with no soft shadow, a white app bar and the sidebar kept in Simulab's navy `#0F3266`. Field icons and placeholders stay those of the current kit. Source: `_cas-design-system/design-system/tokens.json` and its README, the Stitch reference screen of the F-95 question form as adjusted on 2026-10-17, and D-4. It also absorbs F-83 (the literal colours of `wwwroot/app.css` come from the tokens). It records the brand decision ADR-0001 decision 30 left under "Revisit when" and updates `docs/design/identity.tokens.json` and `DESIGN.md`.
+Every screen takes the Control Alt Systems identity in one change of `SimulabTheme`, the UI kit and the gallery `/dev/ui`: the palette of `## Approved list` (page `#F4F6F9`, ink `#0B1B2E`, primary dark blue `#064F80`, blue `#0872B8` for links and info, green `#00806B`, one orange `#E8650A` action per screen), Bricolage Grotesque and JetBrains Mono, keycap-shaped buttons, bordered cards with no soft shadow, a white app bar with the Control Alt Systems key symbol, "Simulab" and "Control Alt Systems" under it, and the sidebar kept in Simulab's navy `#0F3266` (`#081522` in the dark theme). Field icons and placeholders stay those of the current kit. The emails take the same button colour and type. Source: `_cas-design-system/design-system/tokens.json` and its README, the Stitch reference of the F-95 question form approved on 2026-10-17, and D-4. It also absorbs F-83 (the literal colours of `wwwroot/app.css` come from the tokens), records the brand decision ADR-0001 decision 30 left under "Revisit when" in ADR-0006, and updates `docs/design/identity.tokens.json` and `DESIGN.md`.
 
 ## Start
 - Depends on: nothing
 - Waits on (to start): nothing
-- Needed to validate: the owner, on screen, in both themes
-- Model: unknown — settled at /agile:refine
-- Suggested path: `/agile:refine` → `/agile:screen` (gallery and one reference screen) → `/agile:build`
-- Parallel with: none — F-126 to F-134 depend on it
+- Needed to validate: the owner, on screen, in both themes, desktop and phone width; Docker Desktop running for the app host — owner
+- Model: opus (a wide visual change across theme, kit, gallery, emails and the contrast tests, with judgement on every pair of colours)
+- Suggested path: `/agile:build F-125`
+- Parallel with: none — F-126 to F-134 and F-139 depend on it
+
+## Goal
+Give Simulab its own brand (the Control Alt Systems identity) in one place, so every screen changes at once and the screen items F-126 to F-134 only change composition.
+
+## Users and use cases
+- UC1 A student, curator or admin opens any screen and sees the Control Alt Systems identity: palette, fonts, keycap buttons, bordered cards, the white app bar with the brand.
+- UC2 A user switches between the light and the dark theme and both follow the identity, readable at WCAG 2.2 AA.
+- UC3 A developer opens `/dev/ui` and sees every button variant, the type scale and the palette of both themes, to build the screen items from them.
+- UC4 A user receives a verification, password, erasure or data export email and its button and type follow the identity.
+
+## Business rules
+- BR1 Two themes only, light and dark, both of the Control Alt Systems identity; the Simulae identity is removed, not kept as a choice.
+- BR2 Every colour comes from `SimulabTheme` (light and dark), whose values are those of `## Approved list` (1. Palette); no screen and no stylesheet carries a literal colour, except the QR code's white quiet zone (`.app-security-qr`).
+- BR3 Every text pair reads at 4.5:1 and every non-text pair (field border, icon, keycap edge against its page, focus ring) at 3:1, in both themes, as `ThemeContrastTests` and `ThemePaletteTests` check today.
+- BR4 Buttons follow the four variants of `## Approved list` (3. Buttons). Every `MudButton` takes its variant from its existing `Variant` and `Color`, set once in the kit stylesheet; no page changes a button to get the look.
+- BR5 One orange action at most per screen. F-125 delivers the variant (`Color.Tertiary`, filled) in the kit and the gallery only; no routed page uses it until its screen item (F-126 to F-134) picks its action. The orange key of the brand symbol in the app bar is the brand mark and does not count as that action.
+- BR6 No diffuse shadow: cards, the app bar, the sidebar, menus and dialogs are separated by a 1px `line` border; the only shadow is the keycap edge.
+- BR7 Corner radii follow `## Approved list` (4. Shape): 6px tags and chips, 12px buttons and fields, 20px cards and dialogs.
+- BR8 Fonts are served by the app (never a third-party host), with their OFL licence files next to them: Bricolage Grotesque 500 for text and 800 for titles, JetBrains Mono 500/700 for code, grids of numbers and keyboard shortcuts; the fallback stacks are those of `tokens.json`.
+- BR9 The app bar shows, from left: the menu button, the brand symbol (three keys: Ctrl green, Alt blue, restart orange), "Simulab" (Bricolage 800) with "Control Alt Systems" under it in `ink-muted`, then the theme switch, the language switch and the user menu. The symbol is decorative (`aria-hidden`); the home link keeps its accessible name. Both texts are resource keys in the three locales. The same layout fits at 375px width.
+- BR10 The favicon is the Control Alt Systems app icon (`icone-app.svg`).
+- BR11 Field icons and placeholders stay those of the current kit (F-95, F-114).
+- BR12 Emails use the primary dark blue `#064F80` with white text for their button, ink `#0B1B2E` for text, and the Bricolage Grotesque stack with its fallback (email clients do not load web fonts); "Simulab" and "Control Alt Systems" head each email as text, no image.
+
+## Screens and API
+- No route, endpoint or error code changes. Every routed page changes look through the theme and the kit stylesheet.
+- `/dev/ui` (dev only) — gains three sections: `gallery-buttons` (four variants, sizes and states), `gallery-type` (the type scale and the mono font), `gallery-palette` (the palette of the theme in use, with each role's name and value).
+- Files: `Theme/SimulabTheme.cs`, `wwwroot/app.css`, `wwwroot/fonts/` (new), `wwwroot/brand/` (new: symbol light and dark, favicon), `Components/App.razor` (favicon link), `Components/Layout/MainLayout.razor` (app bar), `Simulab.Identity.Infrastructure/Email/EmailHtml.cs` and the mailers, `docs/design/identity.tokens.json`, `docs/design/DESIGN.md`, `docs/decisions/ADR-0006-control-alt-identity.md` (new), ADR-0001 decision 30.
+
+### Wireframe: App bar (every screen with `MainLayout`)
+```text
++----------------------------------------------------------+
+| [=] [G][B][O] Simulab              (moon) (A) (avatar)   |
+|               Control Alt Systems                        |
+|     [changed: white bar, brand symbol, two-line name]    |
++--------+-------------------------------------------------+
+| navy   | page #F4F6F9                                    |
+| menu   | +-------------------------------------------+   |
+|        | | card: white, 1px line, radius 20 [changed]|   |
+|        | | [ Field ________ ] radius 12    [changed] |   |
+|        | | [Salvar]=  [Filtrar]  Cancelar  [changed] |   |
+|        | +-------------------------------------------+   |
++--------+-------------------------------------------------+
+```
+
+### Wireframe: UI gallery (`/dev/ui`)
+```text
++----------------------------------------------------------+
+| UI gallery                                               |
+| ...existing sections, in the new look...      [changed]  |
+| Buttons                                           [new]  |
+|  [Primary]=  [Secondary]  Text link  [Action]=           |
+|  small size | hover | pressed | focus | disabled         |
+| Type                                              [new]  |
+|  ui-title 28 / ui-heading 20 / ui-body 15 / mono 14     |
+| Palette (theme in use)                            [new]  |
+|  [##] primary #064F80  [##] info #0872B8  ...            |
++----------------------------------------------------------+
+```
+
+## Docs
+- none — no flow, contract, setting or module changes; the identity is recorded in `docs/design/identity.tokens.json`, `DESIGN.md` and ADR-0006, and the gallery `/dev/ui` shows it.
+
+## Acceptance criteria
+- AC1 Given `SimulabTheme`, when the light and the dark palettes are built, then every role holds the value of `## Approved list` (1. Palette) and `docs/design/identity.tokens.json` and `DESIGN.md` hold the same values (BR1, BR2).
+- AC2 Given both themes, when every text pair and every non-text pair of the palette is measured, then text reads at 4.5:1 or more and non-text at 3:1 or more, the keycap edges included (BR3).
+- AC3 Given `wwwroot/app.css`, when its colours are read, then no literal colour is left but the QR code's white quiet zone; the validation outlines, the validation message, the error boundary and the checkbox border use theme variables (BR2, F-83).
+- AC4 Given a page with a filled primary, an outlined, a text and a filled tertiary `MudButton`, when it renders, then each has the classes the kit stylesheet styles as keycap primary, secondary, text link and action, with a minimum height of 44px (36px for the small size) (BR4).
+- AC5 Given the routed pages, when they are scanned, then none uses `Color.Tertiary` on a button (BR5).
+- AC6 Given the kit stylesheet and the theme, when cards, the app bar, the sidebar, menus and dialogs render, then none has a diffuse shadow and each has a 1px border in `line` (BR6).
+- AC7 Given the theme and the kit stylesheet, when tags, buttons, fields, cards and dialogs render, then their radii are 6px, 12px, 12px, 20px and 20px (BR7).
+- AC8 Given the app head, when a page loads, then the four `woff2` files are served from the app (no external host), each `@font-face` names its weight, body text uses Bricolage Grotesque 500, titles 800 and code JetBrains Mono, and the OFL files sit next to the fonts (BR8).
+- AC9 Given any page with `MainLayout`, when it renders in light and in dark, then the app bar is white (light) or `surface-raised` (dark), shows the decorative brand symbol, "Simulab" and "Control Alt Systems" from resource keys, and the home link keeps its accessible name; at 375px width nothing wraps or overflows (BR9).
+- AC10 Given the app head, when a page loads, then the favicon link points at the Control Alt Systems app icon (BR10).
+- AC11 Given a field of the kit, when it renders, then its leading icon and placeholder are those it had before (BR11).
+- AC12 Given the verification, password, erasure and data export emails, when they are sent, then their button is `#064F80` with white text, their text is `#0B1B2E`, their font stack starts with Bricolage Grotesque and they open with "Simulab" and "Control Alt Systems" as text (BR12).
+- AC13 Given `/dev/ui`, when it opens, then it shows the sections `gallery-buttons`, `gallery-type` and `gallery-palette` (UC3).
+- AC14 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green.
+
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+
+## Approved list
+
+### 1. Palette
+Light / dark. Darken and lighten shades not listed are derived at build and pinned by `ThemePaletteTests`.
+1. Background (page): `#F4F6F9` / `#0B1B2E`
+2. Surface (cards, dialogs): `#FFFFFF` / `#12263A`
+3. Surface sunken (disabled, wells): `#E9EDF2` / `#081522`
+4. Text primary (ink): `#0B1B2E` / `#F4F6F9`
+5. Text secondary and action default (ink-muted): `#52647A` / `#B8C4D2`
+6. Lines and inputs (line-strong): `#6B7C91` / `#6A829A`
+7. Divider and table lines (line): `#DDE3EA` / `#26405A`
+8. Primary (filled button, selected item, focus): `#064F80`, text `#FFFFFF`, keycap edge `#043A5E` / `#2AA8F0`, text `#0B1B2E`, keycap edge `#0F6BA8`
+9. Info and links: `#0872B8`, text `#FFFFFF` / `#2AA8F0`, text `#0B1B2E`
+10. Secondary and success (green): `#00806B`, text `#FFFFFF`, edge `#00574A` / `#00A68C`, text `#0B1B2E`, edge `#006B5B`
+11. Tertiary (action, orange): `#E8650A`, text `#0B1B2E`, edge `#A84606` / `#FF7A2E`, text `#0B1B2E`, edge `#B24A0C`
+12. Warning: `#D98B1A`, text `#0B1B2E` / `#D98B1A`, text `#0B1B2E`
+13. Error: `#BE3737`, text `#FFFFFF` / `#E06C6C`, text `#0B1B2E`
+14. App bar: `#FFFFFF`, text `#0B1B2E`, subline `#52647A` / `#12263A`, text `#F4F6F9`, subline `#B8C4D2`
+15. Sidebar (drawer): `#0F3266`, text and icon `rgba(255,255,255,0.92)` / `#081522`, text and icon `#B8C4D2`
+16. Focus ring: `#0872B8` / `#2AA8F0`, 3px, 2px offset
+17. Tint blue (informative highlights): `#DCEBF7` / `#16344F`
+
+### 2. Type
+1. Families: Bricolage Grotesque (500 text, 800 titles), fallback `system-ui, sans-serif`; JetBrains Mono (500, 700), fallback `ui-monospace, Consolas, monospace`
+2. Scale (`ui-*`, px size / line height): title 28/32, heading 20/24, subheading 16/20, body 15/22, control 14/20, caption 12/16, label 12/16; mono code 14/22, grid 13/20, kbd 12/16
+3. Titles keep a negative letter spacing; body and control text none
+
+### 3. Buttons
+1. Primary (filled, `Color.Primary`): primary fill, keycap edge below, white text (dark theme: ink text)
+2. Secondary (outlined): surface fill, 2px inner border in line-strong, ink text
+3. Text: no fill, info blue, underlined
+4. Action (filled, `Color.Tertiary`): orange fill, ink text, orange keycap edge; one per screen, on surface only
+5. Destructive (filled or outlined, `Color.Error`): error colours, same shapes
+6. States: minimum height 44px (small 36px); hover 8% brighter; pressed moves down and the edge shrinks, at once with `prefers-reduced-motion`; focus ring of item 16 of the palette; disabled sunken fill, ink-muted text, no edge, real `disabled`
+
+### 4. Shape
+1. Radius: tags and chips 6px, buttons and fields 12px, cards and dialogs 20px, brand keys 22%
+2. Shadow: only the keycap edge; every other separation is a 1px `line` border
+
+## Decisions
+- 2026-10-17 — Two themes (light and dark), both Control Alt Systems; the Simulae identity is not kept as a choice — owner chose "4 themes (current + new)" over the recommended "2 themes" (average 4.8 vs 7.6); switched — asked
+- 2026-10-17 — Palette, sidebar navy and white app bar, field icons and placeholders kept, F-83 absorbed and F-70 kept apart, the orange action only in the kit and the gallery — the owner's D-4 decisions, still true — confirmed: D-4
+- 2026-10-17 — Primary is the dark blue `#064F80` (the brand's `key-blue-shadow`, 8.61:1 under white); `#2AA8F0` in the dark theme — the owner did not like the ink button and asked for a darker blue; this one is already a brand token — asked
+- 2026-10-17 — Error and warning keep Simulab's values — the design system has none, and an orange warning would confuse an alert with the action — asked
+- 2026-10-17 — Dark sidebar `#081522` (surface-sunken) — the navy against the dark page reads at 1.38:1 and its edge disappears — asked
+- 2026-10-17 — Radii of the tokens (6 / 12 / 20) — they are part of the identity — asked
+- 2026-10-17 — The four button variants of the brand — one look for every button of a screen, changed in one place — asked
+- 2026-10-17 — App bar with the key symbol, "Simulab" and "Control Alt Systems" under it — owner chose "Control Alt Systems logo" over the recommended "Simulab name only" (average 6.5 vs 7.3); kept; the owner then drew the two-line layout — asked
+- 2026-10-17 — The orange key of the brand symbol does not count as the screen's orange action — the symbol is the brand mark and is never redrawn (README: do not change colours or order of the keys) — asked
+- 2026-10-17 — Favicon is the Control Alt Systems app icon — consistent with the symbol in the app bar — asked
+- 2026-10-17 — Emails are in scope — owner chose "in F-125" over the recommended "out, as an idea" (average 7.5 vs 7.0, the chosen option scores higher: the recommendation was the weaker one); kept — asked
+- 2026-10-17 — Reference for the build: `## Approved list` and the gallery; the Stitch screen is not exported — the Stitch API lists only `DESIGN.md` in both projects ("Simulab - F-95 Questions (CAS identity)" and "Simulab"), so the file carries every value instead — asked
+- 2026-10-17 — Partner brand per tenant captured as F-139 in the new epic Partner tenants — the owner wants a partner who rents Simulab to show its own name and logo; F-125 keeps the brand in resource keys and files that F-139 can make come from the tenant — asked
+- 2026-10-17 — No new package; fonts are files copied from `_cas-design-system/design-system/fonts/` with their OFL licences — Claude
+- 2026-10-17 — Buttons are styled by CSS on MudBlazor's classes (`mud-button-filled-primary`, `mud-button-outlined`, `mud-button-text`, `mud-button-filled-tertiary`) in the kit stylesheet, written from MudBlazor 9.9.0's own CSS — the kit has no button component and 73 `MudButton`s in 36 files must change at once (ui-project.md: CSS on a library class is written from the package's CSS) — Claude
+- 2026-10-17 — `Elevation` values stay in the pages; the theme sets no shadows and the stylesheet draws the border — removing 40 attributes in 13 pages would touch screen items' files for no visible gain — Claude
+- 2026-10-17 — Brand files (symbol light and dark, favicon) go to `wwwroot/brand/`; the dark symbol uses the dark key colours of `tokens.json` — Claude
+- 2026-10-17 — ADR-0006 records the brand; ADR-0001 decision 30 points to it and its "Revisit when" line is closed — D-4 asked for an ADR — confirmed: D-4
+
+## Out of scope
+- Composition and new actions of each screen: F-126 to F-134 (and which action is orange on each).
+- The actions of the Stitch screen captured as F-135 to F-138.
+- A partner's own name and logo: F-139.
+- Exam session screens (distraction-free exception): wait on the first exam session screen (D-4).
+- The Control Alt Systems logo in emails as an image.
+
+## Open questions
+- (none)
+
+## Change notes
+
+## Validation script
+### English
+1. (written at the end of build)
+
+### pt-BR
+1. (escrito no fim do build)
+
+## Events
+
+- 2026-10-17 question — round 1: asked 10, from context 4
+- 2026-10-17 question — follow-up: asked 4, from context 0
+- 2026-10-17 override — themes: 4 chosen over 2 recommended (4.8 vs 7.6); switched
+- 2026-10-17 override — app bar: CAS logo chosen over Simulab name (6.5 vs 7.3); kept
+- 2026-10-17 override — emails: in chosen over out (7.5 vs 7.0); kept
+
+## Delivery
