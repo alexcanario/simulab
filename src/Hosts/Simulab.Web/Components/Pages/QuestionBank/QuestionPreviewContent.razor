@@ -90,6 +90,11 @@
             {
                 <p class="app-preview-no-key">@(IsTrueFalse ? L["Questions.Preview.NoKey.TrueFalse"] : L["Questions.Preview.NoKey"])</p>
             }
+            else
+            {
+                @* F-105 screen 2: the heading carries the key in words, the letters or True/False, not the marked options alone. *@
+                <p class="app-preview-key" id="question-preview-key">@KeyText</p>
+            }
 
             <h4 class="app-preview-heading">@L["Questions.Preview.Explanation"]</h4>
             @if (QuestionHtml.IsBlank(Question.ExplanationHtml))
@@ -127,6 +132,12 @@
     private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
 
     private int CorrectCount => _options.Count(option => option.IsCorrect);
+
+    // The key in words: True or False, or the letters of the correct options.
+    private string KeyText =>
+        IsTrueFalse
+            ? (Question.TrueFalseKey == true ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])
+            : string.Join(", ", _options.Where(option => option.IsCorrect).Select(option => QuestionText.Letter(option.Position)));
 
     protected override void OnParametersSet() =>
         _options = [.. Question.Options.OrderBy(option => option.Position)];

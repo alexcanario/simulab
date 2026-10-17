@@ -62,7 +62,7 @@ Entity: `QuestionReviewEntry` — One event in the review of a question: sent, w
 | is_deleted | boolean | no |  |  | True once the row was deleted. Rows are never removed; a global query filter hides the deleted ones. |
 | kind | character varying(40) | no |  |  | max 40; What happened: Submitted, Withdrawn, Approved or Rejected. |
 | question_id | uuid | no | FK → questions |  | The question the entry belongs to. |
-| reason | character varying(500) | yes |  |  | max 500; The reason of a rejection or the note of an approval, trimmed. Empty when none was given. |
+| reason | character varying(500) | yes |  |  | max 500; The reason of a rejection or the note of an approval, trimmed. Null when none was given. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |

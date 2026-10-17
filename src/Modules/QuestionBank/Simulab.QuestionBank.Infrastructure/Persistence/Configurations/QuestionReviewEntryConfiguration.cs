@@ -38,7 +38,7 @@ public sealed class QuestionReviewEntryConfiguration : IEntityTypeConfiguration<
 
         builder.Property(entry => entry.Reason)
             .HasMaxLength(QuestionLimits.ChangeReasonMaxLength)
-            .HasComment("The reason of a rejection or the note of an approval, trimmed. Empty when none was given.");
+            .HasComment("The reason of a rejection or the note of an approval, trimmed. Null when none was given.");
 
         builder.HasOne<Question>()
             .WithMany()

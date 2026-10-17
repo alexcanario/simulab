@@ -91,6 +91,7 @@ public sealed class ReviewQuestionPageTests : QuestionPageTestContext
 
         // The answer section is there from the start: no Show/Hide button.
         page.FindAll("#question-preview-toggle").Should().BeEmpty();
+        page.Find("#question-preview-key").TextContent.Trim().Should().Be("A", "the Answer heading carries the key in words");
         var answer = page.Find("section.app-preview-answer");
         answer.TextContent.Should().Contain("Answer").And.Contain("Explanation");
         page.Find("#question-preview-explanation").TextContent.Should().Contain("Porque separa o vocativo.");

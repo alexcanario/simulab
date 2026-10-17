@@ -909,8 +909,7 @@ else
                 : IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"];
 
     private string SubmittedAtText =>
-        (_saved?.SubmittedAt ?? _reviews.LastOrDefault(entry => entry.Kind == QuestionReviewKind.Submitted)?.At)
-            ?.ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+        _saved?.SubmittedAt?.ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
 
     // F-105 UC6: the rejection that sent the draft back, shown while it is the latest thing that happened.
     private QuestionReviewEntryResponse? LatestRejection =>

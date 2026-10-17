@@ -412,7 +412,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("reason")
-                        .HasComment("The reason of a rejection or the note of an approval, trimmed. Empty when none was given.");
+                        .HasComment("The reason of a rejection or the note of an approval, trimmed. Null when none was given.");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid")

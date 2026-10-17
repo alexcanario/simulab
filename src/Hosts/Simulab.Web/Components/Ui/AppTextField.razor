@@ -40,7 +40,7 @@
         }
         @if (Counter)
         {
-            @* F-105 BR18: the count is text beside the message, never colour, and part of the description the input
+            @* F-105 AC18: the count is text beside the message, never colour, and part of the description the input
                points at; it never replaces the error text. *@
             <span class="app-field-counter">@CounterText</span>
         }
@@ -81,7 +81,7 @@
     [Parameter] public int? MaxLength { get; set; }
 
     /// <summary>
-    /// F-105 BR18: shows "{n}/{max}" under the field while the user types (off by default). It needs
+    /// F-105 AC18: shows "{n}/{max}" under the field while the user types (off by default). It needs
     /// <see cref="MaxLength"/>; the value then follows the typing, after a short pause, instead of the blur.
     /// </summary>
     [Parameter] public bool Counter { get; set; }

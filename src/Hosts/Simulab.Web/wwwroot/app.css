@@ -945,7 +945,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-top: 5px;
 }
 
-/* F-105 BR18: the counter of a text field sits right-aligned on the line of the hint or the error text, as text
+/* F-105 AC18: the counter of a text field sits right-aligned on the line of the hint or the error text, as text
    in the secondary colour (the same token as the hint), so the count never depends on colour and never replaces
    the message. */
 .app-field-description-counter {
