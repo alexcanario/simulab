@@ -1,5 +1,6 @@
 @* One text field everywhere: label above, required marker, hint or error below, both announced (rule: ui). *@
 @typeparam TValue
+@inject IStringLocalizer<SharedResources> L
 
 <div class="app-field @(HasError ? "app-field-error" : null)">
     <label class="app-field-label" for="@Id">
@@ -18,7 +19,8 @@
                   Margin="Margin.Dense"
                   MaxLength="@(MaxLength ?? 524288)"
                   Lines="@Lines"
-                  Immediate="false"
+                  Immediate="@Counter"
+                  DebounceInterval="@(Counter ? CounterDebounceMilliseconds : 0)"
                   Disabled="Disabled"
                   ReadOnly="ReadOnly"
                   Error="HasError"
@@ -27,7 +29,7 @@
                   AdornmentIcon="@(EffectiveAdornmentIcon)"
                   AdornmentAriaLabel="@AdornmentAriaLabel"
                   OnAdornmentClick="OnAdornmentClick" />
-    <span id="@DescriptionId" class="app-field-description">
+    <span id="@DescriptionId" class="app-field-description @(Counter ? "app-field-description-counter" : null)">
         @if (HasError)
         {
             <span class="app-field-error-text">@Error</span>
@@ -36,7 +38,19 @@
         {
             <span class="app-field-hint">@Hint</span>
         }
+        @if (Counter)
+        {
+            @* F-105 AC18: the count is text beside the message, never colour, and part of the description the input
+               points at; it never replaces the error text. *@
+            <span class="app-field-counter">@CounterText</span>
+        }
     </span>
+    @if (Counter)
+    {
+        @* The change is announced politely, after the typing pauses (the input is debounced), so a screen reader is
+           never interrupted while the user types. *@
+        <span class="app-visually-hidden" role="status" aria-live="polite" aria-atomic="true">@CounterSpokenText</span>
+    }
 </div>
 
 @code {
@@ -66,6 +80,12 @@
 
     [Parameter] public int? MaxLength { get; set; }
 
+    /// <summary>
+    /// F-105 AC18: shows "{n}/{max}" under the field while the user types (off by default). It needs
+    /// <see cref="MaxLength"/>; the value then follows the typing, after a short pause, instead of the blur.
+    /// </summary>
+    [Parameter] public bool Counter { get; set; }
+
     /// <summary>Rows of the input. Above 1 it becomes a text area that grows with its content (F-33).</summary>
     [Parameter] public int Lines { get; set; } = 1;
 
@@ -92,6 +112,16 @@
     private string? EffectiveAdornmentIcon => ShowsLeadingIcon ? LeadingIcon : AdornmentIcon;
 
     private string DescriptionId => $"{Id}-description";
+
+    /// <summary>The pause after the last keystroke before the count follows (and is announced).</summary>
+    private const int CounterDebounceMilliseconds = 250;
+
+    private int CounterLength => Value?.ToString()?.Length ?? 0;
+
+    private string CounterText => string.Format(CultureInfo.CurrentCulture, L["Common.Counter"].Value, CounterLength, MaxLength);
+
+    private string CounterSpokenText =>
+        string.Format(CultureInfo.CurrentCulture, L["Common.Counter.Spoken"].Value, CounterLength, MaxLength);
 
     private Dictionary<string, object?> Attributes => new()
     {

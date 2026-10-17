@@ -28,4 +28,31 @@ public sealed class QuestionStatusTextTests : KitTestContext
             .Should().Equal(QuestionStatus.Draft);
         statuses.Select(QuestionText.StatusTone).Should().OnlyHaveUniqueItems();
     }
+
+    // F-105: the entries of the review history are named and toned over every value too.
+    [Fact]
+    public void EveryReviewKind_HasItsOwnName_AndItsTone()
+    {
+        var localizer = Services.GetRequiredService<IStringLocalizer<SharedResources>>();
+        var kinds = Enum.GetValues<QuestionReviewKind>();
+
+        var names = kinds.ToDictionary(kind => kind, kind => QuestionText.ReviewKindName(localizer, kind));
+
+        names.Values.Should().OnlyHaveUniqueItems();
+        names.Values.Should().NotContain(name => string.IsNullOrWhiteSpace(name) || name.StartsWith("Questions.ReviewHistory.", StringComparison.Ordinal));
+        names.Should().Contain(new KeyValuePair<QuestionReviewKind, string>(QuestionReviewKind.Submitted, "Sent"));
+        QuestionText.ReviewKindTone(QuestionReviewKind.Submitted).Should().Be(Simulab.Web.Components.Ui.AppStatusTone.Info);
+        QuestionText.ReviewKindTone(QuestionReviewKind.Withdrawn).Should().Be(Simulab.Web.Components.Ui.AppStatusTone.Neutral);
+        QuestionText.ReviewKindTone(QuestionReviewKind.Approved).Should().Be(Simulab.Web.Components.Ui.AppStatusTone.Success);
+        QuestionText.ReviewKindTone(QuestionReviewKind.Rejected).Should().Be(Simulab.Web.Components.Ui.AppStatusTone.Error);
+    }
+
+    [Fact]
+    public void TheInReviewStatus_IsNamedInReview_AndToneWarning()
+    {
+        var localizer = Services.GetRequiredService<IStringLocalizer<SharedResources>>();
+
+        QuestionText.StatusName(localizer, QuestionStatus.InReview).Should().Be("In review");
+        QuestionText.StatusTone(QuestionStatus.InReview).Should().Be(Simulab.Web.Components.Ui.AppStatusTone.Warning);
+    }
 }

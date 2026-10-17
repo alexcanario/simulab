@@ -51,6 +51,15 @@ public interface IQuestionStore
     /// <summary>Adds a version made by <see cref="Question.NextVersion"/>; it is written by the next save, with the content (F-98, BR3).</summary>
     void AddVersion(QuestionVersion version);
 
+    /// <summary>Adds the entry a review change made (F-105, BR7); it is written by the same save as the status change.</summary>
+    void AddReviewEntry(QuestionReviewEntry entry);
+
+    /// <summary>
+    /// Makes the question's status part of the next UPDATE's condition even when the save changes nothing on the row
+    /// itself (F-105, BR3): an edit of the options of a draft that went into review meanwhile is a lost race.
+    /// </summary>
+    void GuardStatus(Question question);
+
     void Add(Question question);
 
     /// <summary>Soft-deletes the question and its options: the interceptor turns the removal into a flag (BR11).</summary>

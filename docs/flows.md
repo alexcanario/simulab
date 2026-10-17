@@ -5,5 +5,6 @@
 |---|---|---|
 | [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101 |
 | [Author and publish a multiple-answer question](flows/multiple-answer-questions.md) | How a curator writes a question with several correct options, what a draft and a published one need, how its key change is versioned and where the type is declared. | F-104 |
+| [Review before publishing](flows/review-before-publishing.md) | How a curator sends a complete draft for review, how a reviewer approves or rejects it, what the frozen state refuses and what the history records. | F-105 |
 | [Share a base text between questions](flows/shared-base-text.md) | How a curator writes a base text once, links questions to it, what an edit of the text records, what refuses a delete or a language change, and how transcription keeps the choice. | F-102 |
 | [Transcribe the paper of an edition](flows/transcribe-paper.md) | How transcription mode enters a whole past paper, what stays and what clears between questions, and where the suggested number comes from. | F-99, F-102 |

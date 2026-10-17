@@ -2,8 +2,10 @@
 @inject IStringLocalizer<SharedResources> L
 @inject ErrorText Errors
 
-@* F-101 BR3: the reason of an annulment or a reinstatement. The dialog sends it through the caller's delegate, so a
-   refusal of the Api is shown here, where the reason is being typed, and only an accepted change closes it. *@
+@* F-101 BR3: the reason of an annulment or a reinstatement. F-105 asks the same of a rejection (required) and of an
+   approval (an optional note): the same dialog, with the texts and the codes of each. The dialog sends it through the
+   caller's delegate, so a refusal of the Api is shown here, where the reason is being typed, and only an accepted
+   change closes it. *@
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.body1" Class="mb-4">@Message</MudText>
@@ -15,13 +17,14 @@
 
         <AppTextField TValue="string"
                       Id="question-status-reason"
-                      Label="@L["Questions.StatusReason.Label"]"
-                      Hint="@L["Questions.StatusReason.Hint"]"
+                      Label="@(Label ?? L["Questions.StatusReason.Label"])"
+                      Hint="@(Hint ?? L["Questions.StatusReason.Hint"])"
                       Value="_reason"
                       ValueChanged="@((string? value) => OnReasonChanged(value))"
                       Lines="3"
                       MaxLength="QuestionLimits.ChangeReasonMaxLength"
-                      Required="true"
+                      Counter="true"
+                      Required="Required"
                       Error="@_reasonError" />
     </DialogContent>
     <DialogActions>
@@ -53,7 +56,28 @@
 
     [Parameter] public bool Destructive { get; set; }
 
-    /// <summary>Sends the trimmed reason; answers null when the change was made, else the Api's error code.</summary>
+    /// <summary>
+    /// True when the text is a required reason (an annulment, a reinstatement, a rejection); false for an optional
+    /// note (an approval), which then sends the empty text when nothing was typed (F-105).
+    /// </summary>
+    [Parameter] public bool Required { get; set; } = true;
+
+    /// <summary>The label of the field; the reason's when none is given.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>The hint under the field; the reason's when none is given.</summary>
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The code of a missing required text (the reason's of F-101 when none is given).</summary>
+    [Parameter] public string RequiredCode { get; set; } = QuestionBankErrorCodes.QuestionStatusReasonRequired;
+
+    /// <summary>The code of a text over the limit (the reason's of F-101 when none is given).</summary>
+    [Parameter] public string TooLongCode { get; set; } = QuestionBankErrorCodes.QuestionStatusReasonTooLong;
+
+    /// <summary>Other codes the Api answers about the text itself, shown under the field and not above it.</summary>
+    [Parameter] public IReadOnlyCollection<string> FieldCodes { get; set; } = [];
+
+    /// <summary>Sends the trimmed text; answers null when the change was made, else the Api's error code.</summary>
     [Parameter, EditorRequired] public Func<string, Task<string?>> Submit { get; set; } = default!;
 
     private string _reason = string.Empty;
@@ -71,16 +95,16 @@
     {
         var reason = _reason.Trim();
 
-        // The comfort check of the reason (BR3); the Api is the authority and runs the same one.
-        if (reason.Length == 0)
+        // The comfort check of the text (F-101 BR3, F-105 BR5, BR6); the Api is the authority and runs the same one.
+        if (Required && reason.Length == 0)
         {
-            _reasonError = Errors.For(QuestionBankErrorCodes.QuestionStatusReasonRequired);
+            _reasonError = Errors.For(RequiredCode);
             return;
         }
 
         if (reason.Length > QuestionLimits.ChangeReasonMaxLength)
         {
-            _reasonError = Errors.For(QuestionBankErrorCodes.QuestionStatusReasonTooLong);
+            _reasonError = Errors.For(TooLongCode);
             return;
         }
 
@@ -95,8 +119,8 @@
             return;
         }
 
-        // A reason the Api refused sits under the field; any other refusal (a race, a state) above it.
-        if (code is QuestionBankErrorCodes.QuestionStatusReasonRequired or QuestionBankErrorCodes.QuestionStatusReasonTooLong)
+        // A text the Api refused sits under the field; any other refusal (a race, a state) above it.
+        if (code == RequiredCode || code == TooLongCode || FieldCodes.Contains(code))
         {
             _reasonError = Errors.For(code);
         }

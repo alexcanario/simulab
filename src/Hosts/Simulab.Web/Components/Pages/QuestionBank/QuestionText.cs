@@ -23,9 +23,34 @@ public static class QuestionText
         {
             QuestionStatus.Published => l["Questions.Status.Published"],
             QuestionStatus.Annulled => l["Questions.Status.Annulled"],
+            QuestionStatus.InReview => l["Questions.Status.InReview"],
             _ => l["Questions.Status.Draft"]
         };
     }
+
+    /// <summary>What happened in one entry of the review history, in the curator's language (F-105).</summary>
+    public static string ReviewKindName(IStringLocalizer<SharedResources> l, QuestionReviewKind kind)
+    {
+        ArgumentNullException.ThrowIfNull(l);
+
+        return kind switch
+        {
+            QuestionReviewKind.Withdrawn => l["Questions.ReviewHistory.Kind.Withdrawn"],
+            QuestionReviewKind.Approved => l["Questions.ReviewHistory.Kind.Approved"],
+            QuestionReviewKind.Rejected => l["Questions.ReviewHistory.Kind.Rejected"],
+            _ => l["Questions.ReviewHistory.Kind.Submitted"]
+        };
+    }
+
+    /// <summary>A send is information, a withdrawal a plain label, an approval the healthy state, a rejection a refusal (F-105).</summary>
+    public static AppStatusTone ReviewKindTone(QuestionReviewKind kind) =>
+        kind switch
+        {
+            QuestionReviewKind.Withdrawn => AppStatusTone.Neutral,
+            QuestionReviewKind.Approved => AppStatusTone.Success,
+            QuestionReviewKind.Rejected => AppStatusTone.Error,
+            _ => AppStatusTone.Info
+        };
 
     /// <summary>The name of a question type in the curator's language (F-97, BR8).</summary>
     public static string TypeName(IStringLocalizer<SharedResources> l, QuestionType type)
@@ -46,6 +71,7 @@ public static class QuestionText
         {
             QuestionStatus.Published => AppStatusTone.Success,
             QuestionStatus.Annulled => AppStatusTone.Error,
+            QuestionStatus.InReview => AppStatusTone.Warning,
             _ => AppStatusTone.Neutral
         };
 

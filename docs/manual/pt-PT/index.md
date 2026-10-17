@@ -54,3 +54,4 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Catálogo](catalog.md): pesquisar exames publicados, filtrar e ver as edições de cada um
 - [Questões](questions.md): escrever, publicar, pré-visualizar e encontrar questões de escolha única (Curadores e Administradores)
 - [Textos de apoio](base-texts.md): escrever um excerto uma vez e partilhá-lo entre questões (Curadores e Administradores)
+- [Fila de revisão](review-queue.md): rever, aprovar ou rejeitar questões enviadas para revisão antes de serem publicadas (Curadores e Administradores)

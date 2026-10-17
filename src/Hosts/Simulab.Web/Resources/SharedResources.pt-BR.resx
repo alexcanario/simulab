@@ -202,6 +202,8 @@
   <data name="PermissionGroup.questions" xml:space="preserve"><value>Banco de questões</value></data>
   <data name="Permission.questions.manage.Name" xml:space="preserve"><value>Gerenciar o banco de questões</value></data>
   <data name="Permission.questions.manage.Description" xml:space="preserve"><value>Escrever, editar, publicar, visualizar e excluir as questões do banco.</value></data>
+  <data name="Permission.questions.review.Name" xml:space="preserve"><value>Revisar questões</value></data>
+  <data name="Permission.questions.review.Description" xml:space="preserve"><value>Abrir a fila de revisão, aprovar uma questão em revisão para publicá-la ou rejeitá-la com um motivo.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Situação</value></data>
@@ -418,6 +420,7 @@
   <data name="Gallery.FieldKinds.State.Disabled" xml:space="preserve"><value>Desabilitado</value></data>
   <data name="Gallery.FieldKinds.State.Error" xml:space="preserve"><value>Erro</value></data>
   <data name="Gallery.FieldKinds.State.LongText" xml:space="preserve"><value>Texto longo</value></data>
+  <data name="Gallery.FieldKinds.State.Counter" xml:space="preserve"><value>Com contador: vazio, digitando, no limite, acima do limite</value></data>
   <data name="Gallery.FieldKinds.State.Loading" xml:space="preserve"><value>Carregando</value></data>
   <data name="Gallery.FieldKinds.State.Open" xml:space="preserve"><value>Lista aberta</value></data>
   <data name="Gallery.FieldKinds.State.NoResults" xml:space="preserve"><value>Sem resultados</value></data>
@@ -1116,4 +1119,48 @@
   <data name="question.not_annulled" xml:space="preserve"><value>Esta questão não está anulada.</value></data>
   <data name="question.status_reason_required" xml:space="preserve"><value>Escreva o motivo.</value></data>
   <data name="question.status_reason_too_long" xml:space="preserve"><value>O motivo é longo demais (no máximo 500 caracteres).</value></data>
+  <data name="Common.Counter" xml:space="preserve"><value>{0}/{1}</value></data>
+  <data name="Common.Counter.Spoken" xml:space="preserve"><value>{0} de {1} caracteres</value></data>
+  <data name="Nav.ReviewQueue" xml:space="preserve"><value>Fila de revisão</value></data>
+  <data name="Questions.Status.InReview" xml:space="preserve"><value>Em revisão</value></data>
+  <data name="Questions.Action.SendForReview" xml:space="preserve"><value>Enviar para revisão</value></data>
+  <data name="Questions.Action.Withdraw" xml:space="preserve"><value>Retirar da revisão</value></data>
+  <data name="Questions.Publication.InReview" xml:space="preserve"><value>Em revisão. Aguardando um revisor desde {0}.</value></data>
+  <data name="Questions.InReview.Alert" xml:space="preserve"><value>Esta questão está em revisão e não pode ser editada. Retire-a da revisão para alterá-la.</value></data>
+  <data name="Questions.Publication.Rejected" xml:space="preserve"><value>Rejeitada em {0}: {1}</value></data>
+  <data name="Questions.SentForReview" xml:space="preserve"><value>Questão enviada para revisão.</value></data>
+  <data name="Questions.Withdrawn" xml:space="preserve"><value>Questão retirada da revisão. Voltou a ser rascunho.</value></data>
+  <data name="Questions.Delete.DisabledInReview" xml:space="preserve"><value>Esta questão está em revisão. Retire-a da revisão antes de excluir.</value></data>
+  <data name="Questions.Section.ReviewHistory" xml:space="preserve"><value>Histórico de revisão</value></data>
+  <data name="Questions.Section.ReviewHistory.Subtitle" xml:space="preserve"><value>Cada vez que esta questão foi enviada para revisão, retirada, aprovada ou rejeitada, da mais recente para a mais antiga.</value></data>
+  <data name="Questions.ReviewHistory.Column.Date" xml:space="preserve"><value>Data</value></data>
+  <data name="Questions.ReviewHistory.Column.Event" xml:space="preserve"><value>Evento</value></data>
+  <data name="Questions.ReviewHistory.Column.Reason" xml:space="preserve"><value>Motivo ou observação</value></data>
+  <data name="Questions.ReviewHistory.Kind.Submitted" xml:space="preserve"><value>Enviada</value></data>
+  <data name="Questions.ReviewHistory.Kind.Withdrawn" xml:space="preserve"><value>Retirada</value></data>
+  <data name="Questions.ReviewHistory.Kind.Approved" xml:space="preserve"><value>Aprovada</value></data>
+  <data name="Questions.ReviewHistory.Kind.Rejected" xml:space="preserve"><value>Rejeitada</value></data>
+  <data name="ReviewQueue.Title" xml:space="preserve"><value>Fila de revisão</value></data>
+  <data name="ReviewQueue.Column.SentAt" xml:space="preserve"><value>Enviada em</value></data>
+  <data name="ReviewQueue.Empty" xml:space="preserve"><value>Nada aguardando revisão.</value></data>
+  <data name="ReviewQueue.Action.Review" xml:space="preserve"><value>Revisar</value></data>
+  <data name="ReviewQueue.Back" xml:space="preserve"><value>Voltar para a fila</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Revisar questão</value></data>
+  <data name="Review.Aside.SentAt" xml:space="preserve"><value>Enviada em</value></data>
+  <data name="Review.Action.Approve" xml:space="preserve"><value>Aprovar</value></data>
+  <data name="Review.Action.Reject" xml:space="preserve"><value>Rejeitar</value></data>
+  <data name="Review.Approve.Dialog.Title" xml:space="preserve"><value>Aprovar esta questão?</value></data>
+  <data name="Review.Approve.Dialog.Message" xml:space="preserve"><value>Ela é publicada na hora e a prática pode usá-la. A observação é opcional e fica no histórico de revisão.</value></data>
+  <data name="Review.Note.Label" xml:space="preserve"><value>Observação</value></data>
+  <data name="Review.Note.Hint" xml:space="preserve"><value>Opcional. Texto simples, até 500 caracteres.</value></data>
+  <data name="Review.Reject.Dialog.Title" xml:space="preserve"><value>Rejeitar esta questão?</value></data>
+  <data name="Review.Reject.Dialog.Message" xml:space="preserve"><value>Ela volta a rascunho com o seu motivo, que o curador vê na página da questão.</value></data>
+  <data name="Review.Approved" xml:space="preserve"><value>Questão aprovada e publicada.</value></data>
+  <data name="Review.Rejected" xml:space="preserve"><value>Questão rejeitada. Voltou a ser rascunho.</value></data>
+  <data name="Review.NoLongerInReview" xml:space="preserve"><value>Esta questão não está mais em revisão: outro revisor decidiu, ou ela foi retirada.</value></data>
+  <data name="question.in_review" xml:space="preserve"><value>Esta questão está em revisão e não pode ser alterada. Retire-a da revisão primeiro.</value></data>
+  <data name="question.already_in_review" xml:space="preserve"><value>Esta questão já está em revisão.</value></data>
+  <data name="question.not_in_review" xml:space="preserve"><value>Esta questão não está em revisão.</value></data>
+  <data name="question.review_reason_required" xml:space="preserve"><value>Escreva o motivo da rejeição.</value></data>
+  <data name="question.review_reason_too_long" xml:space="preserve"><value>O motivo ou a observação passa de 500 caracteres.</value></data>
 </root>

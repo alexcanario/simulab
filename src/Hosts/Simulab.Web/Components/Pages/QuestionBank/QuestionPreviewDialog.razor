@@ -30,110 +30,20 @@
             </div>
         }
 
-        @* F-96 BR7: where the question came from, above the statement. A question without an edition shows nothing,
-           and so does one whose edition no longer resolves (BR11). *@
-        @if (QuestionText.SourceLine(Question.Origin) is { } sourceLine)
-        {
-            <p class="app-question-source" id="question-preview-source">
-                <span class="app-question-source-line">@sourceLine</span>
-                <span class="app-question-source-number">@L["Questions.Preview.Number", Question.Origin!.PaperNumber]</span>
-            </p>
-        }
-
-        <div class="app-question-paper" lang="@Question.ContentLanguage">
-            @if (!QuestionHtml.IsBlank(BaseTextHtml))
-            {
-                <div class="app-question-base app-question-content" id="question-preview-base-text">@((MarkupString)BaseTextHtml!)</div>
-            }
-
-            <div class="app-question-content" id="question-preview-statement">@((MarkupString)Question.StatementHtml)</div>
-
-            @if (IsTrueFalse)
-            {
-                @* F-97 BR7: the two answers a student judges between, as inert labelled text. *@
-                <ul class="app-question-options" id="question-preview-true-false" aria-label="@L["Questions.Preview.Answers"]">
-                    @foreach (var answer in new[] { true, false })
-                    {
-                        var marked = _revealed && Question.TrueFalseKey == answer;
-                        <li class="@(marked ? "app-question-option is-correct" : "app-question-option")">
-                            <div class="app-question-option-body">
-                                <div class="app-question-content">@(answer ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])</div>
-                                @if (marked)
-                                {
-                                    <span class="app-correct-label">
-                                        <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
-                                        @L["Questions.Preview.CorrectAnswer"]
-                                    </span>
-                                }
-                            </div>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-            @* F-104 BR6: how many options to mark, from the count of correct ones; nothing more of the key shows. *@
-            @if (Question.Type == QuestionType.MultipleAnswer && CorrectCount > 0)
-            {
-                <p class="app-question-select-count" id="question-preview-select-count">@L["Questions.Preview.SelectCount", CorrectCount]</p>
-            }
-
-            <ol class="app-question-options" aria-label="@L["Questions.Preview.Options"]">
-                @foreach (var option in _options)
-                {
-                    var marked = _revealed && option.IsCorrect;
-                    <li class="@(marked ? "app-question-option is-correct" : "app-question-option")">
-                        @* The letter is text, so a screen reader reads it. *@
-                        <span class="app-option-letter">@QuestionText.Letter(option.Position)</span>
-                        <div class="app-question-option-body">
-                            <div class="app-question-content">@((MarkupString)option.TextHtml)</div>
-                            @if (marked)
-                            {
-                                @* Icon, text and border: the key is never colour alone. *@
-                                <span class="app-correct-label">
-                                    <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
-                                    @L["Questions.Preview.CorrectAnswer"]
-                                </span>
-                            }
-                        </div>
-                    </li>
-                }
-            </ol>
-            }
-        </div>
-
-        <div class="app-preview-actions">
-            <MudButton Variant="Variant.Outlined"
-                       Color="Color.Primary"
-                       id="question-preview-toggle"
-                       aria-expanded="@(_revealed ? "true" : "false")"
-                       aria-controls="question-preview-answer"
-                       OnClick="Toggle">@(_revealed ? L["Questions.Preview.HideAnswer"] : L["Questions.Preview.ShowAnswer"])</MudButton>
-        </div>
-
-        @* The live region is in the page from the start, empty: only its content changes on the first reveal. *@
-        <div id="question-preview-answer" aria-live="polite">
-            @if (_revealed)
-            {
-                <section class="app-preview-answer" role="region" aria-labelledby="question-preview-answer-heading">
-                    <h3 class="app-preview-heading" id="question-preview-answer-heading">@L["Questions.Preview.Answer"]</h3>
-                    @if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(option => option.IsCorrect))
-                    {
-                        <p class="app-preview-no-key">@(IsTrueFalse ? L["Questions.Preview.NoKey.TrueFalse"] : L["Questions.Preview.NoKey"])</p>
-                    }
-
-                    <h4 class="app-preview-heading">@L["Questions.Preview.Explanation"]</h4>
-                    @if (QuestionHtml.IsBlank(Question.ExplanationHtml))
-                    {
-                        <p class="app-muted">@L["Questions.Preview.NoExplanation"]</p>
-                    }
-                    else
-                    {
-                        <div class="app-question-content" lang="@Question.ContentLanguage" id="question-preview-explanation">@((MarkupString)Question.ExplanationHtml!)</div>
-                    }
-                </section>
-            }
-        </div>
+        @* The question and its answer section are the shared content (F-105: the review screen renders it too,
+           with the answer always shown); this dialog adds the Show/Hide answer button between the two. *@
+        <QuestionPreviewContent Question="@Question" BaseTextHtml="@BaseTextHtml" Revealed="@_revealed">
+            <Controls>
+                <div class="app-preview-actions">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               id="question-preview-toggle"
+                               aria-expanded="@(_revealed ? "true" : "false")"
+                               aria-controls="question-preview-answer"
+                               OnClick="Toggle">@(_revealed ? L["Questions.Preview.HideAnswer"] : L["Questions.Preview.ShowAnswer"])</MudButton>
+                </div>
+            </Controls>
+        </QuestionPreviewContent>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="Close" Class="app-preview-close">@L["Common.Close"]</MudButton>
@@ -159,18 +69,10 @@
     /// </summary>
     [Parameter] public string? VersionBaseTextHtml { get; set; }
 
-    private IReadOnlyList<QuestionOptionResponse> _options = [];
     private bool _revealed;
 
     // F-102 BR9: the linked text comes from the stored question; a version shows what it recorded.
     private string? BaseTextHtml => VersionRecordedAt is null ? Question.BaseText?.TextHtml : VersionBaseTextHtml;
-
-    private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
-
-    private int CorrectCount => _options.Count(option => option.IsCorrect);
-
-    protected override void OnParametersSet() =>
-        _options = [.. Question.Options.OrderBy(option => option.Position)];
 
     private void Toggle() => _revealed = !_revealed;
 

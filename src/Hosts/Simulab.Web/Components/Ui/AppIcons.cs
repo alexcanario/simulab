@@ -132,6 +132,18 @@ public static class AppIcons
     /// <summary>F-95: takes a published question back to a draft.</summary>
     public const string Unpublish = Icons.Material.Outlined.Unpublished;
 
+    /// <summary>F-105: the review queue and its row action, and the review history card.</summary>
+    public const string Review = Icons.Material.Outlined.FactCheck;
+
+    /// <summary>F-105: takes a question back out of review.</summary>
+    public const string Withdraw = Icons.Material.Outlined.Undo;
+
+    /// <summary>F-105: a reviewer approves a question, which publishes it.</summary>
+    public const string Approve = Icons.Material.Outlined.TaskAlt;
+
+    /// <summary>F-105: a reviewer rejects a question with a reason.</summary>
+    public const string Reject = Icons.Material.Outlined.Cancel;
+
     /// <summary>F-95: the rich text field's toolbar.</summary>
     public const string FormatBold = Icons.Material.Outlined.FormatBold;
     public const string FormatItalic = Icons.Material.Outlined.FormatItalic;

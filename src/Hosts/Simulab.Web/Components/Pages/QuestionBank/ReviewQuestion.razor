@@ -1,0 +1,297 @@
+@page "/admin/questions/review/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Review)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ISnackbar Snackbar
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+@inject IDialogService Dialogs
+@inject IJSRuntime JS
+
+@* F-105 UC4, UC5, BR9: one question in review, read only, as a student will see it with the key and the explanation
+   always shown, and the classification beside it. Nothing here edits content and no link leads to the editor. The
+   reviewer decides with Approve (the page's one filled button) or Reject, each in the shared reason dialog, which
+   sends the decision itself so a refusal of the Api is read where the reviewer is typing. *@
+<AppPageHeader Title="@L["Review.Title"]" Breadcrumbs="_breadcrumbs" />
+
+@if (_loading)
+{
+    <AppLoadingState />
+}
+else if (_loadFailed)
+{
+    <MudPaper Class="app-form-card" Elevation="0" id="review-load-failed">
+        <AppErrorState OnRetry="ReloadAsync" />
+        <AppLink Href="@QueueHref">@L["ReviewQueue.Back"]</AppLink>
+    </MudPaper>
+}
+else if (_notFound)
+{
+    <MudPaper Class="app-form-card" Elevation="0" id="review-not-found">
+        <AppAlert Severity="Severity.Error" Text="@Errors.For(QuestionBankErrorCodes.QuestionNotFound)" Class="mb-4" />
+        <AppLink Href="@QueueHref">@L["ReviewQueue.Back"]</AppLink>
+    </MudPaper>
+}
+else if (_noLongerInReview)
+{
+    @* Decided by someone else, or withdrawn: the reviewer is told, and the queue is one link away. *@
+    <MudPaper Class="app-form-card" Elevation="0" id="review-gone">
+        <AppAlert Severity="Severity.Warning" Text="@L["Review.NoLongerInReview"]" Class="mb-4" />
+        <AppLink Href="@QueueHref">@L["ReviewQueue.Back"]</AppLink>
+    </MudPaper>
+}
+else if (_question is { } question)
+{
+    <div class="app-form-layout">
+        <MudPaper Class="app-form-card" Elevation="0" id="review-question">
+            <QuestionPreviewContent Question="@question"
+                                    BaseTextHtml="@question.BaseText?.TextHtml"
+                                    AlwaysRevealed="true" />
+        </MudPaper>
+
+        <AppFormAside Title="@L["Questions.Form.Aside.Title"]"
+                      EmptyText="@L["Common.Summary.NotFilled"]"
+                      Rows="@AsideRows(question)" />
+    </div>
+
+    <div class="app-form-actions">
+        <MudButton id="@RejectButtonId"
+                   Variant="Variant.Outlined"
+                   Color="Color.Error"
+                   StartIcon="@AppIcons.Reject"
+                   Disabled="_deciding"
+                   OnClick="@(() => DecideAsync(approve: false))">@L["Review.Action.Reject"]</MudButton>
+        <MudButton id="@ApproveButtonId"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@AppIcons.Approve"
+                   Disabled="_deciding"
+                   OnClick="@(() => DecideAsync(approve: true))">@L["Review.Action.Approve"]</MudButton>
+    </div>
+}
+
+@code {
+    private const string QueueHref = "/admin/questions/review";
+    private const string RejectButtonId = "review-reject";
+    private const string ApproveButtonId = "review-approve";
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Parameter] public Guid Id { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+    private QuestionResponse? _question;
+    private Guid? _loadedId;
+    private bool _loading = true;
+    private bool _loadFailed;
+    private bool _notFound;
+    private bool _noLongerInReview;
+    private bool _deciding;
+    private string? _pendingFocus;
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["ReviewQueue.Title"], href: QueueHref),
+            new BreadcrumbItem(L["Review.Title"], href: null, disabled: true)
+        ];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedId == Id)
+        {
+            return;
+        }
+
+        _loadedId = Id;
+        await LoadAsync(quiet: false);
+    }
+
+    private Task ReloadAsync() => LoadAsync(quiet: false);
+
+    // The first load and "Try again" show the loading state; the re-read after a closed dialog does not, so the
+    // question the reviewer is looking at never flashes away.
+    private async Task LoadAsync(bool quiet)
+    {
+        if (!quiet)
+        {
+            _loading = true;
+            _loadFailed = false;
+            _notFound = false;
+            _noLongerInReview = false;
+        }
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.GetQuestionInReviewAsync(token, Id);
+        _loading = false;
+
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            _question = question;
+            _loadFailed = false;
+            _notFound = false;
+            _noLongerInReview = false;
+            return;
+        }
+
+        switch (result?.ErrorCode)
+        {
+            case QuestionBankErrorCodes.QuestionNotFound:
+                _notFound = true;
+                _loadFailed = false;
+                _noLongerInReview = false;
+                break;
+            case QuestionBankErrorCodes.QuestionNotInReview:
+                _noLongerInReview = true;
+                _loadFailed = false;
+                _notFound = false;
+                break;
+            default:
+                // A broken call is only shown on a load the reviewer asked for; a quiet re-read keeps the question.
+                _loadFailed = !quiet || _question is null;
+                break;
+        }
+    }
+
+    private IReadOnlyList<AppAsideRow> AsideRows(QuestionResponse question) =>
+    [
+        new(L["Questions.Form.Aside.Status"], QuestionText.StatusName(L, question.Status)),
+        new(L["Questions.Field.Subject"], question.SubjectName),
+        new(L["Questions.Field.Topic"], question.TopicName),
+        new(L["Questions.Field.ContentLanguage"], QuestionText.LanguageName(question.ContentLanguage)),
+        new(L["Questions.Field.Difficulty"], question.Difficulty?.ToString(CultureInfo.CurrentCulture)),
+        new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, question.Type)),
+        new(L["Questions.Form.Aside.Source"], SourceOf(question)),
+        new(L["Review.Aside.SentAt"], question.SubmittedAt?.ToString("g", CultureInfo.CurrentCulture))
+    ];
+
+    // F-96: the source line with the paper number, or "Authored"; an edition that no longer resolves has no line.
+    private string SourceOf(QuestionResponse question)
+    {
+        if (question.Origin is not { } origin)
+        {
+            return L["Questions.Source.Authored"];
+        }
+
+        var number = L["Questions.Source.Number", origin.PaperNumber].Value;
+
+        return QuestionText.SourceLine(origin) is { } line ? $"{line} · {number}" : number;
+    }
+
+    // UC4 and UC5: the decision is sent by the dialog, so a refusal is read where the reviewer is typing; only an
+    // accepted decision closes it and leaves the page.
+    private async Task DecideAsync(bool approve)
+    {
+        if (_question is not { } current)
+        {
+            return;
+        }
+
+        QuestionResponse? decided = null;
+        Task<string?>? inFlight = null;
+
+        // The dialog may be closed (Esc, backdrop) while the call is still running; the answer of that call is
+        // awaited below, so a decision the Api made is never lost to the screen.
+        Task<string?> Send(string text) => inFlight = SubmitAsync(text);
+
+        async Task<string?> SubmitAsync(string text)
+        {
+            _deciding = true;
+            await InvokeAsync(StateHasChanged);
+            try
+            {
+                var token = await TokenAsync();
+                var result = token is null
+                    ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+                    : approve
+                        ? await Api.ApproveQuestionAsync(token, current.Id, text.Length == 0 ? null : text, current.SubmittedAt)
+                        : await Api.RejectQuestionAsync(token, current.Id, text, current.SubmittedAt);
+                if (result is { IsSuccess: true, Value: { } question })
+                {
+                    decided = question;
+
+                    return null;
+                }
+
+                return result.ErrorCode ?? ErrorText.UnexpectedCode;
+            }
+            finally
+            {
+                _deciding = false;
+            }
+        }
+
+        IReadOnlyCollection<string> noteCodes = [QuestionBankErrorCodes.QuestionKeyChangeReasonRequired];
+        var parameters = approve
+            ? new DialogParameters<QuestionStatusReasonDialog>
+            {
+                { dialog => dialog.Message, L["Review.Approve.Dialog.Message"].Value },
+                { dialog => dialog.ConfirmText, L["Review.Action.Approve"].Value },
+                { dialog => dialog.Required, false },
+                { dialog => dialog.Label, L["Review.Note.Label"].Value },
+                { dialog => dialog.Hint, L["Review.Note.Hint"].Value },
+                { dialog => dialog.TooLongCode, QuestionBankErrorCodes.QuestionReviewReasonTooLong },
+                { dialog => dialog.FieldCodes, noteCodes },
+                { dialog => dialog.Submit, Send }
+            }
+            : new DialogParameters<QuestionStatusReasonDialog>
+            {
+                { dialog => dialog.Message, L["Review.Reject.Dialog.Message"].Value },
+                { dialog => dialog.ConfirmText, L["Review.Action.Reject"].Value },
+                { dialog => dialog.Destructive, true },
+                { dialog => dialog.Required, true },
+                { dialog => dialog.RequiredCode, QuestionBankErrorCodes.QuestionReviewReasonRequired },
+                { dialog => dialog.TooLongCode, QuestionBankErrorCodes.QuestionReviewReasonTooLong },
+                { dialog => dialog.Submit, Send }
+            };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+
+        var reference = await Dialogs.ShowAsync<QuestionStatusReasonDialog>(
+            approve ? L["Review.Approve.Dialog.Title"] : L["Review.Reject.Dialog.Title"], parameters, options);
+        await reference.Result;
+        if (inFlight is not null)
+        {
+            await inFlight;
+        }
+
+        if (decided is not null)
+        {
+            Snackbar.Add(approve ? L["Review.Approved"] : L["Review.Rejected"], Severity.Success);
+            Navigation.NavigateTo(QueueHref);
+
+            return;
+        }
+
+        // Closed without a decision (cancelled, or refused by the Api: a race, a send that changed): read the
+        // question again. A 409 not_in_review turns the page into the "no longer in review" card.
+        await LoadAsync(quiet: true);
+        _pendingFocus = _question is not null && !_noLongerInReview && !_notFound && !_loadFailed
+            ? (approve ? ApproveButtonId : RejectButtonId)
+            : null;
+        StateHasChanged();
+    }
+
+    // After the dialog closes the focus goes back to the button that opened it (the F-101 pattern).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

@@ -74,7 +74,7 @@ public sealed class QuestionAnnulmentListTests : QuestionPageTestContext
         page.Find("#questions-filter-status").Click();
         page.FindAll("[id^='questions-filter-status-option-']")
             .Select(option => option.QuerySelector(".app-mp-option-name")!.TextContent.Trim())
-            .Should().Equal("Draft", "Published", "Annulled");
+            .Should().Equal("Draft", "Published", "Annulled", "In review");
         page.Find("#questions-filter-status-option-Annulled").Click();
 
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>

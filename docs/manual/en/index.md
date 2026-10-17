@@ -54,3 +54,4 @@ Simulab is available in Portuguese (Brazil), Portuguese (Portugal) and English. 
 - [Catalog](catalog.md): search published exams, filter them and see the editions of each
 - [Questions](questions.md): write, publish, preview and find single-choice questions (Curators and Admins)
 - [Base texts](base-texts.md): write a passage once and share it between questions (Curators and Admins)
+- [Review queue](review-queue.md): review, approve or reject questions sent for review before they are published (Curators and Admins)

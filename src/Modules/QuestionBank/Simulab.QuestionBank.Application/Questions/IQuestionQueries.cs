@@ -30,6 +30,18 @@ public interface IQuestionQueries
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// The review history of a question, oldest first (F-105, UC6, BR7), or null when the question does not exist
+    /// or was deleted. A question that was never sent has an empty list.
+    /// </summary>
+    Task<IReadOnlyList<QuestionReviewEntryResponse>?> ListReviewsAsync(Guid questionId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// One page of the review queue (F-105, BR8): the questions in review, oldest latest send first, never deleted
+    /// ones. <paramref name="page"/> is zero-based and the size is capped as the list's.
+    /// </summary>
+    Task<ReviewQueuePageResponse> ListReviewQueueAsync(int page, int pageSize, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Editions of any status the origin lookup offers, by exam name then notice year descending, at most
     /// <paramref name="take"/> (F-96, BR9).
     /// </summary>

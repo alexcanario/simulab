@@ -314,9 +314,9 @@ public sealed class RoleAdministrationTests : IdentityApiTests
             .Should().BeEquivalentTo([curator.Id, custom.Id]);
         var session = await (await Accounts.SignedInAsync(Client(), user.Email!))
             .GetFromJsonAsync<SessionInfoResponse>("/api/v1/identity/session", AppJson.Options);
-        // The union of the Curator seed grants (F-36: catalog.browse; F-95: questions.manage) and the custom role.
+        // The union of the Curator seed grants (F-36: catalog.browse; F-95: questions.manage; F-105: questions.review) and the custom role.
         session!.Permissions.Should().BeEquivalentTo(
-            [IdentityPermissions.RolesManage, CatalogPermissions.Browse, QuestionBankPermissions.Manage]);
+            [IdentityPermissions.RolesManage, CatalogPermissions.Browse, QuestionBankPermissions.Manage, QuestionBankPermissions.Review]);
 
         var emptied = await admin.PutAsJsonAsync($"{Users}/{user.Id}/roles", new SetUserRolesRequest([]), AppJson.Options);
         emptied.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -31,7 +31,11 @@ public static class QuestionBankModule
             QuestionBankPermissions.All,
             new Dictionary<string, IReadOnlyList<string>>
             {
-                [QuestionBankPermissions.Manage] = [IdentityRoles.Curator]
+                [QuestionBankPermissions.Manage] = [IdentityRoles.Curator],
+                // F-105 BR10: the curator is the person who reviews (brief, glossary); a role holding only this
+                // permission can do the whole review. Added in the same commit as the name, or a start that
+                // creates the row without the grant would never be fixed by a later one.
+                [QuestionBankPermissions.Review] = [IdentityRoles.Curator]
             }));
 
         services.AddSingleton<QuestionHtmlSanitizer>();
@@ -45,6 +49,10 @@ public static class QuestionBankModule
         services.AddScoped<SaveQuestionHandler>();
         services.AddScoped<PublishQuestionHandler>();
         services.AddScoped<UnpublishQuestionHandler>();
+        services.AddScoped<SubmitQuestionHandler>();
+        services.AddScoped<WithdrawQuestionHandler>();
+        services.AddScoped<ApproveQuestionHandler>();
+        services.AddScoped<RejectQuestionHandler>();
         services.AddScoped<AnnulQuestionHandler>();
         services.AddScoped<ReinstateQuestionHandler>();
         services.AddScoped<DeleteQuestionHandler>();

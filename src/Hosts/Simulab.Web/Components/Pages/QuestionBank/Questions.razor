@@ -612,6 +612,8 @@
         L["Questions.Row.Name", QuestionHtml.Excerpt(question.StatementExcerpt, QuestionText.RowNameLength)];
 
     // F-101 BR5: an annulled question is frozen, so its row offers neither; it is reinstated on its own page.
+    // F-105 BR3: so is one in review, which only a decision or a withdrawal (on its own page) leaves. Each status is
+    // named; a status added later offers nothing until it is mapped here (the test reads the enum values).
     private IReadOnlyList<AppRowAction> PublicationActions(QuestionListItemResponse question) =>
         question.Status switch
         {
@@ -621,22 +623,25 @@
                     L["Questions.Action.Unpublish"], AppIcons.Unpublish, () => SetPublicationAsync(question, publish: false),
                     Key: "unpublish")
             ],
-            QuestionStatus.Annulled => [],
-            _ =>
+            QuestionStatus.Draft =>
             [
                 new AppRowAction(
                     L["Questions.Action.Publish"], AppIcons.Publish, () => SetPublicationAsync(question, publish: true),
                     Key: "publish")
-            ]
+            ],
+            _ => []
         };
 
-    // The reason a row's Delete is disabled, said in words: published and annulled questions are not deleted.
+    // The reason a row's Delete is disabled, said in words: only a draft is deleted. A status added later is
+    // refused until it is mapped here.
     private string? DeleteDisabledReasonOf(QuestionListItemResponse question) =>
         question.Status switch
         {
+            QuestionStatus.Draft => null,
             QuestionStatus.Published => L["Questions.Delete.DisabledPublished"].Value,
             QuestionStatus.Annulled => L["Questions.Delete.DisabledAnnulled"].Value,
-            _ => null
+            QuestionStatus.InReview => L["Questions.Delete.DisabledInReview"].Value,
+            _ => L["Questions.Delete.DisabledPublished"].Value
         };
 
     /// <summary>The list is searched, filtered and paged by the server (BR15).</summary>

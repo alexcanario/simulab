@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-105 - Review before publishing (mockup)</title>
+<style>
+/* ===========================================================================
+   F-105 mockup - the review queue (/admin/questions/review), the review screen
+   (/admin/questions/review/{id}), the question form's Publication and Review history
+   cards (/admin/questions/{id}) and the question list (/admin/questions).
+   Every colour is a token of docs/design/identity.tokens.json (light and dark); the
+   white on a filled info alert is MudBlazor's default contrast text (DESIGN.md, Info).
+   Classes mirror the kit (app.css): app-page-header, app-data-table, app-row-actions,
+   app-section-card, app-form-layout, app-form-aside, app-status-chip, app-chip,
+   app-alert, app-state, app-question-*, app-preview-*, app-form-actions, app-dialog.
+   No new kit component, no new colour, no new token. New AppIcons constants only.
+   No external request: no web font, no icon font, no image.
+   =========================================================================== */
+:root {
+  --app-font-xs: 0.75rem; --app-font-sm: 0.8125rem; --app-font-md: 0.9375rem;
+  --app-font-lg: 1.0625rem; --app-font-xl: 1.25rem; --app-font-xxl: 1.75rem;
+  --app-space-1: 4px; --app-space-2: 8px; --app-space-3: 12px; --app-space-4: 16px; --app-space-5: 24px; --app-space-6: 32px;
+  --app-radius-md: 10px; --app-radius-pill: 999px;
+
+  /* tokens, light */
+  --primary: #216DB5; --primary-darken: #1858A0; --primary-lighten: #EBF3FD; --primary-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --warning-contrast: #19243E;
+  --info: #2478C5; --info-contrast: #FFFFFF;
+  --error: #BE3737; --error-contrast: #FFFFFF;
+  --background: #F2F5FB; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: rgba(255,255,255,0.918); --appbar: #0F3266; --appbar-text: #FFFFFF;
+  --text-primary: #19243E; --text-secondary: #4A5A7A; --action-default: #4A5A7A;
+  --lines-inputs: #7E8AA1; --table-lines: #D0D8EA; --divider: #D0D8EA;
+}
+[data-theme="dark"] {
+  --primary: #64A2E3; --primary-darken: #5096DC; --primary-lighten: #162540; --primary-contrast: #19243E;
+  --success: #1A9E8C; --success-contrast: #19243E;
+  --warning: #D98B1A; --warning-contrast: #19243E;
+  --info: #2478C5; --info-contrast: #FFFFFF;
+  --error: #E06C6C; --error-contrast: #19243E;
+  --background: #0E1828; --surface: #172035;
+  --drawer: #091422; --drawer-text: rgba(255,255,255,0.498); --appbar: #091422; --appbar-text: rgba(255,255,255,0.7);
+  --text-primary: #E0E8F8; --text-secondary: #7A8EB0; --action-default: #7A8EB0;
+  --lines-inputs: #61718F; --table-lines: #263352; --divider: #263352;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--app-font-md); line-height: 1.65;
+  background: var(--background); color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+svg { display: inline-block; flex-shrink: 0; vertical-align: middle; fill: currentColor; }
+button { font: inherit; color: inherit; }
+:is(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.app-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-4);
+  background: var(--surface); border-bottom: 1px dashed var(--divider); font-size: var(--app-font-xs); }
+.demo-label { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin-left: var(--app-space-2); }
+.demo button { font-size: var(--app-font-xs); font-weight: 600; padding: 3px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text-primary); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-states { display: contents; }
+.demo-note { width: 100%; color: var(--text-secondary); }
+
+/* ---- app shell (F-2) ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--app-space-3); padding: 0 var(--app-space-4); background: var(--appbar); color: var(--appbar-text); }
+.brand { font-weight: 700; letter-spacing: .09em; }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: var(--app-font-xs); font-weight: 700; }
+.lay { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 260px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); padding: var(--app-space-3) var(--app-space-2); }
+.nav-section { display: block; padding: var(--app-space-4) var(--app-space-3) var(--app-space-1); font-size: var(--app-font-xs); text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
+.nav-link { display: flex; align-items: center; gap: var(--app-space-3); padding: var(--app-space-2) var(--app-space-3); border-left: 3px solid transparent; border-radius: 6px; font-size: var(--app-font-sm); cursor: pointer; color: inherit; text-decoration: none; }
+.nav-link:hover { background: rgba(255,255,255,.08); }
+.nav-link[aria-current="page"] { background: rgba(255,255,255,.14); border-left-color: var(--primary); font-weight: 600; }
+.main { flex: 1; overflow-y: auto; padding: var(--app-space-5); min-width: 0; }
+@media (max-width: 959.98px) { .drawer { display: none; } .main { padding: var(--app-space-4); } }
+/* demo: the "narrow width" state squeezes the page to a phone-like column */
+.is-narrow .drawer { display: none; }
+.is-narrow .main { max-width: 412px; margin: 0 auto; padding: var(--app-space-3); border-left: 1px dashed var(--lines-inputs); border-right: 1px dashed var(--lines-inputs); }
+.is-narrow .app-form-layout { grid-template-columns: minmax(0, 1fr); }
+
+/* ---- AppLink (B-6) ---- */
+.app-link { color: var(--text-primary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.app-link:hover { text-decoration-thickness: 2px; }
+
+/* ---- AppPageHeader ---- */
+.app-page-header { margin-bottom: var(--app-space-5); }
+.app-breadcrumbs { font-size: var(--app-font-sm); color: var(--text-secondary); padding-bottom: var(--app-space-1); overflow-wrap: anywhere; }
+.app-breadcrumbs .app-link { color: var(--text-secondary); }
+.app-page-header-row { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-page-title { font-size: var(--app-font-xxl); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; min-width: 0; }
+
+/* ---- buttons (MudButton variants) ---- */
+.app-button { font-size: var(--app-font-sm); font-weight: 600; cursor: pointer; min-height: 38px; padding: 0 var(--app-space-4); border-radius: var(--app-radius-md);
+  display: inline-flex; align-items: center; gap: var(--app-space-2); border: 1px solid transparent; background: transparent; text-transform: none; }
+.app-button-filled { background: var(--primary); color: var(--primary-contrast); }
+.app-button-filled:hover { background: var(--primary-darken); }
+.app-button-outlined { border-color: var(--primary); color: var(--primary); }
+.app-button-outlined:hover { background: var(--primary-lighten); }
+.app-button-outlined-error { border-color: var(--error); color: var(--error); }
+.app-button-text { color: var(--text-primary); }
+.app-button-text:hover { background: var(--primary-lighten); }
+.app-button-error { background: var(--error); color: var(--error-contrast); }
+.app-button[disabled] { opacity: .45; cursor: not-allowed; }
+.app-icon-button { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--action-default); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.app-icon-button:hover { background: var(--primary-lighten); }
+.app-icon-button.is-error { color: var(--error); }
+.app-icon-button[disabled] { opacity: .4; cursor: not-allowed; }
+.app-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .9s linear infinite; }
+.app-spinner-lg { width: 36px; height: 36px; border-width: 3px; color: var(--primary); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- AppDataTable ---- */
+.app-data-table { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); overflow: hidden; }
+.app-table-toolbar { display: flex; align-items: flex-end; gap: var(--app-space-3); padding: var(--app-space-3) var(--app-space-4); flex-wrap: wrap; }
+.app-table-search { flex: 1 1 18rem; margin: 0 !important; }
+.app-table-filters { display: flex; gap: var(--app-space-3); flex-wrap: wrap; }
+.app-table-filters .app-field { width: 15rem; margin: 0; }
+.app-table-wrap { overflow-x: auto; }
+.app-table { width: 100%; border-collapse: collapse; font-size: var(--app-font-sm); }
+.app-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.app-table th { text-align: left; font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); }
+.app-table td { padding: var(--app-space-2) var(--app-space-4); border-bottom: 1px solid var(--table-lines); vertical-align: middle; }
+.app-table tbody tr:hover { background: var(--primary-lighten); }
+.app-cell-actions { text-align: right; white-space: nowrap; width: 1%; }
+.app-cell-secondary { display: block; color: var(--text-secondary); font-size: var(--app-font-xs); }
+.app-cell-nowrap { white-space: nowrap; }
+.app-truncate { display: inline-block; max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.app-truncate-sm { max-width: 14rem; }
+.app-truncate-md { max-width: 16rem; }
+.app-truncate-reason { max-width: 24rem; }
+.app-row-actions { display: inline-flex; gap: 2px; }
+.app-pager { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-4); padding: var(--app-space-2) var(--app-space-4); font-size: var(--app-font-xs); color: var(--text-secondary); }
+.app-pager select { font: inherit; color: inherit; background: transparent; border: 0; }
+
+/* ---- AppStatusChip / AppChip ---- */
+.app-status-chip { display: inline-flex; align-items: center; gap: var(--app-space-2); padding: 2px 10px; border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-pill); background: var(--surface); color: var(--text-primary); font-size: var(--app-font-xs); font-weight: 600; white-space: nowrap; }
+.app-status-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.app-status-chip-success .app-status-chip-dot { background: var(--success); }
+.app-status-chip-error .app-status-chip-dot { background: var(--error); }
+.app-status-chip-warning .app-status-chip-dot { background: var(--warning); }
+.app-status-chip-info .app-status-chip-dot { background: var(--info); }
+.app-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 2px 10px; border: 1px solid var(--divider); border-radius: 12px; font-size: var(--app-font-xs); background: var(--surface); }
+
+/* ---- states ---- */
+.app-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--app-space-3); padding: var(--app-space-6) var(--app-space-4); text-align: center; color: var(--text-secondary); }
+.app-state-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); }
+.app-state-title { font-size: var(--app-font-xl); font-weight: 700; color: var(--text-primary); }
+.app-state-error svg { color: var(--error); }
+
+/* ---- AppAlert (MudAlert, Filled, Dense) ---- */
+.app-alert { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); overflow-wrap: anywhere; }
+.app-alert-content { flex: 1; min-width: 0; }
+.app-alert-error { background: var(--error); color: var(--error-contrast); }
+.app-alert-info { background: var(--info); color: var(--info-contrast); }
+.app-alert-warning { background: var(--warning); color: var(--warning-contrast); }
+.app-alert-success { background: var(--success); color: var(--success-contrast); }
+
+/* ---- form layout ---- */
+.app-form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--app-space-4); align-items: start; }
+@media (max-width: 1279.98px) { .app-form-layout { grid-template-columns: minmax(0, 1fr); } }
+.app-form-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-5); min-width: 0; display: block; }
+.mt-4 { margin-top: var(--app-space-4); }
+.mb-4 { margin-bottom: var(--app-space-4); }
+.app-section-card { border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4); min-width: 0; }
+.app-section-card + .app-section-card { margin-top: var(--app-space-4); }
+.app-section-card-head { display: flex; align-items: flex-start; gap: var(--app-space-3); margin-bottom: var(--app-space-4); }
+.app-section-card-icon { color: var(--primary); margin-top: 3px; }
+.app-section-card-title { font-size: var(--app-font-lg); font-weight: 600; color: var(--primary); }
+.app-section-card-subtitle { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-1); }
+.app-form-note { font-size: var(--app-font-xs); color: var(--text-secondary); border: 1px dashed var(--lines-inputs); border-radius: var(--app-radius-md); padding: var(--app-space-2) var(--app-space-3); margin-bottom: var(--app-space-4); }
+
+/* ---- fields ---- */
+.app-field { margin-bottom: var(--app-space-4); min-width: 0; }
+.app-field-label { display: block; font-size: var(--app-font-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: var(--app-space-1); }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-value { display: block; }
+.app-field-input { display: flex; align-items: flex-start; gap: var(--app-space-2); padding: var(--app-space-2) var(--app-space-3); border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); color: var(--text-primary); }
+.app-field-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.app-field-input textarea { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--app-font-md); resize: vertical; min-height: 4.5rem; }
+.app-field-error .app-field-input { border-color: var(--error); }
+.app-field-description { display: block; font-size: var(--app-font-xs); line-height: 1.45; margin-top: var(--app-space-1); min-height: 1.1em; overflow-wrap: anywhere; }
+/* AppTextField Counter (F-105, OQ1 → B): the count sits at the end of the description line, after the hint or the error text */
+.app-field-description.has-counter { display: flex; justify-content: space-between; gap: var(--app-space-3); align-items: flex-start; }
+.app-field-description.has-counter > :first-child { flex: 1; min-width: 0; }
+.app-field-counter { flex: none; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.app-field-error .app-field-counter { color: var(--error); font-weight: 600; }
+.app-field-hint { color: var(--text-secondary); }
+.app-field-error-text { color: var(--error); font-weight: 600; }
+.app-rich-text-frame { border: 1px solid var(--lines-inputs); border-radius: var(--app-radius-md); background: var(--surface); overflow: hidden; }
+.app-rt-editor { padding: var(--app-space-2) var(--app-space-3); min-height: 5rem; outline: none; font-size: var(--app-font-md); overflow-wrap: anywhere; }
+.app-field-disabled .app-rich-text-frame, .app-field-disabled .app-field-input { opacity: .55; }
+
+/* ---- publication card ---- */
+.app-publication-row { display: flex; align-items: center; gap: var(--app-space-3); flex-wrap: wrap; font-size: var(--app-font-sm); }
+.app-publication-actions { display: flex; gap: var(--app-space-2); margin-top: var(--app-space-4); flex-wrap: wrap; }
+.app-publication-reason { font-size: var(--app-font-xs); color: var(--text-secondary); margin-top: var(--app-space-2); }
+
+/* ---- AppFormActions / AppFormAside ---- */
+.app-form-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--app-space-2); margin-top: var(--app-space-5); flex-wrap: wrap; }
+.app-form-aside { position: sticky; top: var(--app-space-4); background: var(--surface); border: 1px solid var(--divider); border-radius: var(--app-radius-md); padding: var(--app-space-4) var(--app-space-4) var(--app-space-3); }
+.app-form-aside-title { font-size: var(--app-font-md); font-weight: 700; margin-bottom: var(--app-space-2); }
+.app-form-aside-row { display: flex; justify-content: space-between; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--divider); font-size: var(--app-font-sm); }
+.app-form-aside-row:last-of-type { border-bottom: 0; }
+.app-form-aside-row-label { color: var(--text-secondary); font-weight: 600; flex: none; }
+.app-form-aside-row-value { text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.app-form-aside-row-empty { color: var(--text-secondary); font-style: italic; }
+.app-form-aside-checklist-title { font-size: var(--app-font-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); margin: var(--app-space-4) 0 var(--app-space-2); }
+.app-form-aside-checklist { list-style: none; display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-form-aside-checklist li { display: flex; align-items: center; gap: var(--app-space-2); font-size: var(--app-font-sm); }
+.app-checklist-done svg { color: var(--success); }
+.app-checklist-pending svg { color: var(--text-secondary); }
+
+/* ---- question paper (QuestionPreviewDialog content, F-95/F-97/F-104) ---- */
+.app-question-source { display: flex; justify-content: space-between; gap: var(--app-space-3); flex-wrap: wrap; font-size: var(--app-font-sm); color: var(--text-secondary); margin-bottom: var(--app-space-3); }
+.app-question-content { overflow-wrap: anywhere; }
+.app-question-content p + p { margin-top: var(--app-space-2); }
+.app-question-content a { color: var(--text-primary); }
+.app-question-base { padding: var(--app-space-3) var(--app-space-4); border: 1px solid var(--divider); border-radius: var(--app-radius-md); margin-bottom: var(--app-space-4); font-size: var(--app-font-sm); }
+.app-question-select-count { margin-top: var(--app-space-3); font-size: var(--app-font-sm); color: var(--text-secondary); }
+.app-question-options { list-style: none; margin-top: var(--app-space-4); display: flex; flex-direction: column; gap: var(--app-space-2); }
+.app-question-option { display: flex; gap: var(--app-space-3); align-items: flex-start; padding: var(--app-space-2) var(--app-space-3); border: 1px solid var(--divider); border-radius: var(--app-radius-md); }
+.app-question-option.is-correct { border: 2px solid var(--success); }
+.app-option-letter { font-weight: 700; min-width: 1.25rem; }
+.app-question-option-body { flex: 1; min-width: 0; }
+.app-correct-label { display: inline-flex; align-items: center; gap: 4px; font-size: var(--app-font-xs); font-weight: 700; margin-top: var(--app-space-1); }
+.app-correct-label svg { color: var(--success); }
+.app-preview-answer { margin-top: var(--app-space-4); border-top: 1px solid var(--divider); padding-top: var(--app-space-4); }
+.app-preview-heading { font-size: var(--app-font-sm); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); margin-bottom: var(--app-space-2); }
+.app-preview-heading + .app-preview-heading, .app-question-content + .app-preview-heading, p + .app-preview-heading { margin-top: var(--app-space-3); }
+.app-muted { color: var(--text-secondary); }
+
+/* ---- dialog (MudDialog) ---- */
+.app-dialog-backdrop { position: fixed; inset: 0; background: rgba(14,24,40,.55); display: flex; align-items: flex-start; justify-content: center; padding: 12vh var(--app-space-4) var(--app-space-4); z-index: 40; overflow-y: auto; }
+.app-dialog { background: var(--surface); color: var(--text-primary); border-radius: var(--app-radius-md); width: 100%; max-width: 30rem; box-shadow: 0 8px 32px rgba(10,20,40,.35); }
+.app-dialog-title { font-size: var(--app-font-xl); font-weight: 600; padding: var(--app-space-4) var(--app-space-5) var(--app-space-2); }
+.app-dialog-content { padding: 0 var(--app-space-5) var(--app-space-2); font-size: var(--app-font-md); overflow-wrap: anywhere; }
+.app-dialog-content .app-field { margin-bottom: 0; }
+.app-dialog-actions { display: flex; justify-content: flex-end; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-5) var(--app-space-4); flex-wrap: wrap; }
+
+/* ---- snackbar ---- */
+.app-snackbar { position: fixed; right: var(--app-space-5); bottom: var(--app-space-5); z-index: 50; display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3) var(--app-space-4); border-radius: var(--app-radius-md); background: var(--success); color: var(--success-contrast); font-weight: 600; font-size: var(--app-font-sm); box-shadow: 0 4px 16px rgba(20,40,100,.25); max-width: 28rem; }
+</style>
+</head>
+<body>
+
+<!-- ===================== demo chrome (not part of the product) ===================== -->
+<div class="demo" id="demo">
+  <span class="demo-label">Screen</span>
+  <button type="button" data-screen="queue" aria-pressed="true">1 Review queue</button>
+  <button type="button" data-screen="review" aria-pressed="false">2 Review screen</button>
+  <button type="button" data-screen="form" aria-pressed="false">3 Question form: Publication</button>
+  <button type="button" data-screen="list" aria-pressed="false">4 Question list</button>
+  <span class="demo-label">State</span>
+  <span id="demo-states" class="demo-states"></span>
+  <span class="demo-label">Language</span>
+  <button type="button" data-lang="pt-BR" aria-pressed="true">pt-BR</button>
+  <button type="button" data-lang="pt-PT" aria-pressed="false">pt-PT</button>
+  <button type="button" data-lang="en" aria-pressed="false">en</button>
+  <span class="demo-label">Theme</span>
+  <button type="button" data-theme-btn="light" aria-pressed="true">Light</button>
+  <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+  <span class="demo-note" id="demo-note"></span>
+</div>
+
+<header class="appbar">
+  <button type="button" class="app-icon-button" style="color:inherit" aria-label="Menu"><svg data-icon="menu" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"></svg></button>
+  <span class="brand">SIMULAB</span>
+  <span class="spacer"></span>
+  <span class="avatar" aria-hidden="true">AC</span>
+</header>
+
+<div class="lay">
+  <nav class="drawer" aria-label="Main">
+    <span class="nav-section" data-i18n="Nav.Section.Content"></span>
+    <a class="nav-link" href="#" id="nav-exams"><svg data-icon="exams" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Exams"></span></a>
+    <a class="nav-link" href="#" id="nav-subjects"><svg data-icon="subjects" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Subjects"></span></a>
+    <!-- questions.manage -->
+    <a class="nav-link" href="#" id="nav-questions" data-go="list:ready"><svg data-icon="questions" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.Questions"></span></a>
+    <!-- F-105: new entry, questions.review only, right after Questions -->
+    <a class="nav-link" href="#" id="nav-review-queue" data-go="queue:ready"><svg data-icon="review" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.ReviewQueue"></span></a>
+    <!-- questions.manage -->
+    <a class="nav-link" href="#" id="nav-base-texts"><svg data-icon="basetext" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"></svg><span data-i18n="Nav.BaseTexts"></span></a>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="overlay"></div>
+
+<script>
+/* ===========================================================================
+   Texts: resource keys of SharedResources in the three UI locales.
+   New with F-105: Nav.ReviewQueue, Questions.Status.InReview, Questions.Action.SendForReview,
+   Questions.Action.Withdraw, Questions.Publication.InReview, Questions.InReview.Alert,
+   Questions.Publication.Rejected, Questions.SentForReview, Questions.Withdrawn,
+   Questions.Delete.DisabledInReview, Questions.Section.ReviewHistory(.Subtitle),
+   Questions.ReviewHistory.*, ReviewQueue.*, Review.*, question.in_review,
+   question.already_in_review, question.not_in_review, question.review_reason_required,
+   question.review_reason_too_long. The rest exist today.
+   =========================================================================== */
+const TEXTS = {
+  "en": {
+    "Nav.Section.Content": "Content", "Nav.Exams": "Exams", "Nav.Subjects": "Subjects", "Nav.Questions": "Questions", "Nav.BaseTexts": "Base texts", "Nav.ReviewQueue": "Review queue",
+    "NotFound.Title": "Page not found", "NotFound.Message": "The page you are looking for does not exist.",
+    "Common.Add": "Add", "Common.Edit": "Edit", "Common.Delete": "Delete", "Common.Save": "Save", "Common.Cancel": "Cancel", "Common.Close": "Close", "Common.Search": "Search",
+    "Common.Actions": "Actions", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Try again", "Common.Loading": "Loading...", "Common.LoadFailed": "We could not load this list.",
+    "Common.Table.RowsPerPage": "Rows per page:", "Common.Table.PageInfo": "{0}-{1} of {2}", "Common.Summary.NotFilled": "Not filled", "Common.Checklist.Done": "Done", "Common.Checklist.Pending": "Pending",
+    "Common.Counter": "{0}/{1}", "Common.Counter.Spoken": "{0} of {1} characters",
+    "Questions.Title": "Questions", "Questions.Form.EditTitle": "Edit question", "Questions.Search.Placeholder": "Search the statement", "Questions.Filter.Status": "Status", "Questions.Empty": "No question in the bank yet.",
+    "Questions.Column.Statement": "Statement", "Questions.Column.Topic": "Topic", "Questions.Column.Source": "Source", "Questions.Column.Difficulty": "Difficulty", "Questions.Column.Language": "Language", "Questions.Column.Status": "Status", "Questions.Column.Type": "Type",
+    "Questions.Row.Name": "question \"{0}\"", "Questions.Source.Number": "Question {0}", "Questions.Source.Authored": "Authored", "Questions.Difficulty.NotSet": "Not set",
+    "Questions.Status.Draft": "Draft", "Questions.Status.Published": "Published", "Questions.Status.Annulled": "Annulled", "Questions.Status.InReview": "In review",
+    "Questions.Type.SingleChoice": "Single choice", "Questions.Type.TrueFalse": "True/false", "Questions.Type.MultipleAnswer": "Multiple answer",
+    "Questions.Form.Aside.Title": "Summary", "Questions.Form.Aside.Status": "Status", "Questions.Form.Aside.Source": "Source", "Questions.Form.Aside.Type": "Type", "Questions.Form.Aside.Options": "Options", "Questions.Form.Aside.Checklist": "Before publishing",
+    "Questions.Field.Subject": "Subject", "Questions.Field.Topic": "Topic", "Questions.Field.ContentLanguage": "Content language", "Questions.Field.Difficulty": "Difficulty", "Questions.Field.Statement": "Statement", "Questions.Options.Count": "{0} of 5 options",
+    "Questions.Checklist.Topic": "Topic", "Questions.Checklist.Language": "Content language", "Questions.Checklist.Statement": "Statement", "Questions.Checklist.OptionsCount": "2 to 5 options", "Questions.Checklist.OptionsText": "Every option has text", "Questions.Checklist.Key": "Exactly one correct option",
+    "Questions.Section.Statement": "Statement", "Questions.Section.Statement.Subtitle": "What the student is asked. Formatting, lists and links are kept; images come later.",
+    "Questions.Section.Publication": "Publication", "Questions.Section.Publication.Subtitle": "A draft is seen only here. A published question is ready for the bank and must stay complete.",
+    "Questions.Publication.Draft": "Draft. Not available outside the back office.", "Questions.Publication.Published": "Published. Edits apply at once and must keep it complete.",
+    "Questions.Publication.Publish.DisabledUnsaved": "Save your changes first.", "Questions.Publication.Publish.DisabledIncomplete": "Complete the checklist before publishing.",
+    "Questions.Publication.InReview": "In review. Waiting for a reviewer since {0}.", "Questions.Publication.Rejected": "Rejected on {0}: {1}",
+    "Questions.InReview.Alert": "This question is in review and cannot be edited. Withdraw it from review to change it.",
+    "Questions.Action.Preview": "Preview as a student", "Questions.Action.Publish": "Publish", "Questions.Action.Unpublish": "Unpublish", "Questions.Action.SendForReview": "Send for review", "Questions.Action.Withdraw": "Withdraw from review",
+    "Questions.SentForReview": "Question sent for review.", "Questions.Withdrawn": "Question withdrawn from review. It is a draft again.",
+    "Questions.Delete.DisabledPublished": "This question is published. Unpublish it before deleting.", "Questions.Delete.DisabledAnnulled": "This question is annulled and cannot be deleted.", "Questions.Delete.DisabledInReview": "This question is in review. Withdraw it before deleting.",
+    "Questions.Section.ReviewHistory": "Review history", "Questions.Section.ReviewHistory.Subtitle": "Every time this question was sent for review, withdrawn, approved or rejected, newest first.",
+    "Questions.ReviewHistory.Column.Date": "Date", "Questions.ReviewHistory.Column.Event": "Event", "Questions.ReviewHistory.Column.Reason": "Reason or note",
+    "Questions.ReviewHistory.Kind.Submitted": "Sent", "Questions.ReviewHistory.Kind.Withdrawn": "Withdrawn", "Questions.ReviewHistory.Kind.Approved": "Approved", "Questions.ReviewHistory.Kind.Rejected": "Rejected",
+    "Questions.History.NoReason": "No reason given",
+    "Questions.Preview.Options": "Options", "Questions.Preview.Answers": "Answers", "Questions.Preview.Answer": "Answer", "Questions.Preview.Explanation": "Explanation", "Questions.Preview.CorrectAnswer": "Correct answer", "Questions.Preview.NoExplanation": "No explanation.", "Questions.Preview.Number": "Question {0}", "Questions.Preview.SelectCount": "Mark {0} options.",
+    "Questions.TrueFalse.True": "True", "Questions.TrueFalse.False": "False",
+    "Questions.StatusReason.Label": "Reason", "Questions.StatusReason.Hint": "Required. Plain text, up to 500 characters.", "Questions.StatusReason.Cancel": "Cancel",
+    "ReviewQueue.Title": "Review queue", "ReviewQueue.Column.SentAt": "Sent on", "ReviewQueue.Empty": "Nothing is waiting for review.", "ReviewQueue.Action.Review": "Review", "ReviewQueue.Back": "Back to the queue",
+    "Review.Title": "Review question", "Review.Aside.SentAt": "Sent on", "Review.Action.Approve": "Approve", "Review.Action.Reject": "Reject",
+    "Review.Approve.Dialog.Title": "Approve this question?", "Review.Approve.Dialog.Message": "It is published at once and practice can use it. A note is optional and stays in the review history.",
+    "Review.Note.Label": "Note", "Review.Note.Hint": "Optional. Plain text, up to 500 characters.",
+    "Review.Reject.Dialog.Title": "Reject this question?", "Review.Reject.Dialog.Message": "It goes back to draft with your reason, which the curator sees on the question's page.",
+    "Review.Approved": "Question approved and published.", "Review.Rejected": "Question rejected. It is a draft again.",
+    "Review.NoLongerInReview": "This question is no longer in review: another reviewer decided it, or it was withdrawn.",
+    "question.not_found": "This question no longer exists.", "question.version_conflict": "Another save changed this question's history first. Reload the page and try again.",
+    "question.in_review": "This question is in review and cannot be changed. Withdraw it from review first.", "question.already_in_review": "This question is already in review.", "question.not_in_review": "This question is not in review.",
+    "question.review_reason_required": "Write the reason for the rejection.", "question.review_reason_too_long": "The reason or note has more than 500 characters."
+  },
+  "pt-BR": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões", "Nav.BaseTexts": "Textos-base", "Nav.ReviewQueue": "Fila de revisão",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que você procura não existe.",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Excluir", "Common.Save": "Salvar", "Common.Cancel": "Cancelar", "Common.Close": "Fechar", "Common.Search": "Pesquisar",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Tentar novamente", "Common.Loading": "Carregando...", "Common.LoadFailed": "Não foi possível carregar esta lista.",
+    "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}", "Common.Summary.NotFilled": "Não preenchido", "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "Common.Counter": "{0}/{1}", "Common.Counter.Spoken": "{0} de {1} caracteres",
+    "Questions.Title": "Questões", "Questions.Form.EditTitle": "Editar questão", "Questions.Search.Placeholder": "Pesquisar no enunciado", "Questions.Filter.Status": "Situação", "Questions.Empty": "Nenhuma questão no banco ainda.",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Topic": "Tópico", "Questions.Column.Source": "Fonte", "Questions.Column.Difficulty": "Dificuldade", "Questions.Column.Language": "Idioma", "Questions.Column.Status": "Situação", "Questions.Column.Type": "Tipo",
+    "Questions.Row.Name": "questão \"{0}\"", "Questions.Source.Number": "Questão {0}", "Questions.Source.Authored": "Autoral", "Questions.Difficulty.NotSet": "Não definida",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada", "Questions.Status.Annulled": "Anulada", "Questions.Status.InReview": "Em revisão",
+    "Questions.Type.SingleChoice": "Múltipla escolha", "Questions.Type.TrueFalse": "Certo/errado", "Questions.Type.MultipleAnswer": "Múltiplas respostas",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Situação", "Questions.Form.Aside.Source": "Fonte", "Questions.Form.Aside.Type": "Tipo", "Questions.Form.Aside.Options": "Alternativas", "Questions.Form.Aside.Checklist": "Antes de publicar",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Topic": "Tópico", "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.Difficulty": "Dificuldade", "Questions.Field.Statement": "Enunciado", "Questions.Options.Count": "{0} de 5 alternativas",
+    "Questions.Checklist.Topic": "Tópico", "Questions.Checklist.Language": "Idioma do conteúdo", "Questions.Checklist.Statement": "Enunciado", "Questions.Checklist.OptionsCount": "De 2 a 5 alternativas", "Questions.Checklist.OptionsText": "Toda alternativa tem texto", "Questions.Checklist.Key": "Exatamente uma alternativa correta",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao aluno. Formatação, listas e links são mantidos; imagens vêm depois.",
+    "Questions.Section.Publication": "Publicação", "Questions.Section.Publication.Subtitle": "Um rascunho só aparece aqui. Uma questão publicada está pronta para o banco e precisa continuar completa.",
+    "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.", "Questions.Publication.Published": "Publicada. Edições valem na hora e precisam mantê-la completa.",
+    "Questions.Publication.Publish.DisabledUnsaved": "Salve suas alterações primeiro.", "Questions.Publication.Publish.DisabledIncomplete": "Complete a lista \"Antes de publicar\" primeiro.",
+    "Questions.Publication.InReview": "Em revisão. Aguardando um revisor desde {0}.", "Questions.Publication.Rejected": "Rejeitada em {0}: {1}",
+    "Questions.InReview.Alert": "Esta questão está em revisão e não pode ser editada. Retire-a da revisão para alterá-la.",
+    "Questions.Action.Preview": "Visualizar como aluno", "Questions.Action.Publish": "Publicar", "Questions.Action.Unpublish": "Despublicar", "Questions.Action.SendForReview": "Enviar para revisão", "Questions.Action.Withdraw": "Retirar da revisão",
+    "Questions.SentForReview": "Questão enviada para revisão.", "Questions.Withdrawn": "Questão retirada da revisão. Voltou a ser rascunho.",
+    "Questions.Delete.DisabledPublished": "Esta questão está publicada. Despublique-a antes de excluir.", "Questions.Delete.DisabledAnnulled": "Esta questão está anulada e não pode ser excluída.", "Questions.Delete.DisabledInReview": "Esta questão está em revisão. Retire-a da revisão antes de excluir.",
+    "Questions.Section.ReviewHistory": "Histórico de revisão", "Questions.Section.ReviewHistory.Subtitle": "Cada vez que esta questão foi enviada para revisão, retirada, aprovada ou rejeitada, da mais recente para a mais antiga.",
+    "Questions.ReviewHistory.Column.Date": "Data", "Questions.ReviewHistory.Column.Event": "Evento", "Questions.ReviewHistory.Column.Reason": "Motivo ou observação",
+    "Questions.ReviewHistory.Kind.Submitted": "Enviada", "Questions.ReviewHistory.Kind.Withdrawn": "Retirada", "Questions.ReviewHistory.Kind.Approved": "Aprovada", "Questions.ReviewHistory.Kind.Rejected": "Rejeitada",
+    "Questions.History.NoReason": "Sem motivo",
+    "Questions.Preview.Options": "Alternativas", "Questions.Preview.Answers": "Respostas", "Questions.Preview.Answer": "Resposta", "Questions.Preview.Explanation": "Explicação", "Questions.Preview.CorrectAnswer": "Resposta correta", "Questions.Preview.NoExplanation": "Sem explicação.", "Questions.Preview.Number": "Questão {0}", "Questions.Preview.SelectCount": "Marque {0} alternativas.",
+    "Questions.TrueFalse.True": "Certo", "Questions.TrueFalse.False": "Errado",
+    "Questions.StatusReason.Label": "Motivo", "Questions.StatusReason.Hint": "Obrigatório. Texto simples, até 500 caracteres.", "Questions.StatusReason.Cancel": "Cancelar",
+    "ReviewQueue.Title": "Fila de revisão", "ReviewQueue.Column.SentAt": "Enviada em", "ReviewQueue.Empty": "Nada aguardando revisão.", "ReviewQueue.Action.Review": "Revisar", "ReviewQueue.Back": "Voltar para a fila",
+    "Review.Title": "Revisar questão", "Review.Aside.SentAt": "Enviada em", "Review.Action.Approve": "Aprovar", "Review.Action.Reject": "Rejeitar",
+    "Review.Approve.Dialog.Title": "Aprovar esta questão?", "Review.Approve.Dialog.Message": "Ela é publicada na hora e a prática pode usá-la. A observação é opcional e fica no histórico de revisão.",
+    "Review.Note.Label": "Observação", "Review.Note.Hint": "Opcional. Texto simples, até 500 caracteres.",
+    "Review.Reject.Dialog.Title": "Rejeitar esta questão?", "Review.Reject.Dialog.Message": "Ela volta a rascunho com o seu motivo, que o curador vê na página da questão.",
+    "Review.Approved": "Questão aprovada e publicada.", "Review.Rejected": "Questão rejeitada. Voltou a ser rascunho.",
+    "Review.NoLongerInReview": "Esta questão não está mais em revisão: outro revisor decidiu, ou ela foi retirada.",
+    "question.not_found": "Esta questão não existe mais.", "question.version_conflict": "Outra gravação alterou o histórico desta questão antes. Recarregue a página e tente de novo.",
+    "question.in_review": "Esta questão está em revisão e não pode ser alterada. Retire-a da revisão primeiro.", "question.already_in_review": "Esta questão já está em revisão.", "question.not_in_review": "Esta questão não está em revisão.",
+    "question.review_reason_required": "Escreva o motivo da rejeição.", "question.review_reason_too_long": "O motivo ou a observação passa de 500 caracteres."
+  },
+  "pt-PT": {
+    "Nav.Section.Content": "Conteúdo", "Nav.Exams": "Exames", "Nav.Subjects": "Disciplinas", "Nav.Questions": "Questões", "Nav.BaseTexts": "Textos de apoio", "Nav.ReviewQueue": "Fila de revisão",
+    "NotFound.Title": "Página não encontrada", "NotFound.Message": "A página que procura não existe.",
+    "Common.Add": "Adicionar", "Common.Edit": "Editar", "Common.Delete": "Eliminar", "Common.Save": "Guardar", "Common.Cancel": "Cancelar", "Common.Close": "Fechar", "Common.Search": "Pesquisar",
+    "Common.Actions": "Ações", "Common.ActionOnItem": "{0}: {1}", "Common.TryAgain": "Tentar novamente", "Common.Loading": "A carregar...", "Common.LoadFailed": "Não foi possível carregar esta lista.",
+    "Common.Table.RowsPerPage": "Linhas por página:", "Common.Table.PageInfo": "{0}-{1} de {2}", "Common.Summary.NotFilled": "Não preenchido", "Common.Checklist.Done": "Concluído", "Common.Checklist.Pending": "Pendente",
+    "Common.Counter": "{0}/{1}", "Common.Counter.Spoken": "{0} de {1} carateres",
+    "Questions.Title": "Questões", "Questions.Form.EditTitle": "Editar questão", "Questions.Search.Placeholder": "Pesquisar no enunciado", "Questions.Filter.Status": "Estado", "Questions.Empty": "Ainda não há questões no banco.",
+    "Questions.Column.Statement": "Enunciado", "Questions.Column.Topic": "Tópico", "Questions.Column.Source": "Fonte", "Questions.Column.Difficulty": "Dificuldade", "Questions.Column.Language": "Idioma", "Questions.Column.Status": "Estado", "Questions.Column.Type": "Tipo",
+    "Questions.Row.Name": "questão \"{0}\"", "Questions.Source.Number": "Questão {0}", "Questions.Source.Authored": "Autoral", "Questions.Difficulty.NotSet": "Não definida",
+    "Questions.Status.Draft": "Rascunho", "Questions.Status.Published": "Publicada", "Questions.Status.Annulled": "Anulada", "Questions.Status.InReview": "Em revisão",
+    "Questions.Type.SingleChoice": "Escolha múltipla", "Questions.Type.TrueFalse": "Certo/errado", "Questions.Type.MultipleAnswer": "Respostas múltiplas",
+    "Questions.Form.Aside.Title": "Resumo", "Questions.Form.Aside.Status": "Estado", "Questions.Form.Aside.Source": "Fonte", "Questions.Form.Aside.Type": "Tipo", "Questions.Form.Aside.Options": "Opções", "Questions.Form.Aside.Checklist": "Antes de publicar",
+    "Questions.Field.Subject": "Disciplina", "Questions.Field.Topic": "Tópico", "Questions.Field.ContentLanguage": "Idioma do conteúdo", "Questions.Field.Difficulty": "Dificuldade", "Questions.Field.Statement": "Enunciado", "Questions.Options.Count": "{0} de 5 opções",
+    "Questions.Checklist.Topic": "Tópico", "Questions.Checklist.Language": "Idioma do conteúdo", "Questions.Checklist.Statement": "Enunciado", "Questions.Checklist.OptionsCount": "De 2 a 5 opções", "Questions.Checklist.OptionsText": "Todas as opções têm texto", "Questions.Checklist.Key": "Exatamente uma opção correta",
+    "Questions.Section.Statement": "Enunciado", "Questions.Section.Statement.Subtitle": "O que se pede ao estudante. Formatação, listas e ligações são mantidas; as imagens vêm mais tarde.",
+    "Questions.Section.Publication": "Publicação", "Questions.Section.Publication.Subtitle": "Um rascunho só aparece aqui. Uma questão publicada está pronta para o banco e tem de continuar completa.",
+    "Questions.Publication.Draft": "Rascunho. Não aparece fora do back office.", "Questions.Publication.Published": "Publicada. As edições aplicam-se de imediato e têm de a manter completa.",
+    "Questions.Publication.Publish.DisabledUnsaved": "Guarde primeiro as suas alterações.", "Questions.Publication.Publish.DisabledIncomplete": "Complete primeiro a lista \"Antes de publicar\".",
+    "Questions.Publication.InReview": "Em revisão. À espera de um revisor desde {0}.", "Questions.Publication.Rejected": "Rejeitada em {0}: {1}",
+    "Questions.InReview.Alert": "Esta questão está em revisão e não pode ser editada. Retire-a da revisão para a alterar.",
+    "Questions.Action.Preview": "Pré-visualizar como estudante", "Questions.Action.Publish": "Publicar", "Questions.Action.Unpublish": "Retirar publicação", "Questions.Action.SendForReview": "Enviar para revisão", "Questions.Action.Withdraw": "Retirar da revisão",
+    "Questions.SentForReview": "Questão enviada para revisão.", "Questions.Withdrawn": "Questão retirada da revisão. Voltou a ser rascunho.",
+    "Questions.Delete.DisabledPublished": "Esta questão está publicada. Retire a publicação antes de eliminar.", "Questions.Delete.DisabledAnnulled": "Esta questão está anulada e não pode ser eliminada.", "Questions.Delete.DisabledInReview": "Esta questão está em revisão. Retire-a da revisão antes de eliminar.",
+    "Questions.Section.ReviewHistory": "Histórico de revisão", "Questions.Section.ReviewHistory.Subtitle": "Cada vez que esta questão foi enviada para revisão, retirada, aprovada ou rejeitada, da mais recente para a mais antiga.",
+    "Questions.ReviewHistory.Column.Date": "Data", "Questions.ReviewHistory.Column.Event": "Evento", "Questions.ReviewHistory.Column.Reason": "Motivo ou nota",
+    "Questions.ReviewHistory.Kind.Submitted": "Enviada", "Questions.ReviewHistory.Kind.Withdrawn": "Retirada", "Questions.ReviewHistory.Kind.Approved": "Aprovada", "Questions.ReviewHistory.Kind.Rejected": "Rejeitada",
+    "Questions.History.NoReason": "Sem motivo",
+    "Questions.Preview.Options": "Opções", "Questions.Preview.Answers": "Respostas", "Questions.Preview.Answer": "Resposta", "Questions.Preview.Explanation": "Explicação", "Questions.Preview.CorrectAnswer": "Resposta correta", "Questions.Preview.NoExplanation": "Sem explicação.", "Questions.Preview.Number": "Questão {0}", "Questions.Preview.SelectCount": "Assinale {0} opções.",
+    "Questions.TrueFalse.True": "Certo", "Questions.TrueFalse.False": "Errado",
+    "Questions.StatusReason.Label": "Motivo", "Questions.StatusReason.Hint": "Obrigatório. Texto simples, até 500 carateres.", "Questions.StatusReason.Cancel": "Cancelar",
+    "ReviewQueue.Title": "Fila de revisão", "ReviewQueue.Column.SentAt": "Enviada em", "ReviewQueue.Empty": "Nada à espera de revisão.", "ReviewQueue.Action.Review": "Rever", "ReviewQueue.Back": "Voltar à fila",
+    "Review.Title": "Rever questão", "Review.Aside.SentAt": "Enviada em", "Review.Action.Approve": "Aprovar", "Review.Action.Reject": "Rejeitar",
+    "Review.Approve.Dialog.Title": "Aprovar esta questão?", "Review.Approve.Dialog.Message": "É publicada de imediato e a prática pode usá-la. A nota é opcional e fica no histórico de revisão.",
+    "Review.Note.Label": "Nota", "Review.Note.Hint": "Opcional. Texto simples, até 500 carateres.",
+    "Review.Reject.Dialog.Title": "Rejeitar esta questão?", "Review.Reject.Dialog.Message": "Volta a rascunho com o seu motivo, que o curador vê na página da questão.",
+    "Review.Approved": "Questão aprovada e publicada.", "Review.Rejected": "Questão rejeitada. Voltou a ser rascunho.",
+    "Review.NoLongerInReview": "Esta questão já não está em revisão: outro revisor decidiu, ou foi retirada.",
+    "question.not_found": "Esta questão já não existe.", "question.version_conflict": "Outra gravação alterou antes o histórico desta questão. Recarregue a página e tente novamente.",
+    "question.in_review": "Esta questão está em revisão e não pode ser alterada. Retire-a primeiro da revisão.", "question.already_in_review": "Esta questão já está em revisão.", "question.not_in_review": "Esta questão não está em revisão.",
+    "question.review_reason_required": "Escreva o motivo da rejeição.", "question.review_reason_too_long": "O motivo ou a nota excede 500 carateres."
+  }
+};
+
+/* Material Outlined paths (AppIcons). New with F-105: review (FactCheck), withdraw (Undo), approve (TaskAlt), reject (Cancel). */
+const ICONS = {
+  menu: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+  add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  edit: "M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z",
+  delete: "M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z",
+  search: "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  close: "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  view: "M12 6a9.77 9.77 0 0 1 8.82 5.5A9.77 9.77 0 0 1 12 17a9.77 9.77 0 0 1-8.82-5.5A9.77 9.77 0 0 1 12 6zm0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5zm0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z",
+  publish: "M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7zm8-2v6h-2v-6H9.83L12 9.83 14.17 12H13z",
+  unpublish: "M18.95 4.5A9.967 9.967 0 0 0 12 2a9.967 9.967 0 0 0-6.95 2.5l1.42 1.42A7.99 7.99 0 0 1 12 4c2.03 0 3.9.76 5.33 2.01l1.62-1.51zM19.07 4.93l-1.41 1.41A7.957 7.957 0 0 1 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-2.18.88-4.16 2.3-5.6L4.89 4.98A9.962 9.962 0 0 0 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07zM9.17 11.17 8 12.34l3 3 5-5-1.17-1.17L11 13z",
+  verified: "M16.59 7.58L10 14.17l-3.59-3.58L5 12l5 5 8-8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  pending: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  inbox: "M19 3H4.99c-1.11 0-1.98.89-1.98 2L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10zm-3-5h-2V7h-4v3H8l4 4 4-4z",
+  error: "M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  info: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+  warning: "M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z",
+  refresh: "M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  questions: "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-7.5-1.5h2v-2h-2v2zm1-11c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z",
+  basetext: "M3 18h12v-2H3v2zM3 6v2h18V6H3zm0 7h18v-2H3v2z",
+  topics: "M19 18l2 1V3c0-1.1-.9-2-2-2H8.99C7.89 1 7 1.9 7 3h10c1.1 0 2 .9 2 2v13zM15 5H5c-1.1 0-2 .9-2 2v16l7-3 7 3V7c0-1.1-.9-2-2-2zm0 15.01l-5-2.14-5 2.14V7h10v13.01z",
+  subjects: "M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z",
+  exams: "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",
+  send: "M4.01 6.03l7.51 3.22-7.52-1 .01-2.22m7.5 8.72L4 17.97v-2.22l7.51-1M2.01 3L2 10l15 2-15 2 .01 7L23 12 2.01 3z",
+  withdraw: "M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z",
+  review: "M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zM5 7h5v2H5zm0 4h5v2H5zm0 4h5v2H5zm14.41-4.59L17.99 9l-3.17 3.17-1.41-1.42L12 12.16 14.82 15z",
+  approve: "M22 5.18 10.59 16.6l-4.24-4.24 1.41-1.41 2.83 2.83 10-10L22 5.18zm-2.21 5.04c.13.57.21 1.17.21 1.78 0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8c1.58 0 3.04.46 4.28 1.25l1.44-1.44C16.1 2.67 14.13 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-1.19-.22-2.33-.6-3.39l-1.61 1.61z",
+  reject: "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.59-13L12 10.59 8.41 7 7 8.41 10.59 12 7 15.59 8.41 17 12 13.41 15.59 17 17 15.59 13.41 12 17 8.41z",
+  history: "M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"
+};
+
+/* ===========================================================================
+   Sample data (content keeps its own language and is never translated; no names of people)
+   =========================================================================== */
+const LANG_NAMES = { "pt-BR": "Português (Brasil)", "pt-PT": "Português (Portugal)", "en": "English" };
+const CULTURE = { "pt-BR": "pt-BR", "pt-PT": "pt-PT", "en": "en-US" };
+const LONG_URL = "https://www.exemplo-de-um-endereco-muito-longo-sem-espacos.leg.br/comissoes/cpi-barragens-de-rejeitos/relatorio-final-aprovado-em-plenario-versao-integral.pdf";
+
+const Q_SINGLE = {
+  id: 101, lang: "pt-BR", type: "SingleChoice", subject: "Direito Constitucional", topic: "Direitos e garantias fundamentais", difficulty: 3,
+  source: "CEBRASPE · PRF 2024 · Policial Rodoviário Federal", number: 12, submittedAt: "2026-10-16T14:02",
+  baseText: null,
+  statement: "<p>Acerca dos direitos e garantias fundamentais previstos na Constituição Federal de 1988, assinale a opção correta.</p>",
+  options: [
+    { html: "<p>A liberdade de reunião em locais abertos ao público depende de autorização prévia da autoridade competente.</p>", correct: false },
+    { html: "<p>O sigilo das comunicações telefônicas pode ser afastado por determinação de qualquer autoridade administrativa.</p>", correct: false },
+    { html: "<p>É livre a manifestação do pensamento, sendo vedado o anonimato.</p>", correct: true },
+    { html: "<p>A casa é asilo inviolável, e nela ninguém pode penetrar sem consentimento do morador, nem mesmo em caso de flagrante delito.</p>", correct: false },
+    { html: "<p>Os tratados internacionais sobre direitos humanos nunca têm hierarquia constitucional.</p>", correct: false }
+  ],
+  explanation: "<p>O art. 5º, IV, da Constituição Federal garante a livre manifestação do pensamento e veda o anonimato. As demais opções contrariam o texto constitucional: a reunião exige apenas aviso prévio, o sigilo telefônico só cede por ordem judicial, o flagrante autoriza a entrada no domicílio e os tratados aprovados pelo rito do art. 5º, § 3º, equivalem a emendas.</p>"
+};
+const Q_TRUE_FALSE = {
+  id: 102, lang: "en", type: "TrueFalse", subject: "English", topic: "Reading comprehension", difficulty: 2,
+  source: null, number: null, submittedAt: "2026-10-16T15:40",
+  baseText: "<p>Between Hawaii and California, ocean currents gather plastic debris into a slowly turning mass that is larger than many countries. Most of it is not a floating island but a soup of fragments too small to see from a boat.</p>",
+  statement: "<p>According to the text, the garbage patch is mostly made of large floating objects.</p>",
+  options: [], trueFalseKey: false,
+  explanation: "<p>The text says most of the patch is a soup of fragments too small to see, not large floating objects.</p>"
+};
+const Q_MULTIPLE = {
+  id: 103, lang: "pt-BR", type: "MultipleAnswer", subject: "Língua Portuguesa", topic: "Interpretação de texto", difficulty: 4,
+  source: "FGV · CEMIG 2024 · Analista de Gestão", number: 7, submittedAt: "2026-10-17T08:21",
+  baseText: "<p>A barragem de Três Marias, no alto São Francisco, foi construída entre 1957 e 1962 para regularizar a vazão do rio, gerar energia e reduzir as cheias que atingiam as cidades ribeirinhas a jusante.</p>",
+  statement: "<p>De acordo com o texto, a construção da barragem de Três Marias teve como objetivos:</p>",
+  options: [
+    { html: "<p>ampliar a área agricultável do alto São Francisco.</p>", correct: false },
+    { html: "<p>regularizar a vazão do rio.</p>", correct: true },
+    { html: "<p>abrir um canal de navegação até o litoral.</p>", correct: false },
+    { html: "<p>reduzir as cheias nas cidades a jusante.</p>", correct: true }
+  ],
+  explanation: ""
+};
+const Q_LONG = Object.assign({}, Q_SINGLE, {
+  id: 104, topic: "Direitos e garantias fundamentais, remédios constitucionais e tutela coletiva dos direitos difusos e coletivos", submittedAt: "2026-10-14T09:05",
+  statement: "<p>Considerando o relatório final disponível em <a href=\"" + LONG_URL + "\">" + LONG_URL + "</a> e a jurisprudência consolidada do Supremo Tribunal Federal sobre a inviolabilidade do domicílio, a proteção do sigilo das comunicações, a liberdade de reunião e de associação, bem como o regime jurídico dos tratados internacionais de direitos humanos incorporados ao ordenamento brasileiro antes e depois da Emenda Constitucional n.º 45/2004, assinale a opção correta.</p>",
+  options: Q_SINGLE.options.map((o, i) => i === 2 ? { html: "<p>É livre a manifestação do pensamento, sendo vedado o anonimato, inclusive nas redes sociais, nos aplicativos de mensagens, nos fóruns, nos comentários de portais de notícias e em qualquer outro meio eletrônico de comunicação pública ou privada acessível a terceiros. Pneumoultramicroscopicossilicovulcanoconiótico.</p>", correct: true } : o),
+  explanation: "<p>" + "A liberdade de manifestação do pensamento é garantida pelo art. 5º, IV, e a vedação ao anonimato permite a responsabilização por abusos. ".repeat(8) + "</p>"
+});
+const QUEUE = [Q_LONG, Q_SINGLE, Q_TRUE_FALSE, Q_MULTIPLE,
+  { id: 105, lang: "pt-PT", type: "SingleChoice", subject: "Matemática", topic: "Funções", difficulty: 2, source: "IAVE · Exame Nacional 2024 · Matemática A", number: 3, submittedAt: "2026-10-17T10:30", statement: "<p>Seja f a função de domínio ℝ definida por f(x) = 2x − 1. Qual é o valor de f(3)?</p>" },
+  { id: 106, lang: "pt-BR", type: "TrueFalse", subject: "Informática", topic: "Segurança da informação", difficulty: 1, source: null, number: null, submittedAt: "2026-10-17T11:12", statement: "<p>Julgue o item: a autenticação em dois fatores dispensa o uso de senha.</p>" }
+];
+const LIST = [
+  { q: Q_MULTIPLE, status: "InReview" },
+  { q: Q_SINGLE, status: "InReview" },
+  { q: { id: 201, lang: "pt-BR", type: "SingleChoice", subject: "Direito Administrativo", topic: "Atos administrativos", difficulty: 3, source: "CEBRASPE · PRF 2024 · Policial Rodoviário Federal", number: 18, statement: "<p>Acerca dos atributos do ato administrativo, assinale a opção correta.</p>" }, status: "Published" },
+  { q: { id: 202, lang: "en", type: "MultipleAnswer", subject: "English", topic: "Grammar", difficulty: null, source: null, number: null, statement: "<p>Select every sentence written in the passive voice.</p>" }, status: "Draft" },
+  { q: { id: 203, lang: "pt-BR", type: "TrueFalse", subject: "Direito Constitucional", topic: "Organização do Estado", difficulty: 2, source: "CEBRASPE · PRF 2024 · Policial Rodoviário Federal", number: 21, statement: "<p>Julgue o item: os municípios integram a organização político-administrativa da República.</p>" }, status: "Annulled" }
+];
+const REASON_REJECT = "O gabarito da alternativa C contradiz a explicação: o texto cita o inciso IV, mas a alternativa fala em liberdade de reunião. Revise a explicação ou a chave.";
+const REASON_LONG = "A explicação cita a Emenda Constitucional n.º 45/2004 como marco do rito qualificado dos tratados de direitos humanos, mas não distingue os tratados incorporados antes dela (status supralegal, conforme o RE 466.343) dos aprovados pelo rito do art. 5º, § 3º (equivalentes a emendas). Sem essa distinção, a alternativa E fica ambígua: um candidato bem preparado pode defender que ela está correta para os tratados anteriores. Reescreva a alternativa E para dizer expressamente a que tratados se refere, ou troque-a por outra afirmação inequivocamente falsa. Verifique também a referência ao relatório, que aponta para um endereço fora do ar.";
+const NOTE_APPROVE = "Aprovada sem ressalvas. A explicação cobre todas as alternativas.";
+/* exactly 500 characters, and 512 (what the Api refuses with question.review_reason_too_long; the field's maxlength only stops typing) */
+const AT_LIMIT = (REASON_LONG + " " + REASON_LONG).slice(0, 500);
+const TOO_LONG = (REASON_LONG + " " + REASON_LONG).slice(0, 512);
+
+/* ===========================================================================
+   helpers
+   =========================================================================== */
+let lang = "pt-BR", screen = "queue", state = "ready";
+const plain = html => String(html || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+const t = (key, ...args) => {
+  let s = TEXTS[lang] && TEXTS[lang][key];
+  if (s == null) s = TEXTS.en[key];
+  if (s == null) s = key;
+  args.forEach((a, i) => { s = s.split("{" + i + "}").join(String(a)); });
+  return s;
+};
+const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const ic = (name, size) => `<svg width="${size || 18}" height="${size || 18}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+const fmtDateTime = iso => new Intl.DateTimeFormat(CULTURE[lang], { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+const fmtNum = n => new Intl.NumberFormat(CULTURE[lang]).format(n);
+const cut = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+const letter = i => String.fromCharCode(65 + i);
+const typeName = type => t("Questions.Type." + type);
+const sourceLine = q => q.source ? q.source : null;
+const TONES = { Draft: "neutral", Published: "success", Annulled: "error", InReview: "warning" };
+const KIND_TONES = { Submitted: "info", Withdrawn: "neutral", Approved: "success", Rejected: "error" };
+const statusChip = status => `<span class="app-status-chip app-status-chip-${TONES[status]}"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("Questions.Status." + status))}</span>`;
+const kindChip = kind => `<span class="app-status-chip app-status-chip-${KIND_TONES[kind]}"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("Questions.ReviewHistory.Kind." + kind))}</span>`;
+const labelChip = text => `<span class="app-chip"><span class="app-chip-text">${esc(text)}</span></span>`;
+const truncated = (text, cls, lang_, href) => href
+  ? `<a href="#" class="app-link app-truncate ${cls}" title="${esc(text)}" data-go="${href}"${lang_ ? ` lang="${lang_}"` : ""}>${esc(text)}</a>`
+  : `<span class="app-truncate ${cls}" title="${esc(text)}" tabindex="0"${lang_ ? ` lang="${lang_}"` : ""}>${esc(text)}</span>`;
+const dash = hiddenText => `<span aria-hidden="true">—</span><span class="app-visually-hidden">${esc(hiddenText)}</span>`;
+
+function pageHeader(crumbs, title) {
+  const bc = crumbs.map((c, i) => (i ? ' <span aria-hidden="true">/</span> ' : "") + (c.go ? `<a href="#" class="app-link" data-go="${c.go}">${esc(c.text)}</a>` : `<span>${esc(c.text)}</span>`)).join("");
+  return `<header class="app-page-header"><nav class="app-breadcrumbs" aria-label="Breadcrumb">${bc}</nav><div class="app-page-header-row"><h1 class="app-page-title">${esc(title)}</h1></div></header>`;
+}
+const alertBox = (sev, text, id) => `<div class="app-alert app-alert-${sev}" role="${sev === "error" ? "alert" : "status"}"${id ? ` id="${id}"` : ""}>${ic({ error: "error", info: "info", warning: "warning", success: "verified" }[sev], 20)}<div class="app-alert-content">${esc(text)}</div></div>`;
+const loadingState = card => `<div class="app-state${card ? " app-state-card" : ""}" role="status" aria-live="polite"><span class="app-spinner app-spinner-lg" aria-hidden="true"></span><span>${esc(t("Common.Loading"))}</span></div>`;
+const errorState = (card, extra) => `<div class="app-state app-state-error${card ? " app-state-card" : ""}" role="alert">${ic("error", 40)}<p>${esc(t("Common.LoadFailed"))}</p><button type="button" class="app-button app-button-outlined">${ic("refresh")}<span>${esc(t("Common.TryAgain"))}</span></button>${extra || ""}</div>`;
+const emptyState = message => `<div class="app-state">${ic("inbox", 40)}<p>${esc(message)}</p></div>`;
+const deniedState = () => `<div class="app-state app-state-card">${ic("error", 40)}<h1 class="app-state-title">${esc(t("NotFound.Title"))}</h1><p>${esc(t("NotFound.Message"))}</p></div>`;
+const pager = (first, last, total) => `<div class="app-pager"><span>${esc(t("Common.Table.RowsPerPage"))} <select aria-label="${esc(t("Common.Table.RowsPerPage"))}"><option>10</option><option selected>25</option><option>50</option></select></span><span>${esc(t("Common.Table.PageInfo", first, last, total))}</span></div>`;
+const sectionCard = (id, icon, title, subtitle, body) => `<section class="app-section-card" id="${id}" aria-labelledby="${id}-title"><div class="app-section-card-head"><span class="app-section-card-icon">${ic(icon, 22)}</span><div><h2 class="app-section-card-title" id="${id}-title">${esc(title)}</h2>${subtitle ? `<p class="app-section-card-subtitle">${esc(subtitle)}</p>` : ""}</div></div>${body}</section>`;
+const iconButton = (icon, label, title, o) => `<button type="button" class="app-icon-button${o && o.error ? " is-error" : ""}" aria-label="${esc(label)}" title="${esc(title)}"${o && o.disabled ? " disabled" : ""}${o && o.go ? ` data-go="${o.go}"` : ""}>${ic(icon)}</button>`;
+const button = (variant, icon, text, o) => `<button type="button" class="app-button app-button-${variant}"${o && o.id ? ` id="${o.id}"` : ""}${o && o.disabled ? " disabled" : ""}${o && o.describedBy ? ` aria-describedby="${o.describedBy}"` : ""}${o && o.action ? ` data-action="${o.action}"` : ""}${o && o.go ? ` data-go="${o.go}"` : ""}>${o && o.busy ? '<span class="app-spinner" aria-hidden="true"></span>' : icon ? ic(icon) : ""}<span>${esc(text)}</span></button>`;
+const snack = text => `<div class="app-snackbar" role="status">${ic("verified")}<span>${esc(text)}</span></div>`;
+const backLink = () => `<a href="#" class="app-link" data-go="queue:ready">${esc(t("ReviewQueue.Back"))}</a>`;
+
+function aside(rows, checklist) {
+  return `<aside class="app-form-aside" aria-labelledby="aside-title"><h2 class="app-form-aside-title" id="aside-title">${esc(t("Questions.Form.Aside.Title"))}</h2>` +
+    rows.map(r => `<div class="app-form-aside-row"><span class="app-form-aside-row-label">${esc(r[0])}</span><span class="app-form-aside-row-value${r[1] ? "" : " app-form-aside-row-empty"}"${r[2] ? ` lang="${r[2]}"` : ""}>${r[3] ? r[1] : esc(r[1] || t("Common.Summary.NotFilled"))}</span></div>`).join("") +
+    (checklist ? `<p class="app-form-aside-checklist-title">${esc(t("Questions.Form.Aside.Checklist"))}</p><ul class="app-form-aside-checklist">${checklist.map(([k, done]) => `<li class="${done ? "app-checklist-done" : "app-checklist-pending"}">${ic(done ? "verified" : "pending", 18)}<span>${esc(t(k))}</span><span class="app-visually-hidden">${esc(t(done ? "Common.Checklist.Done" : "Common.Checklist.Pending"))}</span></li>`).join("")}</ul>` : "") +
+    `</aside>`;
+}
+
+/* The question as QuestionPreviewDialog renders it, with the key always shown (BR9). */
+function questionPaper(q) {
+  let h = "";
+  if (sourceLine(q)) h += `<p class="app-question-source" id="review-source"><span>${esc(sourceLine(q))}</span><span>${esc(t("Questions.Preview.Number", q.number))}</span></p>`;
+  h += `<div lang="${q.lang}">`;
+  if (q.baseText) h += `<div class="app-question-base app-question-content" id="review-base-text">${q.baseText}</div>`;
+  h += `<div class="app-question-content" id="review-statement">${q.statement}</div>`;
+  if (q.type === "TrueFalse") {
+    h += `<ul class="app-question-options" aria-label="${esc(t("Questions.Preview.Answers"))}">` + [true, false].map(v => {
+      const marked = q.trueFalseKey === v;
+      return `<li class="app-question-option${marked ? " is-correct" : ""}"><div class="app-question-option-body"><div class="app-question-content">${esc(t(v ? "Questions.TrueFalse.True" : "Questions.TrueFalse.False"))}</div>${marked ? `<span class="app-correct-label">${ic("verified", 16)}${esc(t("Questions.Preview.CorrectAnswer"))}</span>` : ""}</div></li>`;
+    }).join("") + `</ul>`;
+  } else {
+    const correct = q.options.filter(o => o.correct).length;
+    if (q.type === "MultipleAnswer" && correct > 0) h += `<p class="app-question-select-count">${esc(t("Questions.Preview.SelectCount", correct))}</p>`;
+    h += `<ol class="app-question-options" aria-label="${esc(t("Questions.Preview.Options"))}">` + q.options.map((o, i) =>
+      `<li class="app-question-option${o.correct ? " is-correct" : ""}"><span class="app-option-letter">${letter(i)}</span><div class="app-question-option-body"><div class="app-question-content">${o.html}</div>${o.correct ? `<span class="app-correct-label">${ic("verified", 16)}${esc(t("Questions.Preview.CorrectAnswer"))}</span>` : ""}</div></li>`).join("") + `</ol>`;
+  }
+  h += `</div>`;
+  const key = q.type === "TrueFalse" ? t(q.trueFalseKey ? "Questions.TrueFalse.True" : "Questions.TrueFalse.False") : q.options.map((o, i) => o.correct ? letter(i) : null).filter(Boolean).join(", ");
+  h += `<section class="app-preview-answer" aria-labelledby="review-answer-heading"><h2 class="app-preview-heading" id="review-answer-heading">${esc(t("Questions.Preview.Answer"))}</h2><p><strong>${esc(key)}</strong></p>` +
+    `<h2 class="app-preview-heading">${esc(t("Questions.Preview.Explanation"))}</h2>` +
+    (plain(q.explanation) ? `<div class="app-question-content" lang="${q.lang}" id="review-explanation">${q.explanation}</div>` : `<p class="app-muted">${esc(t("Questions.Preview.NoExplanation"))}</p>`) + `</section>`;
+  return h;
+}
+
+/* ===========================================================================
+   demo states
+   =========================================================================== */
+const STATES = {
+  queue: [["ready", "Ready"], ["loading", "Loading"], ["empty", "Empty"], ["error", "Load error"], ["reviewOnly", "Role: questions.review only"], ["long", "Long text"], ["narrow", "Narrow width"], ["denied", "Permission denied"]],
+  review: [["ready", "Ready: single choice"], ["trueFalse", "Ready: true/false"], ["multiple", "Ready: multiple answer"], ["loading", "Loading"], ["loadError", "Load error"], ["notFound", "Not found"], ["gone", "No longer in review"],
+    ["approveDialog", "Approve: dialog (empty, 0/500)"], ["approveTyping", "Approve: typing"], ["approveAtLimit", "Approve: at 500/500"], ["approveTooLong", "Approve: note too long"], ["approveBusy", "Approve: in progress"], ["approved", "Approved (queue + snackbar)"],
+    ["rejectDialog", "Reject: dialog (empty, 0/500)"], ["rejectTyping", "Reject: typing"], ["rejectAtLimit", "Reject: at 500/500"], ["rejectValidation", "Reject: reason missing"], ["rejectTooLong", "Reject: reason too long"], ["rejectBusy", "Reject: in progress"], ["rejected", "Rejected (queue + snackbar)"],
+    ["conflict", "Conflict (409 version_conflict)"], ["long", "Long text"], ["narrow", "Narrow width"], ["denied", "Permission denied"]],
+  form: [["draft", "Draft: complete, saved"], ["draftUnsaved", "Draft: unsaved changes"], ["draftIncomplete", "Draft: incomplete"], ["sending", "Sending"], ["sent", "Sent (snackbar)"], ["inReview", "In review"], ["withdrawing", "Withdrawing"], ["withdrawn", "Withdrawn (snackbar)"],
+    ["rejectedDraft", "Draft after rejection"], ["resent", "Sent again after rejection"], ["approvedPublished", "Published after approval"], ["historyError", "Review history: load error"], ["refused", "Send refused (incomplete)"], ["long", "Long text"], ["narrow", "Narrow width"], ["denied", "Permission denied"]],
+  list: [["ready", "Ready"], ["filtered", "Filter: In review"], ["long", "Long text"], ["narrow", "Narrow width"], ["denied", "Permission denied"]]
+};
+const NOTES = {
+  queue: "Screen 1 - /admin/questions/review (questions.review). Oldest latest-send first; no search, no filter, no sortable column. The excerpt is a link to the review screen (read-only detail); the row action does the same. 'Role: questions.review only' shows the drawer of a role without questions.manage.",
+  review: "Screen 2 - /admin/questions/review/{id}. The question as a student sees it, with the key and the explanation always shown, the classification in the aside. Approve is the page's one filled button. A 409 shows inside the dialog; closing it re-reads the question and, if it is gone, shows 'No longer in review'.",
+  form: "Screen 3 - /admin/questions/{id}, the Publication card and the new Review history card. Classification, Origin, Base text, Options and Explanation are unchanged and left out; the Statement section stands for every field (read-only while in review). Click Send for review / Withdraw to walk the flow.",
+  list: "Screen 4 - /admin/questions. The 'In review' chip, the status filter option, the row without Publish/Unpublish and Delete disabled with its reason (tooltip and accessible name). Edit stays: it opens the frozen form, where Withdraw lives."
+};
+
+function setState(s) {
+  state = s;
+  document.body.classList.toggle("is-narrow", s === "narrow");
+  render();
+}
+
+/* ===========================================================================
+   Screen 1 - /admin/questions/review
+   =========================================================================== */
+function queueRows() {
+  let rows = QUEUE.slice();
+  if (state !== "long") rows = rows.filter(q => q.id !== Q_LONG.id);
+  return rows.sort((a, b) => a.submittedAt.localeCompare(b.submittedAt));
+}
+function queueBody() {
+  if (state === "loading") return loadingState(false);
+  if (state === "error") return errorState(false);
+  if (state === "empty") return emptyState(t("ReviewQueue.Empty"));
+  const rows = queueRows();
+  const body = rows.map(q => {
+    const excerpt = plain(q.statement);
+    const name = t("Questions.Row.Name", cut(excerpt, 60));
+    return `<tr><td>${truncated(excerpt, "", q.lang, "review:" + reviewStateOf(q))}</td>` +
+      `<td>${truncated(q.topic, "app-truncate-sm")}<span class="app-cell-secondary">${truncated(q.subject, "app-truncate-sm")}</span></td>` +
+      `<td><span class="app-cell-nowrap">${labelChip(typeName(q.type))}</span></td>` +
+      `<td><span lang="${q.lang}">${esc(LANG_NAMES[q.lang])}</span></td>` +
+      `<td class="app-cell-nowrap">${esc(fmtDateTime(q.submittedAt))}</td>` +
+      `<td class="app-cell-actions"><span class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">${iconButton("review", t("Common.ActionOnItem", t("ReviewQueue.Action.Review"), name), t("ReviewQueue.Action.Review"), { go: "review:" + reviewStateOf(q) })}</span></td></tr>`;
+  }).join("");
+  return `<div class="app-table-wrap"><table class="app-table"><caption>${esc(t("ReviewQueue.Title"))}</caption><thead><tr>` +
+    `<th scope="col">${esc(t("Questions.Column.Statement"))}</th><th scope="col">${esc(t("Questions.Column.Topic"))}</th><th scope="col">${esc(t("Questions.Column.Type"))}</th><th scope="col">${esc(t("Questions.Column.Language"))}</th><th scope="col">${esc(t("ReviewQueue.Column.SentAt"))}</th><th scope="col" class="app-cell-actions"><span class="app-visually-hidden">${esc(t("Common.Actions"))}</span></th>` +
+    `</tr></thead><tbody>${body}</tbody></table></div>${pager(1, rows.length, rows.length)}`;
+}
+const reviewStateOf = q => q.id === Q_TRUE_FALSE.id ? "trueFalse" : q.id === Q_MULTIPLE.id ? "multiple" : q.id === Q_LONG.id ? "long" : "ready";
+function renderQueue() {
+  if (state === "denied") return deniedState();
+  return pageHeader([{ text: t("Nav.Section.Content") }, { text: t("ReviewQueue.Title") }], t("ReviewQueue.Title")) +
+    `<div class="app-data-table"><div id="list-body">${queueBody()}</div></div>`;
+}
+
+/* ===========================================================================
+   Screen 2 - /admin/questions/review/{id}
+   =========================================================================== */
+function reviewQuestion() {
+  return { trueFalse: Q_TRUE_FALSE, multiple: Q_MULTIPLE, long: Q_LONG }[state] || Q_SINGLE;
+}
+function renderReview() {
+  if (state === "denied") return deniedState();
+  if (state === "approved" || state === "rejected") { return pageHeader([{ text: t("Nav.Section.Content") }, { text: t("ReviewQueue.Title") }], t("ReviewQueue.Title")) + `<div class="app-data-table">${queueBodyAfterDecision()}</div>`; }
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("ReviewQueue.Title"), go: "queue:ready" }, { text: t("Review.Title") }], t("Review.Title"));
+  if (state === "loading") return h + loadingState(true);
+  if (state === "loadError") return h + errorState(true, `<p>${backLink()}</p>`);
+  if (state === "notFound") return h + `<div class="app-form-card">${alertBox("error", t("question.not_found"))}${backLink()}</div>`;
+  if (state === "gone") return h + `<div class="app-form-card">${alertBox("warning", t("Review.NoLongerInReview"), "review-gone")}${backLink()}</div>`;
+  const q = reviewQuestion();
+  const busy = state === "approveBusy" || state === "rejectBusy";
+  const rows = [
+    [t("Questions.Form.Aside.Status"), statusChip("InReview"), null, true],
+    [t("Questions.Field.Subject"), q.subject], [t("Questions.Field.Topic"), q.topic],
+    [t("Questions.Field.ContentLanguage"), LANG_NAMES[q.lang], q.lang],
+    [t("Questions.Field.Difficulty"), q.difficulty == null ? null : fmtNum(q.difficulty)],
+    [t("Questions.Form.Aside.Type"), typeName(q.type)],
+    [t("Questions.Form.Aside.Source"), sourceLine(q) ? `${sourceLine(q)} · ${t("Questions.Source.Number", q.number)}` : t("Questions.Source.Authored")],
+    [t("Review.Aside.SentAt"), fmtDateTime(q.submittedAt)]
+  ];
+  h += `<div class="app-form-layout"><div class="app-form-card" id="review-question">${questionPaper(q)}</div>${aside(rows)}</div>` +
+    `<div class="app-form-actions">` +
+    button("outlined-error", "reject", t("Review.Action.Reject"), { id: "review-reject", disabled: busy, action: "reject" }) +
+    button("filled", "approve", t("Review.Action.Approve"), { id: "review-approve", disabled: busy, action: "approve" }) +
+    `</div>`;
+  return h;
+}
+function queueBodyAfterDecision() {
+  const saved = state; state = "ready"; const body = queueBody().replace(/<tr>(?:(?!<\/tr>).)*?Acerca dos direitos e garantias fundamentais previstos(?:(?!<\/tr>).)*?<\/tr>/s, ""); state = saved; return body;
+}
+
+/* QuestionStatusReasonDialog: Required=true (Reject) or Required=false (Approve); AppTextField Counter="true" (OQ1 → B) */
+const MAX_REASON = 500;
+const counterText = n => `<span class="app-field-counter" id="question-status-reason-counter" aria-hidden="true">${esc(t("Common.Counter", fmtNum(n), fmtNum(MAX_REASON)))}</span>`;
+function reasonDialog(o) {
+  const id = "question-status-reason";
+  const descId = id + "-description";
+  const length = (o.value || "").length;
+  return `<div class="app-dialog-backdrop"><div class="app-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-message">` +
+    `<h2 class="app-dialog-title" id="dlg-title">${esc(o.title)}</h2><div class="app-dialog-content"><p id="dlg-message" class="mb-4">${esc(o.message)}</p>` +
+    (o.alert ? alertBox("error", o.alert) : "") +
+    `<div class="app-field${o.error ? " app-field-error" : ""}"><label class="app-field-label" for="${id}">${esc(o.label)}${o.required ? '<span class="app-field-required" aria-hidden="true">*</span>' : ""}</label>` +
+    `<div class="app-field-input"><textarea id="${id}" rows="3" maxlength="${MAX_REASON}" aria-describedby="${descId}"${o.required ? ' aria-required="true"' : ""}${o.error ? ' aria-invalid="true"' : ""}${o.busy ? " disabled" : ""}>${esc(o.value || "")}</textarea></div>` +
+    `<span class="app-field-description has-counter" id="${descId}">${o.error ? `<span class="app-field-error-text">${esc(o.error)}</span>` : `<span class="app-field-hint">${esc(o.hint)}</span>`}${counterText(length)}` +
+    `<span class="app-visually-hidden" id="question-status-reason-spoken" aria-live="polite">${esc(t("Common.Counter.Spoken", fmtNum(length), fmtNum(MAX_REASON)))}</span></span></div></div>` +
+    `<div class="app-dialog-actions"><button type="button" class="app-button app-button-text" data-dlg="cancel"${o.busy ? " disabled" : ""}>${esc(t("Questions.StatusReason.Cancel"))}</button>` +
+    `<button type="button" class="app-button ${o.destructive ? "app-button-error" : "app-button-filled"}" data-dlg="confirm"${o.busy ? " disabled" : ""}>${o.busy ? '<span class="app-spinner" aria-hidden="true"></span>' : ""}<span>${esc(o.confirm)}</span></button></div></div></div>`;
+}
+function reviewOverlay() {
+  const approve = v => reasonDialog(Object.assign({ title: t("Review.Approve.Dialog.Title"), message: t("Review.Approve.Dialog.Message"), label: t("Review.Note.Label"), hint: t("Review.Note.Hint"), required: false, confirm: t("Review.Action.Approve") }, v));
+  const reject = v => reasonDialog(Object.assign({ title: t("Review.Reject.Dialog.Title"), message: t("Review.Reject.Dialog.Message"), label: t("Questions.StatusReason.Label"), hint: t("Questions.StatusReason.Hint"), required: true, destructive: true, confirm: t("Review.Action.Reject") }, v));
+  switch (state) {
+    case "approveDialog": return approve({ value: "" });
+    case "approveTyping": return approve({ value: NOTE_APPROVE });
+    case "approveAtLimit": return approve({ value: AT_LIMIT });
+    case "approveTooLong": return approve({ value: TOO_LONG, error: t("question.review_reason_too_long") });
+    case "approveBusy": return approve({ value: NOTE_APPROVE, busy: true });
+    case "rejectDialog": return reject({ value: "" });
+    case "rejectTyping": return reject({ value: REASON_REJECT });
+    case "rejectAtLimit": return reject({ value: AT_LIMIT });
+    case "rejectValidation": return reject({ value: "", error: t("question.review_reason_required") });
+    case "rejectTooLong": return reject({ value: TOO_LONG, error: t("question.review_reason_too_long") });
+    case "rejectBusy": return reject({ value: REASON_REJECT, busy: true });
+    case "conflict": return reject({ value: REASON_REJECT, alert: t("question.version_conflict") });
+    case "approved": return snack(t("Review.Approved"));
+    case "rejected": return snack(t("Review.Rejected"));
+  }
+  return "";
+}
+
+/* ===========================================================================
+   Screen 3 - /admin/questions/{id}: Publication card and Review history card
+   =========================================================================== */
+const ENTRIES = {
+  inReview: [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }],
+  rejectedDraft: [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }, { kind: "Rejected", at: "2026-10-17T09:15", reason: REASON_REJECT }],
+  resent: [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }, { kind: "Rejected", at: "2026-10-17T09:15", reason: REASON_REJECT }, { kind: "Submitted", at: "2026-10-17T10:30", reason: null }],
+  approvedPublished: [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }, { kind: "Withdrawn", at: "2026-10-16T16:45", reason: null }, { kind: "Submitted", at: "2026-10-16T17:10", reason: null }, { kind: "Approved", at: "2026-10-17T11:02", reason: NOTE_APPROVE }],
+  long: [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }, { kind: "Rejected", at: "2026-10-17T09:15", reason: REASON_LONG }]
+};
+function formModel() {
+  const m = { status: "Draft", unsaved: false, complete: true, busy: null, entries: [], historyError: false, refused: false, long: false };
+  switch (state) {
+    case "draftUnsaved": m.unsaved = true; break;
+    case "draftIncomplete": m.complete = false; break;
+    case "sending": m.busy = "send"; break;
+    case "sent": case "inReview": m.status = "InReview"; m.entries = ENTRIES.inReview; break;
+    case "withdrawing": m.status = "InReview"; m.entries = ENTRIES.inReview; m.busy = "withdraw"; break;
+    case "withdrawn": m.entries = [{ kind: "Submitted", at: "2026-10-16T14:02", reason: null }, { kind: "Withdrawn", at: "2026-10-16T16:45", reason: null }]; break;
+    case "rejectedDraft": m.entries = ENTRIES.rejectedDraft; break;
+    case "resent": m.status = "InReview"; m.entries = ENTRIES.resent; break;
+    case "approvedPublished": m.status = "Published"; m.entries = ENTRIES.approvedPublished; break;
+    case "historyError": m.status = "InReview"; m.historyError = true; break;
+    case "refused": m.refused = true; break;
+    case "long": m.entries = ENTRIES.long; m.long = true; break;
+  }
+  return m;
+}
+function publicationCard(m) {
+  const frozen = m.status === "InReview";
+  const latest = m.entries.length ? m.entries[m.entries.length - 1] : null;
+  const reason = m.unsaved ? t("Questions.Publication.Publish.DisabledUnsaved") : !m.complete ? t("Questions.Publication.Publish.DisabledIncomplete") : null;
+  let body = "";
+  if (m.refused) body += alertBox("error", t("Questions.Publication.Publish.DisabledIncomplete"));
+  if (m.status === "Draft" && latest && latest.kind === "Rejected") body += alertBox("info", t("Questions.Publication.Rejected", fmtDateTime(latest.at), latest.reason), "question-rejected");
+  const sentence = frozen ? t("Questions.Publication.InReview", fmtDateTime(latest.at)) : m.status === "Published" ? t("Questions.Publication.Published") : t("Questions.Publication.Draft");
+  body += `<div class="app-publication-row">${statusChip(m.status)}<span>${esc(sentence)}</span></div><div class="app-publication-actions">`;
+  body += button("outlined", "view", t("Questions.Action.Preview"), { id: "question-preview", disabled: !!m.busy });
+  if (frozen) {
+    body += button("outlined", m.busy === "withdraw" ? null : "withdraw", t("Questions.Action.Withdraw"), { id: "question-withdraw", disabled: !!m.busy, busy: m.busy === "withdraw", action: "withdraw" });
+  } else if (m.status === "Published") {
+    body += button("outlined", "unpublish", t("Questions.Action.Unpublish"), { id: "question-unpublish" });
+  } else {
+    const dis = !!m.busy || reason !== null;
+    body += button("outlined", m.busy === "send" ? null : "send", t("Questions.Action.SendForReview"), { id: "question-submit", disabled: dis, busy: m.busy === "send", describedBy: reason ? "question-publication-reason" : null, action: "send" });
+    body += button("outlined", "publish", t("Questions.Action.Publish"), { id: "question-publish", disabled: dis, describedBy: reason ? "question-publication-reason" : null });
+  }
+  body += `</div>`;
+  if (!frozen && m.status === "Draft" && reason) body += `<p id="question-publication-reason" class="app-publication-reason">${esc(reason)}</p>`;
+  return `<div class="app-form-card mt-4">${sectionCard("question-section-publication", "publish", t("Questions.Section.Publication"), t("Questions.Section.Publication.Subtitle"), body)}</div>`;
+}
+function reviewHistoryCard(m) {
+  if (!m.entries.length && !m.historyError) return "";
+  let body;
+  if (m.historyError) body = errorState(false);
+  else {
+    const rows = m.entries.slice().reverse();
+    body = `<div class="app-data-table"><div class="app-table-wrap"><table class="app-table"><caption>${esc(t("Questions.Section.ReviewHistory"))}</caption><thead><tr><th scope="col">${esc(t("Questions.ReviewHistory.Column.Date"))}</th><th scope="col">${esc(t("Questions.ReviewHistory.Column.Event"))}</th><th scope="col">${esc(t("Questions.ReviewHistory.Column.Reason"))}</th></tr></thead><tbody>` +
+      rows.map(e => `<tr><td class="app-cell-nowrap">${esc(fmtDateTime(e.at))}</td><td>${kindChip(e.kind)}</td><td>${e.reason ? truncated(e.reason, "app-truncate-reason") : dash(t("Questions.History.NoReason"))}</td></tr>`).join("") +
+      `</tbody></table></div>${pager(1, rows.length, rows.length)}</div>`;
+  }
+  return `<div class="app-form-card mt-4">${sectionCard("question-section-review-history", "review", t("Questions.Section.ReviewHistory"), t("Questions.Section.ReviewHistory.Subtitle"), body)}</div>`;
+}
+function renderForm() {
+  if (state === "denied") return deniedState();
+  const m = formModel();
+  const frozen = m.status === "InReview";
+  const q = Q_SINGLE;
+  let h = pageHeader([{ text: t("Nav.Section.Content") }, { text: t("Questions.Title"), go: "list:ready" }, { text: t("Questions.Form.EditTitle") }], t("Questions.Form.EditTitle"));
+  let card = "";
+  if (frozen) card += `<div id="question-in-review-alert">${alertBox("warning", t("Questions.InReview.Alert"))}</div>`;
+  card += `<p class="app-form-note">Classification, Origin, Base text, Options and Explanation: unchanged (F-95 to F-104), left out of this mockup. Every field follows the Statement below: disabled while the question is in review.</p>`;
+  card += sectionCard("question-section-statement", "questions", t("Questions.Section.Statement"), t("Questions.Section.Statement.Subtitle"),
+    `<div class="app-field${frozen ? " app-field-disabled" : ""}"><span class="app-field-label" id="question-statement-label">${esc(t("Questions.Field.Statement"))}<span class="app-field-required" aria-hidden="true">*</span></span><div class="app-rich-text-frame"><div class="app-rt-editor app-question-content" id="question-statement" role="textbox" aria-multiline="true" aria-labelledby="question-statement-label" contenteditable="${frozen ? "false" : "true"}" aria-readonly="${frozen ? "true" : "false"}" lang="${q.lang}" tabindex="0">${q.statement}</div></div></div>`);
+  if (!frozen) card += `<div class="app-form-actions"><button type="button" class="app-button app-button-text">${esc(t("Common.Cancel"))}</button><button type="button" class="app-button app-button-filled"${m.unsaved ? "" : " disabled"}>${esc(t("Common.Save"))}</button></div>`;
+  const checklist = [["Questions.Checklist.Topic", true], ["Questions.Checklist.Language", true], ["Questions.Checklist.Statement", true], ["Questions.Checklist.OptionsCount", true], ["Questions.Checklist.OptionsText", true], ["Questions.Checklist.Key", m.complete]];
+  const rows = [[t("Questions.Form.Aside.Status"), t("Questions.Status." + m.status)], [t("Questions.Field.Subject"), q.subject], [t("Questions.Field.Topic"), q.topic], [t("Questions.Field.ContentLanguage"), LANG_NAMES[q.lang], q.lang], [t("Questions.Field.Difficulty"), fmtNum(q.difficulty)], [t("Questions.Form.Aside.Source"), `${q.source} · ${t("Questions.Source.Number", q.number)}`], [t("Questions.Form.Aside.Options"), t("Questions.Options.Count", 5)]];
+  h += `<div class="app-form-layout"><div class="app-form-card">${card}</div>${aside(rows, checklist)}</div>`;
+  h += publicationCard(m) + reviewHistoryCard(m);
+  return h;
+}
+function formOverlay() {
+  if (state === "sent") return snack(t("Questions.SentForReview"));
+  if (state === "withdrawn") return snack(t("Questions.Withdrawn"));
+  return "";
+}
+
+/* ===========================================================================
+   Screen 4 - /admin/questions
+   =========================================================================== */
+function renderList() {
+  if (state === "denied") return deniedState();
+  let rows = LIST.slice();
+  if (state === "filtered") rows = rows.filter(r => r.status === "InReview");
+  if (state === "long") rows = [{ q: Q_LONG, status: "InReview" }].concat(rows);
+  const deleteReason = s => s === "Published" ? t("Questions.Delete.DisabledPublished") : s === "Annulled" ? t("Questions.Delete.DisabledAnnulled") : s === "InReview" ? t("Questions.Delete.DisabledInReview") : null;
+  const body = rows.map(r => {
+    const q = r.q, excerpt = plain(q.statement), name = t("Questions.Row.Name", cut(excerpt, 60));
+    const reason = deleteReason(r.status);
+    let actions = iconButton("edit", t("Common.ActionOnItem", t("Common.Edit"), name), t("Common.Edit"), { go: "form:" + (r.status === "InReview" ? "inReview" : "draft") }) +
+      iconButton("delete", t("Common.ActionOnItem", t("Common.Delete"), name), reason || t("Common.Delete"), { error: true, disabled: !!reason });
+    if (r.status === "Published") actions += iconButton("unpublish", t("Common.ActionOnItem", t("Questions.Action.Unpublish"), name), t("Questions.Action.Unpublish"));
+    else if (r.status === "Draft") actions += iconButton("publish", t("Common.ActionOnItem", t("Questions.Action.Publish"), name), t("Questions.Action.Publish"));
+    return `<tr><td>${truncated(excerpt, "", q.lang)}</td>` +
+      `<td>${truncated(q.topic, "app-truncate-sm")}<span class="app-cell-secondary">${truncated(q.subject, "app-truncate-sm")}</span></td>` +
+      `<td>${q.source ? truncated(q.source, "app-truncate-md") + `<span class="app-cell-secondary">${esc(t("Questions.Source.Number", q.number))}</span>` : dash(t("Questions.Source.Authored"))}</td>` +
+      `<td style="text-align:right">${q.difficulty == null ? dash(t("Questions.Difficulty.NotSet")) : fmtNum(q.difficulty)}</td>` +
+      `<td><span lang="${q.lang}">${esc(LANG_NAMES[q.lang])}</span></td>` +
+      `<td>${statusChip(r.status)}</td><td><span class="app-cell-nowrap">${labelChip(typeName(q.type))}</span></td>` +
+      `<td class="app-cell-actions"><span class="app-row-actions" role="group" aria-label="${esc(t("Common.Actions"))}">${actions}</span></td></tr>`;
+  }).join("");
+  const filterChip = state === "filtered" ? `<span class="app-status-chip app-status-chip-warning"><span class="app-status-chip-dot" aria-hidden="true"></span>${esc(t("Questions.Status.InReview"))}<button type="button" class="app-icon-button" style="width:22px;height:22px" aria-label="${esc(t("Common.Delete"))}: ${esc(t("Questions.Status.InReview"))}" data-go="list:ready">${ic("close", 14)}</button></span>` : "";
+  return `<header class="app-page-header"><nav class="app-breadcrumbs" aria-label="Breadcrumb"><span>${esc(t("Nav.Section.Content"))}</span> <span aria-hidden="true">/</span> <span>${esc(t("Questions.Title"))}</span></nav><div class="app-page-header-row"><h1 class="app-page-title">${esc(t("Questions.Title"))}</h1><button type="button" class="app-button app-button-filled">${ic("add")}<span>${esc(t("Common.Add"))}</span></button></div></header>` +
+    `<div class="app-data-table"><div class="app-table-toolbar">` +
+    `<div class="app-field app-table-search"><label class="app-visually-hidden" for="questions-search">${esc(t("Common.Search"))}</label><div class="app-field-input" style="align-items:center;padding:0 12px;height:40px"><span style="color:var(--primary);display:inline-flex">${ic("search")}</span><input id="questions-search" type="search" autocomplete="off" placeholder="${esc(t("Questions.Search.Placeholder"))}" style="flex:1;border:0;outline:none;background:transparent;color:inherit;font:inherit"></div></div>` +
+    `<div class="app-table-filters"><div class="app-field" style="width:15rem"><span class="app-field-label">${esc(t("Questions.Filter.Status"))}</span><div class="app-field-input" style="align-items:center;min-height:40px;padding:2px 8px;gap:4px;flex-wrap:wrap">${filterChip}<span class="spacer"></span><button type="button" class="app-icon-button" aria-label="${esc(t("Questions.Filter.Status"))}" aria-expanded="false" data-go="list:filtered" style="width:26px;height:26px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button></div></div></div>` +
+    `</div><div class="app-table-wrap"><table class="app-table"><caption>${esc(t("Questions.Title"))}</caption><thead><tr>` +
+    ["Questions.Column.Statement", "Questions.Column.Topic", "Questions.Column.Source"].map(k => `<th scope="col">${esc(t(k))}</th>`).join("") +
+    `<th scope="col" style="text-align:right">${esc(t("Questions.Column.Difficulty"))}</th>` +
+    ["Questions.Column.Language", "Questions.Column.Status", "Questions.Column.Type"].map(k => `<th scope="col">${esc(t(k))}</th>`).join("") +
+    `<th scope="col" class="app-cell-actions"><span class="app-visually-hidden">${esc(t("Common.Actions"))}</span></th></tr></thead><tbody>${body}</tbody></table></div>${pager(1, rows.length, rows.length)}</div>`;
+}
+
+/* ===========================================================================
+   render
+   =========================================================================== */
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-screen]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.screen === screen)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.getElementById("demo-states").innerHTML = STATES[screen].map(s => `<button type="button" data-state="${s[0]}" aria-pressed="${s[0] === state}">${esc(s[1])}</button>`).join("");
+  document.getElementById("demo-note").textContent = NOTES[screen];
+
+  /* the drawer follows the permissions: questions.review shows the queue; questions.manage shows Questions and Base texts */
+  const denied = state === "denied";
+  const reviewScreen = screen === "queue" || screen === "review";
+  const hasReview = !(reviewScreen && denied);
+  const hasManage = !((screen === "form" || screen === "list") && denied) && !(screen === "queue" && state === "reviewOnly");
+  const nav = id => document.getElementById(id);
+  nav("nav-questions").hidden = !hasManage; nav("nav-base-texts").hidden = !hasManage; nav("nav-review-queue").hidden = !hasReview;
+  ["nav-questions", "nav-review-queue", "nav-base-texts"].forEach(id => nav(id).removeAttribute("aria-current"));
+  if (!denied) nav(reviewScreen ? "nav-review-queue" : "nav-questions").setAttribute("aria-current", "page");
+
+  document.getElementById("main").innerHTML = { queue: renderQueue, review: renderReview, form: renderForm, list: renderList }[screen]();
+
+  const overlay = screen === "review" ? reviewOverlay() : screen === "form" ? formOverlay() : "";
+  document.getElementById("overlay").innerHTML = overlay;
+  const field = document.getElementById("question-status-reason");
+  if (field && !field.disabled) field.focus();
+}
+
+/* ===========================================================================
+   events
+   =========================================================================== */
+document.querySelectorAll("svg[data-icon]").forEach(el => { el.innerHTML = `<path d="${ICONS[el.dataset.icon]}"/>`; });
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-screen],[data-state],[data-lang],[data-theme-btn],[data-go],[data-action],[data-dlg],a[href='#']");
+  if (!el) return;
+  if (el.dataset.screen) { screen = el.dataset.screen; setState(STATES[screen][0][0]); return; }
+  if (el.dataset.state) { setState(el.dataset.state); return; }
+  if (el.dataset.lang) { lang = el.dataset.lang; render(); return; }
+  if (el.dataset.themeBtn) {
+    document.documentElement.dataset.theme = el.dataset.themeBtn;
+    document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", String(b === el)));
+    return;
+  }
+  if (el.dataset.go) { e.preventDefault(); const p = el.dataset.go.split(":"); screen = p[0]; setState(p[1]); return; }
+  if (el.dataset.action) {
+    if (el.dataset.action === "approve") setState("approveDialog");
+    if (el.dataset.action === "reject") setState("rejectDialog");
+    if (el.dataset.action === "send") setState("sent");
+    if (el.dataset.action === "withdraw") setState("withdrawn");
+    return;
+  }
+  if (el.dataset.dlg) {
+    const confirmed = el.dataset.dlg === "confirm";
+    const approving = state.startsWith("approve");
+    if (!confirmed) { setState("ready"); document.getElementById(approving ? "review-approve" : "review-reject").focus(); return; }
+    if (state === "rejectTooLong" || state === "approveTooLong") { setState(state); return; }
+    const field = document.getElementById("question-status-reason");
+    if (!approving && field && !field.value.trim()) { setState("rejectValidation"); return; }
+    setState(approving ? "approved" : "rejected");
+    return;
+  }
+  if (el.matches("a[href='#']")) e.preventDefault();
+});
+/* the counter follows what is typed; the live text is refreshed too (the kit debounces it so a pause, not a keystroke, is announced) */
+document.addEventListener("input", e => {
+  if (e.target.id !== "question-status-reason") return;
+  const n = e.target.value.length;
+  document.getElementById("question-status-reason-counter").textContent = t("Common.Counter", fmtNum(n), fmtNum(MAX_REASON));
+  clearTimeout(window.__counterTimer);
+  window.__counterTimer = setTimeout(() => { const live = document.getElementById("question-status-reason-spoken"); if (live) live.textContent = t("Common.Counter.Spoken", fmtNum(n), fmtNum(MAX_REASON)); }, 600);
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const cancel = document.querySelector("[data-dlg='cancel']");
+  if (cancel && !cancel.disabled) cancel.click();
+});
+
+render();
+</script>
+</body>
+</html>
