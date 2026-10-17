@@ -135,6 +135,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 5/3: `literal-guard.js` did not refuse a file edited through an interpreter (`python - <<EOF` with `open(...).write(...)` inserting a `using` in two test files); only a later `sed -i` was refused. The rule "write files with the Write and Edit tools" (`workflow.md`) was broken twice in one item. The guard should also cover a file written by `python`, `node -e` or `pwsh` text. Evidence: the python command ran with no refusal, and the `sed -i` of the ship was refused with `agile literal-guard` | F-77 | - |
 | ⏳ | agile | `[generic]` score 5/4: the validation script should open with one plain line saying what the screen or button is for, before step 1. At F-99 the owner, validating, wrote "Nao entendi a funcionalidade do botao transcrever" and the script had eight steps but no purpose line (evidence: the owner's own words in the conversation of 2026-10-15) | F-99 | - |
 | ⏳ | agile | `[generic]` score 6/4: the test phase cannot run a migration test against the skeleton (the migration does not exist yet), so a helper that seeds rows may use a column the migration under test drops; at F-102 the locked test failed with `42703: column "base_text_html" of relation "questions" does not exist` and cost an unlock and a new lock (evidence: the item's `blocked` event, 2026-10-15). Ask, for an item with a migration, that the helper be written against the final schema and run once before the lock | F-102 | - |
+| ⏳ | agile | `[generic]` score 5/1: the definition of done says the app manual is updated "in three languages", but the list is the `Manual locales:` line of `CLAUDE.md`; a project that freezes a locale (F-124 froze pt-PT and en) has to override the wording in `project.md`. Read it as "each locale of `Manual locales:`". Evidence: `definition-of-done.md:18` against `references/conventions.md` "App manual languages" | F-124 | - |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1312,3 +1313,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 ## 2026-10-17 - F-105 Review before publishing
 - Lesson (score 0/3): the slowest test projects of the full suite grew to 3 m 2 s (Catalog) and 2 m 56 s (Identity), against about 2 m 20 s at F-101; the whole run is 190 s, inside the 5 min budget. Cause not measured. Went nowhere: no rule; if the next full runs keep rising, capture an item to look at it.
 - Item decisions: all stayed in the item. Events: override 4, question 3, rework 1, test-fail 1, change 1.
+
+## 2026-10-17 - F-124 Freeze the pt-PT and en app manual
+- Lesson (score 5/1): the definition of done reads "three languages" for the manual, while the list is `Manual locales:`. Went to the plugin note ⏳ `[generic]` above (row added to the table), and `project.md` carries the local reading (F-124 BR6, BR8).
+- Lesson (score 3/4): a locked test fixed 23 manual pages; F-105, built in parallel, added a 24th and the test needed an owner unlock and a change note. Went to `project.md`: a test over a folder compares with a reference folder, never a fixed count.
+- Item decisions: 10 stayed in the item. Events: override 1, question 1, blocked 1, rework 0, test-fail 0.
