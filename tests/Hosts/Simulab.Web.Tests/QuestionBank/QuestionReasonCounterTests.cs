@@ -1,6 +1,5 @@
 using Bunit;
 using MudBlazor;
-using Simulab.QuestionBank.Contracts;
 using Simulab.Web.Components.Pages.QuestionBank;
 using Simulab.Web.Components.Ui;
 

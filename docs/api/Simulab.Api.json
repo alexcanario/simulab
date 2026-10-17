@@ -2525,6 +2525,78 @@
         }
       }
     },
+    "/api/v1/question-bank/questions/{id}/submit": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "SubmitQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "WithdrawQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/questions/{id}/reviews": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListQuestionReviews",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/question-bank/questions/{id}/versions": {
       "get": {
         "tags": [
@@ -2576,6 +2648,151 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/review-queue": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ListReviewQueue",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/review-queue/{id}": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "FindQuestionInReview",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/review-queue/{id}/approve": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "ApproveQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ApproveQuestionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/review-queue/{id}/reject": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "RejectQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RejectQuestionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -3045,6 +3262,27 @@
         },
         "description": "The body of an annulment (F-101, BR3): why the question is annulled. The body is optional on the wire so a\r\nmissing one is answered with the code of a missing reason, not with a framework error."
       },
+      "ApproveQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Plain text, 1 to 500 characters after trimming; null or blank means none. It also serves as the\r\n            reason of the version when the answer key differs from the latest version's."
+          },
+          "submittedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The send the reviewer saw (DateTimeOffset? QuestionResponse.SubmittedAt); when it differs\r\n            from the latest send the answer is 409 `question.version_conflict`. Null skips the check.",
+            "format": "date-time"
+          }
+        },
+        "description": "The body of an approval (F-105, BR5). The body is optional on the wire: a missing one is an approval with no\r\nnote."
+      },
       "ChangePasswordRequest": {
         "required": [
           "currentPassword",
@@ -3282,6 +3520,27 @@
           }
         },
         "description": "The body of a reinstatement (F-101, BR6): why an annulled question is published again. The body is\r\noptional on the wire so a missing one is answered with the code of a missing reason."
+      },
+      "RejectQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Plain text, 1 to 500 characters after trimming; null or blank counts as missing."
+          },
+          "submittedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The send the reviewer saw; see DateTimeOffset? ApproveQuestionRequest.SubmittedAt.",
+            "format": "date-time"
+          }
+        },
+        "description": "The body of a rejection (F-105, BR6). The body is optional on the wire so a missing one is answered with the\r\ncode of a missing reason, not with a framework error."
       },
       "RequestPasswordResetRequest": {
         "required": [

@@ -1,5 +1,6 @@
 @page "/dev/ui"
 @using Simulab.Catalog.Contracts
+@using Simulab.QuestionBank.Contracts
 @inject IStringLocalizer<SharedResources> L
 @inject IStringLocalizer<IdentityResources> I
 @inject IHostEnvironment Environment
@@ -293,16 +294,16 @@
                 @* F-105 BR18: the counter, empty, while typing, at the limit and over it (with the error beside it). *@
                 <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Counter"]</p>
                 <AppTextField TValue="string" Id="gallery-kind-text-counter-empty" Label="@L["Questions.StatusReason.Label"]"
-                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="500" Counter="true"
+                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="QuestionLimits.ChangeReasonMaxLength" Counter="true"
                               Autocomplete="off" Value="@string.Empty" />
                 <AppTextField TValue="string" Id="gallery-kind-text-counter-typing" Label="@L["Questions.StatusReason.Label"]"
-                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="500" Counter="true"
+                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="QuestionLimits.ChangeReasonMaxLength" Counter="true"
                               Autocomplete="off" Value="@KindTextCounter(137)" />
                 <AppTextField TValue="string" Id="gallery-kind-text-counter-limit" Label="@L["Questions.StatusReason.Label"]"
-                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="500" Counter="true"
+                              Hint="@L["Questions.StatusReason.Hint"]" Lines="3" MaxLength="QuestionLimits.ChangeReasonMaxLength" Counter="true"
                               Autocomplete="off" Value="@KindTextCounter(500)" />
                 <AppTextField TValue="string" Id="gallery-kind-text-counter-over" Label="@L["Questions.StatusReason.Label"]"
-                              Lines="3" MaxLength="500" Counter="true" Autocomplete="off"
+                              Lines="3" MaxLength="QuestionLimits.ChangeReasonMaxLength" Counter="true" Autocomplete="off"
                               Error="@L["question.review_reason_too_long"].Value" Value="@KindTextCounter(512)" />
 
                 <p class="gallery-state-caption">@L["Gallery.FieldKinds.State.Loading"]</p>
