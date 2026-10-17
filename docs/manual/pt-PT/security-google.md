@@ -3,8 +3,11 @@ page: security-google
 locale: pt-PT
 features: [F-29]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Ligar e desligar o Google
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/security-google.md).
 
 Ligue uma conta Google para iniciar sessão com ela, além da sua palavra-passe. Não tem de ser o endereço com que se registou. Se **A minha conta** não tem a ligação **Segurança**, ou a página não tem o cartão **Google**, ligar o Google ainda não está disponível.
 

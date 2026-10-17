@@ -3,8 +3,11 @@ page: role-history
 locale: pt-PT
 features: [F-14]
 updated: 2026-09-21
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Histórico de perfis
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/role-history.md).
 
 A página Histórico de perfis mostra cada alteração feita aos perfis e aos perfis de uma conta: quem a fez, quando e o que mudou. Responde a perguntas como "quem atribuiu o perfil Administrador a esta pessoa, e quando?".
 

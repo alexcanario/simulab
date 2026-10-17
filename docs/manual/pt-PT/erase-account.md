@@ -3,8 +3,11 @@ page: erase-account
 locale: pt-PT
 features: [F-10]
 updated: 2026-09-20
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Eliminar a sua conta
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/erase-account.md).
 
 Elimine a sua conta Simulab quando quiser. Os seus dados pessoais são removidos de imediato e não é possível recuperá-los.
 

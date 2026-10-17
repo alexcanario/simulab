@@ -3,8 +3,11 @@ page: catalog
 locale: en
 features: [F-36, F-37, F-42, F-57, F-76]
 updated: 2026-10-13
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Catalog
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/catalog.md).
 
 The catalog is where you find the exam you are preparing for. It lists the exams that have at least one published edition, and each exam's page shows its published editions with a link to the official notice.
 

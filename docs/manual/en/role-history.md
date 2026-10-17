@@ -3,8 +3,11 @@ page: role-history
 locale: en
 features: [F-14]
 updated: 2026-09-21
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Role history
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/role-history.md).
 
 The Role history page shows every change made to roles and to the roles of an account: who made it, when, and what changed. It answers questions such as "who gave this person Admin, and when?".
 

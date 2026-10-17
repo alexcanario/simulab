@@ -53,6 +53,9 @@ No screen and no API: a configuration line, rule lines, 46 notices and one test.
 - AC7 No UI text is added: the resource files and the `UI locales:` set are unchanged, and the missing-key test stays green.
 
 ## Criterion → test
+
+Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `FrozenManualTests.ManualLocales_ListsPtBrAlone_AndUiLocalesAreUntouched` |

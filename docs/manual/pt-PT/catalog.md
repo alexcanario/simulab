@@ -3,8 +3,11 @@ page: catalog
 locale: pt-PT
 features: [F-36, F-37, F-42, F-57, F-76]
 updated: 2026-10-13
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Catálogo
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/catalog.md).
 
 O catálogo é onde encontra o exame para o qual se está a preparar. Lista os exames que têm pelo menos uma edição publicada, e a página de cada exame mostra as edições publicadas com uma ligação para o aviso oficial.
 

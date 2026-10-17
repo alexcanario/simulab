@@ -3,8 +3,11 @@ page: sign-in-and-sign-out
 locale: pt-PT
 features: [F-5, B-3, F-7, F-11, F-53]
 updated: 2026-10-06
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Iniciar e terminar sessão
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/sign-in-and-sign-out.md).
 
 Inicie sessão com o e-mail e a palavra-passe que criou, e termine sessão a partir do menu da conta na barra do aplicativo.
 

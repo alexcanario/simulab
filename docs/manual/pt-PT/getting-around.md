@@ -3,8 +3,11 @@ page: getting-around
 locale: pt-PT
 features: [F-2, F-8, F-17, F-50]
 updated: 2026-10-03
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Como navegar
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/getting-around.md).
 
 Todas as páginas do Simulab têm a mesma barra superior e o mesmo menu lateral, no computador e no telemóvel.
 

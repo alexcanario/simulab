@@ -3,8 +3,11 @@ page: create-account
 locale: en
 features: [F-4, F-71]
 updated: 2026-10-09
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Create an account
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/create-account.md).
 
 Create your Simulab account with your email address, then confirm the address from the message we send you.
 

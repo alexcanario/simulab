@@ -3,8 +3,11 @@ page: base-texts
 locale: pt-PT
 features: [F-102]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Textos de apoio
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/base-texts.md).
 
 Um texto de apoio é um excerto, uma tabela ou um caso a que várias questões se referem, como num bloco de
 interpretação de texto. Escreve-o uma vez, dá-lhe um título e liga cada questão a ele; todas as questões

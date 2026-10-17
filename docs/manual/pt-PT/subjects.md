@@ -3,8 +3,11 @@ page: subjects
 locale: pt-PT
 features: [F-79, F-51, F-75, F-95, F-77]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Disciplinas e tópicos
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/subjects.md).
 
 As disciplinas e os tópicos são o vocabulário único do que o aluno estuda: uma disciplina é "Português" ou
 "Direito Constitucional", e um tópico é algo dentro dela, como "Crase". Tudo o resto que fala de conteúdo

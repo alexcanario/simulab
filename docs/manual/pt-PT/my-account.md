@@ -3,8 +3,11 @@ page: my-account
 locale: pt-PT
 features: [F-8, F-10, F-11, F-16, F-32]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # A minha conta
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/my-account.md).
 
 Veja o seu e-mail, altere o nome que aparece no menu da conta e escolha o idioma em que o Simulab abre e escreve os seus e-mails.
 

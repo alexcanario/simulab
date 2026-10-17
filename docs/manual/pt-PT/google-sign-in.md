@@ -3,8 +3,11 @@ page: google-sign-in
 locale: pt-PT
 features: [F-20, F-29]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Iniciar sessão com o Google
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/google-sign-in.md).
 
 Use a sua conta Google para criar uma conta no Simulab ou para iniciar sessão, sem uma palavra-passe do Simulab. Se o ecrã **Iniciar sessão** não tiver o botão **Continuar com o Google**, o início de sessão com o Google ainda não está disponível.
 

@@ -3,8 +3,11 @@ page: account-activity
 locale: pt-PT
 features: [F-31]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Atividade recente
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/account-activity.md).
 
 Mostra os seus próprios eventos recentes de segurança — quando iniciou sessão, uma falha ao iniciar sessão, uma alteração de palavra-passe, a verificação em dois passos ativada ou desativada — para distinguir as suas próprias ações das de outra pessoa. Se **A minha conta → Segurança** não tiver o cartão **Atividade recente**, ainda não está disponível.
 

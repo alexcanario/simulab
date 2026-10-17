@@ -3,8 +3,11 @@ page: roles
 locale: pt-PT
 features: [F-6, F-9, F-14, F-33]
 updated: 2026-09-24
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Perfis e permissões
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/roles.md).
 
 Toda a conta tem um ou mais perfis, e cada perfil carrega as permissões que decidem o que a conta pode ver e fazer no Simulab.
 

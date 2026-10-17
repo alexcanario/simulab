@@ -3,8 +3,11 @@ page: base-texts
 locale: en
 features: [F-102]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Base texts
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/base-texts.md).
 
 A base text is a passage, a table or a case that several questions refer to, as in a reading comprehension
 block. You write it once, give it a title and link each question to it; every linked question shows the text

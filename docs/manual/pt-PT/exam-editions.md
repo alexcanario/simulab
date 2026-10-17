@@ -3,8 +3,11 @@ page: exam-editions
 locale: pt-PT
 features: [F-35, F-74, F-75, F-96, F-99]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Edições de um exame
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/exam-editions.md).
 
 Uma edição é uma prova efetivamente aplicada: o ano do aviso, o posto de trabalho a que se destina, a entidade organizadora que a aplicou e se os alunos a podem ver. Um exame tem tantas edições quantas as provas que teve. Quando um aviso abre vários postos de trabalho com provas diferentes, cada prova é uma edição.
 

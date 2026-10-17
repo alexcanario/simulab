@@ -3,8 +3,11 @@ page: two-factor
 locale: en
 features: [F-11]
 updated: 2026-09-21
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Two-factor sign-in
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/two-factor.md).
 
 Two-factor sign-in asks for a six-digit code from an authenticator app on your phone after your password. Someone who learns your password still cannot sign in without your phone.
 

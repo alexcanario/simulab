@@ -3,8 +3,11 @@ page: users
 locale: pt-PT
 features: [F-9, F-14, F-21]
 updated: 2026-09-23
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Utilizadores
+
+> Congelada em 2026-10-17 (v1.1.0). Esta página pode estar desatualizada; consulte a [versão em pt-BR](../pt-BR/users.md).
 
 A página Utilizadores lista as contas do Simulab e é onde atribui ou retira um perfil.
 

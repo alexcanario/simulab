@@ -25,7 +25,8 @@ A study coach that runs realistic practice exams (public service exams, certific
 ## Languages
 - UI locales: pt-BR, pt-PT, en. No hardcoded UI strings; resource files per module; `IStringLocalizer`.
 - Question content is not translated; each exam and question carries its own language.
-- Manual locales: pt-BR, pt-PT, en. App manual: `docs/manual/<locale>/`, updated when each feature ships.
+- Manual locales: pt-BR
+- App manual: `docs/manual/<locale>/`, updated when each feature ships, in the locales above. `docs/manual/pt-PT/` and `docs/manual/en/` are frozen (F-124): every page keeps its content and carries a notice.
 
 ## Commands
 - Build: `dotnet build Simulab.slnx`

@@ -3,8 +3,11 @@ page: google-sign-in
 locale: en
 features: [F-20, F-29]
 updated: 2026-09-27
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Sign in with Google
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/google-sign-in.md).
 
 Use your Google account to create a Simulab account or to sign in, without a Simulab password. If **Sign in** has no **Continue with Google** button, signing in with Google is not available yet.
 

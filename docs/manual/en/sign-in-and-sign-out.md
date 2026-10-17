@@ -3,8 +3,11 @@ page: sign-in-and-sign-out
 locale: en
 features: [F-5, B-3, F-7, F-11, F-53]
 updated: 2026-10-06
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Sign in and sign out
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/sign-in-and-sign-out.md).
 
 Sign in with the email and password you created, and sign out from the account menu in the app bar.
 

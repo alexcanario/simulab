@@ -3,8 +3,11 @@ page: subjects
 locale: en
 features: [F-79, F-51, F-75, F-95, F-77]
 updated: 2026-10-15
+frozen: 2026-10-17 (v1.1.0)
 ---
 # Subjects and topics
+
+> Frozen on 2026-10-17 (v1.1.0). This page may be out of date; see the [pt-BR version](../pt-BR/subjects.md).
 
 Subjects and topics are the one shared vocabulary of what a student studies: a subject is "Portuguese" or
 "Constitutional Law", and a topic is something inside it, such as "Crase". Everything else that talks about
