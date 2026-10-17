@@ -4820,7 +4820,7 @@ structure GREEN: 0 skills, 0 commands, 0 hooks (limits: 60 skill lines, 5 comman
 hooks GREEN: 0 hooks
 ```
 
-O `CLAUDE.md` tem `Profile: plugin`, nenhuma linha de idiomas de UI (um plugin não tem texto de tela), e o `.claude/agile/build.json` declara as duas checagens como o comando de docs, o scan só com o gitleaks e os limites. O relatório final lembra que o `/agile:publish` ainda não lança um plugin (#222): a tag `v<versão>` é feita à mão.
+O `CLAUDE.md` tem `Profile: plugin`, nenhuma linha de idiomas de UI (um plugin não tem texto de tela), e o `.claude/agile/build.json` declara as duas checagens como o comando de docs, o scan só com o gitleaks e os limites. O relatório final lembra que o `/agile:publish` lança um plugin da sua máquina (#222): a tag `v<versão>` e um GitHub Release com as notas, sem pacote.
 
 ### 14.134 O ship de um plugin parado pela checagem de estrutura, e depois a versão
 
@@ -4937,3 +4937,104 @@ Para ver o `architect` pegar uma ordem errada, a mesma F-2 foi dada a ele com um
 Quando você retoma um build parado (`/agile:build F-1` com a F-1 já em `building`), o Claude lê essa linha de `plan`, diz em que passo parou pelo último commit `wip` e continua dali; ele nunca reescreve a linha. Se o plano mudar no meio, acrescenta uma linha `plan v2` com o motivo. Se o plano passaria de 8 passos, o item é de tamanho L e o build para antes de qualquer código (`references/item-size.md`).
 
 Se esse plano gasta menos tokens do que o plano solto de antes é uma hipótese, não um número prometido: a linha `plan` de cada item é a evidência daqui em diante.
+
+### 14.138 O benchmark da companheira só mede o que serve a uma API .NET e para na primeira execução sem a skill
+
+Você quer medir uma skill que não tem nada com um app .NET (aqui, a da pasta de fixtures do plugin `safety-pal`) e digita `--go`. O plano, sem o `--go`, já avisa o escopo em uma linha; com o `--go`, uma chamada barata pergunta ao haiku se a skill ajuda a construir uma API ASP.NET Core com testes xUnit. A resposta foi NÃO:
+
+```text
+$ node benchmarks/run.js --go --companion scripts/fixtures/benchmark-companion:review-safety
+benchmark PROBE: ok (base arm sees 0 agile: skills, plugin arm 2)
+benchmark PROBE: ok (companion arm lists safety-pal:review-safety)
+benchmark REFUSED: safety-pal:review-safety does not apply to a .NET app (It creates plugins, it does not help build .NET code.)
+exit 1
+```
+
+Você gastou centavos e nenhuma execução paga começou. Se a sonda errou numa skill de fronteira, `--applies-anyway` pula a pergunta e o relatório registra "applicability overridden by the owner". Se mesmo assim o modelo nunca chama a skill na primeira execução da companheira, o benchmark para ali, em vez de gastar o teto de US$ 80:
+
+```text
+$ node benchmarks/run.js --go --companion scripts/fixtures/benchmark-companion:review-safety --applies-anyway --task order-summary --runs 2
+benchmark PROBE: skipped (--applies-anyway)
+benchmark PARTIAL: benchmark-<stamp>.md (US$ 0.50 of US$ 25.00; some runs not measured)
+benchmark ABORT: safety-pal:review-safety was not invoked in its first run (companion not invoked (safety-pal:review-safety; the run invoked no skill)); no further run started
+exit 2
+```
+
+O relatório é parcial, tem `aborted` com o motivo, e o script de veredito da companheira sobre ele dá "não medido" (saída 2). Uma execução não invocada depois de uma medida não para nada: fica "não medida" e o laço continua. Uma tarefa de plugin (`--task plugin-skill`) não faz a pergunta de .NET, porque ela existe para skills que criam plugins.
+
+### 14.139 Um plugin lançado pelo `/agile:publish`: a parada por versões diferentes e depois a tag e o GitHub Release
+
+O acme-tools é um plugin do Claude Code criado com o perfil `plugin` (exemplo 14.133). O ship da F-3 subiu a versão para 0.2.0 em `.claude-plugin/plugin.json`, mas alguém editou o `marketplace.json` à mão antes e a entrada do plugin ficou em 0.1.0. Você digita `/agile:publish` e o plano para, sem escrever nada. Saída real do `publish.js plan` sobre o repositório do exemplo:
+
+```
+{
+  "ok": false,
+  "mode": "plan",
+  "stop": [
+    ".claude-plugin/marketplace.json says 0.1.0 for acme-tools but .claude-plugin/plugin.json says 0.2.0: one release has one version"
+  ],
+  "profile": "plugin",
+  "projects": [],
+  "pluginName": "acme-tools",
+  "warnings": []
+}
+```
+
+Claude: o plano parou: o `marketplace.json` diz 0.1.0 para o acme-tools e o `plugin.json` diz 0.2.0, e um release tem uma versão só. Corrija a entrada do `marketplace.json` para 0.2.0 (o `tools/plugin-version.js` do próximo ship faz isso sozinho), faça o commit, o push e digite `/agile:publish` de novo. Nada foi escrito.
+
+Corrigida a entrada, você digita `/agile:publish` outra vez. O plano agora passa; o Claude o mostra numa linha e segue, porque digitar o comando é a autorização:
+
+```
+{
+  "ok": true,
+  "mode": "plan",
+  "profile": "plugin",
+  "projects": [],
+  "pluginName": "acme-tools",
+  "version": "0.2.0",
+  "branch": "main",
+  "tag": "v0.2.0",
+  "notesFile": "docs/releases/v0.2.0.md",
+  "previousTag": null,
+  "mergeCount": 0,
+  "warnings": []
+}
+```
+
+```
+Claude: plugin acme-tools 0.2.0 (tag v0.2.0, no package) · primeiro release · nenhum item desde a tag anterior
+```
+
+O `package` de um plugin escreve só as notas (`docs/releases/v0.2.0.md`) e não cria a pasta `artifacts/`; como o projeto não tem `docs/glossary.md`, as notas não trazem a linha do glossário. O `release` faz o resto:
+
+```
+{
+  "ok": true,
+  "mode": "release",
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "steps": [
+    "committed docs/releases/v0.2.0.md",
+    "tagged v0.2.0 (annotated, with the notes)",
+    "pushed main and v0.2.0",
+    "GitHub Release v0.2.0 created: https://github.com/acme/acme-tools/releases/tag/v0.2.0"
+  ],
+  "warnings": []
+}
+```
+
+Claude: release v0.2.0 feito: commit das notas, tag anotada, push e GitHub Release só com as notas (um plugin não tem binários: o marketplace instala a partir do git). Nada foi empacotado. A próxima versão vem do próximo `/agile:ship`.
+
+Um plugin não tem ambiente, loja nem nuvem. Se você digitar `/agile:publish staging`, o script para antes de ler qualquer outra coisa:
+
+```
+{
+  "ok": false,
+  "mode": "deploy",
+  "stop": [
+    "a plugin has no environment to deploy to: it is released by its tag, run /agile:publish --local"
+  ]
+}
+```
+
+O mesmo vale para `--beta`, `--park`, `--resume`, `--cost` e `--restore-drill` (cada um com o seu motivo) e para o release no GitHub Actions: um plugin é sempre lançado da sua máquina, e nenhum desses modos escreve nada. Se o `gh` não estiver instalado, ou o `origin` não for do GitHub, a tag é feita e enviada do mesmo jeito, e o relatório diz `GitHub Release skipped` com o motivo.
