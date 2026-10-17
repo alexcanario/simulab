@@ -34,7 +34,8 @@ public static class QuestionBankResult
 public sealed class QuestionBankApiClient(HttpClient http)
 {
     private const string Base = "/api/v1/question-bank/questions";
-    private const string BaseTextsBase = "/api/v1/question-bank/base-texts";
+    private const string ReviewQueueBase = "/api/v1/question-bank/review-queue";
+    private const string BaseTextsBase ="/api/v1/question-bank/base-texts";
     private const string EditionsBase = "/api/v1/question-bank/editions";
     private const string SubjectsBase = "/api/v1/question-bank/subjects";
     private const string TaxonomyRoute = "/api/v1/question-bank/taxonomy";
@@ -135,6 +136,85 @@ public sealed class QuestionBankApiClient(HttpClient http)
         SendAsync<QuestionResponse>(
             () => Authorized(
                 WithJson(HttpMethod.Post, $"{Base}/{questionId}/reinstate", new ReinstateQuestionRequest(reason)),
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC1: sends a complete draft for review; 400 with a publish code when incomplete, 409 for another state.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> SubmitQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Post, $"{Base}/{questionId}/submit"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC2: takes a question back out of review; it is a draft again. 409 when it is not in review.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> WithdrawQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Post, $"{Base}/{questionId}/withdraw"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC6: the review history of a question, oldest first; an empty list while it was never sent.</summary>
+    public Task<QuestionBankResult<IReadOnlyList<QuestionReviewEntryResponse>>> ListReviewsAsync(
+        string accessToken,
+        Guid questionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<QuestionReviewEntryResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/{questionId}/reviews"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC3: one page of the review queue, oldest latest send first; needs the review permission.</summary>
+    public Task<QuestionBankResult<ReviewQueuePageResponse>> ListReviewQueueAsync(
+        string accessToken,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<ReviewQueuePageResponse>(
+            () => Authorized(
+                new HttpRequestMessage(
+                    HttpMethod.Get,
+                    $"{ReviewQueueBase}?page={page.ToString(CultureInfo.InvariantCulture)}&pageSize={pageSize.ToString(CultureInfo.InvariantCulture)}"),
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC4: a question in review as the reviewer sees it; 409 when it is not in review.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> GetQuestionInReviewAsync(
+        string accessToken,
+        Guid questionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{ReviewQueueBase}/{questionId}"), accessToken),
+            cancellationToken);
+
+    /// <summary>
+    /// F-105 UC4: approves a question in review, which publishes it. <paramref name="submittedAt"/> is the send the
+    /// reviewer saw; 409 <c>question.version_conflict</c> when it is no longer the latest.
+    /// </summary>
+    public Task<QuestionBankResult<QuestionResponse>> ApproveQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        string? note,
+        DateTimeOffset? submittedAt,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(
+                WithJson(HttpMethod.Post, $"{ReviewQueueBase}/{questionId}/approve", new ApproveQuestionRequest(note, submittedAt)),
+                accessToken),
+            cancellationToken);
+
+    /// <summary>F-105 UC5: rejects a question in review with a reason; it is a draft again. 400 without a reason.</summary>
+    public Task<QuestionBankResult<QuestionResponse>> RejectQuestionAsync(
+        string accessToken,
+        Guid questionId,
+        string reason,
+        DateTimeOffset? submittedAt,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<QuestionResponse>(
+            () => Authorized(
+                WithJson(HttpMethod.Post, $"{ReviewQueueBase}/{questionId}/reject", new RejectQuestionRequest(reason, submittedAt)),
                 accessToken),
             cancellationToken);
 

@@ -337,10 +337,76 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                     Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionKeyChangeReasonRequired),
                 (2, "POST") when segments[1] == "publish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Published),
                 (2, "POST") when segments[1] == "unpublish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Draft),
+                (2, "GET") when segments[1] == "reviews" => ListReviews(Guid.Parse(segments[0])),
+                (2, "POST") when segments[1] == "submit" => ChangeReview(Guid.Parse(segments[0]), submit: true),
+                (2, "POST") when segments[1] == "withdraw" => ChangeReview(Guid.Parse(segments[0]), submit: false),
                 (2, "POST") when segments[1] == "annul" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: true),
                 (2, "POST") when segments[1] == "reinstate" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: false),
                 _ => new HttpResponseMessage(HttpStatusCode.NotFound)
             };
+        }
+
+        /// <summary>F-105: the review history of each question, oldest first: the test sets it; a send and a withdrawal add to it.</summary>
+        public Dictionary<Guid, List<QuestionReviewEntryResponse>> Reviews { get; } = [];
+
+        /// <summary>F-105: when set, a send or a withdrawal answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? ReviewFailure { get; set; }
+
+        /// <summary>F-105: when set, reading the review history answers this problem (the card then shows its error state).</summary>
+        public (HttpStatusCode Status, string Code)? ReviewsReadFailure { get; set; }
+
+        private static readonly DateTimeOffset ReviewMoment = new(2026, 10, 16, 14, 2, 0, TimeSpan.Zero);
+
+        private HttpResponseMessage ListReviews(Guid questionId)
+        {
+            if (!Questions.Exists(candidate => candidate.Id == questionId))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            if (ReviewsReadFailure is { } failed)
+            {
+                return Problem(failed.Status, failed.Code);
+            }
+
+            return Json(Reviews.TryGetValue(questionId, out var found) ? found : []);
+        }
+
+        // F-105: the Api's answer to a send or a withdrawal. It records the entry the Api would, so the history the
+        // page reads again shows it, and moves the question the way the Api does.
+        private HttpResponseMessage ChangeReview(Guid id, bool submit)
+        {
+            if (ReviewFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var index = Questions.FindIndex(candidate => candidate.Id == id);
+            if (index < 0)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var current = Questions[index];
+            var changed = current with
+            {
+                Status = submit ? QuestionStatus.InReview : QuestionStatus.Draft,
+                SubmittedAt = submit ? ReviewMoment : null
+            };
+            Questions[index] = changed;
+
+            if (!Reviews.TryGetValue(id, out var entries))
+            {
+                entries = [];
+                Reviews[id] = entries;
+            }
+
+            entries.Add(new QuestionReviewEntryResponse(
+                submit ? QuestionReviewKind.Submitted : QuestionReviewKind.Withdrawn,
+                null,
+                ReviewMoment.AddMinutes(entries.Count)));
+
+            return Json(changed);
         }
 
         /// <summary>F-101: when set, an annul or a reinstate answers this problem.</summary>

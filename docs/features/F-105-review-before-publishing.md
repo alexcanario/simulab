@@ -317,13 +317,13 @@ Tests locked: 15a43374df1432e7b4049b5ce4cc5f48f55b2453 (9 files); unlocks: 0
 | AC10 | ReviewQueueEndpointTests.Queue_ListsOnlyQuestionsInReview_OldestLatestSendFirst, Queue_Row_CarriesTheExcerptTheTopicTheSubjectTheTypeAndTheLanguage, Queue_IsPaginated_AndThePageSizeIsCappedAt100; ReviewQueueEmptyEndpointTests.Queue_WithNothingInReview_IsEmpty; QuestionReviewDecisionEndpointTests.ReviewDetail_OfAQuestionInReview_ReturnsItWithItsSubmittedAt_AndAnyOtherStateAnswers409; the empty state on screen: pending |
 | AC11 | QuestionSubmitWithdrawEndpointTests.Reviews_AfterSendRejectionAndSecondSend_AreThreeEntriesOldestFirst, Reviews_HaveNoRouteThatChangesOrDeletesAnEntry |
 | AC12 | QuestionSubmitWithdrawEndpointTests.DeleteTopic_UsedOnlyByAQuestionInReview_IsRefusedWithTopicInUse |
-| AC13 | pending |
-| AC14 | pending |
+| AC13 | QuestionReviewListTests.Row_InReview_ShowsTheInReviewChipInTheWarningTone, Row_InReview_HasNeitherPublishNorUnpublish_AndDeleteIsDisabledWithTheReason, Filter_ByInReview_SendsTheStatus_AndOnlyTheRowInReviewStays; QuestionsPageTests.Filter_Status_OffersEveryStatus; QuestionStatusTextTests.EveryStatus_HasItsOwnName_AndOnlyTheDraftIsNeutral, TheInReviewStatus_IsNamedInReview_AndToneWarning |
+| AC14 | QuestionReviewFormTests.Draft_OffersSendForReviewBesidePublish, Draft_Incomplete_SendIsDisabledForTheSameReasonAsPublish, Send_CallsTheApi_AndTheCardShowsTheQuestionInReview_WithOnlyWithdrawToLeave, AQuestionInReview_OpensFrozen_WithTheSendTimeAndTheStatusChipInTheWarningTone, Withdraw_AsksNoReason_CallsTheApi_AndTheFormIsEditableAgain, Withdraw_WhenTheQuestionIsNoLongerInReview_ShowsTheApisTextInTheCard, ARejectedDraft_ShowsTheRejectionAlert_WithTheDateAndTheReason, ARejectedDraft_SentAgain_NoLongerShowsTheRejectionAlert, ReviewHistory_ListsTheEntriesNewestFirst_WithTheirKindAndReason, ReviewHistory_WithoutEntries_HasNoCard, ReviewHistory_WhenTheEntriesFailToLoad_ShowsTheErrorStateInTheCard |
 | AC15 | pending |
 | AC16 | QuestionSubmitWithdrawEndpointTests.PublishDirect_AndEditAPublishedQuestion_StillWorkWithNoReview (API); the form and the direct paths on screen: pending |
 | AC17 | AddQuestionReviewMigrationTests.Up_AddsTheHistoryTableWithItsCommentsAndIndex_NamesInReviewInTheStatusComment_AndKeepsEveryStatus, Down_TurnsAQuestionInReviewBackIntoADraft_AndDropsTheTable; EnumColumnCommentTests, TableDescriptionTests (existing) |
-| AC18 | pending |
-| AC19 | pending |
+| AC18 | AppTextFieldCounterTests.* (off, "0/500" and "12/500", inside the description, beside the error, polite live region, follows the typing); QuestionReasonCounterTests.ReasonDialog_OpensWithTheCounterAtZero_InsideTheFieldsDescription, ReasonDialog_CountsWhatIsTyped, ReasonDialog_AnEmptyReason_ShowsTheErrorBesideTheCounter; the gallery states: validation step |
+| AC19 | ResourceParityTests (existing, every key in the three locales), ErrorCodeTextTests.EveryErrorCode_HasATextInEveryLanguage_AndEveryCodeShapedTextAnswersToACode (existing, the five new codes), RoleResourcesTests.EveryPermissionSystemRoleAndActionName_HasAText (existing, questions.review) |
 
 ## Decisions
 - 2026-10-16 — The rejection reason is required, 1 to 500 characters, the F-101 rule — one rule for curators to learn — confirmed: F-101.
