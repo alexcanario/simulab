@@ -1,7 +1,7 @@
 ---
 feature: F-124
 epic: Foundation and identity
-status: building
+status: validating
 board: 175
 version: 1
 ---
@@ -81,6 +81,8 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 - 2026-10-17 — Parallel build with F-105 (validating) authorized by the owner in chat; no shared files — owner
 - 2026-10-17: plan — 1 `FrozenManualTests` (AC1-AC4) and `PrivacyManualTests` in pt-BR only (AC5), seen failing → commit `test(F-124)` and lock; 2 `CLAUDE.md` `Manual locales:` line (AC1); 3 the 46 pages: `frozen:` key and notice written by one throwaway script run from the scratchpad (AC2-AC4); 4 `project.md` three edits and the unfreezing rule (AC6); 5 gate, coverage table, scan, validation script → `FrozenManualTests`, `PrivacyManualTests` green
 - 2026-10-17 — Design passes skipped: no project, contract, message or schema change (configuration, rule text, markdown and one test) — Claude decided
+- 2026-10-17 — Reuse: `SolutionAssemblies.RepositoryRoot()` and the `PrivacyManualTests` file-reading pattern for `FrozenManualTests`
+- 2026-10-17 — The 46 notices were written by a Sonnet subagent with Edit (one file each); checked by `git diff --numstat` (3 insertions per file, 0 deletions) and by `FrozenManualTests` — Claude decided
 
 ## Out of scope
 - Unfreezing and translating the pages again (a later item, when a real pt-PT or en user exists).
@@ -95,7 +97,24 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written by /agile:build at its end. -->
+
+### English
+Needed to validate: nothing beyond the repository (the worktree `D:/wt/simulab/f-124-freeze-manual-pt-pt`), in place now. No app to start: this item changes no screen.
+
+1. Open `CLAUDE.md` in the worktree, section `## Languages`. Expect `- Manual locales: pt-BR` alone on its line, `- UI locales: pt-BR, pt-PT, en. ...` unchanged, and the manual sentence on its own line below.
+2. Open `.claude/rules/agile/project.md` and read three places: the `## Content language` line (manual is pt-BR only), the `create-account` manual line in pt-BR, and the new `App manual (F-124)` line with the unfreezing rule. Open `.claude/rules/agile/definition-of-done.md`: it is unchanged.
+3. Open `docs/manual/en/exams.md` and `docs/manual/pt-PT/index.md`. Expect `frozen: 2026-10-17 (v1.1.0)` in the front matter and, right under the title, the notice with the link to the pt-BR page; `updated:` and `features:` unchanged.
+4. Open `docs/manual/pt-BR/exams.md`. Expect no `frozen:` key and no notice.
+5. Say if the notice wording is what you want a reader to see.
+
+### pt-BR
+Necessário para validar: nada além do repositório (a worktree `D:/wt/simulab/f-124-freeze-manual-pt-pt`), já disponível. Não há app para iniciar: este item não muda nenhuma tela.
+
+1. Abra o `CLAUDE.md` da worktree, seção `## Languages`. Esperado: `- Manual locales: pt-BR` sozinho na linha, `- UI locales: pt-BR, pt-PT, en. ...` sem mudança, e a frase do manual em uma linha própria logo abaixo.
+2. Abra `.claude/rules/agile/project.md` e leia três pontos: a linha de `## Content language` (manual só em pt-BR), a linha do manual de `create-account` em pt-BR e a nova linha `App manual (F-124)` com a regra de descongelar. Abra `.claude/rules/agile/definition-of-done.md`: não mudou.
+3. Abra `docs/manual/en/exams.md` e `docs/manual/pt-PT/index.md`. Esperado: `frozen: 2026-10-17 (v1.1.0)` no cabeçalho e, logo abaixo do título, o aviso com o link para a página em pt-BR; `updated:` e `features:` sem mudança.
+4. Abra `docs/manual/pt-BR/exams.md`. Esperado: nenhuma chave `frozen:` e nenhum aviso.
+5. Diga se o texto do aviso é o que você quer que o leitor veja.
 
 ## Events
 
@@ -105,5 +124,5 @@ Tests locked: 4f08bcca3f34dba2a8a4faf5f8665e3bbbdd0d40 (1 file); unlocks: 0
 ## Delivery
 - Branch: feature/F-124
 - Merge: -
-- Tests: -
+- Tests: ArchitectureTests 291 passed, 0 failed (2 s); gate GREEN; scan GREEN; full suite at the ship
 - Manual pages: pt-PT and en pages frozen (46 notices); pt-BR unchanged
