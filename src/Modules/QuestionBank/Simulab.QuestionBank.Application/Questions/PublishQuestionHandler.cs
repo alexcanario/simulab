@@ -27,22 +27,10 @@ public sealed class PublishQuestionHandler(IQuestionStore store, IQuestionQuerie
             return Result.Failure<QuestionResponse>(published.Error!);
         }
 
-        // A refusal here happens before the save, so the question stays a draft.
-        var latest = await store.FindLatestVersionAsync(id, cancellationToken);
-        // F-102 BR5: the version snapshots the passage as it is now; the read holds a shared lock until the save,
-        // so an edit of the text cannot commit between this read and the version.
-        var baseText = question.BaseTextId is { } baseTextId
-            ? await store.FindBaseTextAsync(baseTextId, cancellationToken)
-            : null;
-        var next = question.NextVersion(latest, changeReason, baseText?.TextHtml);
-        if (next.IsFailure)
+        var versioned = await QuestionPublication.AddVersionAsync(store, question, changeReason, cancellationToken);
+        if (versioned.IsFailure)
         {
-            return Result.Failure<QuestionResponse>(next.Error!);
-        }
-
-        if (next.Value is { } version)
-        {
-            store.AddVersion(version);
+            return Result.Failure<QuestionResponse>(versioned.Error!);
         }
 
         // The status and the version are one save: a lost race for the number (F-98 BR10) leaves both undone.
@@ -51,10 +39,6 @@ public sealed class PublishQuestionHandler(IQuestionStore store, IQuestionQuerie
             return Result.Failure<QuestionResponse>(refused);
         }
 
-        var saved = await queries.FindAsync(id, cancellationToken);
-
-        return saved is null
-            ? Result.Failure<QuestionResponse>(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound))
-            : Result.Success(saved);
+        return await ReviewAnswer.ReadAsync(queries, id, cancellationToken);
     }
 }

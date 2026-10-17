@@ -119,9 +119,9 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         CellsOf(page, 5).Should().Equal("Published");
     }
 
-    // F-95 BR15 read with F-100 and F-101: the status filter offers Draft, Published and Annulled, in that order.
+    // F-95 BR15 read with F-100 and F-101: the status filter offers every status (Draft, Published, Annulled, and In review from F-105), in that order.
     [Fact]
-    public void Filter_Status_OffersDraftPublishedAndAnnulled()
+    public void Filter_Status_OffersEveryStatus()
     {
         var page = RenderPage();
         page.WaitForAssertion(() => page.FindAll("#questions-filter-status").Should().ContainSingle());
@@ -130,7 +130,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
 
         page.FindAll("[id^='questions-filter-status-option-']")
             .Select(option => option.QuerySelector(".app-mp-option-name")!.TextContent.Trim())
-            .Should().Equal("Draft", "Published", "Annulled");
+            .Should().Equal("Draft", "Published", "Annulled", "In review");
         page.Find("label[for='questions-filter-status']").TextContent.Should().Be("Status");
     }
 

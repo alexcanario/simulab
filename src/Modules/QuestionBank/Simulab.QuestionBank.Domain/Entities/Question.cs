@@ -83,10 +83,16 @@ public sealed class Question : TenantEntity
     {
         ArgumentNullException.ThrowIfNull(content);
 
-        // F-101 BR5: an annulled question is frozen; only a reinstatement leaves the state.
+        // F-101 BR5: an annulled question is frozen; only a reinstatement leaves the state. F-105 BR3: so is a
+        // question in review; only a decision or a withdrawal leaves it.
         if (Status == QuestionStatus.Annulled)
         {
             return Result.Failure(Frozen());
+        }
+
+        if (Status == QuestionStatus.InReview)
+        {
+            return Result.Failure(InReviewFrozen());
         }
 
         return content.Type == Type
@@ -181,7 +187,7 @@ public sealed class Question : TenantEntity
                 && pair.First.TextHtml == pair.Second.TextHtml
                 && pair.First.IsCorrect == pair.Second.IsCorrect);
 
-    /// <summary>Draft to published; the status only (BR12).</summary>
+    /// <summary>Draft to published; the status only (BR12). A question in review is published by a reviewer's approval, not here (F-105, BR3).</summary>
     public Result Publish()
     {
         if (Status == QuestionStatus.Annulled)
@@ -189,11 +195,23 @@ public sealed class Question : TenantEntity
             return Result.Failure(Frozen());
         }
 
+        if (Status == QuestionStatus.InReview)
+        {
+            return Result.Failure(InReviewFrozen());
+        }
+
         if (Status == QuestionStatus.Published)
         {
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionAlreadyPublished, ErrorKind.Conflict));
         }
 
+        return MakePublished();
+    }
+
+    // The one rule of what publishing a question means (F-105, BR5): the content is checked as a published key is,
+    // then the status changes. A direct publish and an approval both end here.
+    private Result MakePublished()
+    {
         var fault = StoredKey().Check(published: true);
         if (fault is not null)
         {
@@ -211,6 +229,11 @@ public sealed class Question : TenantEntity
         if (Status == QuestionStatus.Annulled)
         {
             return Result.Failure(Frozen());
+        }
+
+        if (Status == QuestionStatus.InReview)
+        {
+            return Result.Failure(InReviewFrozen());
         }
 
         if (Status != QuestionStatus.Published)
@@ -279,7 +302,110 @@ public sealed class Question : TenantEntity
     }
 
     /// <summary>
+    /// Draft to in review (F-105, BR1, BR2): the entry that records the send. The state is judged first, as a
+    /// publish judges it, then the content is checked as publishing checks it, so a reviewer never receives a
+    /// question that could not be published. A send makes no version (versions belong to published content).
+    /// </summary>
+    public Result<QuestionReviewEntry> Submit()
+    {
+        if (Status == QuestionStatus.Annulled)
+        {
+            return Result.Failure<QuestionReviewEntry>(Frozen());
+        }
+
+        if (Status == QuestionStatus.InReview)
+        {
+            return Result.Failure<QuestionReviewEntry>(
+                new Error(QuestionBankErrorCodes.QuestionAlreadyInReview, ErrorKind.Conflict));
+        }
+
+        if (Status == QuestionStatus.Published)
+        {
+            return Result.Failure<QuestionReviewEntry>(
+                new Error(QuestionBankErrorCodes.QuestionAlreadyPublished, ErrorKind.Conflict));
+        }
+
+        var fault = StoredKey().Check(published: true);
+        if (fault is not null)
+        {
+            return Result.Failure<QuestionReviewEntry>(fault.Error);
+        }
+
+        Status = QuestionStatus.InReview;
+
+        return Result.Success(new QuestionReviewEntry(Id, QuestionReviewKind.Submitted, null));
+    }
+
+    /// <summary>In review to draft (F-105, BR4): the content is untouched, and the entry records the withdrawal.</summary>
+    public Result<QuestionReviewEntry> Withdraw()
+    {
+        if (Status != QuestionStatus.InReview)
+        {
+            return Result.Failure<QuestionReviewEntry>(NotInReview());
+        }
+
+        Status = QuestionStatus.Draft;
+
+        return Result.Success(new QuestionReviewEntry(Id, QuestionReviewKind.Withdrawn, null));
+    }
+
+    /// <summary>
+    /// In review to published (F-105, BR5): the same publication as <see cref="Publish"/> (the caller makes the
+    /// version with <see cref="NextVersion"/>, as a publish does), and the entry holds the trimmed
+    /// <paramref name="note"/>, optional, 1 to 500 characters. The state is judged before the note. Nothing changes
+    /// when it fails.
+    /// </summary>
+    public Result<QuestionReviewEntry> Approve(string? note)
+    {
+        if (Status != QuestionStatus.InReview)
+        {
+            return Result.Failure<QuestionReviewEntry>(NotInReview());
+        }
+
+        var text = note?.Trim();
+        if (text is { Length: > QuestionLimits.ChangeReasonMaxLength })
+        {
+            return Result.Failure<QuestionReviewEntry>(
+                new Error(QuestionBankErrorCodes.QuestionReviewReasonTooLong, ErrorKind.Validation));
+        }
+
+        var published = MakePublished();
+        if (published.IsFailure)
+        {
+            return Result.Failure<QuestionReviewEntry>(published.Error!);
+        }
+
+        return Result.Success(new QuestionReviewEntry(Id, QuestionReviewKind.Approved, string.IsNullOrEmpty(text) ? null : text));
+    }
+
+    /// <summary>
+    /// In review to draft (F-105, BR6): the entry holds the trimmed <paramref name="reason"/>, required, 1 to 500
+    /// characters. The state is judged before the reason. There is no rejected status.
+    /// </summary>
+    public Result<QuestionReviewEntry> Reject(string? reason)
+    {
+        if (Status != QuestionStatus.InReview)
+        {
+            return Result.Failure<QuestionReviewEntry>(NotInReview());
+        }
+
+        var checkedReason = StatusReason(
+            reason,
+            QuestionBankErrorCodes.QuestionReviewReasonRequired,
+            QuestionBankErrorCodes.QuestionReviewReasonTooLong);
+        if (checkedReason.IsFailure)
+        {
+            return Result.Failure<QuestionReviewEntry>(checkedReason.Error!);
+        }
+
+        Status = QuestionStatus.Draft;
+
+        return Result.Success(new QuestionReviewEntry(Id, QuestionReviewKind.Rejected, checkedReason.Value!));
+    }
+
+    /// <summary>
     /// Ok for a draft; <c>question.annulled</c> for an annulled question (F-101, BR5);
+    /// <c>question.in_review</c> for a question in review (F-105, BR3);
     /// <c>question.delete_requires_draft</c> for a published question (BR11).
     /// </summary>
     public Result EnsureDeletable() =>
@@ -287,23 +413,32 @@ public sealed class Question : TenantEntity
         {
             QuestionStatus.Draft => Result.Success(),
             QuestionStatus.Annulled => Result.Failure(Frozen()),
+            QuestionStatus.InReview => Result.Failure(InReviewFrozen()),
             _ => Result.Failure(new Error(QuestionBankErrorCodes.QuestionDeleteRequiresDraft, ErrorKind.Conflict))
         };
 
     private static Error Frozen() => new(QuestionBankErrorCodes.QuestionAnnulled, ErrorKind.Conflict);
 
-    // F-101 BR3: the reason of an annulment or a reinstatement, 1 to 500 characters once trimmed.
-    private static Result<string> StatusReason(string? reason)
+    // F-105 BR3: a question in review is frozen as an annulled one is, with a code of its own.
+    private static Error InReviewFrozen() => new(QuestionBankErrorCodes.QuestionInReview, ErrorKind.Conflict);
+
+    private static Error NotInReview() => new(QuestionBankErrorCodes.QuestionNotInReview, ErrorKind.Conflict);
+
+    // F-101 BR3: the reason of an annulment or a reinstatement, 1 to 500 characters once trimmed. F-105 BR6 asks
+    // the same of a rejection, with the codes of its own.
+    private static Result<string> StatusReason(
+        string? reason,
+        string requiredCode = QuestionBankErrorCodes.QuestionStatusReasonRequired,
+        string tooLongCode = QuestionBankErrorCodes.QuestionStatusReasonTooLong)
     {
         var text = reason?.Trim();
         if (string.IsNullOrEmpty(text))
         {
-            return Result.Failure<string>(
-                new Error(QuestionBankErrorCodes.QuestionStatusReasonRequired, ErrorKind.Validation));
+            return Result.Failure<string>(new Error(requiredCode, ErrorKind.Validation));
         }
 
         return text.Length > QuestionLimits.ChangeReasonMaxLength
-            ? Result.Failure<string>(new Error(QuestionBankErrorCodes.QuestionStatusReasonTooLong, ErrorKind.Validation))
+            ? Result.Failure<string>(new Error(tooLongCode, ErrorKind.Validation))
             : Result.Success(text);
     }
 

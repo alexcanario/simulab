@@ -1,0 +1,112 @@
+@page "/admin/questions/review"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Review)]
+@layout MainLayout
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Services
+@inject QuestionBankApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+
+@* F-105 UC3, BR8: the questions waiting for a decision, the oldest latest send first, paged on the server. There is
+   no search, no filter and no sortable column: the order is the Api's. The reviewer only reads here, so the
+   statement is a link to the read-only review screen and the row has no Edit and no Delete (the holder of
+   questions.review alone has no questions.manage). *@
+<AppPageHeader Title="@L["ReviewQueue.Title"]" Breadcrumbs="_breadcrumbs" />
+
+<AppDataTable TItem="ReviewQueueItemResponse"
+              LoadAsync="LoadAsync"
+              Searchable="false"
+              EmptyMessage="@L["ReviewQueue.Empty"]">
+    <Columns>
+        <TemplateColumn T="ReviewQueueItemResponse" Title="@L["Questions.Column.Statement"]" Sortable="false">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.StatementExcerpt"
+                                  MaxWidth="26rem"
+                                  Lang="@context.Item.ContentLanguage"
+                                  Href="@ReviewHref(context.Item)" />
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="ReviewQueueItemResponse" Title="@L["Questions.Column.Topic"]" Sortable="false">
+            <CellTemplate>
+                <AppTruncatedText Text="@context.Item.TopicName" MaxWidth="14rem" />
+                <span class="app-cell-secondary"><AppTruncatedText Text="@context.Item.SubjectName" MaxWidth="14rem" /></span>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="ReviewQueueItemResponse" Title="@L["Questions.Column.Type"]" Sortable="false">
+            <CellTemplate>
+                <span class="app-cell-nowrap"><AppChip Text="@QuestionText.TypeName(L, context.Item.Type)" /></span>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn T="ReviewQueueItemResponse" Title="@L["Questions.Column.Language"]" Sortable="false">
+            <CellTemplate>
+                <span lang="@context.Item.ContentLanguage">@QuestionText.LanguageName(context.Item.ContentLanguage)</span>
+            </CellTemplate>
+        </TemplateColumn>
+        @* The time of the latest send, as text: it is not a state, so it is not a chip. *@
+        <TemplateColumn T="ReviewQueueItemResponse" Title="@L["ReviewQueue.Column.SentAt"]" Sortable="false">
+            <CellTemplate>
+                <span class="app-cell-nowrap">@context.Item.SubmittedAt.ToString("g", CultureInfo.CurrentCulture)</span>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <RowActions>
+        <AppRowActions ItemName="@ItemName(context)"
+                       IdPrefix="@ActionsId(context)"
+                       MoreActions="@ReviewActions(context)" />
+    </RowActions>
+</AppDataTable>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
+
+    protected override void OnInitialized() =>
+        _breadcrumbs =
+        [
+            new BreadcrumbItem(L["Nav.Section.Content"], href: null, disabled: true),
+            new BreadcrumbItem(L["ReviewQueue.Title"], href: null, disabled: true)
+        ];
+
+    private static string ReviewHref(ReviewQueueItemResponse question) => $"/admin/questions/review/{question.Id}";
+
+    private static string ActionsId(ReviewQueueItemResponse question) => $"review-queue-actions-{question.Id}";
+
+    // The excerpt is cut at 60 characters so the accessible name of the row's button stays short.
+    private string ItemName(ReviewQueueItemResponse question) =>
+        L["Questions.Row.Name", QuestionHtml.Excerpt(question.StatementExcerpt, QuestionText.RowNameLength)];
+
+    // Review is the only action: it opens the same read-only screen as the excerpt link.
+    private IReadOnlyList<AppRowAction> ReviewActions(ReviewQueueItemResponse question) =>
+    [
+        new AppRowAction(
+            L["ReviewQueue.Action.Review"], AppIcons.Review, () => OpenAsync(question), Key: "review")
+    ];
+
+    private Task OpenAsync(ReviewQueueItemResponse question)
+    {
+        Navigation.NavigateTo(ReviewHref(question));
+
+        return Task.CompletedTask;
+    }
+
+    private async Task<AppTablePage<ReviewQueueItemResponse>> LoadAsync(AppTableQuery query, CancellationToken cancellationToken)
+    {
+        var token = await TokenAsync() ?? throw new InvalidOperationException("No session.");
+        var result = await Api.ListReviewQueueAsync(token, query.Page, query.PageSize, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            throw new InvalidOperationException($"The review queue failed to load: {result.ErrorCode}.");
+        }
+
+        return new AppTablePage<ReviewQueueItemResponse>(result.Value!.Items, result.Value.Total);
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

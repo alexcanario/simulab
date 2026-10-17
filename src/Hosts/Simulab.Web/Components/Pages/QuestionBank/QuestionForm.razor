@@ -84,6 +84,14 @@ else
                 </div>
             }
 
+            @* F-105 BR3: a question in review is frozen too; the way out is the Withdraw button of the card below. *@
+            @if (IsInReview)
+            {
+                <div id="question-in-review-alert" role="status">
+                    <AppAlert Severity="Severity.Warning" Text="@L["Questions.InReview.Alert"]" Class="mb-4" />
+                </div>
+            }
+
             <AppSectionCard Id="question-section-classification"
                             Title="@L["Questions.Section.Classification"]"
                             Icon="@AppIcons.Topics"
@@ -121,7 +129,7 @@ else
                                     Value="_subject"
                                     ValueChanged="OnSubjectChanged"
                                     Required="true"
-                                    Disabled="IsAnnulled"
+                                    Disabled="IsFrozen"
                                     Hint="@L["Questions.Field.Subject.Hint"]" />
 
                     <AppLookupField Id="question-topic"
@@ -134,7 +142,7 @@ else
                                     Value="_topic"
                                     ValueChanged="OnTopicChanged"
                                     Required="true"
-                                    Disabled="@(_subject is null || IsAnnulled)"
+                                    Disabled="@(_subject is null || IsFrozen)"
                                     Hint="@(_subject is null ? L["Questions.Field.Topic.DisabledHint"].Value : L["Questions.Field.Topic.Hint"].Value)"
                                     Error="@_topicError" />
 
@@ -145,7 +153,7 @@ else
                                     ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
                                     Options="LanguageOptions"
                                     Required="true"
-                                    Disabled="IsAnnulled"
+                                    Disabled="IsFrozen"
                                     LeadingIcon="@AppIcons.Language"
                                     Hint="@L["Questions.Field.ContentLanguage.Hint"]"
                                     Error="@_languageError" />
@@ -156,7 +164,7 @@ else
                                     Value="_difficulty"
                                     ValueChanged="@((int? value) => OnDifficultyChanged(value))"
                                     Options="DifficultyOptions"
-                                    Disabled="IsAnnulled"
+                                    Disabled="IsFrozen"
                                     Hint="@L["Questions.Field.Difficulty.Hint"]"
                                     Error="@_difficultyError" />
                 </AppFormGrid>
@@ -179,7 +187,7 @@ else
                                     OpenOnFocus="true"
                                     Value="_edition"
                                     ValueChanged="OnEditionChangedAsync"
-                                    Disabled="@(IsAnnulled || IsTranscribing)"
+                                    Disabled="@(IsFrozen || IsTranscribing)"
                                     Hint="@(IsTranscribing ? L["Questions.Transcribe.EditionLocked"].Value : L["Questions.Field.Edition.Hint"].Value)"
                                     Error="@_editionError" />
 
@@ -190,7 +198,7 @@ else
                                   Value="_paperNumber"
                                   ValueChanged="@((int? value) => OnPaperNumberChanged(value))"
                                   Required="@(_edition is not null)"
-                                  Disabled="@(_edition is null || IsAnnulled)"
+                                  Disabled="@(_edition is null || IsFrozen)"
                                   Hint="@(_edition is null ? L["Questions.Field.PaperNumber.DisabledHint"].Value : L["Questions.Field.PaperNumber.Hint"].Value)"
                                   Error="@_paperNumberError" />
 
@@ -200,7 +208,7 @@ else
                                     Value="_noticeSubjectId"
                                     ValueChanged="@((Guid? value) => OnNoticeSubjectChanged(value))"
                                     Options="NoticeSubjectOptions"
-                                    Disabled="@(_edition is null || IsAnnulled)"
+                                    Disabled="@(_edition is null || IsFrozen)"
                                     Loading="_noticeSubjectsLoading"
                                     Hint="@(_edition is null ? L["Questions.Field.NoticeSubject.DisabledHint"].Value : L["Questions.Field.NoticeSubject.Hint"].Value)"
                                     Error="@_noticeSubjectError" />
@@ -216,7 +224,7 @@ else
                                   Placeholder="@L["Questions.Field.Statement.Placeholder"]"
                                   Hint="@L["Questions.Field.Statement.Hint"]"
                                   Required="true"
-                                  Disabled="IsAnnulled"
+                                  Disabled="IsFrozen"
                                   Lang="@_contentLanguage"
                                   Value="@_statement"
                                   ValueChanged="@((string? value) => OnStatementChanged(value))"
@@ -238,7 +246,7 @@ else
                                 OpenOnFocus="true"
                                 Value="_baseText"
                                 ValueChanged="OnBaseTextChanged"
-                                Disabled="IsAnnulled"
+                                Disabled="IsFrozen"
                                 Hint="@BaseTextHint"
                                 Error="@_baseTextError" />
 
@@ -289,7 +297,7 @@ else
                     </AppDisclosure>
                 }
 
-                @if (!IsAnnulled)
+                @if (!IsFrozen)
                 {
                     <div class="app-base-text-create" id="question-base-text-create">
                         <span>@L["Questions.BaseText.Create.Lead"]</span>
@@ -316,7 +324,7 @@ else
                                 Icon="@AppIcons.Verified"
                                 Subtitle="@L["Questions.Section.TrueFalseKey.Subtitle"]">
                     @* F-101: the radio cards have no disabled state, so a frozen key is read as a value, as the type is. *@
-                    @if (IsAnnulled)
+                    @if (IsFrozen)
                     {
                         <div class="app-field mb-4">
                             <span class="app-field-label" id="question-true-false-key-label">@L["Questions.TrueFalseKey.Label"]</span>
@@ -370,13 +378,13 @@ else
                                         <AppCheckbox Id="@($"question-option-correct-{position}")"
                                                      Value="option.IsCorrect"
                                                      ValueChanged="@((bool value) => OnCorrectToggled(option, value))"
-                                                     Disabled="IsAnnulled">
+                                                     Disabled="IsFrozen">
                                             <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
                                         </AppCheckbox>
                                     }
                                     else
                                     {
-                                        <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsAnnulled">
+                                        <MudRadio T="int?" Value="@((int?)position)" Color="Color.Primary" Disabled="IsFrozen">
                                             <span class="app-visually-hidden">@L["Questions.Options.MarkCorrect", letter]</span>
                                         </MudRadio>
                                     }
@@ -386,7 +394,7 @@ else
                                                   LabelVisuallyHidden="true"
                                                   Placeholder="@L["Questions.Options.Field.Placeholder"]"
                                                   Compact="true"
-                                                  Disabled="IsAnnulled"
+                                                  Disabled="IsFrozen"
                                                   AutoFocus="@option.FocusOnRender"
                                                   Lang="@_contentLanguage"
                                                   Value="@option.Html"
@@ -398,7 +406,7 @@ else
                             @{
                                 var index = _options.IndexOf(option);
                             }
-                            @if (!IsAnnulled)
+                            @if (!IsFrozen)
                             {
                                 <AppRowActions ItemName="@L["Questions.Options.Letter", QuestionText.Letter(index)]"
                                                IdPrefix="@ActionsId(index)"
@@ -440,7 +448,7 @@ else
                 </span>
 
                 <div class="app-options-footer">
-                    @if (IsAnnulled)
+                    @if (IsFrozen)
                     {
                         @* F-101: frozen; no button, only the count below. *@
                     }
@@ -485,7 +493,7 @@ else
                                   Label="@L["Questions.Field.Explanation"]"
                                   Placeholder="@L["Questions.Field.Explanation.Placeholder"]"
                                   Hint="@L["Questions.Field.Explanation.Hint"]"
-                                  Disabled="IsAnnulled"
+                                  Disabled="IsFrozen"
                                   Lang="@_contentLanguage"
                                   Value="@_explanation"
                                   ValueChanged="@((string? value) => OnExplanationChanged(value))"
@@ -493,7 +501,7 @@ else
             </AppSectionCard>
 
             @* F-101 BR5: a frozen form has nothing to save; Cancel's job is the "Back" of the page header. *@
-            @if (!IsAnnulled)
+            @if (!IsFrozen)
             {
                 <AppFormActions Saving="_saving"
                                 HasChanges="HasChanges"
@@ -532,6 +540,16 @@ else
                     <AppAlert Severity="Severity.Error" Text="@_publicationError" Class="mb-4" />
                 }
 
+                @* F-105 UC6: why the last review sent it back, while the latest entry is that rejection; the next send ends it. *@
+                @if (LatestRejection is { } rejection)
+                {
+                    <div id="question-rejected-alert">
+                        <AppAlert Severity="Severity.Info"
+                                  Text="@L["Questions.Publication.Rejected", rejection.At.ToString("g", CultureInfo.CurrentCulture), rejection.Reason ?? string.Empty]"
+                                  Class="mb-4" />
+                    </div>
+                }
+
                 <div class="app-publication-row">
                     <AppStatusChip Text="@QuestionText.StatusName(L, _saved.Status)" Tone="QuestionText.StatusTone(_saved.Status)" />
                     <span>@PublicationText</span>
@@ -563,6 +581,23 @@ else
                                    OnClick="ReinstateAsync"
                                    id="question-reinstate">@L["Questions.Action.Reinstate"]</MudButton>
                     }
+                    else if (IsInReview)
+                    {
+                        @* F-105 BR4: the way out for a curator; it asks no reason and no confirmation (it is reversible,
+                           as Unpublish is). *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@(_publishing ? null : AppIcons.Withdraw)"
+                                   Disabled="_publishing"
+                                   OnClick="WithdrawAsync"
+                                   id="question-withdraw">
+                            @if (_publishing)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                            }
+                            @L["Questions.Action.Withdraw"]
+                        </MudButton>
+                    }
                     else if (IsPublished)
                     {
                         <MudButton Variant="Variant.Outlined"
@@ -589,6 +624,18 @@ else
                     }
                     else
                     {
+                        @* F-105 UC1: a second way to publish, through a reviewer. It is disabled for the same reasons as
+                           Publish, in the same order; the one visible reason below describes both buttons. *@
+                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.SendForReview"].Value)">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@(_publishing ? null : AppIcons.Send)"
+                                       Disabled="@(_publishing || PublishDisabledReason is not null)"
+                                       OnClick="SubmitForReviewAsync"
+                                       aria-describedby="@(PublishDisabledReason is null ? null : "question-publication-reason")"
+                                       id="question-send-for-review">@L["Questions.Action.SendForReview"]</MudButton>
+                        </MudTooltip>
+
                         <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.Publish"].Value)">
                             <MudButton Variant="Variant.Outlined"
                                        Color="Color.Primary"
@@ -608,7 +655,7 @@ else
                 </div>
 
                 @* The reason is visible text, not a tooltip alone: a disabled button is not focusable. *@
-                @if (!IsPublished && !IsAnnulled && PublishDisabledReason is not null)
+                @if (!IsPublished && !IsAnnulled && !IsInReview && PublishDisabledReason is not null)
                 {
                     <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
                 }
@@ -619,7 +666,7 @@ else
 
                 @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
                    the Api refused the first click; the second click sends it. *@
-                @if (!IsPublished && !IsAnnulled && _publishReasonRequired)
+                @if (!IsPublished && !IsAnnulled && !IsInReview && _publishReasonRequired)
                 {
                     <div class="app-publication-change-reason">
                         <AppTextField TValue="string"
@@ -637,6 +684,58 @@ else
             }
         </AppSectionCard>
     </MudPaper>
+    }
+
+    @* F-105 UC6, BR7: every send, withdrawal, approval and rejection, newest first. No card while there is nothing
+       to show, unless the entries failed to load: then the failure is shown, never silent. The person is stored and
+       not shown (no contract resolves a name). *@
+    @if (_saved is not null && !IsTranscribing && (_reviewsFailed || _reviews.Count > 0))
+    {
+        <MudPaper Class="app-form-card mt-4" Elevation="0">
+            <AppSectionCard Id="question-section-review-history"
+                            Title="@L["Questions.Section.ReviewHistory"]"
+                            Icon="@AppIcons.Review"
+                            Subtitle="@L["Questions.Section.ReviewHistory.Subtitle"]">
+                @if (_reviewsFailed)
+                {
+                    <AppErrorState OnRetry="ReloadReviewsAsync" />
+                }
+                else
+                {
+                    <AppDataTable @ref="_reviewHistory"
+                                  TItem="QuestionReviewEntryResponse"
+                                  LoadAsync="LoadReviewHistoryAsync"
+                                  Searchable="false"
+                                  EmptyMessage="@L["Questions.History.Empty"]">
+                        <Columns>
+                            <TemplateColumn T="QuestionReviewEntryResponse" Title="@L["Questions.ReviewHistory.Column.Date"]" Sortable="false">
+                                <CellTemplate>
+                                    <span class="app-cell-nowrap">@context.Item.At.ToString("g", CultureInfo.CurrentCulture)</span>
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <TemplateColumn T="QuestionReviewEntryResponse" Title="@L["Questions.ReviewHistory.Column.Event"]" Sortable="false">
+                                <CellTemplate>
+                                    <AppStatusChip Text="@QuestionText.ReviewKindName(L, context.Item.Kind)" Tone="QuestionText.ReviewKindTone(context.Item.Kind)" />
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <TemplateColumn T="QuestionReviewEntryResponse" Title="@L["Questions.ReviewHistory.Column.Reason"]" Sortable="false">
+                                <CellTemplate>
+                                    @if (string.IsNullOrWhiteSpace(context.Item.Reason))
+                                    {
+                                        <span aria-hidden="true">—</span>
+                                        <span class="app-visually-hidden">@L["Questions.History.NoReason"]</span>
+                                    }
+                                    else
+                                    {
+                                        <AppTruncatedText Text="@context.Item.Reason" MaxWidth="24rem" />
+                                    }
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                    </AppDataTable>
+                }
+            </AppSectionCard>
+        </MudPaper>
     }
 
     @* F-98 UC5, AC15: every version the question has had, newest first. A version opens read only in the preview
@@ -777,6 +876,11 @@ else
     private AppDataTable<QuestionVersionListItemResponse>? _history;
     private string? _historyError;
 
+    // F-105 UC6: the review history, oldest first as the Api answers it; the card shows it newest first.
+    private IReadOnlyList<QuestionReviewEntryResponse> _reviews = [];
+    private bool _reviewsFailed;
+    private AppDataTable<QuestionReviewEntryResponse>? _reviewHistory;
+
     private bool _loading;
     private bool _loadFailed;
     private bool _notFound;
@@ -791,10 +895,27 @@ else
     // F-101 BR5: an annulled question is frozen; the fields, the options and Save give way to Reinstate.
     private bool IsAnnulled => _saved?.Status == QuestionStatus.Annulled;
 
+    // F-105 BR3: a question in review is frozen too; the fields, the options and Save give way to Withdraw.
+    private bool IsInReview => _saved?.Status == QuestionStatus.InReview;
+
+    // One condition for both frozen states: the fields are read as values, the options cannot be added or removed.
+    private bool IsFrozen => IsAnnulled || IsInReview;
+
     private string PublicationText =>
         IsAnnulled
             ? L["Questions.Publication.Annulled"]
-            : IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"];
+            : IsInReview
+                ? L["Questions.Publication.InReview", SubmittedAtText]
+                : IsPublished ? L["Questions.Publication.Published"] : L["Questions.Publication.Draft"];
+
+    private string SubmittedAtText =>
+        _saved?.SubmittedAt?.ToString("g", CultureInfo.CurrentCulture) ?? string.Empty;
+
+    // F-105 UC6: the rejection that sent the draft back, shown while it is the latest thing that happened.
+    private QuestionReviewEntryResponse? LatestRejection =>
+        _saved is { Status: QuestionStatus.Draft } && _reviews.Count > 0 && _reviews[^1].Kind == QuestionReviewKind.Rejected
+            ? _reviews[^1]
+            : null;
 
     private bool AtMaxOptions => _options.Count >= QuestionLimits.OptionsMax;
 
@@ -1174,6 +1295,7 @@ else
             Apply(question);
             BuildBreadcrumbs();
             await LoadNoticeSubjectsAsync(question.Origin?.ExamEditionId);
+            await LoadReviewsAsync(question.Id);
             return;
         }
 
@@ -1280,6 +1402,36 @@ else
     }
 
     private Task ReloadHistoryAsync() => _history is null ? Task.CompletedTask : _history.ReloadAsync();
+
+    // -- review history (F-105) -------------------------------------------------------------------------------
+
+    // Read with the question and after every send and withdrawal. A failure is kept and shown in the card (never
+    // silent); the rejected alert and the "waiting since" time then fall back to what the question itself carries.
+    private async Task LoadReviewsAsync(Guid questionId)
+    {
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ListReviewsAsync(token, questionId);
+        _reviewsFailed = result is not { IsSuccess: true };
+        _reviews = result is { IsSuccess: true, Value: { } entries } ? entries : [];
+        if (_reviewHistory is not null)
+        {
+            await _reviewHistory.ReloadAsync();
+        }
+    }
+
+    private Task ReloadReviewsAsync() => _saved is { } current ? LoadReviewsAsync(current.Id) : Task.CompletedTask;
+
+    // The entries are all in memory (a question has few): the table pages them here, newest first.
+    private Task<AppTablePage<QuestionReviewEntryResponse>> LoadReviewHistoryAsync(
+        AppTableQuery query,
+        CancellationToken cancellationToken)
+    {
+        var newestFirst = _reviews.Reverse().ToList();
+
+        return Task.FromResult(new AppTablePage<QuestionReviewEntryResponse>(
+            [.. newestFirst.Skip(query.Page * query.PageSize).Take(query.PageSize)],
+            newestFirst.Count));
+    }
 
     // UC5: the version opens in the preview dialog, read only, from what was recorded then.
     private async Task ViewVersionAsync(QuestionVersionListItemResponse row)
@@ -2017,6 +2169,63 @@ else
 
         // 400 while incomplete (BR4), 409 when it is already in that state, 404 when it is gone.
         _publicationError = Errors.For(result.ErrorCode);
+    }
+
+    private Task SubmitForReviewAsync() => ChangeReviewAsync(submit: true);
+
+    private Task WithdrawAsync() => ChangeReviewAsync(submit: false);
+
+    // F-105 UC1 and UC2: a send acts on what is stored, as Publish does, and a withdrawal asks no reason. The card
+    // switches to the new state and the history is read again; a refusal is shown in the card's own alert.
+    private async Task ChangeReviewAsync(bool submit)
+    {
+        if (_saved is not { } current)
+        {
+            return;
+        }
+
+        _publicationError = null;
+        _publishing = true;
+
+        var token = await TokenAsync();
+        var result = token is null
+            ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
+            : submit
+                ? await Api.SubmitQuestionAsync(token, current.Id)
+                : await Api.WithdrawQuestionAsync(token, current.Id);
+
+        _publishing = false;
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            _saved = question;
+            _publishReason = string.Empty;
+            _publishReasonRequired = false;
+            Snackbar.Add(submit ? L["Questions.SentForReview"] : L["Questions.Withdrawn"], Severity.Success);
+            await LoadReviewsAsync(question.Id);
+            await ReloadHistoryAsync();
+            _pendingFocus = PreviewButtonId;
+            return;
+        }
+
+        // 400 while incomplete, 409 when it is in another state (decided or withdrawn meanwhile), 404 when gone.
+        _publicationError = Errors.For(result.ErrorCode);
+        if (!submit && result.ErrorCode is QuestionBankErrorCodes.QuestionNotInReview or QuestionBankErrorCodes.QuestionVersionConflict)
+        {
+            await ReloadAfterRaceAsync(current.Id);
+        }
+    }
+
+    // The question changed under the page (a reviewer decided meanwhile): read it again so the card tells the truth.
+    private async Task ReloadAfterRaceAsync(Guid id)
+    {
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.FindQuestionAsync(token, id);
+        if (result is { IsSuccess: true, Value: { } question })
+        {
+            Apply(question);
+            await LoadReviewsAsync(id);
+            await ReloadHistoryAsync();
+        }
     }
 
     private Task AnnulAsync() => ChangeAnnulmentAsync(annul: true);

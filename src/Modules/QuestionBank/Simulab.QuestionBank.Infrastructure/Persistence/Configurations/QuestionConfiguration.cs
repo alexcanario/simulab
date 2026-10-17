@@ -58,7 +58,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasMaxLength(40)
             .IsRequired()
             .IsConcurrencyToken()
-            .HasComment("Where the question is in its life: Draft, Published or Annulled.");
+            .HasComment("Where the question is in its life: Draft, InReview, Published or Annulled.");
 
         builder.Property(question => question.TopicId)
             .IsRequired()

@@ -202,6 +202,8 @@
   <data name="PermissionGroup.questions" xml:space="preserve"><value>Question bank</value></data>
   <data name="Permission.questions.manage.Name" xml:space="preserve"><value>Manage the question bank</value></data>
   <data name="Permission.questions.manage.Description" xml:space="preserve"><value>Write, edit, publish, preview and delete the questions of the bank.</value></data>
+  <data name="Permission.questions.review.Name" xml:space="preserve"><value>Review questions</value></data>
+  <data name="Permission.questions.review.Description" xml:space="preserve"><value>Open the review queue, approve a question in review to publish it, or reject it with a reason.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
@@ -418,6 +420,7 @@
   <data name="Gallery.FieldKinds.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
   <data name="Gallery.FieldKinds.State.Error" xml:space="preserve"><value>Error</value></data>
   <data name="Gallery.FieldKinds.State.LongText" xml:space="preserve"><value>Long text</value></data>
+  <data name="Gallery.FieldKinds.State.Counter" xml:space="preserve"><value>With a counter: empty, typing, at the limit, over the limit</value></data>
   <data name="Gallery.FieldKinds.State.Loading" xml:space="preserve"><value>Loading</value></data>
   <data name="Gallery.FieldKinds.State.Open" xml:space="preserve"><value>Open list</value></data>
   <data name="Gallery.FieldKinds.State.NoResults" xml:space="preserve"><value>No results</value></data>
@@ -1116,4 +1119,48 @@
   <data name="question.not_annulled" xml:space="preserve"><value>This question is not annulled.</value></data>
   <data name="question.status_reason_required" xml:space="preserve"><value>Write the reason.</value></data>
   <data name="question.status_reason_too_long" xml:space="preserve"><value>The reason is too long (500 characters at most).</value></data>
+  <data name="Common.Counter" xml:space="preserve"><value>{0}/{1}</value></data>
+  <data name="Common.Counter.Spoken" xml:space="preserve"><value>{0} of {1} characters</value></data>
+  <data name="Nav.ReviewQueue" xml:space="preserve"><value>Review queue</value></data>
+  <data name="Questions.Status.InReview" xml:space="preserve"><value>In review</value></data>
+  <data name="Questions.Action.SendForReview" xml:space="preserve"><value>Send for review</value></data>
+  <data name="Questions.Action.Withdraw" xml:space="preserve"><value>Withdraw from review</value></data>
+  <data name="Questions.Publication.InReview" xml:space="preserve"><value>In review. Waiting for a reviewer since {0}.</value></data>
+  <data name="Questions.InReview.Alert" xml:space="preserve"><value>This question is in review and cannot be edited. Withdraw it from review to change it.</value></data>
+  <data name="Questions.Publication.Rejected" xml:space="preserve"><value>Rejected on {0}: {1}</value></data>
+  <data name="Questions.SentForReview" xml:space="preserve"><value>Question sent for review.</value></data>
+  <data name="Questions.Withdrawn" xml:space="preserve"><value>Question withdrawn from review. It is a draft again.</value></data>
+  <data name="Questions.Delete.DisabledInReview" xml:space="preserve"><value>This question is in review. Withdraw it before deleting.</value></data>
+  <data name="Questions.Section.ReviewHistory" xml:space="preserve"><value>Review history</value></data>
+  <data name="Questions.Section.ReviewHistory.Subtitle" xml:space="preserve"><value>Every time this question was sent for review, withdrawn, approved or rejected, newest first.</value></data>
+  <data name="Questions.ReviewHistory.Column.Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Questions.ReviewHistory.Column.Event" xml:space="preserve"><value>Event</value></data>
+  <data name="Questions.ReviewHistory.Column.Reason" xml:space="preserve"><value>Reason or note</value></data>
+  <data name="Questions.ReviewHistory.Kind.Submitted" xml:space="preserve"><value>Sent</value></data>
+  <data name="Questions.ReviewHistory.Kind.Withdrawn" xml:space="preserve"><value>Withdrawn</value></data>
+  <data name="Questions.ReviewHistory.Kind.Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Questions.ReviewHistory.Kind.Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="ReviewQueue.Title" xml:space="preserve"><value>Review queue</value></data>
+  <data name="ReviewQueue.Column.SentAt" xml:space="preserve"><value>Sent on</value></data>
+  <data name="ReviewQueue.Empty" xml:space="preserve"><value>Nothing is waiting for review.</value></data>
+  <data name="ReviewQueue.Action.Review" xml:space="preserve"><value>Review</value></data>
+  <data name="ReviewQueue.Back" xml:space="preserve"><value>Back to the queue</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Review question</value></data>
+  <data name="Review.Aside.SentAt" xml:space="preserve"><value>Sent on</value></data>
+  <data name="Review.Action.Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Review.Action.Reject" xml:space="preserve"><value>Reject</value></data>
+  <data name="Review.Approve.Dialog.Title" xml:space="preserve"><value>Approve this question?</value></data>
+  <data name="Review.Approve.Dialog.Message" xml:space="preserve"><value>It is published at once and practice can use it. A note is optional and stays in the review history.</value></data>
+  <data name="Review.Note.Label" xml:space="preserve"><value>Note</value></data>
+  <data name="Review.Note.Hint" xml:space="preserve"><value>Optional. Plain text, up to 500 characters.</value></data>
+  <data name="Review.Reject.Dialog.Title" xml:space="preserve"><value>Reject this question?</value></data>
+  <data name="Review.Reject.Dialog.Message" xml:space="preserve"><value>It goes back to draft with your reason, which the curator sees on the question's page.</value></data>
+  <data name="Review.Approved" xml:space="preserve"><value>Question approved and published.</value></data>
+  <data name="Review.Rejected" xml:space="preserve"><value>Question rejected. It is a draft again.</value></data>
+  <data name="Review.NoLongerInReview" xml:space="preserve"><value>This question is no longer in review: another reviewer decided it, or it was withdrawn.</value></data>
+  <data name="question.in_review" xml:space="preserve"><value>This question is in review and cannot be changed. Withdraw it from review first.</value></data>
+  <data name="question.already_in_review" xml:space="preserve"><value>This question is already in review.</value></data>
+  <data name="question.not_in_review" xml:space="preserve"><value>This question is not in review.</value></data>
+  <data name="question.review_reason_required" xml:space="preserve"><value>Write the reason for the rejection.</value></data>
+  <data name="question.review_reason_too_long" xml:space="preserve"><value>The reason or note has more than 500 characters.</value></data>
 </root>

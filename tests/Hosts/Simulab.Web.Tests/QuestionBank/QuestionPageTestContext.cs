@@ -316,6 +316,11 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                 return HandleBaseTexts(request.Method, path, query, body);
             }
 
+            if (path.StartsWith(ReviewQueuePath, StringComparison.Ordinal))
+            {
+                return HandleReviewQueue(request.Method, path, query, body);
+            }
+
             if (!path.StartsWith(QuestionsPath, StringComparison.Ordinal))
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -337,10 +342,208 @@ public abstract partial class QuestionPageTestContext : KitTestContext
                     Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionKeyChangeReasonRequired),
                 (2, "POST") when segments[1] == "publish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Published),
                 (2, "POST") when segments[1] == "unpublish" => SetStatus(Guid.Parse(segments[0]), QuestionStatus.Draft),
+                (2, "GET") when segments[1] == "reviews" => ListReviews(Guid.Parse(segments[0])),
+                (2, "POST") when segments[1] == "submit" => ChangeReview(Guid.Parse(segments[0]), submit: true),
+                (2, "POST") when segments[1] == "withdraw" => ChangeReview(Guid.Parse(segments[0]), submit: false),
                 (2, "POST") when segments[1] == "annul" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: true),
                 (2, "POST") when segments[1] == "reinstate" => ChangeAnnulment(Guid.Parse(segments[0]), body, annul: false),
                 _ => new HttpResponseMessage(HttpStatusCode.NotFound)
             };
+        }
+
+        private const string ReviewQueuePath = "/api/v1/question-bank/review-queue";
+
+        /// <summary>F-105: when set, listing the review queue answers this problem (the queue's load error).</summary>
+        public (HttpStatusCode Status, string Code)? QueueFailure { get; set; }
+
+        /// <summary>F-105: when set, reading one question of the queue answers this problem (the review screen's load error).</summary>
+        public (HttpStatusCode Status, string Code)? ReviewFindFailure { get; set; }
+
+        /// <summary>F-105: when set, an approve or a reject answers this problem (a 409 race, say).</summary>
+        public (HttpStatusCode Status, string Code)? DecisionFailure { get; set; }
+
+        /// <summary>F-105: how many times the queue was listed.</summary>
+        public int QueueCalls => Received.Count(call => call.Method == HttpMethod.Get && call.Path == ReviewQueuePath);
+
+        /// <summary>F-105: how many times one question of the queue was read.</summary>
+        public int ReviewReads => Received.Count(call =>
+            call.Method == HttpMethod.Get && call.Path.StartsWith(ReviewQueuePath + "/", StringComparison.Ordinal));
+
+        public ApproveQuestionRequest LastApproval() =>
+            Read<ApproveQuestionRequest>(Received.Last(call => call.Path.EndsWith("/approve", StringComparison.Ordinal)).Body);
+
+        public RejectQuestionRequest LastRejection() =>
+            Read<RejectQuestionRequest>(Received.Last(call => call.Path.EndsWith("/reject", StringComparison.Ordinal)).Body);
+
+        // F-105: the review routes as the Api answers them, with the smallest rules a screen test needs.
+        private HttpResponseMessage HandleReviewQueue(HttpMethod method, string path, string query, string? body)
+        {
+            var segments = path[ReviewQueuePath.Length..].Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            return (segments.Length, method.Method) switch
+            {
+                (0, "GET") => ListQueue(query),
+                (1, "GET") => FindInReview(Guid.Parse(segments[0])),
+                (2, "POST") when segments[1] == "approve" => Decide(Guid.Parse(segments[0]), approve: true, body),
+                (2, "POST") when segments[1] == "reject" => Decide(Guid.Parse(segments[0]), approve: false, body),
+                _ => new HttpResponseMessage(HttpStatusCode.NotFound)
+            };
+        }
+
+        // BR8: only the questions in review, the oldest latest send first.
+        private HttpResponseMessage ListQueue(string query)
+        {
+            if (QueueFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var parameters = System.Web.HttpUtility.ParseQueryString(query);
+            var all = Questions
+                .Where(question => question.Status == QuestionStatus.InReview)
+                .OrderBy(question => question.SubmittedAt)
+                .ToList();
+            var size = int.Parse(parameters["pageSize"] ?? "25", System.Globalization.CultureInfo.InvariantCulture);
+            var page = int.Parse(parameters["page"] ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+            var items = all.Skip(page * size).Take(size)
+                .Select(question => new ReviewQueueItemResponse(
+                    question.Id,
+                    PlainText(question.StatementHtml),
+                    question.ContentLanguage,
+                    question.Type,
+                    question.TopicName,
+                    question.SubjectName,
+                    question.Difficulty,
+                    question.SubmittedAt ?? default))
+                .ToList();
+
+            return Json(new ReviewQueuePageResponse(items, all.Count));
+        }
+
+        private HttpResponseMessage FindInReview(Guid id)
+        {
+            if (ReviewFindFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var question = Questions.Find(candidate => candidate.Id == id);
+            if (question is null)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            return question.Status == QuestionStatus.InReview
+                ? Json(question)
+                : Problem(HttpStatusCode.Conflict, QuestionBankErrorCodes.QuestionNotInReview);
+        }
+
+        // Approve publishes (and makes the version the Api would), reject takes it back to a draft; a SubmittedAt other
+        // than the latest send is a lost race (change note v2).
+        private HttpResponseMessage Decide(Guid id, bool approve, string? body)
+        {
+            if (DecisionFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var index = Questions.FindIndex(candidate => candidate.Id == id);
+            if (index < 0)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var current = Questions[index];
+            if (current.Status != QuestionStatus.InReview)
+            {
+                return Problem(HttpStatusCode.Conflict, QuestionBankErrorCodes.QuestionNotInReview);
+            }
+
+            var (text, submittedAt) = approve
+                ? (Read<ApproveQuestionRequest>(body).Note, Read<ApproveQuestionRequest>(body).SubmittedAt)
+                : (Read<RejectQuestionRequest>(body).Reason, Read<RejectQuestionRequest>(body).SubmittedAt);
+            if (!approve && string.IsNullOrWhiteSpace(text))
+            {
+                return Problem(HttpStatusCode.BadRequest, QuestionBankErrorCodes.QuestionReviewReasonRequired);
+            }
+
+            if (submittedAt is { } seen && seen != current.SubmittedAt)
+            {
+                return Problem(HttpStatusCode.Conflict, QuestionBankErrorCodes.QuestionVersionConflict);
+            }
+
+            var changed = current with
+            {
+                Status = approve ? QuestionStatus.Published : QuestionStatus.Draft,
+                CurrentVersion = approve ? (current.CurrentVersion ?? 0) + 1 : current.CurrentVersion,
+                SubmittedAt = null
+            };
+            Questions[index] = changed;
+
+            return Json(changed);
+        }
+
+        /// <summary>F-105: the review history of each question, oldest first: the test sets it; a send and a withdrawal add to it.</summary>
+        public Dictionary<Guid, List<QuestionReviewEntryResponse>> Reviews { get; } = [];
+
+        /// <summary>F-105: when set, a send or a withdrawal answers this problem.</summary>
+        public (HttpStatusCode Status, string Code)? ReviewFailure { get; set; }
+
+        /// <summary>F-105: when set, reading the review history answers this problem (the card then shows its error state).</summary>
+        public (HttpStatusCode Status, string Code)? ReviewsReadFailure { get; set; }
+
+        private static readonly DateTimeOffset ReviewMoment = new(2026, 10, 16, 14, 2, 0, TimeSpan.Zero);
+
+        private HttpResponseMessage ListReviews(Guid questionId)
+        {
+            if (!Questions.Exists(candidate => candidate.Id == questionId))
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            if (ReviewsReadFailure is { } failed)
+            {
+                return Problem(failed.Status, failed.Code);
+            }
+
+            return Json(Reviews.TryGetValue(questionId, out var found) ? found : []);
+        }
+
+        // F-105: the Api's answer to a send or a withdrawal. It records the entry the Api would, so the history the
+        // page reads again shows it, and moves the question the way the Api does.
+        private HttpResponseMessage ChangeReview(Guid id, bool submit)
+        {
+            if (ReviewFailure is { } refused)
+            {
+                return Problem(refused.Status, refused.Code);
+            }
+
+            var index = Questions.FindIndex(candidate => candidate.Id == id);
+            if (index < 0)
+            {
+                return Problem(HttpStatusCode.NotFound, QuestionBankErrorCodes.QuestionNotFound);
+            }
+
+            var current = Questions[index];
+            var changed = current with
+            {
+                Status = submit ? QuestionStatus.InReview : QuestionStatus.Draft,
+                SubmittedAt = submit ? ReviewMoment : null
+            };
+            Questions[index] = changed;
+
+            if (!Reviews.TryGetValue(id, out var entries))
+            {
+                entries = [];
+                Reviews[id] = entries;
+            }
+
+            entries.Add(new QuestionReviewEntryResponse(
+                submit ? QuestionReviewKind.Submitted : QuestionReviewKind.Withdrawn,
+                null,
+                ReviewMoment.AddMinutes(entries.Count)));
+
+            return Json(changed);
         }
 
         /// <summary>F-101: when set, an annul or a reinstate answers this problem.</summary>

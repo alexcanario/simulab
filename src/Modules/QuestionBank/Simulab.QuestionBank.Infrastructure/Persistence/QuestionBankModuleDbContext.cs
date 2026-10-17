@@ -31,6 +31,9 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-102: the passages several questions share, linked through <c>questions.base_text_id</c>.</summary>
     public DbSet<BaseText> BaseTexts => Set<BaseText>();
 
+    /// <summary>F-105: the append-only history of each question's review.</summary>
+    public DbSet<QuestionReviewEntry> QuestionReviewEntries => Set<QuestionReviewEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -39,6 +42,7 @@ public sealed class QuestionBankModuleDbContext(
         modelBuilder.ApplyConfiguration(new BaseTextConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionReviewEntryConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());
     }
 }

@@ -39,7 +39,10 @@ public sealed class AdminPagesAuthorizationTests
         ["QuestionForm"] = QuestionBankPermissions.Manage,
         // F-102 AC10 (BR12): the base text list and form (three routes) ask for the same permission as the questions.
         ["BaseTexts"] = QuestionBankPermissions.Manage,
-        ["BaseTextForm"] = QuestionBankPermissions.Manage
+        ["BaseTextForm"] = QuestionBankPermissions.Manage,
+        // F-105 AC9 (BR10): the review queue and the review screen ask for the review permission, never for manage.
+        ["ReviewQueue"] = QuestionBankPermissions.Review,
+        ["ReviewQuestion"] = QuestionBankPermissions.Review
     };
 
     // F-36 BR10 and AC12: the student catalog is behind catalog.browse, never catalog.manage: a back office account

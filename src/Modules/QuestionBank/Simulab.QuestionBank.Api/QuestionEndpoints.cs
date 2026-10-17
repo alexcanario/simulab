@@ -33,6 +33,9 @@ public static class QuestionEndpoints
         questions.MapPost("/{id:guid}/unpublish", UnpublishAsync).WithName("UnpublishQuestion");
         questions.MapPost("/{id:guid}/annul", AnnulAsync).WithName("AnnulQuestion");
         questions.MapPost("/{id:guid}/reinstate", ReinstateAsync).WithName("ReinstateQuestion");
+        questions.MapPost("/{id:guid}/submit", SubmitAsync).WithName("SubmitQuestion");
+        questions.MapPost("/{id:guid}/withdraw", WithdrawAsync).WithName("WithdrawQuestion");
+        questions.MapGet("/{id:guid}/reviews", ListReviewsAsync).WithName("ListQuestionReviews");
         questions.MapDelete("/{id:guid}", DeleteAsync).WithName("DeleteQuestion");
         questions.MapGet("/{id:guid}/versions", ListVersionsAsync).WithName("ListQuestionVersions");
         questions.MapGet("/{id:guid}/versions/{number:int}", FindVersionAsync).WithName("FindQuestionVersion");
@@ -168,6 +171,40 @@ public static class QuestionEndpoints
         var result = await handler.HandleAsync(id, request?.Reason, cancellationToken);
 
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    // F-105 UC1, UC2: a curator sends a complete draft for review or takes it back; no body.
+    private static async Task<IResult> SubmitAsync(
+        Guid id,
+        SubmitQuestionHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(id, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    private static async Task<IResult> WithdrawAsync(
+        Guid id,
+        WithdrawQuestionHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(id, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
+    }
+
+    // F-105 UC6, BR7: the history of a question's review, oldest first; a read, so no paging (a question has few).
+    private static async Task<IResult> ListReviewsAsync(
+        Guid id,
+        IQuestionQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var reviews = await queries.ListReviewsAsync(id, cancellationToken);
+
+        return reviews is null
+            ? Problem(new Error(QuestionBankErrorCodes.QuestionNotFound, ErrorKind.NotFound))
+            : Results.Ok(reviews);
     }
 
     private static async Task<IResult> DeleteAsync(

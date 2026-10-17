@@ -128,4 +128,19 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-102 BR3: the language of a base text that has linked questions cannot change.</summary>
     public const string BaseTextLanguageInUse = "base_text.language_in_use";
+
+    /// <summary>F-105 BR3: the question is in review and frozen; save, publish, unpublish and delete are refused.</summary>
+    public const string QuestionInReview = "question.in_review";
+
+    /// <summary>F-105 BR2: the question is already in review.</summary>
+    public const string QuestionAlreadyInReview = "question.already_in_review";
+
+    /// <summary>F-105 BR4, BR5, BR6: only a question in review is withdrawn, approved or rejected.</summary>
+    public const string QuestionNotInReview = "question.not_in_review";
+
+    /// <summary>F-105 BR6: a rejection has no reason (missing, blank or no body).</summary>
+    public const string QuestionReviewReasonRequired = "question.review_reason_required";
+
+    /// <summary>F-105 BR5, BR6: the reason of a rejection or the note of an approval has more than 500 characters.</summary>
+    public const string QuestionReviewReasonTooLong = "question.review_reason_too_long";
 }

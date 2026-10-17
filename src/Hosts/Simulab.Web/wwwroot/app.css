@@ -945,6 +945,25 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-top: 5px;
 }
 
+/* F-105 AC18: the counter of a text field sits right-aligned on the line of the hint or the error text, as text
+   in the secondary colour (the same token as the hint), so the count never depends on colour and never replaces
+   the message. */
+.app-field-description-counter {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--app-space-2);
+}
+
+.app-field-counter {
+    margin-left: auto;
+    margin-top: 5px;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 /* F-35, BR16: the date field says what is wrong in its own description below (one place, announced through
    aria-describedby). The picker's own helper line would repeat it with MudBlazor's wording. */
 .app-date-field .mud-input-helper-text {

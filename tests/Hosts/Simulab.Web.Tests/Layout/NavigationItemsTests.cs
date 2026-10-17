@@ -85,6 +85,8 @@ public class NavigationItemsTests
                 ("/admin/exams", CatalogPermissions.Manage),
                 ("/admin/subjects", CatalogPermissions.Manage),
                 ("/admin/questions", QuestionBankPermissions.Manage),
+                // F-105 AC9 (Screen 1): the review queue follows the questions, behind the review permission.
+                ("/admin/questions/review", QuestionBankPermissions.Review),
                 // F-102 AC10 (BR12): the base texts follow the questions, behind the same permission.
                 ("/admin/base-texts", QuestionBankPermissions.Manage));
     }

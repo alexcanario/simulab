@@ -303,7 +303,9 @@ public sealed class BaseTextsPageTests : QuestionPageTestContext
         var questions = entries.FindIndex(item => item.ResourceKey == "Nav.Questions");
         var baseTexts = entries.FindIndex(item => item.ResourceKey == "Nav.BaseTexts");
 
-        baseTexts.Should().Be(questions + 1);
+        // F-105 AC9 (Screen 1): the review queue entry sits right after Questions, so the base texts follow it.
+        baseTexts.Should().Be(questions + 2);
+        entries[questions + 1].ResourceKey.Should().Be("Nav.ReviewQueue");
         entries[baseTexts].Route.Should().Be("/admin/base-texts");
         entries[baseTexts].RequiredPermission.Should().Be(QuestionBankPermissions.Manage);
         entries[baseTexts].Icon.Should().Be(AppIcons.BaseText);

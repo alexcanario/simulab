@@ -15,10 +15,13 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/question-bank/editions/{editionId}` | FindQuestionEdition | 200 |
 | `GET` | `/api/v1/question-bank/editions` | SearchQuestionEditions | 200 |
 | `GET` | `/api/v1/question-bank/organizers` | ListQuestionOrganizers | 200 |
+| `GET` | `/api/v1/question-bank/questions/{id}/reviews` | ListQuestionReviews | 200 |
 | `GET` | `/api/v1/question-bank/questions/{id}/versions/{number}` | FindQuestionVersion | 200 |
 | `GET` | `/api/v1/question-bank/questions/{id}/versions` | ListQuestionVersions | 200 |
 | `GET` | `/api/v1/question-bank/questions/{id}` | FindQuestion | 200 |
 | `GET` | `/api/v1/question-bank/questions` | ListQuestions | 200 |
+| `GET` | `/api/v1/question-bank/review-queue/{id}` | FindQuestionInReview | 200 |
+| `GET` | `/api/v1/question-bank/review-queue` | ListReviewQueue | 200 |
 | `GET` | `/api/v1/question-bank/subjects/{subjectId}/topics` | ListQuestionSubjectTopics | 200 |
 | `GET` | `/api/v1/question-bank/subjects` | SearchQuestionSubjects | 200 |
 | `GET` | `/api/v1/question-bank/taxonomy` | GetQuestionTaxonomy | 200 |
@@ -26,7 +29,11 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `POST` | `/api/v1/question-bank/questions/{id}/annul` | AnnulQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/publish` | PublishQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/reinstate` | ReinstateQuestion | 200 |
+| `POST` | `/api/v1/question-bank/questions/{id}/submit` | SubmitQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions/{id}/unpublish` | UnpublishQuestion | 200 |
+| `POST` | `/api/v1/question-bank/questions/{id}/withdraw` | WithdrawQuestion | 200 |
 | `POST` | `/api/v1/question-bank/questions` | CreateQuestion | 200 |
+| `POST` | `/api/v1/question-bank/review-queue/{id}/approve` | ApproveQuestion | 200 |
+| `POST` | `/api/v1/question-bank/review-queue/{id}/reject` | RejectQuestion | 200 |
 | `PUT` | `/api/v1/question-bank/base-texts/{id}` | UpdateBaseText | 200 |
 | `PUT` | `/api/v1/question-bank/questions/{id}` | UpdateQuestion | 200 |

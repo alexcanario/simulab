@@ -18,6 +18,9 @@ public static class NavigationItems
         new(NavigationSection.Content, "/admin/exams", AppIcons.Exams, "Nav.Exams", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/subjects", AppIcons.Subjects, "Nav.Subjects", RequiredPermission: CatalogPermissions.Manage),
         new(NavigationSection.Content, "/admin/questions", AppIcons.Questions, "Nav.Questions", RequiredPermission: QuestionBankPermissions.Manage),
+        // F-105 (BR10): the review queue follows the questions and is behind its own permission, so a role holding
+        // only questions.review sees this item and nothing else of the question bank.
+        new(NavigationSection.Content, "/admin/questions/review", AppIcons.Review, "Nav.ReviewQueue", RequiredPermission: QuestionBankPermissions.Review),
         new(NavigationSection.Content, "/admin/base-texts", AppIcons.BaseText, "Nav.BaseTexts", RequiredPermission: QuestionBankPermissions.Manage),
         new(NavigationSection.Administration, "/admin/roles", AppIcons.Roles, "Nav.Roles", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
