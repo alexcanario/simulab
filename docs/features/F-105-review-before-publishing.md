@@ -1,9 +1,9 @@
 ---
 feature: F-105
 epic: Question bank
-status: approved
+status: building
 board: 151
-version: 1
+version: 2
 ---
 # Review before publishing
 
@@ -45,7 +45,7 @@ Give the question bank the middle step of "draft, review, publish": a question c
 - BR2 Sending needs `questions.manage`, a `Draft`, and the same completeness check as publishing (BR4 of F-95 and the type's key rules): an incomplete draft is refused with the codes publishing uses. A send makes no version (versions belong to published content).
 - BR3 While `InReview` the question is frozen: save, publish, unpublish and delete answer 409 `question.in_review` and change nothing; reading, listing, previewing and the version history still work. The only ways out are a decision and a withdrawal. Annul keeps its own rule (`question.not_published`).
 - BR4 Withdrawing needs `questions.manage` (any holder, not only the one who sent it) and an `InReview` question; it becomes `Draft`. No reason.
-- BR5 Approving needs `questions.review` and an `InReview` question. It does exactly what Publish does (status `Published`, and the version F-98 makes) and adds a note, optional, 1 to 500 characters once trimmed. The person who sent the question may approve it (owner, 2026-10-16); the history records who sent and who decided.
+- BR5 Approving needs `questions.review` and an `InReview` question. It does exactly what Publish does (status `Published`, and the version F-98 makes) and adds a note, optional, 1 to 500 characters once trimmed; the note also serves as the version's change reason when the answer key differs from the latest version (without it, 400 `question.key_change_reason_required`, shown under the note field; change note v2). The person who sent the question may approve it (owner, 2026-10-16); the history records who sent and who decided.
 - BR6 Rejecting needs `questions.review` and an `InReview` question; the reason is required, 1 to 500 characters once trimmed (the F-101 rule). The question becomes `Draft`; there is no `Rejected` status.
 - BR7 Every send, withdrawal, approval and rejection adds one `QuestionReviewEntry` (kind, reason or note, who, when). Entries are never edited or deleted. "Who" is the user id the audit interceptor stores; this item shows no names (see Decisions).
 - BR8 The review queue lists the `InReview` questions, oldest send first (the time of the latest `Submitted` entry), paginated (cap 100), never deleted ones. It has no search or filter in this item.
@@ -59,8 +59,8 @@ Give the question bank the middle step of "draft, review, publish": a question c
 ## Screens and API
 ### API (`/api/v1/question-bank`)
 - `questions.manage`: `POST /questions/{id}/submit` (no body; 200 `QuestionResponse`), `POST /questions/{id}/withdraw` (no body; 200 `QuestionResponse`), `GET /questions/{id}/reviews` (the entries of one question, oldest first: `QuestionReviewEntryResponse(Kind, Reason, At)`).
-- `questions.review`: `GET /review-queue?page=&pageSize=` (`ReviewQueuePageResponse(Items, Total)` of `ReviewQueueItemResponse(Id, StatementExcerpt, ContentLanguage, Type, TopicName, SubjectName, Difficulty, SubmittedAt)`), `GET /review-queue/{id}` (a `QuestionResponse` of an `InReview` question), `POST /review-queue/{id}/approve` (`ApproveQuestionRequest(Note)`), `POST /review-queue/{id}/reject` (`RejectQuestionRequest(Reason)`); both 200 `QuestionResponse`.
-- `QuestionStatus` gains `InReview`; `QuestionResponse` is otherwise unchanged. Typed client methods in `QuestionBankApiClient`.
+- `questions.review`: `GET /review-queue?page=&pageSize=` (`ReviewQueuePageResponse(Items, Total)` of `ReviewQueueItemResponse(Id, StatementExcerpt, ContentLanguage, Type, TopicName, SubjectName, Difficulty, SubmittedAt)`), `GET /review-queue/{id}` (a `QuestionResponse` of an `InReview` question), `POST /review-queue/{id}/approve` (`ApproveQuestionRequest(Note, SubmittedAt)`), `POST /review-queue/{id}/reject` (`RejectQuestionRequest(Reason, SubmittedAt)`); both 200 `QuestionResponse`. `SubmittedAt` is optional on the wire: when sent and different from the time of the latest `Submitted` entry, the call answers 409 `question.version_conflict` (change note v2).
+- `QuestionStatus` gains `InReview`; `QuestionResponse` gains the optional last parameter `DateTimeOffset? SubmittedAt = null`, filled only while the question is `InReview` (the time of the latest `Submitted` entry; change note v2), and is otherwise unchanged. Typed client methods in `QuestionBankApiClient`.
 - Error codes (new): `question.in_review` (409), `question.already_in_review` (409), `question.not_in_review` (409), `question.review_reason_required` (400), `question.review_reason_too_long` (400). Reused: `question.not_found`, `question.already_published`, `question.annulled`, `question.not_published`, `question.version_conflict`, and the completeness codes of publishing.
 - Migration in schema `question_bank`: new table `question_review_entries` (`id`, `question_id`, `kind` string, `reason` nullable text, the `TenantEntity` audit columns; index `ix_question_review_entries_question_id_created_at`; column comments), and the comment of `questions.status` updated to list `InReview`. No stored status becomes invalid; no data is changed.
 
@@ -284,10 +284,10 @@ typing, at the limit, over the limit (the Api's 400):
 - AC4 Given an `InReview` question, when it is withdrawn, then it is a `Draft` again with the same content and a `Withdrawn` entry; given any other status, then 409 `question.not_in_review`. (UC2, BR4)
 - AC5 Given an `InReview` question, when a reviewer approves it with or without a note, then it is `Published`, version 1 holds its content (or the version F-98 makes), and an `Approved` entry holds the trimmed note; a note of 501 characters answers 400 `question.review_reason_too_long` and changes nothing; 500 is accepted. (UC4, BR5)
 - AC6 Given an `InReview` question, when a reviewer rejects it with a reason, then it is a `Draft` and a `Rejected` entry holds the trimmed reason; a missing, blank or 501-character reason answers 400 `question.review_reason_required` or `question.review_reason_too_long` and it stays `InReview`; 500 is accepted. (UC5, BR6)
-- AC7 Given a question that is not `InReview`, when approve or reject is called, then 409 `question.not_in_review`; given two decisions sent together, then one succeeds and the other answers 409 `question.version_conflict`. (BR11)
+- AC7 Given a question that is not `InReview`, when approve or reject is called, then 409 `question.not_in_review`; given two decisions sent together, then one succeeds and the other answers 409 `question.version_conflict`; given a decision that sends a `SubmittedAt` different from the latest `Submitted` entry's (the question was withdrawn and sent again meanwhile), then 409 `question.version_conflict` and it stays `InReview`. (BR11, change note v2)
 - AC8 Given a reviewer who is also the user who sent the question, when they approve it, then it is published and the entries `Submitted` and `Approved` both carry that user's id. (BR5, BR7)
 - AC9 Given the permissions, then: with `questions.manage` only, send, withdraw and the history answer and the queue, review detail, approve and reject answer 403; with `questions.review` only, the queue, review detail, approve and reject answer and send, withdraw, save and the history answer 403; with neither, every route answers 403; a new `Curator` and `Admin` hold both; the menu item and the pages follow the permission. (BR10)
-- AC10 Given questions in several statuses, a deleted one and two sends of which one was rejected and sent again, when the queue is listed, then only the `InReview` ones appear, oldest latest-send first, paginated, and an empty queue shows the empty state; the review detail of a question that is not `InReview` answers 409 `question.not_in_review`. (UC3, BR8)
+- AC10 Given questions in several statuses, a deleted one and two sends of which one was rejected and sent again, when the queue is listed, then only the `InReview` ones appear, oldest latest-send first, paginated, and an empty queue shows the empty state; the review detail of a question that is not `InReview` answers 409 `question.not_in_review`, and one that is carries `SubmittedAt` (the latest send); a question that is not `InReview` carries none. (UC3, BR8, change note v2)
 - AC11 Given a question that went through send, rejection and send, when its history is read, then three entries come oldest first with their kinds and reasons; entries cannot be changed or deleted by any route. (UC6, BR7)
 - AC12 Given a topic used only by an `InReview` question, when it is deleted, then 409 `topic.in_use`. (BR12)
 - AC13 Given a question in review, then the list shows the chip and the filter finds it, the row menu has no Publish or Unpublish and Delete is disabled with its reason. (BR1, BR3)
@@ -300,6 +300,27 @@ typing, at the limit, over the limit (the Api's 400):
 
 ## Criterion → test
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
+| AC17 | pending |
+| AC18 | pending |
+| AC19 | pending |
 
 ## Decisions
 - 2026-10-16 — The rejection reason is required, 1 to 500 characters, the F-101 rule — one rule for curators to learn — confirmed: F-101.
@@ -324,6 +345,12 @@ typing, at the limit, over the limit (the Api's 400):
 - 2026-10-17 — The reason dialogs show a character counter ("0/500") — owner chose "with counter" over the recommended "no counter" (average 6.6 vs 8.0); kept. `AppTextField` gains an optional `Counter`, and because the reason dialog is shared, F-101's annul and reinstate dialogs show it too — asked.
 - 2026-10-17 — Stitch offered — reference (project `projects/7595070180449228896`, design system from `docs/design/DESIGN.md`); failed (the one `generate_screen_from_text` call timed out and no screen appeared in the project after about 9 minutes of polling; not retried). The HTML mockup is the design — owner chose "reference beside the mockup" over the recommended "no" (average 6.8 vs 8.4); kept — asked.
 - 2026-10-17 — Screen design (`ux-designer`, from the kit only): "In review" chip in the `Warning` tone; the history chips Sent `Info`, Withdrawn `Neutral`, Approved `Success`, Rejected `Error`; four new icon constants and no new colour, token or component; Approve and Reject reuse `QuestionStatusReasonDialog` (`Required`, `Label`, `Hint`, `Counter`); the queue has no search, filter or sort; the review screen always shows the key — Claude.
+- 2026-10-17 — Design passes (`system-design`, `architect`, opus: permissions door and public API contract), verified against the code (ErrorCodeTextTests reflection, `BaseTextStore.GuardStatus`, `QuestionResponse`, `IdentityModule` InitialGrants). Accepted: the domain shape (`Submit`, `Withdraw`, `Approve`, `Reject` on `Question`, state judged first, the entry created only by the entity, one `TrySaveChangesAsync`); `InitialGrants [Review]=[Curator]` in the same commit as the permission; the architect's reorder into vertical slices; the glossary rows first (adding `QuestionReviewKind`); a status guard on every update of an existing question so a draft save cannot rewrite the options of a question that went into review (the `GuardStatus` pattern); one shared version-making block for Publish and Approve. Dropped: the original layer-only steps 5 and 8 — Claude.
+- 2026-10-17 — Design coverage: checked layout, rules, contracts, data, scope, simplicity; read Question.cs, the five question handlers, QuestionStore, QuestionConfiguration, IdentityModule, EnumColumnCommentTests, ErrorCodeTextTests, QuestionStatusTextTests, AppTextField, QuestionPageTestContext; not read: QuestionPreviewDialog.razor, UiGallery.razor, MudBlazor icon constants (read at their step) — Claude.
+- 2026-10-17 — Traps: T1 queue ordered by questions timestamps or a `submitted_at` column on questions: wrong order for a re-sent question and an uncarried schema change; T2 Approve calling `Publish()` or a second `SaveChanges`: Publish must refuse InReview and a 409 between saves loses the entry; T3 `Immediate` on every `AppTextField`: a SignalR round trip per keystroke app-wide — Claude.
+- 2026-10-17 — design trade-off 1 approve note as the version change reason — owner chose as proposed. design trade-off 2 `SubmittedAt` optional on `QuestionResponse` — owner chose as proposed. design trade-off 3 optional `SubmittedAt` on approve and reject, 409 on mismatch — owner chose as proposed. Contract changes recorded in change note v2 — asked.
+- 2026-10-17 — Size: kept whole, not L — one state machine, 6 vertical steps (fewer than the 8 allowed), one validation flow; the counter is a small kit piece used by the same dialogs — Claude.
+- 2026-10-17 — plan — 1 glossary rows + Submit end to end (enum value, entry table and migration, `Submit`, POST submit, client method, list arms, form Send, keys and code texts) → AC1, AC2, AC13, AC17; 2 freeze, withdraw and history on API and form (`IsFrozen`, status guard, Withdraw, rejected alert, Review history card, keys) → AC3, AC4, AC11, AC12, AC14, AC16; 3 AppTextField Counter, gallery and the shared reason dialog seen on F-101's annul dialog → AC18; 4 `questions.review`, queue, review detail, approve and reject on the API with keys and code texts, `SubmittedAt` → AC5, AC6, AC7, AC8, AC9, AC10; 5 queue page, review page and nav item (frontend agent) → AC15, AC9, AC10; 6 flow page, manual in three languages, security scan, gate → AC19 — Claude.
 
 ## Out of scope
 - Email to the author when a decision is made — F-121.
@@ -339,6 +366,7 @@ typing, at the limit, over the limit (the Api's 400):
 
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
+- v2 (2026-10-17, owner answers to the design pass): (1) the approve note doubles as the version change reason (BR5); (2) `QuestionResponse` gains optional `SubmittedAt`, the source of "Sent on" on the review screen and of "waiting since" on the form (API section, AC10); (3) approve and reject take an optional `SubmittedAt` that must match the latest `Submitted` entry, else 409 `question.version_conflict` (API section, AC7). Re-approved: BR5, AC7, AC10 and the API contract; nothing else changed.
 
 ## Validation script
 <!-- Written at the end of build, in two subsections with the same steps (English, pt-BR). -->
@@ -351,6 +379,8 @@ typing, at the limit, over the limit (the Api's 400):
 - 2026-10-17 override — reason counter on the reject dialog — chose "with counter" over "no counter"
 - 2026-10-17 override — Stitch reference — chose "reference beside the mockup" over "no"
 - 2026-10-17 question — asked 2, from context 0
+- 2026-10-17 question — asked 3, from context 0
+- 2026-10-17 change — v2: approve note as change reason; QuestionResponse.SubmittedAt; SubmittedAt check on approve/reject
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
