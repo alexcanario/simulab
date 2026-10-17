@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104]
-updated: 2026-10-15
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104, F-105]
+updated: 2026-10-17
 ---
 # Questões
 
@@ -14,7 +14,9 @@ de múltiplas respostas tem várias alternativas corretas.
 
 ## Quem pode usar
 Uma conta com a permissão "Gerenciar o banco de questões". Curadores e Administradores a têm. Todas as outras
-veem Página não encontrada, e o menu não tem o item Questões.
+veem Página não encontrada, e o menu não tem o item Questões. Enviar uma questão para revisão e retirá-la da
+revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem tem a permissão "Revisar questões"
+(Curadores e Administradores a têm): veja [Fila de revisão](review-queue.md).
 
 ## Como fazer
 ### Ver as questões
@@ -25,7 +27,7 @@ veem Página não encontrada, e o menu não tem o item Questões.
 3. Digite na caixa de busca para achar uma palavra do enunciado. Maiúsculas e acentos não importam.
 4. Restrinja a lista com os filtros acima da tabela. Cada um aceita vários valores; uma questão é mantida
    quando combina com pelo menos um valor de cada filtro usado:
-   - **Situação**: rascunhos, questões publicadas, questões anuladas ou qualquer combinação.
+   - **Situação**: rascunhos, questões em revisão, questões publicadas, questões anuladas ou qualquer combinação.
    - **Tipo**: múltipla escolha, certo/errado ou os dois.
    - **Dificuldade**: de 1 a 5, e **Não definida** para questões sem dificuldade.
    - **Disciplina e tópico**: escolha uma disciplina inteira (vale todos os tópicos dela, até os que forem
@@ -109,6 +111,28 @@ Os três tipos de questão podem ser transcritos. O contador existe apenas na te
    corretas e ao menos uma errada). **Salvar** nunca publica.
 3. Uma questão publicada ainda pode ser editada, mas toda edição precisa mantê-la completa.
 4. **Despublicar** devolve a questão a rascunho com o mesmo conteúdo.
+
+### Enviar para revisão
+A publicação direta continua como está. Enviar para revisão é um segundo caminho: a questão só é publicada
+depois que outra pessoa, com a permissão "Revisar questões", a aprova.
+1. Abra um rascunho salvo e, no cartão **Publicação**, escolha **Enviar para revisão**. O botão fica
+   desabilitado pelos mesmos motivos de **Publicar**: alterações não salvas e lista "Antes de publicar"
+   incompleta; a linha de motivo embaixo vale para os dois.
+2. A questão passa a **Em revisão**: um aviso amarelo diz que ela não pode ser editada, todos os campos ficam
+   só para leitura e o cartão mostra desde quando ela espera um revisor.
+3. Enquanto estiver em revisão, a questão não pode ser salva, publicada, despublicada nem excluída, e a lista
+   não oferece Publicar nem Despublicar para ela. **Visualizar como aluno** e o histórico continuam
+   funcionando. Um tópico usado só por uma questão em revisão também não pode ser excluído.
+4. Para mudar algo, escolha **Retirar da revisão**. Não pede motivo: a questão volta a rascunho, com o mesmo
+   conteúdo, e pode ser editada.
+5. Se o revisor **rejeitar**, a questão volta a rascunho e um aviso azul no cartão **Publicação** mostra a data
+   e o motivo da rejeição. Corrija e envie de novo; o aviso some no próximo envio.
+6. Se o revisor **aprovar**, a questão é publicada na hora (versão 1), com a observação do revisor, se houver,
+   guardada no histórico.
+7. O cartão **Histórico de revisão**, entre os cartões **Publicação** e **Histórico**, lista da mais nova para
+   a mais antiga cada envio, retirada, aprovação e rejeição, com a data e o motivo ou a observação. Ele só
+   aparece quando a questão já teve alguma dessas etapas. O nome de quem agiu é guardado, mas ainda não é
+   exibido.
 
 ### Versões e trocas de gabarito
 Todo estado em que uma questão publicada foi exibida fica guardado, de modo que uma tentativa de prova sempre
@@ -224,6 +248,10 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | Esta questão já está anulada. / Esta questão não está anulada. | Outra pessoa a alterou antes. | Recarregue a página. |
 | Só um rascunho pode ser excluído. Despublique a questão primeiro. | A questão está publicada. | Despublique e depois exclua. |
 | Esta questão já está publicada. / Esta questão não está publicada. | Outra pessoa mudou antes de você. | Recarregue a página. |
+| Esta questão está em revisão e não pode ser alterada. Retire-a da revisão primeiro. | Você tentou salvar, publicar, despublicar ou excluir uma questão em revisão. | Escolha **Retirar da revisão** e tente de novo. |
+| Esta questão já está em revisão. | Ela foi enviada antes, por você ou por outra pessoa. | Recarregue a página. |
+| Esta questão não está em revisão. | Outra pessoa a retirou ou decidiu antes de você. | Recarregue a página. |
+| Esta questão está em revisão. Retire-a da revisão antes de excluir. | Excluir está desabilitado para uma questão em revisão. | Retire-a da revisão e depois exclua. |
 | Esta questão não existe mais. | Alguém a excluiu com a sua tela aberta. | Volte à lista. |
 | Só endereços http e https. | O link digitado não é um endereço da web. | Digite um endereço que comece com https://. |
 | Página não encontrada | A sua conta não gerencia o banco de questões. | Fale com um administrador se achar que deveria. |
@@ -235,6 +263,7 @@ removidos ao salvar, e a página mostra o que foi mantido.
 - Um campo com erro avisa ao sair dele, e um salvamento que falha leva o foco à lista de erros.
 
 ## Páginas relacionadas
+- [Fila de revisão](review-queue.md): revisar, aprovar e rejeitar questões enviadas para revisão
 - [Textos-base](base-texts.md): os trechos que várias questões compartilham
 - [Disciplinas e tópicos](subjects.md): as disciplinas e os tópicos a que uma questão aponta
 - [Edições de um exame](exam-editions.md): as provas de onde as questões vêm

@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: en
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104]
-updated: 2026-10-15
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104, F-105]
+updated: 2026-10-17
 ---
 # Questions
 
@@ -14,7 +14,9 @@ multiple-answer question has several correct options.
 
 ## Who can use it
 An account with the permission "Manage the question bank". Curators and Admins have it. Everyone else gets
-Page not found, and the menu has no Questions entry.
+Page not found, and the menu has no Questions entry. Sending a question for review and withdrawing it from
+review also belong to whoever manages the bank. Approving or rejecting belongs to whoever has the permission
+"Review questions" (Curators and Admins have it): see [Review queue](review-queue.md).
 
 ## How to
 ### See the questions
@@ -25,7 +27,7 @@ Page not found, and the menu has no Questions entry.
 3. Type in the search box to find a word of the statement. Case and accents do not matter.
 4. Narrow the list with the filters above the table. Each one lets you pick several values; a question is
    kept when it matches at least one value of every filter you used:
-   - **Status**: drafts, published questions, annulled questions, or any mix.
+   - **Status**: drafts, questions in review, published questions, annulled questions, or any mix.
    - **Type**: single choice, true/false, or both.
    - **Difficulty**: 1 to 5, and **Not set** for questions with no difficulty.
    - **Subject and topic**: pick a whole subject (it means all its topics, even topics added later) or
@@ -108,6 +110,28 @@ All three question types can be transcribed. The counter lives only on the scree
    least one wrong). Choosing **Save** never publishes.
 3. A published question can still be edited, but every edit must keep it complete.
 4. **Unpublish** takes it back to a draft with the same content.
+
+### Send for review
+Publishing directly stays as it is. Sending for review is a second way: the question is published only after
+someone with the permission "Review questions" approves it.
+1. Open a saved draft and, in the **Publication** card, choose **Send for review**. The button is disabled for
+   the same reasons as **Publish**: unsaved changes and an incomplete "Before publishing" list; the reason
+   line below applies to both.
+2. The question becomes **In review**: a yellow notice says it cannot be edited, every field becomes
+   read-only and the card shows since when it has been waiting for a reviewer.
+3. While it is in review, the question cannot be saved, published, unpublished or deleted, and the list offers
+   neither Publish nor Unpublish for it. **Preview as a student** and the history keep working. A topic used
+   only by a question in review cannot be deleted either.
+4. To change something, choose **Withdraw from review**. It asks for no reason: the question goes back to a
+   draft with the same content and can be edited.
+5. If the reviewer **rejects** it, the question goes back to a draft and a blue notice in the **Publication**
+   card shows the date and the reason for the rejection. Fix it and send it again; the notice goes away with
+   the next send.
+6. If the reviewer **approves** it, the question is published at once (version 1), and the reviewer's note, if
+   any, is kept in the history.
+7. The **Review history** card, between the **Publication** and **History** cards, lists every send,
+   withdrawal, approval and rejection, newest first, with the date and the reason or note. It appears only
+   once the question has had one of these steps. The name of who acted is stored, but not shown yet.
 
 ### Versions and answer key changes
 Every state a published question was shown in is kept, so an exam attempt can always be tied to the exact text
@@ -223,6 +247,10 @@ the question is saved, and the page shows what was kept.
 | This question is already annulled. / This question is not annulled. | Someone else changed it first. | Reload the page. |
 | Only a draft can be deleted. Unpublish the question first. | The question is published. | Unpublish it, then delete. |
 | This question is already published. / This question is not published. | Someone else changed it first. | Reload the page. |
+| This question is in review and cannot be changed. Withdraw it from review first. | You tried to save, publish, unpublish or delete a question in review. | Choose **Withdraw from review** and try again. |
+| This question is already in review. | It was sent earlier, by you or someone else. | Reload the page. |
+| This question is not in review. | Someone else withdrew it or decided it first. | Reload the page. |
+| This question is in review. Withdraw it before deleting. | Delete is disabled for a question in review. | Withdraw it from review, then delete. |
 | This question no longer exists. | Someone deleted it while your screen was open. | Go back to the list. |
 | Only http and https addresses. | The link you typed is not a web address. | Type an address that starts with https://. |
 | Page not found | Your account cannot manage the question bank. | Talk to an admin if you think it should. |
@@ -234,6 +262,7 @@ the question is saved, and the page shows what was kept.
 - A field with an error says so when you leave it, and a failed save moves the focus to the list of errors.
 
 ## Related pages
+- [Review queue](review-queue.md): review, approve and reject questions sent for review
 - [Base texts](base-texts.md): the passages several questions share
 - [Subjects and topics](subjects.md): the subjects and topics a question points at
 - [Exam editions](exam-editions.md): the papers questions come from
