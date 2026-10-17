@@ -1,0 +1,21 @@
+---
+feature: F-127
+epic: Foundation and identity
+status: idea
+board: 178
+version: 1
+---
+# Exam form in the new composition
+
+Technical terms: [glossary](../glossary.md)
+
+## Summary
+The exam form (`Catalog/ExamForm.razor`) takes the composition of the Control Alt Systems reference screen (D-4): section cards, the summary aside and one orange action. The colours and controls come from F-125; this item decides the composition of this page and which action is its single orange one.
+
+## Start
+- Depends on: F-125
+- Waits on (to start): nothing
+- Needed to validate: the owner, on screen
+- Model: unknown — settled at /agile:refine
+- Suggested path: `/agile:refine` → `/agile:screen` → `/agile:build`
+- Parallel with: F-126, F-128, F-129 (different pages)

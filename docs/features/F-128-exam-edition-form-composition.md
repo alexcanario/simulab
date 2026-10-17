@@ -1,0 +1,21 @@
+---
+feature: F-128
+epic: Foundation and identity
+status: idea
+board: 179
+version: 1
+---
+# Exam edition form in the new composition
+
+Technical terms: [glossary](../glossary.md)
+
+## Summary
+The exam edition form (`Catalog/ExamEditionForm.razor`, with its sections: syllabus, notice subjects, questions of the edition and their dialogs) takes the composition of the Control Alt Systems reference screen (D-4): section cards, the summary aside and one orange action. The colours and controls come from F-125; this item decides the composition and which action is the single orange one.
+
+## Start
+- Depends on: F-125
+- Waits on (to start): nothing
+- Needed to validate: the owner, on screen
+- Model: unknown — settled at /agile:refine
+- Suggested path: `/agile:refine` → `/agile:screen` → `/agile:build`
+- Parallel with: F-126, F-127, F-129 (different pages)
