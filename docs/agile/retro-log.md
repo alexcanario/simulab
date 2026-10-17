@@ -1303,3 +1303,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.96.0 to 0.100.0 (4 minor versions). Copied: `workflow.pt-BR.md` (companion benchmark scope, plugin release section) and `workflow-examples.pt-BR.md` (examples 14.138 and 14.139). Left alone: edited `git.md` and `profile.md` (plugin unchanged), manual build files (plugin unchanged).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
 - Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.
+
+## 2026-10-17 - Sync with agile@canary 0.103.0
+- From 0.100.0 to 0.103.0 (3 minor versions). Copied: `docs/agile/templates/bug.md` and `feature.md` (`- Model:` line), `project-claude.md` (Evals line uses `node evals/run.js`), `workflow.pt-BR.md` (models per activity, sealed green tree, `/agile:order`) and `workflow-examples.pt-BR.md`. Left alone: edited `git.md` and `profile.md` (upstream unchanged), manual build files (plugin unchanged).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: nothing proposed; the technical-terms sweep was not run.
+- Proposed, not captured: DocGen tool catalogue, release pipeline (`release.yml`), Azure login check in `agile-deploy.js`.

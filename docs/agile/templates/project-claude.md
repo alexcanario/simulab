@@ -41,7 +41,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Build: `<build command>`
 - Affected tests: `<command or hook>` (budget: unit < 30 s, integration < 2 min)
 - Full suite (ship only): `<test command>` (budget: < 5 min)
-- Evals (ship and on demand, never in the turn gate; only when a feature calls a model, quiz 30b): `claude plugin eval <target> --model <model> --ablation none --max-cost-usd <ceiling> --json <result file>`, then `node evals/compare.js <result file>` — pass-rate baseline `evals/baseline.json` (records the model and the ablation; another model or ablation is "not measured"), cost ceiling `<amount>` per run, set after one measured run. Another runner keeps the model and the ceiling. Delete this line otherwise.
+- Evals (ship and on demand, never in the turn gate; only when a feature calls a model, quiz 30b): `node evals/run.js` (`evals/evals.json`: model, `runs`, `ablation`, `limitUsd` = the most one run may cost; it seals green cases, estimates before paying, refuses above the limit, then runs `node evals/compare.js`; `--fresh` runs every case) — pass-rate baseline `evals/baseline.json` (records the model and the ablation; another model or ablation is "not measured"). Without `evals.json`: `claude plugin eval <target> --model <model> --ablation none --max-cost-usd <ceiling> --json <result file>`, then `node evals/compare.js <result file>`. Delete this line otherwise.
 - Run locally: `<app host command>`
 
 ## Models

@@ -108,7 +108,7 @@ Conferi o código: o módulo Catalog existe, mas ainda não tem entidades.
 O modelo de usuários e papéis do bootstrap tem Curator e Admin.
 ```
 
-Um item sobre evals é a exceção a "perguntar tudo de uma vez": o número de execuções por caso e o teto de custo só são propostos depois que o Claude roda um caso uma vez e cita quanto custou (exemplo 14.26).
+Um item sobre evals é a exceção a "perguntar tudo de uma vez": o número de execuções por caso e o `limitUsd` (o teto de cada chamada o runner deriva) só são propostos depois que o Claude roda um caso uma vez e cita quanto custou (exemplo 14.26).
 
 As perguntas vêm como cartões de quiz, um por tema, com a opção recomendada primeiro. No app desktop você clica; sem a ferramenta de perguntas (um terminal, uma execução sem interface) cada pergunta chega como um bloco citado com o marcador `❓`, respondido com "ok" ou uma letra. O primeiro cartão, "Regras":
 
@@ -5038,3 +5038,91 @@ Um plugin não tem ambiente, loja nem nuvem. Se você digitar `/agile:publish st
 ```
 
 O mesmo vale para `--beta`, `--park`, `--resume`, `--cost` e `--restore-drill` (cada um com o seu motivo) e para o release no GitHub Actions: um plugin é sempre lançado da sua máquina, e nenhum desses modos escreve nada. Se o `gh` não estiver instalado, ou o `origin` não for do GitHub, a tag é feita e enviada do mesmo jeito, e o relatório diz `GitHub Release skipped` com o motivo.
+
+### 14.140 O modelo sugerido de cada item: gravado no refinamento, mostrado em `/agile:order` e dito no `/agile:build`
+
+No acme-shop você refina a F-12, "Add a webhook for paid orders", e a F-13, "Show the paid date in the order list". Logo antes de pedir o "aprovo", o Claude decide o modelo de cada uma com a seção "Main session" da régua e diz isso no resumo:
+
+Claude: Modelo sugerido para construir a F-12: opus (porta: webhook). Para a F-13: sonnet (nenhum sinal: sem porta, sem contrato público, sem esquema, sem módulo novo, tamanho M). A linha fica no `## Start` de cada item, depois de `Needed to validate`; quem troca o modelo da sessão é você.
+
+```
+- Needed to validate: nothing
+- Model: opus (door: webhook)
+```
+
+A F-14, "Export orders to CSV", foi aprovada antes dessa mudança e não tem a linha. Você digita `/agile:order` e a lista mostra os três, a F-14 com `-`. Saída real do `order.js` sobre esses três itens:
+
+```
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 1 | F-12 | Add a webhook for paid orders | approved | opus | checkout | - | - |
+| 2 | F-13 | Show the paid date in the order list | approved | sonnet | checkout | - | - |
+| 3 | F-14 | Export orders to CSV | approved | - | checkout | - | - |
+
+- [ ] 1. F-12 — Add a webhook for paid orders [approved] — model opus
+- [ ] 2. F-13 — Show the paid date in the order list [approved] — model sonnet
+- [ ] 3. F-14 — Export orders to CSV [approved]
+```
+
+Você abre uma sessão em `opus` e digita `/agile:build F-13`. O item sugere `sonnet`, e o Claude diz uma linha e segue, sem perguntar nada:
+
+Claude: Model: item suggests sonnet, session is opus
+
+Com `/agile:build F-12` na mesma sessão `opus` o Claude não diz nada: o modelo é o mesmo. A ordem da lista não mudou por causa da coluna, e nenhum item sem a linha foi alterado.
+
+### 14.141 O ship das evals paga só o caso que mudou, estima antes e recusa acima do limite
+
+O app tem quatro casos de eval e um `evals/evals.json` com o modelo `claude-haiku-5-5`, `runs: 1`, `ablation: "none"`, `limitUsd: 3` e um mapa de entradas: `prompts/system.md` vale para todos os casos e `prompts/refusal.md` só para `refuses-off-topic`. Ninguém mediu o custo de um caso ainda. No ship, o Claude roda o runner:
+
+```powershell
+node evals/run.js
+```
+
+```bash
+node evals/run.js
+```
+
+```
+no measured cost for cites-source: running it first (the only paid call before the estimate)
+estimate: US$ 1.23 (3 case(s) × 1 run(s))
+ok       grounded-answer: 1 (baseline 1)
+ok       refuses-off-topic: 1 (baseline 1)
+ok       cites-source: 1 (baseline 1)
+ok       short-reply: 1 (baseline 1)
+cost US$ 1.64, model claude-haiku-5-5, ablation none
+evals GREEN
+```
+
+Um caso rodou sozinho para medir o custo; os outros três foram estimados com ele, ficaram abaixo do limite e rodaram, cada chamada com o teto da própria estimativa × 1,5 (você não digita teto nenhum). Os quatro casos verdes foram selados. No ship seguinte nada mudou nas entradas:
+
+```
+sealed: 4 case(s) green on an equal key, US$ 1.64 and 0 s not spent; --fresh runs them again
+ok       grounded-answer: 1 (baseline 1)
+ok       refuses-off-topic: 1 (baseline 1)
+ok       cites-source: 1 (baseline 1)
+ok       short-reply: 1 (baseline 1)
+cost US$ 0.00, model claude-haiku-5-5, ablation none
+evals GREEN
+```
+
+Nenhuma chamada paga; o veredito e o código de saída são os de uma rodada inteira. (Os segundos são 0 porque o runner deste exemplo é um stand-in que responde na hora; numa rodada real o selo guarda o tempo de verdade de cada caso.) Depois a feature muda `prompts/refusal.md`, e só o caso que lê esse arquivo roda:
+
+```
+estimate: US$ 0.41 (1 case(s) × 1 run(s))
+sealed: 3 case(s) green on an equal key, US$ 1.23 and 0 s not spent; --fresh runs them again
+ok       grounded-answer: 1 (baseline 1)
+ok       refuses-off-topic: 1 (baseline 1)
+ok       cites-source: 1 (baseline 1)
+ok       short-reply: 1 (baseline 1)
+cost US$ 0.41, model claude-haiku-5-5, ablation none
+evals GREEN
+```
+
+Se `prompts/system.md` mudar (vale para os quatro) com o `limitUsd` baixado para 1, a estimativa passa do limite e nada é pago:
+
+```
+estimate: US$ 1.64 (4 case(s) × 1 run(s))
+REFUSED: estimate US$ 1.64 (4 case(s) × 1 run(s)) over the limit US$ 1.00; nothing was paid
+```
+
+O código de saída é 4 e o ship para até você decidir (subir o `limitUsd`). Um caso que caiu abaixo da base (`DROP`), uma execução parcial ou um caso sem base (`NEW`) nunca é selado, e o próximo ship o roda de novo. `--fresh` roda tudo sem olhar os selos.
