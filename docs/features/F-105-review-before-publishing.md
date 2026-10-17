@@ -299,6 +299,9 @@ typing, at the limit, over the limit (the Api's 400):
 - AC19 All new texts and error code texts appear in every locale of `UI locales:`.
 
 ## Criterion → test
+
+Tests locked: 15a43374df1432e7b4049b5ce4cc5f48f55b2453 (9 files); unlocks: 0
+
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
 | Criterion | Test |
 |---|---|

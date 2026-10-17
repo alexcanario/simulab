@@ -46,6 +46,12 @@ public sealed class SaveQuestionHandler(
             return Refused(new Error(QuestionBankErrorCodes.QuestionAnnulled, ErrorKind.Conflict));
         }
 
+        // F-105 BR3: so is a question in review, which only a decision or a withdrawal leaves.
+        if (existing?.Status == QuestionStatus.InReview)
+        {
+            return Refused(new Error(QuestionBankErrorCodes.QuestionInReview, ErrorKind.Conflict));
+        }
+
         // F-97 BR2: the type never changes. Naming another one is a 409 before anything else is judged, so the
         // shape checks never answer 400 for a request that is really asking to change the type.
         if (existing is not null && request.Type is { } named && named != existing.Type)
@@ -164,6 +170,12 @@ public sealed class SaveQuestionHandler(
         if (existing is null)
         {
             store.Add(question);
+        }
+        else
+        {
+            // F-105 BR3: a save that changes only options writes no column of the question; the guard still puts
+            // the status in the UPDATE's condition, so a draft that went into review meanwhile is a lost race.
+            store.GuardStatus(question);
         }
 
         if (await store.TrySaveChangesAsync(cancellationToken) is { } refused)

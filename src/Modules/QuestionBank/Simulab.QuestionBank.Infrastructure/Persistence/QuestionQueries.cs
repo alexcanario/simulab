@@ -171,6 +171,11 @@ public sealed class QuestionQueries(
                 .FirstOrDefaultAsync(cancellationToken)
             : null;
 
+        // F-105 (change note v2): the time of the latest send, only while the question waits for a reviewer.
+        var submittedAt = question.Status == QuestionStatus.InReview
+            ? await LatestSubmittedAtAsync(question.Id, cancellationToken)
+            : null;
+
         return new QuestionResponse(
             question.Id,
             question.Type,
@@ -192,7 +197,89 @@ public sealed class QuestionQueries(
             origins.Build(question.ExamEditionId, question.PaperNumber, question.NoticeSubjectId),
             question.TrueFalseKey,
             latest?.Number,
-            annulment);
+            annulment,
+            submittedAt);
+    }
+
+    private Task<DateTimeOffset?> LatestSubmittedAtAsync(Guid questionId, CancellationToken cancellationToken) =>
+        context.QuestionReviewEntries
+            .AsNoTracking()
+            .Where(entry => entry.QuestionId == questionId && entry.Kind == QuestionReviewKind.Submitted)
+            .MaxAsync(entry => (DateTimeOffset?)entry.CreatedAt, cancellationToken);
+
+    public async Task<IReadOnlyList<QuestionReviewEntryResponse>?> ListReviewsAsync(
+        Guid questionId,
+        CancellationToken cancellationToken)
+    {
+        // The question's own filter hides a deleted one, so its history is not read through the API either.
+        if (!await context.Questions.AsNoTracking().AnyAsync(question => question.Id == questionId, cancellationToken))
+        {
+            return null;
+        }
+
+        // Oldest first; the id breaks a tie between two events of the same instant.
+        return await context.QuestionReviewEntries
+            .AsNoTracking()
+            .Where(entry => entry.QuestionId == questionId)
+            .OrderBy(entry => entry.CreatedAt)
+            .ThenBy(entry => entry.Id)
+            .Select(entry => new QuestionReviewEntryResponse(entry.Kind, entry.Reason, entry.CreatedAt))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<ReviewQueuePageResponse> ListReviewQueueAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var take = Math.Clamp(pageSize, 1, QuestionListQuery.MaxPageSize);
+        var skip = Math.Max(page, 0) * take;
+        var inReview = context.Questions.AsNoTracking().Where(question => question.Status == QuestionStatus.InReview);
+
+        var total = await inReview.CountAsync(cancellationToken);
+
+        // BR8: the order is the time of the latest send, oldest first. A question rejected and sent again goes
+        // behind the others; one with no send on record (E-9 may create such) falls back to its creation.
+        var rows = await inReview
+            .Select(question => new
+            {
+                question.Id,
+                question.StatementText,
+                question.TopicId,
+                question.Difficulty,
+                question.ContentLanguage,
+                question.Type,
+                SubmittedAt = context.QuestionReviewEntries
+                    .Where(entry => entry.QuestionId == question.Id && entry.Kind == QuestionReviewKind.Submitted)
+                    .Max(entry => (DateTimeOffset?)entry.CreatedAt) ?? question.CreatedAt
+            })
+            .OrderBy(row => row.SubmittedAt)
+            .ThenBy(row => row.Id)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        var names = (await topics.FindManyAsync([.. rows.Select(row => row.TopicId).Distinct()], cancellationToken))
+            .ToDictionary(entry => entry.Id);
+
+        var items = rows
+            .Select(row =>
+            {
+                names.TryGetValue(row.TopicId, out var topic);
+
+                return new ReviewQueueItemResponse(
+                    row.Id,
+                    Excerpt(row.StatementText),
+                    row.ContentLanguage,
+                    row.Type,
+                    topic?.Name ?? string.Empty,
+                    topic?.SubjectName ?? string.Empty,
+                    row.Difficulty,
+                    row.SubmittedAt);
+            })
+            .ToList();
+
+        return new ReviewQueuePageResponse(items, total);
     }
 
     public async Task<IReadOnlyList<QuestionVersionListItemResponse>?> ListVersionsAsync(
