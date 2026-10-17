@@ -295,7 +295,8 @@ typing, at the limit, over the limit (the Api's 400):
 - AC15 Given the review screen, then **Approve** publishes and returns to the queue, **Reject** needs a reason in its dialog, and a question decided meanwhile shows the "no longer in review" alert. (UC4, UC5)
 - AC16 Given a complete draft, when it is published directly, and given a published question, when it is edited, then both work as in F-95 and F-98 with no review. (UC7, BR13, BR14)
 - AC17 Given the migration, then existing rows stay valid, `question_review_entries` exists with its comments and index, and the enum column comments test passes. (migration)
-- AC18 All new texts and error code texts appear in every locale of `UI locales:`.
+- AC18 Given the reason dialogs of the review (approve, reject) and of F-101 (annul, reinstate), when the user types, then the field shows "{n}/500" updated as they type, stays visible beside an error text, and the count is part of the field's description; `AppTextField` without `Counter` renders as before. (owner decision of 2026-10-17)
+- AC19 All new texts and error code texts appear in every locale of `UI locales:`.
 
 ## Criterion → test
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
@@ -320,6 +321,9 @@ typing, at the limit, over the limit (the Api's 400):
 - 2026-10-16 — No new package (production or tests), setting, job or ADR; the glossary gets the rows `ReviewQueue`, `QuestionReviewEntry`, `Submit for review`, `Approve` and `Reject` before their first use in code — Claude.
 - 2026-10-16 — No data is migrated: stored statuses stay valid and the new table starts empty — Claude, from the code.
 - 2026-10-16 — The Simulae review source is unreachable on this machine and its status path is unused; nothing is imported — Claude, from the code.
+- 2026-10-17 — The reason dialogs show a character counter ("0/500") — owner chose "with counter" over the recommended "no counter" (average 6.6 vs 8.0); kept. `AppTextField` gains an optional `Counter`, and because the reason dialog is shared, F-101's annul and reinstate dialogs show it too — asked.
+- 2026-10-17 — Stitch offered — reference (project `projects/7595070180449228896`, design system from `docs/design/DESIGN.md`); failed (the one `generate_screen_from_text` call timed out and no screen appeared in the project after about 9 minutes of polling; not retried). The HTML mockup is the design — owner chose "reference beside the mockup" over the recommended "no" (average 6.8 vs 8.4); kept — asked.
+- 2026-10-17 — Screen design (`ux-designer`, from the kit only): "In review" chip in the `Warning` tone; the history chips Sent `Info`, Withdrawn `Neutral`, Approved `Success`, Rejected `Error`; four new icon constants and no new colour, token or component; Approve and Reject reuse `QuestionStatusReasonDialog` (`Required`, `Label`, `Hint`, `Counter`); the queue has no search, filter or sort; the review screen always shows the key — Claude.
 
 ## Out of scope
 - Email to the author when a decision is made — F-121.
@@ -344,6 +348,9 @@ typing, at the limit, over the limit (the Api's 400):
 - 2026-10-16 question — asked 9, from context 1
 - 2026-10-16 override — who holds questions.review by default — chose "Admin and Curator" over "Admin only"
 - 2026-10-16 override — capture future ideas — chose "capture the three as ideas" over "only list them"
+- 2026-10-17 override — reason counter on the reject dialog — chose "with counter" over "no counter"
+- 2026-10-17 override — Stitch reference — chose "reference beside the mockup" over "no"
+- 2026-10-17 question — asked 2, from context 0
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
