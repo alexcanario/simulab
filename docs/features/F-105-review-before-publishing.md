@@ -65,75 +65,213 @@ Give the question bank the middle step of "draft, review, publish": a question c
 - Migration in schema `question_bank`: new table `question_review_entries` (`id`, `question_id`, `kind` string, `reason` nullable text, the `TenantEntity` audit columns; index `ix_question_review_entries_question_id_created_at`; column comments), and the comment of `questions.status` updated to list `InReview`. No stored status becomes invalid; no data is changed.
 
 ### Screens
-- **Question form** (`/admin/questions/{id}`), Publication card [changed]: a `Draft` gets **Send for review** beside Preview and Publish, disabled with the same reasons as Publish (unsaved changes, incomplete checklist). An `InReview` question shows the chip "In review", "Waiting for a reviewer since <date>" and one button **Withdraw from review**; the fields are read-only and an alert above the form says the question is frozen and how to leave it (the F-101 pattern). After a rejection, the draft's card shows an info alert "Rejected on <date>: <reason>" until the next send. Sending is only here: the list has no send action.
-- **Review history card** [new], below the Publication card, shown when the question has entries: one row per entry with a chip (Sent, Withdrawn, Approved, Rejected), the date and the reason or note.
-- **Review queue** (`/admin/questions/review`) [new]: menu item "Review queue" in the Content section, shown with `questions.review`. `AppDataTable`: statement excerpt, topic with subject, type, language, sent date; one row action **Review**. Empty state "Nothing is waiting for review."
-- **Review screen** (`/admin/questions/review/{id}`) [new]: read-only. Classification summary, the question as a student sees it, then the answer key and the explanation; buttons **Approve** (filled; optional note in a small dialog) and **Reject** (outlined; dialog with the required reason) and a link back to the queue. States: loading, load error, not found, no longer in review (alert with the link back), conflict.
-- **Question list** [changed]: the status chip says "In review", the status filter offers it, the row menu has no Publish or Unpublish for it and Delete is disabled with the reason said in words.
-- **Edition's question list** (`EditionQuestionsSection`) [changed]: shows the same chip through the shared status text.
-- Mockup: `/agile:screen F-105` for the queue and the review screen; the rest follows the wireframes below.
+Mockup: `docs/features/mockups/F-105-review-before-publishing.html` (the four screens below, every state, light and dark, pt-BR / pt-PT / en). Designed 2026-10-17 by `/agile:screen`; only kit patterns of the gallery, no new colour, no new token. Dates and times are shown with the culture's short format (`"g"`), as the History card does.
+
+#### Kit additions (no new component)
+- `AppIcons` (Material Outlined, one family): `Review` (`FactCheck`: the menu item and the row action), `Withdraw` (`Undo`), `Approve` (`TaskAlt`), `Reject` (`Cancel`). `Send` already exists and is **Send for review**. The exact constants are confirmed against the MudBlazor icon set at build.
+- `QuestionStatusReasonDialog` (F-101) gains `Required` (bool, default `true`), `Label` and `Hint` (default the F-101 texts): the Approve dialog is the same dialog with `Required="false"`, so a reason or a note is asked one way everywhere. An empty optional note sends `Note: null`.
+- `QuestionText.StatusName` and `StatusTone` gain `InReview`; `QuestionText` gains `ReviewKindName` and `ReviewKindTone` for the entries (below).
+- `AppTextField` gains an optional `Counter` parameter (owner, OQ1 → option B, 2026-10-17): off by default; when on, the field shows "{n}/{max}" (`Common.Counter`, `n` = the current length, `max` = `MaxLength`) under the field, right-aligned on the same line as the hint or the error text, inside the field's description (`aria-describedby`); the count is text, not colour, and never replaces the error text. The change is announced politely through a visually hidden live region that says `Common.Counter.Spoken` ("12 of 500 characters"), so a screen reader is never interrupted while typing. Shown in the gallery ("Field kinds": a text field with a counter, empty, typing, at the limit, over the limit with the error). Used by the shared reason dialog `QuestionStatusReasonDialog` (`Counter="true"`), so it also applies to F-101's annul and reinstate reasons and to the Approve note here.
+
+#### Tones
+- Status chip `In review`: `AppStatusTone.Warning` (the kit's "waiting or expiring: pending" tone; the chip text is always beside the dot, so the state never depends on the colour).
+- Review history chips: `Submitted` → `Info`, `Withdrawn` → `Neutral`, `Approved` → `Success`, `Rejected` → `Error` (the F-101 History card tones: an annulment is `Error`, a reinstatement `Neutral`).
+
+#### 1. Review queue (`/admin/questions/review`) [new]
+- `[Authorize(Policy = PermissionPolicy.Prefix + QuestionBankPermissions.Review)]`, `MainLayout`. Without the permission the app answers its not-found page, as every other admin page. Menu item `Nav.ReviewQueue` in the Content section, right after Questions (`NavigationItems`, `RequiredPermission: QuestionBankPermissions.Review`, icon `AppIcons.Review`): a role holding only `questions.review` sees this item and nothing else of the question bank.
+- `AppPageHeader`: breadcrumbs Content / Review queue; title `ReviewQueue.Title`; no primary action (nothing is created here).
+- `AppDataTable<ReviewQueueItemResponse>`, `Searchable="false"`, no filters, no sortable column (the order is fixed: oldest latest-send first, BR8), server paging through `GET /review-queue?page=&pageSize=` with the kit's page sizes. Columns, in order:
+  1. `Questions.Column.Statement`: `AppTruncatedText` (26rem, `Lang` = the question's `ContentLanguage`, `Href` = `/admin/questions/review/{id}`): the name is a link because the review screen is a read-only detail page (rule `ui`). The whole excerpt is the tooltip.
+  2. `Questions.Column.Topic`: topic (`AppTruncatedText` 14rem) with the subject under it in `app-cell-secondary`, as the question list.
+  3. `Questions.Column.Type`: `AppChip` with `QuestionText.TypeName`.
+  4. `Questions.Column.Language`: `QuestionText.LanguageName`, marked `lang`.
+  5. `ReviewQueue.Column.SentAt`: `SubmittedAt` in `"g"`, `app-cell-nowrap`.
+- Row actions (`AppRowActions`, `ItemName` = `Questions.Row.Name` with the excerpt cut at 60 characters): one `MoreActions` entry **Review** (`ReviewQueue.Action.Review`, `AppIcons.Review`, `Key: "review"`) that navigates to the review screen. No Edit, no Delete: the reviewer does not edit here, and a holder of `questions.review` alone has no `questions.manage`.
+- States: loading (`AppLoadingState` inside the table), empty (`AppEmptyState` with `ReviewQueue.Empty`, no action: nothing is created from the queue), ready, load error (`AppErrorState` with Try again), long text (excerpt and topic truncated with tooltip), narrow width (the table scrolls inside `app-table-wrap`; the page header wraps).
+- Accessibility: the table has a caption from the title (kit); each row's Review button is announced as "Review: question "<excerpt>""; the excerpt link is the only tab stop of its cell; the Sent column is text, not a chip. Tab order: drawer, breadcrumbs, rows (excerpt link, then Review) top to bottom, pager.
+
+#### 2. Review screen (`/admin/questions/review/{id}`) [new]
+- Same policy as the queue. Loads `GET /review-queue/{id}`; the reviewer sees what the student sees plus the key, the explanation and the classification (BR9). Nothing here edits content and no link leads to the editor.
+- `AppPageHeader`: breadcrumbs Content / Review queue (link) / Review question; title `Review.Title`. The breadcrumb is the way back in the ready state; the explicit link `ReviewQueue.Back` (`AppLink`) appears in the not-found, no-longer-in-review and load-error cards, as the question form's not-found card does with `Questions.BackToList`.
+- Layout `app-form-layout`: the question card on the left, `AppFormAside` on the right (title `Questions.Form.Aside.Title`, rows: Status chip, Subject, Topic, Content language, Difficulty, Type, Source (the F-96 source line with the paper number, or `Questions.Source.Authored`), `Review.Aside.SentAt`); no checklist. Below 1280 px the aside stacks under the card.
+- Question card (`MudPaper.app-form-card`), the `QuestionPreviewDialog` content rendered inline with the key always shown (the reviewer must see it; there is no Show/Hide answer): source line (`QuestionText.SourceLine` + `Questions.Preview.Number`), the base text in `app-question-base` when there is one, the statement, then the options (`ol.app-question-options`, each correct one with `is-correct`, the icon and the text `Questions.Preview.CorrectAnswer`: never colour alone), or the two answers of a true/false question (`Questions.Preview.Answers`) with the correct one marked, and for multiple answer the line `Questions.Preview.SelectCount`. Then `section.app-preview-answer` with the headings `Questions.Preview.Answer` (the letters of the key, or True/False) and `Questions.Preview.Explanation` (the HTML, or `Questions.Preview.NoExplanation`). Everything the Api sanitised, marked `lang` with the content language.
+- Actions bar (`div.app-form-actions`, under the card): **Reject** (`MudButton` `Variant.Outlined` `Color.Error`, `AppIcons.Reject`) then **Approve** (`Variant.Filled` `Color.Primary`, `AppIcons.Approve`): the page's one filled button. Both are disabled while a decision is in flight.
+- Approve dialog: `QuestionStatusReasonDialog` with `Required="false"`, title `Review.Approve.Dialog.Title`, message `Review.Approve.Dialog.Message`, label `Review.Note.Label`, hint `Review.Note.Hint`, `MaxLength` 500, confirm `Review.Action.Approve` (`Color.Primary`), cancel `Questions.StatusReason.Cancel`; the field shows the counter ("0/500", counting as the reviewer types). The only field check is "too long" (`question.review_reason_too_long`, under the field, beside the counter).
+- Reject dialog: the same dialog with `Required="true"`, `Destructive="true"`, title `Review.Reject.Dialog.Title`, message `Review.Reject.Dialog.Message`, label `Questions.StatusReason.Label`, hint `Questions.StatusReason.Hint`, confirm `Review.Action.Reject` (`Color.Error`); the field shows the counter ("0/500", counting as the reviewer types). An empty or blank reason refuses with `question.review_reason_required` under the field and calls nothing; 501 characters with `question.review_reason_too_long`; the counter stays visible beside the error text in both cases.
+- In progress: the dialog's confirm button shows the progress circle and both dialog buttons are disabled (the dialog's `_busy`); Esc still closes it only when idle.
+- Success: the dialog closes, the page navigates to the queue and a success snackbar says `Review.Approved` or `Review.Rejected`. The queue reloads from its first page.
+- Conflict: the Api's 409 (`question.version_conflict`, `question.not_in_review`) is shown as the error alert inside the dialog (the F-101 rule: a refusal is read where the reviewer is typing). When the dialog closes without a success, the page re-reads `GET /review-queue/{id}`: a 409 `question.not_in_review` turns the page into the **no longer in review** card (`AppAlert` `Severity.Warning`, text `Review.NoLongerInReview`, then the link `ReviewQueue.Back`); a 200 shows the question again.
+- Other states: loading (`AppLoadingState`), load error (`AppErrorState` with Try again, plus the back link), not found (`question.not_found` alert, back link), no longer in review on first load (the same 409 from the Api), long text (a long option, a long URL and a long explanation wrap inside the card: `app-question-content` has `overflow-wrap: anywhere`), narrow width (one column, buttons wrap, aside under the card).
+- Accessibility: the page title is the `h1`; the aside is an `aside` labelled by its title; in both dialogs the counter is part of the field's description (read with the label on focus) and its change is announced politely, never assertively, and the error text is read before it; the options list is labelled (`Questions.Preview.Options` / `Questions.Preview.Answers`); the key is icon + text + border; the dialog is modal, labelled by its title and described by its message (MudBlazor's dialog); after the dialog closes the focus returns to the button that opened it (the F-101 pattern, `_pendingFocus`); the snackbar is the kit's; the frozen states are `role="status"` alerts. Tab order: drawer, breadcrumbs, card content (links inside the content only), Reject, Approve, aside rows are text.
+
+#### 3. Question form (`/admin/questions/{id}`), Publication card [changed]
+- `Draft`: the actions row is **Preview**, **Send for review** (`Questions.Action.SendForReview`, `Variant.Outlined` `Color.Primary`, `AppIcons.Send`), **Publish**, all outlined (Save stays the page's one filled button). Send is disabled for the same reasons as Publish, in the same order (unsaved changes first, then the incomplete checklist); the one visible reason line `#question-publication-reason` describes both buttons (`aria-describedby`). A refused send (400 with a publish code) shows in the card's error alert, as a refused publish does. Success: the card switches to the `InReview` state below and the snackbar says `Questions.SentForReview`; the page stays.
+- `InReview`: above the form the alert `Questions.InReview.Alert` (`Severity.Warning`, the F-101 frozen alert); every field, option, the Add option button and the row actions are disabled or read as values exactly as `IsAnnulled` does (the one `IsFrozen` condition covers both); `AppFormActions` is not rendered. The card shows the chip `In review` (Warning), the sentence `Questions.Publication.InReview` with the time of the latest `Submitted` entry, and the actions **Preview** and **Withdraw from review** (`Questions.Action.Withdraw`, outlined, `AppIcons.Withdraw`). Withdraw asks no reason and no confirmation (BR4; it is reversible, as Unpublish is); while it runs the button shows progress; success puts the card back to `Draft`, the form becomes editable and the snackbar says `Questions.Withdrawn`. A 409 (`question.not_in_review`: decided meanwhile) reloads the question and shows the Api's text in the card's alert.
+- `Draft` after a rejection: inside the card, above the status row, `AppAlert` `Severity.Info` with `Questions.Publication.Rejected` (date in `"g"`, the reason, wrapping). It is shown while the latest entry is `Rejected`, so it disappears with the next send.
+- `Published` and `Annulled`: unchanged.
+- The entries come from `GET /questions/{id}/reviews`, read with the question and after every send, withdrawal and reload. The Api answers oldest first; the page keeps the list and shows it newest first (next card).
+
+#### 3b. Review history card [new]
+- A `MudPaper.app-form-card` with `AppSectionCard` (`Questions.Section.ReviewHistory`, icon `AppIcons.Review`, subtitle `Questions.Section.ReviewHistory.Subtitle`) between the Publication card and the History card, rendered only when the question has at least one entry, or when the entries failed to load (then it shows `AppErrorState` with Try again, so the failure is not silent). No empty state: without entries there is no card.
+- `AppDataTable<QuestionReviewEntryResponse>`, `Searchable="false"`, paged in memory as the History card is, newest first. Columns: `Questions.ReviewHistory.Column.Date` (`At` in `"g"`, `app-cell-nowrap`), `Questions.ReviewHistory.Column.Event` (`AppStatusChip` with `ReviewKindName` / `ReviewKindTone`), `Questions.ReviewHistory.Column.Reason` (`AppTruncatedText` 24rem, or the dash with the hidden `Questions.History.NoReason`). No row action, no person (Decisions).
+
+#### 4. Question list (`/admin/questions`) [changed]
+- The status chip says `Questions.Status.InReview` (Warning) through `QuestionText`; the status filter lists it (it enumerates `QuestionStatus`); `PublicationActions` returns no action for `InReview` (no Publish, no Unpublish, so the row has Edit and Delete only); Delete is disabled with `Questions.Delete.DisabledInReview` as its tooltip and accessible reason. Edit stays: it opens the frozen form, where Withdraw lives.
+- `EditionQuestionsSection`: the chip through the shared status text; nothing else.
+
+#### Claims to check at the build's screen check (`unverified (gallery DOM)`)
+Not confirmable from source on 2026-10-17; the build reads them in the gallery's rendered DOM and corrects this section to what the markup says.
+- `MudDialog` (the approve and reject dialogs): `role="dialog"`, `aria-modal`, labelled by its title and described by its message.
+- `AppDataTable` (queue, review history): a `<caption>` or an accessible name from the page title.
+- `AppRowActions` / `MudIconButton`: the row action's `aria-label` ("Review: question ...") and the disabled Delete's reason reach the accessibility tree.
+- `MudSnackbar`: a `role="status"` live region.
+- `MudButton` with `MudProgressCircular` (busy Send, Withdraw, Approve, Reject): what is announced while in progress.
+- `AppRichTextField` disabled while in review: `contenteditable="false"` or `aria-readonly`.
+- `AppTextField` with `Counter`: that the visually hidden live region (`aria-live="polite"`) announces the count once per pause in typing and not on every keystroke, and that MudBlazor's own `MudTextField` `Counter` (if the build uses it instead of the kit's span) renders text a screen reader reaches.
+- The icon constants `FactCheck`, `TaskAlt`, `Cancel` and `Undo` exist in the installed MudBlazor icon set.
+
+#### Resource keys (SharedResources; en / pt-BR / pt-PT)
+| Key | en | pt-BR | pt-PT |
+|---|---|---|---|
+| `Common.Counter` | {0}/{1} | {0}/{1} | {0}/{1} |
+| `Common.Counter.Spoken` | {0} of {1} characters | {0} de {1} caracteres | {0} de {1} carateres |
+| `Nav.ReviewQueue` | Review queue | Fila de revisão | Fila de revisão |
+| `Questions.Status.InReview` | In review | Em revisão | Em revisão |
+| `Questions.Action.SendForReview` | Send for review | Enviar para revisão | Enviar para revisão |
+| `Questions.Action.Withdraw` | Withdraw from review | Retirar da revisão | Retirar da revisão |
+| `Questions.Publication.InReview` | In review. Waiting for a reviewer since {0}. | Em revisão. Aguardando um revisor desde {0}. | Em revisão. À espera de um revisor desde {0}. |
+| `Questions.InReview.Alert` | This question is in review and cannot be edited. Withdraw it from review to change it. | Esta questão está em revisão e não pode ser editada. Retire-a da revisão para alterá-la. | Esta questão está em revisão e não pode ser editada. Retire-a da revisão para a alterar. |
+| `Questions.Publication.Rejected` | Rejected on {0}: {1} | Rejeitada em {0}: {1} | Rejeitada em {0}: {1} |
+| `Questions.SentForReview` | Question sent for review. | Questão enviada para revisão. | Questão enviada para revisão. |
+| `Questions.Withdrawn` | Question withdrawn from review. It is a draft again. | Questão retirada da revisão. Voltou a ser rascunho. | Questão retirada da revisão. Voltou a ser rascunho. |
+| `Questions.Delete.DisabledInReview` | This question is in review. Withdraw it before deleting. | Esta questão está em revisão. Retire-a da revisão antes de excluir. | Esta questão está em revisão. Retire-a da revisão antes de eliminar. |
+| `Questions.Section.ReviewHistory` | Review history | Histórico de revisão | Histórico de revisão |
+| `Questions.Section.ReviewHistory.Subtitle` | Every time this question was sent for review, withdrawn, approved or rejected, newest first. | Cada vez que esta questão foi enviada para revisão, retirada, aprovada ou rejeitada, da mais recente para a mais antiga. | Cada vez que esta questão foi enviada para revisão, retirada, aprovada ou rejeitada, da mais recente para a mais antiga. |
+| `Questions.ReviewHistory.Column.Date` | Date | Data | Data |
+| `Questions.ReviewHistory.Column.Event` | Event | Evento | Evento |
+| `Questions.ReviewHistory.Column.Reason` | Reason or note | Motivo ou observação | Motivo ou nota |
+| `Questions.ReviewHistory.Kind.Submitted` | Sent | Enviada | Enviada |
+| `Questions.ReviewHistory.Kind.Withdrawn` | Withdrawn | Retirada | Retirada |
+| `Questions.ReviewHistory.Kind.Approved` | Approved | Aprovada | Aprovada |
+| `Questions.ReviewHistory.Kind.Rejected` | Rejected | Rejeitada | Rejeitada |
+| `ReviewQueue.Title` | Review queue | Fila de revisão | Fila de revisão |
+| `ReviewQueue.Column.SentAt` | Sent on | Enviada em | Enviada em |
+| `ReviewQueue.Empty` | Nothing is waiting for review. | Nada aguardando revisão. | Nada à espera de revisão. |
+| `ReviewQueue.Action.Review` | Review | Revisar | Rever |
+| `ReviewQueue.Back` | Back to the queue | Voltar para a fila | Voltar à fila |
+| `Review.Title` | Review question | Revisar questão | Rever questão |
+| `Review.Aside.SentAt` | Sent on | Enviada em | Enviada em |
+| `Review.Action.Approve` | Approve | Aprovar | Aprovar |
+| `Review.Action.Reject` | Reject | Rejeitar | Rejeitar |
+| `Review.Approve.Dialog.Title` | Approve this question? | Aprovar esta questão? | Aprovar esta questão? |
+| `Review.Approve.Dialog.Message` | It is published at once and practice can use it. A note is optional and stays in the review history. | Ela é publicada na hora e a prática pode usá-la. A observação é opcional e fica no histórico de revisão. | É publicada de imediato e a prática pode usá-la. A nota é opcional e fica no histórico de revisão. |
+| `Review.Note.Label` | Note | Observação | Nota |
+| `Review.Note.Hint` | Optional. Plain text, up to 500 characters. | Opcional. Texto simples, até 500 caracteres. | Opcional. Texto simples, até 500 carateres. |
+| `Review.Reject.Dialog.Title` | Reject this question? | Rejeitar esta questão? | Rejeitar esta questão? |
+| `Review.Reject.Dialog.Message` | It goes back to draft with your reason, which the curator sees on the question's page. | Ela volta a rascunho com o seu motivo, que o curador vê na página da questão. | Volta a rascunho com o seu motivo, que o curador vê na página da questão. |
+| `Review.Approved` | Question approved and published. | Questão aprovada e publicada. | Questão aprovada e publicada. |
+| `Review.Rejected` | Question rejected. It is a draft again. | Questão rejeitada. Voltou a ser rascunho. | Questão rejeitada. Voltou a ser rascunho. |
+| `Review.NoLongerInReview` | This question is no longer in review: another reviewer decided it, or it was withdrawn. | Esta questão não está mais em revisão: outro revisor decidiu, ou ela foi retirada. | Esta questão já não está em revisão: outro revisor decidiu, ou foi retirada. |
+| `question.in_review` | This question is in review and cannot be changed. Withdraw it from review first. | Esta questão está em revisão e não pode ser alterada. Retire-a da revisão primeiro. | Esta questão está em revisão e não pode ser alterada. Retire-a primeiro da revisão. |
+| `question.already_in_review` | This question is already in review. | Esta questão já está em revisão. | Esta questão já está em revisão. |
+| `question.not_in_review` | This question is not in review. | Esta questão não está em revisão. | Esta questão não está em revisão. |
+| `question.review_reason_required` | Write the reason for the rejection. | Escreva o motivo da rejeição. | Escreva o motivo da rejeição. |
+| `question.review_reason_too_long` | The reason or note has more than 500 characters. | O motivo ou a observação passa de 500 caracteres. | O motivo ou a nota excede 500 carateres. |
+
+Reused as they are: `Questions.Column.*`, `Questions.Row.Name`, `Questions.Form.Aside.*`, `Questions.Field.*`, `Questions.Source.*`, `Questions.Preview.*`, `Questions.StatusReason.*`, `Questions.History.NoReason`, `Questions.Publication.Publish.Disabled*`, `Common.*`, `question.not_found`, `question.version_conflict`, the completeness codes.
 
 ### Wireframe: Question form, Publication card
 ```text
 +--------------------------------------------------------+
 | Publication                                            |
-| [Draft]  Not available outside the back office.        |
+| [Draft]  Draft. Not available outside the back office. |
 | [ Preview ] [ Send for review ] [new]  [ Publish ]     |
+| Save your changes first.          (one reason, both)   |
 +--------------------------------------------------------+
 
 +--------------------------------------------------------+
 | (!) This question is in review and cannot be edited.   |
-|     Withdraw it to change it.                    [new] |
+|     Withdraw it from review to change it.        [new] |
 +--------------------------------------------------------+
 | Publication                                            |
-| [In review] [new]  Waiting since 16 Oct 2026           |
+| [In review] [new]  In review. Waiting for a reviewer   |
+|                    since 16/10/2026 14:02.             |
 | [ Preview ] [ Withdraw from review ] [new]             |
 +--------------------------------------------------------+
 
 +--------------------------------------------------------+
-| (i) Rejected on 17 Oct 2026: The key of option C       |
+| Publication                                            |
+| (i) Rejected on 17/10/2026 09:15: The key of option C  |
 |     contradicts the explanation.                 [new] |
+| [Draft]  Draft. Not available outside the back office. |
+| [ Preview ] [ Send for review ]  [ Publish ]           |
++--------------------------------------------------------+
+
++--------------------------------------------------------+
+| Review history                                   [new] |
+| Date             | Event      | Reason or note         |
+| 17/10/2026 09:15 | [Rejected] | The key of option C... |
+| 16/10/2026 14:02 | [Sent]     | —                      |
 +--------------------------------------------------------+
 ```
 
 ### Wireframe: Review queue
 ```text
-+------------------------------------------------------------+
-| Review queue                                         [new] |
-+------------------------------------------------------------+
-| Statement          | Topic / Subject | Type  | Lang | Sent |
-| Which article...   | Art. 5 / Const. | Single| pt-BR| 16/10| [ Review ]
-| Read the text...   | Parsing / Port. | Multi | pt-BR| 16/10| [ Review ]
-+------------------------------------------------------------+
-| Nothing is waiting for review.        (empty state)  [new] |
-+------------------------------------------------------------+
++------------------------------------------------------------------------+
+| Content / Review queue                                                 |
+| Review queue                                                     [new] |
++------------------------------------------------------------------------+
+| Statement             | Topic          | Type   | Language | Sent on   | |
+| Acerca dos direitos…  | Direitos fund. | Single | pt-BR    | 16/10 14:02 | [Review]
+|  (link)               |  Direito Const.|        |          |           | |
+| Read the text and…    | Reading        | Multi  | English  | 16/10 15:40 | [Review]
++------------------------------------------------------------------------+
+| (inbox)  Nothing is waiting for review.            (empty state) [new] |
++------------------------------------------------------------------------+
 ```
 
 ### Wireframe: Review screen
 ```text
++--------------------------------------------------------------+--------------------+
+| Content / Review queue / Review question                      | Summary            |
+| Review question                                         [new] | Status [In review] |
++--------------------------------------------------------------+ Subject  Direito…  |
+| CEBRASPE · PRF 2024 · Policial Rodoviário   Question 12       | Topic    Direitos… |
+| (base text)                                                   | Language pt-BR     |
+| Statement ...                                                 | Difficulty 3       |
+| A) ...   B) ...   [C) ... (v) Correct answer]   D) ...  E) ...| Type     Single    |
+| ------------------------------------------------------------- | Source   CEBRASPE… |
+| ANSWER  C                                                     | Sent on  16/10 …   |
+| EXPLANATION ...                                               |                    |
++--------------------------------------------------------------+--------------------+
+|                                   [ (x) Reject ]  [ (v) Approve ]                  |
++------------------------------------------------------------------------------------+
+
+no longer in review:
 +------------------------------------------------------------+
-| < Back to the queue                                  [new] |
-| Review question                                            |
-| Subject / Topic - pt-BR - Difficulty 3 - CEBRASPE 2024 #12 |
-+------------------------------------------------------------+
-| (base text)                                                |
-| Statement ...                                              |
-| A) ...   B) ...   C) ... [correct]   D) ...   E) ...       |
-| Explanation ...                                            |
-+------------------------------------------------------------+
-|                          [ Reject ]  [ Approve ]           |
+| (!) This question is no longer in review: another reviewer |
+|     decided it, or it was withdrawn.                       |
+| Back to the queue                                          |
 +------------------------------------------------------------+
 ```
 
-### Wireframe: Reject dialog
+### Wireframe: Reject and Approve dialogs
 ```text
-+--------------------------------------------+
-| Reject this question?                [new]  |
-| It goes back to draft with your reason.    |
-| Reason *                                   |
-| [______________________________]   0/500   |
-|                  [ Cancel ]  [ Reject ]    |
-+--------------------------------------------+
++----------------------------------------------+   +----------------------------------------------+
+| Reject this question?                  [new] |   | Approve this question?                 [new] |
+| It goes back to draft with your reason,      |   | It is published at once and practice can use |
+| which the curator sees on the question's page|   | it. A note is optional and stays in the      |
+| Reason *                                     |   | review history.                              |
+| [__________________________________________] |   | Note                                         |
+| Required. Plain text, up to 500 chars. 0/500 |   | [__________________________________________] |
+|                    [ Cancel ]  [ Reject ]    |   | Optional. Plain text, up to 500 chars. 0/500 |
++----------------------------------------------+   |                    [ Cancel ]  [ Approve ]   |
+                                                   +----------------------------------------------+
+
+typing, at the limit, over the limit (the Api's 400):
+| Required. Plain text, up to 500 characters.                            137/500 |
+| Required. Plain text, up to 500 characters.                            500/500 |
+| The reason or note has more than 500 characters.                       512/500 |
 ```
 
 ## Docs
