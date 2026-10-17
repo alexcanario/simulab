@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.103.0 (rascunho).
+> Versão 0.104.0 (rascunho).
 
 Sumário
 1. Conceitos em dois minutos
@@ -106,7 +106,7 @@ O que a medida mostrou, parte por parte. `funciona` quer dizer que o Copilot CLI
 | Agentes (6) | funciona (carrega e lista; delegar a um: não medido) | a mesma chamada listou `agile:architect`, `agile:frontend`, `agile:reviewer`, `agile:system-design` e `agile:ux-designer` (o sexto, `agile:worker` do #216, é do mesmo formato e não foi listado de novo nessa medida), dos `agents/*.md` sem a extensão `.agent.md` que o manual oficial cita |
 | Comandos (21) | não medido | a chamada respondeu que `/agile:idea` existe e "mapeia" a skill `idea-capture`; uma resposta do modelo não é medida, ninguém digitou o comando |
 | Hooks (6 eventos) | parcial: funciona em 5 dos 6 eventos, 1 não foi alcançado e o matcher de `SubagentStart` não casa | Copilot CLI 1.0.99, 2026-10-15, modelo `claude-haiku-5.5`: um plugin de teste com um registro por evento e oito chamadas `-p` (2,31 AI credits no total), e o `guard.js` real num repositório de teste em `main` com um item `approved` em stage; o detalhe de cada evento está na lista abaixo |
-| `CLAUDE_PLUGIN_ROOT` (26 arquivos) | parcial: funciona em hook; em texto de skill, não medido | Copilot CLI 1.0.99, 2026-10-15: um plugin de teste com um hook `SessionStart` (0,46 AI credits, repetido em 0,19 AI credits com o plugin da sonda abaixo): o processo do hook recebeu `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PLUGIN_DATA`, `COPILOT_PLUGIN_ROOT`, `COPILOT_PLUGIN_DATA` e `PLUGIN_ROOT` (a doc oficial só cita `PLUGIN_ROOT` e `PLUGIN_DATA`, para servidores MCP stdio), e `"${CLAUDE_PLUGIN_ROOT}"` no texto do comando do hook virou a pasta do plugin; nas skills e referências a variável é texto que o modelo lê, e o que ele faz com ela não foi medido |
+| `CLAUDE_PLUGIN_ROOT` (28 arquivos) | parcial: funciona em hook; em texto de skill, não medido | Copilot CLI 1.0.99, 2026-10-15: um plugin de teste com um hook `SessionStart` (0,46 AI credits, repetido em 0,19 AI credits com o plugin da sonda abaixo): o processo do hook recebeu `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PLUGIN_DATA`, `COPILOT_PLUGIN_ROOT`, `COPILOT_PLUGIN_DATA` e `PLUGIN_ROOT` (a doc oficial só cita `PLUGIN_ROOT` e `PLUGIN_DATA`, para servidores MCP stdio), e `"${CLAUDE_PLUGIN_ROOT}"` no texto do comando do hook virou a pasta do plugin; nas skills e referências a variável é texto que o modelo lê, e o que ele faz com ela não foi medido |
 | `AskUserQuestion` (1 arquivo) | não medido | é uma ferramenta do Claude Code; o equivalente do Copilot CLI não foi verificado, e um item futuro o mede |
 
 Eventos de hook medidos com o Copilot CLI 1.0.99 (a entrada de cada hook é um JSON no stdin, e o `cwd` do processo do hook é a pasta do plugin):
@@ -441,6 +441,8 @@ board: <id do work item>
 ```
 
 **O roteiro de validação em dois idiomas (#198).** A seção `## Validation script` de uma feature ou de um bug tem duas subseções, `### English` e `### pt-BR`, nessa ordem, com os mesmos passos e os mesmos blocos de código: só a prosa em volta muda. O build, o autopilot e o `/agile:script` escrevem as duas numa edição só, rodam cada comando uma vez e citam a mesma saída real nas duas. O Claude mostra a versão pt-BR no chat e a board recebe só ela, sob `Roteiro de validação`. o conferidor `validation-script.check.js`, com `--file` e o arquivo do item, confere o par: o código de saída 0 é OK, e uma subseção que falta, outra ordem, um passo a mais ou um bloco de comando diferente é nomeado. Um item antigo, com um idioma só, continua válido até um comando reescrever o roteiro (exemplo 14.124). O pt-BR no arquivo é a única exceção à regra "tudo em inglês", ao lado da coluna pt-BR do glossário e dos manuais.
+
+**Subpassos, caixas e marcas (#229).** Um passo do roteiro tem até 5 subpassos, `   - [ ] 1.1 texto`, e cada unidade que você executa tem uma caixa; um passo de uma unidade só leva a própria (`2. [ ] texto`), e um passo com subpassos não tem caixa. Até 8 passos; as duas subseções têm a mesma estrutura, a numeração é contínua e o conferidor nomeia cada defeito. O arquivo do item guarda só caixas vazias (um `[x]` ali é defeito): as suas marcas ficam em um arquivo da máquina, fora do Git, compartilhado pelas worktrees (`validation-ticks.js`), e aparecem num widget clicável (`/agile:script <id> ticks <caminho>...` a cada clique, sem verbo novo; sem `show_widget` o roteiro vem num bloco de código) e no corpo do issue, que o build envia inteiro logo depois de escrever o roteiro. Um subpasso cujo texto mudou perde a marca; os que não mudaram a mantêm. No ship a evidência (cada caminho `[x]` com a data, ou `not tested`, e `Evidence: n of N tested`) vai para `## Delivery` e para um comentário no issue, e só então as marcas são apagadas (exemplo 14.142). Um roteiro de passos soltos ou de um idioma só continua válido e aparece sem caixas. Nos exemplos deste manual a caixa é uma ilustração.
 
 `## Approved list` é uma seção opcional, depois de `## Screens and API`: só existe quando você aprovou uma lista no chat (26 seções de um site, cinco formatos de exportação, dez códigos de erro). Ela guarda todos os elementos, numerados, um por linha, na ordem aprovada e com as suas edições aplicadas; critérios e decisões apontam para ela pelo nome. O build e qualquer leitor posterior tiram a lista do arquivo, nunca do chat da refinação.
 
@@ -860,7 +862,7 @@ Você só digita os comandos abaixo. Cada um carrega uma skill com o procediment
 | `/agile:build <feature> [--worktree] [--autopilot]` | Acha a worktree do item pela branch e implementa ali uma feature aprovada (uma por vez; `--worktree` para uma segunda em paralelo); com `--autopilot` a execução segue até a parada 2, e num item `validating` mostra a parada 2 de novo; se a linha `- Model:` do item nomeia outro modelo que o da sessão, diz uma vez `Model: item suggests <m>, session is <s>` e segue |
 | `/agile:review <feature>` | Revisão com contexto limpo de uma mudança arriscada |
 | `/agile:change <feature> [texto \| --block "<motivo>" \| --unblock [--worktree]]` | Registra uma mudança de ideia durante o build; ou põe o item em `blocked` (motivo e quem destrava) e o traz de volta |
-| `/agile:script <feature> [o que mudou]` | Refaz o roteiro de validação de um item `building` ou `validating`: só os passos que o seu texto atinge, ou o roteiro inteiro sem texto; arquivo, commit e corpo do issue, sem nota de mudança |
+| `/agile:script <feature> [o que mudou, ou ticks <caminho>...]` | Refaz o roteiro de validação de um item `building` ou `validating`: só os passos que o seu texto atinge, ou o roteiro inteiro sem texto; arquivo, commit e corpo do issue, sem nota de mudança. `ticks` é o clique do widget: grava só as marcas, sem arquivo, commit nem board |
 | `/agile:ship <feature>` | Suíte completa, a linha `Usage:` em `## Delivery` ao lado de `Gate time:` (`usage.js`), versão da app (acrescentada ou movida para o `Directory.Build.props` quando falta, e incrementada), merge (digitar é a autorização; com `- Merge: pr` ele abre um pull request que você mescla, e uma segunda execução fecha o item), branch e worktree removidas, board, manual da app e o comando de docs declarado; um app desktop com `- Beta channel: every merge`: a `main` mandada para a pasta de rede como `<Version>-beta` |
 | `/agile:retro` | Abre com `Events:`, `Gate time:` e `Usage:`; transforma lições e as `## Decisions` do item, classificadas, em regras, fatos escondidos ou notas de plugin |
 | `/agile:pause [nota]` | Parar por agora: commit wip na branch do item e uma nota de onde paramos |
@@ -1109,6 +1111,7 @@ flowchart TD
     B -->|sim| C(["Nada gravado: /agile:change é impresso"])
     B -->|não| D["Só os passos que o texto atinge, ou o roteiro inteiro sem texto;<br/>passos de terminal alterados rodam em Git Bash e PowerShell 7"]
     D --> E(["Arquivo + commit docs(F-n): validation script + corpo do issue enviado inteiro e lido de volta"])
+    A -.->|"ticks caminho... (clique do widget)"| T(["Só as marcas, fora do Git: sem arquivo, commit nem board"])
 ```
 
 ### /agile:ship

@@ -101,9 +101,13 @@ Technical terms: [glossary](../glossary.md)
 <!-- Written at the end of build, in two subsections with the same steps and the same code blocks (`scripts/validation-script.check.js`). At most 8 steps the product owner follows on screen. Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
 ### English
 1. <Step> → <expected result>
+   - [ ] 1.1 <Sub-step> → <expected result>
+2. [ ] <Step with one unit, its own box> → <expected result>
 
 ### pt-BR
 1. <Passo> → <resultado esperado>
+   - [ ] 1.1 <Subpasso> → <resultado esperado>
+2. [ ] <Passo de uma unidade, caixa própria> → <resultado esperado>
 
 ## Events
 <!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->
