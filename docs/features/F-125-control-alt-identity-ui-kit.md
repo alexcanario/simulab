@@ -1,7 +1,7 @@
 ---
 feature: F-125
 epic: Foundation and identity
-status: refining
+status: approved
 board: 176
 version: 1
 ---
