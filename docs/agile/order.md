@@ -46,8 +46,21 @@
 | 33 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - |
 | 34 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - |
 | 35 | F-123 | Review edits of a published question | idea | - | Question bank | - | - |
-| 36 | F-124 | Freeze the pt-PT and en app manual | building | - | Foundation and identity | - | - |
+| 36 | F-125 | Control Alt Systems identity in the theme and the UI kit | idea | - | Foundation and identity | - | F-126, F-127, F-128, F-129, F-130, F-131, F-132, F-133, F-134, F-135, F-138 |
 | 37 | F-103 | Images in questions | idea | - | Question bank | F-89 | - |
+| 38 | F-126 | Question form in the new composition | idea | - | Foundation and identity | F-125 | F-136, F-137 |
+| 39 | F-127 | Exam form in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 40 | F-128 | Exam edition form in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 41 | F-129 | Base text form in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 42 | F-130 | Admin screens in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 43 | F-131 | Catalog screens in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 44 | F-132 | Question bank lists in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 45 | F-133 | Identity screens in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 46 | F-134 | Home, error and diagnostics pages in the new composition | idea | - | Foundation and identity | F-125 | - |
+| 47 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | F-125 | - |
+| 48 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | F-125 | - |
+| 49 | F-136 | Inline student preview on the question form | idea | - | Question bank | F-126 | - |
+| 50 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | F-126 | - |
 
 ## Checklist
 
@@ -91,12 +104,25 @@
 - [ ] 33. F-121 — Email the author of a review decision [idea]
 - [ ] 34. F-122 — Assign a reviewer to a question [idea]
 - [ ] 35. F-123 — Review edits of a published question [idea]
-- [ ] 36. F-124 — Freeze the pt-PT and en app manual [building]
+- [ ] 36. F-125 — Control Alt Systems identity in the theme and the UI kit [idea] — unlocks F-126, F-127, F-128, F-129, F-130, F-131, F-132, F-133, F-134, F-135, F-138
 - [ ] 37. F-103 — Images in questions [idea] — waits on F-89
+- [ ] 38. F-126 — Question form in the new composition [idea] — waits on F-125 — unlocks F-136, F-137
+- [ ] 39. F-127 — Exam form in the new composition [idea] — waits on F-125
+- [ ] 40. F-128 — Exam edition form in the new composition [idea] — waits on F-125
+- [ ] 41. F-129 — Base text form in the new composition [idea] — waits on F-125
+- [ ] 42. F-130 — Admin screens in the new composition [idea] — waits on F-125
+- [ ] 43. F-131 — Catalog screens in the new composition [idea] — waits on F-125
+- [ ] 44. F-132 — Question bank lists in the new composition [idea] — waits on F-125
+- [ ] 45. F-133 — Identity screens in the new composition [idea] — waits on F-125
+- [ ] 46. F-134 — Home, error and diagnostics pages in the new composition [idea] — waits on F-125
+- [ ] 47. F-135 — Sticky section index on long forms [idea] — waits on F-125
+- [ ] 48. F-138 — Keyboard shortcuts on forms [idea] — waits on F-125
+- [ ] 49. F-136 — Inline student preview on the question form [idea] — waits on F-126
+- [ ] 50. F-137 — Publishing readiness meter on the question form [idea] — waits on F-126
 
 ## Summary
 
-- Delivered: 115
+- Delivered: 116
 - MVP: 1 open (1 in the cuts, 0 their dependencies)
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish

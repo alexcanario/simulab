@@ -1,7 +1,7 @@
 ---
 feature: F-124
 epic: Foundation and identity
-status: validating
+status: done
 board: 175
 version: 1
 ---
@@ -127,6 +127,8 @@ Necessário para validar: nada além do repositório (a worktree `D:/wt/simulab/
 
 ## Delivery
 - Branch: feature/F-124
-- Merge: -
-- Tests: ArchitectureTests 291 passed, 0 failed (2 s); gate GREEN; scan GREEN; full suite at the ship
+- Merge: 654bfe7 (version 1.3.0)
+- Tests: full suite 4044 passed, 0 failed (13 test projects, slowest 2 m 50 s); gate GREEN; scan GREEN
 - Manual pages: pt-PT and en pages frozen (48 notices); pt-BR unchanged
+Gate time: 7 passes, 15 min 36 s — turn 2 (30 s), ship 3 (11 min 52 s), scan 2 (3 min 14 s); 0 red
+Usage: 1441.7k weighted (estimate) — refine 33% · build 42% · ship 25% · other 1% — agents 9% — context per turn 194k → 182k — 2 sessions, 90 turns
