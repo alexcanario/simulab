@@ -4,7 +4,7 @@
 
 ## 14. Exemplos de workflow
 
-Todos os exemplos usam um app fictício, o **ExamPrep**: uma plataforma em que curadores montam um banco de questões de concursos e alunos praticam com elas. `>` marca o que você digita; `Claude:` marca a resposta (resumida). Os diálogos estão em português, como na conversa real; os arquivos do projeto ficam em inglês.
+Todos os exemplos usam um app fictício, o **ExamPrep**: uma plataforma em que curadores montam um banco de questões de concursos e alunos praticam com elas. `>` marca o que você digita; `Claude:` marca a resposta (resumida). Os diálogos estão em português, como na conversa real; os arquivos do projeto ficam em inglês. Nos roteiros de validação mostrados aqui, a caixa `- [ ]` é uma ilustração: no arquivo do item ela fica sempre vazia, e as suas marcas ficam na sua máquina, fora do Git.
 
 ### 14.1 Bootstrap de um app novo
 
@@ -214,26 +214,29 @@ Critério → teste:
 | AC1 lista       | ExamBoardsPage_Open_ShowsActiveBoards                        |
 | AC3 única       | CreateExamBoard_DuplicateAcronym_Returns409                  |
 | AC5 desativar   | ExamBoardsPage_Deactivate_ShowsInactive                      |
-| AC7 idiomas     | roteiro de validação, passo 7                                |
+| AC7 idiomas     | roteiro de validação, passo 4                                |
 A AC5 era uma lacuna: ExamBoard.Deactivate tinha um teste verde, mas nenhuma página
 nem endpoint o chamava. Acrescentei o endpoint e o botão, depois o teste de página acima.
 
 Roteiro de validação (F-3):
-1. Suba o AppHost e entre como admin.
-2. Menu Catalog → Exam boards: lista vazia.
-3. Nova: "Fundação Getulio Vargas" / "FGV" → salva e aparece na lista.
-4. Nova: "Outra" / "fgv" → mensagem "Sigla já em uso".
-5. Edite a FGV e mude o nome → a lista mostra o nome novo.
-6. Desative a FGV → status "Inativa"; reative.
-7. Troque o idioma para pt-PT e en → os textos mudam.
-8. Entre como curador → Nova/Editar não aparecem.
+1. Abrir a lista de bancas
+   - [ ] 1.1 Suba o AppHost e entre como admin.
+   - [ ] 1.2 Menu Catalog → Exam boards: lista vazia.
+2. Cadastrar bancas
+   - [ ] 2.1 Nova: "Fundação Getulio Vargas" / "FGV" → salva e aparece na lista.
+   - [ ] 2.2 Nova: "Outra" / "fgv" → mensagem "Sigla já em uso".
+3. Editar e desativar
+   - [ ] 3.1 Edite a FGV e mude o nome → a lista mostra o nome novo.
+   - [ ] 3.2 Desative a FGV → status "Inativa"; reative.
+4. [ ] Troque o idioma para pt-PT e en → os textos mudam.
+5. [ ] Entre como curador → Nova/Editar não aparecem.
 Status: validating.
 ```
 
 Quando um passo precisa de terminal (um limite, um endpoint ainda sem tela), ele vem para os dois shells, já rodado pelo Claude:
 
 ```
-4. Seis tentativas de cadastro seguidas do mesmo endereço: a 6ª é recusada.
+4. [ ] Seis tentativas de cadastro seguidas do mesmo endereço: a 6ª é recusada.
    Git Bash:     for i in 1 2 3 4 5 6; do curl -sk -o /dev/null -w "%{http_code}\n" -X POST https://localhost:7101/api/v1/auth/sign-up -H "Content-Type: application/json" -d '{}'; done
    PowerShell 7: 1..6 | % { (Invoke-WebRequest -Method Post https://localhost:7101/api/v1/auth/sign-up -ContentType application/json -Body '{}' -SkipCertificateCheck -SkipHttpErrorCheck).StatusCode }
    Esperado: 400 cinco vezes, depois 429. Para repetir: espere um minuto.
@@ -242,8 +245,8 @@ Quando um passo precisa de terminal (um limite, um endpoint ainda sem tela), ele
 **Validação** (**Portão 2**):
 
 ```
-> O passo 4 mostra a mensagem, mas em inglês mesmo com pt-BR.
-Claude: Faltava a chave no arquivo pt-BR. Corrigido, e acrescentei um teste para o AC4. Refaça o passo 4.
+> O passo 2.2 mostra a mensagem, mas em inglês mesmo com pt-BR.
+Claude: Faltava a chave no arquivo pt-BR. Corrigido, e acrescentei um teste para o AC4. Refaça o passo 2.2.
 > ok, validado.
 ```
 
@@ -3049,7 +3052,7 @@ O F-12 acrescenta uma coluna `Discount` aos pedidos da Acme, construído na work
 O AppHost declara `WithDataVolume()` sem nome (os perfis escrevem assim): o nome do volume carrega o caminho do AppHost, então a worktree já tem o seu próprio banco.
 
 ```
-1. Inicie o app a partir da worktree: aspire run em D:\wt\shop\f-12-order-discount.
+1. [ ] Inicie o app a partir da worktree: aspire run em D:\wt\shop\f-12-order-discount.
    Dados: esta worktree tem o seu próprio volume (o volume de dados do AppHost não tem nome); nada a ajustar.
    A migração do F-12 cai só ali; o banco do checkout principal não é tocado.
 ```
@@ -3057,7 +3060,7 @@ O AppHost declara `WithDataVolume()` sem nome (os perfis escrevem assim): o nome
 O projeto dá nome ao volume e mantém a sua própria chave em `docs/infra.md` (`Database__Name`):
 
 ```
-1. Pare qualquer app host que esteja rodando e inicie o app a partir da worktree, num banco só dela:
+1. [ ] Pare qualquer app host que esteja rodando e inicie o app a partir da worktree, num banco só dela:
 ```
 
 ```powershell
@@ -3077,7 +3080,7 @@ aspire run
 O projeto não tem nenhum dos dois:
 
 ```
-1. Inicie o app a partir da worktree: aspire run.
+1. [ ] Inicie o app a partir da worktree: aspire run.
    Aviso: o banco local é compartilhado com o checkout principal; a migração do F-12 cai nele
    (registrado em ## Decisions com o seu sim de hoje).
 ```
@@ -3085,7 +3088,7 @@ O projeto não tem nenhum dos dois:
 Um passo que pede para você mudar código diz onde e o que falha, e um passo que compila para o host antes:
 
 ```
-5. Pare o app host (Ctrl+C no terminal dele). Em src/Shop/Orders/Order.cs, dentro da classe Order, depois da
+5. [ ] Pare o app host (Ctrl+C no terminal dele). Em src/Shop/Orders/Order.cs, dentro da classe Order, depois da
    propriedade Total, acrescente: public decimal Discount { get; init; } = -1m;
    Rode os testes: OrderTests.Discount_cannot_be_negative falha com "Discount must be zero or more".
    Remova a linha de novo.
@@ -4516,12 +4519,14 @@ O Claude corrige as duas subseções numa edição, roda o conferidor de novo e 
 No ExamPrep, a feature "transcrever questão" acrescenta o botão **Transcrever** ao cartão de questões. O build não escreve "no cartão de questões, clique em Transcrever": o roteiro diz como chegar lá, e explica o termo uma vez só.
 
 ```
-1. Abra o app e entre com o usuário curador.
-2. No sidebar (menu lateral esquerdo), clique em Exames; a lista de edições aparece; escolha a edição clicando nela.
-3. Clicando em Questões, no sidebar, clique no botão "Transcrever" no canto superior direito.
+1. [ ] Abra o app e entre com o usuário curador.
+2. Abrir a edição
+   - [ ] 2.1 No sidebar (menu lateral esquerdo), clique em Exames; a lista de edições aparece.
+   - [ ] 2.2 Escolha a edição clicando nela.
+3. [ ] Clicando em Questões, no sidebar, clique no botão "Transcrever" no canto superior direito.
 ```
 
-O sidebar foi explicado no passo 2 e aparece curto no passo 3. O caminho vem da linha da tela no mapa `docs/agile/ui-map.md`; o Claude só abriu o código para a linha que o diff tocou. Quando a linha não existe e o código não confirma o menu, o passo diz `(caminho não conferido: nome da entrada de Questões no sidebar)` e a linha fica com `Verified: no`.
+O sidebar foi explicado no passo 2.1 e aparece curto no passo 3. O caminho vem da linha da tela no mapa `docs/agile/ui-map.md`; o Claude só abriu o código para a linha que o diff tocou. Quando a linha não existe e o código não confirma o menu, o passo diz `(caminho não conferido: nome da entrada de Questões no sidebar)` e a linha fica com `Verified: no`.
 
 No ship, o mapa é conferido. Saída real do script sobre o cenário do exemplo, com o cartão de questões alterado depois da linha ser lida:
 
@@ -5126,3 +5131,46 @@ REFUSED: estimate US$ 1.64 (4 case(s) × 1 run(s)) over the limit US$ 1.00; noth
 ```
 
 O código de saída é 4 e o ship para até você decidir (subir o `limitUsd`). Um caso que caiu abaixo da base (`DROP`), uma execução parcial ou um caso sem base (`NEW`) nunca é selado, e o próximo ship o roda de novo. `--fresh` roda tudo sem olhar os selos.
+
+### 14.142 O roteiro com subpassos e caixas: marcar na tela, reabrir, e a evidência no ship
+
+O F-12 chega ao fim do build. O roteiro tem 3 passos e, ao todo, 5 unidades que você executa: os subpassos `1.1`, `1.2`, `2.1`, `2.2` e o passo `3`, que tem uma unidade só e por isso leva a própria caixa. No arquivo todas as caixas estão vazias (`[ ]`); o Claude mostra o roteiro no chat e, logo abaixo, o widget, uma lista clicável com o contador `0 de 5 marcados`. Sem o widget (a sessão não oferece `show_widget`, ou a chamada falha) ele mostra as mesmas linhas num bloco de código, com uma linha dizendo por quê.
+
+Você testa o passo 1 e o passo 3 e clica nas caixas. Cada clique manda uma mensagem com o conjunto inteiro:
+
+```
+> /agile:script F-12 ticks 1.1 1.2 3
+Claude: agile validation TICKED: 3 of 5
+```
+
+Nada é gravado no arquivo do item, nenhum commit, nenhum envio à board: as marcas ficam em um arquivo da sua máquina, fora do Git, e valem para todas as worktrees do repositório. Dito em palavras, "marque 2.1" ou "limpe as marcas" fazem o mesmo. Se você pedir o roteiro de novo, em outra sessão, as caixas continuam marcadas:
+
+```
+1. Abrir o relatório   (done)
+   [x] 1.1 No menu lateral esquerdo (sidebar) clique em Relatórios → a lista aparece.
+   [x] 1.2 Clique no relatório mensal → a página abre.
+2. Exportar
+   [ ] 2.1 Clique em Exportar CSV → o arquivo baixa.
+   [ ] 2.2 Abra o arquivo → tem 12 linhas.
+3. [x] Troque o idioma para en → os rótulos mudam.
+agile validation TICKED: 3 of 5
+```
+
+O passo 1 aparece como feito porque os seus dois subpassos estão marcados; esse estado é derivado e nunca guardado. O corpo do issue na board mostra o roteiro com as marcas que valiam no último envio do Claude; marcar uma caixa na página do GitHub não vale, e o próximo envio a sobrescreve.
+
+Depois você acha um problema no passo 2.1 e o Claude reescreve só esse subpasso com `/agile:script F-12 step 2.1 ...`. Os subpassos que não mudaram, palavra por palavra, mantêm a marca; o que mudou a perde e você o valida de novo.
+
+No ship, antes do commit, o Claude escreve a evidência em `## Delivery` e a posta como comentário no issue entregue. Saída real do script sobre o cenário do exemplo, com o passo 2 nunca testado:
+
+```
+1. Open the report
+   [x] 1.1 (2026-10-17) In the left sidebar (menu lateral esquerdo) click Reports → the list appears.
+   [x] 1.2 (2026-10-17) Click the monthly report → the page opens.
+2. Export it
+   [ ] 2.1 not tested Click Export CSV → the file downloads.
+   [ ] 2.2 not tested Open the file → it has 12 rows.
+3. [x] (2026-10-17) Switch the language to en → the labels change.
+Evidence: 3 of 5 tested
+```
+
+Um caminho sem marca vira `not tested` e nunca impede o ship: digitar o ship é a autorização. Só depois de escrever a evidência o Claude apaga as marcas do item; se a evidência ou a limpeza falhar, o ship continua e diz isso em uma linha. Um roteiro antigo, de passos soltos ou de um idioma só, continua válido e aparece sem caixas.
