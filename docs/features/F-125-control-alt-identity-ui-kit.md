@@ -100,7 +100,7 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 
 ## Criterion → test
 
-Tests locked: 607db9602a6671850aeb91ff21b39948a021a5ca (12 files); unlocks: 0
+Tests locked: 7c2e7fb0d3ddceed935da8300c0615f0539c3f31 (12 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
