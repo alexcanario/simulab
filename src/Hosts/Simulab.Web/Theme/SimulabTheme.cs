@@ -5,6 +5,10 @@ namespace Simulab.Web.Theme;
 /// <summary>Started from Simulae's theme (ADR-0001, decision 30). Revisit when Simulab has its own brand.</summary>
 public static class SimulabTheme
 {
+    public static KeycapEdges LightKeycapEdges => throw new NotImplementedException();
+
+    public static KeycapEdges DarkKeycapEdges => throw new NotImplementedException();
+
     public static MudTheme Create() => new()
     {
         PaletteLight = new PaletteLight

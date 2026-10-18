@@ -20,32 +20,45 @@ internal static partial class AppCssColours
         File.ReadAllText(Path.Combine(RepositoryRoot(), "src", "Hosts", "Simulab.Web", "wwwroot", "app.css")),
         string.Empty);
 
-    /// <summary>The value of <paramref name="property"/> inside the rule whose selector list contains <paramref name="selector"/>.</summary>
-    public static string Declaration(string selector, string property)
-    {
-        var bodies = Rules()
-            .Where(candidate => candidate.Selectors.Contains(selector, StringComparer.Ordinal))
-            .Select(candidate => candidate.Body)
-            .ToArray();
-        bodies.Should().ContainSingle($"app.css must still have exactly one rule for '{selector}'");
+    /// <summary>F-125: the top-level rules, and each <c>@media</c> block's own rules by its condition.</summary>
+    private static readonly (string TopLevel, IReadOnlyList<(string Condition, string Body)> Media) Split = SplitMedia(Css);
 
-        var match = Regex.Match(bodies[0], $@"(?m)^\s*{Regex.Escape(property)}\s*:\s*([^;]+);");
-        match.Success.Should().BeTrue($"the rule for '{selector}' must still declare '{property}'");
-        return match.Groups[1].Value.Trim();
+    /// <summary>The value of <paramref name="property"/> inside the top-level rule whose selector list contains <paramref name="selector"/>.</summary>
+    public static string Declaration(string selector, string property) =>
+        DeclarationIn(Split.TopLevel, selector, property, "app.css");
+
+    /// <summary>F-125: the same, inside the <c>@media</c> block whose condition contains <paramref name="condition"/>.</summary>
+    public static string MediaDeclaration(string condition, string selector, string property)
+    {
+        var blocks = Split.Media.Where(block => block.Condition.Contains(condition, StringComparison.Ordinal)).Select(block => block.Body).ToArray();
+        blocks.Should().NotBeEmpty($"app.css must have an @media block for '{condition}'");
+        var bodies = blocks.SelectMany(block => Rules(block).Where(rule => rule.Selectors.Contains(selector, StringComparer.Ordinal))).ToArray();
+        bodies.Should().ContainSingle($"the @media ({condition}) blocks must have exactly one rule for '{selector}'");
+        return Value(bodies[0].Body, selector, property);
     }
 
     /// <summary>
     /// Turns a declaration into a colour the contrast helper understands. A <c>var(--mud-palette-x)</c> is read
     /// from <paramref name="palette"/> by its own name, so a MudBlazor default counts exactly as a token the
-    /// project set. <c>inherit</c> resolves to <paramref name="inherited"/>, the colour the parent gives it.
+    /// project set; MudBlazor's <c>-text</c> names (<c>--mud-palette-primary-text</c>) are the palette's contrast texts.
+    /// <c>inherit</c> resolves to <paramref name="inherited"/>, the colour the parent gives it, and
+    /// <c>color-mix(in srgb, X N%, transparent)</c> to X at that opacity (F-125).
     /// </summary>
     public static string Resolve(string declaration, Palette palette, string? inherited = null)
     {
-        var value = declaration.Trim();
+        var value = declaration.Replace("!important", string.Empty, StringComparison.Ordinal).Trim();
         if (value.Equals("inherit", StringComparison.OrdinalIgnoreCase))
         {
             inherited.Should().NotBeNull("an inherited colour needs the colour of its parent to be measured");
             return inherited!;
+        }
+
+        var mix = MixPattern().Match(value);
+        if (mix.Success)
+        {
+            var (red, green, blue, alpha) = ColourContrast.Parse(Resolve(mix.Groups[1].Value, palette, inherited));
+            var share = double.Parse(mix.Groups[2].Value, CultureInfo.InvariantCulture) / 100;
+            return string.Create(CultureInfo.InvariantCulture, $"rgba({red},{green},{blue},{alpha * share})");
         }
 
         var variable = TokenPattern().Match(value);
@@ -56,7 +69,10 @@ internal static partial class AppCssColours
 
         var name = string.Concat(variable.Groups[1].Value.Split('-')
             .Select(part => CultureInfo.InvariantCulture.TextInfo.ToTitleCase(part)));
-        var property = typeof(Palette).GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+        var property = typeof(Palette).GetProperty(name, BindingFlags.Public | BindingFlags.Instance)
+            ?? (name.EndsWith("Text", StringComparison.Ordinal)
+                ? typeof(Palette).GetProperty(name[..^"Text".Length] + "ContrastText", BindingFlags.Public | BindingFlags.Instance)
+                : null);
         property.Should().NotBeNull($"'{variable.Groups[1].Value}' must be a palette token");
         return property!.GetValue(palette)!.ToString()!;
     }
@@ -71,9 +87,26 @@ internal static partial class AppCssColours
             $"rgb({(overRed * alpha) + (red * (1 - alpha))},{(overGreen * alpha) + (green * (1 - alpha))},{(overBlue * alpha) + (blue * (1 - alpha))})");
     }
 
-    private static IEnumerable<(string[] Selectors, string Body)> Rules()
+    private static string DeclarationIn(string css, string selector, string property, string where)
     {
-        foreach (Match match in RulePattern().Matches(Css))
+        var bodies = Rules(css)
+            .Where(candidate => candidate.Selectors.Contains(selector, StringComparer.Ordinal))
+            .Select(candidate => candidate.Body)
+            .ToArray();
+        bodies.Should().ContainSingle($"{where} must still have exactly one rule for '{selector}'");
+        return Value(bodies[0], selector, property);
+    }
+
+    private static string Value(string body, string selector, string property)
+    {
+        var match = Regex.Match(body, $@"(?m)^\s*{Regex.Escape(property)}\s*:\s*([^;]+);");
+        match.Success.Should().BeTrue($"the rule for '{selector}' must still declare '{property}'");
+        return match.Groups[1].Value.Trim();
+    }
+
+    private static IEnumerable<(string[] Selectors, string Body)> Rules(string css)
+    {
+        foreach (Match match in RulePattern().Matches(css))
         {
             var selectors = match.Groups[1].Value
                 .Split(',')
@@ -82,6 +115,38 @@ internal static partial class AppCssColours
                 .ToArray();
             yield return (selectors, match.Groups[2].Value);
         }
+    }
+
+    /// <summary>Cuts every <c>@media</c> block out of the sheet, matching its braces, and keeps it apart with its condition.</summary>
+    private static (string, IReadOnlyList<(string, string)>) SplitMedia(string css)
+    {
+        var media = new List<(string, string)>();
+        var topLevel = new System.Text.StringBuilder();
+        var position = 0;
+        while (true)
+        {
+            var start = css.IndexOf("@media", position, StringComparison.Ordinal);
+            if (start < 0)
+            {
+                topLevel.Append(css, position, css.Length - position);
+                break;
+            }
+
+            topLevel.Append(css, position, start - position);
+            var open = css.IndexOf('{', start);
+            var depth = 1;
+            var index = open + 1;
+            while (depth > 0)
+            {
+                depth += css[index] switch { '{' => 1, '}' => -1, _ => 0 };
+                index++;
+            }
+
+            media.Add((css[(start + "@media".Length)..open].Trim(), css[(open + 1)..(index - 1)]));
+            position = index;
+        }
+
+        return (topLevel.ToString(), media);
     }
 
     private static string RepositoryRoot()
@@ -104,4 +169,7 @@ internal static partial class AppCssColours
 
     [GeneratedRegex(@"var\(\s*--mud-palette-([a-z0-9-]+)\s*\)")]
     private static partial Regex TokenPattern();
+
+    [GeneratedRegex(@"^color-mix\(\s*in srgb\s*,\s*(var\([^)]+\))\s+([0-9.]+)%\s*,\s*transparent\s*\)$")]
+    private static partial Regex MixPattern();
 }

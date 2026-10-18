@@ -101,20 +101,20 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | `ApprovedPaletteTests` (every role, both themes; keycap edges; focus ring); `IdentityTokensTests` (tokens and `DESIGN.md` equal the theme) |
+| AC2 | `KeycapContrastTests` (filled fills on page and surface, text at rest and on hover, outlined border, text link, focus rings, app bar brand, sunken surface); `ThemePaletteTests` |
+| AC3 | `StylesheetLiteralColourTests` |
+| AC4 | `KeycapButtonTests` |
+| AC5 | `ActionColourScopeTests` |
+| AC6 | `SurfaceBorderTests` |
+| AC7 | `ShapeRadiusTests` |
+| AC8 | `BrandFontTests`; `BrandAssetsHostTests.Get_Font_IsServedByTheAppAsWoff2` |
+| AC9 | `AppBarBrandTests`; `KeycapContrastTests.AppBarBrand_ReadsAtAaOnTheBar`; validation step (375px) |
+| AC10 | `BrandAssetsHostTests.Get_Home_LinksTheAppIconAsTheFaviconAndNoFontHost`, `Get_BrandFile_IsServedAsSvg` |
 | AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC12 | `EmailIdentityTests` |
+| AC13 | `UiGalleryIdentityTests`; `UiGalleryTests.Render_Development_ShowsHeaderAndEverySection`; `DevPagesHostTests.Get_GalleryInDevelopment_RendersEverySection` |
+| AC14 | `ResourceParityTests`; `AppBarBrandTests.Brand_TextsComeFromTheResources` |
 
 ## Approved list
 
@@ -173,6 +173,11 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-17 — Buttons are styled by CSS on MudBlazor's classes (`mud-button-filled-primary`, `mud-button-outlined`, `mud-button-text`, `mud-button-filled-tertiary`) in the kit stylesheet, written from MudBlazor 9.9.0's own CSS — the kit has no button component and 73 `MudButton`s in 36 files must change at once (ui-project.md: CSS on a library class is written from the package's CSS) — Claude
 - 2026-10-17 — `Elevation` values stay in the pages; the theme sets no shadows and the stylesheet draws the border — removing 40 attributes in 13 pages would touch screen items' files for no visible gain — Claude
 - 2026-10-17 — Brand files (symbol light and dark, favicon) go to `wwwroot/brand/`; the dark symbol uses the dark key colours of `tokens.json` — Claude
+- 2026-10-18: plan — 1 palette, hover tones and keycap edges in SimulabTheme (edges emitted by a SimulabThemeProvider), tokens and DESIGN.md → AC1, AC2; 2 kit stylesheet: keycap buttons, no literal colour, borders instead of shadows, radii → AC3, AC4, AC6, AC7; 3 fonts served from wwwroot/fonts with the OFL files and the type scale → AC8; 4 app bar brand, favicon and resource keys → AC9, AC10, AC14; 5 gallery sections buttons, type and palette, and the scan for the orange action → AC13, AC5; 6 emails through one EmailHtml page → AC12; 7 ADR-0006, ADR-0001 decision 30, field icons and placeholders kept → AC11, gate; 8 app-host screen check, scan, validation script → validation steps
+- 2026-10-18 — Hover tones (the `*Darken` tokens) are 8% brighter (each channel x1.08) when the fill's contrast text keeps 4.5:1 there, else 8% darker: light green (`#00806B`, white text reads 4.30:1 on any brighter tone) and light info get the darker tone; neither is a filled button variant — Claude
+- 2026-10-18 — The destructive keycap edge, which `## Approved list` does not give, is derived like the others: light `#892828` (error x0.72), dark `#924646` (error x0.65) — Claude
+- 2026-10-18 — BR2 covers every stylesheet: the scoped `MainLayout.razor.css` and `ReconnectModal.razor.css` lose their literal colours too, and the scan of AC3 reads them — Claude
+- 2026-10-18 — Brand file names are English (`keys-symbol.svg`, `keys-symbol-dark.svg`, `app-icon.svg`), copied from `simbolo-teclas.svg` and `icone-app.svg` — Claude
 - 2026-10-17 — ADR-0006 records the brand; ADR-0001 decision 30 points to it and its "Revisit when" line is closed — D-4 asked for an ADR — confirmed: D-4
 
 ## Out of scope
