@@ -16,6 +16,6 @@
 - Merge with `--no-ff` and a message that references the item and the board id.
 - After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
-- Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables. A hook refuses a commit, a push or a `gh`/`az` body that carries one; fake test data takes `agile:allow-secret` on its line.
+- Never commit secrets or local settings (passwords in development, staging, test paths pass). Use user secrets or environment variables. A hook refuses a commit, push or `gh`/`az` body that carries one; fake test data takes `agile:allow-secret` on its line.
 - `.claude/agile/warnings-baseline.json` is committed; build output, `bin/`, `obj/` and IDE folders are not.
 - Generated files (migrations, snapshots, OpenAPI documents) are committed with the change that produced them.

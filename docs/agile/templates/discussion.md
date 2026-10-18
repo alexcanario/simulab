@@ -18,6 +18,13 @@ Technical terms: [glossary](../glossary.md)
 ## What we already know
 <!-- From the brief, earlier decisions and the code. -->
 
+## Wide pass
+<!-- Optional: only after /agile:discuss --wide; delete the section otherwise. No raw ideas. -->
+- Frames: <the 5 frames; a branch that failed>
+- Clusters: <one line each>
+- Traps: <T1 idea — hidden cost>
+- Non-obvious pick: <idea — why viable>
+
 ## Options
 | Option | How it works for the user | Effort | Risks / what it rules out |
 |---|---|---|---|

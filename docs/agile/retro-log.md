@@ -1331,3 +1331,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson (score 2/7): the rerun of `gate.js ship` after the version bump printed `tested Simulab.slnx (297 s)` (Catalog 4 m 49 s), 3 s under the 5-minute budget; the first run of the same ship took 207 s. Cause not verified. Went to F-141 (#193).
 - Not recommended (over the cap): two MudBlazor hidden facts, already pinned and commented in `SimulabTheme` (an `rgba(…,0.92)` truncates its alpha to `0xEA`; the derived `Lighten` tone of the green differs between runtimes).
 - Item decisions: 14 stayed in the item. Events: override 3, question 4, blocked 3, change 1, rework 0, test-fail 0.
+
+## 2026-10-18 - Sync with agile@canary 0.112.0
+- From 0.104.0 to 0.112.0 (8 minor versions; the plugin reported 0.111.0 at the plan and 0.112.0 at the record). Copied: `.claude/rules/agile/workflow.md` (subagent roles: `diverge` and the `architect` condition), `docs/agile/templates/discussion.md` (Wide pass section), `docs/agile/templates/companions.md`, `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md`. Created `docs/agile/companions.md` (empty list, no companion installed). Left alone: `profile.md` (edited, upstream unchanged), manual build files (plugin unchanged).
+- Merged: `.claude/rules/agile/git.md` (edited, upstream changed). One conflict, the secrets line: the owner kept the project's line (stricter) over the plugin's exception for passwords in development, staging and test paths. The base copy was recorded.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen F-61/F-69, release pipeline F-116, Azure login F-117).
+- Not done yet: the sync commit (owner's authorization pending).

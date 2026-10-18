@@ -4466,10 +4466,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (26)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (29)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
-ok   AC5: the report states the skills (23) and the agents (5)
+ok   AC5: the report states the skills (23) and the agents (6)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -5174,3 +5174,176 @@ Evidence: 3 of 5 tested
 ```
 
 Um caminho sem marca vira `not tested` e nunca impede o ship: digitar o ship é a autorização. Só depois de escrever a evidência o Claude apaga as marcas do item; se a evidência ou a limpeza falhar, o ship continua e diz isso em uma linha. Um roteiro antigo, de passos soltos ou de um idioma só, continua válido e aparece sem caixas.
+
+
+### 14.143 As skills de companhia usadas: o evento `companion` e a proposta de absorção na retro
+
+Durante o trabalho, o Claude propôs uma skill de outro plugin e você disse sim. Ao terminar o uso, ele registra um evento no item, no worktree dele:
+
+```powershell
+node "$env:CLAUDE_PLUGIN_ROOT/scripts/events.js" add F-9 companion "acme-tools@acme-market:design-review — design review of the export contract"
+```
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/events.js" add F-9 companion "acme-tools@acme-market:design-review — design review of the export contract"
+```
+
+Uma nota fora do formato `<plugin@marketplace>:<skill> — <para que serviu>` é recusada e nada é escrito. Uma proposta que você recusou, ou uma skill só lida, não é uso.
+
+Na retro, o Claude roda `events.js companions` antes de reunir as lições. Num projeto com a skill `design-review` usada em F-3, F-7 e F-9, e `pair-test` usada duas vezes só em F-4, a saída real é:
+
+```
+Absorb: acme-tools@acme-market:design-review — uses 3, items 3 (F-3, F-7, F-9)
+Companion: acme-tools@acme-market:pair-test — uses 2, items 1 (F-4)
+```
+
+O limite conta itens diferentes, não usos: `pair-test` tem 2 usos em 1 item e não é proposta. Para `design-review` a retro mostra, depois das lições e fora do teto de 3, a nota `⏳ plugin: agile [generic] score 6/3 — absorb acme-tools@acme-market:design-review: used in F-3, F-7, F-9`. Você aprova como qualquer nota de plugin; nada é absorvido sozinho. Depois que a nota entra em "Plugin notes — status", a mesma saída diz `already proposed` e a proposta não se repete, mesmo que você a recuse:
+
+```
+Companion: acme-tools@acme-market:design-review — uses 3, items 3 (F-3, F-7, F-9) — already proposed
+Companion: acme-tools@acme-market:pair-test — uses 2, items 1 (F-4)
+```
+
+
+### 14.144 A lista de skills de companhia do projeto: a proposta do sync e a linha `Companions:` do início da sessão
+
+Depois de atualizar o plugin, o `/agile:sync` vê que o projeto ainda não tem `docs/agile/companions.md` e acrescenta uma linha à tabela: "companions list — missing — create it with 1 installed companion". Nesta máquina só `design-review@acme-market` está instalado, então a proposta traz uma linha só, a do catálogo:
+
+```
+| design-review@acme-market | review | design review of an API contract | Reads | acme/acme-market |
+```
+
+Você diz ok e o Claude escreve o arquivo (o cabeçalho do template mais essa linha); o `CLAUDE.md` não muda, e um arquivo que já existisse seria deixado como está:
+
+```powershell
+node "$env:CLAUDE_PLUGIN_ROOT/scripts/companions.js" write
+```
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/companions.js" write
+```
+
+Mais tarde, numa outra tarefa, o Claude propõe uma skill que não está na lista, `pair-test@acme-market:tests`, e você diz sim. Ele pergunta se ela só lê ou também escreve; você responde que escreve, e a linha entra no arquivo, sem commit, para o próximo commit do item:
+
+```powershell
+node "$env:CLAUDE_PLUGIN_ROOT/scripts/companions.js" add pair-test@acme-market tests writes "writes test skeletons in the worktree" --source acme/acme-market
+```
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/companions.js" add pair-test@acme-market tests writes "writes test skeletons in the worktree" --source acme/acme-market
+```
+
+Numa máquina onde `pair-test` não está instalado, o início da sessão (e o `/agile:status`) imprime esta linha. O marketplace `acme-market` já é conhecido ali, então não há comando de `marketplace add`; o trabalho segue sem a skill, e o comando é seu para digitar:
+
+````
+Companions: 1 da lista de acompanhantes (docs/agile/companions.md) falta nesta máquina; o trabalho segue sem ele. Os comandos são seus para digitar:
+- pair-test@acme-market (tests): não instalado
+```powershell
+claude plugin install pair-test@acme-market
+```
+```bash
+claude plugin install pair-test@acme-market
+```
+````
+
+Se `pair-test` estivesse instalado mas desativado, a linha trocaria o `install` por `enable`. Numa máquina sem o marketplace, os blocos trariam antes um `marketplace add` com o valor da coluna `Source`, `acme/acme-market`; sem `Source` na linha, ela diria para adicionar o marketplace antes. Com tudo instalado, ou sem o arquivo `installed_plugins.json`, nada é impresso.
+
+O `companions.js check` avisa, sem editar, de uma linha cuja skill o catálogo exclui, de uma sem entrada no catálogo (`no catalogue`) e de uma sem `Reads/Writes`. Neste projeto ele não imprime nada, porque as duas linhas estão no catálogo e marcadas.
+
+### 14.145 Senha de exemplo em arquivo de desenvolvimento passa; a mesma linha em arquivo de produção, não
+
+No acme-shop, o Claude termina a F-15 (a conexão com o banco local) e commita só o `appsettings.Development.json`, que tem uma senha de exemplo. O commit passa, sem marcador e sem nada no stderr, porque o caminho está na lista de isentos. No mesmo trabalho ele também colocou a linha no `appsettings.json` e o commit seguinte, com os dois arquivos, é recusado só por esse:
+
+```
+Claude: git add src/App/appsettings.json && git commit -m "feat(F-15): local database connection"
+        [agile secret-guard] Possible secret in the commit: src/App/appsettings.json:2 (password).
+        Remove it, or name the setting instead (${DB_PASSWORD}, <password>); for fake test data put agile:allow-secret in a comment on that line. The value is not shown here.
+        Exempt paths (a password or a URL with credentials only; never under Production or Prod): **/*.Development.*, **/*.Staging.*, **/*.Local.*, **/.env.local, **/.env.development, **/.env.staging, tests/**, **/*.Tests/**, **/fixtures/**, docs/features/mockups/**. Add yours with "- Secret-guard paths: <glob>" in CLAUDE.md.
+        If this is a mistake, ask the owner; with a yes, repeat the command ending with the comment  # agile:secret-ok
+Claude: O commit foi recusado: o `appsettings.json` não está na lista de isentos. Troquei a senha por `Password=<password>` e o `appsettings.Development.json` ficou como estava.
+```
+
+A lista padrão vale para senha e URL com credenciais; um token de GitHub, uma chave da AWS ou uma chave privada bloqueiam até dentro de `appsettings.Development.json`, porque um token colado ali pode ser real. Um caminho com `Production` ou `Prod` (`tests/appsettings.Production.json`) nunca é isento. Se o projeto guarda dados de exemplo em `config/seed/`, o dono acrescenta ao `CLAUDE.md` do projeto a linha `- Secret-guard paths: config/seed/**` e esses arquivos passam também; o plugin não escreve essa linha. A mensagem de commit e o texto de um `gh issue create` nunca são isentos: uma senha ali bloqueia mesmo que o arquivo de corpo se chame `appsettings.Development.json`.
+
+### 14.146 A passada larga do `/agile:discuss --wide`: cinco ramos isolados, o crítico e as armadilhas
+
+Num SaaS de lavanderias de bairro, você digita:
+
+```
+/agile:discuss --wide "Como reduzir o prejuízo das lavanderias com clientes que não aparecem no horário de retirada e pagamentos cobrados por telefone?"
+```
+
+O Claude faz o enquadramento de sempre (o brief, o `Order { Id, TenantId, CustomerId, PickupSlot, Total, Paid }` do código, o que está em aberto) e confere os três sinais. A pergunta é aberta, mexe com dinheiro e dados e não é um sim/não, então nenhum card aparece. Na mesma mensagem que chama os ramos, ele escreve:
+
+```
+Sinais de pré-voo (aberto, alto risco — toca dinheiro e dados —, pergunta não binária): os três batem.
+Passada larga: 5 ramos — regulador, concorrente, orçamento zero, primeiro uso, tirar a premissa que sustenta tudo.
+```
+
+Os 5 agentes `diverge` saem numa mensagem só, cada um com o enquadramento da discussão e o seu enquadramento cognitivo por último. Cada um volta em cerca de 7 segundos com 5 ideias, sem ferramenta usada e sem nota. O ramo da premissa removida, por exemplo, escolheu "o pagamento tem que acontecer na retirada" e devolveu ideias como cobrar já na entrega da roupa. O do concorrente trouxe superlotar os horários como uma companhia aérea. Você não vê as 25 ideias cruas; vê o que o crítico tirou delas:
+
+```
+Opções (do conjunto largo)
+A — Cobrar no drop-off, não na retirada: o Pix ou o dinheiro no momento da entrega (o campo Paid já existe), e um lembrete algumas horas antes do PickupSlot avisando a consequência de não aparecer. Esforço: S. Risco: o valor precisa ser conhecido na entrega.
+B — Link de cobrança Pix automático na criação do pedido (não óbvia), com uma taxa de no-show limitada e divulgada antes, e um registro de eventos por pedido para sustentar uma disputa. Esforço: M. Risco: depende de um gateway que hoje não existe; exige texto de consentimento explícito.
+C — Depósito no drop-off, o saldo na retirada, mais lembrete e taxa de no-show. Esforço: M. Risco: a cobrança do saldo por telefone continua.
+Armadilhas:
+- T1 — Superlotar os horários como companhia aérea: a lavanderia tem capacidade física fixa, e não há dado de taxa de no-show para calibrar.
+- T2 — Abandonar o horário de retirada: elimina o problema por definição, mas destrói a agenda, que é o valor central do produto.
+- T3 — Guardar a roupa como garantia e cobrar armazenagem: passivo jurídico (até quando reter o bem do cliente?) e não resolve quem nunca volta.
+Recomendo: A — ataca o no-show e a cobrança por telefone só com o que já existe, é reversível e gera o dado real antes de investir em gateway.
+```
+
+Depois vêm as perguntas numeradas do passo 3, como sempre. Quando você decide, o arquivo `docs/discussions/D-<n>-<slug>.md` ganha, entre `## What we already know` e `## Options`:
+
+```
+## Wide pass
+- Frames: regulator, competitor, zero budget, first-time user, remove the load-bearing assumption (payment at pickup); no branch failed
+- Clusters: charge before pickup (drop-off Pix, deposit, payment link); remind and confirm (WhatsApp, one-tap confirm); absorb the loss (surcharge, overbooking, storage fee)
+- Traps: T1 overbooking — fixed physical capacity, no no-show rate to calibrate; T2 drop the pickup slot — destroys the core scheduling value; T3 hold items as collateral — legal liability, does not reach the customer who never returns
+- Non-obvious pick: automatic Pix charge link at order creation — viable once a gateway exists, with consent text and an event log
+```
+
+Esta passada custou US$ 0,48 na execução de validação do #120 (a sessão principal mais os 5 ramos, todos em `sonnet`). Se a sua pergunta fosse "Devemos aceitar cartão, sim ou não?", o Claude diria numa linha que falhou o sinal de pergunta aberta e mostraria o card `Run wide anyway` / `Normal step 2` antes de chamar qualquer ramo. E sem o `--wide`, o passo 2 seria o de sempre, sem nenhuma menção à passada larga.
+
+### 14.147 A suíte da passada larga: um caso medido primeiro, depois a suíte com limite
+
+Você quer saber se o `--wide` dá opções melhores que o passo 2 de hoje. Antes, lê e reescreve os 4 problemas de `benchmarks/wide/problems/` (e os hashes de `suite.json`). Sem argumento, o script só mostra o plano e não chama nada:
+
+```text
+$ node benchmarks/wide.js
+wide suite v1: 4 problems x 3 runs x 2 arms (step2, wide) on sonnet, judge opus (another family)
+  import-records  How should a clinic that joins us bring in the patient records and the future appointments it keeps
+  clinic-leaves  What should happen when a clinic stops paying or decides to leave us? It holds years of health recor
+  no-shows  How could we help clinics lose less money to patients who book and never show up? It is the complain
+  offline-desk  How should the front desk keep working when the clinic's internet line drops for an hour in the midd
+Nothing started and nothing paid. First one measured case: node benchmarks/wide.js --measure; then the suite: node benchmarks/wide.js --go --max-cost-usd <n>
+```
+
+Se você pular direto para a suíte, ela recusa sem gastar nada:
+
+```text
+$ node benchmarks/wide.js --go --seed 42
+wide suite REFUSED: --go needs --max-cost-usd <n>: run --measure first, it prints the limit to use (BR7)
+```
+
+O caso medido roda os dois braços uma vez no primeiro problema e depois o juiz, sem limite, e sugere o limite da suíte. Saída do script sobre o `claude` falso do check (cada chamada custa US$ 0,37 ali; numa execução real, os valores são os que a CLI do Claude informar):
+
+```text
+$ node benchmarks/wide.js --measure --seed 3
+import-records run 1: step2 US$ 0.37, wide US$ 0.37; judge US$ 0.37
+results: benchmarks/results/wide-measure-<stamp>.json and .md (seed 3)
+measured: US$ 1.11 for one case (2 arms + judge); suggested --max-cost-usd 17 (x 4 problems x 3 runs + 25%)
+wide suite DONE (total US$ 1.11)
+```
+
+O relatório traz a tabela do problema, com a coluna "Shown as" dizendo qual resposta o juiz viu como X:
+
+```text
+| Run | Arm | Shown as | breadth | novelty | traps | Cost US$ | Judge US$ | Traps named (judge) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | step2 | Y | 5 | 1 | 2 | 0.37 | 0.37 | none named |
+| 1 | wide | X | 10 | 6 | 4 | 0.37 | 0.37 | names the lock-in of a custom format |
+```
+
+Com o limite em mãos, você roda a suíte inteira com ele. Se um problema for editado sem subir a `version` de `suite.json`, o script recusa nomeando o problema; se você pedir um juiz da mesma família dos braços (por exemplo `claude-sonnet-5-5`), também recusa, antes de qualquer chamada.
