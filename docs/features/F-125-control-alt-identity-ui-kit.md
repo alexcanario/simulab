@@ -1,7 +1,7 @@
 ---
 feature: F-125
 epic: Foundation and identity
-status: building
+status: validating
 board: 176
 version: 2
 ---
@@ -182,6 +182,8 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-18 — BR2 covers every stylesheet: the scoped `MainLayout.razor.css` and `ReconnectModal.razor.css` lose their literal colours too, and the scan of AC3 reads them — Claude
 - 2026-10-18 — Brand file names are English (`keys-symbol.svg`, `keys-symbol-dark.svg`, `app-icon.svg`), copied from `simbolo-teclas.svg` and `icone-app.svg` — Claude
 - 2026-10-18: tests unlocked (owner, "Destravar e corrigir": `KeycapButtonTests` and `UiGalleryIdentityTests` looked for `mud-button-size-small`, which MudBlazor 9.9.0 never renders — it names the size per variant; `BrandAssetsHostTests` required a literal `+` that Blazor writes as `&#x2B;`; `AppBarBrandTests` had an unused using and `BrandFontTests` an unresolved cref, two new build warnings). Only those lines changed; locked again
+- 2026-10-18 — Reuse: MudBlazor's own classes for the four button variants and its `GenerateTheme` for the keycap edges (no new component); `AppCssColours`, `ColourContrast` and `IdentityTokensComparison` for every new contrast and token test; the design system's font, licence and logo files copied as they are; `EmailHtml` grew one `Page` for the four mailers instead of four copies — Claude
+- 2026-10-18 — Screen check through the app host (database `simulab_f125`): found that JetBrains Mono widened two gallery labels past the page and that the company line lost 25px at 375px; both fixed in `app.css` (5078271) — Claude
 - 2026-10-17 — ADR-0006 records the brand; ADR-0001 decision 30 points to it and its "Revisit when" line is closed — D-4 asked for an ADR — confirmed: D-4
 
 ## Out of scope
