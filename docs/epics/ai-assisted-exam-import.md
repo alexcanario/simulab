@@ -44,9 +44,10 @@ Recorded on 2026-10-18 from a discussion with the owner about RAG over legal PDF
 ## Features
 | Id | Feature | Value | Priority | Size | Depends on | Waits on | Screen design | Status |
 |---|---|---|---|---|---|---|---|---|
+| F-143 | Align the external ingestion lab with E-9 | Bring what the owner's standalone lab (Docling, Ollama, pgvector, `OllamaAiGateway`, golden exams) proves back into this epic before its first item | Should | S | - | the lab tutorial and its path — owner | no | idea |
 
 ## Execution plan
-Not broken down yet: `/agile:epic ai-assisted-exam-import` details it.
+Not broken down yet: `/agile:epic ai-assisted-exam-import` details it. F-143 comes before the first import item.
 
 ## Waiting outside the epic
 | What | For | Who provides it | Who asks |
@@ -54,6 +55,7 @@ Not broken down yet: `/agile:epic ai-assisted-exam-import` details it.
 | Python worker yes or no | first E-9 item | owner | Claude |
 | Dedicated machine with a GPU for Ollama | first E-9 item | owner | Claude |
 | Rights to reproduce each source | every E-9 item | owner | Claude |
+| The external ingestion lab tutorial and its path | F-143 | owner | Claude |
 
 ## First release cut
 
