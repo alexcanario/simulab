@@ -181,6 +181,7 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-18 — The destructive keycap edge, which `## Approved list` does not give, is derived like the others: light `#892828` (error x0.72), dark `#924646` (error x0.65) — Claude
 - 2026-10-18 — BR2 covers every stylesheet: the scoped `MainLayout.razor.css` and `ReconnectModal.razor.css` lose their literal colours too, and the scan of AC3 reads them — Claude
 - 2026-10-18 — Brand file names are English (`keys-symbol.svg`, `keys-symbol-dark.svg`, `app-icon.svg`), copied from `simbolo-teclas.svg` and `icone-app.svg` — Claude
+- 2026-10-18: tests unlocked (owner, "Destravar e corrigir": `KeycapButtonTests` and `UiGalleryIdentityTests` looked for `mud-button-size-small`, which MudBlazor 9.9.0 never renders — it names the size per variant; `BrandAssetsHostTests` required a literal `+` that Blazor writes as `&#x2B;`; `AppBarBrandTests` had an unused using and `BrandFontTests` an unresolved cref, two new build warnings). Only those lines changed; locked again
 - 2026-10-17 — ADR-0006 records the brand; ADR-0001 decision 30 points to it and its "Revisit when" line is closed — D-4 asked for an ADR — confirmed: D-4
 
 ## Out of scope
@@ -218,5 +219,8 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 - 2026-10-17 blocked — impossible criterion: dark keycap edges read 2.39-2.84:1 on the surface, BR3/AC2 ask 3:1
 - 2026-10-17 question — asked 1, from context 0
 - 2026-10-18 change — v2: keycap edge decorative; BR3 and AC2 measure the button fill on page and surface
+- 2026-10-18 blocked — test wrong: small-button class, favicon type encoding, unused using and cref in 5 locked files
+- 2026-10-18 question — asked 1, from context 0
+- 2026-10-18 blocked — test wrong: owner 2026-10-18: small-button class MudBlazor never renders, favicon type encoding, unused using and unresolved cref
 
 ## Delivery

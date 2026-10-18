@@ -136,7 +136,9 @@ code, kbd, pre, samp {
     transition: background-color 150ms ease, transform 80ms ease, box-shadow 80ms ease;
 }
 
-.mud-button-root.mud-button-size-small {
+.mud-button-root.mud-button-filled-size-small,
+.mud-button-root.mud-button-outlined-size-small,
+.mud-button-root.mud-button-text-size-small {
     min-height: 36px;
 }
 

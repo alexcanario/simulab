@@ -30,7 +30,7 @@ public sealed class UiGalleryIdentityTests : KitTestContext
         section.QuerySelectorAll("button.mud-button-text").Should().NotBeEmpty();
         section.QuerySelectorAll("button.mud-button-filled-tertiary").Should().ContainSingle("one orange action per screen (BR5)");
         section.QuerySelectorAll("button.mud-button-filled-error, button.mud-button-outlined-error").Should().NotBeEmpty();
-        section.QuerySelectorAll("button.mud-button-size-small").Should().NotBeEmpty();
+        section.QuerySelectorAll("button[class*='-size-small']").Should().NotBeEmpty();
         section.QuerySelectorAll("button[disabled]").Should().NotBeEmpty();
         section.TextContent.Should().Contain("Hover").And.Contain("Pressed").And.Contain("Focus").And.Contain("Disabled");
     }

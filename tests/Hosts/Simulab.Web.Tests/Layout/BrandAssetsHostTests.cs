@@ -43,7 +43,8 @@ public class BrandAssetsHostTests(WebApplicationFactory<Program> factory) : ICla
     {
         var html = await Client().GetStringAsync("/");
 
-        html.Should().MatchRegex(@"<link rel=""icon"" type=""image/svg\+xml"" href=""brand/app-icon[^""]*\.svg""");
+        // Blazor writes the '+' of the media type as &#x2B;; the browser reads both the same.
+        html.Should().MatchRegex(@"<link rel=""icon"" type=""image/svg(\+|&#x2B;)xml"" href=""brand/app-icon[^""]*\.svg""");
         html.Should().NotContainAny("fonts.googleapis", "fonts.gstatic");
     }
 }

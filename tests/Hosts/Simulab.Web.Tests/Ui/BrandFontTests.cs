@@ -6,7 +6,7 @@ namespace Simulab.Web.Tests.Ui;
 /// <summary>
 /// F-125 AC8 (BR8): the two families of the brand are files of the app, never a third-party host, each <c>@font-face</c>
 /// names its weight, and the OFL licence of each family sits next to its files. Body text is Bricolage Grotesque 500,
-/// titles 800, code and numbers JetBrains Mono. <see cref="BrandAssetsHostTests"/> fetches the files through the host.
+/// titles 800, code and numbers JetBrains Mono. <c>BrandAssetsHostTests</c> fetches the files through the host.
 /// </summary>
 public sealed partial class BrandFontTests
 {

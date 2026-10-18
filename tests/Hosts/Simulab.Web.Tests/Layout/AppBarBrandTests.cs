@@ -1,6 +1,5 @@
 using System.Globalization;
 using Bunit;
-using MudBlazor;
 using Simulab.Web.Components.Layout;
 using Simulab.Web.Tests.Ui;
 

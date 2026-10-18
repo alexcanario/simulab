@@ -70,9 +70,14 @@ public sealed class KeycapButtonTests : KitTestContext
     public void Buttons_HaveTheMinimumHeights()
     {
         AppCssColours.Declaration(".mud-button-root.mud-button", "min-height").Should().Be("44px");
-        AppCssColours.Declaration(".mud-button-root.mud-button-size-small", "min-height").Should().Be("36px");
-        Render<MudButton>(parameters => parameters.Add(p => p.Size, Size.Small).AddChildContent("Filter"))
-            .Find("button").ClassList.Should().Contain("mud-button-size-small");
+        // MudBlazor names the small size per variant: mud-button-filled-size-small, -outlined-, -text-.
+        foreach (var (variant, kind) in new[] { (Variant.Filled, "filled"), (Variant.Outlined, "outlined"), (Variant.Text, "text") })
+        {
+            var selector = $".mud-button-root.mud-button-{kind}-size-small";
+            AppCssColours.Declaration(selector, "min-height").Should().Be("36px", selector);
+            Render<MudButton>(parameters => parameters.Add(p => p.Variant, variant).Add(p => p.Size, Size.Small).AddChildContent("Filter"))
+                .Find("button").ClassList.Should().Contain($"mud-button-{kind}-size-small");
+        }
     }
 
     /// <summary>Pressed moves the key down and shrinks the edge; with reduced motion it happens at once.</summary>
