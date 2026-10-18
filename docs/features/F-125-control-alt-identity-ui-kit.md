@@ -114,7 +114,7 @@ Tests locked: 7c2e7fb0d3ddceed935da8300c0615f0539c3f31 (12 files); unlocks: 1
 | AC8 | `BrandFontTests`; `BrandAssetsHostTests.Get_Font_IsServedByTheAppAsWoff2` |
 | AC9 | `AppBarBrandTests`; `KeycapContrastTests.AppBarBrand_ReadsAtAaOnTheBar`; validation step (375px) |
 | AC10 | `BrandAssetsHostTests.Get_Home_LinksTheAppIconAsTheFaviconAndNoFontHost`, `Get_BrandFile_IsServedAsSvg` |
-| AC11 | pending |
+| AC11 | `AppFieldLeadingIconTests`, `AppLookupFieldTests`, `AppMultiPickFieldTests`, `AppChipsFieldTests` (icons and placeholders, unchanged and green; no file of `Components/Ui` changed) |
 | AC12 | `EmailIdentityTests` |
 | AC13 | `UiGalleryIdentityTests`; `UiGalleryTests.Render_Development_ShowsHeaderAndEverySection`; `DevPagesHostTests.Get_GalleryInDevelopment_RendersEverySection` |
 | AC14 | `ResourceParityTests`; `AppBarBrandTests.Brand_TextsComeFromTheResources` |
