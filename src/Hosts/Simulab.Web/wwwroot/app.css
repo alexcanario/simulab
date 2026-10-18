@@ -364,6 +364,13 @@ code, kbd, pre, samp {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+}
+
+/* F-125: the mono font is wider than the system one; a long name breaks instead of widening the page. */
+.gallery-icon code {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 /* F-125: the identity sections of the gallery. */
@@ -943,13 +950,16 @@ code, kbd, pre, samp {
     text-overflow: ellipsis;
 }
 
+/* At 375px the switches keep their 48px targets, so the symbol shrinks first: measured, "Control Alt Systems" needs
+   117px and has 118px left with a 12px symbol, the small gap and no margin; the ellipsis stays as the fallback. */
 @media (max-width: 599.98px) {
     .app-name.mud-link {
-        gap: var(--app-space-2);
+        gap: var(--app-space-1);
+        margin-left: 0;
     }
 
     .app-brand-symbol {
-        height: 1.125rem;
+        height: 0.75rem;
     }
 }
 
