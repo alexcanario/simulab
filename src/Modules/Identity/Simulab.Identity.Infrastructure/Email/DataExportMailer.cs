@@ -28,7 +28,7 @@ public sealed class DataExportMailer(
         // The user's time zone is not known (F-8), so the instant says plainly that it is UTC.
         var when = $"{exportedAt.UtcDateTime.ToString("f", culture.Culture)} UTC";
         string body = localizer["Email.DataExported.Body", when];
-        var html = Page(
+        var html = EmailHtml.Page(
             localizer["Email.DataExported.Heading"],
             $"""
             <p>{WebUtility.HtmlEncode(body)}</p>
@@ -47,15 +47,4 @@ public sealed class DataExportMailer(
         queue.EnqueueEmail(new EmailMessage(email, localizer["Email.DataExported.Subject"], html, text));
         return Task.CompletedTask;
     }
-
-    private static string Page(string heading, string innerHtml) =>
-        $"""
-        <!doctype html>
-        <html>
-          <body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #19243E; line-height: 1.6;">
-            <h1 style="font-size: 20px;">{WebUtility.HtmlEncode(heading)}</h1>
-            {innerHtml}
-          </body>
-        </html>
-        """;
 }

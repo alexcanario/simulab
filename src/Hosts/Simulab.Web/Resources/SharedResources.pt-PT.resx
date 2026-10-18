@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="App.Name" xml:space="preserve"><value>Simulab</value></data>
+  <data name="App.Company" xml:space="preserve"><value>Control Alt Systems</value></data>
   <data name="Home.Title" xml:space="preserve"><value>Pratique como se fosse o dia da prova</value></data>
   <data name="Home.Tagline" xml:space="preserve"><value>Simulações realistas e um coach que lhe diz o que estudar a seguir.</value></data>
   <data name="Home.Status" xml:space="preserve"><value>O Simulab está em construção. As funcionalidades chegam aqui uma de cada vez.</value></data>
@@ -986,6 +987,23 @@
   <data name="RichText.ClearFormatting" xml:space="preserve"><value>Limpar formatação</value></data>
   <data name="RichText.Hint.Keyboard" xml:space="preserve"><value>Tab sai do editor.</value></data>
   <data name="Gallery.Section.RichText" xml:space="preserve"><value>Campo de texto formatado</value></data>
+  <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Botões</value></data>
+  <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>As quatro variantes da marca: primária, secundária, texto e a ação laranja, uma por ecrã. A página define apenas Variant e Color; o aspeto vem do kit.</value></data>
+  <data name="Gallery.Buttons.Variants" xml:space="preserve"><value>Variantes</value></data>
+  <data name="Gallery.Buttons.Small" xml:space="preserve"><value>Tamanho pequeno</value></data>
+  <data name="Gallery.Buttons.States" xml:space="preserve"><value>Estados</value></data>
+  <data name="Gallery.Buttons.Action" xml:space="preserve"><value>Iniciar simulado</value></data>
+  <data name="Gallery.Buttons.Filter" xml:space="preserve"><value>Filtrar</value></data>
+  <data name="Gallery.Buttons.State.Hover" xml:space="preserve"><value>Passar o rato: o botão fica 8% mais claro.</value></data>
+  <data name="Gallery.Buttons.State.Pressed" xml:space="preserve"><value>Premido: mantenha a tecla premida e ela desce sobre a aresta.</value></data>
+  <data name="Gallery.Buttons.State.Focus" xml:space="preserve"><value>Foco: chegue ao botão com Tab e o anel azul aparece.</value></data>
+  <data name="Gallery.Buttons.State.Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Gallery.Section.Type" xml:space="preserve"><value>Tipografia</value></data>
+  <data name="Gallery.Type.Hint" xml:space="preserve"><value>Bricolage Grotesque 500 para texto e 800 para títulos; JetBrains Mono para código, grelhas de números e atalhos de teclado.</value></data>
+  <data name="Gallery.Type.Sample" xml:space="preserve"><value>Simulados que dizem o que estudar a seguir</value></data>
+  <data name="Gallery.Type.Shortcut" xml:space="preserve"><value>Pesquisar</value></data>
+  <data name="Gallery.Section.Palette" xml:space="preserve"><value>Paleta</value></data>
+  <data name="Gallery.Palette.Hint" xml:space="preserve"><value>A paleta do tema em uso, pelo nome que a folha de estilos lê. Mude o tema para ver a outra.</value></data>
   <data name="Gallery.RichText.Hint" xml:space="preserve"><value>Um editor visual para texto formatado, com a etiqueta, a dica e o erro de todos os campos do kit. Use Tab para entrar num campo e ver o anel de foco.</value></data>
   <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Vazio</value></data>
   <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Preenchido</value></data>

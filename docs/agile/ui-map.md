@@ -13,10 +13,15 @@
 | review queue | fila de revisão: a lista das questões enviadas para revisão, da mais antiga para a mais recente |
 | in review | em revisão: a questão foi enviada, está congelada e espera uma decisão |
 | reviewer-only role | papel só de revisão: um papel criado na tela de papéis que tem apenas a permissão "Review questions" |
+| app bar | barra superior: a faixa no alto de todas as páginas, com o menu, a marca e os botões de tema, idioma e usuário |
+| theme switch | botão de tema: a lua (ou o sol, no tema escuro) no canto superior direito da barra superior |
+| UI gallery | galeria do kit: a página de desenvolvimento que mostra cada peça do kit de interface |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
 |---|---|---|---|---|
+| App bar | every page with the main layout, at the top | from the left: menu button, brand symbol, "Simulab" over "Control Alt Systems" (the home link), theme switch, language switch (globe), user menu or Sign in | src/Hosts/Simulab.Web/Components/Layout/MainLayout.razor | 5078271 |
+| UI gallery, identity sections | sidebar > Development > UI kit (/dev/ui, Development only) | the sections Buttons, Type and Palette at the end of the page | src/Hosts/Simulab.Web/Components/Pages/Dev/UiGallery.razor | 5078271 |
 | Base texts list | sidebar > Content > Base texts | the table; Add at the top right; Edit and Delete in each row | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/BaseTexts.razor | 31cb0606 |
 | Base text form | Base texts list > Add, or Edit on a row | Save at the bottom of the first card; the linked questions and Delete in the cards below | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/BaseTextForm.razor | 31cb0606 |
 | Question form, base text section | sidebar > Content > Questions > Add (or Edit on a row) > Base text card, after Statement | the picker field; Open and Show the text under it | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | bc7db0cb |

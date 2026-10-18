@@ -1,23 +1,57 @@
+/* ---- Brand fonts (F-125, BR8): files of the app, with their OFL licences in fonts/. Never a third-party host. ---- */
+@font-face {
+    font-family: "Bricolage Grotesque";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("fonts/bricolage-grotesque-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Bricolage Grotesque";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("fonts/bricolage-grotesque-latin-800-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+}
+
 h1:focus {
     outline: none;
 }
 
+/* F-83: the template's validation and error colours read the theme. */
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid var(--mud-palette-success);
 }
 
 .invalid {
-    outline: 1px solid #e50000;
+    outline: 1px solid var(--mud-palette-error);
 }
 
 .validation-message {
-    color: #e50000;
+    color: var(--mud-palette-error);
 }
 
 .blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, var(--mud-palette-error);
     padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
+    color: var(--mud-palette-error-text);
 }
 
     .blazor-error-boundary::after {
@@ -25,7 +59,7 @@ h1:focus {
     }
 
 .darker-border-checkbox.form-check-input {
-    border-color: #929292;
+    border-color: var(--mud-palette-lines-inputs);
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -42,8 +76,13 @@ h1:focus {
    genuinely needs something else says so in a comment on the same line.
    Type: 0.75 / 0.8125 / 0.875 / 0.9375 (body) / 1 / 1.375rem.
    Space: 0.25 / 0.5 / 0.75 / 1 / 1.5 / 2 / 2.5rem.
-   Radius: 6 / 10 (the theme's default) / 16px, and a pill. */
+   Radius (F-125, BR7): 6 tags and chips / 12 buttons and fields (the theme's default) / 20px cards and dialogs, and a pill.
+   Mono (F-125): JetBrains Mono for code, grids of numbers and keyboard shortcuts.
+   Keycap (F-125): the edge under a filled button is 4px deep; pressed, the key moves 2px down and the edge shrinks. */
 :root {
+    --app-font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    --app-keycap-depth: 4px;
+    --app-keycap-press: 2px;
     --app-font-xs: 0.75rem;
     --app-font-sm: 0.8125rem;
     --app-font-md: 0.875rem;
@@ -58,8 +97,8 @@ h1:focus {
     --app-space-6: 2rem;
     --app-space-7: 2.5rem;
     --app-radius-sm: 6px;
-    --app-radius-md: 10px;
-    --app-radius-lg: 16px;
+    --app-radius-md: 12px;
+    --app-radius-lg: 20px;
     --app-radius-pill: 999px;
 }
 
@@ -69,14 +108,153 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     cursor: pointer;
 }
 
+/* F-125, palette 16: the focus ring is the info blue, 3px, 2px away. Inside the navy sidebar it takes the drawer's text
+   colour, since the blue reads at 2.6:1 on the navy. */
 :is(a, button, input, select, textarea, [tabindex], .mud-button-root):focus-visible {
-    outline: 2px solid var(--mud-palette-primary);
+    outline: 3px solid var(--mud-palette-info);
     outline-offset: 2px;
+}
+
+.app-drawer :focus-visible {
+    outline-color: var(--mud-palette-drawer-text);
 }
 
 .mud-button-root, .mud-icon-button {
     min-width: 24px;
     min-height: 24px;
+}
+
+code, kbd, pre, samp {
+    font-family: var(--app-font-mono);
+}
+
+/* ---- Buttons (F-125, BR4): the four variants of the brand, styled on the classes MudBlazor renders, so a page keeps
+   its Variant and Color and changes nothing. Written from MudBlazor 9.9.0's own CSS (rule: ui-project). ---- */
+.mud-button-root.mud-button {
+    min-height: 44px;
+    border-radius: var(--app-radius-md);
+    transition: background-color 150ms ease, transform 80ms ease, box-shadow 80ms ease;
+}
+
+.mud-button-root.mud-button-filled-size-small,
+.mud-button-root.mud-button-outlined-size-small,
+.mud-button-root.mud-button-text-size-small {
+    min-height: 36px;
+}
+
+/* Primary, action and destructive are keycaps: the fill, its contrast text and the edge under it. */
+.mud-button-filled.mud-button-filled-primary {
+    background-color: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-primary-edge);
+}
+
+.mud-button-filled.mud-button-filled-tertiary {
+    background-color: var(--mud-palette-tertiary);
+    color: var(--mud-palette-tertiary-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-tertiary-edge);
+}
+
+.mud-button-filled.mud-button-filled-error {
+    background-color: var(--mud-palette-error);
+    color: var(--mud-palette-error-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-error-edge);
+}
+
+.mud-button-filled.mud-button-filled-secondary,
+.mud-button-filled.mud-button-filled-success {
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-secondary-edge);
+}
+
+/* Pressed, the key moves down while its edge shrinks by as much. */
+.mud-button-filled:active:not(:disabled) {
+    transform: translateY(var(--app-keycap-press));
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-primary-edge);
+}
+
+.mud-button-filled.mud-button-filled-tertiary:active:not(:disabled) {
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-tertiary-edge);
+}
+
+.mud-button-filled.mud-button-filled-error:active:not(:disabled) {
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-error-edge);
+}
+
+/* Disabled: the sunken fill, ink-muted text, no edge; the button keeps its real disabled attribute. */
+.mud-button-filled:disabled {
+    background-color: var(--mud-palette-background-gray) !important;
+    color: var(--mud-palette-text-secondary);
+    box-shadow: none;
+}
+
+/* Secondary: the surface inside a 2px line-strong border, ink text. */
+.mud-button-root.mud-button-outlined {
+    background-color: var(--mud-palette-surface);
+    border: 2px solid var(--mud-palette-lines-inputs);
+    color: var(--mud-palette-text-primary);
+}
+
+/* A destructive outlined button keeps the error colour for its text and its border. */
+.mud-button-outlined.mud-button-outlined-error {
+    border-color: var(--mud-palette-error);
+    color: var(--mud-palette-error);
+}
+
+.mud-button-outlined:disabled {
+    border-color: var(--mud-palette-background-gray);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* Text: a link — no fill, the info blue, underlined. A destructive text button keeps the error colour. */
+.mud-button-root.mud-button-text {
+    background-color: transparent;
+    color: var(--mud-palette-info);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mud-button-text.mud-button-text-error {
+    color: var(--mud-palette-error);
+}
+
+.mud-button-text:disabled {
+    color: var(--mud-palette-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mud-button-root.mud-button {
+        transition: none;
+    }
+}
+
+/* ---- Surfaces (F-125, BR6 and BR7): no diffuse shadow (the theme draws none), a 1px line around each surface,
+   20px corners on cards and dialogs. Menus and lists keep the field radius. ---- */
+.mud-paper:not(.mud-paper-square):not(.mud-popover) {
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-lg);
+}
+
+.mud-dialog {
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-lg);
+}
+
+.mud-popover {
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.mud-appbar {
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.app-drawer.mud-drawer {
+    border-right: 1px solid var(--mud-palette-divider);
+}
+
+.mud-chip.mud-chip-size-small,
+.mud-chip.mud-chip-size-medium,
+.mud-chip.mud-chip-size-large {
+    border-radius: var(--app-radius-sm);
 }
 
 .app-page-header {
@@ -186,13 +364,75 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+}
+
+/* F-125: the mono font is wider than the system one; a long name breaks instead of widening the page. */
+.gallery-icon code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* F-125: the identity sections of the gallery. */
+.gallery-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.gallery-button-states {
+    margin: 0 0 1rem;
+    padding-left: 1.5rem;
+}
+
+.gallery-type-scale {
+    display: grid;
+    grid-template-columns: minmax(10rem, max-content) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+}
+
+.gallery-type-scale dd {
+    margin: 0;
+}
+
+.gallery-mono-grid {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.gallery-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gallery-swatch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gallery-swatch-chip {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: 6px;
 }
 
 /* ---- Composition patterns (F-43) ---- */
 
 .app-section-card {
     border: 1px solid var(--mud-palette-divider);
-    border-radius: var(--app-radius-md);
+    border-radius: var(--app-radius-lg);
     padding: var(--app-space-4);
 }
 
@@ -304,7 +544,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     align-items: center;
     gap: var(--app-space-2);
     padding: var(--app-space-1) var(--app-space-3);
-    border-radius: var(--app-radius-pill);
+    border-radius: var(--app-radius-sm);
     /* Measured on screen: the divider colour reads 1.42:1 on the dark card, so the pill vanished and the chip
        became loose text. The field-border colour is the one F-17 already took above 3:1 in both themes. */
     border: 1px solid var(--mud-palette-lines-inputs);
@@ -513,7 +753,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-disclosure-button:focus-visible {
-    outline: 2px solid var(--mud-palette-primary);
+    outline: 3px solid var(--mud-palette-info);
     outline-offset: 2px;
 }
 
@@ -648,7 +888,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-form-card {
     border: 1px solid var(--mud-palette-divider);
-    border-radius: var(--app-radius-md);
+    border-radius: var(--app-radius-lg);
     padding: var(--app-space-5);
 }
 
@@ -671,9 +911,60 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     transform: none;
 }
 
+/* F-125, BR9: the brand in the app bar — the key symbol, then "Simulab" over "Control Alt Systems". The link shrinks
+   before the switches do: each line stays on one line and the company line ends in an ellipsis at 375px. */
 .app-name.mud-link {
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    min-width: 0;
     margin-left: var(--app-space-1);
+    color: var(--mud-palette-appbar-text);
+}
+
+.app-brand-symbol {
+    flex: none;
+    height: 1.75rem;
+    width: auto;
+}
+
+.app-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.app-brand-name {
+    font-size: var(--app-font-lg);
+    font-weight: 800;
+    line-height: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.app-brand-company {
+    overflow: hidden;
+    color: var(--mud-palette-text-secondary);
+    font-size: var(--app-font-xs);
+    line-height: 1rem;
+    text-overflow: ellipsis;
+}
+
+/* At 375px the switches keep their 48px targets, so the symbol shrinks first: measured, "Control Alt Systems" needs
+   117px and has 118px left with a 12px symbol, the small gap and no margin; the ellipsis stays as the fallback. */
+@media (max-width: 599.98px) {
+    .app-name.mud-link {
+        gap: var(--app-space-1);
+        margin-left: 0;
+    }
+
+    .app-brand-symbol {
+        height: 0.75rem;
+    }
+}
+
+.mud-appbar .mud-toolbar {
+    min-width: 0;
 }
 
 .app-user-menu:empty {
@@ -694,9 +985,10 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     opacity: 0.7;
 }
 
+/* F-125: the drawer's tints are its own text colour at a share, so no literal colour is left (BR2). */
 .app-nav-divider.mud-divider {
     margin: var(--app-space-2) 0;
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: color-mix(in srgb, var(--mud-palette-drawer-text) 22%, transparent);
 }
 
 /* One menu item per line. MudBlazor's own .mud-tooltip-inline (inline-block) came later with the same weight
@@ -715,7 +1007,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-drawer .mud-nav-link:not(.mud-nav-link-disabled):hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: color-mix(in srgb, var(--mud-palette-white) 8%, transparent);
 }
 
 /* B-17: the selected item lightens its background and used to keep the drawer's translucent text, so the entry
@@ -723,8 +1015,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
    reads 12.5:1 dark and 9.4:1 light. ThemeContrastTests computes both from the stylesheet. */
 .app-drawer .mud-navmenu .mud-nav-link.active:not(.mud-nav-link-disabled),
 .app-drawer .mud-navmenu .mud-nav-link[aria-current="page"] {
-    background-color: rgba(255, 255, 255, 0.14);
-    border-left-color: var(--mud-palette-primary);
+    background-color: color-mix(in srgb, var(--mud-palette-white) 14%, transparent);
+    border-left-color: var(--mud-palette-white);
     color: var(--mud-palette-white);
     font-weight: 600;
 }
@@ -782,7 +1074,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     /* The auth card's own breathing room, wider than the scale's top step (F-4). */
     padding: 28px 26px;
     border: 1px solid var(--mud-palette-divider);
-    border-radius: var(--mud-default-borderradius);
+    border-radius: var(--app-radius-lg);
     background: var(--mud-palette-surface);
 }
 
@@ -1015,7 +1307,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin-left: var(--app-space-2);
     padding: 1px var(--app-space-2);
     border: 1px solid var(--mud-palette-primary);
-    border-radius: var(--app-radius-md);
+    border-radius: var(--app-radius-sm);
     background: var(--mud-palette-primary-lighten);
     color: var(--mud-palette-text-primary);
     font-size: 0.6875rem;
@@ -1033,7 +1325,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     margin: 2px var(--app-space-1) 2px 0;
     padding: 2px 10px;
     border: 1px solid var(--mud-palette-divider);
-    border-radius: 12px;
+    border-radius: var(--app-radius-sm);
     background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
     font-size: var(--app-font-xs);
@@ -1114,7 +1406,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     height: 42px;
     padding: 0 var(--app-space-3);
     border: 1px solid var(--mud-palette-lines-inputs);
-    border-radius: var(--app-radius-sm);
+    border-radius: var(--app-radius-md);
     background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
 }
@@ -1174,7 +1466,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     height: 42px;
     padding: 0 var(--app-space-3);
     border: 1px solid var(--mud-palette-lines-inputs);
-    border-radius: var(--app-radius-sm);
+    border-radius: var(--app-radius-md);
     background: var(--mud-palette-surface);
     color: var(--mud-palette-text-primary);
 }
@@ -1223,9 +1515,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     overflow-y: auto;
     padding: var(--app-space-1) 0;
     border: 1px solid var(--mud-palette-divider);
-    border-radius: var(--app-radius-sm);
+    border-radius: var(--app-radius-md);
     background: var(--mud-palette-surface);
-    box-shadow: var(--mud-elevation-8);
 }
 
 .app-mp-group + .app-mp-group {
@@ -1257,8 +1548,8 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 }
 
 .app-mp-option:focus-visible {
-    outline: 2px solid var(--mud-palette-primary);
-    outline-offset: -2px;
+    outline: 3px solid var(--mud-palette-info);
+    outline-offset: -3px;
 }
 
 .app-mp-option[aria-selected="true"] {
@@ -1395,7 +1686,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
     gap: 2px;
     padding: 0 2px 0 var(--app-space-3);
     border: 1px solid var(--mud-palette-divider);
-    border-radius: var(--app-radius-lg);
+    border-radius: var(--app-radius-sm);
     color: var(--mud-palette-text-primary);
     font-size: var(--app-font-md);
 }
@@ -1442,7 +1733,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-permission-technical {
     color: var(--mud-palette-text-secondary);
-    font-family: Consolas, "Courier New", monospace;
+    font-family: var(--app-font-mono);
     font-size: var(--app-font-xs);
 }
 
@@ -1491,7 +1782,7 @@ a, button, [role="button"], [role="menuitem"], .mud-button-root, .mud-icon-butto
 
 .app-security-secret,
 .app-security-codes code {
-    font-family: Consolas, "Courier New", monospace;
+    font-family: var(--app-font-mono);
     font-size: 0.95rem;
     letter-spacing: 0.05em;
     color: var(--mud-palette-text-primary);

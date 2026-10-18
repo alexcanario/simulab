@@ -9,7 +9,7 @@
    account and of the legal text they are accepting. The page renders its own card, so a form and a
    legal document can have different widths without a second layout. *@
 
-<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
+<SimulabThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -41,7 +41,7 @@
 
 @code {
     private readonly MudTheme _theme = Theme.SimulabTheme.Create();
-    private MudThemeProvider? _themeProvider;
+    private SimulabThemeProvider? _themeProvider;
 
     [CascadingParameter] public ShellPreferences Preferences { get; set; } = ShellPreferences.Default;
 

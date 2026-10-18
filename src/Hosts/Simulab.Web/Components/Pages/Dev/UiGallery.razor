@@ -1,4 +1,5 @@
 @page "/dev/ui"
+@implements IDisposable
 @using Simulab.Catalog.Contracts
 @using Simulab.QuestionBank.Contracts
 @inject IStringLocalizer<SharedResources> L
@@ -8,6 +9,7 @@
 @inject IConfirmService Confirm
 @inject ISnackbar Snackbar
 @inject ErrorText ErrorText
+@inject ThemeState ThemeState
 
 @if (!_allowed)
 {
@@ -842,7 +844,108 @@
     </div>
 </section>
 
+@* F-125, UC3: the identity a screen item builds from. The page sets only Variant and Color; the look comes from the kit. *@
+<section id="gallery-buttons" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Buttons"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Buttons.Hint"]</MudText>
+    <p class="gallery-state-caption">@L["Gallery.Buttons.Variants"]</p>
+    <div class="gallery-button-row">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary">@L["Common.Save"]</MudButton>
+        <MudButton Variant="Variant.Outlined">@L["Gallery.Buttons.Filter"]</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Primary">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary">@L["Gallery.Buttons.Action"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@AppIcons.Delete">@L["Common.Delete"]</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Error">@L["Common.Delete"]</MudButton>
+    </div>
+    <p class="gallery-state-caption">@L["Gallery.Buttons.Small"]</p>
+    <div class="gallery-button-row">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">@L["Common.Save"]</MudButton>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small">@L["Gallery.Buttons.Filter"]</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">@L["Common.Cancel"]</MudButton>
+    </div>
+    <p class="gallery-state-caption">@L["Gallery.Buttons.States"]</p>
+    <ul class="gallery-button-states">
+        <li>@L["Gallery.Buttons.State.Hover"]</li>
+        <li>@L["Gallery.Buttons.State.Pressed"]</li>
+        <li>@L["Gallery.Buttons.State.Focus"]</li>
+    </ul>
+    <p class="gallery-state-caption">@L["Gallery.Buttons.State.Disabled"]</p>
+    <div class="gallery-button-row">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">@L["Common.Save"]</MudButton>
+        <MudButton Variant="Variant.Outlined" Disabled="true">@L["Gallery.Buttons.Filter"]</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" Disabled="true">@L["Common.Cancel"]</MudButton>
+    </div>
+</section>
+
+<section id="gallery-type" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Type"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Type.Hint"]</MudText>
+    <dl class="gallery-type-scale">
+        @foreach (var (step, typo) in TypeScale)
+        {
+            <dt><code>@step</code></dt>
+            <dd><MudText Typo="typo" HtmlTag="p">@L["Gallery.Type.Sample"]</MudText></dd>
+        }
+        <dt><code>mono 14/22</code></dt>
+        <dd><code>AppIcons.Edit</code></dd>
+        <dt><code>mono grid 13/20</code></dt>
+        <dd><code class="gallery-mono-grid">12.5 · 7.0 · 98.25</code></dd>
+        <dt><code>mono kbd 12/16</code></dt>
+        <dd><kbd>Ctrl</kbd> + <kbd>K</kbd> · @L["Gallery.Type.Shortcut"]</dd>
+    </dl>
+</section>
+
+<section id="gallery-palette" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Palette"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Palette.Hint"]</MudText>
+    <ul class="gallery-palette">
+        @foreach (var (role, colour) in PaletteRoles)
+        {
+            <li class="gallery-swatch" data-role="@role">
+                <span class="gallery-swatch-chip" style="background-color: var(--mud-palette-@role)" aria-hidden="true"></span>
+                <code>@role</code>
+                <code>@Hex(colour)</code>
+            </li>
+        }
+    </ul>
+</section>
+
 @code {
+    // F-125: the type scale of the identity, named like its tokens (ui-*), each with its size and line height in px.
+    private static readonly IReadOnlyList<(string Step, Typo Typo)> TypeScale =
+    [
+        ("ui-title 28/32", Typo.h1), ("ui-heading 20/24", Typo.h2), ("ui-subheading 16/20", Typo.h3),
+        ("ui-body 15/22", Typo.body1), ("ui-control 14/20", Typo.body2), ("ui-caption 12/16", Typo.caption),
+        ("ui-label 12/16", Typo.overline),
+    ];
+
+    private static readonly MudTheme Identity = SimulabTheme.Create();
+
+    // F-125: the palette roles a screen paints with, by their MudBlazor variable name, in the theme in use.
+    private IReadOnlyList<(string Role, string Colour)> PaletteRoles
+    {
+        get
+        {
+            Palette palette = ThemeState.IsDarkMode ? Identity.PaletteDark : Identity.PaletteLight;
+            return
+            [
+                ("primary", palette.Primary.ToString()), ("info", palette.Info.ToString()), ("secondary", palette.Secondary.ToString()),
+                ("tertiary", palette.Tertiary.ToString()), ("success", palette.Success.ToString()), ("warning", palette.Warning.ToString()),
+                ("error", palette.Error.ToString()), ("background", palette.Background.ToString()), ("surface", palette.Surface.ToString()),
+                ("background-gray", palette.BackgroundGray.ToString()), ("text-primary", palette.TextPrimary.ToString()),
+                ("text-secondary", palette.TextSecondary.ToString()), ("lines-inputs", palette.LinesInputs.ToString()),
+                ("divider", palette.Divider.ToString()), ("primary-lighten", palette.PrimaryLighten),
+                ("appbar-background", palette.AppbarBackground.ToString()), ("drawer-background", palette.DrawerBackground.ToString()),
+            ];
+        }
+    }
+
+    private static string Hex(string colour)
+    {
+        var parsed = new MudBlazor.Utilities.MudColor(colour);
+        return string.Create(CultureInfo.InvariantCulture, $"#{parsed.R:X2}{parsed.G:X2}{parsed.B:X2}");
+    }
+
     private string? _fieldValue;
     private string? _passwordValue;
     private bool _checked;
@@ -1082,6 +1185,10 @@
     [Parameter] public TimeSpan SourceDelay { get; set; } = TimeSpan.FromMilliseconds(400);
 
 
+    private void OnThemeChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => ThemeState.Changed -= OnThemeChanged;
+
     protected override void OnInitialized()
     {
         _allowed = Environment.IsDevelopment();
@@ -1092,6 +1199,8 @@
             return;
         }
 
+        // F-125: the palette section shows the theme in use, so it follows the theme switch.
+        ThemeState.Changed += OnThemeChanged;
         _source = new GallerySource(CreateSample, SourceDelay);
         _sample = CreateSample(1);
         _kindTextValue = SampleName(1);

@@ -10,7 +10,9 @@ namespace Simulab.ArchitectureTests;
 /// </summary>
 public class FillColourTextTests
 {
-    private const string FillNames = "Secondary|Tertiary|Success|Warning|Info";
+    // F-125: info is the Control Alt Systems link blue, the colour of links and the text button, measured as text on the
+    // page and the surface by ThemePaletteTests and KeycapContrastTests, so it is no longer a fill only.
+    private const string FillNames = "Secondary|Tertiary|Success|Warning";
 
     /// <summary>A text component in a fill colour; a filled button paints the colour as its background, so it is allowed.</summary>
     private static readonly Regex TextComponent = new(@"<(MudText|MudLink|MudButton)\b[^>]*>", RegexOptions.Singleline | RegexOptions.CultureInvariant);
@@ -57,7 +59,7 @@ public class FillColourTextTests
         try
         {
             File.WriteAllText(Path.Combine(root.FullName, "Text.razor"), "<MudText Typo=\"Typo.body1\"\n  Color=\"Color.Success\">Saved</MudText>");
-            File.WriteAllText(Path.Combine(root.FullName, "Link.razor"), "<MudLink Href=\"/\" Color=\"Color.Info\">More</MudLink>");
+            File.WriteAllText(Path.Combine(root.FullName, "Link.razor"), "<MudLink Href=\"/\" Color=\"Color.Tertiary\">More</MudLink>");
             File.WriteAllText(Path.Combine(root.FullName, "Outlined.razor"), "<MudButton Variant=\"Variant.Outlined\" Color=\"Color.Warning\">Retry</MudButton>");
             File.WriteAllText(Path.Combine(root.FullName, "Style.css"), ".note { color: var(--mud-palette-tertiary); }");
             File.WriteAllText(Path.Combine(root.FullName, "Hover.css"), ".note:hover { color:var(--mud-palette-secondary-darken) }");

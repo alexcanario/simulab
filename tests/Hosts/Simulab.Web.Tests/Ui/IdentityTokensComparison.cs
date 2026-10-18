@@ -91,16 +91,24 @@ internal static class IdentityTokensComparison
         {
             ("h1", theme.Typography.H1, new H1Typography()),
             ("h2", theme.Typography.H2, new H2Typography()),
+            // F-125: the identity's scale also sets the subheading, the button and the label, and letter spacing.
+            ("h3", theme.Typography.H3, new H3Typography()),
+            ("subtitle1", theme.Typography.Subtitle1, new Subtitle1Typography()),
             ("body1", theme.Typography.Body1, new Body1Typography()),
             ("body2", theme.Typography.Body2, new Body2Typography()),
+            ("button", theme.Typography.Button, new ButtonTypography()),
             ("caption", theme.Typography.Caption, new CaptionTypography()),
+            ("overline", theme.Typography.Overline, new OverlineTypography()),
         };
 
+        AddIfSet(values, "typography.fontWeight", theme.Typography.Default.FontWeight, new DefaultTypography().FontWeight);
         foreach (var (name, current, standard) in styles)
         {
             AddIfSet(values, $"typography.{name}.fontSize", current.FontSize, standard.FontSize);
             AddIfSet(values, $"typography.{name}.fontWeight", current.FontWeight, standard.FontWeight);
             AddIfSet(values, $"typography.{name}.lineHeight", current.LineHeight, standard.LineHeight);
+            AddIfSet(values, $"typography.{name}.letterSpacing", current.LetterSpacing, standard.LetterSpacing);
+            AddIfSet(values, $"typography.{name}.textTransform", current.TextTransform, standard.TextTransform);
         }
 
         return values;
@@ -113,7 +121,12 @@ internal static class IdentityTokensComparison
         var typography = tokens["typography"]!.AsObject();
         values["typography.fontFamily"] = string.Join(", ", typography["fontFamily"]!["$value"]!.AsArray().Select(font => font!.GetValue<string>()));
 
-        foreach (var (style, node) in typography.Where(entry => !entry.Key.StartsWith('$') && entry.Key != "fontFamily"))
+        if (typography["fontWeight"] is { } weight)
+        {
+            values["typography.fontWeight"] = Scalar(weight["$value"]!);
+        }
+
+        foreach (var (style, node) in typography.Where(entry => !entry.Key.StartsWith('$') && entry.Key is not ("fontFamily" or "fontWeight")))
         {
             foreach (var (property, token) in node!.AsObject())
             {
@@ -241,11 +254,11 @@ internal static class IdentityTokensComparison
         }
     }
 
-    /// <summary>A number as written ("700", "1.2") or a dimension as value plus unit ("1.75rem").</summary>
+    /// <summary>A number as written ("700", "1.2"), a dimension as value plus unit ("1.75rem"), or a keyword ("none").</summary>
     private static string Scalar(JsonNode value) =>
         value is JsonObject dimension
             ? dimension["value"]!.ToJsonString() + dimension["unit"]!.GetValue<string>()
-            : value.ToJsonString();
+            : value.GetValueKind() == System.Text.Json.JsonValueKind.String ? value.GetValue<string>() : value.ToJsonString();
 
     private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];
 }

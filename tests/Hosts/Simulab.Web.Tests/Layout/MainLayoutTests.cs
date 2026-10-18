@@ -44,7 +44,8 @@ public class MainLayoutTests : ShellTestContext
         controls.Should().Equal("menu", "name", "theme", "language", "user");
         var name = bar.QuerySelector(".app-name")!;
         name.GetAttribute("href").Should().Be("/");
-        name.TextContent.Trim().Should().Be("Simulab");
+        // F-125: the home link holds the brand symbol and two lines; AppBarBrandTests checks each one.
+        name.QuerySelector(".app-brand-name")!.TextContent.Trim().Should().Be("Simulab");
         name.GetAttribute("aria-label").Should().Be("Simulab, home page");
         // F-5, BR10: anonymous shows "Sign in"; the KitTestContext default is not-authorized.
         bar.QuerySelector(".app-user-menu .app-sign-in-link")!.TextContent.Trim().Should().Be("Sign in");

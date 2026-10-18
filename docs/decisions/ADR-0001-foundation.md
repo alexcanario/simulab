@@ -82,7 +82,7 @@ Known exception: `User` inherits `IdentityUser<Guid>`, so it cannot inherit `Ten
 | 27 | Content language | Question content is not translated; each exam and question carries its own language; the coach answers in the user's UI language | A translated exam is no longer the real exam |
 | 28 | Default language | Per user (profile), then browser, then `en` | Several devices; emails need the user's language |
 | 29 | Accessibility | WCAG 2.2 AA. The exam timer is announced accessibly without interrupting | Public service exams have candidates with disabilities |
-| 30 | Design system | `SimulabTheme` starting from Simulae's theme (light and dark). Its values are recorded in `docs/design/identity.tokens.json` (source: `SimulabTheme`, F-63; `IdentityTokensTests` keeps both equal), primary `#216DB5` in light mode (`#2478C5` until B-8) | Theme is ready; revisit when Simulab has its own brand |
+| 30 | Design system | `SimulabTheme` (light and dark). Its values are recorded in `docs/design/identity.tokens.json` (source: `SimulabTheme`, F-63; `IdentityTokensTests` keeps both equal). Amended by F-125, 2026-10-18: the theme is the Control Alt Systems identity, [ADR-0006](ADR-0006-control-alt-identity.md); it started from Simulae's theme | Simulab has its own brand now (ADR-0006) |
 
 ### Round 6 — Operations
 | # | Question | Decision | Reason |
@@ -139,4 +139,4 @@ Deferred by the owner on 2026-09-17; each returns when its epic is refined.
 - A second process needs events (broker).
 - A mobile client appears (OpenIddict flows, render mode).
 - The first release is near (environments, deployment pipeline).
-- Simulab has its own brand (theme).
+- ~~Simulab has its own brand (theme).~~ Closed by ADR-0006 (F-125, 2026-10-18).
