@@ -99,6 +99,9 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 - AC14 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 607db9602a6671850aeb91ff21b39948a021a5ca (12 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `ApprovedPaletteTests` (every role, both themes; keycap edges; focus ring); `IdentityTokensTests` (tokens and `DESIGN.md` equal the theme) |

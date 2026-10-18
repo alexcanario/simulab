@@ -32,7 +32,7 @@ internal static partial class AppCssColours
     {
         var blocks = Split.Media.Where(block => block.Condition.Contains(condition, StringComparison.Ordinal)).Select(block => block.Body).ToArray();
         blocks.Should().NotBeEmpty($"app.css must have an @media block for '{condition}'");
-        var bodies = blocks.SelectMany(block => Rules(block).Where(rule => rule.Selectors.Contains(selector, StringComparer.Ordinal))).ToArray();
+        var bodies = blocks.SelectMany(block => Rules(block).Where(rule => Names(rule, selector))).ToArray();
         bodies.Should().ContainSingle($"the @media ({condition}) blocks must have exactly one rule for '{selector}'");
         return Value(bodies[0].Body, selector, property);
     }
@@ -87,10 +87,15 @@ internal static partial class AppCssColours
             $"rgb({(overRed * alpha) + (red * (1 - alpha))},{(overGreen * alpha) + (green * (1 - alpha))},{(overBlue * alpha) + (blue * (1 - alpha))})");
     }
 
+    /// <summary>A rule is found by one of its selectors, or by its whole selector list written as in the sheet (F-125).</summary>
+    private static bool Names((string[] Selectors, string Body) rule, string selector) =>
+        rule.Selectors.Contains(selector, StringComparer.Ordinal)
+        || string.Equals(string.Join(", ", rule.Selectors), selector, StringComparison.Ordinal);
+
     private static string DeclarationIn(string css, string selector, string property, string where)
     {
         var bodies = Rules(css)
-            .Where(candidate => candidate.Selectors.Contains(selector, StringComparer.Ordinal))
+            .Where(candidate => Names(candidate, selector))
             .Select(candidate => candidate.Body)
             .ToArray();
         bodies.Should().ContainSingle($"{where} must still have exactly one rule for '{selector}'");
@@ -108,13 +113,30 @@ internal static partial class AppCssColours
     {
         foreach (Match match in RulePattern().Matches(css))
         {
-            var selectors = match.Groups[1].Value
-                .Split(',')
-                .Select(selector => selector.Trim())
+            var selectors = SplitSelectors(match.Groups[1].Value)
+                .Select(selector => string.Join(' ', selector.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)))
                 .Where(selector => selector.Length > 0)
                 .ToArray();
             yield return (selectors, match.Groups[2].Value);
         }
+    }
+
+    /// <summary>Splits a selector list at its top-level commas: the commas of <c>:is(a, button)</c> stay inside their selector.</summary>
+    private static IEnumerable<string> SplitSelectors(string list)
+    {
+        var depth = 0;
+        var start = 0;
+        for (var index = 0; index < list.Length; index++)
+        {
+            depth += list[index] switch { '(' => 1, ')' => -1, _ => 0 };
+            if (list[index] == ',' && depth == 0)
+            {
+                yield return list[start..index];
+                start = index + 1;
+            }
+        }
+
+        yield return list[start..];
     }
 
     /// <summary>Cuts every <c>@media</c> block out of the sheet, matching its braces, and keeps it apart with its condition.</summary>

@@ -24,14 +24,14 @@ public sealed class PasswordMailer(
         var safeLink = WebUtility.HtmlEncode(link);
 
         using var culture = EmailCulture.Use(locale);
-        var html = Page(
+        var html = EmailHtml.Page(
             localizer["Email.PasswordReset.Heading"],
             $"""
             <p>{Encode("Email.PasswordReset.Body")}</p>
             {EmailHtml.Button(link, localizer["Email.PasswordReset.Button"])}
             <p>{Encode("Email.PasswordReset.Expiry")}</p>
-            <p style="color: #4A5A7A; font-size: 13px;">{Encode("Email.Verification.LinkFallback")}<br><a href="{safeLink}">{safeLink}</a></p>
-            <p style="color: #4A5A7A; font-size: 13px;">{Encode("Email.PasswordReset.Ignore")}</p>
+            {EmailHtml.SmallPrint($"{Encode("Email.Verification.LinkFallback")}<br><a href=\"{safeLink}\">{safeLink}</a>")}
+            {EmailHtml.SmallPrint(Encode("Email.PasswordReset.Ignore"))}
             """);
         var text = $"""
             {localizer["Email.PasswordReset.Heading"]}
@@ -59,7 +59,7 @@ public sealed class PasswordMailer(
         // The user's time zone is not known yet (F-8): the instant says plainly that it is UTC.
         var when = $"{changedAt.UtcDateTime.ToString("f", culture.Culture)} UTC";
         string body = localizer["Email.PasswordChanged.Body", when];
-        var html = Page(
+        var html = EmailHtml.Page(
             localizer["Email.PasswordChanged.Heading"],
             $"""
             <p>{WebUtility.HtmlEncode(body)}</p>
@@ -80,15 +80,4 @@ public sealed class PasswordMailer(
     }
 
     private string Encode(string key) => WebUtility.HtmlEncode(localizer[key]);
-
-    private static string Page(string heading, string innerHtml) =>
-        $"""
-        <!doctype html>
-        <html>
-          <body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #19243E; line-height: 1.6;">
-            <h1 style="font-size: 20px;">{WebUtility.HtmlEncode(heading)}</h1>
-            {innerHtml}
-          </body>
-        </html>
-        """;
 }

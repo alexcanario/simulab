@@ -28,7 +28,7 @@ public sealed class ErasureMailer(
         // The user's time zone is not known (F-8), so the instant says plainly that it is UTC.
         var when = $"{erasedAt.UtcDateTime.ToString("f", culture.Culture)} UTC";
         string body = localizer["Email.AccountErased.Body", when];
-        var html = Page(
+        var html = EmailHtml.Page(
             localizer["Email.AccountErased.Heading"],
             $"""
             <p>{WebUtility.HtmlEncode(body)}</p>
@@ -52,15 +52,4 @@ public sealed class ErasureMailer(
     }
 
     private string Encode(string key) => WebUtility.HtmlEncode(localizer[key]);
-
-    private static string Page(string heading, string innerHtml) =>
-        $"""
-        <!doctype html>
-        <html>
-          <body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #19243E; line-height: 1.6;">
-            <h1 style="font-size: 20px;">{WebUtility.HtmlEncode(heading)}</h1>
-            {innerHtml}
-          </body>
-        </html>
-        """;
 }

@@ -6,7 +6,7 @@
 @inject IBrowserViewportService Viewport
 @inject NavigationManager Navigation
 
-<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
+<SimulabThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -16,7 +16,7 @@
 <SessionEndedWatcher />
 
 <MudLayout Class="@(_isDesktop is null ? "app-shell app-shell-pending" : "app-shell")">
-    <MudAppBar Elevation="1" Dense="false">
+    <MudAppBar Elevation="0" Dense="false">
         <MudTooltip Text="@MenuButtonLabel">
             <MudIconButton Icon="@AppIcons.Menu"
                            Color="Color.Inherit"
@@ -27,8 +27,15 @@
                            OnClick="ToggleMenuAsync"
                            Class="app-menu-button" />
         </MudTooltip>
-        <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None" Typo="Typo.h6"
-                 Class="app-name" aria-label="@L["Layout.HomeLink"]">@L["App.Name"]</MudLink>
+        @* F-125, BR9: the Control Alt Systems key symbol (decorative) and the two lines of the brand, inside the home link. *@
+        <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None"
+                 Class="app-name" aria-label="@L["Layout.HomeLink"]">
+            <img class="app-brand-symbol" src="@BrandSymbol" alt="" aria-hidden="true" />
+            <span class="app-brand-text">
+                <span class="app-brand-name">@L["App.Name"]</span>
+                <span class="app-brand-company">@L["App.Company"]</span>
+            </span>
+        </MudLink>
         <MudSpacer />
         <ThemeSwitch />
         <LanguageSwitch />
@@ -41,7 +48,7 @@
                ClipMode="DrawerClipMode.Always"
                Width="240px"
                MiniWidth="56px"
-               Elevation="1"
+               Elevation="0"
                Class="app-drawer"
                role="navigation"
                aria-label="@L["Layout.Menu.Label"]">
@@ -65,12 +72,15 @@
 @code {
     private readonly MudTheme _theme = Theme.SimulabTheme.Create();
     private readonly Guid _viewportSubscription = Guid.NewGuid();
-    private MudThemeProvider? _themeProvider;
+    private SimulabThemeProvider? _themeProvider;
     private bool _drawerOpen;
     private bool? _isDesktop;
     private bool _collapsedOnDesktop;
 
     [CascadingParameter] public ShellPreferences Preferences { get; set; } = ShellPreferences.Default;
+
+    // The symbol is a picture with fixed colours, so each theme has its own file (brand README).
+    private string BrandSymbol => ThemeState.IsDarkMode ? "brand/keys-symbol-dark.svg" : "brand/keys-symbol.svg";
 
     // Desktop: open = expanded, closed = icons only. Phone: open = shown over the content.
     private bool DrawerShowsLabels => _drawerOpen;

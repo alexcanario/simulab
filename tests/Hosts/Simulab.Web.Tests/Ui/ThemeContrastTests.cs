@@ -175,7 +175,8 @@ public sealed class ThemeContrastTests
         var palette = light ? (Palette)Theme.PaletteLight : Theme.PaletteDark;
         const string selected = ".app-drawer .mud-navmenu .mud-nav-link[aria-current=\"page\"]";
         var drawer = palette.DrawerBackground.ToString();
-        var surface = AppCssColours.Over(AppCssColours.Declaration(selected, "background-color"), drawer);
+        // F-125: the tint is the theme's white at a share (color-mix), resolved to its rgba before compositing.
+        var surface = AppCssColours.Over(AppCssColours.Resolve(AppCssColours.Declaration(selected, "background-color"), palette), drawer);
         var text = AppCssColours.Resolve(
             AppCssColours.Declaration(selected, "color"),
             palette,

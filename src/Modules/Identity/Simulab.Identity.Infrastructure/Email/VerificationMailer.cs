@@ -40,19 +40,15 @@ public sealed class VerificationMailer(
     {
         var safeLink = WebUtility.HtmlEncode(link);
 
-        return $"""
-            <!doctype html>
-            <html>
-              <body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: #19243E; line-height: 1.6;">
-                <h1 style="font-size: 20px;">{WebUtility.HtmlEncode(localizer["Email.Verification.Heading"])}</h1>
-                <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Body"])}</p>
-                {EmailHtml.Button(link, localizer["Email.Verification.Button"])}
-                <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Expiry"])}</p>
-                <p style="color: #4A5A7A; font-size: 13px;">{WebUtility.HtmlEncode(localizer["Email.Verification.LinkFallback"])}<br><a href="{safeLink}">{safeLink}</a></p>
-                <p style="color: #4A5A7A; font-size: 13px;">{WebUtility.HtmlEncode(localizer["Email.Verification.Ignore"])}</p>
-              </body>
-            </html>
-            """;
+        return EmailHtml.Page(
+            localizer["Email.Verification.Heading"],
+            $"""
+            <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Body"])}</p>
+            {EmailHtml.Button(link, localizer["Email.Verification.Button"])}
+            <p>{WebUtility.HtmlEncode(localizer["Email.Verification.Expiry"])}</p>
+            {EmailHtml.SmallPrint($"{WebUtility.HtmlEncode(localizer["Email.Verification.LinkFallback"])}<br><a href=\"{safeLink}\">{safeLink}</a>")}
+            {EmailHtml.SmallPrint(WebUtility.HtmlEncode(localizer["Email.Verification.Ignore"]))}
+            """);
     }
 
     private string RenderText(string link) =>
