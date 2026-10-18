@@ -38,6 +38,7 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | F-108 | Short-answer questions | The short-answer type with accepted answers | Could | S | F-95 | - | no | idea |
 | F-109 | Open-answer and essay questions | The open-answer and essay types with their rubric | Could | M | F-95 | how they are graded (person, AI or out of v1) — owner | no | idea |
 | F-110 | Sample questions of the municipal guard editions | Seeded questions for the F-37 editions, for local work and testers | Could | S | F-96, F-97 | source questions and the right to use them — owner | no | idea |
+| F-142 | Question similarity search | Duplicate and reused questions across editions, similar questions, topic suggestion by neighbourhood; full-text first, vectors later | Could | M | - | questions in volume; embedding model choice (E-9 ADR) — owner | no | idea |
 
 ## Execution plan
 1. F-95 — creates the module, the model and the safe content format (sanitized HTML or Markdown, settled at its refinement); every other feature needs it — path: `/agile:refine` with `/agile:screen` → `/agile:build` — parallel with: none.

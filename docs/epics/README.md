@@ -14,7 +14,7 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 | 6 | Exam Simulator | `exam-simulator` | 695 | idea |
 | 7 | Plans and entitlements | `plans-and-entitlements` | 696 | idea |
 | 8 | Entitlements and promo codes | `entitlements-and-promo-codes` | 697 | idea |
-| 9 | AI-assisted exam import | `ai-assisted-exam-import` | 698 | idea |
+| 9 | AI-assisted exam import | `ai-assisted-exam-import` | 698 (GitHub #9) | draft (no features yet; candidate approach recorded) |
 | 10 | Performance analytics | `performance-analytics` | 699 | idea |
 | 11 | Study recommendations | `study-recommendations` | 700 | idea |
 | 12 | AI coach | `ai-coach` | 701 | idea |
