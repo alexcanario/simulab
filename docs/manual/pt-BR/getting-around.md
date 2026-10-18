@@ -1,12 +1,19 @@
 ---
 page: getting-around
 locale: pt-BR
-features: [F-2, F-8, F-17, F-50]
-updated: 2026-10-03
+features: [F-2, F-8, F-17, F-50, F-125]
+updated: 2026-10-18
 ---
 # Como navegar
 
 Todas as páginas do Simulab têm a mesma barra superior e o mesmo menu lateral, no computador e no celular.
+
+## A aparência do Simulab
+O Simulab usa a identidade visual da Control Alt Systems:
+- **Barra superior**: branca no modo claro. Da esquerda para a direita mostra o botão de menu, o símbolo das três teclas (Ctrl, Alt e reiniciar), o nome "Simulab" com "Control Alt Systems" embaixo, e os botões de modo, de idioma e da sua conta. Clicar no nome leva à página inicial.
+- **Botões em forma de tecla**: o botão principal de cada tela é azul-escuro e tem uma borda mais escura embaixo, como uma tecla; quando você o pressiona, ele desce. Botões secundários têm só um contorno, e ações menores aparecem como links azuis sublinhados. Quando um botão está desativado, ele fica cinza.
+- **Cartões**: os blocos de cada página têm cantos arredondados e uma linha fina em volta, sem sombra.
+- **E-mails**: os e-mails do Simulab (verificação, senha, apagamento da conta e exportação de dados) começam com "Simulab" e "Control Alt Systems" e trazem o botão no mesmo azul-escuro.
 
 ## Quem pode usar
 Todos, com ou sem login.
@@ -31,6 +38,7 @@ Todos, com ou sem login.
 ### Usar o teclado
 1. Pressione Tab uma vez depois que a página carregar: aparece o link "Pular para o conteúdo" no canto superior esquerdo. Pressione Enter para ir direto ao conteúdo da página.
 2. O Tab passa pelo botão de menu, pelo nome Simulab (volta à página inicial), pelos botões de modo e de idioma e pelos itens do menu.
+3. O controle em que você está ganha um anel azul em volta; no menu lateral o anel é claro, para aparecer sobre o fundo escuro.
 
 ### Pesquisar numa lista com um leitor de tela
 1. Use Tab até a caixa de pesquisa acima de uma lista: o leitor de tela diz o nome dela ("Pesquisar") e, quando a caixa pesquisa por algo específico, por que campos pesquisa (por exemplo "Pesquisar por nome ou e-mail").

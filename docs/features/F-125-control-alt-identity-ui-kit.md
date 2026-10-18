@@ -80,7 +80,7 @@ Give Simulab its own brand (the Control Alt Systems identity) in one place, so e
 ```
 
 ## Docs
-- none — no flow, contract, setting or module changes; the identity is recorded in `docs/design/identity.tokens.json`, `DESIGN.md` and ADR-0006, and the gallery `/dev/ui` shows it.
+- flow: new docs/flows/brand-identity-theme.md — the item draws two screens (app bar, UI gallery); the page carries their wireframes and how the theme reaches every screen (added at the ship: `techdocs.js check` refuses `none` for an item with a wireframe)
 
 ## Acceptance criteria
 - AC1 Given `SimulabTheme`, when the light and the dark palettes are built, then every role holds the value of `## Approved list` (1. Palette) and `docs/design/identity.tokens.json` and `DESIGN.md` hold the same values (BR1, BR2).

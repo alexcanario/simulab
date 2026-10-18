@@ -190,6 +190,8 @@ shape:
 ---
 # Simulab design
 
+Technical terms: [glossary](../glossary.md)
+
 Simulab in the Control Alt Systems identity (F-125, ADR-0006), recorded from `SimulabTheme`. The source of the brand is the Control Alt Systems design system (`tokens.json` and its README); F-125's `## Approved list` holds the values Simulab took from it and the few it keeps of its own. `IdentityTokensTests` fails when this file, `identity.tokens.json` and the theme drift apart, and `ApprovedPaletteTests` when the theme leaves the approved list.
 
 The values above and in `identity.tokens.json` are the source for every screen and mockup. A mockup uses these colors and no other.
