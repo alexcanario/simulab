@@ -1,7 +1,7 @@
 ---
 feature: F-125
 epic: Foundation and identity
-status: validating
+status: done
 board: 176
 version: 2
 ---
@@ -299,3 +299,38 @@ Database__Name=simulab_f125 dotnet run --project src/Hosts/Simulab.AppHost
 - 2026-10-18 blocked — test wrong: owner 2026-10-18: small-button class MudBlazor never renders, favicon type encoding, unused using and unresolved cref
 
 ## Delivery
+Gate time: 6 passes, 14 min 41 s — turn 2 (1 min 33 s), ship 2 (9 min 38 s), scan 2 (3 min 30 s); 0 red
+Usage: 17456.2k weighted (estimate) — build 7% · ship 14% · other 79% — context per turn 194k → 690k — 2 sessions, 296 turns
+- Branch: `feature/F-125` (deleted; never pushed), worktree `D:\wt\simulab\f-125-control-alt-identity` removed
+- Merge: `e1d0de7` on `main` (board #176); app version 1.4.0
+- Tests: 4220 in 13 projects, 0 failures (`gate.js ship`, 35 s build and 207 s test run; the rerun after the version bump took 39 s and 297 s, 3 s under the 5-minute budget); `agile scan GREEN`; tests locked at `7c2e7fb` (12 files, 1 unlock with the owner's yes)
+- Manual: `docs/manual/pt-BR/getting-around.md` (pt-PT and en frozen by F-124)
+- Technical pages: `docs/flows/brand-identity-theme.md`; ADR-0006; `docs/design/identity.tokens.json` and `DESIGN.md`
+- Validation: by the owner on screen, 2026-10-18 ("validado F-125"); no box was ticked in the widget
+- Validation evidence:
+```text
+1. Pare qualquer app host que esteja aberto (um app host rodando trava a pasta `bin/`) e suba o app host deste item a partir da pasta do worktree. Ele roda no seu próprio banco, `simulab_f125`, no PostgreSQL local; nada cai no banco compartilhado `simulab`. Espere o endereço do painel do Aspire aparecer e abra https://localhost:7125.
+2. A barra superior (a faixa branca no alto de todas as páginas) no tema claro:
+   [ ] 2.1 not tested
+   [ ] 2.2 not tested
+3. A galeria do kit: no menu lateral, em Desenvolvimento, clique em Kit de interface; abre a página "Galeria do kit de interface".
+   [ ] 3.1 not tested
+   [ ] 3.2 not tested
+   [ ] 3.3 not tested
+   [ ] 3.4 not tested
+   [ ] 3.5 not tested
+4. O tema escuro: clique no botão de tema.
+   [ ] 4.1 not tested
+   [ ] 4.2 not tested
+   [ ] 4.3 not tested
+5. [ ] not tested
+6. [ ] not tested
+7. Só teclado, na galeria do kit, sem o mouse:
+   [ ] 7.1 not tested
+   [ ] 7.2 not tested
+   [ ] 7.3 not tested
+8. Os e-mails: abra https://localhost:7125/sign-up e crie uma conta com um endereço qualquer (o Mailpit captura); depois abra o Mailpit pelo painel do Aspire (o recurso "mailpit", o link web dele).
+   [ ] 8.1 not tested
+   [ ] 8.2 not tested
+Evidence: 0 of 17 tested
+```
