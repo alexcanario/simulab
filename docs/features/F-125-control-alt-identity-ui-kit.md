@@ -204,10 +204,82 @@ Light / dark. Darken and lighten shades not listed are derived at build and pinn
 
 ## Validation script
 ### English
-1. (written at the end of build)
+Needed to validate: you, on screen, in both themes, at desktop and phone width, and Docker Desktop running for the app host. Both are in place now (the app host started on 2026-10-18 for the screen check).
+
+1. Stop any app host you have open (a running one locks `bin/`), then start this item's app host from the worktree folder. It runs on its own database, `simulab_f125`, on the local PostgreSQL server; nothing lands in the shared `simulab` database. Wait until the Aspire dashboard address is printed, then open https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-125-control-alt-identity
+$env:Database__Name = "simulab_f125"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-125-control-alt-identity
+Database__Name=simulab_f125 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Expected: a line `Dashboard: https://localhost:<port>/login?t=<token>`; https://localhost:7125 answers with the home page.
+2. The app bar (the white bar at the top of every page) in the light theme:
+   - [ ] 2.1 From the left you see the menu button, the brand symbol (three keys: green Ctrl, blue Alt, orange restart), "Simulab" in bold and "Control Alt Systems" under it in grey, then the theme switch (the moon or sun at the top right), the language switch and Sign in.
+   - [ ] 2.2 The bar is white with a thin line under it and no shadow; the sidebar (left menu) stays navy; the browser tab shows the Control Alt Systems app icon (the orange key on navy).
+3. The UI gallery: in the sidebar, under Development, click UI kit; the page "UI kit gallery" opens.
+   - [ ] 3.1 Scroll to "Buttons": Save is a dark blue key with a darker edge under it, Filter has a grey 2px border, Cancel is an underlined blue link, Start exam is the one orange key, and Delete appears red, filled and outlined.
+   - [ ] 3.2 Point at Save (it turns a little brighter), hold the mouse button down on it (it sinks onto its edge), and check the disabled row: grey fill, grey text, no edge.
+   - [ ] 3.3 "Type" shows the scale from ui-title 28/32 to ui-label 12/16 in Bricolage Grotesque, and code, a grid of numbers and Ctrl + K in JetBrains Mono.
+   - [ ] 3.4 "Palette" lists each role with its value: primary `#064F80`, info `#0872B8`, secondary `#00806B`, tertiary `#E8650A`, background `#F4F6F9`.
+   - [ ] 3.5 Cards have round 20px corners and a thin line, and no card, menu or dialog has a soft shadow.
+4. The dark theme: click the theme switch.
+   - [ ] 4.1 The page turns deep navy, cards a lighter navy, the app bar takes the card colour with light text, the sidebar turns almost black (`#081522`), and the brand symbol shows its dark keys.
+   - [ ] 4.2 In the gallery, Save is a light blue key with dark text, and "Palette" now shows primary `#2AA8F0` and background `#0B1B2E`.
+   - [ ] 4.3 Every text is easy to read on its background; switch back to light with the theme switch.
+5. [ ] Phone width: open the browser developer tools (F12), turn on the device toolbar (Ctrl+Shift+M) and choose 375 px wide. The app bar keeps the symbol, "Simulab" and "Control Alt Systems" on one line each, nothing wraps or runs off the right edge, and the page has no sideways scroll.
+6. [ ] Language: in the language switch (the globe at the top right) choose Português (Brasil). The home link is still named "Simulab, página inicial", the company line still reads "Control Alt Systems", and in the gallery (sidebar > Desenvolvimento > Kit de interface) the new sections read "Botões", "Tipografia" and "Paleta". Switch back to English.
+7. Keyboard only, on the UI gallery, without the mouse:
+   - [ ] 7.1 Press Tab from the top of the page: each control you reach shows a blue focus ring, 3 px wide, 2 px away from it; in the sidebar the ring is light instead of blue.
+   - [ ] 7.2 Tab to the theme switch and press Space: the theme changes; press Space again to change it back.
+   - [ ] 7.3 Tab to Save in "Buttons" and hold Space: the key sinks onto its edge.
+8. The emails: open https://localhost:7125/sign-up and create an account with an address of your choice (any, Mailpit catches it); then open Mailpit from the Aspire dashboard (the "mailpit" resource, its web link).
+   - [ ] 8.1 The verification email opens with "Simulab" and "Control Alt Systems" as text, then its heading; its button is dark blue (`#064F80`) with white text.
+   - [ ] 8.2 At https://localhost:7125/forgot-password ask a reset for the same address: the reset email has the same top lines and the same button.
 
 ### pt-BR
-1. (escrito no fim do build)
+Necessário para validar: você, na tela, nos dois temas, em largura de computador e de celular, e o Docker Desktop rodando para o app host. Os dois estão disponíveis agora (o app host subiu em 2026-10-18 para a conferência na tela).
+
+1. Pare qualquer app host que esteja aberto (um app host rodando trava a pasta `bin/`) e suba o app host deste item a partir da pasta do worktree. Ele roda no seu próprio banco, `simulab_f125`, no PostgreSQL local; nada cai no banco compartilhado `simulab`. Espere o endereço do painel do Aspire aparecer e abra https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-125-control-alt-identity
+$env:Database__Name = "simulab_f125"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-125-control-alt-identity
+Database__Name=simulab_f125 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Esperado: uma linha `Dashboard: https://localhost:<porta>/login?t=<token>`; https://localhost:7125 responde com a página inicial.
+2. A barra superior (a faixa branca no alto de todas as páginas) no tema claro:
+   - [ ] 2.1 Da esquerda para a direita aparecem o botão de menu, o símbolo da marca (três teclas: Ctrl verde, Alt azul, reiniciar laranja), "Simulab" em negrito e "Control Alt Systems" embaixo em cinza; depois o botão de tema (a lua ou o sol no canto superior direito), o seletor de idioma e Entrar.
+   - [ ] 2.2 A barra é branca, com uma linha fina embaixo e sem sombra; o menu lateral esquerdo continua azul-marinho; a aba do navegador mostra o ícone da Control Alt Systems (a tecla laranja sobre azul-marinho).
+3. A galeria do kit: no menu lateral, em Desenvolvimento, clique em Kit de interface; abre a página "Galeria do kit de interface".
+   - [ ] 3.1 Role até "Botões": Salvar é uma tecla azul-escura com uma borda mais escura embaixo, Filtrar tem uma borda cinza de 2px, Cancelar é um link azul sublinhado, Iniciar simulado é a única tecla laranja, e Excluir aparece em vermelho, cheio e com contorno.
+   - [ ] 3.2 Passe o mouse sobre Salvar (ele fica um pouco mais claro), segure o botão do mouse sobre ele (a tecla desce sobre a borda) e confira a linha de desativados: fundo cinza, texto cinza, sem borda.
+   - [ ] 3.3 "Tipografia" mostra a escala de ui-title 28/32 a ui-label 12/16 em Bricolage Grotesque, e código, uma grade de números e Ctrl + K em JetBrains Mono.
+   - [ ] 3.4 "Paleta" lista cada papel com seu valor: primary `#064F80`, info `#0872B8`, secondary `#00806B`, tertiary `#E8650A`, background `#F4F6F9`.
+   - [ ] 3.5 Os cartões têm cantos arredondados de 20px e uma linha fina, e nenhum cartão, menu ou diálogo tem sombra esfumaçada.
+4. O tema escuro: clique no botão de tema.
+   - [ ] 4.1 A página fica azul-marinho profundo, os cartões num azul-marinho mais claro, a barra superior na cor dos cartões com texto claro, o menu lateral quase preto (`#081522`), e o símbolo da marca mostra as teclas escuras.
+   - [ ] 4.2 Na galeria, Salvar é uma tecla azul-clara com texto escuro, e "Paleta" agora mostra primary `#2AA8F0` e background `#0B1B2E`.
+   - [ ] 4.3 Todo texto fica fácil de ler sobre o seu fundo; volte ao claro pelo botão de tema.
+5. [ ] Largura de celular: abra as ferramentas do navegador (F12), ligue a barra de dispositivo (Ctrl+Shift+M) e escolha 375 px de largura. A barra superior mantém o símbolo, "Simulab" e "Control Alt Systems" numa linha cada, nada quebra nem passa da borda direita, e a página não rola para o lado.
+6. [ ] Idioma: no seletor de idioma (o globo no canto superior direito) escolha Português (Brasil). O link da página inicial continua com o nome "Simulab, página inicial", a linha da empresa continua "Control Alt Systems", e na galeria (menu lateral > Desenvolvimento > Kit de interface) as seções novas se chamam "Botões", "Tipografia" e "Paleta". Volte para English.
+7. Só teclado, na galeria do kit, sem o mouse:
+   - [ ] 7.1 Aperte Tab desde o alto da página: cada controle alcançado mostra um anel de foco azul, de 3 px, a 2 px dele; no menu lateral o anel é claro em vez de azul.
+   - [ ] 7.2 Vá com Tab até o botão de tema e aperte Espaço: o tema muda; aperte Espaço de novo para voltar.
+   - [ ] 7.3 Vá com Tab até Salvar em "Botões" e segure Espaço: a tecla desce sobre a borda.
+8. Os e-mails: abra https://localhost:7125/sign-up e crie uma conta com um endereço qualquer (o Mailpit captura); depois abra o Mailpit pelo painel do Aspire (o recurso "mailpit", o link web dele).
+   - [ ] 8.1 O e-mail de verificação começa com "Simulab" e "Control Alt Systems" como texto, depois o título; o botão é azul-escuro (`#064F80`) com texto branco.
+   - [ ] 8.2 Em https://localhost:7125/forgot-password peça a redefinição para o mesmo endereço: o e-mail de redefinição tem as mesmas linhas no topo e o mesmo botão.
 
 ## Events
 
