@@ -136,7 +136,8 @@ public sealed class ThemePaletteTests
         foreach (var fill in Fills)
         {
             // BR5: only the primary and the error colours are also text; the other fills are never text (F-17 Q2).
-            roles[fill] = new Fill(AlsoText: fill is "Primary" or "Error");
+            // F-125: info, the link blue of the Control Alt Systems identity, is text too (links, the text button).
+            roles[fill] = new Fill(AlsoText: fill is "Primary" or "Error" or "Info");
             roles[fill + "ContrastText"] = new PartOfFill(fill);
             roles[fill + "Darken"] = new PartOfFill(fill);
             roles.TryAdd(fill + "Lighten", new Exempt(lighten));
