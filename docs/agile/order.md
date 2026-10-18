@@ -58,9 +58,11 @@
 | 45 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | - | - |
 | 46 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | - | - |
 | 47 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - |
-| 48 | F-103 | Images in questions | idea | - | Question bank | F-89 | - |
-| 49 | F-136 | Inline student preview on the question form | idea | - | Question bank | F-126 | - |
-| 50 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | F-126 | - |
+| 48 | F-140 | Check library class names against the package CSS | idea | - | Foundation and identity | - | - |
+| 49 | F-141 | Keep the full test suite inside its budget | idea | - | Foundation and identity | - | - |
+| 50 | F-103 | Images in questions | idea | - | Question bank | F-89 | - |
+| 51 | F-136 | Inline student preview on the question form | idea | - | Question bank | F-126 | - |
+| 52 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | F-126 | - |
 
 ## Checklist
 
@@ -116,9 +118,11 @@
 - [ ] 45. F-135 — Sticky section index on long forms [idea]
 - [ ] 46. F-138 — Keyboard shortcuts on forms [idea]
 - [ ] 47. F-139 — Partner brand in place of Control Alt Systems [idea]
-- [ ] 48. F-103 — Images in questions [idea] — waits on F-89
-- [ ] 49. F-136 — Inline student preview on the question form [idea] — waits on F-126
-- [ ] 50. F-137 — Publishing readiness meter on the question form [idea] — waits on F-126
+- [ ] 48. F-140 — Check library class names against the package CSS [idea]
+- [ ] 49. F-141 — Keep the full test suite inside its budget [idea]
+- [ ] 50. F-103 — Images in questions [idea] — waits on F-89
+- [ ] 51. F-136 — Inline student preview on the question form [idea] — waits on F-126
+- [ ] 52. F-137 — Publishing readiness meter on the question form [idea] — waits on F-126
 
 ## Summary
 
