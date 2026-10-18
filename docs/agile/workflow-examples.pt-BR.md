@@ -3698,14 +3698,14 @@ O acme-shop é um projeto novo. Na rodada 5 do `/agile:bootstrap`, depois dos id
 ```
 > /agile:bootstrap
 Claude: ❓ Em quais idiomas o manual do app será escrito?
-        a) pt-BR   b) pt-PT   c) en   d) outras tags (vários podem ser escolhidos; o primeiro é a referência)
+        a) pt-BR (padrão)   b) outras tags (vários podem ser escolhidos; o primeiro é a referência)
         Recomendação: pt-BR. Motivo: só o que você vai ler e manter; cada idioma extra é traduzido a cada ship.
-> a, c
+> a e, em outras tags, en
 Claude: CLAUDE.md em "## Languages": - Manual locales: pt-BR, en
         docs/manual/pt-BR/index.md e docs/manual/en/index.md (locale: pt-BR e locale: en); nenhuma outra pasta.
 ```
 
-A lista não tem relação com a pergunta 20: a app pode continuar saindo com a UI em três idiomas. Algumas features depois você decide que o manual também precisa de espanhol, edita a linha para `- Manual locales: pt-BR, en, es` e dá o ship do próximo item:
+A lista não tem relação com a pergunta 20: a app pode sair com a UI numa lista própria de idiomas. Algumas features depois você decide que o manual também precisa de espanhol, edita a linha para `- Manual locales: pt-BR, en, es` e dá o ship do próximo item:
 
 ```
 > /agile:ship F-9
@@ -3772,34 +3772,34 @@ A acme-shop é um projeto novo. Na rodada 5 do `/agile:bootstrap`, a pergunta 20
 ```
 > /agile:bootstrap
 Claude: ❓ Em quais idiomas o app terá textos de tela?
-        a) pt-BR e en   b) pt-PT   c) outras tags (vários podem ser escolhidos; a ordem da resposta é a ordem da linha, o primeiro é o idioma base)
-        Recomendação: pt-BR, en. Motivo: cada idioma extra é um conjunto de textos a escrever e manter em toda tela; o primeiro da lista é o idioma base do app.
+        a) pt-BR (padrão)   b) outras tags (vários podem ser escolhidos; a ordem da resposta é a ordem da linha, o primeiro é o idioma base)
+        Recomendação: pt-BR. Motivo: cada idioma extra é um conjunto de textos a escrever e manter em toda tela; o primeiro da lista é o idioma base do app.
 > a
-Claude: CLAUDE.md em "## Languages": - UI locales: pt-BR, en
+Claude: CLAUDE.md em "## Languages": - UI locales: pt-BR
         Directory.Build.props: <NeutralLanguage>pt-BR</NeutralLanguage>
-        Resources/: App.resx (pt-BR, o arquivo neutro) e App.en.resx; nenhum App.pt-BR.resx.
+        Resources/: App.resx (pt-BR, o arquivo neutro); nenhum App.pt-BR.resx e nenhum seletor de idioma.
 ```
 
-Algumas features depois a app precisa de espanhol. Você edita a linha para `- UI locales: pt-BR, en, es` e começa o próximo item. Antes do trabalho do próprio item, o build atualiza o idioma novo em um commit só dele (esta é a saída da execução real num projeto de teste com quatro chaves):
+Algumas features depois a app precisa de espanhol. Você edita a linha para `- UI locales: pt-BR, es` e começa o próximo item. Antes do trabalho do próprio item, o build atualiza o idioma novo em um commit só dele (esta é a saída da execução real num projeto de teste com quatro chaves):
 
 ```
 > /agile:build F-9
 Claude: UI: adicionando es, 4 chaves em 1 arquivo
         src/App/Resources/App.es.resx escrito a partir do arquivo neutro (mesmas chaves e placeholders).
         Commit só dele: feat(F-9): add es UI texts
-        Depois o trabalho do F-9, com cada texto novo em pt-BR, en e es.
+        Depois o trabalho do F-9, com cada texto novo em pt-BR e es.
 ```
 
-Um projeto antigo não tem a linha `- UI locales:`. O build dele trabalha com `pt-BR, pt-PT, en`, os três que o plugin exigia antes da lista, e avisa uma vez que a linha falta; o `/agile:sync` a propõe. O relatório do sync desse projeto traz a chave `uiLocales` (impressa pelo script no projeto de teste):
+Um projeto antigo não tem a linha `- UI locales:`. O build dele trabalha com `pt-BR` e avisa uma vez `UI locales: sem linha, usando pt-BR` que a linha falta; o `/agile:sync` a propõe. O relatório do sync desse projeto traz a chave `uiLocales` (impressa pelo script no projeto de teste):
 
 ```
-"uiLocales": { "line": null, "proposed": "pt-BR, pt-PT, en" }
+"uiLocales": { "line": null, "proposed": "pt-BR" }
 ```
 
 ```
 > /agile:sync
 Claude: | arquivo | estado | o que proponho |
-        | ui locales | sem linha | escrever `- UI locales: pt-BR, pt-PT, en` |
+        | ui locales | sem linha | escrever `- UI locales: pt-BR` |
         Posso escrever?
 > ok
 Claude: Escrito em "## Languages". Nenhum arquivo de recursos foi tocado.
@@ -4466,7 +4466,7 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (29)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (31)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
 ok   AC5: the report states the skills (23) and the agents (6)
@@ -5347,3 +5347,123 @@ O relatório traz a tabela do problema, com a coluna "Shown as" dizendo qual res
 ```
 
 Com o limite em mãos, você roda a suíte inteira com ele. Se um problema for editado sem subir a `version` de `suite.json`, o script recusa nomeando o problema; se você pedir um juiz da mesma família dos braços (por exemplo `claude-sonnet-5-5`), também recusa, antes de qualquer chamada.
+
+### 14.148 Um tema embutido a mais e um par de contraste recusado
+
+O app desktop Cais já tem a identidade com chaves próprias (`Surface`, `Surface.Page`, `Text`, `Text.Muted`, `Accent`, `Focus`, `Env.Production.Bg`, `Scrim`), os pares de contraste declarados e a pasta `docs/design/themes/`, criada pelo item do kit de UI. Você quer um segundo tema, âmbar:
+
+```
+> /agile:identity
+Claude: Identidade registrada: tema Cais (claro e escuro), 9 chaves, 5 pares de contraste, 2 chaves bloqueadas
+(Env.Production.Bg, Focus). O que muda? A) uma cor  B) adicionar um tema embutido  C) fontes ou raio  D) nada
+> B, amber
+Claude: As mesmas 9 chaves, claro e escuro. Quais as cores do tema amber? (ou eu derivo de uma cor base)
+> deriva de #9A4A00, e o texto do escuro quero #8F7D5F
+Claude: Nada foi escrito ainda. Tabela do tema amber, claro e escuro... Um par não passa:
+Text sobre Surface no escuro dá 4.49:1, abaixo de 4.5:1 (o mais próximo que passa: #907E5F). Troco?
+> não, confirmo assim
+Claude: Escrevi docs/design/identity.amber.tokens.json e rodei a geração dos temas embutidos:
+```
+
+```
+amber-dark Text on Surface 4.49 < 4.5 nearest #907E5F
+REFUSED: 1 contrast pair below the minimum
+```
+
+```
+Claude: A geração recusou: um tema embutido que falha um par nunca é escrito, e os arquivos do tema Cais
+continuam como estavam. Text sobre Surface no escuro do amber: 4.49 contra o mínimo 4.5. Opções: A) usar
+#907E5F, a cor mais próxima que passa (recomendado: a diferença não se vê); B) outra cor sua.
+> A
+Claude: Troquei o texto do escuro do amber para #907E5F e rodei de novo:
+```
+
+```
+WROTE 5 files
+```
+
+```
+Claude: docs/design/themes/ tem agora cais-light.json, cais-dark.json, amber-light.json, amber-dark.json e o
+index.json, com o Cais como padrão. Nenhum código do app foi alterado.
+```
+
+Os quatro arquivos de tema e o índice são gerados, nunca editados à mão; o formato está em `references/theme-format.md` do plugin. A chave `Accent` marcada como bloqueada no arquivo do amber não entra na lista de bloqueadas: só o tema padrão bloqueia chaves.
+
+### 14.149 Um atalho deliberado: marcado no build, sem gatilho corrigido, oferecido como ideia na retro
+
+Você está construindo o F-12, a busca de pedidos do app Cais. O Claude usa uma varredura linear e um lock global, de propósito. Cada um ganha uma linha de comentário com o limite e o gatilho para revisitar: `// shortcut(F-12): linear scan of the rows — revisit when a tenant passes 5,000 rows` na busca e `// shortcut(F-12): one global lock` no cache. A do lock ficou sem gatilho.
+
+Antes de marcar `validating`, o build confere os marcadores do item. O script lista só os que não têm gatilho e sai com 1:
+
+```text
+src/Orders/Cache.cs:4 | one global lock | no-trigger
+Shortcuts: 2 marked (1 no-trigger: src/Orders/Cache.cs:4)
+```
+
+```
+Claude: Um marcador não diz quando revisitar: src/Orders/Cache.cs:4, "one global lock". Sem gatilho ele nunca
+é revisitado. Qual é o gatilho? (recomendo "throughput matters", o que você disse na refinação)
+> throughput matters
+Claude: Completei o gatilho no marcador e conferi de novo: nenhum no-trigger. O relatório do build traz a linha
+Shortcuts: 2 marked (src/Orders/Cache.cs:4, src/Orders/OrderSearch.cs:4), copiada para ## Decisions.
+```
+
+Você valida e dá o `/agile:ship F-12`. Depois do merge, no passo da retro, o ship lê os marcadores que os commits do item acrescentaram, do commit de merge contra o primeiro pai:
+
+```text
+src/Orders/Cache.cs:4 | one global lock | throughput matters
+src/Orders/OrderSearch.cs:4 | linear scan of the rows | a tenant passes 5,000 rows
+Shortcuts: 2 marked (src/Orders/Cache.cs:4, src/Orders/OrderSearch.cs:4)
+```
+
+```
+Claude: Lições do F-12: nenhuma nova. Atalhos deixados (fora do limite de 3 lições):
+  1. src/Orders/Cache.cs:4 — um lock global — revisitar quando throughput matters
+  2. src/Orders/OrderSearch.cs:4 — varredura linear das linhas — revisitar quando um tenant passar de 5.000 linhas
+Quais viram ideia? (nenhum vira sem a sua escolha)
+> 2
+Claude: Em qual épico? (sugiro o do F-12, "Busca", para o lote todo)
+> Busca
+Claude: Capturei a ideia F-31 no épico Busca: "Trocar a varredura linear de OrderSearch". O Summary cita
+src/Orders/OrderSearch.cs:4, o limite e o gatilho, e traz a linha "Source: shortcut marker of F-12".
+```
+
+Um item que não tomou atalho nenhum fecha com a linha `Shortcuts: none` no relatório e a retro não oferece nada. O marcador não derruba nenhum gate: ele só garante que cada atalho tenha o dia de ser revisitado escrito ao lado.
+
+### 14.150 O plugin oferece só pt-BR: o padrão da pergunta 20, outros idiomas como tags e o seletor só com dois
+
+A acme-shop é um projeto novo. Na pergunta 20 do `/agile:bootstrap` só `pt-BR` aparece como opção; qualquer outro idioma é digitado como tag em "outras tags". O dono quer espanhol também e digita `es`:
+
+```
+> /agile:bootstrap
+Claude: ❓ Em quais idiomas o app terá textos de tela?
+        a) pt-BR (padrão)   b) outras tags (vários podem ser escolhidos; a ordem da resposta é a ordem da linha, o primeiro é o idioma base)
+        Recomendação: pt-BR. Motivo: cada idioma extra é um conjunto de textos a escrever e manter em toda tela; o primeiro da lista é o idioma base do app.
+> a e, em outras tags, es
+Claude: CLAUDE.md em "## Languages": - UI locales: pt-BR, es
+        Directory.Build.props: <NeutralLanguage>pt-BR</NeutralLanguage>
+        Resources/: App.resx (pt-BR, o arquivo neutro) e App.es.resx.
+```
+
+Com dois idiomas, o mockup de uma tela e o roteiro de validação trazem um seletor de idioma, como sempre. Se o dono tivesse respondido só `a`, a linha seria `- UI locales: pt-BR` e nem o mockup nem o roteiro teriam seletor: com um idioma só não há o que trocar.
+
+Três projetos que já existiam, lidos pelo `/agile:sync` (a saída é a do script em cada um):
+
+```
+"uiLocales": { "line": ["pt-BR","pt-PT","en"], "proposed": "pt-BR" }   <- projeto com a forma antiga: três idiomas
+"uiLocales": { "line": ["pt-BR","es"], "proposed": "pt-BR" }           <- projeto da acme-shop acima
+"uiLocales": { "line": null, "proposed": "pt-BR" }                     <- projeto sem a linha
+```
+
+Os dois primeiros não ganham linha na tabela do sync nem reescrita: a lista que eles têm continua valendo, `pt-PT` e `en` incluídos. Só o terceiro ganha a proposta, e o dono a aceita:
+
+```
+> /agile:sync
+Claude: | arquivo | estado | o que proponho |
+        | ui locales | sem linha | escrever `- UI locales: pt-BR` |
+        Posso escrever?
+> ok
+Claude: Escrito em "## Languages". Nenhum arquivo de recursos foi tocado.
+```
+
+Até o dono aceitar, o build desse projeto diz uma vez `UI locales: sem linha, usando pt-BR` e exige só o idioma neutro. Um `.pt-PT.resx` ou `.en.resx` que ele já tenha fica fora da lista: nada é apagado, nada é exigido.
