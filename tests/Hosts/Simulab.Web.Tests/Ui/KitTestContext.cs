@@ -77,7 +77,9 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         }
     }
 
-    private static readonly TimeSpan TryWindow = TimeSpan.FromMilliseconds(50);
+    // Long enough for the check to start on a loaded machine (a 50 ms window ended with "Check count: 0" in the stress
+    // loop), short enough for many tries inside the 5-second ceiling.
+    private static readonly TimeSpan TryWindow = TimeSpan.FromMilliseconds(250);
 
     public Task InitializeAsync() => Task.CompletedTask;
 
