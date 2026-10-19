@@ -62,6 +62,9 @@ No new route, screen or endpoint. The seeded rows appear in F-74's section "Noti
 - On screen only (validation script): a seeded edition shows its rows and chips on the edition page, and the student syllabus of a published guard exam lists them (UC1, UC2).
 
 ## Criterion → test
+
+Tests locked: 5aaf27504eb85a84d5b74e33d6e14b8e9df4386a (1 file); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachEditionHoldsExactlyItsListedNoticeSubjectsInOrderWithNoTenant`; `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_TheNoticeSubjectsHaveTheFixedIdsOfTheSeed` |
