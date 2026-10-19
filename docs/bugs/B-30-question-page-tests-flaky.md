@@ -1,7 +1,7 @@
 ---
 bug: B-30
 feature: -
-status: validating
+status: done
 board: 196
 version: 2
 severity: medium
@@ -128,3 +128,9 @@ Needed to validate: nothing. No screen is involved. Close the IDE and any app ho
 - Branch: bug/B-30
 - Build state (2026-10-19): helper, 33 conversions and the guard done; `gate.js stop` ends `agile gate GREEN`; `Simulab.Web.Tests` 2142 of 2142; `scan.js run` ends `agile scan GREEN`; `git diff main --stat -- src` empty.
 - AC5 stress loop, real output (24 processes at once, 3 rounds, copies of the build output inside the worktree): 69 of 72 green (`Passed: 553`), 3 red, all in `BaseTextsPageTests.Search_SendsTheWordToTheServerAsSearch_AndNarrowsTheRows`: two in round 1 (cold start of 24 hosts, 9 s and 10 s, `Check count: 0`: the machine starved the check itself) and one in round 3 (6 s, `Check count: 32`, the fake API held only the first list call: no search request came out despite 32 clock advances). AC5 as written (72 of 72) is not met; baseline 47 of 48.
+Gate time: 5 passes, 10 min 24 s — turn 2 (53 s), ship 1 (5 min 42 s), scan 2 (3 min 49 s); 0 red
+Usage: 2263.8k weighted (estimate) — refine 27% · build 41% · ship 9% · other 23% — context per turn 171k → 131k — 3 sessions, 133 turns
+- Merge commit a95939d on main (version 1.5.0 -> 1.5.1); pushed; branch and worktree removed.
+- Ship gate (2026-10-19): `agile gate GREEN`, 4242 tests in 13 projects, 0 failures, 35 s build, 307 s test run (slowest projects QuestionBank 4 m 14 s, Catalog 5 m, Identity 5 m); `agile scan GREEN`; `agile docs GREEN`; test lock unchanged.
+- Manual: no page changed (test-only change, no visible behavior).
+- Validation evidence: validated by the owner in chat on 2026-10-19; the script has no tick (the five steps are `not tested` in the tick file, 0 of 5 ticked).

@@ -4,7 +4,7 @@
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 1 | B-30 | QuestionBank page tests time out under full-suite load | idea | - | - | - | - |
+| 1 | B-31 | Base texts search test still fails under heavy parallel load | idea | - | Question bank | - | - |
 | 2 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - |
 | 3 | F-108 | Short-answer questions | idea | - | Question bank | - | - |
 | 4 | F-110 | Sample questions of the municipal guard editions | idea | - | Question bank | - | - |
@@ -57,7 +57,7 @@
 
 ## Checklist
 
-- [ ] 1. B-30 — QuestionBank page tests time out under full-suite load [idea]
+- [ ] 1. B-31 — Base texts search test still fails under heavy parallel load [idea]
 - [ ] 2. F-143 — Align the external ingestion lab with E-9 [idea]
 - [ ] 3. F-108 — Short-answer questions [idea]
 - [ ] 4. F-110 — Sample questions of the municipal guard editions [idea]
@@ -110,7 +110,7 @@
 
 ## Summary
 
-- Delivered: 118
+- Delivered: 119
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
