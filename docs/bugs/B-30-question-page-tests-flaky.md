@@ -1,7 +1,7 @@
 ---
 bug: B-30
 feature: -
-status: refining
+status: approved
 board: 196
 severity: medium
 ---
