@@ -79,7 +79,8 @@
 
             <div class="app-notice-subjects-footer">
                 @* A button, not a link: it opens a dialog and does not navigate. Outlined: the edition's Save stays the
-                   page's only primary button. *@
+                   page's only primary button. The buttons sit together, so the total stays at the other end. *@
+                <div class="app-notice-subjects-actions">
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Primary"
                            StartIcon="@AppIcons.Add"
@@ -109,6 +110,7 @@
                         </MudTooltip>
                     }
                 }
+                </div>
 
                 @if (_rows.Count > 0)
                 {
