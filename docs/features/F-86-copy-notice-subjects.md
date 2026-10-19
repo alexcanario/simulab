@@ -1,7 +1,7 @@
 ---
 feature: F-86
 epic: Subject taxonomy
-status: building
+status: validating
 board: 129
 version: 1
 ---
@@ -151,7 +151,85 @@ Tests locked: bd437bea711c9d6374dbc16d73e28ace874f109f (1 file); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+### English
+Needed to validate: one exam with two editions, one of them with mapped notice subjects and one with none. The seeded exam **Guarda Municipal** has editions 2025 (6 subjects) and 2026 (9 subjects), all mapped; Claude also left two editions in the database `simulab_f86` that it made while checking: **2024** (empty, the one step 1 uses) and **2027** (a copy of 2025). All of it is in place now. The app host starts the local PostgreSQL, Redis and Mailpit containers; close any app host running from another checkout first (two hosts fight for the same ports).
+
+Git Bash, from `D:/wt/simulab/f-86-copy-notice-subjects`:
+
+```bash
+Database__Name=simulab_f86 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+PowerShell 7, from the same folder:
+
+```powershell
+$env:Database__Name = "simulab_f86"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+Expected: the Aspire dashboard URL is printed and the Web is at https://localhost:7125, with no `fail` line. To repeat, stop it (Ctrl+C) and run it again; stop it before you build (a running host locks `bin/`).
+
+1. Open the empty edition.
+   - [ ] 1.1 Sign in as `admin@simulab.local` (password in `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`). In the sidebar (left menu) under Content click **Exams**; the list appears.
+   - [ ] 1.2 Click **Guarda Municipal**; in its **Editions** section click the **2024** edition. The page "Edit edition" opens.
+   - [ ] 1.3 Scroll to the **Notice subjects** card (the notice subjects of the edition: each subject as the notice names and groups it, with its number of questions). It says "This edition has no notice subject yet." and, next to **Add notice subject**, there is an outlined button **Copy from another edition** (enabled).
+2. Copy from another edition.
+   - [ ] 2.1 Click **Copy from another edition**. A dialog "Copy notice subjects from another edition" opens with the explanation, the group "Edition to copy from" and one card per edition, newest first: **2027** (6 subjects), **2026 — Técnico Municipal I - Guarda Municipal** (9 subjects), **2025 — Guarda Municipal** (6 subjects), each with its board. **Copy** is disabled.
+   - [ ] 2.2 Click the **2026** card; **Copy** is enabled.
+   - [ ] 2.3 Click **Copy**. The dialog closes, the snackbar (the message that appears and fades) says "9 subjects copied." and the card lists 9 rows under their group headings, each with its mapping chips.
+   - [ ] 2.4 Open the **2026** edition in the same way and compare: same groups, labels, numbers of questions, order and chips. It still has its 9 rows (the source is not changed).
+3. After the copy.
+   - [ ] 3.1 Back in **2024**: the **Copy from another edition** button is gone (a list with rows is not copied into); the total of questions is at the right end of the card.
+   - [ ] 3.2 Edit one row of **2024** (change its number of questions) and Save; open **2026**: that row is unchanged (copy and source are independent). Delete one row of **2024**: the 2026 rows stay.
+4. The button with no source.
+   - [ ] 4.1 In **Exams** click **Add exam**, fill the required fields and Save; in the new exam add one edition (any board, year 2024) and Save. In that edition's **Notice subjects** card the **Copy from another edition** button is disabled and its tooltip (the hint when you point at it) says "No other edition of this exam has notice subjects."
+5. Keyboard only, on a new empty edition.
+   - [ ] 5.1 In **Guarda Municipal** add an edition (board Instituto AOCP, year 2023) and Save; in its **Notice subjects** card press Tab until **Copy from another edition** has focus and press Enter: the dialog opens.
+   - [ ] 5.2 Press Arrow down to move between the edition cards and Space or Enter to pick one; Tab to **Copy** and press Enter: the rows appear and the focus is on the first row's Edit button.
+   - [ ] 5.3 Repeat on another empty edition and press Esc in the dialog: it closes at once, nothing is copied and the focus returns to **Copy from another edition**.
+6. Language and theme.
+   - [ ] 6.1 Switch the language (globe in the top bar) to **pt-PT** and to **pt-BR**: the button, the dialog, the snackbar and the tooltip are in that language (pt-BR: "Copiar de outra edição", "disciplinas copiadas"; pt-PT says "aviso" where pt-BR says "edital").
+   - [ ] 6.2 In the light and in the dark theme the button, the cards, the selected card and the disabled button stay readable.
+7. [ ] Permission check: sign in as a Student. `/admin/exams` and the edition page show Page not found, so the button and the dialog are not reachable.
+
+### pt-BR
+Necessário para validar: um exame com duas edições, uma com disciplinas do edital mapeadas e outra sem nenhuma. O exame **Guarda Municipal** do seed tem as edições 2025 (6 disciplinas) e 2026 (9 disciplinas), todas mapeadas; o Claude também deixou duas edições no banco `simulab_f86`, feitas durante a conferência: **2024** (vazia, a que o passo 1 usa) e **2027** (cópia da 2025). Tudo isso já está no lugar. O app host sobe os contêineres locais de PostgreSQL, Redis e Mailpit; feche antes qualquer app host de outro checkout (dois hosts brigam pelas mesmas portas).
+
+Git Bash, a partir de `D:/wt/simulab/f-86-copy-notice-subjects`:
+
+```bash
+Database__Name=simulab_f86 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+PowerShell 7, a partir da mesma pasta:
+
+```powershell
+$env:Database__Name = "simulab_f86"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+Esperado: a URL do painel do Aspire é impressa e a Web fica em https://localhost:7125, sem nenhuma linha `fail`. Para repetir, pare (Ctrl+C) e rode de novo; pare antes de compilar (um host em execução trava `bin/`).
+
+1. Abra a edição vazia.
+   - [ ] 1.1 Entre como `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`). No menu lateral esquerdo, em Content, clique em **Exams**; a lista aparece.
+   - [ ] 1.2 Clique em **Guarda Municipal**; na seção **Editions** clique na edição **2024**. A página "Edit edition" abre.
+   - [ ] 1.3 Role até o cartão **Notice subjects** (as disciplinas do edital da edição: cada matéria como o edital a nomeia e agrupa, com o número de questões). Ele diz "This edition has no notice subject yet." e, ao lado de **Add notice subject**, há um botão com contorno **Copy from another edition** (habilitado).
+2. Copie de outra edição.
+   - [ ] 2.1 Clique em **Copy from another edition**. Abre o diálogo "Copy notice subjects from another edition" com a explicação, o grupo "Edition to copy from" e um cartão por edição, a mais recente primeiro: **2027** (6 subjects), **2026 — Técnico Municipal I - Guarda Municipal** (9 subjects), **2025 — Guarda Municipal** (6 subjects), cada um com a banca. **Copy** está desabilitado.
+   - [ ] 2.2 Clique no cartão **2026**; **Copy** fica habilitado.
+   - [ ] 2.3 Clique em **Copy**. O diálogo fecha, o snackbar (a mensagem que aparece e some) diz "9 subjects copied." e o cartão lista 9 linhas sob os títulos de grupo, cada uma com seus chips de mapeamento.
+   - [ ] 2.4 Abra a edição **2026** do mesmo jeito e compare: mesmos grupos, nomes, números de questões, ordem e chips. Ela continua com suas 9 linhas (a origem não muda).
+3. Depois da cópia.
+   - [ ] 3.1 De volta à **2024**: o botão **Copy from another edition** sumiu (lista com linhas não recebe cópia); o total de questões está na ponta direita do cartão.
+   - [ ] 3.2 Edite uma linha da **2024** (mude o número de questões) e salve; abra a **2026**: essa linha não mudou (cópia e origem são independentes). Exclua uma linha da **2024**: as linhas da 2026 continuam.
+4. O botão sem origem.
+   - [ ] 4.1 Em **Exams** clique em **Add exam**, preencha os campos obrigatórios e salve; no exame novo adicione uma edição (qualquer banca, ano 2024) e salve. No cartão **Notice subjects** dessa edição o botão **Copy from another edition** está desabilitado e a dica (o texto que aparece ao apontar) diz "No other edition of this exam has notice subjects."
+5. Só com o teclado, numa edição vazia nova.
+   - [ ] 5.1 Em **Guarda Municipal** adicione uma edição (banca Instituto AOCP, ano 2023) e salve; no cartão **Notice subjects** dela, aperte Tab até o foco chegar em **Copy from another edition** e aperte Enter: o diálogo abre.
+   - [ ] 5.2 Use a seta para baixo para mover entre os cartões de edição e Espaço ou Enter para escolher um; Tab até **Copy** e Enter: as linhas aparecem e o foco fica no botão Edit da primeira linha.
+   - [ ] 5.3 Repita em outra edição vazia e aperte Esc no diálogo: ele fecha na hora, nada é copiado e o foco volta para **Copy from another edition**.
+6. Idioma e tema.
+   - [ ] 6.1 Troque o idioma (globo na barra superior) para **pt-PT** e para **pt-BR**: o botão, o diálogo, o snackbar e a dica estão nesse idioma (o app abre em inglês; em pt-BR: "Copiar de outra edição", "9 disciplinas copiadas."; o pt-PT diz "aviso" onde o pt-BR diz "edital").
+   - [ ] 6.2 No tema claro e no escuro, o botão, os cartões, o cartão selecionado e o botão desabilitado continuam legíveis.
+7. [ ] Verificação de permissão: entre como Student. `/admin/exams` e a página da edição mostram Page not found, então o botão e o diálogo não são alcançáveis.
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
