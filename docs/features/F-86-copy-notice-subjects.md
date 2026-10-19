@@ -231,5 +231,9 @@ Esperado: a URL do painel do Aspire é impressa e a Web fica em https://localhos
    - [ ] 6.2 No tema claro e no escuro, o botão, os cartões, o cartão selecionado e o botão desabilitado continuam legíveis.
 7. [ ] Verificação de permissão: entre como Student. `/admin/exams` e a página da edição mostram Page not found, então o botão e o diálogo não são alcançáveis.
 
+## Events
+
+- 2026-10-19 test-fail — build blocked by a running process (Simulab.slnx), 1 red
+
 ## Delivery
 <!-- Filled by /agile:ship. -->

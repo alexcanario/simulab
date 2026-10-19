@@ -1,7 +1,7 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35, F-74, F-75, F-78, F-96, F-99]
+features: [F-35, F-74, F-75, F-78, F-86, F-96, F-99]
 updated: 2026-10-19
 ---
 # Edições de um exame
@@ -82,6 +82,16 @@ As quatro edições de guarda municipal (Curitiba 2025, Manaus 2026, Salvador 20
 - **Editar** abre o mesmo diálogo preenchido. Mudar o grupo leva a disciplina para o fim do novo grupo; mudar só o nome ou o número mantém a posição.
 - **Excluir** pede confirmação e remove a disciplina da edição. Ela pode ser adicionada de novo depois.
 
+### Copiar as disciplinas de outra edição
+Quando o edital se repete de um ano para o outro, você não precisa digitar tudo de novo: copie as disciplinas de outra edição do mesmo exame e ajuste só o que mudou.
+1. Abra uma edição que ainda não tem disciplinas do edital. Ao lado de **Adicionar disciplina do edital** aparece o botão **Copiar de outra edição**. Ele só aparece com a lista vazia; se nenhuma outra edição do exame tem disciplinas, ele fica desativado e explica o motivo.
+2. Escolha **Copiar de outra edição**. O diálogo lista as outras edições do exame que têm disciplinas, da mais nova para a mais antiga, com o ano, o cargo, a banca e quantas disciplinas cada uma tem.
+3. Escolha a edição de origem e depois **Copiar**. A mensagem diz quantas disciplinas foram copiadas e a lista passa a mostrá-las.
+- A cópia leva, de cada disciplina, o grupo, o nome, o número de questões, a posição e o campo **Abrange**, como estão na origem naquele momento. As disciplinas excluídas da origem não vêm.
+- A cópia é feita de uma vez: ou vem tudo, ou nada. As disciplinas copiadas são novas e independentes: alterar uma delas não muda a origem, e o contrário também vale.
+- Só os dados das disciplinas são copiados. O ano, o cargo, a banca e os demais campos da edição não mudam.
+- Funciona em edições em rascunho e publicadas. Não há como desfazer a cópia: exclua as disciplinas uma a uma, como qualquer outra.
+
 ### Mapear uma disciplina do edital para a taxonomia
 O edital nomeia as disciplinas com as próprias palavras ("Raciocínio Lógico-Matemático"). O campo **Abrange** diz quais [disciplinas e tópicos](subjects.md) da lista comum do Simulab aquele título quer dizer, para que todas as edições falem o mesmo vocabulário.
 1. Escolha **Editar** na disciplina do edital (ou preencha ao adicioná-la).
@@ -122,6 +132,9 @@ Na mesma edição, o nome da disciplina não pode se repetir dentro do mesmo gru
 | Um dos itens escolhidos não é válido. Remova-o e escolha de novo. | Uma escolha não pôde ser lida. | Remova-a e escolha de novo. |
 | Outra pessoa salvou esta disciplina ao mesmo tempo. Salve de novo. | Duas pessoas salvaram a mesma linha ao mesmo tempo. | Salve de novo. |
 | Não foi possível carregar a taxonomia. Os itens já escolhidos continuam aqui. | A lista de disciplinas não carregou. | Recarregue a página e tente de novo. |
+| A edição escolhida não está mais disponível. Escolha outra. | A edição de origem foi excluída com o diálogo de cópia aberto. | Escolha outra edição na lista atualizada. |
+| A edição escolhida não tem disciplinas do edital para copiar. | A edição de origem ficou sem disciplinas com o diálogo aberto. | Escolha outra edição. |
+| Esta edição já tem disciplinas do edital; a cópia só é feita numa lista vazia. A lista foi recarregada. | Outra pessoa adicionou disciplinas a esta edição com o diálogo aberto. | Confira a lista; para mudar o que já está lá, use as ações de cada disciplina. |
 
 ## Questões da edição
 No cartão **Questões**, abaixo das disciplinas do edital, aparecem as questões do banco que vieram desta edição, na ordem da prova: o número, o início do enunciado, a disciplina do edital e a situação (rascunho ou publicada), 25 por página. O cartão só aparece para quem também gerencia o banco de questões; numa edição nova ele pede para salvar a edição primeiro.
