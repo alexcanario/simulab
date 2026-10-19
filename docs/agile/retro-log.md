@@ -1337,3 +1337,25 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Merged: `.claude/rules/agile/git.md` (edited, upstream changed). One conflict, the secrets line: the owner kept the project's line (stricter) over the plugin's exception for passwords in development, staging and test paths. The base copy was recorded.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen F-61/F-69, release pipeline F-116, Azure login F-117).
 - Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-18 - Sync with agile@canary 0.118.0
+- From 0.112.0 to 0.118.0 (6 minor versions). Copied: `.claude/rules/agile/ui.md` (plugin text: the two-locale condition dropped, run-time themes sentences), `docs/agile/templates/glossary.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (their two link lines kept pointing at the project's file names).
+- Merged: `docs/agile/profile.md` (edited, upstream changed): the "Run-time themes" section came in; the three-way merge had no conflicts; the Simulab lines are kept.
+- Kept on purpose (owner's choice): `.claude/rules/agile/i18n.md` and `.claude/rules/agile/naming.md` keep the project's pt-BR / pt-PT wording; the plugin now says "default pt-BR" and drops the pt-PT note. Not copied; to revisit if the owner wants the plugin text.
+- Added to `docs/glossary.md`: the rows `shortcut marker` and `shortcut ledger` (business table, with the `Meaning (pt-BR)` column).
+- Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged); build files (`Directory.Build.props`, `Directory.Packages.props`, `.editorconfig`, `.gitignore`, `global.json`, `tests/Directory.Build.props`, `.github/workflows/deploy.yml`): differences are the project's own.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Missing capabilities unchanged (DocGen tool catalogue, release pipeline, Azure login in deploy); none installed by the sync.
+- Note: `CLAUDE.md` is at ~4.4k tokens always loaded, close to the ~4.5k budget; trim at the next retro.
+- Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-19 - F-78 Notice subjects of the municipal guard editions
+- Events: question 1, test-fail 2. Gate time: 8 passes, 33 min; 2 red. Decisions: 28 lines, all item decisions, none promoted.
+- Lesson 1, score 2/7: bUnit page tests of the QuestionBank area time out under full-suite load (two different tests in 2 of 4 full runs, each green alone and on the next run; cause not verified). Went to B-30 (board #196), not to a rule: `project.md:75` already asks for `WaitForAssertion` and the tests follow it (stronger level, step 2d).
+- Lesson 2, score 1/6: the three slowest test projects grew 40 s to 45 s each since F-125 and one full run took 360 s of test time, over the 5 min budget (cause not measured). Went to F-144 (board #197).
+- No rule, template or `CLAUDE.md` change. Ship notes: the per-step validation ticks were not recorded on this machine (`Evidence: 0 of 15 tested`, the owner said "validado" in the chat). The item database `simulab_f78` was not dropped: the Postgres container was not running, and the owner's yes stands for the next time the app host is up (`DROP DATABASE simulab_f78;`, nobody connected).
+
+## 2026-10-19 - Sync with agile@canary 0.123.0
+- From 0.118.0 to 0.123.0 (5 minor versions). Copied: `docs/agile/templates/feature.md` (new `## Security` section for items that touch a door), `docs/agile/templates/infra.md` (release-signing environment line), `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (their link lines kept pointing at the project's file names).
+- Merged: `docs/agile/profile.md` (edited, upstream changed): one line, the bootstrap question 23f mention in "Run-time themes"; no conflicts, the Simulab lines are kept.
+- Left alone: `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); build files (the differences are the project's own).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen tool catalogue F-61/F-69, release pipeline F-116, Azure login check F-117); none installed by the sync.

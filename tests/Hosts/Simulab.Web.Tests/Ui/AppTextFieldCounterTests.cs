@@ -91,12 +91,10 @@ public sealed class AppTextFieldCounterTests : KitTestContext
 
         field.Find("input,textarea").Input("abc");
         // The host's clock is fake, which freezes the field's debounce (profile: test strategy): move it past.
-        AdvanceDebounce(500);
-
-        field.WaitForAssertion(() =>
+        WaitForAfterDebounce(field, () =>
         {
             received.Should().Be("abc");
             field.Find(".app-field-counter").TextContent.Trim().Should().Be("3/500");
-        });
+        }, 500);
     }
 }

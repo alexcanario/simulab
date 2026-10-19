@@ -169,9 +169,7 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         WaitForRows(page, 2);
 
         page.Find(".app-table-search input").Input("guarda sp");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("search=guarda%20sp"));
+        WaitForAfterDebounce(page, () => Api.ListQueries.Last().Should().Contain("search=guarda%20sp"));
         page.WaitForAssertion(() => Navigation.Uri.Should().EndWith("/catalog?search=guarda%20sp"));
     }
 
@@ -290,9 +288,7 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         WaitForRows(page, 2);
 
         page.Find(".app-table-search input").Input("zzz");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => page.Find(".app-state-empty").TextContent.Should().Contain("No published exam matches \"zzz\"."));
+        WaitForAfterDebounce(page, () => page.Find(".app-state-empty").TextContent.Should().Contain("No published exam matches \"zzz\"."));
         page.FindAll(".app-empty-action").Should().BeEmpty();
     }
 
@@ -445,8 +441,7 @@ public sealed class CatalogSearchPageTests : StudentCatalogTestContext
         page.WaitForAssertion(() => StateFilter(page).Disabled.Should().BeFalse());
         await page.InvokeAsync(() => Filter<AssessmentType?>(page, "catalog-filter-type").ValueChanged.InvokeAsync(AssessmentType.PublicServiceExam));
         page.Find(".app-table-search input").Input("guarda");
-        AdvanceDebounce();
-        page.WaitForAssertion(() => Api.ListQueries.Last().Should().Contain("search=guarda"));
+        WaitForAfterDebounce(page, () => Api.ListQueries.Last().Should().Contain("search=guarda"));
         await PickStateAsync(page, "São Paulo (SP)");
 
         page.WaitForAssertion(() => Api.ListQueries.Last().Should()

@@ -72,9 +72,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Nothing);
 
         field.Find("#lookup").Input("zzz");
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() =>
+        WaitForAfterDebounce(field, () =>
             field.Find("[aria-live='polite']").TextContent.Should().Contain("Nothing found for \"zzz\"."));
         field.Find(".app-field-description").TextContent.Should().NotContain("The search failed.");
     }
@@ -86,9 +84,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Broken);
 
         field.Find("#lookup").Input("ceb");
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
+        WaitForAfterDebounce(field, () => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
         field.Markup.Should().Contain("Try again");
         field.Find("[aria-live='polite']").TextContent.Should().Contain("The search failed.");
     }
@@ -98,8 +94,7 @@ public sealed class AppLookupFieldTests : KitTestContext
     {
         var field = Render(Broken);
         field.Find("#lookup").Input("ceb");
-        AdvanceDebounce();
-        field.WaitForAssertion(() => field.Markup.Should().Contain("The search failed."));
+        WaitForAfterDebounce(field, () => field.Markup.Should().Contain("The search failed."));
 
         field.FindAll("button").First(button => button.TextContent.Contains("Try again", StringComparison.Ordinal)).Click();
 
@@ -120,9 +115,7 @@ public sealed class AppLookupFieldTests : KitTestContext
         field.Find("#lookup").Input("ceb");
         terms.Should().BeEmpty("the term is still waiting out the debounce");
 
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() => terms.Should().Equal("ceb"));
+        WaitForAfterDebounce(field, () => terms.Should().Equal("ceb"));
     }
 
     [Fact]
@@ -131,10 +124,8 @@ public sealed class AppLookupFieldTests : KitTestContext
         var field = Render(Found);
 
         field.Find("#lookup").Input("ceb");
-        AdvanceDebounce();
-
         // "Results: 1", not "1 results": the count is read aloud, and no language here has one plural form.
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
     }
 
     private static IEnumerable<string> PathData(string svg) =>
@@ -180,13 +171,11 @@ public sealed class AppLookupFieldTests : KitTestContext
                 ? [Cebraspe]
                 : [Cebraspe, Cebraspe with { Id = Guid.NewGuid() }, Cebraspe with { Id = Guid.NewGuid() }]));
         field.Find("#lookup").Input("ceb");
-        AdvanceDebounce();
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
 
         field.Find("#lookup").Input("cebr");
-        AdvanceDebounce();
 
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 3"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 3"));
     }
 
     // B-27 AC2: a second search that throws shows the failure and the retry button at once.
@@ -196,13 +185,11 @@ public sealed class AppLookupFieldTests : KitTestContext
         Render<MudBlazor.MudPopoverProvider>();
         var field = Render((term, cancellationToken) => term.Length == 3 ? Found(term, cancellationToken) : Broken(term, cancellationToken));
         field.Find("#lookup").Input("ceb");
-        AdvanceDebounce();
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Results: 1"));
 
         field.Find("#lookup").Input("cebr");
-        AdvanceDebounce();
 
-        field.WaitForAssertion(() => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
+        WaitForAfterDebounce(field, () => field.Find(".app-field-error-text").TextContent.Should().Contain("The search failed."));
         field.Markup.Should().Contain("Try again");
     }
 
