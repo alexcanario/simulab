@@ -5609,3 +5609,123 @@ No runner o job `release` importa o certificado, assina por `/sha1`, confere cad
 ```
 
 Se um dos arquivos não estivesse validamente assinado, a run pararia antes da tag, nomeando o arquivo e o status (`Setup.exe is not validly signed (status NotSigned)`), e nenhum release sairia sem assinatura.
+
+### 14.156 MVPs nomeados e ranqueados: `/agile:order` abre com um grupo por MVP e põe antes o item que fecha uma feature
+
+No ExamPrep há dois epics, e cada um tem um corte com nome: o `cadastro` tem `mvp1-cadastro` (o cadastro de questões completo), com `Rank: 1`, e o `provas` tem `mvp2-provas` (a correção das provas), ainda sem rank. Você quer que o `mvp2-provas` seja o segundo e que o F-2, que os dois cortes pedem, fique no primeiro. Para gravar o rank sem editar o epic à mão:
+
+```
+/agile:mvp provas mvp2-provas --rank 2
+```
+
+Antes de pedir o seu ok, o Claude roda o `mvp.js diff` com o rótulo, o rank e os ids, e mostra a saída (o corte antigo não tinha rank):
+
+```
+enters: F-2
+leaves: -
+kept: -
+rank: none → 2
+agile mvp DIFF: provas 1 enter, 0 leave, 0 kept
+```
+
+Com o seu ok, o `mvp.js write` grava o título, a linha `Rank: 2` e os ids (a linha `Rank:` de um corte que já tinha rank continua onde está, a menos que você passe `--rank`; um valor que não seja um inteiro de 1 a 99 é recusado e nada é escrito). Depois, o `/agile:order` escreve a lista. Esta é a saída real do script sobre essa fixture (o arquivo, sem o cabeçalho de comentário); o `F-6` e o `F-7` já foram entregues e o `F-10` é a última parte aberta da funcionalidade que eles começaram (`Split from F-6` na primeira linha do `## Summary`):
+
+```
+# Order of implementation
+
+## MVP: mvp1-cadastro
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 1 | F-1 | Question bank | approved | - | cadastro | - | F-2 |
+| 2 | F-3 | Image attachments | approved | - | cadastro | - | F-2 |
+| 3 | F-2 | Question editor | approved | - | cadastro | F-1, F-3 | - |
+
+## MVP: mvp2-provas
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 4 | B-1 | Exam printed without questions | approved | - | provas | - | - |
+| 5 | F-4 | Exam correction | approved | - | provas | - | - |
+
+## Later
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 6 | F-10 | Answer key import: error report | approved | - | provas | - | - |
+| 7 | F-9 | Dark theme | approved | - | cadastro | - | - |
+
+## Checklist
+
+### MVP: mvp1-cadastro
+
+- [ ] 1. F-1 — Question bank [approved] — unlocks F-2
+- [ ] 2. F-3 — Image attachments [approved] — unlocks F-2
+- [ ] 3. F-2 — Question editor [approved] — waits on F-1, F-3
+
+### MVP: mvp2-provas
+
+- [ ] 4. B-1 — Exam printed without questions [approved]
+- [ ] 5. F-4 — Exam correction [approved]
+
+### Later
+
+- [ ] 6. F-10 — Answer key import: error report [approved]
+- [ ] 7. F-9 — Dark theme [approved]
+
+## Summary
+
+- Delivered: 2
+- MVP mvp1-cadastro: 3 open (2 in the cuts, 1 their dependencies)
+- MVP mvp2-provas: 2 open (2 in the cuts, 0 their dependencies)
+- First release (cadastro, mvp1-cadastro): 0 of 2 delivered; missing: F-1, F-2
+- First release (provas, mvp2-provas): 0 of 3 delivered; missing: B-1, F-4, F-2
+```
+
+Quatro coisas para notar. Os grupos seguem o `Rank:`: `mvp1-cadastro` (rank 1) vem antes de `mvp2-provas` (rank 2), e sem nenhum `Rank:` a ordem alfabética dos nomes decidiria; um MVP com rank vem sempre antes de um sem. O F-2 está nos dois cortes e fica só no primeiro, e o F-3, que o F-2 precisa e nenhum corte cita, entra no primeiro como dependência (`2 in the cuts, 1 their dependencies`); nada num MVP espera por um MVP posterior. Dentro de cada grupo a chave é: nível, bug, se o item fecha uma feature, Must, Should, Could, tamanho, id. Por isso o B-1 vem antes do F-4 no `mvp2-provas`, e no `Later` o F-10 (Could) vem antes do F-9 (Must): o F-10 é a última parte aberta de uma família (`Split from F-6`) com partes entregues. Um irmão ainda aberto, bloqueado ou adiado desfaz esse empurrão, uma família sem parte entregue não ganha nenhum, e um `Split from` de um id que não existe ou um laço não dão erro nem empurrão. Por fim, as linhas `First release` continuam por épico: o F-2 aparece como faltando nas duas, porque o corte de cada épico não muda, e só a lista é a união. Com um corte só, o arquivo é o de antes (`## MVP`, `- MVP: <k> open (...)`); no widget os cabeçalhos são `MVP: <nome>` (ou `MVP`) e `Depois`.
+
+### 14.157 O `.aab` Android sai assinado no GitHub Actions: os nomes no ambiente `release-signing`, a parada antes de qualquer commit e o resumo com o signatário
+
+A acme-shop é um app mobile (MAUI, `Shop.Api` e `Shop.Mobile`, com `ApplicationId` `com.acme.shop`) cujo `release.yml` o `pipeline write` escreveu já com os passos Android. O dono criou o ambiente `release-signing` no GitHub, mas ele ficou aberto a qualquer branch e sem o segredo do keystore. O dono digita `/agile:publish`. O Claude roda o plano; nesta máquina não há variável `ANDROID_SIGNING_*`, nem keystore, nem a workload do Android, e isso não importa: o script só lê o `release.yml` e, no GitHub, os nomes.
+
+```
+{
+  "ok": false,
+  "stop": [
+    "the GitHub environment release-signing is open to every branch: a workflow edited on any branch could read the signing keys; limit it to main (Settings > Environments > release-signing > Deployment branches and tags > Selected branches)",
+    "the GitHub environment release-signing has no secret ANDROID_SIGNING_KEYSTORE_BASE64 (the Android signing needs it; Settings > Environments > release-signing)"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita as duas frases e diz o único próximo passo: no GitHub, em Settings, Environments, `release-signing`, escolher "Selected branches" com só a `main` e criar o segredo `ANDROID_SIGNING_KEYSTORE_BASE64` (a seção `## Store signing` do `docs/infra.md` traz os comandos `gh`, em PowerShell e em Bash: o keystore é lido do arquivo e as senhas são pedidas pelo `gh`, então nenhum valor passa pelo chat nem por uma linha de comando). Nada foi commitado, marcado nem disparado. Com o ambiente limitado à `main` e a variável `ANDROID_SIGNING_ALIAS` e os três segredos no lugar, o mesmo comando segue: mostra o plano com a linha do deploy, dispara o `Release` e espera a run.
+
+No runner o job `release` instala a workload, grava o keystore num arquivo temporário fora do checkout, empacota o `.aab` assinado, confere a assinatura com o `jarsigner`, lê o certificado com o `keytool` e só então commita as notas e cria a tag. O `.aab` vai como arquivo do GitHub Release, e o resumo da run, que o Claude cita ao dono, nomeia quem assinou, a run e o commit das notas:
+
+```
+## Release v0.4.0
+
+- Tag: v0.4.0 (annotated, with the notes)
+- Files: docs/releases/v0.4.0.md, docs/releases/v0.4.0-store.md
+- GitHub Release: https://github.com/acme/shop/releases/tag/v0.4.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Android bundle: com.acme.shop-Signed.aab (attached to the GitHub Release)
+- Android signer: CN=Acme Shop Upload, O=Acme Software Ltd, C=BR
+- Android SHA-256: 1E:08:1A:32:7A:93:B8:AB:EE:17:4C:75:00:AF:36:5D:81:BB:95:16:E9:DE:72:7E:71:4C:B4:05:10:25:49:92
+- Run: 8123456789 (https://github.com/acme/shop/actions/runs/8123456789)
+- Commit: 96324db95e235e6cfcb71641f08beb9988a67d3f
+```
+
+O checklist da loja que a run commitou na `main` já não aponta um caminho de `artifacts/`, que o dono não tem depois de uma run: nomeia o arquivo do Release e o endereço para baixá-lo, e o resto do checklist é o de sempre (o envio à Play Console continua sendo do dono):
+
+```
+# Store checklist v0.4.0
+
+Written by `/agile:publish` for this release. The plugin uploads nothing to either store: every step below is yours.
+
+## Android, this release
+- The signed bundle: the asset `com.acme.shop-Signed.aab` of the GitHub Release v0.4.0: https://github.com/acme/shop/releases/download/v0.4.0/com.acme.shop-Signed.aab (application id `com.acme.shop`).
+```
+
+Se o `.aab` não tivesse assinatura (o `jarsigner` sai com código 0 até para `jar is unsigned.`, então o Claude e o script leem o texto), a run pararia antes de commitar qualquer coisa, nomeando o arquivo, e nenhum release sairia com um pacote sem assinatura. O keystore, as duas senhas e o base64 não aparecem em relatório, resumo nem log: o arquivo temporário é apagado por um passo que roda mesmo quando a run falha, e um valor que vazasse numa mensagem de erro de uma ferramenta sai como `***`.

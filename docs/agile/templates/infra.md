@@ -121,6 +121,21 @@ Example, weekdays: staging | park | 0 20 * * 1-5 | America/Sao_Paulo; staging | 
 ## Store signing (a mobile app only)
 - `/agile:publish` signs the Android `.aab` with the upload key named by four environment variables: `ANDROID_SIGNING_KEYSTORE` (absolute path, outside the repository), `ANDROID_SIGNING_ALIAS`, `ANDROID_SIGNING_STORE_PASS`, `ANDROID_SIGNING_KEY_PASS`. Their values are never written here.
 - The keystore is kept in: <where, and where its backup is>. Passwords kept in: <where>.
+- In GitHub Actions (the `Release` workflow, `/agile:publish` without `--local`) the upload key lives in the GitHub environment `release-signing`, limited to the main branch only (Settings > Environments > Deployment branches and tags > Selected branches), with no required reviewer. It is the one environment a desktop app's `## Code signing` mode uses too: a project with both a desktop head and an Android head sets the desktop names and the Android names on that one environment, and the job takes it once. The run installs the MAUI Android workload, writes the keystore from the base64 secret to a temporary file outside the checkout, packs the `.aab` with the four variables the local flow reads, checks it with `jarsigner -verify`, deletes the file in a step that runs even when the build fails, and attaches the `.aab` to the GitHub Release; the upload to Play Console stays yours. The names to set on the environment (your machine checks the names, never the values): variable `ANDROID_SIGNING_ALIAS`, and secrets `ANDROID_SIGNING_KEYSTORE_BASE64` (the keystore file as base64), `ANDROID_SIGNING_STORE_PASS` and `ANDROID_SIGNING_KEY_PASS`. A `release.yml` written before this is yours: `/agile:sync` does not change it, and `/agile:publish` stops and names the steps to add (`sync.js pipeline write` on a scratch copy of the project shows the current ones). Set the names with `gh`; a secret asks for its value and the keystore is read from its file, so no value is typed on a command line:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("<path of the keystore>")) | gh secret set ANDROID_SIGNING_KEYSTORE_BASE64 --env release-signing
+gh secret set ANDROID_SIGNING_STORE_PASS --env release-signing
+gh secret set ANDROID_SIGNING_KEY_PASS --env release-signing
+gh variable set ANDROID_SIGNING_ALIAS --env release-signing --body "<alias>"
+```
+
+```bash
+base64 -w0 "<path of the keystore>" | gh secret set ANDROID_SIGNING_KEYSTORE_BASE64 --env release-signing
+gh secret set ANDROID_SIGNING_STORE_PASS --env release-signing
+gh secret set ANDROID_SIGNING_KEY_PASS --env release-signing
+gh variable set ANDROID_SIGNING_ALIAS --env release-signing --body "<alias>"
+```
 
 ## Shared-screens package (a Hybrid app and its site only)
 - The site's `/agile:publish` pushes `<App>.Contracts` and `<App>.Shared` to the GitHub Packages feed of the `origin` owner; the app restores them. Both sides read the token from the environment variable `GITHUB_PACKAGES_TOKEN`, a classic personal access token (`write:packages` on the site, `read:packages` in the app). Its value is never written here.

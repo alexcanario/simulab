@@ -1369,3 +1369,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Merged: `docs/agile/profile.md` (edited, upstream changed): one line, the bootstrap question 23f mention in "Run-time themes"; no conflicts, the Simulab lines are kept.
 - Left alone: `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); build files (the differences are the project's own).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen tool catalogue F-61/F-69, release pipeline F-116, Azure login check F-117); none installed by the sync.
+
+## 2026-10-19 - Sync with agile@canary 0.125.0
+- From 0.123.0 to 0.125.0 (2 minor versions). Copied: `docs/agile/templates/epic.md` (comment: `Rank:` line for named MVP cuts), `docs/agile/templates/infra.md` (Store signing section), `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (release on GitHub Actions, `/agile:order`, MVP by goal and rank); their link lines kept pointing at the project's file names.
+- Merged: none. Left alone: `docs/agile/profile.md`, `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); build files (the differences are the project's own, `<Version>` 1.6.0 stays).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync (step 5g not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Not done yet: the sync commit (owner's authorization pending).
