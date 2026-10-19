@@ -1,7 +1,7 @@
 ---
 feature: F-78
 epic: Subject taxonomy
-status: building
+status: validating
 board: 122
 version: 1
 ---
@@ -77,7 +77,7 @@ Tests locked: 5aaf27504eb85a84d5b74e33d6e14b8e9df4386a (1 file); unlocks: 0
 | AC8 | `SeedGuardNoticeSubjectsTests.Migrate_AgainAfterAnAdminEditedASeededRow_KeepsTheEditAndAddsNoDuplicate`; `SeedGuardNoticeSubjectsTests.Down_RemovesTheSeededRowsAndKeepsTheAdminsOwnNoticeSubject`; `SeedGuardNoticeSubjectsTests.Down_KeepsASeededNoticeSubjectThatHoldsAnEntryOfTheAdmin` |
 | AC9 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachEditionHoldsExactlyItsListedNoticeSubjectsInOrderWithNoTenant` (no pending model change); `ApiHostTests.OpenApi_document_is_served`; the architecture tests (full suite) |
 | AC10 | no resource file changes; the existing Catalog resource tests stay green (full suite) |
-| On screen only | pending |
+| On screen only | validation steps 2 to 5 |
 
 ## Approved list
 Checked by the owner on 2026-10-19. Per edition: the source read, then the rows in order as `<n>. [group] Label — questions → mapping`. Mapping: a subject name alone is the whole subject; `Subject › Topic` is one topic. Subject numbers in brackets follow F-51's `## Approved list`.
@@ -158,6 +158,9 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - 2026-10-19 — `DisplayOrder` is seeded from 0 as BR2 writes it, while F-74's `NoticeSubjectOrder` renumbers from 1 on every write: nothing reads the absolute value (every read orders by it and a move swaps neighbours), so the first admin write on an edition repairs it; shown to the owner at validation (Claude, verified in `NoticeSubjectOrder` and its readers).
 - 2026-10-19 — A topic entry is looked up inside its subject found by seeded id, then by name; a live topic under a deleted subject still maps (Claude, technical).
 - 2026-10-19 — `Down` keeps a seeded notice subject that holds an entry an admin added, because the cascade would drop that entry with it (Claude, technical).
+- 2026-10-19 — Reuse: `20261005135846_SeedGuardTaxonomy` (SQL-insert-with-skip pattern, fixed-id helper), `SeedGuardTaxonomyTests` (database helpers), `NoticeSubject.Create`, `NoticeSubjectMappingRules` and `CatalogText` in the tests (Claude).
+- 2026-10-19 — Shortcuts: none (Claude).
+- 2026-10-19 — Gate: `gate.js ship` GREEN (13 test assemblies, Catalog 598 passed, 0 failed); `scan.js run` GREEN (3 open medium findings, none in this diff). App host started from this worktree with `Database__Name=simulab_f78`: the seed ran at Api start, the edition pages of Curitiba and Salvador and the student syllabus of Curitiba showed the listed rows; stopped afterwards (Claude).
 
 ## Out of scope
 - Editions of Recife and Goiânia.
@@ -170,6 +173,82 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 
 ## Open questions
 - (none)
+
+## Validation script
+
+### English
+Needed to validate: the app host started from this worktree with its own database, and the Admin account `admin@simulab.local` — Claude gives the commands, the owner signs in; in place now.
+
+Data: the local PostgreSQL volume is shared by every checkout, so this item gets its own database, `simulab_f78`, through the knob of `docs/infra.md`; the seed runs by itself when the Api starts on the empty database. Stop any app host of another checkout first (ports collide).
+
+1. Start the app host from this worktree and sign in.
+   - [ ] 1.1 In a new terminal run:
+     ```powershell
+     cd D:\wt\simulab\f-78-guard-notice; $env:Database__Name = "simulab_f78"; dotnet run --project src/Hosts/Simulab.AppHost
+     ```
+     ```bash
+     cd /d/wt/simulab/f-78-guard-notice && Database__Name=simulab_f78 dotnet run --project src/Hosts/Simulab.AppHost
+     ```
+     Expected: the Aspire dashboard lists `api` and `web` as running; to repeat, stop it with Ctrl+C and run it again.
+   - [ ] 1.2 Open `http://localhost:5211` and sign in as `admin@simulab.local`. Expected: you land signed in.
+2. AC1, AC2, UC1. Curitiba's syllabus as the admin sees it.
+   - [ ] 2.1 In the sidebar (the left-hand menu) open Content → Exams and click the exam Guarda Municipal of Curitiba; the page lists its editions in the "Editions" section; click the 2025 edition (caminho não conferido: whether the whole row or only its text opens the edition).
+   - [ ] 2.2 Scroll to the section "Notice subjects". Expected: 6 rows, in this order, with no group heading: Língua Portuguesa (5 questions), Raciocínio Lógico e Matemático (5), Noções de Informática (5), História e Geografia de Curitiba (5), Noções de Direito (Constitucional, Administrativo, Penal e Processual Penal) (10), Legislação (10) — 40 in all.
+   - [ ] 2.3 Under each label read its chips (small rounded tags, one per mapping entry; a chip marked "whole subject" is a whole canonical subject, the others read `Subject › Topic`). Expected: Língua Portuguesa has 5 chips (Leitura e Interpretação, Morfologia, Sintaxe, Ortografia e Pontuação, Semântica e Léxico); História e Geografia de Curitiba has one chip, `Conhecimentos locais › Curitiba (PR)`; Legislação has 8 chips, four of them `Subject › Topic`.
+3. AC2, AC4. Salvador: two groups and one row with no mapping. Go back to the exam Guarda Civil Municipal of Salvador and open its 2026 edition.
+   - [ ] 3.1 In "Notice subjects" expected: 8 rows under two group headings, "Módulo I - Conhecimentos Básicos" (Língua Portuguesa 10, Raciocínio Lógico-Matemático 10, Informática 8) and "Módulo II - Conhecimentos Específicos" (Noções de Direito Constitucional e Direito Civil 10, Noções de Direito Penal e Direito Processual Penal 7, Noções de Administração e Políticas Públicas 5, Conhecimentos na Área de Atuação 10, Legislação 10) — 70 in all.
+   - [ ] 3.2 Expected: "Noções de Administração e Políticas Públicas" shows the marker "Not mapped" and no chip; every other row has at least one chip.
+4. AC1. Manaus and Maceió. Open the 2026 edition of Guarda Municipal of Manaus, then the 2026 edition of Guarda Civil Municipal of Maceió.
+   - [ ] 4.1 Manaus expected: 9 rows (Língua Portuguesa 10, Informática 5, Geografia e História de Manaus 5, Ética e Direitos Humanos 5, Direito Constitucional 5, Direito Penal 5, Direito Processual Penal 5, Legislação de trânsito 5, Legislação específica 15) — 60 in all. "Legislação específica" has 8 chips.
+   - [ ] 4.2 Maceió expected: 5 rows (Língua Portuguesa 10, Raciocínio Lógico 5, Noções de Informática 5, Legislação Municipal Específica 10, Conhecimentos Específicos 30) — 60 in all.
+5. UC2. The student's syllabus. In the sidebar open Study → Catalog and search for `Guarda`; open the exam Guarda Municipal of Curitiba.
+   - [ ] 5.1 Under the 2025 edition click "Show syllabus (6 subjects)". Expected: the six subjects of step 2, each with its question count and its mapped subjects and topics.
+   - [ ] 5.2 Keyboard only: close it with Enter on "Hide syllabus", Tab away and back, and open it again with Enter. Expected: it opens and closes without the mouse and the focus stays on the button.
+6. AC8, UC3. An edit stays. In the admin page of Curitiba's 2025 edition, in "Notice subjects", click the pencil (Edit) of "Noções de Informática", change "Number of questions" to 6 and save.
+   - [ ] 6.1 Expected: the row reads 6 questions. Stop the app host with Ctrl+C, start it again with the command of step 1.1 and reopen the page. Expected: still 6 questions, and the list still has 6 rows (no duplicate).
+   - [ ] 6.2 Click the pencil of "Noções de Informática" again and set it back to 5. Expected: saved.
+7. AC10. Language. In the app bar (the top strip) use the globe to switch to Português (Brasil), then English.
+   - [ ] 7.1 Expected: the section title reads "Disciplinas do edital" in pt-BR and "Notice subjects" in English; the labels and chips of the notice stay in the notice's own language (Portuguese).
+8. [ ] Stop the app host with Ctrl+C. Expected: the terminal returns. The item's database `simulab_f78` stays until the ship, which drops it as `docs/infra.md` says (`DROP DATABASE simulab_f78;`, server up, nobody connected).
+
+Not on screen, covered by tests: the skips (a deleted edition, an edition that already has notice subjects, a deleted target, a subject under another id), the rollback and the frozen ids.
+
+### pt-BR
+Necessário para validar: o app host iniciado a partir deste worktree com banco próprio, e a conta Admin `admin@simulab.local` — o Claude dá os comandos, você entra; já está no lugar.
+
+Dados: o volume local do PostgreSQL é compartilhado por todos os checkouts, então este item usa um banco próprio, `simulab_f78`, pelo parâmetro de `docs/infra.md`; o seed roda sozinho quando a Api sobe no banco vazio. Pare antes qualquer app host de outro checkout (as portas colidem).
+
+1. Inicie o app host a partir deste worktree e entre.
+   - [ ] 1.1 Em um terminal novo, rode:
+     ```powershell
+     cd D:\wt\simulab\f-78-guard-notice; $env:Database__Name = "simulab_f78"; dotnet run --project src/Hosts/Simulab.AppHost
+     ```
+     ```bash
+     cd /d/wt/simulab/f-78-guard-notice && Database__Name=simulab_f78 dotnet run --project src/Hosts/Simulab.AppHost
+     ```
+     Esperado: o painel do Aspire lista `api` e `web` rodando; para repetir, pare com Ctrl+C e rode de novo.
+   - [ ] 1.2 Abra `http://localhost:5211` e entre como `admin@simulab.local`. Esperado: você entra autenticado.
+2. AC1, AC2, UC1. O conteúdo de Curitiba como o admin vê.
+   - [ ] 2.1 Na sidebar (o menu lateral esquerdo) abra Conteúdo → Exames e clique no exame Guarda Municipal de Curitiba; a página lista as edições na seção "Edições"; clique na edição 2025 (caminho não conferido: se a linha inteira ou só o texto abre a edição).
+   - [ ] 2.2 Role até a seção "Disciplinas do edital". Esperado: 6 linhas, nesta ordem, sem título de grupo: Língua Portuguesa (5 questões), Raciocínio Lógico e Matemático (5), Noções de Informática (5), História e Geografia de Curitiba (5), Noções de Direito (Constitucional, Administrativo, Penal e Processual Penal) (10), Legislação (10) — 40 no total.
+   - [ ] 2.3 Sob cada nome leia os chips (etiquetas arredondadas, uma por entrada do mapeamento; o chip marcado "disciplina inteira" é uma disciplina canônica inteira, os outros leem `Disciplina › Tópico`). Esperado: Língua Portuguesa tem 5 chips (Leitura e Interpretação, Morfologia, Sintaxe, Ortografia e Pontuação, Semântica e Léxico); História e Geografia de Curitiba tem um chip, `Conhecimentos locais › Curitiba (PR)`; Legislação tem 8 chips, quatro deles `Disciplina › Tópico`.
+3. AC2, AC4. Salvador: dois grupos e uma linha sem mapeamento. Volte e abra o exame Guarda Civil Municipal de Salvador e a edição 2026.
+   - [ ] 3.1 Em "Disciplinas do edital" esperado: 8 linhas sob dois títulos de grupo, "Módulo I - Conhecimentos Básicos" (Língua Portuguesa 10, Raciocínio Lógico-Matemático 10, Informática 8) e "Módulo II - Conhecimentos Específicos" (Noções de Direito Constitucional e Direito Civil 10, Noções de Direito Penal e Direito Processual Penal 7, Noções de Administração e Políticas Públicas 5, Conhecimentos na Área de Atuação 10, Legislação 10) — 70 no total.
+   - [ ] 3.2 Esperado: "Noções de Administração e Políticas Públicas" mostra o marcador "Não mapeada" e nenhum chip; todas as outras linhas têm pelo menos um chip.
+4. AC1. Manaus e Maceió. Abra a edição 2026 da Guarda Municipal de Manaus e depois a edição 2026 da Guarda Civil Municipal de Maceió.
+   - [ ] 4.1 Manaus, esperado: 9 linhas (Língua Portuguesa 10, Informática 5, Geografia e História de Manaus 5, Ética e Direitos Humanos 5, Direito Constitucional 5, Direito Penal 5, Direito Processual Penal 5, Legislação de trânsito 5, Legislação específica 15) — 60 no total. "Legislação específica" tem 8 chips.
+   - [ ] 4.2 Maceió, esperado: 5 linhas (Língua Portuguesa 10, Raciocínio Lógico 5, Noções de Informática 5, Legislação Municipal Específica 10, Conhecimentos Específicos 30) — 60 no total.
+5. UC2. O conteúdo na visão do aluno. Na sidebar abra Estudo → Catálogo e busque `Guarda`; abra o exame Guarda Municipal de Curitiba.
+   - [ ] 5.1 Sob a edição 2025 clique em "Ver conteúdo programático (6 disciplinas)". Esperado: as seis disciplinas do passo 2, cada uma com o número de questões e as disciplinas e tópicos mapeados.
+   - [ ] 5.2 Só pelo teclado: feche com Enter em "Ocultar conteúdo programático", saia com Tab e volte, e abra de novo com Enter. Esperado: abre e fecha sem o mouse e o foco fica no botão.
+6. AC8, UC3. Uma edição permanece. Na página admin da edição 2025 de Curitiba, em "Disciplinas do edital", clique no lápis (Editar) de "Noções de Informática", mude "Número de questões" para 6 e salve.
+   - [ ] 6.1 Esperado: a linha mostra 6 questões. Pare o app host com Ctrl+C, inicie de novo com o comando do passo 1.1 e reabra a página. Esperado: continua com 6 questões e a lista continua com 6 linhas (sem duplicata).
+   - [ ] 6.2 Clique de novo no lápis de "Noções de Informática" e volte para 5. Esperado: salvo.
+7. AC10. Idioma. Na barra superior (a faixa no alto) use o globo para trocar para Português (Brasil) e depois para English.
+   - [ ] 7.1 Esperado: o título da seção diz "Disciplinas do edital" em pt-BR e "Notice subjects" em inglês; os nomes e os chips do edital continuam no idioma do próprio edital (português).
+8. [ ] Pare o app host com Ctrl+C. Esperado: o terminal volta. O banco do item, `simulab_f78`, fica até o ship, que o apaga como diz `docs/infra.md` (`DROP DATABASE simulab_f78;`, servidor ligado, ninguém conectado).
+
+Fora da tela, coberto por testes: os saltos (edição apagada, edição que já tem disciplinas do edital, alvo apagado, disciplina com outro id), o desfazer e os ids fixos.
 
 ## Events
 
