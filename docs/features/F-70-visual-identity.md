@@ -1,10 +1,11 @@
 ---
 feature: F-70
 epic: Foundation and identity
-status: idea
+status: cancelled
 board: 112
 version: 1
 ---
+Duplicate of F-63 (2026-10-19): F-63 (done) recorded `docs/design/identity.tokens.json` and `DESIGN.md`, absorbed this scope on 2026-10-04, and F-125 (done) updated them.
 # Record the visual identity
 
 Technical terms: [glossary](../glossary.md)
