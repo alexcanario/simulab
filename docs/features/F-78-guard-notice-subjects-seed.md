@@ -155,6 +155,9 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - 2026-10-19 — Build started; the branch was brought up to date with `main` first (docs only). The newest catalog migration is `20261014160521_AddSubjectTopicAliases` (F-77), so the seed goes after it (Claude, verified).
 - 2026-10-19 — plan — 1 tests first: `SeedGuardNoticeSubjectsTests` keeps its own copy of the approved list and covers AC1-AC8 on real PostgreSQL → seen failing (no rows), committed and locked; 2 migration `SeedGuardNoticeSubjects` (EF scaffold for the Designer, body replaced): one SQL insert per edition guarded by "edition live and no notice subject at all", then one SQL insert per mapping entry resolving the target by seeded id, then by normalized name → AC1-AC8 green; 3 `Down` by id, keeping a notice subject that still holds an entry of an admin → AC8; 4 AC9 (OpenAPI, pending model changes, architecture tests) and AC10 (missing-key test) through the affected suites; 5 coverage table, scan, validation script → `validating`.
 - 2026-10-19 — Mapping entry ids are `0198f370-0009-7000-8000-<notice subject number * 100 + position in its list>`, a frozen rule over a frozen list; the test asserts them (Claude, technical).
+- 2026-10-19 — `DisplayOrder` is seeded from 0 as BR2 writes it, while F-74's `NoticeSubjectOrder` renumbers from 1 on every write: nothing reads the absolute value (every read orders by it and a move swaps neighbours), so the first admin write on an edition repairs it; shown to the owner at validation (Claude, verified in `NoticeSubjectOrder` and its readers).
+- 2026-10-19 — A topic entry is looked up inside its subject found by seeded id, then by name; a live topic under a deleted subject still maps (Claude, technical).
+- 2026-10-19 — `Down` keeps a seeded notice subject that holds an entry an admin added, because the cascade would drop that entry with it (Claude, technical).
 
 ## Out of scope
 - Editions of Recife and Goiânia.
