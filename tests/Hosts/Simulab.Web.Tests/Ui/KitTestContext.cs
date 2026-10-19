@@ -1,6 +1,7 @@
 using System.Globalization;
 using Bunit;
 using Bunit.TestDoubles;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Simulab.Web.Components.Ui;
@@ -49,6 +50,10 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     /// shares; a field with another interval passes it.</summary>
     protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
+
+    protected void WaitForAfterDebounce<TComponent>(IRenderedComponent<TComponent> component, Action assertion, int milliseconds = AppLookupField.DebounceMilliseconds)
+        where TComponent : IComponent =>
+        throw new NotImplementedException();
 
     public Task InitializeAsync() => Task.CompletedTask;
 

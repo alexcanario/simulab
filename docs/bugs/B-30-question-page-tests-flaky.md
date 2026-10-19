@@ -1,7 +1,7 @@
 ---
 bug: B-30
 feature: -
-status: approved
+status: building
 board: 196
 severity: medium
 ---
@@ -63,7 +63,8 @@ A bUnit test that types into a debounced field (the table search box, a lookup, 
 
 ## Regression test
 - `DebounceWaitTests` (new, `tests/Hosts/Simulab.Web.Tests/Ui`): the window forced as AC1 says, the helper's retry as AC2 — Simulab.Web.Tests
-- `UiTestTimingTests` (existing class, new guard and its self-tests) — Simulab.ArchitectureTests
+- `UiTestTimingTests` (existing class, new guard `AdvanceDebounceAlone_InTestSources_IsNotFound` and its two self-tests `FindBareAdvanceDebounce_*`) — Simulab.ArchitectureTests
+- Seen failing before the fix: `DebounceWaitTests` 3 of 3 (`NotImplementedException` from the skeleton); the guard lists 33 hits; the old shape times out (`WaitForFailedException`, 5 s).
 
 ## Decisions
 - 2026-10-19 — The proposed fix of the report (a longer `WaitForAssertion` timeout) is dropped — it is already 5 s since B-19 and the debounce already runs on a fake clock since F-48; the reproduced failure waited the whole 5 s — verified in `KitTestContext.cs:23,43` and by the stress run in `## Cause` — asked
@@ -73,6 +74,9 @@ A bUnit test that types into a debounced field (the table search box, a lookup, 
 - 2026-10-19 — The helper moves the clock on every try, not once: a fake clock cannot say whether a delay is registered (`FakeTimeProvider` has no pending-timer query), so retrying is the only way a test can be sure without sleeping — decided by Claude
 - 2026-10-19 — The rule line for `project.md` goes through the retro, not this item — a project rule is the owner's to accept — decided by Claude
 - 2026-10-19 — Main-session model: sonnet (no signal) — `references/model-choice.md` "Main session"
+- 2026-10-19 — Count corrected at the build: the architecture guard finds 33 calls in 15 files, not 34 in 14 (the list of `## Cause` sums to 32; `Ui/AppTextFieldCounterTests.cs:94`, `AdvanceDebounce(500)`, was missing). It is converted like the rest; AC3 holds as written (no statement of the form is left) — verified by the red run of `AdvanceDebounceAlone_InTestSources_IsNotFound`
+- 2026-10-19 — AC1's test forces the window with `Clock.Advance(...)` and not `AdvanceDebounce()`, so the new guard does not flag its own proof; the old shape (one `AdvanceDebounce()` then `WaitForAssertion`) was run once from a scratch test, not committed: `WaitForFailedException` after 5 s — decided by Claude
+- 2026-10-19 — plan — 1 skeleton `WaitForAfterDebounce` + `DebounceWaitTests` (AC1, AC2) + guard and self-tests (AC3) written red, committed and locked → AC1, AC2, AC3 red; 2 implement the helper → AC1, AC2 green; 3 convert the 33 calls of the 15 files, each assertion moves into the helper → AC3, AC4 green (`Simulab.Web.Tests` whole); 4 stress loop, 24 processes x 3 rounds on copies of the build output → AC5; 5 gate, scan, `git diff main --stat -- src` empty → AC6, validation script
 
 ## Out of scope
 - The slow projects of the full suite (QuestionBank, Identity and Catalog at 5 m or more on 2026-10-19, over the 5 m budget): already watched in `docs/infra.md` (Measured times); not caused by this window.
