@@ -253,3 +253,4 @@ Fora da tela, coberto por testes: os saltos (edição apagada, edição que já 
 ## Events
 
 - 2026-10-19 question — asked 3, from context 1
+- 2026-10-19 test-fail — tests failed (Simulab.slnx): Simulab.Web.Tests.QuestionBank.QuestionsPageTests.Search_NothingMatches_NamesTheTerm, 1 red
