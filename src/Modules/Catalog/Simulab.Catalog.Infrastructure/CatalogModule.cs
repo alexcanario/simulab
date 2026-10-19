@@ -77,6 +77,7 @@ public static class CatalogModule
         services.AddScoped<SaveNoticeSubjectHandler>();
         services.AddScoped<MoveNoticeSubjectHandler>();
         services.AddScoped<DeleteNoticeSubjectHandler>();
+        services.AddScoped<CopyNoticeSubjectsHandler>();
 
         return services;
     }

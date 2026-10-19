@@ -30,6 +30,22 @@ public sealed class NoticeSubjectQueries(CatalogModuleDbContext context) : INoti
         return rows.Count == 0 ? null : rows[0];
     }
 
+    // The soft-delete filters leave out deleted editions and deleted rows. The order is the editions section's
+    // (F-35 BR14): normalized, so an accented name sorts with its letter.
+    public async Task<IReadOnlyList<NoticeSubjectCopySourceResponse>> ListCopySourcesAsync(
+        Guid examId,
+        Guid targetEditionId,
+        CancellationToken cancellationToken) =>
+        await (
+                from edition in context.ExamEditions.AsNoTracking()
+                where edition.ExamId == examId && edition.Id != targetEditionId
+                join organizer in context.Organizers on edition.OrganizerId equals organizer.Id
+                let count = context.NoticeSubjects.Count(subject => subject.ExamEditionId == edition.Id)
+                where count > 0
+                orderby edition.NoticeYear descending, edition.NormalizedPosition, organizer.NormalizedName
+                select new NoticeSubjectCopySourceResponse(edition.Id, edition.NoticeYear, edition.Position, organizer.Name, count))
+            .ToListAsync(cancellationToken);
+
     /// <summary>
     /// The notice subjects of several editions at once, each edition's list in display order (F-76): the same fixed
     /// number of queries whatever the number of editions or rows. An edition with none has no key.

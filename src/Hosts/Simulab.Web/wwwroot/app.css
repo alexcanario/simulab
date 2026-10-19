@@ -844,6 +844,13 @@ code, kbd, pre, samp {
     margin-top: var(--app-space-3);
 }
 
+.app-notice-subjects-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+
 .app-notice-subjects-total {
     margin: 0;
     font-size: var(--app-font-sm);
