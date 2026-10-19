@@ -137,8 +137,18 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 6/4: the test phase cannot run a migration test against the skeleton (the migration does not exist yet), so a helper that seeds rows may use a column the migration under test drops; at F-102 the locked test failed with `42703: column "base_text_html" of relation "questions" does not exist` and cost an unlock and a new lock (evidence: the item's `blocked` event, 2026-10-15). Ask, for an item with a migration, that the helper be written against the final schema and run once before the lock | F-102 | - |
 | ⏳ | agile | `[generic]` score 5/1: the definition of done says the app manual is updated "in three languages", but the list is the `Manual locales:` line of `CLAUDE.md`; a project that freezes a locale (F-124 froze pt-PT and en) has to override the wording in `project.md`. Read it as "each locale of `Manual locales:`". Evidence: `definition-of-done.md:18` against `references/conventions.md` "App manual languages" | F-124 | - |
 | ⏳ | agile | `[generic]` score 6/7: a refinement that approves new colour values (a palette, an identity) runs a contrast check of every text and non-text pair of the proposal (4.5:1 / 3:1, both themes) before the approval card, so an impossible criterion is found at refinement and not at the build. At F-125 the approved dark keycap edges read 2.39 to 2.84:1 on the surface against the 3:1 of BR3; the build stopped and a change note followed (evidence: the item's events `blocked — impossible criterion…` and `change — v2`). The project rule `project.md:91` re-measures ratios from committed tokens and does not cover a proposed palette | F-125 | - |
+| ⏳ | agile | `[generic]` score 4/3: the validation script template (and its start step) says to stop the app host before typing `/agile:ship`; at F-86 the ship's first `gate.js ship` was `agile gate RED: build blocked by a running process (Simulab.Api ..., Simulab.AppHost ..., Simulab.Web ...)` because the owner's validation app host was still up, and the item got one `test-fail` event for it | F-86 | - |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
+
+## 2026-10-19 - F-86 Copy notice subjects from another edition
+Events: override 0, question 0, assumed 0, rework 0, test-fail 1, blocked 0, change 0, correction 0, stop 0, companion 0. Gate time: 6 passes, 19 min 17 s, 1 red. Item decisions: 5, stay in the item.
+
+| # | Lesson | Score (plugin/project) | Where it went |
+|---|---|---|---|
+| 1 | A callback a child dialog calls outside an event of the parent needs `InvokeAsync(StateHasChanged)`; the bUnit test `Copy_TargetNotEmpty_...` failed until it was added | 3/5 | project rule, `.claude/rules/agile/project.md` |
+| 2 | Stop the app host before `/agile:ship`: the first `gate.js ship` was RED for a held build output | 4/3 | plugin note `[generic]` in the table above |
+| 3 | Each integration project (Catalog 4 m 48 s, Identity 4 m 44 s, QuestionBank 4 m 5 s) is over the 2 min budget and the full suite (294 s) is at the 5 min edge | 1/6 | idea captured: reduce the integration suite time |
 
 ## 2026-09-17 — Bootstrap session (no item)
 Raised by the owner after the bootstrap, approved the same day.
