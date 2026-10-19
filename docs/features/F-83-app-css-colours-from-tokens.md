@@ -1,10 +1,11 @@
 ---
 feature: F-83
 epic: Foundation and identity
-status: idea
+status: cancelled
 board: 126
 version: 1
 ---
+Duplicate of F-125 (2026-10-19): F-125 (done, merge e1d0de7) delivered it; today's `app.css` holds only the QR code's white quiet zone as a literal colour.
 # The stylesheet paints colours from the identity tokens
 
 Technical terms: [glossary](../glossary.md)
