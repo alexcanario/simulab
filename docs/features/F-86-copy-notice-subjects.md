@@ -1,7 +1,7 @@
 ---
 feature: F-86
 epic: Subject taxonomy
-status: validating
+status: done
 board: 129
 version: 1
 ---
@@ -236,4 +236,13 @@ Esperado: a URL do painel do Aspire é impressa e a Web fica em https://localhos
 - 2026-10-19 test-fail — build blocked by a running process (Simulab.slnx), 1 red
 
 ## Delivery
-<!-- Filled by /agile:ship. -->
+- Branch: `feature/F-86`, merged into `main` by `dfc5fd0` (`--no-ff`), board #129. App version 1.6.0.
+- Full check (`gate.js ship`): build 25 s, 0 new warnings; suite 4,3 min wall (294 s): Catalog 608 in 4 m 48 s, Identity 508 in 4 m 44 s, QuestionBank 456 in 4 m 5 s, Web 2166 in 29 s, Architecture 296, AppHost 80, Api 58, Jobs 25, Persistence 25, Email 19, Ai 10, ApiResults 13, SharedKernel 12; 0 failed. The first run was refused (RED) only because the owner's validation app host still held the build output; it passed after that host was stopped. Scan: `agile scan GREEN` (open medium findings in `tools/Simulab.DocGen` and MessagePack, not from this item). Test lock: unchanged (`bd437be`, 1 file).
+- Budget: the full suite is at the edge of the 5 min budget and each integration project (Catalog, Identity, QuestionBank) is above the 2 min budget; a retro finding, not caused by this item alone.
+- Criterion → test: 13 rows filled (AC1 to AC10 in `CopyNoticeSubjectsEndpointTests`, AC11 to AC13 in `CopyNoticeSubjectsTests`).
+- Manual: `exam-editions.md` (new "Copiar as disciplinas de outra edição" and three messages) in pt-BR only; pt-PT and en are frozen (F-124).
+- Technical docs: `docs/architecture/Catalog/routes.md` and `docs/api/Simulab.Api.json` regenerated (two routes). Glossary: nothing missing. Technical pages: none.
+- Validated on screen by the owner on 2026-10-19 ("validado"). Validation evidence: 0 of 16 boxes were ticked in the widget, so each path is recorded as not tested; the owner's own statement is the evidence.
+- Worktree: `D:/wt/simulab/f-86-copy-notice-subjects` could not be removed at ship time (`worktree.js`: HELD, a `.vs` folder, Visual Studio may hold it); branch `feature/F-86` is merged and stays until the worktree is removed.
+Gate time: 6 passes, 19 min 17 s — turn 2 (3 min 12 s), ship 2 (9 min 5 s), scan 2 (7 min); 1 red
+Usage: 3379.3k weighted (estimate) — build 85% · ship 15% — context per turn 281k → 429k — 1 session, 145 turns
