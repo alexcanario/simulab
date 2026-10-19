@@ -1,7 +1,7 @@
 ---
 feature: F-78
 epic: Subject taxonomy
-status: validating
+status: done
 board: 122
 version: 1
 ---
@@ -255,3 +255,16 @@ Fora da tela, coberto por testes: os saltos (edição apagada, edição que já 
 - 2026-10-19 question — asked 3, from context 1
 - 2026-10-19 test-fail — tests failed (Simulab.slnx): Simulab.Web.Tests.QuestionBank.QuestionsPageTests.Search_NothingMatches_NamesTheTerm, 1 red
 - 2026-10-19 test-fail — tests failed (Simulab.slnx): Simulab.Web.Tests.QuestionBank.QuestionsFilterPageTests.ClearAll_RemovesEveryFilterAndTheSe, 1 red
+
+## Delivery
+
+Gate time: 8 passes, 33 min — turn 1 (24 s), ship 5 (28 min 39 s), scan 2 (3 min 57 s); 2 red
+Usage: 2617.1k weighted (estimate) — build 87% · ship 13% — context per turn 258k → 147k — 2 sessions, 120 turns
+
+- Branch: `feature/F-78` (removed locally, never pushed), merged into `main` with `--no-ff` as `586fe36`; app version 1.4.0 → 1.5.0; board #122.
+- Delivered: migration `20261019092342_SeedGuardNoticeSubjects` (`catalog` schema) seeding the notice subjects and their mapping for the Curitiba, Manaus, Salvador and Maceió editions; `SeedGuardNoticeSubjectsTests` (AC1 to AC8 on real PostgreSQL, locked at `5aaf275`).
+- Tests (last full run, 2026-10-19): 4236 passed, 0 failed, 13 assemblies (Catalog 598, Identity 508, QuestionBank 456, Web 2139, ArchitectureTests 293); build 42 s, test run 360 s (over the 5 min budget by 62 s of test time on a shared machine; the best run of the ship was 251 s). Two of four full runs were red on a bUnit debounce test of the Web project, each green alone and green on the next run (`docs/infra.md`).
+- Scan: `agile scan GREEN` (3 open medium findings, none in this diff). Test lock: unchanged.
+- Manual: `docs/manual/pt-BR/exam-editions.md` ("Edições que já vêm preenchidas"); `pt-PT` and `en` are frozen (F-124).
+- Technical pages: none (`## Docs`: a data migration only).
+- Validation evidence: the owner said "validado" in the conversation; the per-step boxes were not ticked on this machine, so all 15 are recorded as not tested (`Evidence: 0 of 15 tested`).
