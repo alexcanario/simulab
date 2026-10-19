@@ -16,6 +16,7 @@ Seed the `NoticeSubject` rows and their mapping for the municipal guard editions
 - Depends on: F-74 (the `NoticeSubject` model, done), F-51 (the canonical subjects and topics, done), F-75 (the mapping model, done). All three are on `main` (checked 2026-10-19).
 - Waits on (to start): nothing.
 - Needed to validate: the local app host started from this item's worktree with its own database, showing the four seeded editions on the F-74/F-75 edition page and on the F-76 student syllabus — Claude starts it; the owner signs in.
+- Model: sonnet (no signal: data migration only, no door, no contract, no schema change, size S)
 - Suggested path: `/agile:build F-78`.
 - Parallel with: F-89 (different tables; it touches the edition form, this item touches no screen). F-86 copies notice subjects between editions: no file in common, but its validation is easier after this seed.
 
@@ -61,7 +62,7 @@ No new route, screen or endpoint. The seeded rows appear in F-74's section "Noti
 - On screen only (validation script): a seeded edition shows its rows and chips on the edition page, and the student syllabus of a published guard exam lists them (UC1, UC2).
 
 ## Approved list
-Draft for the owner's check (2026-10-19). Per edition: the source read, then the rows in order as `<n>. [group] Label — questions → mapping`. Mapping: a subject name alone is the whole subject; `Subject › Topic` is one topic. Subject numbers in brackets follow F-51's `## Approved list`.
+Checked by the owner on 2026-10-19. Per edition: the source read, then the rows in order as `<n>. [group] Label — questions → mapping`. Mapping: a subject name alone is the whole subject; `Subject › Topic` is one topic. Subject numbers in brackets follow F-51's `## Approved list`.
 
 ### Edition 1 — Curitiba 2025 (40 questions)
 Source: AOCP, Edital nº 2/2025 – Abertura, consolidated with Retificação nº 1/2025, item 10.1 and Anexo II — https://arquivos-site.institutoaocp.org.br/publicacoes/61d6e126-7d7a-464f-bddf-d31525423205.pdf. No block heading: no group.
@@ -127,6 +128,10 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - 2026-10-19 — The skip and lookup logic of BR3 and BR4 is SQL inside the migration (insert where the edition qualifies; targets resolved by id, then by normalized name), not `InsertData` — the F-51 precedent (Claude, technical).
 - 2026-10-19 — The test keeps its own copy of `## Approved list`, so a slip in the migration's literals fails a test (F-51 precedent) (Claude, technical).
 - 2026-10-19 — No system-design or architect pass: no new project, contract, message or schema change (Claude, technical).
+- 2026-10-19 — `## Approved list` (rows, counts and mapping) checked and accepted as written — the sums match each notice's total (owner; asked).
+- 2026-10-19 — Manaus counts taken from the text copy of the notice, its source recorded — the points column confirms them (owner; asked).
+- 2026-10-19 — Salvador's group keeps the notice's block name in normal case, "Módulo I - Conhecimentos Básicos" / "Módulo II - Conhecimentos Específicos" — closest to the notice, as decided on 2026-10-06 (owner; asked).
+- 2026-10-19 — A canonical target deleted by an admin is skipped and the row is seeded with the entries left (BR4) — an admin's delete is final (owner; confirmed: F-51 BR6).
 
 ## Out of scope
 - Editions of Recife and Goiânia.
@@ -138,4 +143,8 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - none — a data migration only: no new flow, route, contract or screen.
 
 ## Open questions
-- The transcribed notice subjects and the proposed mapping (`## Approved list`) — to be checked by the owner.
+- (none)
+
+## Events
+
+- 2026-10-19 question — asked 3, from context 1
