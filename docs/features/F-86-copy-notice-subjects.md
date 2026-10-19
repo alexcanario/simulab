@@ -1,7 +1,7 @@
 ---
 feature: F-86
 epic: Subject taxonomy
-status: approved
+status: building
 board: 129
 version: 1
 ---
@@ -101,16 +101,16 @@ Screens follow the rules `ui` and `ui-project`. No mockup: one button and one pi
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAnEmptyEdition_CopiesTheLiveRowsInOrderAndLeavesTheSourceAlone` |
+| AC2 | `CopyNoticeSubjectsEndpointTests.Copy_CarriesTheMappingOfEachRow` |
+| AC3 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAnEditionWithALiveRow_IsRefusedAndWritesNothing` |
+| AC4 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAnEditionWithOnlyDeletedRows_Succeeds` |
+| AC5 | `CopyNoticeSubjectsEndpointTests.Copy_FromASourceThatCannotBeUsed_IsNotFound` |
+| AC6 | `CopyNoticeSubjectsEndpointTests.Copy_FromASourceWithNoLiveRow_IsRefused` |
+| AC7 | `CopyNoticeSubjectsEndpointTests.Copy_WhenTheSaveFails_LeavesNeitherRowsNorMappingEntries` |
+| AC8 | `CopyNoticeSubjectsEndpointTests.CopySources_ListsOnlyUsableEditionsNewestYearFirst` |
+| AC9 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAPublishedEdition_Succeeds` |
+| AC10 | `CopyNoticeSubjectsEndpointTests.BothRoutes_WithoutTheManagePermission_AreForbidden` |
 | AC11 | pending |
 | AC12 | pending |
 | AC13 | pending |
@@ -128,6 +128,8 @@ Screens follow the rules `ui` and `ui-project`. No mockup: one button and one pi
 - 2026-10-11 — The list of copy sources is not paged — at most a few editions per exam; the F-74 list of notice subjects is not paged either (Claude).
 - 2026-10-11 — Approved by the owner ("aprovo f-86"); `## Start` and `## What exists` re-checked against `main` after the F-74 and F-75 merges (owner, Claude).
 - 2026-10-06 — Routes use the real prefix `/api/v1/catalog/exams/...`; F-74's file says `/api/v1/exams/...` — a premise to correct in F-74 with `/agile:change F-74` (Claude, reported to the owner).
+- 2026-10-19 — Build started in the item worktree; `main` was already merged into the branch (F-74 and F-75 present). The design passes (`system-design`, `architect`) are skipped: no new project, table, column or message between modules — two endpoints and their DTOs in the existing Catalog slice (Claude).
+- 2026-10-19 — plan — 1 sources query + `GET .../copy-sources` (AC8, AC10) → locked endpoint tests; 2 copy handler happy path with order, mapping, deleted-target and Published target (AC1, AC2, AC4, AC9) → AC tests green; 3 refusals 404/400/409 (AC3, AC5, AC6) → AC tests green; 4 one-save atomicity (AC7) → failure test green; 5 Web client + `CopyNoticeSubjectsDialog` + section button (AC11, AC12) → bUnit green; 6 UI texts in three locales (AC13) → missing-key test green; gate, scan, validation script.
 
 ## Out of scope
 - Copying the edition's other fields (year, position, board, notice reference).

@@ -50,6 +50,11 @@ public sealed class NoticeSubjectStore(CatalogModuleDbContext context) : INotice
             .Where(mapping => mapping.NoticeSubjectId == noticeSubjectId)
             .ToListAsync(cancellationToken);
 
+    public Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsOfEditionAsync(
+        Guid examEditionId,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     public async Task<MappingTargets> FindLiveTargetsAsync(
         IReadOnlyCollection<Guid> subjectIds,
         IReadOnlyCollection<Guid> topicIds,

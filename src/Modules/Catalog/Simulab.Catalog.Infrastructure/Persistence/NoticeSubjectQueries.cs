@@ -30,6 +30,12 @@ public sealed class NoticeSubjectQueries(CatalogModuleDbContext context) : INoti
         return rows.Count == 0 ? null : rows[0];
     }
 
+    public Task<IReadOnlyList<NoticeSubjectCopySourceResponse>> ListCopySourcesAsync(
+        Guid examId,
+        Guid targetEditionId,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     /// <summary>
     /// The notice subjects of several editions at once, each edition's list in display order (F-76): the same fixed
     /// number of queries whatever the number of editions or rows. An edition with none has no key.
