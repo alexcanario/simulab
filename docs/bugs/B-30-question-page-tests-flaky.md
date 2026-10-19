@@ -112,3 +112,5 @@ Needed to validate: nothing. No screen is involved. Close the IDE and any app ho
 
 ## Delivery
 - Branch: bug/B-30
+- Build state (2026-10-19): helper, 33 conversions and the guard done; `gate.js stop` ends `agile gate GREEN`; `Simulab.Web.Tests` 2142 of 2142; `scan.js run` ends `agile scan GREEN`; `git diff main --stat -- src` empty.
+- AC5 stress loop, real output (24 processes at once, 3 rounds, copies of the build output inside the worktree): 69 of 72 green (`Passed: 553`), 3 red, all in `BaseTextsPageTests.Search_SendsTheWordToTheServerAsSearch_AndNarrowsTheRows`: two in round 1 (cold start of 24 hosts, 9 s and 10 s, `Check count: 0`: the machine starved the check itself) and one in round 3 (6 s, `Check count: 32`, the fake API held only the first list call: no search request came out despite 32 clock advances). AC5 as written (72 of 72) is not met; baseline 47 of 48.
