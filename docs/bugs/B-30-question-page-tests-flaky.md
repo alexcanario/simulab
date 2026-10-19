@@ -3,6 +3,7 @@ bug: B-30
 feature: -
 status: building
 board: 196
+version: 2
 severity: medium
 ---
 # QuestionBank page tests time out under full-suite load
@@ -49,7 +50,7 @@ A bUnit test that types into a debounced field (the table search box, a lookup, 
 - AC2 Given the helper, when its assertion does not pass on a try, then the next try moves the fake clock by the debounce interval again before it asserts; when the assertion passes, no further advance happens.
 - AC3 Given the test sources under `tests/`, when the architecture test reads them, then no statement of a `*Tests.cs` file is `AdvanceDebounce(...)` alone: the 34 calls in the 14 files of `## Cause` all use the helper. The architecture test is seen failing on today's 34 calls before they are converted, and its finder has the same two self-tests as the B-23 guard (it names file and line; it leaves the helper alone).
 - AC4 Given the converted tests, when `Simulab.Web.Tests` runs, then every test that used `AdvanceDebounce()` still passes with the same assertions (none is weakened or removed).
-- AC5 Given 24 processes of `dotnet test --filter "FullyQualifiedName~QuestionBank"` at once on copies of the build output, 3 rounds, when they finish, then all 72 runs are green (baseline: 1 red in 48 runs of the same load on 2026-10-19). The count is weak evidence by itself, since the failure is about 1 in 48: AC1 is the proof, this loop only shows nothing else broke.
+- AC5 Given 24 processes of `dotnet test --filter "FullyQualifiedName~QuestionBank"` at once on copies of the build output, 3 rounds, when they finish, then the result is recorded as measured: 69 of 72 green on 2026-10-19 (baseline: 47 of 48 of the same load). The 3 red are all `BaseTextsPageTests.Search_SendsTheWordToTheServerAsSearch_AndNarrowsTheRows`: two in round 1 (cold start of 24 hosts, `Check count: 0`) and one in round 3 (no search request despite 32 clock advances), captured as a new idea. The loop is weak evidence only; AC1, AC2 and AC3 are the proof.
 - AC6 No file under `src/` changes, no package is added, and `KitTestContext.DefaultWaitTimeout` stays 5 s (`KitTestContext.cs:43`). No UI text: the localization criterion does not apply.
 
 ## Fix
@@ -82,6 +83,14 @@ Tests locked: 7842397f822807387120894e678863e2dd7ca71d (2 files); unlocks: 0
 - 2026-10-19 — The helper loops itself and does not wrap one `WaitForAssertion`: bUnit 2.10.3 re-checks only when the component renders (measured: `Check count: 1` over 5 s with no render), so a single wait would retry only if something rendered; each try is `AdvanceDebounce` plus a 250 ms `WaitForAssertion` (a first stress run with 50 ms ended one test with `Check count: 0`: the window closed before the check started), until the 5 s ceiling — verified by the locked AC2 test, red on the first version (`Expected tries to be greater than or equal to 3, but found 1`)
 - 2026-10-19 — plan — 1 skeleton `WaitForAfterDebounce` + `DebounceWaitTests` (AC1, AC2) + guard and self-tests (AC3) written red, committed and locked → AC1, AC2, AC3 red; 2 implement the helper → AC1, AC2 green; 3 convert the 33 calls of the 15 files, each assertion moves into the helper → AC3, AC4 green (`Simulab.Web.Tests` whole); 4 stress loop, 24 processes x 3 rounds on copies of the build output → AC5; 5 gate, scan, `git diff main --stat -- src` empty → AC6, validation script
 
+## Change notes
+### v2 — 2026-10-19
+- What: AC5 no longer asks for 72 of 72 green runs; it records the measured result, 69 of 72, and says the loop is weak evidence.
+- Why: the stress loop after the fix gave 69 of 72 (baseline 47 of 48). All 3 red are one test, `BaseTextsPageTests.Search_SendsTheWordToTheServerAsSearch_AndNarrowsTheRows`: two cold-start starvation in round 1 (`Check count: 0`), one in round 3 with no search request despite 32 clock advances. AC1, AC2 and AC3 stay the proof.
+- Affected: AC5 and step 5 of the validation script (both languages). Not affected: AC1-AC4, AC6, the code and the locked tests.
+- Follow-up: the 3 failures are captured as a new idea.
+- Re-approved by the owner: 2026-10-19 ("aprovo").
+
 ## Out of scope
 - The slow projects of the full suite (QuestionBank, Identity and Catalog at 5 m or more on 2026-10-19, over the 5 m budget): already watched in `docs/infra.md` (Measured times); not caused by this window.
 - The MudBlazor debounce itself and any change under `src/`.
@@ -97,18 +106,19 @@ Needed to validate: nothing. No screen is involved. Close the IDE and any app ho
 2. [ ] Run the architecture guard: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~UiTestTimingTests"` → `Passed!`, none failed.
 3. [ ] Run the QuestionBank tests: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~QuestionBank"` → `Passed!  - Failed: 0, Passed: 553` (plus the new tests of the area, if any).
 4. [ ] Read the diff: `git diff main --stat -- src` → empty (nothing under `src/` changed).
-5. [ ] Read the stress loop's real output under `## Delivery` (72 runs); the loop takes about 6 minutes and is not meant to be repeated by hand.
+5. [ ] Read the stress loop's real output under `## Delivery` (72 runs, 69 green, the 3 red named); the loop takes about 6 minutes and is not meant to be repeated by hand.
 
 ### pt-BR
 1. [ ] Rode os testes novos: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTests"` → `Passed!` com os testes dos AC1 e AC2, nenhum falhou.
 2. [ ] Rode a trava de arquitetura: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~UiTestTimingTests"` → `Passed!`, nenhum falhou.
 3. [ ] Rode os testes do banco de questões: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~QuestionBank"` → `Passed!  - Failed: 0, Passed: 553` (mais os testes novos da área, se houver).
 4. [ ] Leia o diff: `git diff main --stat -- src` → vazio (nada em `src/` mudou).
-5. [ ] Leia a saída real do laço de estresse em `## Delivery` (72 execuções); o laço leva cerca de 6 minutos e não é para repetir à mão.
+5. [ ] Leia a saída real do laço de estresse em `## Delivery` (72 execuções, 69 verdes, as 3 vermelhas nomeadas); o laço leva cerca de 6 minutos e não é para repetir à mão.
 
 ## Events
 
 - 2026-10-19 question — asked 1, from context 1
+- 2026-10-19 change — v2: AC5 now records the measured 69 of 72 stress runs; the loop is weak evidence
 
 ## Delivery
 - Branch: bug/B-30
