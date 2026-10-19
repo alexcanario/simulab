@@ -48,9 +48,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
 
         page.Find(".app-table-search input").Input("avaliacao");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Query!.Contains("search=avaliacao", StringComparison.Ordinal)));
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call => call.Query!.Contains("search=avaliacao", StringComparison.Ordinal)));
     }
 
     // AC16: a filter reloads the list and travels as its own query parameter. The pick goes through the
@@ -146,9 +144,7 @@ public sealed class ExamsPageTests : CatalogPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(2));
 
         page.Find("#exams-filter-authority").Input("gua");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/catalog/issuing-authorities" && call.Query!.Contains("search=gua", StringComparison.Ordinal)));
         Api.Received.Should().NotContain(call => call.Path == "/api/v1/catalog/organizers");
     }

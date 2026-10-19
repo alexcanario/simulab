@@ -128,9 +128,7 @@ public class AppDataTableTests : KitTestContext
         table.Find(".app-table-search input").Input("Item 3");
         _queries.Should().HaveCount(1, "the term is still waiting out the debounce");
 
-        AdvanceDebounce();
-
-        table.WaitForAssertion(() => _queries.Should().HaveCount(2));
+        WaitForAfterDebounce(table, () => _queries.Should().HaveCount(2));
         _queries.Last().Should().Be(new AppTableQuery(0, 25, "Item 3", null, false));
     }
 

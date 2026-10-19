@@ -43,9 +43,7 @@ public sealed class OrganizersPageTests : CatalogPageTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(3));
 
         page.Find("input.app-table-search input, .app-table-search input").Input("fgv");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Query!.Contains("search=fgv", StringComparison.Ordinal)));
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call => call.Query!.Contains("search=fgv", StringComparison.Ordinal)));
     }
 
     [Fact]
