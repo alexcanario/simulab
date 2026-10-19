@@ -24,9 +24,10 @@ Already fixed by earlier bugs, so a later refinement does not read them as open:
 ## Start
 - Depends on: nothing. Related, both done: B-19, B-22.
 - Waits on (to start): nothing.
-- Needed to validate: nothing; the full suite, run several times, is the check.
-- Suggested path: `/agile:refine` → `/agile:build`. Proposed fix, to confirm at refinement: raise the `WaitForAssertion` default timeout in one place (the shared test base) with a regression check; no new rule line, because `.claude/rules/agile/project.md:75` already asks for `WaitForAssertion` and the tests follow it.
-- Parallel with: none.
+- Needed to validate: nothing; no screen. The proof is the deterministic regression test plus the stress loop of `## Expected` (AC5).
+- Model: sonnet (no signal: test-only change, one test project and the architecture tests, cause found)
+- Suggested path: `/agile:build B-30` (the cause is found; the proposal of the first version of this file, a longer wait, is dropped: see `## Cause`).
+- Parallel with: F-86 and F-89 (their worktrees do not touch the 14 test files; once this item merges, a test of theirs that still calls `AdvanceDebounce()` alone fails the new architecture test, so bring them up to date first).
 
 ## Cause
 The premise of the report is false: the bUnit wait is already 5 s (`tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs:43`, B-19) and the debounce already runs on a fake clock (`KitTestContext.cs:23`, F-48; `MudDebouncedInput` waits with `Task.Delay(interval, timeProvider)`, MudBlazor 9.9.0). A longer timeout cannot help a wait on a clock that only a test moves.
@@ -40,3 +41,66 @@ Mechanism (inferred, not yet proved by a diagnostic; the build proves it first):
 Duplicates: none that is a business rule (this is test timing). The same shape, `Input(...)` or a field change, then `AdvanceDebounce()` once, then a wait, is in 34 calls of `AdvanceDebounce` in 14 files (counts in parentheses): `Catalog/CatalogSearchPageTests.cs` (3), `ExamEditionFormTests.cs` (1), `ExamFormTests.cs` (1), `ExamsPageTests.cs` (2), `IssuingAuthoritiesPageTests.cs` (1), `OrganizersPageTests.cs` (1), `SubjectsPageTests.cs` (1), `QuestionBank/BaseTextsPageTests.cs` (2), `QuestionsFilterPageTests.cs` (3), `QuestionsPageTests.cs` (2), `Ui/AppDataTableTests.cs` (1), `AppLookupFieldTests.cs` (9), `AppSelectFieldTests.cs` (2), `AppSuggestFieldTests.cs` (3).
 
 Callers: `KitTestContext.AdvanceDebounce` (`KitTestContext.cs:50`): the 34 calls above, each `same defect` (one advance right after the keystroke, never repeated); the rest of the suite does not call it.
+
+## Expected
+A bUnit test that types into a debounced field (the table search box, a lookup, a suggest or select field) gets its debounced result whether or not the field had registered its delay when the test moved the fake clock. Nothing under `src/` changes.
+
+- AC1 Given a table with the search box and the fake clock moved before the field registered its delay (the window of `## Cause`, forced by calling `AdvanceDebounce()` before the keystroke), when the test types and waits with the new helper `WaitForAfterDebounce`, then the search request is made and the wait passes. The test is seen failing first with the old shape (one `AdvanceDebounce()`, then `WaitForAssertion`): it times out after 5 s.
+- AC2 Given the helper, when its assertion does not pass on a try, then the next try moves the fake clock by the debounce interval again before it asserts; when the assertion passes, no further advance happens.
+- AC3 Given the test sources under `tests/`, when the architecture test reads them, then no statement of a `*Tests.cs` file is `AdvanceDebounce(...)` alone: the 34 calls in the 14 files of `## Cause` all use the helper. The architecture test is seen failing on today's 34 calls before they are converted, and its finder has the same two self-tests as the B-23 guard (it names file and line; it leaves the helper alone).
+- AC4 Given the converted tests, when `Simulab.Web.Tests` runs, then every test that used `AdvanceDebounce()` still passes with the same assertions (none is weakened or removed).
+- AC5 Given 24 processes of `dotnet test --filter "FullyQualifiedName~QuestionBank"` at once on copies of the build output, 3 rounds, when they finish, then all 72 runs are green (baseline: 1 red in 48 runs of the same load on 2026-10-19). The count is weak evidence by itself, since the failure is about 1 in 48: AC1 is the proof, this loop only shows nothing else broke.
+- AC6 No file under `src/` changes, no package is added, and `KitTestContext.DefaultWaitTimeout` stays 5 s (`KitTestContext.cs:43`). No UI text: the localization criterion does not apply.
+
+## Fix
+- `KitTestContext`: add `WaitForAfterDebounce(IRenderedComponent, Action assertion, int milliseconds = AppLookupField.DebounceMilliseconds)`, which is `WaitForAssertion(() => { AdvanceDebounce(milliseconds); assertion(); })`: the clock is moved again on every try, so a delay registered late is still reached. `AdvanceDebounce` stays (the helper uses it).
+- Convert the 34 calls of the 14 files of `## Cause`. A call whose next statement is not a `WaitForAssertion` is read case by case in the build (the assertion moves into the helper, or the call stays inside a lambda and the reason is a line in the test).
+- `UiTestTimingTests` (`tests/Simulab.ArchitectureTests`): a second guard next to the B-23 one, with its finder and two self-tests.
+- Deferred, recorded: the rule line "after typing into a debounced field wait with `WaitForAfterDebounce`" for `.claude/rules/agile/project.md` (UI tests) goes to the retro at the ship, with the owner's yes; the architecture test already holds the line.
+
+## Docs
+- none — test-only change; no technical page describes the debounce helper.
+
+## Regression test
+- `DebounceWaitTests` (new, `tests/Hosts/Simulab.Web.Tests/Ui`): the window forced as AC1 says, the helper's retry as AC2 — Simulab.Web.Tests
+- `UiTestTimingTests` (existing class, new guard and its self-tests) — Simulab.ArchitectureTests
+
+## Decisions
+- 2026-10-19 — The proposed fix of the report (a longer `WaitForAssertion` timeout) is dropped — it is already 5 s since B-19 and the debounce already runs on a fake clock since F-48; the reproduced failure waited the whole 5 s — verified in `KitTestContext.cs:23,43` and by the stress run in `## Cause` — asked
+- 2026-10-19 — The 5 s ceiling stays — decided in F-48 (2026-10-03): a ceiling, a green run never waits on it — confirmed: docs/features/F-48-debounce-on-timeprovider.md
+- 2026-10-19 — Scope: all 34 calls of `AdvanceDebounce` through one helper, plus an architecture guard — the same window is open in 11 more files; a guard stops a new test from bringing it back, as B-23 did for the URL read — asked
+- 2026-10-19 — The fix is in the tests; the kit and `src/` are not touched — MudBlazor's debounce is correct, the window is in how a test moves the clock — Cause
+- 2026-10-19 — The helper moves the clock on every try, not once: a fake clock cannot say whether a delay is registered (`FakeTimeProvider` has no pending-timer query), so retrying is the only way a test can be sure without sleeping — decided by Claude
+- 2026-10-19 — The rule line for `project.md` goes through the retro, not this item — a project rule is the owner's to accept — decided by Claude
+- 2026-10-19 — Main-session model: sonnet (no signal) — `references/model-choice.md` "Main session"
+
+## Out of scope
+- The slow projects of the full suite (QuestionBank, Identity and Catalog at 5 m or more on 2026-10-19, over the 5 m budget): already watched in `docs/infra.md` (Measured times); not caused by this window.
+- The MudBlazor debounce itself and any change under `src/`.
+
+## Open questions
+- (none)
+
+## Validation script
+Needed to validate: nothing. No screen is involved. Close the IDE and any app host first (a running one locks the build output). Commands are the same in Git Bash and PowerShell 7, run from the worktree `D:\wt\simulab\b-30-question-page-tests`.
+
+### English
+1. [ ] Run the new tests: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTests"` → `Passed!` with the tests of AC1 and AC2, none failed.
+2. [ ] Run the architecture guard: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~UiTestTimingTests"` → `Passed!`, none failed.
+3. [ ] Run the QuestionBank tests: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~QuestionBank"` → `Passed!  - Failed: 0, Passed: 553` (plus the new tests of the area, if any).
+4. [ ] Read the diff: `git diff main --stat -- src` → empty (nothing under `src/` changed).
+5. [ ] Read the stress loop's real output under `## Delivery` (72 runs); the loop takes about 6 minutes and is not meant to be repeated by hand.
+
+### pt-BR
+1. [ ] Rode os testes novos: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTests"` → `Passed!` com os testes dos AC1 e AC2, nenhum falhou.
+2. [ ] Rode a trava de arquitetura: `dotnet test tests/Simulab.ArchitectureTests --filter "FullyQualifiedName~UiTestTimingTests"` → `Passed!`, nenhum falhou.
+3. [ ] Rode os testes do banco de questões: `dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~QuestionBank"` → `Passed!  - Failed: 0, Passed: 553` (mais os testes novos da área, se houver).
+4. [ ] Leia o diff: `git diff main --stat -- src` → vazio (nada em `src/` mudou).
+5. [ ] Leia a saída real do laço de estresse em `## Delivery` (72 execuções); o laço leva cerca de 6 minutos e não é para repetir à mão.
+
+## Events
+
+- 2026-10-19 question — asked 1, from context 1
+
+## Delivery
+- Branch: bug/B-30
