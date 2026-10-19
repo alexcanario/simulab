@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35, F-74, F-75, F-96, F-99]
-updated: 2026-10-15
+features: [F-35, F-74, F-75, F-78, F-96, F-99]
+updated: 2026-10-19
 ---
 # Edições de um exame
 
@@ -65,6 +65,9 @@ Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúscula
 
 ## Disciplinas do edital
 No cartão **Disciplinas do edital**, abaixo do formulário da edição, você registra as disciplinas exatamente como o edital as apresenta: o grupo (por exemplo "Conhecimentos Básicos"), o nome da disciplina e o número de questões. O cartão só aparece depois que a edição é salva; numa edição nova ele pede para salvar primeiro. Cada disciplina é salva pelo seu próprio diálogo ou ação: o botão **Salvar** da edição nunca as salva. Funciona em edições em rascunho e publicadas.
+
+### Edições que já vêm preenchidas
+As quatro edições de guarda municipal (Curitiba 2025, Manaus 2026, Salvador 2026 e Maceió 2026) já trazem as disciplinas do próprio edital, com grupo, número de questões e o campo **Abrange** preenchido, em todos os ambientes. Você as altera como qualquer outra disciplina do edital, e a alteração não é desfeita por atualizações do sistema. Uma edição que já tinha disciplinas digitadas por você, ou que foi excluída, não recebe as do edital. Algumas disciplinas, como as de conhecimentos que a taxonomia ainda não tem, ficam sem o campo **Abrange**; o preenchimento delas depende de novos itens na [lista comum](subjects.md).
 
 ### Adicionar uma disciplina
 1. No cartão, escolha **Adicionar disciplina do edital**.

@@ -16,6 +16,9 @@
 | app bar | barra superior: a faixa no alto de todas as páginas, com o menu, a marca e os botões de tema, idioma e usuário |
 | theme switch | botão de tema: a lua (ou o sol, no tema escuro) no canto superior direito da barra superior |
 | UI gallery | galeria do kit: a página de desenvolvimento que mostra cada peça do kit de interface |
+| chip | etiqueta: uma pílula arredondada que mostra um item (aqui, uma entrada do mapeamento de uma disciplina do edital) |
+| notice subject | disciplina do edital: uma matéria como o edital a nomeia e agrupa, com o número de questões |
+| syllabus | conteúdo programático: a lista de disciplinas do edital que o aluno abre sob cada edição no catálogo |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
@@ -30,3 +33,5 @@
 | Review queue | sidebar > Content > Review queue | the table; the question text is a link, and Review is in the row menu | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/ReviewQueue.razor | 203369c |
 | Review screen | Review queue > the question text or Review in the row | Reject and Approve at the bottom right; the summary (aside) on the right | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/ReviewQuestion.razor | 203369c |
 | Question form, review | sidebar > Content > Questions > Edit on a row > Publication card (Send for review, Withdraw from review) and the Review history card below it | the buttons in the Publication card; the Review history table under it | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | 203369c |
+| Edition notice subjects | sidebar > Content > Exams > the exam > "Editions" section > the edition (/admin/exams/{exam}/editions/{edition}) | the section "Notice subjects": rows in the notice's order under group headings, chips under each label, Edit and the move controls in each row | src/Hosts/Simulab.Web/Components/Pages/Catalog/NoticeSubjectsSection.razor | no |
+| Student syllabus | sidebar > Study > Catalog > the exam (/catalog/exams/{id}) | under each edition the button "Show syllabus (n subjects)" opens its notice subjects with their mapping | src/Hosts/Simulab.Web/Components/Pages/Catalog/EditionSyllabus.razor | no |
