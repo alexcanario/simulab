@@ -1,7 +1,7 @@
 ---
 bug: B-30
 feature: -
-status: building
+status: validating
 board: 196
 version: 2
 severity: medium
@@ -82,6 +82,10 @@ Tests locked: 7842397f822807387120894e678863e2dd7ca71d (2 files); unlocks: 0
 - 2026-10-19 — AC1's test forces the window with `Clock.Advance(...)` and not `AdvanceDebounce()`, so the new guard does not flag its own proof; the old shape (one `AdvanceDebounce()` then `WaitForAssertion`) was run once from a scratch test, not committed: `WaitForFailedException` after 5 s — decided by Claude
 - 2026-10-19 — The helper loops itself and does not wrap one `WaitForAssertion`: bUnit 2.10.3 re-checks only when the component renders (measured: `Check count: 1` over 5 s with no render), so a single wait would retry only if something rendered; each try is `AdvanceDebounce` plus a 250 ms `WaitForAssertion` (a first stress run with 50 ms ended one test with `Check count: 0`: the window closed before the check started), until the 5 s ceiling — verified by the locked AC2 test, red on the first version (`Expected tries to be greater than or equal to 3, but found 1`)
 - 2026-10-19 — plan — 1 skeleton `WaitForAfterDebounce` + `DebounceWaitTests` (AC1, AC2) + guard and self-tests (AC3) written red, committed and locked → AC1, AC2, AC3 red; 2 implement the helper → AC1, AC2 green; 3 convert the 33 calls of the 15 files, each assertion moves into the helper → AC3, AC4 green (`Simulab.Web.Tests` whole); 4 stress loop, 24 processes x 3 rounds on copies of the build output → AC5; 5 gate, scan, `git diff main --stat -- src` empty → AC6, validation script
+
+- 2026-10-19 — Reuse: `KitTestContext.AdvanceDebounce` and bUnit's `WaitForAssertion` (the helper wraps both), the B-23 guard's file enumeration (extracted and shared by the new guard), the table's `RenderTable` shape from `AppDataTableTests` — decided by Claude
+- 2026-10-19 — Shortcuts: none — decided by Claude
+- 2026-10-19 — The 3 failures of the stress loop are captured as B-31 (board 198), not fixed here — AC5 changed to the measured result by change note v2 — asked
 
 ## Change notes
 ### v2 — 2026-10-19
