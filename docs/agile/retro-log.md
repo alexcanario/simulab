@@ -1347,3 +1347,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Missing capabilities unchanged (DocGen tool catalogue, release pipeline, Azure login in deploy); none installed by the sync.
 - Note: `CLAUDE.md` is at ~4.4k tokens always loaded, close to the ~4.5k budget; trim at the next retro.
 - Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-19 - F-78 Notice subjects of the municipal guard editions
+- Events: question 1, test-fail 2. Gate time: 8 passes, 33 min; 2 red. Decisions: 28 lines, all item decisions, none promoted.
+- Lesson 1, score 2/7: bUnit page tests of the QuestionBank area time out under full-suite load (two different tests in 2 of 4 full runs, each green alone and on the next run; cause not verified). Went to B-30 (board #196), not to a rule: `project.md:75` already asks for `WaitForAssertion` and the tests follow it (stronger level, step 2d).
+- Lesson 2, score 1/6: the three slowest test projects grew 40 s to 45 s each since F-125 and one full run took 360 s of test time, over the 5 min budget (cause not measured). Went to F-144 (board #197).
+- No rule, template or `CLAUDE.md` change. Ship notes: the per-step validation ticks were not recorded on this machine (`Evidence: 0 of 15 tested`, the owner said "validado" in the chat). The item database `simulab_f78` was not dropped: the Postgres container was not running, and the owner's yes stands for the next time the app host is up (`DROP DATABASE simulab_f78;`, nobody connected).
