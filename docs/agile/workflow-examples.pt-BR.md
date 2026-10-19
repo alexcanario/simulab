@@ -5467,3 +5467,145 @@ Claude: Escrito em "## Languages". Nenhum arquivo de recursos foi tocado.
 ```
 
 Até o dono aceitar, o build desse projeto diz uma vez `UI locales: sem linha, usando pt-BR` e exige só o idioma neutro. Um `.pt-PT.resx` ou `.en.resx` que ele já tenha fica fora da lista: nada é apagado, nada é exigido.
+
+### 14.151 Uma feature com porta ganha a seção Security e um critério [sec] por ameaça; uma troca de texto não ganha nada
+
+Você refina o F-1 do app Loja, "Partner sign-in and order webhook": o parceiro entra com e-mail e senha, o sistema dele posta atualizações de pedido em `POST /api/v1/webhooks/orders` e o app guarda o nome e o e-mail do contato. O Claude lê o código (passo 6) e vê uma porta pelo sinal 1 de `references/model-choice.md`: login, uma chamada de entrada de outro sistema e dado pessoal. Antes de qualquer pergunta ele lê `references/security-section.md` (passo 7d) e a rodada ganha um tópico de segurança, depois de permissões. A rodada continua uma só.
+
+A retenção do dado pessoal não é perguntada: a linha da 9b do `docs/decisions/ADR-0001-foundation.md` já diz 24 meses depois do último pedido, apagado por um job de retenção, lido só pela equipe. O Claude diz isso na linha de confirmações e pergunta só o que a 9b deixou em aberto (a base legal, por exemplo). Com as respostas, o arquivo ganha a seção, entre `## Screens and API` e `## Docs` (trecho):
+
+```text
+## Security
+### Surfaces
+- S1 POST /api/v1/webhooks/orders — the partner's own order-management system, over the internet, with no signed-in session
+- S2 POST /api/v1/partners/sign-in — anyone on the internet
+### Threats
+- T1 (S1, S) Another party sends a status update claiming to be a partner's system it is not → AC5 [sec]
+- T3 (S2, S) Repeated password guesses against one partner's e-mail (online brute force) → AC7 [sec]
+- T4 (S1/S2, I) A sign-in or webhook failure reveals which part was wrong (that the e-mail exists, or that the order exists) → AC8 [sec]
+### Personal data
+| Datum | Lives in | Read by | Kept for | Legal basis |
+| --- | --- | --- | --- | --- |
+| Partner contact name and e-mail | Partners table | Staff only; never leaves the network | 24 months after the partner's last order, then deleted by a retention job | Legitimate interest — needed to reach the partner about an order |
+```
+
+Cada ameaça tem o seu critério em `## Acceptance criteria`, no formato `AC5 [sec] (T1) Given ..., when ..., then ...`. No build eles viram linhas de `## Criterion → test` como qualquer outro, o teste é travado e o ship confere que nenhuma ficou `pending`. Uma ameaça sem critério não fica: ou o critério é escrito, ou a ameaça é riscada com o motivo em `## Decisions`. Depois, `/agile:review` lê a seção; uma ameaça sem critério `[sec]` ou sem teste é um `blocker`.
+
+Já no F-2, "Empty-state wording", que troca duas frases em arquivos de recurso, sem rota, dado nem permissão, o Claude não acha porta: a rodada não tem tópico de segurança, o arquivo não tem `## Security` e a seção do template é removida. Um bug também não ganha a seção; o revisor cobre a porta de um bug no diff.
+
+### 14.152 O zip de cada runtime do head desktop vai junto ao GitHub Release, com a linha de `chmod +x`
+
+A acme-stock é um app desktop sem fonte de atualização no `docs/infra.md`: ele continua sendo um zip, e a lista de runtimes do `.csproj` é `win-x64;linux-x64`. O dono digita `/agile:publish --local` numa máquina Windows. O empacotamento faz um zip por runtime; no `release`, o Claude cita a lista de arquivos que o relatório traz e a chamada do `gh` (a saída é a do script no projeto de teste, com o caminho da pasta encurtado):
+
+```
+package: ok
+  artifacts/publish/v1.2.0/Stock.Desktop-win-x64.zip
+  artifacts/publish/v1.2.0/Stock.Desktop-linux-x64.zip  (note: the zip was made on Windows and lost the execute bit: after unzipping on linux-x64, run chmod +x on the executable)
+
+release: ok
+  "releaseAssets": [
+    "artifacts/publish/v1.2.0/Stock.Desktop-win-x64.zip",
+    "artifacts/publish/v1.2.0/Stock.Desktop-linux-x64.zip"
+  ]
+  committed docs/releases/v1.2.0.md
+  tagged v1.2.0 (annotated, with the notes)
+  pushed main and v1.2.0
+  GitHub Release v1.2.0 created: https://github.com/acme/shop/releases/tag/v1.2.0
+```
+
+Na chamada que criou o GitHub Release, os dois zips vêm depois do arquivo de notas, na mesma chamada.
+
+As notas do release ganham uma seção só para quem baixa o zip do Linux, porque o zip feito no Windows perde o bit de execução:
+
+```
+## Install
+
+- linux-x64: the zip was made on Windows and lost the execute bit: after unzipping, run `chmod +x` on the executable.
+```
+
+Um zip do `win-x64` não ganha essa linha, e um zip feito no Linux (o runner do `release.yml`) também não. O mesmo projeto, liberado pelo `release.yml`, deixa no GitHub Release os dois zips sem assinatura que o runner empacotou; antes, eles sumiam com o runner. Um head Velopack que lista também `linux-arm64` leva o Setup.exe, o zip portátil e o `Stock.Desktop-linux-arm64.zip`, e nenhum zip do `win-x64`. Os arquivos de um head web, de uma API ou do Mobile (o `.aab`) nunca vão ao release. Se um dos zips sumir entre o `package` e o `release`, o `release` para antes do commit e da tag, dizendo qual zip falta. Um repositório privado recebe os zips como qualquer arquivo; quem baixa precisa estar logado.
+
+### 14.153 A pergunta 23f do bootstrap só aparece para um kit com módulo de temas, e um sim cria a pasta dos temas
+
+A acme-stock é um app `web-app` com MudBlazor. Na rodada 5, depois de a 23a gravar a identidade e de a 23c ser respondida, o bootstrap pergunta, com sim como recomendação:
+
+```
+Pergunta 23f — Temas personalizáveis, no padrão do VS Code?
+a) sim   b) não
+Recomendação: sim. Motivo: quem usa o app escolhe o tema do modo claro e do escuro do sistema e a fonte, e o kit aplica isso em tempo de execução.
+```
+
+O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade, no mesmo projeto:
+
+```
+WROTE 5 files
+```
+
+Isso cria `docs/design/themes/` com `index.json` e um arquivo por tema e modo, que é o que liga o módulo do kit. No passo 13, a ideia "Run-time themes in the MudBlazor" entra no quadro logo depois da ideia do kit de UI e depende dela.
+
+Se o dono responde não, o ADR-0001 só ganha `Customizable themes | no | one identity`: nenhuma pasta, nenhuma ideia. Se o script recusasse por um par de cores sem contraste, o bootstrap mostraria a recusa, manteria o sim e capturaria antes a ideia "Built-in themes from the identity".
+
+Um app `desktop` com cabeça WinUI 3 não recebe a pergunta: o kit dele ainda não tem módulo (#251). O ADR-0001 ganha `Customizable themes | not offered | no run-time theme module for WinUI 3 yet`, e a mensagem do bootstrap lista isso em "Já claro". O mesmo vale para `web-api` e `plugin`, que não têm telas.
+
+### 14.154 O head Velopack sem assinatura é lançado no GitHub Actions: o runner é Windows e o feed https vira artefato
+
+A acme-stock é um app desktop (Avalonia, `win-x64;linux-x64`) com `Update source` no `docs/infra.md` e `release.yml` escrito antes da fonte de atualização existir. A fonte é o GitHub deste repositório, mas o `release.yml` ainda diz `ubuntu-latest`. O dono digita `/agile:publish`. O Claude roda o plano do release em CI, e o script para antes de qualquer disparo (a saída é a do script num projeto de teste):
+
+```
+{
+  "ok": false,
+  "stop": [
+    "release.yml runs on ubuntu-latest: set runs-on: windows-latest"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita a frase e diz o único próximo passo: trocar `runs-on` do job `release` para `windows-latest` (o `release.yml` escrito é do projeto: o `/agile:sync` não o muda; um projeto novo que declara a fonte já nasce com `windows-latest`, e o job `deploy` fica no `ubuntu-latest`). Com a troca feita, o runner empacota o que o `/agile:publish --local` empacotaria (Setup.exe, Portable.zip, pacotes completo e delta e o índice do feed do `win-x64`, o AppImage do `linux-x64`), cria o GitHub Release e anexa o feed com o `GITHUB_TOKEN` da run, sem segredo novo.
+
+Num projeto cuja fonte é uma URL https, o runner não tem para onde enviar o feed. O release termina bem e os arquivos do feed ficam como o artefato `velopack-v1.2.0` da run (a saída é a do script, com `GITHUB_STEP_SUMMARY` e `GITHUB_OUTPUT` de teste):
+
+```
+## Release v1.2.0
+
+- Tag: v1.2.0 (annotated, with the notes)
+- Files: docs/releases/v1.2.0.md
+- GitHub Release: https://github.com/acme/shop/releases/tag/v1.2.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Velopack feed: artifact velopack-v1.2.0 (kept 30 days): copy its files to https://updates.acme.example/stock; installed apps see no update until you do
+```
+
+O relatório de `/agile:publish` diz o mesmo e o Claude repete ao dono: baixe o artefato `velopack-v1.2.0` em 30 dias e copie os arquivos para `https://updates.acme.example/stock`; até lá os apps instalados não veem a atualização. Uma fonte numa pasta de rede, o GitHub de outro repositório, um modo de assinatura declarado ou um head Mobile continuam parando antes de qualquer commit, cada um com o próprio motivo, e `/agile:publish --local` os libera da sua máquina.
+
+### 14.155 O release no GitHub Actions é assinado: o ambiente `release-signing`, a parada antes de qualquer commit e o resumo com o publisher
+
+A acme-shop é um app desktop (Avalonia, `win-x64`) com a fonte de atualização no GitHub deste repositório e `- Code signing: signtool` no `docs/infra.md`. O `release.yml` já tem `environment: release-signing` e os passos do `signtool`, mas o ambiente do GitHub foi criado aberto a qualquer branch e sem o segredo do certificado. O dono digita `/agile:publish`. O Claude roda o plano; na máquina dele nenhuma checagem de assinatura roda (não há variável aqui): o script só lê o `release.yml` e os nomes no GitHub.
+
+```
+{
+  "ok": false,
+  "stop": [
+    "the GitHub environment release-signing is open to every branch: a workflow edited on any branch could read the signing keys; limit it to main (Settings > Environments > release-signing > Deployment branches and tags > Selected branches)",
+    "the GitHub environment release-signing has no secret SIGNING_PFX_BASE64 (signtool needs it; Settings > Environments > release-signing)"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita as duas frases e diz o único próximo passo: no GitHub, em Settings, Environments, `release-signing`, escolher "Selected branches" com só a `main` e criar o segredo `SIGNING_PFX_BASE64` (o certificado em base64) ao lado de `SIGNING_PFX_PASSWORD`; nenhum valor passa pelo chat. Nada foi commitado, marcado nem disparado. Com o ambiente limitado à `main` e os dois segredos e a variável `SIGNING_TIMESTAMP_URL` no lugar, o mesmo comando segue: mostra o plano, dispara o `Release` e espera a run. Se o `gh` não conseguir ler o ambiente, o plano diz `could not check ...` como aviso e a própria run para se um nome faltar.
+
+No runner o job `release` importa o certificado, assina por `/sha1`, confere cada assinatura e só então cria a tag. O resumo da run, que o Claude cita ao dono, nomeia quem assinou, a run e o commit das notas:
+
+```
+## Release v1.0.0
+- Tag: v1.0.0 (annotated, with the notes)
+- Files: docs/releases/v1.0.0.md
+- GitHub Release: https://github.com/acme/shop/releases/tag/v1.0.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Signed: signtool
+- Publisher: Acme Software Ltd
+- Run: 8123456789 (https://github.com/acme/shop/actions/runs/8123456789)
+- Commit: 85cea08b027fb8b604ebbd3e4773f97f5eff0884
+```
+
+Se um dos arquivos não estivesse validamente assinado, a run pararia antes da tag, nomeando o arquivo e o status (`Setup.exe is not validly signed (status NotSigned)`), e nenhum release sairia sem assinatura.
