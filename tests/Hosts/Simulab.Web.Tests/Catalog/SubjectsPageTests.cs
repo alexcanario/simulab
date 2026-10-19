@@ -75,9 +75,7 @@ public sealed class SubjectsPageTests : SubjectsTestContext
         page.WaitForAssertion(() => page.FindAll("tbody tr").Should().HaveCount(3));
 
         page.Find(".app-table-search input").Input("constit");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call =>
             call.Query!.Contains("search=constit", StringComparison.Ordinal)));
     }
 

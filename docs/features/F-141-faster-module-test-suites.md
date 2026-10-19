@@ -1,10 +1,11 @@
 ---
 feature: F-141
 epic: Foundation and identity
-status: idea
+status: cancelled
 board: 193
 version: 1
 ---
+Duplicate of F-144 (2026-10-19): F-144 has the same goal (bring the full suite back under its 5-minute budget) and carries the newer measurements from the F-78 ship and the link to B-30.
 <!--
 One file per feature. Save as: docs/features/F-<number>-<slug>.md
 With an external ticket (`/agile:idea feature --ticket PRJ-123`): the id is the ticket's, `feature: PRJ-123`, the file docs/features/PRJ-123-<slug>.md, and an optional header line `ticket-url: <URL>` right after `board:`.

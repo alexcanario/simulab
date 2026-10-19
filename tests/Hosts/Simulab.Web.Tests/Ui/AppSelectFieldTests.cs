@@ -96,9 +96,7 @@ public sealed class AppSelectFieldTests : KitTestContext
         field.Find("#area").Focus();
 
         field.Find("#area").Input("MATEMATICA");
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() => OpenOptionTexts().Should().Equal("Matemática"));
+        WaitForAfterDebounce(field, () => OpenOptionTexts().Should().Equal("Matemática"));
     }
 
     // AC3: a text that matches nothing says so, with the term.
@@ -109,9 +107,7 @@ public sealed class AppSelectFieldTests : KitTestContext
         field.Find("#area").Focus();
 
         field.Find("#area").Input("zzz");
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() => _provider.Markup.Should().Contain("No option matches \"zzz\"."));
+        WaitForAfterDebounce(field, () => _provider.Markup.Should().Contain("No option matches \"zzz\"."));
     }
 
     // AC4: the field already shows "All"; focusing it lists everything, not only "All".

@@ -57,6 +57,17 @@ Technical terms: [glossary](../glossary.md)
 +------------------------------+
 ```
 
+## Security
+<!-- Only when the item touches a door (references/security-section.md); remove the whole section when it touches no door. Each threat gets one `AC<n> [sec]` criterion below. -->
+### Surfaces
+- S1 <route / action / webhook / upload / hook> — <who can reach it>
+### Threats
+- T1 (S1, <S|T|R|I|D|E>) <threat in one line> → AC<n> [sec]
+### Personal data
+<!-- Only when the item handles personal data; the retention comes from the answer to question 9b when the project has one. -->
+| Datum | Lives in | Read by | Kept for | Legal basis |
+| --- | --- | --- | --- | --- |
+
 ## Docs
 <!-- Written at refinement (references/tech-pages.md): one line per technical page the item touches, or `- none — <reason>`. Kinds: flow (behavior added or changed), how-to (a way of working), reference (a contract or a setting), architecture (a module or an external dependency). The build writes the pages with the code; the ship checks each one and refreshes the index of each theme. -->
 - flow: new docs/flows/<slug>.md — <why>

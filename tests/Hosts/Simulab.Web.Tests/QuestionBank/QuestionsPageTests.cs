@@ -93,9 +93,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         WaitForRows(page, 2);
 
         page.Find(".app-table-search input").Input("crase");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/question-bank/questions" && call.Query!.Contains("search=crase", StringComparison.Ordinal)));
         WaitForRows(page, 1);
     }
@@ -164,9 +162,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         WaitForRows(page, 2);
 
         page.Find(".app-table-search input").Input("zzzz");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => page.Markup.Should().Contain("No question matches").And.Contain("zzzz"));
+        WaitForAfterDebounce(page, () => page.Markup.Should().Contain("No question matches").And.Contain("zzzz"));
     }
 
     [Fact]

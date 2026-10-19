@@ -33,7 +33,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Messaging: <none | in-process | broker>. Auth: <provider>. RBAC: <yes | no>. Entitlements: <yes | no>. Multi-tenancy: <yes | no>.
 
 ## Languages
-- UI locales: pt-BR, en
+- UI locales: pt-BR
 - No hardcoded UI strings; resource files per module; `IStringLocalizer`.
 - Manual locales: pt-BR
 

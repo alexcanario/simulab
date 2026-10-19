@@ -159,9 +159,7 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
         page.Find("#edition-organizer").Input("ceb");
 
         // BR4: the year rule reads the context's frozen clock (28 Sep 2026), and so does the picker's debounce.
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call =>
             call.Path == "/api/v1/catalog/organizers"
             && call.Query!.Contains("search=ceb", StringComparison.Ordinal)
             && call.Query.Contains($"pageSize={AppLookupField.MaxCandidates}", StringComparison.Ordinal)));

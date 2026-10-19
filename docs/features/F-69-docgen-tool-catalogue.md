@@ -1,10 +1,11 @@
 ---
 feature: F-69
 epic: Foundation and identity
-status: idea
+status: cancelled
 board: 111
 version: 1
 ---
+Duplicate of F-49 (2026-10-19): F-49 (done, merge 1003885) delivered the tool catalogue; `DocGen --check` reports `docs/architecture is up to date`.
 # DocGen tool catalogue
 
 Technical terms: [glossary](../glossary.md)
