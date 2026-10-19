@@ -1337,3 +1337,13 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Merged: `.claude/rules/agile/git.md` (edited, upstream changed). One conflict, the secrets line: the owner kept the project's line (stricter) over the plugin's exception for passwords in development, staging and test paths. The base copy was recorded.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen F-61/F-69, release pipeline F-116, Azure login F-117).
 - Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-18 - Sync with agile@canary 0.118.0
+- From 0.112.0 to 0.118.0 (6 minor versions). Copied: `.claude/rules/agile/ui.md` (plugin text: the two-locale condition dropped, run-time themes sentences), `docs/agile/templates/glossary.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (their two link lines kept pointing at the project's file names).
+- Merged: `docs/agile/profile.md` (edited, upstream changed): the "Run-time themes" section came in; the three-way merge had no conflicts; the Simulab lines are kept.
+- Kept on purpose (owner's choice): `.claude/rules/agile/i18n.md` and `.claude/rules/agile/naming.md` keep the project's pt-BR / pt-PT wording; the plugin now says "default pt-BR" and drops the pt-PT note. Not copied; to revisit if the owner wants the plugin text.
+- Added to `docs/glossary.md`: the rows `shortcut marker` and `shortcut ledger` (business table, with the `Meaning (pt-BR)` column).
+- Left alone: `.claude/rules/agile/git.md` (edited, upstream unchanged); build files (`Directory.Build.props`, `Directory.Packages.props`, `.editorconfig`, `.gitignore`, `global.json`, `tests/Directory.Build.props`, `.github/workflows/deploy.yml`): differences are the project's own.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Missing capabilities unchanged (DocGen tool catalogue, release pipeline, Azure login in deploy); none installed by the sync.
+- Note: `CLAUDE.md` is at ~4.4k tokens always loaded, close to the ~4.5k budget; trim at the next retro.
+- Not done yet: the sync commit (owner's authorization pending).
