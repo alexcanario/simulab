@@ -1,7 +1,7 @@
 ---
 feature: F-78
 epic: Subject taxonomy
-status: refining
+status: approved
 board: 122
 version: 1
 ---
@@ -132,6 +132,8 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - 2026-10-19 — Manaus counts taken from the text copy of the notice, its source recorded — the points column confirms them (owner; asked).
 - 2026-10-19 — Salvador's group keeps the notice's block name in normal case, "Módulo I - Conhecimentos Básicos" / "Módulo II - Conhecimentos Específicos" — closest to the notice, as decided on 2026-10-06 (owner; asked).
 - 2026-10-19 — A canonical target deleted by an admin is skipped and the row is seeded with the entries left (BR4) — an admin's delete is final (owner; confirmed: F-51 BR6).
+
+- 2026-10-19 — Approved by the owner ("aprovo f-78") (owner).
 
 ## Out of scope
 - Editions of Recife and Goiânia.
