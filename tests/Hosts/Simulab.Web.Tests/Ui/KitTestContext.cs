@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Globalization;
 using Bunit;
+using Bunit.Extensions.WaitForHelpers;
 using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,9 +53,31 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
+    /// <summary>B-30: waits for what a debounced field sends. A keystroke can reach its debounce after a single
+    /// <see cref="AdvanceDebounce"/> already moved the clock, and then no other advance would ever come: this moves the
+    /// clock again before every try, so a delay registered late is still reached. bUnit re-checks only when the
+    /// component renders, so each try is a short wait of its own and the next try follows even when nothing rendered.
+    /// The ceiling is <see cref="BunitContext.DefaultWaitTimeout"/>, as for any wait.</summary>
     protected void WaitForAfterDebounce<TComponent>(IRenderedComponent<TComponent> component, Action assertion, int milliseconds = AppLookupField.DebounceMilliseconds)
-        where TComponent : IComponent =>
-        throw new NotImplementedException();
+        where TComponent : IComponent
+    {
+        var elapsed = Stopwatch.StartNew();
+        while (true)
+        {
+            AdvanceDebounce(milliseconds);
+            try
+            {
+                component.WaitForAssertion(assertion, TryWindow);
+                return;
+            }
+            catch (WaitForFailedException) when (elapsed.Elapsed < DefaultWaitTimeout)
+            {
+                // Not yet: the delay may not have existed when the clock moved. Move it again.
+            }
+        }
+    }
+
+    private static readonly TimeSpan TryWindow = TimeSpan.FromMilliseconds(50);
 
     public Task InitializeAsync() => Task.CompletedTask;
 

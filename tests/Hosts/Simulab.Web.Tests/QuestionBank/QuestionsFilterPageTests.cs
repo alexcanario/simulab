@@ -220,9 +220,7 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         page.WaitForAssertion(() => LastListQuery().Should().Contain("status=Published"));
 
         page.Find(".app-table-search input").Input("vírgula");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => LastListQuery().Should().Contain("status=Published").And.Contain("search=v%C3%ADrgula"));
+        WaitForAfterDebounce(page, () => LastListQuery().Should().Contain("status=Published").And.Contain("search=v%C3%ADrgula"));
     }
 
     // -- the address ----------------------------------------------------------------------------------------
@@ -315,8 +313,7 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         Pick(page, "questions-filter-status", "Published");
         Pick(page, "questions-filter-type", "TrueFalse");
         page.Find(".app-table-search input").Input("guarda");
-        AdvanceDebounce();
-        page.WaitForAssertion(() => LastListQuery().Should().Contain("status=Published").And.Contain("search=guarda"));
+        WaitForAfterDebounce(page, () => LastListQuery().Should().Contain("status=Published").And.Contain("search=guarda"));
         page.Find("#questions-filter-clear").TextContent.Should().Contain("Clear all");
 
         page.Find("#questions-filter-clear").Click();
@@ -338,9 +335,7 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         WaitForRows(page, 3);
 
         page.Find(".app-table-search input").Input("guarda");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => page.FindAll("#questions-filter-clear").Should().ContainSingle());
+        WaitForAfterDebounce(page, () => page.FindAll("#questions-filter-clear").Should().ContainSingle());
     }
 
     // The empty state says it is the filters, not an empty bank (F-95 text, F-100 wording).

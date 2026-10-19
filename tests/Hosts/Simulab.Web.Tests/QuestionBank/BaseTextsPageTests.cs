@@ -77,9 +77,7 @@ public sealed class BaseTextsPageTests : QuestionPageTestContext
         WaitForRows(page, 3);
 
         page.Find(".app-table-search input").Input("tarifas");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
+        WaitForAfterDebounce(page, () => Api.Received.Should().Contain(call =>
             call.Method == HttpMethod.Get && call.Path == "/api/v1/question-bank/base-texts"
             && call.Query!.Contains("search=tarifas", StringComparison.Ordinal)));
         WaitForRows(page, 1);
@@ -147,9 +145,7 @@ public sealed class BaseTextsPageTests : QuestionPageTestContext
         WaitForRows(page, 3);
 
         page.Find(".app-table-search input").Input("zzzz");
-        AdvanceDebounce();
-
-        page.WaitForAssertion(() => page.Markup.Should().Contain("No base text matches").And.Contain("zzzz"));
+        WaitForAfterDebounce(page, () => page.Markup.Should().Contain("No base text matches").And.Contain("zzzz"));
     }
 
     [Fact]

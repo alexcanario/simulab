@@ -114,13 +114,11 @@ public sealed class AppSuggestFieldTests : KitTestContext
     {
         var field = RenderField();
         field.Find("#suggest").Input("conhecimentos");
-        AdvanceDebounce();
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 2"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 2"));
 
         field.Find("#suggest").Input("basicos");
-        AdvanceDebounce();
 
-        field.WaitForAssertion(() => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 1"));
+        WaitForAfterDebounce(field, () => field.Find("[aria-live='polite']").TextContent.Should().Contain("Groups already used: 1"));
     }
 
     // A text that matches no suggestion is the value all the same: nothing is coerced to a pick.
@@ -137,8 +135,6 @@ public sealed class AppSuggestFieldTests : KitTestContext
             .Add(f => f.ValueChanged, (string? value) => reported = value));
 
         field.Find("#suggest").Input("Matemática");
-        AdvanceDebounce();
-
-        field.WaitForAssertion(() => reported.Should().Be("Matemática"));
+        WaitForAfterDebounce(field, () => reported.Should().Be("Matemática"));
     }
 }
