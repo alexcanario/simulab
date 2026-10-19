@@ -53,6 +53,23 @@ public sealed class NoticeSubject : TenantEntity
     /// <summary>Replaces the group, the label and the number of questions; the edition never changes (BR1).</summary>
     public Result Update(string? group, string? label, int? questionCount) => Apply(group, label, questionCount);
 
+    /// <summary>
+    /// A new row of another edition with this row's group, label and number of questions, placed at
+    /// <paramref name="displayOrder"/> (F-86, BR3 and BR4). The values already passed <see cref="Apply"/> here, so
+    /// they are copied as they are; the copy and its source share nothing afterwards.
+    /// </summary>
+    public NoticeSubject CopyTo(Guid examEditionId, int displayOrder) =>
+        new()
+        {
+            ExamEditionId = examEditionId,
+            Group = Group,
+            NormalizedGroup = NormalizedGroup,
+            Label = Label,
+            NormalizedLabel = NormalizedLabel,
+            QuestionCount = QuestionCount,
+            DisplayOrder = displayOrder
+        };
+
     internal void PlaceAt(int displayOrder) => DisplayOrder = displayOrder;
 
     private Result Apply(string? group, string? label, int? questionCount)

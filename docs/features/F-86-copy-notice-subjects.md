@@ -99,6 +99,9 @@ Screens follow the rules `ui` and `ui-project`. No mockup: one button and one pi
 - AC13 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: bd437bea711c9d6374dbc16d73e28ace874f109f (1 file); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAnEmptyEdition_CopiesTheLiveRowsInOrderAndLeavesTheSourceAlone` |
