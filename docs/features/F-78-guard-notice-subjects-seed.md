@@ -1,7 +1,7 @@
 ---
 feature: F-78
 epic: Subject taxonomy
-status: approved
+status: building
 board: 122
 version: 1
 ---
@@ -60,6 +60,21 @@ No new route, screen or endpoint. The seeded rows appear in F-74's section "Noti
 - AC9 Given the Api host, when the catalog migrations ran, then the OpenAPI document still returns 200, EF reports no pending model change, and the architecture tests pass. (BR1)
 - AC10 The seed adds no UI text; the three UI locales and the missing-key test are unchanged and green.
 - On screen only (validation script): a seeded edition shows its rows and chips on the edition page, and the student syllabus of a published guard exam lists them (UC1, UC2).
+
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachEditionHoldsExactlyItsListedNoticeSubjectsInOrderWithNoTenant`; `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_TheNoticeSubjectsHaveTheFixedIdsOfTheSeed` |
+| AC2 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachNoticeSubjectHasExactlyItsListedMappingEntriesInOrder`; `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_TheMappingEntriesHaveTheFixedIdsOfTheSeed`; `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_TheUncoveredNoticeSubjectHasNoEntryAndEveryOtherOneHasAtLeastOne` |
+| AC3 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EverySeededRowEqualsWhatTheDomainComputes`; `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachEditionsQuestionsAddUpToTheNoticeTotal` |
+| AC4 | `SeedGuardNoticeSubjectsTests.Migrate_ASalvadorNoticeSubjectTypedByAnAdmin_KeepsOnlyThatRowAndSeedsTheOtherThreeEditions`; `SeedGuardNoticeSubjectsTests.Migrate_AManausNoticeSubjectAlreadyDeleted_SkipsTheWholeEditionToo` |
+| AC5 | `SeedGuardNoticeSubjectsTests.Migrate_TheMaceioEditionSoftDeletedBeforehand_GetsNoNoticeSubjectAndTheMigrationSucceeds` |
+| AC6 | `SeedGuardNoticeSubjectsTests.Migrate_ACanonicalSubjectUnderAnotherId_IsStillMappedByItsName` |
+| AC7 | `SeedGuardNoticeSubjectsTests.Migrate_ASoftDeletedTopic_IsSkippedAndTheRowIsSeededWithTheEntriesLeft`; `SeedGuardNoticeSubjectsTests.Migrate_ASoftDeletedSubject_IsSkippedWholeAndItsTopicsToo` |
+| AC8 | `SeedGuardNoticeSubjectsTests.Migrate_AgainAfterAnAdminEditedASeededRow_KeepsTheEditAndAddsNoDuplicate`; `SeedGuardNoticeSubjectsTests.Down_RemovesTheSeededRowsAndKeepsTheAdminsOwnNoticeSubject`; `SeedGuardNoticeSubjectsTests.Down_KeepsASeededNoticeSubjectThatHoldsAnEntryOfTheAdmin` |
+| AC9 | `SeedGuardNoticeSubjectsTests.Migrate_EmptyDatabase_EachEditionHoldsExactlyItsListedNoticeSubjectsInOrderWithNoTenant` (no pending model change); `ApiHostTests.OpenApi_document_is_served`; the architecture tests (full suite) |
+| AC10 | no resource file changes; the existing Catalog resource tests stay green (full suite) |
+| On screen only | pending |
 
 ## Approved list
 Checked by the owner on 2026-10-19. Per edition: the source read, then the rows in order as `<n>. [group] Label — questions → mapping`. Mapping: a subject name alone is the whole subject; `Subject › Topic` is one topic. Subject numbers in brackets follow F-51's `## Approved list`.
@@ -134,6 +149,9 @@ Parts of a notice subject with no canonical subject or topic in F-51 (BR5); a cu
 - 2026-10-19 — A canonical target deleted by an admin is skipped and the row is seeded with the entries left (BR4) — an admin's delete is final (owner; confirmed: F-51 BR6).
 
 - 2026-10-19 — Approved by the owner ("aprovo f-78") (owner).
+- 2026-10-19 — Build started; the branch was brought up to date with `main` first (docs only). The newest catalog migration is `20261014160521_AddSubjectTopicAliases` (F-77), so the seed goes after it (Claude, verified).
+- 2026-10-19 — plan — 1 tests first: `SeedGuardNoticeSubjectsTests` keeps its own copy of the approved list and covers AC1-AC8 on real PostgreSQL → seen failing (no rows), committed and locked; 2 migration `SeedGuardNoticeSubjects` (EF scaffold for the Designer, body replaced): one SQL insert per edition guarded by "edition live and no notice subject at all", then one SQL insert per mapping entry resolving the target by seeded id, then by normalized name → AC1-AC8 green; 3 `Down` by id, keeping a notice subject that still holds an entry of an admin → AC8; 4 AC9 (OpenAPI, pending model changes, architecture tests) and AC10 (missing-key test) through the affected suites; 5 coverage table, scan, validation script → `validating`.
+- 2026-10-19 — Mapping entry ids are `0198f370-0009-7000-8000-<notice subject number * 100 + position in its list>`, a frozen rule over a frozen list; the test asserts them (Claude, technical).
 
 ## Out of scope
 - Editions of Recife and Goiânia.
