@@ -1,0 +1,144 @@
+@* F-86 Screen 2: copy the notice subjects of another edition of the same exam into this empty one. One required choice,
+   the source edition, so a dialog (rule: ui-project). The Api runs every rule (BR1, BR2, BR7); the choice here is for
+   comfort. Nothing is typed, so closing never asks to discard. *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+<MudDialog Class="app-copy-notice-subjects-dialog">
+    <DialogContent>
+        <div @onkeydown="OnKeyDownAsync">
+            @if (_error is not null)
+            {
+                <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+
+            <MudText Typo="Typo.body2" Class="mb-4">@L["NoticeSubjects.Copy.Intro"]</MudText>
+
+            @if (_sources.Count > 0)
+            {
+                <AppRadioCards TValue="Guid?"
+                               Id="@SourceId"
+                               Label="@L["NoticeSubjects.Copy.Source"]"
+                               Required="true"
+                               Columns="1"
+                               Options="@BuildOptions()"
+                               Value="_sourceId"
+                               ValueChanged="@((Guid? value) => OnSourceChanged(value))" />
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="app-muted">@L["NoticeSubjects.Copy.NoSource"]</MudText>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <AppFormActions Saving="_saving"
+                        Disabled="@(_sourceId is null)"
+                        HasChanges="false"
+                        SaveText="@L["NoticeSubjects.Copy.Confirm"]"
+                        OnSave="CopyAsync"
+                        OnCancel="CancelAsync" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private const string SourceId = "copy-notice-subjects-source";
+
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>The editions the copy may start from (BR1), newest notice year first, as the section read them.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<NoticeSubjectCopySourceResponse> Sources { get; set; } = [];
+
+    /// <summary>Sends the copy to the Api; the dialog stays open and shows the error when it fails.</summary>
+    [Parameter, EditorRequired] public Func<CopyNoticeSubjectsRequest, Task<ApiResult<CopyNoticeSubjectsResponse>>> Copy { get; set; } = default!;
+
+    /// <summary>Reads the sources again: after a refusal that says the choice is stale (the source is gone or empty).</summary>
+    [Parameter, EditorRequired] public Func<Task<ApiResult<IReadOnlyList<NoticeSubjectCopySourceResponse>>>> LoadSources { get; set; } = default!;
+
+    /// <summary>Called when another admin filled the target meanwhile, so the list behind the dialog is read again.</summary>
+    [Parameter, EditorRequired] public Func<Task> OnTargetNotEmpty { get; set; } = default!;
+
+    private IReadOnlyList<NoticeSubjectCopySourceResponse> _sources = [];
+    private Guid? _sourceId;
+    private string? _error;
+    private bool _saving;
+
+    protected override void OnInitialized() => _sources = Sources;
+
+    private IReadOnlyList<AppRadioCardOption<Guid?>> BuildOptions() =>
+        [.. _sources.Select(source => new AppRadioCardOption<Guid?>(
+            source.EditionId,
+            string.IsNullOrWhiteSpace(source.Position)
+                ? source.NoticeYear.ToString(CultureInfo.InvariantCulture)
+                : $"{source.NoticeYear} — {source.Position}",
+            $"{source.OrganizerName} · {CountText(source.NoticeSubjectCount)}"))];
+
+    private string CountText(int count) =>
+        count == 1
+            ? L["NoticeSubjects.Copy.SourceCount.One"].Value
+            : L["NoticeSubjects.Copy.SourceCount.Many", count.ToString("N0", CultureInfo.CurrentCulture)].Value;
+
+    private void OnSourceChanged(Guid? value)
+    {
+        _sourceId = value;
+        _error = null;
+    }
+
+    private async Task CopyAsync()
+    {
+        if (_saving || _sourceId is not { } sourceId)
+        {
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+        var result = await Copy(new CopyNoticeSubjectsRequest(sourceId));
+        _saving = false;
+
+        if (result.IsSuccess)
+        {
+            Dialog.Close(DialogResult.Ok(result.Value));
+            return;
+        }
+
+        _error = Errors.For(result.ErrorCode);
+        switch (result.ErrorCode)
+        {
+            case CatalogErrorCodes.NoticeSubjectCopyTargetNotEmpty:
+                // Another admin added rows meanwhile: the list behind the dialog is read again, the dialog stays.
+                await OnTargetNotEmpty();
+                break;
+            case CatalogErrorCodes.ExamEditionCopySourceNotFound:
+            case CatalogErrorCodes.NoticeSubjectCopySourceEmpty:
+                // The choice is stale: the options are read again and the pick is dropped.
+                await RefreshSourcesAsync();
+                break;
+        }
+    }
+
+    private async Task RefreshSourcesAsync()
+    {
+        _sourceId = null;
+        var fresh = await LoadSources();
+        if (fresh is { IsSuccess: true, Value: { } sources })
+        {
+            _sources = sources;
+        }
+    }
+
+    // While the copy runs the dialog cannot be closed; with nothing typed, Cancel and Esc close at once.
+    private Task CancelAsync()
+    {
+        if (!_saving)
+        {
+            Dialog.Cancel();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnKeyDownAsync(KeyboardEventArgs args) => args.Key == "Escape" ? CancelAsync() : Task.CompletedTask;
+}

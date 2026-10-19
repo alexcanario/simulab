@@ -86,6 +86,30 @@
                            OnClick="AddAsync"
                            id="@AddButtonId">@L["NoticeSubjects.Form.AddTitle"]</MudButton>
 
+                @* F-86 BR2: the copy only fills an empty list, so the button is not drawn once there are rows. With no
+                   edition to copy from it stays, disabled, and the tooltip says why. Outlined, like Add. *@
+                @if (_rows.Count == 0)
+                {
+                    @if (_copySources.Count > 0)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Copy"
+                                   OnClick="CopyAsync"
+                                   id="@CopyButtonId">@L["NoticeSubjects.Copy.Open"]</MudButton>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="@L["NoticeSubjects.Copy.NoSource"]">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@AppIcons.Copy"
+                                       Disabled="true"
+                                       id="@CopyButtonId">@L["NoticeSubjects.Copy.Open"]</MudButton>
+                        </MudTooltip>
+                    }
+                }
+
                 @if (_rows.Count > 0)
                 {
                     <div class="app-notice-subjects-summary">
@@ -122,6 +146,7 @@
 
 @code {
     private const string AddButtonId = "notice-subject-add";
+    private const string CopyButtonId = "notice-subject-copy";
     private const string MoveUp = "up";
     private const string MoveDown = "down";
 
@@ -138,6 +163,8 @@
     private bool _showHeadings;
     private NoticeSubjectTotals _totals = new(0, 0, 0);
     private int _unmappedCount;
+    // F-86: the editions the empty list may copy from; read only while the list is empty, and empty when that read fails.
+    private IReadOnlyList<NoticeSubjectCopySourceResponse> _copySources = [];
     private Guid? _loadedFor;
     private Guid? _movingId;
     private string? _error;
@@ -215,12 +242,76 @@
         if (result is { IsSuccess: true, Value: { } rows })
         {
             Apply(rows);
+            _copySources = rows.Count == 0 ? await ReadCopySourcesAsync(editionId, token!) : [];
         }
         else
         {
             Apply([]);
+            _copySources = [];
             _loadFailed = true;
         }
+    }
+
+    // F-86 BR1: a failed read leaves the copy button disabled; the list itself still works.
+    private async Task<IReadOnlyList<NoticeSubjectCopySourceResponse>> ReadCopySourcesAsync(Guid editionId, string token)
+    {
+        var sources = await Api.ListNoticeSubjectCopySourcesAsync(token, ExamId, editionId);
+
+        return sources is { IsSuccess: true, Value: { } value } ? value : [];
+    }
+
+    // F-86 Screen 2: pick another edition of the exam and copy its notice subjects, with their mapping, into this list.
+    private async Task CopyAsync()
+    {
+        if (EditionId is not { } editionId)
+        {
+            return;
+        }
+
+        _error = null;
+        var parameters = new DialogParameters<CopyNoticeSubjectsDialog>
+        {
+            { dialog => dialog.Sources, _copySources },
+            {
+                dialog => dialog.Copy,
+                // A fresh token at Copy time, never the one read when the dialog opened (it may have expired).
+                async request => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<CopyNoticeSubjectsResponse>(ErrorText.UnexpectedCode)
+                    : await Api.CopyNoticeSubjectsAsync(fresh, ExamId, editionId, request)
+            },
+            {
+                dialog => dialog.LoadSources,
+                async () => await TokenAsync() is not { } fresh
+                    ? ApiResult.Failed<IReadOnlyList<NoticeSubjectCopySourceResponse>>(ErrorText.UnexpectedCode)
+                    : await Api.ListNoticeSubjectCopySourcesAsync(fresh, ExamId, editionId)
+            },
+            {
+                // Called by the dialog, outside this component's own event: it must ask for the render itself.
+                dialog => dialog.OnTargetNotEmpty,
+                async () =>
+                {
+                    await LoadAsync(showLoading: false);
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        };
+
+        var dialog = await Dialogs.ShowAsync<CopyNoticeSubjectsDialog>(L["NoticeSubjects.Copy.Title"], parameters, DialogOptions);
+        var result = await dialog.Result;
+        if (result is not { Canceled: false, Data: CopyNoticeSubjectsResponse copied })
+        {
+            // Closed without copying: the focus goes back to the button that opened the dialog, when it is still drawn.
+            _pendingFocus = _rows.Count == 0 ? CopyButtonId : AddButtonId;
+            return;
+        }
+
+        Snackbar.Add(
+            copied.CopiedCount == 1
+                ? L["NoticeSubjects.Copy.Done.One"].Value
+                : L["NoticeSubjects.Copy.Done", copied.CopiedCount.ToString("N0", CultureInfo.CurrentCulture)].Value,
+            Severity.Success);
+        await LoadAsync(showLoading: false);
+        _pendingFocus = _rows.Count > 0 ? $"{ActionsId(_rows[0])}-{AppRowActions.EditKey}" : AddButtonId;
     }
 
     // BR6: the Api sends the rows in display order and the rows of one group are consecutive; one heading per run of

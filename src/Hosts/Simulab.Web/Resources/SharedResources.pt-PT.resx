@@ -750,6 +750,19 @@
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos já não existe na taxonomia; está assinalado abaixo. Retire-o e guarde novamente.</value></data>
   <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido juntamente com a disciplina inteira a que pertence; os itens estão assinalados abaixo. Retire o tópico ou a disciplina inteira.</value></data>
   <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa guardou esta disciplina ao mesmo tempo. Guarde novamente.</value></data>
+  <data name="NoticeSubjects.Copy.Open" xml:space="preserve"><value>Copiar de outra edição</value></data>
+  <data name="NoticeSubjects.Copy.NoSource" xml:space="preserve"><value>Nenhuma outra edição deste exame tem disciplinas do aviso.</value></data>
+  <data name="NoticeSubjects.Copy.Title" xml:space="preserve"><value>Copiar disciplinas de outra edição</value></data>
+  <data name="NoticeSubjects.Copy.Intro" xml:space="preserve"><value>As disciplinas da edição escolhida, com grupos, número de questões, ordem e mapeamento, são copiadas para esta edição. Depois, ajuste o que mudou no aviso.</value></data>
+  <data name="NoticeSubjects.Copy.Source" xml:space="preserve"><value>Edição de origem</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.One" xml:space="preserve"><value>1 disciplina</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.Many" xml:space="preserve"><value>{0} disciplinas</value></data>
+  <data name="NoticeSubjects.Copy.Confirm" xml:space="preserve"><value>Copiar</value></data>
+  <data name="NoticeSubjects.Copy.Done" xml:space="preserve"><value>{0} disciplinas copiadas.</value></data>
+  <data name="NoticeSubjects.Copy.Done.One" xml:space="preserve"><value>1 disciplina copiada.</value></data>
+  <data name="exam_edition.copy_source_not_found" xml:space="preserve"><value>A edição escolhida já não está disponível. Escolha outra.</value></data>
+  <data name="notice_subject.copy_source_empty" xml:space="preserve"><value>A edição escolhida não tem disciplinas do aviso para copiar.</value></data>
+  <data name="notice_subject.copy_target_not_empty" xml:space="preserve"><value>Esta edição já tem disciplinas do aviso; a cópia só é feita numa lista vazia. A lista foi recarregada.</value></data>
   <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do aviso e não pode ser eliminada. A lista foi recarregada.</value></data>
   <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso ou é usado por questões e não pode ser eliminado. A lista foi recarregada.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>Esta questão já não existe.</value></data>

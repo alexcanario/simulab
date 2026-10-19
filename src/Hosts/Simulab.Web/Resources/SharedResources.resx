@@ -750,6 +750,19 @@
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again.</value></data>
   <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>A topic cannot be picked together with its whole subject; the items are marked below. Remove the topic or the whole subject.</value></data>
   <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Someone else saved this notice subject at the same time. Save again.</value></data>
+  <data name="NoticeSubjects.Copy.Open" xml:space="preserve"><value>Copy from another edition</value></data>
+  <data name="NoticeSubjects.Copy.NoSource" xml:space="preserve"><value>No other edition of this exam has notice subjects.</value></data>
+  <data name="NoticeSubjects.Copy.Title" xml:space="preserve"><value>Copy notice subjects from another edition</value></data>
+  <data name="NoticeSubjects.Copy.Intro" xml:space="preserve"><value>The subjects of the chosen edition, with their groups, numbers of questions, order and mapping, are copied to this edition. Then adjust what changed in the notice.</value></data>
+  <data name="NoticeSubjects.Copy.Source" xml:space="preserve"><value>Edition to copy from</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.One" xml:space="preserve"><value>1 subject</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.Many" xml:space="preserve"><value>{0} subjects</value></data>
+  <data name="NoticeSubjects.Copy.Confirm" xml:space="preserve"><value>Copy</value></data>
+  <data name="NoticeSubjects.Copy.Done" xml:space="preserve"><value>{0} subjects copied.</value></data>
+  <data name="NoticeSubjects.Copy.Done.One" xml:space="preserve"><value>1 subject copied.</value></data>
+  <data name="exam_edition.copy_source_not_found" xml:space="preserve"><value>The chosen edition is no longer available. Pick another one.</value></data>
+  <data name="notice_subject.copy_source_empty" xml:space="preserve"><value>The chosen edition has no notice subjects to copy.</value></data>
+  <data name="notice_subject.copy_target_not_empty" xml:space="preserve"><value>This edition already has notice subjects; a copy is only made into an empty list. The list was reloaded.</value></data>
   <data name="subject.in_use" xml:space="preserve"><value>Notice subjects map this subject, so it cannot be deleted. The list was reloaded.</value></data>
   <data name="topic.in_use" xml:space="preserve"><value>Notice subjects map this topic or questions use it, so it cannot be deleted. The list was reloaded.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>This question no longer exists.</value></data>

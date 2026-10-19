@@ -353,6 +353,27 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{NoticeSubjectsRoute(examId, editionId)}/{noticeSubjectId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-86 BR1: the editions of the exam whose notice subjects this edition may copy, newest notice year first.</summary>
+    public Task<ApiResult<IReadOnlyList<NoticeSubjectCopySourceResponse>>> ListNoticeSubjectCopySourcesAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<IReadOnlyList<NoticeSubjectCopySourceResponse>>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{NoticeSubjectsRoute(examId, editionId)}/copy-sources"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-86 UC1: copies the notice subjects of the source edition, with their mapping, into this empty edition.</summary>
+    public Task<ApiResult<CopyNoticeSubjectsResponse>> CopyNoticeSubjectsAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CopyNoticeSubjectsRequest body,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<CopyNoticeSubjectsResponse>(
+            () => Authorized(WithJson(HttpMethod.Post, $"{NoticeSubjectsRoute(examId, editionId)}/copy", body), accessToken),
+            cancellationToken);
+
     /// <summary>F-75: every live subject with its live topics, alphabetical, for the mapping picker (one call per dialog opening).</summary>
     public Task<ApiResult<IReadOnlyList<TaxonomySubjectResponse>>> GetTaxonomyAsync(
         string accessToken,

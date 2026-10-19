@@ -114,9 +114,9 @@ Tests locked: bd437bea711c9d6374dbc16d73e28ace874f109f (1 file); unlocks: 0
 | AC8 | `CopyNoticeSubjectsEndpointTests.CopySources_ListsOnlyUsableEditionsNewestYearFirst` |
 | AC9 | `CopyNoticeSubjectsEndpointTests.Copy_IntoAPublishedEdition_Succeeds` |
 | AC10 | `CopyNoticeSubjectsEndpointTests.BothRoutes_WithoutTheManagePermission_AreForbidden` |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
+| AC11 | `CopyNoticeSubjectsTests.Section_EmptyListWithASource_OffersTheCopyButtonEnabled`, `CopyNoticeSubjectsTests.Section_EmptyListWithNoSource_ShowsTheCopyButtonDisabledWithItsReason`, `CopyNoticeSubjectsTests.Section_ListWithRows_DoesNotShowTheCopyButton` |
+| AC12 | `CopyNoticeSubjectsTests.Copy_PickingASourceAndConfirming_SendsItSaysHowManyAndShowsTheCopies`, `CopyNoticeSubjectsTests.Copy_OneRow_UsesTheSingularMessage`, `CopyNoticeSubjectsTests.Dialog_ListsOneCardPerSourceAndEnablesCopyOnlyAfterAPick` |
+| AC13 | `CopyNoticeSubjectsTests.EveryNewText_ExistsInTheThreeLanguagesWithTheSamePlaceholders`, `CopyNoticeSubjectsTests.Intro_PtPtSaysAvisoWherePtBrSaysEdital` |
 
 ## Decisions
 - 2026-10-06 — Sources are the other editions of the same exam only — the real case is the notice that repeats year to year; the list stays short (owner, question 1).
@@ -133,6 +133,11 @@ Tests locked: bd437bea711c9d6374dbc16d73e28ace874f109f (1 file); unlocks: 0
 - 2026-10-06 — Routes use the real prefix `/api/v1/catalog/exams/...`; F-74's file says `/api/v1/exams/...` — a premise to correct in F-74 with `/agile:change F-74` (Claude, reported to the owner).
 - 2026-10-19 — Build started in the item worktree; `main` was already merged into the branch (F-74 and F-75 present). The design passes (`system-design`, `architect`) are skipped: no new project, table, column or message between modules — two endpoints and their DTOs in the existing Catalog slice (Claude).
 - 2026-10-19 — plan — 1 sources query + `GET .../copy-sources` (AC8, AC10) → locked endpoint tests; 2 copy handler happy path with order, mapping, deleted-target and Published target (AC1, AC2, AC4, AC9) → AC tests green; 3 refusals 404/400/409 (AC3, AC5, AC6) → AC tests green; 4 one-save atomicity (AC7) → failure test green; 5 Web client + `CopyNoticeSubjectsDialog` + section button (AC11, AC12) → bUnit green; 6 UI texts in three locales (AC13) → missing-key test green; gate, scan, validation script.
+- 2026-10-19 — The screen tests of AC11 to AC13 (bUnit) were written with the screen in step 5, not locked: they need the dialog component, which the lock phase of the API tests did not create (Claude).
+- 2026-10-19 — One text key beyond the refined table: `NoticeSubjects.Copy.Source` ("Edition to copy from" / "Edição de origem"), the legend of the radio group, which the kit's `AppRadioCards` requires (Claude).
+- 2026-10-19 — A save refused by the unique index of the label inside the target (another admin wrote meanwhile) answers `notice_subject.copy_target_not_empty`, not `notice_subject.duplicate`: for the caller it is the same BR2 case (Claude).
+- 2026-10-19 — The dialog gets the sources the section already read and a callback to read them again after a stale-choice refusal (`copy_source_not_found`, `copy_source_empty`); no second read on open (Claude).
+- 2026-10-19 — Reuse: nothing found to reuse for the copy itself; reused `NoticeSubjectStore`/`INoticeSubjectQueries` ports, `AppRadioCards`, `AppFormActions`, `AppAlert`, `ErrorText`, the F-74 dialog options and focus pattern. Shortcuts: none (Claude).
 
 ## Out of scope
 - Copying the edition's other fields (year, position, board, notice reference).
