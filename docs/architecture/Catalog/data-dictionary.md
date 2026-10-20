@@ -47,6 +47,10 @@ Entity: `ExamEdition` — One paper actually applied for an exam: its notice yea
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
+| notice_document_blob_name | character varying(98) | yes |  |  | Owned: NoticeDocument; max 98; The name the notice PDF is stored under in the file storage, never the curator's file name. Empty when the edition has no PDF. |
+| notice_document_file_name | character varying(255) | yes |  |  | Owned: NoticeDocument; max 255; The notice PDF's file name as the curator gave it, without any folder. Empty when the edition has no PDF. |
+| notice_document_size | bigint | yes |  |  | Owned: NoticeDocument; The notice PDF's size in bytes, from 1 to 20 MB. Empty when the edition has no PDF. |
+| notice_document_uploaded_at | timestamp with time zone | yes |  |  | Owned: NoticeDocument; When the notice PDF was uploaded. Empty when the edition has no PDF. |
 
 Indexes:
 - `ix_exam_editions_exam` on exam_id

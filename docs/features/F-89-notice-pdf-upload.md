@@ -149,5 +149,6 @@ Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
 - 2026-10-20 blocked — test wrong: two tests of mine expect the wrong exception type and omit the status the Api requires on update; criteria unchanged
 - 2026-10-20 blocked — test wrong: Cancel test did not render the discard dialog providers; StorageErrorCodes moves to a Contracts project so the F-22 error text scan sees it; criteria unchanged
 - 2026-10-20 blocked — test wrong: Cancel test waits on the page render but the navigation after the confirmation does not render it: flaky under load; criteria unchanged
+- 2026-10-20 test-fail — tests failed (Simulab.slnx): Simulab.Api.Tests.ForwardedHeadersHostTests.ProxyListed_ForwardedHeaderFromAnUnlistedSender, 2 reds
 
 ## Delivery

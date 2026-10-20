@@ -5,6 +5,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | Verb | Route | Summary | Responses |
 |---|---|---|---|
 | `DELETE` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}` | DeleteNoticeSubject | 200 |
+| `DELETE` | `/api/v1/catalog/exams/{examId}/editions/{id}/notice-document` | RemoveExamEditionNoticeDocument | 200 |
 | `DELETE` | `/api/v1/catalog/exams/{examId}/editions/{id}` | DeleteExamEdition | 200 |
 | `DELETE` | `/api/v1/catalog/exams/{id}` | DeleteExam | 200 |
 | `DELETE` | `/api/v1/catalog/issuing-authorities/{id}` | DeleteIssuingAuthority | 200 |
@@ -13,6 +14,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `DELETE` | `/api/v1/catalog/topics/{id}` | DeleteTopic | 200 |
 | `GET` | `/api/v1/catalog/areas` | ListAreas | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` | ListNoticeSubjects | 200 |
+| `GET` | `/api/v1/catalog/exams/{examId}/editions/{id}/notice-document` | DownloadExamEditionNoticeDocument | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions/{id}` | FindExamEdition | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions` | ListExamEditions | 200 |
 | `GET` | `/api/v1/catalog/exams/{id}` | FindExam | 200 |
@@ -20,6 +22,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/catalog/issuing-authorities` | ListIssuingAuthorities | 200 |
 | `GET` | `/api/v1/catalog/organizers` | ListOrganizers | 200 |
 | `GET` | `/api/v1/catalog/published-exam-filters` | GetPublishedExamFilters | 200 |
+| `GET` | `/api/v1/catalog/published-exams/{examId}/editions/{id}/notice-document` | DownloadPublishedExamEditionNoticeDocument | 200 |
 | `GET` | `/api/v1/catalog/published-exams/{id}` | FindPublishedExam | 200 |
 | `GET` | `/api/v1/catalog/published-exams` | ListPublishedExams | 200 |
 | `GET` | `/api/v1/catalog/subjects/{id}` | FindSubject | 200 |
@@ -35,6 +38,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `POST` | `/api/v1/catalog/subjects/{subjectId}/topics` | CreateTopic | 200 |
 | `POST` | `/api/v1/catalog/subjects` | CreateSubject | 200 |
 | `PUT` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}` | UpdateNoticeSubject | 200 |
+| `PUT` | `/api/v1/catalog/exams/{examId}/editions/{id}/notice-document` | UploadExamEditionNoticeDocument | 200 |
 | `PUT` | `/api/v1/catalog/exams/{examId}/editions/{id}` | UpdateExamEdition | 200 |
 | `PUT` | `/api/v1/catalog/exams/{id}` | UpdateExam | 200 |
 | `PUT` | `/api/v1/catalog/issuing-authorities/{id}` | UpdateIssuingAuthority | 200 |
