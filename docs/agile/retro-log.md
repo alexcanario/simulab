@@ -141,6 +141,11 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
+## 2026-10-20 - B-31 Base texts search test fails under heavy parallel load
+Events: override 0, question 1, assumed 0, rework 0, test-fail 1, blocked 0, change 0, correction 0, stop 0, companion 0. Gate time: 21 passes, 19 min 25 s, 15 red. Item decisions: 6, stay in the item. Shortcuts: none.
+- Lesson 1, score 4/6 (hidden fact): `BunitContext.DefaultWaitTimeout` is static, so a test that changes it breaks parallel tests (first draft of the AC1 and AC2 tests: 3 red, one of them a B-30 test). Went to `.claude/rules/agile/web-tests-project.md`, loaded only when `tests/Hosts/Simulab.Web.Tests/` is read.
+- Lesson 2, score 3/3, not recommended: a loop of parallel processes must be checked for runs that never started (18 of 72 logs said `test source file ... was not found` while the script ended `ALLDONE`). Registered here only; it happened once, in the AC5 measurement.
+
 ## 2026-10-19 - F-86 Copy notice subjects from another edition
 Events: override 0, question 0, assumed 0, rework 0, test-fail 1, blocked 0, change 0, correction 0, stop 0, companion 0. Gate time: 6 passes, 19 min 17 s, 1 red. Item decisions: 5, stay in the item.
 
