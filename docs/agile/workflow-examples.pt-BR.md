@@ -4466,10 +4466,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (31)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (33)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
-ok   AC5: the report states the skills (23) and the agents (6)
+ok   AC5: the report states the skills (24) and the agents (7)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -5729,3 +5729,208 @@ Written by `/agile:publish` for this release. The plugin uploads nothing to eith
 ```
 
 Se o `.aab` não tivesse assinatura (o `jarsigner` sai com código 0 até para `jar is unsigned.`, então o Claude e o script leem o texto), a run pararia antes de commitar qualquer coisa, nomeando o arquivo, e nenhum release sairia com um pacote sem assinatura. O keystore, as duas senhas e o base64 não aparecem em relatório, resumo nem log: o arquivo temporário é apagado por um passo que roda mesmo quando a run falha, e um valor que vazasse numa mensagem de erro de uma ferramenta sai como `***`.
+
+### 14.158 Os releases ficam em outro repositório: o token de escopo fino `RELEASES_TOKEN` e a prova do alcance antes de qualquer commit
+
+A acme-shop é um app desktop (Avalonia, `win-x64`) cujo código é privado (`acme/shop`) e cuja fonte de atualização é um repositório público só de releases, `https://github.com/acme/shop-releases`. Até aqui o `/agile:publish` não a lançava no GitHub Actions: o `GITHUB_TOKEN` da run alcança só `acme/shop`. O dono digita `/agile:publish`, e o `release.yml` dele, escrito antes desta mudança, ainda não tem as duas linhas do token. O Claude mostra o plano (`ci --plan`), que para antes de qualquer coisa:
+
+```
+{
+  "ok": false,
+  "stop": [
+    "release in CI does not cover Shop.Desktop (Velopack, GitHub source acme/shop-releases is not this repository) yet: run /agile:publish --local (to release it in CI: add environment: release-signing to the release job and AGILE_RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }} to the env of the Release step of release.yml (/agile:sync never changes a release.yml), and keep a fine-grained token (Contents: read and write on that repository only) in the secret RELEASES_TOKEN of the GitHub environment release-signing (Desktop updates in docs/infra.md))"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita a frase e diz o único próximo passo: acrescentar `environment: release-signing` ao job `release` e `AGILE_RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }}` ao `env` do passo `Release` (um projeto novo já nasce com as duas linhas, que o `pipeline write` escreve), e criar o token. Ele não cria nada: no GitHub, em Settings, Developer settings, Fine-grained tokens, o dono escolhe como dono do recurso o dono do repositório de releases, só o repositório `shop-releases`, a permissão Contents: read and write e uma data de vencimento, e grava o valor no ambiente `release-signing` (limitado à `main`, o mesmo das chaves de assinatura) com o `gh secret set` da seção `## Desktop updates` do `docs/infra.md`, que lê o valor de um prompt. Com isso, o `ci --plan` confere o ambiente, o limite à `main` e o nome do segredo (nunca o valor) e passa.
+
+No runner, antes de empacotar, commitar ou criar a tag, a run prova o que o token alcança. Se o dono tivesse criado um token clássico (`ghp_`), que alcança todos os repositórios da conta, a run pararia ali, sem nada commitado:
+
+```
+{
+  "ok": false,
+  "stop": [
+    "RELEASES_TOKEN is a classic personal access token (ghp_): it reaches every repository of the account, not only acme/shop-releases; create a fine-grained token on acme/shop-releases only (Contents: read and write) and set it with gh secret set RELEASES_TOKEN --env release-signing"
+  ],
+  "note": "nothing was packaged, committed or tagged"
+}
+```
+
+Um token vencido ou revogado para do mesmo jeito, com `GitHub refused RELEASES_TOKEN for acme/shop-releases (HTTP 401): the token expired or was revoked`; um token sem `push` no repositório de releases, com `cannot write to`; e um token que consegue ler o `acme/shop` privado, com `the token reaches acme/shop`. Com o token certo, a run escreve em `acme/shop-releases` (o `gh release create` e o `vpk upload github` são as únicas chamadas que o recebem; o `dotnet publish`, o `vpk pack`, o `git` e o NuGet começam sem ele), a leitura de `acme/shop` dá 404 e o resumo da run, que o Claude cita ao dono, diz o que foi provado:
+
+```
+## Release v1.0.0
+
+- Tag: v1.0.0 (annotated, with the notes)
+- Files: docs/releases/v1.0.0.md
+- GitHub Release: https://github.com/acme/shop-releases/releases/tag/v1.0.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Releases token: writes to acme/shop-releases; acme/shop: not found (the token does not reach it)
+```
+
+O código fica com a tag `v1.0.0` e sem Release; o Release e o feed ficam no repositório público. Se o repositório de código fosse público, a prova não conseguiria mostrar que o token não escreve nele (ler não prova a ausência de escrita): a run seguiria com um aviso dizendo isso. O valor do token não aparece em relatório, resumo, saída de passo nem log: se uma ferramenta o repetisse numa mensagem de erro, ele sairia como `***`.
+
+### 14.159 `/agile:docs` gera o site da documentação: o manual e as páginas técnicas viram HTML só de leitura, e uma página com o front matter aberto é pulada
+
+A acme-shop tem o manual do app em pt-BR (`inicio` e `pedidos`) e páginas técnicas: um fluxo do checkout com um diagrama, a referência da API de pedidos e um how-to de carga de dados. O dono quer ler tudo no navegador, sem abrir os `.md` um a um, e digita `/agile:docs`. O Claude roda o script na raiz do projeto e cita as linhas que ele imprimiu, inteiras:
+
+```
+SKIPPED: docs/how-to/seed-data.md: front matter is not closed
+agile docs GREEN: 7 page(s) (manual 2, technical 5) -> D:\dev\acme-shop\.agile-site
+file:///D:/dev/acme-shop/.agile-site/index.html
+```
+
+A página `seed-data.md` abre o front matter com `---` e nunca o fecha: o script a nomeia e a pula, constrói o resto e sai com código 1. As sete páginas são as duas do manual, o fluxo do checkout, a referência da API e os três arquivos de índice (`docs/flows.md`, `docs/how-to.md` e `docs/reference.md`), cada um virando uma página na raiz do site. A pasta ficou assim:
+
+```
+.agile-site/.generated
+.agile-site/assets/mermaid.min.js
+.agile-site/flows.html
+.agile-site/flows/checkout.html
+.agile-site/how-to.html
+.agile-site/index.html
+.agile-site/manual/pt-BR/inicio.html
+.agile-site/manual/pt-BR/pedidos.html
+.agile-site/reference.html
+.agile-site/reference/orders-api.html
+```
+
+O Claude diz, em pt-BR, o que o site é: só leitura e derivado dos `.md`, que continuam sendo a fonte; a pasta `.agile-site/` entrou no `.gitignore` (a linha `.agile-site/`, uma vez) e não vai para o Git; o `assets/mermaid.min.js` está ali porque o fluxo do checkout tem um diagrama, e o navegador o desenha sem nenhuma chamada de rede, então a pasta inteira vai junto se for enviada. O dono abre o `index.html` com um clique duplo: a home lista o manual por idioma e cada tipo de página técnica, e uma página tem os atalhos das suas seções no topo.
+
+O dono fecha o front matter de `seed-data.md` e pede de novo. O script apaga só os arquivos que a marca `.generated` listava, escreve tudo outra vez e agora não pula nada:
+
+```
+agile docs GREEN: 8 page(s) (manual 2, technical 6) -> D:\dev\acme-shop\.agile-site
+file:///D:/dev/acme-shop/.agile-site/index.html
+```
+
+Um arquivo que o dono tivesse posto na pasta continuaria lá. Se `.agile-site/` já existisse com arquivos que o script não escreveu (sem a marca `.generated`), ele pararia com `REFUSED:` nomeando a pasta e não escreveria nada; o Claude então deixa o dono escolher outra pasta com `--out` ou limpar a existente, e nunca a apaga. Num projeto sem nenhuma página de manual nem técnica, a resposta é só `agile docs NOTHING TO RENDER`.
+
+### 14.160 A inclinação primeiro, rodadas até "decidido" e um resumo antes de gravar: o `/agile:discuss` como conversa
+
+No Clinic Desk, um app de agenda para clínicas pequenas, você digita:
+
+```
+/agile:discuss "Como o Clinic Desk deve tratar o paciente que marca e não aparece?"
+```
+
+O Claude lê o brief e o que já existe e escreve o enquadramento (a ideia em duas linhas, o que o brief diz: o paciente nunca entra no app, ninguém paga pelo app, a meta do ano inclui perder menos clínicas; o que está em aberto). A mensagem termina aí, sem nenhuma opção, com uma pergunta só:
+
+> ❓ **Pergunta**
+> Qual é a sua inclinação sobre até onde o Clinic Desk deve ir: só lembrar o paciente, ou também agir depois do não comparecimento (uma taxa, por exemplo)? O que te preocupa em ir além?
+> **Recomendação:** responda numa linha, ou `sem inclinação` para ir direto às opções.
+
+Você responde `sem inclinação`. Agora vêm as opções: A, só o lembrete (S); B, o lembrete mais uma taxa que o app só registra (M); C, o lembrete mais o acompanhamento dos não comparecimentos, sem dinheiro (S/M). Com uma inclinação dita, uma linha diria como cada opção a pesa, e uma recomendação diferente dela diria por quê. Depois vem a rodada 1, com 4 perguntas, cada uma com recomendação e motivo (quando o lembrete sai, quem marca o não comparecimento, quem fixa a taxa, como o paciente fica sabendo dela). Você aceita todas as recomendações e diz `decidido`. Se a conversa passasse da segunda rodada, a primeira linha de cada rodada seguinte lembraria `diga decidido ou estacionar para encerrar`; nada a encerra além de você.
+
+Antes de gravar qualquer coisa, o Claude mostra o resumo: as cinco decisões (data, decisão, motivo), nenhum ponto adiado e os itens a criar, cada um com o épico que vai receber:
+
+| Tipo | Título | Épico |
+|---|---|---|
+| Feature | Lembrete antes da consulta | Novo épico: No-shows (recomendado, nenhum existente serve) |
+| Feature | Taxa de não comparecimento | Novo épico: No-shows |
+
+> ❓ **Pergunta**
+> a) Record and capture (Recommended)
+> b) Change the list
+> c) Park, capture nothing
+
+Você escolhe `Change the list` e tira a taxa: "preço está fora do escopo". Nenhum número foi pego e nenhum arquivo foi escrito. O resumo aparece de novo com uma linha só na tabela (o lembrete), as decisões que existiam só para a taxa saem da lista, e o card se repete. Você escolhe `Record and capture` e responde "sem épico" para o item que sobrou.
+
+Só agora o arquivo `docs/discussions/D-1-<slug>.md` é gravado, com a linha `dropped at the gate: No-show fee — the owner does not want it; pricing is out of scope` em `## Decisions`, a busca de itens parecidos roda (`No similar item (0 items read)`) e só o lembrete vira a feature F-1, no status `idea`, com o épico que você respondeu no resumo, sem perguntar de novo. A taxa nunca teve número nem issue. Se em vez do card você tivesse dito `estacionar` na rodada, o arquivo sairia `parked`, sem card e sem item. Numa execução sem ninguém para responder, a pergunta da inclinação não é feita e o card toma a opção recomendada.
+
+
+### 14.161 O Claude fecha um falso positivo do scan e você reabre
+
+No F-14 do HR-Portal, o scan do fim do build para com quatro achados critical. O Claude lê o código de cada um antes de decidir. A linha `src/Db.cs:13` é uma consulta que concatena uma constante, sem entrada de usuário: um falso positivo. Ele chama o agente `reviewer` com o achado, o lugar e a evidência; o `reviewer` confirma, e só então o Claude fecha a linha.
+
+```
+Claude: agile scan BLOCKED: 4 critical, 0 high open
+        a1b2c3d4: false-positive (the query takes a constant (evidence: Db.cs:13 concatenates a literal, no input reaches it) (reviewer confirmed))
+```
+
+Os outros achados ele não toca, e o script recusa quando o Claude tenta fechá-los:
+
+```
+Claude: c3d4e5f6 is a secret found in the git history: only the owner closes it, after saying the credential was rotated: nothing changed
+        --by claude closes only critical or high findings (e5f6a7b8 is medium): nothing changed
+```
+
+O segredo do histórico e o aviso medium vão para você como sempre. O novo scan bloqueia por menos um, sem nenhuma parada nova:
+
+```
+Claude: Triaged: 1 false positive
+        Closed by Claude: 1 (node scan.js closed lists them)
+        agile scan BLOCKED: 3 critical, 0 high open
+```
+
+O script de validação ganha um passo com o que o Claude fechou, exatamente como o script imprime:
+
+```
+Closed by Claude:
+| id | severity | where | reason |
+|---|---|---|---|
+| a1b2c3d4 | critical | src/Db.cs:13 | the query takes a constant (evidence: Db.cs:13 concatenates a literal, no input reaches it) (reviewer confirmed) |
+```
+
+Você abre o `src/Db.cs` e vê que o literal vem de um campo de formulário. Você digita o comando de reabrir do passo, com o motivo, e a linha volta para aberta com `who: owner`. O Claude não a fecha de novo e o scan volta a bloquear:
+
+```
+Claude: a1b2c3d4: reopened (the literal comes from a form field)
+        Triaged: none
+        agile scan BLOCKED: 4 critical, 0 high open
+```
+
+No ship, o passo 4d imprime o mesmo bloco `Closed by Claude:` logo depois do scan e antes do merge, e o relatório o cita sem resumir. Quem aceitar um risco continua sendo você: o `accept` sem `--by` vale mais que o do Claude.
+
+### 14.162 O painel de papéis: o plano, o caso medido e o veredito
+
+Você quer saber se três papéis, cada um num contexto novo, dão opiniões melhores que um contexto só, antes de pedir o `--panel` no `/agile:discuss` (#271). Sem argumento, o script só mostra o plano e não chama nada. O plano diz qual é a régua do veredito, fixada antes de qualquer rodada:
+
+```text
+$ node benchmarks/panel.js
+panel suite v1: 4 problems x 3 runs x 2 arms (self, panel) on sonnet, judge opus (another family)
+Each case: one /agile:discuss step 2, then the arm self (one call: the three roles in one context, with the recommendation) and the arm panel (three calls, one per role, each in a fresh context, with no recommendation: product, architect, contrarian).
+  import-records  How should a clinic that joins us bring in the patient records and the future appointments it keeps 
+  clinic-leaves  What should happen when a clinic stops paying or decides to leave us? It holds years of health recor
+  no-shows  How could we help clinics lose less money to patients who book and never show up? It is the complain
+  offline-desk  How should the front desk keep working when the clinic's internet line drops for an hour in the midd
+The bar for "beats" (BR9, fixed on 2026-10-20 before any run): all three of a mean gap of at least 1.0 (the mean of challenge, traps and decision value over all judged cases, panel over self), the panel higher on at least 3 of 4 problems, and a panel arm that costs at most 3 times the self arm per case. A partial run is INCONCLUSIVE.
+Nothing started and nothing paid. First one measured case: node benchmarks/panel.js --measure; then the suite: node benchmarks/panel.js --go --max-cost-usd <n>
+```
+
+Se você pular direto para a suíte, ela recusa sem gastar nada:
+
+```text
+$ node benchmarks/panel.js --go --seed 42
+panel suite REFUSED: --go needs --max-cost-usd <n>: run --measure first, it prints the limit to use (BR8)
+```
+
+O caso medido faz uma rodada completa de um problema, sem limite: a chamada do passo 2, o braço `self` (uma chamada), o braço `panel` (três chamadas, uma por papel) e o juiz. Saída do script sobre o `claude` falso do check (cada chamada custa US$ 0,37 ali; numa execução real, os valores são os que a CLI do Claude informa). O custo de cada braço é a soma das suas chamadas, e o limite sugerido é o custo do caso × 4 problemas × 3 rodadas + 25%, arredondado para cima:
+
+```text
+$ node benchmarks/panel.js --measure --seed 3
+import-records run 1: step 2 US$ 0.37; self US$ 0.37, panel US$ 1.11; judge US$ 0.37
+results: benchmarks/results/panel-measure-<stamp>.json and .md (seed 3)
+measured: US$ 2.22 for one case (step 2, self, 3 roles, judge); suggested --max-cost-usd 34 (x 4 problems x 3 runs + 25%)
+panel verdict: INCONCLUSIVE (a complete run is every case measured and judged (1 of 12 cases are))
+panel suite DONE (total US$ 2.22)
+```
+
+Um caso só nunca dá veredito: `INCONCLUSIVE`. O relatório traz a tabela do problema, com a coluna "Shown as" dizendo qual conjunto o juiz viu como X (o juiz não sabe qual é o `self` e qual é o `panel`):
+
+```text
+| Run | Arm | Shown as | challenge | traps | decision | Cost US$ | Step 2 US$ | Judge US$ | Traps named (judge) |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | self | Y | 4 | 4 | 4 | 0.37 | 0.37 | 0.37 | names the lock-in of a custom format |
+| 1 | panel | X | 7 | 7 | 7 | 1.11 | 0.37 | 0.37 | names the lock-in of a custom format |
+```
+
+Você autoriza a suíte com o limite sugerido (é uma despesa sua, não do script). Na rodada completa, o relatório fecha com uma linha só, os números atrás dela e a régua ao lado. No exemplo do check, o `panel` tira 3 pontos a mais, ganha nos 4 problemas e custa 3 vezes o `self`, no limite exato da régua:
+
+```text
+panel verdict: BEATS (mean gap +3.00 [bar +1.0], panel higher on 4 of 4 problems [bar 3], cost ratio 3.00 [bar 3.0]; self US$ 0.37 and panel US$ 1.11 a case)
+```
+
+Se qualquer caso não tiver custo informado ou o juiz responder fora da escala, a rodada sai com `PARTIAL`, o veredito é `INCONCLUSIVE` e o código de saída é 2. Um `BEATS` não abre nada sozinho: o #271 só começa quando você o abrir.
