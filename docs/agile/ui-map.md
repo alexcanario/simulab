@@ -19,6 +19,8 @@
 | chip | etiqueta: uma pílula arredondada que mostra um item (aqui, uma entrada do mapeamento de uma disciplina do edital) |
 | notice subject | disciplina do edital: uma matéria como o edital a nomeia e agrupa, com o número de questões |
 | syllabus | conteúdo programático: a lista de disciplinas do edital que o aluno abre sob cada edição no catálogo |
+| notice PDF | PDF do edital: o arquivo PDF do edital de uma edição, guardado dentro do Simulab, além do link oficial |
+| file field | campo de arquivo: o campo "Notice PDF" do formulário da edição, com Choose PDF, Replace e Remove |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
@@ -34,4 +36,6 @@
 | Review screen | Review queue > the question text or Review in the row | Reject and Approve at the bottom right; the summary (aside) on the right | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/ReviewQuestion.razor | 203369c |
 | Question form, review | sidebar > Content > Questions > Edit on a row > Publication card (Send for review, Withdraw from review) and the Review history card below it | the buttons in the Publication card; the Review history table under it | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/QuestionForm.razor | 203369c |
 | Edition notice subjects | sidebar > Content > Exams > the exam > "Editions" section > the edition (/admin/exams/{exam}/editions/{edition}) | the section "Notice subjects": rows in the notice's order under group headings, chips under each label, Edit and the move controls in each row | src/Hosts/Simulab.Web/Components/Pages/Catalog/NoticeSubjectsSection.razor | no |
+| Edition notice PDF | sidebar > Content > Exams > the exam > "Editions" section > the edition (/admin/exams/{exam}/editions/{edition}) > card "Notice and application" | the file field "Notice PDF" below Application date: Choose PDF when empty; with a file, its name and size, Download, Replace and Remove; Save at the bottom sends it | src/Hosts/Simulab.Web/Components/Pages/Catalog/ExamEditionForm.razor, src/Hosts/Simulab.Web/Components/Ui/AppFileField.razor | 5869cb8 |
+| Student notice PDF | sidebar > Study > Catalog > the exam (/catalog/exams/{id}) | in each edition's line, beside "Official notice", the link "Notice (PDF)" when the edition has a file | src/Hosts/Simulab.Web/Components/Pages/Catalog/CatalogExam.razor | 5869cb8 |
 | Student syllabus | sidebar > Study > Catalog > the exam (/catalog/exams/{id}) | under each edition the button "Show syllabus (n subjects)" opens its notice subjects with their mapping | src/Hosts/Simulab.Web/Components/Pages/Catalog/EditionSyllabus.razor | no |

@@ -629,6 +629,7 @@ else
         try
         {
             // Read now, here: the browser's stream is slow, and the call to the Api is made from memory (trade-off 5).
+            // shortcut(F-89): the chosen PDF (up to 20 MB) is held whole in the circuit's memory until Save or Discard — revisit when several curators upload at once or the limit passes 20 MB.
             await using var stream = file.OpenReadStream(CatalogLimits.ExamEditionNoticeDocumentMaxBytes);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);

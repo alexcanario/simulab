@@ -1,7 +1,7 @@
 ---
 feature: F-89
 epic: Assessment catalog
-status: building
+status: validating
 board: 132
 version: 1
 ---
@@ -120,6 +120,8 @@ Tests locked: 99c89bffec0f159031d4547d296f477fe50f38e5 (13 files); unlocks: 2
 - 2026-10-20: tests unlocked a second time (owner's yes, asked: the Cancel test did not render the discard dialog the unsaved-changes rule opens, and the F-22 error text scan only reads `*.Contracts` projects, so `StorageErrorCodes` moved to a new `Simulab.Storage.Contracts` beside `Simulab.Ai.Contracts`; two tests gained a `using`; the criteria did not change), fixed and locked again.
 - 2026-10-20: tests unlocked a third time (owner's yes, asked: the Cancel test passed alone and failed once in the whole suite, because its wait is driven by renders and the navigation that follows the confirmation renders nothing; it now waits with `SpinWait.SpinUntil` and a 15 s ceiling; proof: 12 of 12 alone and 4 of 4 whole-project runs green; the criteria did not change), fixed and locked again.
 - 2026-10-20: the Api hosts that tests start outside Development get a storage connection that is never opened (`SimulabApiFactory` after `ConfigureHost`, `ApiFactory` always), and the blob client has no health check of its own — Claude: trap T3 avoided in the tests with one line per factory, not an Azurite container in four projects; a storage that is down must not take the Api out of rotation.
+- 2026-10-20: Reuse: the Aspire client integration `AddKeyedAzureBlobServiceClient` and the Azurite emulator (`RunAsEmulator`), `Testcontainers` through the `RedisServer` shape (`AzuriteServer`), `ApiProblem` for every answer, the `Simulab.Ai.Contracts` pattern for a code the Web localizes, `AzureDeployment` account settings (`WithLocallyRedundantStorage` shared with the key rings), the form kit (`AppSectionCard`, `AppFormGrid`, `AppFormActions`, `AppLink`, `ErrorText`) and `MudButton HtmlTag="label"` for the picker — Claude.
+- 2026-10-20: Shortcuts: 1 marked (src/Hosts/Simulab.Web/Components/Pages/Catalog/ExamEditionForm.razor, the chosen PDF held whole in the circuit's memory) — Claude.
 - 2026-10-20: a new project, `Simulab.Storage.Contracts` (only `StorageErrorCodes`), referenced by `Simulab.Storage` and the Web — Claude: the error-code text check (F-22) finds codes only in `*.Contracts` assemblies, as it found `ai.not_configured` in `Simulab.Ai.Contracts`.
 - 2026-10-20: plan — 1 Storage block, Azurite in the app host and in the publish model, infra docs, overview and boundary tests → build, Storage.Tests, architecture and app host tests; 2 Upload end to end: migration, `NoticeDocument`, port and adapter, handler, `PUT` → AC1 (upload half), AC5, AC6, AC13; 3 Downloads: back office and student `GET` → AC1, AC9 (API), AC10; 4 Replace, remove and delete the edition → AC3, AC4, AC12; 5 Web plumbing: client, buffered upload, the two download routes with policies → Web host tests; 6 `AppFileField` and the edition form with the three locales → AC2, AC7, AC8, AC9 (screen), AC14; 7 Student page link → AC11.
 
@@ -142,6 +144,103 @@ Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
 ## Change notes
 
 ## Validation script
+### English
+Needed to validate: the local app host with Docker running (Azurite, the local blob storage emulator, starts as a new container the first time), three files of yours — one real notice PDF of up to 20 MB, one file over 20 MB, and one file that is not a PDF renamed to end in `.pdf` — and a second account made at `/sign-up` (confirm its email in Mailpit, the local mail catcher the dashboard links) — owner; the app host and the database are in place now, the files and the second account are yours to bring.
+
+Whose data: the app runs on its own database `simulab_f89` inside the shared local PostgreSQL volume (the migration `AddExamEditionNoticeDocument` is already applied there, never to `simulab`), with the seeded exams; the uploaded files live in the new volume `simulab-azurite-data`.
+
+1. [ ] Start the app host from the item's worktree `D:\wt\simulab\f-89-notice-pdf-upload` (stop any other app host first). Open https://localhost:7125 and sign in as `admin@simulab.local` → you land signed in; the console has no `fail` line.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f89"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f89 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. In the sidebar (left menu) open Content → Exams, click the exam "Guarda Municipal" of Curitiba, and in its "Editions" section click an edition (the edition page, a form in cards).
+   - [ ] 2.1 In the card "Notice and application", below "Application date", the file field (a field that holds one PDF) "Notice PDF" shows "Choose PDF" and the hint "PDF, up to 20 MB."
+   - [ ] 2.2 Press **Choose PDF** and pick your real PDF → the line "Chosen file, not saved yet: <name>" and **Discard choice** appear, and the field's other fields did not change.
+   - [ ] 2.3 Press **Save** (bottom right) → "Edition saved."; the field now shows the file's name, its size (for example "2.5 MB"), **Download**, **Replace** and **Remove**.
+   - [ ] 2.4 Press **Download** → the browser saves a file with the same name; open it and compare its size with the original: the same bytes, nothing else.
+   - [ ] 2.5 The storage is private. Run (it prints the status of an anonymous request to the container; the port changes on each start):
+
+   PowerShell 7:
+   ```powershell
+   $p = (docker port simulab-azurite 10000 | Select-Object -First 1).Split(":")[-1]; curl.exe -s -o NUL -w "%{http_code}`n" "http://127.0.0.1:$p/devstoreaccount1/documents?restype=container&comp=list"
+   ```
+   Git Bash:
+   ```bash
+   PORT=$(docker port simulab-azurite 10000 | head -1 | sed 's/.*://'); curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:$PORT/devstoreaccount1/documents?restype=container&comp=list"
+   ```
+   → it prints `403` (anonymous access is refused). Repeat it any time.
+3. Replace and remove, on the same edition page.
+   - [ ] 3.1 Press **Replace**, pick another PDF, press **Save** → the name and size are the new file's; after the save the old file is gone (nothing else to do: the list of files is not shown).
+   - [ ] 3.2 Press **Remove** → the line "The file will be removed when you save." and **Keep file** appear; press **Keep file** → the file is back as it was.
+   - [ ] 3.3 Press **Remove** again, then **Save** → "Edition saved." and the field shows "Choose PDF" again.
+   - [ ] 3.4 Press **Choose PDF**, pick a file, then press **Cancel** (bottom, text button) → a dialog "Discard changes?" appears; confirm → you return to the exam page; open the edition again → no file was stored.
+4. Refusals on the same page.
+   - [ ] 4.1 Choose the file that is not a PDF (renamed `.pdf`) and press **Save** → the fields are saved, the field shows "This file is not a PDF." in red below it, the error summary (the panel at the top of the form) lists "Notice PDF", and the chosen file stays so you can discard it.
+   - [ ] 4.2 Press **Discard choice**, then choose the file over 20 MB → "The file is over 20 MB." appears at once on the field and nothing is chosen.
+   - [ ] 4.3 The link and the PDF are independent: clear "Notice link", set the status to **Published** with no file and press **Save** → it saves (neither is required).
+5. Add a new edition with a file: on the exam page press **Add edition**, pick an organizer and a notice year, press **Choose PDF** and pick your PDF, press **Save** → "Edition saved.", the address changes to the edition's own page, and the field shows the file (the edition was created first, then the file went to it).
+6. As a student: sign out, sign in with the second account (a student), then in the sidebar open Study → Catalog and click the exam "Guarda Municipal" of Curitiba.
+   - [ ] 6.1 Beside "Official notice", the editions that are published and hold a file show the link "Notice (PDF)"; an edition with no file shows no such link.
+   - [ ] 6.2 Press **Notice (PDF)** → the browser saves the PDF and the page does not navigate away (the link has the `download` attribute; if the page navigates or goes blank, tell me).
+   - [ ] 6.3 As the administrator set that edition back to **Draft** and **Save**, then reload the student page → its "Notice (PDF)" link is gone.
+   - [ ] 6.4 As the student open `/admin/exams` → Page not found (the student cannot reach the back office or upload).
+7. Language: in the app bar (the top strip) press the globe and choose Português (Brasil) → the field reads "PDF do edital", "Escolher PDF", "Substituir", "Remover", "Descartar escolha"; choose Português (Portugal) → "PDF do aviso" and "Transferir"; go back to English.
+8. Keyboard only, as the administrator on the edition page: press Tab until the focus ring surrounds "Choose PDF" → press Enter or Space and the file dialog opens (Esc closes it); Tab on to **Save** and **Cancel**; the order is logical.
+
+### pt-BR
+Necessário para validar: o app host local com o Docker ligado (o Azurite, o emulador local do armazenamento de blobs, sobe como um contêiner novo na primeira vez), três arquivos seus — um PDF de edital de verdade de até 20 MB, um arquivo com mais de 20 MB e um arquivo que não é PDF renomeado para terminar em `.pdf` — e uma segunda conta criada em `/sign-up` (confirme o e-mail no Mailpit, o capturador de e-mail local que o painel mostra) — dono; o app host e o banco já estão no lugar, os arquivos e a segunda conta são você que traz.
+
+De quem são os dados: o app roda no banco próprio `simulab_f89`, dentro do volume compartilhado do PostgreSQL local (a migração `AddExamEditionNoticeDocument` já foi aplicada ali, nunca em `simulab`), com as provas semeadas; os arquivos enviados ficam no volume novo `simulab-azurite-data`.
+
+1. [ ] Suba o app host a partir da worktree do item `D:\wt\simulab\f-89-notice-pdf-upload` (pare qualquer outro app host antes). Abra https://localhost:7125 e entre como `admin@simulab.local` → você entra logado; o console não tem nenhuma linha `fail`.
+
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f89"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f89 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Na sidebar (menu lateral esquerdo) abra Content → Exams, clique na prova "Guarda Municipal" de Curitiba e, na seção "Editions", clique numa edição (a página da edição, um formulário em cartões).
+   - [ ] 2.1 No cartão "Notice and application", abaixo de "Application date", o campo de arquivo (um campo que guarda um PDF) "Notice PDF" mostra "Choose PDF" e a dica "PDF, up to 20 MB."
+   - [ ] 2.2 Aperte **Choose PDF** e escolha o seu PDF → aparecem a linha "Chosen file, not saved yet: <nome>" e **Discard choice**, e os outros campos não mudaram.
+   - [ ] 2.3 Aperte **Save** (canto inferior direito) → "Edition saved."; o campo agora mostra o nome do arquivo, o tamanho (por exemplo "2.5 MB"), **Download**, **Replace** e **Remove**.
+   - [ ] 2.4 Aperte **Download** → o navegador salva um arquivo com o mesmo nome; abra-o e compare o tamanho com o original: os mesmos bytes, nada além.
+   - [ ] 2.5 O armazenamento é privado. Rode (ele imprime o status de um pedido anônimo ao contêiner; a porta muda a cada subida):
+
+   PowerShell 7:
+   ```powershell
+   $p = (docker port simulab-azurite 10000 | Select-Object -First 1).Split(":")[-1]; curl.exe -s -o NUL -w "%{http_code}`n" "http://127.0.0.1:$p/devstoreaccount1/documents?restype=container&comp=list"
+   ```
+   Git Bash:
+   ```bash
+   PORT=$(docker port simulab-azurite 10000 | head -1 | sed 's/.*://'); curl -s -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:$PORT/devstoreaccount1/documents?restype=container&comp=list"
+   ```
+   → imprime `403` (o acesso anônimo é recusado). Repita quando quiser.
+3. Troca e remoção, na mesma página da edição.
+   - [ ] 3.1 Aperte **Replace**, escolha outro PDF e aperte **Save** → o nome e o tamanho são os do novo arquivo; depois do salvamento o arquivo antigo some (não há mais nada a fazer: a lista de arquivos não é mostrada).
+   - [ ] 3.2 Aperte **Remove** → aparecem a linha "The file will be removed when you save." e **Keep file**; aperte **Keep file** → o arquivo volta como estava.
+   - [ ] 3.3 Aperte **Remove** de novo e depois **Save** → "Edition saved." e o campo volta a mostrar "Choose PDF".
+   - [ ] 3.4 Aperte **Choose PDF**, escolha um arquivo e depois aperte **Cancel** (embaixo, botão de texto) → aparece o diálogo "Discard changes?"; confirme → você volta à página da prova; abra a edição de novo → nenhum arquivo foi guardado.
+4. Recusas, na mesma página.
+   - [ ] 4.1 Escolha o arquivo que não é PDF (renomeado `.pdf`) e aperte **Save** → os campos são salvos, o campo mostra "This file is not a PDF." em vermelho embaixo, o painel de erros (o quadro no alto do formulário) lista "Notice PDF" e o arquivo escolhido continua, para você descartá-lo.
+   - [ ] 4.2 Aperte **Discard choice** e depois escolha o arquivo com mais de 20 MB → "The file is over 20 MB." aparece na hora no campo e nada fica escolhido.
+   - [ ] 4.3 O link e o PDF são independentes: apague o "Notice link", ponha o status em **Published** sem arquivo e aperte **Save** → salva (nenhum dos dois é obrigatório).
+5. Adicione uma edição nova com arquivo: na página da prova aperte **Add edition**, escolha uma banca e um ano do edital, aperte **Choose PDF** e escolha o seu PDF, aperte **Save** → "Edition saved.", o endereço muda para o da própria edição e o campo mostra o arquivo (a edição foi criada primeiro, depois o arquivo foi para ela).
+6. Como aluno: saia, entre com a segunda conta (de aluno) e, na sidebar, abra Study → Catalog e clique na prova "Guarda Municipal" de Curitiba.
+   - [ ] 6.1 Ao lado de "Official notice", as edições publicadas que têm arquivo mostram o link "Notice (PDF)"; uma edição sem arquivo não mostra esse link.
+   - [ ] 6.2 Aperte **Notice (PDF)** → o navegador salva o PDF e a página não sai do lugar (o link tem o atributo `download`; se a página navegar ou ficar em branco, me avise).
+   - [ ] 6.3 Como administrador, volte essa edição para **Draft** e **Save**; recarregue a página do aluno → o link "Notice (PDF)" dela sumiu.
+   - [ ] 6.4 Como aluno abra `/admin/exams` → Page not found (o aluno não alcança o back office nem envia arquivo).
+7. Idioma: na barra superior (a faixa no alto) aperte o globo e escolha Português (Brasil) → o campo diz "PDF do edital", "Escolher PDF", "Substituir", "Remover", "Descartar escolha"; escolha Português (Portugal) → "PDF do aviso" e "Transferir"; volte para o inglês.
+8. Só com o teclado, como administrador na página da edição: aperte Tab até o anel de foco cercar "Choose PDF" → aperte Enter ou Espaço e o diálogo de arquivo abre (Esc fecha); siga com Tab até **Save** e **Cancel**; a ordem é lógica.
 
 ## Events
 
@@ -150,5 +249,8 @@ Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
 - 2026-10-20 blocked — test wrong: Cancel test did not render the discard dialog providers; StorageErrorCodes moves to a Contracts project so the F-22 error text scan sees it; criteria unchanged
 - 2026-10-20 blocked — test wrong: Cancel test waits on the page render but the navigation after the confirmation does not render it: flaky under load; criteria unchanged
 - 2026-10-20 test-fail — tests failed (Simulab.slnx): Simulab.Api.Tests.ForwardedHeadersHostTests.ProxyListed_ForwardedHeaderFromAnUnlistedSender, 2 reds
+- 2026-10-20 question — owner card: unlock of a locked test (round 1)
+- 2026-10-20 question — owner card: unlock of a locked test (round 2)
+- 2026-10-20 question — owner card: unlock of a locked test (round 3)
 
 ## Delivery
