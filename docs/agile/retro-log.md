@@ -1394,3 +1394,11 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 2, score 0/4: stress-loop copies of the test output live inside the worktree (outside it `TrueFalseQuestionListTypeCellTests.TheStylesheet_...` fails with NullReferenceException in `FindWebRoot`). Went to `.claude/rules/agile/project.md`.
 - Lesson 3, score 0/5: the full suite took 356 s (budget 5 min; Catalog, Identity and QuestionBank 4 to 6 min each). Not captured: F-144 already exists for it (board #197).
 - Shortcuts: none. Item decisions stay in the item.
+
+## 2026-10-20 - Sync with agile@canary 0.135.0
+- From 0.130.0 to 0.135.0 (5 minor versions). Copied (owner's OK): `.claude/rules/agile/ui.md` (contrast test checks `hc-*` themes at `minHighContrast`), `docs/agile/templates/epic.md` (several labelled MVP cuts), `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md`.
+- Merged (owner's OK, clean): `docs/agile/profile.md` (one line: `hc-light` counts as light, `hc-dark` as dark, `hc-*` user themes checked at `minHighContrast`). Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (differences are the project's own).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present in both tables; technical-term rows not swept in this sync.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Commit: `chore: sync with agile@canary 0.135.0` on main, with the owner's OK.

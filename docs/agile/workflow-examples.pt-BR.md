@@ -5379,15 +5379,17 @@ Claude: Troquei o texto do escuro do amber para #907E5F e rodei de novo:
 ```
 
 ```
-WROTE 5 files
+high contrast: 1 colors adjusted, 0 of them backgrounds
+WROTE 7 files
 ```
 
 ```
-Claude: docs/design/themes/ tem agora cais-light.json, cais-dark.json, amber-light.json, amber-dark.json e o
-index.json, com o Cais como padrão. Nenhum código do app foi alterado.
+Claude: docs/design/themes/ tem agora cais-light.json, cais-dark.json, cais-hc-light.json, cais-hc-dark.json,
+amber-light.json, amber-dark.json e o index.json, com o Cais como padrão. Os dois temas de alto contraste
+são do tema padrão: o amber não tem um. Nenhum código do app foi alterado.
 ```
 
-Os quatro arquivos de tema e o índice são gerados, nunca editados à mão; o formato está em `references/theme-format.md` do plugin. A chave `Accent` marcada como bloqueada no arquivo do amber não entra na lista de bloqueadas: só o tema padrão bloqueia chaves.
+Os seis arquivos de tema e o índice são gerados, nunca editados à mão; o formato está em `references/theme-format.md` do plugin. A chave `Accent` marcada como bloqueada no arquivo do amber não entra na lista de bloqueadas: só o tema padrão bloqueia chaves.
 
 ### 14.149 Um atalho deliberado: marcado no build, sem gatilho corrigido, oferecido como ideia na retro
 
@@ -5535,13 +5537,13 @@ a) sim   b) não
 Recomendação: sim. Motivo: quem usa o app escolhe o tema do modo claro e do escuro do sistema e a fonte, e o kit aplica isso em tempo de execução.
 ```
 
-O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade, no mesmo projeto:
+O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade, no mesmo projeto (o script diz também, antes do veredito, quantas cores ajustou nos dois temas de alto contraste):
 
 ```
-WROTE 5 files
+WROTE 7 files
 ```
 
-Isso cria `docs/design/themes/` com `index.json` e um arquivo por tema e modo, que é o que liga o módulo do kit. No passo 13, a ideia "Run-time themes in the MudBlazor" entra no quadro logo depois da ideia do kit de UI e depende dela.
+Isso cria `docs/design/themes/` com `index.json`, um arquivo por tema e modo e os dois temas de alto contraste do tema padrão, que é o que liga o módulo do kit. No passo 13, a ideia "Run-time themes in the MudBlazor" entra no quadro logo depois da ideia do kit de UI e depende dela.
 
 Se o dono responde não, o ADR-0001 só ganha `Customizable themes | no | one identity`: nenhuma pasta, nenhuma ideia. Se o script recusasse por um par de cores sem contraste, o bootstrap mostraria a recusa, manteria o sim e capturaria antes a ideia "Built-in themes from the identity".
 
@@ -5934,3 +5936,312 @@ panel verdict: BEATS (mean gap +3.00 [bar +1.0], panel higher on 4 of 4 problems
 ```
 
 Se qualquer caso não tiver custo informado ou o juiz responder fora da escala, a rodada sai com `PARTIAL`, o veredito é `INCONCLUSIVE` e o código de saída é 2. Um `BEATS` não abre nada sozinho: o #271 só começa quando você o abrir.
+
+### 14.163 A página HTML do roteiro, para validar no celular
+
+O F-12 está em `validating` e você vai testar os passos longe do computador: no celular, no caminho do trabalho. Você digita o comando com `--html` e a pasta de uma pasta sincronizada com o aparelho:
+
+```text
+> /agile:script F-12 --html --out C:\Users\ana\Sync
+Claude: F-12 — Bulk import of exams [validating]
+agile validation page WRITTEN: C:\Users\ana\Sync\F-12.html
+```
+
+O Claude não leu o status nem escreveu nada no item, no board ou no arquivo das marcas: a página é só uma vista do roteiro. Sem `--out`, o arquivo vai para `agile-validation-pages/F-12.html` dentro da pasta `.git` e nunca é versionado. A página é um arquivo só, sem rede: abre no celular direto da pasta sincronizada.
+
+No aparelho você vê o roteiro em pt-BR (o botão `EN` troca para o inglês, com as mesmas marcas). Cada subpasso tem a sua caixa; os blocos de comando têm um botão `Copiar` cada. A página nasceu com as marcas que a máquina já guardava, `1.1` e `1.2`, e por isso o passo 1 já aparece como `(feito)`:
+
+```text
+Roteiro de validação                                [pt-BR | EN]
+Gerada em 2026-10-20
+2 de 4 marcados  [=========-------]                [Limpar marcas]
+Se o roteiro mudar, gere de novo.
+
+1. Iniciar o app   (feito)
+   [x] 1.1 Suba o app host → a página de login abre.
+   [x] 1.2 Entre como o usuário demo → a home abre.
+2. Rodar a conferência da importação
+   [ ] 2.1 Rode o comando do seu shell → 12 passaram.
+       dotnet test --filter Name~Import                [Copiar]
+       dotnet test --filter Name~Import                [Copiar]
+3. [ ] Troque o idioma para inglês → os textos mudam.
+
+/agile:script F-12 ticks 1.1 1.2                       [Copiar comando]
+As marcas ficam neste navegador; para o Claude, copie o comando e cole no chat.
+```
+
+Você roda o passo 2 e marca `2.1`: o contador vira `3 de 4 marcados`, a linha riscada mostra a unidade feita e o comando passa a ser `/agile:script F-12 ticks 1.1 1.2 2.1`. Se você fechar a aba e abrir de novo, as marcas estão como ficaram (elas ficam no navegador daquele aparelho; sem esse armazenamento, a página funciona do mesmo jeito, só não lembra). `Limpar marcas` desmarca tudo.
+
+De volta ao computador, você toca em `Copiar comando` (ou seleciona o texto do campo, se o navegador bloquear a área de transferência) e cola no chat:
+
+```text
+> /agile:script F-12 ticks 1.1 1.2 2.1
+Claude: agile validation TICKED: 3 of 4
+```
+
+Daí em diante as marcas valem como as do widget: aparecem nele, no corpo do issue e na evidência do ship. A página não sabe disso: ela é uma foto. Se o roteiro mudar, você pede `--html` outra vez, e a página nova começa das marcas da máquina.
+
+Um item que ainda não tem roteiro é recusado e nada é escrito:
+
+```text
+> /agile:script F-5 --html
+Claude: F-5 — No script yet [building]
+agile validation page REFUSED: C:\dev\app\docs\features\F-5-none.md has no readable ## Validation script (no ## Validation script section)
+```
+
+O texto do item só aparece como texto: um passo que contenha `<script>` ou `</script>` é mostrado do jeito que foi escrito, e a página continua funcionando.
+
+### 14.164 Dois temas de alto contraste saem da identidade e o teste de contraste do app lê o mínimo deles
+
+O app desktop Cais já tem os temas embutidos (claro, escuro e o âmbar). Você ajusta o texto secundário do tema claro, e a geração escreve também os dois temas de alto contraste do tema padrão:
+
+```
+> /agile:identity
+Claude: Identidade registrada: tema Cais (claro e escuro), 9 chaves, 5 pares de contraste, 2 chaves bloqueadas
+(Env.Production.Bg, Focus). O que muda? A) uma cor  B) adicionar um tema embutido  C) fontes ou raio  D) nada
+> A, Text.Muted do claro: #5E6875
+Claude: Nada foi escrito ainda. Text.Muted sobre Surface no claro dá 5.65:1, acima do mínimo 4.5:1. Confirma?
+> confirmo
+Claude: Escrevi docs/design/identity.tokens.json e rodei a geração dos temas embutidos:
+```
+
+```
+high contrast: 1 colors adjusted, 0 of them backgrounds
+WROTE 7 files
+```
+
+```
+Claude: Além dos quatro temas de antes, saíram cais-hc-light.json e cais-hc-dark.json, os temas de alto contraste do
+tema padrão (o âmbar não tem um). Uma cor foi ajustada, e nenhuma delas era fundo: no claro, Text.Muted passou de
+#5E6875 (5.65:1 sobre Surface) para #515965 (7.08:1, o mínimo de texto em alto contraste é 7:1). Todas as outras cores
+já chegavam ao mínimo e ficaram iguais às do tema claro. Nenhum código do app foi alterado.
+```
+
+O mínimo de alto contraste é 7:1 para texto e 4.5:1 para o resto (a WCAG 2.2 só define o nível AAA para texto, então a parte de interface usa o do texto grande). Cada par do `index.json` traz os dois, `min` e `minHighContrast`, e o teste de contraste do app confere cada arquivo de tema com o mínimo certo:
+
+```csharp
+// para cada tema listado no index.json
+var minimum = theme.Type.StartsWith("hc-") ? pair.MinHighContrast : pair.Min;
+Assert.True(Contrast(colors[pair.Foreground], colors[pair.Background]) >= minimum);
+```
+
+Em um app que adotou o kit de temas antes desta versão, a verificação aponta `STALE` para os dois arquivos novos até a próxima geração; o kit só passa a listar "Cais High Contrast Light" entre os temas claros e "Cais High Contrast Dark" entre os escuros depois do `/agile:sync` e de refazer o módulo do kit. Trocar sozinho para o alto contraste quando o sistema operacional pede esse modo não faz parte disto: é a #273. Se uma identidade tem um par que nenhuma cor de primeiro plano leva ao mínimo, o fundo anda e o relatório conta esse fundo; se nem assim o par fecha em dez passadas, a geração recusa pelo nome do par e nada é escrito.
+
+### 14.165 O `/agile:order` puxa a cadeia de um bug de nível alto para o topo
+
+O acme-shop tem cinco itens em aberto: F-20 (catálogo de produtos), F-21 (totais do carrinho, depende do F-20), F-22 (layout de impressão), F-23 (compartilhar por link, depende do F-22) e B-5, um bug no total dos reembolsos que depende do F-21. O B-5 fica no nível 3, e antes desta versão a lista o punha depois de todas as features dos níveis 1 e 2, inclusive as que nada têm a ver com ele:
+
+```
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+| 1 | F-20 | Product catalog | approved | - | shop | - | F-21 |
+| 2 | F-22 | Print layout | approved | - | shop | - | F-23 |
+| 3 | F-21 | Cart totals | approved | - | shop | F-20 | B-5 |
+| 4 | F-23 | Share by link | approved | - | shop | F-22 | - |
+| 5 | B-5 | Total wrong on refunds | approved | - | shop | F-21 | - |
+```
+
+Agora o `/agile:order` puxa o bug e o que ele espera para o topo; o resto fica na ordem de sempre (a saída abaixo é a do script no projeto de teste):
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 5 items, 0 delivered
+        | # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+        | 1 | F-20 | Product catalog | approved | - | shop | - | F-21 |
+        | 2 | F-21 | Cart totals | approved | - | shop | F-20 | B-5 |
+        | 3 | B-5 | Total wrong on refunds | approved | - | shop | F-21 | - |
+        | 4 | F-22 | Print layout | approved | - | shop | - | F-23 |
+        | 5 | F-23 | Share by link | approved | - | shop | F-22 | - |
+```
+
+A cadeia do B-5 (F-20, F-21 e o próprio bug) vem primeiro, e o F-22 e o F-23, que o bug não precisa, vêm depois. Nada fica antes do que espera: o F-20 abre a lista porque o F-21 depende dele. Um bug bloqueado à mão, um adiado ou um que está num ciclo não puxa nada. Com épicos em corte, a puxada vale dentro de cada grupo: o bug de `Later` leva a cadeia para o topo de `Later` e não muda nenhum item de grupo.
+
+### 14.166 Um objetivo vira quatro marcos em sequência: `/agile:mvp --milestones`
+
+No acme-shop há dois epics, `catalogo` e `checkout`, e seis itens em aberto: o F-20 (Lista de produtos), o F-21 (Busca de produtos), o F-22 (Carrinho, depende do F-20), o F-23 (Pagar com cartão, depende do F-22), o F-24 (Cupom de desconto, Could) e o F-25 (Painel de pedidos, depende do F-23). Nenhum epic tem corte. Você quer ver o caminho até uma loja que vende e acompanha pedidos, não um corte só. Você digita:
+
+```
+/agile:mvp loja "vender produtos online com pagamento por cartão e acompanhar os pedidos" --milestones
+```
+
+A primeira linha da resposta diz o que foi lido: `label: loja · epic: all · goal: vender produtos online com pagamento por cartão e acompanhar os pedidos`. O Claude lê o brief, os epics e os itens e analisa o objetivo no chat: o que o usuário faz (ver, buscar, montar o carrinho, pagar, acompanhar), o que o técnico impõe (o pagamento depende do carrinho, o painel depende do pagamento), o que o negócio pede (cartão) e o que ninguém escreveu mas o objetivo exige: fechar um pedido precisa de um valor de frete, e nenhum item cobre isso. Essa é uma lacuna, e vem com quatro campos num card:
+
+- Nome curto: Cálculo de frete.
+- Descrição objetiva: informar o custo de entrega do carrinho pelo CEP.
+- Dependências: F-22.
+- Impacto no objetivo: sem o frete o pedido não fecha; entra no marco do pagamento.
+
+O card pergunta o que fazer com a lacuna: `Capturar como ideia (Recomendado)`, `Sugerir uma discussão` ou `Ignorar`. Você escolhe capturar. O `/agile:idea` cria o F-26 (Cálculo de frete, depende do F-22), que passa a ser semente do marco do pagamento. O Claude grava as sementes de cada marco num arquivo de plano, fora do repositório, e nunca digita os ids de um corte:
+
+```
+{
+  "milestones": [
+    { "name": "vitrine", "purpose": "see and search products", "seeds": ["F-20", "F-21"] },
+    { "name": "carrinho", "purpose": "fill a cart", "seeds": ["F-22"] },
+    { "name": "pagamento", "purpose": "pay by card with shipping", "seeds": ["F-23", "F-26"] },
+    { "name": "pedidos", "purpose": "follow the orders", "seeds": ["F-25"] }
+  ]
+}
+```
+
+O script calcula o resto, e a saída real dele sobre esse cenário é a diferença contra o que está gravado (nada, ainda):
+
+```
+cut loja-1-vitrine (rank 1, catalogo): enters: F-20, F-21; leaves: -
+cut loja-2-carrinho (rank 2, catalogo): enters: F-22; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: F-23, F-26; leaves: -
+cut loja-4-pedidos (rank 4, checkout): enters: F-25; leaves: -
+agile mvp MILESTONES DIFF: 4 milestones, 6 items
+```
+
+O F-24 (cupom, Could) não é pedido pelo objetivo e fica em `Later`. O Claude mostra a tabela com o motivo de cada marco e faz uma pergunta só:
+
+| Marco | Rank | Epic | Itens | Motivo |
+|---|---|---|---|---|
+| vitrine | 1 | catalogo | F-20, F-21 | ver e buscar produtos é o começo de qualquer venda |
+| carrinho | 2 | catalogo | F-22 | juntar o que se quer comprar |
+| pagamento | 3 | checkout | F-23, F-26 | pagar por cartão e fechar o pedido com o frete |
+| pedidos | 4 | checkout | F-25 | acompanhar o que foi vendido |
+
+O card diz `Escrever (Recomendado)`, `Mudar a lista` ou `Pular`. Nada foi escrito até aqui; `Pular` não toca em arquivo algum, e `Mudar a lista` refaz o plano e mostra uma nova diferença antes de perguntar de novo. Você escolhe escrever. O script grava um corte por marco, cada um no epic que tem mais dos seus ids, com a linha `Rank:` igual ao número do marco, e uma linha em `## Decisions` de cada arquivo:
+
+```
+cut loja-1-vitrine (rank 1, catalogo): enters: F-20, F-21; leaves: -
+cut loja-2-carrinho (rank 2, catalogo): enters: F-22; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: F-23, F-26; leaves: -
+cut loja-4-pedidos (rank 4, checkout): enters: F-25; leaves: -
+files: docs/epics/catalogo.md, docs/epics/checkout.md
+commit: chore(epic): milestones of loja
+agile mvp WRITTEN: 4 milestones
+```
+
+```
+## First release cut: loja-3-pagamento
+Rank: 3
+F-23, F-26
+
+## First release cut: loja-4-pedidos
+Rank: 4
+F-25
+```
+
+```
+- 2026-10-20 — milestones of loja written by /agile:mvp: 4 milestones (6 items); label: loja; goal: "vender produtos online com pagamento por cartão e acompanhar os pedidos"; gaps left: 0; milestones: loja-1-vitrine (see and search products), loja-2-carrinho (fill a cart), loja-3-pagamento (pay by card with shipping), loja-4-pedidos (follow the orders)
+```
+
+O Claude propõe o commit `chore(epic): milestones of loja`, com os dois epics por nome, e só o faz com a sua autorização. A análise e o motivo de cada marco ficaram no chat; nos cortes só há ids. O `/agile:order` passa a listar os marcos em sequência, e o F-24 em `Later`; este é o trecho real dos grupos:
+
+```
+## MVP: loja-1-vitrine
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 1 | F-20 | Lista de produtos | approved | - | catalogo | - | F-22 |
+| 2 | F-21 | Busca de produtos | approved | - | catalogo | - | - |
+
+## MVP: loja-2-carrinho
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 3 | F-22 | Carrinho | approved | - | catalogo | F-20 | F-23, F-26, first release of catalogo |
+
+## MVP: loja-3-pagamento
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 4 | F-23 | Pagar com cartao | approved | - | checkout | F-22 | F-24, F-25 |
+| 5 | F-26 | Calculo de frete | idea | - | checkout | F-22 | - |
+
+## MVP: loja-4-pedidos
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 6 | F-25 | Painel de pedidos | approved | - | checkout | F-23 | first release of checkout |
+
+## Later
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 7 | F-24 | Cupom de desconto | approved | - | checkout | F-23 | - |
+```
+
+Semanas depois o F-20 e o F-21 foram entregues, e você digita `/agile:mvp loja --milestones`, sem o texto. O Claude não pede o objetivo de novo: lê o último gravado para o rótulo (`agile mvp GOAL: 2026-10-20 "vender produtos online com pagamento por cartão e acompanhar os pedidos"`) e a primeira linha diz `goal: reused from 2026-10-20`. Ele reavalia só o que está em aberto e propõe três marcos, juntando o cupom ao painel. A saída real do script, sobre esse novo estado:
+
+```
+cut loja-1-vitrine (kept, rank 1, catalogo): F-20, F-21
+cut loja-2-carrinho (rank 2, catalogo): enters: -; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: -; leaves: -
+cut loja-4-pedidos-e-cupom (rank 4, checkout): enters: F-25, F-24; leaves: -
+cut loja-4-pedidos (removed, checkout): leaves: F-25
+files: docs/epics/catalogo.md, docs/epics/checkout.md
+commit: chore(epic): milestones of loja
+agile mvp WRITTEN: 3 milestones
+```
+
+O corte `loja-1-vitrine` tem todos os ids entregues: fica como estava, com o número 1. Os outros são trocados, de qualquer epic, e os três novos recebem os números 2, 3 e 4. Se um item de um marco de número menor dependesse de um que você pôs num marco maior, o script o traria para o marco menor e diria `moved <id> from <corte> to <corte> (needed by <id>)`, para nenhum item esperar por um marco posterior. Rodar o mesmo plano de novo termina em `UNCHANGED`, sem escrever nada. Publicar uma versão continua sendo o `/agile:publish`.
+
+### 14.167 Só o que um objetivo ainda precisa: `/agile:order <rótulo>` e o porquê de cada linha
+
+No acme-shop o `/agile:mvp loja --milestones` gravou dois marcos para o objetivo "Vender online com pagamento por cartão": `loja-1-catalogo` (Rank 1, no épico `catalog`, com o F-12 e o F-13) e `loja-2-pagamento` (Rank 2, no `checkout`, com o F-14). O F-14 depende do F-15, que está no corte `admin`; o F-16 (lista de desejos) não está em corte nenhum. Você quer ver só o caminho até a loja, sem o resto do backlog:
+
+```
+> /agile:order loja
+```
+
+A saída real do script nesse projeto (no app, o mesmo vem como um widget só de leitura, com o objetivo no topo e o porquê embaixo de cada título):
+
+```
+# Order of implementation: loja
+
+Goal: "Vender online com pagamento por cartão"
+
+## MVP: loja-1-catalogo
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 1 | F-12 | Product list with filters | approved | - | catalog | - | F-13 | in cut loja-1-catalogo; level 1; feature; Must; size M |
+| 2 | F-13 | Product page | idea | - | catalog | F-12 | - | in cut loja-1-catalogo; level 2: waits on F-12; feature; Must; size S |
+
+## MVP: loja-2-pagamento
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 3 | F-15 | Payment provider settings | approved | - | admin | - | F-14, first release of admin | needed by F-14; level 1; feature; Should; size S |
+| 4 | F-14 | Card payment | approved | - | checkout | F-15 | first release of checkout | in cut loja-2-pagamento; level 2: waits on F-15; feature; Must; size L |
+
+## Summary
+
+- loja-1-catalogo: 2 open (2 in the cut, 0 their dependencies)
+- loja-2-pagamento: 2 open (1 in the cut, 1 their dependencies)
+- Delivered in these cuts: 0
+
+agile order SHOWN: 4 items for loja
+```
+
+O F-16 não aparece: nenhum corte de `loja` o pede. O F-15 entrou no segundo marco porque o F-14 precisa dele (`needed by F-14`), embora o corte dele seja o `admin`. A coluna `Why` diz por que cada linha está ali: o corte ou quem a puxou, o nível e o que ela espera, feature ou bug, e a prioridade e o tamanho da tabela do épico. O Claude resume em português: 4 itens, o objetivo, e que o primeiro é o F-12, nível 1 e Must. Nada foi gravado: nem o `docs/agile/order.md`, nem as marcas, nem commit (a seção `## Checklist` da saída foi omitida aqui).
+
+Dias depois o F-12 é entregue e você digita o mesmo comando. A visão é recalculada dos arquivos, não guardada (da saída real, o primeiro grupo e o resumo):
+
+```
+## MVP: loja-1-catalogo
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 1 | F-13 | Product page | idea | - | catalog | - | first release of catalog | in cut loja-1-catalogo; level 1; feature; Must; size S |
+
+## Summary
+
+- loja-1-catalogo: 1 open (1 in the cut, 0 their dependencies)
+- loja-2-pagamento: 2 open (1 in the cut, 1 their dependencies)
+- Delivered in these cuts: 1
+
+agile order SHOWN: 3 items for loja
+```
+
+O F-12 saiu, e o F-13 não espera mais nada (`level 1`, sem `waits on`). Se você digitar um rótulo que não existe, nada é mostrado nem gravado, e a resposta diz quais cortes há:
+
+```
+> /agile:order loj
+agile order REFUSED: no cut named loj; cuts found: loja-1-catalogo, loja-2-pagamento, admin
+```
+
+O `/agile:order` sem argumento continua escrevendo a lista inteira, agora também com a coluna `Why`. Um rótulo como `ticks` ou `write` não pode ser usado num corte: o `/agile:mvp` o recusa, porque o `/agile:order` o leria como outra coisa.
