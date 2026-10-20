@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Time.Testing;
 using Npgsql;
 using Simulab.Email;
@@ -85,6 +86,15 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
             }));
 
         ConfigureHost?.Invoke(builder);
+
+        // F-89: outside Development the Api refuses to start without a storage connection. A host a test class starts as
+        // Staging or Production (it chose the environment in ConfigureHost, just above) is given one that is never opened;
+        // a Development host keeps none, which is the "storage not configured" start.
+        if (builder.GetSetting(WebHostDefaults.EnvironmentKey) is { Length: > 0 } environment
+            && !string.Equals(environment, Environments.Development, StringComparison.OrdinalIgnoreCase))
+        {
+            builder.UseSetting("ConnectionStrings:blobs", "UseDevelopmentStorage=true");
+        }
 
         builder.ConfigureServices(services =>
         {

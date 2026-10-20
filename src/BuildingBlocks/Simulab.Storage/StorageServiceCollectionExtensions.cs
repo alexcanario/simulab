@@ -20,7 +20,9 @@ public static class StorageServiceCollectionExtensions
 
         if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString(connectionName)))
         {
-            builder.AddKeyedAzureBlobServiceClient(connectionName);
+            // No health check of its own: files are one feature, and a storage that is down must not take the whole Api out
+            // of rotation (the database and Redis checks stay). An upload then fails with its own error.
+            builder.AddKeyedAzureBlobServiceClient(connectionName, settings => settings.DisableHealthChecks = true);
             builder.Services.AddSingleton<IFileStorage>(services =>
                 new BlobFileStorage(services.GetRequiredKeyedService<BlobServiceClient>(connectionName)));
         }

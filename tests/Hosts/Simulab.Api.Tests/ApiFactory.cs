@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace Simulab.Api.Tests;
 
@@ -45,5 +46,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
                 // F-53: pinned as the password is.
                 ["Identity:SeedAdmin:RequirePasswordChange"] = "false",
             }));
+
+        // F-89: outside Development the Api refuses to start without a storage connection, and these tests start it as
+        // Staging or Production after this method runs. The connection is never opened: the host is only started.
+        builder.UseSetting("ConnectionStrings:blobs", "UseDevelopmentStorage=true");
     }
 }
