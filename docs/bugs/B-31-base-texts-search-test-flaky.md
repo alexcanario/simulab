@@ -1,7 +1,7 @@
 ---
 bug: B-31
 feature: F-102
-status: building
+status: validating
 board: 198
 severity: low
 epic: Question bank
@@ -61,7 +61,8 @@ Callers: `KitTestContext.WaitForAfterDebounce` (`KitTestContext.cs:61`): the 33 
 
 Tests locked: c0926bbf0049be22231a506d9d72e4257376a188 (2 files); unlocks: 0
 
-- `DebounceWaitTimeoutTests` (new, `tests/Hosts/Simulab.Web.Tests/Ui`): AC1 and AC2 with a derived context that sets `DefaultWaitTimeout` to 500 ms and overrides `DebounceWaitTimeout`; AC3 reads both settings — Simulab.Web.Tests
+- `DebounceWaitTimeoutTests` (new, `tests/Hosts/Simulab.Web.Tests/Ui`): AC1 and AC2 with a derived context that sets `DefaultWaitTimeout` to 500 ms and overrides `DebounceWaitTimeout`; AC3 reads both settings — Simulab.Web.Tests. Seen failing before the fix (3 red, the 3 B-30 tests green: `Expected clock.Elapsed to be greater than or equal to 1s and 500ms, but found 505ms`; `... greater than 1s and 200ms, but found 265ms`; `Expected 15s, but found 5s`), green after (6 of 6).
+- `SerialDebounceWait` (new collection definition, same folder): `BunitContext.DefaultWaitTimeout` is static, so the tests that change it run alone and restore it.
 
 ## Decisions
 - 2026-10-19 — Captured as a separate bug and not as part of B-30 — B-30 was accepted with 69 of 72 runs and fixes the late-registered delay; this failure has another shape — asked
@@ -72,6 +73,10 @@ Tests locked: c0926bbf0049be22231a506d9d72e4257376a188 (2 files); unlocks: 0
 - 2026-10-20 — `DebounceWaitTimeout` is `protected virtual` so a test can shrink it and prove the ceiling in under 2 s, without sleeping 15 s — decided by Claude
 - 2026-10-20 — The stress loop (AC5) stays a recorded measurement, not a gate: its load is artificial (24 processes on 24 cores, plus the Stop hook's own build during run 2) and stalls processes beyond any fixed ceiling — decided by Claude
 - 2026-10-20 — Main-session model: sonnet (no signal) — `references/model-choice.md` "Main session"
+- 2026-10-20 — plan — 1 skeleton `DebounceWaitTimeout` (same value as the default) + `DebounceWaitTimeoutTests` written red, committed and locked → AC1, AC2, AC3 red; 2 helper uses a 15 s `DebounceWaitTimeout` → AC1 to AC3 green; 3 whole `Simulab.Web.Tests` → AC4; 4 stress loop 24 x 3 on copies → AC5; 5 gate, scan, `git diff main --stat -- src` empty → AC6
+- 2026-10-20 — `BunitContext.DefaultWaitTimeout` is static (bUnit 2.10.3, decompiled), so the first draft of AC1 and AC2 (a context that sets it to 500 ms) made a parallel B-30 test fail; the three tests run in a collection with parallelization disabled (`SerialDebounceWait`) and restore the value in `finally`; no criterion changes — decided by Claude
+- 2026-10-20 — Reuse: the B-30 helper and `KitTestContext` extended in place, xUnit's own `CollectionDefinition` for isolation; no new package — decided by Claude
+- 2026-10-20 — Shortcuts: none — decided by Claude
 
 ## Out of scope
 - The plain `WaitForAssertion` waits with no debounce that fail under the same load: B-32.
@@ -83,6 +88,44 @@ Tests locked: c0926bbf0049be22231a506d9d72e4257376a188 (2 files); unlocks: 0
 
 ## Validation script
 
+### English
+Needed to validate: nothing (no screen, no data). Run from the repository folder of this branch.
+
+1. [ ] Run the tests of the debounced wait. Expected last line: `Passed!  - Failed:     0, Passed:     6, Skipped:     0, Total:     6`. Repeat as often as you like; it needs no app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWait"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWait"
+```
+2. [ ] Check that nothing under `src/` changed. Expected: no output.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Read the ceiling in `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DebounceWaitTimeout` is 15 s and `DefaultWaitTimeout` is still 5 s.
+
+### pt-BR
+Necessário para validar: nada (sem tela, sem dados). Rode na pasta do repositório desta branch.
+
+1. [ ] Rode os testes da espera com debounce. Última linha esperada: `Passed!  - Failed:     0, Passed:     6, Skipped:     0, Total:     6`. Repita quando quiser; não precisa subir o app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWait"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWait"
+```
+2. [ ] Confira que nada em `src/` mudou. Esperado: nenhuma saída.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Leia o teto em `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DebounceWaitTimeout` é 15 s e `DefaultWaitTimeout` continua 5 s.
+
 ## Events
 
 - 2026-10-20 question — asked 2, from context 1
@@ -90,3 +133,5 @@ Tests locked: c0926bbf0049be22231a506d9d72e4257376a188 (2 files); unlocks: 0
 
 ## Delivery
 - Branch: bug/B-31
+- Build state (2026-10-20): `gate.js stop` ends `agile gate GREEN`; `Simulab.Web.Tests` 2169 of 2169; `scan.js run` ends `agile scan GREEN`; `git diff main --stat -- src` empty.
+- AC5 stress loop, real output (24 processes at once, 3 rounds, copies of the build output inside the worktree): 72 of 72 green (`Passed: 553` each, 32 s to 53 s), 0 red. A first attempt ran only 18 processes a round (copies 19 to 24 were incomplete) and is not counted. Baseline of 2026-10-20: 13 reds of 72. The loop is weak evidence only; AC1 to AC3 are the proof.
