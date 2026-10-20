@@ -31,8 +31,39 @@ public static class NoticeSubjectEndpoints
         subjects.MapPut("/{id:guid}", UpdateAsync).WithName("UpdateNoticeSubject");
         subjects.MapPost("/{id:guid}/move", MoveAsync).WithName("MoveNoticeSubject");
         subjects.MapDelete("/{id:guid}", DeleteAsync).WithName("DeleteNoticeSubject");
+        subjects.MapGet("/copy-sources", ListCopySourcesAsync).WithName("ListNoticeSubjectCopySources");
+        subjects.MapPost("/copy", CopyAsync).WithName("CopyNoticeSubjects");
 
         return group;
+    }
+
+    // F-86 BR1: the editions this one may copy from; the target itself must exist under the exam of the route.
+    private static async Task<IResult> ListCopySourcesAsync(
+        Guid examId,
+        Guid editionId,
+        IExamEditionQueries editions,
+        INoticeSubjectQueries queries,
+        CancellationToken cancellationToken)
+    {
+        if (await editions.FindAsync(examId, editionId, cancellationToken) is null)
+        {
+            return Problem(new Error(CatalogErrorCodes.ExamEditionNotFound, ErrorKind.NotFound));
+        }
+
+        return Results.Ok(await queries.ListCopySourcesAsync(examId, editionId, cancellationToken));
+    }
+
+    // F-86 BR2 to BR8: the whole copy is one handler call and one save.
+    private static async Task<IResult> CopyAsync(
+        Guid examId,
+        Guid editionId,
+        CopyNoticeSubjectsRequest request,
+        CopyNoticeSubjectsHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(examId, editionId, request, cancellationToken);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
 
     private static async Task<IResult> ListAsync(

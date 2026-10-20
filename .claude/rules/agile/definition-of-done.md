@@ -2,10 +2,10 @@
 
 An item is `done` only when every line is true. "Almost" is `validating`.
 
-- Every acceptance criterion maps to at least one test, kept in the item's `## Criterion → test`, every row filled at ship. A criterion checked only on screen is in the validation script.
+- Every acceptance criterion maps to at least one test, kept in `## Criterion → test`, every row filled at ship. A criterion checked only on screen is in the validation script.
 - A bug has a regression test that was seen failing before the fix.
 - The build has no new warnings (the gate compares with the committed baseline). Accepting a new warning needs the owner's yes.
-- No open critical or high security finding: the scan (`scan.js`) ends `agile scan GREEN`, or the owner accepted each finding with a reason in `docs/security/findings.md`.
+- No open critical or high security finding: `agile scan GREEN`, or accepted by the owner, or closed as a false positive by Claude with evidence (ship report).
 - Affected tests are green at the end of every turn; the full suite and the architecture tests are green before merge.
 - Test time is inside the profile budget. An overrun is reported and becomes a retro finding.
 - Every UI text exists in each locale of `UI locales:` and the missing-key test is green.

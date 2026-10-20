@@ -22,6 +22,8 @@ Measured at the ship of F-78 (2026-10-19, `docs/infra.md` "Full test suite", 423
 
 The last run had the machine shared with other sessions. Cause not measured: the breakdown is part of this item.
 
+Added 2026-10-19 (retro of F-86): at the ship of F-86 (`gate.js ship`, 4 m 54 s total of which the test run was 294 s, 13 projects) the three slow projects ran Catalog 608 tests in 4 m 48 s, Identity 508 in 4 m 44 s and QuestionBank 456 in 4 m 5 s; every integration project is above the 2 min per project budget of the profile, and the full run is at the edge of the 5 min budget. Evidence: the output of that run (`agile gate GREEN`, per-project `Passed! ... Duration` lines).
+
 Done means a measured breakdown of where the time goes (database container start, migrations, per-test setup) and a change that brings the full suite back under the budget with margin, with the numbers recorded in `docs/infra.md`.
 
 ## Start

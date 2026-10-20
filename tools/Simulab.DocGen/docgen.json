@@ -3,5 +3,5 @@
   "dataDictionary": true,
   "routes": true,
   "modules": true,
-  "tools": true
+  "tools": false
 }

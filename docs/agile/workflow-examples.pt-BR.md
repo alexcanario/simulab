@@ -4466,10 +4466,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (31)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (33)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
-ok   AC5: the report states the skills (23) and the agents (6)
+ok   AC5: the report states the skills (24) and the agents (7)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -5379,15 +5379,17 @@ Claude: Troquei o texto do escuro do amber para #907E5F e rodei de novo:
 ```
 
 ```
-WROTE 5 files
+high contrast: 1 colors adjusted, 0 of them backgrounds
+WROTE 7 files
 ```
 
 ```
-Claude: docs/design/themes/ tem agora cais-light.json, cais-dark.json, amber-light.json, amber-dark.json e o
-index.json, com o Cais como padrão. Nenhum código do app foi alterado.
+Claude: docs/design/themes/ tem agora cais-light.json, cais-dark.json, cais-hc-light.json, cais-hc-dark.json,
+amber-light.json, amber-dark.json e o index.json, com o Cais como padrão. Os dois temas de alto contraste
+são do tema padrão: o amber não tem um. Nenhum código do app foi alterado.
 ```
 
-Os quatro arquivos de tema e o índice são gerados, nunca editados à mão; o formato está em `references/theme-format.md` do plugin. A chave `Accent` marcada como bloqueada no arquivo do amber não entra na lista de bloqueadas: só o tema padrão bloqueia chaves.
+Os seis arquivos de tema e o índice são gerados, nunca editados à mão; o formato está em `references/theme-format.md` do plugin. A chave `Accent` marcada como bloqueada no arquivo do amber não entra na lista de bloqueadas: só o tema padrão bloqueia chaves.
 
 ### 14.149 Um atalho deliberado: marcado no build, sem gatilho corrigido, oferecido como ideia na retro
 
@@ -5535,13 +5537,13 @@ a) sim   b) não
 Recomendação: sim. Motivo: quem usa o app escolhe o tema do modo claro e do escuro do sistema e a fonte, e o kit aplica isso em tempo de execução.
 ```
 
-O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade, no mesmo projeto:
+O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade, no mesmo projeto (o script diz também, antes do veredito, quantas cores ajustou nos dois temas de alto contraste):
 
 ```
-WROTE 5 files
+WROTE 7 files
 ```
 
-Isso cria `docs/design/themes/` com `index.json` e um arquivo por tema e modo, que é o que liga o módulo do kit. No passo 13, a ideia "Run-time themes in the MudBlazor" entra no quadro logo depois da ideia do kit de UI e depende dela.
+Isso cria `docs/design/themes/` com `index.json`, um arquivo por tema e modo e os dois temas de alto contraste do tema padrão, que é o que liga o módulo do kit. No passo 13, a ideia "Run-time themes in the MudBlazor" entra no quadro logo depois da ideia do kit de UI e depende dela.
 
 Se o dono responde não, o ADR-0001 só ganha `Customizable themes | no | one identity`: nenhuma pasta, nenhuma ideia. Se o script recusasse por um par de cores sem contraste, o bootstrap mostraria a recusa, manteria o sim e capturaria antes a ideia "Built-in themes from the identity".
 
@@ -5609,3 +5611,674 @@ No runner o job `release` importa o certificado, assina por `/sha1`, confere cad
 ```
 
 Se um dos arquivos não estivesse validamente assinado, a run pararia antes da tag, nomeando o arquivo e o status (`Setup.exe is not validly signed (status NotSigned)`), e nenhum release sairia sem assinatura.
+
+### 14.156 MVPs nomeados e ranqueados: `/agile:order` abre com um grupo por MVP e põe antes o item que fecha uma feature
+
+No ExamPrep há dois epics, e cada um tem um corte com nome: o `cadastro` tem `mvp1-cadastro` (o cadastro de questões completo), com `Rank: 1`, e o `provas` tem `mvp2-provas` (a correção das provas), ainda sem rank. Você quer que o `mvp2-provas` seja o segundo e que o F-2, que os dois cortes pedem, fique no primeiro. Para gravar o rank sem editar o epic à mão:
+
+```
+/agile:mvp provas mvp2-provas --rank 2
+```
+
+Antes de pedir o seu ok, o Claude roda o `mvp.js diff` com o rótulo, o rank e os ids, e mostra a saída (o corte antigo não tinha rank):
+
+```
+enters: F-2
+leaves: -
+kept: -
+rank: none → 2
+agile mvp DIFF: provas 1 enter, 0 leave, 0 kept
+```
+
+Com o seu ok, o `mvp.js write` grava o título, a linha `Rank: 2` e os ids (a linha `Rank:` de um corte que já tinha rank continua onde está, a menos que você passe `--rank`; um valor que não seja um inteiro de 1 a 99 é recusado e nada é escrito). Depois, o `/agile:order` escreve a lista. Esta é a saída real do script sobre essa fixture (o arquivo, sem o cabeçalho de comentário); o `F-6` e o `F-7` já foram entregues e o `F-10` é a última parte aberta da funcionalidade que eles começaram (`Split from F-6` na primeira linha do `## Summary`):
+
+```
+# Order of implementation
+
+## MVP: mvp1-cadastro
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 1 | F-1 | Question bank | approved | - | cadastro | - | F-2 |
+| 2 | F-3 | Image attachments | approved | - | cadastro | - | F-2 |
+| 3 | F-2 | Question editor | approved | - | cadastro | F-1, F-3 | - |
+
+## MVP: mvp2-provas
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 4 | B-1 | Exam printed without questions | approved | - | provas | - | - |
+| 5 | F-4 | Exam correction | approved | - | provas | - | - |
+
+## Later
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 6 | F-10 | Answer key import: error report | approved | - | provas | - | - |
+| 7 | F-9 | Dark theme | approved | - | cadastro | - | - |
+
+## Checklist
+
+### MVP: mvp1-cadastro
+
+- [ ] 1. F-1 — Question bank [approved] — unlocks F-2
+- [ ] 2. F-3 — Image attachments [approved] — unlocks F-2
+- [ ] 3. F-2 — Question editor [approved] — waits on F-1, F-3
+
+### MVP: mvp2-provas
+
+- [ ] 4. B-1 — Exam printed without questions [approved]
+- [ ] 5. F-4 — Exam correction [approved]
+
+### Later
+
+- [ ] 6. F-10 — Answer key import: error report [approved]
+- [ ] 7. F-9 — Dark theme [approved]
+
+## Summary
+
+- Delivered: 2
+- MVP mvp1-cadastro: 3 open (2 in the cuts, 1 their dependencies)
+- MVP mvp2-provas: 2 open (2 in the cuts, 0 their dependencies)
+- First release (cadastro, mvp1-cadastro): 0 of 2 delivered; missing: F-1, F-2
+- First release (provas, mvp2-provas): 0 of 3 delivered; missing: B-1, F-4, F-2
+```
+
+Quatro coisas para notar. Os grupos seguem o `Rank:`: `mvp1-cadastro` (rank 1) vem antes de `mvp2-provas` (rank 2), e sem nenhum `Rank:` a ordem alfabética dos nomes decidiria; um MVP com rank vem sempre antes de um sem. O F-2 está nos dois cortes e fica só no primeiro, e o F-3, que o F-2 precisa e nenhum corte cita, entra no primeiro como dependência (`2 in the cuts, 1 their dependencies`); nada num MVP espera por um MVP posterior. Dentro de cada grupo a chave é: nível, bug, se o item fecha uma feature, Must, Should, Could, tamanho, id. Por isso o B-1 vem antes do F-4 no `mvp2-provas`, e no `Later` o F-10 (Could) vem antes do F-9 (Must): o F-10 é a última parte aberta de uma família (`Split from F-6`) com partes entregues. Um irmão ainda aberto, bloqueado ou adiado desfaz esse empurrão, uma família sem parte entregue não ganha nenhum, e um `Split from` de um id que não existe ou um laço não dão erro nem empurrão. Por fim, as linhas `First release` continuam por épico: o F-2 aparece como faltando nas duas, porque o corte de cada épico não muda, e só a lista é a união. Com um corte só, o arquivo é o de antes (`## MVP`, `- MVP: <k> open (...)`); no widget os cabeçalhos são `MVP: <nome>` (ou `MVP`) e `Depois`.
+
+### 14.157 O `.aab` Android sai assinado no GitHub Actions: os nomes no ambiente `release-signing`, a parada antes de qualquer commit e o resumo com o signatário
+
+A acme-shop é um app mobile (MAUI, `Shop.Api` e `Shop.Mobile`, com `ApplicationId` `com.acme.shop`) cujo `release.yml` o `pipeline write` escreveu já com os passos Android. O dono criou o ambiente `release-signing` no GitHub, mas ele ficou aberto a qualquer branch e sem o segredo do keystore. O dono digita `/agile:publish`. O Claude roda o plano; nesta máquina não há variável `ANDROID_SIGNING_*`, nem keystore, nem a workload do Android, e isso não importa: o script só lê o `release.yml` e, no GitHub, os nomes.
+
+```
+{
+  "ok": false,
+  "stop": [
+    "the GitHub environment release-signing is open to every branch: a workflow edited on any branch could read the signing keys; limit it to main (Settings > Environments > release-signing > Deployment branches and tags > Selected branches)",
+    "the GitHub environment release-signing has no secret ANDROID_SIGNING_KEYSTORE_BASE64 (the Android signing needs it; Settings > Environments > release-signing)"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita as duas frases e diz o único próximo passo: no GitHub, em Settings, Environments, `release-signing`, escolher "Selected branches" com só a `main` e criar o segredo `ANDROID_SIGNING_KEYSTORE_BASE64` (a seção `## Store signing` do `docs/infra.md` traz os comandos `gh`, em PowerShell e em Bash: o keystore é lido do arquivo e as senhas são pedidas pelo `gh`, então nenhum valor passa pelo chat nem por uma linha de comando). Nada foi commitado, marcado nem disparado. Com o ambiente limitado à `main` e a variável `ANDROID_SIGNING_ALIAS` e os três segredos no lugar, o mesmo comando segue: mostra o plano com a linha do deploy, dispara o `Release` e espera a run.
+
+No runner o job `release` instala a workload, grava o keystore num arquivo temporário fora do checkout, empacota o `.aab` assinado, confere a assinatura com o `jarsigner`, lê o certificado com o `keytool` e só então commita as notas e cria a tag. O `.aab` vai como arquivo do GitHub Release, e o resumo da run, que o Claude cita ao dono, nomeia quem assinou, a run e o commit das notas:
+
+```
+## Release v0.4.0
+
+- Tag: v0.4.0 (annotated, with the notes)
+- Files: docs/releases/v0.4.0.md, docs/releases/v0.4.0-store.md
+- GitHub Release: https://github.com/acme/shop/releases/tag/v0.4.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Android bundle: com.acme.shop-Signed.aab (attached to the GitHub Release)
+- Android signer: CN=Acme Shop Upload, O=Acme Software Ltd, C=BR
+- Android SHA-256: 1E:08:1A:32:7A:93:B8:AB:EE:17:4C:75:00:AF:36:5D:81:BB:95:16:E9:DE:72:7E:71:4C:B4:05:10:25:49:92
+- Run: 8123456789 (https://github.com/acme/shop/actions/runs/8123456789)
+- Commit: 96324db95e235e6cfcb71641f08beb9988a67d3f
+```
+
+O checklist da loja que a run commitou na `main` já não aponta um caminho de `artifacts/`, que o dono não tem depois de uma run: nomeia o arquivo do Release e o endereço para baixá-lo, e o resto do checklist é o de sempre (o envio à Play Console continua sendo do dono):
+
+```
+# Store checklist v0.4.0
+
+Written by `/agile:publish` for this release. The plugin uploads nothing to either store: every step below is yours.
+
+## Android, this release
+- The signed bundle: the asset `com.acme.shop-Signed.aab` of the GitHub Release v0.4.0: https://github.com/acme/shop/releases/download/v0.4.0/com.acme.shop-Signed.aab (application id `com.acme.shop`).
+```
+
+Se o `.aab` não tivesse assinatura (o `jarsigner` sai com código 0 até para `jar is unsigned.`, então o Claude e o script leem o texto), a run pararia antes de commitar qualquer coisa, nomeando o arquivo, e nenhum release sairia com um pacote sem assinatura. O keystore, as duas senhas e o base64 não aparecem em relatório, resumo nem log: o arquivo temporário é apagado por um passo que roda mesmo quando a run falha, e um valor que vazasse numa mensagem de erro de uma ferramenta sai como `***`.
+
+### 14.158 Os releases ficam em outro repositório: o token de escopo fino `RELEASES_TOKEN` e a prova do alcance antes de qualquer commit
+
+A acme-shop é um app desktop (Avalonia, `win-x64`) cujo código é privado (`acme/shop`) e cuja fonte de atualização é um repositório público só de releases, `https://github.com/acme/shop-releases`. Até aqui o `/agile:publish` não a lançava no GitHub Actions: o `GITHUB_TOKEN` da run alcança só `acme/shop`. O dono digita `/agile:publish`, e o `release.yml` dele, escrito antes desta mudança, ainda não tem as duas linhas do token. O Claude mostra o plano (`ci --plan`), que para antes de qualquer coisa:
+
+```
+{
+  "ok": false,
+  "stop": [
+    "release in CI does not cover Shop.Desktop (Velopack, GitHub source acme/shop-releases is not this repository) yet: run /agile:publish --local (to release it in CI: add environment: release-signing to the release job and AGILE_RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }} to the env of the Release step of release.yml (/agile:sync never changes a release.yml), and keep a fine-grained token (Contents: read and write on that repository only) in the secret RELEASES_TOKEN of the GitHub environment release-signing (Desktop updates in docs/infra.md))"
+  ],
+  "note": "nothing was committed, tagged or dispatched"
+}
+```
+
+O Claude cita a frase e diz o único próximo passo: acrescentar `environment: release-signing` ao job `release` e `AGILE_RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }}` ao `env` do passo `Release` (um projeto novo já nasce com as duas linhas, que o `pipeline write` escreve), e criar o token. Ele não cria nada: no GitHub, em Settings, Developer settings, Fine-grained tokens, o dono escolhe como dono do recurso o dono do repositório de releases, só o repositório `shop-releases`, a permissão Contents: read and write e uma data de vencimento, e grava o valor no ambiente `release-signing` (limitado à `main`, o mesmo das chaves de assinatura) com o `gh secret set` da seção `## Desktop updates` do `docs/infra.md`, que lê o valor de um prompt. Com isso, o `ci --plan` confere o ambiente, o limite à `main` e o nome do segredo (nunca o valor) e passa.
+
+No runner, antes de empacotar, commitar ou criar a tag, a run prova o que o token alcança. Se o dono tivesse criado um token clássico (`ghp_`), que alcança todos os repositórios da conta, a run pararia ali, sem nada commitado:
+
+```
+{
+  "ok": false,
+  "stop": [
+    "RELEASES_TOKEN is a classic personal access token (ghp_): it reaches every repository of the account, not only acme/shop-releases; create a fine-grained token on acme/shop-releases only (Contents: read and write) and set it with gh secret set RELEASES_TOKEN --env release-signing"
+  ],
+  "note": "nothing was packaged, committed or tagged"
+}
+```
+
+Um token vencido ou revogado para do mesmo jeito, com `GitHub refused RELEASES_TOKEN for acme/shop-releases (HTTP 401): the token expired or was revoked`; um token sem `push` no repositório de releases, com `cannot write to`; e um token que consegue ler o `acme/shop` privado, com `the token reaches acme/shop`. Com o token certo, a run escreve em `acme/shop-releases` (o `gh release create` e o `vpk upload github` são as únicas chamadas que o recebem; o `dotnet publish`, o `vpk pack`, o `git` e o NuGet começam sem ele), a leitura de `acme/shop` dá 404 e o resumo da run, que o Claude cita ao dono, diz o que foi provado:
+
+```
+## Release v1.0.0
+
+- Tag: v1.0.0 (annotated, with the notes)
+- Files: docs/releases/v1.0.0.md
+- GitHub Release: https://github.com/acme/shop-releases/releases/tag/v1.0.0
+- Glossary: not updated (the rows are added by /agile:publish before it dispatches this run; a run started by hand skips them)
+- Releases token: writes to acme/shop-releases; acme/shop: not found (the token does not reach it)
+```
+
+O código fica com a tag `v1.0.0` e sem Release; o Release e o feed ficam no repositório público. Se o repositório de código fosse público, a prova não conseguiria mostrar que o token não escreve nele (ler não prova a ausência de escrita): a run seguiria com um aviso dizendo isso. O valor do token não aparece em relatório, resumo, saída de passo nem log: se uma ferramenta o repetisse numa mensagem de erro, ele sairia como `***`.
+
+### 14.159 `/agile:docs` gera o site da documentação: o manual e as páginas técnicas viram HTML só de leitura, e uma página com o front matter aberto é pulada
+
+A acme-shop tem o manual do app em pt-BR (`inicio` e `pedidos`) e páginas técnicas: um fluxo do checkout com um diagrama, a referência da API de pedidos e um how-to de carga de dados. O dono quer ler tudo no navegador, sem abrir os `.md` um a um, e digita `/agile:docs`. O Claude roda o script na raiz do projeto e cita as linhas que ele imprimiu, inteiras:
+
+```
+SKIPPED: docs/how-to/seed-data.md: front matter is not closed
+agile docs GREEN: 7 page(s) (manual 2, technical 5) -> D:\dev\acme-shop\.agile-site
+file:///D:/dev/acme-shop/.agile-site/index.html
+```
+
+A página `seed-data.md` abre o front matter com `---` e nunca o fecha: o script a nomeia e a pula, constrói o resto e sai com código 1. As sete páginas são as duas do manual, o fluxo do checkout, a referência da API e os três arquivos de índice (`docs/flows.md`, `docs/how-to.md` e `docs/reference.md`), cada um virando uma página na raiz do site. A pasta ficou assim:
+
+```
+.agile-site/.generated
+.agile-site/assets/mermaid.min.js
+.agile-site/flows.html
+.agile-site/flows/checkout.html
+.agile-site/how-to.html
+.agile-site/index.html
+.agile-site/manual/pt-BR/inicio.html
+.agile-site/manual/pt-BR/pedidos.html
+.agile-site/reference.html
+.agile-site/reference/orders-api.html
+```
+
+O Claude diz, em pt-BR, o que o site é: só leitura e derivado dos `.md`, que continuam sendo a fonte; a pasta `.agile-site/` entrou no `.gitignore` (a linha `.agile-site/`, uma vez) e não vai para o Git; o `assets/mermaid.min.js` está ali porque o fluxo do checkout tem um diagrama, e o navegador o desenha sem nenhuma chamada de rede, então a pasta inteira vai junto se for enviada. O dono abre o `index.html` com um clique duplo: a home lista o manual por idioma e cada tipo de página técnica, e uma página tem os atalhos das suas seções no topo.
+
+O dono fecha o front matter de `seed-data.md` e pede de novo. O script apaga só os arquivos que a marca `.generated` listava, escreve tudo outra vez e agora não pula nada:
+
+```
+agile docs GREEN: 8 page(s) (manual 2, technical 6) -> D:\dev\acme-shop\.agile-site
+file:///D:/dev/acme-shop/.agile-site/index.html
+```
+
+Um arquivo que o dono tivesse posto na pasta continuaria lá. Se `.agile-site/` já existisse com arquivos que o script não escreveu (sem a marca `.generated`), ele pararia com `REFUSED:` nomeando a pasta e não escreveria nada; o Claude então deixa o dono escolher outra pasta com `--out` ou limpar a existente, e nunca a apaga. Num projeto sem nenhuma página de manual nem técnica, a resposta é só `agile docs NOTHING TO RENDER`.
+
+### 14.160 A inclinação primeiro, rodadas até "decidido" e um resumo antes de gravar: o `/agile:discuss` como conversa
+
+No Clinic Desk, um app de agenda para clínicas pequenas, você digita:
+
+```
+/agile:discuss "Como o Clinic Desk deve tratar o paciente que marca e não aparece?"
+```
+
+O Claude lê o brief e o que já existe e escreve o enquadramento (a ideia em duas linhas, o que o brief diz: o paciente nunca entra no app, ninguém paga pelo app, a meta do ano inclui perder menos clínicas; o que está em aberto). A mensagem termina aí, sem nenhuma opção, com uma pergunta só:
+
+> ❓ **Pergunta**
+> Qual é a sua inclinação sobre até onde o Clinic Desk deve ir: só lembrar o paciente, ou também agir depois do não comparecimento (uma taxa, por exemplo)? O que te preocupa em ir além?
+> **Recomendação:** responda numa linha, ou `sem inclinação` para ir direto às opções.
+
+Você responde `sem inclinação`. Agora vêm as opções: A, só o lembrete (S); B, o lembrete mais uma taxa que o app só registra (M); C, o lembrete mais o acompanhamento dos não comparecimentos, sem dinheiro (S/M). Com uma inclinação dita, uma linha diria como cada opção a pesa, e uma recomendação diferente dela diria por quê. Depois vem a rodada 1, com 4 perguntas, cada uma com recomendação e motivo (quando o lembrete sai, quem marca o não comparecimento, quem fixa a taxa, como o paciente fica sabendo dela). Você aceita todas as recomendações e diz `decidido`. Se a conversa passasse da segunda rodada, a primeira linha de cada rodada seguinte lembraria `diga decidido ou estacionar para encerrar`; nada a encerra além de você.
+
+Antes de gravar qualquer coisa, o Claude mostra o resumo: as cinco decisões (data, decisão, motivo), nenhum ponto adiado e os itens a criar, cada um com o épico que vai receber:
+
+| Tipo | Título | Épico |
+|---|---|---|
+| Feature | Lembrete antes da consulta | Novo épico: No-shows (recomendado, nenhum existente serve) |
+| Feature | Taxa de não comparecimento | Novo épico: No-shows |
+
+> ❓ **Pergunta**
+> a) Record and capture (Recommended)
+> b) Change the list
+> c) Park, capture nothing
+
+Você escolhe `Change the list` e tira a taxa: "preço está fora do escopo". Nenhum número foi pego e nenhum arquivo foi escrito. O resumo aparece de novo com uma linha só na tabela (o lembrete), as decisões que existiam só para a taxa saem da lista, e o card se repete. Você escolhe `Record and capture` e responde "sem épico" para o item que sobrou.
+
+Só agora o arquivo `docs/discussions/D-1-<slug>.md` é gravado, com a linha `dropped at the gate: No-show fee — the owner does not want it; pricing is out of scope` em `## Decisions`, a busca de itens parecidos roda (`No similar item (0 items read)`) e só o lembrete vira a feature F-1, no status `idea`, com o épico que você respondeu no resumo, sem perguntar de novo. A taxa nunca teve número nem issue. Se em vez do card você tivesse dito `estacionar` na rodada, o arquivo sairia `parked`, sem card e sem item. Numa execução sem ninguém para responder, a pergunta da inclinação não é feita e o card toma a opção recomendada.
+
+
+### 14.161 O Claude fecha um falso positivo do scan e você reabre
+
+No F-14 do HR-Portal, o scan do fim do build para com quatro achados critical. O Claude lê o código de cada um antes de decidir. A linha `src/Db.cs:13` é uma consulta que concatena uma constante, sem entrada de usuário: um falso positivo. Ele chama o agente `reviewer` com o achado, o lugar e a evidência; o `reviewer` confirma, e só então o Claude fecha a linha.
+
+```
+Claude: agile scan BLOCKED: 4 critical, 0 high open
+        a1b2c3d4: false-positive (the query takes a constant (evidence: Db.cs:13 concatenates a literal, no input reaches it) (reviewer confirmed))
+```
+
+Os outros achados ele não toca, e o script recusa quando o Claude tenta fechá-los:
+
+```
+Claude: c3d4e5f6 is a secret found in the git history: only the owner closes it, after saying the credential was rotated: nothing changed
+        --by claude closes only critical or high findings (e5f6a7b8 is medium): nothing changed
+```
+
+O segredo do histórico e o aviso medium vão para você como sempre. O novo scan bloqueia por menos um, sem nenhuma parada nova:
+
+```
+Claude: Triaged: 1 false positive
+        Closed by Claude: 1 (node scan.js closed lists them)
+        agile scan BLOCKED: 3 critical, 0 high open
+```
+
+O script de validação ganha um passo com o que o Claude fechou, exatamente como o script imprime:
+
+```
+Closed by Claude:
+| id | severity | where | reason |
+|---|---|---|---|
+| a1b2c3d4 | critical | src/Db.cs:13 | the query takes a constant (evidence: Db.cs:13 concatenates a literal, no input reaches it) (reviewer confirmed) |
+```
+
+Você abre o `src/Db.cs` e vê que o literal vem de um campo de formulário. Você digita o comando de reabrir do passo, com o motivo, e a linha volta para aberta com `who: owner`. O Claude não a fecha de novo e o scan volta a bloquear:
+
+```
+Claude: a1b2c3d4: reopened (the literal comes from a form field)
+        Triaged: none
+        agile scan BLOCKED: 4 critical, 0 high open
+```
+
+No ship, o passo 4d imprime o mesmo bloco `Closed by Claude:` logo depois do scan e antes do merge, e o relatório o cita sem resumir. Quem aceitar um risco continua sendo você: o `accept` sem `--by` vale mais que o do Claude.
+
+### 14.162 O painel de papéis: o plano, o caso medido e o veredito
+
+Você quer saber se três papéis, cada um num contexto novo, dão opiniões melhores que um contexto só, antes de pedir o `--panel` no `/agile:discuss` (#271). Sem argumento, o script só mostra o plano e não chama nada. O plano diz qual é a régua do veredito, fixada antes de qualquer rodada:
+
+```text
+$ node benchmarks/panel.js
+panel suite v1: 4 problems x 3 runs x 2 arms (self, panel) on sonnet, judge opus (another family)
+Each case: one /agile:discuss step 2, then the arm self (one call: the three roles in one context, with the recommendation) and the arm panel (three calls, one per role, each in a fresh context, with no recommendation: product, architect, contrarian).
+  import-records  How should a clinic that joins us bring in the patient records and the future appointments it keeps 
+  clinic-leaves  What should happen when a clinic stops paying or decides to leave us? It holds years of health recor
+  no-shows  How could we help clinics lose less money to patients who book and never show up? It is the complain
+  offline-desk  How should the front desk keep working when the clinic's internet line drops for an hour in the midd
+The bar for "beats" (BR9, fixed on 2026-10-20 before any run): all three of a mean gap of at least 1.0 (the mean of challenge, traps and decision value over all judged cases, panel over self), the panel higher on at least 3 of 4 problems, and a panel arm that costs at most 3 times the self arm per case. A partial run is INCONCLUSIVE.
+Nothing started and nothing paid. First one measured case: node benchmarks/panel.js --measure; then the suite: node benchmarks/panel.js --go --max-cost-usd <n>
+```
+
+Se você pular direto para a suíte, ela recusa sem gastar nada:
+
+```text
+$ node benchmarks/panel.js --go --seed 42
+panel suite REFUSED: --go needs --max-cost-usd <n>: run --measure first, it prints the limit to use (BR8)
+```
+
+O caso medido faz uma rodada completa de um problema, sem limite: a chamada do passo 2, o braço `self` (uma chamada), o braço `panel` (três chamadas, uma por papel) e o juiz. Saída do script sobre o `claude` falso do check (cada chamada custa US$ 0,37 ali; numa execução real, os valores são os que a CLI do Claude informa). O custo de cada braço é a soma das suas chamadas, e o limite sugerido é o custo do caso × 4 problemas × 3 rodadas + 25%, arredondado para cima:
+
+```text
+$ node benchmarks/panel.js --measure --seed 3
+import-records run 1: step 2 US$ 0.37; self US$ 0.37, panel US$ 1.11; judge US$ 0.37
+results: benchmarks/results/panel-measure-<stamp>.json and .md (seed 3)
+measured: US$ 2.22 for one case (step 2, self, 3 roles, judge); suggested --max-cost-usd 34 (x 4 problems x 3 runs + 25%)
+panel verdict: INCONCLUSIVE (a complete run is every case measured and judged (1 of 12 cases are))
+panel suite DONE (total US$ 2.22)
+```
+
+Um caso só nunca dá veredito: `INCONCLUSIVE`. O relatório traz a tabela do problema, com a coluna "Shown as" dizendo qual conjunto o juiz viu como X (o juiz não sabe qual é o `self` e qual é o `panel`):
+
+```text
+| Run | Arm | Shown as | challenge | traps | decision | Cost US$ | Step 2 US$ | Judge US$ | Traps named (judge) |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | self | Y | 4 | 4 | 4 | 0.37 | 0.37 | 0.37 | names the lock-in of a custom format |
+| 1 | panel | X | 7 | 7 | 7 | 1.11 | 0.37 | 0.37 | names the lock-in of a custom format |
+```
+
+Você autoriza a suíte com o limite sugerido (é uma despesa sua, não do script). Na rodada completa, o relatório fecha com uma linha só, os números atrás dela e a régua ao lado. No exemplo do check, o `panel` tira 3 pontos a mais, ganha nos 4 problemas e custa 3 vezes o `self`, no limite exato da régua:
+
+```text
+panel verdict: BEATS (mean gap +3.00 [bar +1.0], panel higher on 4 of 4 problems [bar 3], cost ratio 3.00 [bar 3.0]; self US$ 0.37 and panel US$ 1.11 a case)
+```
+
+Se qualquer caso não tiver custo informado ou o juiz responder fora da escala, a rodada sai com `PARTIAL`, o veredito é `INCONCLUSIVE` e o código de saída é 2. Um `BEATS` não abre nada sozinho: o #271 só começa quando você o abrir.
+
+### 14.163 A página HTML do roteiro, para validar no celular
+
+O F-12 está em `validating` e você vai testar os passos longe do computador: no celular, no caminho do trabalho. Você digita o comando com `--html` e a pasta de uma pasta sincronizada com o aparelho:
+
+```text
+> /agile:script F-12 --html --out C:\Users\ana\Sync
+Claude: F-12 — Bulk import of exams [validating]
+agile validation page WRITTEN: C:\Users\ana\Sync\F-12.html
+```
+
+O Claude não leu o status nem escreveu nada no item, no board ou no arquivo das marcas: a página é só uma vista do roteiro. Sem `--out`, o arquivo vai para `agile-validation-pages/F-12.html` dentro da pasta `.git` e nunca é versionado. A página é um arquivo só, sem rede: abre no celular direto da pasta sincronizada.
+
+No aparelho você vê o roteiro em pt-BR (o botão `EN` troca para o inglês, com as mesmas marcas). Cada subpasso tem a sua caixa; os blocos de comando têm um botão `Copiar` cada. A página nasceu com as marcas que a máquina já guardava, `1.1` e `1.2`, e por isso o passo 1 já aparece como `(feito)`:
+
+```text
+Roteiro de validação                                [pt-BR | EN]
+Gerada em 2026-10-20
+2 de 4 marcados  [=========-------]                [Limpar marcas]
+Se o roteiro mudar, gere de novo.
+
+1. Iniciar o app   (feito)
+   [x] 1.1 Suba o app host → a página de login abre.
+   [x] 1.2 Entre como o usuário demo → a home abre.
+2. Rodar a conferência da importação
+   [ ] 2.1 Rode o comando do seu shell → 12 passaram.
+       dotnet test --filter Name~Import                [Copiar]
+       dotnet test --filter Name~Import                [Copiar]
+3. [ ] Troque o idioma para inglês → os textos mudam.
+
+/agile:script F-12 ticks 1.1 1.2                       [Copiar comando]
+As marcas ficam neste navegador; para o Claude, copie o comando e cole no chat.
+```
+
+Você roda o passo 2 e marca `2.1`: o contador vira `3 de 4 marcados`, a linha riscada mostra a unidade feita e o comando passa a ser `/agile:script F-12 ticks 1.1 1.2 2.1`. Se você fechar a aba e abrir de novo, as marcas estão como ficaram (elas ficam no navegador daquele aparelho; sem esse armazenamento, a página funciona do mesmo jeito, só não lembra). `Limpar marcas` desmarca tudo.
+
+De volta ao computador, você toca em `Copiar comando` (ou seleciona o texto do campo, se o navegador bloquear a área de transferência) e cola no chat:
+
+```text
+> /agile:script F-12 ticks 1.1 1.2 2.1
+Claude: agile validation TICKED: 3 of 4
+```
+
+Daí em diante as marcas valem como as do widget: aparecem nele, no corpo do issue e na evidência do ship. A página não sabe disso: ela é uma foto. Se o roteiro mudar, você pede `--html` outra vez, e a página nova começa das marcas da máquina.
+
+Um item que ainda não tem roteiro é recusado e nada é escrito:
+
+```text
+> /agile:script F-5 --html
+Claude: F-5 — No script yet [building]
+agile validation page REFUSED: C:\dev\app\docs\features\F-5-none.md has no readable ## Validation script (no ## Validation script section)
+```
+
+O texto do item só aparece como texto: um passo que contenha `<script>` ou `</script>` é mostrado do jeito que foi escrito, e a página continua funcionando.
+
+### 14.164 Dois temas de alto contraste saem da identidade e o teste de contraste do app lê o mínimo deles
+
+O app desktop Cais já tem os temas embutidos (claro, escuro e o âmbar). Você ajusta o texto secundário do tema claro, e a geração escreve também os dois temas de alto contraste do tema padrão:
+
+```
+> /agile:identity
+Claude: Identidade registrada: tema Cais (claro e escuro), 9 chaves, 5 pares de contraste, 2 chaves bloqueadas
+(Env.Production.Bg, Focus). O que muda? A) uma cor  B) adicionar um tema embutido  C) fontes ou raio  D) nada
+> A, Text.Muted do claro: #5E6875
+Claude: Nada foi escrito ainda. Text.Muted sobre Surface no claro dá 5.65:1, acima do mínimo 4.5:1. Confirma?
+> confirmo
+Claude: Escrevi docs/design/identity.tokens.json e rodei a geração dos temas embutidos:
+```
+
+```
+high contrast: 1 colors adjusted, 0 of them backgrounds
+WROTE 7 files
+```
+
+```
+Claude: Além dos quatro temas de antes, saíram cais-hc-light.json e cais-hc-dark.json, os temas de alto contraste do
+tema padrão (o âmbar não tem um). Uma cor foi ajustada, e nenhuma delas era fundo: no claro, Text.Muted passou de
+#5E6875 (5.65:1 sobre Surface) para #515965 (7.08:1, o mínimo de texto em alto contraste é 7:1). Todas as outras cores
+já chegavam ao mínimo e ficaram iguais às do tema claro. Nenhum código do app foi alterado.
+```
+
+O mínimo de alto contraste é 7:1 para texto e 4.5:1 para o resto (a WCAG 2.2 só define o nível AAA para texto, então a parte de interface usa o do texto grande). Cada par do `index.json` traz os dois, `min` e `minHighContrast`, e o teste de contraste do app confere cada arquivo de tema com o mínimo certo:
+
+```csharp
+// para cada tema listado no index.json
+var minimum = theme.Type.StartsWith("hc-") ? pair.MinHighContrast : pair.Min;
+Assert.True(Contrast(colors[pair.Foreground], colors[pair.Background]) >= minimum);
+```
+
+Em um app que adotou o kit de temas antes desta versão, a verificação aponta `STALE` para os dois arquivos novos até a próxima geração; o kit só passa a listar "Cais High Contrast Light" entre os temas claros e "Cais High Contrast Dark" entre os escuros depois do `/agile:sync` e de refazer o módulo do kit. Trocar sozinho para o alto contraste quando o sistema operacional pede esse modo não faz parte disto: é a #273. Se uma identidade tem um par que nenhuma cor de primeiro plano leva ao mínimo, o fundo anda e o relatório conta esse fundo; se nem assim o par fecha em dez passadas, a geração recusa pelo nome do par e nada é escrito.
+
+### 14.165 O `/agile:order` puxa a cadeia de um bug de nível alto para o topo
+
+O acme-shop tem cinco itens em aberto: F-20 (catálogo de produtos), F-21 (totais do carrinho, depende do F-20), F-22 (layout de impressão), F-23 (compartilhar por link, depende do F-22) e B-5, um bug no total dos reembolsos que depende do F-21. O B-5 fica no nível 3, e antes desta versão a lista o punha depois de todas as features dos níveis 1 e 2, inclusive as que nada têm a ver com ele:
+
+```
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+| 1 | F-20 | Product catalog | approved | - | shop | - | F-21 |
+| 2 | F-22 | Print layout | approved | - | shop | - | F-23 |
+| 3 | F-21 | Cart totals | approved | - | shop | F-20 | B-5 |
+| 4 | F-23 | Share by link | approved | - | shop | F-22 | - |
+| 5 | B-5 | Total wrong on refunds | approved | - | shop | F-21 | - |
+```
+
+Agora o `/agile:order` puxa o bug e o que ele espera para o topo; o resto fica na ordem de sempre (a saída abaixo é a do script no projeto de teste):
+
+```
+> /agile:order
+Claude: agile order WRITTEN: 5 items, 0 delivered
+        | # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+        | 1 | F-20 | Product catalog | approved | - | shop | - | F-21 |
+        | 2 | F-21 | Cart totals | approved | - | shop | F-20 | B-5 |
+        | 3 | B-5 | Total wrong on refunds | approved | - | shop | F-21 | - |
+        | 4 | F-22 | Print layout | approved | - | shop | - | F-23 |
+        | 5 | F-23 | Share by link | approved | - | shop | F-22 | - |
+```
+
+A cadeia do B-5 (F-20, F-21 e o próprio bug) vem primeiro, e o F-22 e o F-23, que o bug não precisa, vêm depois. Nada fica antes do que espera: o F-20 abre a lista porque o F-21 depende dele. Um bug bloqueado à mão, um adiado ou um que está num ciclo não puxa nada. Com épicos em corte, a puxada vale dentro de cada grupo: o bug de `Later` leva a cadeia para o topo de `Later` e não muda nenhum item de grupo.
+
+### 14.166 Um objetivo vira quatro marcos em sequência: `/agile:mvp --milestones`
+
+No acme-shop há dois epics, `catalogo` e `checkout`, e seis itens em aberto: o F-20 (Lista de produtos), o F-21 (Busca de produtos), o F-22 (Carrinho, depende do F-20), o F-23 (Pagar com cartão, depende do F-22), o F-24 (Cupom de desconto, Could) e o F-25 (Painel de pedidos, depende do F-23). Nenhum epic tem corte. Você quer ver o caminho até uma loja que vende e acompanha pedidos, não um corte só. Você digita:
+
+```
+/agile:mvp loja "vender produtos online com pagamento por cartão e acompanhar os pedidos" --milestones
+```
+
+A primeira linha da resposta diz o que foi lido: `label: loja · epic: all · goal: vender produtos online com pagamento por cartão e acompanhar os pedidos`. O Claude lê o brief, os epics e os itens e analisa o objetivo no chat: o que o usuário faz (ver, buscar, montar o carrinho, pagar, acompanhar), o que o técnico impõe (o pagamento depende do carrinho, o painel depende do pagamento), o que o negócio pede (cartão) e o que ninguém escreveu mas o objetivo exige: fechar um pedido precisa de um valor de frete, e nenhum item cobre isso. Essa é uma lacuna, e vem com quatro campos num card:
+
+- Nome curto: Cálculo de frete.
+- Descrição objetiva: informar o custo de entrega do carrinho pelo CEP.
+- Dependências: F-22.
+- Impacto no objetivo: sem o frete o pedido não fecha; entra no marco do pagamento.
+
+O card pergunta o que fazer com a lacuna: `Capturar como ideia (Recomendado)`, `Sugerir uma discussão` ou `Ignorar`. Você escolhe capturar. O `/agile:idea` cria o F-26 (Cálculo de frete, depende do F-22), que passa a ser semente do marco do pagamento. O Claude grava as sementes de cada marco num arquivo de plano, fora do repositório, e nunca digita os ids de um corte:
+
+```
+{
+  "milestones": [
+    { "name": "vitrine", "purpose": "see and search products", "seeds": ["F-20", "F-21"] },
+    { "name": "carrinho", "purpose": "fill a cart", "seeds": ["F-22"] },
+    { "name": "pagamento", "purpose": "pay by card with shipping", "seeds": ["F-23", "F-26"] },
+    { "name": "pedidos", "purpose": "follow the orders", "seeds": ["F-25"] }
+  ]
+}
+```
+
+O script calcula o resto, e a saída real dele sobre esse cenário é a diferença contra o que está gravado (nada, ainda):
+
+```
+cut loja-1-vitrine (rank 1, catalogo): enters: F-20, F-21; leaves: -
+cut loja-2-carrinho (rank 2, catalogo): enters: F-22; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: F-23, F-26; leaves: -
+cut loja-4-pedidos (rank 4, checkout): enters: F-25; leaves: -
+agile mvp MILESTONES DIFF: 4 milestones, 6 items
+```
+
+O F-24 (cupom, Could) não é pedido pelo objetivo e fica em `Later`. O Claude mostra a tabela com o motivo de cada marco e faz uma pergunta só:
+
+| Marco | Rank | Epic | Itens | Motivo |
+|---|---|---|---|---|
+| vitrine | 1 | catalogo | F-20, F-21 | ver e buscar produtos é o começo de qualquer venda |
+| carrinho | 2 | catalogo | F-22 | juntar o que se quer comprar |
+| pagamento | 3 | checkout | F-23, F-26 | pagar por cartão e fechar o pedido com o frete |
+| pedidos | 4 | checkout | F-25 | acompanhar o que foi vendido |
+
+O card diz `Escrever (Recomendado)`, `Mudar a lista` ou `Pular`. Nada foi escrito até aqui; `Pular` não toca em arquivo algum, e `Mudar a lista` refaz o plano e mostra uma nova diferença antes de perguntar de novo. Você escolhe escrever. O script grava um corte por marco, cada um no epic que tem mais dos seus ids, com a linha `Rank:` igual ao número do marco, e uma linha em `## Decisions` de cada arquivo:
+
+```
+cut loja-1-vitrine (rank 1, catalogo): enters: F-20, F-21; leaves: -
+cut loja-2-carrinho (rank 2, catalogo): enters: F-22; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: F-23, F-26; leaves: -
+cut loja-4-pedidos (rank 4, checkout): enters: F-25; leaves: -
+files: docs/epics/catalogo.md, docs/epics/checkout.md
+commit: chore(epic): milestones of loja
+agile mvp WRITTEN: 4 milestones
+```
+
+```
+## First release cut: loja-3-pagamento
+Rank: 3
+F-23, F-26
+
+## First release cut: loja-4-pedidos
+Rank: 4
+F-25
+```
+
+```
+- 2026-10-20 — milestones of loja written by /agile:mvp: 4 milestones (6 items); label: loja; goal: "vender produtos online com pagamento por cartão e acompanhar os pedidos"; gaps left: 0; milestones: loja-1-vitrine (see and search products), loja-2-carrinho (fill a cart), loja-3-pagamento (pay by card with shipping), loja-4-pedidos (follow the orders)
+```
+
+O Claude propõe o commit `chore(epic): milestones of loja`, com os dois epics por nome, e só o faz com a sua autorização. A análise e o motivo de cada marco ficaram no chat; nos cortes só há ids. O `/agile:order` passa a listar os marcos em sequência, e o F-24 em `Later`; este é o trecho real dos grupos:
+
+```
+## MVP: loja-1-vitrine
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 1 | F-20 | Lista de produtos | approved | - | catalogo | - | F-22 |
+| 2 | F-21 | Busca de produtos | approved | - | catalogo | - | - |
+
+## MVP: loja-2-carrinho
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 3 | F-22 | Carrinho | approved | - | catalogo | F-20 | F-23, F-26, first release of catalogo |
+
+## MVP: loja-3-pagamento
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 4 | F-23 | Pagar com cartao | approved | - | checkout | F-22 | F-24, F-25 |
+| 5 | F-26 | Calculo de frete | idea | - | checkout | F-22 | - |
+
+## MVP: loja-4-pedidos
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 6 | F-25 | Painel de pedidos | approved | - | checkout | F-23 | first release of checkout |
+
+## Later
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 7 | F-24 | Cupom de desconto | approved | - | checkout | F-23 | - |
+```
+
+Semanas depois o F-20 e o F-21 foram entregues, e você digita `/agile:mvp loja --milestones`, sem o texto. O Claude não pede o objetivo de novo: lê o último gravado para o rótulo (`agile mvp GOAL: 2026-10-20 "vender produtos online com pagamento por cartão e acompanhar os pedidos"`) e a primeira linha diz `goal: reused from 2026-10-20`. Ele reavalia só o que está em aberto e propõe três marcos, juntando o cupom ao painel. A saída real do script, sobre esse novo estado:
+
+```
+cut loja-1-vitrine (kept, rank 1, catalogo): F-20, F-21
+cut loja-2-carrinho (rank 2, catalogo): enters: -; leaves: -
+cut loja-3-pagamento (rank 3, checkout): enters: -; leaves: -
+cut loja-4-pedidos-e-cupom (rank 4, checkout): enters: F-25, F-24; leaves: -
+cut loja-4-pedidos (removed, checkout): leaves: F-25
+files: docs/epics/catalogo.md, docs/epics/checkout.md
+commit: chore(epic): milestones of loja
+agile mvp WRITTEN: 3 milestones
+```
+
+O corte `loja-1-vitrine` tem todos os ids entregues: fica como estava, com o número 1. Os outros são trocados, de qualquer epic, e os três novos recebem os números 2, 3 e 4. Se um item de um marco de número menor dependesse de um que você pôs num marco maior, o script o traria para o marco menor e diria `moved <id> from <corte> to <corte> (needed by <id>)`, para nenhum item esperar por um marco posterior. Rodar o mesmo plano de novo termina em `UNCHANGED`, sem escrever nada. Publicar uma versão continua sendo o `/agile:publish`.
+
+### 14.167 Só o que um objetivo ainda precisa: `/agile:order <rótulo>` e o porquê de cada linha
+
+No acme-shop o `/agile:mvp loja --milestones` gravou dois marcos para o objetivo "Vender online com pagamento por cartão": `loja-1-catalogo` (Rank 1, no épico `catalog`, com o F-12 e o F-13) e `loja-2-pagamento` (Rank 2, no `checkout`, com o F-14). O F-14 depende do F-15, que está no corte `admin`; o F-16 (lista de desejos) não está em corte nenhum. Você quer ver só o caminho até a loja, sem o resto do backlog:
+
+```
+> /agile:order loja
+```
+
+A saída real do script nesse projeto (no app, o mesmo vem como um widget só de leitura, com o objetivo no topo e o porquê embaixo de cada título):
+
+```
+# Order of implementation: loja
+
+Goal: "Vender online com pagamento por cartão"
+
+## MVP: loja-1-catalogo
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 1 | F-12 | Product list with filters | approved | - | catalog | - | F-13 | in cut loja-1-catalogo; level 1; feature; Must; size M |
+| 2 | F-13 | Product page | idea | - | catalog | F-12 | - | in cut loja-1-catalogo; level 2: waits on F-12; feature; Must; size S |
+
+## MVP: loja-2-pagamento
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 3 | F-15 | Payment provider settings | approved | - | admin | - | F-14, first release of admin | needed by F-14; level 1; feature; Should; size S |
+| 4 | F-14 | Card payment | approved | - | checkout | F-15 | first release of checkout | in cut loja-2-pagamento; level 2: waits on F-15; feature; Must; size L |
+
+## Summary
+
+- loja-1-catalogo: 2 open (2 in the cut, 0 their dependencies)
+- loja-2-pagamento: 2 open (1 in the cut, 1 their dependencies)
+- Delivered in these cuts: 0
+
+agile order SHOWN: 4 items for loja
+```
+
+O F-16 não aparece: nenhum corte de `loja` o pede. O F-15 entrou no segundo marco porque o F-14 precisa dele (`needed by F-14`), embora o corte dele seja o `admin`. A coluna `Why` diz por que cada linha está ali: o corte ou quem a puxou, o nível e o que ela espera, feature ou bug, e a prioridade e o tamanho da tabela do épico. O Claude resume em português: 4 itens, o objetivo, e que o primeiro é o F-12, nível 1 e Must. Nada foi gravado: nem o `docs/agile/order.md`, nem as marcas, nem commit (a seção `## Checklist` da saída foi omitida aqui).
+
+Dias depois o F-12 é entregue e você digita o mesmo comando. A visão é recalculada dos arquivos, não guardada (da saída real, o primeiro grupo e o resumo):
+
+```
+## MVP: loja-1-catalogo
+
+| # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
+|---|---|---|---|---|---|---|---|---|
+| 1 | F-13 | Product page | idea | - | catalog | - | first release of catalog | in cut loja-1-catalogo; level 1; feature; Must; size S |
+
+## Summary
+
+- loja-1-catalogo: 1 open (1 in the cut, 0 their dependencies)
+- loja-2-pagamento: 2 open (1 in the cut, 1 their dependencies)
+- Delivered in these cuts: 1
+
+agile order SHOWN: 3 items for loja
+```
+
+O F-12 saiu, e o F-13 não espera mais nada (`level 1`, sem `waits on`). Se você digitar um rótulo que não existe, nada é mostrado nem gravado, e a resposta diz quais cortes há:
+
+```
+> /agile:order loj
+agile order REFUSED: no cut named loj; cuts found: loja-1-catalogo, loja-2-pagamento, admin
+```
+
+O `/agile:order` sem argumento continua escrevendo a lista inteira, agora também com a coluna `Why`. Um rótulo como `ticks` ou `write` não pode ser usado num corte: o `/agile:mvp` o recusa, porque o `/agile:order` o leria como outra coisa.
+
+### 14.168 Quem usa o app importa um tema e a página conta o que ficou de fora
+
+O app web Cais já tem a página de aparência com a importação (o segundo item, "Import and generate themes in the MudBlazor kit", está entregue). Uma pessoa recebeu de um colega o arquivo `night-owl.json`, feito à mão: ele traz uma cor escrita como `red`, uma chave `Mystery` que o app não conhece e o foco (`Focus`, travado) em preto. Ela abre a página, toca em "Importar tema..." e escolhe o arquivo. A página aplica as mesmas regras do oráculo de importação do plugin, que dá, para esse arquivo (o mesmo conteúdo da fixture `report.json` do plugin):
+
+```
+themes.js import report.json
+{
+  "formatVersion": 1,
+  "id": "night-owl",
+  "name": "Night Owl",
+  "type": "light",
+  "colors": {
+    "Accent": "#0B57D0",
+    "Surface": "#FFFFFF",
+    "Text.Muted": "#555F6D"
+  }
+}
+ignored bad color: Text "red"
+ignored unknown key: Mystery
+ignored locked key: Focus
+ACCEPTED night-owl
+```
+
+e a área de resultado da página mostra, em pt-BR:
+
+```
+Seus temas
+  Night Owl                         [Baixar] [Remover]
+[Importar tema...]  [Gerar a partir das minhas personalizações]
+
+Resultado
+  Importado "Night Owl" como night-owl
+  ignoradas: 1 chave desconhecida, 1 chave travada, 1 cor inválida
+```
+
+"Night Owl" já aparece na lista de temas claros, sem recarregar a página, e fica no `localStorage` do navegador, na chave `appearance.themes`: outro navegador não o vê, e a pasta de temas do servidor não muda. O texto e o foco que faltaram vêm do tema claro padrão, Cais Light, e nenhum par de contraste falhou, então não há aviso. Se ela importar o mesmo arquivo de novo, o tema novo vira `night-owl-2`, com o nome "Night Owl (2)"; se escolher um tema do próprio VS Code, a página diz `Não importado: nenhuma chave de cor deste app` e nada é guardado.

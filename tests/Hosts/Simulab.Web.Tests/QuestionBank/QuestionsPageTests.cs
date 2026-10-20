@@ -232,7 +232,7 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         page.WaitForAssertion(() => Api.Received.Should().Contain(call =>
             call.Method == HttpMethod.Delete && call.Path == $"/api/v1/question-bank/questions/{Draft.Id}"));
         providers.Snackbars.WaitForAssertion(() => providers.Snackbars.Markup.Should().Contain("Question deleted."));
-        page.WaitForAssertion(() => page.Markup.Should().Contain("No question in the bank yet."), TimeSpan.FromSeconds(5));
+        page.WaitForAssertion(() => page.Markup.Should().Contain("No question in the bank yet."));
     }
 
     [Fact]

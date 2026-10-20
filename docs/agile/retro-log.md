@@ -137,8 +137,23 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 6/4: the test phase cannot run a migration test against the skeleton (the migration does not exist yet), so a helper that seeds rows may use a column the migration under test drops; at F-102 the locked test failed with `42703: column "base_text_html" of relation "questions" does not exist` and cost an unlock and a new lock (evidence: the item's `blocked` event, 2026-10-15). Ask, for an item with a migration, that the helper be written against the final schema and run once before the lock | F-102 | - |
 | ⏳ | agile | `[generic]` score 5/1: the definition of done says the app manual is updated "in three languages", but the list is the `Manual locales:` line of `CLAUDE.md`; a project that freezes a locale (F-124 froze pt-PT and en) has to override the wording in `project.md`. Read it as "each locale of `Manual locales:`". Evidence: `definition-of-done.md:18` against `references/conventions.md` "App manual languages" | F-124 | - |
 | ⏳ | agile | `[generic]` score 6/7: a refinement that approves new colour values (a palette, an identity) runs a contrast check of every text and non-text pair of the proposal (4.5:1 / 3:1, both themes) before the approval card, so an impossible criterion is found at refinement and not at the build. At F-125 the approved dark keycap edges read 2.39 to 2.84:1 on the surface against the 3:1 of BR3; the build stopped and a change note followed (evidence: the item's events `blocked — impossible criterion…` and `change — v2`). The project rule `project.md:91` re-measures ratios from committed tokens and does not cover a proposed palette | F-125 | - |
+| ⏳ | agile | `[generic]` score 4/3: the validation script template (and its start step) says to stop the app host before typing `/agile:ship`; at F-86 the ship's first `gate.js ship` was `agile gate RED: build blocked by a running process (Simulab.Api ..., Simulab.AppHost ..., Simulab.Web ...)` because the owner's validation app host was still up, and the item got one `test-fail` event for it | F-86 | - |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
+
+## 2026-10-20 - B-31 Base texts search test fails under heavy parallel load
+Events: override 0, question 1, assumed 0, rework 0, test-fail 1, blocked 0, change 0, correction 0, stop 0, companion 0. Gate time: 21 passes, 19 min 25 s, 15 red. Item decisions: 6, stay in the item. Shortcuts: none.
+- Lesson 1, score 4/6 (hidden fact): `BunitContext.DefaultWaitTimeout` is static, so a test that changes it breaks parallel tests (first draft of the AC1 and AC2 tests: 3 red, one of them a B-30 test). Went to `.claude/rules/agile/web-tests-project.md`, loaded only when `tests/Hosts/Simulab.Web.Tests/` is read.
+- Lesson 2, score 3/3, not recommended: a loop of parallel processes must be checked for runs that never started (18 of 72 logs said `test source file ... was not found` while the script ended `ALLDONE`). Registered here only; it happened once, in the AC5 measurement.
+
+## 2026-10-19 - F-86 Copy notice subjects from another edition
+Events: override 0, question 0, assumed 0, rework 0, test-fail 1, blocked 0, change 0, correction 0, stop 0, companion 0. Gate time: 6 passes, 19 min 17 s, 1 red. Item decisions: 5, stay in the item.
+
+| # | Lesson | Score (plugin/project) | Where it went |
+|---|---|---|---|
+| 1 | A callback a child dialog calls outside an event of the parent needs `InvokeAsync(StateHasChanged)`; the bUnit test `Copy_TargetNotEmpty_...` failed until it was added | 3/5 | project rule, `.claude/rules/agile/project.md` |
+| 2 | Stop the app host before `/agile:ship`: the first `gate.js ship` was RED for a held build output | 4/3 | plugin note `[generic]` in the table above |
+| 3 | Each integration project (Catalog 4 m 48 s, Identity 4 m 44 s, QuestionBank 4 m 5 s) is over the 2 min budget and the full suite (294 s) is at the 5 min edge | 1/6 | idea captured: reduce the integration suite time |
 
 ## 2026-09-17 — Bootstrap session (no item)
 Raised by the owner after the bootstrap, approved the same day.
@@ -1359,3 +1374,38 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Merged: `docs/agile/profile.md` (edited, upstream changed): one line, the bootstrap question 23f mention in "Run-time themes"; no conflicts, the Simulab lines are kept.
 - Left alone: `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); build files (the differences are the project's own).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync. Missing capabilities unchanged (DocGen tool catalogue F-61/F-69, release pipeline F-116, Azure login check F-117); none installed by the sync.
+
+## 2026-10-19 - Sync with agile@canary 0.125.0
+- From 0.123.0 to 0.125.0 (2 minor versions). Copied: `docs/agile/templates/epic.md` (comment: `Rank:` line for named MVP cuts), `docs/agile/templates/infra.md` (Store signing section), `docs/agile/workflow.pt-BR.md` and `docs/agile/workflow-examples.pt-BR.md` (release on GitHub Actions, `/agile:order`, MVP by goal and rank); their link lines kept pointing at the project's file names.
+- Merged: none. Left alone: `docs/agile/profile.md`, `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); build files (the differences are the project's own, `<Version>` 1.6.0 stays).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync (step 5g not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-20 - Sync with agile@canary 0.130.0
+- From 0.125.0 to 0.130.0 (5 minor versions). Copied (owner's OK): `.claude/rules/agile/definition-of-done.md` (criteria wording; a false-positive security finding closed by Claude with evidence in the ship report), `docs/agile/templates/infra.md` (cross-repository releases: `RELEASES_TOKEN` section), `docs/agile/workflow.pt-BR.md` (version and skill count) and `docs/agile/workflow-examples.pt-BR.md` (new examples, including 14.158).
+- Merged: none. Left alone: `docs/agile/profile.md`, `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (the differences are the project's own: app version 1.6.1, SDK 10.0.401, own packages and `.gitignore`, `deploy.yml` rendered from `infra.md`).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present in both tables; technical-term rows not swept in this sync (step 5g b and c not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Commit: `chore: sync with agile@canary 0.130.0` on main, with the owner's OK.
+
+## 2026-10-20 - B-32 (plain bUnit waits get the 15 s ceiling)
+- Lesson 1, score 2/3: a bUnit wait is rechecked only when the component renders, so a test of a wait ceiling must keep rendering the component (the first AC2 test failed at 15 s for that reason; `blocked` event). Went nowhere: the comments of `KitTestContext` and `DebounceWaitTimeoutTests` already say it.
+- Lesson 2, score 0/4: stress-loop copies of the test output live inside the worktree (outside it `TrueFalseQuestionListTypeCellTests.TheStylesheet_...` fails with NullReferenceException in `FindWebRoot`). Went to `.claude/rules/agile/project.md`.
+- Lesson 3, score 0/5: the full suite took 356 s (budget 5 min; Catalog, Identity and QuestionBank 4 to 6 min each). Not captured: F-144 already exists for it (board #197).
+- Shortcuts: none. Item decisions stay in the item.
+
+## 2026-10-20 - Sync with agile@canary 0.135.0
+- From 0.130.0 to 0.135.0 (5 minor versions). Copied (owner's OK): `.claude/rules/agile/ui.md` (contrast test checks `hc-*` themes at `minHighContrast`), `docs/agile/templates/epic.md` (several labelled MVP cuts), `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md`.
+- Merged (owner's OK, clean): `docs/agile/profile.md` (one line: `hc-light` counts as light, `hc-dark` as dark, `hc-*` user themes checked at `minHighContrast`). Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (differences are the project's own).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present in both tables; technical-term rows not swept in this sync.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Commit: `chore: sync with agile@canary 0.135.0` on main, with the owner's OK.
+
+## 2026-10-20 - Sync with agile@canary 0.136.0
+- From 0.135.0 to 0.136.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md` (version, "Importar e gerar temas (#249)"), `docs/agile/workflow-examples.pt-BR.md` (example 14.168).
+- Merged (owner's OK, clean): `docs/agile/profile.md` (new `### Import and generate` section of the MudBlazor kit). Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (differences are the project's own).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present; technical-term rows not swept in this sync.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+- Commit: `chore: sync with agile@canary 0.136.0` on main, pending the owner's authorization.

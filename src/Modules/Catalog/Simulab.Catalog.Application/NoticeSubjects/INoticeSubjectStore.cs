@@ -26,6 +26,9 @@ public interface INoticeSubjectStore
     /// <summary>The notice subject's live mapping entries, tracked so a save can drop some and keep the rest (F-75, BR7).</summary>
     Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsAsync(Guid noticeSubjectId, CancellationToken cancellationToken);
 
+    /// <summary>The live mapping entries of every live notice subject of the edition, read only (F-86, BR6).</summary>
+    Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsOfEditionAsync(Guid examEditionId, CancellationToken cancellationToken);
+
     /// <summary>
     /// Which of these subjects and topics exist and are not deleted, and each live topic's current subject
     /// (F-75, BR3, BR4). An id that is not in the answer does not exist.

@@ -750,6 +750,19 @@
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos não existe mais na taxonomia; ele está marcado abaixo. Remova-o e salve de novo.</value></data>
   <data name="notice_subject.mapping_overlap" xml:space="preserve"><value>Um tópico não pode ser escolhido junto com a disciplina inteira dele; os itens estão marcados abaixo. Remova o tópico ou a disciplina inteira.</value></data>
   <data name="notice_subject.mapping_conflict" xml:space="preserve"><value>Outra pessoa salvou esta disciplina ao mesmo tempo. Salve de novo.</value></data>
+  <data name="NoticeSubjects.Copy.Open" xml:space="preserve"><value>Copiar de outra edição</value></data>
+  <data name="NoticeSubjects.Copy.NoSource" xml:space="preserve"><value>Nenhuma outra edição deste exame tem disciplinas do edital.</value></data>
+  <data name="NoticeSubjects.Copy.Title" xml:space="preserve"><value>Copiar disciplinas de outra edição</value></data>
+  <data name="NoticeSubjects.Copy.Intro" xml:space="preserve"><value>As disciplinas da edição escolhida, com grupos, número de questões, ordem e mapeamento, são copiadas para esta edição. Depois, ajuste o que mudou no edital.</value></data>
+  <data name="NoticeSubjects.Copy.Source" xml:space="preserve"><value>Edição de origem</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.One" xml:space="preserve"><value>1 disciplina</value></data>
+  <data name="NoticeSubjects.Copy.SourceCount.Many" xml:space="preserve"><value>{0} disciplinas</value></data>
+  <data name="NoticeSubjects.Copy.Confirm" xml:space="preserve"><value>Copiar</value></data>
+  <data name="NoticeSubjects.Copy.Done" xml:space="preserve"><value>{0} disciplinas copiadas.</value></data>
+  <data name="NoticeSubjects.Copy.Done.One" xml:space="preserve"><value>1 disciplina copiada.</value></data>
+  <data name="exam_edition.copy_source_not_found" xml:space="preserve"><value>A edição escolhida não está mais disponível. Escolha outra.</value></data>
+  <data name="notice_subject.copy_source_empty" xml:space="preserve"><value>A edição escolhida não tem disciplinas do edital para copiar.</value></data>
+  <data name="notice_subject.copy_target_not_empty" xml:space="preserve"><value>Esta edição já tem disciplinas do edital; a cópia só é feita numa lista vazia. A lista foi recarregada.</value></data>
   <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada.</value></data>
   <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do edital ou é usado por questões e não pode ser excluído. A lista foi recarregada.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>Esta questão não existe mais.</value></data>

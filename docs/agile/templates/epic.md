@@ -37,7 +37,7 @@ Technical terms: [glossary](../glossary.md)
 | <decision / access / environment / team> | F-<n> | <person or team> | <owner or Claude> |
 
 ## First release cut
-<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. /agile:mvp may name the cut in the heading: `## First release cut: <label>`. -->
+<!-- Which features must be done before the first release: their ids, comma separated (F-12, F-13, F-14). A range or prose is not read by scripts/order.js. /agile:mvp may name the cut in the heading: `## First release cut: <label>`. Each labelled cut is one named MVP, and an epic may hold several labelled cuts, each with its own heading (`/agile:mvp <label> "<goal>" --milestones` writes `<label>-<n>-<name>` ones, #275); with several, a first line `Rank: <n>` in the body (1 to 99) puts it before the cut with a higher number, and without it the names decide (#266). -->
 
 ## Out of scope
 - <Item>

@@ -1841,6 +1841,82 @@
         }
       }
     },
+    "/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/copy-sources": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "ListNoticeSubjectCopySources",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/copy": {
+      "post": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "CopyNoticeSubjects",
+        "parameters": [
+          {
+            "name": "examId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "editionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyNoticeSubjectsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/catalog/published-exams": {
       "get": {
         "tags": [
@@ -3447,6 +3523,20 @@
           }
         },
         "description": "The first code from the authenticator app, which turns two-factor on (F-11 BR2)."
+      },
+      "CopyNoticeSubjectsRequest": {
+        "type": "object",
+        "properties": {
+          "sourceEditionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The source edition; null or missing is read as an edition that does not exist (BR7).",
+            "format": "uuid"
+          }
+        },
+        "description": "What the copy dialog sends (F-86): the edition whose notice subjects are copied into the one of the route."
       },
       "DataExportRequest": {
         "required": [

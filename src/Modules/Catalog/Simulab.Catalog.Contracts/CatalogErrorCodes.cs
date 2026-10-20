@@ -142,4 +142,13 @@ public static class CatalogErrorCodes
 
     /// <summary>F-96 BR8: a live question points at this notice subject, so it cannot be deleted. Carries no count.</summary>
     public const string NoticeSubjectHasQuestions = "notice_subject.has_questions";
+
+    /// <summary>F-86 BR7: the source edition does not exist, was deleted, belongs to another exam or is the target.</summary>
+    public const string ExamEditionCopySourceNotFound = "exam_edition.copy_source_not_found";
+
+    /// <summary>F-86 BR7: the source edition has no live notice subject to copy.</summary>
+    public const string NoticeSubjectCopySourceEmpty = "notice_subject.copy_source_empty";
+
+    /// <summary>F-86 BR2: the target edition already has a live notice subject, so nothing is copied.</summary>
+    public const string NoticeSubjectCopyTargetNotEmpty = "notice_subject.copy_target_not_empty";
 }

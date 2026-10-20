@@ -123,6 +123,15 @@ public abstract class CatalogPageTestContext : KitTestContext
         /// <summary>The notice subjects the fake holds (F-74), in display order: the test sets it, the writes change it.</summary>
         public List<NoticeSubjectResponse> NoticeSubjects { get; } = [];
 
+        /// <summary>The editions the copy sources route lists (F-86); the test sets it. What a copy writes is <see cref="CopyRows"/>.</summary>
+        public List<NoticeSubjectCopySourceResponse> CopySources { get; } = [];
+
+        /// <summary>The rows a successful copy adds to the target edition (F-86), in order; the fake gives them new ids.</summary>
+        public List<NoticeSubjectResponse> CopyRows { get; } = [];
+
+        /// <summary>When set, the copy answers this problem and nothing changes (F-86: a refusal shown in the dialog).</summary>
+        public (HttpStatusCode Status, string Code)? CopyFailure { get; set; }
+
         /// <summary>When set, every write waits for it before it is answered (F-75: the screen while a save is in flight).</summary>
         public TaskCompletionSource? WriteGate { get; set; }
 
@@ -171,6 +180,14 @@ public abstract class CatalogPageTestContext : KitTestContext
                 return TaxonomyFailure is { } taxonomyRefused
                     ? Problem(taxonomyRefused)
                     : Json<IReadOnlyList<TaxonomySubjectResponse>>([.. Taxonomy]);
+            }
+
+            // F-86: the two routes of the copy; they sit before the notice subject routes, which would read "copy" as an id.
+            var copyRoute = System.Text.RegularExpressions.Regex.Match(
+                path, "^/api/v1/catalog/exams/[^/]+/editions/(?<edition>[^/]+)/notice-subjects/(?<verb>copy-sources|copy)$");
+            if (copyRoute.Success)
+            {
+                return HandleCopy(request.Method, Guid.Parse(copyRoute.Groups["edition"].Value), copyRoute.Groups["verb"].Value);
             }
 
             var subjectRoute = System.Text.RegularExpressions.Regex.Match(
@@ -400,6 +417,29 @@ public abstract class CatalogPageTestContext : KitTestContext
 
             Editions.Remove(existing);
             return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        // F-86: the sources are what the test set; a copy adds the rows the test set, as new rows of the target, or fails.
+        private HttpResponseMessage HandleCopy(HttpMethod method, Guid editionId, string verb)
+        {
+            if (verb == "copy-sources")
+            {
+                return Json<IReadOnlyList<NoticeSubjectCopySourceResponse>>([.. CopySources]);
+            }
+
+            if (method != HttpMethod.Post)
+            {
+                return new HttpResponseMessage(HttpStatusCode.MethodNotAllowed);
+            }
+
+            if (CopyFailure is { } refused)
+            {
+                return Problem(refused);
+            }
+
+            NoticeSubjects.AddRange(CopyRows.Select(row => row with { Id = Guid.CreateVersion7(), ExamEditionId = editionId }));
+
+            return Json(new CopyNoticeSubjectsResponse(CopyRows.Count));
         }
 
         // F-74: the five notice subject routes. The fake keeps the shape the Api has (rows of one group stay together, a

@@ -13,6 +13,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `DELETE` | `/api/v1/catalog/subjects/{id}` | DeleteSubject | 200 |
 | `DELETE` | `/api/v1/catalog/topics/{id}` | DeleteTopic | 200 |
 | `GET` | `/api/v1/catalog/areas` | ListAreas | 200 |
+| `GET` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/copy-sources` | ListNoticeSubjectCopySources | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` | ListNoticeSubjects | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions/{id}/notice-document` | DownloadExamEditionNoticeDocument | 200 |
 | `GET` | `/api/v1/catalog/exams/{examId}/editions/{id}` | FindExamEdition | 200 |
@@ -29,6 +30,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/catalog/subjects/{subjectId}/topics` | ListTopics | 200 |
 | `GET` | `/api/v1/catalog/subjects` | ListSubjects | 200 |
 | `GET` | `/api/v1/catalog/taxonomy` | GetTaxonomy | 200 |
+| `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/copy` | CopyNoticeSubjects | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move` | MoveNoticeSubject | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` | CreateNoticeSubject | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions` | CreateExamEdition | 200 |

@@ -50,6 +50,15 @@ public sealed class NoticeSubjectStore(CatalogModuleDbContext context) : INotice
             .Where(mapping => mapping.NoticeSubjectId == noticeSubjectId)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<NoticeSubjectMapping>> ListMappingsOfEditionAsync(
+        Guid examEditionId,
+        CancellationToken cancellationToken) =>
+        await context.NoticeSubjectMappings
+            .AsNoTracking()
+            .Where(mapping => context.NoticeSubjects.Any(subject =>
+                subject.Id == mapping.NoticeSubjectId && subject.ExamEditionId == examEditionId))
+            .ToListAsync(cancellationToken);
+
     public async Task<MappingTargets> FindLiveTargetsAsync(
         IReadOnlyCollection<Guid> subjectIds,
         IReadOnlyCollection<Guid> topicIds,

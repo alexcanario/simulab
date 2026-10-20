@@ -43,7 +43,9 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         // (AppDataTable, AppLookupField), so a WaitFor behind one of them has only 700 ms left of bUnit's
         // 1-second default. Under the whole solution running in parallel that budget runs out and the test
         // fails for the machine's load, not for the code. A timeout is a maximum: a green run does not wait.
-        DefaultWaitTimeout = TimeSpan.FromSeconds(5);
+        // B-32: 15 s, because a test process stalled by many hosts starting at once reached its first check up to
+        // 9.7 s late (measured in B-31); the value is static in bUnit, so it covers every plain wait of the process.
+        DefaultWaitTimeout = TimeSpan.FromSeconds(15);
 
         Authorization = AddAuthorization().SetNotAuthorized();
     }
@@ -53,11 +55,17 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
+    /// <summary>B-31: the ceiling of <see cref="WaitForAfterDebounce{TComponent}"/>. A test process stalled by a cold start of
+    /// many hosts at once reached its first check up to 9.7 s after the keystroke (measured); B-32 gives the plain waits the
+    /// same 15 s. A green run never waits on it; only a failing test pays. A test can override it to prove the ceiling
+    /// without waiting 15 s.</summary>
+    protected virtual TimeSpan DebounceWaitTimeout => TimeSpan.FromSeconds(15);
+
     /// <summary>B-30: waits for what a debounced field sends. A keystroke can reach its debounce after a single
     /// <see cref="AdvanceDebounce"/> already moved the clock, and then no other advance would ever come: this moves the
     /// clock again before every try, so a delay registered late is still reached. bUnit re-checks only when the
     /// component renders, so each try is a short wait of its own and the next try follows even when nothing rendered.
-    /// The ceiling is <see cref="BunitContext.DefaultWaitTimeout"/>, as for any wait.</summary>
+    /// The ceiling is <see cref="DebounceWaitTimeout"/>, not the default wait of other waits.</summary>
     protected void WaitForAfterDebounce<TComponent>(IRenderedComponent<TComponent> component, Action assertion, int milliseconds = AppLookupField.DebounceMilliseconds)
         where TComponent : IComponent
     {
@@ -70,7 +78,7 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
                 component.WaitForAssertion(assertion, TryWindow);
                 return;
             }
-            catch (WaitForFailedException) when (elapsed.Elapsed < DefaultWaitTimeout)
+            catch (WaitForFailedException) when (elapsed.Elapsed < DebounceWaitTimeout)
             {
                 // Not yet: the delay may not have existed when the clock moved. Move it again.
             }
