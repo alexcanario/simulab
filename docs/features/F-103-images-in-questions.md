@@ -1,10 +1,11 @@
 ---
 feature: F-103
 epic: Question bank
-status: refining
+status: blocked
 board: 149
 version: 1
 ---
+Blocked (2026-10-20): depends on F-89 (building) — unblocked by the delivery of F-89 — returns to approved
 # Images in questions
 
 Technical terms: [glossary](../glossary.md)
@@ -182,6 +183,7 @@ the file field; "Alternative text is required" under the text.
 - 2026-10-20: the image belongs to a question or a base text through `owner kind` and `owner id` set on save from the ids found in the sanitized HTML; the live-or-versioned check searches the version HTML for the id — Claude: no extra link table to keep in step with the HTML.
 - 2026-10-20: build spikes, settled by a test during the build: Quill 2 writes `alt` for an `img` (its image format lists `alt`); the editor drops a pasted or dropped image file; the sanitizer keeps `img` when it sits inside an option, a list item and a table cell — Claude.
 - 2026-10-20: the plan has no layer alone: 1 table, upload and download endpoints, the sanitizer `img`, ownership on save, the sweep (needs F-89 merged) → AC1 to AC9, AC11, AC12; 2 the editor button, the dialog and the Web route → AC10, AC15, AC16, AC17; 3 removal and versions → AC13, AC14 — Claude.
+- 2026-10-20: blocked (depends on F-89 (building)) — unblocked by the delivery of F-89
 
 ## Out of scope
 - Images in the explanation.
@@ -203,5 +205,7 @@ the file field; "Alternative text is required" under the text.
 
 - 2026-10-20 question — asked 7, from context 2
 - 2026-10-20 override — F-89 Q5 (file sent only at Save) changed to send on choose: the editor needs an address and the HTML would pass the 32 KB message limit
+- 2026-10-20 blocked — depends on F-89
+- 2026-10-20 blocked — depends on F-89
 
 ## Delivery
