@@ -387,7 +387,8 @@ public abstract class CatalogPageTestContext : KitTestContext
 
             if (method == HttpMethod.Put)
             {
-                var updated = SavedEdition(id, examId, Read<SaveExamEditionRequest>(body));
+                // F-89 BR5: saving the fields never touches the notice PDF.
+                var updated = SavedEdition(id, examId, Read<SaveExamEditionRequest>(body)) with { NoticeDocument = existing.NoticeDocument };
                 Editions[Editions.IndexOf(existing)] = updated;
                 return Json(updated);
             }

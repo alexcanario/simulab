@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+    <ProjectReference Include="..\Simulab.Storage.Contracts\Simulab.Storage.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

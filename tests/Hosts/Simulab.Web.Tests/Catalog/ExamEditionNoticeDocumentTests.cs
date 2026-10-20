@@ -227,11 +227,15 @@ public sealed class ExamEditionNoticeDocumentTests : CatalogPageTestContext
     [Fact]
     public void Cancel_WithAChosenFile_UploadsNothingAndLeavesTheStoredFile()
     {
+        var (dialogs, _) = RenderProviders();
         var page = RenderEdit(EditionWithFile);
         Choose(page, "new.pdf");
         page.WaitForAssertion(() => page.FindAll($"#{FieldId}-chosen").Should().ContainSingle());
 
+        // A chosen file is an unsaved change, so leaving asks first (rule: ui); answering yes goes back.
         page.Find(".app-form-cancel").Click();
+        dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Discard changes?"));
+        dialogs.Find(".app-confirm-ok").Click();
 
         page.WaitForAssertion(() =>
             Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith($"/admin/exams/{AgentePf.Id}"));

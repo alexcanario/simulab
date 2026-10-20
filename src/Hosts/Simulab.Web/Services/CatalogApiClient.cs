@@ -295,6 +295,69 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Delete, $"{Base}/exams/{examId}/editions/{editionId}"), accessToken),
             cancellationToken);
 
+    /// <summary>
+    /// F-89 UC1 and UC2: sends the notice PDF of an edition (it replaces the one it had). The content is already in memory:
+    /// the Web reads the browser's stream first, so this call is one short hop to the Api and the resilience handler's
+    /// attempt timeout never runs against the browser's slow upload (design trade-off 5).
+    /// </summary>
+    public Task<ApiResult<ExamEditionResponse>> UploadNoticeDocumentAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        string fileName,
+        byte[] content,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+
+        return SendAsync<ExamEditionResponse>(
+            () =>
+            {
+                var file = new ByteArrayContent(content);
+                file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/pdf");
+                var form = new MultipartFormDataContent { { file, "file", fileName } };
+
+                return Authorized(
+                    new HttpRequestMessage(HttpMethod.Put, NoticeDocumentRoute(examId, editionId)) { Content = form },
+                    accessToken);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>F-89 UC2: removes the notice PDF of an edition; an edition without one answers the same.</summary>
+    public Task<ApiResult<bool>> DeleteNoticeDocumentAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Delete, NoticeDocumentRoute(examId, editionId)), accessToken),
+            cancellationToken);
+
+    /// <summary>
+    /// F-89 UC3 and UC4: asks the Api for the notice PDF and returns its answer with the headers read and the body still
+    /// unread, so the Web endpoint streams it on without holding 20 MB. The caller disposes the response.
+    /// </summary>
+    public async Task<HttpResponseMessage> OpenNoticeDocumentAsync(
+        string accessToken,
+        Guid examId,
+        Guid editionId,
+        bool published,
+        CancellationToken cancellationToken = default)
+    {
+        var route = published
+            ? $"{Base}/published-exams/{examId}/editions/{editionId}/notice-document"
+            : NoticeDocumentRoute(examId, editionId);
+
+        using var request = Authorized(new HttpRequestMessage(HttpMethod.Get, route), accessToken);
+        request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+
+        return await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
+
+    private static string NoticeDocumentRoute(Guid examId, Guid editionId) =>
+        $"{Base}/exams/{examId}/editions/{editionId}/notice-document";
+
     /// <summary>F-74 UC1: the edition's notice subjects in display order (the Api orders them, BR6).</summary>
     public Task<ApiResult<IReadOnlyList<NoticeSubjectResponse>>> ListNoticeSubjectsAsync(
         string accessToken,

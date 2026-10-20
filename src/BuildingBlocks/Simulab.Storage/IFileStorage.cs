@@ -1,4 +1,5 @@
 using Simulab.SharedKernel.Results;
+using Simulab.Storage.Contracts;
 
 namespace Simulab.Storage;
 

@@ -1,3 +1,5 @@
+using Simulab.Storage.Contracts;
+
 namespace Simulab.Storage.Tests;
 
 /// <summary>Open point 1 of F-89: a Development host without storage starts, saves answer a stable code, reads find nothing.</summary>

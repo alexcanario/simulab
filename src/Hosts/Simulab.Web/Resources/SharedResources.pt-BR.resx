@@ -1181,4 +1181,23 @@
   <data name="question.not_in_review" xml:space="preserve"><value>Esta questão não está em revisão.</value></data>
   <data name="question.review_reason_required" xml:space="preserve"><value>Escreva o motivo da rejeição.</value></data>
   <data name="question.review_reason_too_long" xml:space="preserve"><value>O motivo ou a observação passa de 500 caracteres.</value></data>
+  <data name="ExamEditions.NoticeDocument.Label" xml:space="preserve"><value>PDF do edital</value></data>
+  <data name="ExamEditions.NoticeDocument.Hint" xml:space="preserve"><value>PDF, até 20 MB.</value></data>
+  <data name="ExamEditions.NoticeDocument.Choose" xml:space="preserve"><value>Escolher PDF</value></data>
+  <data name="ExamEditions.NoticeDocument.Replace" xml:space="preserve"><value>Substituir</value></data>
+  <data name="ExamEditions.NoticeDocument.Remove" xml:space="preserve"><value>Remover</value></data>
+  <data name="ExamEditions.NoticeDocument.Discard" xml:space="preserve"><value>Descartar escolha</value></data>
+  <data name="ExamEditions.NoticeDocument.Chosen" xml:space="preserve"><value>Arquivo escolhido, ainda não salvo: {0}</value></data>
+  <data name="ExamEditions.NoticeDocument.RemovePending" xml:space="preserve"><value>O arquivo será removido quando você salvar.</value></data>
+  <data name="ExamEditions.NoticeDocument.KeepFile" xml:space="preserve"><value>Manter arquivo</value></data>
+  <data name="ExamEditions.NoticeDocument.Download" xml:space="preserve"><value>Baixar</value></data>
+  <data name="ExamEditions.NoticeDocument.Download.Name" xml:space="preserve"><value>Baixar {0} (PDF)</value></data>
+  <data name="Catalog.Editions.NoticePdf" xml:space="preserve"><value>Edital (PDF)</value></data>
+  <data name="Catalog.Editions.NoticePdf.Name" xml:space="preserve"><value>Edital (PDF) de {0}, baixa o arquivo</value></data>
+  <data name="exam_edition.notice_document_not_pdf" xml:space="preserve"><value>Este arquivo não é um PDF.</value></data>
+  <data name="exam_edition.notice_document_too_large" xml:space="preserve"><value>O arquivo tem mais de 20 MB.</value></data>
+  <data name="exam_edition.notice_document_not_found" xml:space="preserve"><value>Esta edição não tem PDF do edital.</value></data>
+  <data name="storage.not_configured" xml:space="preserve"><value>O armazenamento de arquivos não está configurado neste servidor, então o PDF não pode ser salvo.</value></data>
+  <data name="Gallery.Section.FileField" xml:space="preserve"><value>Campo de arquivo</value></data>
+  <data name="Gallery.FileField.Hint" xml:space="preserve"><value>Escolher um arquivo muda o formulário e não envia nada; quem envia é o Salvar. Vazio, escolhido, guardado, a remover, com erro e com nome de arquivo longo.</value></data>
 </root>

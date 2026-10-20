@@ -15,6 +15,7 @@
     <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Storage/Simulab.Storage.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.Storage.Contracts/Simulab.Storage.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/Hosts/">
     <Project Path="src/Hosts/Simulab.Api/Simulab.Api.csproj" />

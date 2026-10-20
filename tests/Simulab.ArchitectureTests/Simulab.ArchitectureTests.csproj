@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Jobs\Simulab.Jobs.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Storage\Simulab.Storage.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.Storage.Contracts\Simulab.Storage.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Hosts\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
     <ProjectReference Include="..\..\src\Hosts\Simulab.Web\Simulab.Web.csproj" />

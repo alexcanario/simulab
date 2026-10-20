@@ -1,6 +1,6 @@
 using System.Net;
 using Simulab.Catalog.Contracts;
-using Simulab.Storage;
+using Simulab.Storage.Contracts;
 
 namespace Simulab.Catalog.Tests;
 
