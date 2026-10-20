@@ -48,8 +48,8 @@ public sealed class PreviousOpenIddictCertificates
         using var deadline = new CancellationTokenSource(options.ListTimeout);
         var now = TimeProvider.System.GetUtcNow();
         return new PreviousOpenIddictCertificates(
-            LoadRole(configuration, source, OpenIddictCertificates.SigningKey, X509KeyUsageFlags.DigitalSignature, now, deadline.Token, logger),
-            LoadRole(configuration, source, OpenIddictCertificates.EncryptionKey, X509KeyUsageFlags.KeyEncipherment, now, deadline.Token, logger));
+            LoadRole(configuration, source, OpenIddictCertificates.SigningKey, X509KeyUsageFlags.DigitalSignature, now, logger, deadline.Token),
+            LoadRole(configuration, source, OpenIddictCertificates.EncryptionKey, X509KeyUsageFlags.KeyEncipherment, now, logger, deadline.Token));
     }
 
     private static X509Certificate2? LoadRole(
@@ -58,8 +58,8 @@ public sealed class PreviousOpenIddictCertificates
         string key,
         X509KeyUsageFlags usage,
         DateTimeOffset now,
-        CancellationToken deadline,
-        ILogger logger)
+        ILogger logger,
+        CancellationToken deadline)
     {
         // The vault names a certificate with "--" where the configuration key has ":".
         var name = key.Replace(":", "--", StringComparison.Ordinal);

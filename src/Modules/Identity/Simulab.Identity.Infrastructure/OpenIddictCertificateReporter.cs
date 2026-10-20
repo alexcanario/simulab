@@ -14,14 +14,18 @@ internal sealed class OpenIddictCertificateReporter(
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "OpenIddict signing certificates: current {Current}, previous {Previous}",
-            current.Signing.Thumbprint,
-            previous.Signing?.Thumbprint ?? "none");
-        logger.LogInformation(
-            "OpenIddict encryption certificates: current {Current}, previous {Previous}",
-            current.Encryption.Thumbprint,
-            previous.Encryption?.Thumbprint ?? "none");
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "OpenIddict signing certificates: current {Current}, previous {Previous}",
+                current.Signing.Thumbprint,
+                previous.Signing?.Thumbprint ?? "none");
+            logger.LogInformation(
+                "OpenIddict encryption certificates: current {Current}, previous {Previous}",
+                current.Encryption.Thumbprint,
+                previous.Encryption?.Thumbprint ?? "none");
+        }
+
         return Task.CompletedTask;
     }
 
