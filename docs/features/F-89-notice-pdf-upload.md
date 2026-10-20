@@ -72,7 +72,7 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 
 ## Criterion → test
 
-Tests locked: 59c2c106eee4845e47a5e99694b9f44de99de10b (13 files); unlocks: 0
+Tests locked: 823c5a07cf5d3b86a237afb8029a513c9172255d (13 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
@@ -116,6 +116,7 @@ Tests locked: 59c2c106eee4845e47a5e99694b9f44de99de10b (13 files); unlocks: 0
 - 2026-10-20: design trade-off 6 (Azurite only in Storage.Tests; Catalog.Tests use an in-memory `INoticeDocumentFiles`) — owner chose as proposed.
 - 2026-10-20: open point 1 (new code `storage.not_configured`; the Api starts without `blobs` in Development and refuses outside it) — owner chose as proposed.
 - 2026-10-20: architect findings accepted — the plan has no layer alone (schema folds into the upload step; downloads come before replace and remove); `docs/infra.md` (line 13, line 300 and an "Access" row with `InfraAccessTests.ApprovedAccessRows`), the profile line on `tests/Simulab.Testing` and the three resource files get the changes in step 1; `StorageErrorCodes` lives in `Simulab.Storage`; the Web routes carry `RequireAuthorization` by permission (`Manage`, `Browse`); a body above the Kestrel limit answers `exam_edition.notice_document_too_large` with a test, not a bare 413; the CHECK and the string lengths are explicit — Claude.
+- 2026-10-20: tests unlocked (owner's yes, asked: two of my tests expected the wrong exception type and sent a PUT without the status the Api requires on update; the criteria did not change), fixed and locked again.
 - 2026-10-20: plan — 1 Storage block, Azurite in the app host and in the publish model, infra docs, overview and boundary tests → build, Storage.Tests, architecture and app host tests; 2 Upload end to end: migration, `NoticeDocument`, port and adapter, handler, `PUT` → AC1 (upload half), AC5, AC6, AC13; 3 Downloads: back office and student `GET` → AC1, AC9 (API), AC10; 4 Replace, remove and delete the edition → AC3, AC4, AC12; 5 Web plumbing: client, buffered upload, the two download routes with policies → Web host tests; 6 `AppFileField` and the edition form with the three locales → AC2, AC7, AC8, AC9 (screen), AC14; 7 Student page link → AC11.
 
 ## Approved list
