@@ -105,6 +105,15 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 - 2026-10-04 — The browser downloads through a Web endpoint that calls the Api with the signed-in user's token and streams the answer (`Content-Disposition: attachment`) — Claude: the tokens live server-side in the Web (B-3), so a plain link to the Api cannot authenticate.
 - 2026-10-04 — Blazor Server reads the file with `IBrowserFile.OpenReadStream(maxAllowedSize: 20 MB)` and the Web forwards it as multipart; the Api endpoint sets its own request size limit to 20 MB plus multipart overhead — Claude: each layer refuses an oversize file before buffering it.
 - 2026-10-04 — Glossary row: "PDF do edital" → `NoticeDocument`, added in this item before its first use in code — Claude: naming rule.
+- 2026-10-20: size L judged, kept whole — the four use cases are one chain (store, replace or remove, download), the plan has 7 steps, no part is usable alone — asked (approved whole at refinement).
+- 2026-10-20: design passes (system-design, architect) verified against the files; accepted: the storage resource `blob`, connection `blobs`, container `documents`, a keyed client beside the unkeyed key-ring client of ServiceDefaults; `NoticeDocument` as an owned value object with four nullable columns and a CHECK that writes every required column as `IS NOT NULL`; the port `INoticeDocumentFiles` in Application (Application may reference only Contracts, Domain and SharedKernel); `DisableAntiforgery` on the token-authenticated multipart endpoint; the student guard as one Infrastructure query; the `download` attribute checked on screen. Dropped: `Aspire.Hosting.Azure.Storage` and `Aspire.Azure.Storage.Blobs` are not new (already pinned at 13.6.1 since F-64), so only `Testcontainers.Azurite` 4.15.0 is added — Claude.
+- 2026-10-20: design coverage — scope, simplicity, layout, rules, contracts, data checked against the item file, the profile, the project rules and the architecture tests (`ModuleBoundaryTests`, `InfraAccessTests`, `ArchitectureOverviewTests`, `TableDescriptionTests`, `FieldLengthTests`); not checked: the exact Aspire 13.6.1 method name `AddBlobs`, Blazor's handling of an anchor with `download`, .NET 10 antiforgery for `IFormFile` (all three are settled by a test or a validation step during the build) — Claude.
+- 2026-10-20: traps — T1 one multipart request with the edition JSON and the file (changes the JSON contract and the bUnit readers); T2 reuse the F-16 download path (20 MB through SignalR); T3 the Api refusing to start without `blobs` everywhere (an Azurite container in four test projects) — all three avoided.
+- 2026-10-20: design trade-off 5 (Web buffers the browser stream, then one short Api call) — owner chose as proposed.
+- 2026-10-20: design trade-off 6 (Azurite only in Storage.Tests; Catalog.Tests use an in-memory `INoticeDocumentFiles`) — owner chose as proposed.
+- 2026-10-20: open point 1 (new code `storage.not_configured`; the Api starts without `blobs` in Development and refuses outside it) — owner chose as proposed.
+- 2026-10-20: architect findings accepted — the plan has no layer alone (schema folds into the upload step; downloads come before replace and remove); `docs/infra.md` (line 13, line 300 and an "Access" row with `InfraAccessTests.ApprovedAccessRows`), the profile line on `tests/Simulab.Testing` and the three resource files get the changes in step 1; `StorageErrorCodes` lives in `Simulab.Storage`; the Web routes carry `RequireAuthorization` by permission (`Manage`, `Browse`); a body above the Kestrel limit answers `exam_edition.notice_document_too_large` with a test, not a bare 413; the CHECK and the string lengths are explicit — Claude.
+- 2026-10-20: plan — 1 Storage block, Azurite in the app host and in the publish model, infra docs, overview and boundary tests → build, Storage.Tests, architecture and app host tests; 2 Upload end to end: migration, `NoticeDocument`, port and adapter, handler, `PUT` → AC1 (upload half), AC5, AC6, AC13; 3 Downloads: back office and student `GET` → AC1, AC9 (API), AC10; 4 Replace, remove and delete the edition → AC3, AC4, AC12; 5 Web plumbing: client, buffered upload, the two download routes with policies → Web host tests; 6 `AppFileField` and the edition form with the three locales → AC2, AC7, AC8, AC9 (screen), AC14; 7 Student page link → AC11.
 
 ## Approved list
 Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
@@ -125,5 +134,9 @@ Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
 ## Change notes
 
 ## Validation script
+
+## Events
+
+- 2026-10-20 question — asked 3, from context 0
 
 ## Delivery
