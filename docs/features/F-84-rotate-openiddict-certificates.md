@@ -71,7 +71,6 @@ A renewal of the OpenIddict certificates must not sign the students out: a token
 
 ## Docs
 - flow: new docs/flows/rotate-openiddict-certificates.md — how a renewal keeps sessions, the overlap window and the emergency cut-off.
-- none for the other kinds — the renewal procedure lives in `docs/infra.md`, updated by the build (AC12), as F-73 did.
 
 ## Acceptance criteria
 - AC1 (BR1, BR2, UC1) Given a first host with certificate pair A and a second host with pair B as current (B expires after A) and pair A as previous, when a user signs in on the first, then the second accepts the access token on an authenticated `/api/v1/` route and redeems the refresh token. (integration, two test hosts)
@@ -93,6 +92,9 @@ A renewal of the OpenIddict certificates must not sign the students out: a token
 - AC17 (T6, BR11) Given a start with a previous certificate, then the log has one `Information` line per role with the thumbprints and `current` or `previous`, and none holds the value. (integration, captured log)
 
 ## Criterion → test
+
+Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `OpenIddictPreviousCertificateTokenTests.Renewal_TokenMadeWithThePreviousPair_TheRenewedHostAcceptsItAndRedeemsTheRefreshToken` |
