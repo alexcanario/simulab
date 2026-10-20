@@ -1,7 +1,7 @@
 ---
 feature: F-84
 epic: Foundation and identity
-status: refining
+status: approved
 board: 127
 version: 1
 ---
@@ -130,6 +130,7 @@ A renewal of the OpenIddict certificates must not sign the students out: a token
 - 2026-10-21 — The previous certificate stays trusted until the next renewal, up to about 24 months if never replaced; the cut-off is the manual disable plus restart of UC3 — owner (asked) with the cost named by the review (trap T2)
 - 2026-10-21 — The listing of versions has a 10-second bound with limited retries, and the loaded thumbprints are logged at `Information` — technical (review finding 6)
 - 2026-10-21 — AC10 covers the Api's own log lines, not the Azure SDK categories; version ids are not secret — technical (review finding 9)
+- 2026-10-21 — Approved by the owner ("aprovo F-84") after reading the file, including the narrower promise "no mass sign-out" — owner
 - 2026-10-21 — Independent review (change-review, opus) of the refined file: 1 blocker and 5 majors, all confirmed and fixed here; minors 6, 8 and 9 fixed; none rejected — technical
 - 2026-10-21 — Manual pages unchanged — technical; no visible behavior beyond staying signed in
 
