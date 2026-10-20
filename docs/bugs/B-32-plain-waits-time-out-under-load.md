@@ -29,7 +29,13 @@ Already decided, so a later refinement does not read it as open: F-48 (2026-10-0
 unknown — settled at `/agile:refine`
 
 ## Cause
-Measured in B-31 (`## Cause` of `docs/bugs/B-31-base-texts-search-test-flaky.md`): process-wide starvation under 24 parallel test processes, not a lost event. Not measured here for the plain waits.
+Measured in B-31 (`## Cause` of `docs/bugs/B-31-base-texts-search-test-flaky.md`): process-wide starvation under 24 parallel test processes, not a lost event; stalls of up to 9.7 s between an action and the first check of its wait, and 20 s still lost 1 of 720 runs under a heavier load.
+
+Checked in today's code (2026-10-20, `main` at `f43f470`, after B-31): every plain wait (`WaitForAssertion`, `WaitForState`, `WaitForElement` with no timeout argument) ends at `BunitContext.DefaultWaitTimeout`, which `KitTestContext` sets to 5 s in its constructor (`tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs:46`). The value is static (bUnit 2.10.3), so it is one number for the whole test process. There are about 1140 such calls in 83 files; only two pass a timeout of their own (`BaseTextsPageTests.cs:213`, `QuestionsPageTests.cs:235`, both 5 s). The debounced waits already have their own 15 s ceiling (B-31, `KitTestContext.cs:59`); the plain ones did not get it, so a process stalled for more than 5 s fails the test for the machine's load and not for the code (`QuestionOriginTests.Save_WithAnOrigin_SendsTheEditionTheNumberAndTheNoticeSubject`, `QuestionOriginTests.cs:173`, 2 failures in 48 processes).
+
+Duplicates: none that is a business rule (this is test timing). The same number is also asserted by `DebounceWaitTimeoutTests.SharedContext_Settings_DebounceWaitIs15SecondsAndDefaultWaitStays5` (`DebounceWaitTimeoutTests.cs:89`), which a new ceiling must update.
+
+Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place that sets the shared value; the ~1140 waits are `same defect` and none relies on 5 s as a limit (a green wait returns as soon as its assertion passes).
 
 ## Fix
 unknown — settled at `/agile:refine`
