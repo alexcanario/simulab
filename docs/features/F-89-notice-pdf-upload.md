@@ -1,7 +1,7 @@
 ---
 feature: F-89
 epic: Assessment catalog
-status: approved
+status: building
 board: 132
 version: 1
 ---
@@ -69,6 +69,24 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 - AC12 (BR7) Given an edition holding a file, when it is deleted, then the blob no longer exists.
 - AC13 (BR8) Given the stored file, then its container is private (anonymous access off) and no response carries a storage address.
 - AC14 All new texts appear in pt-BR, pt-PT and en.
+
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
 
 ## Decisions
 - 2026-10-04 — The notice PDF belongs to E-2 (Assessment catalog), not E-9: the notice document and the exam paper for the AI import are two different uploads — owner (idea capture).
