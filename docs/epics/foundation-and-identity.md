@@ -41,8 +41,8 @@ Solution skeleton, SharedKernel (`Entity`, `TenantEntity`, `Result`, `AppJson`),
 10. F-10 — privacy right, after the profile exists.
 11. F-11 — dormant code, after the first release.
 
-## First release cut
-F-1 to F-9 (all Must). F-10 is Should, F-11 is Could and comes after the first release.
+## First release cut: mvp-cadastro-provas
+F-10, F-11
 
 ## Out of scope
 - Admin "terminate all sessions" and contract session limits (institutional; see the Institutions epic, board 703).
@@ -55,6 +55,7 @@ F-1 to F-9 (all Must). F-10 is Should, F-11 is Could and comes after the first r
 - 2026-09-17 — First release cut is F-1 to F-9 — without them nobody signs in or manages roles (owner, question 2).
 - 2026-09-17 — Account erasure (F-10) belongs to this epic — Identity owns personal data; other modules subscribe to its event (owner, question 3).
 - 2026-09-17 — Google sign-in and TOTP (F-11) are Could, after the first release — importing switched-off code now costs sessions and delivers nothing (owner, question 4).
+- 2026-10-20 — first release cut written by /agile:mvp: 2 items (criterion: the goal, dependency closure); label: mvp-cadastro-provas; goal: "A aplicacao deve ser capaz atraves do usuario responsavel cadastrar os tipos de provas elencados no levantamento de requisitos"; gaps left: 0
 
 ## Related
 - Discussions: none

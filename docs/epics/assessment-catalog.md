@@ -40,8 +40,8 @@ Simulae has no edition, no assessment type and no content language; the model be
 4. F-36 — the student-facing half; the simulators and the target exam depend on it.
 5. F-37 — real data is worth more once the three shapes are stable.
 
-## First release cut
-F-33, F-34, F-35 and F-36 (all Must). F-37 is Should and may follow the first release.
+## First release cut: mvp-cadastro-provas
+F-33, F-34, F-35, F-36, F-37, F-89
 
 ## Out of scope
 - `NoticeSubject`, the notice's syllabus, the canonical `Subject`/`Topic` taxonomy and the aliases — epic Subject taxonomy (692), ADR-0001 #43 to #46.
@@ -60,6 +60,7 @@ F-33, F-34, F-35 and F-36 (all Must). F-37 is Should and may follow the first re
 - 2026-09-23 — An edition keeps only the official link to its notice, as a field in F-35; the document upload arrives with epic 698 — nothing reads the file before the import does (owner, question 2).
 - 2026-09-23 — First release cut is F-33 to F-36 — without student browsing the catalog cannot be used to pick a target exam, which every simulator needs (owner, question 3).
 - 2026-09-23 — The Simulae seed is its own feature (F-37), after F-35 — the municipal guard data has to be remapped to the new model and tested, and that would push F-35 past L (owner, question 4).
+- 2026-10-20 — first release cut written by /agile:mvp: 6 items (criterion: the goal, dependency closure); label: mvp-cadastro-provas; goal: "A aplicacao deve ser capaz atraves do usuario responsavel cadastrar os tipos de provas elencados no levantamento de requisitos"; gaps left: 0 (owner, 2026-10-21: the four assessment types stay a fixed list)
 
 ## Related
 - Discussions: none
