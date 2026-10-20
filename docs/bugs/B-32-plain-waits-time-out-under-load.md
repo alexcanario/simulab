@@ -1,7 +1,7 @@
 ---
 bug: B-32
 feature: -
-status: validating
+status: done
 board: 200
 severity: low
 epic: Test infrastructure
@@ -131,3 +131,14 @@ git diff main --stat -- src
 
 ## Delivery
 - Branch: bug/B-32
+- Merge commit: 4d639c6 (board #200)
+- Tests: full suite green (Web 2170, QuestionBank 456, Identity 508, Catalog 608, Api 58, Architecture 296, others); suite took 356 s against the 5 min budget (retro finding)
+- Manual pages: none (test-only change)
+- Version: 1.6.1 -> 1.6.2
+Gate time: 5 passes, 15 min 56 s — turn 1 (13 s), ship 2 (11 min 5 s), scan 2 (4 min 38 s); 0 red
+Usage: 922.9k weighted (estimate) — refine 45% · build 44% · ship 10% · other 1% — context per turn 135k → 168k — 2 sessions, 73 turns
+- Validation evidence (the owner said "validado" in the chat; no step was ticked):
+  1. [ ] not tested Rode os testes do teto de espera. Última linha esperada: `Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4` (o teste de 6 s faz levar cerca de 9 s). Repita quando quiser; não precisa subir o app host.
+  2. [ ] not tested Confira que nada em `src/` mudou. Esperado: nenhuma saída.
+  3. [ ] not tested Leia o teto em `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DefaultWaitTimeout` é 15 s, e nenhum código de teste passa timeout de 5 s a uma espera.
+  Evidence: 0 of 3 tested
