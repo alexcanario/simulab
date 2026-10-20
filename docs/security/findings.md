@@ -1,6 +1,6 @@
 # Security findings
 
-Written by `scan.js` (never a secret value). Triage with `node scan.js accept <id> --status accepted|false-positive|fixed --reason "<text>"`; a row keeps its status across runs.
+Written by `scan.js` (never a secret value). Triage with `node scan.js accept <id> --status accepted|false-positive|fixed --reason "<text>"`; bring a closed row back with `node scan.js reopen <id> --reason "<text>"`; Claude closes only a critical or high false positive, with `accept --by claude` and its evidence, and `node scan.js closed` lists them; a row keeps its status across runs.
 
 | id | severity | tool | rule | where | status | reason | who | date |
 |---|---|---|---|---|---|---|---|---|
