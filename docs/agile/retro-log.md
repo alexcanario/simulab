@@ -1381,3 +1381,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: not swept in this sync (step 5g not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
 - `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
 - Not done yet: the sync commit (owner's authorization pending).
+
+## 2026-10-20 - Sync with agile@canary 0.130.0
+- From 0.125.0 to 0.130.0 (5 minor versions). Copied (owner's OK): `.claude/rules/agile/definition-of-done.md` (criteria wording; a false-positive security finding closed by Claude with evidence in the ship report), `docs/agile/templates/infra.md` (cross-repository releases: `RELEASES_TOKEN` section), `docs/agile/workflow.pt-BR.md` (version and skill count) and `docs/agile/workflow-examples.pt-BR.md` (new examples, including 14.158).
+- Merged: none. Left alone: `docs/agile/profile.md`, `.claude/rules/agile/git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (the differences are the project's own: app version 1.6.1, SDK 10.0.401, own packages and `.gitignore`, `deploy.yml` rendered from `infra.md`).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present in both tables; technical-term rows not swept in this sync (step 5g b and c not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
+- `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
+- Commit: `chore: sync with agile@canary 0.130.0` on main, with the owner's OK.

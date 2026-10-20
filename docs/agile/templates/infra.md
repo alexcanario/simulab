@@ -147,6 +147,17 @@ gh variable set ANDROID_SIGNING_ALIAS --env release-signing --body "<alias>"
 - Beta channel: <every merge | off>
 - With a share and `every merge`, `/agile:ship` packs each merge to the main branch as `<Version>-beta` on Velopack's beta channel and sends it to the share (the five newest betas stay); testers install `<App>-beta-Setup.exe` from there, and the stable Setup.exe takes a machine back to stable. `off`, or an https source, sends no beta.
 - `/agile:publish` packs the Windows head with Velopack (and an Avalonia head's `linux-x64` as an AppImage, which reads the Linux line) and sends the feed to a share; an https URL receives nothing from the plugin (the output lists the files to copy). A public GitHub repository (`https://github.com/<owner>/<repo>`, the app's own or one that holds only the releases) gets the GitHub Release and the feed attached to it (the apps see a release up to 60 s after the upload, and a repository without a token allows 60 checks per hour per IP address); `/agile:publish` stops when the repository is not public, and a GitHub source takes no beta channel and one `win-*` runtime per head. The app reads the source from `Updates:Source` in its `appsettings.json`. Never a token or a private repository's GitHub Releases address here.
+- In GitHub Actions (`/agile:publish` without `--local`), a GitHub source in another repository than the code's (private code, public releases) needs a fine-grained personal access token: the run's own token reaches only this repository. It lives in the secret `RELEASES_TOKEN` of the GitHub environment `release-signing` (limited to the main branch only, as under Code signing), and `release.yml` passes it as `AGILE_RELEASES_TOKEN` to the `Release` step. Create it at Settings > Developer settings > Personal access tokens > Fine-grained tokens: resource owner the owner of the releases repository, Only select repositories = that one, repository permission Contents: read and write (Metadata: read comes with it), and an expiry. Then set it from a prompt, so the value is never in a file, the shell history or the chat:
+
+```powershell
+gh secret set RELEASES_TOKEN --env release-signing
+```
+
+```bash
+gh secret set RELEASES_TOKEN --env release-signing
+```
+
+  Before anything is committed or tagged the run proves that the token writes to the releases repository and does not reach this one; a classic token, a token that reads this repository or one that cannot write there stops it. The token expires: when it does, the run stops before anything is packaged, committed or tagged with `GitHub refused RELEASES_TOKEN ... the token expired or was revoked`; create a new one and set it again.
 
 ## Code signing (a desktop app only)
 - Code signing: none
