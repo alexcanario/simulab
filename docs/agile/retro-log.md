@@ -1388,3 +1388,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present in both tables; technical-term rows not swept in this sync (step 5g b and c not run). Missing capabilities unchanged (DocGen tool catalogue since 0.0.70, release pipeline since 0.64.0, Azure login check since 0.2.0); none installed by the sync.
 - `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
 - Commit: `chore: sync with agile@canary 0.130.0` on main, with the owner's OK.
+
+## 2026-10-20 - B-32 (plain bUnit waits get the 15 s ceiling)
+- Lesson 1, score 2/3: a bUnit wait is rechecked only when the component renders, so a test of a wait ceiling must keep rendering the component (the first AC2 test failed at 15 s for that reason; `blocked` event). Went nowhere: the comments of `KitTestContext` and `DebounceWaitTimeoutTests` already say it.
+- Lesson 2, score 0/4: stress-loop copies of the test output live inside the worktree (outside it `TrueFalseQuestionListTypeCellTests.TheStylesheet_...` fails with NullReferenceException in `FindWebRoot`). Went to `.claude/rules/agile/project.md`.
+- Lesson 3, score 0/5: the full suite took 356 s (budget 5 min; Catalog, Identity and QuestionBank 4 to 6 min each). Not captured: F-144 already exists for it (board #197).
+- Shortcuts: none. Item decisions stay in the item.
