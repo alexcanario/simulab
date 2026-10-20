@@ -15,6 +15,14 @@ public sealed record TestCertificates(string Signing, string Encryption)
     /// <summary>A new pair, different from every other pair.</summary>
     public static TestCertificates Create() => new(CreateOne("simulab-test-signing"), CreateOne("simulab-test-encryption"));
 
+    /// <summary>F-84: a new pair that stops being valid at the given instant, so a test can say which of two pairs expires last.</summary>
+    public static TestCertificates Create(DateTimeOffset notAfter) =>
+        new(CreateOne("simulab-test-signing", notAfter: notAfter), CreateOne("simulab-test-encryption", notAfter: notAfter));
+
+    /// <summary>The SHA-1 thumbprint of a certificate as the Api logs it (public, F-84 BR11).</summary>
+    public static string Thumbprint(string base64) =>
+        X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(base64), password: null).Thumbprint;
+
     /// <summary>
     /// F-73 AC5: one certificate with a single thing wrong, for the refusals the Api makes at start. By default it is a
     /// good one (the default policy's key usages, valid from a year back to two years ahead, with its private key).

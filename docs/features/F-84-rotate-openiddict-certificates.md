@@ -1,10 +1,11 @@
 ---
 feature: F-84
 epic: Foundation and identity
-status: approved
+status: building
 board: 127
 version: 1
 ---
+Autopilot: building
 # Rotate the OpenIddict certificates without signing users out
 
 Technical terms: [glossary](../glossary.md)
@@ -94,25 +95,27 @@ A renewal of the OpenIddict certificates must not sign the students out: a token
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | `OpenIddictPreviousCertificateTokenTests.Renewal_TokenMadeWithThePreviousPair_TheRenewedHostAcceptsItAndRedeemsTheRefreshToken` |
+| AC2 | `OpenIddictPreviousCertificateTokenTests.Renewal_TokenMadeAfterIt_IsMadeWithTheNewPairAndTheOverlapIsReal`, `Options_PreviousRegisteredBeforeOrAfterTheCurrent_TheOneThatExpiresLastComesFirst` |
+| AC3 | `PreviousCertificateSelectorTests.Select_OneVersionOnly_HasNoPreviousAndNothingToReport`, `OpenIddictPreviousCertificateStartTests.Start_OneVersionOnly_LoadsNoPreviousCertificate` |
+| AC4 | `PreviousCertificateSelectorTests` (three enabled versions, previous disabled, newest disabled) |
+| AC5 | `OpenIddictPreviousCertificateStartTests.Start_PreviousCertificateCannotDoItsJob_StartsWithTheCurrentOneAndWarns` (7 reasons x 2 roles) |
+| AC6 | `OpenIddictCertificateStartTests.Start_CertificateCannotDoItsJob_RefusesNamingTheSettingAndTheReason` (F-73, unchanged) |
+| AC7 | `OpenIddictPreviousCertificateStartTests.Start_ListingFails_StartsWithTheCurrentCertificatesAndWarnsOncePerCertificate` (throws, never answers, disagrees) |
+| AC8 | `OpenIddictPreviousCertificateTokenTests.Renewal_TokenMadeWithAnUnknownPair_IsRefusedWith401AndInvalidGrant` |
+| AC9 | `OpenIddictPreviousCertificateTokenTests.Renewal_PreviousVersionDisabled_NeitherItNorAnOlderOneIsTrusted`, `OpenIddictPreviousCertificateStartTests.Start_PreviousVersionDisabled_LoadsNoPreviousCertificate` |
+| AC10 | `ShouldHoldNoValue` in every `OpenIddictPreviousCertificateStartTests` case of AC5, AC7, AC9 |
+| AC11 | `OpenIddictPreviousCertificateStartTests.Start_DevelopmentWithASourceThatMustNotBeCalled_NeverCallsIt`, `Start_NoVaultConnection_HasNoPreviousCertificate` |
+| AC12 | `OpenIddictCertificatePolicyTests.Infra_RenewalKeepsSessionsAndDocumentsTheOverlapAndTheCutOff` |
+| AC13 | `AzurePublishFilesTests.Publish_KeepsTheApiSecretsRoleAndCarriesNoCertificateVersion` |
+| AC14 | the existing missing-key test (no UI text is added) |
 | AC15 | validation step |
-| AC16 | pending |
-| AC17 | pending |
+| AC16 | `OpenIddictPreviousCertificateTokenTests.Renewal_PreviousPairSetAsConfiguration_IsNotTrusted`, `OpenIddictPreviousCertificateStartTests.Start_PreviousCertificateOfferedThroughConfiguration_IsNotLoaded` |
+| AC17 | `OpenIddictPreviousCertificateStartTests.Start_WithAPreviousCertificate_LogsTheThumbprintsOfEachRole` |
 
 ## Decisions
+- 2026-10-21 — Build started in parallel with F-89 (validating) — owner (`/agile:build F-84 --worktree --autopilot`); F-89 also edits `Simulab.Api/Program.cs` and `docs/infra.md`, so expect small conflicts at merge
+- 2026-10-21 — plan — 1 contracts: `ICertificateVersionSource`, `CertificateVersion`, selection of the previous version → unit tests (AC3, AC4); 2 loader `PreviousOpenIddictCertificates` (validation, bounded listing, warnings, no value in messages) → AC5, AC7, AC9, AC10; 3 wiring in `IdentityModule` (options configured from the loaded set, hosted logger of thumbprints) → AC1, AC2, AC8, AC16, AC17; 4 Api host: real Key Vault source registered only with a vault outside Development → AC11, AC13; 5 `docs/infra.md` renewal text → AC12; 6 flow page `docs/flows/rotate-openiddict-certificates.md`; each step ends with the affected tests green
 - 2026-10-21 — The current certificate keeps the strict start check of F-73 BR3 — F-73 decision of 2026-10-04, "Missing or invalid certificates outside Development stop the Api's start" — confirmed: docs/features/F-73-shared-openiddict-keys-replicas.md
 - 2026-10-21 — The private key never leaves the vault, so the previous certificate is not copied by hand to another secret — F-73 decision of 2026-10-04, "Key Vault creates the certificates from a committed policy" — confirmed: docs/features/F-73-shared-openiddict-keys-replicas.md
 - 2026-10-21 — The Api takes the previous certificate from the version immediately before the current one in the vault, read at start with the Api's own identity — owner; no manual copy, one command per certificate to renew — asked (sharpened by the review: "immediately previous, and enabled", never "the newest older enabled one")
