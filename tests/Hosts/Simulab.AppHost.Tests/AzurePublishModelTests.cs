@@ -103,9 +103,11 @@ public class AzurePublishModelTests
             ["--Google:ClientId=", "--Google:ClientSecret=", "--Ai:ApiKey="]);
 
         builder.Resources.Select(resource => resource.Name)
-            .Should().Contain(["postgres", "postgres-password", "simulab", "mailpit", "redis", "api", "web"])
+            .Should().Contain(["postgres", "postgres-password", "simulab", "mailpit", "redis", "blob", "blobs", "api", "web"])
             .And.NotContain(["cae", "keyvault"]);
-        builder.Resources.OfType<AzureProvisioningResource>().Should().BeEmpty();
+        // F-89: the storage account is only the Azurite emulator here; nothing else of Azure is provisioned.
+        builder.Resources.OfType<AzureProvisioningResource>().Select(resource => resource.Name).Should().Equal("blob");
+        builder.Resources.OfType<AzureStorageResource>().Single().IsEmulator.Should().BeTrue();
         builder.Resources.Single(resource => resource.Name == "postgres").Should().BeOfType<PostgresServerResource>();
     }
 }

@@ -37,6 +37,7 @@ internal static class RequiredSettingsCatalog
         Api("ConnectionStrings:simulab", "Program.cs: the host stops without it"),
         Api("ConnectionStrings:redis", "Program.cs: AddRedisClient(\"redis\"), the sessions and the revocation set"),
         Api("ConnectionStrings:keys", "the Data Protection key ring is a blob in the cloud (F-64 BR4)"),
+        Api("ConnectionStrings:blobs", "Program.cs: AddFileStorage(\"blobs\") refuses to start outside Development without it (F-89)"),
         Api("ConnectionStrings:keyvault", "the Api reads its secrets from the vault as configuration (F-64 BR7)"),
         Api("DataProtection:KeyVaultKeyId", "the key that encrypts the key ring at rest (F-64 D9)"),
         Api("Authentication:OpenIddict:ClientSecret", "IdentityModule.cs: the same secret the Web sends (F-5)"),

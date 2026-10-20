@@ -18,6 +18,7 @@ using Simulab.ServiceDefaults;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
 using Simulab.SharedKernel.Serialization;
+using Simulab.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,10 @@ builder.Services.AddEmailSender(
     builder.Configuration.GetConnectionString("mailpit"),
     cloudEnvironment: !builder.Environment.IsDevelopment());
 builder.Services.AddIntegrationEvents();
+
+// The files users upload (F-89, ADR-0001 #23): Azurite locally, a private Blob container in the cloud. Without the
+// connection a Development host still starts and an upload answers storage.not_configured.
+builder.AddFileStorage("blobs");
 
 // The one door to a model (F-41, BR1). Without a key the host still starts and every call fails with
 // ai.not_configured (BR4), so nobody needs a key to work on the rest of the app.

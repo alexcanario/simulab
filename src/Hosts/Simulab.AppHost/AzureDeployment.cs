@@ -68,14 +68,25 @@ internal static class AzureDeployment
     /// </summary>
     private static IResourceBuilder<AzureBlobStorageContainerResource> AddKeyStorage(IDistributedApplicationBuilder builder, string name) =>
         builder.AddAzureStorage(name)
-            .ConfigureInfrastructure(infrastructure =>
-            {
-                foreach (var account in infrastructure.GetProvisionableResources().OfType<StorageAccount>())
-                {
-                    account.Sku = new StorageSku { Name = StorageSkuName.StandardLrs };
-                }
-            })
+            .WithLocallyRedundantStorage()
             .AddBlobContainer($"keys-{name["storage-".Length..]}", "keys");
+
+    /// <summary>
+    /// Makes the storage account locally redundant (<c>Standard_LRS</c>). The default, geo-redundant, costs more, and neither
+    /// the key rings nor the notice PDFs (F-89, which the curator can upload again) need a copy in another region.
+    /// </summary>
+    internal static IResourceBuilder<AzureStorageResource> WithLocallyRedundantStorage(this IResourceBuilder<AzureStorageResource> storage)
+    {
+        ArgumentNullException.ThrowIfNull(storage);
+
+        return storage.ConfigureInfrastructure(infrastructure =>
+        {
+            foreach (var account in infrastructure.GetProvisionableResources().OfType<StorageAccount>())
+            {
+                account.Sku = new StorageSku { Name = StorageSkuName.StandardLrs };
+            }
+        });
+    }
 
     /// <summary>
     /// F-66: the Email Communication Service, its Azure-managed domain, the Communication Service and the role that lets

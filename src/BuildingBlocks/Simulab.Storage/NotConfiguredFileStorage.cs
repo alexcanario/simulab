@@ -9,14 +9,14 @@ namespace Simulab.Storage;
 public sealed class NotConfiguredFileStorage : IFileStorage
 {
     public Task<Result> SaveAsync(string name, Stream content, string contentType, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        Task.FromResult(Result.Failure(new Error(StorageErrorCodes.NotConfigured, ErrorKind.BusinessRule)));
 
     public Task<Stream?> OpenReadAsync(string name, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        Task.FromResult<Stream?>(null);
 
     public Task<bool> DeleteAsync(string name, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        Task.FromResult(false);
 
     public Task<bool> ExistsAsync(string name, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        Task.FromResult(false);
 }

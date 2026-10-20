@@ -71,6 +71,9 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 - AC14 All new texts appear in pt-BR, pt-PT and en.
 
 ## Criterion → test
+
+Tests locked: 59c2c106eee4845e47a5e99694b9f44de99de10b (13 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `NoticeDocumentEndpointTests.Upload_AValidPdf_KeepsItOnTheEdition_AndTheDownloadReturnsTheSameBytes`; `ExamEditionNoticeDocumentTests.Render_WithAStoredFile_ShowsNameSizeDownloadReplaceAndRemove`; validation step (the browser saves the same bytes) |
