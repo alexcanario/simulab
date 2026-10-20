@@ -252,5 +252,6 @@ De quem são os dados: o app roda no banco próprio `simulab_f89`, dentro do vol
 - 2026-10-20 question — owner card: unlock of a locked test (round 1)
 - 2026-10-20 question — owner card: unlock of a locked test (round 2)
 - 2026-10-20 question — owner card: unlock of a locked test (round 3)
+- 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.DocGen.ToolCatalogueDocTests.CommittedCatalogue_MatchesTheToolsIn, 1 red
 
 ## Delivery
