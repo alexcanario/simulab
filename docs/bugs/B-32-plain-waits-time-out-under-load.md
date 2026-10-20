@@ -1,7 +1,7 @@
 ---
 bug: B-32
 feature: -
-status: building
+status: validating
 board: 200
 severity: low
 epic: Test infrastructure
@@ -58,7 +58,7 @@ Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place
 
 Tests locked: 7d0647ce8ac1f970216826fecbeada2bbc913cd3 (1 file); unlocks: 1
 
-- AC1 and AC2 in `DebounceWaitTimeoutTests` (same folder and collection `SerialDebounceWait` as B-31's, because `DefaultWaitTimeout` is static): AC1 reads the settings; AC2 waits for an assertion that turns true after 6 s of wall time (costs about 6 s once). Both must be seen failing before the fix.
+- AC1 and AC2 in `DebounceWaitTimeoutTests` (same folder and collection `SerialDebounceWait` as B-31's, because `DefaultWaitTimeout` is static): AC1 reads the settings; AC2 waits for an assertion that turns true after 6 s of wall time while the component is re-rendered every 500 ms (bUnit rechecks a wait only on render; costs about 6 s once). Both were seen failing with the 5 s ceiling (`Expected 15s, but found 5s.` and `WaitForFailedException` after 5 s) and pass with 15 s (`Passed: 4` of `DebounceWaitTimeoutTests`).
 
 ## Decisions
 - 2026-10-20 — Captured as a separate bug and not as part of B-31 — the owner kept B-31 to the debounced helper and put the plain waits in a later item; the epic "Test infrastructure" is new — asked
@@ -70,6 +70,12 @@ Tests locked: 7d0647ce8ac1f970216826fecbeada2bbc913cd3 (1 file); unlocks: 1
 - 2026-10-20 — Reuse: `KitTestContext` and B-31's `DebounceWaitTimeoutTests` and `SerialDebounceWait` extended in place; no new package — decided by Claude
 - 2026-10-20 — Tests unlocked and AC2 test rewritten — the first version waited on a component that never re-renders and bUnit rechecks a wait only on render, so it failed even at 15 s; the rewrite re-renders every 500 ms, seen red at 5 s and green at 15 s — owner chose unlock and rewrite
 
+- 2026-10-20 — plan — 1 AC1 and AC2 tests written red, committed, locked; 2 `DefaultWaitTimeout` 15 s and the two explicit 5 s waits dropped → AC1 to AC3 green; 3 whole `Simulab.Web.Tests` and the gate → AC4; 4 stress loop 24 x 3 on copies → AC5; 5 scan, `git diff main --stat -- src` empty → AC6
+- 2026-10-20 — AC5 measured: 72 of 72 green (`Passed: 553` each, 37 s in round 1), 0 red, copies inside the worktree. A first attempt with the copies outside the repository failed `TrueFalseQuestionListTypeCellTests.TheStylesheet_KeepsAChipOfAOneLineCellOnOneLine` in every process (it finds the web root by walking up from the build output; not a timing failure, so not counted) and once `QuestionsFilterPageTests.ClearAll_RemovesEveryFilterAndTheSearch_AndHidesItself` (`UnknownEventHandlerIdException`, a click on an element found before a re-render, not a wait timeout). Baseline of 2026-10-20: `QuestionOriginTests.Save_...` red 2 times in 48 — decided by Claude
+- 2026-10-20 — Reuse: `KitTestContext` and `DebounceWaitTimeoutTests` extended in place; nothing new — decided by Claude
+- 2026-10-20 — Shortcuts: none — decided by Claude
+- 2026-10-20 — Gate: `agile gate GREEN` (whole suite: Web 2170 passed, QuestionBank 456, Identity 508, Catalog 608, Api 58, others green); `agile scan GREEN`; `git diff main --stat -- src` empty — decided by Claude
+
 ## Out of scope
 - The 15 s debounced helper (B-31) and the MudBlazor debounce itself; any change under `src/`.
 - Making the 24-process stress loop pass 72 of 72: a load that stalls a process beyond any fixed ceiling cannot be fixed by a ceiling.
@@ -79,6 +85,44 @@ Tests locked: 7d0647ce8ac1f970216826fecbeada2bbc913cd3 (1 file); unlocks: 1
 - (none)
 
 ## Validation script
+
+### English
+Needed to validate: nothing (no screen, no data). Run from the repository folder of this branch.
+
+1. [ ] Run the tests of the wait ceiling. Expected last line: `Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4` (the 6 s test makes it take about 9 s). Repeat as often as you like; it needs no app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+2. [ ] Check that nothing under `src/` changed. Expected: no output.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Read the ceiling in `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DefaultWaitTimeout` is 15 s, and no test source passes a 5 s timeout to a wait.
+
+### pt-BR
+Necessário para validar: nada (sem tela, sem dados). Rode na pasta do repositório desta branch.
+
+1. [ ] Rode os testes do teto de espera. Última linha esperada: `Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4` (o teste de 6 s faz levar cerca de 9 s). Repita quando quiser; não precisa subir o app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+2. [ ] Confira que nada em `src/` mudou. Esperado: nenhuma saída.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Leia o teto em `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DefaultWaitTimeout` é 15 s, e nenhum código de teste passa timeout de 5 s a uma espera.
 
 ## Events
 
