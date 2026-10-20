@@ -5,7 +5,7 @@ status: building
 board: 127
 version: 1
 ---
-Autopilot: building
+Autopilot: reviewed
 # Rotate the OpenIddict certificates without signing users out
 
 Technical terms: [glossary](../glossary.md)
@@ -109,7 +109,7 @@ Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
 | AC10 | `ShouldHoldNoValue` in every `OpenIddictPreviousCertificateStartTests` case of AC5, AC7, AC9 |
 | AC11 | `OpenIddictPreviousCertificateStartTests.Start_DevelopmentWithASourceThatMustNotBeCalled_NeverCallsIt`, `Start_NoVaultConnection_HasNoPreviousCertificate` |
 | AC12 | `OpenIddictCertificatePolicyTests.Infra_RenewalKeepsSessionsAndDocumentsTheOverlapAndTheCutOff` |
-| AC13 | `AzurePublishFilesTests.Publish_KeepsTheApiSecretsRoleAndCarriesNoCertificateVersion` |
+| AC13 | `AzurePublishFilesTests.Publish_CarriesNoPreviousCertificateOrVersionId`, `Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets` (the role) |
 | AC14 | the existing missing-key test (no UI text is added) |
 | AC15 | validation step |
 | AC16 | `OpenIddictPreviousCertificateTokenTests.Renewal_PreviousPairSetAsConfiguration_IsNotTrusted`, `OpenIddictPreviousCertificateStartTests.Start_PreviousCertificateOfferedThroughConfiguration_IsNotLoaded` |
@@ -118,6 +118,10 @@ Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
 ## Decisions
 - 2026-10-21 — Build started in parallel with F-89 (validating) — owner (`/agile:build F-84 --worktree --autopilot`); F-89 also edits `Simulab.Api/Program.cs` and `docs/infra.md`, so expect small conflicts at merge
 - 2026-10-21 — plan — 1 contracts: `ICertificateVersionSource`, `CertificateVersion`, selection of the previous version → unit tests (AC3, AC4); 2 loader `PreviousOpenIddictCertificates` (validation, bounded listing, warnings, no value in messages) → AC5, AC7, AC9, AC10; 3 wiring in `IdentityModule` (options configured from the loaded set, hosted logger of thumbprints) → AC1, AC2, AC8, AC16, AC17; 4 Api host: real Key Vault source registered only with a vault outside Development → AC11, AC13; 5 `docs/infra.md` renewal text → AC12; 6 flow page `docs/flows/rotate-openiddict-certificates.md`; each step ends with the affected tests green
+- 2026-10-21 — Independent review of the built code (reviewer, opus): 0 blockers, 0 majors, 3 minors, none fixed — technical. (1) a current certificate whose `NotBefore` is up to 5 minutes ahead of OpenIddict's clock could make the previous one sign for those minutes: accepted, the previous stays trusted until the next renewal anyway and the window is minutes; (2) the checks repeat those of `OpenIddictCertificates.Read`: accepted, kept apart so the F-73 start check stays untouched; (3) the current PKCS#12 is parsed a second time: accepted, once per start
+- 2026-10-21 — Review coverage: security T1-T6 against the code and tests, data (no schema), contracts (no route or error code), localization (no UI text), locks (`git diff 3a970ad` empty on the 5 locked files), tests (AC1-AC14, AC16, AC17 map to tests that can fail), rules — technical
+- 2026-10-21 — Traps: T1 the blocking vault read sits in a singleton that the server options depend on, resolved at start only because `OpenIddictCertificateReporter` injects it; T2 two copies of the locked fake version source; T3 the real source lists every version of the secret before sorting (negligible at one renewal per 24 months) — technical
+- 2026-10-21 — Scan: finding 0f4dea5d (the public Azure role id of Key Vault Secrets User in `AzurePublishFilesTests.cs:388`, moved down by this item's test) closed as false positive by Claude with the reviewer's confirmation; finding 7ba94396 (the same id, in the history at commit 3a970ad of this item's own test commit) is a history finding, which only the owner closes — technical; the run stopped there
 - 2026-10-21 — The current certificate keeps the strict start check of F-73 BR3 — F-73 decision of 2026-10-04, "Missing or invalid certificates outside Development stop the Api's start" — confirmed: docs/features/F-73-shared-openiddict-keys-replicas.md
 - 2026-10-21 — The private key never leaves the vault, so the previous certificate is not copied by hand to another secret — F-73 decision of 2026-10-04, "Key Vault creates the certificates from a committed policy" — confirmed: docs/features/F-73-shared-openiddict-keys-replicas.md
 - 2026-10-21 — The Api takes the previous certificate from the version immediately before the current one in the vault, read at start with the Api's own identity — owner; no manual copy, one command per certificate to renew — asked (sharpened by the review: "immediately previous, and enabled", never "the newest older enabled one")
@@ -155,6 +159,10 @@ Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
 <!-- Written at the end of build. -->
 
 ## Events
+
+- 2026-10-21 test-fail — 2 new warning(s): CA1873 in src/Modules/Identity/Simulab.Identity.Infrastructure/OpenIddictCertificateReporter.cs; CA106, 2 reds
+- 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.AppHost.Tests.OpenIddictCertificatePolicyTests.Infra_RenewalKeepsSessionsAndDocumen, 1 red
+- 2026-10-21 stop — scan: history finding 7ba94396 needs the owner
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

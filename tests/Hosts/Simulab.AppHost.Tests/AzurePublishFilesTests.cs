@@ -132,16 +132,16 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
     }
 
     /// <summary>
-    /// F-84 AC13 (BR2): the Api still has the Key Vault Secrets User role, which is what lets it list the versions of its
-    /// certificates, and no certificate, previous certificate or version id travels in a deploy parameter or a file.
+    /// F-84 AC13 (BR2): no previous certificate or version id travels in a deploy parameter or a file. The Api's Key Vault
+    /// Secrets User role, which lets it list the versions of its certificates, is asserted by
+    /// <c>Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets</c> (F-64).
     /// </summary>
     [Fact]
-    public void Publish_KeepsTheApiSecretsRoleAndCarriesNoCertificateVersion()
+    public void Publish_CarriesNoPreviousCertificateOrVersionId()
     {
-        const string SecretsUser = "4633458b-17de-408a-b874-0445c86b69e6";
         var all = string.Join('\n', _files.Values);
 
-        Bicep("api-roles-keyvault").Should().Contain(SecretsUser);
+        Bicep("api-roles-keyvault").Should().NotBeEmpty("the Api's role assignments on the vault are still published");
         all.Should().NotContainEquivalentOf("PreviousSigningCertificate")
             .And.NotContainEquivalentOf("PreviousEncryptionCertificate")
             .And.NotContainEquivalentOf("CertificateVersion");
