@@ -55,11 +55,50 @@ public sealed class ExamEdition : TenantEntity
     /// Keeps this file as the edition's notice PDF (F-89, BR2 to BR4) and returns the blob name it replaced, null
     /// when there was none, so the caller can delete the old file once the row is saved.
     /// </summary>
-    public Result<string?> AttachNoticeDocument(string blobName, string fileName, long size, DateTimeOffset uploadedAt) =>
-        throw new NotImplementedException();
+    public Result<string?> AttachNoticeDocument(string blobName, string fileName, long size, DateTimeOffset uploadedAt)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(blobName);
+
+        // An empty file cannot be a PDF (BR3); the signature itself is checked where the content is read.
+        if (size <= 0)
+        {
+            return Result.Failure<string?>(new Error(CatalogErrorCodes.ExamEditionNoticeDocumentNotPdf, ErrorKind.Validation));
+        }
+
+        if (size > CatalogLimits.ExamEditionNoticeDocumentMaxBytes)
+        {
+            return Result.Failure<string?>(new Error(CatalogErrorCodes.ExamEditionNoticeDocumentTooLarge, ErrorKind.Validation));
+        }
+
+        var replaced = NoticeDocument?.BlobName;
+        NoticeDocument = new NoticeDocument(blobName, OnlyTheName(fileName), size, uploadedAt);
+
+        return Result.Success(replaced);
+    }
 
     /// <summary>Drops the notice PDF and returns the blob name it had, null when there was none (F-89, BR2).</summary>
-    public string? RemoveNoticeDocument() => throw new NotImplementedException();
+    public string? RemoveNoticeDocument()
+    {
+        var removed = NoticeDocument?.BlobName;
+        NoticeDocument = null;
+
+        return removed;
+    }
+
+    // A browser may send the whole path (older ones did): only the last part is a name. Cut to the column width.
+    private static string OnlyTheName(string fileName)
+    {
+        var trimmed = fileName?.Trim() ?? string.Empty;
+        var name = trimmed[(trimmed.LastIndexOfAny(['/', '\\']) + 1)..].Trim();
+        if (name.Length == 0)
+        {
+            name = "notice.pdf";
+        }
+
+        return name.Length > CatalogLimits.ExamEditionNoticeDocumentFileNameMaxLength
+            ? name[..CatalogLimits.ExamEditionNoticeDocumentFileNameMaxLength]
+            : name;
+    }
 
     public static Result<ExamEdition> Create(
         Guid examId,

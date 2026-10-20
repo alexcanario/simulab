@@ -21,8 +21,19 @@ public sealed class ExamEditionConfiguration : IEntityTypeConfiguration<ExamEdit
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("exam_editions", table => table.HasComment(
-            "One paper actually applied for an exam: its notice year, the job it selects for, the board that applied it and whether students can see it."));
+        builder.ToTable("exam_editions", table =>
+        {
+            table.HasComment(
+                "One paper actually applied for an exam: its notice year, the job it selects for, the board that applied it and whether students can see it.");
+
+            // F-89: the four notice document columns are all set or all empty, and the size stays inside 20 MB. Every
+            // required column is written as IS NOT NULL: a comparison alone accepts a null.
+            table.HasCheckConstraint(
+                "ck_exam_editions_notice_document",
+                "(notice_document_blob_name IS NULL AND notice_document_file_name IS NULL AND notice_document_size IS NULL AND notice_document_uploaded_at IS NULL)"
+                + " OR (notice_document_blob_name IS NOT NULL AND notice_document_file_name IS NOT NULL AND notice_document_uploaded_at IS NOT NULL"
+                + " AND notice_document_size IS NOT NULL AND notice_document_size BETWEEN 1 AND 20971520)");
+        });
         builder.HasKey(edition => edition.Id);
 
         builder.Property(edition => edition.ExamId)
@@ -57,8 +68,29 @@ public sealed class ExamEditionConfiguration : IEntityTypeConfiguration<ExamEdit
         builder.Property(edition => edition.AppliedOn)
             .HasComment("The day the paper was applied. Optional, also to publish.");
 
-        // F-89 step 2 maps the notice PDF to its four columns; until then the model leaves it out.
-        builder.Ignore(edition => edition.NoticeDocument);
+        // F-89: the notice PDF is a value of the edition, kept in four columns of the same row. The columns are nullable
+        // because an edition may have none; the entity sets all four or none, and the check below says it to the database.
+        builder.OwnsOne(edition => edition.NoticeDocument, document =>
+        {
+            document.Property(value => value.BlobName)
+                .HasColumnName("notice_document_blob_name")
+                .HasMaxLength(CatalogLimits.ExamEditionNoticeDocumentBlobNameLength)
+                .HasComment("The name the notice PDF is stored under in the file storage, never the curator's file name. Empty when the edition has no PDF.");
+
+            document.Property(value => value.FileName)
+                .HasColumnName("notice_document_file_name")
+                .HasMaxLength(CatalogLimits.ExamEditionNoticeDocumentFileNameMaxLength)
+                .HasComment("The notice PDF's file name as the curator gave it, without any folder. Empty when the edition has no PDF.");
+
+            document.Property(value => value.Size)
+                .HasColumnName("notice_document_size")
+                .HasComment("The notice PDF's size in bytes, from 1 to 20 MB. Empty when the edition has no PDF.");
+
+            document.Property(value => value.UploadedAt)
+                .HasColumnName("notice_document_uploaded_at")
+                .HasComment("When the notice PDF was uploaded. Empty when the edition has no PDF.");
+        });
+        builder.Navigation(edition => edition.NoticeDocument).IsRequired(false);
 
         builder.Property(edition => edition.Status)
             .HasConversion<string>()

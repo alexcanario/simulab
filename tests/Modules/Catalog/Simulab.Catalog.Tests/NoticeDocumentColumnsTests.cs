@@ -29,8 +29,7 @@ public sealed class NoticeDocumentColumnsTests : NoticeDocumentApiTests
         var act = () => QueryAsync(context => context.Database.ExecuteSqlInterpolatedAsync(
             $"UPDATE catalog.exam_editions SET notice_document_file_name = NULL WHERE id = {edition}"));
 
-        (await act.Should().ThrowAsync<DbUpdateException>()).Which.InnerException.Should().BeOfType<PostgresException>()
-            .Which.SqlState.Should().Be(CheckViolation);
+        (await act.Should().ThrowAsync<PostgresException>()).Which.SqlState.Should().Be(CheckViolation);
     }
 
     [Fact]

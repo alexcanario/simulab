@@ -141,5 +141,6 @@ Packages (owner, Q7), versions checked on NuGet on 2026-10-04, all MIT:
 ## Events
 
 - 2026-10-20 question — asked 3, from context 0
+- 2026-10-20 blocked — test wrong: two tests of mine expect the wrong exception type and omit the status the Api requires on update; criteria unchanged
 
 ## Delivery

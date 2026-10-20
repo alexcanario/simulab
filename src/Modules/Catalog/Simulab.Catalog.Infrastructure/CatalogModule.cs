@@ -8,6 +8,7 @@ using Simulab.Catalog.Application.Organizers;
 using Simulab.Catalog.Application.Subjects;
 using Simulab.Catalog.Application.Topics;
 using Simulab.Catalog.Contracts;
+using Simulab.Catalog.Infrastructure.Files;
 using Simulab.Catalog.Infrastructure.Persistence;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
@@ -58,6 +59,12 @@ public static class CatalogModule
         services.AddScoped<IExamEditionQueries, ExamEditionQueries>();
         services.AddScoped<SaveExamEditionHandler>();
         services.AddScoped<DeleteExamEditionHandler>();
+
+        // F-89: the notice PDF of an edition, kept in the storage building block.
+        services.AddScoped<INoticeDocumentFiles, NoticeDocumentFiles>();
+        services.AddScoped<SaveNoticeDocumentHandler>();
+        services.AddScoped<RemoveNoticeDocumentHandler>();
+        services.AddScoped<OpenNoticeDocumentHandler>();
 
         services.AddScoped<ISubjectStore, SubjectStore>();
         services.AddScoped<ISubjectQueries, SubjectQueries>();

@@ -51,7 +51,7 @@ public sealed class NoticeDocumentEndpointTests : NoticeDocumentApiTests
 
         var saved = await admin.PutAsJsonAsync(
             $"{Exams}/{exam.Id}/editions/{edition.Id}",
-            Fields(board.Id, url: "https://www.exemplo.gov.br/edital.pdf"),
+            Fields(board.Id, nameof(ExamEditionStatus.Draft), url: "https://www.exemplo.gov.br/edital.pdf"),
             AppJson.Options);
 
         saved.StatusCode.Should().Be(HttpStatusCode.OK, await saved.Content.ReadAsStringAsync());
