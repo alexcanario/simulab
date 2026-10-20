@@ -53,14 +53,17 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
-    /// <summary>B-31: the ceiling of <see cref="WaitForAfterDebounce{TComponent}"/>.</summary>
-    protected virtual TimeSpan DebounceWaitTimeout => DefaultWaitTimeout;
+    /// <summary>B-31: the ceiling of <see cref="WaitForAfterDebounce{TComponent}"/>. A test process stalled by a cold start of
+    /// many hosts at once reached its first check up to 9.7 s after the keystroke (measured), so this is longer than
+    /// <see cref="BunitContext.DefaultWaitTimeout"/>. A green run never waits on it; only a failing test pays. A test can
+    /// override it to prove the ceiling without waiting 15 s.</summary>
+    protected virtual TimeSpan DebounceWaitTimeout => TimeSpan.FromSeconds(15);
 
     /// <summary>B-30: waits for what a debounced field sends. A keystroke can reach its debounce after a single
     /// <see cref="AdvanceDebounce"/> already moved the clock, and then no other advance would ever come: this moves the
     /// clock again before every try, so a delay registered late is still reached. bUnit re-checks only when the
     /// component renders, so each try is a short wait of its own and the next try follows even when nothing rendered.
-    /// The ceiling is <see cref="BunitContext.DefaultWaitTimeout"/>, as for any wait.</summary>
+    /// The ceiling is <see cref="DebounceWaitTimeout"/>, not the default wait of other waits.</summary>
     protected void WaitForAfterDebounce<TComponent>(IRenderedComponent<TComponent> component, Action assertion, int milliseconds = AppLookupField.DebounceMilliseconds)
         where TComponent : IComponent
     {
@@ -73,7 +76,7 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
                 component.WaitForAssertion(assertion, TryWindow);
                 return;
             }
-            catch (WaitForFailedException) when (elapsed.Elapsed < DefaultWaitTimeout)
+            catch (WaitForFailedException) when (elapsed.Elapsed < DebounceWaitTimeout)
             {
                 // Not yet: the delay may not have existed when the clock moved. Move it again.
             }

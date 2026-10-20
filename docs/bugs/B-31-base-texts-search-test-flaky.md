@@ -58,6 +58,9 @@ Callers: `KitTestContext.WaitForAfterDebounce` (`KitTestContext.cs:61`): the 33 
 - none — test-only change; no technical page describes the debounce helper.
 
 ## Regression test
+
+Tests locked: c0926bbf0049be22231a506d9d72e4257376a188 (2 files); unlocks: 0
+
 - `DebounceWaitTimeoutTests` (new, `tests/Hosts/Simulab.Web.Tests/Ui`): AC1 and AC2 with a derived context that sets `DefaultWaitTimeout` to 500 ms and overrides `DebounceWaitTimeout`; AC3 reads both settings — Simulab.Web.Tests
 
 ## Decisions
