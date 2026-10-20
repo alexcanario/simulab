@@ -111,7 +111,27 @@ public class DebounceWaitTimeoutTests
             var component = context.RenderPopoverProvider();
             var clock = Stopwatch.StartNew();
 
-            component.WaitForAssertion(() => clock.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(6)));
+            // bUnit rechecks a wait only when the component renders, so something has to keep rendering it, as a
+            // component waiting on a real timer or a task does in the page tests.
+            using var stop = new CancellationTokenSource();
+            var renders = Task.Run(async () =>
+            {
+                while (!stop.IsCancellationRequested)
+                {
+                    await Task.Delay(500);
+                    component.Render();
+                }
+            });
+
+            try
+            {
+                component.WaitForAssertion(() => clock.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(6)));
+            }
+            finally
+            {
+                await stop.CancelAsync();
+                await renders;
+            }
 
             clock.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(6));
         }
