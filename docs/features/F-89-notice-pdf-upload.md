@@ -73,20 +73,20 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | `NoticeDocumentEndpointTests.Upload_AValidPdf_KeepsItOnTheEdition_AndTheDownloadReturnsTheSameBytes`; `ExamEditionNoticeDocumentTests.Render_WithAStoredFile_ShowsNameSizeDownloadReplaceAndRemove`; validation step (the browser saves the same bytes) |
+| AC2 | `NoticeDocumentEndpointTests.Save_PublishedWithNeitherLinkNorFile_IsSaved` |
+| AC3 | `NoticeDocumentEndpointTests.Upload_OverAnExistingFile_LeavesOnlyTheNewOneInTheStorage`; `ExamEditionNoticeDocumentTests.Save_AReplacementFile_SendsTheFieldsThenTheNewFile`; `Attach_ToAnEditionWithAFile_ReturnsTheBlobNameItReplaced` |
+| AC4 | `NoticeDocumentEndpointTests.Remove_DeletesTheFileFromTheEditionAndTheStorage`; `ExamEditionNoticeDocumentTests.Save_AfterRemove_DeletesTheFileAndUploadsNothing` |
+| AC5 | `NoticeDocumentEndpointTests.Upload_AFileNamedPdfThatIsNotOne_IsRefusedWithNotPdfAndStoresNothing`; `Upload_AnEmptyFile_IsRefusedWithNotPdf`; `Upload_WithoutAFilePart_IsRefusedWithNotPdf` |
+| AC6 | `NoticeDocumentEndpointTests.Upload_ExactlyTwentyMegabytes_IsAccepted`; `Upload_OverTwentyMegabytes_IsRefusedWithTooLargeAndStoresNothing`; `ExamEditionNoticeDocumentTests.Choose_AFileOverTwentyMegabytes_IsRefusedOnTheFieldAndNothingIsSent`; `NoticeDocumentColumnsTests.AFileOver20Megabytes_IsRefusedByTheDatabase` |
+| AC7 | `ExamEditionNoticeDocumentTests.Cancel_WithAChosenFile_UploadsNothingAndLeavesTheStoredFile`; `Choose_AFile_ShowsItsNameAndDiscard_AndSendsNothing` |
+| AC8 | `ExamEditionNoticeDocumentTests.Save_ANewEditionWithAChosenFile_CreatesTheEditionThenUploadsTheFileToIt` |
+| AC9 | `NoticeDocumentEndpointTests.BackOfficeRoutes_WithoutTheManagePermission_AreForbidden`; validation step (the form is reachable only with `catalog.manage`) |
+| AC10 | `NoticeDocumentEndpointTests.Student_DownloadsTheFileOfAPublishedEdition`; `Student_AskingForTheFileOfADraftEdition_GetsNotFound`; `Student_AskingForAPublishedEditionWithoutAFile_GetsNotFound` |
+| AC11 | `CatalogExamNoticePdfTests.Render_AnEditionWithAFile_ShowsTheNoticePdfDownloadLink`; `Render_AnEditionWithoutAFile_ShowsNoPdfLink`; `NoticeDocumentEndpointTests.PublishedExam_ListsTheNoticeDocumentOnlyOnTheEditionThatHasOne` |
+| AC12 | `NoticeDocumentEndpointTests.DeletingTheEdition_DeletesItsFileFromTheStorage` |
+| AC13 | `BlobFileStorageTests.Container_IsPrivate_AndAnAnonymousRequestForAFileIsRefused`; `NoticeDocumentEndpointTests.Responses_NeverCarryTheBlobNameOrAStorageAddress` |
+| AC14 | `NoticeDocumentResourcesTests.EveryNewText_ExistsInTheThreeLanguages` |
 
 ## Decisions
 - 2026-10-04 — The notice PDF belongs to E-2 (Assessment catalog), not E-9: the notice document and the exam paper for the AI import are two different uploads — owner (idea capture).

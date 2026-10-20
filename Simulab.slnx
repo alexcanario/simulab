@@ -14,6 +14,7 @@
     <Project Path="src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.Persistence/Simulab.Persistence.csproj" />
     <Project Path="src/BuildingBlocks/Simulab.SharedKernel/Simulab.SharedKernel.csproj" />
+    <Project Path="src/BuildingBlocks/Simulab.Storage/Simulab.Storage.csproj" />
   </Folder>
   <Folder Name="/src/Hosts/">
     <Project Path="src/Hosts/Simulab.Api/Simulab.Api.csproj" />
@@ -58,6 +59,7 @@
     <Project Path="tests/BuildingBlocks/Simulab.Jobs.Tests/Simulab.Jobs.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.Persistence.Tests/Simulab.Persistence.Tests.csproj" />
     <Project Path="tests/BuildingBlocks/Simulab.SharedKernel.Tests/Simulab.SharedKernel.Tests.csproj" />
+    <Project Path="tests/BuildingBlocks/Simulab.Storage.Tests/Simulab.Storage.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Hosts/">
     <Project Path="tests/Hosts/Simulab.Api.Tests/Simulab.Api.Tests.csproj" />

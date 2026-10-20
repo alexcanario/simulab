@@ -57,6 +57,9 @@ public sealed class ExamEditionConfiguration : IEntityTypeConfiguration<ExamEdit
         builder.Property(edition => edition.AppliedOn)
             .HasComment("The day the paper was applied. Optional, also to publish.");
 
+        // F-89 step 2 maps the notice PDF to its four columns; until then the model leaves it out.
+        builder.Ignore(edition => edition.NoticeDocument);
+
         builder.Property(edition => edition.Status)
             .HasConversion<string>()
             .HasMaxLength(40)

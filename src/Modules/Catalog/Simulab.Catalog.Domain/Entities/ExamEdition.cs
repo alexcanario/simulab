@@ -48,6 +48,19 @@ public sealed class ExamEdition : TenantEntity
     /// <summary>Draft or Published (BR9).</summary>
     public ExamEditionStatus Status { get; private set; }
 
+    /// <summary>The notice PDF kept inside Simulab, or null (F-89, BR2): independent of <see cref="NoticeUrl"/>.</summary>
+    public NoticeDocument? NoticeDocument { get; private set; }
+
+    /// <summary>
+    /// Keeps this file as the edition's notice PDF (F-89, BR2 to BR4) and returns the blob name it replaced, null
+    /// when there was none, so the caller can delete the old file once the row is saved.
+    /// </summary>
+    public Result<string?> AttachNoticeDocument(string blobName, string fileName, long size, DateTimeOffset uploadedAt) =>
+        throw new NotImplementedException();
+
+    /// <summary>Drops the notice PDF and returns the blob name it had, null when there was none (F-89, BR2).</summary>
+    public string? RemoveNoticeDocument() => throw new NotImplementedException();
+
     public static Result<ExamEdition> Create(
         Guid examId,
         Guid? organizerId,
