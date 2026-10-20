@@ -43,7 +43,9 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         // (AppDataTable, AppLookupField), so a WaitFor behind one of them has only 700 ms left of bUnit's
         // 1-second default. Under the whole solution running in parallel that budget runs out and the test
         // fails for the machine's load, not for the code. A timeout is a maximum: a green run does not wait.
-        DefaultWaitTimeout = TimeSpan.FromSeconds(5);
+        // B-32: 15 s, because a test process stalled by many hosts starting at once reached its first check up to
+        // 9.7 s late (measured in B-31); the value is static in bUnit, so it covers every plain wait of the process.
+        DefaultWaitTimeout = TimeSpan.FromSeconds(15);
 
         Authorization = AddAuthorization().SetNotAuthorized();
     }
@@ -54,9 +56,9 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
     /// <summary>B-31: the ceiling of <see cref="WaitForAfterDebounce{TComponent}"/>. A test process stalled by a cold start of
-    /// many hosts at once reached its first check up to 9.7 s after the keystroke (measured), so this is longer than
-    /// <see cref="BunitContext.DefaultWaitTimeout"/>. A green run never waits on it; only a failing test pays. A test can
-    /// override it to prove the ceiling without waiting 15 s.</summary>
+    /// many hosts at once reached its first check up to 9.7 s after the keystroke (measured); B-32 gives the plain waits the
+    /// same 15 s. A green run never waits on it; only a failing test pays. A test can override it to prove the ceiling
+    /// without waiting 15 s.</summary>
     protected virtual TimeSpan DebounceWaitTimeout => TimeSpan.FromSeconds(15);
 
     /// <summary>B-30: waits for what a debounced field sends. A keystroke can reach its debounce after a single

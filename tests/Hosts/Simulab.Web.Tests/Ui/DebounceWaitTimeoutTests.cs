@@ -35,6 +35,8 @@ public class DebounceWaitTimeoutTests
     private sealed class SharedContext : KitTestContext
     {
         public TimeSpan Debounce => DebounceWaitTimeout;
+
+        public IRenderedComponent<MudPopoverProvider> RenderPopoverProvider() => Render<MudPopoverProvider>();
     }
 
     // AC1: the assertion becomes true only after 1.2 s of wall time; the default wait is 500 ms, the debounce ceiling 3 s.
@@ -79,13 +81,63 @@ public class DebounceWaitTimeoutTests
         }
     }
 
-    // AC3: the shared context keeps 5 s for any wait and gives the debounced wait 15 s.
+    // B-32 AC1: the shared context gives every plain wait and the debounced wait the same 15 s ceiling.
     [Fact]
-    public async Task SharedContext_Settings_DebounceWaitIs15SecondsAndDefaultWaitStays5()
+    public async Task SharedContext_Settings_DefaultWaitAndDebounceWaitAre15Seconds()
     {
-        await using var context = new SharedContext();
+        var previous = BunitContext.DefaultWaitTimeout;
+        try
+        {
+            await using var context = new SharedContext();
 
-        context.Debounce.Should().Be(TimeSpan.FromSeconds(15));
-        BunitContext.DefaultWaitTimeout.Should().Be(TimeSpan.FromSeconds(5));
+            context.Debounce.Should().Be(TimeSpan.FromSeconds(15));
+            BunitContext.DefaultWaitTimeout.Should().Be(TimeSpan.FromSeconds(15));
+        }
+        finally
+        {
+            BunitContext.DefaultWaitTimeout = previous;
+        }
+    }
+
+    // B-32 AC2: a plain wait with no timeout argument whose assertion turns true after 6 s of wall time passes
+    // (with the old 5 s ceiling it threw WaitForFailedException).
+    [Fact]
+    public async Task PlainWaitForAssertion_AssertionPassesAfter6Seconds_WaitsForTheSharedCeiling()
+    {
+        var previous = BunitContext.DefaultWaitTimeout;
+        try
+        {
+            await using var context = new SharedContext();
+            var component = context.RenderPopoverProvider();
+            var clock = Stopwatch.StartNew();
+
+            // bUnit rechecks a wait only when the component renders, so something has to keep rendering it, as a
+            // component waiting on a real timer or a task does in the page tests.
+            using var stop = new CancellationTokenSource();
+            var renders = Task.Run(async () =>
+            {
+                while (!stop.IsCancellationRequested)
+                {
+                    await Task.Delay(500);
+                    component.Render();
+                }
+            });
+
+            try
+            {
+                component.WaitForAssertion(() => clock.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(6)));
+            }
+            finally
+            {
+                await stop.CancelAsync();
+                await renders;
+            }
+
+            clock.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(6));
+        }
+        finally
+        {
+            BunitContext.DefaultWaitTimeout = previous;
+        }
     }
 }

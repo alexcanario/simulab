@@ -1,7 +1,7 @@
 ---
 bug: B-32
 feature: -
-status: idea
+status: validating
 board: 200
 severity: low
 epic: Test infrastructure
@@ -18,37 +18,116 @@ bUnit page tests that wait with a bare `WaitForAssertion` fail when the machine 
 Already decided, so a later refinement does not read it as open: F-48 (2026-10-03) keeps the 5 s default ceiling ("a ceiling, a green run never waits on it"). A general ceiling would change that decision, so it needs the owner's answer at refinement. Already fixed by earlier bugs: B-19 (thread-pool minimum), B-22, B-23, B-30 (a debounced wait whose clock advance came before the delay existed) and B-31 (the debounced wait's own ceiling). What is left: the plain waits.
 
 ## Start
-- Depends on: B-31 (it measures the load and adds the helper's own ceiling; the work starts after its merge).
+- Depends on: B-31 (done, merged 2026-10-20 as `2221539`; it measures the load and adds the helper's own ceiling).
 - Waits on (to start): nothing.
-- Needed to validate: nothing; no screen. The proof is a stress run like the one in `docs/bugs/B-31-base-texts-search-test-flaky.md`.
-- Model: unknown — settled at `/agile:refine`
-- Suggested path: `/agile:refine B-32`, then `/agile:build B-32`. Cause measured in B-31 (starvation); the open question is the decision: a general ceiling, a ceiling per kind of wait, or accepting the risk.
-- Parallel with: unknown — settled at `/agile:refine`
+- Needed to validate: nothing; no screen. The proof is the settings and wait tests of the regression test, and a stress run like the one in `docs/bugs/B-31-base-texts-search-test-flaky.md`.
+- Model: sonnet (no signal)
+- Suggested path: `/agile:build B-32`.
+- Parallel with: F-89 (its worktree touches no test helper; a conflict on `KitTestContext.cs` is possible but small).
 
 ## Expected
-unknown — settled at `/agile:refine`
+A bUnit test that waits with a plain `WaitForAssertion`, `WaitForState` or `WaitForElement` gets its result even when the machine stalls the test process for seconds. The shared ceiling of those waits is 15 s, the same as the debounced waits already have (B-31). A wait whose assertion passes returns at once; only a failing test pays the longer ceiling. Nothing under `src/` changes.
+
+- AC1 Given the shared test context, when its settings are read, then `BunitContext.DefaultWaitTimeout` is 15 s and `DebounceWaitTimeout` is 15 s.
+- AC2 Given a plain `WaitForAssertion` with no timeout argument whose assertion becomes true only after 6 s of wall time, when the test waits, then the wait passes (with 5 s it throws `WaitForFailedException`).
+- AC3 Given the plain waits that pass an explicit 5 s (`BaseTextsPageTests.cs:213`, `QuestionsPageTests.cs:235`), when the item is built, then they pass no timeout and use the shared ceiling; no test source passes a 5 s timeout to a wait.
+- AC4 Given the change, when `Simulab.Web.Tests` runs, then every test passes with the same assertions (none is weakened, removed or skipped), including the six tests of `DebounceWaitTimeoutTests` with the settings test updated to 15 s.
+- AC5 Given 24 processes of `dotnet test --filter "FullyQualifiedName~QuestionBank"` at once on copies of the build output, 3 rounds, when they finish, then the result is recorded as measured, with the shape of each red (baselines of 2026-10-20: B-31 run 2 failed `QuestionOriginTests.Save_WithAnOrigin_SendsTheEditionTheNumberAndTheNoticeSubject` 2 times in 48 processes). The loop is weak evidence only and does not gate the ship: its load is artificial; AC1 and AC2 are the proof.
+- AC6 No file under `src/` changes and no package is added. No UI text: the localization criterion does not apply.
 
 ## Cause
-Measured in B-31 (`## Cause` of `docs/bugs/B-31-base-texts-search-test-flaky.md`): process-wide starvation under 24 parallel test processes, not a lost event. Not measured here for the plain waits.
+Measured in B-31 (`## Cause` of `docs/bugs/B-31-base-texts-search-test-flaky.md`): process-wide starvation under 24 parallel test processes, not a lost event; stalls of up to 9.7 s between an action and the first check of its wait, and 20 s still lost 1 of 720 runs under a heavier load.
+
+Checked in today's code (2026-10-20, `main` at `f43f470`, after B-31): every plain wait (`WaitForAssertion`, `WaitForState`, `WaitForElement` with no timeout argument) ends at `BunitContext.DefaultWaitTimeout`, which `KitTestContext` sets to 5 s in its constructor (`tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs:46`). The value is static (bUnit 2.10.3), so it is one number for the whole test process. There are about 1140 such calls in 83 files; only two pass a timeout of their own (`BaseTextsPageTests.cs:213`, `QuestionsPageTests.cs:235`, both 5 s). The debounced waits already have their own 15 s ceiling (B-31, `KitTestContext.cs:59`); the plain ones did not get it, so a process stalled for more than 5 s fails the test for the machine's load and not for the code (`QuestionOriginTests.Save_WithAnOrigin_SendsTheEditionTheNumberAndTheNoticeSubject`, `QuestionOriginTests.cs:173`, 2 failures in 48 processes).
+
+Duplicates: none that is a business rule (this is test timing). The same number is also asserted by `DebounceWaitTimeoutTests.SharedContext_Settings_DebounceWaitIs15SecondsAndDefaultWaitStays5` (`DebounceWaitTimeoutTests.cs:89`), which a new ceiling must update.
+
+Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place that sets the shared value; the ~1140 waits are `same defect` and none relies on 5 s as a limit (a green wait returns as soon as its assertion passes).
 
 ## Fix
-unknown — settled at `/agile:refine`
+- `KitTestContext` (`tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs:46`): `DefaultWaitTimeout = TimeSpan.FromSeconds(15)`. The comment above it (B-19) says why it is 15 s now: the stalls measured in B-31 reached 9.7 s, and a green run never waits on a ceiling.
+- `DebounceWaitTimeout` keeps its own property (a test can still shrink it to prove the helper's ceiling); its comment no longer says it is longer than the default wait.
+- `BaseTextsPageTests.cs:213` and `QuestionsPageTests.cs:235`: drop the explicit `TimeSpan.FromSeconds(5)` so both use the shared ceiling.
+- `DebounceWaitTimeoutTests.SharedContext_Settings_DebounceWaitIs15SecondsAndDefaultWaitStays5` (`DebounceWaitTimeoutTests.cs:89`): renamed and updated to AC1.
+- Nothing else: the ~1140 waits need no edit.
 
 ## Docs
-- none — test-only, to be confirmed at `/agile:refine`
+- none — test-only change; no technical page describes the wait ceiling.
 
 ## Regression test
-- unknown — settled at `/agile:refine`
+
+Tests locked: 7d0647ce8ac1f970216826fecbeada2bbc913cd3 (1 file); unlocks: 1
+
+- AC1 and AC2 in `DebounceWaitTimeoutTests` (same folder and collection `SerialDebounceWait` as B-31's, because `DefaultWaitTimeout` is static): AC1 reads the settings; AC2 waits for an assertion that turns true after 6 s of wall time while the component is re-rendered every 500 ms (bUnit rechecks a wait only on render; costs about 6 s once). Both were seen failing with the 5 s ceiling (`Expected 15s, but found 5s.` and `WaitForFailedException` after 5 s) and pass with 15 s (`Passed: 4` of `DebounceWaitTimeoutTests`).
 
 ## Decisions
 - 2026-10-20 — Captured as a separate bug and not as part of B-31 — the owner kept B-31 to the debounced helper and put the plain waits in a later item; the epic "Test infrastructure" is new — asked
+- 2026-10-20 — The 5 s default ceiling of F-48 (2026-10-03: "a ceiling, a green run never waits on it") is changed — No, change it; the same reasoning holds for 15 s and the measured stalls (up to 9.7 s) exceed 5 s — changed: 5 s default ceiling (docs/features/F-48-debounce-on-timeprovider.md)
+- 2026-10-20 — The new shared ceiling is 15 s, one place for every plain wait, rather than 10 s, 20 s, a ceiling per kind of wait or accepting the risk — it equals the debounced helper's ceiling (B-31), covers the measured stalls with margin, and a failing test pays the extra wait — asked
+- 2026-10-20 — AC2 uses a real 6 s wall-clock wait, accepting about 6 s once in `Simulab.Web.Tests` — a smaller proof would need a non-static ceiling, which bUnit 2.10.3 does not offer — decided by Claude
+- 2026-10-20 — The stress loop (AC5) stays a recorded measurement, not a gate, as in B-31 — decided by Claude
+- 2026-10-20 — Main-session model: sonnet (no signal) — `references/model-choice.md` "Main session"
+- 2026-10-20 — Reuse: `KitTestContext` and B-31's `DebounceWaitTimeoutTests` and `SerialDebounceWait` extended in place; no new package — decided by Claude
+- 2026-10-20 — Tests unlocked and AC2 test rewritten — the first version waited on a component that never re-renders and bUnit rechecks a wait only on render, so it failed even at 15 s; the rewrite re-renders every 500 ms, seen red at 5 s and green at 15 s — owner chose unlock and rewrite
+
+- 2026-10-20 — plan — 1 AC1 and AC2 tests written red, committed, locked; 2 `DefaultWaitTimeout` 15 s and the two explicit 5 s waits dropped → AC1 to AC3 green; 3 whole `Simulab.Web.Tests` and the gate → AC4; 4 stress loop 24 x 3 on copies → AC5; 5 scan, `git diff main --stat -- src` empty → AC6
+- 2026-10-20 — AC5 measured: 72 of 72 green (`Passed: 553` each, 37 s in round 1), 0 red, copies inside the worktree. A first attempt with the copies outside the repository failed `TrueFalseQuestionListTypeCellTests.TheStylesheet_KeepsAChipOfAOneLineCellOnOneLine` in every process (it finds the web root by walking up from the build output; not a timing failure, so not counted) and once `QuestionsFilterPageTests.ClearAll_RemovesEveryFilterAndTheSearch_AndHidesItself` (`UnknownEventHandlerIdException`, a click on an element found before a re-render, not a wait timeout). Baseline of 2026-10-20: `QuestionOriginTests.Save_...` red 2 times in 48 — decided by Claude
+- 2026-10-20 — Reuse: `KitTestContext` and `DebounceWaitTimeoutTests` extended in place; nothing new — decided by Claude
+- 2026-10-20 — Shortcuts: none — decided by Claude
+- 2026-10-20 — Gate: `agile gate GREEN` (whole suite: Web 2170 passed, QuestionBank 456, Identity 508, Catalog 608, Api 58, others green); `agile scan GREEN`; `git diff main --stat -- src` empty — decided by Claude
+
+## Out of scope
+- The 15 s debounced helper (B-31) and the MudBlazor debounce itself; any change under `src/`.
+- Making the 24-process stress loop pass 72 of 72: a load that stalls a process beyond any fixed ceiling cannot be fixed by a ceiling.
+- Test projects other than `Simulab.Web.Tests` that do not use `KitTestContext`.
 
 ## Open questions
 - (none)
 
 ## Validation script
 
+### English
+Needed to validate: nothing (no screen, no data). Run from the repository folder of this branch.
+
+1. [ ] Run the tests of the wait ceiling. Expected last line: `Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4` (the 6 s test makes it take about 9 s). Repeat as often as you like; it needs no app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+2. [ ] Check that nothing under `src/` changed. Expected: no output.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Read the ceiling in `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DefaultWaitTimeout` is 15 s, and no test source passes a 5 s timeout to a wait.
+
+### pt-BR
+Necessário para validar: nada (sem tela, sem dados). Rode na pasta do repositório desta branch.
+
+1. [ ] Rode os testes do teto de espera. Última linha esperada: `Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4` (o teste de 6 s faz levar cerca de 9 s). Repita quando quiser; não precisa subir o app host.
+```powershell
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+```bash
+dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~DebounceWaitTimeoutTests"
+```
+2. [ ] Confira que nada em `src/` mudou. Esperado: nenhuma saída.
+```powershell
+git diff main --stat -- src
+```
+```bash
+git diff main --stat -- src
+```
+3. [ ] Leia o teto em `tests/Hosts/Simulab.Web.Tests/Ui/KitTestContext.cs`: `DefaultWaitTimeout` é 15 s, e nenhum código de teste passa timeout de 5 s a uma espera.
+
 ## Events
+
+- 2026-10-20 question — asked 2, from context 0
+- 2026-10-20 blocked — test wrong: AC2 test waited on a component that never re-renders; bUnit rechecks only on render
 
 ## Delivery
 - Branch: bug/B-32
