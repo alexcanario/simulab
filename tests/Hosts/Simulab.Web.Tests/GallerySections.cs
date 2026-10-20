@@ -24,6 +24,8 @@ internal static class GallerySections
         "gallery-chips-field",
         // F-114: the three field kinds and their states.
         "gallery-field-kinds",
+        // F-89: the file field in every state.
+        "gallery-file-field",
         // F-95: the rich text field in every state, and the option row built from it.
         "gallery-rich-text",
         // F-125: the identity — button variants, the type scale and the palette of the theme in use.

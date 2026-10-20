@@ -140,6 +140,32 @@ else
                                   Hint="@L["ExamEditions.Field.AppliedOn.Hint"]"
                                   Error="@_appliedOnError" />
                 </AppFormGrid>
+                @* F-89: the notice PDF is kept in Simulab besides the official link; both are optional and independent
+                   (BR1). Choosing, replacing or removing it is a change of the form, sent only by Save (BR5). *@
+                <AppFormGrid Columns="1">
+                    <AppFileField Id="edition-notice-document"
+                                  Label="@L["ExamEditions.NoticeDocument.Label"]"
+                                  Hint="@L["ExamEditions.NoticeDocument.Hint"]"
+                                  Error="@_documentError"
+                                  Accept=".pdf,application/pdf"
+                                  StoredName="@_saved?.NoticeDocument?.FileName"
+                                  StoredSizeText="@(_saved?.NoticeDocument is { } stored ? FileSizeText.Format(stored.Size) : null)"
+                                  DownloadHref="@(_saved is null ? null : $"/catalog/exams/{ExamId}/editions/{_saved.Id}/notice-document")"
+                                  DownloadText="@L["ExamEditions.NoticeDocument.Download"]"
+                                  DownloadLabel="@(L["ExamEditions.NoticeDocument.Download.Name", _saved?.NoticeDocument?.FileName ?? string.Empty].Value)"
+                                  ChosenText="@(_chosen is null ? null : L["ExamEditions.NoticeDocument.Chosen", _chosen.Name].Value)"
+                                  RemovePending="_removeDocument"
+                                  ChooseText="@L["ExamEditions.NoticeDocument.Choose"]"
+                                  ReplaceText="@L["ExamEditions.NoticeDocument.Replace"]"
+                                  RemoveText="@L["ExamEditions.NoticeDocument.Remove"]"
+                                  DiscardText="@L["ExamEditions.NoticeDocument.Discard"]"
+                                  RemovePendingText="@L["ExamEditions.NoticeDocument.RemovePending"]"
+                                  KeepText="@L["ExamEditions.NoticeDocument.KeepFile"]"
+                                  OnChosen="OnDocumentChosenAsync"
+                                  OnDiscard="OnDocumentDiscarded"
+                                  OnRemove="OnDocumentRemoved"
+                                  OnKeep="OnDocumentKept" />
+                </AppFormGrid>
             </AppSectionCard>
 
             <AppSectionCard Id="edition-section-publication"
@@ -214,6 +240,9 @@ else
     private string? _noticeUrlError;
     private string? _appliedOnError;
     private string? _statusError;
+    private string? _documentError;
+    private ChosenDocument? _chosen;
+    private bool _removeDocument;
     private string? _error;
     private string? _backHref;
     private string? _backText;
@@ -283,6 +312,7 @@ else
             (_noticeReferenceError, "edition-notice-reference", L["ExamEditions.Field.NoticeReference"]),
             (_noticeUrlError, "edition-notice-url", L["ExamEditions.Field.NoticeUrl"]),
             (_appliedOnError, "edition-applied-on", L["ExamEditions.Field.AppliedOn"]),
+            (_documentError, "edition-notice-document", L["ExamEditions.NoticeDocument.Label"]),
             (_statusError, "edition-status", L["ExamEditions.Field.Status"])
         }.Where(item => item.Error is not null)
          .Select(item => new AppErrorSummaryItem(item.FieldId, item.Label))
@@ -296,7 +326,9 @@ else
         || Trimmed(_noticeReference) != (_saved?.NoticeReference ?? string.Empty)
         || Trimmed(_noticeUrl) != (_saved?.NoticeUrl ?? string.Empty)
         || _appliedOn != _saved?.AppliedOn
-        || _status != (_saved?.Status ?? ExamEditionStatus.Draft);
+        || _status != (_saved?.Status ?? ExamEditionStatus.Draft)
+        || _chosen is not null
+        || _removeDocument;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -508,12 +540,22 @@ else
                 ? await Api.UpdateExamEditionAsync(token, ExamId, _saved!.Id, request)
                 : await Api.CreateExamEditionAsync(token, ExamId, request);
 
-        _saving = false;
         if (result is { IsSuccess: true, Value: { } edition })
         {
             var wasAdd = !IsEdit;
             Hydrate(edition);
             BuildBreadcrumbs();
+
+            // F-89 BR5: the file goes after the fields, in the same Save, to the edition they just saved. A new edition
+            // exists by now, so its file has somewhere to go (AC8).
+            var documentSaved = await ApplyDocumentAsync(token!);
+            _saving = false;
+            if (!documentSaved)
+            {
+                // The fields are saved and the file is not: no "saved" message, and the page stays so the choice can be sent again.
+                return;
+            }
+
             Snackbar.Add(L["ExamEditions.Saved"], Severity.Success);
             if (wasAdd)
             {
@@ -527,8 +569,96 @@ else
             return;
         }
 
+        _saving = false;
         ShowRefusal(result.ErrorCode);
     }
+
+    // F-89: sends the chosen file, or deletes the stored one the reader marked for removal. False when the Api refused it.
+    private async Task<bool> ApplyDocumentAsync(string token)
+    {
+        if (_chosen is { } chosen)
+        {
+            var uploaded = await Api.UploadNoticeDocumentAsync(token, ExamId, _saved!.Id, chosen.Name, chosen.Content);
+            if (uploaded is { IsSuccess: true, Value: { } withFile })
+            {
+                Hydrate(withFile);
+                _chosen = null;
+                _documentError = null;
+                return true;
+            }
+
+            ShowDocumentRefusal(uploaded.ErrorCode);
+            return false;
+        }
+
+        if (_removeDocument)
+        {
+            var removed = await Api.DeleteNoticeDocumentAsync(token, ExamId, _saved!.Id);
+            if (removed.IsSuccess)
+            {
+                _saved = _saved with { NoticeDocument = null };
+                _removeDocument = false;
+                _documentError = null;
+                return true;
+            }
+
+            ShowDocumentRefusal(removed.ErrorCode);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ShowDocumentRefusal(string? code)
+    {
+        _documentError = Errors.For(code);
+        ShowErrorSummary();
+    }
+
+    // Comfort only: a file over 20 MB is refused before it is read. The Api checks the size and the content again (BR3, BR4).
+    private async Task OnDocumentChosenAsync(IBrowserFile file)
+    {
+        _removeDocument = false;
+        _chosen = null;
+        if (file.Size > CatalogLimits.ExamEditionNoticeDocumentMaxBytes)
+        {
+            _documentError = Errors.For(CatalogErrorCodes.ExamEditionNoticeDocumentTooLarge);
+            return;
+        }
+
+        try
+        {
+            // Read now, here: the browser's stream is slow, and the call to the Api is made from memory (trade-off 5).
+            // shortcut(F-89): the chosen PDF (up to 20 MB) is held whole in the circuit's memory until Save or Discard — revisit when several curators upload at once or the limit passes 20 MB.
+            await using var stream = file.OpenReadStream(CatalogLimits.ExamEditionNoticeDocumentMaxBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            _chosen = new ChosenDocument(file.Name, buffer.ToArray());
+            _documentError = null;
+        }
+        catch (IOException)
+        {
+            _documentError = Errors.For(ErrorText.UnexpectedCode);
+        }
+    }
+
+    private void OnDocumentDiscarded()
+    {
+        _chosen = null;
+        _documentError = null;
+    }
+
+    private void OnDocumentRemoved()
+    {
+        _chosen = null;
+        _documentError = null;
+        _removeDocument = true;
+    }
+
+    private void OnDocumentKept() => _removeDocument = false;
+
+    /// <summary>The file the reader chose and has not saved yet, read into memory.</summary>
+    private sealed record ChosenDocument(string Name, byte[] Content);
 
     // A refusal belongs to the field that caused it, so the reader sees where to change something.
     private void ShowRefusal(string? code)
@@ -556,6 +686,10 @@ else
                 break;
             case CatalogErrorCodes.ExamEditionStatusInvalid:
                 _statusError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionNoticeDocumentNotPdf:
+            case CatalogErrorCodes.ExamEditionNoticeDocumentTooLarge:
+                _documentError = text;
                 break;
             case CatalogErrorCodes.OrganizerNotFound:
                 // The board left the catalog since it was picked: clear it and make the reader choose again.

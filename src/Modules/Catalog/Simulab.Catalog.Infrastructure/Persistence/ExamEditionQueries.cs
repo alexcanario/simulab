@@ -52,5 +52,6 @@ public sealed class ExamEditionQueries(CatalogModuleDbContext context) : IExamEd
             edition.NoticeReference,
             edition.NoticeUrl,
             edition.AppliedOn,
-            edition.Status);
+            edition.Status,
+            edition.NoticeDocument is { } document ? new NoticeDocumentResponse(document.FileName, document.Size, document.UploadedAt) : null);
 }

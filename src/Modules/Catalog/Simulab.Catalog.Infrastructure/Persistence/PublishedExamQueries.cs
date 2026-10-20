@@ -78,7 +78,11 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
                     organizer.Acronym,
                     edition.NoticeReference,
                     edition.NoticeUrl,
-                    edition.AppliedOn))
+                    edition.AppliedOn,
+                    (IReadOnlyList<NoticeSubjectResponse>?)null,
+                    edition.NoticeDocument == null
+                        ? null
+                        : new NoticeDocumentResponse(edition.NoticeDocument.FileName, edition.NoticeDocument.Size, edition.NoticeDocument.UploadedAt)))
             .ToListAsync(cancellationToken);
 
         // F-76 BR1: the syllabus of every published edition above, in one read for all of them. A draft edition

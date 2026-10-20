@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
     <ProjectReference Include="..\Simulab.ServiceDefaults\Simulab.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Simulab.Storage\Simulab.Storage.csproj" />
   </ItemGroup>
 
 </Project>

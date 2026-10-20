@@ -12,6 +12,8 @@ flowchart LR
         Simulab_Jobs["Simulab.Jobs"]
         Simulab_Persistence["Simulab.Persistence"]
         Simulab_SharedKernel["Simulab.SharedKernel"]
+        Simulab_Storage["Simulab.Storage"]
+        Simulab_Storage_Contracts["Simulab.Storage.Contracts"]
     end
     subgraph Hosts["Hosts"]
         Simulab_Api["Simulab.Api"]
@@ -55,6 +57,7 @@ flowchart LR
     Simulab_Api --> Simulab_QuestionBank_Api
     Simulab_Api --> Simulab_ServiceDefaults
     Simulab_Api --> Simulab_SharedKernel
+    Simulab_Api --> Simulab_Storage
     Simulab_ApiResults --> Simulab_SharedKernel
     Simulab_AppHost --> Simulab_Api
     Simulab_AppHost --> Simulab_Web
@@ -70,6 +73,7 @@ flowchart LR
     Simulab_Catalog_Domain --> Simulab_SharedKernel
     Simulab_Catalog_Infrastructure --> Simulab_Catalog_Application
     Simulab_Catalog_Infrastructure --> Simulab_Persistence
+    Simulab_Catalog_Infrastructure --> Simulab_Storage
     Simulab_Identity_Api --> Simulab_ApiResults
     Simulab_Identity_Api --> Simulab_Identity_Application
     Simulab_Identity_Api --> Simulab_Identity_Infrastructure
@@ -98,9 +102,12 @@ flowchart LR
     Simulab_QuestionBank_Infrastructure --> Simulab_Catalog_Contracts
     Simulab_QuestionBank_Infrastructure --> Simulab_Persistence
     Simulab_QuestionBank_Infrastructure --> Simulab_QuestionBank_Application
+    Simulab_Storage --> Simulab_SharedKernel
+    Simulab_Storage --> Simulab_Storage_Contracts
     Simulab_Web --> Simulab_Ai_Contracts
     Simulab_Web --> Simulab_Catalog_Contracts
     Simulab_Web --> Simulab_Identity_Contracts
     Simulab_Web --> Simulab_QuestionBank_Contracts
     Simulab_Web --> Simulab_ServiceDefaults
+    Simulab_Web --> Simulab_Storage_Contracts
 ```

@@ -202,6 +202,19 @@ public abstract class CatalogPageTestContext : KitTestContext
                     body);
             }
 
+            // F-89: the edition's notice PDF. The fake keeps the shape the Api has: an upload answers the edition with the
+            // file's name and size, a removal answers 204; the rules about the content are the Api's and tested there.
+            var documentRoute = System.Text.RegularExpressions.Regex.Match(
+                path, "^/api/v1/catalog/exams/(?<exam>[^/]+)/editions/(?<id>[^/]+)/notice-document$");
+            if (documentRoute.Success)
+            {
+                return HandleNoticeDocument(
+                    request.Method,
+                    Guid.Parse(documentRoute.Groups["exam"].Value),
+                    Guid.Parse(documentRoute.Groups["id"].Value),
+                    body);
+            }
+
             var editionRoute = System.Text.RegularExpressions.Regex.Match(
                 path, "^/api/v1/catalog/exams/(?<exam>[^/]+)/editions(/(?<id>[^/]+))?$");
             if (editionRoute.Success)
@@ -319,6 +332,34 @@ public abstract class CatalogPageTestContext : KitTestContext
             return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
+        private HttpResponseMessage HandleNoticeDocument(HttpMethod method, Guid examId, Guid id, string? body)
+        {
+            if (WriteFailure is { } failure)
+            {
+                return Problem(failure);
+            }
+
+            var index = Editions.FindIndex(edition => edition.Id == id && edition.ExamId == examId);
+            if (index < 0)
+            {
+                return Problem((HttpStatusCode.NotFound, CatalogErrorCodes.ExamEditionNotFound));
+            }
+
+            if (method == HttpMethod.Delete)
+            {
+                Editions[index] = Editions[index] with { NoticeDocument = null };
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
+            }
+
+            var name = System.Text.RegularExpressions.Regex.Match(body ?? string.Empty, "filename=\"?(?<name>[^\";\\r\\n]+)\"?").Groups["name"].Value;
+            Editions[index] = Editions[index] with
+            {
+                NoticeDocument = new NoticeDocumentResponse(name, body?.Length ?? 0, DateTimeOffset.UtcNow)
+            };
+
+            return Json(Editions[index]);
+        }
+
         // F-35: the five edition routes, answering the way the Api does (BR3 to BR14 are the Api's; the fake keeps the
         // shape: a list, one edition, a create that is a draft by default, an update, and a delete that refuses a
         // published edition).
@@ -363,7 +404,8 @@ public abstract class CatalogPageTestContext : KitTestContext
 
             if (method == HttpMethod.Put)
             {
-                var updated = SavedEdition(id, examId, Read<SaveExamEditionRequest>(body));
+                // F-89 BR5: saving the fields never touches the notice PDF.
+                var updated = SavedEdition(id, examId, Read<SaveExamEditionRequest>(body)) with { NoticeDocument = existing.NoticeDocument };
                 Editions[Editions.IndexOf(existing)] = updated;
                 return Json(updated);
             }

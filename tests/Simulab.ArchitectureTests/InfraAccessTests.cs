@@ -41,6 +41,7 @@ public class InfraAccessTests
         "Local Mailpit",
         "Local PostgreSQL",
         "Local Redis",
+        "Local Azurite (blob storage, F-89)",
         "Claude API console",
         "Google Cloud console (OAuth client, F-20)",
         "Former board (Azure Boards)",

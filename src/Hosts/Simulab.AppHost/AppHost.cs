@@ -47,11 +47,30 @@ else
         .WithDataVolume("simulab-redis-data");
 }
 
+// F-89 (ADR-0001 #23): the files users upload, in one private container. Azurite locally, with a named volume so the
+// files outlive a restart; a locally redundant storage account of its own in the cloud (the Data Protection key rings
+// have theirs). Only the Api reaches it: the Web downloads through the Api.
+var storage = builder.AddAzureStorage("blob");
+if (publishing)
+{
+    storage.WithLocallyRedundantStorage();
+}
+else
+{
+    storage.RunAsEmulator(emulator => emulator
+        .WithContainerName("simulab-azurite")
+        .WithDataVolume("simulab-azurite-data"));
+}
+
+var blobs = storage.AddBlobs("blobs");
+
 var api = builder.AddProject<Projects.Simulab_Api>("api")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(redis)
-    .WaitFor(redis);
+    .WaitFor(redis)
+    .WithReference(blobs)
+    .WaitFor(blobs);
 
 var web = builder.AddProject<Projects.Simulab_Web>("web")
     .WithReference(api)

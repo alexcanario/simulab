@@ -21,6 +21,10 @@ Table exam_editions {
   organizer_id uuid [not null, note: 'The exam board that applied the paper, as the notice names it.']
   position varchar(200) [note: 'The job the paper selects for. Empty for ENEM, entrance exams and certifications.']
   status varchar(40) [not null, note: 'Who can see the edition: Draft or Published.']
+  notice_document_blob_name varchar(98) [note: 'Owned: NoticeDocument; The name the notice PDF is stored under in the file storage, never the curator\'s file name. Empty when the edition has no PDF.']
+  notice_document_file_name varchar(255) [note: 'Owned: NoticeDocument; The notice PDF\'s file name as the curator gave it, without any folder. Empty when the edition has no PDF.']
+  notice_document_size bigint [note: 'Owned: NoticeDocument; The notice PDF\'s size in bytes, from 1 to 20 MB. Empty when the edition has no PDF.']
+  notice_document_uploaded_at timestamptz [note: 'Owned: NoticeDocument; When the notice PDF was uploaded. Empty when the edition has no PDF.']
 
   indexes {
     exam_id [name: 'ix_exam_editions_exam']

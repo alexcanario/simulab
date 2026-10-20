@@ -37,6 +37,9 @@ public static class ExamEndpoints
         exams.MapPut("/{examId:guid}/editions/{id:guid}", UpdateEditionAsync).WithName("UpdateExamEdition");
         exams.MapDelete("/{examId:guid}/editions/{id:guid}", DeleteEditionAsync).WithName("DeleteExamEdition");
 
+        // F-89: the notice PDF of an edition shares the group's policy too.
+        exams.MapNoticeDocumentEndpoints();
+
         return group;
     }
 
