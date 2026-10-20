@@ -1,7 +1,7 @@
 ---
 feature: F-89
 epic: Assessment catalog
-status: validating
+status: done
 board: 132
 version: 1
 ---
@@ -255,3 +255,15 @@ De quem são os dados: o app roda no banco próprio `simulab_f89`, dentro do vol
 - 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.DocGen.ToolCatalogueDocTests.CommittedCatalogue_MatchesTheToolsIn, 1 red
 
 ## Delivery
+Gate time: 10 passes, 38 min 32 s — turn 1 (28 s), ship 6 (31 min 15 s), scan 3 (6 min 49 s); 3 red
+Usage: 9962.6k weighted (estimate) — build 94% · ship 6% — agents 11% — context per turn 473k → 168k — 2 sessions, 279 turns
+
+- Branch: `feature/F-89` (removed locally, never pushed), merged into `main` with `--no-ff` as `81c289a`; app version 1.6.2 → 1.7.0; board #132.
+- Delivered: the notice PDF of an edition. A new building block `Simulab.Storage` (`IFileStorage`, Azure Blob through `Aspire.Azure.Storage.Blobs`, Azurite locally, a storage account of its own in the cloud) with `Simulab.Storage.Contracts`; `NoticeDocument` as an owned value object (four nullable columns and a CHECK) in the `catalog` schema; `PUT/DELETE/GET .../notice-document` for the back office and `GET` for published editions; the Web download routes; `AppFileField` and the edition form; the "Notice (PDF)" link on the student exam page; texts in pt-BR, pt-PT and en.
+- Tests (last full run, 2026-10-21): 4382 passed, 0 failed, 14 assemblies (Catalog 646, Identity 508, QuestionBank 456, Web 2225, ArchitectureTests 296, Storage 8); build 39 s, test run 373 s (over the 5 min budget by 73 s of test time on a machine shared with other sessions; the first green run of this ship was 343 s; reported to the retro). Test lock: 13 files, 3 unlocks, each with its `## Decisions` line; locked again at the ship because the third rewrite had never been locked.
+- Ship incident: the first full run of this ship after the second merge of `main` was RED on `ToolCatalogueDocTests.CommittedCatalogue_MatchesTheToolsInTheProductionAssemblies`: the DocGen run of the docs step deleted `docs/architecture/tools.md` (`"tools": false` in `docgen.json` since F-49) while that architecture test still reads the committed page. The two files were restored from `main` and the suite was green again. The inconsistency is in `main` (F-49), not in this item.
+- Scan: `agile scan GREEN` (3 open medium findings, none in this diff). `Closed by Claude: none`.
+- Manual: `docs/manual/pt-BR/exam-editions.md` ("Guardar o PDF do edital", the field and four messages) and `docs/manual/pt-BR/catalog.md` ("Edital (PDF)"); `pt-PT` and `en` are frozen (F-124).
+- Technical pages: none (no `## Docs` section). UI map: 5 stale rows, 1 unverified (warning only; the two rows of this item point to `5869cb8`).
+- Shortcuts: 1 marked (`src/Hosts/Simulab.Web/Components/Pages/Catalog/ExamEditionForm.razor:632`, the chosen PDF held whole in the circuit's memory; revisit when several curators upload at once or the limit passes 20 MB).
+- Validation evidence: the owner said "validado" in the conversation; the per-step boxes were not ticked on this machine, so all 17 paths are recorded as not tested (`Evidence: 0 of 17 tested`).
