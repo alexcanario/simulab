@@ -4,7 +4,7 @@
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 1 | B-31 | Base texts search test still fails under heavy parallel load | idea | - | Question bank | - | - |
+| 1 | B-32 | Plain WaitForAssertion waits in bUnit page tests time out under heavy load | idea | - | Test infrastructure | - | - |
 | 2 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - |
 | 3 | F-108 | Short-answer questions | idea | - | Question bank | - | - |
 | 4 | F-110 | Sample questions of the municipal guard editions | idea | - | Question bank | - | - |
@@ -56,7 +56,7 @@
 
 ## Checklist
 
-- [ ] 1. B-31 — Base texts search test still fails under heavy parallel load [idea]
+- [ ] 1. B-32 — Plain WaitForAssertion waits in bUnit page tests time out under heavy load [idea]
 - [ ] 2. F-143 — Align the external ingestion lab with E-9 [idea]
 - [ ] 3. F-108 — Short-answer questions [idea]
 - [ ] 4. F-110 — Sample questions of the municipal guard editions [idea]
@@ -108,10 +108,11 @@
 
 ## Summary
 
-- Delivered: 120
+- Delivered: 121
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog): complete: /agile:publish
 - First release (foundation-and-identity): complete: /agile:publish
 - First release (partner-tenants): cut not defined
 - First release (question-bank): complete: /agile:publish
 - First release (subject-taxonomy): complete: /agile:publish
+- First release (test-infrastructure): cut not defined

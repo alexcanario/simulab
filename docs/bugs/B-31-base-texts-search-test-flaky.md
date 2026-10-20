@@ -1,7 +1,7 @@
 ---
 bug: B-31
 feature: F-102
-status: validating
+status: done
 board: 198
 severity: low
 epic: Question bank
@@ -135,3 +135,9 @@ git diff main --stat -- src
 - Branch: bug/B-31
 - Build state (2026-10-20): `gate.js stop` ends `agile gate GREEN`; `Simulab.Web.Tests` 2169 of 2169; `scan.js run` ends `agile scan GREEN`; `git diff main --stat -- src` empty.
 - AC5 stress loop, real output (24 processes at once, 3 rounds, copies of the build output inside the worktree): 72 of 72 green (`Passed: 553` each, 32 s to 53 s), 0 red. A first attempt ran only 18 processes a round (copies 19 to 24 were incomplete) and is not counted. Baseline of 2026-10-20: 13 reds of 72. The loop is weak evidence only; AC1 to AC3 are the proof.
+Gate time: 21 passes, 19 min 25 s — turn 18 (11 min 24 s), ship 1 (3 min 59 s), scan 2 (4 min 2 s); 15 red
+Usage: 811.5k weighted (estimate) — build 82% · ship 16% · other 1% — context per turn 156k → 197k — 1 session, 60 turns
+- Merge commit 2221539 on main (version 1.6.0 -> 1.6.1).
+- Ship gate (2026-10-20): `agile gate GREEN`, 4279 tests in 13 projects, 0 failures, 26 s build, 213 s test run (slowest projects Identity 3 m 28 s, Catalog 3 m 27 s, QuestionBank 3 m); `agile scan GREEN`; `agile docs GREEN`; test lock unchanged.
+- Manual: no page changed (test-only change, no visible behavior).
+- Validation evidence: validated by the owner in chat on 2026-10-20; the script has no tick (the three steps are `not tested` in the tick file, 0 of 3 ticked).
