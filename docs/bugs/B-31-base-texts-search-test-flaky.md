@@ -1,7 +1,7 @@
 ---
 bug: B-31
 feature: F-102
-status: refining
+status: approved
 board: 198
 severity: low
 epic: Question bank
@@ -83,6 +83,7 @@ Callers: `KitTestContext.WaitForAfterDebounce` (`KitTestContext.cs:61`): the 33 
 ## Events
 
 - 2026-10-20 question — asked 2, from context 1
+- 2026-10-20 test-fail — 3 new warning(s): IDE0011 in tests/Hosts/Simulab.Web.Tests/QuestionBank/ScratchB31DiagnosticTests.cs; CA1305 in tests/Ho, 15 reds
 
 ## Delivery
 - Branch: bug/B-31
