@@ -237,8 +237,10 @@ public sealed class ExamEditionNoticeDocumentTests : CatalogPageTestContext
         dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Discard changes?"));
         dialogs.Find(".app-confirm-ok").Click();
 
-        page.WaitForAssertion(() =>
-            Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith($"/admin/exams/{AgentePf.Id}"));
+        // The navigation ends after the answer, without rendering the page, so a render-driven wait would never look again.
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        SpinWait.SpinUntil(() => navigation.Uri.EndsWith($"/admin/exams/{AgentePf.Id}", StringComparison.Ordinal), TimeSpan.FromSeconds(15))
+            .Should().BeTrue("answering yes to the discard dialog goes back to the exam");
         Calls().Should().BeEmpty("nothing was written");
         Api.Editions.Single().NoticeDocument!.FileName.Should().Be("edital.pdf");
     }
