@@ -53,6 +53,9 @@ public abstract class KitTestContext : BunitContext, IAsyncLifetime
     protected void AdvanceDebounce(int milliseconds = AppLookupField.DebounceMilliseconds) =>
         Clock.Advance(TimeSpan.FromMilliseconds(milliseconds));
 
+    /// <summary>B-31: the ceiling of <see cref="WaitForAfterDebounce{TComponent}"/>.</summary>
+    protected virtual TimeSpan DebounceWaitTimeout => DefaultWaitTimeout;
+
     /// <summary>B-30: waits for what a debounced field sends. A keystroke can reach its debounce after a single
     /// <see cref="AdvanceDebounce"/> already moved the clock, and then no other advance would ever come: this moves the
     /// clock again before every try, so a delay registered late is still reached. bUnit re-checks only when the
