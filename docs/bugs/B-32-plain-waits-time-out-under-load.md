@@ -55,6 +55,9 @@ Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place
 - none — test-only change; no technical page describes the wait ceiling.
 
 ## Regression test
+
+Tests locked: 7d0647ce8ac1f970216826fecbeada2bbc913cd3 (1 file); unlocks: 1
+
 - AC1 and AC2 in `DebounceWaitTimeoutTests` (same folder and collection `SerialDebounceWait` as B-31's, because `DefaultWaitTimeout` is static): AC1 reads the settings; AC2 waits for an assertion that turns true after 6 s of wall time (costs about 6 s once). Both must be seen failing before the fix.
 
 ## Decisions
@@ -65,6 +68,7 @@ Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place
 - 2026-10-20 — The stress loop (AC5) stays a recorded measurement, not a gate, as in B-31 — decided by Claude
 - 2026-10-20 — Main-session model: sonnet (no signal) — `references/model-choice.md` "Main session"
 - 2026-10-20 — Reuse: `KitTestContext` and B-31's `DebounceWaitTimeoutTests` and `SerialDebounceWait` extended in place; no new package — decided by Claude
+- 2026-10-20 — Tests unlocked and AC2 test rewritten — the first version waited on a component that never re-renders and bUnit rechecks a wait only on render, so it failed even at 15 s; the rewrite re-renders every 500 ms, seen red at 5 s and green at 15 s — owner chose unlock and rewrite
 
 ## Out of scope
 - The 15 s debounced helper (B-31) and the MudBlazor debounce itself; any change under `src/`.
@@ -79,6 +83,7 @@ Callers: `KitTestContext` constructor (`KitTestContext.cs:46`) is the only place
 ## Events
 
 - 2026-10-20 question — asked 2, from context 0
+- 2026-10-20 blocked — test wrong: AC2 test waited on a component that never re-renders; bUnit rechecks only on render
 
 ## Delivery
 - Branch: bug/B-32
