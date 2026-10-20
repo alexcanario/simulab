@@ -72,7 +72,7 @@ Keep a copy of each edition's notice inside Simulab, so the curator and the stud
 
 ## Criterion → test
 
-Tests locked: 99c89bffec0f159031d4547d296f477fe50f38e5 (13 files); unlocks: 2
+Tests locked: 281448a6904ecefd8ed9df1f6bec1e588b8d257d (13 files); unlocks: 3
 
 | Criterion | Test |
 | --- | --- |
