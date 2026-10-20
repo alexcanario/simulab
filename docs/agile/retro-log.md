@@ -1402,3 +1402,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
 - `CLAUDE.md` is at ~4.4k always-loaded tokens (budget ~4.5k): trim at the next retro.
 - Commit: `chore: sync with agile@canary 0.135.0` on main, with the owner's OK.
+
+## 2026-10-20 - Sync with agile@canary 0.136.0
+- From 0.135.0 to 0.136.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md` (version, "Importar e gerar temas (#249)"), `docs/agile/workflow-examples.pt-BR.md` (example 14.168).
+- Merged (owner's OK, clean): `docs/agile/profile.md` (new `### Import and generate` section of the MudBlazor kit). Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (differences are the project's own).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present; technical-term rows not swept in this sync.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+- Commit: `chore: sync with agile@canary 0.136.0` on main, pending the owner's authorization.

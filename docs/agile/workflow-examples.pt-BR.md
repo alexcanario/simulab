@@ -6245,3 +6245,40 @@ agile order REFUSED: no cut named loj; cuts found: loja-1-catalogo, loja-2-pagam
 ```
 
 O `/agile:order` sem argumento continua escrevendo a lista inteira, agora também com a coluna `Why`. Um rótulo como `ticks` ou `write` não pode ser usado num corte: o `/agile:mvp` o recusa, porque o `/agile:order` o leria como outra coisa.
+
+### 14.168 Quem usa o app importa um tema e a página conta o que ficou de fora
+
+O app web Cais já tem a página de aparência com a importação (o segundo item, "Import and generate themes in the MudBlazor kit", está entregue). Uma pessoa recebeu de um colega o arquivo `night-owl.json`, feito à mão: ele traz uma cor escrita como `red`, uma chave `Mystery` que o app não conhece e o foco (`Focus`, travado) em preto. Ela abre a página, toca em "Importar tema..." e escolhe o arquivo. A página aplica as mesmas regras do oráculo de importação do plugin, que dá, para esse arquivo (o mesmo conteúdo da fixture `report.json` do plugin):
+
+```
+themes.js import report.json
+{
+  "formatVersion": 1,
+  "id": "night-owl",
+  "name": "Night Owl",
+  "type": "light",
+  "colors": {
+    "Accent": "#0B57D0",
+    "Surface": "#FFFFFF",
+    "Text.Muted": "#555F6D"
+  }
+}
+ignored bad color: Text "red"
+ignored unknown key: Mystery
+ignored locked key: Focus
+ACCEPTED night-owl
+```
+
+e a área de resultado da página mostra, em pt-BR:
+
+```
+Seus temas
+  Night Owl                         [Baixar] [Remover]
+[Importar tema...]  [Gerar a partir das minhas personalizações]
+
+Resultado
+  Importado "Night Owl" como night-owl
+  ignoradas: 1 chave desconhecida, 1 chave travada, 1 cor inválida
+```
+
+"Night Owl" já aparece na lista de temas claros, sem recarregar a página, e fica no `localStorage` do navegador, na chave `appearance.themes`: outro navegador não o vê, e a pasta de temas do servidor não muda. O texto e o foco que faltaram vêm do tema claro padrão, Cais Light, e nenhum par de contraste falhou, então não há aviso. Se ela importar o mesmo arquivo de novo, o tema novo vira `night-owl-2`, com o nome "Night Owl (2)"; se escolher um tema do próprio VS Code, a página diz `Não importado: nenhuma chave de cor deste app` e nada é guardado.

@@ -1,5 +1,5 @@
 {
-  "version": "0.135.0",
+  "version": "0.136.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "64d2516a691af738",
@@ -24,9 +24,9 @@
     "docs/agile/templates/project-claude.md": "ff3ed594f1500917",
     "docs/agile/templates/tech-page.md": "2eff0cc69175555a",
     "docs/agile/templates/ui-map.md": "b05a64b27a3e73a4",
-    "docs/agile/workflow.pt-BR.md": "e8acf16fc6bb4459",
-    "docs/agile/workflow-examples.pt-BR.md": "baabbaabdab32dea",
-    "docs/agile/profile.md": "11e1e3c72e50de0f",
+    "docs/agile/workflow.pt-BR.md": "83dcc377ce450ac8",
+    "docs/agile/workflow-examples.pt-BR.md": "118f02db57789576",
+    "docs/agile/profile.md": "b2a1889f920b46af",
     ".editorconfig": "3e4b965db9964dcd",
     "BannedSymbols.txt": "3949fcbfeb3d446c",
     "Directory.Build.props": "1d030455d9937892",
