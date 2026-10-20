@@ -1,7 +1,7 @@
 ---
 bug: B-32
 feature: -
-status: approved
+status: building
 board: 200
 severity: low
 epic: Test infrastructure
