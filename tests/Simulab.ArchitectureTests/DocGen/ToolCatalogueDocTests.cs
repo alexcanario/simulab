@@ -105,15 +105,26 @@ public class ToolCatalogueDocTests
         after["README.md"].Should().Contain("- [tools.md](tools.md)");
     }
 
-    // AC7: the committed catalogue is what the real code produces today: no tool has been added yet.
+    // B-33: the committed files follow the "tools" switch of docgen.json, as DocGen writes them.
     [Fact]
-    public void CommittedCatalogue_MatchesTheToolsInTheProductionAssemblies()
+    public void CommittedFiles_FollowTheToolsSwitch()
     {
-        var types = EntityModelsTests.DocGenAssemblies().SelectMany(a => a.GetTypes()).ToList();
-        var file = Path.Combine(SolutionAssemblies.RepositoryRoot(), "docs", "architecture", "tools.md");
+        var root = SolutionAssemblies.RepositoryRoot();
+        var options = DocGenOptions.Read(Path.Combine(root, "tools", "Simulab.DocGen", "docgen.json"));
+        var page = Path.Combine(root, "docs", "architecture", "tools.md");
+        var readme = File.ReadAllText(Path.Combine(root, "docs", "architecture", "README.md"));
 
-        File.ReadAllText(file).Replace("\r\n", "\n", StringComparison.Ordinal)
-            .Should().Be(ToolCatalogueDoc.Render([.. types, typeof(AIFunctionFactory)]));
+        if (options.Tools)
+        {
+            var types = EntityModelsTests.DocGenAssemblies().SelectMany(a => a.GetTypes()).ToList();
+            File.ReadAllText(page).Replace("\r\n", "\n", StringComparison.Ordinal)
+                .Should().Be(ToolCatalogueDoc.Render([.. types, typeof(AIFunctionFactory)]));
+        }
+        else
+        {
+            File.Exists(page).Should().BeFalse("DocGen deletes tools.md while the switch is off");
+            readme.Should().NotContain("tools.md");
+        }
     }
 
     public sealed class GoodTool
