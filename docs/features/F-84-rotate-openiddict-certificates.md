@@ -1,7 +1,7 @@
 ---
 feature: F-84
 epic: Foundation and identity
-status: validating
+status: done
 board: 127
 version: 1
 ---
@@ -309,3 +309,21 @@ Necessário para validar: o ambiente de staging rodando com os dois certificados
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
+Gate time: 14 passes, 42 min 7 s — turn 2 (2 min), ship 7 (29 min 43 s), scan 5 (10 min 24 s); 6 red
+Usage: 3766.9k weighted (estimate) — refine 10% · build 3% · review 14% · ship 10% · other 63% — agents 10% — context per turn 160k → 151k — 3 sessions, 173 turns
+- Branch: `feature/F-84`, merged with `--no-ff` into `main` as `f2ac101` (board #127); branch and worktree removed, `main` and `origin/main` at `0 0`; the branch was never pushed.
+- Version: 1.7.0 → 1.8.0 (`Directory.Build.props`).
+- Tests: 4409 in 14 projects, 0 failures (13 + 12 + 296 + 19 + 8 + 83 + 25 + 10 + 2225 + 83 + 25 + 456 + 521 + 646); the last full run after the second merge of `main` was green too, 23 s build and 240 s test run; the run before it, 276 s after the version bump; the first, 307 s (over the 5 min budget by 7 s, machine shared, cause not measured, reported to the retro).
+- Scan: `agile scan GREEN`; 3 open medium findings (two `unsafe-path-combine` in `tools/Simulab.DocGen/GeneratedDocs.cs`, `MessagePack@2.5.302`), none critical or high; test lock unchanged (5 files).
+- Manual pages: none (no visible behavior beyond staying signed in). Technical pages: 1 (`docs/flows/rotate-openiddict-certificates.md`). Glossary: 1 row added (thumbprint).
+- DocGen: the docs command deleted `docs/architecture/tools.md` again (B-33); both generated files were restored from `main` and not committed.
+- Validation evidence (the owner typed "validado" in the chat; the local ticks were never saved, so every path reads `not tested`):
+  1. [ ] not tested Publish the branch to staging.
+  2. [ ] not tested Read the `api` log after publishing: one version of each certificate, no previous certificate (2.1, 2.2).
+  3. [ ] not tested Sign in with two test accounts in two browsers (3.1, 3.2).
+  4. [ ] not tested Renew both certificates and restart the `api` (4.1 to 4.3).
+  5. [ ] not tested Use browser 1 again after 16 minutes (5.1).
+  6. [ ] not tested Disable the oldest version of each certificate and restart the `api` (6.1).
+  7. [ ] not tested Check both browsers after the cut-off (7.1, 7.2).
+  8. [ ] not tested Read the scan findings closed by Claude (8.1).
+  Evidence: 0 of 13 tested
