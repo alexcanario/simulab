@@ -166,7 +166,7 @@ Rows show only the documents that changed since the last acceptance (both when t
 - D5 (owner, 2026-10-21) The gate lives in the Web shell, not in the token endpoint: it covers every sign-in method and the sessions already open. Cost: the Api itself is not blocked (BR9) — asked
 - D6 (owner, 2026-10-21) An account with no acceptance (the seeded administrator) owes one like an outdated account; no special case — asked
 - D7 (owner, 2026-10-21) The acceptance screen is its own page in the authentication layout; no dialog — asked
-- D8 (owner, 2026-10-21) Left out: the e-mail notice of a new version (needs F-66 and a rule of when to notify) and the acceptance history on the account page (the export already has it); each captured as an idea — asked
+- D8 (owner, 2026-10-21) Left out: the e-mail notice of a new version (needs F-66 and a rule of when to notify) and the acceptance history on the account page (the export already has it); captured as F-145 (board #203) and F-146 (board #204) — asked
 - D9 (Claude, 2026-10-21) Technical: no schema change and no migration; the newest record is read by `AcceptedAt` descending, then `Id`.
 - D10 (Claude, 2026-10-21) Technical: a single "Accept and continue" button, no checkbox. Reason: one explicit click on a page that names the documents; sign-up keeps its two checkboxes.
 - D11 (Claude, 2026-10-21) Technical: where the gate is evaluated (layout or router) and whether the circuit caches "accepted" is a build decision for the design pass; BR6 fixes only the behaviour.
@@ -188,3 +188,7 @@ Rows show only the documents that changed since the last acceptance (both when t
 
 ## Validation script
 (written at the end of the build)
+
+## Events
+
+- 2026-10-21 question — asked 6, from context 2
