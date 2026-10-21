@@ -1,7 +1,7 @@
 ---
 feature: F-85
 epic: Foundation and identity
-status: refining
+status: approved
 board: 128
 version: 1
 ---
