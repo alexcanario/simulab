@@ -19,7 +19,10 @@ a tela Exames. Para as demais, a página não é encontrada.
 1. Escolha **Exames**, na seção **Conteúdo** do menu lateral.
 2. A lista mostra o nome, o órgão contratante, o tipo de avaliação e a abrangência, em ordem de nome. Clique no
    título de uma coluna para ordenar por ela.
-3. Digite na caixa de busca para filtrar por nome. Acento e maiúscula não importam: "publica" encontra "Pública".
+3. Digite na caixa de busca uma palavra do nome do exame, do órgão contratante ou do local (estado ou município).
+   Acento e maiúscula não importam: "publica" encontra "Pública", "sp" ou "sao paulo" encontram os exames de São Paulo.
+   Você pode digitar várias palavras, em qualquer ordem e de campos diferentes ("guarda sao paulo"): o exame aparece
+   quando cada palavra está em algum desses três campos.
 4. Os quatro filtros acima da lista — órgão contratante, tipo de avaliação, abrangência e estado — podem ser combinados.
    No filtro de órgão contratante, digite duas letras do nome e escolha na lista que aparece. O filtro de estado
    abre com os 27 estados; escolher um lista só os exames estaduais desse estado, publicados ou não, e define a
