@@ -1,8 +1,8 @@
 ---
 feature: F-106
 epic: Question bank
-status: validating
-Autopilot: stop 2
+status: done
+Autopilot: shipping
 board: 152
 version: 1
 ---
@@ -298,3 +298,11 @@ Necessário para validar: o app host local — o dono; disponível (subiu a part
 - 2026-10-21 blocked — test wrong: owner 2026-10-21: three writing defects in locked tests (params null bound as the array, a because text taken as an Equal item, three new warnings); no assertion changes meaning
 
 ## Delivery
+Gate time: 5 passes, 32 min 27 s — turn 2 (3 min 56 s), ship 1 (12 min 24 s), scan 2 (16 min 7 s); 0 red
+Usage: 11770.0k weighted (estimate) — other 100% — agents 8% — context per turn 396k — 2 sessions, 225 turns
+- Branch: `feature/F-106` (never pushed), merged with `--no-ff` in ae6c90b (board #152); app version 1.12.0 in 3457479.
+- Validated by the owner in the conversation on 2026-10-21 ("validado e autorizo o merge de F-106").
+- Full suite (`gate.js ship`): 4,715 passed, 0 failed, 0 warnings; the slowest projects ran 11 min 27 s (Catalog), 11 min 25 s (Identity), 10 min 49 s (QuestionBank), over the 5 min budget of `CLAUDE.md` — a retro finding.
+- Security scan: `agile scan GREEN`; closed by Claude: none.
+- App manual: `docs/manual/pt-BR/questions.md` (pt-PT and en are frozen, F-124). Technical page: `docs/flows/matching-questions.md`. OpenAPI: `docs/api/Simulab.Api.json`.
+- Validation evidence: 0 of 16 boxes ticked in the widget (the owner validated in words); every path recorded as `not tested`.
