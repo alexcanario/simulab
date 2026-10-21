@@ -56,4 +56,29 @@ public class OpenIddictCertificatePolicyTests
             .And.NotContain("get-default-policy")
             .And.Contain("Renewing the OpenIddict certificates");
     }
+
+    /// <summary>
+    /// F-84 AC12 (BR7, BR8, UC2, UC3): the renewal paragraph says a renewal is one command per certificate and a restart, that
+    /// nobody is signed out en masse, what the overlap costs, and how to cut an old certificate off; the F-73 sentence that
+    /// said every user is signed out once is gone.
+    /// </summary>
+    [Fact]
+    public void Infra_RenewalKeepsSessionsAndDocumentsTheOverlapAndTheCutOff()
+    {
+        var infra = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "infra.md"));
+        var start = infra.IndexOf("Renewing the OpenIddict certificates", StringComparison.Ordinal);
+        start.Should().BeGreaterThan(0);
+        var paragraph = infra[start..infra.IndexOf('\n', start)];
+
+        paragraph.Should().NotContain("signs every user out once")
+            .And.Contain("new version")
+            .And.Contain("committed policy")
+            .And.Contain("restart")
+            .And.Contain("no mass sign-out")
+            .And.Contain("a few users can be signed out")
+            .And.Contain("every replica has restarted")
+            .And.Contain("disabling the previous version")
+            .And.Contain("disabling the current");
+        infra.Should().NotContain("Changing them signs everybody out");
+    }
 }

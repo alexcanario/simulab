@@ -1,4 +1,6 @@
 using System.Reflection;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using OpenIddict.Validation.AspNetCore;
 using Simulab.Ai;
 using Simulab.Api;
@@ -27,6 +29,16 @@ var builder = WebApplication.CreateBuilder(args);
 if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("keyvault")))
 {
     builder.Configuration.AddAzureKeyVaultSecrets("keyvault");
+
+    // F-84 BR1, BR9: with a vault, outside Development, the Api also reads the version before the current OpenIddict
+    // certificates. Handed to the Identity module as a service in code, never as configuration (T5).
+    if (!builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddSingleton<ICertificateVersionSource>(new KeyVaultCertificateVersionSource(new SecretClient(
+            new Uri(builder.Configuration.GetConnectionString("keyvault")!),
+            new DefaultAzureCredential(),
+            new SecretClientOptions { Retry = { MaxRetries = 2, NetworkTimeout = TimeSpan.FromSeconds(5) } })));
+    }
 }
 
 // F-64: the cloud database accepts only encrypted connections; its connection string says nothing about SSL.

@@ -131,6 +131,22 @@ public sealed class AzurePublishFilesTests : IAsyncLifetime
             .And.NotContainEquivalentOf("EncryptionCertificate");
     }
 
+    /// <summary>
+    /// F-84 AC13 (BR2): no previous certificate or version id travels in a deploy parameter or a file. The Api's Key Vault
+    /// Secrets User role, which lets it list the versions of its certificates, is asserted by
+    /// <c>Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets</c> (F-64).
+    /// </summary>
+    [Fact]
+    public void Publish_CarriesNoPreviousCertificateOrVersionId()
+    {
+        var all = string.Join('\n', _files.Values);
+
+        Bicep("api-roles-keyvault").Should().NotBeEmpty("the Api's role assignments on the vault are still published");
+        all.Should().NotContainEquivalentOf("PreviousSigningCertificate")
+            .And.NotContainEquivalentOf("PreviousEncryptionCertificate")
+            .And.NotContainEquivalentOf("CertificateVersion");
+    }
+
     /// <summary>BR1 (v2): the images go to the Azure Container Registry that the environment creates.</summary>
     [Fact]
     public void Publish_KeepsTheImagesInTheEnvironmentRegistry()
