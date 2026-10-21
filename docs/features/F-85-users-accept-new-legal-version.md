@@ -212,7 +212,7 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 - What: the wireframe and AC24 follow the kit's order of actions (secondary "Sign out" first, primary "Accept and continue" last); the Tab order is the Read links, Sign out, Accept and continue, Account.
 - Why: found while building the page: every kit form puts the primary action last (`AppFormActions`), and the wireframe had drawn it first.
 - Affected: the wireframe, AC24; other criteria unchanged.
-- Re-approved: pending (Claude's wording; the owner confirms at validation).
+- Re-approved: 2026-10-21 (owner, with the validation of the script).
 
 ## Validation script
 ### English
