@@ -28,6 +28,8 @@ Added 2026-10-21 (retro of F-89): at the ship of F-89 two full runs gave 343 s a
 
 Added 2026-10-21 (retro of F-84): at the ship of F-84 three full runs of nearly the same tree (14 projects, 4409 tests) gave 307 s, 276 s and 240 s of test run; the slow projects ran Catalog 646 in 4 m 22 s to 4 m 59 s, Identity 521 in 4 m 27 s to 4 m 57 s and QuestionBank 456 in 3 m 50 s to 4 m 16 s. The spread on one tree (67 s) shows how much the shared machine moves the result; the slowest project sets the wall time. It is the fourth item in a row at or over the budget. Evidence: `docs/infra.md` "Full test suite".
 
+Added 2026-10-21 (retro of F-103): at the ship of F-103 the full run (`gate.js ship`, 14 projects, build 28 s, test run 459 s) gave QuestionBank 526 tests in 7 m 3 s, Identity 521 in 7 m 25 s and Catalog 646 in 7 m 32 s, with the shared machine busy. It is the fifth item in a row at or over the budget, and the worst run so far. Evidence: the output of that run (`tested Simulab.slnx (459 s)`, per-project `Passed! ... Duration` lines).
+
 Done means a measured breakdown of where the time goes (database container start, migrations, per-test setup) and a change that brings the full suite back under the budget with margin, with the numbers recorded in `docs/infra.md`.
 
 ## Start
