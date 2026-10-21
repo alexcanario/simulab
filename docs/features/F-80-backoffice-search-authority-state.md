@@ -197,5 +197,6 @@ Necessário para validar: Docker rodando (o app host sobe seus containers) e o a
 ## Events
 
 - 2026-10-21 question — asked 1, from context 2
+- 2026-10-21 test-fail — build blocked by a running process (Simulab.slnx), 1 red
 
 ## Delivery
