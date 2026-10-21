@@ -201,6 +201,8 @@ Tests locked: 8d35a0d661b6f988b717ab9264b3afd04de1b249 (8 files); unlocks: 1
 - 2026-10-21: review trade-off 5 (the editor stamps an empty `alt` on a picture that lost it) — owner chose keep as built.
 - 2026-10-21: review coverage — correctness (BR1 to BR15 against the handlers, format sniffing, sanitizer, rules, ownership, sweep, Web route, rich-text.js), security (policies, request limit, blob name, response headers, no storage address), contracts, localization, locks (diff of the 8 locked paths empty), data (migration, checks, indexes), tests, rules (read: the diff from 98bd48e, the item file, the profile and the rules) — reviewer.
 - 2026-10-21: review traps — T1 the preview is a base64 data URL rendered through the circuit (a 2 MB file is a 2.7 MB render batch; a browser-side object URL would cost nothing): accepted as debt, marked in the dialog; T2 the version check is a LIKE scan over `question_versions` (no index; fine for thousands, slow for hundreds of thousands): the recorded decision of 2026-10-20, marked; T3 `Results.Challenge()` on an expired session makes an `img` follow a redirect to sign-in and show a broken picture without a message — Claude.
+- 2026-10-21: Reuse: the notice-document pattern of F-89 (port in Application, adapter over `IFileStorage`, hand-read multipart with a body limit, blob first and row second), `FOR UPDATE` through `FromSql` from `BaseTextStore`, `RowLockTransactions` helpers, the link dialog and `AppFileField` of the kit, `ErrorText` for codes, `JobCleanup`'s logging shape; Shortcuts: 2 marked (AppRichTextImageDialog.razor:84, QuestionImageStore.cs:38) — Claude.
+- 2026-10-21: app host check: started from the worktree; `GET /question-images/<id>` signed out answers 302 to sign-in, `POST` and `GET` of the Api images route answer 401, `rich-text.js` is served with the new callback. The signed-in editor flow was not driven (no way to pick a file in the browser pane here) and is covered by the validation script; the app host was stopped — Claude.
 - 2026-10-21: plan — 1 upload: table, entity, endpoint, magic bytes → AC1, AC2, AC3 (file), AC4; 2 download with headers and the manage-or-review check → AC5 (Api), AC6; 3 sanitizer `img` and entity rules (alt, count, empty) → AC7, AC11, AC12; 4 ownership on save → AC8, AC10 (Api), AC3 (count); 5 release and versions → AC13, AC14; 6 pending sweep → AC9; 7 Web: route, editor button, dialog, preview, resources → AC5 (Web), AC10, AC15, AC16, AC17; 8 flow pages and data dictionary → techdocs check, DocGen --check — Claude.
 
 ## Out of scope
@@ -300,5 +302,6 @@ Necessário para validar: Docker rodando e alguns arquivos para escolher (você 
 - 2026-10-20 blocked — depends on F-89
 - 2026-10-20 blocked — depends on F-89
 - 2026-10-21 blocked — test wrong: RowAsync used PascalCase aliases in raw SQL; the EF convention maps snake_case columns
+- 2026-10-21 test-fail — build blocked by a running process (tests/Modules/QuestionBank/Simulab.QuestionBank.Tests/Simulab.QuestionBank.Tests.csp, 1 red
 
 ## Delivery
