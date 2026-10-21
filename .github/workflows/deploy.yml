@@ -20,7 +20,7 @@ permissions:
 
 env:
   # Must equal the version of the Aspire.* packages in Directory.Packages.props (a test compares them, AC5).
-  ASPIRE_CLI_VERSION: "13.6.1"
+  ASPIRE_CLI_VERSION: "13.6.2"
 
 jobs:
   deploy:
