@@ -1,7 +1,7 @@
 ---
 feature: F-103
 epic: Question bank
-status: approved
+status: building
 board: 149
 version: 1
 ---
@@ -184,6 +184,15 @@ the file field; "Alternative text is required" under the text.
 - 2026-10-20: the plan has no layer alone: 1 table, upload and download endpoints, the sanitizer `img`, ownership on save, the sweep (needs F-89 merged) → AC1 to AC9, AC11, AC12; 2 the editor button, the dialog and the Web route → AC10, AC15, AC16, AC17; 3 removal and versions → AC13, AC14 — Claude.
 - 2026-10-20: blocked (depends on F-89 (building)) — unblocked by the delivery of F-89
 - 2026-10-21: blocked (depends on F-89 (building)), unblocked (F-89 delivered)
+- 2026-10-21: design passes (system-design, architect) verified against the files. Accepted: the 8-step slice, the `question_images` table (create only, no foreign key on the owner), `IQuestionImageFiles` port in Application with the adapter in Infrastructure (the architecture test lets Application reference only its Domain, Contracts and SharedKernel), a shared `QuestionImageOwnership` for both save handlers with a `FOR UPDATE` read, magic bytes by hand, blob first and row second, blob delete after the commit. Dropped: the inline `RequireClaim` on the Api route (the Api token carries no permission claim: `TokenEndpoints.cs:392-395`; the Api checks by `PermissionAuthorizationHandler`) — Claude.
+- 2026-10-21: design coverage — contracts, data, simplicity, rules, scope, layout (read: item, profile, project rules, Catalog notice-document pattern, Identity authorization, architecture tests) — Claude.
+- 2026-10-21: traps — T1 link table instead of ids read from the HTML: drift from the HTML; T2 the kit field calling the module client: every rich-text field gets the button; T3 trusting the content type or extension: stored SVG/HTML served in the app origin — Claude.
+- 2026-10-21: design trade-off 1 (manage-or-review on the Api image route) — owner chose as proposed: the endpoint asks `IPermissionQueryService` (Identity.Contracts) and answers 403 without either permission; no change to the Identity contract.
+- 2026-10-21: design trade-off 2 (alt over 250 characters) — owner chose as proposed: two new codes `question.image_alt_too_long` and `base_text.image_alt_too_long` (change note v2).
+- 2026-10-21: design trade-off 3 (Cache-Control of the Web route) — owner chose as proposed: `private`, as BR13.
+- 2026-10-21: design trade-off 4 (where the sweep runs) — owner chose as proposed: a hosted service of the module, switch `QuestionBank:ImageSweepEnabled` (default true, false in `SimulabApiFactory`).
+- 2026-10-21: swept pending rows are soft-deleted (project rule "soft delete only"); the BR9 search for a base-text image reads every version's `base_text_html` — Claude.
+- 2026-10-21: plan — 1 upload: table, entity, endpoint, magic bytes → AC1, AC2, AC3 (file), AC4; 2 download with headers and the manage-or-review check → AC5 (Api), AC6; 3 sanitizer `img` and entity rules (alt, count, empty) → AC7, AC11, AC12; 4 ownership on save → AC8, AC10 (Api), AC3 (count); 5 release and versions → AC13, AC14; 6 pending sweep → AC9; 7 Web: route, editor button, dialog, preview, resources → AC5 (Web), AC10, AC15, AC16, AC17; 8 flow pages and data dictionary → techdocs check, DocGen --check — Claude.
 
 ## Out of scope
 - Images in the explanation.
@@ -198,6 +207,7 @@ the file field; "Alternative text is required" under the text.
 - (none)
 
 ## Change notes
+- v2 (2026-10-21, owner answered at the build's design round): AC11 gains two error codes for an `alt` over 250 characters, `question.image_alt_too_long` and `base_text.image_alt_too_long` (400); the error-code list under "Screens and API" gains them. Affected criterion: AC11 only, re-approved by the owner's answer. The Api route `GET /api/v1/question-bank/images/{id}` checks "manage or review" in the endpoint through `IPermissionQueryService`, not by a policy.
 
 ## Validation script
 
