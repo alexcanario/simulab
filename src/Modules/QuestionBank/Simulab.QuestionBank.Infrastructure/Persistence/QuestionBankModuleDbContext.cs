@@ -25,6 +25,9 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-95: the options of the questions, in position order.</summary>
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
 
+    /// <summary>F-106: the left items of the matching questions, in position order.</summary>
+    public DbSet<QuestionMatchItem> QuestionMatchItems => Set<QuestionMatchItem>();
+
     /// <summary>F-103: the pictures of the statements, options and base texts; the files are in the storage.</summary>
     public DbSet<QuestionImage> QuestionImages => Set<QuestionImage>();
 
@@ -45,6 +48,7 @@ public sealed class QuestionBankModuleDbContext(
         modelBuilder.ApplyConfiguration(new BaseTextConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionImageConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionMatchItemConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionReviewEntryConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());

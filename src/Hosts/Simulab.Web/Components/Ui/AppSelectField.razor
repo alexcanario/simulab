@@ -5,7 +5,7 @@
 @inject IStringLocalizer<SharedResources> L
 
 <div class="app-field @(HasError ? "app-field-error" : null)">
-    <label class="app-field-label" id="@LabelId" for="@Id">
+    <label class="@(LabelVisuallyHidden ? "app-visually-hidden" : "app-field-label")" id="@LabelId" for="@Id">
         @Label
         @if (Required)
         {
@@ -98,6 +98,10 @@
     /// <summary>F-114 AC14: the page is still fetching the options. A progress takes the arrow's place and the list
     /// says so. Default false: no call site has to change.</summary>
     [Parameter] public bool Loading { get; set; }
+
+    /// <summary>F-106: the label is read by assistive technology but not drawn, for a select inside a row whose
+    /// heading already says what it is (as AppRichTextField's). Default false.</summary>
+    [Parameter] public bool LabelVisuallyHidden { get; set; }
 
     private string _lastTerm = string.Empty;
     private bool _open;

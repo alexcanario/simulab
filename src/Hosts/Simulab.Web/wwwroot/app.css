@@ -2285,8 +2285,10 @@ code, kbd, pre, samp {
     margin-bottom: 0;
 }
 
-/* A circle with the letter: the primary text on its lighten tone, a pair the theme tests already measure. */
-.app-option-letter {
+/* A circle with the letter (or, F-106, the number): the primary text on its lighten tone, a pair the theme tests
+   already measure. */
+.app-option-letter,
+.app-match-number {
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -2322,6 +2324,46 @@ code, kbd, pre, samp {
 .app-options-count {
     font-size: var(--app-font-sm);
     color: var(--mud-palette-text-secondary);
+}
+
+/* ---- Matching key (F-106): the numbered items and the lettered matches, side by side on a wide screen. ---- */
+.app-matching-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--app-space-4);
+}
+
+@media (min-width: 1100px) {
+    .app-matching-columns {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+.app-matching-heading {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+}
+
+.app-match-select {
+    flex: none;
+    width: 8rem;
+}
+
+.app-match-select .app-field {
+    margin-bottom: 0;
+}
+
+.app-match-note {
+    flex: none;
+    align-self: center;
+    font-size: var(--app-font-sm);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-match-key {
+    margin-left: var(--app-space-2);
+    font-weight: 700;
 }
 
 /* ---- Publication card of the question form. ---- */
@@ -2511,7 +2553,8 @@ code, kbd, pre, samp {
     border: 2px solid var(--mud-palette-success);
 }
 
-.app-question-option .app-option-letter {
+.app-question-option .app-option-letter,
+.app-question-option .app-match-number {
     margin-top: 0;
 }
 

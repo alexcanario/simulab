@@ -10,5 +10,11 @@ public enum QuestionType
     TrueFalse,
 
     /// <summary>One statement, three to five options, two or more correct and at least one wrong (F-104).</summary>
-    MultipleAnswer
+    MultipleAnswer,
+
+    /// <summary>
+    /// Two columns: numbered left items, each matching one lettered right item (the options); the right column may
+    /// have extra items. One to one (F-106).
+    /// </summary>
+    Matching
 }

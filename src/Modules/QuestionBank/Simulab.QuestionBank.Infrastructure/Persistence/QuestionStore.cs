@@ -19,6 +19,8 @@ public sealed class QuestionStore(
     public Task<Question?> FindAsync(Guid id, CancellationToken cancellationToken) =>
         context.Questions
             .Include(question => question.Options)
+            .Include(question => question.MatchItems)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(question => question.Id == id, cancellationToken);
 
     public async Task<LinkedBaseText?> FindBaseTextAsync(Guid id, CancellationToken cancellationToken)

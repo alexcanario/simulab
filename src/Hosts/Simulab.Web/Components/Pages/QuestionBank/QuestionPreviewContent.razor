@@ -53,10 +53,32 @@
             <p class="app-question-select-count" id="question-preview-select-count">@L["Questions.Preview.SelectCount", CorrectCount]</p>
         }
 
+        @* F-106 BR13: the task, not the answer; then the numbered items, in authored order. Each number's letter
+           shows only after "show answer". *@
+        @if (IsMatching)
+        {
+            <p class="app-question-select-count" id="question-preview-match-instruction">@L["Questions.Preview.MatchInstruction"]</p>
+            <ol class="app-question-options" id="question-preview-match-items" aria-label="@L["Questions.Preview.MatchItems"]">
+                @foreach (var item in _matchItems)
+                {
+                    <li class="app-question-option">
+                        <span class="app-match-number">@Number(item.Position)</span>
+                        <div class="app-question-option-body">
+                            <div class="app-question-content">@((MarkupString)item.TextHtml)</div>
+                            @if (Shown && item.MatchPosition is { } match)
+                            {
+                                <span class="app-correct-label app-match-key">@MatchText(item.Position, match)</span>
+                            }
+                        </div>
+                    </li>
+                }
+            </ol>
+        }
+
         <ol class="app-question-options" aria-label="@L["Questions.Preview.Options"]">
             @foreach (var option in _options)
             {
-                var marked = Shown && option.IsCorrect;
+                var marked = Shown && IsKey(option);
                 <li class="@(marked ? "app-question-option is-correct" : "app-question-option")">
                     @* The letter is text, so a screen reader reads it. *@
                     <span class="app-option-letter">@QuestionText.Letter(option.Position)</span>
@@ -86,9 +108,9 @@
     {
         <section class="app-preview-answer" role="region" aria-labelledby="question-preview-answer-heading">
             <h3 class="app-preview-heading" id="question-preview-answer-heading">@L["Questions.Preview.Answer"]</h3>
-            @if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(option => option.IsCorrect))
+            @if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(IsKey))
             {
-                <p class="app-preview-no-key">@(IsTrueFalse ? L["Questions.Preview.NoKey.TrueFalse"] : L["Questions.Preview.NoKey"])</p>
+                <p class="app-preview-no-key">@NoKeyText</p>
             }
             else
             {
@@ -126,19 +148,40 @@
     [Parameter] public RenderFragment? Controls { get; set; }
 
     private IReadOnlyList<QuestionOptionResponse> _options = [];
+    private IReadOnlyList<MatchItemResponse> _matchItems = [];
 
     private bool Shown => AlwaysRevealed || Revealed;
 
     private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
 
+    private bool IsMatching => Question.Type == QuestionType.Matching;
+
     private int CorrectCount => _options.Count(option => option.IsCorrect);
 
-    // The key in words: True or False, or the letters of the correct options.
+    // F-106: a matching question marks the options some item matches; an extra one shows nothing.
+    private bool IsKey(QuestionOptionResponse option) =>
+        IsMatching ? _matchItems.Any(item => item.MatchPosition == option.Position) : option.IsCorrect;
+
+    private string NoKeyText =>
+        IsTrueFalse ? L["Questions.Preview.NoKey.TrueFalse"] : IsMatching ? L["Questions.Preview.NoKey.Matching"] : L["Questions.Preview.NoKey"];
+
+    // The key in words: True or False, the letters of the correct options, or each number with its letter.
     private string KeyText =>
         IsTrueFalse
             ? (Question.TrueFalseKey == true ? L["Questions.TrueFalse.True"] : L["Questions.TrueFalse.False"])
-            : string.Join(", ", _options.Where(option => option.IsCorrect).Select(option => QuestionText.Letter(option.Position)));
+            : IsMatching
+                ? string.Join(", ", _matchItems
+                    .Where(item => item.MatchPosition is not null)
+                    .Select(item => MatchText(item.Position, item.MatchPosition!.Value)))
+                : string.Join(", ", _options.Where(option => option.IsCorrect).Select(option => QuestionText.Letter(option.Position)));
 
-    protected override void OnParametersSet() =>
+    private static string Number(int position) => (position + 1).ToString(CultureInfo.CurrentCulture);
+
+    private string MatchText(int position, int match) => L["Questions.Preview.MatchKey", Number(position), QuestionText.Letter(match)];
+
+    protected override void OnParametersSet()
+    {
         _options = [.. Question.Options.OrderBy(option => option.Position)];
+        _matchItems = [.. (Question.MatchItems ?? []).OrderBy(item => item.Position)];
+    }
 }

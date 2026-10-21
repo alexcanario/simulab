@@ -54,8 +54,8 @@ public class TableDescriptionTests
     }
 
     /// <summary>
-    /// AC1b: the exemption is real and narrow — the JSON containers of <c>role_changes</c> and the options of a
-    /// question version (F-98: an immutable copy read whole, never queried by option).
+    /// AC1b: the exemption is real and narrow — the JSON containers of <c>role_changes</c> and the options and
+    /// (F-106) the left items of a question version (F-98: an immutable copy read whole, never queried by item).
     /// </summary>
     [Fact]
     public void OnlyColumnsWithNoPropertyBehindThem_AreExempt()
@@ -66,7 +66,8 @@ public class TableDescriptionTests
             .ToList();
 
         exempt.Should().NotBeEmpty("the exemption must cover something, or it hides a gap instead of naming one");
-        exempt.Should().BeEquivalentTo(["role_changes.added", "role_changes.removed", "question_versions.options"]);
+        exempt.Should().BeEquivalentTo(
+            ["role_changes.added", "role_changes.removed", "question_versions.options", "question_versions.match_items"]);
     }
 
     /// <summary>AC6: the tables we do not define are skipped, and the skipped set is not empty.</summary>

@@ -146,7 +146,7 @@ public sealed class QuestionTranscriptionTests : QuestionPageTestContext
         });
     }
 
-    // AC6, BR5: the types the form implements (F-104 added the third; owner, 2026-10-15).
+    // AC6, BR5: the types the form implements (F-104 added the third; owner, 2026-10-15; F-106 AC18 the fourth).
     [Fact]
     public void Open_OffersEveryTypeTheFormImplements()
     {
@@ -159,7 +159,8 @@ public sealed class QuestionTranscriptionTests : QuestionPageTestContext
             page.FindAll("#question-type-SingleChoice").Should().ContainSingle();
             page.FindAll("#question-type-TrueFalse").Should().ContainSingle();
             page.FindAll("#question-type-MultipleAnswer").Should().ContainSingle();
-            page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(3);
+            page.FindAll("#question-type-Matching").Should().ContainSingle();
+            page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(4);
         });
     }
 

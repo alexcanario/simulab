@@ -19,6 +19,10 @@ namespace Simulab.QuestionBank.Contracts;
 /// <param name="Reason">The reason the curator wrote, or null.</param>
 /// <param name="CreatedAt">When the version was recorded.</param>
 /// <param name="Annulled">True when the question was annulled when this version was recorded (F-101, BR2).</param>
+/// <param name="MatchItems">
+/// The left items of a matching question with their matches (F-106, BR8); the Api always sends the list, empty for
+/// the other types and for versions recorded before F-106.
+/// </param>
 public sealed record QuestionVersionResponse(
     Guid Id,
     Guid QuestionId,
@@ -33,4 +37,5 @@ public sealed record QuestionVersionResponse(
     bool AnswerKeyChanged,
     string? Reason,
     DateTimeOffset CreatedAt,
-    bool Annulled);
+    bool Annulled,
+    IReadOnlyList<MatchItemResponse>? MatchItems = null);

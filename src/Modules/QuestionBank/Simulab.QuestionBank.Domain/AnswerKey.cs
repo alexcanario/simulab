@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Domain;
 
@@ -19,6 +20,9 @@ public abstract record AnswerKey
     /// <summary>The true/false key the question stores; null for any other type or when it is not set.</summary>
     public abstract bool? TrueFalseValue { get; }
 
+    /// <summary>The left items the question stores (F-106, BR10); empty for every type but matching.</summary>
+    public virtual IReadOnlyList<MatchItemDraft> MatchItems => [];
+
     /// <summary>
     /// The first thing wrong with this key, or null (BR3, BR4). A draft may be incomplete; a published question
     /// must be complete. A key given to a type that has none, and options given to a type that has none, are
@@ -26,19 +30,31 @@ public abstract record AnswerKey
     /// </summary>
     public abstract OptionFault? Check(bool published);
 
+    /// <summary>F-106 BR6: left items written to a type that has none; null when there are none.</summary>
+    protected static OptionFault? MatchItemsRefused(IReadOnlyList<MatchItemDraft>? written) =>
+        written is { Count: > 0 }
+            ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionMatchItemsNotAllowed, ErrorKind.Validation), null)
+            : null;
+
     /// <summary>
-    /// The key of a question of <paramref name="type"/> from what was written: the options and the true/false
-    /// key as they came, so that the key itself can refuse what its type does not have.
+    /// The key of a question of <paramref name="type"/> from what was written: the options, the true/false key and
+    /// the left items as they came, so that the key itself can refuse what its type does not have.
     /// </summary>
-    public static AnswerKey From(QuestionType type, IReadOnlyList<OptionDraft> options, bool? trueFalseKey)
+    public static AnswerKey From(
+        QuestionType type,
+        IReadOnlyList<OptionDraft> options,
+        bool? trueFalseKey,
+        IReadOnlyList<MatchItemDraft>? matchItems = null)
     {
         ArgumentNullException.ThrowIfNull(options);
+        var items = matchItems ?? [];
 
         return type switch
         {
-            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey),
-            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey),
-            _ => new SingleChoiceKey(options, trueFalseKey)
+            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey, items),
+            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items),
+            QuestionType.Matching => new MatchingKey(options, items, trueFalseKey),
+            _ => new SingleChoiceKey(options, trueFalseKey, items)
         };
     }
 }

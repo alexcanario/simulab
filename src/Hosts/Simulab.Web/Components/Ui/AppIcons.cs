@@ -127,6 +127,9 @@ public static class AppIcons
     /// <summary>F-104: a question with several correct options.</summary>
     public const string MultipleAnswer = Icons.Material.Outlined.Checklist;
 
+    /// <summary>F-106: a question of two columns whose items are matched.</summary>
+    public const string Matching = Icons.Material.Outlined.CompareArrows;
+
     /// <summary>F-95: why the key is right.</summary>
     public const string Explanation = Icons.Material.Outlined.Info;
 

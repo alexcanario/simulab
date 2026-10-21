@@ -76,6 +76,24 @@ public static class QuestionBankErrorCodes
     /// <summary>F-104 BR4: a published multiple-answer question needs two or more correct options and at least one wrong.</summary>
     public const string QuestionMultipleKeyInvalid = "question.multiple_key_invalid";
 
+    /// <summary>F-106 BR3, BR4: a matching question has more than 8 items on either side, or is published with fewer than 2 on the left or fewer on the right than on the left.</summary>
+    public const string QuestionMatchingItemsCount = "question.matching_items_count";
+
+    /// <summary>F-106 BR3, BR4: a left item names a right item that does not exist, or a published one has no match.</summary>
+    public const string QuestionMatchingKeyInvalid = "question.matching_key_invalid";
+
+    /// <summary>F-106 BR3: two left items name the same right item; the match is one to one.</summary>
+    public const string QuestionMatchingKeyRepeated = "question.matching_key_repeated";
+
+    /// <summary>F-106 BR4: a published matching question has a left item with no text.</summary>
+    public const string QuestionMatchItemTextRequired = "question.match_item_text_required";
+
+    /// <summary>F-106 BR7: a left item is longer than the option limit.</summary>
+    public const string QuestionMatchItemTooLong = "question.match_item_too_long";
+
+    /// <summary>F-106 BR6: a question of another type was sent left items (a non-empty list); nothing is ignored.</summary>
+    public const string QuestionMatchItemsNotAllowed = "question.match_items_not_allowed";
+
     /// <summary>F-98 BR5: a save or a publish would create a version whose answer key changed and gave no reason.</summary>
     public const string QuestionKeyChangeReasonRequired = "question.key_change_reason_required";
 

@@ -1113,6 +1113,43 @@
   <data name="Questions.Preview.SelectCount" xml:space="preserve"><value>Mark {0} options.</value></data>
   <data name="question.multiple_options_count" xml:space="preserve"><value>A multiple-answer question is published with 3 to 5 options.</value></data>
   <data name="question.multiple_key_invalid" xml:space="preserve"><value>Mark at least two options as correct, and leave at least one wrong.</value></data>
+  <data name="Questions.Type.Matching" xml:space="preserve"><value>Matching</value></data>
+  <data name="Questions.Type.Matching.Description" xml:space="preserve"><value>Two columns: match each numbered item with a lettered one.</value></data>
+  <data name="Questions.Section.Matching" xml:space="preserve"><value>Matches</value></data>
+  <data name="Questions.Section.Matching.Subtitle" xml:space="preserve"><value>2 to 8 items on the left. The right column needs at least as many items; extra items match nothing. Pick the letter each number matches.</value></data>
+  <data name="Questions.Matching.Items" xml:space="preserve"><value>Items</value></data>
+  <data name="Questions.Matching.Matches" xml:space="preserve"><value>Matches</value></data>
+  <data name="Questions.Matching.ItemsEmpty" xml:space="preserve"><value>No item yet. A draft can be saved without items; publishing needs 2 to 8.</value></data>
+  <data name="Questions.Matching.MatchesEmpty" xml:space="preserve"><value>No match yet. Publishing needs at least as many as the items.</value></data>
+  <data name="Questions.Matching.Item.Field" xml:space="preserve"><value>Text of item {0}</value></data>
+  <data name="Questions.Matching.Item.Match" xml:space="preserve"><value>Letter matched by item {0}</value></data>
+  <data name="Questions.Matching.Item.Name" xml:space="preserve"><value>item {0}</value></data>
+  <data name="Questions.Matching.Item.MoveUp.DisabledFirst" xml:space="preserve"><value>Already the first item.</value></data>
+  <data name="Questions.Matching.Item.MoveDown.DisabledLast" xml:space="preserve"><value>Already the last item.</value></data>
+  <data name="Questions.Matching.Item.Moved" xml:space="preserve"><value>Item moved to position {0} of {1}.</value></data>
+  <data name="Questions.Matching.Item.Removed" xml:space="preserve"><value>Item removed. {0} left.</value></data>
+  <data name="Questions.Matching.Match.Field" xml:space="preserve"><value>Text of match {0}</value></data>
+  <data name="Questions.Matching.Match.Name" xml:space="preserve"><value>match {0}</value></data>
+  <data name="Questions.Matching.UsedBy" xml:space="preserve"><value>Used by item {0}</value></data>
+  <data name="Questions.Matching.Extra" xml:space="preserve"><value>Extra</value></data>
+  <data name="Questions.Matching.AddItem" xml:space="preserve"><value>Add item</value></data>
+  <data name="Questions.Matching.AddMatch" xml:space="preserve"><value>Add match</value></data>
+  <data name="Questions.Matching.ItemsCount" xml:space="preserve"><value>{0} of 8 items</value></data>
+  <data name="Questions.Matching.MatchesCount" xml:space="preserve"><value>{0} of 8 matches</value></data>
+  <data name="Questions.Matching.NoMatch" xml:space="preserve"><value>No letter</value></data>
+  <data name="Questions.Checklist.Matching.ItemsCount" xml:space="preserve"><value>2 to 8 items on the left</value></data>
+  <data name="Questions.Checklist.Matching.MatchesCount" xml:space="preserve"><value>At least as many matches on the right</value></data>
+  <data name="Questions.Checklist.Matching.Key" xml:space="preserve"><value>Every item has text and a match</value></data>
+  <data name="Questions.Preview.MatchInstruction" xml:space="preserve"><value>Match each number with one letter.</value></data>
+  <data name="Questions.Preview.MatchItems" xml:space="preserve"><value>Items to match</value></data>
+  <data name="Questions.Preview.MatchKey" xml:space="preserve"><value>{0} → {1}</value></data>
+  <data name="Questions.Preview.NoKey.Matching" xml:space="preserve"><value>This draft has no match set yet.</value></data>
+  <data name="question.matching_items_count" xml:space="preserve"><value>A matching question has 2 to 8 items on the left and, on the right, at least as many and at most 8.</value></data>
+  <data name="question.matching_key_invalid" xml:space="preserve"><value>Every item needs a match.</value></data>
+  <data name="question.matching_key_repeated" xml:space="preserve"><value>Each letter can match only one item.</value></data>
+  <data name="question.match_item_text_required" xml:space="preserve"><value>Write the text of the item.</value></data>
+  <data name="question.match_item_too_long" xml:space="preserve"><value>An item has more than 2,000 characters.</value></data>
+  <data name="question.match_items_not_allowed" xml:space="preserve"><value>Only a matching question has items on the left.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>The type cannot be changed after the question is created.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Answer key</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Mark the statement as true or false. Needed only to publish.</value></data>

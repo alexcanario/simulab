@@ -10,7 +10,11 @@ namespace Simulab.QuestionBank.Domain;
 /// </summary>
 /// <param name="Written">The options as written.</param>
 /// <param name="TrueFalseWritten">A true/false key that came with them; always a refusal.</param>
-public sealed record MultipleAnswerKey(IReadOnlyList<OptionDraft> Written, bool? TrueFalseWritten = null) : AnswerKey
+/// <param name="MatchItemsWritten">Left items that came with them; any of them is a refusal (F-106, BR6).</param>
+public sealed record MultipleAnswerKey(
+    IReadOnlyList<OptionDraft> Written,
+    bool? TrueFalseWritten = null,
+    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null) : AnswerKey
 {
     public override QuestionType Type => QuestionType.MultipleAnswer;
 
@@ -25,6 +29,6 @@ public sealed record MultipleAnswerKey(IReadOnlyList<OptionDraft> Written, bool?
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
         }
 
-        return QuestionRules.CheckMultipleAnswerOptions(Written, published);
+        return MatchItemsRefused(MatchItemsWritten) ?? QuestionRules.CheckMultipleAnswerOptions(Written, published);
     }
 }
