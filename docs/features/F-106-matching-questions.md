@@ -1,8 +1,8 @@
 ---
 feature: F-106
 epic: Question bank
-status: building
-Autopilot: approved
+status: validating
+Autopilot: stop 2
 board: 152
 version: 1
 ---
@@ -169,8 +169,8 @@ Tests locked: e8cca65aa1473a34dbeb4bb4375e2290f71d799b (7 files); unlocks: 1
 | AC14 | `MatchingQuestionPreviewAndListTests.Preview_Matching_*`, `.Preview_MatchingDraftWithNoMatches_*`, `.VersionPreview_Matching_ShowsTheLeftItemsOfTheVersion` |
 | AC15 | `AddMatchingQuestionsMigrationTests.Up_AddsTheMatchItemsTableAndColumn_NamesTheFourthType_AndKeepsEveryRow` |
 | AC16 | `MatchingQuestionEndpointTests.CreateAndUpdate_OfAMatchingQuestion_WithoutThePermission_AnswerForbidden` |
-| AC17 | `MatchingQuestionFormTests.Add_Matching_EachControlNamesItsNumberOrLetter`; keyboard pass: validation step (set with the script) |
-| AC18 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements`; `MatchingQuestionFormTests.Add_OffersTheFourTypesWithSingleChoicePreselected` |
+| AC17 | `MatchingQuestionFormTests.Add_Matching_EachControlNamesItsNumberOrLetter`; keyboard pass: validation step 8.1 |
+| AC18 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements`; `MatchingQuestionFormTests.Add_OffersTheFourTypesWithSingleChoicePreselected`; the key section on the transcription screen: validation step 8.2 |
 | AC19 | `MatchingQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` |
 
 ## Decisions
@@ -200,6 +200,12 @@ Tests locked: e8cca65aa1473a34dbeb4bb4375e2290f71d799b (7 files); unlocks: 1
 - 2026-10-21: tests unlocked (owner, card: three writing defects in locked tests — `Lefts(null)` bound null as the `params` array in `MatchingQuestionTests` and `MatchingQuestionEndpointTests`, a because text taken as a fourth `Equal` item in `MatchingQuestionFormTests`, three new warnings CS8625 ×2 and CA1826; no assertion changed meaning), fixed in e8cca65 and locked again.
 - 2026-10-21: the section card of `MatchingKeySection` sits in a `div id="question-section-matching"`: the kit's `AppSectionCard` gives its id only to the title.
 - 2026-10-21: `AppSelectField` gains `LabelVisuallyHidden` (as `AppRichTextField` has) so each left row's select keeps the accessible name "Letter matched by item n" without a visible label per row (AC17).
+- 2026-10-21: review finding 1 (minor, confirmed) `MatchingQuestionFormTests` checks `#question-section-options` absent, an id the kit never renders, so it cannot fail — kept for stop 2: fixing it needs an owner unlock.
+- 2026-10-21: review finding 2 (minor, confirmed) AC18's "the key section works there" has no test on the transcription screen — covered by a step of the validation script.
+- 2026-10-21: Review coverage — correctness (BR1–BR13, AC1–AC19 against the key, entity, version, stores, handler, form, preview), security (routes, permissions, sanitizing, image cap and ownership), data (migration reversible, FK cascade, index, nullable jsonb), contracts (optional trailing `MatchItems`, six codes), localization (37 keys × 3 locales), locks (diff over the 7 locked paths empty; one unlock recorded), simplicity, rules; read: the diff from 28a233f and the files above.
+- 2026-10-21: traps — T1 a third LIKE over `match_items` in the image-held scan: adds to the F-103 shortcut; T2 moving a right row above a matched letter is a key change (BR8 compares positions): a reason may be asked when no pairing changed; T3 `MatchingKey(options, items, trueFalseKey)` orders its parameters unlike the other keys: a direct caller could pass the wrong list.
+- 2026-10-21: Reuse: `AnswerKey` seam (F-97), `QuestionRules.CheckEachOption` turned into the shared `CheckEach`, kit `AppItemRows`, `AppRowActions`, `AppSelectField` (gained `LabelVisuallyHidden`), `AppRichTextField`, `AppRadioCards`, the F-98 reason field and `NextVersion`, the F-103 image rule and scan, the migration test pattern of F-104.
+- 2026-10-21: Shortcuts: none.
 
 ## Out of scope
 - Scoring: all or nothing, partial credit, penalty — epic E-6 with the edition's scoring rules (owner, 2026-10-09).
@@ -215,7 +221,76 @@ Tests locked: e8cca65aa1473a34dbeb4bb4375e2290f71d799b (7 files); unlocks: 1
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+
+### English
+Needed to validate: the local app host — the owner; in place (it started from this worktree on 2026-10-21).
+
+1. Stop any app host you have open, then start this worktree's app host on its own database `simulab_f106` (the item's migration lands only there), from the worktree folder `D:\wt\simulab\f-106-matching-questions`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f106 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f106"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue".
+3. Create a matching draft:
+   - [ ] 3.1 In the sidebar (menu lateral esquerdo) click Content > Questions, then Add. In "Question type" click the type card (cartão de tipo: each card of the "Question type" field) "Matching"; the Options card is replaced by the matching key (gabarito de associação: the "Matches" card with the numbered "Items" column and the lettered "Matches" column).
+   - [ ] 3.2 Pick a subject and a topic, write a statement, click "Add match" three times and type Lisbon, Madrid, Paris (A, B, C); the counter reads "3 of 8 matches".
+   - [ ] 3.3 Click "Add item" twice and type France and Portugal; in item 1's select pick C. Open item 2's select: C is not offered. Pick A. Under the right list C reads "Used by item 1", A "Used by item 2", B "Extra".
+   - [ ] 3.4 Click Save: the page becomes the edit page and the type reads "Matching", not editable.
+4. Rules of the two lists and publishing:
+   - [ ] 4.1 On Paris (C) click move up: it becomes B and item 1's select now shows B (the letter follows the text).
+   - [ ] 4.2 Remove Madrid (the Extra one): nothing else changes. Add a third item "Spain" with no letter and click Save, then Publish: the message "Every item needs a match." appears under the lists and the checklist "Before publishing" shows "Every item has text and a match" pending.
+   - [ ] 4.3 Remove the "Spain" item, Save, then Publish: the status becomes Published.
+5. Preview:
+   - [ ] 5.1 In the Publication card click "Preview as a student": the line "Match each number with one letter.", items 1 and 2 numbered, matches A and B lettered, nothing marked.
+   - [ ] 5.2 Click "Show answer": item 1 shows "1 → B", item 2 "2 → A"; Paris and Lisbon carry the check icon, "Correct answer" and a border. Close the dialog.
+6. Answer key change:
+   - [ ] 6.1 Swap the letters (item 1 → A, item 2 → B): the field "Reason for the answer key change" appears.
+   - [ ] 6.2 Write a reason and Save: the History card lists version 2 with "Answer key changed" and your reason.
+   - [ ] 6.3 On version 1 click View: the dialog shows the items with their old letters.
+7. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the type card reads "Associação", the columns "Itens" and "Correspondências", and the preview line "Associe cada número a uma letra.". Switch back to English.
+8. Keyboard and transcription:
+   - [ ] 8.1 Without the mouse, on Questions > Add pick the Matching card with the arrows, then Tab through "Add item", the item text, its letter select (open with the arrows, choose with Enter), move up, move down and remove: each takes one Tab stop and the screen reader names "Text of item 1" and "Letter matched by item 1".
+   - [ ] 8.2 In the sidebar click Catalog > Exams, open a saved edition, and on its Questions card click Transcribe: the "Question type" field offers four cards; pick Matching and the two lists appear (AC18).
+
+### pt-BR
+Necessário para validar: o app host local — o dono; disponível (subiu a partir deste worktree em 2026-10-21).
+
+1. Pare qualquer app host aberto e suba o app host deste worktree no banco próprio `simulab_f106` (a migração do item cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-106-matching-questions`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f106 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f106"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento de `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue".
+3. Crie um rascunho de associação:
+   - [ ] 3.1 No menu lateral (sidebar, menu lateral esquerdo) clique em Content > Questions e depois em Add. Em "Question type" clique no cartão de tipo (cada cartão do campo "Question type") "Matching"; o cartão Options dá lugar ao gabarito de associação (o cartão "Matches" com a coluna numerada "Items" e a coluna com letras "Matches").
+   - [ ] 3.2 Escolha disciplina e tópico, escreva um enunciado, clique três vezes em "Add match" e digite Lisboa, Madri, Paris (A, B, C); o contador mostra "3 of 8 matches".
+   - [ ] 3.3 Clique duas vezes em "Add item" e digite França e Portugal; no seletor do item 1 escolha C. Abra o seletor do item 2: C não aparece. Escolha A. Na lista da direita, C mostra "Used by item 1", A "Used by item 2", B "Extra".
+   - [ ] 3.4 Clique em Save: a página vira a de edição e o tipo aparece como "Matching", sem edição.
+4. Regras das duas listas e publicação:
+   - [ ] 4.1 Em Paris (C) clique em mover para cima: vira B e o seletor do item 1 passa a mostrar B (a letra acompanha o texto).
+   - [ ] 4.2 Remova Madri (a Extra): nada mais muda. Adicione um terceiro item "Espanha" sem letra, clique em Save e depois em Publish: a mensagem "Every item needs a match." aparece sob as listas e a lista "Before publishing" mostra "Every item has text and a match" pendente.
+   - [ ] 4.3 Remova o item "Espanha", Save e depois Publish: o status vira Published.
+5. Pré-visualização:
+   - [ ] 5.1 No cartão Publication clique em "Preview as a student": a linha "Match each number with one letter.", os itens 1 e 2 numerados, as correspondências A e B com letra, nada marcado.
+   - [ ] 5.2 Clique em "Show answer": o item 1 mostra "1 → B", o item 2 "2 → A"; Paris e Lisboa ganham o ícone, "Correct answer" e a borda. Feche o diálogo.
+6. Troca de gabarito:
+   - [ ] 6.1 Troque as letras (item 1 → A, item 2 → B): aparece o campo "Reason for the answer key change".
+   - [ ] 6.2 Escreva um motivo e clique em Save: o cartão History lista a versão 2 com "Answer key changed" e o seu motivo.
+   - [ ] 6.3 Na versão 1 clique em View: o diálogo mostra os itens com as letras antigas.
+7. [ ] Idioma: na barra superior (app bar, a faixa no alto das páginas) clique no globo e escolha Português (Brasil): o cartão de tipo mostra "Associação", as colunas "Itens" e "Correspondências", e a pré-visualização "Associe cada número a uma letra.". Volte para English.
+8. Teclado e transcrição:
+   - [ ] 8.1 Sem o mouse, em Questions > Add escolha o cartão Matching com as setas e percorra com Tab "Add item", o texto do item, o seletor de letra (abra com as setas, escolha com Enter), mover para cima, mover para baixo e remover: cada um é uma parada de Tab e o leitor de tela diz "Text of item 1" e "Letter matched by item 1".
+   - [ ] 8.2 No menu lateral clique em Catalog > Exams, abra uma edição salva e, no cartão Questions dela, clique em Transcribe: o campo "Question type" oferece quatro cartões; escolha Matching e as duas listas aparecem (AC18).
 
 ## Events
 
