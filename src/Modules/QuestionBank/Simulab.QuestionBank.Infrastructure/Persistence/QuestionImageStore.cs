@@ -35,6 +35,7 @@ public sealed class QuestionImageStore(QuestionBankModuleDbContext context) : IQ
             .ToListAsync(cancellationToken);
 
     // A uuid is hex digits and hyphens, so it has no LIKE wildcard in it. The options are a JSON column read as text.
+    // shortcut(F-103): a LIKE scan over the versions, no index and no link table (decision of 2026-10-20) — revisit when question_versions reaches the hundreds of thousands of rows.
     public async Task<bool> IsHeldByAVersionAsync(
         QuestionImageOwnerKind kind,
         Guid ownerId,

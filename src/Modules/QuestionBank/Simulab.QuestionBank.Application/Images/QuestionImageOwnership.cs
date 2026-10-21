@@ -35,7 +35,7 @@ public sealed class QuestionImageOwnership(IQuestionImageStore store, IQuestionI
             var found = (await store.FindForUpdateAsync(named, cancellationToken)).ToDictionary(image => image.Id);
             foreach (var id in named)
             {
-                if (!found.TryGetValue(id, out var image) || image.Claim(kind, ownerId).IsFailure)
+                if (!found.TryGetValue(id, out var image) || !image.TryClaim(kind, ownerId))
                 {
                     return new QuestionImageSync(new Error(notFoundCode, ErrorKind.NotFound), []);
                 }

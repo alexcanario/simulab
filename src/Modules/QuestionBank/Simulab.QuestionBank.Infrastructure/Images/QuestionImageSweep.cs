@@ -28,14 +28,27 @@ public sealed partial class QuestionImageSweep(IServiceScopeFactory scopes, Time
 
         var cutoff = clock.GetUtcNow() - PendingLifetime;
         var expired = await context.QuestionImages
+            .AsNoTracking()
             .Where(image => image.OwnerId == null && image.CreatedAt < cutoff)
             .OrderBy(image => image.CreatedAt)
+            .Select(image => image.Id)
             .Take(BatchSize)
             .ToListAsync(cancellationToken);
 
         var removed = 0;
-        foreach (var image in expired)
+        foreach (var id in expired)
         {
+            // Each image is locked while it goes: a save that claims it meanwhile either wins the lock, and the image is no
+            // longer pending here, or waits and finds the row deleted. SKIP LOCKED leaves a claimed row to its save.
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+            var image = await context.QuestionImages
+                .FromSql($"SELECT * FROM question_bank.question_images WHERE id = {id} AND owner_id IS NULL AND is_deleted = false FOR UPDATE SKIP LOCKED")
+                .FirstOrDefaultAsync(cancellationToken);
+            if (image is null)
+            {
+                continue;
+            }
+
             await files.DeleteAsync(image.BlobName, cancellationToken);
 
             // The adapter logs a failed delete and returns; the file still being there keeps the row for the next pass.
@@ -50,12 +63,13 @@ public sealed partial class QuestionImageSweep(IServiceScopeFactory scopes, Time
             }
 
             context.QuestionImages.Remove(image);
+            await context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             removed++;
         }
 
         if (removed > 0)
         {
-            await context.SaveChangesAsync(cancellationToken);
             LogRemoved(logger, removed);
         }
 

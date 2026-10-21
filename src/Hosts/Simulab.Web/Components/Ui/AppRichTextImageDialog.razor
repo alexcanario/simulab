@@ -81,6 +81,7 @@
         try
         {
             // Read here, from the browser's stream: the preview needs the bytes and so does the upload that follows.
+            // shortcut(F-103): the preview is a base64 data URL rendered through the circuit (a 2 MB file is a 2.7 MB render batch) — revisit with a browser-side object URL when several curators upload at once.
             await using var stream = file.OpenReadStream(Options.MaxBytes);
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer);

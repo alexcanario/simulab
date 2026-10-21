@@ -1,6 +1,4 @@
-using Simulab.QuestionBank.Contracts;
 using Simulab.SharedKernel.Entities;
-using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Domain.Entities;
 
@@ -44,20 +42,18 @@ public sealed class QuestionImage : TenantEntity
 
     /// <summary>
     /// Makes the image the owner's. A pending image is claimed; one the same owner already holds stays; one held by
-    /// another owner is refused (BR6) and nothing changes.
+    /// another owner is refused (BR6, false) and nothing changes.
     /// </summary>
-    public Result Claim(QuestionImageOwnerKind kind, Guid ownerId)
+    public bool TryClaim(QuestionImageOwnerKind kind, Guid ownerId)
     {
         if (OwnerId is null)
         {
             OwnerKind = kind;
             OwnerId = ownerId;
 
-            return Result.Success();
+            return true;
         }
 
-        return OwnerKind == kind && OwnerId == ownerId
-            ? Result.Success()
-            : Result.Failure(new Error(QuestionBankErrorCodes.QuestionImageNotFound, ErrorKind.NotFound));
+        return OwnerKind == kind && OwnerId == ownerId;
     }
 }
