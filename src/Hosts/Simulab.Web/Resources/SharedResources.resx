@@ -430,7 +430,7 @@
   <data name="Lookup.LoadFailed" xml:space="preserve"><value>The search failed.</value></data>
   <data name="Lookup.Clear" xml:space="preserve"><value>Clear the selection</value></data>
   <data name="Exams.Title" xml:space="preserve"><value>Exams</value></data>
-  <data name="Exams.Search.Placeholder" xml:space="preserve"><value>Search by name</value></data>
+  <data name="Exams.Search.Placeholder" xml:space="preserve"><value>Search by exam, authority or place</value></data>
   <data name="Exams.Empty" xml:space="preserve"><value>No exam in the catalog yet.</value></data>
   <data name="Exams.Empty.Search" xml:space="preserve"><value>No exam matches "{0}".</value></data>
   <data name="Exams.Empty.Filters" xml:space="preserve"><value>No exam matches the chosen filters.</value></data>

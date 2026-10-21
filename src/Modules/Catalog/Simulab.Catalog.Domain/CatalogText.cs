@@ -13,4 +13,11 @@ public static class CatalogText
 {
     /// <summary>The comparable form of <paramref name="value"/>; an empty string when there is nothing to compare.</summary>
     public static string Normalize(string? value) => ComparableText.Normalize(value);
+
+    /// <summary>
+    /// The words of a search box (F-36 BR3, F-80 BR1): normalized, split on whitespace, none empty. A list
+    /// keeps a row only when every word is found in one of its fields; no words is no filter.
+    /// </summary>
+    public static string[] SearchWords(string? search) =>
+        Normalize(search).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
 }

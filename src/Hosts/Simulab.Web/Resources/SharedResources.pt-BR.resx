@@ -430,7 +430,7 @@
   <data name="Lookup.LoadFailed" xml:space="preserve"><value>A pesquisa falhou.</value></data>
   <data name="Lookup.Clear" xml:space="preserve"><value>Limpar a seleção</value></data>
   <data name="Exams.Title" xml:space="preserve"><value>Exames</value></data>
-  <data name="Exams.Search.Placeholder" xml:space="preserve"><value>Pesquisar pelo nome</value></data>
+  <data name="Exams.Search.Placeholder" xml:space="preserve"><value>Pesquisar por exame, órgão ou local</value></data>
   <data name="Exams.Empty" xml:space="preserve"><value>Nenhum exame no catálogo ainda.</value></data>
   <data name="Exams.Empty.Search" xml:space="preserve"><value>Nenhum exame corresponde a "{0}".</value></data>
   <data name="Exams.Empty.Filters" xml:space="preserve"><value>Nenhum exame corresponde aos filtros escolhidos.</value></data>

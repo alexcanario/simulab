@@ -7,8 +7,9 @@ using Simulab.Catalog.Domain.Entities;
 namespace Simulab.Catalog.Infrastructure.Persistence;
 
 /// <summary>
-/// The exam list and the form page's read (F-34, UC1 and UC3). The search runs over the normalized name so
-/// it ignores case and accents without a PostgreSQL extension (BR14); the three filters combine with AND;
+/// The exam list and the form page's read (F-34, UC1 and UC3). The search runs word by word over the normalized
+/// exam name, authority name and scope detail (F-80), so it ignores case and accents without a PostgreSQL
+/// extension (BR14); the three filters combine with AND;
 /// the two columns whose label is translated are ranked by the order the caller sends (B-15), because only
 /// the caller knows the reader's culture.
 /// </summary>
@@ -21,10 +22,16 @@ public sealed class ExamQueries(CatalogModuleDbContext context) : IExamQueries
         var sanitized = query.Sanitized();
         var exams = context.Exams.AsNoTracking();
 
-        var search = CatalogText.Normalize(sanitized.Search);
-        if (search.Length > 0)
+        // F-80 BR1: the student catalog's rule — every word is found in the exam name, the authority name or the
+        // scope detail. The authority is an Any inside the Where so the soft-delete filter applies to it.
+        var authorities = context.IssuingAuthorities;
+        foreach (var word in CatalogText.SearchWords(sanitized.Search))
         {
-            exams = exams.Where(exam => exam.NormalizedName.Contains(search));
+            var term = word;
+            exams = exams.Where(exam =>
+                exam.NormalizedName.Contains(term)
+                || exam.NormalizedScopeDetail.Contains(term)
+                || authorities.Any(authority => authority.Id == exam.IssuingAuthorityId && authority.NormalizedName.Contains(term)));
         }
 
         if (sanitized.IssuingAuthorityId is { } authority)

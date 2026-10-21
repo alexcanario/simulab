@@ -86,6 +86,9 @@ An editor types what they remember of an exam (a word of its name, of its author
 - AC10 Given the exam list on screen, then the search box shows the new placeholder; the new texts exist in en, pt-BR and pt-PT and the missing-key test is green. (BR7)
 
 ## Criterion → test
+
+Tests locked: d87c1785509c0ce0b0b45c5c357a57f0e8d0dc35 (2 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | ExamSearchEndpointTests.List_SearchByAnAuthorityWord_FindsTheExamsOfThatAuthority |
