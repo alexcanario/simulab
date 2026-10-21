@@ -1,7 +1,7 @@
 ---
 feature: F-103
 epic: Question bank
-status: validating
+status: done
 board: 149
 version: 1
 ---
@@ -305,3 +305,10 @@ Necessário para validar: Docker rodando e alguns arquivos para escolher (você 
 - 2026-10-21 test-fail — build blocked by a running process (tests/Modules/QuestionBank/Simulab.QuestionBank.Tests/Simulab.QuestionBank.Tests.csp, 1 red
 
 ## Delivery
+- Branch: feature/F-103, merged into main as 7fedc35 (`--no-ff`, board #149); app version 1.8.1 -> 1.9.0.
+- Tests: full suite green, 14 projects, 0 failed (QuestionBank 526, Identity 521, Catalog 646, Web 2272, Api 83, ArchitectureTests 296, AppHost 83, others); build 28 s, tests 459 s (over the 5 min budget: retro finding). Security scan GREEN; test lock unchanged.
+- Manual: docs/manual/pt-BR/questions.md, docs/manual/pt-BR/base-texts.md (pt-PT and en are frozen). Glossary: 4 rows added (magic bytes, multipart upload, nosniff, alternative text). Technical pages: 2.
+- Validation evidence: the owner said in the conversation that the whole script passed (2026-10-21); the per-step ticks were not recorded in the tracker, so each of the 20 steps is `not tested` there.
+- Open debt (marked shortcuts): the preview in the image dialog is a base64 data URL (AppRichTextImageDialog.razor:84); the version check is a LIKE scan over `question_versions` (QuestionImageStore.cs:38).
+Gate time: 8 passes, 30 min 58 s — turn 4 (8 min 39 s), ship 2 (16 min 45 s), scan 2 (5 min 34 s); 1 red
+Usage: 83.3k weighted (estimate) — build 100% — context per turn 123k — 1 session, 5 turns
