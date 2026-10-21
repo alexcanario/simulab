@@ -1,7 +1,7 @@
 ---
 feature: F-80
 epic: Assessment catalog
-status: approved
+status: building
 board: 123
 version: 1
 ---
@@ -88,16 +88,16 @@ An editor types what they remember of an exam (a word of its name, of its author
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | ExamSearchEndpointTests.List_SearchByAnAuthorityWord_FindsTheExamsOfThatAuthority |
+| AC2 | ExamSearchEndpointTests.List_SearchByTheStateAcronymOrName_FindsTheStateExam |
+| AC3 | ExamSearchEndpointTests.List_SearchByTheMunicipality_FindsTheMunicipalExamAndNeverANationalOne |
+| AC4 | ExamSearchEndpointTests.List_SearchWithWordsOfDifferentFields_FindsTheExamThatHasEachWordSomewhere |
+| AC5 | ExamSearchEndpointTests.List_SearchWithNonContiguousWordsOfTheName_FindsTheExam |
+| AC6 | ExamSearchEndpointTests.List_SearchByTheStoredAcronymOfTheAuthority_FindsNothing |
+| AC7 | ExamSearchEndpointTests.List_SearchWithFiltersAndPaging_CountsOnlyWhatTheSearchAndTheFiltersMatched |
+| AC8 | ExamSearchEndpointTests.List_SearchBlankOrAbsent_ReturnsEveryExam |
+| AC9 | ExamSearchEndpointTests.List_SearchThroughTheHttpPipeline_ServesTheAdminAndClosesTheStudent |
+| AC10 | ExamsSearchPlaceholderTests.SearchBox_SaysItSearchesExamAuthorityOrPlace; ResourceParityTests (missing-key) |
 
 ## Decisions
 - 2026-10-21 — The back-office search uses the student search's word-by-word rule over exam name, authority name and scope detail (BR1) — one meaning of "search" across the two lists; the cost is that non-contiguous words of a name now match (BR5) — confirmed: docs/features/F-36-catalog-browsing-for-students.md (BR3)
@@ -108,6 +108,8 @@ An editor types what they remember of an exam (a word of its name, of its author
 - 2026-10-21 — Technical, no question: no security section — same route, same permission, no new input beyond the existing `search`, which is already normalized and bound as a parameter by EF.
 - 2026-10-21 — Technical, no question: no new package, no migration, no OpenAPI change (`search` already exists), no `docs/architecture/` regeneration.
 - 2026-10-21 — The `## Start` note "not parallel with F-57" is dropped: F-57 is `done` (merge on `main`).
+- 2026-10-21 — plan — 1 tests first: `ExamSearchEndpointTests` (AC1-AC9 over HTTP) and `ExamsSearchPlaceholderTests` (AC10, bUnit), seen failing, committed, locked → the new tests are red for a missing behavior; 2 `CatalogText.SearchWords` helper + `ExamQueries` word-by-word match over name, authority name and scope detail, `PublishedExamQueries` switched to the helper → Catalog tests green, student tests unchanged; 3 placeholder in the three resx files → Web tests and missing-key test green; 4 manual (pt-BR), flow page `docs/flows/exam-list-search.md`, glossary check → `techdocs.js check F-80` green; 5 app-host check of `/admin/exams`, coverage table, scan, validation script → status `validating`.
+- 2026-10-21 — The GitHub board was rate limited when the build started: the `building` mirror is sent when the quota returns.
 
 ## Out of scope
 - Searching the labels of the scope or the type ("Estadual", "Concurso"): they are translated by the caller, so the Api does not know them.
