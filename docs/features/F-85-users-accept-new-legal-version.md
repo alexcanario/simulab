@@ -135,19 +135,19 @@ Rows show only the documents that changed since the last acceptance (both when t
 
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
+| AC1 | `LegalAcceptanceEndpointTests.Status_LastAcceptanceIsCurrent_DoesNotOwe` |
+| AC2 | `LegalAcceptanceEndpointTests.Status_AnOlderVersion_OwesAndMarksExactlyTheDocumentsThatDiffer` (x3) |
+| AC3 | `LegalAcceptanceEndpointTests.Status_NoAcceptanceAtAll_OwesAndEveryDocumentIsChanged` |
+| AC4 | `LegalAcceptanceEndpointTests.Status_AnOldAndANewerCurrentAcceptance_TheNewestDecidesWhateverTheInsertionOrder` |
+| AC5 | `LegalAcceptanceEndpointTests.Accept_WhenOwing_WritesANewRecordAndKeepsTheOlderOnesAndTheExportListsItLast` |
+| AC6 | `LegalAcceptanceWithoutDocumentsTests.Status_NoDocumentOnTheServer_DoesNotOweAndListsNothing` |
+| AC7 | `LegalAcceptanceEndpointTests.Status_PortugueseUser_GetsThePortugueseTitlesAndTheSameVersions` |
+| AC8 | `LegalAcceptanceEndpointTests.Accept_WhenNothingIsOwed_AnswersOkAndWritesNothing` |
+| AC9 | `LegalAcceptanceEndpointTests.Accept_VersionsThatAreNotTheCurrentOnes_AreRefusedAndNothingIsWritten` (x3) |
+| AC10 | `LegalAcceptanceEndpointTests.BothRoutes_WithoutAToken_AreUnauthorized`, `Status_DescribesTheTokensOwnAccountOnly` |
+| AC11 | `LegalAcceptanceEndpointTests.Accept_BodyCarriesAnotherUsersId_TheFieldIsIgnoredAndTheRecordIsTheCallers` |
+| AC12 | `LegalAcceptanceEndpointTests.Accept_VersionsThatAreNotTheCurrentOnes_AreRefusedAndNothingIsWritten` (the two one-document cases) |
+| AC13 | `LegalAcceptanceEndpointTests.Accept_TwentyPostsAtOnce_WriteExactlyOneRow` |
 | AC14 | pending |
 | AC15 | pending |
 | AC16 | pending |
@@ -155,11 +155,11 @@ Rows show only the documents that changed since the last acceptance (both when t
 | AC18 | pending |
 | AC19 | pending |
 | AC20 | pending |
-| AC21 | pending |
-| AC22 | pending |
+| AC21 | `LegalAcceptanceEndpointTests.Accept_WhenOwing_WritesANewRecordAndKeepsTheOlderOnesAndTheExportListsItLast` |
+| AC22 | `LegalAcceptanceEndpointTests.OtherAuthenticatedRoutes_AnswerAsBeforeForAUserWhoOwesAnAcceptance` (a guard: it passes before the code, by design) |
 | AC23 | pending |
 | AC24 | pending |
-| AC25 | pending |
+| AC25 | `LegalAcceptanceEndpointTests.Accept_ALocaleThatIsNotSupported_IsBadRequestAndNothingIsWritten` (x5), `Accept_EverySupportedLocale_IsStoredAsSent` |
 | AC26 | pending |
 
 ## Decisions

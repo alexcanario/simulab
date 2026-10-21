@@ -20,6 +20,12 @@ public static class IdentityErrorCodes
 
     public const string LegalDocumentNotFound = "legal_document.not_found";
 
+    /// <summary>F-85 BR5: the versions the page showed are not the current ones.</summary>
+    public const string LegalAcceptanceVersionOutdated = "legal_acceptance.version_outdated";
+
+    /// <summary>F-85 change note v2: the locale of the post is not a supported UI language.</summary>
+    public const string LegalAcceptanceLocaleInvalid = "legal_acceptance.locale_invalid";
+
     public const string InvalidCredentials = "identity.invalid_credentials";
     public const string EmailNotVerified = "identity.email_not_verified";
     public const string AccountLocked = "identity.account_locked";

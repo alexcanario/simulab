@@ -9,6 +9,7 @@ using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Persistence;
+using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Serialization;
 
 namespace Simulab.Identity.Tests;
@@ -314,6 +315,12 @@ public sealed class SignUpTransactionTests : IdentityApiTests
                 },
                 cancellationToken);
         }
+
+        public Task<ConsentRecord?> FindLatestAsync(Guid userId, CancellationToken cancellationToken = default) =>
+            inner.FindLatestAsync(userId, cancellationToken);
+
+        public Task<Result<T>> RunExclusiveForUserAsync<T>(Guid userId, Func<Task<Result<T>>> work, CancellationToken cancellationToken = default) =>
+            inner.RunExclusiveForUserAsync(userId, work, cancellationToken);
     }
 
     /// <summary>Writes a hash longer than its column (F-30 AC2): the same shape F-13's own break-the-write test uses.</summary>
