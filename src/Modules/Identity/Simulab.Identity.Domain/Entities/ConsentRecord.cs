@@ -4,10 +4,10 @@ namespace Simulab.Identity.Domain.Entities;
 
 /// <summary>
 /// What a user accepted, when, from where and in which language (BR6). Written once at sign-up and
-/// again each time the user accepts a new version of the documents (F-85); never updated and never
-/// deleted: it is the evidence LGPD and GDPR ask for, and the newest row says what the user still owes. The only change it ever takes is losing
-/// <see cref="IpAddress"/> when the account is erased (F-10, BR9), which the store writes in one
-/// statement because the record has no other reason to be loaded.
+/// again each time the user accepts a new version of the documents (F-85); never deleted: it is the
+/// evidence LGPD and GDPR ask for, and the newest row says what the user still owes. The only change a
+/// row ever takes is losing <see cref="IpAddress"/> when the account is erased (F-10, BR9), which the
+/// store writes in one statement because the record has no other reason to be loaded.
 /// </summary>
 public class ConsentRecord : TenantEntity
 {

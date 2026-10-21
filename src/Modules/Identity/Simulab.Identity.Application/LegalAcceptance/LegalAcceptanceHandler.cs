@@ -69,7 +69,7 @@ public sealed class LegalAcceptanceHandler(
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return Result.Failure<bool>(new Error(IdentityErrorCodes.Forbidden, ErrorKind.NotFound));
+            return Result.Failure<bool>(new Error(IdentityErrorCodes.UserNotFound, ErrorKind.NotFound));
         }
 
         var current = await documents.GetCurrentAsync(requestLocale, cancellationToken);

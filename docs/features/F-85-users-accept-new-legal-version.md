@@ -1,7 +1,7 @@
 ---
 feature: F-85
 epic: Foundation and identity
-status: building
+status: validating
 board: 128
 version: 2
 ---
@@ -143,7 +143,7 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 | AC3 | `LegalAcceptanceEndpointTests.Status_NoAcceptanceAtAll_OwesAndEveryDocumentIsChanged` |
 | AC4 | `LegalAcceptanceEndpointTests.Status_AnOldAndANewerCurrentAcceptance_TheNewestDecidesWhateverTheInsertionOrder` |
 | AC5 | `LegalAcceptanceEndpointTests.Accept_WhenOwing_WritesANewRecordAndKeepsTheOlderOnesAndTheExportListsItLast` |
-| AC6 | `LegalAcceptanceWithoutDocumentsTests.Status_NoDocumentOnTheServer_DoesNotOweAndListsNothing` |
+| AC6 | `LegalAcceptanceWithoutDocumentsTests.Status_NoDocumentOnTheServer_DoesNotOweAndListsNothing`, `LegalAcceptanceOneDocumentTests` (3: no earlier acceptance, an older terms with the privacy policy unreadable, and the post that keeps the last privacy version) |
 | AC7 | `LegalAcceptanceEndpointTests.Status_PortugueseUser_GetsThePortugueseTitlesAndTheSameVersions` |
 | AC8 | `LegalAcceptanceEndpointTests.Accept_WhenNothingIsOwed_AnswersOkAndWritesNothing` |
 | AC9 | `LegalAcceptanceEndpointTests.Accept_VersionsThatAreNotTheCurrentOnes_AreRefusedAndNothingIsWritten` (x3) |
@@ -152,7 +152,7 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 | AC12 | `LegalAcceptanceEndpointTests.Accept_VersionsThatAreNotTheCurrentOnes_AreRefusedAndNothingIsWritten` (the two one-document cases) |
 | AC13 | `LegalAcceptanceEndpointTests.Accept_TwentyPostsAtOnce_WriteExactlyOneRow` |
 | AC14 | `AcceptTermsPageTests.Accept_AReturnUrlThatIsNotALocalPath_GoesHome` (x7), `Accept_SendsTheShownVersionsAndGoesToTheLocalReturnUrl` |
-| AC15 | `LegalAcceptanceGateTests.Owing_AGatedPageIsNotRenderedAndTheUserIsSentToAcceptTerms`, `Owing_AnExemptPageIsRendered` (x3), `Owing_TheOtherAccountPagesStayBehindTheGate` (x2) |
+| AC15 | `LegalAcceptanceGateTests.Owing_AGatedPageIsNotRenderedAndTheUserIsSentToAcceptTerms`, `Owing_AnExemptPageIsRendered` (x3), `Owing_TheOtherAccountPagesStayBehindTheGate` (x2); through the real router: `LegalAcceptanceRoutesTests` (3) |
 | AC16 | `LegalAcceptanceGateTests.ANewVersionIsPublishedWhileTheSessionIsOpen_TheNextNavigationIsSentToAcceptTerms` |
 | AC17 | `LegalAcceptanceGateTests.Owing_TheHomePage_GoesToAcceptTermsWithNoReturnUrl` (every sign-in method ends at `/`, `AccountEndpoints.CompleteSignIn`) |
 | AC18 | `AcceptTermsPageTests.Accept_SendsTheShownVersionsAndGoesToTheLocalReturnUrl`, `Accept_WithoutReturnUrl_GoesHome`, `Accept_ANewerVersionWasPublished_ReloadsTheDocumentsAndAsksAgain` |
@@ -186,6 +186,9 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 - D17 (Claude, 2026-10-21) Design coverage: contracts (routes, records, codes, both `IConsentRecordStore` implementers), layout (Application/Infrastructure/Api/Web split, gate placement, steps), rules (module boundary, problem-details, banned symbols, vocabulary, error-text check), simplicity (one extraction), data (no migration, existing index, `Id` v7 tie-break); not checked: the redirect during prerender (checked on screen through the app host in step 12).
 - D18 (Claude, 2026-10-21) Traps: T1 cache "accepted" per circuit: breaks BR6/AC16; T2 exempt `/account` by prefix: opens password and security pages; T3 call `RegistrationTerms.CheckAsync` as is for the POST: wrong error code and flags.
 - D19 (Claude, 2026-10-21) plan — 1 Glossary row, contracts, `FindLatestAsync` (and the test fake that implements the port), extraction of the version comparison, GET status route → AC1-4, 6, 7, AC10 (GET half); 2 POST acceptance with the per-user lock, locale check, 201/200/409/400/401, `ThenBy(Id)` in the export → AC5, 8, 9, 11, 12, 13, 21, 22, 25, AC10 (POST half); 3 Web client methods, gate component in `Routes.razor`, bare `AcceptTerms` page → AC15, 16, 17, 20, 26; 4 full `AcceptTerms` page, resources and error texts → AC14, 18, 19, 23; 5 flow page, pt-BR manual, OpenAPI and DocGen route docs → techdocs check, docs checks; 6 app host check, review, scan, validation script → AC24.
+
+- D20 (Claude, 2026-10-21) Independent review of the built branch (reviewer agent, opus), all findings checked in the code: (1) major, confirmed — no test went through `Routes.razor`: added `LegalAcceptanceRoutesTests` (3); (2) major, confirmed — the one-unreadable-document branches of BR2/D14 had no test: added `LegalAcceptanceOneDocumentTests` (3); (3) minor, confirmed — a missing user carried the code `identity.forbidden` on a not-found kind: now `user.not_found`; (4) minor, confirmed — the `ConsentRecord` comment contradicted itself about the erasure update: rewritten; (5) minor, not done — AC20/AC26 lean on existing tests that never use a user who owes; the plain endpoints sit outside the router by structure, and the validation script covers the language switch on the page. Traps the reviewer listed: T1 one Redis read, one Api call and one query per navigation (accepted: BR6 and AC16 ask for a check on each navigation; a cache needs a change note); T2 the provider falls back to `en` silently if a locale lacks a document (all three ship both documents today); T3 `SafeReturnPath` is a blocklist and `/%61ccept-terms` passes the prefix check but only lands on the page and moves home (accepted).
+- D21 (Claude, 2026-10-21) Verified on screen through the app host (own database `simulab_f85_val`, seeded administrator with no acceptance): sign-in lands on `/accept-terms` with Terms 2026-v1 and Privacy 2026-v3; `/account/password` by URL returns to the page with `?returnUrl=%2Faccount%2Fpassword` on the first load; `/account` opens; accepting from that address lands on `/account/password`; `/` does not redirect afterwards; the console had no error. Not seen on screen: dark mode, narrow width, keyboard order (steps 4 and 6 of the script). The prerender redirect works (D17's open point).
 
 ## Out of scope
 - An e-mail telling everyone about a new version (idea).
