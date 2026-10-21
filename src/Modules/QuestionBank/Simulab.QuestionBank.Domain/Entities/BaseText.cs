@@ -80,6 +80,16 @@ public sealed class BaseText : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.BaseTextTextTooLong, ErrorKind.Validation));
         }
 
+        // F-103 BR4, BR7: at most ten images, each with its alternative text.
+        if (QuestionImageRules.Check(
+                [text],
+                QuestionBankErrorCodes.BaseTextImageAltRequired,
+                QuestionBankErrorCodes.BaseTextImageAltTooLong,
+                QuestionBankErrorCodes.BaseTextImagesTooMany) is { } imageFault)
+        {
+            return Result.Failure(imageFault);
+        }
+
         // BR3: the language of a text that questions use cannot change; the same language is not a change.
         if (languageLocked && language != ContentLanguage)
         {

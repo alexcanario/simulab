@@ -5,6 +5,7 @@ using Simulab.Identity.Contracts;
 using Simulab.Persistence;
 using Simulab.QuestionBank.Application.BaseTexts;
 using Simulab.QuestionBank.Application.Content;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Infrastructure.Images;
@@ -40,7 +41,15 @@ public static class QuestionBankModule
             }));
 
         services.AddSingleton<QuestionHtmlSanitizer>();
+
+        // F-103: the pictures. The files go through the storage block (registered by the host); the sweep is hosted in the Api.
+        services.AddSingleton<IQuestionImageFiles, QuestionImageFiles>();
+        services.AddScoped<IQuestionImageStore, QuestionImageStore>();
+        services.AddScoped<QuestionImageOwnership>();
+        services.AddScoped<UploadQuestionImageHandler>();
+        services.AddScoped<OpenQuestionImageHandler>();
         services.AddSingleton<QuestionImageSweep>();
+        services.AddHostedService<QuestionImageSweepWorker>();
 
         services.AddScoped<IQuestionStore, QuestionStore>();
         services.AddScoped<IQuestionQueries, QuestionQueries>();

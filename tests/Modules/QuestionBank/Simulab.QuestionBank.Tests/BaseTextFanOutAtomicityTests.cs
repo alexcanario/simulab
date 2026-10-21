@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Application.BaseTexts;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Application.Questions;
@@ -46,7 +47,8 @@ public sealed class BaseTextFanOutAtomicityTests : OriginApiTests
             provider.GetRequiredService<IBaseTextStore>(),
             store,
             provider.GetRequiredService<IBaseTextQueries>(),
-            provider.GetRequiredService<QuestionHtmlSanitizer>());
+            provider.GetRequiredService<QuestionHtmlSanitizer>(),
+            provider.GetRequiredService<QuestionImageOwnership>());
 
         var result = await handler.HandleAsync(
             text.Id, new SaveBaseTextRequest(text.Title, "pt-BR", "<p>O rio corria depressa.</p>"));

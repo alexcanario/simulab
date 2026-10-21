@@ -146,6 +146,9 @@ the file field; "Alternative text is required" under the text.
 - AC17 All new texts appear in pt-BR, pt-PT and en.
 
 ## Criterion → test
+
+Tests locked: 8d35a0d661b6f988b717ab9264b3afd04de1b249 (8 files); unlocks: 1
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | QuestionImageUploadTests: Upload_WithoutAToken_Answers401_AndStoresNothing, Upload_ByAStudent_Answers403_AndStoresNothing, Upload_ByAHolderOfReviewOnly_Answers403_AndStoresNothing |
@@ -193,6 +196,7 @@ the file field; "Alternative text is required" under the text.
 - 2026-10-21: design trade-off 4 (where the sweep runs) — owner chose as proposed: a hosted service of the module, switch `QuestionBank:ImageSweepEnabled` (default true, false in `SimulabApiFactory`).
 - 2026-10-21: swept pending rows are soft-deleted (project rule "soft delete only"); the BR9 search for a base-text image reads every version's `base_text_html` — Claude.
 - 2026-10-21: the explanation takes no image (BR1): the Api drops every `img` of the explanation after sanitizing, so an image only the explanation names is never owned; AC7's "any of the four fields" is proved for the statement, an option and the base text, and the explanation proves BR1 — Claude (found at the test phase: the sanitizer is shared by all fields).
+- 2026-10-21: tests unlocked twice (owner chose unlock and fix, both times): `QuestionImageApiTests.RowAsync` aliased columns in PascalCase while the EF convention maps snake_case, and `QuestionImageSweepTests` did not sign in again after moving the clock 25 hours. No assertion changed; locked again at the commit after — owner.
 - 2026-10-21: plan — 1 upload: table, entity, endpoint, magic bytes → AC1, AC2, AC3 (file), AC4; 2 download with headers and the manage-or-review check → AC5 (Api), AC6; 3 sanitizer `img` and entity rules (alt, count, empty) → AC7, AC11, AC12; 4 ownership on save → AC8, AC10 (Api), AC3 (count); 5 release and versions → AC13, AC14; 6 pending sweep → AC9; 7 Web: route, editor button, dialog, preview, resources → AC5 (Web), AC10, AC15, AC16, AC17; 8 flow pages and data dictionary → techdocs check, DocGen --check — Claude.
 
 ## Out of scope
@@ -218,5 +222,6 @@ the file field; "Alternative text is required" under the text.
 - 2026-10-20 override — F-89 Q5 (file sent only at Save) changed to send on choose: the editor needs an address and the HTML would pass the 32 KB message limit
 - 2026-10-20 blocked — depends on F-89
 - 2026-10-20 blocked — depends on F-89
+- 2026-10-21 blocked — test wrong: RowAsync used PascalCase aliases in raw SQL; the EF convention maps snake_case columns
 
 ## Delivery

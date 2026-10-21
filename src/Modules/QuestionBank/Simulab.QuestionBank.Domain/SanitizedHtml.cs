@@ -21,5 +21,6 @@ public sealed record SanitizedHtml(string Html, string PlainText)
     /// <summary>A field that was not sent.</summary>
     public static SanitizedHtml Empty { get; } = new(string.Empty, string.Empty);
 
-    public bool IsEmpty => PlainText.Length == 0;
+    /// <summary>True when there is no text and no image: a text that holds only a picture is content (F-103, BR8).</summary>
+    public bool IsEmpty => PlainText.Length == 0 && ImageIds.Count == 0;
 }

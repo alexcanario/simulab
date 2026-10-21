@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Ganss.Xss;
+using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain;
 
 namespace Simulab.QuestionBank.Application.Content;
@@ -22,8 +23,13 @@ public sealed partial class QuestionHtmlSanitizer
     private static readonly string[] Allowed =
     [
         "p", "br", "strong", "b", "em", "i", "u", "s", "sub", "sup", "ul", "ol", "li", "blockquote",
-        "table", "thead", "tbody", "tr", "th", "td", "a"
+        "table", "thead", "tbody", "tr", "th", "td", "a", "img"
     ];
+
+    // F-103 BR5: the one address an img may have, the route the Web serves a stored image from. Anchored, so a
+    // protocol-relative address, a query string or anything after the id is another address and loses the img.
+    [GeneratedRegex(@"^/question-images/(?<id>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$")]
+    private static partial Regex StoredImageAddress();
 
     // Removed with everything inside: their text is code or markup, never something to read.
     private static readonly string[] Dropped =
@@ -54,22 +60,32 @@ public sealed partial class QuestionHtmlSanitizer
     /// <summary>The tags a stored text may hold (BR8).</summary>
     public static IReadOnlyList<string> AllowedTags => Allowed;
 
-    /// <summary>The sanitized HTML and its plain text; both empty when <paramref name="html"/> is null or only empty tags.</summary>
-    public SanitizedHtml Sanitize(string? html)
+    /// <summary>
+    /// The sanitized HTML, its plain text and the stored images it holds; empty when <paramref name="html"/> is null or only
+    /// empty tags. <paramref name="allowImages"/> is off for a field that takes no picture (the explanation, F-103 BR1).
+    /// </summary>
+    public SanitizedHtml Sanitize(string? html, bool allowImages = true)
     {
         if (string.IsNullOrWhiteSpace(html))
         {
             return SanitizedHtml.Empty;
         }
 
-        var safe = SanitizeAllowList(Prepare(html)).Trim();
-        var plain = PlainTextOf(safe);
+        var safe = SanitizeAllowList(Prepare(html, allowImages)).Trim();
+        var (plain, images) = ReadBack(safe);
 
         // Only empty tags is empty: nothing to store, so the field is the same as one that was not sent.
-        return plain.Length == 0 ? SanitizedHtml.Empty : new SanitizedHtml(safe, plain);
+        return plain.Length == 0 && images.Ids.Count == 0
+            ? SanitizedHtml.Empty
+            : new SanitizedHtml(safe, plain)
+            {
+                ImageIds = images.Ids,
+                ImagesWithoutAlt = images.WithoutAlt,
+                AltTooLong = images.AltTooLong
+            };
     }
 
-    private static string Prepare(string html)
+    private static string Prepare(string html, bool allowImages)
     {
         var document = new HtmlParser().ParseDocument(html);
 
@@ -77,6 +93,8 @@ public sealed partial class QuestionHtmlSanitizer
         {
             element.Remove();
         }
+
+        KeepStoredImages(document, allowImages);
 
         NormalizeEditorLists(document);
 
@@ -92,6 +110,24 @@ public sealed partial class QuestionHtmlSanitizer
         }
 
         return document.Body?.InnerHtml ?? string.Empty;
+    }
+
+    // BR5: an img is kept only with the address of a stored image, rewritten to its canonical form; any other address
+    // (http, https, data:, javascript:, another path) removes the element. BR1: a field that takes no picture loses all.
+    private static void KeepStoredImages(IDocument document, bool allowImages)
+    {
+        foreach (var image in document.QuerySelectorAll("img").ToList())
+        {
+            var match = allowImages ? StoredImageAddress().Match(image.GetAttribute("src") ?? string.Empty) : Match.Empty;
+            if (!match.Success)
+            {
+                image.Remove();
+
+                continue;
+            }
+
+            image.SetAttribute("src", $"/question-images/{Guid.Parse(match.Groups["id"].Value):D}");
+        }
     }
 
     // Quill 2 writes every list as an <ol> whose <li> carry data-list="bullet" or "ordered". The sanitizer
@@ -131,7 +167,7 @@ public sealed partial class QuestionHtmlSanitizer
         var options = new HtmlSanitizerOptions
         {
             AllowedTags = new HashSet<string>(_allowedTags, StringComparer.OrdinalIgnoreCase),
-            AllowedAttributes = new HashSet<string>(["href"], StringComparer.OrdinalIgnoreCase),
+            AllowedAttributes = new HashSet<string>(["href", "src", "alt"], StringComparer.OrdinalIgnoreCase),
             AllowedSchemes = new HashSet<string>(["http", "https"], StringComparer.OrdinalIgnoreCase),
             AllowedCssProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         };
@@ -148,6 +184,13 @@ public sealed partial class QuestionHtmlSanitizer
         if (node is not IElement element)
         {
             return;
+        }
+
+        // F-103 BR5: src and alt belong to img alone.
+        if (!string.Equals(element.LocalName, "img", StringComparison.OrdinalIgnoreCase))
+        {
+            element.RemoveAttribute("src");
+            element.RemoveAttribute("alt");
         }
 
         if (!string.Equals(element.LocalName, "a", StringComparison.OrdinalIgnoreCase))
@@ -169,21 +212,54 @@ public sealed partial class QuestionHtmlSanitizer
         element.SetAttribute("rel", LinkRel);
     }
 
-    private static string PlainTextOf(string safeHtml)
+    private readonly record struct ImagesFound(List<Guid> Ids, int WithoutAlt, int AltTooLong);
+
+    // The plain text and the images of the HTML that is going to be stored, from one parse. The alt of a picture is part of
+    // the plain text (BR8): a decorative one (an empty alt) adds nothing. A picture counts with no alt attribute at all (BR4).
+    private static (string PlainText, ImagesFound Images) ReadBack(string safeHtml)
     {
+        var ids = new List<Guid>();
         if (safeHtml.Length == 0)
         {
-            return string.Empty;
+            return (string.Empty, new ImagesFound(ids, 0, 0));
         }
 
         var document = new HtmlParser().ParseDocument(safeHtml);
+        var withoutAlt = 0;
+        var altTooLong = 0;
+        foreach (var image in document.QuerySelectorAll("img").ToList())
+        {
+            var match = StoredImageAddress().Match(image.GetAttribute("src") ?? string.Empty);
+            if (match.Success)
+            {
+                ids.Add(Guid.Parse(match.Groups["id"].Value));
+            }
+
+            var alt = image.GetAttribute("alt");
+            if (alt is null)
+            {
+                withoutAlt++;
+            }
+            else if (alt.Length > QuestionLimits.ImageAltMaxLength)
+            {
+                altTooLong++;
+            }
+
+            if (!string.IsNullOrWhiteSpace(alt))
+            {
+                image.Before(document.CreateTextNode($" {alt} "));
+            }
+        }
+
         foreach (var block in document.QuerySelectorAll(string.Join(',', Blocks)).ToList())
         {
             block.Before(document.CreateTextNode(" "));
             block.After(document.CreateTextNode(" "));
         }
 
-        return WhiteSpace().Replace(document.Body?.TextContent ?? string.Empty, " ").Trim();
+        var plain = WhiteSpace().Replace(document.Body?.TextContent ?? string.Empty, " ").Trim();
+
+        return (plain, new ImagesFound(ids, withoutAlt, altTooLong));
     }
 
     [GeneratedRegex(@"\s+")]

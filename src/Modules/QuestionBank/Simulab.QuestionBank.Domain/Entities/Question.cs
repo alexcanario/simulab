@@ -483,6 +483,16 @@ public sealed class Question : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionExplanationTooLong, ErrorKind.Validation));
         }
 
+        // F-103 BR4, BR7: the statement and the options together hold at most ten images, each with its alternative text.
+        if (QuestionImageRules.Check(
+                content.Options.Select(option => option.Text).Prepend(content.Statement),
+                QuestionBankErrorCodes.QuestionImageAltRequired,
+                QuestionBankErrorCodes.QuestionImageAltTooLong,
+                QuestionBankErrorCodes.QuestionImagesTooMany) is { } imageFault)
+        {
+            return Result.Failure(imageFault);
+        }
+
         if (content.Difficulty is { } difficulty
             && (difficulty < QuestionLimits.DifficultyMin || difficulty > QuestionLimits.DifficultyMax))
         {

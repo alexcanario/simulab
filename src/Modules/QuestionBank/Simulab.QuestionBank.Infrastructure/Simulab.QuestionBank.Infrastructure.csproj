@@ -13,6 +13,8 @@
     <!-- Catalog.Contracts only: the directories (ITopicDirectory, ISubjectDirectory, IExamEditionDirectory) and ITopicUsageCheck (the delete guard, BR13). -->
     <ProjectReference Include="..\..\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
+    <!-- The adapter of the image files (F-103), as the Catalog's notice document. -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Storage\Simulab.Storage.csproj" />
   </ItemGroup>
 
 </Project>

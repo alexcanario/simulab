@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Simulab.Catalog.Contracts;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
@@ -128,7 +129,8 @@ public sealed class QuestionReviewRaceTests : QuestionReviewApiTests
         var handler = new SaveQuestionHandler(
             store,
             scope.ServiceProvider.GetRequiredService<IQuestionQueries>(),
-            scope.ServiceProvider.GetRequiredService<QuestionHtmlSanitizer>());
+            scope.ServiceProvider.GetRequiredService<QuestionHtmlSanitizer>(),
+            scope.ServiceProvider.GetRequiredService<QuestionImageOwnership>());
 
         var outcome = await handler.HandleAsync(
             draft.Id,
