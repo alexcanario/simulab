@@ -253,6 +253,9 @@ public static class IdentityModule
                     var (signing, encryption) = OpenIddictCertificates.Load(configuration);
                     options.AddSigningCertificate(signing)
                         .AddEncryptionCertificate(encryption);
+
+                    // F-84: the version before the current one, when the host offers a vault to read it from.
+                    services.AddPreviousOpenIddictCertificates(configuration, signing, encryption);
                 }
 
                 // Custom endpoint below (TokenEndpoints.cs) does the actual credential check; OpenIddict

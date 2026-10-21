@@ -42,6 +42,15 @@ public static class CatalogLimits
     /// <summary>The notice's official address, an absolute http or https URL (F-35, BR7).</summary>
     public const int ExamEditionNoticeUrlMaxLength = 300;
 
+    /// <summary>The biggest notice PDF an edition keeps: 20 MB, exactly 20 × 1024 × 1024 bytes (F-89, BR4).</summary>
+    public const long ExamEditionNoticeDocumentMaxBytes = 20L * 1024 * 1024;
+
+    /// <summary>The notice PDF's file name as the curator gave it, cut of any folder part (F-89).</summary>
+    public const int ExamEditionNoticeDocumentFileNameMaxLength = 255;
+
+    /// <summary>The name the PDF is stored under: <c>exam-editions/{guid}/notice/{guid}.pdf</c>, 98 characters with the guids written with hyphens (F-89).</summary>
+    public const int ExamEditionNoticeDocumentBlobNameLength = 98;
+
     /// <summary>The oldest notice year an edition may carry (F-35, BR4).</summary>
     public const int ExamEditionNoticeYearMin = 1990;
 

@@ -64,8 +64,8 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | The questions of the municipal guard editions and the right to use them | F-110 | owner | Claude, at F-110 refinement |
 | `IFileStorage` built (F-89) | F-103 | F-89 build | Claude |
 
-## First release cut
-F-95, F-96, F-97, F-98, F-99 (owner, 2026-10-09). This cut releases testers together with epic E-5; E-5 starts after it.
+## First release cut: mvp-cadastro-provas
+F-95, F-96, F-97, F-98, F-99
 
 ## Out of scope
 - Hotspot questions (Simulae T5) — not in the brief.
@@ -81,6 +81,7 @@ F-95, F-96, F-97, F-98, F-99 (owner, 2026-10-09). This cut releases testers toge
 - 2026-10-09 — F-95 has only `Draft` and `Published`, like editions; `InReview` and the review queue arrive with F-105, which may move to E-9 — shortest path to testers; the glossary already says `InReview` joins with the AI import (owner, question 3).
 - 2026-10-09 — First release cut is F-95 to F-99 — single choice and true/false cover most public service exams; versions before any attempt exists avoid a data migration; transcription gives volume (owner, question 4).
 - 2026-10-09 — Do not import Simulae's raw-HTML fields without a sanitizer, nor its unused `EmRevisao`/`Rascunho` paths — known defects of the source (Claude, from the Simulae read).
+- 2026-10-20 — first release cut written by /agile:mvp: 5 items (criterion: the goal, dependency closure); label: mvp-cadastro-provas; goal: "A aplicacao deve ser capaz atraves do usuario responsavel cadastrar os tipos de provas elencados no levantamento de requisitos"; gaps left: 0
 
 ## Related
 - Discussions: none

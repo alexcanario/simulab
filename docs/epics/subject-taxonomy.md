@@ -46,8 +46,8 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): three levels `Subject`
 |---|---|---|---|
 | The official notices of the F-37 editions (labels and question counts) | F-78 | owner | Claude, at F-78 refinement |
 
-## First release cut
-F-79, F-51, F-74, F-75 and F-76 (owner, 2026-10-04). F-77 and F-78 may follow the first release.
+## First release cut: mvp-cadastro-provas
+F-79, F-51, F-74, F-75, F-76, F-77, F-78
 
 ## Out of scope
 - Weight and minimum score per notice subject — epic Exam Simulator (E-6), with the other scoring rules (owner, 2026-10-04).
@@ -63,6 +63,7 @@ F-79, F-51, F-74, F-75 and F-76 (owner, 2026-10-04). F-77 and F-78 may follow th
 - 2026-10-04 — The taxonomy and the notice subjects are edited under `catalog.manage` — the same curators run the catalog; no new permission to assign (owner, question 3).
 - 2026-10-04 — First release cut is F-79, F-51, F-74, F-75, F-76 — the student sees a real syllabus; aliases arrive with the AI import that uses them most (owner, question 4).
 - 2026-10-04 — Board ids: the epic is GitHub issue #3 (E-3, migrated from Azure Boards 692); F-51 is #88 (was 777).
+- 2026-10-20 — first release cut written by /agile:mvp: 7 items (criterion: the goal, dependency closure); label: mvp-cadastro-provas; goal: "A aplicacao deve ser capaz atraves do usuario responsavel cadastrar os tipos de provas elencados no levantamento de requisitos"; gaps left: 0
 
 ## Related
 - Discussions: none

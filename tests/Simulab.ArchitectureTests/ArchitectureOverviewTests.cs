@@ -83,7 +83,7 @@ public class ArchitectureOverviewTests
     public void AppHostResources_TheRealAppHost_FindsEveryStartedResource()
     {
         // Guards the guard: a parser that finds nothing would let the drift test pass for free.
-        AppHostResources(AppHost()).Should().BeEquivalentTo(["postgres", "mailpit", "redis", "api", "web"]);
+        AppHostResources(AppHost()).Should().BeEquivalentTo(["postgres", "mailpit", "redis", "blob", "api", "web"]);
     }
 
     [Fact]
@@ -160,8 +160,8 @@ public class ArchitectureOverviewTests
         var diagram = ContainersDiagram();
 
         NodeIds(diagram).Should().BeEquivalentTo(["people", "web", "redis", "api", "postgres", "blob", "mailpit", "claude"]);
-        ClassMembers(diagram, "container").Should().BeEquivalentTo(["web", "api", "postgres", "redis"]);
-        ClassMembers(diagram, "planned").Should().BeEquivalentTo(["blob", "claude"]);
+        ClassMembers(diagram, "container").Should().BeEquivalentTo(["web", "api", "postgres", "redis", "blob"]);
+        ClassMembers(diagram, "planned").Should().BeEquivalentTo(["claude"]);
         Overview().Should().Contain("(architecture/modules.md)", "the component level is the generated module map (F-23 BR2)");
     }
 

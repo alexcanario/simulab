@@ -55,6 +55,17 @@ public class AppHostModelTests : IAsyncLifetime
         waits.Should().Contain(["simulab", "mailpit"]);
     }
 
+    // F-89: the files users upload live in Azurite with a named data volume, and only the Api reaches them.
+    [Fact]
+    public void Model_HasAzuriteWithADataVolume_AndOnlyTheApiReferencesTheBlobs()
+    {
+        Resource("blob").Annotations.OfType<ContainerMountAnnotation>()
+            .Should().ContainSingle(mount => mount.Type == ContainerMountType.Volume && mount.Source == "simulab-azurite-data");
+        Resource("blobs").Should().BeAssignableTo<IResourceWithConnectionString>();
+        Resource("api").Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name).Should().Contain("blobs");
+        Resource("web").Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name).Should().NotContain("blobs");
+    }
+
     [Fact]
     public void Web_WaitsForTheApi()
     {

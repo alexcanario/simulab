@@ -48,7 +48,7 @@ flowchart TB
         redis[("<b>Redis</b><br/>[Cache]<br/>Sessions,<br/>revoked tokens")]
         api["<b>Api</b><br/>[ASP.NET Core]<br/>/api/v1, modules,<br/>job worker"]
         postgres[("<b>PostgreSQL</b><br/>[Database]<br/>One schema<br/>per module")]
-        blob[("<b>File storage</b><br/>[Blob, planned]<br/>Azurite locally")]
+        blob[("<b>File storage</b><br/>[Blob]<br/>Azurite locally")]
     end
     mailpit["<b>Email provider</b><br/>[SMTP or HTTPS]<br/>Mailpit locally, Azure Communication Services in the cloud"]
     claude["<b>Claude API</b><br/>[planned]"]
@@ -65,16 +65,16 @@ flowchart TB
     classDef external fill:#999999,stroke:#6b6b6b,color:#fff
     classDef planned fill:#fff,stroke:#6b6b6b,color:#1f2328,stroke-dasharray:6 4
     class people person
-    class web,api,postgres,redis container
+    class web,api,postgres,redis,blob container
     class mailpit external
-    class claude,blob planned
+    class claude planned
 ```
 
 - **Web** — every screen, in pt-BR, pt-PT and en. Talks to the Api only over `/api/v1`; keeps each browser's tokens in Redis (B-3).
 - **Api** — the modules (Identity, Catalog, QuestionBank), the OpenIddict token endpoint and the job worker that sends the emails (F-13).
 - **PostgreSQL** — one database, one schema per module: `identity`, `catalog`, `question_bank`, `jobs`.
 - **Redis** — refresh-token sessions and the access-token revocation set (F-5), and the Web's server-side sessions (B-3).
-- **File storage** (planned) — blob containers behind `IFileStorage`, Azurite locally; added by the first feature that stores files.
+- **File storage** — one private blob container behind `IFileStorage` (`Simulab.Storage`), Azurite locally and a storage account of its own in the cloud; only the Api reaches it. The first file it keeps is the notice PDF of an edition (F-89).
 - **Claude API** (planned) — reached only through `IAiGateway`, which checks the plan and records usage and cost.
 - **In the cloud** (ADR-0002, F-62) — the same containers run on Azure Container Apps, Central US (ADR-0004), with PostgreSQL Flexible Server, Key Vault and, in production, Azure Cache for Redis (staging keeps Redis as a container). These resources are added only when the app host publishes (`AzureDeployment.cs`), so they are not nodes of this diagram.
 - **Google** (optional) — sign-in with Google, off unless the OAuth client is configured (F-20); shown in the context diagram only.

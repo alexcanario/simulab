@@ -1263,6 +1263,53 @@ code, kbd, pre, samp {
     white-space: nowrap;
 }
 
+/* F-89, the file field: the input is the only control the browser knows, so it stays focusable but invisible, and the
+   button next to it is a label that opens it. The focus ring is drawn on the row's first button when the input has
+   the keyboard, so the reader sees where Enter or Space will act. A long file name wraps; it is never cut. */
+.app-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+}
+
+.app-file-input:focus-visible ~ .app-file-row label.mud-button-root {
+    outline: 3px solid var(--mud-palette-info);
+    outline-offset: 2px;
+}
+
+.app-file-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--app-space-2) var(--app-space-3);
+}
+
+.app-file-stored {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--app-space-2);
+    min-width: 0;
+}
+
+.app-file-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.app-file-size {
+    margin-top: 0;
+}
+
+.app-field-error .app-file-row label.mud-button-root {
+    border-color: var(--mud-palette-error);
+}
+
 /* F-35, BR16: the date field says what is wrong in its own description below (one place, announced through
    aria-describedby). The picker's own helper line would repeat it with MudBlazor's wording. */
 .app-date-field .mud-input-helper-text {

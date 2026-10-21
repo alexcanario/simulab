@@ -1,8 +1,8 @@
 ---
 page: catalog
 locale: pt-BR
-features: [F-36, F-37, F-42, F-57, F-76]
-updated: 2026-10-13
+features: [F-36, F-37, F-42, F-57, F-76, F-89]
+updated: 2026-10-21
 ---
 # Catálogo
 
@@ -27,7 +27,8 @@ O endereço da página guarda sua busca, seus filtros e a página, então você 
 1. Escolha o nome do exame na lista.
 2. A página mostra as edições, da mais recente para a mais antiga, com a banca, o cargo, o número do edital e a data de aplicação quando existem.
 3. Escolha **Edital oficial** para abrir o edital no site do organizador. Ele abre em uma nova aba.
-4. O cartão **Sobre este exame** traz o órgão contratante, o tipo de avaliação, a abrangência, o idioma do exame e quantas edições estão publicadas.
+4. Quando a edição tem uma cópia do edital guardada no Simulab, ao lado de **Edital oficial** aparece o link **Edital (PDF)**: escolha-o para baixar o arquivo. Ele serve para o caso de o site oficial mudar de endereço ou sair do ar. Uma edição sem arquivo não mostra o link.
+5. O cartão **Sobre este exame** traz o órgão contratante, o tipo de avaliação, a abrangência, o idioma do exame e quantas edições estão publicadas.
 
 O conteúdo do exame aparece no próprio idioma e nunca é traduzido.
 

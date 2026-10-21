@@ -1,4 +1,6 @@
 using System.Reflection;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using OpenIddict.Validation.AspNetCore;
 using Simulab.Ai;
 using Simulab.Api;
@@ -18,6 +20,7 @@ using Simulab.ServiceDefaults;
 using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
 using Simulab.SharedKernel.Serialization;
+using Simulab.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,16 @@ var builder = WebApplication.CreateBuilder(args);
 if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("keyvault")))
 {
     builder.Configuration.AddAzureKeyVaultSecrets("keyvault");
+
+    // F-84 BR1, BR9: with a vault, outside Development, the Api also reads the version before the current OpenIddict
+    // certificates. Handed to the Identity module as a service in code, never as configuration (T5).
+    if (!builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddSingleton<ICertificateVersionSource>(new KeyVaultCertificateVersionSource(new SecretClient(
+            new Uri(builder.Configuration.GetConnectionString("keyvault")!),
+            new DefaultAzureCredential(),
+            new SecretClientOptions { Retry = { MaxRetries = 2, NetworkTimeout = TimeSpan.FromSeconds(5) } })));
+    }
 }
 
 // F-64: the cloud database accepts only encrypted connections; its connection string says nothing about SSL.
@@ -46,6 +59,10 @@ builder.Services.AddEmailSender(
     builder.Configuration.GetConnectionString("mailpit"),
     cloudEnvironment: !builder.Environment.IsDevelopment());
 builder.Services.AddIntegrationEvents();
+
+// The files users upload (F-89, ADR-0001 #23): Azurite locally, a private Blob container in the cloud. Without the
+// connection a Development host still starts and an upload answers storage.not_configured.
+builder.AddFileStorage("blobs");
 
 // The one door to a model (F-41, BR1). Without a key the host still starts and every call fails with
 // ai.not_configured (BR4), so nobody needs a key to work on the rest of the app.

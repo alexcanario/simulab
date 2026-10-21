@@ -27,6 +27,11 @@ public static class PublishedExamEndpoints
         published.MapGet("/published-exams/{id:guid}", FindAsync).WithName("FindPublishedExam");
         published.MapGet("/published-exam-filters", FiltersAsync).WithName("GetPublishedExamFilters");
 
+        // F-89 UC4: the notice PDF of a published edition, under catalog.browse like the rest of the student catalog.
+        published.MapGet(
+            "/published-exams/{examId:guid}/editions/{id:guid}/notice-document",
+            NoticeDocumentEndpoints.DownloadForStudentAsync).WithName("DownloadPublishedExamEditionNoticeDocument");
+
         return group;
     }
 

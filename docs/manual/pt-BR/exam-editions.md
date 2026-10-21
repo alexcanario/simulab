@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35, F-74, F-75, F-78, F-86, F-96, F-99]
-updated: 2026-10-19
+features: [F-35, F-74, F-75, F-78, F-86, F-89, F-96, F-99]
+updated: 2026-10-21
 ---
 # Edições de um exame
 
@@ -30,6 +30,16 @@ Apenas uma conta com a permissão "Gerenciar o catálogo" — o papel Admin a te
 1. Escolha **Editar** na linha dela.
 2. Mude o que precisar. Para publicar ou despublicar, escolha o outro cartão em **Publicação**. Escolha **Salvar**.
 
+### Guardar o PDF do edital
+O Simulab pode guardar uma cópia do edital da edição, para que ele continue disponível mesmo que o site oficial mude de endereço ou saia do ar. O PDF e o **link do edital** são independentes: nenhum dos dois é obrigatório para salvar ou publicar uma edição.
+1. Na página da edição, no cartão **Edital e aplicação**, abaixo da **data de aplicação**, escolha **Escolher PDF** e selecione o arquivo (PDF, até 20 MB). O nome do arquivo aparece com **Descartar escolha**; nada foi enviado ainda.
+2. Escolha **Salvar**. O arquivo é enviado junto com os demais campos, e a edição passa a mostrar o nome e o tamanho dele. Numa edição nova, a edição é criada e o arquivo vai logo em seguida.
+3. Escolha **Cancelar** em vez de **Salvar** para desistir: nada é enviado e o arquivo guardado, se houver, continua como estava.
+
+Uma edição guarda no máximo um PDF. Para trocá-lo, escolha **Substituir**, escolha o novo arquivo e **Salvar**: o arquivo anterior é apagado. Para tirá-lo, escolha **Remover** (o cartão avisa que o arquivo será removido quando você salvar; **Manter arquivo** desfaz) e **Salvar**. Excluir a edição também apaga o PDF.
+
+Com um arquivo guardado, **Baixar** o salva no seu computador. Os alunos baixam o PDF pela página do exame no [catálogo](catalog.md), apenas de edições publicadas; o arquivo de um rascunho só aparece para quem gerencia o catálogo.
+
 ### Excluir uma edição
 1. Só um rascunho pode ser excluído. Se a edição está publicada, abra-a, escolha **Rascunho** e salve antes: a ação de excluir da linha publicada fica desativada.
 2. Escolha **Excluir** na linha e confirme. A edição sai da lista, com as suas disciplinas do edital (a confirmação avisa). O ano, o cargo e a banca continuam reservados dentro do exame, para que a mesma prova não seja adicionada de novo por engano.
@@ -45,6 +55,7 @@ Um exame que ainda tem edições não pode ser excluído, nem uma banca que algu
 | Identificação do edital | Como o edital se identifica | Opcional, até 100 caracteres. Edições do mesmo edital repetem o texto |
 | Link do edital | O endereço oficial do edital | Opcional, endereço completo começando com `http://` ou `https://`, até 300 caracteres |
 | Data de aplicação | O dia em que a prova foi aplicada | Opcional, também para publicar. Não pode ser anterior a 1º de janeiro do ano do edital |
+| PDF do edital | Uma cópia do edital guardada no Simulab | Opcional, um por edição. Precisa ser um PDF de verdade (a extensão do nome não basta), com até 20 MB. É enviado só quando você salva |
 | Situação | Rascunho fica só na administração; Publicada é oferecida aos alunos | Obrigatório. Começa em Rascunho |
 
 Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúsculas e acentos não tornam um cargo diferente, e uma edição excluída ainda conta.
@@ -62,6 +73,10 @@ Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúscula
 | Há edições que indicam esta banca. Altere ou exclua essas edições primeiro. | Uma banca em uso não pode ser excluída. | Altere ou exclua essas edições. |
 | Esta edição não existe mais. | Alguém a excluiu com a sua tela aberta. | Volte ao exame. |
 | Há questões do banco que vieram desta edição, então ela não pode ser excluída. | Uma questão (rascunho ou publicada) aponta para esta edição. | Exclua as questões ou esvazie a edição delas, e depois exclua a edição. |
+| Este arquivo não é um PDF. | O conteúdo do arquivo não é de um PDF, mesmo que o nome termine em `.pdf`, ou o arquivo está vazio. | Escolha um PDF de verdade. |
+| O arquivo tem mais de 20 MB. | O arquivo passa do limite. | Escolha um arquivo menor ou reduza o PDF. |
+| Esta edição não tem PDF do edital. | Nenhum arquivo foi guardado, ou ele foi removido com a sua tela aberta. | Escolha um PDF e salve. |
+| O armazenamento de arquivos não está configurado neste servidor, então o PDF não pode ser salvo. | O servidor não tem o armazenamento de arquivos ligado. | Avise quem administra a instalação; o resto da edição continua funcionando. |
 
 ## Disciplinas do edital
 No cartão **Disciplinas do edital**, abaixo do formulário da edição, você registra as disciplinas exatamente como o edital as apresenta: o grupo (por exemplo "Conhecimentos Básicos"), o nome da disciplina e o número de questões. O cartão só aparece depois que a edição é salva; numa edição nova ele pede para salvar primeiro. Cada disciplina é salva pelo seu próprio diálogo ou ação: o botão **Salvar** da edição nunca as salva. Funciona em edições em rascunho e publicadas.
