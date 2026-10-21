@@ -1426,3 +1426,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 2, score 6/3: the main branch moved twice during the ship and the second move was one docs-only commit (`chore(order)`), yet the gate was run again (23 s build and 240 s tests). Went to a plugin note (`agile [generic]`, table above).
 - Lesson 3, score 3/6: the first full run of the ship took 307 s of test run (budget 5 min), then 276 s and 240 s on the same tree (Catalog, Identity and QuestionBank 4 to 5 min each). Not captured as a new item: F-144 (board #197) already exists for it; the numbers were added to it.
 - Validation ticks were never saved on this machine, so the evidence block reads `0 of 13 tested`; the owner's "validado" in the chat is recorded beside it in `## Delivery`.
+
+## 2026-10-21 - Sync with agile@canary 0.140.0
+- From 0.136.0 to 0.140.0 (4 minor versions). Copied (owner's OK): `docs/agile/workflow.pt-BR.md` (security reader #236, third agent file guard, user-chosen appearance #244, MVP cut #201), `docs/agile/workflow-examples.pt-BR.md`.
+- Merged (owner's OK, clean): `docs/agile/profile.md` (theme module: contrast, font, `/appearance` page details). Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (no upstream change).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present; technical-term rows not swept in this sync.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+- Commit: `chore: sync with agile@canary 0.140.0` on main. Item F-103 (validating in its worktree) needs the main branch merged in before its full suite.
