@@ -1,7 +1,7 @@
 ---
 feature: F-80
 epic: Assessment catalog
-status: validating
+status: done
 board: 123
 version: 1
 ---
@@ -200,3 +200,10 @@ Necessário para validar: Docker rodando (o app host sobe seus containers) e o a
 - 2026-10-21 test-fail — build blocked by a running process (Simulab.slnx), 1 red
 
 ## Delivery
+Gate time: 4 passes, 15 min 41 s — turn 1 (42 s), ship 2 (13 min 9 s), scan 1 (1 min 50 s), sealed 1 (1 min 50 s saved); 1 red
+Usage: 1399.8k weighted (estimate) — refine 34% · build 50% · ship 15% · other 1% — context per turn 175k → 215k — 2 sessions, 90 turns
+- Branch: `feature/F-80` (never pushed; deleted). Merge commit: `f812de4` on `main`. App version 1.9.0 → 1.10.0.
+- Tests: full suite green — Catalog 655, Web 2273, Identity 521, QuestionBank 526, Api 83, AppHost 83, Architecture 296, Jobs 25, Persistence 25, Storage 8, Email 19, Ai 10; 0 failed. Scan: GREEN.
+- Manual: `docs/manual/pt-BR/exams.md` (step 3). Technical page: `docs/flows/exam-list-search.md`. Glossary: nothing missing.
+- Validation evidence: the owner typed "validado" in the conversation; the per-step ticks were not recorded on this machine (0 of 16 tested by the evidence script), so no step is claimed as individually ticked.
+- Not done in the build: the app-host check of `/admin/exams` by Claude (screen behind sign-in); covered by bUnit and the validation script.
