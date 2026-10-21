@@ -2,7 +2,7 @@
 bug: B-33
 feature: F-49
 epic: Foundation and identity
-status: validating
+status: done
 board: 201
 severity: medium
 ---
@@ -105,3 +105,12 @@ git status --short docs/architecture
 ## Out of scope
 - The plugin's `sync.js` note and the docs step of `gate.js` (plugin repository).
 - Any change to `ToolCatalogueDoc`, `ModelToolAttribute` or the other DocGen switches.
+
+## Delivery
+- Branch: `bug/B-33`, merged with `--no-ff` (merge commit `c36baac`), version 1.8.0 -> 1.8.1.
+- Tests: `gate.js ship` GREEN, 4422 passed, 0 failed; `agile scan GREEN`; `gate.js docs`: 0 files changed.
+- Manual pages: none (no visible behavior changed).
+- Validation evidence: owner reported "validado B-33" in the conversation; ticks not recorded (0 of 3 tested in the tick store).
+
+Gate time: 4 passes, 19 min — turn 1 (28 s), ship 2 (16 min 9 s), scan 1 (2 min 23 s), sealed 2 (9 min 24 s saved); 0 red
+Usage: 647.2k weighted (estimate) — refine 38% · build 49% · ship 13% — context per turn 140k → 147k — 2 sessions, 56 turns
