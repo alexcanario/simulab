@@ -1,11 +1,11 @@
 ---
 feature: F-84
 epic: Foundation and identity
-status: building
+status: validating
 board: 127
 version: 1
 ---
-Autopilot: reviewed
+Autopilot: stop 2
 # Rotate the OpenIddict certificates without signing users out
 
 Technical terms: [glossary](../glossary.md)
@@ -111,7 +111,7 @@ Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
 | AC12 | `OpenIddictCertificatePolicyTests.Infra_RenewalKeepsSessionsAndDocumentsTheOverlapAndTheCutOff` |
 | AC13 | `AzurePublishFilesTests.Publish_CarriesNoPreviousCertificateOrVersionId`, `Publish_KeepsEachHostsKeyRingApartAndGivesOnlyTheApiTheSecrets` (the role) |
 | AC14 | the existing missing-key test (no UI text is added) |
-| AC15 | validation step |
+| AC15 | validation steps 3 to 7 |
 | AC16 | `OpenIddictPreviousCertificateTokenTests.Renewal_PreviousPairSetAsConfiguration_IsNotTrusted`, `OpenIddictPreviousCertificateStartTests.Start_PreviousCertificateOfferedThroughConfiguration_IsNotLoaded` |
 | AC17 | `OpenIddictPreviousCertificateStartTests.Start_WithAPreviousCertificate_LogsTheThumbprintsOfEachRole` |
 
@@ -156,13 +156,156 @@ Tests locked: 3a970ad5771dbeb6865f9bebe93c08e96c5e8e97 (5 files); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of build. -->
+### English
+Needed to validate: the staging environment running with the two certificates of F-73 and this branch deployed to it, and you running the `az` commands below (they change the shared Azure staging; Claude did not run them). In place now: no, the deploy of this branch is step 1. Replace `<resource-group>`, `<vault>`, `<old-version>` and `<revision>` with the values of staging (the vault and the revision names are chosen by Azure; docs/infra.md says where to read them). There is no new screen, so there is no language switch and no keyboard pass in this script.
+
+1. [ ] Deploy this branch to staging the way docs/infra.md ("Deploy workflow") describes, so the `api` runs this code. If that workflow deploys only the main branch, stop here and tell me: the staging steps then wait for the ship.
+2. Read the log of the `api` right after the deploy: there is one version of each certificate, so no previous certificate.
+   ```powershell
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 2.1 Two lines appear, `OpenIddict signing certificates: current <thumbprint>, previous none` and the same for encryption. Write down the two `current` thumbprints (they become the old ones).
+   - [ ] 2.2 No line says `previous certificate ... ignored`.
+3. Sign in on staging with two test accounts, one in each browser (or one browser and one private window), before any renewal.
+   - [ ] 3.1 Browser 1: sign in as tester 1 and open any page of the app.
+   - [ ] 3.2 Browser 2: sign in as tester 2, then close the tab without signing out, and do nothing else with it until step 7.
+4. Renew both certificates and restart the `api` right away (the renewal of docs/infra.md, step 7).
+   ```powershell
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--SigningCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--EncryptionCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az containerapp revision list -g <resource-group> -n api --query "[?properties.active].name" -o tsv
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--SigningCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--EncryptionCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az containerapp revision list -g <resource-group> -n api --query "[?properties.active].name" -o tsv
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 4.1 Each certificate lists two versions, both enabled. Write down the older version id of each (`<old-version>`).
+   - [ ] 4.2 The log shows `current <new thumbprint>, previous <old thumbprint>` for signing and for encryption, with the old thumbprints of step 2.1.
+   - [ ] 4.3 No `previous certificate ... ignored` line. If one says the versions could not be listed (`UnauthorizedAccessException` or `RequestFailedException`), the role `Key Vault Secrets User` does not allow listing versions: stop and tell me.
+5. At least 16 minutes after the sign-in of step 3.1 (the access token lives 15 minutes), use browser 1 again.
+   - [ ] 5.1 Browser 1: click any link of the app; you stay signed in (the session was refreshed, now with the new certificates).
+6. Cut the old certificates off: disable the older version of each certificate and restart the `api`.
+   ```powershell
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--SigningCertificate --version <old-version> --enabled false
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--EncryptionCertificate --version <old-version> --enabled false
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--SigningCertificate --version <old-version> --enabled false
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--EncryptionCertificate --version <old-version> --enabled false
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 6.1 The log shows `current <new thumbprint>, previous none` for both roles.
+7. Check both browsers after the cut-off.
+   - [ ] 7.1 Browser 1 (refreshed after the renewal): click any link; you stay signed in.
+   - [ ] 7.2 Browser 2 (idle since step 3.2, still with a token of the old certificates): reopen the app; you land on the sign-in page.
+8. Findings of the security scan that Claude closed as false positive (this block is exactly what `scan.js closed` prints; `reopen` undoes a closure):
+   ```text
+   Closed by Claude:
+   | id | severity | where | reason |
+   |---|---|---|---|
+   | 0f4dea5d | critical | tests/Hosts/Simulab.AppHost.Tests/AzurePublishFilesTests.cs:388 | public Azure built-in role definition id of Key Vault Secrets User, not a credential (evidence: AzurePublishFilesTests.cs:388 const SecretsUser asserted inside api-roles-keyvault bicep; closed by owner before as 39bbef85) (reviewer confirmed) |
+   ```
+   ```powershell
+   node "D:/dev/_icontrol/agile-canary/scripts/scan.js" reopen 0f4dea5d --reason "<why>"
+   ```
+   ```bash
+   node "D:/dev/_icontrol/agile-canary/scripts/scan.js" reopen 0f4dea5d --reason "<why>"
+   ```
+   - [ ] 8.1 Read the row; if you disagree with the closure, run the command above with your reason.
+
+### pt-BR
+Necessário para validar: o ambiente de staging rodando com os dois certificados da F-73 e este branch publicado nele, e você rodando os comandos `az` abaixo (eles mudam o staging compartilhado no Azure; Claude não os rodou). No lugar agora: não, a publicação deste branch é o passo 1. Troque `<resource-group>`, `<vault>`, `<old-version>` e `<revision>` pelos valores do staging (os nomes do vault e da revisão são escolhidos pelo Azure; docs/infra.md diz onde ler). Não há tela nova, então não há troca de idioma nem passagem só por teclado neste roteiro.
+
+1. [ ] Publique este branch no staging como docs/infra.md ("Deploy workflow") descreve, para que o `api` rode este código. Se esse fluxo publica só o branch principal, pare aqui e me avise: os passos do staging esperam o ship.
+2. Leia o log do `api` logo após a publicação: há uma versão de cada certificado, então não há certificado anterior.
+   ```powershell
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 2.1 Aparecem duas linhas, `OpenIddict signing certificates: current <thumbprint>, previous none` e a mesma para encryption. Anote os dois `current` (viram os antigos).
+   - [ ] 2.2 Nenhuma linha diz `previous certificate ... ignored`.
+3. Entre no staging com duas contas de teste, uma em cada navegador (ou um navegador e uma janela anônima), antes de qualquer renovação.
+   - [ ] 3.1 Navegador 1: entre como testador 1 e abra qualquer página do app.
+   - [ ] 3.2 Navegador 2: entre como testador 2, feche a aba sem sair da conta e não faça mais nada com ele até o passo 7.
+4. Renove os dois certificados e reinicie o `api` logo em seguida (a renovação de docs/infra.md, passo 7).
+   ```powershell
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--SigningCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--EncryptionCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az containerapp revision list -g <resource-group> -n api --query "[?properties.active].name" -o tsv
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--SigningCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-signing-policy.json"
+   az keyvault certificate create --vault-name <vault> -n OpenIddict--EncryptionCertificate -p "@src/Hosts/Simulab.AppHost/keyvault/openiddict-encryption-policy.json"
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--SigningCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az keyvault certificate list-versions --vault-name <vault> -n OpenIddict--EncryptionCertificate --query "[].{version:id,enabled:attributes.enabled,created:attributes.created}" -o table
+   az containerapp revision list -g <resource-group> -n api --query "[?properties.active].name" -o tsv
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 4.1 Cada certificado lista duas versões, ambas habilitadas. Anote o id da versão mais antiga de cada um (`<old-version>`).
+   - [ ] 4.2 O log mostra `current <thumbprint novo>, previous <thumbprint antigo>` para signing e para encryption, com os thumbprints antigos do passo 2.1.
+   - [ ] 4.3 Nenhuma linha `previous certificate ... ignored`. Se alguma disser que as versões não puderam ser listadas (`UnauthorizedAccessException` ou `RequestFailedException`), a função `Key Vault Secrets User` não permite listar versões: pare e me avise.
+5. Pelo menos 16 minutos depois do login do passo 3.1 (o token de acesso vive 15 minutos), use o navegador 1 de novo.
+   - [ ] 5.1 Navegador 1: clique em qualquer link do app; você continua conectado (a sessão foi renovada, agora com os certificados novos).
+6. Corte os certificados antigos: desabilite a versão mais antiga de cada certificado e reinicie o `api`.
+   ```powershell
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--SigningCertificate --version <old-version> --enabled false
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--EncryptionCertificate --version <old-version> --enabled false
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | Select-String "OpenIddict"
+   ```
+   ```bash
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--SigningCertificate --version <old-version> --enabled false
+   az keyvault certificate set-attributes --vault-name <vault> -n OpenIddict--EncryptionCertificate --version <old-version> --enabled false
+   az containerapp revision restart -g <resource-group> -n api --revision <revision>
+   az containerapp logs show -g <resource-group> -n api --tail 300 | grep "OpenIddict"
+   ```
+   - [ ] 6.1 O log mostra `current <thumbprint novo>, previous none` nos dois papéis.
+7. Confira os dois navegadores depois do corte.
+   - [ ] 7.1 Navegador 1 (renovado depois da renovação dos certificados): clique em qualquer link; você continua conectado.
+   - [ ] 7.2 Navegador 2 (parado desde o passo 3.2, ainda com um token dos certificados antigos): reabra o app; você cai na página de login.
+8. Achados do scan de segurança que Claude fechou como falso positivo (o bloco é exatamente o que `scan.js closed` imprime; `reopen` desfaz o fechamento):
+   ```text
+   Closed by Claude:
+   | id | severity | where | reason |
+   |---|---|---|---|
+   | 0f4dea5d | critical | tests/Hosts/Simulab.AppHost.Tests/AzurePublishFilesTests.cs:388 | public Azure built-in role definition id of Key Vault Secrets User, not a credential (evidence: AzurePublishFilesTests.cs:388 const SecretsUser asserted inside api-roles-keyvault bicep; closed by owner before as 39bbef85) (reviewer confirmed) |
+   ```
+   ```powershell
+   node "D:/dev/_icontrol/agile-canary/scripts/scan.js" reopen 0f4dea5d --reason "<why>"
+   ```
+   ```bash
+   node "D:/dev/_icontrol/agile-canary/scripts/scan.js" reopen 0f4dea5d --reason "<why>"
+   ```
+   - [ ] 8.1 Leia a linha; se discordar do fechamento, rode o comando acima com o seu motivo.
 
 ## Events
 
 - 2026-10-21 test-fail — 2 new warning(s): CA1873 in src/Modules/Identity/Simulab.Identity.Infrastructure/OpenIddictCertificateReporter.cs; CA106, 2 reds
 - 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.AppHost.Tests.OpenIddictCertificatePolicyTests.Infra_RenewalKeepsSessionsAndDocumen, 1 red
 - 2026-10-21 stop — scan: history finding 7ba94396 needs the owner
+- 2026-10-21 stop — stop 2: validation script
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
