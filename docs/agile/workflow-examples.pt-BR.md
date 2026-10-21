@@ -4466,10 +4466,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (33)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (34)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (6)
-ok   AC5: the report states the skills (24) and the agents (7)
+ok   AC5: the report states the skills (24) and the agents (8)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -6282,3 +6282,31 @@ Resultado
 ```
 
 "Night Owl" já aparece na lista de temas claros, sem recarregar a página, e fica no `localStorage` do navegador, na chave `appearance.themes`: outro navegador não o vê, e a pasta de temas do servidor não muda. O texto e o foco que faltaram vêm do tema claro padrão, Cais Light, e nenhum par de contraste falhou, então não há aviso. Se ela importar o mesmo arquivo de novo, o tema novo vira `night-owl-2`, com o nome "Night Owl (2)"; se escolher um tema do próprio VS Code, a página diz `Não importado: nenhuma chave de cor deste app` e nada é guardado.
+
+### 14.169 A leitura de segurança de um item: `/agile:review F-7 security`
+
+O item F-7 reembolsa um pedido e vai guardar uma porta. Antes de validar, você pede a leitura de segurança. Ela não escreve nada: o agente `security` só lê e devolve uma tabela. Sem o argumento `security` o comando é o revisor de sempre. Sem id, ou com um id sem branch e sem worktree (um app já pronto), o comando para e diz o motivo (o app pronto é do legacy-lens), e nenhum agente roda.
+
+```
+/agile:review F-7 security
+```
+
+O Claude acha a worktree do item, usa o `docs/security/findings.md` como está (a varredura roda antes só quando o arquivo é mais velho que o último commit da branch) e diz o modelo de cada modo antes de chamar, um modo por chamada:
+
+```
+Model: sonnet (leaks: no signal)
+Model: opus (pentest: reasons about attacks)
+```
+
+O `leaks` achou a senha na string de conexão (mostrada como `[redacted: ...]`, nunca o valor) e o e-mail no log; o `pentest` achou a rota sem autorização e disse o ataque e o teste que o prova, sem carga de exploração. O Claude confere cada bloqueador e grave no código e mostra a tabela de verdade, tirada da execução real sobre uma cópia de teste:
+
+```
+| # | Severity | Finding | Verdict | Action |
+|---|---|---|---|---|
+| 1 | blocker | `POST /api/v1/orders/{id}/refund` has no `.RequireAuthorization()` (`Program.cs:3-7`). Anonymous callers can refund any order. | confirmed | fix now |
+| 2 | blocker | The handler checks neither the manager role nor that the order belongs to the caller's tenant (`Program.cs:3-7`). Suggested tests: `Refund_WithoutManagerRole_Returns403`, `Refund_OrderOfOtherTenant_Returns403`. | confirmed | fix now |
+| 3 | blocker | A production connection string with a plaintext password is committed in `appsettings.Production.json:3`. | confirmed | fix now: move it to a secret store and rotate the password |
+| 4 | major | `body.CustomerEmail` (personal data) is written to the Information log (`Program.cs:5`). | confirmed | fix now |
+```
+
+Os três bloqueadores confirmados impedem o merge, como os do revisor. Você decide cada linha; o Claude corrige as que você mandar, grava uma linha por achado e a linha `Security coverage` em `## Decisions`. No build, um item que guarda uma porta recebe a proposta uma vez, depois da varredura: "Quer a leitura de segurança do agente (só lê, não escreve, custa uma chamada)?", e só roda com o seu sim; no piloto automático ela não é proposta e o relatório traz a linha `Agente de segurança: não rodou (autopilot); /agile:review F-7 security`.
