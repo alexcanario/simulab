@@ -18,6 +18,8 @@ Found at the ship of F-89 (2026-10-21). Since F-49 (`959b821`, "turn off the Doc
 
 Evidence: the gate log of the F-89 ship (`agile gate RED: tests failed (Simulab.slnx): Simulab.ArchitectureTests.DocGen.ToolCatalogueDocTests.CommittedCatalogue_MatchesTheToolsInTheProductionAssemblies`). The F-89 ship restored both files from `main` and the next full run was green (4382 tests), so `main` still carries the inconsistency and the next item whose ship runs the docs command meets it again.
 
+Added 2026-10-21 (retro of F-84): it did. At the ship of F-84, `gate.js docs` ran `dotnet run --project tools/Simulab.DocGen` and printed `agile docs GREEN: 2 file(s) changed under docs/architecture/`; `git status` showed ` M docs/architecture/README.md` and ` D docs/architecture/tools.md` (the same two files). They were restored with `git checkout --` and not committed, and the next full run was green (4409 tests). Evidence: the output of that docs run.
+
 ## Start
 - Depends on: nothing (F-49 is done; the catalogue code stays).
 - Waits on (to start): nothing.
