@@ -2,7 +2,7 @@
 bug: B-33
 feature: F-49
 epic: Foundation and identity
-status: refining
+status: approved
 board: 201
 severity: medium
 ---
