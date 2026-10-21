@@ -1,7 +1,7 @@
 ---
 feature: F-80
 epic: Assessment catalog
-status: building
+status: validating
 board: 123
 version: 1
 ---
@@ -112,6 +112,7 @@ Tests locked: d87c1785509c0ce0b0b45c5c357a57f0e8d0dc35 (2 files); unlocks: 0
 - 2026-10-21 — Technical, no question: no new package, no migration, no OpenAPI change (`search` already exists), no `docs/architecture/` regeneration.
 - 2026-10-21 — The `## Start` note "not parallel with F-57" is dropped: F-57 is `done` (merge on `main`).
 - 2026-10-21 — plan — 1 tests first: `ExamSearchEndpointTests` (AC1-AC9 over HTTP) and `ExamsSearchPlaceholderTests` (AC10, bUnit), seen failing, committed, locked → the new tests are red for a missing behavior; 2 `CatalogText.SearchWords` helper + `ExamQueries` word-by-word match over name, authority name and scope detail, `PublishedExamQueries` switched to the helper → Catalog tests green, student tests unchanged; 3 placeholder in the three resx files → Web tests and missing-key test green; 4 manual (pt-BR), flow page `docs/flows/exam-list-search.md`, glossary check → `techdocs.js check F-80` green; 5 app-host check of `/admin/exams`, coverage table, scan, validation script → status `validating`.
+- 2026-10-21 — Reuse: `ComparableText.Normalize` via `CatalogText`, the student query's word rule (now `CatalogText.SearchWords`, shared), `Exams.Search.Placeholder` key kept. Shortcuts: none. Not done in the build: the app-host check of `/admin/exams` (the page sits behind sign-in and the app host needs the owner's containers); the screen is covered by bUnit and the validation script.
 - 2026-10-21 — The GitHub board was rate limited when the build started: the `building` mirror is sent when the quota returns.
 
 ## Out of scope
@@ -127,6 +128,71 @@ Tests locked: d87c1785509c0ce0b0b45c5c357a57f0e8d0dc35 (2 files); unlocks: 0
 ## Change notes
 
 ## Validation script
+### English
+Needed to validate: Docker running (the app host starts its containers) and the seeded admin `admin@simulab.local` (F-52; in place now: yes). The three exams are created in step 2 through the back office.
+
+1. Start the app (the app host, which starts the database and the other services in containers; stop it before any build). This worktree uses its own database, `simulab_f80`, so the shared local one is untouched.
+   - [ ] 1.1 In a terminal, from the item's worktree, run the command for your shell below and wait for the Aspire dashboard address.
+   ```powershell
+   cd D:\wt\simulab\f-80-backoffice-search; $env:Database__Name = "simulab_f80"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   cd /d/wt/simulab/f-80-backoffice-search && Database__Name=simulab_f80 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   - [ ] 1.2 Open https://localhost:7125/sign-in and sign in as `admin@simulab.local` (its password is the local development one in the project settings).
+2. Create the three exams the search will look for.
+   - [ ] 2.1 In the sidebar (left menu) click Content, then Issuing authorities, then Add; name it `Instituto Zefir` and save.
+   - [ ] 2.2 In the sidebar click Exams, then Add; pick the authority `Instituto Zefir`, name the exam `Analista Quimera`, scope National, save.
+   - [ ] 2.3 Add a second exam of the same authority named `Escrevente Quimera`, scope State (the picker for the state appears), state São Paulo (SP), save.
+   - [ ] 2.4 Add a third exam of the same authority named `Guarda Quimera`, scope Municipal, detail `Guarulhos`, save.
+3. The search box says what it searches.
+   - [ ] 3.1 In the sidebar click Exams → the search box above the table reads "Search by exam, authority or place".
+4. Find the exams by authority and by place.
+   - [ ] 4.1 Type `zefir` in the search box (any case) → the three exams of Instituto Zefir are listed, and the table's total says 3.
+   - [ ] 4.2 Replace it with `sao paulo quimera` → only `Escrevente Quimera` is listed; `SP QUIMERA` gives the same.
+   - [ ] 4.3 Replace it with `guarulhos` → only `Guarda Quimera` is listed.
+   - [ ] 4.4 Replace it with `quimera analista` (words out of order) → only `Analista Quimera` is listed; `zefir rio` → the empty-list message names the term.
+5. The search works with the filters.
+   - [ ] 5.1 With `zefir` typed, pick the Scope filter State → only `Escrevente Quimera` remains and the total says 1; clear the filter → three again.
+   - [ ] 5.2 Clear the search box (or type only spaces) → the whole list comes back.
+6. The texts follow the language.
+   - [ ] 6.1 Switch the app language with the globe in the app bar (the top strip) to Portuguese (Brazil) → the placeholder reads "Pesquisar por exame, órgão ou local"; to Portuguese (Portugal) → "Pesquisar por exame, entidade ou local"; back to English.
+7. Who may use it, and the keyboard.
+   - [ ] 7.1 Sign out, sign up a student at `/sign-up` (the verification mail is in the mail catcher) and open `/admin/exams` → the page is refused; sign back in as the admin.
+   - [ ] 7.2 With the keyboard only: Tab into the search box, type `guarulhos`, wait for the list to filter → `Guarda Quimera` is the only row.
+
+### pt-BR
+Necessário para validar: Docker rodando (o app host sobe seus containers) e o admin semeado `admin@simulab.local` (F-52; no lugar agora: sim). Os três exames são criados no passo 2 pelo back office.
+
+1. Inicie o app (o app host, que sobe o banco e os demais serviços em containers; pare-o antes de qualquer build). Este worktree usa um banco próprio, `simulab_f80`, então o banco local compartilhado não é tocado.
+   - [ ] 1.1 Em um terminal, na pasta do worktree do item, rode o comando do seu shell abaixo e espere o endereço do painel do Aspire.
+   ```powershell
+   cd D:\wt\simulab\f-80-backoffice-search; $env:Database__Name = "simulab_f80"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   cd /d/wt/simulab/f-80-backoffice-search && Database__Name=simulab_f80 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   - [ ] 1.2 Abra https://localhost:7125/sign-in e entre como `admin@simulab.local` (a senha é a de desenvolvimento local, nas configurações do projeto).
+2. Crie os três exames que a busca vai procurar.
+   - [ ] 2.1 No menu lateral clique em Content, depois Issuing authorities, depois Add; dê o nome `Instituto Zefir` e salve.
+   - [ ] 2.2 No menu lateral clique em Exams, depois Add; escolha o órgão `Instituto Zefir`, nome `Analista Quimera`, abrangência National (nacional), salve.
+   - [ ] 2.3 Adicione um segundo exame do mesmo órgão chamado `Escrevente Quimera`, abrangência State (estadual; aparece o seletor de estado), estado São Paulo (SP), salve.
+   - [ ] 2.4 Adicione um terceiro exame do mesmo órgão chamado `Guarda Quimera`, abrangência Municipal, detalhe `Guarulhos`, salve.
+3. A caixa de busca diz o que procura.
+   - [ ] 3.1 No menu lateral clique em Exams → a caixa de busca acima da tabela mostra "Pesquisar por exame, órgão ou local" (no idioma em uso; em inglês, "Search by exam, authority or place").
+4. Encontre os exames pelo órgão e pelo local.
+   - [ ] 4.1 Digite `zefir` na caixa de busca (maiúscula ou minúscula) → os três exames do Instituto Zefir aparecem, e o total da tabela diz 3.
+   - [ ] 4.2 Troque por `sao paulo quimera` → só `Escrevente Quimera` aparece; `SP QUIMERA` dá o mesmo resultado.
+   - [ ] 4.3 Troque por `guarulhos` → só `Guarda Quimera` aparece.
+   - [ ] 4.4 Troque por `quimera analista` (palavras fora de ordem) → só `Analista Quimera` aparece; `zefir rio` → a mensagem de lista vazia cita o termo.
+5. A busca funciona junto com os filtros.
+   - [ ] 5.1 Com `zefir` digitado, escolha o filtro de abrangência State → só `Escrevente Quimera` fica e o total diz 1; limpe o filtro → voltam os três.
+   - [ ] 5.2 Limpe a caixa de busca (ou digite só espaços) → a lista inteira volta.
+6. Os textos seguem o idioma.
+   - [ ] 6.1 Troque o idioma do app pelo globo na barra superior (a faixa no alto) para português (Brasil) → o texto da caixa é "Pesquisar por exame, órgão ou local"; para português (Portugal) → "Pesquisar por exame, entidade ou local"; volte para inglês.
+7. Quem pode usar, e o teclado.
+   - [ ] 7.1 Saia, cadastre um aluno em `/sign-up` (o e-mail de verificação está no capturador de e-mail) e abra `/admin/exams` → a página é recusada; entre de novo como admin.
+   - [ ] 7.2 Só com o teclado: Tab até a caixa de busca, digite `guarulhos`, espere a lista filtrar → `Guarda Quimera` é a única linha.
 
 ## Events
 
