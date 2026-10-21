@@ -1457,3 +1457,11 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 3 (score 4/4): a router-level guard needs a test through `Routes`, found by the independent review. Went to the plugin note above.
 - Seen again: the ticks of the validation widget did not reach `validation-ticks.js` (`0 of 10 tested` for F-85, fourth time after F-78, F-84, F-103); the open note above stays with this fourth case as evidence.
 - Suite time: inside the budget on the final run (273 s) but the first run of the ship took 7 m 12 s to 7 m 49 s per slow project on a shared machine; watched.
+
+## 2026-10-21 - F-106 Matching questions
+- Events: question 1 (asked 6, from context 4), blocked 1 (owner unlock of three writing defects in locked tests); Gate time 32 min 27 s over 5 passes, 0 red; Usage 11770.0k weighted. Owner picked lesson 1.
+- Lesson 1 (score 1/8): `AppSectionCard` gives its id only to the title (`{Id}-title`), so a test that checks `#<Id>` passes vacuously; found by the independent review, same defect as F-97 and F-104. Went to `web-project.md` (`rule-line.js add`).
+- Lesson 2 (score 7/6), not applied (owner): before the lock, read each red test's message; three red tests threw `ArgumentNullException` from their own helper (`Lefts(null)` bound null as the `params` array) and needed an unlock later.
+- Lesson 3 (score 2/7), not applied (owner): the full suite took about 12 min (Catalog 11 m 27 s, Identity 11 m 25 s, QuestionBank 10 m 49 s), over the 5 min budget; no idea captured.
+- Seen again: the widget ticks did not reach `validation-ticks.js` (`0 of 16 tested`, fifth time); the open note stays.
+- Process slip: the app version bump ran on main after the merge instead of on the item branch before it (`AppVersionTests` 4/4 green on main).
