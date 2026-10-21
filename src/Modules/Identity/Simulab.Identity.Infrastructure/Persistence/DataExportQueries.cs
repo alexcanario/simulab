@@ -39,6 +39,7 @@ public sealed class DataExportQueries(IdentityModuleDbContext context) : IDataEx
         var consents = await context.ConsentRecords.AsNoTracking()
             .Where(consent => consent.UserId == userId)
             .OrderBy(consent => consent.AcceptedAt)
+            .ThenBy(consent => consent.Id)
             .Select(consent => new ConsentDataResponse(
                 consent.TermsVersion,
                 consent.PrivacyVersion,

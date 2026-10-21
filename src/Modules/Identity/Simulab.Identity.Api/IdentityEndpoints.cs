@@ -9,6 +9,7 @@ using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.GoogleSignIn;
+using Simulab.Identity.Application.LegalAcceptance;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -44,6 +45,15 @@ public static class IdentityEndpoints
 
         group.MapGet("/legal-documents/{topic}", GetLegalDocumentAsync)
             .WithName("GetLegalDocument");
+
+        // F-85: the caller's own acceptance of the current legal documents; no id in the route or the body (T1, T2).
+        group.MapGet("/legal-acceptance", GetLegalAcceptanceAsync)
+            .WithName("GetLegalAcceptance")
+            .RequireAuthorization();
+
+        group.MapPost("/legal-acceptances", AcceptLegalDocumentsAsync)
+            .WithName("AcceptLegalDocuments")
+            .RequireAuthorization();
 
         // F-7: password recovery is anonymous (BR12) and answers the same whether the account exists.
         group.MapPost("/password-reset-requests", RequestPasswordResetAsync).WithName("RequestPasswordReset");
@@ -125,6 +135,48 @@ public static class IdentityEndpoints
         // F-8 BR5, BR8: the name and language as they are now, so a sign-in on any device starts with them.
         var profile = await profiles.GetAsync(userId);
         return Results.Ok(new SessionInfoResponse(subject, email, sessionJti, effective.ToList(), profile?.FullName, profile?.PreferredLanguage));
+    }
+
+    /// <summary>F-85 BR1, BR2: what the caller still owes, in the language of the request; a token whose user is gone is a 401.</summary>
+    private static async Task<IResult> GetLegalAcceptanceAsync(
+        HttpContext context,
+        ClaimsPrincipal user,
+        LegalAcceptanceHandler handler,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var status = await handler.GetStatusAsync(userId, RequestLocale.From(context.Request), cancellationToken);
+        return status is null ? Results.Unauthorized() : Results.Ok(status);
+    }
+
+    /// <summary>F-85 BR3-BR5: 201 when a row was written, 200 when nothing was owed, 409 or 400 with a code otherwise.</summary>
+    private static async Task<IResult> AcceptLegalDocumentsAsync(
+        AcceptLegalDocumentsRequest request,
+        HttpContext context,
+        ClaimsPrincipal user,
+        LegalAcceptanceHandler handler,
+        ClientAddress clientAddress,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!TryGetUserId(user, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await handler.AcceptAsync(userId, request, RequestLocale.From(context.Request), clientAddress.Of(context), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return result.Value ? Results.Created() : Results.Ok();
+        }
+
+        return result.Error!.Kind == ErrorKind.NotFound ? Results.Unauthorized() : Problem(result.Error);
     }
 
     private static async Task<IResult> GetProfileAsync(ClaimsPrincipal user, ProfileHandler handler)

@@ -1,4 +1,4 @@
-using Simulab.Identity.Application.Abstractions;
+using Simulab.Identity.Application.LegalAcceptance;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Results;
 
@@ -9,7 +9,7 @@ namespace Simulab.Identity.Application.Registration;
 /// the 18+ declaration, both acceptances, and the document versions the page showed. One place, so the password
 /// sign-up and the Google sign-up can never drift apart.
 /// </summary>
-public sealed class RegistrationTerms(ILegalDocumentProvider legalDocuments)
+public sealed class RegistrationTerms(LegalDocumentReader legalDocuments)
 {
     /// <summary>The trimmed name, or null when the visitor left it empty.</summary>
     public static string? NormalizeFullName(string? fullName) =>
@@ -46,14 +46,9 @@ public sealed class RegistrationTerms(ILegalDocumentProvider legalDocuments)
             return Failure(IdentityErrorCodes.ConsentRequired, ErrorKind.Validation);
         }
 
-        var terms = await legalDocuments.GetCurrentAsync(LegalTopic.Terms, locale, cancellationToken);
-        var privacy = await legalDocuments.GetCurrentAsync(LegalTopic.Privacy, locale, cancellationToken);
+        var current = await legalDocuments.GetCurrentAsync(locale, cancellationToken);
 
-        var outdated =
-            (terms is not null && !string.Equals(terms.Version, termsVersion, StringComparison.Ordinal))
-            || (privacy is not null && !string.Equals(privacy.Version, privacyVersion, StringComparison.Ordinal));
-
-        return outdated
+        return current.Differs(termsVersion, privacyVersion)
             ? Failure(IdentityErrorCodes.TermsVersionOutdated, ErrorKind.Conflict)
             : Result.Success();
     }

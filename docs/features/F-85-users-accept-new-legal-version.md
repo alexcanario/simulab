@@ -133,6 +133,9 @@ Rows show only the documents that changed since the last acceptance (both when t
 
 ## Criterion → test
 
+Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
+
+
 | Criterion | Test |
 |---|---|
 | AC1 | `LegalAcceptanceEndpointTests.Status_LastAcceptanceIsCurrent_DoesNotOwe` |

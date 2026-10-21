@@ -11,6 +11,7 @@ using OpenIddict.Abstractions;
 using Simulab.Identity.Application.Abstractions;
 using Simulab.Identity.Application.Account;
 using Simulab.Identity.Application.GoogleSignIn;
+using Simulab.Identity.Application.LegalAcceptance;
 using Simulab.Identity.Application.Passwords;
 using Simulab.Identity.Application.Profile;
 using Simulab.Identity.Application.Registration;
@@ -119,6 +120,8 @@ public static class IdentityModule
         // The verification email is written from this module's own resources.
         services.AddLocalization();
 
+        services.AddScoped<LegalDocumentReader>();
+        services.AddScoped<LegalAcceptanceHandler>();
         services.AddScoped<RegistrationTerms>();
         services.AddScoped<RegisterUserHandler>();
         services.AddScoped<VerifyEmailHandler>();
