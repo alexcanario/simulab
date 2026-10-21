@@ -1449,3 +1449,11 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column and link lines present; technical-term rows not swept.
 - Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-21 - F-85 Existing users accept a new legal document version
+- Events: question 1 (asked 6, from context 2), test-fail 1; Gate time 25 min 32 s over 7 passes; Usage 6497.2k weighted. Owner picked all three lessons.
+- Lesson 1 (score 3/6): a new pt-BR manual page also needs frozen pt-PT and en copies in the same commit; `FrozenManualTests` was red on 4 cases and the ship needed a second 7-minute run. Went to `project.md` line 133 (replaced, `rule-line.js replace`); the architecture test is already the strong check.
+- Lesson 2 (score 2/7): a component around the router must not inject Redis-backed services eagerly (16 Web host cases answered 500: `No endpoints specified ... ConnectionStrings:redis`). Went to the new hidden-fact file `web-project.md` (paths `src/Hosts/Simulab.Web/Components/**`).
+- Lesson 3 (score 4/4): a router-level guard needs a test through `Routes`, found by the independent review. Went to the plugin note above.
+- Seen again: the ticks of the validation widget did not reach `validation-ticks.js` (`0 of 10 tested` for F-85, fourth time after F-78, F-84, F-103); the open note above stays with this fourth case as evidence.
+- Suite time: inside the budget on the final run (273 s) but the first run of the ship took 7 m 12 s to 7 m 49 s per slow project on a shared machine; watched.
