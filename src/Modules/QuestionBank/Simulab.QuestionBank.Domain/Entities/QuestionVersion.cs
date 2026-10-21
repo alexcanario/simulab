@@ -12,7 +12,7 @@ namespace Simulab.QuestionBank.Domain.Entities;
 public sealed class QuestionVersion : TenantEntity
 {
     private readonly List<QuestionVersionOption> _options = [];
-    private List<QuestionVersionMatchItem>? _matchItems = [];
+    private readonly List<QuestionVersionMatchItem>? _matchItems = [];
 
     // For EF.
     private QuestionVersion()

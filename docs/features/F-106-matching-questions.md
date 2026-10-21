@@ -148,7 +148,7 @@ No mockup (owner, 2026-10-21): the form gains a fourth type card and one new sec
 
 ## Criterion → test
 
-Tests locked: ec77fdd9232fac264b5d9c3239a8fcca650da096 (7 files); unlocks: 0
+Tests locked: e8cca65aa1473a34dbeb4bb4375e2290f71d799b (7 files); unlocks: 1
 
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
 | Criterion | Test |
