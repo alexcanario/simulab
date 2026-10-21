@@ -3,7 +3,7 @@ feature: F-85
 epic: Foundation and identity
 status: building
 board: 128
-version: 1
+version: 2
 ---
 # Existing users accept a new legal document version
 
@@ -45,7 +45,7 @@ Nobody keeps using Simulab on terms or a privacy policy they never saw: when eit
 - BR4 Accepting when nothing is owed (already current, a second click, two tabs) writes no row and succeeds.
 - BR5 Accepting needs the versions the page showed. When they are not the current ones (a new version was published meanwhile), the answer is `legal_acceptance.version_outdated` and nothing is written; the page reloads with the newer documents.
 - BR6 Gate: a signed-in user who owes an acceptance is sent to `/accept-terms` from every Web route except the exempt ones (BR7), whatever the sign-in method (password, code, Google) and also when the session was already open before the version changed. The check happens on each navigation (a version published while the user is on a page is caught at the next one). The page asked for is kept as a local `returnUrl` only; any other value goes to the home page.
-- BR7 Exempt routes, so a user who does not accept keeps their rights (D4): `/accept-terms`, `/terms`, `/privacy`, `/account` (download my data, delete my account, with the rest of that page), and the sign-out endpoint. Nothing else.
+- BR7 Exempt routes, so a user who does not accept keeps their rights (D4): `/accept-terms`, `/terms`, `/privacy`, `/account` (download my data, delete my account, with the rest of that page), the sign-out endpoint, and the plain Web endpoints outside the Blazor router, which only proxy Api data that BR9 leaves open or finish a sign-in or a language change: `/account/sign-in-complete`, `/account/profile-applied`, `/culture/set`, the Google start and complete endpoints, the notice-document and question-image endpoints (change note v2). Nothing else.
 - BR8 The page has no "decline" button. Not accepting is signing out (or leaving the app open on an exempt route); the user is not locked into a state they cannot leave.
 - BR9 The gate belongs to the Web shell: the Api is not blocked for a user who owes an acceptance (D5). The token endpoint, the refresh grant and the sign-in screens are unchanged.
 - BR10 No schema change: the latest acceptance is a query over `consent_records` using `ix_consent_records_user_id`.
@@ -54,7 +54,7 @@ Nobody keeps using Simulab on terms or a privacy policy they never saw: when eit
 - `/accept-terms` — new page in the authentication layout: title, one line saying why, one row per document that changed (name, version, effective date, link "Read" to `/terms` or `/privacy`), the draft notice when the document is a placeholder, one primary button "Accept and continue", and a secondary "Sign out". Loading, error (with retry) and "version outdated" (reload) states.
 - `GET /api/v1/identity/legal-acceptance` (authenticated, own account only) — `{ owes: bool, documents: [{ topic, version, effectiveDate, title, isPlaceholder, changed }] }` for the current versions in the caller's locale; `changed` is true for a document whose version is not the one in the last acceptance (all of them when there is none).
 - `POST /api/v1/identity/legal-acceptances` (authenticated, own account only) — body `{ termsVersion, privacyVersion, locale }`; `201` when a row is written, `200` when nothing was owed (BR4); the user is the token's subject, never a body field.
-- Error codes: new `legal_acceptance.version_outdated` (409); the existing authentication errors for a missing or invalid token.
+- Error codes: new `legal_acceptance.version_outdated` (409) and `legal_acceptance.locale_invalid` (400, the body `locale` is not a supported UI language; change note v2); the existing authentication errors for a missing or invalid token (a token whose user no longer exists answers 401, as the profile route does).
 - Resource keys (identity resources, three locales): page title, explanation, button, sign-out, "Read", the version line, the outdated message, the error code text; the draft notice reuses `Legal.DraftNotice`.
 
 ### Wireframe: Accept the updated documents
@@ -128,6 +128,8 @@ Rows show only the documents that changed since the last acceptance (both when t
 - AC22 Given the Api, when a user who owes an acceptance calls another authenticated route, then it answers as before. (BR9)
 - AC23 Localization: every text of the page and the error code exists in pt-BR, pt-PT and en; the missing-key test and the error-code-text test are green. (all)
 - AC24 Given the page at a narrow width, when it is used by keyboard only, then Tab reaches "Read", "Accept and continue" and "Sign out" in that order and the title is announced. — validation script.
+- AC25 Given a post whose `locale` is not a supported UI language (an unknown name, a rooted path, a value longer than the column), when it arrives, then the answer is `400 legal_acceptance.locale_invalid` and nothing is written; the current versions are always read with the request's own locale, never with the body's. (BR3, change note v2)
+- AC26 Given a signed-in user who owes an acceptance, when they use the plain endpoints of BR7 (sign-in complete, language switch, notice document, question image), then they work as before. (BR7, change note v2)
 
 ## Criterion → test
 
@@ -157,6 +159,8 @@ Rows show only the documents that changed since the last acceptance (both when t
 | AC22 | pending |
 | AC23 | pending |
 | AC24 | pending |
+| AC25 | pending |
+| AC26 | pending |
 
 ## Decisions
 - D1 (owner, 2026-10-21) Any new version of the terms or the privacy policy asks for an acceptance; no per-version "notice only" mark. Reason: same rule as sign-up, no case-by-case judgement to maintain — asked
@@ -173,6 +177,13 @@ Rows show only the documents that changed since the last acceptance (both when t
 - D12 (Claude, 2026-10-21) Technical: the summary's premise "F-71 is the first version change" is stale (privacy is at `2026-v3`); every sign-up before the current versions is already behind, which the rule handles.
 - D13 (Claude, 2026-10-21) New packages: none (production and tests).
 
+- D14 (Claude, 2026-10-21) Build design passes (`system-design`, then `architect`, both read-only on opus; the main session checked the advisory-lock precedent `RoleAdministrationStore.cs:21-40`, `Routes.razor`, `SupportedCultures.SafeLocalPath` and the error-text location in `SharedResources*.resx`, and the second `IConsentRecordStore` implementer `TooLongConsentRecordStore` in `SignUpTransactionTests.cs:299`). Accepted: `FindLatestAsync` and `RunExclusiveForUserAsync` on the existing port; the comparison extracted into one Application class used by sign-up and the new handler (`RegistrationTerms` keeps only its own error code); handler in Application, endpoints in `IdentityEndpoints.cs`; the gate component wrapping `AuthorizeRouteView` in `Routes.razor`, exempting pages by page type (so `/account/password` and `/account/security` stay gated); no "accepted" cache; error-code text in `SharedResources`, page keys in `IdentityResources`; `.ThenBy(Id)` in the data export (AC21); a token whose user is gone answers 401; the current versions are read with the request's locale. Dropped or changed: the gate renders nothing only on the first load and keeps the last allowed route while the next check runs (the layout stays mounted); the open point "unreadable document while the other changed" is decided as: copy that topic's version from the latest record, and with no earlier record nothing is owed (BR2); a failed status call lets the page open and logs a warning (B-3 BR3).
+- D15 (owner, 2026-10-21) Design trade-offs, as proposed by the architect: (8) a body locale outside the supported languages is `400 legal_acceptance.locale_invalid`; (9) the stricter `returnUrl` check lives in the page and calls `SafeLocalPath` first; (10) one row under concurrency by a per-user `pg_advisory_xact_lock` transaction — asked
+- D16 (owner, 2026-10-21) The plain Web endpoints outside the router are exempt by change note v2 (BR7, AC26) — asked
+- D17 (Claude, 2026-10-21) Design coverage: contracts (routes, records, codes, both `IConsentRecordStore` implementers), layout (Application/Infrastructure/Api/Web split, gate placement, steps), rules (module boundary, problem-details, banned symbols, vocabulary, error-text check), simplicity (one extraction), data (no migration, existing index, `Id` v7 tie-break); not checked: the redirect during prerender (checked on screen through the app host in step 12).
+- D18 (Claude, 2026-10-21) Traps: T1 cache "accepted" per circuit: breaks BR6/AC16; T2 exempt `/account` by prefix: opens password and security pages; T3 call `RegistrationTerms.CheckAsync` as is for the POST: wrong error code and flags.
+- D19 (Claude, 2026-10-21) plan — 1 Glossary row, contracts, `FindLatestAsync` (and the test fake that implements the port), extraction of the version comparison, GET status route → AC1-4, 6, 7, AC10 (GET half); 2 POST acceptance with the per-user lock, locale check, 201/200/409/400/401, `ThenBy(Id)` in the export → AC5, 8, 9, 11, 12, 13, 21, 22, 25, AC10 (POST half); 3 Web client methods, gate component in `Routes.razor`, bare `AcceptTerms` page → AC15, 16, 17, 20, 26; 4 full `AcceptTerms` page, resources and error texts → AC14, 18, 19, 23; 5 flow page, pt-BR manual, OpenAPI and DocGen route docs → techdocs check, docs checks; 6 app host check, review, scan, validation script → AC24.
+
 ## Out of scope
 - An e-mail telling everyone about a new version (idea).
 - The history of acceptances on the account page (idea).
@@ -185,6 +196,11 @@ Rows show only the documents that changed since the last acceptance (both when t
 - (none)
 
 ## Change notes
+### v2 — 2026-10-21
+- What: (1) BR7 also exempts the plain Web endpoints outside the Blazor router (sign-in complete, profile applied, language switch, Google start and complete, notice document, question image); (2) a new error code `legal_acceptance.locale_invalid` (400) for a body locale outside the supported languages.
+- Why: found by the build design pass: the gate sits in the router, so these endpoints are outside it, and sign-in complete and the language switch must stay open or sign-in and the language switch on the acceptance page break; the body locale reaches a file path and a `varchar(10)` column.
+- Affected: BR7, `## Screens and API`, AC15 (read with BR7), new AC25 and AC26; other criteria unchanged.
+- Re-approved: 2026-10-21 (owner, in the build design round)
 
 ## Validation script
 (written at the end of the build)
