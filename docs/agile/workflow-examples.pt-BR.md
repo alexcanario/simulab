@@ -4468,7 +4468,7 @@ O check confere que a tabela e o repositório contam o mesmo. Esta é a saída r
 ```
 ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (34)
 ok   AC5: the report states the files that use AskUserQuestion (1)
-ok   AC5: the report states the hook events (6)
+ok   AC5: the report states the hook events (7)
 ok   AC5: the report states the skills (24) and the agents (8)
 ```
 
@@ -6310,3 +6310,124 @@ O `leaks` achou a senha na string de conexão (mostrada como `[redacted: ...]`, 
 ```
 
 Os três bloqueadores confirmados impedem o merge, como os do revisor. Você decide cada linha; o Claude corrige as que você mandar, grava uma linha por achado e a linha `Security coverage` em `## Decisions`. No build, um item que guarda uma porta recebe a proposta uma vez, depois da varredura: "Quer a leitura de segurança do agente (só lê, não escreve, custa uma chamada)?", e só roda com o seu sim; no piloto automático ela não é proposta e o relatório traz a linha `Agente de segurança: não rodou (autopilot); /agile:review F-7 security`.
+
+### 14.170 Uma segunda biblioteca de UI: o AdminLTE 4 na pergunta 23
+
+O brief pede um app web só para a equipe, em .NET, telas de tabela e formulário. Na rodada 5 a pergunta 4 já saiu como Blazor Server, então a 23 oferece o AdminLTE 4 ao lado do MudBlazor, que continua a recomendação. Você responde "AdminLTE 4". A mensagem da rodada, tirada de uma execução de verdade do bootstrap num app de teste (o teste rodou em inglês):
+
+```
+Round 5 — Experience.
+- Questions 20 and 20a: pt-BR, the recommendation. Already clear: 21 (one locale, so no switch) and 22 (WCAG 2.2 AA).
+- Question 23a: skipped for this test, so nothing goes under `docs/design`.
+- Question 23: AdminLTE 4 is offered, because this is a `web-app` on Blazor Server.
+- Question 23b: Outlined, which is Bootstrap Icons' base name.
+- Question 23c: row action (pencil).
+- Question 23f isn't asked, because AdminLTE has no run-time theme module.
+```
+
+No `CLAUDE.md` entra a linha `- UI library: adminlte` embaixo de `Profile:`, e o ADR-0001 ganha a linha da biblioteca (`AdminLTE 4 (package ColorlibHQ.AdminLTE.AspNetCore 0.3.1; sidebar stays the package's dark #343A40 in both themes)`) e `Customizable themes | not offered (AdminLTE, #248)`. A ideia do kit de UI passa a seguir a seção `## AdminLTE kit` do perfil.
+
+Outro app, mesmo brief, mas você responde Blazor WebAssembly na pergunta 4. A 23 não oferece o AdminLTE e a mensagem diz o porquê (texto da execução):
+
+```
+- **23 (biblioteca):** o AdminLTE 4 não é oferecido com Blazor WebAssembly, porque o pacote falha o build `browser-wasm` (NETSDK1082). Vale o MudBlazor.
+```
+
+O `CLAUDE.md` não ganha a linha `UI library`, e quem chegou aqui tem o MudBlazor como sempre.
+
+### 14.171 O registro de execuções de um item: o que cada agente custou e como terminou
+
+O F-7 foi construído numa terça e revisado na quarta, em duas sessões. Na terça, o build chamou o `system-design` e o `architect`; na quarta, a primeira chamada do `reviewer` voltou com a resposta vazia e a segunda trouxe o relatório. Ninguém escreveu nada à mão: os hooks gravaram duas linhas por agente no registro do F-7, na pasta comum do git. Este é o registro (os ids são do exemplo):
+
+```jsonl
+{"v":1,"ev":"start","item":"F-7","agent":"a3f1c09e2b7d4410","session":"11111111-1111-4111-8111-111111111111","role":"system-design","stage":"build","at":"2026-10-21T14:02:11.000Z"}
+{"v":1,"ev":"end","item":"F-7","agent":"a3f1c09e2b7d4410","at":"2026-10-21T14:04:03.000Z","status":"done","model":"claude-opus-5-5","tokens":{"in":38,"out":4120,"cacheRead":412300,"cacheWrite":61200}}
+{"v":1,"ev":"start","item":"F-7","agent":"b81d77c2e0a94f31","session":"11111111-1111-4111-8111-111111111111","role":"architect","stage":"build","at":"2026-10-21T14:05:40.000Z"}
+{"v":1,"ev":"end","item":"F-7","agent":"b81d77c2e0a94f31","at":"2026-10-21T14:07:10.000Z","status":"done","model":"claude-opus-5-5","tokens":{"in":22,"out":2890,"cacheRead":298100,"cacheWrite":40800},"findings":{"blocker":0,"major":1,"minor":1}}
+{"v":1,"ev":"start","item":"F-7","agent":"c47e02a9d1f86b55","session":"22222222-2222-4222-8222-222222222222","role":"reviewer","stage":"review","at":"2026-10-22T09:15:00.000Z"}
+{"v":1,"ev":"end","item":"F-7","agent":"c47e02a9d1f86b55","at":"2026-10-22T09:15:20.000Z","status":"failed","model":"claude-opus-5-5","tokens":{"in":9,"out":0,"cacheRead":51000,"cacheWrite":18300}}
+{"v":1,"ev":"start","item":"F-7","agent":"d920f3b6a7c14e88","session":"22222222-2222-4222-8222-222222222222","role":"reviewer","stage":"review","at":"2026-10-22T09:16:02.000Z"}
+{"v":1,"ev":"end","item":"F-7","agent":"d920f3b6a7c14e88","at":"2026-10-22T09:18:16.000Z","status":"done","model":"claude-opus-5-5","tokens":{"in":31,"out":3650,"cacheRead":502700,"cacheWrite":55900},"findings":{"blocker":1,"major":0,"minor":2}}
+```
+
+Para ler, numa sessão qualquer do repositório (o checkout principal ou uma worktree):
+
+```powershell
+node "$env:CLAUDE_PLUGIN_ROOT/scripts/run-log.js" show F-7
+```
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/run-log.js" show F-7
+```
+
+A saída real sobre esse registro:
+
+```text
+Run log of F-7: 4 runs (3 done, 1 failed, 0 running, 0 lost)
+1. system-design (build), try 1: done in 1 min 52 s — claude-opus-5-5, tokens in 38, out 4120, cache read 412300, cache write 61200
+2. architect (build), try 1: done in 1 min 30 s — claude-opus-5-5, tokens in 22, out 2890, cache read 298100, cache write 40800; findings 0 blocker, 1 major, 1 minor
+3. reviewer (review), try 1: failed in 20 s — claude-opus-5-5, tokens in 9, out 0, cache read 51000, cache write 18300
+4. reviewer (review), try 2: done in 2 min 14 s — claude-opus-5-5, tokens in 31, out 3650, cache read 502700, cache write 55900; findings 1 blocker, 0 major, 2 minor
+Totals: 5 min 56 s of finished runs; tokens in 100, out 10660, cache read 1264100, cache write 176200; findings 1 blocker, 1 major, 3 minor
+```
+
+A terceira linha é a revisão que voltou vazia (`failed`), e a quarta é a segunda tentativa do mesmo papel (`try 2`), com um bloqueador e dois menores. O registro não guarda nenhum texto: nem o prompt, nem o relatório, só ids, papéis, horários, o modelo e as contagens. Um agente ainda rodando aparece como `running for <tempo>`, e um que começou há mais de 2 horas sem fim, como `lost`. Com `--json` a mesma lista sai como dados, para o módulo de UI do #240.
+
+### 14.172 O ship limpa as scratches do item e mostra a pasta órfã
+
+O item #268 foi mergeado e a worktree dele saiu. Na raiz de scratches estão `268`, `268-live`, `2680` e `other`; na raiz das worktrees sobrou `old-f-200`, que o git não lista. O ship roda a limpeza na checkout principal (saída de uma execução de verdade do script nesse cenário, sem nada a pedir antes porque digitar `/agile:ship` já autorizou as scratches do item):
+
+```
+removed: S:\scratch\268
+removed: S:\scratch\268-live
+scratches: 2 removed for item 268 under S:\scratch.
+ORPHAN: S:\wt\old-f-200
+  build.log
+  notes.txt
+orphans: 1 under S:\wt.
+agile cleanup ORPHANS: 1
+```
+
+`2680` e `other` ficam: não são do item 268. Nada foi apagado da pasta órfã. O Claude pergunta:
+
+```
+Pergunta: apagar a pasta órfã S:\wt\old-f-200 (build.log, notes.txt)?
+Recomendação: não apagar sem olhar — Motivo: o git não a lista e o ship não sabe de quem é.
+```
+
+Você responde "sim": o ship roda `worktree.js remove S:\wt\old-f-200 --orphan` e a linha do relatório fecha assim:
+
+```
+Cleanup: 2 scratches removidas (268, 268-live), 1 pasta órfã (removida)
+```
+
+Com "não" a pasta fica e a linha diz `(mantida)`. Sem nada a limpar a linha é `Cleanup: nada a limpar`. À mão, `--dry-run` mostra o que sairia (saída do mesmo cenário com uma scratch `268-b` a mais):
+
+```
+would remove: S:\scratch\268-b
+scratches: 1 would go for item 268 under S:\scratch.
+would remove (after a yes): S:\wt\old-f-200
+orphans: 1 under S:\wt.
+agile cleanup DRY-RUN
+```
+
+### 14.173 O rodapé acima do prompt e o Process board: onde o tempo e os tokens do item foram
+
+O F-12 está em `building`. O `architect` rodou às 13:18, a primeira revisão achou um bloqueador e dois maiores, a segunda revisão (`try 2`) voltou só com dois menores, e agora o agente `security` está rodando. Você não pergunta nada: o rodapé acima do prompt, que o módulo do agile desenha num cliente que carrega módulos de plugin, mostra a trilha do item, lida do `status:` do arquivo, e o que roda agora:
+
+```text
+F-12  ●idea ─●refining ─●approved ─◉building ┄validating ┄done  security running
+```
+
+Você digita `/process-board` e o painel lateral abre com uma linha por execução, lidas do registro do item:
+
+```text
+Process board — F-12   elapsed 1h 12m   76k in / 5.6k out   1.5M read / 109k written
+#  Task    Agent (model)                  In / Out    Start  Duration  Verdict
+1  build   architect (claude-sonnet-5-5)  12k / 1.1k  13:18  1 min     0 blocker, 0 major, 1 minor
+2  review  reviewer (claude-opus-5-5)     30k / 2.4k  14:00  3 min     1 blocker, 2 major, 0 minor
+3  review  reviewer (claude-opus-5-5)     34k / 2.1k  14:18  2 min     0 blocker, 0 major, 2 minor try 2
+4  review  security (-)                   - / -       14:29  1 min     running
+```
+
+O topo soma os tokens das execuções terminadas (o cache à parte); o `security` ainda não tem modelo nem tokens, porque eles chegam na linha de fim. Os horários são os do seu computador. Neste repositório do plugin, onde o item é um issue e não há arquivo com `status:`, o rodapé mostra só o id e o que roda (`F-240 · security running`), sem trilha. Num cliente sem módulos de plugin nada aparece, e com `AGILE_HOOKS=off` o rodapé some e o comando responde que o módulo está desligado.

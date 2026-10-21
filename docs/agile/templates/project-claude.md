@@ -25,6 +25,7 @@ Save as: CLAUDE.md (project root). Replace every <...>.
 - Backoffice: staff | none (Optional: only on profile `mobile` with the backend in this solution, when quiz question 2g chose a staff backoffice or declined it, or after a "Backoffice foundation" item; `none` stops the `/agile:sync` note. Delete this line otherwise.)
 - Backoffice audit: on | none (Optional: only with `- Backoffice: staff`; `on` is written by the "Backoffice foundation" item, which includes the audit log, or by the later "Backoffice audit" item; `none` declines it and stops the `/agile:sync` note. Delete this line otherwise.)
 - Local services: fixed | none (Optional: only with an AppHost, when quiz question 3a chose fixed ports and passwords for the local run or declined them, or after a "Fixed local services" item; `none` stops the `/agile:sync` note. Delete this line otherwise.)
+- UI library: adminlte (Optional: only on profile `web-app` or `website` on Blazor Server, when quiz question 23 chose AdminLTE 4; no line means MudBlazor. Delete this line otherwise.)
 - Decisions: `docs/decisions/` (start with ADR-0001).
 - Keep code simple: add structure only where the profile asks for it.
 
