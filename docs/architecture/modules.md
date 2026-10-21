@@ -102,6 +102,7 @@ flowchart LR
     Simulab_QuestionBank_Infrastructure --> Simulab_Catalog_Contracts
     Simulab_QuestionBank_Infrastructure --> Simulab_Persistence
     Simulab_QuestionBank_Infrastructure --> Simulab_QuestionBank_Application
+    Simulab_QuestionBank_Infrastructure --> Simulab_Storage
     Simulab_Storage --> Simulab_SharedKernel
     Simulab_Storage --> Simulab_Storage_Contracts
     Simulab_Web --> Simulab_Ai_Contracts

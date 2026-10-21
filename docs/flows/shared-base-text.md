@@ -1,7 +1,7 @@
 ---
 title: Share a base text between questions
 summary: How a curator writes a base text once, links questions to it, what an edit of the text records, what refuses a delete or a language change, and how transcription keeps the choice.
-items: [F-102]
+items: [F-102, F-103]
 ---
 # Share a base text between questions
 
@@ -13,7 +13,7 @@ Manual page for the user: [Questions](../manual/en/questions.md)
 A curator holding `questions.manage` opens **Content / Base texts** (`/admin/base-texts`) and presses **Add**, or opens a question at `/admin/questions/{id}` and picks a base text in its **Base text** section.
 
 ## Steps
-1. The curator writes a base text at `/admin/base-texts/new`: a title (1 to 200 characters), a content language and the text in the visual editor. `POST /api/v1/question-bank/base-texts` sanitizes the HTML and stores it.
+1. The curator writes a base text at `/admin/base-texts/new`: a title (1 to 200 characters), a content language and the text in the visual editor. `POST /api/v1/question-bank/base-texts` sanitizes the HTML and stores it. The editor has an **Insert image** button (F-103): the pictures the text names become the base text's, up to 10, each with its alternative text; see [Put images in questions](images-in-questions.md).
 2. In the question form, the picker asks `GET /api/v1/question-bank/base-texts?language=<the question's language>` as the curator types and offers only texts in that language. Saving the question sends `BaseTextId`; sending `null` removes the link.
 3. A question with a link shows the text before its statement (preview, student view). The question response carries `BaseText` (id, title, HTML); the question itself stores only the id.
 4. Editing the text at `/admin/base-texts/{id}` sends `PUT .../base-texts/{id}`. When the sanitized HTML changed, the handler reads the live questions that link the text and are `Published`, takes each one's latest version, and adds a new version (same content, the new HTML, not an answer key change, no reason) to every one whose latest version holds other HTML. All of it is one save.
