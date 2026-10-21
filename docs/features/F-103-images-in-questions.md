@@ -1,7 +1,7 @@
 ---
 feature: F-103
 epic: Question bank
-status: building
+status: validating
 board: 149
 version: 1
 ---
@@ -219,6 +219,79 @@ Tests locked: 8d35a0d661b6f988b717ab9264b3afd04de1b249 (8 files); unlocks: 1
 - v2 (2026-10-21, owner answered at the build's design round): AC11 gains two error codes for an `alt` over 250 characters, `question.image_alt_too_long` and `base_text.image_alt_too_long` (400); the error-code list under "Screens and API" gains them. Affected criterion: AC11 only, re-approved by the owner's answer. The Api route `GET /api/v1/question-bank/images/{id}` checks "manage or review" in the endpoint through `IPermissionQueryService`, not by a policy.
 
 ## Validation script
+### English
+Needed to validate: Docker running, and a few files to pick (owner provides them; in place now: no): a PNG, a JPEG, a file over 2 MB, an SVG, and a text file renamed to `.png`.
+
+1. Start the app (the app host, which starts the database, the mail catcher and the file emulator in containers; stop it before any build).
+   - [ ] 1.1 In a terminal, from the item's worktree, run the command below and wait for the Aspire dashboard address; this worktree has its own database volume, nothing to set.
+   ```powershell
+   cd D:\wt\simulab\f-103-images-in-questions; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   cd /d/wt/simulab/f-103-images-in-questions && dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   - [ ] 1.2 Open https://localhost:7125/sign-in and sign in as `admin@simulab.local` (its password is the local development one in the project settings).
+2. Insert a picture in the statement (the question text), and see the dialog refuse bad files.
+   - [ ] 2.1 In the sidebar (left menu) click Content, then Questions, then Add; in the Statement card (the question's text) click the picture button at the end of the editor's toolbar (named "Insert image").
+   - [ ] 2.2 In the dialog choose the text file renamed `.png`, write any alternative text (the text read aloud for people who cannot see the picture) and click Insert → the message "The file is not a PNG, JPEG, WebP or GIF image." appears under the file field and the dialog stays open.
+   - [ ] 2.3 Choose the SVG → the same message; choose the file over 2 MB → "The image is larger than 2 MB." appears as soon as it is chosen.
+   - [ ] 2.4 Choose the PNG → a preview appears; click Insert with the alternative text empty → "Write the alternative text, or mark the image as decorative." appears; type a text and click Insert → the picture appears in the editor.
+   - [ ] 2.5 Switch the app language with the globe in the app bar (the top strip) to Portuguese and back to English, reopening the dialog once → every text is in the language chosen.
+3. Only the dialog inserts pictures, in the keyboard and in the toolbars.
+   - [ ] 3.1 In the Options card, click inside an option's editor → its toolbar has the same picture button; the Explanation card's toolbar has none.
+   - [ ] 3.2 Copy a picture (a screenshot, or "Copy image" on a web page) and paste it into the statement with Ctrl+V → nothing is inserted; drag a picture file from a folder into the statement → nothing is inserted.
+   - [ ] 3.3 With the keyboard only: Tab into the statement's toolbar, arrow to the picture button, press Enter → the dialog opens with the focus inside; Tab through file, alternative text, the "Decorative image" box and the buttons; press Esc → it closes and the focus returns to the editor.
+   - [ ] 3.4 Insert the JPEG marking "Decorative image" with no alternative text → the picture appears.
+4. Save the question and see the pictures where it is read.
+   - [ ] 4.1 Fill the Classification card (topic, language), put a picture in two options (one with the PNG, one with the JPEG), mark one option correct and click Save → the question saves and the pictures are still in the editors.
+   - [ ] 4.2 In the Publication card click "Preview as a student" (a dialog that shows the question as a student reads it) → the three pictures show, none wider than its column, and the pictures with a text have it as alternative text (a screen reader reads it).
+   - [ ] 4.3 Click "Send for review", sign out and sign in as an account with a reviewer-only role (a role that has only "Review questions"; create one in the roles screen if you have none) → in the review queue open the question → the pictures show there too.
+5. Remove a picture from a draft and from a published question.
+   - [ ] 5.1 Sign in as the admin again; open a new draft question with one picture, save it, copy the picture's address (right-click it, "Copy image address"), remove the picture in the editor and click Save → the address, opened in a new tab, now shows "not found".
+   - [ ] 5.2 Open a published question with a picture (publish one first), remove the picture, click Save with a reason for the change → the old picture's address still shows the picture, because the earlier version keeps it.
+6. A base text takes pictures too.
+   - [ ] 6.1 In the sidebar click Content, then Base texts, then Add; write a title, pick a language, put a picture in the text and click Save → it saves with the picture.
+   - [ ] 6.2 Link a published question to it (the Base text card of a question, "picker" field), open the question's preview → the picture of the base text shows before the statement.
+7. Who may see a picture.
+   - [ ] 7.1 Copy the address of any picture; sign in as a student (sign up at `/sign-up`, the verification mail is in the mail catcher) and open the address → a refusal page, not the picture.
+   - [ ] 7.2 Open the address while signed out → the sign-in page.
+
+### pt-BR
+Necessário para validar: Docker rodando e alguns arquivos para escolher (você fornece; no lugar agora: não): um PNG, um JPEG, um arquivo com mais de 2 MB, um SVG e um arquivo de texto renomeado para `.png`.
+
+1. Inicie o app (o app host, que sobe o banco, o capturador de e-mail e o emulador de arquivos em containers; pare-o antes de qualquer build).
+   - [ ] 1.1 Em um terminal, na pasta do worktree do item, rode o comando abaixo e espere o endereço do painel do Aspire; este worktree tem seu próprio volume de banco, nada a configurar.
+   ```powershell
+   cd D:\wt\simulab\f-103-images-in-questions; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   cd /d/wt/simulab/f-103-images-in-questions && dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   - [ ] 1.2 Abra https://localhost:7125/sign-in e entre como `admin@simulab.local` (a senha é a de desenvolvimento local, nas configurações do projeto).
+2. Insira uma imagem no enunciado (o texto da questão) e veja o diálogo recusar arquivos ruins.
+   - [ ] 2.1 No menu lateral clique em Content, depois Questions, depois Add; no cartão Statement (o texto da questão) clique no botão de imagem no fim da barra do editor (nome "Inserir imagem").
+   - [ ] 2.2 No diálogo escolha o arquivo de texto renomeado `.png`, escreva um texto alternativo qualquer (o texto lido em voz alta para quem não vê a imagem) e clique em Inserir → a mensagem "O arquivo não é uma imagem PNG, JPEG, WebP ou GIF." aparece sob o campo do arquivo e o diálogo continua aberto.
+   - [ ] 2.3 Escolha o SVG → a mesma mensagem; escolha o arquivo com mais de 2 MB → "A imagem tem mais de 2 MB." aparece assim que ele é escolhido.
+   - [ ] 2.4 Escolha o PNG → aparece uma prévia; clique em Inserir com o texto alternativo vazio → aparece "Escreva o texto alternativo ou marque a imagem como decorativa."; digite um texto e clique em Inserir → a imagem aparece no editor.
+   - [ ] 2.5 Troque o idioma do app pelo globo na barra superior (a faixa no alto) para português e volte para inglês, reabrindo o diálogo uma vez → todos os textos estão no idioma escolhido.
+3. Só o diálogo insere imagens, no teclado e nas barras.
+   - [ ] 3.1 No cartão Options clique dentro do editor de uma opção → a barra dela tem o mesmo botão de imagem; a barra do cartão Explanation não tem.
+   - [ ] 3.2 Copie uma imagem (uma captura de tela, ou "Copiar imagem" em uma página) e cole no enunciado com Ctrl+V → nada é inserido; arraste um arquivo de imagem de uma pasta para o enunciado → nada é inserido.
+   - [ ] 3.3 Só com o teclado: Tab até a barra do enunciado, setas até o botão de imagem, Enter → o diálogo abre com o foco dentro; Tab passa pelo arquivo, pelo texto alternativo, pela caixa "Imagem decorativa" e pelos botões; Esc → fecha e o foco volta ao editor.
+   - [ ] 3.4 Insira o JPEG marcando "Imagem decorativa" sem texto alternativo → a imagem aparece.
+4. Salve a questão e veja as imagens onde ela é lida.
+   - [ ] 4.1 Preencha o cartão Classification (tema, idioma), ponha uma imagem em duas opções (uma com o PNG, outra com o JPEG), marque uma opção como correta e clique em Save → a questão salva e as imagens continuam nos editores.
+   - [ ] 4.2 No cartão Publication clique em "Preview as a student" (um diálogo que mostra a questão como o aluno a lê) → as três imagens aparecem, nenhuma mais larga que a coluna, e as que têm texto o usam como texto alternativo (o leitor de tela o lê).
+   - [ ] 4.3 Clique em "Send for review", saia e entre com uma conta de papel só de revisão (um papel que tem apenas a permissão "Review questions"; crie um na tela de papéis se não houver) → na fila de revisão abra a questão → as imagens aparecem ali também.
+5. Remova uma imagem de um rascunho e de uma questão publicada.
+   - [ ] 5.1 Entre de novo como admin; abra um rascunho novo com uma imagem, salve, copie o endereço da imagem (botão direito, "Copiar endereço da imagem"), remova a imagem no editor e clique em Save → o endereço, aberto em outra aba, agora mostra "não encontrado".
+   - [ ] 5.2 Abra uma questão publicada com imagem (publique uma antes), remova a imagem, clique em Save com um motivo da mudança → o endereço da imagem antiga ainda mostra a imagem, porque a versão anterior a mantém.
+6. Um texto-base também recebe imagens.
+   - [ ] 6.1 No menu lateral clique em Content, depois Base texts, depois Add; escreva um título, escolha o idioma, ponha uma imagem no texto e clique em Save → salva com a imagem.
+   - [ ] 6.2 Ligue uma questão publicada a ele (cartão Base text da questão, campo "seletor"), abra a prévia da questão → a imagem do texto-base aparece antes do enunciado.
+7. Quem pode ver uma imagem.
+   - [ ] 7.1 Copie o endereço de uma imagem; entre como aluno (cadastre-se em `/sign-up`, o e-mail de verificação está no capturador de e-mail) e abra o endereço → uma página de recusa, não a imagem.
+   - [ ] 7.2 Abra o endereço sem estar logado → a página de entrada.
 
 ## Events
 

@@ -21,6 +21,8 @@
 | syllabus | conteúdo programático: a lista de disciplinas do edital que o aluno abre sob cada edição no catálogo |
 | notice PDF | PDF do edital: o arquivo PDF do edital de uma edição, guardado dentro do Simulab, além do link oficial |
 | file field | campo de arquivo: o campo "Notice PDF" do formulário da edição, com Choose PDF, Replace e Remove |
+| alternative text | texto alternativo: o texto de uma imagem lido em voz alta para quem não a vê; "Imagem decorativa" dispensa o texto |
+| image dialog | diálogo de imagem: a janelinha "Insert image" aberta pelo botão de imagem da barra do editor, com arquivo, prévia e texto alternativo |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
@@ -40,3 +42,4 @@
 | Edition notice PDF | sidebar > Content > Exams > the exam > "Editions" section > the edition (/admin/exams/{exam}/editions/{edition}) > card "Notice and application" | the file field "Notice PDF" below Application date: Choose PDF when empty; with a file, its name and size, Download, Replace and Remove; Save at the bottom sends it | src/Hosts/Simulab.Web/Components/Pages/Catalog/ExamEditionForm.razor, src/Hosts/Simulab.Web/Components/Ui/AppFileField.razor | 5869cb8 |
 | Student notice PDF | sidebar > Study > Catalog > the exam (/catalog/exams/{id}) | in each edition's line, beside "Official notice", the link "Notice (PDF)" when the edition has a file | src/Hosts/Simulab.Web/Components/Pages/Catalog/CatalogExam.razor | 5869cb8 |
 | Student syllabus | sidebar > Study > Catalog > the exam (/catalog/exams/{id}) | under each edition the button "Show syllabus (n subjects)" opens its notice subjects with their mapping | src/Hosts/Simulab.Web/Components/Pages/Catalog/EditionSyllabus.razor | no |
+| Image dialog | sidebar > Content > Questions > Add (or Edit on a row) > Statement card, or an option in the Options card; or Base texts > Add > the text editor | the picture button at the end of the editor toolbar ("Insert image"); the dialog has the file field, a preview, "Alternative text", the "Decorative image" box, Cancel and Insert | src/Hosts/Simulab.Web/Components/Ui/AppRichTextImageDialog.razor | 995af62 |
