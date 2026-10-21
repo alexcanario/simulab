@@ -1,16 +1,17 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105]
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106]
 updated: 2026-10-21
 ---
 # Questões
 
 O banco de questões é onde os curadores escrevem as questões de que provas e treinos são feitos. Uma questão
 tem enunciado, texto-base opcional, de duas a cinco alternativas com uma correta, explicação opcional,
-dificuldade, tópico e o idioma em que está escrita. Uma questão é de múltipla escolha, certo/errado ou
-múltiplas respostas; a questão certo/errado tem um gabarito, certo ou errado, no lugar das alternativas, e a
-de múltiplas respostas tem várias alternativas corretas.
+dificuldade, tópico e o idioma em que está escrita. Uma questão é de múltipla escolha, certo/errado,
+múltiplas respostas ou associação; a questão certo/errado tem um gabarito, certo ou errado, no lugar das
+alternativas, a de múltiplas respostas tem várias alternativas corretas, e a de associação liga cada item
+numerado da esquerda a uma correspondência com letra da direita.
 
 ## Quem pode usar
 Uma conta com a permissão "Gerenciar o banco de questões". Curadores e Administradores a têm. Todas as outras
@@ -43,7 +44,7 @@ revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem t
 
 ### Escrever uma questão
 1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Múltipla escolha** (o padrão),
-   **Certo/errado** e **Múltiplas respostas**. O tipo é escolhido agora e não pode ser alterado depois que a questão é criada; numa
+   **Certo/errado**, **Múltiplas respostas** e **Associação**. O tipo é escolhido agora e não pode ser alterado depois que a questão é criada; numa
    questão salva ele aparece como um valor.
 2. Escolha a **disciplina** e depois o **tópico** (a lista mostra só os tópicos daquela disciplina). O
    **idioma do conteúdo** começa com o seu idioma; troque pelo idioma em que a questão está escrita. Informe
@@ -71,12 +72,29 @@ alternativas."), contadas a partir das que você marcou. Como uma resposta parci
 parte da questão: vem das regras de pontuação da edição. Ao voltar para múltipla escolha, só a primeira
 alternativa marcada é mantida.
 
+Numa questão de **associação** o cartão **Alternativas** dá lugar ao cartão **Associações**, com duas listas:
+1. Em **Correspondências** (à direita), escolha **Adicionar correspondência** para cada item com letra (até 8).
+2. Em **Itens** (à esquerda), escolha **Adicionar item** para cada item numerado (até 8) e digite o texto.
+3. No seletor de letra de cada item, escolha a correspondência certa. Uma letra já usada por outro item não é
+   oferecida: cada letra serve a um item só.
+4. Ao lado de cada correspondência aparece "Usada pelo item N" ou "Extra". Correspondências extras, que não
+   servem a nenhum item, são permitidas e confundem quem chuta.
+
+Mover uma correspondência leva a letra junto com o texto: o item que a usava passa a mostrar a nova letra.
+Remover uma correspondência usada deixa aquele item sem letra. Um rascunho aceita itens sem letra; para
+publicar, são de 2 a 8 itens, ao menos tantas correspondências quanto itens, todos com texto e todo item com
+a sua letra. Como uma resposta parcialmente certa pontua não faz parte da questão: vem das regras de
+pontuação da edição.
+
 Um rascunho pode ser salvo sem alternativas e sem correta, ou sem gabarito. A lista "Antes de publicar", ao
-lado do formulário, mostra o que ainda falta; numa questão certo/errado ela tem um item, "Gabarito definido", e
-numa de múltiplas respostas pede "Ao menos duas corretas e uma errada".
+lado do formulário, mostra o que ainda falta; numa questão certo/errado ela tem um item, "Gabarito definido",
+numa de múltiplas respostas pede "Ao menos duas corretas e uma errada", e numa de associação pede "De 2 a 8
+itens à esquerda", "Ao menos o mesmo número de correspondências à direita" e "Todo item tem texto e uma
+correspondência".
 
 ### Pôr imagens no texto
-O enunciado, o texto-base e cada alternativa aceitam imagens; a explicação não.
+O enunciado, o texto-base, cada alternativa e cada item e correspondência de uma associação aceitam imagens; a
+explicação não.
 1. Na barra do editor, escolha **Inserir imagem** (o botão com o desenho de uma paisagem). A barra pequena das
    alternativas tem o mesmo botão.
 2. Em **Escolher imagem**, escolha um arquivo PNG, JPEG, WebP ou GIF de até 2 MB. O tipo é reconhecido pelo
@@ -89,8 +107,8 @@ O enunciado, o texto-base e cada alternativa aceitam imagens; a explicação nã
 Colar ou arrastar um arquivo de imagem para dentro do editor não insere nada: só o diálogo insere.
 
 A imagem é enviada quando você a escolhe, antes de salvar a questão. Uma imagem que nenhum texto salvo
-guarda é apagada sozinha depois de 24 horas. Cada questão tem no máximo 10 imagens (enunciado e alternativas
-juntos), e cada texto-base também. Uma alternativa só com uma imagem conta como preenchida.
+guarda é apagada sozinha depois de 24 horas. Cada questão tem no máximo 10 imagens (enunciado, alternativas e
+itens juntos), e cada texto-base também. Uma alternativa só com uma imagem conta como preenchida.
 
 Ao apagar uma imagem de uma questão **publicada**, o arquivo continua guardado enquanto alguma versão anterior
 da questão ainda o usa: quem fez a prova com aquela versão continua vendo a imagem. Num rascunho, o arquivo é
@@ -124,14 +142,15 @@ Use para digitar todas as questões de uma prova anterior de uma vez, sem reabri
 4. A edição, a disciplina do edital, o idioma e o texto-base continuam como estavam; o resto volta em branco. Um bloco de leitura com várias questões só precisa do texto escolhido uma vez; troque ou retire-o quando o bloco acabar. Troque a disciplina do edital sempre que a prova passar para outra.
 5. Escolha **Concluir** ao terminar. Toda questão já salva continua no banco como rascunho.
 
-Os três tipos de questão podem ser transcritos. O contador existe apenas na tela: se você sair e voltar, ele recomeça em 1 e o número sugerido segue o que já está salvo.
+Os quatro tipos de questão podem ser transcritos. O contador existe apenas na tela: se você sair e voltar, ele recomeça em 1 e o número sugerido segue o que já está salvo.
 
 ### Publicar e despublicar
 1. Abra a questão e veja o cartão **Publicação**, abaixo do formulário.
 2. **Publicar** fica disponível quando a questão está salva e a lista está completa: tópico, idioma,
    enunciado, de duas a cinco alternativas, todas com texto e exatamente uma correta (numa questão
    certo/errado: o gabarito definido; numa de múltiplas respostas: de três a cinco alternativas, ao menos duas
-   corretas e ao menos uma errada). **Salvar** nunca publica.
+   corretas e ao menos uma errada; numa de associação: de 2 a 8 itens, ao menos tantas correspondências, todos
+   com texto e com letra). **Salvar** nunca publica.
 3. Uma questão publicada ainda pode ser editada, mas toda edição precisa mantê-la completa.
 4. **Despublicar** devolve a questão a rascunho com o mesmo conteúdo.
 
@@ -173,6 +192,8 @@ mudou e o motivo.
    como correta ou inverta Certo/Errado. Aparece o campo **Motivo da troca de gabarito** sob as alternativas
    (ou sob o gabarito); ele é obrigatório, até 500 caracteres. **Salvar** registra a versão como "Gabarito
    alterado" com o seu motivo e a data. Mover a alternativa correta por reordenação também conta como troca.
+   Numa associação, trocar a letra de um item, acrescentar ou remover um item, ou mover uma correspondência
+   usada para outra letra conta como troca; mudar só o texto de um item não.
 5. Se o gabarito mudou enquanto a questão era rascunho, **Publicar** é recusado na primeira vez com "Escreva o
    motivo da troca de gabarito." O campo de motivo aparece no cartão **Publicação**; digite-o e escolha
    **Publicar** de novo.
@@ -208,9 +229,11 @@ citar o ato oficial.
 ### Visualizar como aluno
 1. No cartão **Publicação**, escolha **Visualizar como aluno**.
 2. A janela mostra o texto-base, o enunciado e as alternativas como o aluno vai ver; uma questão certo/errado
-   mostra duas linhas, Certo e Errado, e uma de múltiplas respostas começa com "Marque N alternativas." acima
-   das alternativas.
-3. Escolha **Mostrar resposta** para ver a alternativa correta (ou o gabarito) e a explicação. A visualização sempre mostra a
+   mostra duas linhas, Certo e Errado, uma de múltiplas respostas começa com "Marque N alternativas." acima
+   das alternativas, e uma de associação mostra "Associe cada número a uma letra.", os itens numerados e as
+   correspondências com letra, na ordem em que foram escritos.
+3. Escolha **Mostrar resposta** para ver a alternativa correta (ou o gabarito; numa associação, "1 → C" ao lado
+   de cada item e a marca em cada correspondência usada) e a explicação. A visualização sempre mostra a
    versão salva; salve antes para ver as últimas alterações.
 
 ### Excluir uma questão
@@ -221,7 +244,7 @@ citar o ato oficial.
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
-| Tipo de questão | Como a questão é respondida | Múltipla escolha, certo/errado ou múltiplas respostas. Escolhido ao criar a questão; não pode ser alterado depois |
+| Tipo de questão | Como a questão é respondida | Múltipla escolha, certo/errado, múltiplas respostas ou associação. Escolhido ao criar a questão; não pode ser alterado depois |
 | Disciplina | Serve para escolher o tópico | Obrigatória na tela; a questão guarda só o tópico |
 | Tópico | O tópico a que a questão pertence | Obrigatório. Um tópico não pode ser excluído enquanto uma questão o usa |
 | Idioma do conteúdo | O idioma em que a questão está escrita | Obrigatório, um dos idiomas do app. O conteúdo nunca é traduzido |
@@ -233,6 +256,8 @@ citar o ato oficial.
 | Enunciado | O que se pede ao aluno | Obrigatório, até 10.000 caracteres |
 | Texto-base | Um trecho a que a questão se refere, escrito uma vez e compartilhado por toda questão que o liga | Opcional. Escolhido entre os textos-base do idioma da questão; veja [Textos-base](base-texts.md) |
 | Alternativas | As escolhas, letras A a E | Até 5. Para publicar: de 2 a 5, todas com texto, exatamente uma correta (múltiplas respostas: de 3 a 5, ao menos duas corretas e ao menos uma errada). Cada uma até 2.000 caracteres |
+| Itens (associação) | Os itens numerados da esquerda, cada um com a letra da sua correspondência | Até 8. Para publicar: de 2 a 8, todos com texto e com letra; cada letra serve a um item só. Cada um até 2.000 caracteres |
+| Correspondências (associação) | Os itens com letra da direita | Até 8. Para publicar: ao menos tantos quanto os itens, todos com texto; os que nenhum item usa são extras. Cada um até 2.000 caracteres |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não pode perdê-lo |
 | Explicação | Por que o gabarito está certo | Opcional, até 10.000 caracteres |
 | Motivo da troca de gabarito | Por que o gabarito de uma questão publicada mudou | Obrigatório quando um salvamento ou uma publicação registra uma versão cujo gabarito difere da anterior; de 1 a 500 caracteres. Um motivo em qualquer outra versão nova fica como nota |
@@ -257,6 +282,12 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | Marque exatamente uma alternativa como correta. | Nenhuma correta, ou mais de uma, numa questão de múltipla escolha. | Marque uma. |
 | Uma questão de múltiplas respostas é publicada com 3 a 5 alternativas. | Menos de três alternativas. | Acrescente alternativas. |
 | Marque ao menos duas alternativas como corretas e deixe ao menos uma errada. | Menos de duas corretas, ou todas as alternativas marcadas. | Marque duas ou mais e deixe uma errada. |
+| Uma questão de associação tem de 2 a 8 itens à esquerda e, à direita, ao menos o mesmo número e no máximo 8. | Itens ou correspondências demais, ou poucos para publicar. | Acrescente ou remova itens ou correspondências. |
+| Todo item precisa de uma correspondência. | Um item ficou sem letra, ou com uma letra que não existe. | Escolha a letra de cada item. |
+| Cada letra só pode ser associada a um item. | Dois itens escolheram a mesma letra. | Troque a letra de um deles. |
+| Escreva o texto do item. | Uma associação publicada tem item vazio. | Escreva o texto ou remova o item. |
+| Um item passa de 2.000 caracteres. | O texto do item passou do limite. | Encurte-o. |
+| Só uma questão de associação tem itens à esquerda. | Um salvamento de outro tipo trouxe itens. | Recarregue a página e salve de novo. |
 | Defina o gabarito (certo ou errado) para publicar. | A questão certo/errado não tem gabarito. | Escolha Certo ou Errado em Gabarito. |
 | O tipo de uma questão não pode ser alterado. | Um salvamento citou outro tipo que o guardado. | Recarregue a página; crie uma questão nova para o outro tipo. |
 | Uma questão certo/errado não tem alternativas. / Uma questão de múltipla escolha não tem gabarito certo/errado. | Um salvamento trouxe uma resposta que o tipo não tem. | Recarregue a página e salve de novo. |
