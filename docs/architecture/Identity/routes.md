@@ -8,6 +8,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `DELETE` | `/api/v1/identity/totp` | DisableTotp | 200 |
 | `GET` | `/api/v1/identity/account-events/mine` | GetMyAccountEvents | 200 |
 | `GET` | `/api/v1/identity/account-events` | ListAccountEvents | 200 |
+| `GET` | `/api/v1/identity/legal-acceptance` | GetLegalAcceptance | 200 |
 | `GET` | `/api/v1/identity/legal-documents/{topic}` | GetLegalDocument | 200 |
 | `GET` | `/api/v1/identity/permissions` | ListPermissions | 200 |
 | `GET` | `/api/v1/identity/profile` | GetProfile | 200 |
@@ -21,6 +22,7 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `POST` | `/api/v1/identity/data-exports` | ExportData | 200 |
 | `POST` | `/api/v1/identity/email-verifications/resend` | ResendVerification | 200 |
 | `POST` | `/api/v1/identity/email-verifications` | VerifyEmail | 200 |
+| `POST` | `/api/v1/identity/legal-acceptances` | AcceptLegalDocuments | 200 |
 | `POST` | `/api/v1/identity/password-changes` | ChangePassword | 200 |
 | `POST` | `/api/v1/identity/password-reset-requests` | RequestPasswordReset | 200 |
 | `POST` | `/api/v1/identity/password-reset-token-checks` | CheckPasswordResetToken | 200 |

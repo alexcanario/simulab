@@ -3,6 +3,7 @@
 
 | Page | Summary | Items |
 |---|---|---|
+| [Accepting a new version of the legal documents](flows/accept-new-legal-version.md) | How a signed-in user who has not accepted the current terms or privacy policy is stopped, shown what changed and recorded as accepting it. | F-85 |
 | [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101 |
 | [Author and publish a multiple-answer question](flows/multiple-answer-questions.md) | How a curator writes a question with several correct options, what a draft and a published one need, how its key change is versioned and where the type is declared. | F-104 |
 | [Brand identity and theme](flows/brand-identity-theme.md) | How the Control Alt Systems identity reaches every screen from one theme, how the keycap buttons, borders and fonts are styled on MudBlazor's classes, and which tests hold each value. | F-125 |

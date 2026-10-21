@@ -1089,6 +1089,36 @@ code, kbd, pre, samp {
     max-width: 760px;
 }
 
+/* F-85: the documents the acceptance page asks the user to read, one row each. */
+.app-accept-documents {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-3);
+    margin: var(--app-space-4) 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-accept-document {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-2) var(--app-space-4);
+    padding: var(--app-space-3) var(--app-space-4);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-md);
+}
+
+.app-accept-document > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-accept-data {
+    margin-top: var(--app-space-4);
+}
+
 /* The kit link (B-6): underlined, in the text colour of its surface, AA in both themes. */
 .app-link {
     color: var(--mud-palette-text-primary);

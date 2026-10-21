@@ -135,6 +135,42 @@
         }
       }
     },
+    "/api/v1/identity/legal-acceptance": {
+      "get": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "GetLegalAcceptance",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/identity/legal-acceptances": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "AcceptLegalDocuments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptLegalDocumentsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/identity/password-reset-requests": {
       "post": {
         "tags": [
@@ -3490,6 +3526,26 @@
   },
   "components": {
     "schemas": {
+      "AcceptLegalDocumentsRequest": {
+        "required": [
+          "termsVersion",
+          "privacyVersion",
+          "locale"
+        ],
+        "type": "object",
+        "properties": {
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyVersion": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          }
+        },
+        "description": "The versions the page showed and the locale it showed them in (F-85 BR3, BR5). There is no user id on purpose:\r\nthe acceptance is always the signed-in caller's own."
+      },
       "AnnulQuestionRequest": {
         "type": "object",
         "properties": {

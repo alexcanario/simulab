@@ -1,0 +1,201 @@
+@page "/accept-terms"
+@layout AuthLayout
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Simulab.Identity.Contracts
+@using Simulab.Web.Localization
+@using Simulab.Web.Services.Auth
+@inject IStringLocalizer<IdentityResources> I
+@inject IStringLocalizer<SharedResources> L
+@inject IdentityApiClient Api
+@inject WebSessionTokenAccessor Tokens
+@inject ErrorText Errors
+@inject NavigationManager Navigation
+
+<PageTitle>@I["AcceptTerms.Title"] — @L["App.Name"]</PageTitle>
+
+@* F-85 UC1: the page a signed-in user lands on when the terms or the privacy policy moved to a version they have not accepted. *@
+<div class="app-auth-card app-auth-card-wide">
+    @if (_loading)
+    {
+        <AppLoadingState />
+    }
+    else if (_loadError is not null)
+    {
+        <AppErrorState Message="@Errors.For(_loadError)" OnRetry="LoadAsync" />
+    }
+    else
+    {
+        <h1 class="app-auth-title">@I["AcceptTerms.Title"]</h1>
+        <p>@I["AcceptTerms.Intro"]</p>
+
+        @if (_outdated)
+        {
+            <div aria-live="polite">
+                <AppAlert Severity="Severity.Warning" Text="@I["AcceptTerms.Outdated"]" />
+            </div>
+        }
+
+        @if (_acceptError is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@Errors.For(_acceptError)" ActionText="@L["Common.TryAgain"]" OnAction="AcceptAsync" />
+        }
+
+        <ul class="app-accept-documents">
+            @foreach (var document in _documents)
+            {
+                <li class="app-accept-document" data-topic="@document.Topic">
+                    <div>
+                        <strong>@document.Title</strong>
+                        <span class="app-legal-meta">@VersionLine(document)</span>
+                    </div>
+                    @if (document.IsPlaceholder)
+                    {
+                        <AppAlert Severity="Severity.Warning" Text="@I["Legal.DraftNotice"]" />
+                    }
+                    <AppLink Href="@PathOf(document)" aria-label="@string.Format(CultureInfo.CurrentCulture, I["AcceptTerms.ReadLabel"], document.Title)">@I["AcceptTerms.Read"]</AppLink>
+                </li>
+            }
+        </ul>
+
+        <div class="app-form-actions">
+            <MudButton Variant="Variant.Text" Disabled="_accepting" OnClick="SignOut" Class="app-accept-signout">@L["Layout.UserMenu.SignOut"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_accepting" OnClick="AcceptAsync" Class="app-accept-submit">
+                @if (_accepting)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                    <span role="status">@L["Common.Saving"]</span>
+                }
+                else
+                {
+                    @I["AcceptTerms.Accept"]
+                }
+            </MudButton>
+        </div>
+
+        <p class="app-accept-data">@I["AcceptTerms.YourData"] <AppLink Href="/account">@I["AcceptTerms.AccountLink"]</AppLink></p>
+    }
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    /// <summary>BR6: the page the user asked for before the gate sent them here; only a local path is followed.</summary>
+    [SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
+
+    private IReadOnlyList<LegalAcceptanceDocumentResponse> _documents = [];
+    private LegalAcceptanceStatusResponse? _status;
+    private string? _loadError;
+    private string? _acceptError;
+    private bool _loading = true;
+    private bool _accepting;
+    private bool _outdated;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _loadError = null;
+
+        var token = await TokenAsync();
+        if (token is null)
+        {
+            Navigation.NavigateTo("/sign-in");
+            return;
+        }
+
+        var result = await Api.GetLegalAcceptanceAsync(token);
+        if (!result.IsSuccess)
+        {
+            _loadError = result.ErrorCode;
+            _loading = false;
+            return;
+        }
+
+        _status = result.Value;
+        if (!_status!.Owes)
+        {
+            // Nothing is owed (an old link, a second tab): there is nothing to accept here.
+            Navigation.NavigateTo(SafeReturnPath(ReturnUrl), replace: true);
+            return;
+        }
+
+        _documents = [.. _status.Documents.Where(document => document.Changed)];
+        _loading = false;
+    }
+
+    private async Task AcceptAsync()
+    {
+        if (_accepting || _status is null)
+        {
+            return;
+        }
+
+        _accepting = true;
+        _acceptError = null;
+        _outdated = false;
+
+        var token = await TokenAsync();
+        if (token is null)
+        {
+            Navigation.NavigateTo("/sign-in");
+            return;
+        }
+
+        var terms = _status.Documents.FirstOrDefault(document => document.Topic == LegalTopic.Terms)?.Version ?? string.Empty;
+        var privacy = _status.Documents.FirstOrDefault(document => document.Topic == LegalTopic.Privacy)?.Version ?? string.Empty;
+        var locale = SupportedLanguages.Canonical(CultureInfo.CurrentUICulture.Name) ?? SupportedLanguages.Default;
+
+        var result = await Api.AcceptLegalDocumentsAsync(token, new AcceptLegalDocumentsRequest(terms, privacy, locale));
+        if (result.IsSuccess)
+        {
+            Navigation.NavigateTo(SafeReturnPath(ReturnUrl));
+            return;
+        }
+
+        if (result.ErrorCode == IdentityErrorCodes.LegalAcceptanceVersionOutdated)
+        {
+            // A newer version was published while the user read: show the new documents and ask again.
+            await LoadAsync();
+            _outdated = true;
+        }
+        else
+        {
+            _acceptError = result.ErrorCode;
+        }
+
+        _accepting = false;
+    }
+
+    private void SignOut() => Navigation.NavigateTo("/account/sign-out", forceLoad: true);
+
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthState is null ? null : (await AuthState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    private string VersionLine(LegalAcceptanceDocumentResponse document) => string.Format(
+        CultureInfo.CurrentCulture,
+        I["Legal.Version"],
+        document.Version,
+        document.EffectiveDate?.ToString("d", CultureInfo.CurrentCulture) ?? string.Empty);
+
+    private static string PathOf(LegalAcceptanceDocumentResponse document) =>
+        document.Topic == LegalTopic.Privacy ? "/privacy" : "/terms";
+
+    /// <summary>
+    /// T6: SafeLocalPath refuses an absolute address and "//host"; this page adds what it lets through but a browser can
+    /// still read as another place (any backslash, a control character) and never sends the user back to this page.
+    /// </summary>
+    private static string SafeReturnPath(string? value)
+    {
+        var path = SupportedCultures.SafeLocalPath(value);
+        return path.Contains('\\', StringComparison.Ordinal)
+            || path.Any(char.IsControl)
+            || path.StartsWith("/accept-terms", StringComparison.OrdinalIgnoreCase)
+            ? "/"
+            : path;
+    }
+}

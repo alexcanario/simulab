@@ -60,6 +60,29 @@ public abstract class IdentityPageTestContext : KitTestContext
 
         public LegalDocumentResponse? Privacy { get; set; }
 
+        /// <summary>F-85: what GET /legal-acceptance answers; by default the user owes both documents.</summary>
+        public LegalAcceptanceStatusResponse LegalStatus { get; set; } = OwingBoth();
+
+        /// <summary>F-85: when set, GET /legal-acceptance answers with this failure instead.</summary>
+        public (HttpStatusCode Status, string Code)? LegalStatusFailure { get; set; }
+
+        /// <summary>F-85: when set, POST /legal-acceptances answers with this failure. Null means 201.</summary>
+        public (HttpStatusCode Status, string Code)? AcceptFailure { get; set; }
+
+        /// <summary>F-85: when set, runs once as POST /legal-acceptances fails, so a test can publish a newer version meanwhile.</summary>
+        public Action? OnAcceptFailure { get; set; }
+
+        /// <summary>F-85: the bodies POST /legal-acceptances received, in order.</summary>
+        public List<AcceptLegalDocumentsRequest> Acceptances { get; } = [];
+
+        /// <summary>F-85: the status of a user who owes both current documents.</summary>
+        public static LegalAcceptanceStatusResponse OwingBoth(string terms = "2026-v1", string privacy = "2026-v3") => new(
+            Owes: true,
+            [
+                new LegalAcceptanceDocumentResponse(LegalTopic.Terms, terms, new DateOnly(2026, 9, 17), "Terms of use", false, true),
+                new LegalAcceptanceDocumentResponse(LegalTopic.Privacy, privacy, new DateOnly(2026, 10, 9), "Privacy policy", true, true),
+            ]);
+
         /// <summary>What POST /registrations answers. Null means 202.</summary>
         public (HttpStatusCode Status, string Code)? RegisterFailure { get; set; }
 
@@ -164,6 +187,24 @@ public abstract class IdentityPageTestContext : KitTestContext
             if (path.EndsWith("/legal-documents/privacy", StringComparison.Ordinal))
             {
                 return Json(Privacy);
+            }
+
+            // F-85.
+            if (path.EndsWith("/legal-acceptance", StringComparison.Ordinal))
+            {
+                return LegalStatusFailure is { } statusFailure ? Problem(statusFailure) : Json(LegalStatus);
+            }
+
+            if (path.EndsWith("/legal-acceptances", StringComparison.Ordinal))
+            {
+                Acceptances.Add((await request.Content!.ReadFromJsonAsync<AcceptLegalDocumentsRequest>(AppJson.Options, cancellationToken))!);
+                if (AcceptFailure is { } acceptFailure)
+                {
+                    OnAcceptFailure?.Invoke();
+                    return Problem(acceptFailure);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.Created);
             }
 
             // F-20.

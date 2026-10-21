@@ -266,6 +266,8 @@
   <data name="registration.age_declaration_required" xml:space="preserve"><value>You must be 18 or older to create an account.</value></data>
   <data name="registration.consent_required" xml:space="preserve"><value>Accept the terms of use and the privacy policy.</value></data>
   <data name="registration.terms_version_outdated" xml:space="preserve"><value>The legal texts changed while you were filling the form. Read them again and accept.</value></data>
+  <data name="legal_acceptance.version_outdated" xml:space="preserve"><value>The legal documents changed while you were reading. Read them again and accept.</value></data>
+  <data name="legal_acceptance.locale_invalid" xml:space="preserve"><value>That language is not supported.</value></data>
   <data name="registration.password_too_weak" xml:space="preserve"><value>This password does not follow the rules above.</value></data>
   <data name="registration.email_invalid" xml:space="preserve"><value>Enter a valid email address.</value></data>
   <data name="registration.rate_limited" xml:space="preserve"><value>Too many attempts from this device. Try again in an hour.</value></data>

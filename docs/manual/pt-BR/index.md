@@ -38,6 +38,7 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Senha](password.md): esqueci a senha, redefinir e alterar
 - [Minha conta](my-account.md): nome de exibição, idioma preferido e baixar seus dados
 - [Apagar sua conta](erase-account.md): apagar a conta e o que fica guardado
+- [Aceitar documentos atualizados](accept-new-documents.md): ler e aceitar os Termos e a Política de Privacidade quando mudam
 - [Verificação em duas etapas](two-factor.md): um código do celular depois da senha, e códigos de recuperação
 - [Atividade recente](account-activity.md): seus próprios logins, falhas ao entrar e mudanças de conta, em **Minha conta → Segurança**
 - [Entrar com o Google](google-sign-in.md): criar uma conta ou entrar com sua conta Google

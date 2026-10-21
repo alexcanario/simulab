@@ -34,6 +34,14 @@
   <data name="SignUp.LegalUnavailable" xml:space="preserve"><value>The legal texts could not be loaded, so sign-up is unavailable right now.</value></data>
   <data name="Legal.DraftNotice" xml:space="preserve"><value>Draft text: the legal documents are under review and may still change.</value></data>
   <data name="Legal.Version" xml:space="preserve"><value>Version {0}, effective {1}</value></data>
+  <data name="AcceptTerms.Title" xml:space="preserve"><value>Our documents changed</value></data>
+  <data name="AcceptTerms.Intro" xml:space="preserve"><value>Read what is new and accept it to keep using Simulab.</value></data>
+  <data name="AcceptTerms.Read" xml:space="preserve"><value>Read</value></data>
+  <data name="AcceptTerms.ReadLabel" xml:space="preserve"><value>Read {0}</value></data>
+  <data name="AcceptTerms.Accept" xml:space="preserve"><value>Accept and continue</value></data>
+  <data name="AcceptTerms.Outdated" xml:space="preserve"><value>The documents changed while you were reading. They were loaded again: read them and accept.</value></data>
+  <data name="AcceptTerms.YourData" xml:space="preserve"><value>Download or delete your data:</value></data>
+  <data name="AcceptTerms.AccountLink" xml:space="preserve"><value>Account</value></data>
   <data name="CheckEmail.Title" xml:space="preserve"><value>Check your email</value></data>
   <data name="CheckEmail.Message" xml:space="preserve"><value>We sent a verification link to {0}. It is valid for 24 hours.</value></data>
   <data name="CheckEmail.NotArrived" xml:space="preserve"><value>Did not arrive? Look in the spam folder before asking for a new link.</value></data>
