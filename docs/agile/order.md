@@ -15,39 +15,40 @@
 | 9 | F-72 | EU representative before selling in Portugal | idea | - | Foundation and identity | - | - | level 1; feature |
 | 10 | F-81 | Park and start staging from a GitHub Actions workflow | idea | - | Cloud hosting and operations | - | - | level 1; feature |
 | 11 | F-82 | Update the CI workflow actions to current majors | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 12 | F-85 | Existing users accept a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
-| 13 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 14 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 15 | F-90 | Where a subject or topic is used | idea | - | Subject taxonomy | - | - | level 1; feature |
-| 16 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 17 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
-| 18 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 19 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 20 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
-| 21 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 22 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 23 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
-| 24 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | - | Question bank | - | - | level 1; feature |
-| 25 | F-120 | Architecture test for section id selectors | idea | - | foundation-and-identity | - | - | level 1; feature |
-| 26 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
-| 27 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
-| 28 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
-| 29 | F-126 | Question form in the new composition | idea | - | Foundation and identity | - | F-136, F-137 | level 1; feature |
-| 30 | F-127 | Exam form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 31 | F-128 | Exam edition form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 32 | F-129 | Base text form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 33 | F-130 | Admin screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 34 | F-131 | Catalog screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 35 | F-132 | Question bank lists in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 36 | F-133 | Identity screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 37 | F-134 | Home, error and diagnostics pages in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 38 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 39 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 40 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
-| 41 | F-140 | Check library class names against the package CSS | idea | - | Foundation and identity | - | - | level 1; feature |
-| 42 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
-| 43 | F-136 | Inline student preview on the question form | idea | - | Question bank | F-126 | - | level 2: waits on F-126; feature |
-| 44 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | F-126 | - | level 2: waits on F-126; feature |
+| 12 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 13 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 14 | F-90 | Where a subject or topic is used | idea | - | Subject taxonomy | - | - | level 1; feature |
+| 15 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 16 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
+| 17 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 18 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 19 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
+| 20 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 21 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 22 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
+| 23 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | - | Question bank | - | - | level 1; feature |
+| 24 | F-120 | Architecture test for section id selectors | idea | - | foundation-and-identity | - | - | level 1; feature |
+| 25 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
+| 26 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
+| 27 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
+| 28 | F-126 | Question form in the new composition | idea | - | Foundation and identity | - | F-136, F-137 | level 1; feature |
+| 29 | F-127 | Exam form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 30 | F-128 | Exam edition form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 31 | F-129 | Base text form in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 32 | F-130 | Admin screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 33 | F-131 | Catalog screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 34 | F-132 | Question bank lists in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 35 | F-133 | Identity screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 36 | F-134 | Home, error and diagnostics pages in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
+| 37 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 38 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 39 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
+| 40 | F-140 | Check library class names against the package CSS | idea | - | Foundation and identity | - | - | level 1; feature |
+| 41 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
+| 42 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
+| 43 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
+| 44 | F-136 | Inline student preview on the question form | idea | - | Question bank | F-126 | - | level 2: waits on F-126; feature |
+| 45 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | F-126 | - | level 2: waits on F-126; feature |
 
 ## Checklist
 
@@ -62,43 +63,44 @@
 - [ ] 9. F-72 — EU representative before selling in Portugal [idea] — why level 1; feature
 - [ ] 10. F-81 — Park and start staging from a GitHub Actions workflow [idea] — why level 1; feature
 - [ ] 11. F-82 — Update the CI workflow actions to current majors [idea] — why level 1; feature
-- [ ] 12. F-85 — Existing users accept a new legal document version [idea] — why level 1; feature
-- [ ] 13. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
-- [ ] 14. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
-- [ ] 15. F-90 — Where a subject or topic is used [idea] — why level 1; feature
-- [ ] 16. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
-- [ ] 17. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
-- [ ] 18. F-111 — A release migrates the production database [idea] — why level 1; feature
-- [ ] 19. F-113 — Table button in the rich text editor [idea] — why level 1; feature
-- [ ] 20. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
-- [ ] 21. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
-- [ ] 22. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — why level 1; feature
-- [ ] 23. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
-- [ ] 24. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — why level 1; feature
-- [ ] 25. F-120 — Architecture test for section id selectors [idea] — why level 1; feature
-- [ ] 26. F-121 — Email the author of a review decision [idea] — why level 1; feature
-- [ ] 27. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
-- [ ] 28. F-123 — Review edits of a published question [idea] — why level 1; feature
-- [ ] 29. F-126 — Question form in the new composition [idea] — unlocks F-136, F-137 — why level 1; feature
-- [ ] 30. F-127 — Exam form in the new composition [idea] — why level 1; feature
-- [ ] 31. F-128 — Exam edition form in the new composition [idea] — why level 1; feature
-- [ ] 32. F-129 — Base text form in the new composition [idea] — why level 1; feature
-- [ ] 33. F-130 — Admin screens in the new composition [idea] — why level 1; feature
-- [ ] 34. F-131 — Catalog screens in the new composition [idea] — why level 1; feature
-- [ ] 35. F-132 — Question bank lists in the new composition [idea] — why level 1; feature
-- [ ] 36. F-133 — Identity screens in the new composition [idea] — why level 1; feature
-- [ ] 37. F-134 — Home, error and diagnostics pages in the new composition [idea] — why level 1; feature
-- [ ] 38. F-135 — Sticky section index on long forms [idea] — why level 1; feature
-- [ ] 39. F-138 — Keyboard shortcuts on forms [idea] — why level 1; feature
-- [ ] 40. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
-- [ ] 41. F-140 — Check library class names against the package CSS [idea] — why level 1; feature
-- [ ] 42. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
-- [ ] 43. F-136 — Inline student preview on the question form [idea] — waits on F-126 — why level 2: waits on F-126; feature
-- [ ] 44. F-137 — Publishing readiness meter on the question form [idea] — waits on F-126 — why level 2: waits on F-126; feature
+- [ ] 12. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
+- [ ] 13. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
+- [ ] 14. F-90 — Where a subject or topic is used [idea] — why level 1; feature
+- [ ] 15. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
+- [ ] 16. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
+- [ ] 17. F-111 — A release migrates the production database [idea] — why level 1; feature
+- [ ] 18. F-113 — Table button in the rich text editor [idea] — why level 1; feature
+- [ ] 19. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
+- [ ] 20. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
+- [ ] 21. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — why level 1; feature
+- [ ] 22. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
+- [ ] 23. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — why level 1; feature
+- [ ] 24. F-120 — Architecture test for section id selectors [idea] — why level 1; feature
+- [ ] 25. F-121 — Email the author of a review decision [idea] — why level 1; feature
+- [ ] 26. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
+- [ ] 27. F-123 — Review edits of a published question [idea] — why level 1; feature
+- [ ] 28. F-126 — Question form in the new composition [idea] — unlocks F-136, F-137 — why level 1; feature
+- [ ] 29. F-127 — Exam form in the new composition [idea] — why level 1; feature
+- [ ] 30. F-128 — Exam edition form in the new composition [idea] — why level 1; feature
+- [ ] 31. F-129 — Base text form in the new composition [idea] — why level 1; feature
+- [ ] 32. F-130 — Admin screens in the new composition [idea] — why level 1; feature
+- [ ] 33. F-131 — Catalog screens in the new composition [idea] — why level 1; feature
+- [ ] 34. F-132 — Question bank lists in the new composition [idea] — why level 1; feature
+- [ ] 35. F-133 — Identity screens in the new composition [idea] — why level 1; feature
+- [ ] 36. F-134 — Home, error and diagnostics pages in the new composition [idea] — why level 1; feature
+- [ ] 37. F-135 — Sticky section index on long forms [idea] — why level 1; feature
+- [ ] 38. F-138 — Keyboard shortcuts on forms [idea] — why level 1; feature
+- [ ] 39. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
+- [ ] 40. F-140 — Check library class names against the package CSS [idea] — why level 1; feature
+- [ ] 41. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
+- [ ] 42. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
+- [ ] 43. F-146 — Acceptance history on the account page [idea] — why level 1; feature
+- [ ] 44. F-136 — Inline student preview on the question form [idea] — waits on F-126 — why level 2: waits on F-126; feature
+- [ ] 45. F-137 — Publishing readiness meter on the question form [idea] — waits on F-126 — why level 2: waits on F-126; feature
 
 ## Summary
 
-- Delivered: 127
+- Delivered: 129
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog, mvp-cadastro-provas): complete: /agile:publish
 - First release (foundation-and-identity, mvp-cadastro-provas): complete: /agile:publish

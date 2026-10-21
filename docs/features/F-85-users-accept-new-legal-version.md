@@ -1,7 +1,7 @@
 ---
 feature: F-85
 epic: Foundation and identity
-status: validating
+status: done
 board: 128
 version: 2
 ---
@@ -273,3 +273,17 @@ Não mostrado na tela, coberto por testes: as rotas de status e de aceite, as li
 
 - 2026-10-21 question — asked 6, from context 2
 - 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.FrozenManualTests.FrozenPage_CarriesTheFrozenKeyAndTheNotice(loca, 1 red
+
+## Delivery
+
+Gate time: 7 passes, 25 min 32 s — turn 2 (1 min 19 s), ship 3 (21 min 9 s), scan 2 (3 min 4 s); 1 red
+Usage: 6497.2k weighted (estimate) — refine 6% · build 80% · ship 11% · other 3% — agents 25% — context per turn 156k → 488k — 1 session, 189 turns
+- Branch `feature/F-85`, merge commit f2e427f (board #128). App version 1.10.0 -> 1.11.0.
+- Tests: full suite green, 0 failed, 4613 tests in 14 projects (Identity 548, Catalog 655, QuestionBank 526, Web 2305, Architecture 301, Api 83, AppHost 83, the rest 112); 20 s build and 273 s test run, slowest projects 4 m 29 s (Catalog), 4 m 25 s (Identity), 4 m 3 s (QuestionBank): inside the 5 min budget. The first full run of the ship took 7 m 12 s to 7 m 49 s per slow project (machine shared with other sessions, cause not measured, reported to the retro) and was red on four `FrozenManualTests` cases until the frozen pt-PT and en copies of the new manual page existed.
+- New tests: 24 API tests locked at a6cc28a (`LegalAcceptanceEndpointTests`, `LegalAcceptanceWithoutDocumentsTests`), 3 `LegalAcceptanceOneDocumentTests`, and on the Web 3 `LegalAcceptanceRoutesTests`, 11 `LegalAcceptanceGateTests`, 12 `AcceptTermsPageTests`.
+- Scan: `agile scan GREEN` (2 medium open findings in `tools/Simulab.DocGen`, not touched by this item).
+- Manual: `accept-new-documents` in pt-BR; frozen copies in pt-PT and en. Technical pages: `docs/flows/accept-new-legal-version.md`; `docs/api/Simulab.Api.json` and `docs/architecture/Identity/routes.md` regenerated. Glossary: 3 rows (`LegalAcceptance`, advisory lock, returnUrl).
+- Review: independent review before validation, findings in D20.
+- Validation: the owner said "validado F-85" in the conversation on 2026-10-21 and typed `/agile:ship F-85`; the steps were not ticked in the widget.
+- Validation evidence: 0 of 10 paths ticked (all `not tested` in the widget); the owner's word in chat is the evidence.
+- Follow-up ideas: F-145 (e-mail notice of a new version, board #203) and F-146 (acceptance history on the account page, board #204).
