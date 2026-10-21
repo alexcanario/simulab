@@ -9,6 +9,15 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="PlainText">The text content of <paramref name="Html"/>, whitespace collapsed; empty when it is only empty tags.</param>
 public sealed record SanitizedHtml(string Html, string PlainText)
 {
+    /// <summary>The ids of the stored images the HTML holds, in order of appearance (F-103, BR6).</summary>
+    public IReadOnlyList<Guid> ImageIds { get; init; } = [];
+
+    /// <summary>How many images carry no <c>alt</c> attribute at all; an empty one marks a decorative image (F-103, BR4).</summary>
+    public int ImagesWithoutAlt { get; init; }
+
+    /// <summary>How many images carry an <c>alt</c> longer than <c>QuestionLimits.ImageAltMaxLength</c> (F-103, BR4).</summary>
+    public int AltTooLong { get; init; }
+
     /// <summary>A field that was not sent.</summary>
     public static SanitizedHtml Empty { get; } = new(string.Empty, string.Empty);
 

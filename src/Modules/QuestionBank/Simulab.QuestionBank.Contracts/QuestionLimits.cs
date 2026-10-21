@@ -44,4 +44,13 @@ public static class QuestionLimits
 
     /// <summary>The most characters the reason of a change may have, after trimming (F-98, BR5).</summary>
     public const int ChangeReasonMaxLength = 500;
+
+    /// <summary>The largest image file, in bytes: 2 MB (F-103, BR2).</summary>
+    public const long ImageMaxBytes = 2L * 1024 * 1024;
+
+    /// <summary>The most images a question (statement and options together) or a base text holds (F-103, BR7).</summary>
+    public const int ImagesPerTextMax = 10;
+
+    /// <summary>The most characters the alternative text of an image has (F-103, BR4).</summary>
+    public const int ImageAltMaxLength = 250;
 }

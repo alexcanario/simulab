@@ -148,20 +148,20 @@ the file field; "Alternative text is required" under the text.
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | QuestionImageUploadTests: Upload_WithoutAToken_Answers401_AndStoresNothing, Upload_ByAStudent_Answers403_AndStoresNothing, Upload_ByAHolderOfReviewOnly_Answers403_AndStoresNothing |
+| AC2 | QuestionImageUploadTests: Upload_OfEachAcceptedFormat_Answers201_WithTheTypeOfItsBytes, Upload_OfAFileNamedPngThatIsNotAnImage_AnswersNotAnImage_AndStoresNothing, Upload_WithNoFilePart_AnswersNotAnImage |
+| AC3 | QuestionImageUploadTests: Upload_OfExactlyTwoMegabytes_IsAccepted, Upload_OfOneByteOverTwoMegabytes_AnswersTooLarge_AndStoresNothing; QuestionImageOwnershipTests: Save_AQuestionWithTenImages_IsAccepted_AndWithElevenIsRefused_CountingTheOptionsToo, Save_ABaseTextWithTenImages_IsAccepted_AndWithElevenIsRefused |
+| AC4 | QuestionImageUploadTests: Upload_OfAFileNamedWithATraversal_StoresItUnderAGeneratedName |
+| AC5 | QuestionImageDownloadTests: Download_ByAHolderOfManage_AnswersTheBytes, Download_ByAHolderOfReviewOnly_AnswersTheBytes, Download_ByAStudent_Answers403, Download_WithoutAToken_Answers401, Download_AnswerCarriesNoStorageAddress; Web route: pending (step 7) |
+| AC6 | QuestionImageDownloadTests: Download_AnswersTheStoredTypeAndTheHardeningHeaders |
+| AC7 | QuestionImageSanitizerTests: Sanitize_AnImgWithAnAddressOtherThanAStoredImage_IsRemoved, Sanitize_AStoredImageWithExtraAttributes_KeepsOnlySrcAndAlt, Sanitize_AStoredImageInsideAListItemATableCellOrAlone_IsKept; QuestionImageOwnershipTests: Save_AStatementWithForeignAddressesAndAStoredImageWithAnEventAttribute_KeepsOnlyTheCleanStoredImage, Save_AnOptionAndABaseTextWithForeignAddresses_DropThemToo; QuestionHtmlSanitizerTests: AllowedTags_AreExactlyTheListOfTheRule (explanation drops images: Save_AnExplanationWithAStoredImage_DropsTheImage) |
+| AC8 | QuestionImageOwnershipTests: Save_AQuestionNamingAnImageOfAnotherQuestion_AnswersImageNotFound_AndStaysUnchanged, Save_ANewQuestionNamingAnImageOfAnotherQuestion_AnswersImageNotFound, Save_ABaseTextNamingAnImageOfAQuestion_AnswersImageNotFound, Save_ABaseTextNamingAnImageOfAnotherBaseText_AnswersImageNotFound, Save_NamingAnImageThatDoesNotExist_AnswersImageNotFound_ForAQuestionAndForABaseText |
+| AC9 | QuestionImageSweepTests: Sweep_DeletesAPendingImageOlderThan24Hours_AndKeepsTheYoungOneAndTheOwnedOne, Sweep_LeavesAPendingImageYoungerThan24Hours |
+| AC10 | QuestionImageOwnershipTests: Save_AQuestionWithAnImageInTheStatementAndInTwoOptions_StoresThemAndOwnsThemByTheQuestion, Save_ABaseTextWithAnImage_OwnsItByTheBaseText, Save_AgainWithTheImageThatTheQuestionOwns_IsAccepted; editor side: pending (step 7) |
+| AC11 | QuestionImageSanitizerTests: Sanitize_AnImgWithNoAlt_IsCountedAsWithoutAlt, Sanitize_AnImgWithAnEmptyAlt_IsDecorativeAndNotCounted, Sanitize_AnAltOverTheLimit_IsCountedAsTooLong; QuestionImageOwnershipTests: Save_AQuestionImageWithNoAlt_AnswersAltRequired_WithAnEmptyAltIsAccepted_AndWithALongAltIsRefused, Save_ABaseTextImageWithNoAlt_AnswersAltRequired_WithAnEmptyAltIsAccepted_AndWithALongAltIsRefused |
+| AC12 | QuestionImageSanitizerTests: Sanitize_ATextWithOnlyAnImage_IsNotEmpty, Sanitize_PlainText_CarriesTheAltOfANonDecorativeImageOnly; QuestionImageOwnershipTests: Publish_AQuestionWhoseOptionsAreOnlyImages_IsAccepted; empty tags still refused: QuestionEndpointTests (existing, QuestionStatementRequired) |
+| AC13 | QuestionImageReleaseTests: Save_ADraftWithoutItsImageAnymore_DeletesTheFileAndTheRow, Save_APublishedQuestionWithoutItsImageAnymore_KeepsTheFileBecauseAVersionHoldsIt, Save_AnUnpublishedQuestionThatAddedAnImageAfterItsVersionsAndDropsIt_DeletesTheFile, Delete_ADraftQuestionWithAnImage_KeepsTheFile, Version_OfAPublishedQuestion_KeepsTheImageAddressAfterTheTextDroppedIt |
+| AC14 | QuestionImageReleaseTests: Save_ABaseTextWithoutItsImageAnymore_KeepsTheFileWhileAPublishedQuestionVersionHoldsIt, Save_ABaseTextNoQuestionVersionHolds_DeletesTheFileWhenTheTextDropsTheImage |
 | AC15 | pending |
 | AC16 | pending |
 | AC17 | pending |
@@ -192,6 +192,7 @@ the file field; "Alternative text is required" under the text.
 - 2026-10-21: design trade-off 3 (Cache-Control of the Web route) — owner chose as proposed: `private`, as BR13.
 - 2026-10-21: design trade-off 4 (where the sweep runs) — owner chose as proposed: a hosted service of the module, switch `QuestionBank:ImageSweepEnabled` (default true, false in `SimulabApiFactory`).
 - 2026-10-21: swept pending rows are soft-deleted (project rule "soft delete only"); the BR9 search for a base-text image reads every version's `base_text_html` — Claude.
+- 2026-10-21: the explanation takes no image (BR1): the Api drops every `img` of the explanation after sanitizing, so an image only the explanation names is never owned; AC7's "any of the four fields" is proved for the statement, an option and the base text, and the explanation proves BR1 — Claude (found at the test phase: the sanitizer is shared by all fields).
 - 2026-10-21: plan — 1 upload: table, entity, endpoint, magic bytes → AC1, AC2, AC3 (file), AC4; 2 download with headers and the manage-or-review check → AC5 (Api), AC6; 3 sanitizer `img` and entity rules (alt, count, empty) → AC7, AC11, AC12; 4 ownership on save → AC8, AC10 (Api), AC3 (count); 5 release and versions → AC13, AC14; 6 pending sweep → AC9; 7 Web: route, editor button, dialog, preview, resources → AC5 (Web), AC10, AC15, AC16, AC17; 8 flow pages and data dictionary → techdocs check, DocGen --check — Claude.
 
 ## Out of scope

@@ -7,6 +7,7 @@ using Simulab.QuestionBank.Application.BaseTexts;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.QuestionBank.Infrastructure.Images;
 using Simulab.QuestionBank.Infrastructure.Persistence;
 using Simulab.SharedKernel.Security;
 
@@ -39,6 +40,7 @@ public static class QuestionBankModule
             }));
 
         services.AddSingleton<QuestionHtmlSanitizer>();
+        services.AddSingleton<QuestionImageSweep>();
 
         services.AddScoped<IQuestionStore, QuestionStore>();
         services.AddScoped<IQuestionQueries, QuestionQueries>();

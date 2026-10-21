@@ -16,7 +16,7 @@ public sealed class QuestionHtmlSanitizerTests
     {
         QuestionHtmlSanitizer.AllowedTags.Should().BeEquivalentTo(
             "p", "br", "strong", "b", "em", "i", "u", "s", "sub", "sup", "ul", "ol", "li", "blockquote",
-            "table", "thead", "tbody", "tr", "th", "td", "a");
+            "table", "thead", "tbody", "tr", "th", "td", "a", "img");
     }
 
     // AC3: script, event attributes, javascript: links and data: images never survive.

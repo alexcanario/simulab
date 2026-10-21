@@ -143,4 +143,37 @@ public static class QuestionBankErrorCodes
 
     /// <summary>F-105 BR5, BR6: the reason of a rejection or the note of an approval has more than 500 characters.</summary>
     public const string QuestionReviewReasonTooLong = "question.review_reason_too_long";
+
+    /// <summary>F-103 BR2: the file is not a PNG, JPEG, WebP or GIF image (decided by its first bytes), or no file was sent.</summary>
+    public const string QuestionImageNotAnImage = "question_image.not_an_image";
+
+    /// <summary>F-103 BR2: the file is larger than 2 MB.</summary>
+    public const string QuestionImageTooLarge = "question_image.too_large";
+
+    /// <summary>F-103 BR12: the image is unknown, deleted, or its file is gone.</summary>
+    public const string QuestionImageNotFound = "question_image.not_found";
+
+    /// <summary>F-103 BR4: an image in the question's texts has no alternative text attribute.</summary>
+    public const string QuestionImageAltRequired = "question.image_alt_required";
+
+    /// <summary>F-103 BR4 (change note v2): the alternative text of an image has more than 250 characters.</summary>
+    public const string QuestionImageAltTooLong = "question.image_alt_too_long";
+
+    /// <summary>F-103 BR6: an image id in the question's texts does not exist or belongs to another question or base text.</summary>
+    public const string QuestionImageNotFoundOnSave = "question.image_not_found";
+
+    /// <summary>F-103 BR7: the statement and options hold more than 10 images.</summary>
+    public const string QuestionImagesTooMany = "question.images_too_many";
+
+    /// <summary>F-103 BR4: an image in the base text has no alternative text attribute.</summary>
+    public const string BaseTextImageAltRequired = "base_text.image_alt_required";
+
+    /// <summary>F-103 BR4 (change note v2): the alternative text of an image has more than 250 characters.</summary>
+    public const string BaseTextImageAltTooLong = "base_text.image_alt_too_long";
+
+    /// <summary>F-103 BR6: an image id in the base text does not exist or belongs to another question or base text.</summary>
+    public const string BaseTextImageNotFound = "base_text.image_not_found";
+
+    /// <summary>F-103 BR7: the base text holds more than 10 images.</summary>
+    public const string BaseTextImagesTooMany = "base_text.images_too_many";
 }
