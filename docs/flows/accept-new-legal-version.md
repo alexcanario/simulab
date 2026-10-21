@@ -46,7 +46,7 @@ A signed-in user opens any Web page and their last `ConsentRecord` is not of the
 |  |                                      [ Read ]      |  |
 |  +----------------------------------------------------+  |
 |                                                          |
-|  [ Accept and continue ]        [ Sign out ]             |
+|             [ Sign out ]        [ Accept and continue ]  |
 |  Download or delete your data: Account                   |
 +----------------------------------------------------------+
 ```

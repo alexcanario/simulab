@@ -73,7 +73,7 @@ Nobody keeps using Simulab on terms or a privacy policy they never saw: when eit
 |  |                                      [ Read ]      |  |
 |  +----------------------------------------------------+  |
 |                                                          |
-|  [ Accept and continue ]        [ Sign out ]             |
+|             [ Sign out ]        [ Accept and continue ]  |
 |  Download or delete your data: Account                   |
 +----------------------------------------------------------+
 ```
@@ -127,7 +127,7 @@ Rows show only the documents that changed since the last acceptance (both when t
 - AC21 Given the user data export, when it is built after an acceptance, then it lists the new record after the older ones. (BR3)
 - AC22 Given the Api, when a user who owes an acceptance calls another authenticated route, then it answers as before. (BR9)
 - AC23 Localization: every text of the page and the error code exists in pt-BR, pt-PT and en; the missing-key test and the error-code-text test are green. (all)
-- AC24 Given the page at a narrow width, when it is used by keyboard only, then Tab reaches "Read", "Accept and continue" and "Sign out" in that order and the title is announced. — validation script.
+- AC24 Given the page at a narrow width, when it is used by keyboard only, then Tab reaches the "Read" links, then "Sign out", then "Accept and continue" (the kit's order: the secondary action first, the primary last), then the "Account" link, and the title is announced. — validation script. (Reworded by change note v2, note 2.)
 - AC25 Given a post whose `locale` is not a supported UI language (an unknown name, a rooted path, a value longer than the column), when it arrives, then the answer is `400 legal_acceptance.locale_invalid` and nothing is written; the current versions are always read with the request's own locale, never with the body's. (BR3, change note v2)
 - AC26 Given a signed-in user who owes an acceptance, when they use the plain endpoints of BR7 (sign-in complete, language switch, notice document, question image), then they work as before. (BR7, change note v2)
 
@@ -161,9 +161,9 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 | AC21 | `LegalAcceptanceEndpointTests.Accept_WhenOwing_WritesANewRecordAndKeepsTheOlderOnesAndTheExportListsItLast` |
 | AC22 | `LegalAcceptanceEndpointTests.OtherAuthenticatedRoutes_AnswerAsBeforeForAUserWhoOwesAnAcceptance` (a guard: it passes before the code, by design) |
 | AC23 | `AcceptTermsPageTests.Page_IsTranslated` (x3), `ResourceParityTests` and `ErrorTextTests` (existing, green) |
-| AC24 | validation step 5 (keyboard only) |
+| AC24 | validation step 6 (keyboard only) |
 | AC25 | `LegalAcceptanceEndpointTests.Accept_ALocaleThatIsNotSupported_IsBadRequestAndNothingIsWritten` (x5), `Accept_EverySupportedLocale_IsStoredAsSent` |
-| AC26 | `SignInCompleteTests` (existing, unchanged: the plain endpoints sit outside the router, so the gate never meets them), validation step 6 (language switch on the acceptance page) |
+| AC26 | `SignInCompleteTests` (existing, unchanged: the plain endpoints sit outside the router, so the gate never meets them), validation step 4 (language switch on the acceptance page) |
 
 ## Decisions
 - D1 (owner, 2026-10-21) Any new version of the terms or the privacy policy asks for an acceptance; no per-version "notice only" mark. Reason: same rule as sign-up, no case-by-case judgement to maintain — asked
@@ -205,8 +205,66 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 - Affected: BR7, `## Screens and API`, AC15 (read with BR7), new AC25 and AC26; other criteria unchanged.
 - Re-approved: 2026-10-21 (owner, in the build design round)
 
+### v2, note 2 — 2026-10-21
+- What: the wireframe and AC24 follow the kit's order of actions (secondary "Sign out" first, primary "Accept and continue" last); the Tab order is the Read links, Sign out, Accept and continue, Account.
+- Why: found while building the page: every kit form puts the primary action last (`AppFormActions`), and the wireframe had drawn it first.
+- Affected: the wireframe, AC24; other criteria unchanged.
+- Re-approved: pending (Claude's wording; the owner confirms at validation).
+
 ## Validation script
-(written at the end of the build)
+### English
+Needed to validate: nothing beyond the local app host, in place now. The start command gives the item its own database, so the seeded administrator has accepted nothing yet (no `consent_records` row), which is the case to see. Sign in with `admin@simulab.local` and the development password of `appsettings.Development.json` (`Admin@Simulab123!`). Stop any other app host first. To repeat the whole script after accepting, stop the app host and start it again with another database name (`simulab_f85_own2`).
+
+1. Start the app host from the F-85 worktree. Expected: the dashboard opens at `https://localhost:17162` with `api` and `web` Running; the Web address is usually `https://localhost:7125`.
+   - Git Bash:
+     ```bash
+     cd /d/wt/simulab/f-85-users-accept-new && Database__Name=simulab_f85_own dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+     ```
+   - PowerShell 7:
+     ```powershell
+     Set-Location D:\wt\simulab\f-85-users-accept-new; $env:Database__Name = "simulab_f85_own"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+     ```
+2. [ ] Open `https://localhost:7125/sign-in` and sign in as `admin@simulab.local`. Expected: instead of the home page you land on **Our documents changed** (the acceptance page, a page that asks you to accept the new legal documents): a line "Read what is new and accept it to keep using Simulab", two rows (Terms of use, version 2026-v1; Privacy policy, version 2026-v3), each with a **Read** link and the draft notice, then **Sign out**, **Accept and continue**, and "Download or delete your data: Account".
+3. Before accepting, check the gate (the check that sends you back to that page):
+   - [ ] 3.1 In the address bar open `https://localhost:7125/account/password`. Expected: you come back to **Our documents changed**; the address ends with `?returnUrl=%2Faccount%2Fpassword`.
+   - [ ] 3.2 Click **Read** on Privacy policy. Expected: the privacy policy opens (version 2026-v3) with no redirect. Press the browser's back button.
+   - [ ] 3.3 Click **Account** in the last line. Expected: **My account** opens, with the profile and, at the end, the download and delete sections (do not use them now). Go back to `https://localhost:7125/accept-terms`.
+4. [ ] Click the globe in the top bar (language switch) and choose Português (Brasil). Expected: **Nossos documentos mudaram**, **Aceitar e continuar**, **Sair**, **Ler**. Choose English again.
+5. [ ] Click **Sign out**, then sign in again as the administrator. Expected: you land on **Our documents changed** again (signing out is not accepting).
+6. [ ] Keyboard only: press Tab until the focus ring reaches each control. Expected order: **Read** (Terms), **Read** (Privacy), **Sign out**, **Accept and continue**, **Account**; the title is read first by a screen reader. On **Accept and continue** press Enter. Expected: you land on the home page.
+7. After accepting:
+   - [ ] 7.1 In the address bar open `https://localhost:7125/account/password`. Expected: **Change password** opens with no detour.
+   - [ ] 7.2 Click the account menu (top right), **Sign out**, then sign in again. Expected: straight to the home page, no acceptance page.
+8. [ ] Stop the app host (Ctrl+C in its terminal).
+
+Not shown on screen, covered by tests: the status and the acceptance routes, the rows written, the older ones kept, the lock under concurrency, the sec criteria and the other languages of the error texts (AC1 to AC13, AC21, AC22, AC25). The case of a user whose last acceptance is older than the current versions (AC2) is a test; on screen the administrator, who never accepted, shows the same page.
+
+### pt-BR
+Necessário para validar: nada além do app host local, já disponível. O comando de início dá ao item um banco só dele, então o administrador semeado ainda não aceitou nada (nenhuma linha em `consent_records`), que é o caso a ver. Entre com `admin@simulab.local` e a senha de desenvolvimento do `appsettings.Development.json` (`Admin@Simulab123!`). Pare qualquer outro app host antes. Para repetir o roteiro inteiro depois de aceitar, pare o app host e suba de novo com outro nome de banco (`simulab_f85_own2`).
+
+1. Suba o app host a partir da worktree da F-85. Esperado: o dashboard abre em `https://localhost:17162` com `api` e `web` Running; o endereço da Web costuma ser `https://localhost:7125`.
+   - Git Bash:
+     ```bash
+     cd /d/wt/simulab/f-85-users-accept-new && Database__Name=simulab_f85_own dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+     ```
+   - PowerShell 7:
+     ```powershell
+     Set-Location D:\wt\simulab\f-85-users-accept-new; $env:Database__Name = "simulab_f85_own"; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+     ```
+2. [ ] Abra `https://localhost:7125/sign-in` e entre como `admin@simulab.local`. Esperado: em vez da página inicial você cai em **Nossos documentos mudaram** (a página de aceite, que pede para aceitar os documentos legais novos): a linha "Leia o que mudou e aceite para continuar usando o Simulab", duas linhas (Termos de Uso, versão 2026-v1; Política de Privacidade, versão 2026-v3), cada uma com o link **Ler** e o aviso de texto provisório, depois **Sair**, **Aceitar e continuar** e "Baixar ou excluir seus dados: Conta".
+3. Antes de aceitar, confira a trava (a checagem que devolve você a essa página):
+   - [ ] 3.1 Na barra de endereço abra `https://localhost:7125/account/password`. Esperado: você volta para **Nossos documentos mudaram**; o endereço termina com `?returnUrl=%2Faccount%2Fpassword`.
+   - [ ] 3.2 Clique em **Ler** na Política de Privacidade. Esperado: a política abre (versão 2026-v3) sem redirecionamento. Use o botão voltar do navegador.
+   - [ ] 3.3 Clique em **Conta** na última linha. Esperado: **Minha conta** abre, com o perfil e, no fim, as seções de baixar e apagar os dados (não use agora). Volte para `https://localhost:7125/accept-terms`.
+4. [ ] Clique no globo da barra superior (troca de idioma) e escolha Português (Brasil). Esperado: **Nossos documentos mudaram**, **Aceitar e continuar**, **Sair**, **Ler**. Escolha English de novo.
+5. [ ] Clique em **Sair** e entre de novo como administrador. Esperado: você cai em **Nossos documentos mudaram** outra vez (sair não é aceitar).
+6. [ ] Só com o teclado: aperte Tab até o foco passar por cada controle. Esperado, nesta ordem: **Ler** (Termos), **Ler** (Privacidade), **Sair**, **Aceitar e continuar**, **Conta**; um leitor de tela lê o título primeiro. Em **Aceitar e continuar** aperte Enter. Esperado: você cai na página inicial.
+7. Depois de aceitar:
+   - [ ] 7.1 Na barra de endereço abra `https://localhost:7125/account/password`. Esperado: **Alterar senha** abre sem desvio.
+   - [ ] 7.2 Clique no menu da conta (canto superior direito), **Sair**, e entre de novo. Esperado: direto para a página inicial, sem a página de aceite.
+8. [ ] Pare o app host (Ctrl+C no terminal dele).
+
+Não mostrado na tela, coberto por testes: as rotas de status e de aceite, as linhas gravadas, as antigas mantidas, o lock sob concorrência, os critérios de segurança e os textos de erro nos outros idiomas (AC1 a AC13, AC21, AC22, AC25). O caso do usuário cujo último aceite é mais antigo que as versões atuais (AC2) é um teste; na tela o administrador, que nunca aceitou, mostra a mesma página.
 
 ## Events
 
