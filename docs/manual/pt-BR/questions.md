@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-104, F-105]
-updated: 2026-10-17
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105]
+updated: 2026-10-21
 ---
 # Questões
 
@@ -49,7 +49,8 @@ revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem t
    **idioma do conteúdo** começa com o seu idioma; troque pelo idioma em que a questão está escrita. Informe
    uma **dificuldade** de 1 (mais fácil) a 5 (mais difícil), se quiser.
 3. Escreva o **enunciado**. A barra oferece negrito, itálico, sublinhado, tachado, sobrescrito, subscrito,
-   listas, citação, link e limpar formatação. Imagens ainda não são aceitas.
+   listas, citação, link, imagem e limpar formatação. Para pôr uma figura no enunciado, veja
+   [Pôr imagens no texto](#por-imagens-no-texto).
 4. Se a questão se refere a um trecho, escolha o **texto-base** dela no cartão **Texto-base** (veja
    [Textos-base](base-texts.md)); só textos do idioma da questão são oferecidos. Ele aparece antes do
    enunciado, e o mesmo texto pode servir a várias questões.
@@ -73,6 +74,28 @@ alternativa marcada é mantida.
 Um rascunho pode ser salvo sem alternativas e sem correta, ou sem gabarito. A lista "Antes de publicar", ao
 lado do formulário, mostra o que ainda falta; numa questão certo/errado ela tem um item, "Gabarito definido", e
 numa de múltiplas respostas pede "Ao menos duas corretas e uma errada".
+
+### Pôr imagens no texto
+O enunciado, o texto-base e cada alternativa aceitam imagens; a explicação não.
+1. Na barra do editor, escolha **Inserir imagem** (o botão com o desenho de uma paisagem). A barra pequena das
+   alternativas tem o mesmo botão.
+2. Em **Escolher imagem**, escolha um arquivo PNG, JPEG, WebP ou GIF de até 2 MB. O tipo é reconhecido pelo
+   conteúdo do arquivo, não pelo nome: um texto renomeado para `.png` é recusado, e SVG não é aceito.
+3. Escreva o **texto alternativo**, a descrição lida em voz alta para quem não vê a imagem (até 250
+   caracteres), ou marque **Imagem decorativa** se ela não traz informação.
+4. Escolha **Inserir**. A imagem aparece no editor, no lugar do cursor.
+5. Para tirar uma imagem, apague-a no editor e salve.
+
+Colar ou arrastar um arquivo de imagem para dentro do editor não insere nada: só o diálogo insere.
+
+A imagem é enviada quando você a escolhe, antes de salvar a questão. Uma imagem que nenhum texto salvo
+guarda é apagada sozinha depois de 24 horas. Cada questão tem no máximo 10 imagens (enunciado e alternativas
+juntos), e cada texto-base também. Uma alternativa só com uma imagem conta como preenchida.
+
+Ao apagar uma imagem de uma questão **publicada**, o arquivo continua guardado enquanto alguma versão anterior
+da questão ainda o usa: quem fez a prova com aquela versão continua vendo a imagem. Num rascunho, o arquivo é
+apagado de vez. A imagem aparece na visualização como aluno, na fila de revisão e no texto-base, reduzida à
+largura da coluna, e só quem gerencia ou revisa o banco de questões a vê.
 
 ### Registrar de onde a questão veio
 Uma questão de prova anterior guarda a edição de onde veio, o número dela na prova e, se quiser, a disciplina do
@@ -221,6 +244,13 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | Mensagem | O que significa | O que fazer |
 |---|---|---|
 | Escreva o enunciado. | O enunciado está vazio. | Escreva o que se pede ao aluno. |
+| O arquivo não é uma imagem PNG, JPEG, WebP ou GIF. | O conteúdo do arquivo não é de um desses formatos. | Escolha outro arquivo. |
+| A imagem tem mais de 2 MB. | O arquivo passou do limite. | Reduza a imagem ou escolha outra. |
+| Escreva o texto alternativo ou marque a imagem como decorativa. | O diálogo foi confirmado sem texto alternativo. | Descreva a imagem ou marque **Imagem decorativa**. |
+| Toda imagem precisa de texto alternativo ou deve ser marcada como decorativa. | Uma imagem do texto ficou sem alternativo. | Reinsira a imagem com o texto alternativo. |
+| O texto alternativo de uma imagem tem no máximo 250 caracteres. | O texto alternativo passou do limite. | Encurte-o. |
+| Uma imagem do texto não existe mais. Insira-a de novo. | A imagem foi apagada (por exemplo, a espera de 24 horas passou). | Insira a imagem de novo. |
+| Uma questão tem no máximo 10 imagens. | Enunciado e alternativas somam mais de 10. | Tire algumas. |
 | O enunciado passa de 10.000 caracteres. (e os limites da explicação e da alternativa) | O texto passou do limite. | Encurte-o. Nada é cortado por você. |
 | Uma questão é publicada com 2 a 5 alternativas. | Menos de duas alternativas, ou mais de cinco. | Adicione ou remova alternativas. |
 | Toda alternativa precisa de texto. | Uma questão publicada tem alternativa vazia. | Escreva o texto ou remova a alternativa. |

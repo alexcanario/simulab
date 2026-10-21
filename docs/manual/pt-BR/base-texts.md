@@ -1,8 +1,8 @@
 ---
 page: base-texts
 locale: pt-BR
-features: [F-102]
-updated: 2026-10-15
+features: [F-102, F-103]
+updated: 2026-10-21
 ---
 # Textos-base
 
@@ -27,7 +27,9 @@ Página não encontrada, e o menu não tem o item Textos-base.
 3. Escolha o **idioma do conteúdo**: o idioma em que o texto está escrito. Só questões do mesmo idioma podem
    usá-lo.
 4. Escreva o **texto** no editor. A barra oferece negrito, itálico, sublinhado, tachado, sobrescrito,
-   subscrito, listas, citação, link e limpar formatação. Imagens ainda não são aceitas.
+   subscrito, listas, citação, link, imagem e limpar formatação. **Inserir imagem** aceita PNG, JPEG, WebP ou
+   GIF de até 2 MB, com texto alternativo (ou marcada como decorativa), até 10 imagens por texto; veja
+   [Pôr imagens no texto](questions.md#por-imagens-no-texto).
 5. Escolha **Salvar**. A página vira a página de edição do texto.
 
 ### Ligar uma questão a um texto-base
@@ -79,6 +81,8 @@ removidos quando o texto é salvo, e a página mostra o que foi mantido.
 | Escreva o texto. | O texto está vazio. | Escreva o trecho. |
 | O texto passa de 20.000 caracteres. | O texto passou do limite. | Encurte-o. Nada é cortado por você. |
 | Escolha um dos idiomas da lista. | O idioma não está na lista. | Escolha um idioma da lista. |
+| Um texto-base tem no máximo 10 imagens. | O texto tem mais de 10 imagens. | Tire algumas. |
+| Uma imagem do texto não existe mais. Insira-a de novo. | A imagem foi apagada antes de o texto ser salvo. | Insira a imagem de novo. |
 | Ainda há questões usando este texto-base. Remova os vínculos delas antes de excluir. | Uma ou mais questões ainda ligam o texto. | Retire os vínculos primeiro. |
 | Há questões usando este texto-base, então o idioma dele não pode mudar. | Você tentou mudar o idioma de um texto em uso. | Retire os vínculos ou crie outro texto. |
 | Este texto-base não existe mais. | Ele foi excluído enquanto sua tela estava aberta. | Volte à lista. |
