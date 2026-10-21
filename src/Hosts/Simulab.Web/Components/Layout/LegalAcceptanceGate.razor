@@ -2,7 +2,7 @@
 @using Simulab.Web.Components.Pages.Identity
 @using Simulab.Web.Services.Auth
 @inject IdentityApiClient Api
-@inject WebSessionTokenAccessor Tokens
+@inject IServiceProvider Services
 @inject NavigationManager Navigation
 @inject ILogger<LegalAcceptanceGate> Logger
 
@@ -52,7 +52,8 @@
             return false;
         }
 
-        var token = await Tokens.GetAccessTokenAsync(user);
+        // Resolved here, not injected: the session store behind it needs Redis, and a visitor who is not signed in never needs it.
+        var token = await Services.GetRequiredService<WebSessionTokenAccessor>().GetAccessTokenAsync(user);
         if (token is null)
         {
             // The session ended: the watcher and the router's own authorization take it from here.
